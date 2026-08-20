@@ -1,4 +1,4 @@
-# SMP Project Folder — v3.3
+# SMP Project Folder — v3.4
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.3.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.4.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.3.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.4.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -207,6 +207,17 @@ was the condense-on-scroll itself — at scroll position 25 the chrome settled a
 22px of chrome into the page in one step. It bought 22px on a header that is now
 47px. The mechanism is gone and the chrome reports one single height, in both
 directions.
+
+Version **3.4** took seven more off the deployed product (§29). The
+Units/Functions folds were not lagging, they were **dead** after any use of the
+Manage menu — that row's HTML is rewritten when the menu opens or closes, which
+destroys the handlers inside it. The first line is **27px**, half of 47, once a
+duplicate `.themebtn` rule was found holding it at 31. The rail's slide is
+**0px**, because its gap and its sticky offset are now the same variable rather
+than two numbers that were meant to agree. Direction/Capability is hidden behind
+one flag everywhere a reader goes, with the field untouched in the data and the
+import template. The "Plan only" notice and the rail footer went, and rail rows
+now read "3 measures · 2 tactics" instead of a bare unlabelled number.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

@@ -308,7 +308,7 @@ function pillarRow(it, i, u){
     (on ? handle("Reorder " + it.name) : '') +
     '<span class="pname"><b><span class="pcode">' + pillarCode(u, i) + '</span> ' + esc(it.name) + '</b>' +
       (it.sub ? '<span class="psub">' + esc(it.sub) + '</span>' : '') + '</span>' +
-    '<span>' + kindPill(it) + '</span>' +
+    '<span><span class="pill kind">' + esc(it.kind) + '</span></span>' +
     '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
     '<span class="powner">' + esc(it.owner) + '</span>' +
     '<span class="num lead" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</span>' +
@@ -474,37 +474,6 @@ function capsTable(){
     '<p class="sub">Ranked on project performance. Milestones read completed / in progress / not started.</p>';
 }
 
-
-/* DIRECTION / CAPABILITY — HIDDEN, NOT REMOVED (§29).
-
-   Islam: "across the platform hide the distinction of direction and capability.
-   it will be brought later not now." So the field stays in the data, stays in
-   the import template, and stays editable in Setup, where an SMO sets it. What
-   goes is every place a READER meets it: the pill on a pillar, the meta line
-   above it, the rail's sub-line and the Kind column in the drill table.
-
-   One flag, because the alternative is deleting five call sites and then
-   reconstructing them from a git log when the distinction comes back. Flip
-   SHOW_KIND to true and every one of them returns.
-
-   Note what is NOT touched: the "Direction" COLUMN in a key-objective table
-   means the direction of travel - whether higher is better - and has nothing
-   to do with this. Same word, different thing. */
-var SHOW_KIND = false;
-function kindPill(it){
-  return SHOW_KIND ? '<span class="pill kind">' + esc(it.kind) + '</span>' : '';
-}
-/* The meta line, built from the parts that actually have a value. It used to
-   concatenate kind, theme and owner with fixed separators, so a pillar with no
-   theme and no owner read "Direction · theme ·" - two separators pointing at
-   nothing. With the kind hidden that would have become "theme ·". */
-function pillarMeta(it){
-  var parts = [];
-  if (SHOW_KIND && it.kind) parts.push(esc(it.kind));
-  if (it.theme) parts.push("theme " + esc(it.theme));
-  if (it.owner) parts.push(esc(it.owner));
-  return parts.join(" &middot; ");
-}
 
 function section(eyebrow, title, note, body, tipText, action){
   /* A section with nothing to say in its header does not get one. Emitting an
@@ -791,11 +760,10 @@ function renderGroupPerformance(){
       '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
       u.weight + '%</b> weight to the group.</p>' +
       '<h4 class="mini">Pillars beneath</h4>' +
-      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
-                          : ["Pillar","Theme","Performance","Of plan"],
+      miniTable(["Pillar","Kind","Theme","Performance","Of plan"],
         u.items.map(function(it, i){
           return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
-            (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
+            '<td><span class="pill kind">' + it.kind + '</span></td>' +
             '<td><span class="pill theme">' + it.theme + '</span></td>' +
             '<td class="num">' + pillarPerf(it) + '%</td>' +
             '<td class="num">' + pillarRatio(it) + '%</td></tr>';
@@ -1924,7 +1892,8 @@ function projPlanBody(p){
   return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
       '<div class="pmeta">' + projMeta(p) + '</div></div>' +
       '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span></div>' +
-
+    '<p class="planonly"><b>Plan only</b> &nbsp;Nothing here has been reported. Progress and actuals are ' +
+      'entered on Reporting and read on Performance.</p>' +
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
     (p.stakeholders || []).map(function(s){ return '<span class="pill kind">' + esc(s) + '</span> '; }).join("") +
@@ -2099,21 +2068,13 @@ function unitRailFor(u, sel){
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '">' +
         '<b>' + esc(it.code) + '&nbsp; ' + esc(it.name) + '</b>' +
-        /* Both counts, both labelled, on one line. It used to put the tactics
-           count in the small line and the MEASURES count as a bare number on
-           the right - two numbers, one of them unlabelled, and nothing saying
-           which was which. The bare number went with the footer that tried to
-           explain it (§29.6). */
-        '<span class="rsub">' + plural(it.measures.length, "measure") +
-          ' &middot; ' + plural(it.tactics.length, "tactic") +
-          (it.owner ? ' &middot; ' + esc(it.owner) : '') + '</span>' +
+        '<span class="rnum">' + it.measures.length + '</span>' +
+        '<span class="rsub">' + it.tactics.length + ' tactics &middot; ' + esc(it.owner) + '</span>' +
       '</button>';
   }).join("");
-  /* No footer. It said "Figure shown is key measures", explaining a number
-     that no longer exists - and on the PLAN page there is no figure to explain
-     in the first place: nothing here has been reported. */
   return '<div class="rail"><div class="rhead">' + L("pillar","bu") +
-    ' <span>' + list.length + '</span></div>' + rows + '</div>';
+    ' <span>' + list.length + '</span></div>' + rows +
+    '<div class="rfoot">Figure shown is key measures</div></div>';
 }
 function unitPlanBody(it){
   var mRows = it.measures.map(function(m, i){
@@ -2127,14 +2088,13 @@ function unitPlanBody(it){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(t.name) + '</td>' +
       '<td>' + esc(t.owner) + '</td><td>' + qs(t) + '</td></tr>';
   }).join("");
-  var meta = pillarMeta(it);
   return '<div class="ptitle"><div><h3>' + esc(it.code) + '&nbsp; ' + esc(it.name) + '</h3>' +
-      (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
-      kindPill(it) + '</div>' +
+      '<div class="pmeta">' + esc(it.kind) + ' &middot; theme ' + esc(it.theme) +
+      ' &middot; ' + esc(it.owner) + '</div></div>' +
+      '<span class="pill kind">' + esc(it.kind) + '</span></div>' +
     (it.sub ? '<p class="sub" style="margin:10px 0 0">' + esc(it.sub) + '</p>' : '') +
-    /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
-       table headings say "as planned", and every actual column reads em-dash -
-       three statements of the same thing above a fourth. */
+    '<p class="planonly"><b>Plan only</b> &nbsp;Nothing here has been reported. Actuals are entered ' +
+      'on My reporting and read on Performance.</p>' +
     '<h4 class="mini">Key measures <em>\u2014 as planned: target, horizon, how it compiles</em></h4>' +
     miniTable(["#","Measure","Dir.","Target","3-year","Compiled"], mRows) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, and in which quarters</em></h4>' +
@@ -2216,9 +2176,8 @@ function unitPerfRail(u){
       (on ? handle("Reorder " + it.name) : '') +
       '<b>' + pillarCode(u, i) + '&nbsp; ' + esc(it.name) + '</b>' +
       '<span class="rnum" style="color:var(--' + band(perf) + ');font-weight:700">' + pct(perf) + '</span>' +
-      '<span class="rsub">' + (SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
-        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '') +
-        '</span></button>';
+      '<span class="rsub">' + esc(it.kind) + ' &middot; execution ' + pct(r) +
+        ' &middot; ' + esc(it.owner) + '</span></button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
     '<div class="rhead">' + L("pillar","bu") + ' <span>' + u.items.length + '</span></div>' +
@@ -2232,9 +2191,9 @@ function unitPerfRail(u){
 function unitPerfPane(it, u){
   var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
-  var meta = pillarMeta(it);
   return '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
-      (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
+      '<div class="pmeta">' + esc(it.kind) + ' &middot; theme ' + esc(it.theme) +
+      ' &middot; ' + esc(it.owner) + '</div></div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>' +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
               it.measures.length, scored.length,

@@ -9,9 +9,9 @@
      for in 2.9 was never actually one line for anyone signed in. The name
      truncates instead; the note beside it already says the level and the
      reach, so nothing is lost that is not said twice. */
-  .viewer select { font:inherit; border:1px solid var(--line);
-                   border-radius:var(--r); background:var(--surface); color:var(--ink);
-                   max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
+  .viewer select { font:inherit; font-size:13px; padding:5px 9px; border:1px solid var(--line);
+                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:150px;
+                   font-size:12px; padding:3px 7px; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
                  letter-spacing:.06em; text-transform:uppercase; }

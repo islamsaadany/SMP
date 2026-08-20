@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.3 · **Last updated:** 2026-08-20
+**Latest version:** v3.4 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,31 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.3 — your six, and the scroll glitch at its source *(current)*
+### v3.4 — seven from the deployed product *(current)*
+**The Units/Functions buttons weren't lagging — they were dead.** Open the
+Manage menu, close it any way at all, and both folds stopped listening until
+something else forced a repaint. The row's HTML is rewritten whenever the menu
+opens or closes, which destroys every handler inside it; the folds were wired
+somewhere that only ran on a full repaint. Now whoever rewrites that row re-wires
+it, in the same place.
+
+The **first line is 27px**, half of 47. It was stuck at 31px of content because
+two `.themebtn` rules disagreed and the wrong one won — a duplicated rule doesn't
+fail loudly, it quietly ignores you.
+
+The **rail no longer slides**. It sat 34px below the chrome and pinned at 12px,
+so it dropped 22px on the first scroll. The gap and the pin are now the same
+variable, so the difference can't be non-zero: measured 0px of travel at every
+scroll position.
+
+Also: **Direction/Capability is hidden everywhere a reader goes** (one flag,
+five call sites — flip it to bring them all back; the field itself is untouched
+in the data and the import template). The **"Plan only" notice** and the rail's
+**"Figure shown is key measures"** footer are gone. The rail rows now read
+**"3 measures · 2 tactics"** instead of a small line and a bare unlabelled
+number. The Manage menu's group labels sit on a grey band.
+
+### v3.3 — your six, and the scroll glitch at its source
 The footer sentence is gone. **Manage is a gear**, not a word — it was the
 widest thing in the navigation row and it named a menu rather than a place; the
 word moved to its tooltip. The **rail expands to fit any number of directions**
@@ -500,8 +524,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.3.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.3.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.4.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.4.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

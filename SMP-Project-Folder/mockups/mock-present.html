@@ -1,0 +1,658 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Presentation mode — mockup</title>
+<style>
+:root{--panel:#16325C;--gold:#C9A24D;--gold-deep:#A8842F;--surface:#FFF;--surface-2:#EFF2F6;
+--zebra:#F7F9FC;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;--ink-3:#6B7583;
+--good:#2E7D5B;--attn:#B8860B;--warn:#CC6B3D;--bad:#B04434;--none:#8A9099;
+--serif:Georgia,'Iowan Old Style',serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--mono:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#0B1A33;color:var(--ink);font:16px/1.6 var(--sans);overflow:hidden}
+
+/* Every slide is authored at one fixed size and scaled to fit. What is
+   rehearsed is what projects: the same line breaks, the same rows per slide,
+   on any screen. Fit-to-window is the exception, for an odd display. */
+.stage{position:fixed;inset:34px 0 62px;display:flex;align-items:center;justify-content:center}
+.deck{width:1600px;height:900px;position:relative;transform-origin:center center;flex:none}
+body.fitwin .deck{width:100%;height:100%}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;
+background:var(--surface);border-radius:5px;padding:52px 62px;overflow:hidden}
+.slide.on{display:flex}
+
+h1{font:400 76px/1.08 var(--serif);margin:8px 0 22px}
+h1.cover{font-size:112px;letter-spacing:-.015em}
+h2{font:400 46px/1.15 var(--serif);margin:0 0 26px}
+.eyebrow{font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+.asp{font:400 25px/1.5 var(--serif);color:var(--ink-2);max-width:62ch;margin:0 0 auto}
+.sublede{color:var(--ink-3);font-size:16px;margin:0 0 22px}
+.bigrow{display:flex;gap:70px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:30px}
+.lab{display:block;font-size:15px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+font-weight:700;margin-bottom:10px}
+.bigstat b{font:400 78px/1 var(--serif)}
+.bigstat .sub{display:block;color:var(--ink-3);font-size:15px;margin-top:10px}
+.delta{font-family:var(--mono);font-size:18px;margin-left:16px;font-weight:600}
+.delta.up{color:var(--good)}.delta.down{color:var(--bad)}
+.good{color:var(--good)}.attn{color:var(--attn)}.warn{color:var(--warn)}.bad{color:var(--bad)}.none{color:var(--none)}
+
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--panel);color:#fff;font-size:14px;letter-spacing:.09em;text-transform:uppercase;
+font-weight:700;text-align:left;padding:16px 18px;white-space:nowrap}
+th.num,td.num{text-align:right}th.cc,td.cc{text-align:center}
+td{padding:20px 18px;font-size:23px;vertical-align:middle;border-bottom:1px solid var(--line-soft)}
+table.big td{font-size:26px;padding:24px 18px}
+tbody tr:last-child td{border-bottom:0}
+/* Alternating rows: the eye keeps its place across a wide table without a rule
+   between every line. */
+table.zebra tbody tr:nth-child(even) td{background:var(--zebra)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.final{font-weight:700}
+tdtd.idx{width:60px;color:var(--none);font-family:var(--mono);font-size:18px;text-align:right}
+th.idx{width:60px;text-align:right}
+tr.dim td{opacity:.5}
+.lead{font-weight:500}
+.sub2{display:block;color:var(--ink-3);font-size:17px;margin-top:5px;font-weight:400}
+.withnote td.note{font-size:18px;color:var(--ink-2);line-height:1.42;max-width:30ch}
+.withnote td.note.empty{color:var(--none)}
+.withnote th:last-child{width:24%}
+/* The direction carries the slide; its context sits under it, quieter. */
+.dirs td.dirname b{font:400 40px/1.2 var(--serif);display:block}
+.dirs td.dirname .sub2{font-size:19px;margin-top:8px}
+.dirs td{padding:30px 18px}
+.dirs td.num{font-size:34px}
+.pcode{color:var(--ink-3);font-family:var(--mono);font-size:.62em;font-weight:400}
+.pcode.big{font-size:32px}
+.phdr{display:flex;align-items:flex-start;justify-content:space-between;gap:30px;flex-wrap:wrap;
+border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px}
+.phdrstats{display:flex;gap:32px}
+.phdrstats i{display:block;font-style:normal;font-size:14px;letter-spacing:.1em;text-transform:uppercase;
+color:var(--ink-3);font-weight:700}
+.phdrstats b{font:400 44px/1.15 var(--serif)}
+.which{font:400 20px/1 var(--sans);color:var(--ink-3);letter-spacing:.1em;text-transform:uppercase;
+margin-left:16px;vertical-align:middle}
+ol.swot{list-style:none;margin:26px 0 0;padding:0;columns:2;column-gap:56px}
+ol.swot{margin-top:6px}
+ol.swot li{display:grid;grid-template-columns:44px 1fr;gap:16px;align-items:baseline;padding:22px 0;
+font-size:29px;line-height:1.35;break-inside:avoid;border-bottom:1px solid var(--line-soft)}
+ol.swot .n{font-family:var(--mono);font-size:18px;color:var(--none)}
+.s-swot h2{padding-left:18px}
+.s-swot.t-good h2{border-left:5px solid var(--good)}
+.s-swot.t-bad h2{border-left:5px solid var(--bad)}
+.s-swot.t-stone h2{border-left:5px solid var(--panel)}
+.s-swot.t-warn h2{border-left:5px solid var(--warn)}
+/* Statement across the top, objectives filling the lower half — the eye reads
+   the ambition first and then what it means in numbers. */
+.aimtop{display:grid;grid-template-columns:1.25fr 1fr;gap:60px;padding-bottom:34px;
+border-bottom:1px solid var(--line)}
+.asp2{font:400 38px/1.35 var(--serif);color:var(--ink);margin:0}
+.asp3{font:400 27px/1.4 var(--serif);color:var(--ink-2);margin:0}
+.aimbottom{margin-top:34px}
+.s-cover{align-items:flex-start;justify-content:center}
+.coverrule{width:120px;height:5px;background:var(--gold);margin:6px 0 30px}
+.coversub{font:400 30px/1.3 var(--serif);color:var(--ink-2);margin:0}
+.s-cover .eyebrow{font-size:17px}
+.s-thanks{align-items:center;text-align:center;justify-content:center}
+/* A section opens with its own page: the deck stops being a run of tables and
+   the presenter gets somewhere to stand and talk. */
+.s-sec{justify-content:center}
+.seclab{display:block;font-size:17px;letter-spacing:.14em;text-transform:uppercase;
+color:var(--gold-deep);font-weight:700;margin-bottom:10px}
+.secgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-top:52px}
+.seccell{border-top:5px solid var(--line);padding-top:20px}
+.seccell b{display:block;font:400 64px/1 var(--serif)}
+.seccell span{display:block;font-size:19px;color:var(--ink-3);margin-top:8px}
+.seccell.t-good{border-top-color:var(--good)}
+.seccell.t-bad{border-top-color:var(--bad)}
+.seccell.t-stone{border-top-color:var(--panel)}
+.seccell.t-warn{border-top-color:var(--warn)}
+.pillarname{font:400 68px/1.12 var(--serif);margin:0 0 14px}
+.pcode.huge{font-size:.5em;color:var(--ink-3);font-family:var(--mono)}
+.leadstats{display:flex;gap:80px;margin-top:44px}
+.leadstats b{display:block;font:400 84px/1 var(--serif);margin-top:8px}
+.leadstats b.plain{color:var(--ink-2);font-size:56px}
+.s-thanks .coverrule{margin:6px auto 30px}
+.headgrid{display:grid;grid-template-columns:1fr 1fr;gap:70px;flex:1;align-content:center}
+.headcell b{display:block;font:400 168px/.95 var(--serif);letter-spacing:-.02em;margin:10px 0 14px}
+.headsub{display:block;color:var(--ink-3);font-size:22px}
+.headfoot{color:var(--ink-3);font-size:20px;margin:0;padding-top:26px;border-top:1px solid var(--line)}
+.s-head .delta{font-size:24px;margin:0 8px 0 0}
+.big3{color:var(--gold-deep)}
+.fmark{display:inline-block;width:9px;height:9px;background:var(--gold);transform:rotate(45deg);
+margin-left:9px;vertical-align:middle}
+.notebox{border:1px dashed var(--line);border-radius:3px;padding:34px 38px;
+font:400 33px/1.55 var(--serif);color:var(--ink);flex:1;outline:none}
+.notebox:focus{border-color:var(--gold);border-style:solid;background:#FFFDF7}
+.hint{color:var(--ink-3);font-size:18px;margin-top:20px}
+.contd{font:400 17px/1 var(--sans);color:var(--ink-3);letter-spacing:.09em;text-transform:uppercase;
+margin-left:14px}
+/* Rows are squeezed before a slide is split; only when the floor is reached
+   does the table run on to another slide. */
+.slide.tight td,.slide.tight table.big td{padding:12px 18px;font-size:19px}
+.slide.tight .withnote td.note{font-size:16px}
+.slide.tight ol.swot li{padding:13px 0;font-size:23px}
+.slide.tight .dirs td{padding:18px 18px}
+.slide.tight .dirs td.dirname b{font-size:31px}
+  .slide.tight .asp2{font-size:31px;line-height:1.32}
+  .slide.tight .asp3{font-size:23px}
+  .slide.tight h2{font-size:40px;margin-bottom:18px}
+  .slide.tight .aimtop{padding-bottom:24px}
+  .slide.tight .aimbottom{margin-top:24px}
+  .slide.tight .notebox{font-size:28px;padding:26px 30px}
+
+.bar{position:fixed;left:0;right:0;bottom:0;height:62px;display:flex;align-items:center;gap:18px;
+padding:0 26px;background:rgba(11,26,51,.94);border-top:1px solid rgba(255,255,255,.1)}
+.bar button{background:none;border:1px solid rgba(255,255,255,.25);color:#C3CEE0;font:inherit;
+font-size:15px;line-height:1;padding:8px 13px;border-radius:20px;cursor:pointer}
+.bar button:hover{border-color:#fff;color:#fff}
+.bar button.txt{font-size:12px;letter-spacing:.06em}
+.counter{color:#8FA3C0;font-family:var(--mono);font-size:14px}
+.title{color:#fff;font-size:14px;margin-right:auto}.title b{color:var(--gold)}
+.dots{display:flex;gap:5px;align-items:center;max-width:38vw;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);border:0;padding:0;cursor:pointer}
+.dot.on{background:var(--gold);transform:scale(1.35)}
+.topnote{position:fixed;top:0;left:0;right:0;background:rgba(11,26,51,.94);color:#8FA3C0;font-size:12px;
+padding:9px 26px;border-bottom:1px solid rgba(255,255,255,.1);z-index:2}
+.topnote b{color:var(--gold)}
+body:fullscreen .topnote{display:none}
+body:fullscreen .stage{inset:0 0 62px}
+</style></head><body>
+<div class="topnote"><b>Mockup</b> — presentation mode, built from Mobile's live figures.
+Arrows to move · F for fullscreen · W to fit the window.</div>
+<div class="stage"><div class="deck"><section class="slide s-cover">
+  <div class="eyebrow">Raya Trade</div>
+  <h1 class="cover">Mobile</h1>
+  <div class="coverrule"></div>
+  <p class="coversub">Strategy review &middot; H1 2026</p>
+</section><section class="slide s-aim"><h2>What we are aiming at</h2>
+  <div class="aimtop">
+    <div><span class="lab">Winning aspiration</span>
+      <p class="asp2">To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.</p></div>
+    <div><span class="lab">End in mind</span><p class="asp3">To be positioned as one of the recognized regional distributors for consumer electronics</p></div>
+  </div>
+  <div class="aimbottom">
+    <span class="lab">Key objectives by 2029</span>
+    <table class="zebra big"><thead><tr><th class="idx">#</th><th>Objective</th>
+      <th class="num">Dir.</th><th class="num">By 2029</th><th class="num">This year</th>
+    </tr></thead><tbody><tr><td class="idx">1</td>
+  <td class="lead">Distribution revenue</td>
+  <td class="num">≥</td><td class="num big3">9.0B EGP</td>
+  <td class="num">6.2B EGP</td></tr><tr><td class="idx">2</td>
+  <td class="lead">Mobile market share <span class="fmark"></span></td>
+  <td class="num">≥</td><td class="num big3">38%</td>
+  <td class="num">32%</td></tr><tr><td class="idx">3</td>
+  <td class="lead">Active merchant reach</td>
+  <td class="num">≥</td><td class="num big3">6,500</td>
+  <td class="num">4,500</td></tr><tr><td class="idx">4</td>
+  <td class="lead">App coverage rate</td>
+  <td class="num">≥</td><td class="num big3">75%</td>
+  <td class="num">50%</td></tr></tbody></table>
+  </div></section><section class="slide s-head"><h2>Where the unit stands</h2>
+  <div class="headgrid">
+    <div class="headcell">
+      <span class="lab">Key objectives performance</span>
+      <b class="warn">60%</b>
+      <span class="headsub"><span class="delta up">▲ 4</span> against the last cycle</span>
+    </div>
+    <div class="headcell">
+      <span class="lab">Execution performance</span>
+      <b class="good">107%</b>
+      <span class="headsub">47% delivered against 44% planned</span>
+    </div>
+  </div>
+  <p class="headfoot">Objectives measure what the unit committed to achieve.
+     Execution measures whether the work behind it is landing on time.</p>
+</section><section class="slide"><h2>Key objectives &mdash; where we stand</h2>
+  <table class="zebra big"><thead><tr><th class="idx">#</th><th>Objective</th><th class="num">Dir.</th>
+    <th class="num">This year</th><th class="num">Actual</th><th class="num">Progress</th></tr></thead>
+    <tbody><tr><td class="idx">1</td>
+  <td class="lead">Distribution revenue</td>
+  <td class="num">≥</td><td class="num">6.2B EGP</td><td class="num">2.7B</td>
+  <td class="num final bad">44%</td></tr><tr><td class="idx">2</td>
+  <td class="lead">Mobile market share <span class="fmark"></span></td>
+  <td class="num">≥</td><td class="num">32%</td><td class="num">28%</td>
+  <td class="num final good">88%</td></tr><tr><td class="idx">3</td>
+  <td class="lead">Active merchant reach</td>
+  <td class="num">≥</td><td class="num">4,500</td><td class="num">3,180</td>
+  <td class="num final attn">71%</td></tr><tr><td class="idx">4</td>
+  <td class="lead">App coverage rate</td>
+  <td class="num">≥</td><td class="num">50%</td><td class="num">22%</td>
+  <td class="num final bad">44%</td></tr></tbody></table></section><section class="slide s-sec">
+  <span class="seclab">Section</span>
+  <h1 class="cover">SWOT</h1>
+  <div class="coverrule"></div>
+  <p class="coversub">Where this unit is strong, exposed, and what the market is offering it.</p>
+  <div class="secgrid">
+    <div class="seccell t-good"><b>6</b><span>Strengths</span></div>
+    <div class="seccell t-bad"><b>5</b><span>Weaknesses</span></div>
+    <div class="seccell t-stone"><b>6</b><span>Opportunities</span></div>
+    <div class="seccell t-warn"><b>6</b><span>Threats</span></div>
+  </div></section><section class="slide s-swot t-good"><h2>Strengths</h2>
+      <ol class="swot"><li><span class="n">1</span><span>Strong brand equity (Raya &amp; i2)</span></li><li><span class="n">2</span><span>Diversified &amp; strong brand portfolio</span></li><li><span class="n">3</span><span>Over 90% of revenue from local manufacturing</span></li><li><span class="n">4</span><span>Nationwide distribution &amp; retail reach</span></li><li><span class="n">5</span><span>Integrated Raya Trade ecosystem</span></li><li><span class="n">6</span><span>Access to multi-source data</span></li></ol></section><section class="slide s-swot t-bad"><h2>Weaknesses</h2>
+      <ol class="swot"><li><span class="n">1</span><span>Limited control over the value chain</span></li><li><span class="n">2</span><span>Low margin on devices</span></li><li><span class="n">3</span><span>Multiple systems across Raya Trade business units</span></li><li><span class="n">4</span><span>Underutilisation of available automation systems</span></li><li><span class="n">5</span><span>Underdeveloped presence in accessories market</span></li></ol></section><section class="slide s-swot t-stone"><h2>Opportunities</h2>
+      <ol class="swot"><li><span class="n">1</span><span>Growth in accessories and wearables market</span></li><li><span class="n">2</span><span>Local manufacturing expansion</span></li><li><span class="n">3</span><span>Migration of 3G user base</span></li><li><span class="n">4</span><span>Regional expansion using a scalable proven model</span></li><li><span class="n">5</span><span>Dubai free zone multi-branded concept</span></li><li><span class="n">6</span><span>Unlocking value through AI &amp; data</span></li></ol></section><section class="slide s-swot t-warn"><h2>Threats</h2>
+      <ol class="swot"><li><span class="n">1</span><span>Direct-to-market strategies by vendors</span></li><li><span class="n">2</span><span>Margin pressure (global trend)</span></li><li><span class="n">3</span><span>Grey market competition on accessories</span></li><li><span class="n">4</span><span>Economic pressure on consumption</span></li><li><span class="n">5</span><span>Global supply chain disruption</span></li><li><span class="n">6</span><span>Irrational competition</span></li></ol></section><section class="slide"><h2>Directions and capabilities</h2>
+  <table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Pillar</th>
+    <th class="num">Measures</th><th class="num">Execution</th></tr></thead>
+    <tbody><tr><td class="idx">1</td><td class="dirname">
+    <b><span class="pcode">MB01</span> Digital &amp; Data-Driven Operations</b>
+    <span class="sub2">Capability &middot; VC &middot; Ramy Behairy</span></td>
+  <td class="num final warn">58%</td>
+  <td class="num final attn">
+    83%</td></tr><tr><td class="idx">2</td><td class="dirname">
+    <b><span class="pcode">MB02</span> Channel Preference &amp; Development</b>
+    <span class="sub2">Direction &middot; OT &middot; Mohamed Rizk</span></td>
+  <td class="num final warn">61%</td>
+  <td class="num final good">
+    122%</td></tr><tr><td class="idx">3</td><td class="dirname">
+    <b><span class="pcode">MB03</span> Portfolio &amp; Value Chain Expansion</b>
+    <span class="sub2">Direction &middot; DIV &middot; Karim</span></td>
+  <td class="num final warn">53%</td>
+  <td class="num final good">
+    93%</td></tr><tr><td class="idx">4</td><td class="dirname">
+    <b><span class="pcode">MB04</span> Asset-Light Model Regional Expansion</b>
+    <span class="sub2">Direction &middot; VC &middot; Abdelhamid</span></td>
+  <td class="num final bad">36%</td>
+  <td class="num final good">
+    128%</td></tr></tbody></table></section><section class="slide s-sec s-pillar">
+      <span class="seclab">Capability &middot; theme VC &middot; Ramy Behairy</span>
+      <h1 class="pillarname"><span class="pcode huge">MB01</span> Digital &amp; Data-Driven Operations</h1>
+      <p class="coversub">End-state: unified market intelligence engine</p>
+      <div class="coverrule"></div>
+      <div class="leadstats">
+        <div><span class="lab">Key measures</span><b class="warn">58%</b></div>
+        <div><span class="lab">Execution</span><b class="attn">83%</b></div>
+        <div><span class="lab">Delivered / planned</span><b class="plain">38% / 46%</b></div>
+      </div></section><section class="slide" data-split="MB01 Key measures"><div class="phdr">
+      <h2><span class="pcode big">MB01</span> Digital &amp; Data-Driven Operations
+        <span class="which">Key measures</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="warn">58%</b></span>
+        <span><i>Delivered</i><b>38%</b></span>
+        <span><i>Planned</i><b>46%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>
+        <th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>
+        <th class="num">Progress</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td>
+      <td class="lead">Data duplicate rate</td>
+      <td class="num">≤</td><td class="num">1%</td><td class="num">1.4%</td>
+      <td class="num final attn">71%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td>
+      <td class="lead">Orders processed digitally</td>
+      <td class="num">≥</td><td class="num">90%</td><td class="num">48%</td>
+      <td class="num final warn">53%</td><td class="note">ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.</td></tr><tr><td class="idx">3</td>
+      <td class="lead">App coverage rate <span class="fmark"></span></td>
+      <td class="num">≥</td><td class="num">50%</td><td class="num">22%</td>
+      <td class="num final bad">44%</td><td class="note">Rollout gated on the merchant app release. Recovery plan agreed with Ramy for Q3.</td></tr><tr><td class="idx">4</td>
+      <td class="lead">Dependency on automated reports</td>
+      <td class="num">≥</td><td class="num">90%</td><td class="num">58%</td>
+      <td class="num final warn">64%</td><td class="note">Power BI live for sales; finance still manual until the warehouse lands.</td></tr></tbody></table></section><section class="slide" data-split="MB01 Tactics"><div class="phdr">
+      <h2><span class="pcode big">MB01</span> Digital &amp; Data-Driven Operations
+        <span class="which">Tactics</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="warn">58%</b></span>
+        <span><i>Delivered</i><b>38%</b></span>
+        <span><i>Planned</i><b>46%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+        <th class="num">Quarters</th><th class="num">Deliv. / due</th><th class="num">Of plan</th>
+        <th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td class="lead">Clean and standardize customer and SKU base</td>
+              <td>Ramy Behairy</td><td class="num">Q2, Q3</td>
+              <td class="num">45 / 50</td>
+              <td class="num final good">90%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td><td class="lead">End-to-end order-to-cash digitization</td>
+              <td>Mohamed Rizk</td><td class="num">Q2, Q3</td>
+              <td class="num">35 / 50</td>
+              <td class="num final attn">70%</td><td class="note">Blocked behind the ERP cutover date.</td></tr><tr><td class="idx">3</td><td class="lead">Digitize sales reporting via Power BI</td>
+              <td>Ramy Behairy</td><td class="num">Q2, Q3</td>
+              <td class="num">40 / 50</td>
+              <td class="num final attn">80%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">4</td><td class="lead">Scale Mobile Digital App across merchants</td>
+              <td>Ashraf Laithy</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">30 / 33</td>
+              <td class="num final good">91%</td><td class="note">Ahead of plan on merchants, behind on active usage.</td></tr><tr class="dim"><td class="idx">5</td><td class="lead">Data integration across business units</td>
+              <td>Abdelhamid</td><td class="num">Q3, Q4</td>
+              <td colspan="2" class="cc">Outside this cycle</td><td class="note empty">&mdash;</td></tr></tbody></table></section><section class="slide s-sec s-pillar">
+      <span class="seclab">Direction &middot; theme OT &middot; Mohamed Rizk</span>
+      <h1 class="pillarname"><span class="pcode huge">MB02</span> Channel Preference &amp; Development</h1>
+      
+      <div class="coverrule"></div>
+      <div class="leadstats">
+        <div><span class="lab">Key measures</span><b class="warn">61%</b></div>
+        <div><span class="lab">Execution</span><b class="good">122%</b></div>
+        <div><span class="lab">Delivered / planned</span><b class="plain">45% / 37%</b></div>
+      </div></section><section class="slide" data-split="MB02 Key measures"><div class="phdr">
+      <h2><span class="pcode big">MB02</span> Channel Preference &amp; Development
+        <span class="which">Key measures</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="warn">61%</b></span>
+        <span><i>Delivered</i><b>45%</b></span>
+        <span><i>Planned</i><b>37%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>
+        <th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>
+        <th class="num">Progress</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td>
+      <td class="lead">Average delivery time</td>
+      <td class="num">≤</td><td class="num">24 h</td><td class="num">31 h</td>
+      <td class="num final attn">77%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td>
+      <td class="lead">Key retailer revenue growth</td>
+      <td class="num">≥</td><td class="num">50%</td><td class="num">24%</td>
+      <td class="num final bad">48%</td><td class="note">Two key accounts renegotiated late. Q3 volumes already committed.</td></tr><tr><td class="idx">3</td>
+      <td class="lead">Tier 2 merchants enrolled</td>
+      <td class="num">≥</td><td class="num">100</td><td class="num">58</td>
+      <td class="num final warn">58%</td><td class="note">Enrolment slowed by the credit check change. 58 of 100 signed.</td></tr><tr><td class="idx">4</td>
+      <td class="lead">Tier 2 segment revenue growth</td>
+      <td class="num">≥</td><td class="num">100%</td><td class="num">62%</td>
+      <td class="num final warn">62%</td><td class="note">Follows enrolment; expected to close most of the gap in H2.</td></tr></tbody></table></section><section class="slide" data-split="MB02 Tactics"><div class="phdr">
+      <h2><span class="pcode big">MB02</span> Channel Preference &amp; Development
+        <span class="which">Tactics</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="warn">61%</b></span>
+        <span><i>Delivered</i><b>45%</b></span>
+        <span><i>Planned</i><b>37%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+        <th class="num">Quarters</th><th class="num">Deliv. / due</th><th class="num">Of plan</th>
+        <th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td class="lead">Retailer preference index workshop</td>
+              <td>Karim</td><td class="num">Q2, Q3</td>
+              <td class="num">60 / 50</td>
+              <td class="num final good">120%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td><td class="lead">Joint business planning with key retailers</td>
+              <td>Mohamed Rizk</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">45 / 33</td>
+              <td class="num final good">136%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">3</td><td class="lead">Tier 2 growth acceleration programme</td>
+              <td>Ashraf Laithy</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">35 / 33</td>
+              <td class="num final good">106%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">4</td><td class="lead">Channel intelligence engine (pilot)</td>
+              <td>Karim</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">40 / 33</td>
+              <td class="num final good">121%</td><td class="note empty">&mdash;</td></tr></tbody></table></section><section class="slide s-sec s-pillar">
+      <span class="seclab">Direction &middot; theme DIV &middot; Karim</span>
+      <h1 class="pillarname"><span class="pcode huge">MB03</span> Portfolio &amp; Value Chain Expansion</h1>
+      
+      <div class="coverrule"></div>
+      <div class="leadstats">
+        <div><span class="lab">Key measures</span><b class="warn">53%</b></div>
+        <div><span class="lab">Execution</span><b class="good">93%</b></div>
+        <div><span class="lab">Delivered / planned</span><b class="plain">40% / 43%</b></div>
+      </div></section><section class="slide" data-split="MB03 Key measures"><div class="phdr">
+      <h2><span class="pcode big">MB03</span> Portfolio &amp; Value Chain Expansion
+        <span class="which">Key measures</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="warn">53%</b></span>
+        <span><i>Delivered</i><b>40%</b></span>
+        <span><i>Planned</i><b>43%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>
+        <th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>
+        <th class="num">Progress</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td>
+      <td class="lead">Non-Samsung revenue</td>
+      <td class="num">≥</td><td class="num">4B EGP</td><td class="num">1.6B</td>
+      <td class="num final bad">40%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td>
+      <td class="lead">Samsung market share <span class="fmark"></span></td>
+      <td class="num">≥</td><td class="num">30%</td><td class="num">31%</td>
+      <td class="num final good">103%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">3</td>
+      <td class="lead">Vivo market share</td>
+      <td class="num">≥</td><td class="num">60%</td><td class="num">48%</td>
+      <td class="num final attn">80%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">4</td>
+      <td class="lead">Accessory revenue</td>
+      <td class="num">≥</td><td class="num">300M EGP</td><td class="num">96M</td>
+      <td class="num final bad">32%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">5</td>
+      <td class="lead">Active Sary merchants</td>
+      <td class="num">≥</td><td class="num">800</td><td class="num">310</td>
+      <td class="num final bad">39%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">6</td>
+      <td class="lead">Sary revenue</td>
+      <td class="num">≥</td><td class="num">150M EGP</td><td class="num">42M</td>
+      <td class="num final bad">28%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">7</td>
+      <td class="lead">Local production devices</td>
+      <td class="num">≥</td><td class="num">1M</td><td class="num">520K</td>
+      <td class="num final warn">52%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">8</td>
+      <td class="lead">Sary app downloads</td>
+      <td class="num">≥</td><td class="num">40K</td><td class="num">18.4K</td>
+      <td class="num final bad">46%</td><td class="note empty">&mdash;</td></tr></tbody></table></section><section class="slide" data-split="MB03 Tactics"><div class="phdr">
+      <h2><span class="pcode big">MB03</span> Portfolio &amp; Value Chain Expansion
+        <span class="which">Tactics</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="warn">53%</b></span>
+        <span><i>Delivered</i><b>40%</b></span>
+        <span><i>Planned</i><b>43%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+        <th class="num">Quarters</th><th class="num">Deliv. / due</th><th class="num">Of plan</th>
+        <th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td class="lead">Protect and grow share in existing brands</td>
+              <td>Ashraf Abdelaty</td><td class="num">Q1, Q2, Q3, Q4</td>
+              <td class="num">55 / 50</td>
+              <td class="num final good">110%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td><td class="lead">Expand high-margin categories</td>
+              <td>Fayad</td><td class="num">Q1, Q2, Q3, Q4</td>
+              <td class="num">40 / 50</td>
+              <td class="num final attn">80%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">3</td><td class="lead">Leverage Sary for entry-to-mid expansion</td>
+              <td>Fayad</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">30 / 33</td>
+              <td class="num final good">91%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">4</td><td class="lead">Sary-enabled tailored B2B portfolio</td>
+              <td>Fayad</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">25 / 33</td>
+              <td class="num final attn">76%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">5</td><td class="lead">Ongoing scanning for tier-1 brands</td>
+              <td>Karim</td><td class="num">Q1, Q2, Q3, Q4</td>
+              <td class="num">50 / 50</td>
+              <td class="num final good">100%</td><td class="note empty">&mdash;</td></tr><tr class="dim"><td class="idx">6</td><td class="lead">Build a light ecosystem (limited SKU)</td>
+              <td>Fayad</td><td class="num">Q3, Q4</td>
+              <td colspan="2" class="cc">Outside this cycle</td><td class="note empty">&mdash;</td></tr><tr class="dim"><td class="idx">7</td><td class="lead">Market intelligence partner</td>
+              <td>Karim</td><td class="num">Q3, Q4</td>
+              <td colspan="2" class="cc">Outside this cycle</td><td class="note empty">&mdash;</td></tr></tbody></table></section><section class="slide s-sec s-pillar">
+      <span class="seclab">Direction &middot; theme VC &middot; Abdelhamid</span>
+      <h1 class="pillarname"><span class="pcode huge">MB04</span> Asset-Light Model Regional Expansion</h1>
+      
+      <div class="coverrule"></div>
+      <div class="leadstats">
+        <div><span class="lab">Key measures</span><b class="bad">36%</b></div>
+        <div><span class="lab">Execution</span><b class="good">128%</b></div>
+        <div><span class="lab">Delivered / planned</span><b class="plain">64% / 50%</b></div>
+      </div></section><section class="slide" data-split="MB04 Key measures"><div class="phdr">
+      <h2><span class="pcode big">MB04</span> Asset-Light Model Regional Expansion
+        <span class="which">Key measures</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="bad">36%</b></span>
+        <span><i>Delivered</i><b>64%</b></span>
+        <span><i>Planned</i><b>50%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Measure</th>
+        <th class="num">Dir.</th><th class="num">Target</th><th class="num">Actual</th>
+        <th class="num">Progress</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td>
+      <td class="lead">Regional hub revenue</td>
+      <td class="num">≥</td><td class="num">2M USD</td><td class="num">0.5M</td>
+      <td class="num final bad">25%</td><td class="note">Hub opens in H2 by design — this is measured at H2, not now.</td></tr><tr><td class="idx">2</td>
+      <td class="lead">Export markets activated</td>
+      <td class="num">≥</td><td class="num">3</td><td class="num">1</td>
+      <td class="num final bad">33%</td><td class="note">One of three live. Nigeria and Libya in regulatory review.</td></tr><tr><td class="idx">3</td>
+      <td class="lead">Distribution agreements</td>
+      <td class="num">≥</td><td class="num">2</td><td class="num">1</td>
+      <td class="num final warn">50%</td><td class="note">One signed, second in legal.</td></tr></tbody></table></section><section class="slide" data-split="MB04 Tactics"><div class="phdr">
+      <h2><span class="pcode big">MB04</span> Asset-Light Model Regional Expansion
+        <span class="which">Tactics</span></h2>
+      <div class="phdrstats"><span><i>Measures</i><b class="bad">36%</b></span>
+        <span><i>Delivered</i><b>64%</b></span>
+        <span><i>Planned</i><b>50%</b></span></div></div>
+      <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+        <th class="num">Quarters</th><th class="num">Deliv. / due</th><th class="num">Of plan</th>
+        <th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td class="lead">Dubai regional hub multi-branded export concept</td>
+              <td>Karim</td><td class="num">Q1, Q2, Q3</td>
+              <td class="num">60 / 67</td>
+              <td class="num final good">90%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">2</td><td class="lead">Initial agreements with 2–3 tier 2 brands</td>
+              <td>Abdelhamid</td><td class="num">Q1, Q2, Q3</td>
+              <td class="num">55 / 67</td>
+              <td class="num final attn">82%</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">3</td><td class="lead">Pre-entry market validation</td>
+              <td>Abdelhamid</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">50 / 33</td>
+              <td class="num final good">152%</td><td class="note">Fieldwork complete in Nigeria; Libya pending.</td></tr><tr><td class="idx">4</td><td class="lead">Regulatory &amp; entry barriers assessment</td>
+              <td>Fayad</td><td class="num">Q2, Q3, Q4</td>
+              <td class="num">55 / 33</td>
+              <td class="num final good">167%</td><td class="note empty">&mdash;</td></tr><tr class="dim"><td class="idx">5</td><td class="lead">Entry model design &amp; B2B e-commerce presence</td>
+              <td>Abuelenien</td><td class="num">Q4</td>
+              <td colspan="2" class="cc">Outside this cycle</td><td class="note empty">&mdash;</td></tr><tr><td class="idx">6</td><td class="lead">Go / No-Go regional entry risk assessment</td>
+              <td>Karim</td><td class="num">Q2, Q3</td>
+              <td class="num">100 / 50</td>
+              <td class="num final good">200%</td><td class="note empty">&mdash;</td></tr></tbody></table></section><section class="slide s-note"><h2>Notes and achievements</h2>
+  <div class="notebox" contenteditable="true">Digital work is landing but the app rollout slipped a quarter behind the principal&#x27;s own launch. Q3 recovery agreed with Ramy.</div>
+  <p class="hint">Editable live &mdash; a number challenged in the room is corrected here,
+    not in a deck that is already wrong.</p></section><section class="slide" data-split="Attention"><h2>What needs attention
+    <span class="which">15 items at risk or off track</span></h2>
+  <table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>
+    <th class="num">Target / due</th><th class="num">Actual</th><th class="num">Progress</th>
+    <th>What is being done</th></tr></thead><tbody><tr><td class="idx">1</td><td class="lead">Orders processed digitally
+              <span class="sub2">MB01 &middot; measure</span></td>
+              <td class="num">90%</td><td class="num">48%</td>
+              <td class="num final warn">53%</td>
+              <td class="note">ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.</td></tr><tr><td class="idx">2</td><td class="lead">App coverage rate
+              <span class="sub2">MB01 &middot; measure</span></td>
+              <td class="num">50%</td><td class="num">22%</td>
+              <td class="num final bad">44%</td>
+              <td class="note">Rollout gated on the merchant app release. Recovery plan agreed with Ramy for Q3.</td></tr><tr><td class="idx">3</td><td class="lead">Dependency on automated reports
+              <span class="sub2">MB01 &middot; measure</span></td>
+              <td class="num">90%</td><td class="num">58%</td>
+              <td class="num final warn">64%</td>
+              <td class="note">Power BI live for sales; finance still manual until the warehouse lands.</td></tr><tr><td class="idx">4</td><td class="lead">Key retailer revenue growth
+              <span class="sub2">MB02 &middot; measure</span></td>
+              <td class="num">50%</td><td class="num">24%</td>
+              <td class="num final bad">48%</td>
+              <td class="note">Two key accounts renegotiated late. Q3 volumes already committed.</td></tr><tr><td class="idx">5</td><td class="lead">Tier 2 merchants enrolled
+              <span class="sub2">MB02 &middot; measure</span></td>
+              <td class="num">100</td><td class="num">58</td>
+              <td class="num final warn">58%</td>
+              <td class="note">Enrolment slowed by the credit check change. 58 of 100 signed.</td></tr><tr><td class="idx">6</td><td class="lead">Tier 2 segment revenue growth
+              <span class="sub2">MB02 &middot; measure</span></td>
+              <td class="num">100%</td><td class="num">62%</td>
+              <td class="num final warn">62%</td>
+              <td class="note">Follows enrolment; expected to close most of the gap in H2.</td></tr><tr><td class="idx">7</td><td class="lead">Non-Samsung revenue
+              <span class="sub2">MB03 &middot; measure</span></td>
+              <td class="num">4B EGP</td><td class="num">1.6B</td>
+              <td class="num final bad">40%</td>
+              <td class="note">&mdash;</td></tr><tr><td class="idx">8</td><td class="lead">Accessory revenue
+              <span class="sub2">MB03 &middot; measure</span></td>
+              <td class="num">300M EGP</td><td class="num">96M</td>
+              <td class="num final bad">32%</td>
+              <td class="note">&mdash;</td></tr><tr><td class="idx">9</td><td class="lead">Active Sary merchants
+              <span class="sub2">MB03 &middot; measure</span></td>
+              <td class="num">800</td><td class="num">310</td>
+              <td class="num final bad">39%</td>
+              <td class="note">&mdash;</td></tr><tr><td class="idx">10</td><td class="lead">Sary revenue
+              <span class="sub2">MB03 &middot; measure</span></td>
+              <td class="num">150M EGP</td><td class="num">42M</td>
+              <td class="num final bad">28%</td>
+              <td class="note">&mdash;</td></tr><tr><td class="idx">11</td><td class="lead">Local production devices
+              <span class="sub2">MB03 &middot; measure</span></td>
+              <td class="num">1M</td><td class="num">520K</td>
+              <td class="num final warn">52%</td>
+              <td class="note">&mdash;</td></tr><tr><td class="idx">12</td><td class="lead">Sary app downloads
+              <span class="sub2">MB03 &middot; measure</span></td>
+              <td class="num">40K</td><td class="num">18.4K</td>
+              <td class="num final bad">46%</td>
+              <td class="note">&mdash;</td></tr><tr><td class="idx">13</td><td class="lead">Regional hub revenue
+              <span class="sub2">MB04 &middot; measure</span></td>
+              <td class="num">2M USD</td><td class="num">0.5M</td>
+              <td class="num final bad">25%</td>
+              <td class="note">Hub opens in H2 by design — this is measured at H2, not now.</td></tr><tr><td class="idx">14</td><td class="lead">Export markets activated
+              <span class="sub2">MB04 &middot; measure</span></td>
+              <td class="num">3</td><td class="num">1</td>
+              <td class="num final bad">33%</td>
+              <td class="note">One of three live. Nigeria and Libya in regulatory review.</td></tr><tr><td class="idx">15</td><td class="lead">Distribution agreements
+              <span class="sub2">MB04 &middot; measure</span></td>
+              <td class="num">2</td><td class="num">1</td>
+              <td class="num final warn">50%</td>
+              <td class="note">One signed, second in legal.</td></tr></tbody></table></section><section class="slide s-cover s-thanks">
+  <h1 class="cover">Thank you</h1>
+  <div class="coverrule"></div>
+  <p class="coversub">Mobile &middot; H1 2026</p>
+</section></div></div>
+<div class="bar">
+  <span class="title"><b>Mobile</b> · H1 2026</span>
+  <div class="dots" id="dots"></div>
+  <span class="counter"><span id="cur">1</span> / <span id="tot">0</span></span>
+  <button id="prev" title="Previous">&#8592;</button>
+  <button id="next" title="Next">&#8594;</button>
+  <button id="fit" class="txt" title="Fit to window instead of 16:9">Fit</button>
+  <button id="fs" class="txt" title="Fullscreen">Fullscreen</button>
+</div>
+<script>
+var deck = document.querySelector('.deck');
+
+/* Split before anything else: a slide whose table overruns is first squeezed,
+   and only if it still overruns does the table continue on a new slide. Doing
+   this once at load means the deck never reflows while it is being presented. */
+function room(s){
+  var pad = 62*2, h = s.clientHeight;
+  var used = 0;
+  [].forEach.call(s.children, function(c){ used += c.offsetHeight; });
+  return h - used;
+}
+function splitOverflowing(){
+  /* Any slide that overruns is squeezed first, table or not \u2014 the aims slide
+     is prose and a grid, and it can overrun just as easily as a long table. */
+  [].forEach.call(deck.querySelectorAll('.slide'), function(s){
+    s.classList.add('on');
+    if (s.scrollHeight > s.clientHeight) s.classList.add('tight');
+    s.classList.remove('on');
+  });
+  var guard = 0;
+  for (var pass = 0; pass < 12; pass++) {
+    var changed = false;
+    [].forEach.call(deck.querySelectorAll('.slide[data-split]'), function(s){
+      s.classList.add('on');
+      var tb = s.querySelector('tbody');
+      if (!tb || tb.rows.length < 2) { s.classList.remove('on'); return; }
+      if (s.scrollHeight <= s.clientHeight) { s.classList.remove('on'); return; }
+      s.classList.add('tight');
+      if (s.scrollHeight <= s.clientHeight) { s.classList.remove('on'); return; }
+      /* still over after squeezing: move the last row onto a continuation */
+      /* A continuation can overrun in its turn, so it is splittable too \u2014
+         otherwise a long table stops one slide short and quietly overflows. */
+      var next = s.nextElementSibling;
+      if (!next || !next.dataset.cont || next.dataset.cont !== s.dataset.split) {
+        next = s.cloneNode(true);
+        next.dataset.cont = s.dataset.split;
+        next.dataset.split = s.dataset.split;
+        next.querySelector('tbody').innerHTML = '';
+        var h2 = next.querySelector('h2');
+        if (h2 && !h2.querySelector('.contd'))
+          h2.insertAdjacentHTML('beforeend', '<span class="contd">continued</span>');
+        s.parentNode.insertBefore(next, s.nextSibling);
+      }
+      var ntb = next.querySelector('tbody');
+      ntb.insertBefore(tb.rows[tb.rows.length-1], ntb.firstChild);
+      changed = true;
+      s.classList.remove('on');
+    });
+    if (!changed) break;
+    guard = pass;
+  }
+  [].forEach.call(deck.querySelectorAll('.slide'), function(s){ s.classList.remove('on'); });
+}
+
+var slides, dots = [], i = 0;
+function build(){
+  slides = [].slice.call(deck.querySelectorAll('.slide'));
+  document.getElementById('tot').textContent = slides.length;
+  var wrap = document.getElementById('dots');
+  wrap.innerHTML = slides.map(function(_, k){
+    return '<button class="dot" data-go="' + k + '" title="Slide ' + (k+1) + '"></button>';
+  }).join('');
+  dots = [].slice.call(wrap.querySelectorAll('.dot'));
+  dots.forEach(function(dd){ dd.onclick = function(){ show(+dd.dataset.go); }; });
+}
+function show(n){
+  i = Math.max(0, Math.min(slides.length-1, n));
+  slides.forEach(function(s,k){ s.classList.toggle('on', k===i); });
+  dots.forEach(function(dd,k){ dd.classList.toggle('on', k===i); });
+  document.getElementById('cur').textContent = i+1;
+}
+/* Scale the fixed 1600×900 stage into whatever room there is. */
+function fit(){
+  if (document.body.classList.contains('fitwin')) { deck.style.transform = ''; return; }
+  var st = document.querySelector('.stage');
+  var k = Math.min(st.clientWidth / 1600, st.clientHeight / 900);
+  deck.style.transform = 'scale(' + k + ')';
+}
+addEventListener('resize', fit);
+document.getElementById('next').onclick = function(){ show(i+1); };
+document.getElementById('prev').onclick = function(){ show(i-1); };
+document.getElementById('fit').onclick = function(){
+  document.body.classList.toggle('fitwin');
+  this.textContent = document.body.classList.contains('fitwin') ? '16:9' : 'Fit';
+  fit();
+};
+document.getElementById('fs').onclick = function(){
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.body.requestFullscreen();
+};
+addEventListener('keydown', function(ev){
+  if (ev.target.isContentEditable) return;
+  if (ev.key === 'ArrowRight' || ev.key === ' ') { ev.preventDefault(); show(i+1); }
+  if (ev.key === 'ArrowLeft') show(i-1);
+  if (ev.key === 'Home') show(0);
+  if (ev.key === 'End') show(slides.length-1);
+  if (ev.key === 'f' || ev.key === 'F') document.getElementById('fs').click();
+  if (ev.key === 'w' || ev.key === 'W') document.getElementById('fit').click();
+});
+addEventListener('fullscreenchange', fit);
+splitOverflowing(); build(); fit(); show(0);
+</script></body></html>

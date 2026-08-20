@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Capability card</title>
+<style>
+:root{--panel:#16325C;--gold:#C9A24D;--gold-deep:#A8842F;--ground:#F7F8FA;--surface:#FFF;
+--surface-2:#EFF2F6;--zebra:#F7F9FC;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#6B7583;
+--good:#2E7D5B;--attn:#B8860B;--warn:#CC6B3D;--bad:#B04434;--none:#8A9099;
+--serif:Georgia,serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--mono:ui-monospace,Menlo,Consolas,monospace;--r:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.top{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}.top b{color:var(--gold)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 30px 70px}
+.slab{display:flex;align-items:baseline;gap:12px;margin:30px 0 4px}
+.slab b{font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);
+background:#FBF6E9;border:1px solid #E8D9AE;border-radius:20px;padding:5px 10px}
+.slab span{font:400 19px/1.3 var(--serif)}
+.lede{color:var(--ink-3);font-size:13px;margin:0 0 14px;max-width:88ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.ch{background:var(--panel);color:#fff;padding:12px 16px;text-align:center}
+.ch b{display:block;font-size:15px}.ch span{font-size:11.5px;color:#AFC0D8}
+.cb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cb.one{grid-template-columns:1fr}
+.box{padding:14px 16px 16px;text-align:center}
+.box.r{border-left:1px solid var(--line-soft,#E6EAF0)}
+.box.wide{display:flex;align-items:center;gap:22px;text-align:left;justify-content:center}
+.lab{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+font-weight:700;margin-bottom:8px}
+.dial{width:118px;height:118px}
+.dial .tr{fill:none;stroke:var(--surface-2);stroke-width:11}
+.dial .fg{fill:none;stroke-width:11;stroke-linecap:round;transform:rotate(-90deg);transform-origin:65px 65px}
+.dial .fg.good{stroke:var(--good)}.dial .fg.attn{stroke:var(--attn)}
+.dial .fg.warn{stroke:var(--warn)}.dial .fg.bad{stroke:var(--bad)}
+.dv{font:400 30px var(--serif);text-anchor:middle}
+.dv.good{fill:var(--good)}.dv.attn{fill:var(--attn)}.dv.warn{fill:var(--warn)}.dv.bad{fill:var(--bad)}
+.pc{font-size:14px}
+.big2{font-family:var(--mono);font-size:34px;line-height:1;margin:14px 0 4px}
+.big2 .of{font-size:15px;color:var(--ink-3)}
+.mini{display:flex;gap:18px;justify-content:center;margin-top:12px}
+.mini.col{flex-direction:column;gap:4px;margin-top:12px;text-align:left;align-items:flex-start}
+.mini em{display:block;font-style:normal;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+color:var(--ink-3);font-weight:700}
+.mini b{font-family:var(--mono);font-size:15px}
+.mini.col div{display:flex;gap:8px;align-items:baseline}
+.mini.col em{width:88px}
+.attn{color:var(--attn)}.none{color:var(--none)}.good{color:var(--good)}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+th{background:var(--panel);color:#fff;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+text-align:left;padding:10px 13px;font-weight:700}
+th.num,td.num{text-align:right}th.cc,td.cc{text-align:center}
+td{padding:12px 13px;border-bottom:1px solid #E6EAF0;font-size:14px}
+tr:last-child td{border-bottom:0}tbody tr:nth-child(even) td{background:var(--zebra)}
+td.num{font-family:var(--mono)}td.final{font-weight:700}
+.lead{font-weight:500}.s{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px;font-weight:400}
+.ms{font-family:var(--mono);font-size:12.5px}.dash{color:var(--none)}
+.toggle{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-left:auto}
+.toggle button{background:var(--surface);border:0;font:inherit;font-size:11px;letter-spacing:.07em;
+text-transform:uppercase;font-weight:700;color:var(--ink-3);padding:7px 13px;cursor:pointer}
+.toggle button.on{background:var(--panel);color:#fff}
+.bar2{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);
+border-radius:var(--r);padding:10px 16px;margin:0 0 12px;font-size:12.5px;color:var(--ink-3)}
+.note-b{border-left:3px solid var(--gold);background:#FBF6E9;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin-top:14px}
+.note-b b{color:var(--ink)}
+</style></head><body>
+<div class="top"><b>Mockup</b> — the capability card, in the same family as a business unit's. Nothing is built.</div>
+<div class="wrap">
+
+<div class="slab"><b>Option 1</b><span>One box &mdash; delivery, with the counts beside it</span></div>
+<p class="lede">A capability has one number now, so the card carries one. Honest, but it sits oddly in a
+   grid next to two-box unit cards.</p>
+<div class="grid"><div class="gcard"><div class="ch"><b>Operational Excellence</b><span>Treasury · Fayad Sobhy</span></div>
+      <div class="cb one"><div class="box wide"><span class="lab">Project delivery</span>
+        <svg viewBox="0 0 130 130" class="dial"><circle cx="65" cy="65" r="54" class="tr"/>
+      <circle cx="65" cy="65" r="54" class="fg warn" stroke-dasharray="339" stroke-dashoffset="129"/>
+      <text x="65" y="72" class="dv warn">62<tspan class="pc">%</tspan></text></svg>
+        <div class="mini"><div><em>Projects</em><b>3</b></div>
+          <div><em>Milestones</em><b>3</b></div>
+          <div><em>Completed</em><b>2</b></div></div></div></div></div><div class="gcard"><div class="ch"><b>People</b><span>HR · Noran Adel</span></div>
+      <div class="cb one"><div class="box wide"><span class="lab">Project delivery</span>
+        <svg viewBox="0 0 130 130" class="dial"><circle cx="65" cy="65" r="54" class="tr"/>
+      <circle cx="65" cy="65" r="54" class="fg warn" stroke-dasharray="339" stroke-dashoffset="170"/>
+      <text x="65" y="72" class="dv warn">50<tspan class="pc">%</tspan></text></svg>
+        <div class="mini"><div><em>Projects</em><b>2</b></div>
+          <div><em>Milestones</em><b>2</b></div>
+          <div><em>Completed</em><b>1</b></div></div></div></div></div><div class="gcard"><div class="ch"><b>Innovation and Tech</b><span>IT · Dina Shawky</span></div>
+      <div class="cb one"><div class="box wide"><span class="lab">Project delivery</span>
+        <svg viewBox="0 0 130 130" class="dial"><circle cx="65" cy="65" r="54" class="tr"/>
+      <circle cx="65" cy="65" r="54" class="fg bad" stroke-dasharray="339" stroke-dashoffset="227"/>
+      <text x="65" y="72" class="dv bad">33<tspan class="pc">%</tspan></text></svg>
+        <div class="mini"><div><em>Projects</em><b>3</b></div>
+          <div><em>Milestones</em><b>3</b></div>
+          <div><em>Completed</em><b>0</b></div></div></div></div></div></div>
+
+<div class="slab"><b>Option 2</b><span>Two boxes &mdash; delivery, and the milestones behind it</span></div>
+<p class="lede">The composition survives: the dial on the left, and on the right the detail that
+   explains it &mdash; exactly as Execution explains itself with delivered, planned and variance.</p>
+<div class="grid"><div class="gcard"><div class="ch"><b>Operational Excellence</b><span>Treasury · Fayad Sobhy</span></div>
+      <div class="cb"><div class="box"><span class="lab">Delivery</span><svg viewBox="0 0 130 130" class="dial"><circle cx="65" cy="65" r="54" class="tr"/>
+      <circle cx="65" cy="65" r="54" class="fg warn" stroke-dasharray="339" stroke-dashoffset="129"/>
+      <text x="65" y="72" class="dv warn">62<tspan class="pc">%</tspan></text></svg></div>
+      <div class="box r"><span class="lab">Milestones</span>
+        <div class="big2">2<span class="of"> of 3</span></div>
+        <div class="mini col"><div><em>In progress</em><b class="attn">1</b></div>
+          <div><em>Not started</em><b class="none">0</b></div>
+          <div><em>Projects</em><b>3</b></div></div></div></div></div><div class="gcard"><div class="ch"><b>People</b><span>HR · Noran Adel</span></div>
+      <div class="cb"><div class="box"><span class="lab">Delivery</span><svg viewBox="0 0 130 130" class="dial"><circle cx="65" cy="65" r="54" class="tr"/>
+      <circle cx="65" cy="65" r="54" class="fg warn" stroke-dasharray="339" stroke-dashoffset="170"/>
+      <text x="65" y="72" class="dv warn">50<tspan class="pc">%</tspan></text></svg></div>
+      <div class="box r"><span class="lab">Milestones</span>
+        <div class="big2">1<span class="of"> of 2</span></div>
+        <div class="mini col"><div><em>In progress</em><b class="attn">1</b></div>
+          <div><em>Not started</em><b class="none">0</b></div>
+          <div><em>Projects</em><b>2</b></div></div></div></div></div><div class="gcard"><div class="ch"><b>Innovation and Tech</b><span>IT · Dina Shawky</span></div>
+      <div class="cb"><div class="box"><span class="lab">Delivery</span><svg viewBox="0 0 130 130" class="dial"><circle cx="65" cy="65" r="54" class="tr"/>
+      <circle cx="65" cy="65" r="54" class="fg bad" stroke-dasharray="339" stroke-dashoffset="227"/>
+      <text x="65" y="72" class="dv bad">33<tspan class="pc">%</tspan></text></svg></div>
+      <div class="box r"><span class="lab">Milestones</span>
+        <div class="big2">0<span class="of"> of 3</span></div>
+        <div class="mini col"><div><em>In progress</em><b class="attn">2</b></div>
+          <div><em>Not started</em><b class="none">1</b></div>
+          <div><em>Projects</em><b>3</b></div></div></div></div></div></div>
+
+<div class="slab"><b>Your question</b><span>A view toggle on both sections</span></div>
+<p class="lede">Cards to judge, a table to scan. Ten units or eight capabilities are quick to compare in
+   a table and slow in a grid; the reverse is true when you want one to stand out.</p>
+<div class="bar2"><span>Reading the colours &mdash; On track 85%+ &middot; Needs attention 70&ndash;84%</span>
+  <span class="toggle"><button class="on">Cards</button><button>Table</button></span></div>
+<table><thead><tr><th>Capability</th><th class="num">Projects</th><th class="cc">Milestones</th>
+  <th class="num">Delivery</th></tr></thead><tbody><tr><td class="lead">Operational Excellence<span class="s">Treasury · Fayad Sobhy</span></td>
+  <td class="num">3</td><td class="cc"><span class="ms"><b class="good">2</b>/<b class="attn">1</b>/<span class="dash">0</span></span></td>
+  <td class="num final warn">62%</td></tr><tr><td class="lead">People<span class="s">HR · Noran Adel</span></td>
+  <td class="num">2</td><td class="cc"><span class="ms"><b class="good">1</b>/<b class="attn">1</b>/<span class="dash">0</span></span></td>
+  <td class="num final warn">50%</td></tr><tr><td class="lead">Innovation and Tech<span class="s">IT · Dina Shawky</span></td>
+  <td class="num">3</td><td class="cc"><span class="ms"><b class="good">0</b>/<b class="attn">2</b>/<span class="dash">1</span></span></td>
+  <td class="num final bad">33%</td></tr></tbody></table>
+
+<div class="note-b"><b>My reading: option 2, and yes to the toggle.</b> Option 2 keeps one card shape
+  across the whole platform, which is worth more than the small dishonesty of calling milestone counts
+  a second reading &mdash; they genuinely are the workings behind the dial. The toggle then answers the
+  real difference between the two audiences: a CEO wants the cards, an SMO scanning eighteen rows
+  wants the table. It belongs on <b>both</b> sections or neither, or the two stop matching again.</div>
+
+</div></body></html>

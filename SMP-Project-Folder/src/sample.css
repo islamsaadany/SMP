@@ -1,0 +1,18 @@
+  /* Section chips: a control, not a title bar — so they sit in the page under
+     the legend rather than becoming a third row of chrome. */
+  .secchips { display:flex; gap:8px; flex-wrap:wrap; margin:0 0 30px; }
+  .secchip { font:inherit; font-size:13.5px; display:flex; align-items:baseline; gap:9px;
+             padding:9px 16px; border:1px solid var(--line); border-radius:99px;
+             background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .secchip em { font-style:normal; font-family:var(--mono); font-size:11px;
+                color:var(--ink-3); font-variant-numeric:tabular-nums; }
+  .secchip:hover { border-color:var(--stone-soft); color:var(--ink); }
+  .secchip:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .secchip[aria-pressed="true"] { background:var(--panel); border-color:var(--panel);
+                                  color:var(--panel-ink); font-weight:600; }
+  .secchip[aria-pressed="true"] em { color:var(--gold); }
+
+  .secwrap .section { margin-top:0; padding-top:0; border-top:0; }
+  .secwrap .section.bare > .sec-note:first-child { margin-top:0; }
+  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
+  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }

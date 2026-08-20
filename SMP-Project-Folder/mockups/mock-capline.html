@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Capability block — mockup</title>
+<style>
+:root{--panel:#16325C;--stone-2:#24487A;--gold:#C9A24D;--gold-deep:#A8842F;--ground:#F7F8FA;--surface:#FFF;
+--surface-2:#EFF2F6;--zebra:#F7F9FC;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;
+--ink-3:#6B7583;--good:#2E7D5B;--attn:#B8860B;--warn:#CC6B3D;--bad:#B04434;--none:#8A9099;
+--good-bg:#E4F0EA;--attn-bg:#F7EFD6;--bad-bg:#F7E3E0;
+--serif:Georgia,serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--mono:ui-monospace,Menlo,Consolas,monospace;--r:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.top{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}.top b{color:var(--gold)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 30px 70px}
+.lab-s{font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);
+margin:0 0 8px;display:block}
+.why-s{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:84ch}
+/* One line, not a stacked banner: a label, the name, and the facts that
+   qualify it — the same weight as a pillar row, because that is what it is. */
+.capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);color:#fff;
+padding:11px 16px;border-radius:var(--r) var(--r) 0 0}
+.capline .tag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--panel);
+background:var(--gold);border-radius:20px;padding:4px 8px}
+.capline .nm{font-size:15.5px;font-weight:600}
+.capline .meta{font-size:12.5px;color:#AFC0D8}
+.capline .tally{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:#fff;
+background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px}
+.capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
+border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
+h5{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 8px}
+h5.mt{margin-top:16px}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--stone-2);color:#fff;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+font-weight:700;text-align:left;padding:9px 12px;white-space:nowrap}
+th.num,td.num{text-align:right}th.cc,td.cc{text-align:center}
+td{padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:13.5px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.idx{width:40px;color:var(--none);font-family:var(--mono);font-size:11px;text-align:right}
+.lead{font-weight:500}
+.s{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px;font-weight:400}
+.note{color:var(--ink-2);font-size:12.5px}.dash{color:var(--none)}
+.entry{display:inline-flex;align-items:stretch;border:1px solid var(--good);border-radius:var(--r);overflow:hidden}
+.entry .field{font:inherit;font-family:var(--mono);font-size:12.5px;padding:5px 8px;width:58px;border:0;
+text-align:right;background:var(--good-bg);color:var(--ink)}
+.usuf{display:flex;align-items:center;padding:0 8px;background:var(--surface-2);
+border-left:1px solid var(--line);font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.notecol{width:26%}
+.notefld{width:100%;font:inherit;font-size:12.5px;padding:5px 8px;border:1px solid var(--line);
+border-radius:var(--r);background:var(--surface)}
+.badge{display:inline-block;font:700 9px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+padding:4px 8px;border-radius:20px}
+.b-done{background:var(--good-bg);color:var(--good)}
+.b-wip{background:var(--attn-bg);color:var(--attn)}
+.b-todo{background:var(--surface-2);color:var(--none);border:1px solid var(--line)}
+.kindpill{font-size:10.5px;color:var(--ink-3);background:var(--surface-2);border:1px solid var(--line);
+border-radius:20px;padding:3px 8px;white-space:nowrap}
+.bar{display:block;height:6px;background:var(--surface-2);border-radius:20px;overflow:hidden;width:120px}
+.bar i{display:block;height:100%}
+.prj{border:1px solid var(--line);border-radius:var(--r);margin-bottom:8px;overflow:hidden;background:var(--surface)}
+.prjrow{display:grid;grid-template-columns:1fr 120px 54px 54px 20px;gap:14px;align-items:center;width:100%;
+text-align:left;background:none;border:0;padding:12px 14px;font:inherit;cursor:pointer}
+.prjrow:hover{background:var(--surface-2)}
+.prjrow.on{background:var(--surface-2)}
+.pnm{font-weight:600;font-size:14px}
+.prog{font-family:var(--mono);font-weight:700}
+.chev{color:var(--ink-3);font-size:11px;text-align:center}
+.prjbody{padding:14px 16px 18px;border-top:1px solid var(--line);background:var(--ground)}
+.briefgrid{display:grid;grid-template-columns:1.35fr .65fr;gap:24px}
+.briefgrid p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.stake{display:flex;gap:6px;flex-wrap:wrap}
+.stake span{font-size:11.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:20px;
+padding:3px 9px;color:var(--ink-2)}
+.note-b{border-left:3px solid var(--gold);background:#FBF6E9;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin-top:16px}
+.note-b b{color:var(--ink)}
+.before{background:var(--panel);color:#fff;text-align:center;padding:16px;border-radius:var(--r);margin-bottom:6px}
+.before .a{color:var(--gold);font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.before .b{font-size:19px;font-weight:600;margin:8px 0}
+.before .c{font-size:13px;color:#AFC0D8}
+</style></head><body>
+<div class="top"><b>Mockup</b> — the capability block, on one line, with the projects. Nothing is built.</div>
+<div class="wrap">
+
+<span class="lab-s">Before &mdash; three stacked lines for a header</span>
+<div class="before"><div class="a">Group capability you own</div><div class="b">People</div>
+  <div class="c">supporting function HR &middot; scored by the group &middot; 6 of 6 reported</div></div>
+<p class="why-s">Four lines of chrome to introduce one table. It reads as a section divider in a deck,
+   not a row in a working page.</p>
+
+<span class="lab-s">After &mdash; one line, same information</span>
+<div class="capline">
+  <span class="tag">Group capability</span>
+  <span class="nm">People</span>
+  <span class="meta">HR &middot; scored by the group, not by a unit</span>
+  <span class="tally">6 / 6 reported</span>
+</div>
+<div class="capbody">
+  <h5>Key measures</h5>
+  <table><thead><tr><th class="idx">#</th><th>Measure</th><th class="num">Dir.</th><th class="num">Target</th>
+    <th class="cc">Reported</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td class="lead">Key-role coverage</td><td class="num">≥</td>
+  <td class="num">90%</td>
+  <td class="cc"><span class="entry filled"><input class="field" value="62"><span class="usuf">%</span></span></td>
+  <td class="notecol"><input class="fld notefld" placeholder="Note, if there is one"></td></tr><tr><td class="idx">2</td><td class="lead">Voluntary attrition</td><td class="num">≤</td>
+  <td class="num">12%</td>
+  <td class="cc"><span class="entry filled"><input class="field" value="19"><span class="usuf">%</span></span></td>
+  <td class="notecol"><input class="fld notefld" placeholder="Note, if there is one"></td></tr><tr><td class="idx">3</td><td class="lead">Training hours per head</td><td class="num">≥</td>
+  <td class="num">24</td>
+  <td class="cc"><span class="entry filled"><input class="field" value="5"></span></td>
+  <td class="notecol"><input class="fld notefld" placeholder="Note, if there is one"></td></tr></tbody></table>
+
+  <h5 class="mt">Enhancement projects</h5>
+  <div class="prj">
+      <button class="prjrow on">
+        <span class="pnm">Succession map for every unit<span class="s">1 Jan 26 &rarr; 30 Jun 26 &middot; by date &middot; HR, Unit heads</span></span>
+        <span><span class="bar"><i style="width:75%;background:var(--attn)"></i></span></span>
+        <span class="num">3/4</span>
+        <span class="num prog">75%</span>
+        <span class="chev">&#9662;</span>
+      </button>
+      <div class="prjbody">
+        <div class="briefgrid">
+          <div><h5>Brief</h5><p>A named successor and a readiness date for every key role across the ten units.</p></div>
+          <div><h5>Stakeholders</h5><div class="stake"><span>HR</span><span>Unit heads</span></div></div>
+        </div>
+        <h5 class="mt">Deliverables and outcomes</h5>
+        <table><thead><tr><th class="idx">#</th><th>Deliverable</th><th class="cc">Kind</th>
+          <th class="num">Target</th><th class="cc">Reported</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td class="lead">Role map signed off</td>
+          <td class="cc"><span class="kindpill">Delivered / not</span></td>
+          <td class="num"><span class="dash">delivered or not</span></td><td class="cc"><span class="badge b-done">Delivered</span></td></tr><tr><td class="idx">2</td><td class="lead">Successors named</td>
+          <td class="cc"><span class="kindpill">% of delivery</span></td>
+          <td class="num"><span class="dash">100%</span></td><td class="cc"><span class="entry filled"><input class="field" value="78"><span class="usuf">%</span></span></td></tr><tr><td class="idx">3</td><td class="lead">Readiness assessments</td>
+          <td class="cc"><span class="kindpill">Measure</span></td>
+          <td class="num">40 roles</td><td class="cc"><span class="entry filled"><input class="field" value="31"><span class="usuf">roles</span></span></td></tr></tbody></table>
+        <h5 class="mt">Timeline &mdash; milestones</h5>
+        <table><thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Progress</th>
+          <th class="num">Finish</th><th>Note</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td class="lead">Role inventory</td>
+          <td class="cc"><span class="badge b-done">Completed</span></td>
+          <td class="num">20 Feb 26</td><td class="note">All ten units returned</td></tr><tr><td class="idx">2</td><td class="lead">Criticality scoring</td>
+          <td class="cc"><span class="badge b-done">Completed</span></td>
+          <td class="num">15 Mar 26</td><td class="note">Scored with unit heads</td></tr><tr><td class="idx">3</td><td class="lead">Successor nomination</td>
+          <td class="cc"><span class="badge b-done">Completed</span></td>
+          <td class="num">30 Apr 26</td><td class="note"><span class="dash">&mdash;</span></td></tr><tr><td class="idx">4</td><td class="lead">Readiness assessment</td>
+          <td class="cc"><span class="badge b-wip">In progress</span></td>
+          <td class="num">30 Jun 26</td><td class="note">31 of 40 complete</td></tr></tbody></table>
+      </div></div><div class="prj">
+      <button class="prjrow">
+        <span class="pnm">Retention plan, top two attrition roles<span class="s">Q2 &rarr; Q4 &middot; by quarter &middot; HR, Care, Retail Stores</span></span>
+        <span><span class="bar"><i style="width:25%;background:var(--attn)"></i></span></span>
+        <span class="num">1/4</span>
+        <span class="num prog">25%</span>
+        <span class="chev">&#9656;</span>
+      </button>
+      <div class="prjbody" hidden>
+        <div class="briefgrid">
+          <div><h5>Brief</h5><p>Reduce voluntary attrition in field sales and service engineering.</p></div>
+          <div><h5>Stakeholders</h5><div class="stake"><span>HR</span><span>Care</span><span>Retail Stores</span></div></div>
+        </div>
+        <h5 class="mt">Deliverables and outcomes</h5>
+        <table><thead><tr><th class="idx">#</th><th>Deliverable</th><th class="cc">Kind</th>
+          <th class="num">Target</th><th class="cc">Reported</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td class="lead">Exit-interview analysis</td>
+          <td class="cc"><span class="kindpill">Delivered / not</span></td>
+          <td class="num"><span class="dash">delivered or not</span></td><td class="cc"><span class="badge b-done">Delivered</span></td></tr><tr><td class="idx">2</td><td class="lead">Pay-band review</td>
+          <td class="cc"><span class="kindpill">Delivered / not</span></td>
+          <td class="num"><span class="dash">delivered or not</span></td><td class="cc"><span class="badge b-todo">Not yet</span></td></tr><tr><td class="idx">3</td><td class="lead">Attrition in target roles</td>
+          <td class="cc"><span class="kindpill">Measure</span></td>
+          <td class="num">12%</td><td class="cc"><span class="entry filled"><input class="field" value="19"><span class="usuf">%</span></span></td></tr></tbody></table>
+        <h5 class="mt">Timeline &mdash; milestones</h5>
+        <table><thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Progress</th>
+          <th class="num">Finish</th><th>Note</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td class="lead">Root-cause analysis</td>
+          <td class="cc"><span class="badge b-done">Completed</span></td>
+          <td class="num">Q2</td><td class="note">Two roles isolated</td></tr><tr><td class="idx">2</td><td class="lead">Pay-band benchmarking</td>
+          <td class="cc"><span class="badge b-wip">In progress</span></td>
+          <td class="num">Q3</td><td class="note">Market data in</td></tr><tr><td class="idx">3</td><td class="lead">Intervention rollout</td>
+          <td class="cc"><span class="badge b-todo">Not started</span></td>
+          <td class="num">Q4</td><td class="note"><span class="dash">&mdash;</span></td></tr><tr><td class="idx">4</td><td class="lead">Measure and review</td>
+          <td class="cc"><span class="badge b-todo">Not started</span></td>
+          <td class="num">Q4</td><td class="note"><span class="dash">&mdash;</span></td></tr></tbody></table>
+      </div></div>
+</div>
+
+<div class="note-b"><b>The projects are the point, and they were missing.</b> Each one carries its brief,
+  its stakeholders, its deliverables with their own kind, and its milestones &mdash; and its progress is
+  the milestones completed, not a number anyone types. One project runs on dates and the other on
+  quarters, as you asked.</div>
+
+<div class="note-b"><b>The header carries the same facts in a fifth of the space.</b> A tag, the name,
+  who owns it and what it does not touch, and the count on the right. Same construction as a pillar
+  row, because that is what it is.</div>
+
+</div>
+<script>
+document.querySelectorAll('.prjrow').forEach(function(r){
+  r.addEventListener('click', function(){
+    var body = r.nextElementSibling, open = !body.hidden;
+    body.hidden = open; r.classList.toggle('on', !open);
+    r.querySelector('.chev').innerHTML = open ? '&#9656;' : '&#9662;';
+  });
+});
+</script></body></html>

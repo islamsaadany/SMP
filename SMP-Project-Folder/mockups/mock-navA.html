@@ -1,0 +1,106 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Navigation — one row that folds</title>
+<style>
+:root{--panel:#16325C;--stone-2:#24487A;--gold:#C9A24D;--gold-deep:#A8842F;--ground:#F7F8FA;
+--surface:#FFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#6B7583;
+--serif:Georgia,serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--mono:ui-monospace,Menlo,Consolas,monospace;--r:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.top{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}.top b{color:var(--gold)}
+.wrap{max-width:1560px;margin:0 auto;padding:26px 30px 70px}
+h2{font:400 20px/1.3 var(--serif);margin:34px 0 4px}
+.lede{color:var(--ink-3);font-size:13px;margin:0 0 14px;max-width:88ch}
+.case{margin:0 0 20px}
+.who{display:block;font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+color:var(--ink-3);margin:0 0 6px}
+.nav{background:var(--panel);display:flex;gap:4px;align-items:center;flex-wrap:wrap;padding:0 12px;
+border-radius:var(--r) var(--r) 0 0}
+.nav button{background:none;border:0;color:#C3CEE0;font:inherit;font-size:13.5px;padding:11px 8px;
+cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.nav .it.on{color:#fff;font-weight:600;border-bottom-color:var(--gold)}
+.nav .sep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 6px}
+.nav .rt{margin-left:auto;display:flex}
+/* A category is a fold, not a destination: it opens a view without moving you. */
+.cat{color:#8FA3C0;font-size:11.5px !important;letter-spacing:.07em;text-transform:uppercase;
+font-weight:700;border:1px solid rgba(255,255,255,.2) !important;border-radius:20px;
+padding:5px 10px !important;display:inline-flex;align-items:center;gap:6px}
+.cat.open{color:#fff;border-color:var(--gold) !important;background:rgba(201,162,77,.14)}
+.cat .tw{font-size:9px;opacity:.8}
+.cat .inhere{color:var(--gold);font-weight:700;text-transform:none;letter-spacing:0;font-size:12.5px;
+margin-left:2px}
+.cat .inhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
+.nav.sub{background:var(--stone-2);border-radius:0;gap:18px;padding:0 16px}
+.nav.sub button.on{color:#fff;font-weight:600;border-bottom-color:var(--gold)}
+.cn{color:var(--ink-3);font-size:12.5px;margin:7px 0 0}
+.note-b{border-left:3px solid var(--gold);background:#FBF6E9;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin-top:12px}
+.note-b b{color:var(--ink)}
+.warn{border-left:3px solid #B04434;background:#F7E3E0;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin-top:12px}
+.warn b{color:var(--ink)}
+table.m{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);
+border-radius:var(--r);overflow:hidden;margin:0 0 12px}
+table.m th{background:var(--panel);color:#fff;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+text-align:left;padding:9px 12px;font-weight:700}
+table.m td{padding:10px 12px;border-bottom:1px solid #E6EAF0;font-size:13.5px}
+table.m tr:last-child td{border-bottom:0}
+table.m tbody tr:nth-child(even) td{background:#F7F9FC}
+table.m .n{text-align:right;font-family:var(--mono)}
+</style></head><body>
+<div class="top"><b>Option A, folded</b> — one row, two folds, location never lost. Nothing is built.</div>
+<div class="wrap">
+
+<h2>The SMO &mdash; the only role with a length problem</h2>
+<p class="lede">Two folds sit beside Group. Opening one closes the other, so the row is never longer
+   than it is here. Expanding is <b>browsing, not going</b>: the page does not change.</p>
+
+<div class="case"><span class="who">Business units open, viewing Mobile</span><div class="nav"><button class="it">Group</button><span class="sep"></span><button class="cat open">Units<span class="tw">&#9662;</span></button><button class="it on">Mobile</button><button class="it">Retail Stores</button><button class="it">B2B Ecomm</button><button class="it">Consumer Electronics</button><button class="it">Online Shop</button><button class="it">Corporate</button><button class="it">Care</button><button class="it">IT</button><button class="it">Logistics</button><button class="it">Nigeria</button><span class="sep"></span><button class="cat">Functions<span class="tw">&#9656;</span></button><span class="rt"><button class="it">&#9881; Setup</button></span></div><div class="nav sub"><button class="on">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="">My reporting</button></div>
+      <p class="cn">Ten units on one line, Mobile marked as the page in view.</p></div>
+<div class="case"><span class="who">Supporting functions open — still on Mobile</span><div class="nav"><button class="it">Group</button><span class="sep"></span><button class="cat here">Units<span class="inhere">Mobile</span><span class="tw">&#9656;</span></button><span class="sep"></span><button class="cat open">Functions<span class="tw">&#9662;</span></button><button class="it">Operational Excellence</button><button class="it">People</button><button class="it">Innovation and Tech</button><button class="it">Brand Positioning</button><button class="it">Customer Centric</button><button class="it">Product Mindset</button><button class="it">Financial Infrastructure</button><button class="it">Strategy</button><span class="rt"><button class="it">&#9881; Setup</button></span></div><div class="nav sub"><button class="on">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="">My reporting</button></div>
+      <p class="cn">The page has not changed. The Business units fold has closed, so it carries the location: · Mobile in gold.</p></div>
+<div class="case"><span class="who">Now moved into a capability</span><div class="nav"><button class="it">Group</button><span class="sep"></span><button class="cat">Units<span class="tw">&#9656;</span></button><span class="sep"></span><button class="cat open">Functions<span class="tw">&#9662;</span></button><button class="it">Operational Excellence</button><button class="it">People</button><button class="it">Innovation and Tech</button><button class="it">Brand Positioning</button><button class="it">Customer Centric</button><button class="it">Product Mindset</button><button class="it on">Financial Infrastructure</button><button class="it">Strategy</button><span class="rt"><button class="it">&#9881; Setup</button></span></div><div class="nav sub"><button class="on">Projects</button><button class="">Reporting</button></div>
+      <p class="cn">Clicking Financial Infrastructure did move. The tabs beneath change to a capability's — Projects and Reporting.</p></div>
+
+<div class="note-b"><b>The fold carries the location when it closes.</b> Without that, browsing
+  functions while sitting on Mobile leaves a row of capabilities above a Mobile page, and the
+  navigation stops saying where you are. The gold <b>· Mobile</b> is what keeps browsing and being
+  in two different places from becoming confusing.</div>
+
+<h2>Everyone else &mdash; no folds at all</h2>
+<p class="lede">The categories appear only when there is something to fold. Most people reach one or
+   two entities and never meet the concept.</p>
+
+<div class="case"><span class="who">Mobile&#x27;s owner — one unit</span><div class="nav"><button class="it">Group</button><span class="sep"></span><button class="it on">Mobile</button></div><div class="nav sub"><button class="">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="on">My reporting</button></div>
+      <p class="cn">Identical to today. Nothing new to learn.</p></div>
+<div class="case"><span class="who">Finance — one capability</span><div class="nav"><button class="it">Group</button><span class="sep"></span><button class="it on">Financial Infrastructure</button></div><div class="nav sub"><button class="">Projects</button><button class="on">Reporting</button></div>
+      <p class="cn">A direct entry, and a capability's own two tabs.</p></div>
+<div class="case"><span class="who">A head over two units</span><div class="nav"><button class="it">Group</button><span class="sep"></span><button class="it on">Care</button><button class="it">Logistics</button></div><div class="nav sub"><button class="on">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="">My reporting</button></div>
+      <p class="cn">Two entries, still no fold — folding two things saves nothing.</p></div>
+
+<div class="warn"><b>The cost, stated plainly.</b> The navigation now looks different for different
+  people: the SMO has folds, nobody else does. That is a real support cost &mdash; "click Business
+  units first" is advice that makes no sense to nine out of ten users. The platform already accepts
+  this, since a unit head has never seen the same row as the SMO, but folds make the difference
+  structural rather than just shorter.</div>
+
+<h2>What the measurements say</h2>
+<p class="lede">Rendered and measured rather than judged by eye, because the whole point of the fold
+   is whether it fits.</p>
+<table class="m"><thead><tr><th>&nbsp;</th><th class="n">Row needs</th><th>At 1600px</th><th>At 1366px</th></tr></thead>
+<tbody>
+<tr><td>Unfolded &mdash; 18 entries</td><td class="n">1633px</td><td>wraps</td><td>wraps</td></tr>
+<tr><td>Folded, <i>Business units</i> / <i>Supporting functions</i></td><td class="n">1377px</td><td>one line</td><td>wraps</td></tr>
+<tr><td>Folded, short labels <i>Units</i> / <i>Functions</i></td><td class="n">1223px</td><td><b>one line</b></td><td><b>one line</b></td></tr>
+<tr><td>Folded, functions open (8 long names)</td><td class="n">1352px</td><td>one line</td><td>wraps</td></tr>
+</tbody></table>
+<div class="warn"><b>The fold alone did not fix it.</b> With the labels written out, the row still
+  wrapped at every width I tested \u2014 the two pills cost more than the eight capabilities they hide.
+  Shortening them to <b>Units</b> and <b>Functions</b> is what buys the single line, and even then
+  eight long capability names wrap on a 1366px laptop. Worth knowing before this is built: the fold
+  needs short labels to work at all.</div>
+
+<div class="note-b"><b>When the fold appears.</b> Suggested rule: only when a person reaches more than
+  one capability <i>and</i> more than one unit &mdash; which today means the SMO and the CEO, and nobody
+  else. Worth confirming, because the rule decides how many people ever see it.</div>
+
+</div></body></html>

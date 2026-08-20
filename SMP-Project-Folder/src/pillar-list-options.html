@@ -1,0 +1,697 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pillar list — three treatments</title>
+<style>
+  :root {
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --r:2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+      --panel:#24487A; --panel-ink:#EAF0FA;
+    }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 24px 90px; }
+
+  header.top { background:var(--surface); border-bottom:1px solid var(--line);
+               position:sticky; top:0; z-index:9; }
+  .top-in { max-width:1180px; margin:0 auto; padding:16px 24px; display:flex;
+            align-items:center; gap:20px; flex-wrap:wrap; }
+  .brand { margin-right:auto; }
+  .eyebrow { font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:600; display:block; }
+  .brand h1 { margin:0; font-family:var(--serif); font-size:23px; letter-spacing:-.01em; }
+  .switch { display:flex; gap:0; border:1px solid var(--line); border-radius:var(--r);
+            overflow:hidden; background:var(--surface); }
+  .switch button { font:inherit; font-size:13px; padding:8px 18px; border:0; cursor:pointer;
+                   background:none; color:var(--ink-2); border-right:1px solid var(--line); }
+  .switch button:last-child { border-right:0; }
+  .switch button[aria-pressed="true"] { background:var(--panel); color:var(--panel-ink); font-weight:600; }
+  .switch button:focus-visible { outline:2px solid var(--gold); outline-offset:-3px; }
+
+  .lede { max-width:70ch; color:var(--ink-2); margin:30px 0 8px; }
+  .lede strong { color:var(--ink); }
+  .optnote { border-left:3px solid var(--gold); background:var(--surface-2);
+             padding:12px 16px; margin:16px 0 30px; font-size:13.5px; color:var(--ink-2);
+             max-width:80ch; }
+  .optnote b { color:var(--ink); }
+
+  /* Section heading — treatment B, the numeral leads */
+  .section { margin-top:44px; padding-top:24px; border-top:2px solid var(--stone-soft); }
+  .section:first-of-type { margin-top:14px; }
+  .section-h { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+  .section-n { font-family:var(--serif); font-size:34px; line-height:1; color:var(--gold); }
+  .section-h h2 { margin:0; font-family:var(--serif); font-size:25px; letter-spacing:-.01em; }
+  .sec-note { color:var(--ink-3); font-size:13.5px; margin:8px 0 20px; max-width:70ch; }
+
+  .pill { display:inline-flex; align-items:center; font-size:11.5px; font-weight:700;
+          letter-spacing:.04em; padding:3px 8px; border-radius:99px; white-space:nowrap; }
+  .pill.kind { background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line); }
+  .pill.theme { color:var(--gold-deep); border:1px solid var(--gold); }
+  .pill.good { background:var(--good-bg); color:var(--good); }
+  .pill.attn { background:var(--attn-bg); color:var(--attn); }
+  .pill.warn { background:var(--warn-bg); color:var(--warn); }
+  .pill.bad  { background:var(--bad-bg);  color:var(--bad); }
+
+  .mono { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+  /* ── The list ─────────────────────────────────────────────── */
+  .plist { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
+           overflow:hidden; }
+  .phead, .prow, .ptotal { display:grid; gap:12px; align-items:center; padding:12px 16px; }
+  .phead { background:var(--surface-2); border-bottom:1px solid var(--line);
+           font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+           color:var(--ink-3); font-weight:700; padding-top:9px; padding-bottom:9px; }
+  .pspan { background:var(--surface-2); display:grid; gap:12px; padding:8px 16px 0;
+           font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+           color:var(--stone); font-weight:700; }
+  .pspan span { border-bottom:1px solid var(--line); padding-bottom:3px; text-align:center; }
+  .pspan + .phead { padding-top:6px; }
+  .prow { width:100%; text-align:left; font:inherit; color:inherit; background:none;
+          border:0; border-bottom:1px solid var(--line-soft); cursor:pointer; }
+  .prow:hover { background:var(--surface-2); }
+  .prow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .prow[aria-expanded="true"] { background:var(--surface-2); }
+  .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .pname b { font-size:14.5px; font-weight:600; }
+  .pname .meta { font-size:11px; color:var(--gold-deep); font-weight:600;
+                 letter-spacing:.04em; }
+  .powner { font-size:12.5px; color:var(--ink-2); }
+  .num { text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .num.lead { color:var(--stone); font-weight:700; font-size:15px; }
+  .num.sec  { color:var(--ink-3); }
+  .chev { color:var(--ink-3); font-size:12px; transition:transform .15s ease; text-align:center; }
+  .prow[aria-expanded="true"] .chev { transform:rotate(90deg); }
+  .ptotal { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+  .ptotal .num { color:var(--panel-ink); }
+  .ptotal .sub { font-size:11px; font-weight:400; opacity:.75; display:block; }
+
+  .barwrap { display:flex; align-items:center; gap:10px; }
+  .bartrack { flex:1; height:14px; background:var(--surface-2); border-radius:2px; min-width:40px; }
+  .ptotal .bartrack { background:rgba(255,255,255,.18); }
+  .barfill { height:100%; border-radius:2px; display:block; }
+
+  /* ── Expanded body ────────────────────────────────────────── */
+  .pbody { padding:6px 16px 22px; border-bottom:1px solid var(--line-soft);
+           background:var(--surface); }
+  .pbody[hidden] { display:none; }
+  .scores { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+            gap:16px; margin:14px 0 6px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:16px 18px; }
+  .card.primary { border-top:3px solid var(--stone-soft); }
+  .score-h { display:flex; justify-content:space-between; align-items:baseline;
+             gap:10px; margin-bottom:9px; }
+  .score-h h4 { margin:0; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+                color:var(--ink-3); font-weight:700; }
+  .big { font-family:var(--mono); font-size:34px; line-height:1;
+         font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .big small { font-size:17px; }
+  .ofplan { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; display:block; margin-top:5px; }
+  dl.led { margin:11px 0 0; display:grid; grid-template-columns:auto auto;
+           gap:3px 12px; font-size:12px; }
+  dl.led dt { color:var(--ink-2); }
+  dl.led dd { margin:0; font-family:var(--mono); font-size:12.5px; font-weight:600;
+              font-variant-numeric:tabular-nums; text-align:right; }
+  .track { height:9px; background:var(--surface-2); border-radius:99px; margin-top:11px; }
+  .track .fill { height:100%; border-radius:99px; }
+  .csub { font-size:12.5px; color:var(--ink-2); margin:9px 0 0; }
+
+  h5.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; margin:22px 0 9px; }
+  .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r);
+            background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13px; min-width:600px; }
+  th,td { text-align:left; padding:9px 12px; border-bottom:1px solid var(--line-soft); }
+  thead th { font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; background:var(--surface-2); white-space:nowrap; }
+  tbody tr:last-child td { border-bottom:0; }
+  td.n { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; text-align:center; }
+  th.c, td.c { text-align:center; }
+  th.idx, td.idx { width:38px; text-align:center; font-family:var(--mono);
+                   font-variant-numeric:tabular-nums; color:var(--ink-3);
+                   font-size:12px; padding-left:10px; padding-right:6px; }
+  td.final { font-weight:700; font-size:14px; }
+  .qs { justify-content:flex-start; }
+
+  /* Tactic rows: the name leads, everything about who and when drops to a
+     meta line, so the numbers get columns instead of competing for them. */
+  .tname { display:flex; flex-direction:column; gap:3px; }
+  .tname b { font-weight:600; }
+  .tmeta { display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+           font-size:11.5px; color:var(--ink-3); }
+  .tmeta .qs i { width:16px; height:13px; font-size:8px; }
+  .pair { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:12.5px;
+          color:var(--ink-2); white-space:nowrap; }
+  .pair b { color:var(--ink); font-weight:600; }
+  .tbar { display:flex; align-items:center; gap:10px; min-width:150px; }
+  .tbar-track { flex:1; height:15px; background:var(--surface-2); border-radius:2px;
+                position:relative; min-width:70px; }
+  .tbar-fill { height:100%; border-radius:2px; display:block; }
+  .tbar-plan { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink); }
+  .tbar-plan::after { content:attr(data-l); position:absolute; top:-14px; left:50%;
+                      transform:translateX(-50%); font-size:9px; color:var(--ink-3);
+                      font-family:var(--mono); white-space:nowrap; }
+
+  /* Compact score cards: the figures sit beside the headline rather than
+     stacked beneath it, so the card is a band rather than a column. */
+  .card.tight { padding:13px 16px 12px; }
+  .card.tight .score-h { margin-bottom:6px; }
+  .headline { display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; }
+  .headline .big { font-size:30px; }
+  .headline .ofplan { margin:0 0 4px; }
+  .inline-figs { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+                 margin-left:auto; font-size:12.5px; color:var(--ink-2); }
+  .inline-figs span { white-space:nowrap; }
+  .inline-figs b { font-family:var(--mono); font-variant-numeric:tabular-nums;
+                   font-weight:600; color:var(--ink); }
+  .minirow { display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+             margin-top:11px; padding-top:10px; border-top:1px solid var(--line-soft); }
+  .minirow div { display:flex; flex-direction:column; gap:1px; }
+  .minirow em { font-style:normal; font-size:9.5px; letter-spacing:.09em;
+                text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .minirow b { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:14px; }
+  .ebar { flex:1; min-width:110px; height:15px; background:var(--surface-2);
+          border-radius:2px; position:relative; margin-bottom:5px; }
+  .ebar-fill { height:100%; border-radius:2px; display:block; }
+  .ebar-plan { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink); }
+  .ebar-plan::after { content:attr(data-l); position:absolute; top:-13px; left:50%;
+                      transform:translateX(-50%); font-size:9px; color:var(--ink-3);
+                      font-family:var(--mono); white-space:nowrap; }
+  .foot { font-size:11.5px; color:var(--ink-3); margin:8px 0 0; }
+
+  .tswitch { display:flex; gap:0; border:1px solid var(--line); border-radius:var(--r);
+             overflow:hidden; background:var(--surface); }
+  .tswitch button { font:inherit; font-size:12px; padding:5px 12px; border:0; cursor:pointer;
+                    background:none; color:var(--ink-2); border-right:1px solid var(--line); }
+  .tswitch button:last-child { border-right:0; }
+  .tswitch button[aria-pressed="true"] { background:var(--stone-soft); color:#fff; font-weight:600; }
+  .thead-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:22px 0 9px; }
+  .thead-row h5 { margin:0; }
+  .qs { display:flex; gap:3px; }
+  .qs i { width:19px; height:15px; border:1px solid var(--line); border-radius:1px;
+          font-style:normal; font-size:9px; display:flex; align-items:center;
+          justify-content:center; color:var(--ink-3); background:var(--surface); }
+  .qs i.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+
+  /* Sticky header: the two header rows travel together, pinned beneath the
+     page chrome, so a row's numbers are never read without their columns. */
+  .pheadwrap { position:relative; z-index:5; }
+  body.stick .pheadwrap { position:sticky; top:var(--stick,70px); }
+  body.stick .pheadwrap::after { content:""; position:absolute; left:0; right:0; bottom:-1px;
+                                 height:1px; background:var(--line); }
+  .plist { overflow:visible; }
+
+  .toggles { display:flex; gap:20px; flex-wrap:wrap; align-items:center;
+             background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+             padding:12px 16px; margin:0 0 26px; font-size:13.5px; }
+  .toggles > b { font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+                 color:var(--ink-3); font-weight:700; }
+  .toggles label { display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--ink-2); }
+  .toggles input { width:16px; height:16px; accent-color:var(--stone); cursor:pointer; }
+
+  @media (max-width:820px) {
+    .phead, .pspan { display:none; }
+    .prow { grid-template-columns:1fr auto !important; gap:8px; }
+    .prow .powner, .prow .barwrap { display:none; }
+    .ptotal { grid-template-columns:1fr auto !important; }
+  }
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform &middot; option review</span>
+      <h1>Pillar list &mdash; three treatments</h1>
+    </div>
+    <div class="switch" role="group" aria-label="Choose a treatment">
+      <button data-opt="A" aria-pressed="true">A &middot; flat header</button>
+      <button data-opt="B" aria-pressed="false">B &middot; grouped headers</button>
+      <button data-opt="C" aria-pressed="false">C &middot; header plus bar</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="lede">Mobile's four pillars, with <strong>every measure and tactic reported</strong> &mdash; no empty states. Execution is a <strong>ratio to plan</strong> throughout, matching the group page. Click any row to expand it; the separate &ldquo;where the unit figure comes from&rdquo; table is gone, because the total row below does that job.</p>
+  <div class="toggles">
+    <b>Long-list behaviour</b>
+    <label><input type="checkbox" id="tStick" checked> Sticky header row</label>
+    <label><input type="checkbox" id="tSolo" checked> One pillar open at a time</label>
+    <label><input type="checkbox" id="tScroll" checked> Scroll opened row into view</label>
+  </div>
+  <div class="optnote" id="optnote"></div>
+  <div id="mount"></div>
+</div>
+
+<script>
+var UNIT = { name:"Mobile", weight:45 };
+
+var PILLARS = [
+  { code:"01", name:"Digital & Data-Driven Operations", kind:"Capability", theme:"VC",
+    owner:"Ramy Behairy",
+    measures:[
+      { name:"Data duplicate rate",            dir:"\u2264", target:"1%",  compile:"Latest", actual:"1.4%", p:71 },
+      { name:"Orders processed digitally",     dir:"\u2265", target:"90%", compile:"Latest", actual:"48%",  p:53 },
+      { name:"App coverage rate",              dir:"\u2265", target:"50%", compile:"Latest", actual:"22%",  p:44 },
+      { name:"Dependency on automated reports",dir:"\u2265", target:"90%", compile:"Latest", actual:"58%",  p:64 }
+    ],
+    tactics:[
+      { name:"Clean and standardize customer and SKU base", owner:"Ramy Behairy", s:2, e:3, status:"WIP", a:45, pl:50 },
+      { name:"End-to-end order-to-cash digitization",       owner:"Mohamed Rizk",  s:2, e:3, status:"WIP", a:35, pl:50 },
+      { name:"Digitize sales reporting via Power BI",       owner:"Ramy Behairy",  s:2, e:3, status:"WIP", a:40, pl:50 },
+      { name:"Scale Mobile Digital App across merchants",   owner:"Ashraf Laithy", s:2, e:4, status:"WIP", a:30, pl:33 },
+      { name:"Data integration across business units",      owner:"Abdelhamid",    s:3, e:4, status:"WIP", a:22, pl:33 }
+    ] },
+
+  { code:"02", name:"Channel Preference & Development", kind:"Direction", theme:"OT",
+    owner:"Mohamed Rizk",
+    measures:[
+      { name:"Average delivery time",         dir:"\u2264", target:"24 h", compile:"Latest", actual:"31 h", p:77 },
+      { name:"Key retailer revenue growth",   dir:"\u2265", target:"50%",  compile:"Sum",    actual:"24%",  p:48 },
+      { name:"Tier 2 merchants enrolled",     dir:"\u2265", target:"100",  compile:"Latest", actual:"58",   p:58 },
+      { name:"Tier 2 segment revenue growth", dir:"\u2265", target:"100%", compile:"Sum",    actual:"62%",  p:62 }
+    ],
+    tactics:[
+      { name:"Retailer preference index workshop",         owner:"Karim",         s:2, e:3, status:"WIP", a:48, pl:50 },
+      { name:"Joint business planning with key retailers", owner:"Mohamed Rizk",  s:2, e:4, status:"WIP", a:38, pl:33 },
+      { name:"Tier 2 growth acceleration programme",       owner:"Ashraf Laithy", s:2, e:4, status:"WIP", a:30, pl:33 },
+      { name:"Channel intelligence engine (pilot)",        owner:"Karim",         s:2, e:4, status:"WIP", a:34, pl:33 }
+    ] },
+
+  { code:"03", name:"Portfolio & Value Chain Expansion", kind:"Direction", theme:"DIV",
+    owner:"Karim",
+    measures:[
+      { name:"Non-Samsung revenue",      dir:"\u2265", target:"4B EGP",   compile:"Sum",    actual:"1.6B",  p:40 },
+      { name:"Samsung market share",     dir:"\u2265", target:"30%",      compile:"Latest", actual:"27%",   p:90 },
+      { name:"Vivo market share",        dir:"\u2265", target:"60%",      compile:"Latest", actual:"48%",   p:80 },
+      { name:"Accessory revenue",        dir:"\u2265", target:"300M EGP", compile:"Sum",    actual:"96M",   p:32 },
+      { name:"Active Sary merchants",    dir:"\u2265", target:"800",      compile:"Latest", actual:"310",   p:39 },
+      { name:"Sary revenue",             dir:"\u2265", target:"150M EGP", compile:"Sum",    actual:"42M",   p:28 },
+      { name:"Local production devices", dir:"\u2265", target:"1M",       compile:"Sum",    actual:"520K",  p:52 },
+      { name:"Sary app downloads",       dir:"\u2265", target:"40K",      compile:"Latest", actual:"18.4K", p:46 }
+    ],
+    tactics:[
+      { name:"Protect and grow share in existing brands", owner:"Ashraf Abdelaty", s:1, e:4, status:"WIP", a:55, pl:50 },
+      { name:"Expand high-margin categories",             owner:"Fayad",           s:1, e:4, status:"WIP", a:40, pl:50 },
+      { name:"Leverage Sary for entry-to-mid expansion",  owner:"Fayad",           s:2, e:4, status:"WIP", a:30, pl:33 },
+      { name:"Sary-enabled tailored B2B portfolio",       owner:"Fayad",           s:2, e:4, status:"WIP", a:25, pl:33 },
+      { name:"Ongoing scanning for tier-1 brands",        owner:"Karim",           s:1, e:4, status:"WIP", a:50, pl:50 },
+      { name:"Build a light ecosystem (limited SKU)",     owner:"Fayad",           s:3, e:4, status:"WIP", a:28, pl:33 },
+      { name:"Market intelligence partner",               owner:"Karim",           s:3, e:4, status:"WIP", a:35, pl:33 }
+    ] },
+
+  { code:"04", name:"Asset-Light Model Regional Expansion", kind:"Direction", theme:"VC",
+    owner:"Abdelhamid",
+    measures:[
+      { name:"Regional hub revenue",     dir:"\u2265", target:"2M USD", compile:"Sum",    actual:"0.5M", p:25 },
+      { name:"Export markets activated", dir:"\u2265", target:"3",      compile:"Latest", actual:"1",    p:33 },
+      { name:"Distribution agreements",  dir:"\u2265", target:"2",      compile:"Latest", actual:"1",    p:50 },
+      { name:"Go / No-Go risk assessment", milestone:true, met:true }
+    ],
+    tactics:[
+      { name:"Dubai regional hub multi-branded export concept", owner:"Karim",      s:1, e:3, status:"WIP", a:48, pl:67 },
+      { name:"Initial agreements with 2\u20133 tier 2 brands",  owner:"Abdelhamid", s:1, e:3, status:"WIP", a:45, pl:67 },
+      { name:"Pre-entry market validation",                     owner:"Abdelhamid", s:2, e:4, status:"WIP", a:40, pl:33 },
+      { name:"Regulatory & entry barriers assessment",          owner:"Fayad",      s:2, e:4, status:"WIP", a:42, pl:33 },
+      { name:"Entry model design & B2B e-commerce presence",    owner:"Abuelenien", s:4, e:4, status:"WIP", a:18, pl:25 }
+    ] }
+];
+
+/* Every figure on screen is computed from the measures and tactics beneath it,
+   so a row and its expansion can never disagree. */
+function mean(a){ return a.length ? Math.round(a.reduce(function(x,y){ return x+y; },0)/a.length) : null; }
+function perfOf(p){ return mean(p.measures.filter(function(m){ return !m.milestone; }).map(function(m){ return m.p; })); }
+function execOf(p){ return mean(p.tactics.map(function(t){ return t.a; })); }
+function planOf(p){ return mean(p.tactics.map(function(t){ return t.pl; })); }
+function ratioOf(p){ var e=execOf(p), pl=planOf(p); return pl ? Math.round(e/pl*100) : null; }
+function varOf(p){ return execOf(p) - planOf(p); }
+
+var TOTAL = {
+  perf: mean(PILLARS.map(perfOf)),
+  exec: mean(PILLARS.map(execOf)),
+  plan: mean(PILLARS.map(planOf))
+};
+TOTAL.ratio = Math.round(TOTAL.exec / TOTAL.plan * 100);
+TOTAL.var = TOTAL.exec - TOTAL.plan;
+
+/* ONE scale for every achievement-against-benchmark figure. Performance is
+   actual over target; execution is delivered over plan. Both are the same kind
+   of number, so both read on the same bands — and the pill is derived from the
+   same function as the colour, which is what stops a green figure sitting
+   beside a red word. Held in configuration, SMO-editable. */
+var BANDS = [
+  { key:"good", floor:85, label:"On track" },
+  { key:"attn", floor:70, label:"Needs attention" },
+  { key:"warn", floor:50, label:"At risk" },
+  { key:"bad",  floor:0,  label:"Off track" }
+];
+function bandOf(v){
+  if (v == null) return { key:"none", label:"No data" };
+  for (var i=0;i<BANDS.length;i++) if (v >= BANDS[i].floor) return BANDS[i];
+  return BANDS[BANDS.length-1];
+}
+function band(v){ return bandOf(v).key; }
+function bandWord(v){ return bandOf(v).label; }
+function varColour(d){ return d>=0?"var(--good)":d<=-8?"var(--bad)":"var(--warn)"; }
+function varTxt(d){ return '<span style="color:'+varColour(d)+'">'+(d>=0?"+":"\u2212")+Math.abs(d)+'</span>'; }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function qs(s,e){ var o=""; for(var q=1;q<=4;q++) o+='<i class="'+(q>=s&&q<=e?"on":"")+'">'+q+'</i>'; return '<span class="qs">'+o+'</span>'; }
+
+/* ── The expanded body: identical in all three treatments, so the comparison
+   is only ever about the row itself. ─────────────────────────────────── */
+function body(p){
+  var perf=perfOf(p), ex=execOf(p), pl=planOf(p), r=ratioOf(p), v=varOf(p);
+  var ms = p.measures.filter(function(m){ return !m.milestone; });
+  var mil = p.measures.filter(function(m){ return m.milestone; });
+
+  var mRows = p.measures.map(function(m,i){
+    var n = '<td class="idx">'+(i+1)+'</td>';
+    if (m.milestone) return '<tr>'+n+'<td>'+esc(m.name)+'</td><td class="c"><span class="pill kind">Milestone</span></td>'+
+      '<td class="c" colspan="3">'+(m.met?'<span class="pill good">Met</span>':'<span class="pill bad">Not met</span>')+
+      '</td><td class="c"><span class="pill kind">Counted apart</span></td></tr>';
+    return '<tr>'+n+'<td>'+esc(m.name)+'</td><td class="n">'+m.dir+'</td><td class="n">'+esc(m.target)+
+      '</td><td class="c">'+m.compile+'</td><td class="n">'+esc(m.actual)+
+      '</td><td class="n final" style="color:var(--'+band(m.p)+')">'+m.p+'%</td></tr>';
+  }).join("");
+
+  var tRows = TFMT === "T1" ? p.tactics.map(function(t,i){
+    var r = Math.round(t.a/t.pl*100);
+    return '<tr><td class="idx">'+(i+1)+'</td><td><span class="tname"><b>'+esc(t.name)+'</b>'+
+      '<span class="tmeta">'+esc(t.owner)+' &middot; '+qs(t.s,t.e)+
+      ' <span class="pill warn">'+t.status+'</span></span></span></td>'+
+      '<td class="n">'+t.a+'%</td><td class="n">'+t.pl+'%</td>'+
+      '<td class="n">'+varTxt(t.a-t.pl)+'</td>'+
+      '<td class="n final" style="color:var(--'+band(r)+')">'+r+'%</td></tr>';
+  }).join("")
+  : TFMT === "T2" ? p.tactics.map(function(t,i){
+    var r = Math.round(t.a/t.pl*100);
+    return '<tr><td class="idx">'+(i+1)+'</td><td><span class="tname"><b>'+esc(t.name)+'</b>'+
+      '<span class="tmeta">'+esc(t.owner)+' &middot; '+qs(t.s,t.e)+
+      ' <span class="pill warn">'+t.status+'</span></span></span></td>'+
+      '<td><span class="tbar"><span class="tbar-track">'+
+        '<span class="tbar-fill" style="width:'+Math.min(t.a,100)+'%;background:var(--stone-soft)"></span>'+
+        '<span class="tbar-plan" style="left:'+Math.min(t.pl,100)+'%" data-l="plan '+t.pl+'%"></span>'+
+      '</span><span class="pair"><b>'+t.a+'%</b></span></span></td>'+
+      '<td class="n final" style="color:var(--'+band(r)+')">'+r+'%</td></tr>';
+  }).join("")
+  : p.tactics.map(function(t,i){
+    var r = Math.round(t.a/t.pl*100);
+    return '<tr><td class="idx">'+(i+1)+'</td><td>'+esc(t.name)+'</td><td>'+esc(t.owner)+'</td><td>'+qs(t.s,t.e)+'</td>'+
+      '<td class="c"><span class="pill warn">'+t.status+'</span></td>'+
+      '<td class="n"><span class="pair"><b>'+t.a+'</b> / '+t.pl+'</span></td>'+
+      '<td class="n">'+varTxt(t.a-t.pl)+'</td>'+
+      '<td class="n final" style="color:var(--'+band(r)+')">'+r+'%</td></tr>';
+  }).join("");
+
+  var tHead = TFMT === "T1"
+    ? '<tr><th class="idx">#</th><th>Tactic</th><th class="c">Delivered</th><th class="c">Planned</th>'+
+      '<th class="c">Var.</th><th class="c">Of plan</th></tr>'
+    : TFMT === "T2"
+    ? '<tr><th class="idx">#</th><th>Tactic</th><th class="c">Delivered against plan</th><th class="c">Of plan</th></tr>'
+    : '<tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Span</th><th class="c">Status</th>'+
+      '<th class="c">Deliv. / plan</th><th class="c">Var.</th><th class="c">Of plan</th></tr>';
+
+  var pf = '<span class="pill '+band(perf)+'">'+bandWord(perf)+'</span>';
+  var ef = '<span class="pill '+band(r)+'">'+bandWord(r)+'</span>';
+  var scored = ms.map(function(m){ return m.p; });
+  var hi = Math.max.apply(null, scored), lo = Math.min.apply(null, scored);
+  var mNote = ms.length+' measures'+(mil.length?', '+mil.filter(function(m){return m.met;}).length+' of '+mil.length+' milestones met':'');
+  var scores;
+
+  if (SFMT === "E1") {
+    scores =
+      '<div class="card tight primary"><div class="score-h"><h4>Key measures performance</h4>'+pf+'</div>'+
+        '<div class="headline"><span class="big" style="color:var(--'+band(perf)+')">'+perf+'<small>%</small></span>'+
+          '<span class="inline-figs"><span>Across <b>'+ms.length+'</b> measures</span>'+
+          (mil.length?'<span>Milestones <b>'+mil.filter(function(m){return m.met;}).length+'/'+mil.length+'</b></span>':'')+
+          '</span></div></div>'+
+      '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>'+ef+'</div>'+
+        '<div class="headline"><span class="big" style="color:var(--'+band(r)+')">'+r+'<small>%</small></span><span class="ofplan">of plan</span>'+
+          '<span class="inline-figs"><span>Delivered <b>'+ex+'%</b></span>'+
+          '<span>Planned <b>'+pl+'%</b></span>'+
+          '<span>Var. <b>'+varTxt(v)+'</b></span></span></div></div>';
+  } else if (SFMT === "E2") {
+    scores =
+      '<div class="card tight primary"><div class="score-h"><h4>Key measures performance</h4>'+pf+'</div>'+
+        '<div class="headline"><span class="big" style="color:var(--'+band(perf)+')">'+perf+'<small>%</small></span>'+
+          '<span class="ebar"><span class="ebar-fill" style="width:'+perf+'%;background:var(--'+band(perf)+')"></span></span></div>'+
+        '<p class="foot">'+mNote+'</p></div>'+
+      '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>'+ef+'</div>'+
+        '<div class="headline"><span class="big" style="color:var(--'+band(r)+')">'+r+'<small>%</small></span><span class="ofplan">of plan</span>'+
+          '<span class="ebar"><span class="ebar-fill" style="width:'+Math.min(ex,100)+'%;background:var(--stone-soft)"></span>'+
+          '<span class="ebar-plan" style="left:'+Math.min(pl,100)+'%" data-l="plan '+pl+'%"></span></span></div>'+
+        '<p class="foot">Delivered '+ex+'% &middot; planned '+pl+'% &middot; variance '+varTxt(v)+'</p></div>';
+  } else {
+    scores =
+      '<div class="card tight primary"><div class="score-h"><h4>Key measures performance</h4>'+pf+'</div>'+
+        '<div class="headline"><span class="big" style="color:var(--'+band(perf)+')">'+perf+'<small>%</small></span></div>'+
+        '<div class="minirow"><div><em>Measures</em><b>'+ms.length+'</b></div>'+
+          '<div><em>Highest</em><b style="color:var(--'+band(hi)+')">'+hi+'%</b></div>'+
+          '<div><em>Lowest</em><b style="color:var(--'+band(lo)+')">'+lo+'%</b></div></div></div>'+
+      '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>'+ef+'</div>'+
+        '<div class="headline"><span class="big" style="color:var(--'+band(r)+')">'+r+'<small>%</small></span><span class="ofplan">of plan</span></div>'+
+        '<div class="minirow"><div><em>Delivered</em><b>'+ex+'%</b></div>'+
+          '<div><em>Planned</em><b>'+pl+'%</b></div>'+
+          '<div><em>Variance</em><b>'+varTxt(v)+'</b></div></div></div>';
+  }
+
+  return '<div class="pbody" hidden>'+
+    '<div class="thead-row"><h5 class="mini">Scores</h5>'+
+      '<div class="tswitch" role="group" aria-label="Score card format">'+
+        '<button data-sf="E1" aria-pressed="'+(SFMT==="E1")+'">E1 inline</button>'+
+        '<button data-sf="E2" aria-pressed="'+(SFMT==="E2")+'">E2 bar</button>'+
+        '<button data-sf="E3" aria-pressed="'+(SFMT==="E3")+'">E3 mini stats</button>'+
+      '</div></div>'+
+    '<div class="scores">'+scores+'</div>'+
+    '<h5 class="mini">Key measures</h5>'+
+    '<div class="scroll"><table><thead><tr><th class="idx">#</th><th>Measure</th><th class="c">Dir.</th><th class="c">Target</th>'+
+      '<th class="c">Compile</th><th class="c">H1 actual</th><th class="c">Progress</th>'+
+      '</tr></thead><tbody>'+mRows+'</tbody></table></div>'+
+    '<div class="thead-row"><h5 class="mini">Tactics</h5>'+
+      '<div class="tswitch" role="group" aria-label="Tactic table format">'+
+        '<button data-tf="T1" aria-pressed="'+(TFMT==="T1")+'">T1 two-line</button>'+
+        '<button data-tf="T2" aria-pressed="'+(TFMT==="T2")+'">T2 bar</button>'+
+        '<button data-tf="T3" aria-pressed="'+(TFMT==="T3")+'">T3 dense</button>'+
+      '</div></div>'+
+    '<div class="scroll"><table><thead>'+tHead+'</thead><tbody>'+tRows+'</tbody></table></div>'+
+  '</div>';
+}
+
+/* ── Treatment A ─────────────────────────────────────────────── */
+var GA = "grid-template-columns:1fr 96px 54px 104px 76px 78px 46px 18px";
+function optA(){
+  var rows = PILLARS.map(function(p,i){
+    var perf=perfOf(p), r=ratioOf(p);
+    return '<button class="prow" style="'+GA+'" aria-expanded="false" data-i="'+i+'">'+
+      '<span class="pname"><b>'+p.code+' '+esc(p.name)+'</b></span>'+
+      '<span><span class="pill kind">'+p.kind+'</span></span>'+
+      '<span><span class="pill theme">'+p.theme+'</span></span>'+
+      '<span class="powner">'+esc(p.owner)+'</span>'+
+      '<span class="num lead">'+perf+'%</span>'+
+      '<span class="num">'+r+'%</span>'+
+      '<span class="num">'+varTxt(varOf(p))+'</span>'+
+      '<span class="chev">&#9654;</span></button>'+ body(p);
+  }).join("");
+  return '<div class="plist">'+
+    '<div class="pheadwrap"><div class="phead" style="'+GA+'"><span>Pillar</span><span>Kind</span><span>Theme</span>'+
+      '<span>Owner</span><span class="num">Perform.</span><span class="num">Execution</span>'+
+      '<span class="num">Var.</span><span></span></div></div>'+
+    rows+
+    '<div class="ptotal" style="'+GA+'"><span>'+UNIT.name+'<span class="sub">'+PILLARS.length+' pillars</span></span>'+
+      '<span></span><span></span><span></span>'+
+      '<span class="num">'+TOTAL.perf+'%</span><span class="num">'+TOTAL.ratio+'%</span>'+
+      '<span class="num">'+(TOTAL.var>=0?"+":"\u2212")+Math.abs(TOTAL.var)+'</span><span></span></div>'+
+  '</div>';
+}
+
+/* ── Treatment B ─────────────────────────────────────────────── */
+var GB = "grid-template-columns:1fr 104px 82px 72px 64px 66px 48px 18px";
+function optB(){
+  var rows = PILLARS.map(function(p,i){
+    var perf=perfOf(p), r=ratioOf(p);
+    return '<button class="prow" style="'+GB+'" aria-expanded="false" data-i="'+i+'">'+
+      '<span class="pname"><b>'+p.code+' '+esc(p.name)+'</b>'+
+        '<span class="meta">'+p.theme+' &middot; '+p.kind+'</span></span>'+
+      '<span class="powner">'+esc(p.owner)+'</span>'+
+      '<span class="num lead">'+perf+'%</span>'+
+      '<span class="num" style="font-weight:700">'+r+'%</span>'+
+      '<span class="num sec">'+execOf(p)+'%</span>'+
+      '<span class="num sec">'+planOf(p)+'%</span>'+
+      '<span class="num">'+varTxt(varOf(p))+'</span>'+
+      '<span class="chev">&#9654;</span></button>'+ body(p);
+  }).join("");
+  return '<div class="plist">'+
+    '<div class="pheadwrap"><div class="pspan" style="'+GB+'"><span style="border:0"></span><span style="border:0"></span>'+
+      '<span>Performance</span><span style="grid-column:4 / 8">Execution</span><span style="border:0"></span></div>'+
+    '<div class="phead" style="'+GB+'"><span>Pillar</span><span>Owner</span>'+
+      '<span class="num">Measures</span><span class="num">Of plan</span>'+
+      '<span class="num">Deliv.</span><span class="num">Planned</span>'+
+      '<span class="num">Var.</span><span></span></div></div>'+
+    rows+
+    '<div class="ptotal" style="'+GB+'"><span>'+UNIT.name+'<span class="sub">'+PILLARS.length+' pillars</span></span>'+
+      '<span></span>'+
+      '<span class="num">'+TOTAL.perf+'%</span><span class="num">'+TOTAL.ratio+'%</span>'+
+      '<span class="num" style="opacity:.75">'+TOTAL.exec+'%</span>'+
+      '<span class="num" style="opacity:.75">'+TOTAL.plan+'%</span>'+
+      '<span class="num">'+(TOTAL.var>=0?"+":"\u2212")+Math.abs(TOTAL.var)+'</span><span></span></div>'+
+  '</div>';
+}
+
+/* ── Treatment C ─────────────────────────────────────────────── */
+var GC = "grid-template-columns:1fr 104px 168px 78px 48px 18px";
+function optC(){
+  var rows = PILLARS.map(function(p,i){
+    var perf=perfOf(p), r=ratioOf(p);
+    return '<button class="prow" style="'+GC+'" aria-expanded="false" data-i="'+i+'">'+
+      '<span class="pname"><b>'+p.code+' '+esc(p.name)+'</b>'+
+        '<span class="meta">'+p.theme+' &middot; '+p.kind+'</span></span>'+
+      '<span class="powner">'+esc(p.owner)+'</span>'+
+      '<span class="barwrap"><span class="bartrack"><span class="barfill" style="width:'+perf+'%;background:var(--'+band(perf)+')"></span></span>'+
+        '<span class="num lead" style="min-width:38px">'+perf+'%</span></span>'+
+      '<span class="num">'+r+'%</span>'+
+      '<span class="num">'+varTxt(varOf(p))+'</span>'+
+      '<span class="chev">&#9654;</span></button>'+ body(p);
+  }).join("");
+  return '<div class="plist">'+
+    '<div class="pheadwrap"><div class="phead" style="'+GC+'"><span>Pillar</span><span>Owner</span>'+
+      '<span>Performance</span><span class="num">Execution</span>'+
+      '<span class="num">Var.</span><span></span></div></div>'+
+    rows+
+    '<div class="ptotal" style="'+GC+'"><span>'+UNIT.name+'<span class="sub">'+PILLARS.length+' pillars</span></span>'+
+      '<span></span>'+
+      '<span class="barwrap"><span class="bartrack"><span class="barfill" style="width:'+TOTAL.perf+'%;background:var(--'+band(TOTAL.perf)+')"></span></span>'+
+        '<span class="num" style="min-width:38px">'+TOTAL.perf+'%</span></span>'+
+      '<span class="num">'+TOTAL.ratio+'%</span>'+
+      '<span class="num">'+(TOTAL.var>=0?"+":"\u2212")+Math.abs(TOTAL.var)+'</span><span></span></div>'+
+  '</div>';
+}
+
+var NOTES = {
+  A: "<b>Flat header.</b> Kind and theme keep their own columns, exactly as today &mdash; only the repeated <i>performance</i> and <i>execution</i> labels are gone, replaced by one header row. Execution shows the ratio only; delivered and planned wait until you expand.",
+  B: "<b>Grouped headers.</b> Two spanning headers say Performance and Execution are separate readings, which is the same argument the card makes. Delivered and planned stay visible in-row, so a variance can be read without expanding. Kind and theme move under the pillar name to buy the columns.",
+  C: "<b>Header plus bar.</b> Same structure as B, but the delivered and planned columns are traded for a bar, so four pillars can be compared at a glance. Costs the in-row workings, and the bars compete with the theme colours."
+};
+
+var OPTS = { A:optA, B:optB, C:optC };
+var cur = "A";
+var TFMT = "T3";
+var SFMT = "E3";
+
+function render(){
+  document.getElementById("optnote").innerHTML = NOTES[cur];
+  document.getElementById("mount").innerHTML =
+    '<div class="section"><div class="section-h"><span class="section-n">01</span>'+
+    '<h2>Pillars &mdash; directions and capabilities</h2></div>'+
+    '<p class="sec-note">One list, because a direction and a capability are the same thing structurally. '+
+    'Each is tagged with one of the group\u2019s three themes. <strong>Click any row to open its key measures and tactics.</strong></p>'+
+    OPTS[cur]() + '</div>';
+
+  document.querySelectorAll(".prow").forEach(function(b){
+    b.addEventListener("click", function(){
+      var open = b.getAttribute("aria-expanded") === "true";
+      /* Accordion: closing the previous pillar keeps the list roughly one
+         screen tall, which is the other half of the header problem. */
+      if (!open && document.getElementById("tSolo").checked) {
+        document.querySelectorAll('.prow[aria-expanded="true"]').forEach(function(o){
+          o.setAttribute("aria-expanded","false");
+          o.nextElementSibling.hidden = true;
+        });
+      }
+      b.setAttribute("aria-expanded", String(!open));
+      b.nextElementSibling.hidden = open;
+
+      /* With the accordion on, closing a tall row above you moves the page
+         under your cursor. Pulling the opened row to just under the sticky
+         header keeps the thing you clicked where you can see it. */
+      if (!open && document.getElementById("tScroll").checked) {
+        var off = parseInt(getComputedStyle(document.body).getPropertyValue("--stick")) || 70;
+        var head = document.querySelector(".pheadwrap");
+        var hh = document.body.classList.contains("stick") ? head.offsetHeight : 0;
+        window.scrollTo({ top: b.getBoundingClientRect().top + window.scrollY - off - hh, behavior:"smooth" });
+      }
+    });
+  });
+
+  function reswitch(){
+    var openIdx = null;
+    document.querySelectorAll('.prow').forEach(function(r,i){
+      if (r.getAttribute("aria-expanded") === "true") openIdx = i;
+    });
+    render();
+    if (openIdx != null) {
+      var r = document.querySelectorAll(".prow")[openIdx];
+      r.setAttribute("aria-expanded","true");
+      r.nextElementSibling.hidden = false;
+    }
+  }
+  document.querySelectorAll("[data-sf]").forEach(function(b){
+    b.addEventListener("click", function(e){ e.stopPropagation(); SFMT = b.dataset.sf; reswitch(); });
+  });
+  document.querySelectorAll("[data-tf]").forEach(function(b){
+    b.addEventListener("click", function(e){
+      e.stopPropagation();
+      TFMT = b.dataset.tf;
+      var openIdx = null;
+      document.querySelectorAll('.prow').forEach(function(r,i){
+        if (r.getAttribute("aria-expanded") === "true") openIdx = i;
+      });
+      render();
+      /* Re-open whatever was open, or switching format would close the very
+         table being compared. */
+      if (openIdx != null) {
+        var r = document.querySelectorAll(".prow")[openIdx];
+        r.setAttribute("aria-expanded","true");
+        r.nextElementSibling.hidden = false;
+      }
+    });
+  });
+}
+
+function measureStick(){
+  var h = document.querySelector("header.top").offsetHeight;
+  document.body.style.setProperty("--stick", h + "px");
+}
+window.addEventListener("resize", measureStick);
+
+function syncToggles(){
+  document.body.classList.toggle("stick", document.getElementById("tStick").checked);
+}
+["tStick","tSolo","tScroll"].forEach(function(id){
+  document.getElementById(id).addEventListener("change", syncToggles);
+});
+
+document.querySelectorAll(".switch button").forEach(function(b){
+  b.addEventListener("click", function(){
+    cur = b.dataset.opt;
+    document.querySelectorAll(".switch button").forEach(function(x){
+      x.setAttribute("aria-pressed", String(x.dataset.opt === cur));
+    });
+    render(); window.scrollTo(0,0);
+  });
+});
+
+measureStick();
+syncToggles();
+render();
+</script>

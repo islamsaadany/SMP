@@ -1,0 +1,561 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The project model — drawn on the platform's own patterns</title>
+<style>
+/* Tokens and components lifted from _shared.css, config.css and arrange.css so
+   this mockup and the platform cannot drift apart. Nothing here is new except
+   what the project model genuinely needs, and that is marked. */
+:root{
+  --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+  --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --r:2px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.mocktop{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}
+.mocktop b{color:var(--gold)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 30px 70px}
+.screenlab{display:flex;align-items:baseline;gap:12px;margin:38px 0 6px;flex-wrap:wrap}
+.screenlab b{font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);
+  background:#FBF6E9;border:1px solid #E8D9AE;border-radius:20px;padding:5px 10px;white-space:nowrap}
+.screenlab span{font:400 19px/1.3 var(--serif)}
+.why-s{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:86ch}
+
+.nav{background:var(--panel);display:flex;gap:4px;align-items:center;flex-wrap:wrap;padding:0 12px}
+.nav button{background:none;border:0;color:#C3CEE0;font:inherit;font-size:13.5px;padding:11px 8px;
+  border-bottom:2px solid transparent;cursor:default}
+.nav button.on{color:#fff;font-weight:600;border-bottom-color:var(--gold)}
+.nav .sep{width:1px;height:18px;background:rgba(255,255,255,.2);margin:0 6px}
+.nav .cat{color:#8FA3C0;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;
+  border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:5px 11px;margin:0 2px}
+.nav .cat.open{color:#fff;border-color:var(--gold);background:rgba(201,162,77,.14)}
+.nav.sub{background:var(--stone-soft);gap:18px;padding:0 16px}
+.shell{border:1px solid var(--line);border-radius:var(--r);background:var(--ground);overflow:hidden}
+.shell .body{padding:20px 22px 24px}
+.kv{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin:0 0 16px}
+.kv h2{font:400 22px/1.2 var(--serif);margin:0}
+.kv .who{color:var(--ink-3);font-size:13px}
+
+.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:16px;margin:4px 0 20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px}
+.card.tight{padding:14px 16px 13px}
+.card.primary-card{border-color:var(--stone-soft);border-top:3px solid var(--stone-soft)}
+.score-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.score-h h4{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0}
+.score-h .rank{font-size:9.5px;letter-spacing:.1em;color:var(--gold-deep);font-weight:700}
+.headline{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.big{font-family:var(--mono);font-size:31px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big small{font-size:17px}
+.headline .ofplan{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:700;margin:0 0 5px}
+.minirow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:11px;padding-top:10px;
+  border-top:1px solid var(--line-soft)}
+.minirow div{display:flex;flex-direction:column;gap:1px}
+.minirow em{font-style:normal;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700}
+.minirow b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+  padding:3px 8px;border-radius:99px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.attn{background:var(--attn-bg);color:var(--attn)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.kind{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+
+h4.mini{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  margin:20px 0 8px}
+h4.mini em{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0;font-size:12px}
+.plist{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.phead,.prow{display:grid;gap:12px;align-items:center;padding:12px 16px}
+.phead{background:var(--panel);color:var(--panel-ink);border-bottom:0;font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;padding-top:9px;padding-bottom:9px}
+.phead span{color:var(--panel-ink)}
+.prow{width:100%;text-align:left;font:inherit;color:inherit;background:none;border:0;
+  border-bottom:1px solid var(--line-soft)}
+.prow[aria-expanded="true"]{background:var(--surface-2)}
+.plist .prow:last-of-type{border-bottom:0}
+.pname{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pname b{font-size:14.5px;font-weight:600}
+.pname .psub{font-size:11.5px;color:var(--ink-3);font-weight:400}
+.prow .num,.phead .num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.phead .num{font-family:var(--sans)}
+.prow .num.lead{font-weight:700;font-size:15px}
+.chev{color:var(--ink-3);font-size:12px;text-align:center}
+.prow[aria-expanded="true"] .chev{transform:rotate(90deg);display:inline-block}
+.pbody{padding:8px 16px 22px;border-bottom:1px solid var(--line-soft);background:var(--surface)}
+.pcap{grid-template-columns:1fr 96px 84px 84px 84px 20px}
+.prow.rprow,.phead.rphead{grid-template-columns:1fr 110px 74px 84px 78px 20px;gap:14px}
+.phead.rphead .cc{text-align:center}
+
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  background:var(--panel);color:var(--panel-ink);border-bottom:0;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) > td{background:#F7F9FC}
+th.cc,td.cc{text-align:center}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:center}
+th.idx,td.idx{width:38px;text-align:center;font-family:var(--mono);font-variant-numeric:tabular-nums;
+  color:var(--ink-3);font-size:12px}
+td.final{font-weight:700;font-size:14px}
+.why{display:block;font-size:12px;color:var(--ink-3);margin-top:3px}
+tr.notdue td{opacity:.62}
+tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+tbody tr.wantnote:nth-child(even) > td{background:#FBF1EF}
+
+.rep-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 18px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);margin:0 0 16px}
+.kpi{display:flex;align-items:baseline;gap:8px}
+.kpi b{font:400 26px/1 var(--serif)}
+.kpi span{color:var(--ink-3);font-size:12.5px}
+.repbar{display:block;height:6px;background:var(--surface-2);border-radius:20px;overflow:hidden;flex:1;
+  min-width:120px;max-width:260px}
+.repbar i{display:block;height:100%;background:var(--good)}
+.repbar.part i{background:var(--attn)}
+.rep-bar .why{margin-left:auto;margin-top:0}
+.rtally{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+.rtally.full{color:var(--good);background:var(--good-bg);border-color:var(--good)}
+.entry{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;background:var(--surface)}
+.entry.filled{border-color:var(--good)}
+.entry.filled .field{background:var(--good-bg)}
+.entry .field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:70px;border:0;
+  text-align:right;background:var(--surface);color:var(--ink)}
+.unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
+  border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
+.notecol{width:28%}
+.notefld{font:inherit;font-size:13px;width:100%;padding:6px 9px;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.editbtn{font:inherit;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:7px 14px;border:1px solid var(--gold);background:#FBF6E9;color:var(--gold-deep);
+  border-radius:var(--r);cursor:default}
+.selbox{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);border-radius:var(--r);
+  background:var(--surface);color:var(--ink)}
+
+.note{border-left:3px solid var(--gold);background:var(--surface-2);padding:12px 16px;margin:18px 0;
+  font-size:13.5px;color:var(--ink-2);border-radius:0 var(--r) var(--r) 0}
+.note b{color:var(--ink)}
+.note.bad-note{border-left-color:var(--bad);background:var(--bad-bg)}
+.note.warn-note{border-left-color:var(--warn);background:var(--warn-bg)}
+.note.ask{border-left-color:var(--stone-soft);background:#EEF2F8}
+.tabmap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.tabmap{grid-template-columns:1fr}}
+.tabmap .card{padding:0;overflow:hidden}
+.tabmap .th{padding:12px 16px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.tabmap ol{margin:0;padding:8px 16px 16px 34px;font-size:13.5px}
+.tabmap li{margin:9px 0}
+.tabmap li b{font-weight:600}
+.tabmap li .why{margin-top:1px}
+.tabmap li.newt b{color:var(--gold-deep)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:46px 0 0}
+</style></head><body>
+
+<div class="mocktop">Mockup — <b>the project model</b>, redrawn on the platform's own components.
+Score cards, accordion, tables, entry boxes and the reporting bar are the ones already in use. Nothing is built.</div>
+
+<div class="wrap">
+
+<div class="screenlab"><b>Screen A</b><span>The tabs — Strategy split out from Performance</span></div>
+<p class="why-s">The plan and the reading of the plan stop sharing a page. Performance opens first because it
+is what anyone arriving wants; Strategy holds the plan itself with no figures on it, the way the group's
+Temple already does. A capability takes the same shape in its own words.</p>
+
+<div class="tabmap">
+  <div class="card">
+    <div class="th">Business unit</div>
+    <ol>
+      <li><b>Performance</b> — opens here<span class="why">The headline, the pillars and what they read</span></li>
+      <li><b>Foundation</b><span class="why">The unit's own words and its Key objectives</span></li>
+      <li><b>Analysis</b><span class="why">The SWOT</span></li>
+      <li class="newt"><b>Strategy</b> — new<span class="why">Pillars, measures and tactics as planned: targets, owners, quarters. No reported figure anywhere</span></li>
+      <li><b>My reporting</b><span class="why">Enter this cycle's figures</span></li>
+    </ol>
+  </div>
+  <div class="card">
+    <div class="th">Capability</div>
+    <ol>
+      <li class="newt"><b>Performance</b> — new, opens here<span class="why">Key objectives, project performance and execution, then the projects</span></li>
+      <li><b>Projects</b><span class="why">Each project's brief, stakeholders, deliverables, outcomes and milestones. No reported figure anywhere</span></li>
+      <li><b>Reporting</b><span class="why">Enter this cycle's figures</span></li>
+    </ol>
+  </div>
+</div>
+
+<div class="note ask"><b>Two things to confirm.</b> The SWOT page is called <b>Analysis</b> in the platform
+today and you said SWOT — I have left it as Analysis rather than renaming a settled label on my own; say the
+word and it changes everywhere. And a capability has no Foundation or Analysis of its own, so its list is
+three tabs against a unit's five: its foundation is the group's.</div>
+
+<div class="screenlab"><b>Screen 1</b><span>Capability &rarr; Performance</span></div>
+<p class="why-s">The two-card headline a business unit already has, with a third card because a capability
+has a third reading. Band colour, band word, the mono figure and the three sub-figures underneath are the
+platform's own, unchanged — so this page and a unit's page read as the same product.</p>
+
+<div class="shell">
+  <div class="nav"><button>Group</button><span class="sep"></span>
+    <span class="cat">Units &#9656;</span><span class="cat open">Functions &#9662;</span>
+    <button>Finance</button><button class="on">Financial Infrastructure</button>
+    <button>HR</button><button>Marketing</button><button>Treasury</button>
+    <span class="sep"></span><button>&#9881; Setup</button></div>
+  <div class="nav sub"><button class="on">Performance</button><button>Projects</button><button>Reporting</button></div>
+
+  <div class="body">
+    <div class="kv"><h2>Financial Infrastructure</h2>
+      <span class="who">Group capability &middot; Finance &middot; Hossam Abuelenien &middot; 3 projects</span></div>
+
+    <div class="scores">
+      <div class="card tight primary-card">
+        <div class="score-h"><h4>Key objectives <span class="rank">primary</span></h4>
+          <span class="pill attn">Needs attention</span></div>
+        <div class="headline"><span class="big" style="color:var(--attn)">74<small>%</small></span></div>
+        <div class="minirow">
+          <div><em>Objectives</em><b>2</b></div>
+          <div><em>Weighted</em><b>60 / 40</b></div>
+          <div><em>Reported</em><b>2 / 2</b></div>
+        </div>
+      </div>
+
+      <div class="card tight">
+        <div class="score-h"><h4>Project performance</h4><span class="pill attn">Needs attention</span></div>
+        <div class="headline"><span class="big" style="color:var(--attn)">69<small>%</small></span></div>
+        <div class="minirow">
+          <div><em>Deliverables</em><b>88%</b></div>
+          <div><em>Outcomes</em><b>50%</b></div>
+          <div><em>Projects</em><b>3</b></div>
+        </div>
+      </div>
+
+      <div class="card tight">
+        <div class="score-h"><h4>Execution</h4><span class="pill warn">Behind plan</span></div>
+        <div class="headline"><span class="big" style="color:var(--warn)">58<small>%</small></span>
+          <span class="ofplan">7 of 12 milestones</span></div>
+        <div class="minirow">
+          <div><em>Completed</em><b>7</b></div>
+          <div><em>In progress</em><b>3</b></div>
+          <div><em>Not started</em><b>2</b></div>
+        </div>
+      </div>
+    </div>
+
+    <h4 class="mini">Key objectives</h4>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Objective</th><th class="cc">Weight</th><th class="cc">Dir.</th>
+        <th class="cc">Target</th><th class="cc">Reported</th><th class="cc">Score</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Days to close month-end<span class="why">Finance, all sister companies</span></td>
+          <td class="cc">60%</td><td class="cc">&le;</td><td class="num">5 d</td><td class="num">6 d</td>
+          <td class="num final" style="color:var(--attn)">83%</td></tr>
+        <tr><td class="idx">2</td><td>Cost of finance as % of revenue</td>
+          <td class="cc">40%</td><td class="cc">&le;</td><td class="num">2.1%</td><td class="num">2.6%</td>
+          <td class="num final" style="color:var(--warn)">60%</td></tr>
+      </tbody></table></div>
+
+    <h4 class="mini">Projects</h4>
+    <div class="plist">
+      <div class="phead pcap"><span>Project</span><span class="cc">Timeline</span><span class="num">Perform.</span>
+        <span class="num">Milestones</span><span class="num">Ends</span><span></span></div>
+
+      <div class="prow pcap" aria-expanded="true">
+        <span class="pname"><b>Average debt utilisation report automation</b>
+          <span class="psub">Finance, IT &middot; 4 deliverables &middot; 2 outcomes</span></span>
+        <span class="cc"><span class="pill kind">By date</span></span>
+        <span class="num lead" style="color:var(--attn)">69%</span>
+        <span class="num">4 / 5</span><span class="num">30 Apr 26</span><span class="chev">&#9656;</span></div>
+
+      <div class="prow pcap">
+        <span class="pname"><b>Credit facility consolidation</b>
+          <span class="psub">Finance, Treasury &middot; 3 deliverables &middot; 1 outcome</span></span>
+        <span class="cc"><span class="pill kind">By quarter</span></span>
+        <span class="num lead" style="color:var(--good)">75%</span>
+        <span class="num">2 / 4</span><span class="num">Q4 26</span><span class="chev">&#9656;</span></div>
+
+      <div class="prow pcap">
+        <span class="pname"><b>Working capital programme across units</b>
+          <span class="psub">Finance &middot; 2 deliverables &middot; 3 outcomes</span></span>
+        <span class="cc"><span class="pill kind">By quarter</span></span>
+        <span class="num lead" style="color:var(--warn)">62%</span>
+        <span class="num">1 / 3</span><span class="num">Q4 26</span><span class="chev">&#9656;</span></div>
+    </div>
+
+    <div class="note"><b>Three readings, never folded into one.</b> A capability that hit its objectives while
+    its projects delivered nothing is a different situation from one whose projects landed but moved no number.
+    An average of the three hides exactly the distinction that tells you which you are looking at — the same
+    reason focus measures and capability delivery already sit beside the group figure rather than inside it.</div>
+  </div>
+</div>
+
+<div class="screenlab"><b>Screen 1b</b><span>A capability with no key objectives — the card is hidden</span></div>
+<p class="why-s">As you asked: absent, not shown empty. Two cards at their natural width, and the row still
+fills because the grid sizes to what is in it. Nothing on the page hints a third number was ever expected.</p>
+
+<div class="shell"><div class="body">
+  <div class="kv"><h2>Brand Positioning</h2>
+    <span class="who">Group capability &middot; Marketing &middot; Yara Kamal &middot; 2 projects</span></div>
+  <div class="scores">
+    <div class="card tight primary-card">
+      <div class="score-h"><h4>Project performance <span class="rank">primary</span></h4>
+        <span class="pill warn">Behind plan</span></div>
+      <div class="headline"><span class="big" style="color:var(--warn)">58<small>%</small></span></div>
+      <div class="minirow">
+        <div><em>Deliverables</em><b>66%</b></div>
+        <div><em>Outcomes</em><b>50%</b></div>
+        <div><em>Projects</em><b>2</b></div>
+      </div>
+    </div>
+    <div class="card tight">
+      <div class="score-h"><h4>Execution</h4><span class="pill bad">Off track</span></div>
+      <div class="headline"><span class="big" style="color:var(--bad)">40<small>%</small></span>
+        <span class="ofplan">2 of 5 milestones</span></div>
+      <div class="minirow">
+        <div><em>Completed</em><b>2</b></div>
+        <div><em>In progress</em><b>2</b></div>
+        <div><em>Not started</em><b>1</b></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="note"><b>What hiding it costs, stated once.</b> Project performance becomes the primary card here
+while Key objectives is primary on Financial Infrastructure, so the eight capabilities no longer line up
+card-for-card on the group page. That is the price of not showing an empty box, and it is the right price —
+but the group capabilities table should then rank on <b>project performance</b>, which every capability has,
+rather than on a number two of them lack.</div>
+
+<div class="screenlab"><b>Screen 2</b><span>Capability &rarr; Projects — one project, opened</span></div>
+<p class="why-s">The plan side. Your Oracle sample as the model now holds it: brief and stakeholders, then
+deliverables and outcomes kept apart, then milestones. Targets and dates are here; reported figures are not,
+the same way the Temple carries the strategy without the scores.</p>
+
+<div class="shell">
+  <div class="nav sub"><button>Performance</button><button class="on">Projects</button><button>Reporting</button></div>
+  <div class="body">
+    <div class="kv"><h2>Average debt utilisation report automation</h2>
+      <span class="who">1 Jan 2026 &rarr; 30 Apr 2026 &middot; timeline by date &middot; Financial Infrastructure</span></div>
+
+    <div class="card" style="margin-bottom:6px">
+      <p style="margin:0 0 12px;font-size:12.5px;color:var(--ink-3)"><b style="color:var(--gold-deep);
+      letter-spacing:.09em;text-transform:uppercase;font-size:10.5px">Plan only</b> &nbsp;Nothing on this tab
+      has been reported. No progress, no status, no actuals — those are entered on Reporting and read on
+      Performance.</p>
+      <h4 class="mini" style="margin-top:0">Brief</h4>
+      <p style="margin:0;font-size:14px;color:var(--ink-2)">Implementation of an automated debt utilisation
+      report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across
+      sister companies.</p>
+      <h4 class="mini">Stakeholders</h4>
+      <span class="pill kind">Finance Department</span> <span class="pill kind">IT Department</span>
+    </div>
+
+    <h4 class="mini">Deliverables <em>— what the project hands over</em></h4>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Deliverable</th><th class="cc">Kind</th><th class="cc">Due</th><th class="cc">Owner</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Oracle-based interest utilisation form</td>
+          <td class="cc"><span class="pill kind">Delivered / not</span></td><td class="num">Q1</td><td class="cc">IT</td></tr>
+        <tr><td class="idx">2</td><td>Tracking interest expense on a daily basis</td>
+          <td class="cc"><span class="pill kind">Delivered / not</span></td><td class="num">Q1</td><td class="cc">Finance</td></tr>
+        <tr><td class="idx">3</td><td>Real-time data recalculation<span class="why">Corridor interest and pricing</span></td>
+          <td class="cc"><span class="pill kind">Delivered / not</span></td><td class="num">Q2</td><td class="cc">IT</td></tr>
+        <tr><td class="idx">4</td><td>Daily treasury monitoring of debt balances</td>
+          <td class="cc"><span class="pill kind">% delivered</span></td><td class="num">Q2</td><td class="cc">Treasury</td></tr>
+      </tbody></table></div>
+
+    <h4 class="mini">Outcomes <em>— what changed because of it. Always a measure, always with a measurement time</em></h4>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Target</th>
+        <th class="cc">Measured at</th><th class="cc">Owner</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Reduction of manual work</td><td class="cc">&ge;</td>
+          <td class="num">40 h / month</td><td class="num">Q2 2026</td><td class="cc">Finance</td></tr>
+        <tr><td class="idx">2</td><td>Improving financial accuracy<span class="why">Needs a full quarter of data before it reads</span></td>
+          <td class="cc">&ge;</td><td class="num">99%</td><td class="num">Q4 2026</td><td class="cc">Finance</td></tr>
+      </tbody></table></div>
+
+    <h4 class="mini">Milestones <em>— the timeline as planned. What each one is, who owns it, when it finishes</em></h4>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Milestone</th><th>What it covers</th><th class="cc">Owner</th><th class="cc">Finish date</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Solution design</td>
+          <td>Treasury requirements and the calculation approach</td>
+          <td class="cc">Finance</td><td class="num">20 Mar 2026</td></tr>
+        <tr><td class="idx">2</td><td>Oracle form development</td>
+          <td>Retrieval and calculation screens built</td>
+          <td class="cc">IT</td><td class="num">12 Apr 2026</td></tr>
+        <tr><td class="idx">3</td><td>Interest utilisation automation</td>
+          <td>Calculation methodology and finance approval</td>
+          <td class="cc">Finance</td><td class="num">20 Apr 2026</td></tr>
+        <tr><td class="idx">4</td><td>Stakeholder validation</td>
+          <td>Treasury validation of the outputs</td>
+          <td class="cc">Treasury</td><td class="num" style="color:var(--warn)">10 May 2026</td></tr>
+        <tr><td class="idx">5</td><td>Reporting and analysis embedment</td>
+          <td>BI integration of the utilisation report</td>
+          <td class="cc">IT</td><td class="num" style="color:var(--warn)">31 May 2026</td></tr>
+      </tbody></table></div>
+
+    <div class="note warn-note"><b>Two milestones finish after this project's end date of 30 Apr 2026.</b>
+      Saved exactly as entered — the platform does not refuse a date. The project has run past its timeline and
+      one of two things is true, so it asks rather than deciding:
+      <span style="display:inline-flex;gap:10px;margin-top:9px;flex-wrap:wrap">
+        <button class="editbtn">Extend the project to 31 May</button>
+        <button class="editbtn" style="border-color:var(--line);background:var(--surface);color:var(--ink-2)">Leave it — record the overrun</button>
+      </span></div>
+
+    <div class="note"><b>Why a deliverable is not a milestone.</b> A milestone answers <i>when</i> — it carries a
+    finish date and is either reached or not. A deliverable answers <i>whether</i> — it is a thing that now
+    exists, and it can be half-built. <i>Oracle form development</i> is a date; <i>the Oracle-based interest
+    utilisation form</i> is a thing. If a row cannot be given a finish date it is not a milestone; if nobody
+    receives it, it is not a deliverable.</div>
+  </div>
+</div>
+
+<div class="screenlab"><b>Screen 3</b><span>Capability &rarr; Reporting — the unit's reporting page, projects in place of pillars</span></div>
+<p class="why-s">Same reporting bar, same tally pill, same accordion, same entry box stating its unit rather
+than asking for it to be typed, same red edge on a figure that owes a note, same dimming for anything outside
+the cycle, same owner's note at the foot. A project row replaces a pillar row and carries how much is done
+rather than a score — exactly as the unit's does.</p>
+
+<div class="shell">
+  <div class="nav sub"><button>Performance</button><button>Projects</button><button class="on">Reporting</button></div>
+  <div class="body">
+
+    <div class="note bad-note" style="margin-top:0"><b>1 figure needs a note.</b> Anything at risk or off
+    track carries an explanation before it can be submitted — a red number with nothing beside it is where a
+    review meeting stalls.</div>
+
+    <div class="rep-bar">
+      <div class="kpi"><b>6</b><span>of 9 reported</span></div>
+      <div class="repbar part"><i style="width:67%"></i></div>
+      <span class="why">Q2 2026 &middot; due 15 Jul 2026</span>
+      <button class="editbtn">Submit to the SMO</button>
+    </div>
+
+    <h4 class="mini" style="margin-top:0">Key objectives <span class="rtally full">2/2</span></h4>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Objective</th><th class="cc">Dir.</th><th class="cc">Target</th>
+        <th class="cc">Reported</th><th class="notecol">Note</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Days to close month-end</td><td class="cc">&le;</td><td class="num">5 d</td>
+          <td class="cc"><span class="entry filled"><input class="field" value="6" readonly><span class="unitsuf">d</span></span></td>
+          <td class="notecol"><input class="notefld" value="One sister company closed late in June" readonly></td></tr>
+        <tr class="wantnote"><td class="idx">2</td><td>Cost of finance as % of revenue</td><td class="cc">&le;</td>
+          <td class="num">2.1%</td>
+          <td class="cc"><span class="entry filled"><input class="field" value="2.6" readonly><span class="unitsuf">%</span></span></td>
+          <td class="notecol"><input class="notefld" style="border-color:var(--bad);background:var(--bad-bg)" placeholder="Why, and what is being done" readonly></td></tr>
+      </tbody></table></div>
+
+    <h4 class="mini">Projects — deliverables, outcomes and milestones</h4>
+    <div class="plist">
+      <div class="phead rphead"><span>Project</span><span class="cc">Timeline</span><span class="num">Deliv.</span>
+        <span class="num">Outcomes</span><span class="cc">Reported</span><span></span></div>
+
+      <div class="prow rprow" aria-expanded="true">
+        <span class="pname"><b>Average debt utilisation report automation</b>
+          <span class="psub">4 deliverables &middot; 1 outcome asked &middot; 1 outside this cycle</span></span>
+        <span class="cc"><span class="pill kind">By date</span></span>
+        <span class="num">4</span><span class="num">1</span>
+        <span class="cc"><span class="rtally full">6/6</span></span><span class="chev">&#9656;</span></div>
+
+      <div class="pbody">
+        <h4 class="mini" style="margin-top:8px">Deliverables</h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Deliverable</th><th class="cc">Kind</th><th class="cc">Reported</th>
+            <th class="notecol">Note</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Oracle-based interest utilisation form</td>
+              <td class="cc"><span class="pill kind">Delivered / not</span></td>
+              <td class="cc"><select class="selbox"><option>Delivered</option></select></td>
+              <td class="notecol"><input class="notefld" placeholder="Note, if there is one" readonly></td></tr>
+            <tr><td class="idx">2</td><td>Tracking interest expense on a daily basis</td>
+              <td class="cc"><span class="pill kind">Delivered / not</span></td>
+              <td class="cc"><select class="selbox"><option>Delivered</option></select></td>
+              <td class="notecol"><input class="notefld" placeholder="Note, if there is one" readonly></td></tr>
+            <tr class="wantnote"><td class="idx">3</td><td>Real-time data recalculation</td>
+              <td class="cc"><span class="pill kind">Delivered / not</span></td>
+              <td class="cc"><select class="selbox"><option>Not yet</option></select></td>
+              <td class="notecol"><input class="notefld" style="border-color:var(--bad);background:var(--bad-bg)" value="Pricing corridor logic reopened with Treasury" readonly></td></tr>
+            <tr><td class="idx">4</td><td>Daily treasury monitoring of debt balances</td>
+              <td class="cc"><span class="pill kind">% delivered</span></td>
+              <td class="cc"><span class="entry filled"><input class="field" value="100" readonly><span class="unitsuf">%</span></span></td>
+              <td class="notecol"><input class="notefld" placeholder="Note, if there is one" readonly></td></tr>
+          </tbody></table></div>
+
+        <h4 class="mini">Outcomes</h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Outcome</th><th class="cc">Dir.</th><th class="cc">Target</th>
+            <th class="cc">Measured at</th><th class="cc">Reported</th><th class="notecol">Note</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Reduction of manual work</td><td class="cc">&ge;</td>
+              <td class="num">40 h</td><td class="num">Q2 2026</td>
+              <td class="cc"><span class="entry filled"><input class="field" value="20" readonly><span class="unitsuf">h</span></span></td>
+              <td class="notecol"><input class="notefld" value="Half the manual steps still run outside Oracle" readonly></td></tr>
+            <tr class="notdue"><td class="idx">2</td><td>Improving financial accuracy</td><td class="cc">&ge;</td>
+              <td class="num">99%</td><td class="num">Q4 2026</td>
+              <td colspan="2" class="cc"><span class="pill kind">Not asked &mdash; measured at Q4</span></td></tr>
+          </tbody></table></div>
+
+        <h4 class="mini">Milestones</h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Finish date</th><th class="cc">Progress</th>
+            <th class="notecol">Note</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">4</td><td>Stakeholder validation</td><td class="num">10 May 2026</td>
+              <td class="cc"><select class="selbox"><option>Completed</option></select></td>
+              <td class="notecol"><input class="notefld" value="Treasury validation" readonly></td></tr>
+            <tr><td class="idx">5</td><td>Reporting and analysis embedment</td>
+              <td class="num" style="color:var(--warn)">31 May 2026</td>
+              <td class="cc"><select class="selbox"><option>In progress</option></select></td>
+              <td class="notecol"><input class="notefld" value="BI integration phase" readonly></td></tr>
+            <tr class="notdue"><td class="idx">1&ndash;3</td><td>Solution design, form development, automation</td>
+              <td class="num">Q1</td>
+              <td colspan="2" class="cc"><span class="pill kind">Not asked &mdash; closed in an earlier cycle</span></td></tr>
+          </tbody></table></div>
+      </div>
+
+      <div class="prow rprow">
+        <span class="pname"><b>Credit facility consolidation</b>
+          <span class="psub">3 deliverables &middot; 1 outcome asked</span></span>
+        <span class="cc"><span class="pill kind">By quarter</span></span>
+        <span class="num">3</span><span class="num">1</span>
+        <span class="cc"><span class="rtally">0/4</span></span><span class="chev">&#9656;</span></div>
+
+      <div class="prow rprow">
+        <span class="pname"><b>Working capital programme across units</b>
+          <span class="psub">2 deliverables &middot; 3 outcomes &middot; all outside this cycle</span></span>
+        <span class="cc"><span class="pill kind">By quarter</span></span>
+        <span class="num">2</span><span class="num">3</span>
+        <span class="cc"><span class="pill kind">Not asked</span></span><span class="chev">&#9656;</span></div>
+    </div>
+
+    <h4 class="mini">The owner's note on this cycle</h4>
+    <div class="card" style="padding:14px 16px">
+      <textarea class="notefld" rows="3" readonly
+        placeholder="What the numbers do not say — what happened, what is being done, what to expect next."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="note warn-note"><b>This number can fall, and it is not a defect.</b> Before Q2 the Oracle project
+read 88% on its deliverables alone, both outcomes still unmeasurable. Q2 brought 20 hours against a target of
+40 and performance dropped to 69%. It moves again at Q4. Because a drop will be reported as a bug the first
+time it happens, the page has to keep saying which outcomes have been read and which are still waiting —
+which is what the dimmed <i>not asked</i> row does, the same way a tactic outside its quarters is dimmed today.</div>
+
+<hr class="sep">
+
+<div class="note" style="margin-top:26px"><b>Data honesty.</b> The Oracle project — its brief, deliverables,
+outcomes and milestones — is <b>real</b>, from Islam's own sample. Everything else is <b>invented</b>: both key
+objectives on Financial Infrastructure, every figure on Screens 1 and 1b, the other two projects, and
+Brand Positioning's numbers. Capability names and function owners are the real ones from the Strategy Temple.</div>
+
+</div></body></html>

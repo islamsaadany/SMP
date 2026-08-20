@@ -1,0 +1,288 @@
+<div class="banner">
+  <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
+  <span><strong>Retail, Mazaya and every reported actual are invented</strong> so the structure can be judged.</span>
+</div>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform &middot; Spec 012</span>
+      <h1 id="title">Raya Trade</h1>
+    </div>
+    <div class="viewer">
+      <label for="asWho">Viewing as</label>
+      <select id="asWho"></select>
+      <span class="viewer-note" id="viewerNote"></span>
+    </div>
+    <span class="shapetag">Group &middot; 3 business units &middot; H1 2026</span>
+  </div>
+</header>
+
+<nav class="units">
+  <div class="units-in" role="tablist" id="units"></div>
+</nav>
+
+<nav class="tabs">
+  <div class="tabs-in" role="tablist" id="subtabs"></div>
+</nav>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
+      <button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div>
+
+<footer class="end">
+  Spec <b>012-strategy-temple</b> &middot; group shape &middot; prototype for functional review, no database work done.
+  Mobile's plan content comes from the Raya Trade 2026 group and Mobile decks. Retail and Mazaya are invented,
+  and every reported actual throughout is illustrative rather than real performance.
+</footer>
+</div>
+
+<script src="DATA"></script>
+<script src="CONFIGDATA"></script>
+<script src="RENDER"></script>
+<script src="CONFIGRENDER"></script>
+<script>
+  /* Page definitions carry the access key the matrix is keyed on, so a page
+     is never rendered without a grant having been checked first. */
+  var SUBS = {
+    group: [
+      { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
+      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
+      { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
+    ],
+    unit: [
+      { k:"performance", ac:"u_perf",  label:"Performance", primary:true, render:renderUnitPerformance },
+      { k:"foundation",  ac:"u_found", label:"Foundation",                render:renderUnitFoundation },
+      { k:"analysis",    ac:"u_anal",  label:"Analysis",                  render:renderUnitAnalysis }
+    ],
+    setup: [
+      { k:"labels", ac:"c_labels", label:"Labels",          primary:true, render:renderLabels },
+      { k:"access", ac:"c_access", label:"Levels & access",               render:renderAccess }
+    ]
+  };
+
+  var current = "group", currentSub = "performance";
+
+  function allowed(defs){
+    return defs.filter(function(d){ return grant(d.ac) !== "none"; });
+  }
+
+  /* A unit tab appears only if the viewer reaches that unit AND holds at least
+     one of its pages. Restriction is by removing the page, never by trimming
+     what a page shows. */
+  function unitTabs(){
+    var out = [];
+    if (reaches("group") && allowed(SUBS.group).length) out.push({ k:"group", label:"Group" });
+    ["mobile","retail","mazaya"].forEach(function(k){
+      if (reaches(k) && allowed(SUBS.unit).length) out.push({ k:k, label:UNITS[k].name });
+    });
+    if (allowed(SUBS.setup).length) out.push({ k:"setup", label:"\u2699 Setup", setup:true });
+    return out;
+  }
+
+  function defsFor(k){ return k === "group" ? SUBS.group : k === "setup" ? SUBS.setup : SUBS.unit; }
+
+  function paintUnits(){
+    var tabs = unitTabs();
+    if (!tabs.some(function(t){ return t.k === current; })) current = tabs.length ? tabs[0].k : null;
+    document.getElementById("units").innerHTML = tabs.map(function(t, i){
+      return (i === 1 || t.setup ? '<span class="sep"></span>' : '') +
+        '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '">' + t.label + '</button>';
+    }).join("");
+    document.querySelectorAll("#units button").forEach(function(b){
+      b.addEventListener("click", function(){
+        current = b.dataset.u;
+        var d = allowed(defsFor(current));
+        currentSub = d.length ? d[0].k : null;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+  }
+
+  function paint(){
+    paintUnits();
+    var v = viewer();
+    document.getElementById("viewerNote").innerHTML =
+      (v.level === "smo" ? "Super user" : v.level.toUpperCase().replace("N","N-")) +
+      " &middot; " + (v.unit === "group" ? "all units" : UNITS[v.unit].name);
+
+    if (!current) {
+      document.getElementById("subtabs").innerHTML = "";
+      document.getElementById("panel").innerHTML =
+        '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> This level holds no access to any page in the matrix. ' +
+        'That is the matrix working as configured, not an error &mdash; open <b>Setup &rarr; Levels &amp; access</b> as the SMO to change it.</div>';
+      return;
+    }
+
+    var defs = allowed(defsFor(current));
+    if (!defs.some(function(d){ return d.k === currentSub; })) currentSub = defs[0].k;
+
+    document.getElementById("subtabs").innerHTML = defs.map(function(d){
+      var g = grant(d.ac);
+      return '<button role="tab" data-s="' + d.k + '"' + (d.primary ? ' class="primary"' : '') +
+        ' aria-selected="' + (d.k === currentSub) + '">' + d.label +
+        (g === "edit" ? ' <i class="ed" title="Editable">&#9998;</i>' : '') + '</button>';
+    }).join("");
+
+    var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    document.getElementById("panel").innerHTML =
+      (current === "group" || current === "setup") ? def.render() : def.render(UNITS[current]);
+    document.getElementById("title").textContent =
+      current === "setup" ? "Raya Trade \u2014 configuration"
+      : current === "group" ? "Raya Trade" : "Raya Trade \u2014 " + UNITS[current].name;
+
+    wire();
+  }
+
+  function wire(){
+    document.querySelectorAll("#subtabs button").forEach(function(b){
+      b.addEventListener("click", function(){ currentSub = b.dataset.s; paint(); window.scrollTo(0,0); });
+    });
+    document.querySelectorAll("[data-modal]").forEach(function(b){
+      b.addEventListener("click", function(e){ e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal); });
+    });
+    document.querySelectorAll("[data-go]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault();
+        if (!reaches(b.dataset.go)) return;
+        current = b.dataset.go; currentSub = "performance"; paint(); window.scrollTo(0,0);
+      });
+    });
+
+    /* Impact is the one factor a person sets; editing it recomputes the
+       composite immediately so the model is visible rather than asserted. */
+    document.querySelectorAll("[data-imp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.weighting.units[+b.dataset.imp].imp = +b.dataset.val;
+        currentSub = "weighting"; paint();
+        var d = document.querySelector("details.cfgwrap"); if (d) d.open = true;
+      });
+    });
+
+    /* Factor weights: edited live, and the total is checked rather than
+       silently normalised — 40/30/20/20 must fail loudly, not quietly
+       produce an answer nobody asked for. */
+    document.querySelectorAll("input.fwt").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var n = parseInt(inp.value, 10);
+        if (!isNaN(n)) GROUP.weighting.factors[+inp.dataset.f].weight = Math.max(0, Math.min(100, n));
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rmf]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.weighting.factors.splice(+b.dataset.rmf, 1); paint();
+      });
+    });
+    var add = document.getElementById("addf");
+    if (add) add.addEventListener("click", function(){
+      GROUP.weighting.factors.push({ key:"f" + Date.now(), name:"New factor",
+        kind:"judgement", basis:"describe the basis", weight:0 });
+      GROUP.weighting.units.forEach(function(u){ u["f" + Date.now()] = 1; });
+      paint();
+    });
+
+    /* Key Objective weights */
+    document.querySelectorAll("[data-kotog]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.kotog;
+        if (KO_WEIGHTS[k]) { KO_WEIGHTS[k] = null; }
+        else {
+          var n = UNITS[k].keyObjectives.length, base = Math.floor(100 / n), arr = [];
+          for (var i = 0; i < n; i++) arr.push(base);
+          arr[0] += 100 - base * n;
+          KO_WEIGHTS[k] = arr;
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("input.kow").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var p = inp.dataset.ko.split("|"), n = parseInt(inp.value, 10);
+        if (!isNaN(n) && KO_WEIGHTS[p[0]]) KO_WEIGHTS[p[0]][+p[1]] = Math.max(0, Math.min(100, n));
+        paint();
+      });
+    });
+
+    /* Labels */
+    document.querySelectorAll("input.lbl").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        LABELS.entries[+inp.dataset.lbl][inp.dataset.scope] = inp.value || "—";
+        paint();
+      });
+    });
+    document.querySelectorAll("input.lvl").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        LEVELS.filter(function(l){ return l.key === inp.dataset.lvl; })[0].titles = inp.value;
+        paint();
+      });
+    });
+
+    /* Access matrix — changing a cell re-renders the navigation immediately,
+       so the grid is judged by using it rather than by reading it. */
+    document.querySelectorAll("[data-ac]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.ac.split("|");
+        ACCESS[p[0]][p[1]] = p[2];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-as]").forEach(function(b){
+      b.addEventListener("click", function(){
+        VIEWER = b.dataset.as;
+        document.getElementById("asWho").value = VIEWER;
+        current = null; currentSub = null; paint(); window.scrollTo(0,0);
+      });
+    });
+  }
+
+  var overlay = document.getElementById("overlay");
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
+    overlay.classList.add("on");
+    document.getElementById("modal-x").focus();
+  }
+  function closeModal(){ overlay.classList.remove("on"); }
+  document.getElementById("modal-x").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+
+  var sel = document.getElementById("asWho");
+  sel.innerHTML = PEOPLE.map(function(p){
+    return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+  }).join("");
+  sel.value = VIEWER;
+  sel.addEventListener("change", function(){
+    VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
+  });
+
+  function measure(){
+    var top = document.querySelector("header.top");
+    var units = document.querySelector("nav.units");
+    document.documentElement.style.setProperty("--top-h", top.offsetHeight + "px");
+    document.documentElement.style.setProperty("--units-h", units.offsetHeight + "px");
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      document.body.classList.toggle("scrolled", window.scrollY > 40);
+      measure(); ticking = false;
+    });
+  }, { passive: true });
+  window.addEventListener("resize", measure);
+
+  paint();
+  measure();
+</script>

@@ -108,20 +108,34 @@ A drift between specs and code is a documentation bug — report it before silen
 ## Project Context
 
 ### What This App Is
-**SMP** is a new project at its very beginning. Its full scope, purpose, and target users are
-**still to be defined with the user** — do not invent or assume them. What exists today:
+**SMP is the Strategy Management Platform** — a consulting product for running a client's
+strategy: group and business-unit plans, derived scoring, reporting cycles with snapshots,
+focus measures, capabilities with enhancement projects, import/export, and presentation mode.
+The prototype's demo tenant is Raya Trade (group shape); only Mobile's plan content is real,
+everything else is labelled invented.
 
-- A **starting page** (`index.html`): a self-contained navy/gold access gate with exactly **one
-  access — `AdminSMO`** (password `4123`) — that unlocks a placeholder home card where the SMP
-  modules will appear. The session persists per tab via `sessionStorage`, with sign-out.
-- The password check is **client-side and visible in the page source** — a simple gate, not
-  security. It must be replaced with a server-side check before SMP handles anything sensitive.
+The whole project lives in **`SMP-Project-Folder/`**, which Islam also carries outside the
+repo as a zip and brings back — treat that folder as the product. Read, in order:
+
+1. **`SMP-Project-Folder/CLAUDE-RULES.md`** — how Islam and Claude work together. These are
+   the operative working rules for platform work (mock-first, ask-don't-assume, one thing at
+   a time, handover shape). They take precedence over the generic guidelines above where the
+   two overlap.
+2. **`SMP-Project-Folder/DECISIONS-AND-LOGIC-vX.Y.md`** — every decision with its reasoning.
+   The rebuild contract. §16 is the backlog; reversals are recorded, never overwritten.
+3. **`SMP-Project-Folder/README.md`** — the map: what each file and mockup is, and whether it
+   is settled, pending or rejected.
+
+There is also a small **access gate** (`index.html`, AdminSMO / 4123) from before the project
+folder arrived — a client-side placeholder, explicitly not security.
 
 ### Technology Stack
-**Not decided yet.** Currently plain static HTML/CSS/JS with no build step, no `package.json`,
-no framework, no database, no deployment target. When a stack is chosen, record it here and in
-`PROJECT_DETAILS.md` (the HR_ERP house stack — Next.js + TypeScript + Prisma/Postgres + Tailwind
-on Vercel — is the natural default, but it is a decision to align on, not an assumption).
+A **single self-contained HTML prototype** (no server, no dependencies, works offline),
+assembled from `SMP-Project-Folder/src/` by `python3 build.py`. The build must be
+**byte-identical** to the shipped `strategy-management-platform-vX.Y.html` — if it is not,
+something is out of step. `python3 qa.py` walks every page as every viewer and asserts no
+console errors (in this cloud environment, run it via a wrapper that points Playwright at
+`/opt/pw-browsers/chromium`). Edit the sources, never the built file.
 
 ### Repository
 - **GitHub:** `islamsaadany/SMP`
@@ -130,10 +144,18 @@ on Vercel — is the natural default, but it is a decision to align on, not an a
 ### Current Directory Layout
 ```
 SMP/
-  CLAUDE.md          # this file — the only steering file so far
+  CLAUDE.md               # this file
   README.md
-  index.html         # access gate + starting page (AdminSMO)
-  ui-versions/       # UI snapshots before edits (created on first UI edit)
+  index.html              # access gate (AdminSMO) — predates the project folder
+  SMP-Project-Folder/     # THE PRODUCT — sources, docs, mockups (see its README.md)
+    CLAUDE-RULES.md       #   working rules (operative)
+    DECISIONS-AND-LOGIC-vX.Y.md
+    strategy-management-platform-vX.Y.html   # the built prototype
+    src/                  #   sources + build.py + qa.py
+    mockups/              #   settled / pending / rejected design work
+  .specify/               # spec-kit: templates, scripts, memory/constitution.md
+  specs/                  # spec-kit feature specifications (one folder per feature)
+  ui-versions/            # UI snapshots before edits (created on first UI edit)
 ```
 
 ---
@@ -146,8 +168,9 @@ SMP/
 
 ### Build Commands
 ```bash
-# No build step yet — open index.html directly in a browser.
-# When a Node/TS stack lands, record dev/build/lint/typecheck commands here.
+cd SMP-Project-Folder/src
+python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
+python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 ```
 
 ---
@@ -169,10 +192,14 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ### Keeping Docs Current (MANDATORY before merging to main)
 1. Update this **`CLAUDE.md`** if a new pattern/rule/workflow was established or project facts changed.
-2. Once they exist: update **`PROJECT_DETAILS.md`**, **`IMPLEMENTATION_PROGRESS.md`**,
-   **`IMPLEMENTATION_PLAN.md`**, and the relevant **`specs/`** feature spec in the same way
-   the HR_ERP process requires.
+2. Update **`SMP-Project-Folder/DECISIONS-AND-LOGIC-vX.Y.md`** for every decision, reversal, or
+   built backlog item — in the same commit as the code (rule A7/A8).
+3. Update **`SMP-Project-Folder/README.md`** when a mockup's status changes or the "where things
+   stand" picture moves.
+4. Update the relevant **`specs/`** feature spec if product behavior changed.
 
 ---
 
-*Last Updated: 2026-08-20 (Adapted from the HR_ERP rules file for SMP: working rules kept verbatim; HR_ERP project context, benefits/HR patterns, Neon/env configuration, and spec-kit installation notes removed or parked until SMP's scope and stack are defined.)*
+*Last Updated: 2026-08-20 (SMP identified as the Strategy Management Platform: project folder
+imported into the repo, spec-kit installed (.specify/ + specs/), project context, stack, layout,
+build commands, and doc-currency rules rewritten around SMP-Project-Folder/.)*

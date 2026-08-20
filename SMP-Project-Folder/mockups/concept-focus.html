@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Focus measures — concept</title>
+<style>
+  :root{
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --r:2px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px 80px}
+
+  .top{background:var(--panel);color:var(--panel-ink);padding:26px 0 24px;margin-bottom:36px}
+  .top .wrap{padding-bottom:0}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .top h1{font:400 30px/1.2 var(--serif);margin:8px 0 6px}
+  .top p{margin:0;color:#C3CEE0;max-width:66ch;font-size:14px}
+
+  h2.sec{font:400 23px/1.25 var(--serif);margin:0 0 4px}
+  .lede{color:var(--ink-2);margin:0 0 20px;max-width:74ch;font-size:14px}
+  section{margin:0 0 52px}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px}
+  .cardhead{display:flex;align-items:baseline;justify-content:space-between;gap:14px;margin-bottom:16px}
+  .cardhead h3{font:400 18px/1.2 var(--serif);margin:0}
+  .muted{color:var(--ink-3);font-size:12px}
+
+  /* ── the marker ─────────────────────────────────────────────── */
+  /* The mark is a mark. A word beside every one of them turns a quiet signal
+     into a column of shouting, and the row is already carrying six numbers. */
+  .fmark{display:inline-block;width:7px;height:7px;background:var(--gold);
+    transform:rotate(45deg);margin-left:8px;vertical-align:middle;flex:none}
+  .fmark.hollow{background:none;border:1.5px solid var(--line)}
+  .legend-mark{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3)}
+
+  table{width:100%;border-collapse:collapse}
+  th{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+    text-align:left;font-weight:700;padding:9px 10px;background:var(--surface-2);
+    border-bottom:1px solid var(--line)}
+  td{padding:12px 10px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  th.c,td.c{text-align:center}
+  th.r,td.r{text-align:right}
+  .idx{width:34px;color:var(--ink-3);font-family:var(--mono);font-size:11.5px}
+
+  /* the focus row: a gold edge, nothing louder */
+  tr.focus td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+  tr.focus{background:#FEFCF7}
+
+  /* ── stretch bar ────────────────────────────────────────────── */
+  .track{position:relative;height:8px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:20px;min-width:180px}
+  .fill{position:absolute;inset:-1px auto -1px -1px;border-radius:20px;border:1px solid transparent}
+  .tick{position:absolute;top:-5px;bottom:-5px;width:1px;background:var(--ink-3)}
+  .tick.stretch{background:var(--gold-deep)}
+  .tick span{position:absolute;top:-17px;left:50%;transform:translateX(-50%);
+    font:700 9px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+  .tick.stretch span{color:var(--gold-deep)}
+  .barwrap{padding:20px 0 4px}
+
+  .states{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:18px}
+  .state{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px 18px}
+  .state h4{margin:0 0 2px;font:700 11px/1.3 var(--sans);letter-spacing:.09em;text-transform:uppercase}
+  .state .val{font-family:var(--mono);font-size:26px;margin:6px 0 0;letter-spacing:-.02em}
+  .state .cap{font-size:12px;color:var(--ink-3);margin-top:6px;min-height:32px}
+
+  /* ── selection ──────────────────────────────────────────────── */
+  .pick{display:grid;grid-template-columns:26px 1fr auto auto;gap:14px;align-items:center;
+    padding:11px 14px;border-bottom:1px solid var(--line-soft)}
+  .pick:last-child{border-bottom:0}
+  .pick.on{background:#FEFCF7}
+  .box{width:17px;height:17px;border:1.5px solid var(--line);border-radius:var(--r);
+    display:flex;align-items:center;justify-content:center;background:var(--surface)}
+  .pick.on .box{background:var(--gold);border-color:var(--gold-deep)}
+  .pick.on .box::after{content:"";width:9px;height:5px;border-left:2px solid #fff;
+    border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+  .pick .src{font-size:11px;color:var(--ink-3)}
+  .pick .stretchin{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-3)}
+  .pick input{font:inherit;font-family:var(--mono);font-size:12.5px;width:74px;padding:4px 7px;
+    border:1px solid var(--line);border-radius:var(--r);text-align:center;background:var(--surface)}
+  .pick.off input{visibility:hidden}
+  .grouphead{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    font-weight:700;padding:14px 14px 7px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+  .cap-note{display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:13px 16px;background:var(--surface-2);border-top:1px solid var(--line);font-size:12.5px}
+
+  /* ── board ──────────────────────────────────────────────────── */
+  .board td{padding:11px 10px}
+  /* Shaded by unit block rather than by row. Plain zebra striping would cut
+     across the groups the rowspan creates and make the unit boundaries harder
+     to see, not easier — the thing that needs to be visible here is where one
+     unit ends and the next begins. */
+  .board tbody tr.alt td{background:var(--surface-2)}
+  .board tbody tr.unitstart td{border-top:1px solid var(--line)}
+  .board tbody tr:first-child td{border-top:0}
+  .unitcell{font-weight:600}
+  .badge{display:inline-block;font:700 10px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 8px;border-radius:20px}
+  /* Commit met and stretch cleared are different achievements and must not
+     wear one colour — the whole point of focus is the distance between them. */
+  .b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+  .b-over{background:#FBF6E9;color:var(--gold-deep);border:1px solid #E8D9AE}
+  .b-near{background:var(--good-bg);color:var(--good)}
+  .b-short{background:var(--bad-bg);color:var(--bad)}
+  .b-none{background:var(--surface-2);color:var(--none)}
+
+  .note{border-left:3px solid var(--gold);background:#FBF6E9;padding:14px 18px;
+    font-size:13.5px;color:var(--ink-2);border-radius:0 var(--r) var(--r) 0}
+  .note b{color:var(--ink)}
+  .q{border-left:3px solid var(--stone);background:var(--surface);padding:16px 20px;
+    border-radius:0 var(--r) var(--r) 0;border-top:1px solid var(--line);
+    border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .q h4{margin:0 0 10px;font:400 16px/1.3 var(--serif)}
+  .q ol{margin:0;padding-left:20px}
+  .q li{margin:7px 0;font-size:13.5px;color:var(--ink-2)}
+  .q li b{color:var(--ink)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+</style></head>
+<body>
+
+<div class="top"><div class="wrap">
+  <div class="eyebrow">Strategy Management Platform · concept</div>
+  <h1>Focus measures</h1>
+  <p>The CEO marks a few measures per unit as the ones that carry reward. This is a
+     concept for review — not yet built into the platform.</p>
+</div></div>
+
+<div class="wrap">
+
+<section>
+  <h2 class="sec">1 · What a focus measure looks like where it already lives</h2>
+  <p class="lede">A mark, not a column. The row keeps its shape and its width — the measure is
+     already carrying six numbers, and a word beside every marked one turns a quiet signal
+     into a column of shouting. Hovering says what it means; the page legend says it once.</p>
+
+  <div class="card">
+    <div class="cardhead">
+      <h3>MB02 Channel Preference &amp; Development</h3>
+      <span class="legend-mark"><span class="fmark" style="margin:0"></span> carries reward this cycle</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="idx">#</th><th>Measure</th><th class="c">Dir.</th>
+        <th class="r">Target</th><th class="r">H1 actual</th><th class="r">Progress</th>
+      </tr></thead>
+      <tbody>
+        <tr class="focus">
+          <td class="idx">1</td>
+          <td>Retailer preference index <span class="fmark" title="Focus measure"></span></td>
+          <td class="c num">≥</td><td class="r num">70</td>
+          <td class="r num">74</td>
+          <td class="r num" style="color:var(--good);font-weight:600">106%</td>
+        </tr>
+        <tr>
+          <td class="idx">2</td><td>Average delivery time</td>
+          <td class="c num">≤</td><td class="r num">24 h</td>
+          <td class="r num">31 h</td>
+          <td class="r num" style="color:var(--warn);font-weight:600">77%</td>
+        </tr>
+        <tr>
+          <td class="idx">3</td><td>Joint business plans signed</td>
+          <td class="c num">≥</td><td class="r num">12</td>
+          <td class="r num">7</td>
+          <td class="r num" style="color:var(--warn);font-weight:600">58%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="height:18px"></div>
+
+  <div class="card">
+    <div class="cardhead">
+      <h3>Mobile — Key Objectives</h3>
+      <span class="muted">A focus measure can be an objective, not only a pillar measure</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th class="idx">#</th><th>Objective</th>
+        <th class="r">3-year</th><th class="r">This year</th><th class="r">H1 actual</th><th class="r">Progress</th>
+      </tr></thead>
+      <tbody>
+        <tr class="focus">
+          <td class="idx">1</td>
+          <td>Mobile market share <span class="fmark" title="Focus measure"></span></td>
+          <td class="r num">38%</td><td class="r num">32%</td><td class="r num">31%</td>
+          <td class="r num" style="color:var(--warn);font-weight:600">97%</td>
+        </tr>
+        <tr>
+          <td class="idx">2</td><td>Distribution revenue</td>
+          <td class="r num">9.0B EGP</td><td class="r num">6.2B EGP</td><td class="r num">3.1B EGP</td>
+          <td class="r num" style="color:var(--bad);font-weight:600">50%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">2 · One rule, not a target per measure</h2>
+  <p class="lede">Where reward begins is a property of the <i>scheme</i>, not of each measure.
+     It is set once for the cycle and every focus measure is read against it — so no measure
+     grows a second target, and nobody negotiates a stretch line one row at a time.</p>
+
+  <div class="two">
+    <div class="card">
+      <div class="cardhead"><h3>Setup · Reward rule</h3><span class="muted">Cycle 2026</span></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;
+                  padding:14px 0;border-bottom:1px solid var(--line-soft)">
+        <span>Reward begins at</span>
+        <span><input class="num" value="100%" style="width:82px;padding:6px 9px;text-align:center;
+          border:1px solid var(--line);border-radius:var(--r);font-family:var(--mono)"> of target</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:14px 0">
+        <span>Locked when the cycle opens</span>
+        <span class="badge b-met" style="border:1px solid var(--line)">Yes</span>
+      </div>
+      <p class="muted" style="margin:10px 0 0;line-height:1.6">Set it at 100% and delivering the
+        commitment earns reward. Set it above — 110%, say — and reward starts only past it,
+        while the measure is still scored against its own target as it always was.</p>
+    </div>
+
+    <div class="card">
+      <div class="cardhead"><h3>What the rule produces</h3><span class="muted">at 100%</span></div>
+      <table>
+        <thead><tr><th>Progress</th><th class="c">Standing</th></tr></thead>
+        <tbody>
+          <tr><td class="num">below 100%</td><td class="c"><span class="badge b-short">Short</span></td></tr>
+          <tr><td class="num">100% and above</td><td class="c"><span class="badge b-over">Earning</span></td></tr>
+          <tr><td class="num">no figure yet</td><td class="c"><span class="badge b-none">Not reported</span></td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="margin:12px 0 0;line-height:1.6">At a rule of 110% a third standing
+        appears between them — <span class="badge b-met" style="border:1px solid var(--line)">Met, not earning</span> —
+        for a measure that delivered its commitment without clearing the reward line.</p>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+  <div class="note"><b>Focus changes no score.</b> The unit headline, the pillar figures and the
+    group compile are computed exactly as they are today. Unit weights already decide how much a
+    unit counts; letting focus alter scoring would count the same emphasis twice and make the
+    group number impossible to explain in a room. <b>And no compensation arithmetic lives here</b>
+    — the platform reports standing; the scheme pays.</div>
+</section>
+
+<section>
+  <h2 class="sec">3 · Where a measure gets marked</h2>
+  <p class="lede">Inline, where the measure already is. Marking is a judgement about that measure
+     in its context — you are looking at its target, its history and its owner when you make it.
+     A separate list of names strips away everything that informs the choice.</p>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div class="cardhead" style="padding:20px 22px 14px;margin:0;border-bottom:1px solid var(--line)">
+      <h3>Mobile · Key measures <span class="muted" style="font-weight:400">— editing</span></h3>
+      <span class="badge b-over">3 marked</span>
+    </div>
+    <div class="pick on">
+      <span class="fmark" style="margin:0"></span>
+      <span>Retailer preference index <span class="src">MB02 · direction</span></span>
+      <span class="num muted">target 70</span>
+      <span class="muted" style="font-size:11.5px">marked</span>
+    </div>
+    <div class="pick off">
+      <span class="fmark hollow" style="margin:0"></span>
+      <span>Average delivery time <span class="src">MB02 · direction</span></span>
+      <span class="num muted">target 24 h</span>
+      <span class="muted" style="font-size:11.5px">click to mark</span>
+    </div>
+    <div class="pick on">
+      <span class="fmark" style="margin:0"></span>
+      <span>App coverage rate <span class="src">MB01 · capability</span></span>
+      <span class="num muted">target 50%</span>
+      <span class="muted" style="font-size:11.5px">marked</span>
+    </div>
+    <div class="cap-note">
+      <span><b>No cap.</b> <span class="muted">Three is the usual choice, and it stays a choice.</span></span>
+      <span class="muted">Locked once the cycle opens</span>
+    </div>
+  </div>
+
+  <div style="height:16px"></div>
+  <div class="q">
+    <h4>The one trade-off</h4>
+    <p style="margin:0;font-size:13.5px;color:var(--ink-2)">Marking inline means walking ten units
+      to set a cycle. The board in the next section is therefore also where they are
+      <b>reviewed and unmarked</b> — all ten at once, without leaving the choice divorced from
+      the evidence when it is first made.</p>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">4 · Two views of the same thing</h2>
+  <p class="lede">The CEO sees every unit. A unit sees its own and no one else's — what another
+     business unit is rewarded on is not its business, and a league table nobody asked for is
+     the fastest way to make this feature political.</p>
+
+  <div class="card" style="padding:0">
+    <div class="cardhead" style="padding:20px 22px 14px;margin:0;border-bottom:1px solid var(--line)">
+      <h3>Focus board <span class="muted" style="font-weight:400">— as the CEO</span></h3>
+      <span class="muted">Cycle 2026 · reward begins at 100% · locked</span>
+    </div>
+    <table class="board">
+      <thead><tr>
+        <th>Unit</th><th>Focus measure</th><th class="c">Source</th>
+        <th class="r">Target</th><th class="r">Actual</th><th class="r">Progress</th>
+        <th class="c">Standing</th>
+      </tr></thead>
+      <tbody>
+        <tr class="unitstart"><td class="unitcell" rowspan="3">Mobile</td>
+          <td>Mobile market share</td><td class="c muted">objective</td>
+          <td class="r num">32%</td><td class="r num">31%</td>
+          <td class="r num" style="color:var(--warn)">97%</td>
+          <td class="c"><span class="badge b-short">Short</span></td></tr>
+        <tr><td>Retailer preference index</td><td class="c muted">MB02</td>
+          <td class="r num">70</td><td class="r num">74</td>
+          <td class="r num" style="color:var(--good)">106%</td>
+          <td class="c"><span class="badge b-over">Earning</span></td></tr>
+        <tr><td>App coverage rate</td><td class="c muted">MB01</td>
+          <td class="r num">50%</td><td class="r num">22%</td>
+          <td class="r num" style="color:var(--bad)">44%</td>
+          <td class="c"><span class="badge b-short">Short</span></td></tr>
+
+        <tr class="alt unitstart"><td class="unitcell" rowspan="2">Retail Stores</td>
+          <td>Like-for-like growth</td><td class="c muted">objective</td>
+          <td class="r num">8%</td><td class="r num">13%</td>
+          <td class="r num" style="color:var(--good)">163%</td>
+          <td class="c"><span class="badge b-over">Earning</span></td></tr>
+        <tr class="alt"><td>Store conversion rate</td><td class="c muted">RS01</td>
+          <td class="r num">28%</td><td class="r num">28%</td>
+          <td class="r num" style="color:var(--good)">100%</td>
+          <td class="c"><span class="badge b-over">Earning</span></td></tr>
+
+        <tr class="unitstart"><td class="unitcell" rowspan="2">Consumer Electronics</td>
+          <td>Principal share of wallet</td><td class="c muted">objective</td>
+          <td class="r num">40%</td><td class="r num">42%</td>
+          <td class="r num" style="color:var(--good)">105%</td>
+          <td class="c"><span class="badge b-over">Earning</span></td></tr>
+        <tr><td>Attach rate on services</td><td class="c muted">CE02</td>
+          <td class="r num">15%</td><td class="r">—</td><td class="r">—</td>
+          <td class="c"><span class="badge b-none">Not reported</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="height:22px"></div>
+
+  <div class="card" style="padding:0;max-width:760px">
+    <div class="cardhead" style="padding:20px 22px 14px;margin:0;border-bottom:1px solid var(--line)">
+      <h3>The same board <span class="muted" style="font-weight:400">— as Mobile's owner</span></h3>
+      <span class="muted">3 measures</span>
+    </div>
+    <table class="board">
+      <thead><tr>
+        <th>Focus measure</th><th class="c">Source</th>
+        <th class="r">Target</th><th class="r">Actual</th><th class="r">Progress</th><th class="c">Standing</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Mobile market share</td><td class="c muted">objective</td>
+          <td class="r num">32%</td><td class="r num">31%</td>
+          <td class="r num" style="color:var(--warn)">97%</td>
+          <td class="c"><span class="badge b-short">Short</span></td></tr>
+        <tr><td>Retailer preference index</td><td class="c muted">MB02</td>
+          <td class="r num">70</td><td class="r num">74</td>
+          <td class="r num" style="color:var(--good)">106%</td>
+          <td class="c"><span class="badge b-over">Earning</span></td></tr>
+        <tr><td>App coverage rate</td><td class="c muted">MB01</td>
+          <td class="r num">50%</td><td class="r num">22%</td>
+          <td class="r num" style="color:var(--bad)">44%</td>
+          <td class="c"><span class="badge b-short">Short</span></td></tr>
+      </tbody>
+    </table>
+    <div class="cap-note"><span class="muted">One short of the line, one earning, one well behind
+      &mdash; and nothing about any other unit.</span></div>
+  </div>
+
+  <div style="height:16px"></div>
+  <div class="note"><b>Not reported is its own standing.</b> A focus measure with no number is
+    neither a failure nor a success &mdash; the same rule the rest of the platform already follows,
+    and the one most likely to be argued about once reward is attached to it.</div>
+</section>
+
+<section>
+  <h2 class="sec">5 · The unit's own focus reading</h2>
+  <p class="lede">A strip at the top of the unit's Performance page, above the pillars. It is the
+     first thing an owner sees on their own page, and it appears nowhere on the group cards —
+     the card is the group's reading of a unit; this is the unit's reading of itself.</p>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="background:var(--surface-2);border-bottom:1px solid var(--line);padding:14px 22px;
+                display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <span style="font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-2)">
+        <span class="fmark" style="margin:0 7px 0 0"></span>Focus this cycle</span>
+      <span class="muted">reward begins at 100% &middot; locked &middot; set by the CEO</span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:30px;flex-wrap:wrap;padding:20px 22px 18px">
+      <div>
+        <div style="font:400 34px/1 var(--serif)"><span style="color:var(--good)">1</span>
+          <span style="color:var(--ink-3);font-size:22px"> of </span>3</div>
+        <div class="muted" style="margin-top:6px">earning</div>
+      </div>
+      <div style="width:1px;align-self:stretch;background:var(--line)"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="badge b-over">1 earning</span>
+        <span class="badge b-short">2 short</span>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div class="num muted" style="font-size:13px">mean progress 82%</div>
+        <div class="muted" style="font-size:11px;max-width:30ch;margin-top:3px">
+          shown second, and deliberately quiet</div>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr>
+        <th>Focus measure</th><th class="c">Source</th>
+        <th class="r">Target</th><th class="r">H1 actual</th><th class="r">Progress</th><th class="c">Standing</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Retailer preference index</td><td class="c muted">MB02</td>
+          <td class="r num">70</td><td class="r num">74</td>
+          <td class="r num" style="color:var(--good)">106%</td>
+          <td class="c"><span class="badge b-over">Earning</span></td></tr>
+        <tr><td>Mobile market share</td><td class="c muted">objective</td>
+          <td class="r num">32%</td><td class="r num">31%</td>
+          <td class="r num" style="color:var(--warn)">97%</td>
+          <td class="c"><span class="badge b-short">Short</span></td></tr>
+        <tr><td>App coverage rate</td><td class="c muted">MB01</td>
+          <td class="r num">50%</td><td class="r num">22%</td>
+          <td class="r num" style="color:var(--bad)">44%</td>
+          <td class="c"><span class="badge b-short">Short</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="height:18px"></div>
+  <div class="note"><b>The count leads, not the average.</b> Mobile's three focus measures average
+    to <span class="num">82%</span>, which reads as nearly there. It is not: one is earning and two
+    are short, and reward is won per measure, not on a mean. An average of 163% on one measure and
+    44% on another describes no situation anyone is actually in. The mean stays on the strip because
+    the rest of the platform reads in percentages &mdash; but it sits second and quiet.</div>
+
+  <div style="height:16px"></div>
+  <div class="q">
+    <h4>Where it does and does not appear</h4>
+    <ol>
+      <li><b>On the unit's Performance page</b>, above the pillars &mdash; for that unit's head and
+        owner, and for the CEO and SMO.</li>
+      <li><b>Not on the group's business-unit cards.</b> The card is a two-box composition settled
+        over six iterations, and it is the group's reading of a unit. A third box would break both
+        the layout and the distinction.</li>
+      <li><b>Not visible to other units</b>, in keeping with section 4.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">Settled</h2>
+  <div class="two">
+    <div class="q">
+      <h4>Settled</h4>
+      <ol>
+        <li><b>A mark, no word</b>, and no extra column. The row keeps its width.</li>
+        <li><b>One reward rule per cycle</b> — reward begins at 100%, or above it — instead of a target per measure.</li>
+        <li><b>No cap.</b> Three is the usual choice and stays a choice.</li>
+        <li><b>No compensation arithmetic.</b> The platform reports standing; the scheme pays.</li>
+        <li><b>Locked once the cycle opens.</b></li>
+        <li><b>A unit sees only its own.</b> The CEO sees all.</li>
+        <li><b>The CEO marks; the SMO may mark on their behalf.</b></li>
+        <li><b>Each unit gets a focus strip</b> on its own Performance page &mdash; count first,
+          mean second, and never on the group cards.</li>
+      </ol>
+    </div>
+    <div class="q">
+      <h4>Also settled</h4>
+      <ol>
+        <li><b>Marking lives inline</b>, where the measure already sits. The board reviews and
+          unmarks across all units, but the choice is made beside the evidence.</li>
+        <li><b>Focus is a business-unit idea only.</b> The group unit carries none, even though
+          it has Key Objectives of its own.</li>
+        <li><b>Every cycle starts unmarked.</b> Nothing carries forward &mdash; which means the
+          marks are stored against the cycle, not against the measure, and last year's emphasis
+          cannot quietly become this year's by default.</li>
+      </ol>
+      <p style="margin:14px 0 0;font-size:13px;color:var(--ink-3)">Nothing outstanding. This is
+        ready to build into the product.</p>
+    </div>
+  </div>
+</section>
+
+</div>
+</body></html>

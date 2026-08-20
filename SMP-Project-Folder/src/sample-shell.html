@@ -1,0 +1,173 @@
+<div class="banner">
+  <span><strong>Sample &middot; section navigation.</strong> Group Performance, real content, two ways of getting to the four sections.</span>
+</div>
+
+<div class="chrome">
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform &middot; sample</span>
+      <h1>Raya Trade</h1>
+    </div>
+    <div class="viewer">
+      <label>Variant</label>
+      <div class="switch" role="group">
+        <button data-v="A" aria-pressed="true">A &middot; in page</button>
+        <button data-v="B" aria-pressed="false">B &middot; third nav row</button>
+      </div>
+    </div>
+    <span class="shapetag">Group &middot; 3 business units &middot; H1 2026</span>
+  </div>
+</header>
+
+<nav class="units">
+  <div class="units-in" role="tablist">
+    <button role="tab" aria-selected="true">Group</button>
+    <span class="sep"></span>
+    <button role="tab" aria-selected="false">Mobile</button>
+    <button role="tab" aria-selected="false">Retail</button>
+    <button role="tab" aria-selected="false">Mazaya</button>
+    <span class="sep"></span>
+    <button role="tab" aria-selected="false">&#9881; Setup</button>
+  </div>
+</nav>
+
+<nav class="tabs">
+  <div class="tabs-in" role="tablist">
+    <button role="tab" class="primary" aria-selected="true">Performance</button>
+    <button role="tab" aria-selected="false">Foundation</button>
+    <button role="tab" aria-selected="false">Temple</button>
+    <button role="tab" aria-selected="false">Weighting</button>
+  </div>
+</nav>
+
+<nav class="tabs sectionrow" id="navrow" hidden>
+  <div class="tabs-in" role="tablist" id="navrow-in"></div>
+</nav>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
+      <button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div></div>
+
+<script src="DATA"></script>
+<script src="CONFIGDATA"></script>
+<script src="RENDER"></script>
+<script src="CONFIGRENDER"></script>
+<script>
+  var VARIANT = "A", SEC = 0;
+
+  /* The page already renders four sections; rather than rebuild it, the sample
+     splits what renderGroupPerformance returns and shows one section at a time.
+     Whatever the real page renders is what appears here. */
+  function parts(){
+    var html = renderGroupPerformance();
+    var d = document.createElement("div");
+    d.innerHTML = html;
+    var legend = d.querySelector(".bands");
+    var secs = Array.prototype.slice.call(d.querySelectorAll(".section"));
+    return { legend: legend ? legend.outerHTML : "", secs: secs };
+  }
+
+  /* The heading carries a hover-note glyph; strip it before using the text as
+     a label, or every tab reads "Business unitsi". */
+  function titleOf(sec){
+    var h = sec.querySelector(".section-h h2");
+    if (!h) return "Section";
+    var c = h.cloneNode(true);
+    c.querySelectorAll(".tip").forEach(function(t){ t.remove(); });
+    return c.textContent.replace(/\s+/g," ").trim();
+  }
+
+  function render(){
+    var p = parts();
+    var titles = p.secs.map(titleOf);
+
+    var chips = titles.map(function(t,i){
+      return '<button class="secchip" data-s="' + i + '" aria-pressed="' + (i===SEC) + '">' +
+        '<em>' + String(i+1).padStart(2,"0") + '</em>' + t + '</button>';
+    }).join("");
+
+    var navrow = document.getElementById("navrow");
+    if (VARIANT === "B") {
+      navrow.hidden = false;
+      document.getElementById("navrow-in").innerHTML = titles.map(function(t,i){
+        return '<button role="tab" data-s="' + i + '" aria-selected="' + (i===SEC) + '">' + t + '</button>';
+      }).join("");
+    } else {
+      navrow.hidden = true;
+    }
+
+    /* The section keeps its own heading in variant A, because the chip row is a
+       control rather than a title. In B the nav row names it, so the heading
+       would say the same thing twice. */
+    var body = p.secs[SEC];
+    if (VARIANT === "B") {
+      var h = body.querySelector(".section-h");
+      if (h) h.remove();
+      body.classList.add("bare");
+    }
+
+    document.getElementById("panel").innerHTML =
+      p.legend +
+      (VARIANT === "A" ? '<div class="secchips">' + chips + '</div>' : '') +
+      '<div class="secwrap">' + body.outerHTML + '</div>';
+
+    document.querySelectorAll("[data-s]").forEach(function(b){
+      b.addEventListener("click", function(){ SEC = +b.dataset.s; render(); });
+    });
+    document.querySelectorAll("[data-modal]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal);
+      });
+    });
+  }
+
+  var overlay = document.getElementById("overlay");
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
+    overlay.classList.add("on");
+    document.getElementById("modal-x").focus();
+  }
+  document.getElementById("modal-x").addEventListener("click", function(){ overlay.classList.remove("on"); });
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) overlay.classList.remove("on"); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") overlay.classList.remove("on"); });
+
+  document.querySelectorAll("[data-v]").forEach(function(b){
+    b.addEventListener("click", function(){
+      VARIANT = b.dataset.v;
+      document.querySelectorAll("[data-v]").forEach(function(x){
+        x.setAttribute("aria-pressed", String(x.dataset.v === VARIANT));
+      });
+      render(); window.scrollTo(0,0);
+    });
+  });
+
+  var chromeEl = document.querySelector(".chrome");
+  new ResizeObserver(function(){
+    document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
+  }).observe(chromeEl);
+
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY, on = document.body.classList.contains("scrolled");
+      if (!on && y > 70) document.body.classList.add("scrolled");
+      else if (on && y < 20) document.body.classList.remove("scrolled");
+      ticking = false;
+    });
+  }, { passive: true });
+
+  render();
+</script>

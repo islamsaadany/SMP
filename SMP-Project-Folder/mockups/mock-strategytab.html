@@ -1,0 +1,339 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Strategy — Foundation, SWOT and Plan under one tab</title>
+<style>
+:root{
+  --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+  --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --r:2px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.mocktop{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}
+.mocktop b{color:var(--gold)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 30px 70px}
+.screenlab{display:flex;align-items:baseline;gap:12px;margin:38px 0 6px;flex-wrap:wrap}
+.screenlab b{font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);
+  background:#FBF6E9;border:1px solid #E8D9AE;border-radius:20px;padding:5px 10px;white-space:nowrap}
+.screenlab span{font:400 19px/1.3 var(--serif)}
+.why-s{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:86ch}
+
+.nav.sub{background:var(--stone-soft);display:flex;gap:18px;padding:0 16px;align-items:center;flex-wrap:wrap}
+.nav.sub button{background:none;border:0;color:#C3CEE0;font:inherit;font-size:13.5px;padding:11px 3px;
+  border-bottom:2px solid transparent;cursor:default}
+.nav.sub button.on{color:#fff;font-weight:600;border-bottom-color:var(--gold)}
+.nav.sub .cyc{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:11.5px;color:#C3CEE0;padding:6px 0}
+.nav.sub .cyc .dot{width:7px;height:7px;border-radius:99px;background:var(--gold)}
+.nav.third{background:var(--surface-2);display:flex;gap:16px;padding:0 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.nav.third button{background:none;border:0;color:var(--ink-3);font:inherit;font-size:13px;padding:9px 3px;
+  border-bottom:2px solid transparent;cursor:default}
+.nav.third button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--stone-soft)}
+.nav.third .edit{margin-left:auto;padding:5px 0}
+.shell{border:1px solid var(--line);border-radius:var(--r);background:var(--ground);overflow:hidden}
+.shell .body{padding:18px 20px 22px}
+.kv{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin:0 0 14px}
+.kv h2{font:400 21px/1.2 var(--serif);margin:0}
+.kv .who{color:var(--ink-3);font-size:13px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+  padding:3px 8px;border-radius:99px;white-space:nowrap}
+.pill.kind{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.pill.good{background:var(--good-bg);color:var(--good)}
+h4.mini{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  margin:18px 0 8px}
+h4.mini em{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0;font-size:12px}
+
+.clause{display:grid;grid-template-columns:120px 1fr;gap:10px 14px;padding:9px 0;
+  border-bottom:1px solid var(--line-soft)}
+.clause:last-child{border-bottom:0}
+.clause b{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  padding-top:3px}
+.asp{border-left:3px solid var(--gold);background:#FBF6E9;padding:14px 18px;border-radius:0 var(--r) var(--r) 0}
+.asp p{margin:0;font:400 16px/1.5 var(--serif)}
+.asp .lab{font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--gold-deep);
+  font-weight:700;display:block;margin-bottom:5px}
+
+.swotgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:820px){.swotgrid{grid-template-columns:1fr}}
+.swotbox{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.swotbox .sh{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:9px}
+.swotbox .sh b{font-size:11px;letter-spacing:.11em;text-transform:uppercase;font-weight:700}
+.swotbox .sh span{font-size:11.5px;color:var(--ink-3)}
+.swotbox.s .sh{background:var(--good-bg)} .swotbox.s .sh b{color:var(--good)}
+.swotbox.w .sh{background:var(--bad-bg)} .swotbox.w .sh b{color:var(--bad)}
+.swotbox.o .sh{background:var(--attn-bg)} .swotbox.o .sh b{color:var(--attn)}
+.swotbox.t .sh{background:var(--warn-bg)} .swotbox.t .sh b{color:var(--warn)}
+.swotbox ol{margin:0;padding:10px 16px 14px 34px;font-size:13.5px}
+.swotbox li{margin:6px 0}
+
+.split{display:grid;grid-template-columns:236px 1fr;gap:16px;align-items:start}
+.rail{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden;
+  position:sticky;top:12px}
+.rail .rhead{background:var(--panel);color:var(--panel-ink);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;padding:9px 14px;display:flex;justify-content:space-between;gap:8px}
+.rail .rhead span{color:rgba(255,255,255,.65);font-weight:400}
+.rail a{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
+  padding:11px 14px 11px 11px;border-bottom:1px solid var(--line-soft);text-decoration:none;color:inherit;
+  border-left:3px solid transparent}
+.rail a:last-of-type{border-bottom:0}
+.rail a b{font-size:13px;font-weight:500;line-height:1.35}
+.rail a .rsub{grid-column:1/-1;font-size:11px;color:var(--ink-3);margin-top:2px}
+.rail a .rnum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink-3)}
+.rail a.on{background:var(--surface-2);border-left-color:var(--gold)}
+.rail a.on b{font-weight:700}
+.rail .rfoot{padding:9px 14px;border-top:1px solid var(--line);background:var(--surface-2);
+  font-size:11.5px;color:var(--ink-3)}
+.pane{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:16px 18px 20px}
+.pane .ptitle{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;
+  padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+.pane .ptitle h3{font:400 19px/1.25 var(--serif);margin:0}
+.pane .ptitle .pmeta{color:var(--ink-3);font-size:12.5px;margin-top:3px}
+.planonly{font-size:12.5px;color:var(--ink-3);margin:10px 0 0}
+.planonly b{color:var(--gold-deep);letter-spacing:.09em;text-transform:uppercase;font-size:10.5px}
+
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  background:var(--panel);color:var(--panel-ink);border-bottom:0;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) > td{background:#F7F9FC}
+th.cc,td.cc{text-align:center}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:center}
+th.idx,td.idx{width:36px;text-align:center;font-family:var(--mono);color:var(--ink-3);font-size:12px}
+.why{display:block;font-size:12px;color:var(--ink-3);margin-top:3px}
+.qs{display:inline-flex;gap:3px}
+.qs i{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;
+  border:1px solid var(--line);border-radius:2px;font-style:normal;font-size:9.5px;color:var(--none);
+  font-family:var(--mono)}
+.qs i.on{background:var(--stone-soft);border-color:var(--stone-soft);color:#fff}
+.editbtn{font:inherit;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:6px 13px;border:1px solid var(--gold);background:#FBF6E9;color:var(--gold-deep);
+  border-radius:var(--r);cursor:default}
+
+.note{border-left:3px solid var(--gold);background:var(--surface-2);padding:12px 16px;margin:18px 0;
+  font-size:13.5px;color:var(--ink-2);border-radius:0 var(--r) var(--r) 0}
+.note b{color:var(--ink)}
+.note.ask{border-left-color:var(--stone-soft);background:#EEF2F8}
+.note.warn-note{border-left-color:var(--warn);background:var(--warn-bg)}
+.note ul{margin:8px 0 0;padding-left:18px}
+.note li{margin:6px 0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+@media (max-width:860px){.opts{grid-template-columns:1fr}}
+.opt{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.opt .oh{padding:11px 15px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:9px}
+.opt .oh b{font:400 15px/1.2 var(--serif)}
+.opt .oh span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);font-weight:700}
+.opt .ob{padding:12px 15px;font-size:13px;color:var(--ink-2)}
+.opt ul{margin:8px 0 0;padding-left:17px}.opt li{margin:5px 0}
+hr.sep{border:0;border-top:1px solid var(--line);margin:44px 0 0}
+</style></head><body>
+
+<div class="mocktop">Mockup — <b>the Strategy tab</b>: Foundation, SWOT and Plan under one heading.
+Mobile's real content throughout. Nothing here is built.</div>
+
+<div class="wrap">
+
+<div class="screenlab"><b>Screen 1</b><span>Strategy &rarr; Foundation</span></div>
+<p class="why-s">The unit in its own words, and the objectives it is judged on. Unchanged in content from
+the Foundation page today — it has moved one level down, not been rebuilt.</p>
+
+<div class="shell">
+  <div class="nav sub"><button>Performance</button><button class="on">Strategy</button>
+    <span class="cyc"><span class="dot"></span>Q2 2026 open &middot; due 15 Jul</span></div>
+  <div class="nav third"><button class="on">Foundation</button><button>SWOT</button><button>Plan</button>
+    <span class="edit"><button class="editbtn">Edit</button></span></div>
+
+  <div class="body">
+    <div class="kv"><h2>Mobile</h2><span class="who">Business unit &middot; Ashraf Laithy</span></div>
+
+    <div class="card">
+      <h4 class="mini" style="margin-top:0">Who we are</h4>
+      <div class="clause"><b>We are</b><span>consumer electronics distribution company</span></div>
+      <div class="clause"><b>We provide</b><span>distribution services (account management, logistics services, product management)</span></div>
+      <div class="clause"><b>For</b><span>e-commerce, retail, operators, hyper markets, IR and OR</span></div>
+      <div class="clause"><b>All Overall</b><span>Egypt</span></div>
+      <div class="clause"><b>We facilitate</b><span>sell-in, end to end distribution services (logistics cycle, collection)</span></div>
+      <div class="clause"><b>Using</b><span>end to end distribution services to both vendor &amp; channel</span></div>
+    </div>
+
+    <h4 class="mini">Aspiration</h4>
+    <div class="asp"><span class="lab">Aspiration</span>
+      <p>To be the biggest and most diversified distributor in local market through the most developed and
+      advanced tech systems — positioned as one of the recognized regional distributors for consumer
+      electronics.</p></div>
+
+    <h4 class="mini">End in mind</h4>
+    <div class="asp" style="border-left-color:var(--stone-soft);background:#EEF2F8">
+      <span class="lab" style="color:var(--stone-soft)">End in mind</span>
+      <p>To be positioned as one of the recognized regional distributors for consumer electronics</p></div>
+
+    <h4 class="mini">Key objectives <em>— what Performance scores this unit on</em></h4>
+    <div class="scroll"><table>
+      <thead><tr><th class="idx">#</th><th>Objective</th><th class="cc">Dir.</th><th class="cc">This year</th>
+        <th class="cc">3-year</th><th class="cc">Compiled</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Distribution revenue</td><td class="cc">&ge;</td>
+          <td class="num">6.2B EGP</td><td class="num">9.0B EGP</td><td class="cc">Sum</td></tr>
+        <tr><td class="idx">2</td><td>Mobile market share</td><td class="cc">&ge;</td>
+          <td class="num">32%</td><td class="num">38%</td><td class="cc">Latest</td></tr>
+        <tr><td class="idx">3</td><td>Active merchant reach</td><td class="cc">&ge;</td>
+          <td class="num">4,500</td><td class="num">6,500</td><td class="cc">Latest</td></tr>
+        <tr><td class="idx">4</td><td>App coverage rate</td><td class="cc">&ge;</td>
+          <td class="num">50%</td><td class="num">75%</td><td class="cc">Latest</td></tr>
+      </tbody></table></div>
+    <p class="planonly"><b>Plan only</b> &nbsp;No reported figure appears anywhere under Strategy. What these
+    objectives currently read is on Performance.</p>
+  </div>
+</div>
+
+<div class="screenlab"><b>Screen 2</b><span>Strategy &rarr; SWOT</span></div>
+<p class="why-s">Four lists, no rail — there is nothing to move between. The band colours are the platform's
+own: strengths read as good, weaknesses as bad, opportunities and threats as the two middle bands.</p>
+
+<div class="shell">
+  <div class="nav sub"><button>Performance</button><button class="on">Strategy</button>
+    <span class="cyc"><span class="dot"></span>Q2 2026 open &middot; due 15 Jul</span></div>
+  <div class="nav third"><button>Foundation</button><button class="on">SWOT</button><button>Plan</button>
+    <span class="edit"><button class="editbtn">Edit</button></span></div>
+
+  <div class="body">
+    <div class="swotgrid">
+      <div class="swotbox s"><div class="sh"><b>Strengths</b><span>6</span></div>
+        <ol><li>Strong brand equity (Raya &amp; i2)</li><li>Diversified &amp; strong brand portfolio</li>
+          <li>Over 90% of revenue from local manufacturing</li><li>Nationwide distribution &amp; retail reach</li>
+          <li>Integrated Raya Trade ecosystem</li><li>Access to multi-source data</li></ol></div>
+      <div class="swotbox w"><div class="sh"><b>Weaknesses</b><span>5</span></div>
+        <ol><li>Limited control over the value chain</li><li>Low margin on devices</li>
+          <li>Multiple systems across Raya Trade business units</li>
+          <li>Underutilisation of available automation systems</li>
+          <li>Underdeveloped presence in accessories market</li></ol></div>
+      <div class="swotbox o"><div class="sh"><b>Opportunities</b><span>6</span></div>
+        <ol><li>Growth in accessories and wearables market</li><li>Local manufacturing expansion</li>
+          <li>Migration of 3G user base</li><li>Regional expansion using a scalable proven model</li>
+          <li>Dubai free zone multi-branded concept</li><li>Unlocking value through AI &amp; data</li></ol></div>
+      <div class="swotbox t"><div class="sh"><b>Threats</b><span>6</span></div>
+        <ol><li>Direct-to-market strategies by vendors</li><li>Margin pressure (global trend)</li>
+          <li>Grey market competition on accessories</li><li>Economic pressure on consumption</li>
+          <li>Global supply chain disruption</li><li>Irrational competition</li></ol></div>
+    </div>
+  </div>
+</div>
+
+<div class="screenlab"><b>Screen 3</b><span>Strategy &rarr; Plan</span></div>
+<p class="why-s">The rail, without the Direction and Capability headings — the kind is on the item itself and
+splitting a four-item rail bought nothing. Targets, horizons, owners and quarters. No reported figure.</p>
+
+<div class="shell">
+  <div class="nav sub"><button>Performance</button><button class="on">Strategy</button>
+    <span class="cyc"><span class="dot"></span>Q2 2026 open &middot; due 15 Jul</span></div>
+  <div class="nav third"><button>Foundation</button><button>SWOT</button><button class="on">Plan</button>
+    <span class="edit"><button class="editbtn">Edit</button></span></div>
+
+  <div class="body">
+    <div class="split">
+      <div class="rail">
+        <div class="rhead">Items <span>4</span></div>
+        <a><b>01&nbsp; Digital &amp; Data-Driven Operations</b><span class="rnum">4</span>
+          <span class="rsub">Capability &middot; 5 tactics &middot; Ramy Behairy</span></a>
+        <a class="on"><b>02&nbsp; Channel Preference &amp; Development</b><span class="rnum">4</span>
+          <span class="rsub">Direction &middot; 4 tactics &middot; Mohamed Rizk</span></a>
+        <a><b>03&nbsp; Portfolio &amp; Value Chain Expansion</b><span class="rnum">8</span>
+          <span class="rsub">Direction &middot; 7 tactics &middot; Karim</span></a>
+        <a><b>04&nbsp; Asset-Light Model Regional Expansion</b><span class="rnum">7</span>
+          <span class="rsub">Direction &middot; 6 tactics &middot; Abdelhamid</span></a>
+        <div class="rfoot">Figure shown is key measures</div>
+      </div>
+
+      <div class="pane">
+        <div class="ptitle"><div><h3>02&nbsp; Channel Preference &amp; Development</h3>
+          <div class="pmeta">Direction &middot; theme OT &middot; Mohamed Rizk</div></div>
+          <span class="pill kind">Direction</span></div>
+        <p class="planonly"><b>Plan only</b> &nbsp;Nothing here has been reported. Actuals are entered on
+        Performance while a cycle is open.</p>
+
+        <h4 class="mini">Key measures <em>— target, horizon, how it compiles</em></h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>
+            <th class="cc">3-year</th><th class="cc">Compiled</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Average delivery time</td><td class="cc">&le;</td>
+              <td class="num">24 h</td><td class="num">&mdash;</td><td class="cc">Latest</td></tr>
+            <tr><td class="idx">2</td><td>Key retailer revenue growth</td><td class="cc">&ge;</td>
+              <td class="num">50%</td><td class="num">&mdash;</td><td class="cc">Sum</td></tr>
+            <tr><td class="idx">3</td><td>Tier 2 merchants enrolled</td><td class="cc">&ge;</td>
+              <td class="num">100</td><td class="num">&mdash;</td><td class="cc">Latest</td></tr>
+            <tr><td class="idx">4</td><td>Tier 2 segment revenue growth</td><td class="cc">&ge;</td>
+              <td class="num">100%</td><td class="num">&mdash;</td><td class="cc">Sum</td></tr>
+          </tbody></table></div>
+
+        <h4 class="mini">Tactics <em>— who carries it, and in which quarters</em></h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Tactic</th><th class="cc">Owner</th><th class="cc">Quarters</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Retailer preference index workshop</td><td class="cc">Karim</td>
+              <td class="cc"><span class="qs"><i>1</i><i class="on">2</i><i class="on">3</i><i>4</i></span></td></tr>
+            <tr><td class="idx">2</td><td>Joint business planning with key retailers</td><td class="cc">Mohamed Rizk</td>
+              <td class="cc"><span class="qs"><i>1</i><i class="on">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+            <tr><td class="idx">3</td><td>Tier 2 growth acceleration programme</td><td class="cc">Ashraf Laithy</td>
+              <td class="cc"><span class="qs"><i>1</i><i class="on">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+            <tr><td class="idx">4</td><td>Channel intelligence engine (pilot)</td><td class="cc">Karim</td>
+              <td class="cc"><span class="qs"><i>1</i><i class="on">2</i><i class="on">3</i><i class="on">4</i></span></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="note"><b>One Edit button, not three.</b> Foundation, SWOT and Plan are all the plan, and today
+each carries its own edit bar. Under one tab they should share one — you enter edit mode for the strategy,
+not for a page of it. That also stops the odd case where someone edits the SWOT, moves to Foundation, and
+finds themselves reading again.</div>
+
+<div class="note ask"><b>Two decisions this raises.</b>
+  <ul>
+    <li><b>Which subtab opens first.</b> Drawn as Foundation, in the order you gave. But Foundation and SWOT
+      are read rarely and Plan is what people return to, so opening on <b>Plan</b> would serve the common
+      case. The cost is that the tab you land on is not the first tab, which is mildly odd the first time
+      and invisible after that. I would take Plan; the order stays Foundation, SWOT, Plan because it reads
+      as a narrative — who we are, where we stand, what we will do.</li>
+    <li><b>Key objectives appear twice.</b> They are authored on Foundation and they are also the top of the
+      Plan. Drawn here on Foundation only, with Plan starting at the items. The alternative is to move them
+      to Plan and leave Foundation as pure identity — cleaner in one way, but then the thing a unit is
+      judged on is not on the page that says what the unit is.</li>
+  </ul></div>
+
+<div class="note warn-note"><b>What Strategy costs as a container.</b> Foundation and SWOT go from one click
+to two. They are read rarely, so this is probably the right trade — but whoever maintains them will feel it
+every time, and they are also the pages a new unit head reads first.</div>
+
+<div class="opts">
+  <div class="opt"><div class="oh"><span>Take both</span><b>Two tabs, and Strategy as drawn</b></div>
+    <div class="ob">Performance with Report folded in, Strategy holding all three.
+      <ul><li>The top row becomes one question: how is it going, or what did we agree.</li>
+        <li>One edit mode for the whole strategy.</li>
+        <li>Capabilities should change with it — Report folded into Performance, Projects renamed Strategy —
+          or the two halves diverge.</li></ul></div></div>
+  <div class="opt"><div class="oh"><span>Take one</span><b>Strategy only, leave Reporting alone</b></div>
+    <div class="ob">Three tabs: Performance, Strategy, Reporting.
+      <ul><li>Smaller change. Reporting stays a page, which is what the capability side already does, so the
+        two halves keep matching with no further work.</li>
+        <li>Loses the argument that a dead tab should not hold a permanent seat.</li></ul></div></div>
+</div>
+
+<hr class="sep">
+
+<div class="note"><b>Data honesty.</b> Everything on this page is <b>real</b> — Mobile's clauses, aspiration,
+end in mind, key objectives with their targets and horizons, the full SWOT, and item 02's measures, tactics,
+owners and quarter flags are the platform's own data. Only the cycle dates in the header are invented.</div>
+
+</div></body></html>

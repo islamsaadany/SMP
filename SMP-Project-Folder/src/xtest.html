@@ -1,0 +1,20 @@
+<script>
+window.RESULT = (async function(){
+  var out = { decompression: typeof DecompressionStream !== "undefined",
+              compression: typeof CompressionStream !== "undefined" };
+  if (out.decompression) {
+    try {
+      var raw = new TextEncoder().encode("hello xlsx world");
+      var cs = new CompressionStream("deflate-raw");
+      var w = cs.writable.getWriter(); w.write(raw); w.close();
+      var packed = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+      var ds = new DecompressionStream("deflate-raw");
+      var w2 = ds.writable.getWriter(); w2.write(packed); w2.close();
+      var back = await new Response(ds.readable).text();
+      out.roundTrip = back === "hello xlsx world";
+      out.packedBytes = packed.length;
+    } catch (e) { out.error = String(e); }
+  }
+  return out;
+})();
+</script>

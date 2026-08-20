@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reporting cycle — concept</title>
+<style>
+  :root{
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --r:2px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px 80px}
+  .top{background:var(--panel);color:var(--panel-ink);padding:26px 0 24px;margin-bottom:36px}
+  .top .wrap{padding-bottom:0}
+  .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);font-weight:700}
+  .top h1{font:400 30px/1.2 var(--serif);margin:8px 0 6px}
+  .top p{margin:0;color:#C3CEE0;max-width:70ch;font-size:14px}
+  h2.sec{font:400 23px/1.25 var(--serif);margin:0 0 4px}
+  .lede{color:var(--ink-2);margin:0 0 20px;max-width:76ch;font-size:14px}
+  section{margin:0 0 52px}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .muted{color:var(--ink-3);font-size:12px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+  .cardhead{display:flex;align-items:baseline;justify-content:space-between;gap:14px;
+    padding:18px 22px 14px;border-bottom:1px solid var(--line)}
+  .cardhead h3{font:400 18px/1.2 var(--serif);margin:0}
+  .pad{padding:20px 22px}
+  table{width:100%;border-collapse:collapse}
+  th{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+    text-align:left;font-weight:700;padding:9px 12px;background:var(--surface-2);
+    border-bottom:1px solid var(--line)}
+  td{padding:11px 12px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  th.c,td.c{text-align:center} th.r,td.r{text-align:right}
+  .badge{display:inline-block;font:700 10px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+    padding:5px 9px;border-radius:20px;white-space:nowrap}
+  .b-done{background:var(--good-bg);color:var(--good)}
+  .b-part{background:var(--attn-bg);color:var(--attn)}
+  .b-none{background:var(--surface-2);color:var(--none)}
+  .b-late{background:var(--bad-bg);color:var(--bad)}
+  .b-open{background:#FBF6E9;color:var(--gold-deep);border:1px solid #E8D9AE}
+  .btn{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    padding:8px 15px;border-radius:20px;border:1px solid var(--gold);color:var(--gold-deep);
+    background:none;cursor:pointer}
+  .btn.solid{background:var(--panel);border-color:var(--panel);color:#fff}
+  .btn.ghost{border-color:var(--line);color:var(--ink-3)}
+  .field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:110px;
+    border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface)}
+  .field.filled{border-color:var(--good);background:var(--good-bg)}
+  .note{border-left:3px solid var(--gold);background:#FBF6E9;padding:14px 18px;
+    font-size:13.5px;color:var(--ink-2);border-radius:0 var(--r) var(--r) 0}
+  .note b{color:var(--ink)}
+  .q{border:1px solid var(--line);border-left:3px solid var(--stone);background:var(--surface);
+    padding:16px 20px;border-radius:0 var(--r) var(--r) 0}
+  .q h4{margin:0 0 10px;font:400 16px/1.3 var(--serif)}
+  .q ol{margin:0;padding-left:20px}
+  .q li{margin:8px 0;font-size:13.5px;color:var(--ink-2)}
+  .q li b{color:var(--ink)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:820px){.two{grid-template-columns:1fr}}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:2px;
+    background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .step{background:var(--surface);padding:16px 18px}
+  .step b{display:block;font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--gold-deep);margin-bottom:8px}
+  .step h4{margin:0 0 5px;font:400 16px/1.25 var(--serif)}
+  .step p{margin:0;font-size:12.5px;color:var(--ink-3);line-height:1.55}
+  .bar{height:6px;background:var(--surface-2);border-radius:20px;overflow:hidden;min-width:120px}
+  .bar i{display:block;height:100%;background:var(--good)}
+  .bar.part i{background:var(--attn)}
+  .grouphead{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+    font-weight:700;padding:13px 12px 7px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+  .delta{font-family:var(--mono);font-size:11.5px;margin-left:7px}
+  .up{color:var(--good)} .down{color:var(--bad)}
+  .kpi{display:flex;align-items:baseline;gap:8px}
+  .kpi b{font:400 30px/1 var(--serif)}
+</style></head>
+<body>
+
+<div class="top"><div class="wrap">
+  <div class="eyebrow">Strategy Management Platform · concept</div>
+  <h1>The reporting cycle</h1>
+  <p>The SMO opens a window, it becomes a request sitting with each unit's owner, they report
+     in the platform, and closing it snapshots everything. Concept for review — not built.</p>
+</div></div>
+
+<div class="wrap">
+
+<section>
+  <h2 class="sec">Why this one first</h2>
+  <p class="lede">Today the platform can render any moment beautifully and knows nothing about time.
+     A CEO seeing 66% cannot tell whether that is up from 58 or down from 74 — which is the only
+     thing a CEO actually asks. <b>Closing a cycle is what writes history</b>, and history is what
+     lets every other screen carry a delta.</p>
+
+  <div class="steps">
+    <div class="step"><b>1 · Open</b><h4>The SMO sets the window</h4>
+      <p>A span and a due date. Every unit's owner receives a request naming exactly what is
+         expected of them.</p></div>
+    <div class="step"><b>2 · Report</b><h4>Owners enter their numbers</h4>
+      <p>One screen, only their own items, only what is due. Save as you go; submit when done.</p></div>
+    <div class="step"><b>3 · Chase</b><h4>The SMO watches completeness</h4>
+      <p>Who has reported, who is partial, who has not started. The chasing is the SMO's real job
+         between reviews, and today the platform cannot even say who is late.</p></div>
+    <div class="step"><b>4 · Close</b><h4>Everything is snapshotted</h4>
+      <p>The figures freeze against this cycle. From the second cycle onward, every score can show
+         what it was last time.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">1 · Opening a cycle</h2>
+  <p class="lede">Setup, SMO only. A cycle covers a span — a quarter, a half, a month — and the span
+     is what decides which tactics are in scope. Opening it is what turns a plan into a request.</p>
+
+  <div class="two">
+    <div class="card">
+      <div class="cardhead"><h3>New reporting cycle</h3><span class="muted">SMO</span></div>
+      <div class="pad">
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:12px 16px;align-items:center">
+          <span class="muted">Name</span><span><input class="field" style="width:150px;text-align:left" value="H2 2026"></span>
+          <span class="muted">Covers</span>
+          <span><input class="field" style="width:110px" value="Jul 2026"> <span class="muted">to</span>
+                <input class="field" style="width:110px" value="Dec 2026"></span>
+          <span class="muted">Reports due</span><span><input class="field" style="width:130px" value="15 Jan 2027"></span>
+          <span class="muted">Asks</span><span class="muted">all 10 business units</span>
+        </div>
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line-soft)">
+          <div class="muted" style="margin-bottom:8px">What this will ask for</div>
+          <table><tbody>
+            <tr><td>Key Objectives</td><td class="r num">38</td><td class="muted">every unit's scorecard</td></tr>
+            <tr><td>Key measures</td><td class="r num">76</td><td class="muted">those carrying a target</td></tr>
+            <tr><td>Tactics</td><td class="r num">68</td><td class="muted">active in this span</td></tr>
+            <tr><td style="color:var(--ink-3)">Excluded</td><td class="r num" style="color:var(--ink-3)">10</td>
+                <td class="muted">tactics whose quarters fall outside it</td></tr>
+          </tbody></table>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:10px">
+          <button class="btn solid">Open the cycle</button>
+          <button class="btn ghost">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="note"><b>Opening locks the plan.</b> Targets, tactics and quarter flags stop being
+        editable for the span of the cycle. A number reported against a target that can still move
+        is not a report — it is a negotiation. Focus marks lock at the same moment, for the same
+        reason.</div>
+      <div style="height:16px"></div>
+      <div class="q">
+        <h4>What the span decides</h4>
+        <p style="margin:0 0 8px;font-size:13.5px;color:var(--ink-2)">The cycle's end sets
+          <b>as-of</b>, which is what <i>should be delivered by now</i> is measured from. Today that
+          is a constant of 2 sitting in the data.</p>
+        <p style="margin:0;font-size:13.5px;color:var(--ink-2)">A tactic marked Q3–Q4 is
+          <b>not yet due</b> in an H1 cycle and simply is not asked for. It appears in the H2 request
+          instead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">2 · The owner's screen</h2>
+  <p class="lede">The one screen that does not exist today, and the reason the platform is currently
+     a publishing tool rather than a management one. Mennah opens it and sees her own items and
+     nothing else — no other unit, no configuration, no plan editing.</p>
+
+  <div class="card">
+    <div class="cardhead">
+      <h3>My reporting <span class="muted" style="font-weight:400">— Mobile · H2 2026</span></h3>
+      <span class="muted">due 15 Jan 2027 · 9 days left</span>
+    </div>
+    <div class="pad" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+                            border-bottom:1px solid var(--line)">
+      <div class="kpi"><b>12</b><span class="muted">of 41 reported</span></div>
+      <div class="bar part" style="flex:1;max-width:280px"><i style="width:29%"></i></div>
+      <button class="btn" style="margin-left:auto">Save</button>
+      <button class="btn solid">Submit to the SMO</button>
+    </div>
+
+    <div class="grouphead">Key Objectives · 4</div>
+    <table><tbody>
+      <tr><td style="width:34%">Mobile market share</td>
+        <td class="muted">target 32%</td>
+        <td class="muted">last reported 28%</td>
+        <td class="r"><input class="field filled" value="31%"></td></tr>
+      <tr><td>Distribution revenue</td>
+        <td class="muted">target 6.2B EGP</td>
+        <td class="muted">last reported 3.1B</td>
+        <td class="r"><input class="field" placeholder="—"></td></tr>
+    </tbody></table>
+
+    <div class="grouphead">MB01 Digital &amp; Data-Driven Operations · 4 measures, 5 tactics</div>
+    <table><tbody>
+      <tr><td style="width:34%">Data duplicate rate</td>
+        <td class="muted">target 1%</td><td class="muted">last reported 1.4%</td>
+        <td class="r"><input class="field filled" value="1.1%"></td></tr>
+      <tr><td>Orders processed digitally</td>
+        <td class="muted">target 90%</td><td class="muted">last reported 48%</td>
+        <td class="r"><input class="field" placeholder="—"></td></tr>
+      <tr><td>Clean and standardise customer and SKU base
+              <span class="muted" style="display:block">tactic · Q2–Q3 · due at 100%</span></td>
+        <td class="muted">Ramy Behairy</td><td class="muted">last reported 45%</td>
+        <td class="r"><input class="field filled" value="70"></td></tr>
+      <tr><td style="color:var(--ink-3)">Data integration across business units
+              <span class="muted" style="display:block">tactic · Q3–Q4</span></td>
+        <td colspan="2" class="muted">not in this cycle</td>
+        <td class="r"><span class="badge b-none">Not asked</span></td></tr>
+    </tbody></table>
+
+    <div class="pad" style="border-top:1px solid var(--line);background:var(--surface-2)">
+      <span class="muted">Saving keeps a draft. <b>Submit</b> tells the SMO you are done — after that
+        the SMO can reopen it for you, but you cannot change it silently.</span>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+  <div class="two">
+    <div class="note"><b>Only what is due is asked for.</b> A tactic outside the span shows as
+      <i>not asked</i> rather than sitting there as an empty box that looks like a chore
+      somebody forgot.</div>
+    <div class="note"><b>Blank is not zero.</b> An unfilled row stays unreported at close — it does
+      not become a nil return. The platform's oldest rule, and the one most likely to be broken by
+      a form.</div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">3 · What the SMO watches</h2>
+  <p class="lede">Chasing is the SMO's real job between reviews. Today the platform cannot say who is
+     late, which is why chasing happens in email and the platform is not where the cycle lives.</p>
+
+  <div class="card">
+    <div class="cardhead">
+      <h3>H2 2026 <span class="muted" style="font-weight:400">— open, due 15 Jan</span></h3>
+      <div style="display:flex;gap:10px"><button class="btn">Nudge everyone late</button>
+        <button class="btn solid">Close the cycle</button></div>
+    </div>
+    <table>
+      <thead><tr><th>Unit</th><th>Owner</th><th style="width:22%">Reported</th>
+        <th class="c">Objectives</th><th class="c">Measures</th><th class="c">Tactics</th>
+        <th class="c">State</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><b>Retail Stores</b></td><td class="muted">Dalia Sabry</td>
+          <td><div style="display:flex;align-items:center;gap:9px"><div class="bar" style="flex:1"><i style="width:100%"></i></div><span class="num muted">31/31</span></div></td>
+          <td class="c num">4/4</td><td class="c num">11/11</td><td class="c num">16/16</td>
+          <td class="c"><span class="badge b-done">Submitted</span></td><td></td></tr>
+        <tr><td><b>Care</b></td><td class="muted">Rania Fahmy</td>
+          <td><div style="display:flex;align-items:center;gap:9px"><div class="bar" style="flex:1"><i style="width:100%"></i></div><span class="num muted">18/18</span></div></td>
+          <td class="c num">4/4</td><td class="c num">6/6</td><td class="c num">8/8</td>
+          <td class="c"><span class="badge b-done">Submitted</span></td><td></td></tr>
+        <tr><td><b>Mobile</b></td><td class="muted">Mennah Farouk</td>
+          <td><div style="display:flex;align-items:center;gap:9px"><div class="bar part" style="flex:1"><i style="width:29%"></i></div><span class="num muted">12/41</span></div></td>
+          <td class="c num">1/4</td><td class="c num">6/19</td><td class="c num">5/18</td>
+          <td class="c"><span class="badge b-part">In progress</span></td>
+          <td class="r"><button class="btn ghost">Nudge</button></td></tr>
+        <tr><td><b>Consumer Electronics</b></td><td class="muted">Heba Salem</td>
+          <td><div style="display:flex;align-items:center;gap:9px"><div class="bar part" style="flex:1"><i style="width:8%"></i></div><span class="num muted">2/24</span></div></td>
+          <td class="c num">0/4</td><td class="c num">2/9</td><td class="c num">0/11</td>
+          <td class="c"><span class="badge b-part">In progress</span></td>
+          <td class="r"><button class="btn ghost">Nudge</button></td></tr>
+        <tr><td><b>Nigeria</b></td><td class="muted">Amaka Eze</td>
+          <td><div style="display:flex;align-items:center;gap:9px"><div class="bar" style="flex:1"></div><span class="num muted">0/14</span></div></td>
+          <td class="c num">0/4</td><td class="c num">0/5</td><td class="c num">0/5</td>
+          <td class="c"><span class="badge b-late">Not started</span></td>
+          <td class="r"><button class="btn ghost">Nudge</button></td></tr>
+      </tbody>
+    </table>
+    <div class="pad" style="border-top:1px solid var(--line);background:var(--surface-2)">
+      <span class="muted"><b class="num">63 of 218</b> items reported across 10 units &middot;
+        2 submitted &middot; 7 in progress &middot; 1 not started</span>
+    </div>
+  </div>
+
+  <div style="height:18px"></div>
+  <div class="note"><b>The SMO can close with gaps.</b> Waiting for every last number means never
+    closing, and a cycle that never closes writes no history. Unreported items close as unreported
+    — visible as such forever, which is a stronger prompt than a reminder email.</div>
+</section>
+
+<section>
+  <h2 class="sec">4 · What closing produces</h2>
+  <p class="lede">The whole point. Every figure freezes against the cycle, and from the second cycle
+     onward every score can say what it was last time — on the group figure, on each unit card, on
+     every measure.</p>
+
+  <div class="two">
+    <div class="card">
+      <div class="cardhead"><h3>Group</h3><span class="muted">after H2 closes</span></div>
+      <div class="pad">
+        <div class="kpi"><b style="color:var(--attn)">71<span style="font-size:17px">%</span></b>
+          <span class="delta up">▲ 5 vs H1</span></div>
+        <div class="muted" style="margin-top:6px">Business units performance</div>
+        <div style="height:16px"></div>
+        <table><tbody>
+          <tr><td>Mobile</td><td class="r num">64%</td><td class="r"><span class="delta up">▲ 4</span></td></tr>
+          <tr><td>Retail Stores</td><td class="r num">81%</td><td class="r"><span class="delta down">▼ 5</span></td></tr>
+          <tr><td>Care</td><td class="r num">77%</td><td class="r"><span class="delta up">▲ 11</span></td></tr>
+          <tr><td>Nigeria</td><td class="r num">—</td><td class="r muted">not reported</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div>
+      <div class="q">
+        <h4>What a snapshot holds</h4>
+        <ol>
+          <li>Every actual and every derived score, as they stood at close.</li>
+          <li>The <b>target</b> each was judged against — already the platform's rule, now with
+            somewhere to live.</li>
+          <li>Which items were <b>unreported</b>, kept distinct from those reported as zero.</li>
+        </ol>
+      </div>
+      <div style="height:16px"></div>
+      <div class="note"><b>A closed cycle is read-only.</b> Reopening is possible and deliberate, and
+        it says so on the screen. A snapshot that can be quietly rewritten is not a record.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 class="sec">Decisions I need from you</h2>
+  <div class="two">
+    <div class="q">
+      <h4>On the shape</h4>
+      <ol>
+        <li><b>Does opening a cycle lock the plan?</b> Shown as yes — targets and quarter flags
+          freeze for the span. The alternative lets a unit adjust a target while reporting against it.</li>
+        <li><b>Submit, or continuous saving?</b> Shown as both: save a draft freely, submit once.
+          Submission is what lets the SMO tell <i>still working</i> from <i>finished and short</i>.</li>
+        <li><b>Can the SMO close with gaps?</b> Shown as yes, with unreported items closing as
+          unreported.</li>
+      </ol>
+    </div>
+    <div class="q">
+      <h4>On the reach</h4>
+      <ol>
+        <li><b>Who reports?</b> Shown as the unit's owner, with the head able to see it. Should the
+          head also be able to enter numbers?</li>
+        <li><b>Does the group unit report too</b> — its own Key Objectives and its eight capabilities
+          — or does the SMO enter those directly?</li>
+        <li><b>How many cycles a year?</b> The span is free, but the deltas read best against a
+          steady rhythm. Quarterly, or half-yearly as today?</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+</div>
+</body></html>

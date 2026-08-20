@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMP — Access</title>
+<style>
+  :root {
+    --navy: #0f2544;
+    --navy-light: #1b3a63;
+    --gold: #c9a227;
+    --gold-light: #e6c65c;
+    --bg: #f4f6f9;
+    --danger: #b3261e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(15, 37, 68, 0.15);
+    width: 100%;
+    max-width: 380px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--navy);
+    color: #fff;
+    padding: 28px 32px;
+    text-align: center;
+  }
+  .card-header h1 {
+    font-size: 28px;
+    letter-spacing: 2px;
+  }
+  .card-header h1 span { color: var(--gold-light); }
+  .card-header p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #c8d3e2;
+  }
+  .card-body { padding: 28px 32px 32px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .access-name {
+    background: var(--bg);
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 18px;
+  }
+  input[type="password"] {
+    width: 100%;
+    border: 1px solid #d8dee8;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+  }
+  input[type="password"]:focus { border-color: var(--gold); }
+  button {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: var(--navy-light); }
+  .error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  /* Starting page after access */
+  #home { display: none; text-align: center; }
+  #home .card-body p { color: #45536a; font-size: 15px; margin-bottom: 24px; }
+  .logout {
+    background: transparent;
+    color: var(--navy);
+    border: 1px solid var(--navy);
+  }
+  .logout:hover { background: var(--bg); }
+  .badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Login -->
+  <div class="card" id="login">
+    <div class="card-header">
+      <h1>S<span>M</span>P</h1>
+      <p>Sign in to continue</p>
+    </div>
+    <div class="card-body">
+      <form id="loginForm">
+        <label>Access</label>
+        <div class="access-name">AdminSMO</div>
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" autofocus>
+        <div class="error" id="error">Incorrect password. Please try again.</div>
+        <button type="submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Starting page -->
+  <div class="card" id="home">
+    <div class="card-header">
+      <h1>S<span>M</span>P</h1>
+      <p>Starting Page</p>
+    </div>
+    <div class="card-body">
+      <div class="badge">AdminSMO</div>
+      <p>Welcome! You are signed in.<br>The SMP modules will appear here.</p>
+      <button class="logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
+
+<script>
+  var ACCESS = { user: "AdminSMO", password: "4123" };
+
+  var loginCard = document.getElementById("login");
+  var homeCard = document.getElementById("home");
+  var errorEl = document.getElementById("error");
+  var passwordEl = document.getElementById("password");
+
+  function show(signedIn) {
+    loginCard.style.display = signedIn ? "none" : "block";
+    homeCard.style.display = signedIn ? "block" : "none";
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (passwordEl.value === ACCESS.password) {
+      sessionStorage.setItem("smp_access", ACCESS.user);
+      passwordEl.value = "";
+      errorEl.style.display = "none";
+      show(true);
+    } else {
+      errorEl.style.display = "block";
+      passwordEl.value = "";
+      passwordEl.focus();
+    }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    sessionStorage.removeItem("smp_access");
+    show(false);
+    passwordEl.focus();
+  });
+
+  // Keep the session across refreshes within the same tab.
+  show(sessionStorage.getItem("smp_access") === ACCESS.user);
+</script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Concept — Reporting</title>
+<style>
+  :root{
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --r:2px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans);
+       padding-bottom:96px}
+  .note-bar{background:var(--panel);color:var(--panel-ink);font-size:12px;
+            padding:9px 22px;letter-spacing:.02em}
+  .note-bar b{color:var(--gold)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ── who and when ── */
+  header.top{background:var(--surface);border-bottom:1px solid var(--line);padding:22px 0 0}
+  .idrow{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+  .eyebrow{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+           color:var(--ink-3);font-weight:700}
+  h1{font:400 27px/1.15 var(--serif);margin:5px 0 3px}
+  .sub{color:var(--ink-2);font-size:13px;margin:0}
+  .whoami{text-align:right;font-size:13px}
+  .whoami b{display:block;font-size:14px}
+  .whoami span{color:var(--ink-3);font-size:12px}
+  .due{display:inline-flex;align-items:center;gap:6px;margin-top:7px;
+       border:1px solid var(--gold);color:var(--gold-deep);border-radius:999px;
+       padding:3px 11px;font-size:11.5px;font-weight:700;letter-spacing:.04em}
+
+  /* ── the spine: how much is left ── */
+  .spine{margin:20px 0 0;padding-bottom:18px}
+  .spine-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+  .spine-n{font:400 15px/1 var(--serif)}
+  .spine-n b{font-size:22px}
+  .spine-hint{font-size:12px;color:var(--ink-3)}
+  .meter{height:7px;background:var(--surface-2);border-radius:999px;overflow:hidden;display:flex}
+  .meter i{display:block;height:100%}
+  .meter .done{background:var(--stone)}
+  .meter .fresh{background:var(--gold)}
+  .legend{display:flex;gap:16px;margin-top:8px;font-size:11.5px;color:var(--ink-3)}
+  .legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+
+  /* ── filters ── */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;padding:14px 0 0;border-top:1px solid var(--line-soft)}
+  .chip{font:inherit;font-size:12.5px;border:1px solid var(--line);background:var(--surface);
+        color:var(--ink-2);border-radius:999px;padding:6px 14px;cursor:pointer}
+  .chip b{font-family:var(--mono);font-size:11.5px;margin-left:5px;color:var(--ink-3)}
+  .chip[aria-pressed=true]{background:var(--panel);border-color:var(--panel);color:#fff}
+  .chip[aria-pressed=true] b{color:var(--gold)}
+  .chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* ── groups ── */
+  .grp{margin:26px 0 0}
+  .grp-h{display:flex;align-items:baseline;gap:10px;margin:0 0 3px}
+  .grp-h h2{font:400 19px/1.2 var(--serif);margin:0}
+  .pcode{font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+  .grp-why{font-size:12.5px;color:var(--ink-3);margin:0 0 11px}
+  .kind{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+        font-weight:700;margin:16px 0 7px}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+  .row{display:grid;grid-template-columns:1fr 130px 108px 132px 78px;
+       gap:14px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
+  .row:last-child{border-bottom:0}
+  .row.head{padding-top:9px;padding-bottom:9px;background:var(--surface-2);
+            border-bottom:1px solid var(--line)}
+  .row.head span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+                 color:var(--ink-3);font-weight:700}
+  .nm{font-size:13.5px}
+  .nm em{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .tgt{font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+  .tgt s{text-decoration:none;color:var(--ink-3)}
+  .was{font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+  input.val{width:100%;font:inherit;font-family:var(--mono);font-size:13.5px;
+            padding:7px 9px;border:1px solid var(--line);border-radius:var(--r);
+            background:var(--surface);color:var(--ink);text-align:right}
+  input.val:focus{outline:2px solid var(--gold);outline-offset:-1px;border-color:var(--gold)}
+  input.val.filled{border-color:var(--stone-soft);background:var(--surface-2)}
+  .out{font-family:var(--mono);font-size:13.5px;font-weight:700;text-align:right}
+  .out small{font-size:10px;font-weight:400}
+  .muted{color:var(--none);font-style:italic;font-size:12px;text-align:right}
+  .qs{display:inline-flex;gap:3px;margin-top:4px}
+  .qs i{width:17px;height:17px;border:1px dashed var(--line);border-radius:2px;
+        font:400 10px/15px var(--mono);text-align:center;color:var(--none);font-style:normal}
+  .qs i.on{background:var(--attn-bg);border:1px solid var(--line);color:var(--ink-2);font-weight:700}
+  .qs i.on.past{background:var(--panel);border-color:var(--panel);color:#fff}
+  .row.notdue{opacity:.55}
+  .pill{display:inline-block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+        font-weight:700;border-radius:999px;padding:3px 9px;border:1px solid var(--line);
+        color:var(--ink-3)}
+  .pill.done{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+
+  /* ── submit ── */
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);
+       border-top:1px solid var(--line);box-shadow:0 -6px 18px rgba(20,30,50,.07);z-index:9}
+  .bar-in{max-width:1080px;margin:0 auto;padding:14px 22px;display:flex;
+          align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  .bar-n{font-size:13px;color:var(--ink-2)}
+  .bar-n b{font-family:var(--mono)}
+  .btn{font:inherit;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+       text-transform:uppercase;border-radius:999px;padding:10px 22px;cursor:pointer;
+       border:1px solid var(--gold);background:transparent;color:var(--gold-deep)}
+  .btn:hover{background:var(--attn-bg)}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .btn.ghost{border-color:var(--line);color:var(--ink-3)}
+  .done-panel{display:none;background:var(--good-bg);border:1px solid var(--good);
+              border-radius:var(--r);padding:16px 18px;margin:22px 0 0}
+  .done-panel b{color:var(--good)}
+  .empty{padding:34px 18px;text-align:center;color:var(--ink-3);font-size:13.5px}
+  @media (max-width:820px){
+    .row{grid-template-columns:1fr 92px;gap:9px 12px}
+    .row.head{display:none}
+    .tgt,.was{grid-column:1}
+    input.val{grid-column:2}
+  }
+</style></head>
+<body>
+<div class="note-bar"><b>Concept only</b> &middot; nothing in the platform has changed. Mobile's plan is real; the figures are illustrative.</div>
+
+<header class="top"><div class="wrap">
+  <div class="idrow">
+    <div>
+      <div class="eyebrow">Reporting &middot; H1 2026</div>
+      <h1>Mobile</h1>
+      <p class="sub">Enter what has actually happened. Everything else on the platform is worked out from this.</p>
+    </div>
+    <div class="whoami">
+      <b>Mennah Farouk</b>
+      <span>Strategy owner &middot; Mobile</span>
+      <div class="due">Closes 12 September</div>
+    </div>
+  </div>
+
+  <div class="spine">
+    <div class="spine-top">
+      <div class="spine-n"><b id="sn">14</b> of 41 reported</div>
+      <div class="spine-hint" id="hint">27 still need you</div>
+    </div>
+    <div class="meter">
+      <i class="done" id="mDone" style="width:34%"></i>
+      <i class="fresh" id="mFresh" style="width:0%"></i>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--stone)"></i>Already recorded</span>
+      <span><i style="background:var(--gold)"></i>Entered just now</span>
+      <span><i style="background:var(--surface-2)"></i>Outstanding</span>
+    </div>
+  </div>
+
+  <div class="chips" role="group" aria-label="Filter">
+    <button class="chip" data-f="todo" aria-pressed="true">Needs you <b id="c-todo">27</b></button>
+    <button class="chip" data-f="done" aria-pressed="false">Reported <b id="c-done">14</b></button>
+    <button class="chip" data-f="notdue" aria-pressed="false">Not yet due <b id="c-nd">10</b></button>
+    <button class="chip" data-f="all" aria-pressed="false">Everything <b>51</b></button>
+  </div>
+</div></header>
+
+<main class="wrap" id="body"></main>
+
+<div class="wrap"><div class="done-panel" id="donePanel">
+  <b>H1 report submitted for Mobile.</b>
+  <span id="doneMsg"></span>
+</div></div>
+
+<div class="bar"><div class="bar-in">
+  <div class="bar-n"><b id="entered">0</b> entered &middot; <span id="left">27 outstanding</span></div>
+  <div style="display:flex;gap:10px">
+    <button class="btn ghost" id="later">Save and finish later</button>
+    <button class="btn" id="submit" disabled>Submit H1 report</button>
+  </div>
+</div></div>
+
+<script>
+const AS_OF = 2;
+
+/* Mobile's real plan. `a` is what is already recorded; null means nothing yet. */
+const KO = [
+  {n:"Distribution revenue", d:"≥", t:"6.2B EGP", a:"2.7B"},
+  {n:"Mobile market share",  d:"≥", t:"32%",      a:"28%"},
+  {n:"Active merchant reach",d:"≥", t:"4,500",    a:null},
+  {n:"App coverage rate",    d:"≥", t:"50%",      a:null}
+];
+const PILLARS = [
+  {c:"MB01", n:"Digital & Data-Driven Operations", why:"Unified data and digital order flow",
+   m:[{n:"Data duplicate rate",d:"≤",t:"1%",a:"1.4%"},
+      {n:"Orders processed digitally",d:"≥",t:"90%",a:null},
+      {n:"App coverage rate",d:"≥",t:"50%",a:null},
+      {n:"Dependency on automated reports",d:"≥",t:"90%",a:"58%"}],
+   k:[{n:"Clean and standardize customer and SKU base",o:"Ramy Behairy",q:[0,1,1,0],a:45},
+      {n:"End-to-end order-to-cash digitization",o:"Mohamed Rizk",q:[0,1,1,0],a:null},
+      {n:"Digitize sales reporting via Power BI",o:"Ramy Behairy",q:[0,1,1,0],a:40},
+      {n:"Scale Mobile Digital App across merchants",o:"Ashraf Laithy",q:[0,1,1,1],a:null},
+      {n:"Data integration across business units",o:"Abdelhamid",q:[0,0,1,1],a:null}]},
+  {c:"MB02", n:"Channel Preference & Development", why:"Depth with retailers, reach into tier 2",
+   m:[{n:"Average delivery time",d:"≤",t:"24 h",a:"31 h"},
+      {n:"Key retailer revenue growth",d:"≥",t:"50%",a:null},
+      {n:"Tier 2 merchants enrolled",d:"≥",t:"100",a:"58"},
+      {n:"Tier 2 segment revenue growth",d:"≥",t:"100%",a:null}],
+   k:[{n:"Retailer preference index workshop",o:"Karim",q:[0,1,1,0],a:60},
+      {n:"Joint business planning with key retailers",o:"Mohamed Rizk",q:[0,1,1,1],a:null},
+      {n:"Tier 2 growth acceleration programme",o:"Ashraf Laithy",q:[0,1,1,1],a:null},
+      {n:"Channel intelligence engine (pilot)",o:"Karim",q:[0,1,1,1],a:40}]},
+  {c:"MB03", n:"Portfolio & Value Chain Expansion", why:"Less dependence on one brand",
+   m:[{n:"Non-Samsung revenue",d:"≥",t:"4B EGP",a:null},
+      {n:"Samsung market share",d:"≥",t:"30%",a:"27%"},
+      {n:"Vivo market share",d:"≥",t:"60%",a:null},
+      {n:"Accessory revenue",d:"≥",t:"300M EGP",a:null},
+      {n:"Active Sary merchants",d:"≥",t:"800",a:"310"},
+      {n:"Sary revenue",d:"≥",t:"150M EGP",a:null},
+      {n:"Local production devices",d:"≥",t:"1M",a:null},
+      {n:"Sary app downloads",d:"≥",t:"40K",a:null}],
+   k:[{n:"Protect and grow share in existing brands",o:"Ashraf Abdelaty",q:[1,1,1,1],a:55},
+      {n:"Expand high-margin categories",o:"Fayad",q:[1,1,1,1],a:null},
+      {n:"Grow the Sary merchant platform",o:"Ashraf Abdelaty",q:[0,1,1,1],a:null},
+      {n:"Local assembly feasibility",o:"Fayad",q:[0,0,1,1],a:null}]}
+];
+
+const num = s => s==null ? NaN : parseFloat(String(s).replace(/[^0-9.\-]/g,""));
+const scale = s => /B/i.test(s)?1e9 : /M/i.test(s)?1e6 : /K/i.test(s)?1e3 : 1;
+function progress(dir, target, actual){
+  const t = num(target)*scale(target), a = num(actual)*scale(actual);
+  if (isNaN(t) || isNaN(a) || !t) return null;
+  return Math.max(0, Math.min(150, Math.round(dir==="≤" ? t/a*100 : a/t*100)));
+}
+function band(v){ return v==null?"none": v>=85?"good": v>=70?"attn": v>=50?"warn":"bad"; }
+function duePct(q){
+  let tot=0, el=0;
+  q.forEach((on,i)=>{ if(on){ tot++; if(i+1<=AS_OF) el++; } });
+  return tot ? Math.round(el/tot*100) : null;
+}
+const qChips = q => '<span class="qs">' + q.map((on,i)=>
+  `<i class="${on ? (i+1<=AS_OF?'on past':'on') : ''}">${i+1}</i>`).join("") + '</span>';
+
+/* state: what the person types in this sitting */
+const entered = {};
+let filter = "todo";
+
+function stateOf(item, key){
+  if (item.q && duePct(item.q)===0) return "notdue";
+  if (entered[key]!=null && entered[key]!=="") return "fresh";
+  return item.a==null ? "todo" : "done";
+}
+
+function measureRow(m, key){
+  const st = stateOf(m, key);
+  const typed = entered[key];
+  const shown = typed!=null && typed!=="" ? typed : m.a;
+  const p = shown==null ? null : progress(m.d, m.t, shown);
+  return `<div class="row" data-st="${st}">
+    <div class="nm">${m.n}</div>
+    <div class="tgt">${m.d} ${m.t}</div>
+    <div class="was">${m.a==null ? '<span class="muted">nothing yet</span>' : "was "+m.a}</div>
+    <div><input class="val ${typed?'filled':''}" data-k="${key}" value="${typed||''}"
+      placeholder="${m.a? 'new actual':'actual'}" aria-label="Actual for ${m.n}"></div>
+    <div class="out" style="color:var(--${band(p)})">${p==null?'<span class="muted">—</span>':p+'<small>%</small>'}</div>
+  </div>`;
+}
+function tacticRow(t, key){
+  const st = stateOf(t, key);
+  const due = duePct(t.q);
+  const typed = entered[key];
+  const shown = typed!=null && typed!=="" ? typed : t.a;
+  const ratio = (due && shown!=null && shown!=="") ? Math.round(parseFloat(shown)/due*100) : null;
+  return `<div class="row ${st==='notdue'?'notdue':''}" data-st="${st}">
+    <div class="nm">${t.n}<em>${t.o}</em>${qChips(t.q)}</div>
+    <div class="tgt">${due===0?'<s>starts Q3</s>':'due <b>'+due+'%</b>'}</div>
+    <div class="was">${t.a==null ? '<span class="muted">nothing yet</span>' : "was "+t.a+"%"}</div>
+    <div>${st==='notdue' ? '<span class="pill">Not yet due</span>'
+      : `<input class="val ${typed?'filled':''}" data-k="${key}" value="${typed||''}"
+           placeholder="% done" aria-label="Percent complete for ${t.n}">`}</div>
+    <div class="out" style="color:var(--${band(ratio)})">${
+      st==='notdue' ? '' : ratio==null?'<span class="muted">—</span>'
+      : (parseFloat(shown)>=100 ? '<span class="pill done">Done</span>' : ratio+'<small>%</small>')}</div>
+  </div>`;
+}
+
+function head(a,b,c,d,e){
+  return `<div class="row head"><span>${a}</span><span>${b}</span><span>${c}</span>
+          <span>${d}</span><span style="text-align:right">${e}</span></div>`;
+}
+function visible(html, st){
+  if (filter==="all") return true;
+  if (filter==="todo") return st==="todo"||st==="fresh";
+  if (filter==="done") return st==="done"||st==="fresh";
+  return st==="notdue";
+}
+
+function render(){
+  let html = "", shown = 0;
+
+  const koRows = KO.map((m,i)=>({h:measureRow(m,"ko"+i), st:stateOf(m,"ko"+i)}))
+                   .filter(r=>visible(r.h,r.st));
+  if (koRows.length){
+    shown += koRows.length;
+    html += `<section class="grp"><div class="grp-h"><h2>Key objectives</h2></div>
+      <p class="grp-why">These four set Mobile's headline score. Everything else rolls up beneath them.</p>
+      <div class="card">${head("Objective","Target","Recorded","Your figure","Progress")}
+      ${koRows.map(r=>r.h).join("")}</div></section>`;
+  }
+
+  PILLARS.forEach((p,pi)=>{
+    const ms = p.m.map((m,i)=>({h:measureRow(m,`m${pi}-${i}`), st:stateOf(m,`m${pi}-${i}`)}))
+                  .filter(r=>visible(r.h,r.st));
+    const ks = p.k.map((t,i)=>({h:tacticRow(t,`t${pi}-${i}`), st:stateOf(t,`t${pi}-${i}`)}))
+                  .filter(r=>visible(r.h,r.st));
+    if (!ms.length && !ks.length) return;
+    shown += ms.length + ks.length;
+    html += `<section class="grp"><div class="grp-h"><span class="pcode">${p.c}</span><h2>${p.n}</h2></div>
+      <p class="grp-why">${p.why}</p>`;
+    if (ms.length) html += `<div class="kind">Key measures</div><div class="card">
+      ${head("Measure","Target","Recorded","Your figure","Progress")}${ms.map(r=>r.h).join("")}</div>`;
+    if (ks.length) html += `<div class="kind">Tactics</div><div class="card">
+      ${head("Tactic","Due by now","Recorded","% complete","Of plan")}${ks.map(r=>r.h).join("")}</div>`;
+    html += `</section>`;
+  });
+
+  if (!shown) html = `<div class="grp"><div class="card"><div class="empty">
+    ${filter==="todo" ? "Nothing left for you here. Every due item has a figure against it."
+                      : "Nothing in this view."}</div></div></div>`;
+
+  document.getElementById("body").innerHTML = html;
+  document.querySelectorAll("input.val").forEach(i=>{
+    i.addEventListener("input", e=>{
+      entered[i.dataset.k] = i.value;
+      const pos = i.selectionStart;
+      render();
+      const again = document.querySelector(`input[data-k="${i.dataset.k}"]`);
+      if (again){ again.focus(); again.setSelectionRange(pos,pos); }
+    });
+  });
+  counts();
+}
+
+function counts(){
+  let todo=0, done=0, nd=0, fresh=0;
+  const walk = (arr,pre)=>arr.forEach((x,i)=>{
+    const st = stateOf(x, pre+i);
+    if (st==="notdue") nd++; else if (st==="fresh"){ fresh++; } else if (st==="done") done++; else todo++;
+  });
+  walk(KO,"ko");
+  PILLARS.forEach((p,pi)=>{ walk(p.m,`m${pi}-`); walk(p.k,`t${pi}-`); });
+  const total = todo+done+nd+fresh;
+  document.getElementById("sn").textContent = done+fresh;
+  document.getElementById("hint").textContent = todo ? todo+" still need you" : "nothing outstanding";
+  document.getElementById("mDone").style.width  = (done/total*100)+"%";
+  document.getElementById("mFresh").style.width = (fresh/total*100)+"%";
+  document.getElementById("c-todo").textContent = todo+fresh;
+  document.getElementById("c-done").textContent = done+fresh;
+  document.getElementById("c-nd").textContent = nd;
+  document.getElementById("entered").textContent = fresh;
+  document.getElementById("left").textContent = todo+" outstanding";
+  document.getElementById("submit").disabled = fresh===0;
+}
+
+document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{
+  filter = b.dataset.f;
+  document.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  render();
+}));
+document.getElementById("submit").addEventListener("click",()=>{
+  const n = document.getElementById("entered").textContent;
+  document.getElementById("doneMsg").textContent =
+    n+" figures recorded. Mobile's headline and every pillar score have been recomputed. The strategy office can see the unit is reported.";
+  document.getElementById("donePanel").style.display="block";
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+});
+render();
+</script>
+</body></html>

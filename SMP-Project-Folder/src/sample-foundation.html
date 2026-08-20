@@ -1,0 +1,236 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sample — foundation objectives box</title>
+<style>
+  :root {
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace; --r:2px;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --stone:#7FA3D8;--stone-soft:#5C82BC;--gold:#D9B665;--gold-deep:#C9A24D;
+    --ground:#14161A;--surface:#1C2027;--surface-2:#242932;--line:#333A45;--line-soft:#2A303A;
+    --ink:#E9ECF1;--ink-2:#B4BCC8;--ink-3:#868F9C;--panel:#24487A;--panel-ink:#EAF0FA;}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+  .fgrid{display:grid;grid-template-columns:1.05fr 1fr;gap:20px;align-items:start}
+  @media (max-width:900px){.fgrid{grid-template-columns:1fr}}
+  .clause{display:grid;grid-template-columns:120px 1fr;gap:10px 14px;padding:9px 0;
+          border-bottom:1px solid var(--line-soft)}
+  .clause:last-child{border-bottom:0}
+  .clause dt{font-weight:700;color:var(--stone);font-size:13.5px}
+  .clause dd{margin:0;font-family:var(--serif);font-size:15px}
+  .kv{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+  .pill{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;
+        letter-spacing:.04em;padding:3px 9px;border-radius:99px;background:var(--surface-2);
+        color:var(--ink-2);border:1px solid var(--line)}
+  header.top{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:9}
+  .top-in{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .brand{margin-right:auto}
+  .eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);font-weight:600;display:block}
+  .brand h1{margin:0;font-family:var(--serif);font-size:22px}
+  .switch{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+  .switch button{font:inherit;font-size:13px;padding:8px 16px;border:0;cursor:pointer;background:none;
+                 color:var(--ink-2);border-right:1px solid var(--line)}
+  .switch button:last-child{border-right:0}
+  .switch button[aria-pressed="true"]{background:var(--panel);color:var(--panel-ink);font-weight:600}
+  .lede{max-width:70ch;color:var(--ink-2);margin:28px 0 6px}
+  .lede strong{color:var(--ink)}
+  .note{border-left:3px solid var(--gold);background:var(--surface-2);padding:12px 16px;
+        margin:18px 0 28px;font-size:13.5px;color:var(--ink-2);max-width:80ch}
+  .note b{color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-bottom:18px}
+  .card h2{margin:0 0 4px;font-family:var(--serif);font-size:20px}
+  .card .hint{font-size:13px;color:var(--ink-3);margin:0 0 14px}
+  .statement{font-family:var(--serif);font-size:16px;line-height:1.5;margin:0}
+  .divide{border-top:1px solid var(--line-soft);margin:18px 0 16px}
+  .boxhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+  .boxlab{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .minisw{display:inline-flex;margin-left:auto;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .minisw button{font:inherit;font-size:11px;line-height:1;padding:5px 9px;border:0;cursor:pointer;
+                 background:var(--surface);color:var(--ink-3);border-right:1px solid var(--line)}
+  .minisw button:last-child{border-right:0}
+  .minisw button[aria-pressed="true"]{background:var(--stone-soft);color:#fff}
+  .minisw button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+  .horizon{margin:0 0 14px}
+  .horizon .pill{display:inline-flex;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+                 padding:3px 10px;border-radius:99px;color:var(--gold-deep);border:1px solid var(--gold)}
+  .horizon label{font-size:12px;color:var(--ink-3);font-weight:700;letter-spacing:.06em;
+                 text-transform:uppercase;display:inline-flex;align-items:center;gap:8px}
+  .horizon input.yr{width:80px;font-family:var(--mono);text-align:center}
+
+  /* A — objective rows: name left, two targets right */
+  .orow{display:grid;grid-template-columns:1fr 108px 108px;gap:14px;align-items:baseline;
+        padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .orow:last-child{border-bottom:0}
+  .orow .on{font-size:14.5px}
+  .orow .ot{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;font-size:14px}
+  .orow .ot.h{color:var(--ink-3);font-size:13px}
+  .ohead{display:grid;grid-template-columns:1fr 108px 108px;gap:14px;padding-bottom:8px;
+         border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.1em;
+         text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .ohead span:not(:first-child){text-align:right}
+
+  /* B — stacked, no columns */
+  .ostack{padding:11px 0;border-bottom:1px solid var(--line-soft)}
+  .ostack:last-child{border-bottom:0}
+  .ostack b{font-weight:600;font-size:14.5px;display:block;margin-bottom:3px}
+  .ostack span{font-family:var(--mono);font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .ostack em{font-style:normal;color:var(--ink);font-weight:700}
+
+  /* C — chips */
+  .ochips{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+  .ochip{border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;background:var(--surface-2)}
+  .ochip b{display:block;font-size:13.5px;font-weight:600;margin-bottom:6px}
+  .ochip .v{font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums}
+  .ochip .h{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-top:2px}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line-soft)}
+  thead th{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+           font-weight:700;background:var(--surface-2)}
+  td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:center}
+  th.c{text-align:center}
+  .scroll{border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+  input,select{font:inherit;font-size:13px;padding:5px 8px;border:1px solid var(--line);
+               border-radius:var(--r);background:var(--surface);color:var(--ink);width:100%}
+  input.n{font-family:var(--mono);text-align:center}
+  .editbtn{font:inherit;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+           color:var(--gold-deep);background:none;border:1px solid var(--gold);border-radius:99px;
+           padding:6px 15px;cursor:pointer;margin-left:auto}
+  .cardhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .cardhead h2{margin:0}
+  .rmv{font:inherit;font-size:11px;color:#B04434;background:none;border:1px solid var(--line);
+       border-radius:99px;padding:3px 10px;cursor:pointer}
+  .addrow{margin-top:12px}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform · sample</span>
+      <h1>Foundation — the objectives box</h1>
+    </div>
+    <div class="switch" role="group" aria-label="Mode">
+      <button data-m="view" aria-pressed="true">View</button>
+      <button data-m="edit" aria-pressed="false">Edit</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <p class="lede">Mobile's real foundation, whole. The objectives box sits <strong>inside the aspiration card</strong>, beneath the statement — the aspiration says where the unit is going, the objectives say how you would know it got there.</p>
+  <div class="note" id="note"></div>
+  <div id="mount"></div>
+</div>
+
+<script>
+var ASP = "To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems \u2014 positioned as one of the recognized regional distributors for consumer electronics.";
+var HORIZON = "2029";
+var OBJ = [
+  { name:"Distribution revenue",  dir:"\u2265", t3:"9.0B EGP", t1:"6.2B EGP", compile:"Sum" },
+  { name:"Mobile market share",   dir:"\u2265", t3:"38%",      t1:"32%",      compile:"Latest" },
+  { name:"Active merchant reach", dir:"\u2265", t3:"6,500",    t1:"4,500",    compile:"Latest" },
+  { name:"App coverage rate",     dir:"\u2265", t3:"75%",      t1:"50%",      compile:"Latest" }
+];
+var CLAUSES = [
+  ["We are","consumer electronics distribution company"],
+  ["We provide","distribution services (account management, logistics services, product management)"],
+  ["For","e-commerce, retail, operators, hyper markets, IR and OR"],
+  ["All Overall","Egypt"],
+  ["We facilitate","sell-in, end to end distribution services (logistics cycle, collection)"],
+  ["Using","end to end distribution services to both vendor & channel"]
+];
+var OPT = "A", MODE = "view";
+
+var NOTES = "<b>The layout toggle sits in the objectives box itself</b> \u2014 columns to scan two targets down a line, chips to read this year\'s target as a figure. The horizon is a field on the aspiration, not words inside it, so a year is never buried in a sentence someone has to edit around.";
+
+function toggle(){
+  return '<span class="minisw" role="group" aria-label="Objectives layout">' +
+    '<button data-o="A" aria-pressed="' + (OPT==="A") + '" title="Columns">&#9776;</button>' +
+    '<button data-o="C" aria-pressed="' + (OPT==="C") + '" title="Chips">&#9632;&#9632;</button></span>';
+}
+
+function viewBody(){
+  if (OPT === "A") {
+    return '<div class="ohead"><span>Objective</span><span>3-year</span><span>This year</span></div>' +
+      OBJ.map(function(o){
+        return '<div class="orow"><span class="on">' + o.name + '</span>' +
+          '<span class="ot h">' + o.t3 + '</span><span class="ot">' + o.t1 + '</span></div>';
+      }).join("");
+  }
+  return '<div class="ochips">' + OBJ.map(function(o){
+    return '<div class="ochip"><b>' + o.name + '</b>' +
+      '<div class="v">' + o.t1 + '</div><div class="h">3-year ' + o.t3 + '</div></div>';
+  }).join("") + '</div>';
+}
+
+function editBody(){
+  return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="c">Direction</th>' +
+    '<th class="c">3-year target</th><th class="c">This year</th><th class="c">Compile</th><th></th></tr></thead><tbody>' +
+    OBJ.map(function(o){
+      return '<tr><td><input value="' + o.name + '"></td>' +
+        '<td class="n"><select><option ' + (o.dir === "\u2265" ? "selected" : "") + '>\u2265</option>' +
+        '<option ' + (o.dir === "\u2264" ? "selected" : "") + '>\u2264</option></select></td>' +
+        '<td class="n"><input class="n" value="' + o.t3 + '"></td>' +
+        '<td class="n"><input class="n" value="' + o.t1 + '"></td>' +
+        '<td class="n"><select><option ' + (o.compile === "Sum" ? "selected" : "") + '>Sum</option>' +
+        '<option ' + (o.compile === "Latest" ? "selected" : "") + '>Latest</option>' +
+        '<option ' + (o.compile === "Average" ? "selected" : "") + '>Average</option></select></td>' +
+        '<td><button class="rmv">Remove</button></td></tr>';
+    }).join("") + '</tbody></table></div>' +
+    '<div class="addrow"><button class="editbtn" style="margin:0">+ Add an objective</button></div>';
+}
+
+function render(){
+  document.getElementById("note").innerHTML = NOTES;
+  var editing = MODE === "edit";
+  document.getElementById("mount").innerHTML =
+    '<div class="kv"><span class="pill">Mobile</span><span class="pill">3-year horizon</span>' +
+      '<span class="pill">Uses the group\'s themes</span><span class="pill">Inherits the group\'s values</span></div>' +
+    '<div class="fgrid">' +
+    '<div class="card"><div class="cardhead"><h2>Who we are</h2></div>' +
+      '<p class="hint">Labelled clauses. The labels are data \u2014 each unit uses its own set.</p>' +
+      '<dl style="margin:0">' + CLAUSES.map(function(c){
+        return '<div class="clause"><dt>' + c[0] + '</dt><dd>' +
+          (editing ? '<textarea class="fld" rows="2" style="width:100%;font:inherit;font-family:var(--serif);font-size:15px;padding:6px 9px;border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink)">' + c[1] + '</textarea>' : c[1]) +
+          '</dd></div>';
+      }).join("") + '</dl></div>' +
+    '<div class="card"><div class="cardhead"><h2>Winning Aspiration</h2>' +
+      '<button class="editbtn">' + (editing ? "Done" : "Edit") + '</button></div>' +
+      '<p class="hint">Internally Winning Aspiration. Vision and End State are display labels for it.</p>' +
+      '<div class="horizon">' + (editing
+        ? '<label>Horizon <input class="yr" value="' + HORIZON + '"></label>'
+        : '<span class="pill">Horizon &middot; ' + HORIZON + '</span>') + '</div>' +
+      (editing ? '<textarea style="width:100%;font:inherit;font-family:var(--serif);font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--ink)" rows="3">' + ASP + '</textarea>'
+               : '<p class="statement">' + ASP + '</p>') +
+      '<div class="divide"></div>' +
+      '<div class="boxhead"><span class="boxlab">Key Objectives</span>' +
+        (editing ? '' : toggle()) + '</div>' +
+      (editing ? editBody() : viewBody()) +
+    '</div></div>';
+
+  document.querySelectorAll("[data-o]").forEach(function(b){
+    b.addEventListener("click", function(){
+      OPT = b.dataset.o;
+      document.querySelectorAll("[data-o]").forEach(function(x){ x.setAttribute("aria-pressed", String(x.dataset.o === OPT)); });
+      render();
+    });
+  });
+  document.querySelectorAll("[data-m]").forEach(function(b){
+    b.addEventListener("click", function(){
+      MODE = b.dataset.m;
+      document.querySelectorAll("[data-m]").forEach(function(x){ x.setAttribute("aria-pressed", String(x.dataset.m === MODE)); });
+      render();
+    });
+  });
+}
+render();
+</script>

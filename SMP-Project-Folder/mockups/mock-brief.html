@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>CEO brief — mockup</title>
+<style>
+:root{--panel:#16325C;--gold:#C9A24D;--gold-deep:#A8842F;--ground:#F7F8FA;--surface:#FFF;
+--surface-2:#EFF2F6;--zebra:#F7F9FC;--line:#D6DCE5;--line-soft:#E6EAF0;--ink:#171B22;--ink-2:#414A58;
+--ink-3:#6B7583;--good:#2E7D5B;--attn:#B8860B;--warn:#CC6B3D;--bad:#B04434;--none:#8A9099;
+--good-bg:#E4F0EA;--attn-bg:#F7EFD6;--bad-bg:#F7E3E0;
+--serif:Georgia,serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--mono:ui-monospace,Menlo,Consolas,monospace;--r:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.top{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}.top b{color:var(--gold)}
+.wrap{max-width:1120px;margin:0 auto;padding:30px 30px 70px}
+h1{font:400 34px/1.15 var(--serif);margin:0 0 4px}
+.sub{color:var(--ink-3);font-size:13.5px;margin:0 0 26px}
+h2{font:400 21px/1.2 var(--serif);margin:0 0 3px}
+.lede{color:var(--ink-3);font-size:13px;margin:0 0 14px}
+section{margin:0 0 32px}
+.hero{display:grid;grid-template-columns:auto 1fr;gap:50px;align-items:center;background:var(--surface);
+border:1px solid var(--line);border-radius:var(--r);padding:26px 32px;margin-bottom:32px}
+.hero .big{font:400 88px/1 var(--serif);letter-spacing:-.02em}
+.lab{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.spark{display:flex;gap:30px;align-items:flex-end}
+.spark div{text-align:center}.spark b{display:block;font-family:var(--mono);font-size:19px}
+.spark span{font-size:11px;color:var(--ink-3)}.spark .now b{color:var(--attn)}
+.d{font-family:var(--mono);font-weight:600;font-size:14px}
+.d.up{color:var(--good)}.d.dn{color:var(--bad)}.d.flat{color:var(--none)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{background:var(--panel);color:#fff;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+font-weight:700;text-align:left;padding:10px 14px;white-space:nowrap}
+th.num,td.num{text-align:right}th.cc,td.cc{text-align:center}
+td{padding:12px 14px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) td{background:var(--zebra)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.final{font-weight:700}.lead{font-weight:500}
+.s{display:block;color:var(--ink-3);font-size:11.5px;margin-top:2px;font-weight:400}
+.good{color:var(--good)}.attn{color:var(--attn)}.warn{color:var(--warn)}.bad{color:var(--bad)}.none{color:var(--none)}
+.badge{display:inline-block;font:700 9.5px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+padding:5px 8px;border-radius:20px;white-space:nowrap}
+.b-over{background:#FBF6E9;color:var(--gold-deep);border:1px solid #E8D9AE}
+.b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.b-short{background:var(--bad-bg);color:var(--bad)}
+.b-none{background:var(--surface-2);color:var(--none)}
+.frow{cursor:pointer}
+.frow:hover td{background:var(--surface-2)}
+.frow .chev{color:var(--ink-3);font-size:11px;transition:transform .15s ease;display:inline-block}
+/* A dash means "none of these", so it must not wear the colour of the column
+   it sits in — a red dash under Short reads as a red number. */
+.frow td.num b{font-weight:700}
+.frow td.num{color:var(--ink)}
+.dashnone{color:var(--none);font-weight:400}
+.frow.on .chev{transform:rotate(90deg)}
+.fdet > td{padding:0;background:var(--ground)}
+.fdet table.inner{margin:0}
+.fdet table.inner thead th{background:var(--stone,#24487A);font-size:9.5px}
+.fdet table.inner td{font-size:13.5px;padding:10px 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.note-b{border-left:3px solid var(--gold);background:#FBF6E9;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0}
+.note-b b{color:var(--ink)}
+</style></head><body>
+<div class="top"><b>Mockup</b> — the CEO brief, composed from live figures. Nothing is built.</div>
+<div class="wrap">
+
+<h1>Raya Trade &mdash; where we stand</h1>
+<p class="sub">H1 2026 &middot; one page. Everything else is one click away on a unit's own page.</p>
+
+<div class="hero">
+  <div><span class="lab">Business units performance</span>
+    <div class="big warn">67% <span class="d up" style="font-size:20px">▲ 3</span></div>
+    <span class="s">against 64% at the last close</span></div>
+  <div class="spark">
+    <div><b>64%</b><span>H2 2025</span></div>
+    <div class="now"><b>67%</b><span>H1 2026</span></div>
+  </div>
+</div>
+
+<div class="grid2">
+  <section><h2>Who moved up</h2><p class="lede">Largest gains since the last close.</p>
+    <div class="card"><table><thead><tr><th>Unit</th><th class="num">Was</th><th class="num">Now</th>
+      <th class="num">Change</th></tr></thead><tbody><tr><td class="lead">Consumer Electronics<span class="s">weight 15%</span></td>
+      <td class="num">58%</td><td class="num final attn">71%</td>
+      <td class="num"><span class="d up">▲ 13</span></td></tr><tr><td class="lead">Retail Stores<span class="s">weight 14%</span></td>
+      <td class="num">79%</td><td class="num final good">88%</td>
+      <td class="num"><span class="d up">▲ 9</span></td></tr><tr><td class="lead">Mobile<span class="s">weight 21%</span></td>
+      <td class="num">56%</td><td class="num final warn">60%</td>
+      <td class="num"><span class="d up">▲ 4</span></td></tr></tbody></table></div></section>
+  <section><h2>Who moved down</h2><p class="lede">Largest falls since the last close.</p>
+    <div class="card"><table><thead><tr><th>Unit</th><th class="num">Was</th><th class="num">Now</th>
+      <th class="num">Change</th></tr></thead><tbody><tr><td class="lead">B2B Ecomm<span class="s">weight 10%</span></td>
+      <td class="num">61%</td><td class="num final bad">48%</td>
+      <td class="num"><span class="d dn">▼ 13</span></td></tr><tr><td class="lead">Corporate<span class="s">weight 6%</span></td>
+      <td class="num">71%</td><td class="num final warn">59%</td>
+      <td class="num"><span class="d dn">▼ 12</span></td></tr></tbody></table></div></section>
+</div>
+
+<section><h2>Lowest standing</h2>
+  <p class="lede">Weight shown because a low score at 21% is a different problem from one at 6%.</p>
+  <div class="card"><table><thead><tr><th>Unit</th><th class="num">Score</th>
+    <th class="num">Change</th></tr></thead><tbody><tr><td class="lead">B2B Ecomm<span class="s">weight 10%</span></td>
+  <td class="num final bad">48%</td>
+  <td class="num"><span class="d dn">▼ 13</span></td></tr><tr><td class="lead">Corporate<span class="s">weight 6%</span></td>
+  <td class="num final warn">59%</td>
+  <td class="num"><span class="d dn">▼ 12</span></td></tr><tr><td class="lead">Mobile<span class="s">weight 21%</span></td>
+  <td class="num final warn">60%</td>
+  <td class="num"><span class="d up">▲ 4</span></td></tr><tr><td class="lead">IT<span class="s">weight 7%</span></td>
+  <td class="num final warn">64%</td>
+  <td class="num"><span class="d up">▲ 1</span></td></tr></tbody></table></div></section>
+
+<section><h2>Focus measures by business unit</h2>
+  <p class="lede">What each unit is achieving on the measures that carry reward. Click a unit for its detail.</p>
+  <div class="chips">
+    <span class="badge b-over">6 earning</span>
+    
+    <span class="badge b-short">3 short</span>
+    
+  </div>
+  <div class="card"><table><thead><tr><th>Business unit</th><th class="num">Focus</th>
+    <th class="num">Earning</th><th class="num">Met</th><th class="num">Short</th>
+    <th class="num">Not reported</th><th class="cc"></th></tr></thead>
+    <tbody><tr class="frow" data-u="0"><td class="lead">Mobile</td>
+      <td class="num">3</td>
+      <td class="num"><b class="good">1</b></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="num"><b class="bad">2</b></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="cc chev">&#9656;</td></tr>
+      <tr class="fdet" data-d="0" hidden><td colspan="7">
+        <table class="inner"><thead><tr><th>Focus measure</th><th class="num">Target</th>
+          <th class="num">Actual</th><th class="num">Progress</th><th class="cc">Standing</th>
+        </tr></thead><tbody><tr><td class="lead">Mobile market share<span class="s">key objectives</span></td>
+      <td class="num">32%</td><td class="num">28%</td>
+      <td class="num final good">88%</td>
+      <td class="cc"><span class="badge b-short">Short</span></td></tr><tr><td class="lead">App coverage rate<span class="s">MB01</span></td>
+      <td class="num">50%</td><td class="num">22%</td>
+      <td class="num final bad">44%</td>
+      <td class="cc"><span class="badge b-short">Short</span></td></tr><tr><td class="lead">Samsung market share<span class="s">MB03</span></td>
+      <td class="num">30%</td><td class="num">31%</td>
+      <td class="num final good">103%</td>
+      <td class="cc"><span class="badge b-over">Earning</span></td></tr></tbody></table></td></tr><tr class="frow" data-u="1"><td class="lead">Retail Stores</td>
+      <td class="num">2</td>
+      <td class="num"><b class="good">2</b></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="cc chev">&#9656;</td></tr>
+      <tr class="fdet" data-d="1" hidden><td colspan="7">
+        <table class="inner"><thead><tr><th>Focus measure</th><th class="num">Target</th>
+          <th class="num">Actual</th><th class="num">Progress</th><th class="cc">Standing</th>
+        </tr></thead><tbody><tr><td class="lead">Stores operating<span class="s">key objectives</span></td>
+      <td class="num">88</td><td class="num">91</td>
+      <td class="num final good">103%</td>
+      <td class="cc"><span class="badge b-over">Earning</span></td></tr><tr><td class="lead">Revenue per store<span class="s">RS01</span></td>
+      <td class="num">52M</td><td class="num">55M</td>
+      <td class="num final good">106%</td>
+      <td class="cc"><span class="badge b-over">Earning</span></td></tr></tbody></table></td></tr><tr class="frow" data-u="2"><td class="lead">Care</td>
+      <td class="num">2</td>
+      <td class="num"><b class="good">2</b></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="cc chev">&#9656;</td></tr>
+      <tr class="fdet" data-d="2" hidden><td colspan="7">
+        <table class="inner"><thead><tr><th>Focus measure</th><th class="num">Target</th>
+          <th class="num">Actual</th><th class="num">Progress</th><th class="cc">Standing</th>
+        </tr></thead><tbody><tr><td class="lead">First-time fix rate<span class="s">key objectives</span></td>
+      <td class="num">86%</td><td class="num">89%</td>
+      <td class="num final good">103%</td>
+      <td class="cc"><span class="badge b-over">Earning</span></td></tr><tr><td class="lead">Customer satisfaction<span class="s">CA01</span></td>
+      <td class="num">4.5</td><td class="num">4.6</td>
+      <td class="num final good">102%</td>
+      <td class="cc"><span class="badge b-over">Earning</span></td></tr></tbody></table></td></tr><tr class="frow" data-u="3"><td class="lead">Logistics</td>
+      <td class="num">2</td>
+      <td class="num"><b class="good">1</b></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="num"><b class="bad">1</b></td>
+      <td class="num"><span class="dashnone">&mdash;</span></td>
+      <td class="cc chev">&#9656;</td></tr>
+      <tr class="fdet" data-d="3" hidden><td colspan="7">
+        <table class="inner"><thead><tr><th>Focus measure</th><th class="num">Target</th>
+          <th class="num">Actual</th><th class="num">Progress</th><th class="cc">Standing</th>
+        </tr></thead><tbody><tr><td class="lead">On-time delivery rate<span class="s">key objectives</span></td>
+      <td class="num">92%</td><td class="num">94%</td>
+      <td class="num final good">102%</td>
+      <td class="cc"><span class="badge b-over">Earning</span></td></tr><tr><td class="lead">External client revenue<span class="s">LG02</span></td>
+      <td class="num">480M EGP</td><td class="num">192M</td>
+      <td class="num final bad">40%</td>
+      <td class="cc"><span class="badge b-short">Short</span></td></tr></tbody></table></td></tr></tbody></table></div></section>
+
+<div class="note-b"><b>This page asks nobody for anything.</b> Every figure on it exists because a cycle
+was closed, an owner reported, or the CEO marked a measure. The brief composes; it does not collect.</div>
+
+</div>
+<script>
+document.querySelectorAll('.frow').forEach(function(r){
+  r.addEventListener('click', function(){
+    var det = document.querySelector('.fdet[data-d="'+r.dataset.u+'"]');
+    var open = !det.hidden;
+    document.querySelectorAll('.fdet').forEach(function(x){ x.hidden = true; });
+    document.querySelectorAll('.frow').forEach(function(x){ x.classList.remove('on'); });
+    if (!open) { det.hidden = false; r.classList.add('on'); }
+  });
+});
+</script></body></html>

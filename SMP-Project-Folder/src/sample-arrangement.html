@@ -1,0 +1,2725 @@
+<!doctype html>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Sample — arrangement</title>
+<style>
+  :root {
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --r:2px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+      --panel:#24487A; --panel-ink:#EAF0FA;
+    }
+  }
+  :root[data-theme="dark"] {
+    --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --panel:#24487A; --panel-ink:#EAF0FA;
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  h1,h2,h3,h4 { margin:0; text-wrap:balance; }
+  .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
+
+  .banner { background:var(--panel); color:var(--panel-ink); padding:10px 24px; font-size:13px;
+            display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
+  .banner strong { color:var(--gold); font-weight:700; }
+
+  header.top { border-bottom:1px solid var(--line); background:var(--surface); }
+  .top-in { max-width:1180px; margin:0 auto; padding:18px 24px; display:flex;
+            align-items:flex-end; gap:20px; flex-wrap:wrap; }
+  .brand { display:flex; flex-direction:column; gap:2px; margin-right:auto; }
+  .eyebrow { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); font-weight:600; }
+  .brand h1 { font-family:var(--serif); font-size:26px; letter-spacing:-.01em; }
+  .shapetag { font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700;
+              color:var(--gold-deep); border:1px solid var(--gold); border-radius:99px; padding:4px 12px; }
+
+  nav.units { background:var(--panel); }
+  .units-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
+  .units button { font:inherit; font-size:14.5px; padding:13px 18px; border:0; background:none;
+                  color:var(--panel-ink); opacity:.62; cursor:pointer; white-space:nowrap;
+                  border-bottom:3px solid transparent; }
+  .units button[aria-selected="true"] { opacity:1; font-weight:700; border-bottom-color:var(--gold); }
+  .units button:focus-visible { outline:2px solid var(--gold); outline-offset:-4px; }
+  .units .sep { width:1px; background:var(--panel-ink); opacity:.22; margin:10px 12px; flex:0 0 1px; }
+
+  nav.tabs { border-bottom:1px solid var(--line); background:var(--surface); }
+  .tabs-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
+  .tabs button { font:inherit; font-size:14px; padding:12px 15px; border:0; background:none;
+                 color:var(--ink-3); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
+  .tabs button[aria-selected="true"] { color:var(--ink); border-bottom-color:var(--gold); font-weight:600; }
+  .tabs button:focus-visible { outline:2px solid var(--gold); outline-offset:-4px; }
+
+  .view { padding-top:32px; }
+  [hidden] { display:none !important; }
+
+  .lede { max-width:66ch; color:var(--ink-2); margin:0 0 26px; }
+  .lede strong { color:var(--ink); }
+  h2.sec { font-family:var(--serif); font-size:21px; margin:36px 0 4px; padding-top:20px;
+           border-top:1px solid var(--line-soft); }
+  h2.sec.first { border-top:0; padding-top:0; margin-top:0; }
+  .sec-note { color:var(--ink-3); font-size:13.5px; margin:0 0 18px; max-width:64ch; }
+
+  .temple { display:flex; flex-direction:column; margin:4px 0 8px; }
+  .roof { background:var(--panel); clip-path:polygon(50% 0,100% 100%,0 100%); height:70px; margin-bottom:-1px; }
+  .architrave { background:var(--panel); color:var(--panel-ink); padding:18px 26px;
+                font-family:var(--serif); font-size:18px; line-height:1.4; text-align:center; }
+  .entablature { background:var(--surface-2); border-left:1px solid var(--line); border-right:1px solid var(--line);
+                 padding:16px 18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px 20px; }
+  .ns-item { display:flex; flex-direction:column; gap:2px; }
+  .ns-label { font-size:11.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-3); font-weight:600; }
+  .ns-value { font-family:var(--mono); font-size:15px; font-variant-numeric:tabular-nums; }
+  .ns-value.pending { color:var(--none); font-style:italic; font-family:var(--sans); font-size:13.5px; }
+  .pillars { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:16px 18px 0; }
+  .pillar { background:var(--panel); color:var(--panel-ink); padding:20px 14px; text-align:center;
+            min-height:104px; display:flex; flex-direction:column; justify-content:center; gap:6px; border-radius:var(--r); }
+  .pillar b { font-family:var(--serif); font-size:16px; }
+  .pillar span { font-size:11px; letter-spacing:.12em; color:var(--gold); font-weight:700; }
+  .pillar em { font-size:12px; font-style:normal; opacity:.8; }
+  .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
+               border-top:3px solid var(--gold); background:var(--surface); }
+  .base-head { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+               font-weight:700; margin-bottom:12px; }
+  .base-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:8px; }
+  .cap { background:var(--surface-2); border:1px solid var(--line-soft); border-radius:var(--r);
+         padding:10px 12px; font-size:13.5px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:20px 22px; }
+  .scores { display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:16px; margin:4px 0 8px; }
+  .score-h { display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:10px; }
+  .score-h h3 { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .big { font-family:var(--mono); font-size:40px; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .big small { font-size:20px; }
+  .big .vs { font-size:14px; color:var(--ink-3); font-family:var(--sans); letter-spacing:0; }
+  .big.nodata { font-size:19px; color:var(--none); font-style:italic; font-family:var(--sans); }
+  .sub { font-size:13px; color:var(--ink-2); margin-top:9px; }
+  .sub b { font-variant-numeric:tabular-nums; }
+  .track { height:9px; background:var(--surface-2); border-radius:99px; margin-top:12px; position:relative; }
+  .track .fill { height:100%; border-radius:99px; }
+  .track.empty { background:none; border:1px dashed var(--none); }
+  .marker { position:absolute; top:-4px; width:2px; height:17px; background:var(--ink); }
+  .marker::after { content:""; position:absolute; top:-4px; left:-3px; border-left:4px solid transparent;
+                   border-right:4px solid transparent; border-top:5px solid var(--ink); }
+  .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-3); margin-top:10px; }
+  .legend span { display:flex; align-items:center; gap:6px; }
+  .sw { width:11px; height:11px; border-radius:2px; display:inline-block; }
+  .sw.dash { border:1px dashed var(--none); }
+  .sw.line { width:2px; height:13px; border-radius:0; background:var(--ink); }
+
+  .pill { display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:700;
+          letter-spacing:.04em; padding:3px 8px; border-radius:99px; white-space:nowrap; }
+  .pill.good { background:var(--good-bg); color:var(--good); }
+  .pill.attn { background:var(--attn-bg); color:var(--attn); }
+  .pill.warn { background:var(--warn-bg); color:var(--warn); }
+  .pill.bad { background:var(--bad-bg); color:var(--bad); }
+  .pill.none { color:var(--none); border:1px dashed var(--none); font-weight:600; }
+  .pill.kind { background:var(--surface-2); color:var(--ink-2); border:1px solid var(--line); }
+  .pill.theme { color:var(--gold-deep); border:1px solid var(--gold); }
+
+  .scroll { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; min-width:620px; }
+  th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft); vertical-align:top; }
+  thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-3);
+             font-weight:700; background:var(--surface-2); white-space:nowrap; }
+  tbody tr:last-child td { border-bottom:0; }
+  td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  td .why, .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
+  .qs { display:flex; gap:3px; }
+  .qs i { width:20px; height:16px; border:1px solid var(--line); border-radius:1px; font-style:normal;
+          font-size:9px; display:flex; align-items:center; justify-content:center; color:var(--ink-3); background:var(--surface); }
+  .qs i.on { background:var(--panel); border-color:var(--panel); color:var(--panel-ink); }
+
+  .fgrid { display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start; }
+  @media (max-width:820px) { .fgrid { grid-template-columns:1fr; } }
+  .clause { display:grid; grid-template-columns:120px 1fr; gap:10px 14px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+  .clause:last-child { border-bottom:0; }
+  .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
+  .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
+  .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
+  ul.values { display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:0; }
+  ul.values li { list-style:none; background:var(--surface-2); border:1px solid var(--line-soft);
+                 border-radius:var(--r); padding:6px 11px; font-size:13.5px; }
+
+  .swot { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:760px) { .swot { grid-template-columns:1fr; } }
+  .swot section { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); padding:14px 16px; }
+  .swot h3 { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); font-weight:700; margin-bottom:9px; }
+  .swot ul { margin:0; padding-left:18px; font-size:13.5px; }
+  .swot li { margin-bottom:5px; }
+  .swot section.s { border-top:3px solid var(--good); }
+  .swot section.w { border-top:3px solid var(--bad); }
+  .swot section.o { border-top:3px solid var(--stone-soft); }
+  .swot section.t { border-top:3px solid var(--warn); }
+
+  .note { border-left:3px solid var(--gold); background:var(--surface-2); padding:12px 16px;
+          margin:18px 0; font-size:13.5px; color:var(--ink-2); border-radius:0 var(--r) var(--r) 0; }
+  .note b { color:var(--ink); }
+  .note code { font-family:var(--mono); font-size:12.5px; background:var(--surface);
+               padding:1px 5px; border-radius:2px; border:1px solid var(--line-soft); }
+  .kv { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  footer.end { margin-top:44px; padding-top:18px; border-top:1px solid var(--line); font-size:12.5px; color:var(--ink-3); }
+
+  /* Sub-nav: Performance is the regular view and is marked as such */
+  .tabs button.primary { color:var(--gold-deep); font-weight:700; }
+  .tabs button.primary[aria-selected="true"] { color:var(--ink); }
+  .tabs button.primary::before {
+    content:""; display:inline-block; width:7px; height:7px; border-radius:99px;
+    background:var(--gold); margin-right:7px; vertical-align:middle;
+  }
+
+  .ns-group { grid-column:1/-1; border-top:1px solid var(--line); padding-top:12px; margin-top:2px; }
+  .ns-group-h { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+                font-weight:700; display:block; margin-bottom:8px; }
+  .ns-group-in { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:12px 20px; }
+
+  .mono { font-family:var(--mono); }
+  .linkbu { font:inherit; background:none; border:0; padding:0; cursor:pointer; color:var(--stone);
+            text-decoration:underline; text-underline-offset:3px; text-align:left; }
+  .linkbu:hover { color:var(--gold-deep); }
+  .linkbu:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* Expandable item rows */
+  .itemlist { display:flex; flex-direction:column; gap:9px; }
+  details.item { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  details.item[open] { border-color:var(--stone-soft); }
+  details.item summary {
+    list-style:none; cursor:pointer; padding:13px 16px; display:grid;
+    grid-template-columns:34px minmax(150px,1fr) 88px 46px 110px 78px 78px 44px;
+    gap:10px; align-items:center;
+  }
+  details.item summary::-webkit-details-marker { display:none; }
+  details.item summary:hover { background:var(--surface-2); }
+  details.item summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .i-code { font-family:var(--mono); font-size:13px; color:var(--ink-3); font-variant-numeric:tabular-nums; }
+  .i-name { font-weight:600; font-size:14.5px; }
+  .i-owner { font-size:13px; color:var(--ink-2); }
+  .i-sc { display:flex; flex-direction:column; line-height:1.15; text-align:right; }
+  .i-sc b { font-family:var(--mono); font-size:16px; font-variant-numeric:tabular-nums; }
+  .i-sc em { font-style:normal; font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-3); }
+  .i-var { font-family:var(--mono); font-size:14px; text-align:right; font-variant-numeric:tabular-nums; }
+  details.item summary::after {
+    content:"▸"; grid-column:1/-1; display:none;
+  }
+  .item-body { padding:4px 16px 18px; border-top:1px solid var(--line-soft); }
+  h4.mini { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
+            font-weight:700; margin:22px 0 9px; }
+  @media (max-width:900px) {
+    details.item summary { grid-template-columns:30px 1fr 70px 70px; }
+    .i-owner, .i-var { display:none; }
+  }
+
+  /* Performance is the primary reading; execution sits beside it */
+  .card.primary-card { border-color:var(--stone-soft); border-top:3px solid var(--stone-soft); }
+  .score-h .rank { font-size:9.5px; letter-spacing:.1em; color:var(--gold-deep);
+                   border:1px solid var(--gold); border-radius:99px; padding:1px 6px; margin-left:6px; }
+  .i-sc.primary b { color:var(--stone); }
+
+  /* ── Visual performance rows ─────────────────────────── */
+  .chart { display:flex; flex-direction:column; gap:2px; border:1px solid var(--line);
+           border-radius:var(--r); background:var(--surface); padding:6px 0; }
+  .brow { display:grid; grid-template-columns:190px 1fr; gap:18px; align-items:center;
+          padding:13px 18px; border-bottom:1px solid var(--line-soft); }
+  .chart .brow:last-child { border-bottom:0; }
+  .brow.total { background:var(--surface-2); }
+  .brow-l { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .brow-l b { font-size:14.5px; }
+  .brow-l button.linkbu { font-size:14.5px; font-weight:700; }
+  .brow-l span { font-size:11.5px; color:var(--ink-3); }
+  .brow-r { display:flex; flex-direction:column; gap:7px; min-width:0; }
+
+  .bar { display:grid; grid-template-columns:74px 1fr 52px; gap:10px; align-items:center; }
+  .bar > label { font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+                 color:var(--ink-3); font-weight:700; text-align:right; }
+  .bar-track { position:relative; height:16px; background:var(--surface-2);
+               border-radius:2px; overflow:visible; }
+  .bar-fill { height:100%; border-radius:2px; }
+  .bar-val { font-family:var(--mono); font-size:14px; font-variant-numeric:tabular-nums; font-weight:600; }
+  .bar.sec .bar-track { height:11px; }
+  .bar.sec .bar-val { font-size:13px; font-weight:400; color:var(--ink-2); }
+  .bar-plan { position:absolute; top:-3px; bottom:-3px; width:2px; background:var(--ink); }
+  .bar-plan::after { content:attr(data-l); position:absolute; top:-15px; left:50%;
+                     transform:translateX(-50%); font-size:9.5px; color:var(--ink-3);
+                     font-family:var(--mono); white-space:nowrap; }
+  .bar-none { font-size:12.5px; color:var(--none); font-style:italic; }
+
+  .chart-legend { display:flex; gap:18px; flex-wrap:wrap; font-size:12px;
+                  color:var(--ink-3); margin-top:11px; }
+  .chart-legend span { display:flex; align-items:center; gap:6px; }
+
+  /* Temple is for viewing, not performance */
+  .entablature { padding:18px 22px; }
+  .ns-item { gap:3px; padding:2px 0; }
+  .ns-target { font-family:var(--mono); font-size:16px; font-variant-numeric:tabular-nums; color:var(--ink); }
+  .ns-dir { font-size:11px; color:var(--ink-3); font-family:var(--mono); }
+  .ko-head { grid-column:1/-1; font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; margin-bottom:-4px; }
+  .cap.plain { justify-content:flex-start; }
+
+  /* ── Condensing sticky chrome ─────────────────────────── */
+  header.top { position:sticky; top:0; z-index:8; transition:padding .18s ease; }
+  .top-in { padding:12px 24px; transition:padding .18s ease; }
+  .brand h1 { font-size:22px; transition:font-size .18s ease; }
+  .eyebrow { transition:opacity .18s ease, max-height .18s ease; overflow:hidden; max-height:20px; }
+  body.scrolled .top-in { padding:6px 24px; }
+  body.scrolled .brand h1 { font-size:16px; }
+  body.scrolled .eyebrow { opacity:0; max-height:0; }
+  body.scrolled .shapetag { font-size:10px; padding:2px 9px; }
+  nav.units { position:sticky; top:var(--top-h,58px); z-index:7; transition:top .18s ease; }
+  nav.tabs  { position:sticky; top:calc(var(--top-h,58px) + var(--units-h,45px)); z-index:6; }
+  body.scrolled nav.units button { padding:9px 18px; }
+  body.scrolled .tabs button { padding:9px 15px; }
+  .banner { font-size:12px; padding:7px 24px; }
+
+  /* ── Circular gauges ──────────────────────────────────── */
+  .gauges { display:grid; gap:14px; }
+  .gauges.g3 { grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .gauges.g4 { grid-template-columns:repeat(4,1fr); }
+  @media (max-width:900px) { .gauges.g4 { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:480px) { .gauges.g4 { grid-template-columns:1fr; } }
+  .gcard { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+           padding:18px 16px; display:flex; flex-direction:column; align-items:center; gap:11px; text-align:center; }
+  .gcard.click { cursor:pointer; }
+  .gcard.click:hover { border-color:var(--stone-soft); }
+  .gcard.click:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .gauge { --p:0; --c:var(--none); width:108px; height:108px; border-radius:50%; position:relative;
+           background:conic-gradient(var(--c) calc(var(--p)*1%), var(--surface-2) 0); flex:0 0 auto; }
+  .gauge.sm { width:78px; height:78px; }
+  .gauge::before { content:""; position:absolute; inset:11px; border-radius:50%; background:var(--surface); }
+  .gauge.sm::before { inset:9px; }
+  .gauge-in { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center;
+              justify-content:center; gap:0; }
+  .gauge-in b { font-family:var(--mono); font-size:23px; font-variant-numeric:tabular-nums; line-height:1; }
+  .gauge.sm .gauge-in b { font-size:17px; }
+  .gauge-in em { font-style:normal; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); margin-top:3px; }
+  .gname { font-size:15px; font-weight:700; }
+  .gname button.linkbu { font-size:15px; font-weight:700; }
+  .gsub { font-size:11.5px; color:var(--ink-3); }
+  .gexec { display:flex; align-items:center; gap:9px; font-size:12.5px; color:var(--ink-2);
+           border-top:1px solid var(--line-soft); padding-top:10px; width:100%; justify-content:center; }
+  .gexec b { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+  /* ── Hover notes ──────────────────────────────────────── */
+  .tip { position:relative; display:inline-flex; align-items:center; justify-content:center;
+         width:14px; height:14px; border-radius:50%; border:1px solid var(--ink-3);
+         color:var(--ink-3); font-size:9px; font-weight:700; margin-left:5px; cursor:help; vertical-align:middle; }
+  .tip::after {
+    content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    background:var(--ink); color:var(--ground); font-size:12px; font-weight:400; line-height:1.4;
+    letter-spacing:0; text-transform:none; padding:9px 12px; border-radius:3px; width:255px;
+    opacity:0; pointer-events:none; transition:opacity .13s; z-index:20; text-align:left;
+  }
+  .tip:hover::after, .tip:focus::after { opacity:1; }
+
+  /* ── Enabler cards (temple base) ──────────────────────── */
+  .base-grid { grid-template-columns:repeat(4,1fr); }
+  @media (max-width:860px) { .base-grid { grid-template-columns:repeat(2,1fr); } }
+  .cap { flex-direction:column; align-items:flex-start; gap:5px; text-align:left; }
+  details.encard { border:1px solid var(--line-soft); border-radius:var(--r); background:var(--surface-2); }
+  details.encard[open] { background:var(--surface); border-color:var(--stone-soft); }
+  details.encard summary { list-style:none; cursor:pointer; padding:11px 13px; display:flex;
+                           flex-direction:column; gap:4px; }
+  details.encard summary::-webkit-details-marker { display:none; }
+  details.encard summary:hover { background:var(--surface); }
+  details.encard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  details.encard summary b { font-size:13.5px; }
+  details.encard summary span { font-size:11px; color:var(--ink-3); }
+  .encard-body { padding:0 13px 13px; font-size:12.5px; color:var(--ink-2); }
+  .encard-body p { margin:0 0 10px; }
+  .encard-body ul { margin:0; padding-left:16px; }
+  .encard-body li { margin-bottom:4px; }
+  .encard-body .mono { font-size:12px; }
+
+  /* ── Core values box ──────────────────────────────────── */
+  .valbox { margin-top:20px; }
+  .valgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+  details.valcard { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  details.valcard[open] { border-color:var(--gold); }
+  details.valcard summary { list-style:none; cursor:pointer; padding:13px 15px;
+                            font-family:var(--serif); font-size:16px; display:flex;
+                            align-items:center; justify-content:space-between; gap:8px; }
+  details.valcard summary::-webkit-details-marker { display:none; }
+  details.valcard summary::after { content:"+"; font-family:var(--mono); color:var(--gold-deep); font-size:16px; }
+  details.valcard[open] summary::after { content:"−"; }
+  details.valcard summary:hover { background:var(--surface-2); }
+  details.valcard summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .valcard-body { padding:0 15px 14px; font-size:13.5px; color:var(--ink-2); }
+
+  /* ── Temple entablature, fixed grid ───────────────────── */
+  .entablature { grid-template-columns:repeat(3,1fr); gap:16px 26px; align-items:start; }
+  @media (max-width:760px) { .entablature { grid-template-columns:repeat(2,1fr); } }
+  .ns-label { min-height:2.3em; display:flex; align-items:flex-start; }
+  .ns-group-in { grid-template-columns:repeat(3,1fr); gap:16px 26px; }
+  @media (max-width:760px) { .ns-group-in { grid-template-columns:repeat(2,1fr); } }
+
+  /* Health band legend */
+  .bands { display:flex; gap:20px; flex-wrap:wrap; align-items:center; font-size:12.5px;
+           color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r); padding:11px 16px; margin:0 0 24px; }
+  .bands b { font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; margin-right:2px; }
+  .bands span { display:flex; align-items:center; gap:7px; }
+  .bands i { width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .bands i.dash { border:1px dashed var(--none); background:none; }
+
+  /* ── Section separation ───────────────────────────────── */
+  .section { margin-top:46px; padding-top:26px; border-top:2px solid var(--stone-soft); }
+  .section:first-of-type { margin-top:8px; padding-top:0; border-top:0; }
+  .section-h { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:5px; }
+  .section-h h2 { font-family:var(--serif); font-size:25px; letter-spacing:-.01em; }
+  .section-h .eyebrow2 { font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+                         color:var(--gold-deep); font-weight:700; border:1px solid var(--gold);
+                         border-radius:99px; padding:3px 10px; }
+  .section > .sec-note { margin-bottom:20px; max-width:70ch; }
+
+  /* ── Weighting configuration ──────────────────────────── */
+  .cfg { overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  .cfg table { min-width:760px; }
+  .cfg .fw { font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .cfg input { font:inherit; font-family:var(--mono); font-size:13px; width:78px; padding:5px 8px;
+               border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
+               color:var(--ink); text-align:right; }
+  .cfg input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .cfg input[readonly] { background:var(--surface-2); color:var(--ink-3); }
+  .cfg tfoot td { background:var(--surface-2); font-weight:700; }
+  .factor-h { display:flex; flex-direction:column; gap:2px; }
+  .factor-h b { font-size:13px; }
+  .factor-h span { font-size:11px; color:var(--ink-3); font-weight:400; text-transform:none; letter-spacing:0; }
+  .qual { display:inline-flex; gap:3px; }
+  .qual i { width:15px; height:15px; border-radius:2px; border:1px solid var(--line);
+            display:inline-block; font-style:normal; }
+  .qual i.on { background:var(--stone-soft); border-color:var(--stone-soft); }
+
+  /* ── Expandable cards: name at top, drill-down below ──── */
+  details.gcard { display:block; padding:0; }
+  details.gcard > summary { list-style:none; cursor:pointer; padding:16px 16px 18px;
+                            display:flex; flex-direction:column; align-items:center; gap:11px; }
+  details.gcard > summary::-webkit-details-marker { display:none; }
+  details.gcard > summary:hover { background:var(--surface-2); }
+  details.gcard > summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  details.gcard[open] { border-color:var(--stone-soft); }
+  .ghead { width:100%; text-align:center; padding-bottom:10px; border-bottom:1px solid var(--line-soft); }
+  .ghead .gname { font-size:16px; }
+  .gmore { font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--gold-deep);
+           font-weight:700; }
+  details.gcard[open] .gmore::before { content:"− "; }
+  details.gcard:not([open]) .gmore::before { content:"+ "; }
+  .gbody { padding:0 16px 16px; border-top:1px solid var(--line-soft); }
+  .gbody h4.mini { margin-top:14px; }
+
+  details.card { display:block; }
+  details.card > summary { list-style:none; cursor:pointer; }
+  details.card > summary::-webkit-details-marker { display:none; }
+  details.card > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  details.card .cardmore { font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+                           color:var(--gold-deep); font-weight:700; margin-top:12px; display:block; }
+  details.card[open] .cardmore::before { content:"− "; }
+  details.card:not([open]) .cardmore::before { content:"+ "; }
+  .card-drill { margin-top:16px; padding-top:14px; border-top:1px solid var(--line-soft); }
+
+  /* ── Modal ────────────────────────────────────────────── */
+  .overlay { position:fixed; inset:0; background:rgba(10,14,20,.55); z-index:100;
+             display:flex; align-items:center; justify-content:center; padding:28px;
+             opacity:0; pointer-events:none; transition:opacity .15s; }
+  .overlay.on { opacity:1; pointer-events:auto; }
+  .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
+           width:min(940px,100%); max-height:88vh; display:flex; flex-direction:column;
+           box-shadow:0 24px 60px rgba(0,0,0,.28); }
+  .modal-h { display:flex; align-items:flex-start; gap:16px; padding:20px 24px 16px;
+             border-bottom:1px solid var(--line); }
+  .modal-h div { flex:1; min-width:0; }
+  .modal-h h3 { font-family:var(--serif); font-size:21px; }
+  .modal-h p { margin:4px 0 0; font-size:13px; color:var(--ink-3); }
+  .modal-x { font:inherit; font-size:22px; line-height:1; background:none; border:0; cursor:pointer;
+             color:var(--ink-3); padding:2px 8px; border-radius:2px; }
+  .modal-x:hover { background:var(--surface-2); color:var(--ink); }
+  .modal-x:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .modal-b { padding:20px 24px 24px; overflow-y:auto; }
+  .modal-b table { min-width:0; width:100%; }
+  .modal-b .scroll { border:1px solid var(--line-soft); }
+  .modal-b h4.mini:first-child { margin-top:0; }
+  @media (max-width:640px) { .overlay { padding:0; } .modal { max-height:100vh; border-radius:0; } }
+
+  /* ── Split metric boxes inside a card ─────────────────── */
+  .gcard { padding:0; }
+  .card-head { padding:15px 16px 13px; border-bottom:1px solid var(--line-soft); text-align:center; width:100%; }
+  .card-head .gname { font-size:16px; }
+  .metrics { display:grid; grid-template-columns:1fr 1fr; }
+  .metric { padding:16px 12px 14px; display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .metric + .metric { border-left:1px solid var(--line-soft); }
+  .metric > label { font-size:9.5px; letter-spacing:.11em; text-transform:uppercase;
+                    color:var(--ink-3); font-weight:700; }
+  .metric .plan { font-size:11.5px; color:var(--ink-3); font-family:var(--mono);
+                  font-variant-numeric:tabular-nums; }
+  .plusbtn { font:inherit; font-family:var(--mono); font-size:15px; line-height:1; width:26px; height:26px;
+             border:1px solid var(--line); border-radius:50%; background:var(--surface);
+             color:var(--gold-deep); cursor:pointer; }
+  .plusbtn:hover { border-color:var(--gold); background:var(--attn-bg); }
+  .plusbtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .metric .none-note { font-size:11.5px; color:var(--none); font-style:italic; }
+
+  /* ── Editable impact score ────────────────────────────── */
+  .qual { display:inline-flex; gap:3px; }
+  .qual button { width:22px; height:22px; border-radius:2px; border:1px solid var(--line);
+                 background:var(--surface); cursor:pointer; padding:0; font:inherit; font-size:11px;
+                 color:var(--ink-3); font-family:var(--mono); }
+  .qual button.on { background:var(--stone-soft); border-color:var(--stone-soft); color:#fff; }
+  .qual button:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .edithint { font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
+              color:var(--gold-deep); font-weight:700; }
+
+  /* ── v6 card: Objectives 2/3 with the dial, Execution 1/3 as figures ── */
+  .two { display:grid; grid-template-columns:2fr 1fr; }
+  .gcard .card-head { background:var(--panel); color:var(--panel-ink);
+                      padding:13px 16px 12px; border-bottom:0; text-align:center; width:100%; }
+  .gcard .card-head .gname { font-size:16px; font-weight:700; color:var(--panel-ink); }
+  .gcard .card-head .gname button.linkbu { color:var(--panel-ink);
+                      text-decoration-color:rgba(255,255,255,.45); font-size:16px; }
+  .gcard .card-head .gname button.linkbu:hover { color:var(--gold); }
+  .gcard .card-head .gsub { font-size:11.5px; color:var(--panel-ink); opacity:.72; }
+  .gcard .card-head .pill.theme { color:var(--gold); border-color:var(--gold); }
+
+  .box-obj, .box-exec { display:flex; flex-direction:column; align-items:center; padding-top:16px; }
+  .box-obj { gap:11px; padding-bottom:20px; padding-left:14px; padding-right:14px; }
+  .box-exec { gap:2px; padding-bottom:16px; padding-left:10px; padding-right:10px;
+              border-left:1px solid var(--line-soft); }
+
+  .boxlabel { display:flex; align-items:center; justify-content:center; gap:6px;
+              height:20px; margin-bottom:2px; }
+  .boxlabel > span { font-size:10.5px; letter-spacing:.14em; text-transform:uppercase;
+                     color:var(--ink-3); font-weight:700; }
+  .box-exec .boxlabel > span { font-size:9.5px; letter-spacing:.12em; }
+  .boxlabel .plusbtn { width:19px; height:19px; font-size:12px; line-height:1;
+                       opacity:0; transition:opacity .12s ease; }
+  .box-obj:hover .boxlabel .plusbtn,
+  .box-exec:hover .boxlabel .plusbtn,
+  .boxlabel .plusbtn:focus-visible { opacity:1; }
+
+  .box-obj .gauge { width:130px; height:130px; }
+  .box-obj .gauge::before { inset:13px; }
+  .box-obj .gauge-in b { font-size:28px; }
+
+  .ratio { font-family:var(--mono); font-size:26px; line-height:1.1; color:var(--ink);
+           font-variant-numeric:tabular-nums; letter-spacing:-.01em; font-weight:600; margin-top:6px; }
+  .ratio small { font-size:13px; color:var(--ink); }
+  .ratio-l { font-size:9px; letter-spacing:.1em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; }
+  dl.led { margin:11px 0 3px; display:grid; grid-template-columns:auto auto;
+           gap:3px 10px; font-size:11.5px; width:100%; }
+  dl.led dt { color:var(--ink-2); }
+  dl.led dd { margin:0; font-family:var(--mono); font-size:12.5px; font-weight:600;
+              font-variant-numeric:tabular-nums; text-align:right; color:var(--ink); }
+  dl.led dd.varv { font-weight:700; }
+
+  .gauges.g4 .box-obj .gauge { width:110px; height:110px; }
+  .gauges.g4 .box-obj .gauge::before { inset:11px; }
+  .gauges.g4 .box-obj .gauge-in b { font-size:24px; }
+  .gauges.g4 .ratio { font-size:22px; }
+
+  @media (max-width:520px) {
+    .two { grid-template-columns:1fr; }
+    .box-exec { border-left:0; border-top:1px solid var(--line-soft); }
+  }
+
+  /* ── Fixes: centred label, centred glyph, section numbering ─────── */
+  /* Three-column label row: an empty cell mirrors the button so the word
+     stays centred in the box whether or not the button is visible. */
+  .boxlabel { display:grid; grid-template-columns:19px 1fr 19px; gap:6px;
+              align-items:center; width:100%; height:20px; margin-bottom:2px; }
+  .boxlabel::before { content:""; }
+  .boxlabel > span { grid-column:2; text-align:center; }
+  .boxlabel .plusbtn { grid-column:3; }
+
+  .plusbtn { display:inline-flex; align-items:center; justify-content:center;
+             padding:0; line-height:1; font-family:var(--sans); font-weight:700; }
+  .boxlabel .plusbtn { width:19px; height:19px; font-size:11px; }
+
+  /* Section number leads the title */
+  .section-h { align-items:baseline; gap:11px; }
+  .section-n { font-family:var(--mono); font-size:12px; font-weight:700;
+               letter-spacing:.04em; color:var(--gold-deep); border:1px solid var(--gold);
+               border-radius:99px; padding:3px 11px; white-space:nowrap; }
+
+  /* ── Temple: themes span the full width of the temple ───────────── */
+  .pillars { padding:16px 0 0; gap:0; grid-template-columns:repeat(3,1fr); }
+  .pillar { border-radius:0; margin:0; }
+  .pillar + .pillar { border-left:2px solid var(--ground); }
+
+  /* ── Weighting: collapsed, and fits without horizontal scroll ───── */
+  details.cfgwrap { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  details.cfgwrap[open] { border-color:var(--stone-soft); }
+  details.cfgwrap > summary { list-style:none; cursor:pointer; padding:16px 20px;
+                              display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  details.cfgwrap > summary::-webkit-details-marker { display:none; }
+  details.cfgwrap > summary:hover { background:var(--surface-2); }
+  details.cfgwrap > summary:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .cfg-sum { display:flex; gap:20px; flex-wrap:wrap; align-items:baseline; flex:1; }
+  .cfg-sum b { font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+               color:var(--ink-3); font-weight:700; }
+  .cfg-sum span { font-size:14px; }
+  .cfg-sum span em { font-style:normal; font-family:var(--mono); font-weight:700;
+                     font-variant-numeric:tabular-nums; }
+  .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+             font-weight:700; color:var(--gold-deep); background:none;
+             border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
+  .editbtn:hover { background:var(--attn-bg); }
+  details.cfgwrap[open] .editbtn::after { content:" \2014 close"; }
+  .cfg-body { padding:0 20px 20px; border-top:1px solid var(--line-soft); }
+
+  .cfg { overflow:visible; border:0; }
+  .cfg table { min-width:0; width:100%; table-layout:fixed; font-size:12.5px; }
+  .cfg th, .cfg td { padding:9px 8px; }
+  .cfg th:first-child, .cfg td:first-child { width:15%; }
+  .cfg th:last-child, .cfg td:last-child { width:15%; }
+  .cfg input { width:100%; max-width:82px; font-size:12.5px; padding:4px 7px; }
+  .cfg .factor-h b { font-size:11.5px; }
+  .cfg .factor-h span { font-size:10px; line-height:1.3; }
+  .cfg .why { font-size:10.5px; line-height:1.35; }
+  .qual button { width:20px; height:20px; font-size:10px; }
+
+  /* ── Viewer switcher ─────────────────────────────────────────────── */
+  .viewer { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+                  color:var(--ink-3); font-weight:700; }
+  .viewer select { font:inherit; font-size:13px; padding:5px 9px; border:1px solid var(--line);
+                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:250px; }
+  .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
+                 letter-spacing:.06em; text-transform:uppercase; }
+  body.scrolled .viewer label { display:none; }
+
+  /* ── Access matrix ───────────────────────────────────────────────── */
+  .acgrid table { table-layout:auto; }
+  .acgrid th.ac, .acgrid td.ac { text-align:center; width:auto; }
+  .acgrid tr.grouprow td { background:var(--panel); color:var(--panel-ink);
+                           font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+                           font-weight:700; padding:7px 13px; }
+  .st { display:inline-block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+        font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
+  .st-none { color:var(--none); border:1px dashed var(--none); }
+  .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
+  .st-edit { color:var(--gold-deep); background:var(--attn-bg); border:1px solid var(--gold); }
+  .stset { display:inline-flex; gap:2px; }
+  .stbtn { width:26px; height:24px; border:1px solid var(--line); background:var(--surface);
+           color:var(--ink-3); cursor:pointer; font-size:11px; padding:0; border-radius:2px;
+           font-family:var(--sans); line-height:1; }
+  .stbtn:first-child { border-radius:2px 0 0 2px; }
+  .stbtn:last-child { border-radius:0 2px 2px 0; }
+  .stbtn:hover { background:var(--surface-2); }
+  .stbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .stbtn.on.none { background:var(--none); border-color:var(--none); color:var(--surface); }
+  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:#fff; }
+  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:#fff; }
+
+  .chart-legend i.st { margin-right:2px; }
+
+  /* ── Factor editor ───────────────────────────────────────────────── */
+  .rmbtn { font:inherit; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--bad); background:none; border:1px solid var(--line);
+           border-radius:99px; padding:4px 11px; cursor:pointer; }
+  .rmbtn:hover { background:var(--bad-bg); border-color:var(--bad); }
+  .rmbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .addrow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
+  .addrow .why { margin:0; }
+  b.overload { color:var(--bad); }
+  .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
+
+  /* Config tables breathe more than data tables — these are settings, read
+     slowly and one row at a time, not scanned for a number. */
+  .cfg td .why { margin-top:4px; }
+  .cfg input.lbl, .cfg input.lvl { width:100%; max-width:none; text-align:left;
+                                    font-family:var(--sans); font-size:13px; }
+  .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
+
+  /* ── Chrome: one sticky container, nothing measured ─────────────── */
+  .chrome { position:sticky; top:0; z-index:9; }
+  header.top { position:static; }
+  nav.units, nav.tabs { position:static; }
+
+  /* ── Section heading: the numeral leads, no badge ───────────────── */
+  .section-n { font-family:var(--serif); font-size:34px; line-height:1; color:var(--gold);
+               border:0; border-radius:0; padding:0; letter-spacing:0; }
+  .section-h { gap:14px; }
+
+  /* ── Pillar list: a table that expands ─────────────────────────── */
+  .plist { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  .pheadwrap { position:sticky; top:var(--chrome-h,118px); z-index:5; }
+  .phead, .prow, .ptotal { display:grid; gap:12px; align-items:center; padding:12px 16px; }
+  .phead { background:var(--surface-2); border-bottom:1px solid var(--line);
+           font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+           color:var(--ink-3); font-weight:700; padding-top:9px; padding-bottom:9px; }
+  .prow { width:100%; text-align:left; font:inherit; color:inherit; background:none;
+          border:0; border-bottom:1px solid var(--line-soft); cursor:pointer; }
+  .prow:hover { background:var(--surface-2); }
+  .prow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .prow[aria-expanded="true"] { background:var(--surface-2); }
+  .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .pname b { font-size:14.5px; font-weight:600; }
+  .pname .psub { font-size:11.5px; color:var(--ink-3); font-weight:400; }
+  .powner { font-size:12.5px; color:var(--ink-2); }
+  .prow .num, .ptotal .num, .phead .num { text-align:right;
+        font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .phead .num { font-family:var(--sans); }
+  .prow .num.lead { font-weight:700; font-size:15px; }
+  .chev { color:var(--ink-3); font-size:12px; transition:transform .15s ease; text-align:center; }
+  .prow[aria-expanded="true"] .chev { transform:rotate(90deg); }
+  .ptotal { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+  .ptotal .num { color:var(--panel-ink); }
+  .ptotal .tsub { display:block; font-size:11px; font-weight:400; opacity:.75; }
+  .pbody { padding:8px 16px 22px; border-bottom:1px solid var(--line-soft); background:var(--surface); }
+  .pbody[hidden] { display:none; }
+
+  /* ── Compact score pair ────────────────────────────────────────── */
+  .card.tight { padding:14px 16px 13px; }
+  .card.tight .score-h { margin-bottom:6px; }
+  .headline { display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+  .headline .big { font-size:31px; }
+  .headline .ofplan { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+                      color:var(--ink-3); font-weight:700; margin:0 0 5px; }
+  .minirow { display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+             margin-top:11px; padding-top:10px; border-top:1px solid var(--line-soft); }
+  .minirow div { display:flex; flex-direction:column; gap:1px; }
+  .minirow em { font-style:normal; font-size:9.5px; letter-spacing:.09em;
+                text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .minirow b { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:14px; }
+
+  /* ── Tables: name left, figures centred, conclusion coloured ───── */
+  th.cc, td.cc { text-align:center; }
+  td.num, th.num.cc { text-align:center; }
+  .pbody td.num, .pbody th.cc { text-align:center; }
+  th.idx, td.idx { width:38px; text-align:center; font-family:var(--mono);
+                   font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; }
+  td.final { font-weight:700; font-size:14px; }
+  .pair { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .pair b { font-weight:700; }
+  .pbody .qs { justify-content:flex-start; }
+
+  @media (max-width:900px) {
+    .phead { display:none; }
+    .prow, .ptotal { grid-template-columns:1fr 74px 60px 18px !important; }
+    .prow > span:nth-child(2), .prow > span:nth-child(3), .powner { display:none; }
+    .ptotal > span:nth-child(2), .ptotal > span:nth-child(3), .ptotal > span:nth-child(4) { display:none; }
+  }
+
+  /* ── Configuration: read-only until Edit is pressed ─────────────── */
+  .cfgwrap.open { border:1px solid var(--line); border-radius:var(--r);
+                  background:var(--surface); }
+  .cfg-bar { display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+             padding:14px 18px; border-bottom:1px solid var(--line-soft); }
+  .cfg-bar.plain { border:1px solid var(--line); border-bottom:0;
+                   border-radius:var(--r) var(--r) 0 0; background:var(--surface); }
+  .cfg-bar .cfg-sum { flex:1; margin:0; }
+  .cfg-lab { flex:1; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; }
+  .swatch { display:inline-block; width:11px; height:11px; border-radius:50%;
+            margin-right:9px; vertical-align:baseline; }
+  .cfg input.blabel { width:100%; max-width:none; text-align:left;
+                      font-family:var(--sans); font-size:13px; }
+  .cfg input.bfloor { width:64px; max-width:64px; }
+  .qual.static i { width:20px; height:20px; border:1px solid var(--line); border-radius:2px;
+                   display:inline-flex; align-items:center; justify-content:center;
+                   font-style:normal; font-size:10px; font-family:var(--mono);
+                   color:var(--ink-3); background:var(--surface); }
+  .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:#fff; }
+  .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
+
+  /* ── Drag handle ────────────────────────────────────────────────────
+     The handle is the only drag target, so opening a pillar and moving it are
+     never confused with one another. */
+  .grip { display:inline-flex; flex-direction:column; justify-content:center; gap:3px;
+          width:20px; height:26px; padding:0 5px; cursor:grab; touch-action:none;
+          border-radius:2px; opacity:.55; transition:opacity .12s ease; }
+  .grip i { display:block; height:2px; background:var(--ink-3); border-radius:1px; }
+  .prow:hover .grip, tr:hover .grip, .grip:focus-visible { opacity:1; }
+  .grip:hover { background:var(--surface-2); }
+  .grip:active { cursor:grabbing; }
+  .grip:focus-visible { outline:2px solid var(--gold); outline-offset:1px; opacity:1; }
+  .grip-off { display:inline-block; width:20px; }
+
+  .prow.arrangeable { align-items:center; }
+  .prow.static { display:grid; gap:12px; padding:14px 16px;
+                 border-bottom:1px solid var(--line-soft); background:var(--surface); }
+  .prow.static:last-child { border-bottom:0; }
+  .prow-wrap { display:block; }
+
+  .dragging { opacity:.9; background:var(--attn-bg) !important;
+              box-shadow:0 6px 18px rgba(0,0,0,.14); position:relative; z-index:3; }
+  tr.dragging td { background:var(--attn-bg); }
+  .sorting { cursor:grabbing; }
+  .sorting .prow, .sorting tr { transition:transform .12s ease; }
+
+  /* The number doubles as the handle's home, so reordering costs no column. */
+  td.idx { white-space:nowrap; }
+  td.idx .grip { vertical-align:middle; margin-right:2px; height:18px; }
+  td.idx .idx-n { display:inline-block; min-width:14px; }
+
+  /* Arrange mode reads as a distinct state, so nobody drags a row believing
+     they are in the normal view. */
+  .plist.arranging { border-color:var(--gold); }
+  .plist.arranging .phead { background:var(--attn-bg); }
+  .editbtn[data-arrange] { white-space:nowrap; }
+
+  /* The drill sits on the headline row, so it costs no height. It replaces the
+     hover note: a modal explains and shows the breakdown in one place, and
+     works on touch, which a hover note never did. */
+  .drill { font:inherit; font-size:12px; background:none; border:0; padding:0;
+           margin-left:auto; color:var(--stone); cursor:pointer;
+           text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+  .drill:hover { color:var(--gold-deep); }
+  .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+</style>
+
+<div class="banner">
+  <span><strong>Sample &middot; arrangement.</strong> Press <b>Arrange</b> to show the handles; press <b>Done</b> to return to the static view.</span>
+  <span>This is the real unit page &mdash; nothing is redrawn for the sample.</span>
+</div>
+
+<div class="chrome">
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform &middot; sample</span>
+      <h1 id="title">Raya Trade</h1>
+    </div>
+    <div class="viewer">
+      <label for="asWho">Viewing as</label>
+      <select id="asWho"></select>
+      <span class="viewer-note" id="viewerNote"></span>
+    </div>
+  </div>
+</header>
+<nav class="units">
+  <div class="units-in" role="tablist" id="units"></div>
+</nav>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
+      <button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div></div>
+
+<script>
+/* ── Data. Plan content for Mobile is transcribed from the Raya deck.
+   Retail and Mazaya are invented so the shape can be judged. All reported
+   actuals throughout are illustrative. ───────────────────────────────── */
+
+var GROUP = {
+  aspiration: "To be the most trusted & diversified provider of mobile, consumer electronics, IT products & logistics services in Egypt & Nigeria",
+  mission: "To empower our partners and customers with reliable, accessible, and efficient solutions & services across diverse channels through a seamless distribution & logistical network with solid financial infrastructure and exceptional customer experience, fostering trust, innovation & mutual growth.",
+  values: [
+    { name: "Respect for People",
+      def: "An empathetic employee with a socially positive attitude." },
+    { name: "Teamwork",
+      def: "A key team player who portrays a collaborative mindset and adopts a culture of synergy." },
+    { name: "Excellence",
+      def: "A proactive, self-developing employee who surpasses expectations and objectives." },
+    { name: "Customer Focus",
+      def: "A customer-centric employee with an aptitude for business sustainability." }
+  ],
+  clauses: [
+    ["We are", "a diversified holding trade company"],
+    ["Offering", "comprehensive (value added) distribution, retail, care, e-commerce for consumer electronics, IT products, and services in addition to logistics services for diverse sizes of packages"],
+    ["To", "vendors, retail channels, independent sellers, large enterprises, government sectors, e-commerce platforms and individuals"],
+    ["Through", "a seamless network of distribution channels, physical retail locations, e-commerce platforms, logistics hubs, and a dedicated sales force"],
+    ["Covering", "all over Egypt and Nigeria"],
+    ["Empowered by", "a diversified portfolio, economy of scale, extensive reach, exceptional customer experience, and premium after-sales support (owning the value chain)"]
+  ],
+  keyObjectives: [
+    { name: "Revenue",                group: null,           dir: "≥", target: "18B EGP", compile: "Sum",    actual: "7.8B",  progress: 43 },
+    { name: "EBITDA",                 group: null,           dir: "≥", target: "6.5%",    compile: "Latest", actual: "5.1%",  progress: 78 },
+    { name: "Earnings concentration", group: null,           dir: "≤", target: "40%",     compile: "Latest", actual: "46%",   progress: 87 },
+    { name: "Mobile Distribution",    group: "Market share", dir: "≥", target: "32%",     compile: "Latest", actual: "28%",   progress: 88 },
+    { name: "CE Distribution",        group: "Market share", dir: "≥", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
+    { name: "Retail",                 group: "Market share", dir: "≥", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
+  ],
+  keyObjectivesScore: 75,
+  themes: [
+    { ab: "OT",  name: "One Trade",          note: "New for 2026" },
+    { ab: "VC",  name: "Deepen Value Chain", note: "Standing" },
+    { ab: "DIV", name: "Diversification",    note: "Standing" }
+  ],
+  capabilities: [
+    { name: "Operational Excellence", def: "Run the core trading engine so reliably that scale stops costing us margin.", perf: 86, exec: 68, planned: 60,
+        measures: [
+          { name: "Process cycle time", dir: "≤", target: "12 d", compile: "Latest", actual: "15 d", progress: 80 },
+          { name: "First-time-right rate", dir: "≥", target: "95%", compile: "Latest", actual: "82%", progress: 86 },
+          { name: "Cost-to-serve", dir: "≤", target: "4.2%", compile: "Latest", actual: "5.6%", progress: 75 }
+        ] },
+    { name: "People", def: "Have the right people in the right roles, and keep them.", perf: 51, exec: 48, planned: 50,
+        measures: [
+          { name: "Key-role coverage", dir: "≥", target: "90%", compile: "Latest", actual: "62%", progress: 69 },
+          { name: "Voluntary attrition", dir: "≤", target: "12%", compile: "Latest", actual: "19%", progress: 63 },
+          { name: "Training hours per head", dir: "≥", target: "24", compile: "Sum", actual: "5", progress: 21 }
+        ] },
+    { name: "Innovation and Tech", def: "Consolidate onto systems that let a decision be made from one number, not five.", perf: 38, exec: 40, planned: 50,
+        measures: [
+          { name: "Systems consolidated", dir: "≥", target: "6", compile: "Sum", actual: "2", progress: 33 },
+          { name: "Automation coverage", dir: "≥", target: "70%", compile: "Latest", actual: "30%", progress: 43 }
+        ] },
+    { name: "Brand Positioning", def: "Be the name a partner reaches for first, in every category we carry.", perf: 88, exec: 74, planned: 50,
+        measures: [
+          { name: "Aided brand awareness", dir: "≥", target: "75%", compile: "Latest", actual: "61%", progress: 81 },
+          { name: "Preference index", dir: "≥", target: "40", compile: "Latest", actual: "24", progress: 60 }
+        ] },
+    { name: "Customer Centric", def: "Design from the customer's problem backwards, not from our process outwards.", perf: 44, exec: 45, planned: 50,
+        measures: [
+          { name: "Net promoter score", dir: "≥", target: "55", compile: "Latest", actual: "45", progress: 82 },
+          { name: "Complaint resolution time", dir: "≤", target: "48 h", compile: "Latest", actual: "96 h", progress: 50 }
+        ] },
+    { name: "Product Mindset", def: "Treat the portfolio as something we shape deliberately, not something vendors hand us.", perf: 29, exec: 30, planned: 50,
+        measures: [
+          { name: "New SKUs launched", dir: "≥", target: "40", compile: "Sum", actual: "9", progress: 23 },
+          { name: "Portfolio margin mix", dir: "≥", target: "18%", compile: "Latest", actual: "6%", progress: 34 }
+        ] },
+    { name: "Financial Infrastructure", def: "Keep working capital and credit strong enough that growth is never cash-constrained.", perf: 88, exec: 79, planned: 60,
+        measures: [
+          { name: "Working capital days", dir: "≤", target: "65", compile: "Latest", actual: "72", progress: 90 },
+          { name: "Credit facility headroom", dir: "≥", target: "1.5B", compile: "Latest", actual: "1.1B", progress: 73 }
+        ] },
+    { name: "Strategy", def: "Run the cycle itself well — plan, review, adjust, on time and on evidence.", perf: 66, exec: 58, planned: 50,
+        measures: [
+          { name: "Cycles reviewed on time", dir: "≥", target: "4", compile: "Sum", actual: "2", progress: 50 },
+          { name: "Plan adherence", dir: "≥", target: "80%", compile: "Latest", actual: "51%", progress: 64 }
+        ] }
+  ],
+  portfolio: { objectives: 66, exec: 51, planned: 50 },
+  capabilityRoll: { perf: 54, exec: 51 },
+  /* Weighting model — a proposal. Each factor is either derived from a stored
+     figure or a recorded judgement; the composite always normalises to 100. */
+  weighting: {
+    factors: [
+      { key:"rev",  name:"Revenue contribution", kind:"derived",   basis:"FY2025 revenue",        weight:40 },
+      { key:"prof", name:"Profit contribution",  kind:"derived",   basis:"FY2025 gross profit",   weight:30 },
+      { key:"imp",  name:"Impact on group",      kind:"judgement", basis:"1\u20134, set conceptually", weight:20 },
+      { key:"growth", name:"Potential growth",   kind:"estimate",  basis:"our view, next 3 years", weight:10 }
+    ],
+    units: [
+      { unit:"Mobile", rev:8.2, prof:410, imp:4, growth:12,
+        why:"Largest revenue base and the group's route to market for exclusive brands." },
+      { unit:"Retail", rev:4.6, prof:320, imp:3, growth:18,
+        why:"Highest margin pool and the only direct consumer signal the group owns." },
+      { unit:"Mazaya", rev:3.0, prof:160, imp:3, growth:35,
+        why:"Small today, but the platform every other unit's One Trade work depends on." }
+    ],
+    shares: { Mobile:{rev:52,prof:46,imp:40,growth:18}, Retail:{rev:29,prof:36,imp:30,growth:28}, Mazaya:{rev:19,prof:18,imp:30,growth:54} },
+    composite: { Mobile:45, Retail:31, Mazaya:24 }
+  },
+  themePillars: {
+    OT:  [["Mobile","02 Channel Preference & Development",61,45,50],["Retail","R01 Store Network Expansion",84,78,50],["Mazaya","M01 B2B Platform Scale",38,30,50]],
+    VC:  [["Mobile","01 Digital & Data-Driven Operations",null,38,50],["Mobile","04 Asset-Light Model Regional Expansion",33,55,50],["Retail","R02 Omnichannel Experience",71,64,70],["Retail","R03 Retail Operations Excellence",null,71,55],["Mazaya","M03 Platform Reliability",null,36,45]],
+    DIV: [["Mobile","03 Portfolio & Value Chain Expansion",52,40,43],["Mazaya","M02 Merchant Financing",44,42,33]]
+  },
+  themeView: [
+    { ab: "OT",  name: "One Trade",          items: 3, units: "Mobile, Retail, Mazaya", outcomes: 86, exec: 51, planned: 50 },
+    { ab: "VC",  name: "Deepen Value Chain", items: 5, units: "Mobile, Retail, Mazaya", outcomes: 47, exec: 53, planned: 54 },
+    { ab: "DIV", name: "Diversification",    items: 2, units: "Mobile, Mazaya",         outcomes: 55, exec: 41, planned: 38 }
+  ]
+};
+
+var UNITS = {
+  mobile: {
+    name: "Mobile", codePrefix: "",  weight: 45, real: true,
+    perf: { objectives: 62, pillars: 49, exec: 45, planned: 48 },
+    clauses: [
+      ["We are", "consumer electronics distribution company"],
+      ["We provide", "distribution services (account management, logistics services, product management)"],
+      ["For", "e-commerce, retail, operators, hyper markets, IR and OR"],
+      ["All Overall", "Egypt"],
+      ["We facilitate", "sell-in, end to end distribution services (logistics cycle, collection)"],
+      ["Using", "end to end distribution services to both vendor & channel"]
+    ],
+    aspiration: "By the end of 2027: to be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.",
+    keyObjectives: [
+      { name: "Distribution revenue", dir: "≥", target: "6.2B EGP", compile: "Sum", actual: "2.7B", progress: 44 },
+      { name: "Mobile market share",  dir: "≥", target: "32%",      compile: "Latest", actual: "28%", progress: 88 },
+      { name: "Active merchant reach",dir: "≥", target: "4,500",    compile: "Latest", actual: "3,180", progress: 71 },
+      { name: "App coverage rate",    dir: "≥", target: "50%",      compile: "Latest", actual: "22%", progress: 44 }
+    ],
+    swot: {
+      s: ["Strong brand equity (Raya & i2)", "Diversified & strong brand portfolio", "Over 90% of revenue from local manufacturing", "Nationwide distribution & retail reach", "Integrated Raya Trade ecosystem", "Access to multi-source data"],
+      w: ["Limited control over the value chain", "Low margin on devices", "Multiple systems across Raya Trade business units", "Underutilisation of available automation systems", "Underdeveloped presence in accessories market"],
+      o: ["Growth in accessories and wearables market", "Local manufacturing expansion", "Migration of 3G user base", "Regional expansion using a scalable proven model", "Dubai free zone multi-branded concept", "Unlocking value through AI & data"],
+      t: ["Direct-to-market strategies by vendors", "Margin pressure (global trend)", "Grey market competition on accessories", "Economic pressure on consumption", "Global supply chain disruption", "Irrational competition"]
+    },
+    items: [
+      { code: "01", name: "Digital & Data-Driven Operations", sub: "End-state: unified market intelligence engine",
+        kind: "Capability", theme: "VC", owner: "Ramy Behairy", outcomes: null, exec: 38, planned: 50,
+        measures: [
+          { name: "Data duplicate rate",           dir: "≤", target: "1%",  compile: "Latest", actual: "1.4%", progress: 71 },
+          { name: "Orders processed digitally",    dir: "≥", target: "90%", compile: "Latest", actual: "48%", progress: 53 },
+          { name: "App coverage rate",             dir: "≥", target: "50%", compile: "Latest", actual: "22%", progress: 44 },
+          { name: "Dependency on automated reports", dir: "≥", target: "90%", compile: "Latest", actual: "58%", progress: 64 }
+        ],
+        tactics: [
+          { name: "Clean and standardize customer and SKU base", owner: "Ramy Behairy", s: 2, e: 3, status: "WIP", actual: 45, planned: 50 },
+          { name: "End-to-end order-to-cash digitization",       owner: "Mohamed Rizk",  s: 2, e: 3, status: "WIP", actual: 35, planned: 50 },
+          { name: "Digitize sales reporting via Power BI",       owner: "Ramy Behairy",  s: 2, e: 3, status: "WIP", actual: 40, planned: 50 },
+          { name: "Scale Mobile Digital App across merchants",   owner: "Ashraf Laithy", s: 2, e: 4, status: "WIP", actual: 30, planned: 33 },
+          { name: "Data integration across business units",      owner: "Abdelhamid",    s: 3, e: 4, status: "WIP", actual: 22, planned: 33 }
+        ] },
+      { code: "02", name: "Channel Preference & Development", sub: "",
+        kind: "Direction", theme: "OT", owner: "Mohamed Rizk", outcomes: 61, exec: 45, planned: 50,
+        measures: [
+          { name: "Average delivery time",              dir: "≤", target: "24 h",  compile: "Latest", actual: "31 h", progress: 77 },
+          { name: "Key retailer revenue growth",        dir: "≥", target: "50%",   compile: "Sum", actual: "24%", progress: 48 },
+          { name: "Tier 2 merchants enrolled",          dir: "≥", target: "100",   compile: "Latest", actual: "58", progress: 58 },
+          { name: "Tier 2 segment revenue growth",      dir: "≥", target: "100%",  compile: "Sum", actual: "62%", progress: 62 }
+        ],
+        tactics: [
+          { name: "Retailer preference index workshop",        owner: "Karim",         s: 2, e: 3, status: "WIP",  actual: 60, planned: 50 },
+          { name: "Joint business planning with key retailers",owner: "Mohamed Rizk",  s: 2, e: 4, status: "WIP",  actual: 45, planned: 33 },
+          { name: "Tier 2 growth acceleration programme",      owner: "Ashraf Laithy", s: 2, e: 4, status: "WIP",  actual: 35, planned: 33 },
+          { name: "Channel intelligence engine (pilot)",       owner: "Karim",         s: 2, e: 4, status: "WIP",  actual: 40, planned: 33 }
+        ] },
+      { code: "03", name: "Portfolio & Value Chain Expansion", sub: "",
+        kind: "Direction", theme: "DIV", owner: "Karim", outcomes: 52, exec: 40, planned: 43,
+        measures: [
+          { name: "Non-Samsung revenue",      dir: "≥", target: "4B EGP",   compile: "Sum", actual: "1.6B", progress: 40 },
+          { name: "Samsung market share",     dir: "≥", target: "30%",      compile: "Latest", actual: "27%", progress: 90 },
+          { name: "Vivo market share",        dir: "≥", target: "60%",      compile: "Latest", actual: "48%", progress: 80 },
+          { name: "Accessory revenue",        dir: "≥", target: "300M EGP", compile: "Sum", actual: "96M", progress: 32 },
+          { name: "Active Sary merchants",    dir: "≥", target: "800",      compile: "Latest", actual: "310", progress: 39 },
+          { name: "Sary revenue",             dir: "≥", target: "150M EGP", compile: "Sum", actual: "42M", progress: 28 },
+          { name: "Local production devices", dir: "≥", target: "1M",       compile: "Sum", actual: "520K", progress: 52 },
+          { name: "Sary app downloads",       dir: "≥", target: "40K",      compile: "Latest", actual: "18.4K", progress: 46 }
+        ],
+        tactics: [
+          { name: "Protect and grow share in existing brands", owner: "Ashraf Abdelaty", s: 1, e: 4, status: "WIP", actual: 55, planned: 50 },
+          { name: "Expand high-margin categories",             owner: "Fayad",           s: 1, e: 4, status: "WIP", actual: 40, planned: 50 },
+          { name: "Leverage Sary for entry-to-mid expansion",  owner: "Fayad",           s: 2, e: 4, status: "WIP", actual: 30, planned: 33 },
+          { name: "Sary-enabled tailored B2B portfolio",       owner: "Fayad",           s: 2, e: 4, status: "WIP", actual: 25, planned: 33 },
+          { name: "Ongoing scanning for tier-1 brands",        owner: "Karim",           s: 1, e: 4, status: "WIP", actual: 50, planned: 50 },
+          { name: "Build a light ecosystem (limited SKU)",     owner: "Fayad",           s: 3, e: 4, status: "WIP", actual: 28, planned: 33 },
+          { name: "Market intelligence partner",               owner: "Karim",           s: 3, e: 4, status: "WIP", actual: 35, planned: 33 }
+        ] },
+      { code: "04", name: "Asset-Light Model Regional Expansion", sub: "",
+        kind: "Direction", theme: "VC", owner: "Abdelhamid", outcomes: 33, exec: 55, planned: 50,
+        measures: [
+          { name: "Regional hub revenue",     dir: "≥", target: "2M USD", compile: "Sum", actual: "0.5M", progress: 25 },
+          { name: "Export markets activated", dir: "≥", target: "3",      compile: "Latest", actual: "1", progress: 33 },
+          { name: "Distribution agreements",  dir: "≥", target: "2",      compile: "Latest", actual: "1", progress: 50 }
+        ],
+        tactics: [
+          { name: "Dubai regional hub multi-branded export concept", owner: "Karim",      s: 1, e: 3, status: "WIP",  actual: 60, planned: 67 },
+          { name: "Initial agreements with 2–3 tier 2 brands",       owner: "Abdelhamid", s: 1, e: 3, status: "WIP",  actual: 55, planned: 67 },
+          { name: "Pre-entry market validation",                     owner: "Abdelhamid", s: 2, e: 4, status: "WIP",  actual: 50, planned: 33 },
+          { name: "Regulatory & entry barriers assessment",          owner: "Fayad",      s: 2, e: 4, status: "WIP",  actual: 55, planned: 33 },
+          { name: "Entry model design & B2B e-commerce presence",    owner: "Abuelenien", s: 4, e: 4, status: "WIP",  actual: 18, planned: 25 },
+          { name: "Go / No-Go regional entry risk assessment",       owner: "Karim",      s: 2, e: 3, status: "Done", actual: 100, planned: 100 }
+        ] }
+    ]
+  },
+
+  retail: {
+    name: "Retail", codePrefix: "R", weight: 31, real: false,
+    perf: { objectives: 86, pillars: 78, exec: 71, planned: 58 },
+    clauses: [
+      ["We are", "a consumer electronics retail chain and e-store"],
+      ["We provide", "in-store and online retail, trade-in, care and after-sales services"],
+      ["For", "walk-in consumers, online shoppers and corporate buyers"],
+      ["All Overall", "Egypt, concentrated in Greater Cairo and Delta"],
+      ["We facilitate", "sell-out, instalment plans, and device lifecycle services"],
+      ["Using", "an owned store network, the Raya Shop platform, and a national care operation"]
+    ],
+    aspiration: "By the end of 2027: to be the most preferred consumer electronics retailer in Egypt — the destination customers choose first, online and on the high street.",
+    keyObjectives: [
+      { name: "Retail revenue",     dir: "≥", target: "4.5B EGP", compile: "Sum", actual: "3.8B", progress: 84 },
+      { name: "Stores operating",   dir: "≥", target: "88",       compile: "Latest", actual: "84", progress: 95 },
+      { name: "E-store share of revenue", dir: "≥", target: "25%", compile: "Latest", actual: "21%", progress: 84 },
+      { name: "Net promoter score", dir: "≥", target: "55",       compile: "Latest", actual: "45", progress: 82 }
+    ],
+    swot: {
+      s: ["Established high-street presence", "Direct access to consumer demand signal", "Trade-in and care differentiate on service", "Buying power through the group"],
+      w: ["Store economics sensitive to footfall", "E-store still a minority of revenue", "Inventory turns behind category benchmark"],
+      o: ["Shift of category spend online", "Instalment penetration still low", "Care services as a margin pool"],
+      t: ["Vendor direct-to-consumer channels", "Grey market pricing pressure", "Rental cost inflation on prime locations"]
+    },
+    items: [
+      { code: "R01", name: "Store Network Expansion", sub: "",
+        kind: "Direction", theme: "OT", owner: "Hossam", outcomes: 84, exec: 78, planned: 50,
+        measures: [
+          { name: "New stores opened",     dir: "≥", target: "14",   compile: "Sum", actual: "12", progress: 86 },
+          { name: "Revenue per store",     dir: "≥", target: "52M",  compile: "Latest", actual: "45M", progress: 87 },
+          { name: "Prime-location share",  dir: "≥", target: "60%",  compile: "Latest", actual: "47%", progress: 78 }
+        ],
+        tactics: [
+          { name: "Site selection model using catchment data", owner: "Hossam", s: 1, e: 3, status: "WIP",  actual: 70, planned: 67 },
+          { name: "Standard fit-out programme",                owner: "Dalia",  s: 1, e: 4, status: "WIP",  actual: 65, planned: 50 },
+          { name: "Landlord framework agreements",             owner: "Hossam", s: 2, e: 4, status: "WIP",  actual: 55, planned: 33 }
+        ] },
+      { code: "R02", name: "Omnichannel Experience", sub: "",
+        kind: "Direction", theme: "VC", owner: "Dalia", outcomes: 71, exec: 64, planned: 70,
+        measures: [
+          { name: "E-store revenue",        dir: "≥", target: "1.1B EGP", compile: "Sum", actual: "0.62B", progress: 56 },
+          { name: "Click-and-collect share",dir: "≥", target: "30%",      compile: "Latest", actual: "26%", progress: 87 },
+          { name: "Unified stock accuracy", dir: "≥", target: "95%",      compile: "Latest", actual: "67%", progress: 71 }
+        ],
+        tactics: [
+          { name: "Single stock view across store and e-store", owner: "Dalia", s: 1, e: 2, status: "WIP",  actual: 60, planned: 100 },
+          { name: "Click-and-collect rollout",                  owner: "Dalia", s: 1, e: 3, status: "WIP",  actual: 55, planned: 67 },
+          { name: "Unified loyalty across channels",            owner: "Nour",  s: 2, e: 4, status: "WIP",  actual: 50, planned: 33 }
+        ] },
+      { code: "R03", name: "Retail Operations Excellence", sub: "Service, stock and store discipline",
+        kind: "Capability", theme: "VC", owner: "Nour", outcomes: null, exec: 71, planned: 55,
+        measures: [
+          { name: "Inventory turns",     dir: "≥", target: "6.0", compile: "Latest", actual: "4.7", progress: 78 },
+          { name: "Shrinkage rate",      dir: "≤", target: "0.4%",compile: "Latest", actual: "0.6%", progress: 67 }
+        ],
+        tactics: [
+          { name: "Store operating standard and audit cycle", owner: "Nour", s: 1, e: 4, status: "WIP", actual: 60, planned: 50 },
+          { name: "Replenishment automation",                 owner: "Nour", s: 2, e: 3, status: "WIP", actual: 50, planned: 50 }
+        ] }
+    ]
+  },
+
+  mazaya: {
+    name: "Mazaya", codePrefix: "M", weight: 24, real: false,
+    perf: { objectives: 48, pillars: 41, exec: 36, planned: 43 },
+    clauses: [
+      ["We are", "a B2B trade platform for independent retailers"],
+      ["We provide", "online ordering, credit facilities and fulfilment for small merchants"],
+      ["For", "independent retailers, tier 2 dealers and neighbourhood shops"],
+      ["All Overall", "Egypt"],
+      ["We facilitate", "assortment access, working capital and next-day delivery"],
+      ["Using", "a merchant app, a credit engine and the group's logistics network"]
+    ],
+    aspiration: "By the end of 2027: to be the default ordering platform for Egypt's independent electronics retail — the first app a merchant opens each morning.",
+    keyObjectives: [
+      { name: "Platform GMV",         dir: "≥", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
+      { name: "Monthly active merchants", dir: "≥", target: "2,200", compile: "Latest", actual: "980", progress: 45 },
+      { name: "Repeat order rate",    dir: "≥", target: "65%",      compile: "Latest", actual: "31%", progress: 48 },
+      { name: "Credit default rate",  dir: "≤", target: "2%",       compile: "Latest", actual: "3.1%", progress: 65 }
+    ],
+    swot: {
+      s: ["Access to the group's assortment and logistics", "Existing merchant relationships from distribution", "Credit data from trading history"],
+      w: ["Low repeat usage after first order", "Manual onboarding limits reach", "Thin margins on platform transactions"],
+      o: ["Digitising an entirely offline ordering habit", "Embedded finance as a revenue line", "Cross-sell from distribution's merchant base"],
+      t: ["Well-funded horizontal B2B platforms", "Merchant credit risk in a tight economy", "Vendors bypassing platforms entirely"]
+    },
+    items: [
+      { code: "M01", name: "B2B Platform Scale", sub: "",
+        kind: "Direction", theme: "OT", owner: "Abuelenien", outcomes: 38, exec: 30, planned: 50,
+        measures: [
+          { name: "Merchants onboarded", dir: "≥", target: "2,200",  compile: "Latest", actual: "980", progress: 45 },
+          { name: "Platform GMV",        dir: "≥", target: "900M",   compile: "Sum", actual: "310M", progress: 34 },
+          { name: "Orders per merchant", dir: "≥", target: "8",      compile: "Latest", actual: "2.8", progress: 35 }
+        ],
+        tactics: [
+          { name: "Self-serve merchant onboarding",    owner: "Abuelenien", s: 1, e: 4, status: "WIP", actual: 35, planned: 50 },
+          { name: "Field activation programme",        owner: "Hala",       s: 1, e: 4, status: "WIP", actual: 25, planned: 50 }
+        ] },
+      { code: "M02", name: "Merchant Financing", sub: "",
+        kind: "Direction", theme: "DIV", owner: "Hala", outcomes: 44, exec: 42, planned: 33,
+        measures: [
+          { name: "Credit book",         dir: "≥", target: "180M EGP", compile: "Latest", actual: "74M", progress: 41 },
+          { name: "Merchants with credit", dir: "≥", target: "600",    compile: "Latest", actual: "285", progress: 48 }
+        ],
+        tactics: [
+          { name: "Credit scoring from trading history", owner: "Hala",  s: 2, e: 4, status: "WIP", actual: 45, planned: 33 },
+          { name: "Partner lender agreements",           owner: "Hala",  s: 2, e: 4, status: "WIP", actual: 40, planned: 33 }
+        ] },
+      { code: "M03", name: "Platform Reliability", sub: "Uptime, fulfilment and support",
+        kind: "Capability", theme: "VC", owner: "Mohamed Rizk", outcomes: null, exec: 36, planned: 45,
+        measures: [
+          { name: "Order fulfilment rate", dir: "≥", target: "97%", compile: "Latest", actual: "88%", progress: 91 },
+          { name: "App crash-free rate",   dir: "≥", target: "99%", compile: "Latest", actual: "94%", progress: 95 }
+        ],
+        tactics: [
+          { name: "Fulfilment SLA with logistics", owner: "Mohamed Rizk", s: 1, e: 3, status: "WIP", actual: 40, planned: 67 },
+          { name: "Platform stability programme",  owner: "Mohamed Rizk", s: 2, e: 4, status: "WIP", actual: 32, planned: 33 }
+        ] }
+    ]
+  }
+};
+
+</script>
+<script>
+/* ── CONFIGURATION ────────────────────────────────────────────────────────
+   Everything a tenant can configure. The internal name is the contract the
+   platform is built on and never changes; the display label is what a tenant
+   sees on screen. The SMO manages this, not the client.
+
+   Decisions this file implements:
+     · Labels are per TENANT, not per cycle — renaming mid-history would make
+       a 2026 report and a 2027 report use different words for one object.
+     · Every level of the model is configurable, group and business unit alike.
+     · Two entities may never share a display label; the collision is blocked
+       at save time rather than discovered in a client demo.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var LABELS = {
+  scope: "tenant",              /* not per-cycle */
+  managedBy: "SMO",
+  entries: [
+    { key:"theme",       internal:"Theme",              group:"Themes",            bu:"Themes",
+      note:"The group's standing columns. Also called pillars or motto elements by clients." },
+    { key:"pillar",      internal:"Pillar",             group:"Group capabilities", bu:"Pillars",
+      note:"A business unit's direction or capability. Carries key measures and tactics." },
+    { key:"keyobj",      internal:"Key Objectives",     group:"Key Objectives",    bu:"Key Objectives",
+      note:"A unit's own scorecard. Previously called North Star and Guiding Objectives." },
+    { key:"aspiration",  internal:"Winning Aspiration", group:"Vision",            bu:"Winning Aspiration",
+      note:"One entity. Vision, End State and Winning Aspiration are display labels for it." },
+    { key:"purpose",     internal:"Purpose",            group:"Mission",           bu:"—",
+      note:"Held by the top unit only. Business units inherit it." },
+    { key:"values",      internal:"Core Values",        group:"Core Values",       bu:"—",
+      note:"Group-level only. A unit never declares its own." },
+    { key:"measure",     internal:"Key Measure",        group:"Key measures",      bu:"Key measures",
+      note:"The measures under a single pillar." },
+    { key:"tactic",      internal:"Tactic",             group:"Tactics",           bu:"Tactics",
+      note:"The work under a pillar. Spans quarters, has an owner." }
+  ]
+};
+
+/* ── Levels ───────────────────────────────────────────────────────────────
+   Levels replace job titles so the model travels between clients. Each tenant
+   maps its own titles onto them. A person carries a level AND a unit
+   attachment: the level decides WHICH pages, the attachment decides WHOSE.
+   The SMO sits outside the ladder entirely — it is a super user, not a rank.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var LEVELS = [
+  { key:"ceo",  name:"CEO",  titles:"Group Chief Executive",
+    note:"One person. Sees everything, manages nothing outside their own unit." },
+  { key:"n1",   name:"N-1",  titles:"Business Unit Head · Group CFO · Group COO",
+    note:"Runs a business unit, or a group function with no unit of its own." },
+  { key:"n2",   name:"N-2",  titles:"Director · Pillar owner",
+    note:"Owns pillars within a unit. Most tactic owners sit here." },
+  { key:"n3",   name:"N-3",  titles:"Manager · Tactic owner",
+    note:"Delivers tactics. Reports progress, reads little else." }
+];
+
+var SMO_ROLE = { key:"smo", name:"SMO", note:"Super user. Sees and edits everything, including configuration. Not a level." };
+
+/* The eleven pages, grouped by the seven page TYPES the matrix actually
+   controls. A page type resolves against the person's unit attachment, so
+   \"N-1 sees BU Performance\" means their own unit's, automatically. */
+var PAGES = [
+  { key:"g_perf",  scope:"group", label:"Performance", note:"Group headline, business units, themes, capabilities" },
+  { key:"g_found", scope:"group", label:"Foundation",  note:"Purpose, aspiration, core values, who we are" },
+  { key:"g_temple",scope:"group", label:"Temple",      note:"The strategy on one page. No performance figures" },
+  { key:"g_weight",scope:"group", label:"Weighting",   note:"How much each business unit counts" },
+  { key:"u_perf",  scope:"unit",  label:"Performance", note:"The unit's headline and its pillars" },
+  { key:"u_found", scope:"unit",  label:"Foundation",  note:"The unit's own words and Key Objectives" },
+  { key:"u_anal",  scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
+  { key:"c_labels",scope:"setup", label:"Labels",      note:"Internal names and tenant display labels" },
+  { key:"c_access",scope:"setup", label:"Levels & access", note:"This matrix" },
+  { key:"c_bands", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" }
+];
+
+/* Configuration screens open read-only. Editing is entered deliberately, which
+   is what makes a change to a weight or a threshold an act rather than a slip. */
+var EDITING = { weights:false, factors:false, bands:false };
+
+/* none | view | edit — three states, because the CEO can see the weighting
+   table but does not manage it, and that is not expressible in two. */
+var ACCESS = {
+  smo: { g_perf:"edit", g_found:"edit", g_temple:"edit", g_weight:"edit",
+         u_perf:"edit", u_found:"edit", u_anal:"edit", c_labels:"edit", c_access:"edit", c_bands:"edit" },
+  ceo: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view",
+         u_perf:"view", u_found:"view", u_anal:"view", c_labels:"none", c_access:"none", c_bands:"none" },
+  n1:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none",
+         u_perf:"edit", u_found:"edit", u_anal:"edit", c_labels:"none", c_access:"none", c_bands:"none" },
+  n2:  { g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none",
+         u_perf:"view", u_found:"view", u_anal:"view", c_labels:"none", c_access:"none", c_bands:"none" },
+  n3:  { g_perf:"none", g_found:"none", g_temple:"view", g_weight:"none",
+         u_perf:"view", u_found:"none", u_anal:"none", c_labels:"none", c_access:"none", c_bands:"none" }
+};
+
+/* Who is signed in. Changing this re-renders the whole shell against the
+   matrix above, so the grid can be judged by using it rather than reading it. */
+var PEOPLE = [
+  { key:"smo",     name:"Strategy Management Office", level:"smo", unit:"group",  title:"SMO" },
+  { key:"ceo",     name:"Group CEO",                  level:"ceo", unit:"group",  title:"Chief Executive" },
+  { key:"mobhead", name:"Ashraf Laithy",              level:"n1",  unit:"mobile", title:"Head of Mobile" },
+  { key:"rethead", name:"Hossam Farid",               level:"n1",  unit:"retail", title:"Head of Retail" },
+  { key:"cfo",     name:"Group CFO",                  level:"n1",  unit:"group",  title:"Chief Financial Officer" },
+  { key:"dir",     name:"Ramy Behairy",               level:"n2",  unit:"mobile", title:"Director, Digital Operations" }
+];
+
+var VIEWER = "smo";
+
+function viewer(){ return PEOPLE.filter(function(p){ return p.key === VIEWER; })[0]; }
+function grant(pageKey){
+  var v = viewer();
+  return (ACCESS[v.level] || {})[pageKey] || "none";
+}
+/* A person attached to the group reaches every unit; a person attached to a
+   unit reaches only their own. This is the whole of scope — no page ever
+   renders a trimmed version of itself. */
+function reaches(unitKey){
+  var v = viewer();
+  if (unitKey === "group" || unitKey === "setup") return true;
+  return v.unit === "group" || v.unit === unitKey;
+}
+
+/* ── Key Objective weights ────────────────────────────────────────────────
+   Optional. Unweighted means equal weight, which is the one default nobody
+   has to argue for. Where weights are set they must total 100 within the unit.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var KO_WEIGHTS = {
+  group:  null,                       /* equal across the six */
+  mobile: [40, 25, 20, 15],           /* set — revenue carries the unit */
+  retail: null,
+  mazaya: null
+};
+
+function koScore(list, weights){
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
+  if (!vals.length) return null;
+  if (!weights) {
+    return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
+  }
+  var tot = 0, acc = 0;
+  list.forEach(function(m, i){
+    if (m.milestone || m.progress == null) return;
+    var w = weights[i] == null ? 0 : weights[i];
+    acc += m.progress * w; tot += w;
+  });
+  return tot ? Math.round(acc / tot) : null;
+}
+
+/* ── Weighting factors: configurable from the start ───────────────────────
+   Stored as rows rather than four fixed columns, so adding a fifth factor is
+   data entry rather than a migration. Each factor declares its own type,
+   which decides how its values are captured.
+
+   Per cycle, not per tenant — each year takes insight from the last, so the
+   previous cycle's split is carried here to be shown beside the new one.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var FACTOR_TYPES = {
+  derived:   { label:"Derived",   note:"Read from a stored figure. Not typed by hand." },
+  judgement: { label:"Judgement", note:"Set on a scale, carries a written reason." },
+  estimate:  { label:"Estimate",  note:"A view, entered as a figure." }
+};
+
+var PRIOR_CYCLE = {
+  year: 2025,
+  factors: [ { key:"rev", weight:45 }, { key:"prof", weight:30 },
+             { key:"imp", weight:15 }, { key:"growth", weight:10 } ],
+  composite: { Mobile:48, Retail:30, Mazaya:22 }
+};
+
+/* Set true once a review cycle has been reported. Any factor change from here
+   moves a number that has already been seen, so it warns first. */
+var CYCLE_REPORTED = true;
+
+/* Units carry their own key so a render function can look up configuration
+   that lives outside the unit object. */
+Object.keys(UNITS).forEach(function(k){ UNITS[k].ukey = k; });
+
+/* ── Scoring bands ────────────────────────────────────────────────────────
+   ONE scale for every achievement-against-benchmark figure. Performance is
+   actual over target; execution is delivered over plan. Both are the same kind
+   of number, so both read on the same bands — and the status word is derived
+   from the same function as the colour, which is what stops a green figure
+   sitting beside a contradicting word.
+
+   Per tenant, one standing scale. Moving a threshold silently rewrites how
+   every past report reads, so a change warns the same way a weighting change
+   does. 70 and 50 match the platform's existing STATUS_THRESHOLDS so the
+   strategy layer and the functional layer never disagree about a colour;
+   85 is the added top edge.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var BANDS = {
+  scope: "tenant",
+  bands: [
+    { key:"good", floor:85, label:"On track" },
+    { key:"attn", floor:70, label:"Needs attention" },
+    { key:"warn", floor:50, label:"At risk" },
+    { key:"bad",  floor:0,  label:"Off track" }
+  ]
+};
+
+function bandOf(v){
+  if (v == null) return { key:"none", label:"No data" };
+  var b = BANDS.bands;
+  for (var i=0;i<b.length;i++) if (v >= b[i].floor) return b[i];
+  return b[b.length-1];
+}
+
+/* ── Derived scores ───────────────────────────────────────────────────────
+   Nothing below is stored. A pillar's performance comes from its measures and
+   its execution from its tactics; a unit compiles from its pillars; the group
+   compiles from its units. A row and its expansion can therefore never
+   disagree, which is the failure the earlier prototype had built in.
+   ──────────────────────────────────────────────────────────────────────── */
+
+function avg(a){ return a.length ? Math.round(a.reduce(function(x,y){ return x+y; },0)/a.length) : null; }
+
+/* The code is positional, not an identifier — it references nothing outside
+   the platform, so reordering renumbers it. The unit prefix is kept because it
+   still says which unit a pillar belongs to when pillars are listed together
+   at group level. */
+function pillarCode(u, i){
+  return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
+}
+
+function pillarPerf(p){ return avg(p.measures.map(function(m){ return m.progress; })); }
+function pillarExec(p){ return avg(p.tactics.map(function(t){ return t.actual; })); }
+function pillarPlan(p){ return avg(p.tactics.map(function(t){ return t.planned; })); }
+function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
+
+function unitPillars(u){ return avg(u.items.map(pillarPerf)); }
+function unitExec(u){ return avg(u.items.map(pillarExec)); }
+function unitPlan(u){ return avg(u.items.map(pillarPlan)); }
+function unitRatio(u){ var pl = unitPlan(u); return pl ? Math.round(unitExec(u)/pl*100) : null; }
+
+var UNIT_KEYS = ["mobile","retail","mazaya"];
+
+/* A unit's headline is its Key Objectives, optionally weighted. Equal weight
+   is the default nobody has to defend. */
+function unitObjectives(u){ return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]); }
+
+function groupUnitsObjectives(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){
+    var v = unitObjectives(UNITS[k]);
+    if (v == null) return;
+    acc += v * UNITS[k].weight; tot += UNITS[k].weight;
+  });
+  return tot ? Math.round(acc/tot) : null;
+}
+function groupExec(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return Math.round(acc/tot);
+}
+function groupPlan(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return Math.round(acc/tot);
+}
+function groupRatio(){ return Math.round(groupExec()/groupPlan()*100); }
+
+</script>
+<script>
+/* VOCABULARY, fixed after review:
+     Group theme  = One Trade / Deepen Value Chain / Diversification.
+                    The group's motto elements; the temple's columns.
+     Pillar       = a business unit's direction OR capability. Each carries
+                    key measures and tactics, and is tagged with one group theme.
+     Performance  = the score from a pillar's KEY MEASURES. Primary.
+     Execution    = the score from its TACTICS. Secondary, never blended in. */
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+/* Four bands. 70 and 50 match the platform's existing STATUS_THRESHOLDS so
+   the strategy layer and the functional layer never disagree about a colour;
+   85 is the added top edge that splits on-track from needs-attention. */
+function band(v){ return bandOf(v).key; }
+function bandWord(v){ return bandOf(v).label; }
+
+function varCell(a, p){
+  if (a == null || p == null) return '<span class="pill none">&mdash;</span>';
+  var d = a - p;
+  var c = d >= 0 ? "var(--good)" : d <= -8 ? "var(--bad)" : "var(--warn)";
+  return '<span style="color:' + c + '">' + (d >= 0 ? "+" : "−") + Math.abs(d) + '</span>';
+}
+
+function scoreCard(title, val, opts){
+  opts = opts || {};
+  var b = band(val), body;
+  if (val == null) {
+    body = '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>';
+  } else {
+    var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
+    var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
+    body = '<div class="big">' + val + '<small>%</small>' + vs + '</div>' +
+           '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
+  }
+  return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
+         '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
+         '<span class="pill ' + b + '">' + (opts.pill || bandWord(val)) + '</span></div>' +
+         body + (opts.sub ? '<p class="sub">' + opts.sub + '</p>' : '') + '</div>';
+}
+
+
+/* ── Visual performance: a labelled row with a primary Performance bar and a
+   secondary Execution bar carrying its planned marker. Used everywhere the
+   group compares things, in place of a table. ─────────────────────── */
+function bar(label, val, opts){
+  opts = opts || {};
+  if (val == null) {
+    return '<div class="bar' + (opts.sec ? ' sec' : '') + '"><label>' + label + '</label>' +
+           '<div class="bar-track"></div><span class="bar-none">&mdash;</span></div>';
+  }
+  var plan = opts.planned != null
+    ? '<i class="bar-plan" style="left:' + opts.planned + '%" data-l="' + (opts.planLabel || "plan " + opts.planned + "%") + '"></i>'
+    : '';
+  var colour = opts.sec ? "var(--stone-soft)" : "var(--" + band(val) + ")";
+  return '<div class="bar' + (opts.sec ? ' sec' : '') + '"><label>' + label + '</label>' +
+         '<div class="bar-track"><div class="bar-fill" style="width:' + val + '%;background:' + colour + '"></div>' +
+         plan + '</div><span class="bar-val">' + val + '%</span></div>';
+}
+
+
+/* ── Circular gauge. Units read as distinct objects rather than rows to
+   compare along a shared scale. ──────────────────────────────────── */
+function gauge(val, label, small){
+  var cls = "gauge" + (small ? " sm" : "");
+  if (val == null) {
+    return '<div class="' + cls + '" style="--p:0;--c:var(--none)"><span class="gauge-in">' +
+           '<b style="font-size:15px;color:var(--none)">&mdash;</b><em>' + label + '</em></span></div>';
+  }
+  return '<div class="' + cls + '" style="--p:' + val + ';--c:var(--' + band(val) + ')">' +
+         '<span class="gauge-in"><b>' + val + '<span style="font-size:.55em">%</span></b><em>' + label + '</em></span></div>';
+}
+
+function tip(text){
+  return '<span class="tip" tabindex="0" data-tip="' + esc(text).replace(/"/g,"&quot;") + '">i</span>';
+}
+
+/* name → gauge → execution strip. `opts.href` makes the whole card open a unit. */
+function gaugeCard(name, sub, perf, exec, planned, opts){
+  opts = opts || {};
+  var execLine = exec == null ? '' :
+    '<div class="gexec">' + gauge(exec, "exec", true) +
+    '<span>Execution <b>' + exec + '%</b>' +
+    (planned != null ? '<br><span style="color:var(--ink-3)">plan ' + planned + '% &middot; ' + varCell(exec, planned) + '</span>' : '') +
+    '</span></div>';
+  return '<div class="gcard' + (opts.click ? ' click' : '') + '"' + (opts.go ? ' data-go="' + opts.go + '"' : '') + '>' +
+    gauge(perf, "performance") +
+    '<div><div class="gname">' + name + '</div>' + (sub ? '<div class="gsub">' + sub + '</div>' : '') + '</div>' +
+    execLine + '</div>';
+}
+
+
+/* ── Modal registry. Drill-downs render into a dialog rather than expanding
+   the page, so a full table fits without the layout shifting. ─────── */
+var MODALS = {};
+var MODAL_N = 0;
+function modalFor(title, sub, body){
+  var id = "m" + (++MODAL_N);
+  MODALS[id] = { title: title, sub: sub, body: body };
+  return id;
+}
+/* The glyph is an "i", not a "+": these buttons open an EXPLANATION of how a
+   number was derived, they never add anything. A plus promises creation. */
+function plus(id, label){
+  return '<button class="plusbtn" data-modal="' + id + '" aria-label="' + esc(label) + '">i</button>';
+}
+
+/* A headline figure whose derivation opens in a modal. */
+function drillCard(title, val, opts){
+  opts = opts || {};
+  var b = band(val);
+  var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
+  var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
+  var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
+  var body = val == null
+    ? '<div class="big nodata">' + (opts.empty || "Not yet measurable") + '</div><div class="track empty"></div>'
+    : '<div class="big">' + val + '<small>%</small>' + vs + '</div>' +
+      '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
+  return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
+    '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
+    '<span class="pill ' + b + '">' + (opts.pill || bandWord(val)) + '</span></div>' +
+    body + (opts.sub ? '<p class="sub">' + opts.sub + '</p>' : '') +
+    '<p class="sub"><button class="linkbu" data-modal="' + id + '">How this is calculated &rarr;</button></p></div>';
+}
+
+/* Dark header with the name, then Objectives (2/3, the dial) and Execution
+   (1/3, figures). Execution is a RATIO TO PLAN, so one number replaces two the
+   reader would otherwise have to subtract. Colour appears exactly twice: the
+   dial, and the variance. */
+function varColour(d){ return d >= 0 ? "var(--good)" : d <= -8 ? "var(--bad)" : "var(--warn)"; }
+
+function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx){
+  var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
+  var eid = execDrill ? modalFor(ctx + " \u2014 execution", "Where the execution figure comes from", execDrill) : null;
+
+  var execBody;
+  if (exec == null || planned == null || planned === 0) {
+    execBody = '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
+               '<span class="ratio-l">no plan</span>';
+  } else {
+    var ratio = Math.round((exec / planned) * 100);
+    var v = exec - planned;
+    execBody = '<div class="ratio">' + ratio + '<small>%</small></div>' +
+      '<span class="ratio-l">of plan</span>' +
+      '<dl class="led">' +
+        '<dt>Delivered</dt><dd>' + exec + '%</dd>' +
+        '<dt>Planned</dt><dd>' + planned + '%</dd>' +
+        '<dt>Variance</dt><dd class="varv" style="color:' + varColour(v) + '">' +
+          (v >= 0 ? "+" : "\u2212") + Math.abs(v) + '</dd>' +
+      '</dl>';
+  }
+
+  return '<div class="gcard">' +
+    '<div class="card-head"><div class="gname">' + name + '</div>' +
+    (sub ? '<div class="gsub">' + sub + '</div>' : '') + '</div>' +
+    '<div class="two">' +
+      '<div class="box-obj"><div class="boxlabel"><span>Objectives</span>' +
+        plus(pid, "Objectives breakdown for " + ctx) + '</div>' +
+        gauge(perf, "") + '</div>' +
+      '<div class="box-exec"><div class="boxlabel"><span>Execution</span>' +
+        (eid ? plus(eid, "Execution breakdown for " + ctx) : '') + '</div>' +
+        execBody + '</div>' +
+    '</div></div>';
+}
+
+function miniTable(head, rows){
+  return '<div class="scroll"><table><thead><tr>' +
+    head.map(function(h){ return '<th>' + h + '</th>'; }).join("") +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function barRow(main, sub, perf, exec, planned, opts){
+  opts = opts || {};
+  return '<div class="brow' + (opts.total ? ' total' : '') + '">' +
+    '<div class="brow-l">' + main + (sub ? '<span>' + sub + '</span>' : '') + '</div>' +
+    '<div class="brow-r">' + bar("Performance", perf) +
+      bar("Execution", exec, { sec: true, planned: planned }) + '</div></div>';
+}
+
+function chartLegend(){
+  return '<div class="chart-legend">' +
+    '<span><i class="sw" style="background:var(--good)"></i> On track 70+</span>' +
+    '<span><i class="sw" style="background:var(--warn)"></i> At risk 50\u201369</span>' +
+    '<span><i class="sw" style="background:var(--bad)"></i> Off track under 50</span>' +
+    '<span><i class="sw" style="background:var(--stone-soft)"></i> Execution</span>' +
+    '<span><i class="sw line"></i> Planned</span></div>';
+}
+
+function qs(s, e){
+  var out = "";
+  for (var q = 1; q <= 4; q++) out += '<i class="' + (q >= s && q <= e ? "on" : "") + '">' + q + "</i>";
+  return '<span class="qs">' + out + "</span>";
+}
+
+/* Measure name reads left; every figure centres under its column. Progress
+   carries the band colour, since it is the row's conclusion. */
+function measureRows(ms, opts){
+  opts = opts || {};
+  var on = arranging("unit", opts.unit);
+  return ms.map(function(m, i){
+    var head = '<tr data-oi="' + i + '"><td class="idx">' +
+               (on ? handle("Reorder " + m.name) : '') +
+               '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(m.name) +
+               '</td><td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) +
+               '</td><td class="cc">' + esc(m.compile) + '</td>';
+    if (opts.unscored) return head + '</tr>';
+    return head + '<td class="num">' + esc(m.actual) + '</td>' +
+           '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + m.progress + '%</td></tr>';
+  }).join("");
+}
+function measureHead(unscored){
+  return '<thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>' +
+    '<th class="cc">Compile</th>' + (unscored ? '' : '<th class="cc">H1 actual</th><th class="cc">Progress</th>') +
+    '</tr></thead>';
+}
+
+/* Tactic, owner and span read left; the rest centres. Delivered and planned
+   share one cell, and "of plan" closes the row as its conclusion. */
+function tacticRows(ts, unitKey){
+  var on = arranging("unit", unitKey);
+  return ts.map(function(t, i){
+    var r = Math.round(t.actual / t.planned * 100);
+    var status = t.status === "Done" ? '<span class="pill good">Done</span>'
+                                     : '<span class="pill warn">' + esc(t.status) + '</span>';
+    return '<tr data-oi="' + i + '"><td class="idx">' +
+      (on ? handle("Reorder " + t.name) : '') +
+      '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) + '</td><td>' + esc(t.owner) +
+      '</td><td>' + qs(t.s, t.e) + '</td><td class="cc">' + status + '</td>' +
+      '<td class="num"><span class="pair"><b>' + t.actual + '</b> / ' + t.planned + '</span></td>' +
+      '<td class="num">' + varCell(t.actual, t.planned) + '</td>' +
+      '<td class="num final" style="color:var(--' + band(r) + ')">' + r + '%</td></tr>';
+  }).join("");
+}
+function tacticHead(){
+  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Span</th>' +
+    '<th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th>' +
+    '<th class="cc">Of plan</th></tr></thead>';
+}
+
+/* A pillar renders as a table ROW, not a card: the list carries column
+   headers once at the top rather than repeating a label under every value.
+   Clicking a row opens its measures and tactics beneath it. */
+var PGRID_COLS = "1fr 96px 54px 108px 78px 80px 48px 18px";
+function pgrid(on){ return "grid-template-columns:" + (on ? "26px " : "") + PGRID_COLS; }
+
+function pillarRow(it, i, u){
+  var perf = pillarPerf(it), r = pillarRatio(it);
+  var on = arranging("unit", u && u.ukey);
+  return '<div class="prow-wrap" data-oi="' + i + '">' +
+    '<button class="prow" style="' + pgrid(on) + '" aria-expanded="false" data-p="' + i + '">' +
+    (on ? handle("Reorder " + it.name) : '') +
+    '<span class="pname"><b>' + pillarCode(u, i) + ' ' + esc(it.name) + '</b>' +
+      (it.sub ? '<span class="psub">' + esc(it.sub) + '</span>' : '') + '</span>' +
+    '<span><span class="pill kind">' + esc(it.kind) + '</span></span>' +
+    '<span><span class="pill theme">' + esc(it.theme) + '</span></span>' +
+    '<span class="powner">' + esc(it.owner) + '</span>' +
+    '<span class="num lead" style="color:var(--' + band(perf) + ')">' + perf + '%</span>' +
+    '<span class="num" style="color:var(--' + band(r) + ')">' + r + '%</span>' +
+    '<span class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</span>' +
+    '<span class="chev">&#9654;</span></button>' + pillarBody(it, u) + '</div>';
+}
+
+/* Compact score pair. Three figures laid across rather than stacked, so the
+   card is a band rather than a column. Both headline and status word come from
+   the same band function, so they can never contradict each other. */
+function scorePair(perf, ex, pl, nMeasures, hi, lo){
+  var r = pl ? Math.round(ex / pl * 100) : null;
+  return '<div class="scores">' +
+    '<div class="card tight primary"><div class="score-h"><h4>' + L("measure","bu") + ' performance</h4>' +
+      '<span class="pill ' + band(perf) + '">' + bandWord(perf) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:var(--' + band(perf) + ')">' + perf + '<small>%</small></span></div>' +
+      '<div class="minirow"><div><em>Measures</em><b>' + nMeasures + '</b></div>' +
+        '<div><em>Highest</em><b style="color:var(--' + band(hi) + ')">' + hi + '%</b></div>' +
+        '<div><em>Lowest</em><b style="color:var(--' + band(lo) + ')">' + lo + '%</b></div></div></div>' +
+    '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
+      '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
+      '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + r + '<small>%</small></span>' +
+        '<span class="ofplan">of plan</span></div>' +
+      '<div class="minirow"><div><em>Delivered</em><b>' + ex + '%</b></div>' +
+        '<div><em>Planned</em><b>' + pl + '%</b></div>' +
+        '<div><em>Variance</em><b>' + varCell(ex, pl) + '</b></div></div></div>' +
+  '</div>';
+}
+
+function pillarBody(it, u){
+  var ps = it.measures.map(function(m){ return m.progress; });
+  var uk = u && u.ukey;
+  return '<div class="pbody" hidden>' +
+    scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it), it.measures.length,
+              Math.max.apply(null, ps), Math.min.apply(null, ps)) +
+    '<h5 class="mini">' + L("measure","bu") + '</h5>' +
+    '<div class="scroll"><table>' + measureHead() +
+      '<tbody class="sortable" data-kind="measures" data-u="' + uk + '">' +
+      measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
+    '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
+    '<div class="scroll"><table>' + tacticHead() +
+      '<tbody class="sortable" data-kind="tactics" data-u="' + uk + '">' +
+      tacticRows(it.tactics, uk) + '</tbody></table></div>' +
+  '</div>';
+}
+
+function pillarList(u){
+  var on = arranging("unit", u.ukey);
+  return '<div class="plist' + (on ? ' arranging' : '') + '">' +
+    '<div class="pheadwrap"><div class="phead" style="' + pgrid(on) + '">' +
+      (on ? '<span></span>' : '') +
+      '<span>' + L("pillar","bu") + '</span><span>Kind</span><span>Theme</span><span>Owner</span>' +
+      '<span class="num">Perform.</span><span class="num">Execution</span>' +
+      '<span class="num">Var.</span><span></span></div></div>' +
+    '<div class="sortable" data-kind="pillars" data-u="' + u.ukey + '">' +
+      u.items.map(function(it, i){ return pillarRow(it, i, u); }).join("") + '</div>' +
+    '<div class="ptotal" style="' + pgrid(on) + '">' +
+      (on ? '<span></span>' : '') +
+      '<span>' + esc(u.name) + '<span class="tsub">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() + '</span></span>' +
+      '<span></span><span></span><span></span>' +
+      '<span class="num">' + unitPillars(u) + '%</span>' +
+      '<span class="num">' + unitRatio(u) + '%</span>' +
+      '<span class="num">' + (function(){ var d = unitExec(u) - unitPlan(u); return (d>=0?"+":"\u2212") + Math.abs(d); })() + '</span>' +
+      '<span></span></div>' +
+  '</div>';
+}
+
+/* ── GROUP · Performance ─────────────────────────────────────────── */
+var TIP_PERF = "Performance scores this unit's own Key Objectives \u2014 each actual against its target, averaged. It is NOT a roll-up of its pillars' key measures; those are shown per pillar inside the unit and never aggregate.";
+var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 each tactic's percent complete, averaged across those whose quarter span has started. Planned is derived from those same spans.";
+var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
+var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
+
+/* The legend renders from the configured bands rather than restating them,
+   so editing a threshold in Setup cannot leave the legend lying. */
+function bands(){
+  var b = BANDS.bands;
+  return '<div class="bands"><b>Reading the colours</b>' +
+    b.map(function(x,i){
+      var top = i === 0 ? "%+" : "\u2013" + (b[i-1].floor - 1) + "%";
+      var rng = i === b.length-1 ? "below " + b[i-1].floor + "%" : x.floor + top;
+      return '<span><i style="background:var(--'+x.key+')"></i> '+x.label+' &mdash; '+rng+'</span>';
+    }).join("") + '</div>';
+}
+
+
+function section(eyebrow, title, note, body, tipText){
+  return '<div class="section"><div class="section-h">' +
+    (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
+    '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2></div>' +
+    (note ? '<p class="sec-note">' + note + '</p>' : '') + body + '</div>';
+}
+
+/* ── Weighting configuration. Impact is the one factor a human sets, so it
+   is editable here and the composite recomputes live. ─────────────── */
+function shareOf(vals){
+  var t = vals.reduce(function(a,b){ return a + b; }, 0);
+  return vals.map(function(v){ return t ? (v / t) * 100 : 0; });
+}
+
+function computeWeights(){
+  var w = GROUP.weighting, us = w.units;
+  var sh = {
+    rev:    shareOf(us.map(function(u){ return u.rev; })),
+    prof:   shareOf(us.map(function(u){ return u.prof; })),
+    imp:    shareOf(us.map(function(u){ return u.imp; })),
+    growth: shareOf(us.map(function(u){ return u.growth; }))
+  };
+  var fw = {};
+  w.factors.forEach(function(f){ fw[f.key] = f.weight / 100; });
+  var raw = us.map(function(u, i){
+    return fw.rev * sh.rev[i] + fw.prof * sh.prof[i] + fw.imp * sh.imp[i] + fw.growth * sh.growth[i];
+  });
+  var comp = raw.map(function(x){ return Math.round(x); });
+  /* Rounding can leave the composite at 99 or 101; give the drift to the
+     largest unit so the column always reads exactly 100. */
+  var drift = 100 - comp.reduce(function(a,b){ return a + b; }, 0);
+  if (drift) {
+    var big = comp.indexOf(Math.max.apply(null, comp));
+    comp[big] += drift;
+  }
+  return { shares: sh, composite: comp };
+}
+
+function renderWeighting(){
+  var w = GROUP.weighting, f = w.factors;
+  var res = computeWeights();
+  var fmt = { rev:function(u){ return u.rev + "B"; }, prof:function(u){ return u.prof + "M"; },
+              growth:function(u){ return u.growth + "%"; } };
+
+  var head = '<tr><th>Business unit</th>' + f.map(function(x){
+      var kindNote = x.kind === "derived" ? "derived" : x.kind === "judgement" ? "set by hand" : "estimated";
+      return '<th><div class="factor-h"><b>' + esc(x.name) + '</b><span>' + esc(x.basis) +
+             '<br>' + kindNote + ' &middot; weight ' + x.weight + '%</span></div></th>';
+    }).join("") + '<th>Weighted contribution' +
+    tip("Each factor is turned into a share of the group total, then those shares are combined using the factor weights above. The result always sums to 100% across the business units.") +
+    '</th></tr>';
+
+  /* Read-only until Edit is pressed. A weight determines how much a unit counts
+     toward the group figure, so changing one should be an act rather than a
+     stray keystroke in a table someone was reading. */
+  var live = grant("g_weight") === "edit" && EDITING.weights;
+
+  var rows = w.units.map(function(u, i){
+    var cells = f.map(function(x){
+      if (x.key === "imp") {
+        var scale = "";
+        for (var n = 1; n <= 4; n++) {
+          scale += live
+            ? '<button type="button" class="' + (n <= u.imp ? "on" : "") + '" data-imp="' + i +
+              '" data-val="' + n + '" aria-label="Set impact ' + n + ' of 4 for ' + esc(u.unit) + '">' + n + '</button>'
+            : '<i class="' + (n <= u.imp ? "on" : "") + '">' + n + '</i>';
+        }
+        return '<td><span class="qual' + (live ? '' : ' static') + '">' + scale + '</span>' +
+               '<span class="why">' + esc(u.why) + '</span>' +
+               '<span class="why fw">share ' + Math.round(res.shares.imp[i]) + '%</span></td>';
+      }
+      return '<td>' + (live
+          ? '<input value="' + fmt[x.key](u) + '" aria-label="' + esc(x.name) + ' for ' + esc(u.unit) + '" />'
+          : '<span class="mono val">' + fmt[x.key](u) + '</span>') +
+             '<span class="why fw">share ' + Math.round(res.shares[x.key][i]) + '%</span></td>';
+    }).join("");
+    return '<tr><td><b>' + esc(u.unit) + '</b></td>' + cells +
+           '<td class="num"><b data-comp="' + i + '">' + res.composite[i] + '%</b></td></tr>';
+  }).join("");
+
+  var summary = w.units.map(function(u, i){
+    return '<span>' + esc(u.unit) + ' <em>' + res.composite[i] + '%</em></span>';
+  }).join("");
+
+  var body =
+    '<div class="note" style="margin-top:0"><b>How the weighted contribution is worked out.</b> ' +
+    'Each factor is converted into a <b>share</b> &mdash; a unit\'s revenue as a percentage of the three units\' combined revenue, and so on for profit, impact and growth. ' +
+    'Those four shares are then combined using the factor weights: ' +
+    f.map(function(x){ return x.weight + "% " + esc(x.name).toLowerCase(); }).join(" + ") + '. ' +
+    'The result is that unit\'s weighted contribution, and the three always total 100%.</div>' +
+
+    '<div class="cfg"><table><thead>' + head + '</thead><tbody>' + rows + '</tbody>' +
+    '<tfoot><tr><td>Always totals</td>' + f.map(function(){ return '<td></td>'; }).join("") +
+    '<td class="num">100%</td></tr></tfoot></table></div>' +
+
+    '<div class="note"><b>Only the weighted contribution totals 100%.</b> The factor columns hold their own units &mdash; revenue in billions, profit in millions, growth as a rate &mdash; and have no reason to sum to anything.</div>' +
+    '<div class="note"><b>Impact on group is set conceptually.</b> It is a strategic judgement about how much the group depends on a unit &mdash; no formula produces it, so it carries a written reason. <b>Change any score and the contribution recomputes.</b></div>' +
+    '<div class="note"><b>Weights should freeze onto a review cycle once it is reported.</b> Otherwise re-weighting in Q3 would silently change what the group scored at H1 &mdash; the same trap as revising a target, and the same fix.</div>';
+
+  var editorBlock = renderFactorEditor();
+  return '<p class="lede">How much each business unit counts toward the group figure. <strong>Weights are composed from factors rather than typed directly</strong>, so the number can be explained and argued with rather than just asserted.</p>' +
+    section("01", "Business unit weighting", null,
+      '<div class="cfgwrap open">' +
+        '<div class="cfg-bar">' +
+          '<div class="cfg-sum"><b>Weighted contribution</b>' + summary + '</div>' +
+          (grant("g_weight") === "edit"
+            ? '<button class="editbtn" data-edit="weights">' + (EDITING.weights ? "Done" : "Edit") + '</button>'
+            : '<span class="pill none">View only</span>') +
+        '</div>' +
+        '<div class="cfg-body">' + body + '</div>' +
+      '</div>') + editorBlock;
+}
+
+function renderGroupPerformance(){
+  var p = GROUP.portfolio;
+  var keys = ["mobile","retail","mazaya"];
+
+  var koDrill = miniTable(["Objective","Direction","Target","Compile","H1 actual","Progress"],
+    GROUP.keyObjectives.map(function(m){
+      return '<tr><td>' + (m.group ? esc(m.group) + " &mdash; " : "") + esc(m.name) + '</td>' +
+        '<td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
+        '<td>' + esc(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
+        '<td class="num">' + m.progress + '%</td></tr>';
+    }).join("")) +
+    '<p class="sub">Mean of the six: <b>' + GROUP.keyObjectivesScore + '%</b>. Every objective carries a target, so none is excluded from the average.</p>';
+
+  var perfDrill = miniTable(["Business unit","Objectives performance","Weight","Weighted contribution"],
+    keys.map(function(k){
+      var u = UNITS[k];
+      return '<tr><td><b>' + esc(u.name) + '</b></td>' +
+        '<td class="num">' + unitObjectives(u) + '%</td>' +
+        '<td class="num">' + u.weight + '%</td>' +
+        '<td class="num">' + (Math.round(unitObjectives(u) * u.weight) / 100).toFixed(1) + '</td></tr>';
+    }).join("") +
+    '<tr style="background:var(--surface-2)"><td><b>Group</b></td><td></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + groupUnitsObjectives() + '%</b></td></tr>') +
+    '<p class="sub">Each unit\'s own Key Objectives &times; its weight. Weights are composed on the <b>Weighting</b> tab from revenue, profit, impact and growth.</p>';
+
+  var execDrill = miniTable(["Business unit","Of plan","Weight","Delivered","Planned","Variance"],
+    keys.map(function(k){
+      var u = UNITS[k];
+      return '<tr><td><b>' + esc(u.name) + '</b></td>' +
+        '<td class="num">' + unitRatio(u) + '%</td>' +
+        '<td class="num">' + u.weight + '%</td>' +
+        '<td class="num">' + unitExec(u) + '%</td>' +
+        '<td class="num">' + unitPlan(u) + '%</td>' +
+        '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
+    }).join("") +
+    '<tr style="background:var(--surface-2)"><td><b>Group</b></td>' +
+    '<td class="num"><b>' + groupRatio() + '%</b></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + groupExec() + '%</b></td>' +
+    '<td class="num"><b>' + groupPlan() + '%</b></td>' +
+    '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
+    '<p class="sub">Tactic completion under every unit\'s pillars, weighted identically to performance. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
+
+  var units = keys.map(function(k){
+    var u = UNITS[k];
+    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
+      u.keyObjectives.map(function(m){
+        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
+          '</td><td class="num">' + m.progress + '%</td></tr>';
+      }).join("")) +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
+      u.weight + '%</b> weight to the group.</p>' +
+      '<h4 class="mini">Pillars beneath</h4>' +
+      miniTable(["Pillar","Kind","Theme","Performance","Of plan"],
+        u.items.map(function(it, i){
+          return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
+            '<td><span class="pill kind">' + it.kind + '</span></td>' +
+            '<td><span class="pill theme">' + it.theme + '</span></td>' +
+            '<td class="num">' + pillarPerf(it) + '%</td>' +
+            '<td class="num">' + pillarRatio(it) + '%</td></tr>';
+        }).join("")) +
+      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
+    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
+      u.items.map(function(it, i){
+        return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
+          '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
+      unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
+    return splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
+      u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
+      unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name);
+  }).join("");
+
+  var themes = GROUP.themeView.map(function(t){
+    var list = GROUP.themePillars[t.ab] || [];
+    var pd = miniTable(["Business unit","Pillar","Performance"],
+      list.map(function(x){
+        return '<tr><td>' + esc(x[0]) + '</td><td>' + esc(x[1]) + '</td><td class="num">' +
+          (x[2] == null ? '<span class="pill none">Not Reported</span>' : x[2] + "%") + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Mean across the pillars with reported measures: <b>' + t.outcomes + '%</b>.</p>';
+    var ed = miniTable(["Business unit","Pillar","Delivered","Planned","Variance"],
+      list.map(function(x){
+        return '<tr><td>' + esc(x[0]) + '</td><td>' + esc(x[1]) + '</td><td class="num">' + x[3] +
+          '%</td><td class="num">' + x[4] + '%</td><td class="num">' + varCell(x[3], x[4]) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Delivered <b>' + t.exec + '%</b> against <b>' + t.planned + '%</b> planned across all ' +
+      list.length + ' pillars carrying this theme &mdash; <b>' + Math.round(t.exec / t.planned * 100) + '%</b> of plan.</p>';
+    return splitCard('<span class="pill theme">' + t.ab + '</span> ' + esc(t.name),
+      t.items + " pillars &middot; " + esc(t.units), t.outcomes, t.exec, t.planned, pd, ed, t.name);
+  }).join("");
+
+  var caps = GROUP.capabilities.map(function(c){
+    var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
+      miniTable(["Measure","Direction","Target","Actual","Progress"],
+        c.measures.map(function(m){
+          return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+            '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
+            '</td><td class="num">' + m.progress + '%</td></tr>';
+        }).join("")) +
+      '<p class="sub">Mean across ' + c.measures.length + ' key measures: <b>' + c.perf + '%</b>.</p>';
+    var ed = '<p class="sub" style="margin:0 0 14px">Execution <b>' + c.exec + '%</b> against <b>' +
+      c.planned + '%</b> planned &mdash; variance <b>' + varCell(c.exec, c.planned) + '</b>.</p>' +
+      '<p class="sub">Tactic detail for group capabilities is not in this prototype. In the platform this modal lists each tactic, its owner, its quarter span and its percent complete \u2014 the same table a business unit pillar shows.</p>';
+    return splitCard(esc(c.name), c.measures.length + " key measures", c.perf, c.exec, c.planned, pd, ed, c.name);
+  }).join("");
+
+  return bands() +
+
+    section("01", "Overall performance",
+      "The group as a whole. These three figures answer different questions and are never blended.",
+      '<div class="scores">' +
+        drillCard("Group Key Objectives" + tip("The six objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), GROUP.keyObjectivesScore, {
+          primary: true, sub: "The group\'s own scorecard. All <b>6</b> objectives have a target set.",
+          drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
+        }) +
+        drillCard("Business units &mdash; performance" + tip(TIP_PERF), groupUnitsObjectives(), {
+          primary: true, sub: "Each unit\'s own " + L("keyobj","bu") + ", weighted " + UNIT_KEYS.map(function(k){ return UNITS[k].weight; }).join(" / ") + " \u2014 composed on the Weighting tab.",
+          drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
+        }) +
+        drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
+          sub: "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
+               "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>. Read as a share of plan, not of the whole year.",
+          drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
+        }) +
+      '</div>') +
+
+    section("02", "Business units",
+      "Performance and execution are separate boxes with separate breakdowns. Click the unit name to open its page.",
+      '<div class="gauges g3">' + units + '</div>', TIP_PERF) +
+
+    section("03", "Group themes",
+      "How each motto element is doing across every business unit that carries it.",
+      '<div class="gauges g3">' + themes + '</div>', TIP_THEME) +
+
+    section("04", "Group capabilities",
+      "The temple\'s base \u2014 pillars in their own right, carrying no theme because they support all three.",
+      '<div class="gauges g4">' + caps + '</div>', TIP_CAP);
+}
+
+/* ── GROUP · Temple — a VIEW, not a scoreboard ───────────────────── */
+function renderTemple(){
+  var groups = {};
+  GROUP.keyObjectives.forEach(function(m){ (groups[m.group || ""] = groups[m.group || ""] || []).push(m); });
+
+  var cell = function(m){
+    return '<div class="ns-item"><span class="ns-label">' + esc(m.name) + '</span>' +
+           '<span class="ns-target">' + esc(m.target) + '</span>' +
+           '<span class="ns-dir">' + esc(m.dir) + ' &middot; ' + esc(m.compile).toLowerCase() + '</span></div>';
+  };
+  var ns = '<span class="ko-head">Key objectives by 2027</span>' +
+    Object.keys(groups).map(function(k){
+      var inner = groups[k].map(cell).join("");
+      return k ? '<div class="ns-group"><span class="ns-group-h">' + esc(k) + '</span><div class="ns-group-in">' + inner + '</div></div>' : inner;
+    }).join("");
+
+  return '<div class="temple"><div class="roof"></div>' +
+    '<div class="architrave">' + esc(GROUP.aspiration) + '</div>' +
+    '<div class="entablature">' + ns + '</div>' +
+    '<div class="pillars">' + GROUP.themes.map(function(p){
+      return '<div class="pillar"><span>' + p.ab + '</span><b>' + esc(p.name) + '</b><em>' + esc(p.note) + '</em></div>';
+    }).join("") + '</div>' +
+    '<div class="stylobate"><div class="base-head">Group capabilities &mdash; cross-cutting, no theme</div><div class="base-grid">' +
+      GROUP.capabilities.map(function(c){
+        return '<details class="encard"><summary><b>' + esc(c.name) + '</b>' +
+          '<span>' + c.measures.length + ' key measures &middot; tap to open</span></summary>' +
+          '<div class="encard-body"><p>' + esc(c.def) + '</p><ul>' +
+          c.measures.map(function(m){
+            return '<li>' + esc(m.name) + ' &mdash; <span class="mono">' + esc(m.dir) + ' ' + esc(m.target) + '</span></li>';
+          }).join("") + '</ul></div></details>';
+      }).join("") +
+    '</div></div></div>' +
+    '';
+}
+
+/* ── GROUP · Foundation ──────────────────────────────────────────── */
+function renderGroupFoundation(){
+  return '<p class="lede">The group\'s foundation. It <strong>persists across strategy years</strong> &mdash; its horizon outruns the current cycle, so it is not retyped each January. <strong>Core values live here and only here</strong>; business units inherit them.</p>' +
+    '<div class="kv"><span class="pill kind">Raya Trade &mdash; group</span><span class="pill kind">Horizon 2027</span></div>' +
+    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+      '<p class="sec-note">Six labelled clauses. The labels are data &mdash; each unit uses its own set.</p><dl style="margin:0">' +
+      GROUP.clauses.map(function(c){ return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' + esc(c[1]) + '</dd></div>'; }).join("") +
+      '</dl></div>' +
+      '<div class="card"><h2 class="sec first">Mission</h2><p class="statement">' + esc(GROUP.mission) + '</p>' +
+      '<h2 class="sec">Vision</h2><p class="statement">' + esc(GROUP.aspiration) + '</p></div>' +
+    '</div>' +
+
+    '<div class="card valbox"><h2 class="sec first">Core values</h2>' +
+    '<p class="sec-note">Group-level, and inherited by every business unit &mdash; a unit never declares its own. Open any value for what it means in practice.</p>' +
+    '<div class="valgrid">' +
+      GROUP.values.map(function(v){
+        return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
+          '<div class="valcard-body">' + esc(v.def) + '</div></details>';
+      }).join("") +
+    '</div></div>' +
+
+    '<div class="note"><b>Purpose and Core Values are held here and inherited downward.</b> A business unit declares neither. It has its own Who We Are, its own Winning Aspiration and its own Key Objectives &mdash; and since neither set of clause labels is a subset of the other, foundation content is stored as rows rather than columns.</div>' +
+    '<div class="note"><b>Every unit holds a Winning Aspiration, the group included.</b> An earlier draft gave the group a Vision and business units an Aspiration, as two entities. They are one, which removes a foundation block rather than adding one.</div>';
+}
+
+/* ── UNIT · Performance (pillars live here) ──────────────────────── */
+function renderUnitPerformance(u){
+  var ko = unitObjectives(u);
+  var r  = unitRatio(u);
+  var kps = u.keyObjectives.map(function(m){ return m.progress; });
+  var koHi = Math.max.apply(null, kps), koLo = Math.min.apply(null, kps);
+  var ws = KO_WEIGHTS[u.ukey];
+
+  /* The unit's Key Objectives are authored on its Foundation, but they are what
+     this page scores — so the breakdown opens from the headline rather than
+     making someone go and find it. Same drill-down the group page offers. */
+  var koDrill =
+    '<p class="sub" style="margin:0 0 14px">' + TIP_PERF + '</p>' +
+    miniTable(["#", L("keyobj","bu"), "Dir.", "Target", "H1 actual", "Progress"].concat(ws ? ["Weight","Contribution"] : []),
+      u.keyObjectives.map(function(m, i){
+        var w = ws ? (ws[i] == null ? 0 : ws[i]) : null;
+        return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
+          '<td class="num">' + esc(m.dir) + '</td><td class="num">' + esc(m.target) + '</td>' +
+          '<td class="num">' + esc(m.actual) + '</td>' +
+          '<td class="num final" style="color:var(--' + band(m.progress) + ')">' + m.progress + '%</td>' +
+          (ws ? '<td class="num">' + w + '%</td><td class="num">' +
+                (Math.round(m.progress * w) / 100).toFixed(1) + '</td>' : '') + '</tr>';
+      }).join("")) +
+    '<p class="sub">' + (ws
+      ? 'Weighted mean across <b>' + u.keyObjectives.length + '</b> objectives: <b>' + ko + '%</b>. Weights are set on the unit\'s Foundation.'
+      : 'Mean across <b>' + u.keyObjectives.length + '</b> objectives, equally weighted: <b>' + ko + '%</b>.') +
+    ' This unit contributes at <b>' + u.weight + '%</b> weight to the group figure.</p>';
+
+  var exDrill =
+    '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC + '</p>' +
+    miniTable(["#", L("pillar","bu"), "Delivered", "Planned", "Of plan", "Var."],
+      u.items.map(function(it, i){
+        var pr = pillarRatio(it);
+        return '<tr><td class="idx">' + (i+1) + '</td><td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
+          '<td class="num">' + pillarExec(it) + '%</td><td class="num">' + pillarPlan(it) + '%</td>' +
+          '<td class="num final" style="color:var(--' + band(pr) + ')">' + pr + '%</td>' +
+          '<td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
+      }).join("")) +
+    '<p class="sub">Delivered <b>' + unitExec(u) + '%</b> against <b>' + unitPlan(u) +
+    '%</b> planned across <b>' + u.items.length + '</b> ' + L("pillar","bu").toLowerCase() +
+    ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
+
+  var koId = modalFor(esc(u.name) + " &mdash; " + L("keyobj","bu"), "The unit's own scorecard, and how the headline is built", koDrill);
+  var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
+
+  return '<p class="lede">The regular view for ' + esc(u.name) + '. Its <strong>' +
+      L("pillar","bu").toLowerCase() + '</strong> are its directions and capabilities; each carries key measures and tactics. ' +
+      '<strong>The headline is the unit\'s own ' + L("keyobj","bu") + '</strong> &mdash; the pillars below explain that number rather than produce it.</p>' +
+
+    '<div class="scores">' +
+      '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
+        '<span class="pill ' + band(ko) + '">' + bandWord(ko) + '</span></div>' +
+        '<div class="headline"><span class="big" style="color:var(--' + band(ko) + ')">' + ko + '<small>%</small></span>' +
+          '<button class="drill" data-modal="' + koId + '">See the ' + L("keyobj","bu").toLowerCase() + ' &rarr;</button></div>' +
+        '<div class="minirow"><div><em>Objectives</em><b>' + u.keyObjectives.length + '</b></div>' +
+          '<div><em>Highest</em><b style="color:var(--' + band(koHi) + ')">' + koHi + '%</b></div>' +
+          '<div><em>Lowest</em><b style="color:var(--' + band(koLo) + ')">' + koLo + '%</b></div></div></div>' +
+      '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
+        '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
+        '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + r + '<small>%</small></span>' +
+          '<span class="ofplan">of plan</span>' +
+          '<button class="drill" data-modal="' + exId + '">See the breakdown &rarr;</button></div>' +
+        '<div class="minirow"><div><em>Delivered</em><b>' + unitExec(u) + '%</b></div>' +
+          '<div><em>Planned</em><b>' + unitPlan(u) + '%</b></div>' +
+          '<div><em>Variance</em><b>' + varCell(unitExec(u), unitPlan(u)) + '</b></div></div></div>' +
+    '</div>' +
+
+    section("01", L("pillar","bu") + " &mdash; directions and capabilities",
+      "One list, because a direction and a capability are the same thing structurally &mdash; same owner, measures, tactics and scores. " +
+      "<strong>Click any row to open its key measures and tactics.</strong> Each is tagged with one of the group\'s three themes.",
+      (canArrange("unit", u.ukey)
+        ? '<div class="cfg-bar plain"><span class="cfg-lab">' + u.items.length + ' ' +
+          L("pillar","bu").toLowerCase() + (ARRANGE ? ' &middot; drag by the handle to reorder' : '') + '</span>' +
+          '<button class="editbtn" data-arrange="1">' + (ARRANGE ? "Done" : "Arrange") + '</button></div>'
+        : '') +
+      pillarList(u)) +
+
+    '<div class="note"><b>The pillar figures explain the headline rather than produce it.</b> ' +
+    'A pillar\'s measures are internal to that pillar; the unit\'s ' + L("keyobj","bu") +
+    ' are what it is accountable for. Execution is the one reading that travels upward, because ' +
+    'key tactics are worth watching from above even though they belong to a pillar.</div>';
+}
+
+/* ── UNIT · Foundation ───────────────────────────────────────────── */
+function renderUnitFoundation(u){
+  return '<p class="lede">Each business unit has <strong>its own foundation</strong> &mdash; its own words, its own clause labels, its own Key Objectives. It has <strong>no core values of its own</strong>, and no temple: the themes and the group Key Objectives sit one level up.</p>' +
+    '<div class="kv"><span class="pill kind">' + esc(u.name) + '</span><span class="pill kind">Horizon 2027</span>' +
+    '<span class="pill kind">Uses the group\'s three themes</span><span class="pill kind">Inherits the group\'s values</span></div>' +
+    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+      '<p class="sec-note">Six clauses &mdash; and only the first label matches the group\'s.</p><dl style="margin:0">' +
+      u.clauses.map(function(c){ return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' + esc(c[1]) + '</dd></div>'; }).join("") +
+      '</dl></div>' +
+      '<div class="card"><h2 class="sec first">' + L("aspiration","bu") + '</h2>' +
+      '<p class="sec-note">Internally <b>Winning Aspiration</b>. Vision and End State are display labels for the same statement &mdash; a unit holds one, never two.</p>' +
+      '<p class="statement">' + esc(u.aspiration) + '</p></div></div>' +
+
+    koBlock(u) +
+
+    '<div class="note"><b>The group says <code>Offering</code> / <code>To</code> / <code>Through</code> / <code>Covering</code> / <code>Empowered by</code>.</b> This unit says <code>We provide</code> / <code>For</code> / <code>All Overall</code> / <code>We facilitate</code> / <code>Using</code>. Two units in one tenant with different labels &mdash; which is why foundation content is rows, not columns.</div>';
+}
+
+/* ── UNIT · Analysis ─────────────────────────────────────────────── */
+function renderUnitAnalysis(u){
+  var box = function(cls, title, list){
+    return '<section class="' + cls + '"><h3>' + title + '</h3><ul>' +
+      list.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") + '</ul></section>';
+  };
+  return '<p class="lede">' + esc(u.name) + ' runs <strong>its own SWOT</strong>, captured with the first submission of its strategy. It is context, not a score &mdash; nothing here feeds a number.</p>' +
+    '<div class="swot">' + box("s","Strengths",u.swot.s) + box("w","Weaknesses",u.swot.w) +
+    box("o","Opportunities",u.swot.o) + box("t","Threats",u.swot.t) + '</div>' +
+    '<div class="note"><b>In a group this screen appears once per business unit.</b> A single company has exactly one. The screen is identical &mdash; only how many exist differs.</div>';
+}
+
+
+/* ── Key Objectives, with optional weighting ──────────────────────────────
+   Unweighted means equal, which is the one default nobody has to argue for.
+   Where weights are set they must total 100 within the unit, and the headline
+   recomputes live so the mechanism is visible rather than asserted. ────── */
+function koBlock(u){
+  var key = u.ukey;
+  var ws = KO_WEIGHTS[key];
+  var on = !!ws;
+  var editable = grant("u_found") === "edit";
+  var score = koScore(u.keyObjectives, ws);
+  var equal = koScore(u.keyObjectives, null);
+
+  var total = on ? ws.reduce(function(a,b){ return a + (b||0); }, 0) : 100;
+  var ok = total === 100;
+
+  var rows = u.keyObjectives.map(function(m, i){
+    var w = on ? (ws[i] == null ? 0 : ws[i]) : Math.round(100 / u.keyObjectives.length);
+    var wcell = !on
+      ? '<span class="why" style="margin:0">' + w + '% &mdash; equal</span>'
+      : (editable
+          ? '<input class="kow" data-ko="' + key + '|' + i + '" value="' + w + '" aria-label="Weight for ' + esc(m.name) + '" />'
+          : '<b>' + w + '%</b>');
+    var contrib = m.progress == null ? '<span class="pill none">Not Reported</span>'
+      : '<span class="mono">' + (Math.round(m.progress * w) / 100).toFixed(1) + '</span>';
+    return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+      '<td class="num">' + esc(m.target) + '</td><td>' + esc(m.compile) + '</td>' +
+      '<td class="num">' + esc(m.actual) + '</td>' +
+      '<td class="num">' + (m.progress == null ? '&mdash;' : m.progress + '%') + '</td>' +
+      '<td class="num">' + wcell + '</td><td class="num">' + contrib + '</td></tr>';
+  }).join("");
+
+  return '<h2 class="sec">' + L("keyobj","bu") + '</h2>' +
+    '<p class="sec-note">The unit\'s own scorecard &mdash; <strong>this is its headline Performance</strong>. Its pillars explain the number rather than produce it.</p>' +
+
+    '<div class="kv"><span class="pill ' + (on ? "theme" : "kind") + '">' +
+      (on ? "Weighted" : "Equal weight") + '</span>' +
+      (editable ? '<button class="editbtn" data-kotog="' + key + '">' +
+        (on ? "Return to equal weight" : "Apply weights") + '</button>' : '') +
+      (on && !ok ? '<span class="pill bad">Weights total ' + total + '% &mdash; must be 100</span>' : '') +
+    '</div>' +
+
+    '<div class="scroll"><table><thead><tr><th>Objective</th><th>Dir.</th><th>Target</th><th>Compile</th>' +
+      '<th>H1 actual</th><th>Progress</th><th>Weight</th><th>Contribution</th></tr></thead><tbody>' + rows +
+      '<tr style="background:var(--surface-2)"><td colspan="6"><b>' + esc(u.name) + ' headline</b></td>' +
+      '<td class="num"><b>' + total + '%</b></td>' +
+      '<td class="num"><b style="color:var(--' + band(score) + ')">' + (score == null ? "&mdash;" : score + "%") + '</b></td></tr>' +
+      '</tbody></table></div>' +
+
+    (on
+      ? '<div class="note"><b>Weighted, so this unit\'s headline reads ' + score + '% rather than ' + equal + '%.</b> ' +
+        'Weighting lives inside the unit, set by the person accountable for it &mdash; which is what stops a trivial objective ' +
+        'dragging on a serious one without anybody having to argue about it at group level.</div>'
+      : '<div class="note"><b>Unweighted, so every objective counts equally.</b> Equal weighting is the one default nobody has to defend in a quarterly review. Apply weights when a real complaint arrives, because then the weight has a specific justification attached.</div>') +
+
+    '<div class="note"><b>This never changes how the group figure is built.</b> The group weights the three unit headlines at ' +
+      Object.keys(UNITS).map(function(k){ return UNITS[k].weight + "%"; }).join(" / ") +
+      '. Weighting inside a unit changes what that unit\'s headline says; it does not give the unit more influence.</div>';
+}
+
+</script>
+<script>
+/* ── CONFIGURATION SCREENS ───────────────────────────────────────────────
+   Labels · Levels & access · and the factor editor that extends Weighting.
+   ─────────────────────────────────────────────────────────────────────── */
+
+function L(key, scope){
+  var e = LABELS.entries.filter(function(x){ return x.key === key; })[0];
+  if (!e) return key;
+  return (scope === "group" ? e.group : e.bu) || e.internal;
+}
+
+/* ── Labels ─────────────────────────────────────────────────────────── */
+function renderLabels(){
+  var editable = grant("c_labels") === "edit";
+
+  var rows = LABELS.entries.map(function(e, i){
+    var cell = function(which){
+      var val = e[which];
+      if (val === "—") return '<td><span class="pill none">Not held</span></td>';
+      return '<td>' + (editable
+        ? '<input class="lbl" data-lbl="' + i + '" data-scope="' + which + '" value="' + esc(val) + '" aria-label="' + esc(e.internal) + ' label at ' + which + ' level" />'
+        : '<span class="mono">' + esc(val) + '</span>') + '</td>';
+    };
+    return '<tr><td><b>' + esc(e.internal) + '</b><span class="why">' + esc(e.note) + '</span></td>' +
+      cell("group") + cell("bu") + '</tr>';
+  }).join("");
+
+  /* Two entities sharing one display label would render two different things
+     under one word on the same screen. Caught here, not in a client demo. */
+  var seen = {}, clashes = [];
+  LABELS.entries.forEach(function(e){
+    ["group","bu"].forEach(function(s){
+      var v = (e[s] || "").toLowerCase();
+      if (!v || v === "—") return;
+      if (seen[s + "|" + v]) clashes.push(e[s]);
+      seen[s + "|" + v] = true;
+    });
+  });
+
+  var warn = clashes.length
+    ? '<div class="note bad-note"><b>Label collision.</b> <span class="mono">' + esc(clashes[0]) +
+      '</span> is in use by two entities at the same level. Saving is blocked until one of them changes &mdash; ' +
+      'two different objects rendering under one word on the same screen is not recoverable by the reader.</div>'
+    : '<div class="note"><b>No collisions.</b> Every display label at each level is unique, so no two entities can render under the same word.</div>';
+
+  return '<p class="lede">Every level of the model carries an <strong>internal name</strong> the platform is built on, and a <strong>display label</strong> the tenant sees. The internal name never changes. <strong>The SMO manages this, not the client</strong> &mdash; which is what stops a label collision reaching a screen.</p>' +
+
+    '<div class="kv"><span class="pill kind">Scope: per tenant</span>' +
+    '<span class="pill kind">Managed by: SMO</span>' +
+    '<span class="pill ' + (editable ? "good" : "none") + '">' + (editable ? "Editable" : "Read only for this viewer") + '</span></div>' +
+
+    section("Configuration", "Labels", null,
+      '<div class="cfg"><table><thead><tr>' +
+      '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
+      '<th style="width:33%">Display at group level</th>' +
+      '<th style="width:33%">Display at business unit level</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn) +
+
+    '<div class="note"><b>Labels are per tenant, not per strategy cycle.</b> A cycle-scoped label would let 2026 and 2027 use different words for the same object, and no report spanning both could be read without a glossary.</div>' +
+
+    '<div class="note"><b>Vision, End State and Winning Aspiration are one entity.</b> They are three display labels for the same statement, which is why a unit holds exactly one of them and never two.</div>';
+}
+
+/* ── Levels & access ────────────────────────────────────────────────── */
+function stateCell(levelKey, pageKey, editable){
+  var v = ACCESS[levelKey][pageKey];
+  if (!editable) {
+    return '<td class="ac"><span class="st st-' + v + '">' + v + '</span></td>';
+  }
+  var opts = ["none","view","edit"].map(function(o){
+    return '<button type="button" class="stbtn' + (o === v ? " on " + o : "") + '" data-ac="' +
+      levelKey + '|' + pageKey + '|' + o + '" aria-label="' + o + '">' +
+      (o === "none" ? "&minus;" : o === "view" ? "&#128065;" : "&#9998;") + '</button>';
+  }).join("");
+  return '<td class="ac"><span class="stset">' + opts + '</span></td>';
+}
+
+function renderAccess(){
+  var editable = grant("c_access") === "edit";
+  var levels = [SMO_ROLE].concat(LEVELS);
+
+  var groups = [
+    { name:"Group pages",    keys:["g_perf","g_found","g_temple","g_weight"] },
+    { name:"Business unit pages", keys:["u_perf","u_found","u_anal"] },
+    { name:"Configuration",  keys:["c_labels","c_access"] }
+  ];
+
+  var head = '<tr><th style="width:24%">Page</th>' + levels.map(function(l){
+    return '<th class="ac"><div class="factor-h"><b>' + esc(l.name) + '</b><span>' +
+      esc(l.titles || "Super user") + '</span></div></th>';
+  }).join("") + '</tr>';
+
+  var body = groups.map(function(g){
+    return '<tr class="grouprow"><td colspan="' + (levels.length + 1) + '">' + esc(g.name) + '</td></tr>' +
+      g.keys.map(function(pk){
+        var p = PAGES.filter(function(x){ return x.key === pk; })[0];
+        return '<tr><td><b>' + esc(p.label) + '</b><span class="why">' + esc(p.note) + '</span></td>' +
+          levels.map(function(l){ return stateCell(l.key, pk, editable); }).join("") + '</tr>';
+      }).join("");
+  }).join("");
+
+  var levelRows = LEVELS.map(function(l){
+    return '<tr><td><b>' + esc(l.name) + '</b></td><td>' +
+      (editable ? '<input class="lvl" data-lvl="' + l.key + '" value="' + esc(l.titles) + '" aria-label="Titles at ' + esc(l.name) + '" />'
+                : '<span class="mono">' + esc(l.titles) + '</span>') +
+      '</td><td><span class="why" style="margin:0">' + esc(l.note) + '</span></td></tr>';
+  }).join("");
+
+  var peopleRows = PEOPLE.map(function(p){
+    var lv = p.level === "smo" ? SMO_ROLE : LEVELS.filter(function(x){ return x.key === p.level; })[0];
+    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title) + '</span></td>' +
+      '<td><span class="pill kind">' + esc(lv.name) + '</span></td>' +
+      '<td><span class="pill ' + (p.unit === "group" ? "theme" : "kind") + '">' +
+        (p.unit === "group" ? "Group &mdash; all units" : esc(UNITS[p.unit].name)) + '</span></td>' +
+      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button></td></tr>';
+  }).join("");
+
+  return '<p class="lede">Access is <strong>page level only</strong>. If a level can open a page, it sees everything on that page &mdash; restriction happens by removing the page, never by trimming its contents. A person carries a <strong>level</strong>, which decides which pages, and a <strong>unit attachment</strong>, which decides whose.</p>' +
+
+    '<div class="kv"><span class="pill kind">Page level, never per element</span>' +
+    '<span class="pill kind">Three states: none / view / edit</span>' +
+    '<span class="pill ' + (editable ? "good" : "none") + '">' + (editable ? "Editable" : "Read only for this viewer") + '</span></div>' +
+
+    section("1/3", "The visibility matrix",
+      "Pre-filled with a working default. Change any cell and the navigation above re-renders immediately for whoever is currently being viewed as.",
+      '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
+      '<div class="chart-legend" style="margin-top:12px">' +
+        '<span><i class="st st-none">none</i> no access, page hidden</span>' +
+        '<span><i class="st st-view">view</i> reads, cannot change</span>' +
+        '<span><i class="st st-edit">edit</i> reads and changes</span></div>' +
+      '<div class="note"><b>The CEO views weighting but does not manage it.</b> That single row is why a cell needs three states rather than two &mdash; visible and editable are different grants, and collapsing them would either lock the CEO out or hand them the model.</div>') +
+
+    section("2/3", "Levels and titles",
+      "Levels travel between clients; titles do not. Each tenant maps its own titles onto the ladder.",
+      '<div class="cfg"><table><thead><tr><th style="width:12%">Level</th><th style="width:40%">Titles at this level</th><th>What sits here</th></tr></thead><tbody>' +
+      levelRows + '</tbody></table></div>' +
+      '<div class="note"><b>The SMO is not a level.</b> An SMO manager might sit at N-2 and still need edit rights no N-1 has, so it is held as a super user beside the ladder rather than a rung on it.</div>') +
+
+    section("3/3", "People",
+      "Level plus unit attachment. Two people at N-1 reach the same page types but different units &mdash; which is why the matrix alone cannot express access.",
+      '<div class="cfg"><table><thead><tr><th style="width:34%">Person</th><th>Level</th><th>Attached to</th><th>Simulate</th></tr></thead><tbody>' +
+      peopleRows + '</tbody></table></div>' +
+      '<div class="note"><b>Ashraf and Hossam are both N-1.</b> The matrix grants both the same page types; their unit attachment is what sends one to Mobile and the other to Retail. A person attached to the group reaches every unit.</div>');
+}
+
+/* ── The factor editor, appended to the Weighting page ──────────────── */
+function renderFactorEditor(){
+  var w = GROUP.weighting;
+  var editable = grant("g_weight") === "edit" && EDITING.factors;
+  var total = w.factors.reduce(function(a, f){ return a + f.weight; }, 0);
+
+  var rows = w.factors.map(function(f, i){
+    var t = FACTOR_TYPES[f.kind];
+    return '<tr><td><b>' + esc(f.name) + '</b><span class="why">' + esc(f.basis) + '</span></td>' +
+      '<td><span class="pill kind">' + t.label + '</span><span class="why">' + t.note + '</span></td>' +
+      '<td class="num">' + (editable
+        ? '<input class="fwt" data-f="' + i + '" value="' + f.weight + '" aria-label="Weight for ' + esc(f.name) + '" />'
+        : '<b>' + f.weight + '%</b>') + '</td>' +
+      '<td class="num"><span class="why" style="margin:0">' + (function(){
+        var pf = PRIOR_CYCLE.factors.filter(function(x){ return x.key === f.key; })[0];
+        if (!pf) return "new this cycle";
+        var d = f.weight - pf.weight;
+        return pf.weight + "% &rarr; " + (d === 0 ? "unchanged"
+          : '<b style="color:' + (d > 0 ? "var(--good)" : "var(--warn)") + '">' + (d > 0 ? "+" : "\u2212") + Math.abs(d) + '</b>');
+      })() + '</span></td>' +
+      '<td>' + (editable ? '<button class="rmbtn" data-rmf="' + i + '" aria-label="Remove ' + esc(f.name) + '">Remove</button>' : '') + '</td></tr>';
+  }).join("");
+
+  var totalOK = total === 100;
+
+  return section("Configuration", "Weighting factors",
+    "Factors are stored as rows, not as fixed columns, so adding one is data entry rather than a schema change. Each declares its own type, which decides how its values are captured.",
+
+    '<div class="cfg-bar plain">' +
+      '<span class="cfg-lab">' + w.factors.length + ' factors &middot; totalling ' + total + '%</span>' +
+      (grant("g_weight") === "edit"
+        ? '<button class="editbtn" data-edit="factors">' + (EDITING.factors ? "Done" : "Edit") + '</button>'
+        : '<span class="pill none">View only</span>') + '</div>' +
+    '<div class="cfg"><table><thead><tr>' +
+      '<th style="width:30%">Factor</th><th style="width:24%">Type</th><th style="width:14%">Weight</th>' +
+      '<th style="width:22%">' + PRIOR_CYCLE.year + ' cycle</th><th style="width:10%"></th>' +
+    '</tr></thead><tbody>' + rows + '</tbody>' +
+    '<tfoot><tr><td colspan="2"><b>Total</b></td>' +
+      '<td class="num"><b class="' + (totalOK ? "" : "overload") + '">' + total + '%</b></td>' +
+      '<td colspan="2">' + (totalOK
+        ? '<span class="pill good">Totals 100</span>'
+        : '<span class="pill bad">Must total 100 &mdash; saving blocked</span>') + '</td></tr></tfoot></table></div>' +
+
+    (editable ? '<div class="addrow"><button class="editbtn" id="addf">+ Add a factor</button>' +
+      '<span class="why" style="margin:0">A fifth factor takes a share of the same 100 &mdash; the others must give way.</span></div>' : '') +
+
+    (CYCLE_REPORTED
+      ? '<div class="note bad-note"><b>H1 2026 has already been reported.</b> Changing a factor or a weight now recomputes every business unit\'s contribution, and with it the group figure that has already been seen. This is allowed and it is not normal &mdash; the SMO is warned, the change is recorded, and the group performance figure moves.</div>'
+      : '') +
+
+    '<div class="note"><b>Weights are set per cycle, not per tenant.</b> Each year takes insight from the last, so the ' + PRIOR_CYCLE.year + ' split is carried in the column above rather than left in another screen for someone to remember.</div>' +
+
+    '<div class="note"><b>A weight is not the same kind of number as a target.</b> A target freezes when reported, because it is a commitment made to one owner and moving it rewrites what they were judged on. A weight is group governance: when it changes the group figure legitimately recalculates, and the warning is what makes that visible rather than silent.</div>');
+}
+
+
+/* ── Scoring bands ──────────────────────────────────────────────────
+   One scale for every achievement-against-benchmark figure, held once so the
+   legend, the colours and the status words can never drift apart. ── */
+function renderBands(){
+  var editable = grant("c_bands") === "edit" && EDITING.bands;
+  var b = BANDS.bands;
+
+  var rows = b.map(function(x, i){
+    var top = i === 0 ? "and above" : "to " + (b[i-1].floor - 1) + "%";
+    return '<tr><td><span class="swatch" style="background:var(--' + x.key + ')"></span>' +
+      (editable
+        ? '<input class="blabel" data-b="' + i + '" value="' + esc(x.label) + '" aria-label="Label for band ' + (i+1) + '" />'
+        : '<b>' + esc(x.label) + '</b>') + '</td>' +
+      '<td class="cc">' + (editable && i < b.length - 1
+        ? '<input class="bfloor" data-b="' + i + '" value="' + x.floor + '" aria-label="Floor for ' + esc(x.label) + '" />'
+        : '<span class="mono">' + x.floor + '</span>') + '</td>' +
+      '<td class="cc"><span class="mono">' + x.floor + '% ' + top + '</span></td>' +
+      '<td><span class="pill ' + x.key + '">' + esc(x.label) + '</span></td></tr>';
+  }).join("");
+
+  /* Floors must descend, or a figure falls into two bands at once. */
+  var ok = true;
+  for (var i = 1; i < b.length; i++) if (b[i].floor >= b[i-1].floor) ok = false;
+
+  return '<p class="lede">One scale for every figure scored against a benchmark. <strong>Performance is actual over target; execution is delivered over plan</strong> &mdash; the same kind of number, so both read on these bands. The colour and the status word come from the same place, so they can never contradict each other.</p>' +
+
+    '<div class="kv"><span class="pill kind">Scope: per tenant</span>' +
+    '<span class="pill kind">One standing scale</span>' +
+    '<span class="pill ' + (editable ? "good" : "none") + '">' + (editable ? "Editing" : "View only") + '</span></div>' +
+
+    section("01", "Scoring bands",
+      "The lowest band has no floor to set &mdash; it catches everything beneath the band above it.",
+      '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
+        (grant("c_bands") === "edit"
+          ? '<button class="editbtn" data-edit="bands">' + (EDITING.bands ? "Done" : "Edit") + '</button>'
+          : '') + '</div>' +
+      '<div class="cfg"><table><thead><tr><th style="width:34%">Band</th>' +
+        '<th class="cc" style="width:16%">Floor</th><th class="cc" style="width:26%">Range</th>' +
+        '<th style="width:24%">Appears as</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (ok ? '' : '<div class="note bad-note"><b>Floors must descend.</b> Two bands overlap, so a figure would fall into both. Saving is blocked until the order is fixed.</div>') +
+      '<div class="note"><b>70 and 50 match the platform\'s existing thresholds</b> in <code>src/lib/scoring.ts</code>, so the strategy layer and the functional layer never disagree about a colour. 85 is the added top edge. <i>Reconcile against the codebase &mdash; this is carried from the handoff, not verified.</i></div>' +
+      '<div class="note bad-note"><b>Changing a threshold rewrites history.</b> A quarter reported as on track becomes needs attention with no data having changed. Bands are per tenant and change rarely; the warning is what makes a change visible rather than silent.</div>');
+}
+
+</script>
+<script>
+/* ── Arrangement ──────────────────────────────────────────────────────────
+   Order is stored on the object and shared by everyone, which is why it needs
+   permissions at all: a personal view preference would need none.
+
+   Who may reorder what:
+     SMO       everything — business units, capabilities, themes, and any list
+               inside any unit
+     BU head   their own unit's pillars, and the measures and tactics within
+               them
+     everyone else   nothing; the handle is not rendered
+
+   Dragging is by HANDLE, never by the row. A pillar row is already a click
+   target that expands it, so a whole-row drag would make every attempt to open
+   a pillar feel like the start of a drag.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Arrangement is a MODE, entered deliberately and left again — the same
+   pattern as the weighting table. Handles that are always present are clutter
+   on a page whose normal job is reading, and they invite a drag when someone
+   meant to open a row. */
+var ARRANGE = false;
+
+function arranging(scope, unitKey){ return ARRANGE && canArrange(scope, unitKey); }
+
+function canArrange(scope, unitKey){
+  var v = viewer();
+  if (v.level === "smo") return true;
+  if (scope === "group") return false;          /* units, capabilities, themes */
+  return v.level === "n1" && (v.unit === "group" || v.unit === unitKey);
+}
+
+function handle(label){
+  return '<span class="grip" role="button" tabindex="0" aria-label="' + esc(label) +
+         '" title="Drag to reorder"><i></i><i></i><i></i></span>';
+}
+
+/* Pointer-based rather than HTML5 drag-and-drop: the native API cannot drag a
+   table row reliably across browsers and gives nothing on touch. */
+function makeSortable(container, itemSel, onCommit){
+  var dragging = null, items = [], startY = 0, placeholderIdx = -1;
+
+  container.querySelectorAll(".grip").forEach(function(g){
+    g.addEventListener("pointerdown", function(e){
+      var row = g.closest(itemSel);
+      if (!row) return;
+      e.preventDefault(); e.stopPropagation();
+      dragging = row; startY = e.clientY;
+      items = Array.prototype.slice.call(container.querySelectorAll(itemSel));
+      placeholderIdx = items.indexOf(row);
+      row.classList.add("dragging");
+      container.classList.add("sorting");
+      g.setPointerCapture(e.pointerId);
+
+      function move(ev){
+        if (!dragging) return;
+        var y = ev.clientY;
+        items.forEach(function(other, i){
+          if (other === dragging) return;
+          var r = other.getBoundingClientRect();
+          var mid = r.top + r.height / 2;
+          if (y < mid && i < placeholderIdx) {
+            other.parentNode.insertBefore(dragging, other);
+            reindex();
+          } else if (y > mid && i > placeholderIdx) {
+            other.parentNode.insertBefore(dragging, other.nextSibling);
+            reindex();
+          }
+        });
+      }
+      function reindex(){
+        items = Array.prototype.slice.call(container.querySelectorAll(itemSel));
+        placeholderIdx = items.indexOf(dragging);
+        /* Row numbers renumber as you drag, so the position being chosen is
+           visible before the drop rather than after it. */
+        items.forEach(function(el, i){
+          var n = el.querySelector(".idx-n");
+          if (n) n.textContent = i + 1;
+        });
+      }
+      function up(ev){
+        if (!dragging) return;
+        dragging.classList.remove("dragging");
+        container.classList.remove("sorting");
+        var order = Array.prototype.slice.call(container.querySelectorAll(itemSel))
+                      .map(function(el){ return +el.dataset.oi; });
+        dragging = null;
+        g.releasePointerCapture(ev.pointerId);
+        document.removeEventListener("pointermove", move);
+        document.removeEventListener("pointerup", up);
+        onCommit(order);
+      }
+      document.addEventListener("pointermove", move);
+      document.addEventListener("pointerup", up);
+    });
+
+    /* Keyboard equivalent, because a drag handle that only works with a mouse
+       locks out anyone who cannot use one. */
+    g.addEventListener("keydown", function(e){
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.preventDefault();
+      var row = g.closest(itemSel);
+      var all = Array.prototype.slice.call(container.querySelectorAll(itemSel));
+      var i = all.indexOf(row), j = e.key === "ArrowUp" ? i - 1 : i + 1;
+      if (j < 0 || j >= all.length) return;
+      if (j < i) row.parentNode.insertBefore(row, all[j]);
+      else row.parentNode.insertBefore(row, all[j].nextSibling);
+      onCommit(Array.prototype.slice.call(container.querySelectorAll(itemSel))
+                 .map(function(el){ return +el.dataset.oi; }));
+    });
+  });
+}
+
+/* Apply a committed order to the underlying array. */
+function applyOrder(arr, order){
+  var copy = order.map(function(i){ return arr[i]; });
+  arr.length = 0;
+  copy.forEach(function(x){ arr.push(x); });
+}
+
+</script>
+<script>
+  var CUR = "mobile", OPEN = [];
+
+  function render(){
+    var v = viewer();
+    document.getElementById("viewerNote").innerHTML =
+      (v.level === "smo" ? "Super user" : v.level.toUpperCase().replace("N","N-")) +
+      " &middot; " + (v.unit === "group" ? "all units" : UNITS[v.unit].name);
+
+    document.getElementById("units").innerHTML = UNIT_KEYS.map(function(k){
+      return '<button role="tab" aria-selected="' + (k===CUR) + '" data-u="' + k + '">' + UNITS[k].name + '</button>';
+    }).join("");
+
+    document.getElementById("panel").innerHTML = renderUnitPerformance(UNITS[CUR]);
+    document.getElementById("title").textContent = "Raya Trade \u2014 " + UNITS[CUR].name;
+
+    /* Restore whatever was open, so entering arrange mode or dropping a row
+       does not collapse the pillar being worked on. */
+    OPEN.forEach(function(i){
+      var r = document.querySelector('.prow[data-p="' + i + '"]');
+      if (r) { r.setAttribute("aria-expanded","true"); r.nextElementSibling.hidden = false; }
+    });
+    wire();
+  }
+
+  function noteOpen(){
+    OPEN = [];
+    document.querySelectorAll('.prow[aria-expanded="true"]').forEach(function(r){ OPEN.push(+r.dataset.p); });
+  }
+
+  function wire(){
+    document.querySelectorAll("#units button").forEach(function(b){
+      b.addEventListener("click", function(){ CUR = b.dataset.u; OPEN = []; render(); });
+    });
+    document.querySelectorAll("[data-arrange]").forEach(function(b){
+      b.addEventListener("click", function(){ noteOpen(); ARRANGE = !ARRANGE; render(); });
+    });
+    document.querySelectorAll(".prow[data-p]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var open = b.getAttribute("aria-expanded") === "true";
+        b.setAttribute("aria-expanded", String(!open));
+        b.nextElementSibling.hidden = open;
+        noteOpen();
+      });
+    });
+    document.querySelectorAll("[data-modal]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal);
+      });
+    });
+
+    document.querySelectorAll(".sortable").forEach(function(c){
+      var kind = c.dataset.kind;
+      var isTable = kind === "measures" || kind === "tactics";
+      makeSortable(c, isTable ? "tr" : ".prow-wrap", function(order){
+        noteOpen();
+        if (kind === "pillars") applyOrder(UNITS[CUR].items, order);
+        else {
+          var body = c.closest(".pbody");
+          var pi = +body.previousElementSibling.dataset.p;
+          var it = UNITS[CUR].items[pi];
+          applyOrder(kind === "measures" ? it.measures : it.tactics, order);
+        }
+        render();
+      });
+    });
+  }
+
+  var overlay = document.getElementById("overlay");
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
+    overlay.classList.add("on");
+  }
+  document.getElementById("modal-x").addEventListener("click", function(){ overlay.classList.remove("on"); });
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) overlay.classList.remove("on"); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") overlay.classList.remove("on"); });
+
+  var sel = document.getElementById("asWho");
+  sel.innerHTML = PEOPLE.filter(function(p){ return p.unit !== "group" || p.level === "smo"; })
+    .concat(PEOPLE.filter(function(p){ return p.unit === "group" && p.level !== "smo"; }))
+    .map(function(p){ return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>'; }).join("");
+  sel.value = VIEWER;
+  sel.addEventListener("change", function(){ VIEWER = sel.value; ARRANGE = false; render(); });
+
+  var chromeEl = document.querySelector(".chrome");
+  new ResizeObserver(function(){
+    document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
+  }).observe(chromeEl);
+
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY, on = document.body.classList.contains("scrolled");
+      if (!on && y > 70) document.body.classList.add("scrolled");
+      else if (on && y < 20) document.body.classList.remove("scrolled");
+      ticking = false;
+    });
+  }, { passive: true });
+
+  render();
+</script>

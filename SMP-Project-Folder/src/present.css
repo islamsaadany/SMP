@@ -1,0 +1,157 @@
+  /* ── Presentation mode ────────────────────────────────────────────
+     A mode, not a page: it takes the whole window, the app chrome disappears,
+     and Exit returns to exactly where the presenter was standing.
+
+     Every slide is authored at one fixed size and scaled to fit, so what is
+     rehearsed is what projects — the same line breaks and the same rows per
+     slide on any screen. */
+  .deckroot { position:fixed; inset:0; z-index:60; background:#0B1A33; display:none; }
+  .deckroot.on { display:block; }
+  body.presenting { overflow:hidden; }
+  .deckstage { position:absolute; inset:0 0 62px; display:flex; align-items:center;
+               justify-content:center; }
+  .deck { width:1600px; height:900px; position:relative; transform-origin:center center; flex:none; }
+  .deckroot.fitwin .deck { width:100%; height:100%; }
+
+  .dslide { position:absolute; inset:0; display:none; flex-direction:column;
+            background:var(--surface); border-radius:5px; padding:52px 62px; overflow:hidden; }
+  .dslide.on { display:flex; }
+  .dslide h1 { font:400 76px/1.08 var(--serif); margin:8px 0 22px; }
+  .dslide h1.cover { font-size:112px; letter-spacing:-.015em; }
+  .dslide h2 { font:400 46px/1.15 var(--serif); margin:0 0 26px; }
+  .dslide .eyebrow { font-size:17px; letter-spacing:.16em; text-transform:uppercase;
+                     color:var(--gold-deep); font-weight:700; }
+  .dlab { display:block; font-size:15px; letter-spacing:.11em; text-transform:uppercase;
+          color:var(--ink-3); font-weight:700; margin-bottom:10px; }
+
+  .dslide table { width:100%; border-collapse:collapse; }
+  .dslide thead th { background:var(--panel); color:#fff; font-size:14px; letter-spacing:.09em;
+                     text-transform:uppercase; font-weight:700; text-align:left;
+                     padding:16px 18px; white-space:nowrap; }
+  .dslide th.num, .dslide td.num { text-align:right; }
+  .dslide th.cc, .dslide td.cc { text-align:center; }
+  /* The deck states its own typography rather than inheriting the app's:
+     a class named for one meaning in the platform must not silently change a
+     slide. */
+  .dslide, .dslide table, .dslide td { font-family:var(--sans); }
+  .dslide td { padding:20px 18px; font-size:23px; vertical-align:middle;
+               border-bottom:1px solid var(--line-soft); }
+  .dslide table.dbig td { font-size:26px; padding:24px 18px; }
+  .dslide tbody tr:last-child td { border-bottom:0; }
+  .dslide table.zebra tbody tr:nth-child(even) td { background:#F7F9FC; }
+  .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .dslide td.final { font-weight:700; }
+  /* Band colours are applied inline elsewhere in the platform; the deck needs
+     them as classes because a cell carries its band as one. */
+  .dslide .good, .dslide b.good { color:var(--good); }
+  .dslide .attn, .dslide b.attn { color:var(--attn); }
+  .dslide .warn, .dslide b.warn { color:var(--warn); }
+  .dslide .bad,  .dslide b.bad  { color:var(--bad); }
+  .dslide .none, .dslide b.none { color:var(--none); }
+  .dslide td.idx { width:60px; color:var(--none); font-family:var(--mono); font-size:18px; text-align:right; }
+  .dslide th.idx { width:60px; text-align:right; }
+  .dslide tr.dim td { opacity:.5; }
+  .dslide .lead { font-weight:500; }
+  .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
+  .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch; }
+  .dslide .withnote td.dnote.empty { color:var(--none); }
+  .dslide .withnote th:last-child { width:24%; }
+  .dirs td.dirname b { font:400 40px/1.2 var(--serif); display:block; }
+  .dirs td.dirname .dsub { font-size:19px; margin-top:8px; }
+  .dirs td { padding:30px 18px; }
+  .dirs td.num { font-size:34px; }
+  .dcode { color:var(--ink-3); font-family:var(--mono); font-size:.62em; font-weight:400; }
+
+  .dphdr { display:flex; align-items:flex-start; justify-content:space-between; gap:30px;
+           flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:18px; margin-bottom:22px; }
+  .dphdr h2 { margin:0; }
+  .dstats { display:flex; gap:32px; }
+  .dstats i { display:block; font-style:normal; font-size:14px; letter-spacing:.1em;
+              text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .dstats b { font:400 44px/1.15 var(--serif); }
+  .dwhich { font:400 20px/1 var(--sans); color:var(--ink-3); letter-spacing:.1em;
+            text-transform:uppercase; margin-left:16px; vertical-align:middle; }
+
+  ol.dswot { list-style:none; margin:6px 0 0; padding:0; columns:2; column-gap:56px; }
+  ol.dswot li { display:grid; grid-template-columns:44px 1fr; gap:16px; align-items:baseline;
+                padding:22px 0; font-size:29px; line-height:1.35; break-inside:avoid;
+                border-bottom:1px solid var(--line-soft); }
+  ol.dswot .n { font-family:var(--mono); font-size:18px; color:var(--none); }
+  .d-swot h2 { padding-left:18px; }
+  .d-swot.t-good h2 { border-left:5px solid var(--good); }
+  .d-swot.t-bad h2 { border-left:5px solid var(--bad); }
+  .d-swot.t-stone h2 { border-left:5px solid var(--panel); }
+  .d-swot.t-warn h2 { border-left:5px solid var(--warn); }
+
+  .aimtop { display:grid; grid-template-columns:1.25fr 1fr; gap:60px; padding-bottom:34px;
+            border-bottom:1px solid var(--line); }
+  .asp2 { font:400 38px/1.35 var(--serif); color:var(--ink); margin:0; }
+  .asp3 { font:400 27px/1.4 var(--serif); color:var(--ink-2); margin:0; }
+  .aimbottom { margin-top:34px; }
+  .big3 { color:var(--gold-deep); }
+
+  .d-cover { justify-content:center; }
+  .coverrule { width:120px; height:5px; background:var(--gold); margin:6px 0 30px; }
+  .coversub { font:400 30px/1.3 var(--serif); color:var(--ink-2); margin:0; }
+  .d-thanks { align-items:center; text-align:center; justify-content:center; }
+  .d-thanks .coverrule { margin:6px auto 30px; }
+  .seclab { display:block; font-size:17px; letter-spacing:.14em; text-transform:uppercase;
+            color:var(--gold-deep); font-weight:700; margin-bottom:10px; }
+  .secgrid { display:grid; grid-template-columns:repeat(4,1fr); gap:26px; margin-top:52px; }
+  .seccell { border-top:5px solid var(--line); padding-top:20px; }
+  .seccell b { display:block; font:400 64px/1 var(--serif); }
+  .seccell span { display:block; font-size:19px; color:var(--ink-3); margin-top:8px; }
+  .seccell.t-good { border-top-color:var(--good); }
+  .seccell.t-bad { border-top-color:var(--bad); }
+  .seccell.t-stone { border-top-color:var(--panel); }
+  .seccell.t-warn { border-top-color:var(--warn); }
+  .pillarname { font:400 68px/1.12 var(--serif); margin:0 0 14px; }
+  .dcode.huge { font-size:.5em; }
+  .leadstats { display:flex; gap:80px; margin-top:44px; }
+  .leadstats b { display:block; font:400 84px/1 var(--serif); margin-top:8px; }
+  .leadstats b.plain { color:var(--ink-2); font-size:56px; }
+
+  .headgrid { display:grid; grid-template-columns:1fr 1fr; gap:70px; flex:1; align-content:center; }
+  .headcell b { display:block; font:400 168px/.95 var(--serif); letter-spacing:-.02em; margin:10px 0 14px; }
+  .headsub { display:block; color:var(--ink-3); font-size:22px; }
+  .headfoot { color:var(--ink-3); font-size:20px; margin:0; padding-top:26px; border-top:1px solid var(--line); }
+  .ddelta { font-family:var(--mono); font-weight:600; }
+  .ddelta.up { color:var(--good); } .ddelta.down { color:var(--bad); }
+  .d-head .ddelta { font-size:24px; margin-right:8px; }
+
+  .dnotebox { border:1px dashed var(--line); border-radius:3px; padding:34px 38px;
+              font:400 33px/1.55 var(--serif); color:var(--ink); flex:1; outline:none; }
+  .dnotebox:focus { border-color:var(--gold); border-style:solid; background:#FFFDF7; }
+  .dhint { color:var(--ink-3); font-size:18px; margin-top:20px; }
+  .contd { font:400 17px/1 var(--sans); color:var(--ink-3); letter-spacing:.09em;
+           text-transform:uppercase; margin-left:14px; }
+
+  /* Rows are squeezed before a slide is split; only at the floor does a table
+     run on to another slide. */
+  .dslide.tight td, .dslide.tight table.dbig td { padding:12px 18px; font-size:19px; }
+  .dslide.tight .withnote td.dnote { font-size:16px; }
+  .dslide.tight ol.dswot li { padding:13px 0; font-size:23px; }
+  .dslide.tight .dirs td { padding:18px 18px; }
+  .dslide.tight .dirs td.dirname b { font-size:31px; }
+  .dslide.tight .asp2 { font-size:31px; line-height:1.32; }
+  .dslide.tight .asp3 { font-size:23px; }
+  .dslide.tight h2 { font-size:40px; margin-bottom:18px; }
+  .dslide.tight .aimtop { padding-bottom:24px; }
+  .dslide.tight .aimbottom { margin-top:24px; }
+  .dslide.tight .dnotebox { font-size:28px; padding:26px 30px; }
+
+  .deckbar { position:absolute; left:0; right:0; bottom:0; height:62px; display:flex;
+             align-items:center; gap:18px; padding:0 26px; background:rgba(11,26,51,.94);
+             border-top:1px solid rgba(255,255,255,.1); }
+  .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
+                    font:inherit; font-size:15px; line-height:1; padding:8px 13px;
+                    border-radius:20px; cursor:pointer; }
+  .deckbar button:hover { border-color:#fff; color:#fff; }
+  .deckbar button.txt { font-size:12px; letter-spacing:.06em; }
+  .deckbar .dtitle { color:#fff; font-size:14px; margin-right:auto; }
+  .deckbar .dtitle b { color:var(--gold); }
+  .deckbar .dcount { color:#8FA3C0; font-family:var(--mono); font-size:14px; }
+  .ddots { display:flex; gap:5px; align-items:center; max-width:36vw; flex-wrap:wrap; }
+  .ddot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.25);
+          border:0; padding:0; cursor:pointer; }
+  .ddot.on { background:var(--gold); transform:scale(1.35); }

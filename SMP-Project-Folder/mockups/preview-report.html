@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My reporting — page preview</title>
+<style>
+:root{--stone:#16325C;--stone-soft:#24487A;--gold:#C9A24D;--gold-deep:#A8842F;
+--ground:#F7F8FA;--surface:#FFFFFF;--surface-2:#EFF2F6;--line:#D6DCE5;--line-soft:#E6EAF0;
+--ink:#171B22;--ink-2:#414A58;--ink-3:#6B7583;--good:#2E7D5B;--attn:#B8860B;--warn:#CC6B3D;
+--bad:#B04434;--none:#8A9099;--good-bg:#E4F0EA;--attn-bg:#F7EFD6;--warn-bg:#FBEBE0;--bad-bg:#F7E3E0;
+--panel:#16325C;--panel-ink:#FFF;--serif:Georgia,'Iowan Old Style',serif;
+--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;--r:2px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 28px 70px}
+h2.sec .rtally{font-size:12.5px}
+.tophint{background:var(--panel);color:#C3CEE0;font-size:12.5px;padding:10px 28px}
+.tophint b{color:var(--gold)}
+h2.sec{font:400 23px/1.25 var(--serif);margin:30px 0 12px;display:flex;align-items:center;gap:12px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.why,.muted{color:var(--ink-3);font-size:12px}
+.rep-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 18px;
+background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.kpi{display:flex;align-items:baseline;gap:8px} .kpi b{font:400 26px/1 var(--serif)}
+.kpi span{color:var(--ink-3);font-size:12.5px}
+.repbar{display:block;height:6px;background:var(--surface-2);border-radius:20px;overflow:hidden;flex:1;max-width:260px}
+.repbar i{display:block;height:100%;background:var(--attn)}
+.editbtn{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+padding:8px 15px;border-radius:20px;border:1px solid var(--gold);color:var(--gold-deep);background:none;cursor:pointer}
+.note{border-left:3px solid var(--gold);background:#FBF6E9;padding:14px 18px;font-size:13.5px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin:0 0 18px}
+.note.bad-note{border-left-color:var(--bad);background:var(--bad-bg)} .note b{color:var(--ink)}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);text-align:left;
+font-weight:700;padding:9px 12px;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--line-soft);font-size:14px;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+th.num,td.num{text-align:right} th.cc,td.cc{text-align:center}
+.idx{width:38px;color:var(--ink-3);font-family:var(--mono);font-size:11.5px}
+.scroll{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+h4.mini{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+font-weight:700;margin:18px 0 8px} h4.mini:first-child{margin-top:0}
+.plist{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.phead{background:var(--surface-2);display:grid;grid-template-columns:1fr 110px 84px 84px 78px 20px;gap:14px;padding:10px 16px;
+background:var(--surface-2);border-bottom:1px solid var(--line);
+font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.phead .num{text-align:right} .phead .cc{text-align:center}
+.prow{display:grid;grid-template-columns:1fr 110px 84px 84px 78px 20px;gap:14px;align-items:center;
+width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line-soft);
+padding:14px 16px;font:inherit;cursor:pointer}
+.prow:hover{background:var(--surface-2)}
+.prow[aria-expanded="true"]{background:var(--surface-2)}
+.pname b{font-weight:600;font-size:15px} .pcode{color:var(--ink-3);font-weight:400;
+font-family:var(--mono);font-size:12.5px;margin-right:2px}
+.psub{display:block;color:var(--ink-3);font-size:11.5px;margin-top:3px}
+.chev{color:var(--ink-3);font-size:11px;transition:transform .15s ease;text-align:center}
+.prow[aria-expanded="true"] .chev{transform:rotate(90deg)}
+.pbody{padding:16px 18px 20px;border-bottom:1px solid var(--line-soft);background:var(--ground)}
+.pill{display:inline-block;font:700 9.5px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;
+padding:5px 9px;border-radius:20px;background:var(--surface-2);color:var(--ink-3);border:1px solid var(--line)}
+.rtally{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);background:var(--surface);
+border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+.rtally.full{color:var(--good);background:var(--good-bg);border-color:var(--good)}
+.entry{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r);
+overflow:hidden;background:var(--surface)}
+.entry.filled{border-color:var(--good)} .entry.filled .field{background:var(--good-bg)}
+.entry .field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 9px;width:76px;
+border:0;text-align:right;background:var(--surface);color:var(--ink)}
+.entry .field:focus{outline:none} .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
+.unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
+border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--ink-3);white-space:nowrap}
+.notecol{width:28%}
+.notefld{width:100%;font:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);
+border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
+tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+tr.notdue td{opacity:.62}
+.qs{display:inline-flex;gap:3px}
+.qs i{width:19px;height:19px;border:1px dashed var(--line);border-radius:2px;font-style:normal;
+font-family:var(--mono);font-size:10.5px;display:flex;align-items:center;justify-content:center;color:var(--none)}
+.qs i.on{background:var(--attn-bg);border:1px solid var(--stone-soft);color:var(--stone);font-weight:700}
+.qs i.on.past{background:var(--panel);border-color:var(--panel);color:#fff}
+.fmark{display:inline-block;width:7px;height:7px;background:var(--gold);transform:rotate(45deg);
+margin-left:6px;vertical-align:middle}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+textarea.fld{width:100%;font:inherit;font-size:13.5px;padding:10px 12px;border:1px solid var(--line);
+border-radius:var(--r);background:var(--surface);color:var(--ink);resize:vertical}
+</style></head><body>
+<div class="tophint"><b>Page preview</b> — My reporting, Mobile · H1 2026. Every table carries its
+own header, the entry box carries the measure's unit, and each pillar opens on its own.</div>
+
+<div class="wrap">
+
+<div class="note bad-note"><b>17 figures need a note.</b> Anything at risk or off track carries an
+explanation before it can be submitted — a red number with nothing beside it is where a review
+meeting stalls.</div>
+
+<div class="rep-bar">
+  <div class="kpi"><b>41</b><span>of 41 reported</span></div>
+  <div class="repbar"><i style="width:100%"></i></div>
+  <span class="why" style="margin-left:auto">H1 2026 · due 15 Jul 2026</span>
+  <button class="editbtn">Submit to the SMO</button>
+</div>
+
+<h2 class="sec">Key Objectives <span class="rtally full">4/4</span></h2>
+<div class="scroll"><table><thead><tr><th class="idx">#</th><th>Key objective</th>
+  <th class="num">Dir.</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th>
+</tr></thead><tbody><tr class="wantnote"><td class="idx">1</td><td>Distribution revenue</td><td class="num">≥</td><td class="num">6.2B EGP</td><td class="cc"><span class="entry filled"><input class="field" value="2.7" placeholder="—" aria-label="Report Distribution revenue"><span class="unitsuf">B EGP</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Distribution revenue"></td></tr><tr class=""><td class="idx">2</td><td>Mobile market share <span class="fmark"></span></td><td class="num">≥</td><td class="num">32%</td><td class="cc"><span class="entry filled"><input class="field" value="28" placeholder="—" aria-label="Report Mobile market share"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Mobile market share"></td></tr><tr class=""><td class="idx">3</td><td>Active merchant reach</td><td class="num">≥</td><td class="num">4,500</td><td class="cc"><span class="entry filled"><input class="field" value="3,180" placeholder="—" aria-label="Report Active merchant reach"></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Active merchant reach"></td></tr><tr class="wantnote"><td class="idx">4</td><td>App coverage rate</td><td class="num">≥</td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="22" placeholder="—" aria-label="Report App coverage rate"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for App coverage rate"></td></tr></tbody></table></div>
+
+<h2 class="sec">Pillars — measures and tactics</h2>
+<div class="plist">
+  <div class="pheadwrap"><div class="phead"><span>Pillar</span><span class="cc">Kind</span>
+    <span class="num">Measures</span><span class="num">Tactics</span>
+    <span class="cc">Reported</span><span></span></div></div>
+  
+    <div class="prow-wrap">
+      <button class="prow rprow" aria-expanded="true">
+        <span class="pname"><b><span class="pcode">MB01</span> Digital &amp; Data-Driven Operations</b>
+          <span class="psub">4 measures · 4 tactics asked · 1 outside this cycle</span></span>
+        <span class="cc"><span class="pill kind">Capability</span></span>
+        <span class="num">4</span>
+        <span class="num">4</span>
+        <span class="cc"><span class="rtally full">8/8</span></span>
+        <span class="chev">▸</span>
+      </button>
+      <div class="pbody">
+        <h4 class="mini">Key measures</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Measure</th>
+          <th class="num">Dir.</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class=""><td class="idx">1</td><td>Data duplicate rate</td><td class="num">≤</td><td class="num">1%</td><td class="cc"><span class="entry filled"><input class="field" value="1.4" placeholder="—" aria-label="Report Data duplicate rate"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Data duplicate rate"></td></tr><tr class="wantnote"><td class="idx">2</td><td>Orders processed digitally</td><td class="num">≥</td><td class="num">90%</td><td class="cc"><span class="entry filled"><input class="field" value="48" placeholder="—" aria-label="Report Orders processed digitally"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Orders processed digitally"></td></tr><tr class="wantnote"><td class="idx">3</td><td>App coverage rate <span class="fmark"></span></td><td class="num">≥</td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="22" placeholder="—" aria-label="Report App coverage rate"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for App coverage rate"></td></tr><tr class="wantnote"><td class="idx">4</td><td>Dependency on automated reports</td><td class="num">≥</td><td class="num">90%</td><td class="cc"><span class="entry filled"><input class="field" value="58" placeholder="—" aria-label="Report Dependency on automated reports"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Dependency on automated reports"></td></tr></tbody></table></div>
+        <h4 class="mini">Tactics</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+          <th>Quarters</th><th class="num">Due at</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class=""><td class="idx">1</td><td>Clean and standardize customer and SKU base</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="45" placeholder="—" aria-label="Report Clean and standardize customer and SKU base"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Clean and standardize customer and SKU base"></td></tr><tr class=""><td class="idx">2</td><td>End-to-end order-to-cash digitization</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="35" placeholder="—" aria-label="Report End-to-end order-to-cash digitization"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for End-to-end order-to-cash digitization"></td></tr><tr class=""><td class="idx">3</td><td>Digitize sales reporting via Power BI</td><td>Ramy Behairy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="40" placeholder="—" aria-label="Report Digitize sales reporting via Power BI"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Digitize sales reporting via Power BI"></td></tr><tr class=""><td class="idx">4</td><td>Scale Mobile Digital App across merchants</td><td>Ashraf Laithy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="30" placeholder="—" aria-label="Report Scale Mobile Digital App across merchants"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Scale Mobile Digital App across merchants"></td></tr><tr class="notdue"><td class="idx">5</td><td>Data integration across business units</td><td>Abdelhamid</td><td><span class="qs"><i class="">1</i><i class="">2</i><i class="on">3</i><i class="on">4</i></span></td><td colspan="3" class="cc"><span class="pill kind">Not asked — outside this cycle</span></td></tr></tbody></table></div>
+      </div>
+    </div>
+    <div class="prow-wrap">
+      <button class="prow rprow" aria-expanded="false">
+        <span class="pname"><b><span class="pcode">MB02</span> Channel Preference &amp; Development</b>
+          <span class="psub">4 measures · 4 tactics asked</span></span>
+        <span class="cc"><span class="pill kind">Direction</span></span>
+        <span class="num">4</span>
+        <span class="num">4</span>
+        <span class="cc"><span class="rtally full">8/8</span></span>
+        <span class="chev">▸</span>
+      </button>
+      <div class="pbody" hidden>
+        <h4 class="mini">Key measures</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Measure</th>
+          <th class="num">Dir.</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class=""><td class="idx">1</td><td>Average delivery time</td><td class="num">≤</td><td class="num">24 h</td><td class="cc"><span class="entry filled"><input class="field" value="31" placeholder="—" aria-label="Report Average delivery time"><span class="unitsuf">h</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Average delivery time"></td></tr><tr class="wantnote"><td class="idx">2</td><td>Key retailer revenue growth</td><td class="num">≥</td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="24" placeholder="—" aria-label="Report Key retailer revenue growth"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Key retailer revenue growth"></td></tr><tr class="wantnote"><td class="idx">3</td><td>Tier 2 merchants enrolled</td><td class="num">≥</td><td class="num">100</td><td class="cc"><span class="entry filled"><input class="field" value="58" placeholder="—" aria-label="Report Tier 2 merchants enrolled"></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Tier 2 merchants enrolled"></td></tr><tr class="wantnote"><td class="idx">4</td><td>Tier 2 segment revenue growth</td><td class="num">≥</td><td class="num">100%</td><td class="cc"><span class="entry filled"><input class="field" value="62" placeholder="—" aria-label="Report Tier 2 segment revenue growth"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Tier 2 segment revenue growth"></td></tr></tbody></table></div>
+        <h4 class="mini">Tactics</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+          <th>Quarters</th><th class="num">Due at</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class=""><td class="idx">1</td><td>Retailer preference index workshop</td><td>Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="60" placeholder="—" aria-label="Report Retailer preference index workshop"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Retailer preference index workshop"></td></tr><tr class=""><td class="idx">2</td><td>Joint business planning with key retailers</td><td>Mohamed Rizk</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="45" placeholder="—" aria-label="Report Joint business planning with key retailers"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Joint business planning with key retailers"></td></tr><tr class=""><td class="idx">3</td><td>Tier 2 growth acceleration programme</td><td>Ashraf Laithy</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="35" placeholder="—" aria-label="Report Tier 2 growth acceleration programme"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Tier 2 growth acceleration programme"></td></tr><tr class=""><td class="idx">4</td><td>Channel intelligence engine (pilot)</td><td>Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="40" placeholder="—" aria-label="Report Channel intelligence engine (pilot)"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Channel intelligence engine (pilot)"></td></tr></tbody></table></div>
+      </div>
+    </div>
+    <div class="prow-wrap">
+      <button class="prow rprow" aria-expanded="false">
+        <span class="pname"><b><span class="pcode">MB03</span> Portfolio &amp; Value Chain Expansion</b>
+          <span class="psub">8 measures · 5 tactics asked · 2 outside this cycle</span></span>
+        <span class="cc"><span class="pill kind">Direction</span></span>
+        <span class="num">8</span>
+        <span class="num">5</span>
+        <span class="cc"><span class="rtally full">13/13</span></span>
+        <span class="chev">▸</span>
+      </button>
+      <div class="pbody" hidden>
+        <h4 class="mini">Key measures</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Measure</th>
+          <th class="num">Dir.</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class="wantnote"><td class="idx">1</td><td>Non-Samsung revenue</td><td class="num">≥</td><td class="num">4B EGP</td><td class="cc"><span class="entry filled"><input class="field" value="1.6" placeholder="—" aria-label="Report Non-Samsung revenue"><span class="unitsuf">B EGP</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Non-Samsung revenue"></td></tr><tr class=""><td class="idx">2</td><td>Samsung market share <span class="fmark"></span></td><td class="num">≥</td><td class="num">30%</td><td class="cc"><span class="entry filled"><input class="field" value="31" placeholder="—" aria-label="Report Samsung market share"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Samsung market share"></td></tr><tr class=""><td class="idx">3</td><td>Vivo market share</td><td class="num">≥</td><td class="num">60%</td><td class="cc"><span class="entry filled"><input class="field" value="48" placeholder="—" aria-label="Report Vivo market share"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Vivo market share"></td></tr><tr class="wantnote"><td class="idx">4</td><td>Accessory revenue</td><td class="num">≥</td><td class="num">300M EGP</td><td class="cc"><span class="entry filled"><input class="field" value="96" placeholder="—" aria-label="Report Accessory revenue"><span class="unitsuf">M EGP</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Accessory revenue"></td></tr><tr class="wantnote"><td class="idx">5</td><td>Active Sary merchants</td><td class="num">≥</td><td class="num">800</td><td class="cc"><span class="entry filled"><input class="field" value="310" placeholder="—" aria-label="Report Active Sary merchants"></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Active Sary merchants"></td></tr><tr class="wantnote"><td class="idx">6</td><td>Sary revenue</td><td class="num">≥</td><td class="num">150M EGP</td><td class="cc"><span class="entry filled"><input class="field" value="42" placeholder="—" aria-label="Report Sary revenue"><span class="unitsuf">M EGP</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Sary revenue"></td></tr><tr class="wantnote"><td class="idx">7</td><td>Local production devices</td><td class="num">≥</td><td class="num">1M</td><td class="cc"><span class="entry filled"><input class="field" value="520" placeholder="—" aria-label="Report Local production devices"><span class="unitsuf">M</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Local production devices"></td></tr><tr class="wantnote"><td class="idx">8</td><td>Sary app downloads</td><td class="num">≥</td><td class="num">40K</td><td class="cc"><span class="entry filled"><input class="field" value="18.4" placeholder="—" aria-label="Report Sary app downloads"><span class="unitsuf">K</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Sary app downloads"></td></tr></tbody></table></div>
+        <h4 class="mini">Tactics</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+          <th>Quarters</th><th class="num">Due at</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class=""><td class="idx">1</td><td>Protect and grow share in existing brands</td><td>Ashraf Abdelaty</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="55" placeholder="—" aria-label="Report Protect and grow share in existing brands"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Protect and grow share in existing brands"></td></tr><tr class=""><td class="idx">2</td><td>Expand high-margin categories</td><td>Fayad</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="40" placeholder="—" aria-label="Report Expand high-margin categories"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Expand high-margin categories"></td></tr><tr class=""><td class="idx">3</td><td>Leverage Sary for entry-to-mid expansion</td><td>Fayad</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="30" placeholder="—" aria-label="Report Leverage Sary for entry-to-mid expansion"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Leverage Sary for entry-to-mid expansion"></td></tr><tr class=""><td class="idx">4</td><td>Sary-enabled tailored B2B portfolio</td><td>Fayad</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="25" placeholder="—" aria-label="Report Sary-enabled tailored B2B portfolio"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Sary-enabled tailored B2B portfolio"></td></tr><tr class=""><td class="idx">5</td><td>Ongoing scanning for tier-1 brands</td><td>Karim</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="50" placeholder="—" aria-label="Report Ongoing scanning for tier-1 brands"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Ongoing scanning for tier-1 brands"></td></tr><tr class="notdue"><td class="idx">6</td><td>Build a light ecosystem (limited SKU)</td><td>Fayad</td><td><span class="qs"><i class="">1</i><i class="">2</i><i class="on">3</i><i class="on">4</i></span></td><td colspan="3" class="cc"><span class="pill kind">Not asked — outside this cycle</span></td></tr><tr class="notdue"><td class="idx">7</td><td>Market intelligence partner</td><td>Karim</td><td><span class="qs"><i class="">1</i><i class="">2</i><i class="on">3</i><i class="on">4</i></span></td><td colspan="3" class="cc"><span class="pill kind">Not asked — outside this cycle</span></td></tr></tbody></table></div>
+      </div>
+    </div>
+    <div class="prow-wrap">
+      <button class="prow rprow" aria-expanded="false">
+        <span class="pname"><b><span class="pcode">MB04</span> Asset-Light Model Regional Expansion</b>
+          <span class="psub">3 measures · 5 tactics asked · 1 outside this cycle</span></span>
+        <span class="cc"><span class="pill kind">Direction</span></span>
+        <span class="num">3</span>
+        <span class="num">5</span>
+        <span class="cc"><span class="rtally full">8/8</span></span>
+        <span class="chev">▸</span>
+      </button>
+      <div class="pbody" hidden>
+        <h4 class="mini">Key measures</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Measure</th>
+          <th class="num">Dir.</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class="wantnote"><td class="idx">1</td><td>Regional hub revenue</td><td class="num">≥</td><td class="num">2M USD</td><td class="cc"><span class="entry filled"><input class="field" value="0.5" placeholder="—" aria-label="Report Regional hub revenue"><span class="unitsuf">M USD</span></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Regional hub revenue"></td></tr><tr class="wantnote"><td class="idx">2</td><td>Export markets activated</td><td class="num">≥</td><td class="num">3</td><td class="cc"><span class="entry filled"><input class="field" value="1" placeholder="—" aria-label="Report Export markets activated"></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Export markets activated"></td></tr><tr class="wantnote"><td class="idx">3</td><td>Distribution agreements</td><td class="num">≥</td><td class="num">2</td><td class="cc"><span class="entry filled"><input class="field" value="1" placeholder="—" aria-label="Report Distribution agreements"></span></td><td class="notecol"><input class="fld notefld needed" placeholder="Why, and what is being done" aria-label="Note for Distribution agreements"></td></tr></tbody></table></div>
+        <h4 class="mini">Tactics</h4>
+        <div class="scroll"><table><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>
+          <th>Quarters</th><th class="num">Due at</th><th class="cc">Reported</th><th>Note</th>
+        </tr></thead><tbody><tr class=""><td class="idx">1</td><td>Dubai regional hub multi-branded export concept</td><td>Karim</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">67%</td><td class="cc"><span class="entry filled"><input class="field" value="60" placeholder="—" aria-label="Report Dubai regional hub multi-branded export concept"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Dubai regional hub multi-branded export concept"></td></tr><tr class=""><td class="idx">2</td><td>Initial agreements with 2–3 tier 2 brands</td><td>Abdelhamid</td><td><span class="qs"><i class="on past">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">67%</td><td class="cc"><span class="entry filled"><input class="field" value="55" placeholder="—" aria-label="Report Initial agreements with 2–3 tier 2 brands"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Initial agreements with 2–3 tier 2 brands"></td></tr><tr class=""><td class="idx">3</td><td>Pre-entry market validation</td><td>Abdelhamid</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="50" placeholder="—" aria-label="Report Pre-entry market validation"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Pre-entry market validation"></td></tr><tr class=""><td class="idx">4</td><td>Regulatory &amp; entry barriers assessment</td><td>Fayad</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="on">4</i></span></td><td class="num">33%</td><td class="cc"><span class="entry filled"><input class="field" value="55" placeholder="—" aria-label="Report Regulatory &amp; entry barriers assessment"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Regulatory &amp; entry barriers assessment"></td></tr><tr class="notdue"><td class="idx">5</td><td>Entry model design &amp; B2B e-commerce presence</td><td>Abuelenien</td><td><span class="qs"><i class="">1</i><i class="">2</i><i class="">3</i><i class="on">4</i></span></td><td colspan="3" class="cc"><span class="pill kind">Not asked — outside this cycle</span></td></tr><tr class=""><td class="idx">6</td><td>Go / No-Go regional entry risk assessment</td><td>Karim</td><td><span class="qs"><i class="">1</i><i class="on past">2</i><i class="on">3</i><i class="">4</i></span></td><td class="num">50%</td><td class="cc"><span class="entry filled"><input class="field" value="100" placeholder="—" aria-label="Report Go / No-Go regional entry risk assessment"><span class="unitsuf">%</span></span></td><td class="notecol"><input class="fld notefld" placeholder="Note, if there is one" aria-label="Note for Go / No-Go regional entry risk assessment"></td></tr></tbody></table></div>
+      </div>
+    </div>
+</div>
+
+<h4 class="mini" style="margin-top:26px">The owner's note on this cycle</h4>
+<div class="card" style="padding:14px 16px">
+  <textarea class="fld" rows="3">Digital work is landing but the app rollout slipped a quarter behind the principal's own launch. Q3 recovery agreed with Ramy.</textarea>
+</div>
+
+</div>
+<script>
+/* Expanding or collapsing must not move the page under the cursor. Closing a
+   pillar that sits above the one being clicked removes its height, everything
+   below slides up, and the row you aimed at is somewhere else — which reads as
+   the page having refreshed.
+
+   So the clicked row is anchored: note where it sits on screen, let the layout
+   change, then correct the scroll by exactly the difference. The row stays
+   under the cursor and only the content below it moves. */
+document.querySelectorAll('.prow').forEach(function(b){
+  b.addEventListener('click', function(){
+    var before = b.getBoundingClientRect().top;
+    var wasOpen = b.getAttribute('aria-expanded') === 'true';
+
+    document.querySelectorAll('.prow').forEach(function(x){
+      x.setAttribute('aria-expanded', 'false');
+      x.nextElementSibling.hidden = true;
+    });
+    if (!wasOpen) {
+      b.setAttribute('aria-expanded', 'true');
+      b.nextElementSibling.hidden = false;
+    }
+
+    var after = b.getBoundingClientRect().top;
+    if (after !== before) window.scrollBy(0, after - before);
+  });
+});
+</script></body></html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Icons — edit and clear</title>
+<style>
+:root{--panel:#16325C;--gold:#C9A24D;--gold-deep:#A8842F;--ground:#F7F8FA;--surface:#FFF;
+--surface-2:#EFF2F6;--zebra:#F7F9FC;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#6B7583;
+--serif:Georgia,serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--r:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.top{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}.top b{color:var(--gold)}
+.wrap{max-width:1000px;margin:0 auto;padding:26px 30px 70px}
+h3{font:400 20px/1.3 var(--serif);margin:30px 0 10px}
+.lede{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:88ch}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);
+border-radius:var(--r);overflow:hidden}
+th{background:var(--panel);color:#fff;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+text-align:left;padding:9px 12px;font-weight:700}
+th.cc,td.cc{text-align:center;width:88px}
+td{padding:12px;border-bottom:1px solid #E6EAF0;font-size:14px;vertical-align:middle}
+tr:last-child td{border-bottom:0}tbody tr:nth-child(even) td{background:var(--zebra)}
+.nm{font-weight:600;white-space:nowrap}
+.ds{color:var(--ink-2);font-size:13.5px}
+.ico{background:var(--surface);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;
+display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2)}
+.ico.on{background:var(--gold);border-color:var(--gold);color:var(--panel)}
+.ico.sm{width:26px;height:26px}
+.ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;
+stroke-linecap:round;stroke-linejoin:round}
+.ico.sm svg{width:13px;height:13px}
+.note-b{border-left:3px solid var(--gold);background:#FBF6E9;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin-top:18px}
+.note-b b{color:var(--ink)}
+</style></head><body>
+<div class="top"><b>Icons</b> — shown at the size they will actually be used. Nothing is built.</div>
+<div class="wrap">
+<p class="lede">Each drawn at 17px inside a 34px control, and again at 13px for the per-row mark, since
+   an icon that works large and fails small is no use here.</p>
+<h3>For Edit</h3>
+      <table><thead><tr><th class="cc">Resting</th><th class="cc">Active</th><th class="cc">In a row</th>
+        <th>Name</th><th>What it says</th></tr></thead><tbody><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M13.4 3.6l3 3M4 16.5l-1 .5.5-1L13.4 5.6l1 1L4 16.5z"/><path d="M12.4 4.6l3 3"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M13.4 3.6l3 3M4 16.5l-1 .5.5-1L13.4 5.6l1 1L4 16.5z"/><path d="M12.4 4.6l3 3"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M13.4 3.6l3 3M4 16.5l-1 .5.5-1L13.4 5.6l1 1L4 16.5z"/><path d="M12.4 4.6l3 3"/></svg></button></td>
+        <td class="nm">Pencil</td><td class="ds">A plain pencil. The most used mark for edit anywhere, and the least likely to be misread.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M16 10.5V16a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 16V6a1.5 1.5 0 011.5-1.5H10"/><path d="M14 2.8l3.2 3.2L10 13.2l-3.6.4.4-3.6z"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M16 10.5V16a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 16V6a1.5 1.5 0 011.5-1.5H10"/><path d="M14 2.8l3.2 3.2L10 13.2l-3.6.4.4-3.6z"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M16 10.5V16a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 16V6a1.5 1.5 0 011.5-1.5H10"/><path d="M14 2.8l3.2 3.2L10 13.2l-3.6.4.4-3.6z"/></svg></button></td>
+        <td class="nm">Pencil on a square</td><td class="ds">Says edit THIS PAGE rather than edit a thing. Slightly busier at 17px.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/><circle cx="8" cy="6" r="1.8"/><circle cx="13" cy="10" r="1.8"/><circle cx="7" cy="14" r="1.8"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/><circle cx="8" cy="6" r="1.8"/><circle cx="13" cy="10" r="1.8"/><circle cx="7" cy="14" r="1.8"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M4 6h12M4 10h12M4 14h12"/><circle cx="8" cy="6" r="1.8"/><circle cx="13" cy="10" r="1.8"/><circle cx="7" cy="14" r="1.8"/></svg></button></td>
+        <td class="nm">Sliders</td><td class="ds">Reads as settings or filtering, not editing rows. Risks colliding with the Setup gear.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M5.5 9h9a1 1 0 011 1v6a1 1 0 01-1 1h-9a1 1 0 01-1-1v-6a1 1 0 011-1z"/><path d="M7.5 9V6.5a2.5 2.5 0 015 0"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M5.5 9h9a1 1 0 011 1v6a1 1 0 01-1 1h-9a1 1 0 01-1-1v-6a1 1 0 011-1z"/><path d="M7.5 9V6.5a2.5 2.5 0 015 0"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M5.5 9h9a1 1 0 011 1v6a1 1 0 01-1 1h-9a1 1 0 01-1-1v-6a1 1 0 011-1z"/><path d="M7.5 9V6.5a2.5 2.5 0 015 0"/></svg></button></td>
+        <td class="nm">Unlock</td><td class="ds">Says the page is open for change, which is what edit mode means. Uncommon for this job.</td></tr></tbody></table>
+<h3>For Clear</h3>
+      <table><thead><tr><th class="cc">Resting</th><th class="cc">Active</th><th class="cc">In a row</th>
+        <th>Name</th><th>What it says</th></tr></thead><tbody><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M12.5 3.5l4 4M14.5 5.5L8 12l-1.5-1.5L13 4z"/><path d="M6.5 10.5L4 17l6.5-2.5-4-4z"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M12.5 3.5l4 4M14.5 5.5L8 12l-1.5-1.5L13 4z"/><path d="M6.5 10.5L4 17l6.5-2.5-4-4z"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M12.5 3.5l4 4M14.5 5.5L8 12l-1.5-1.5L13 4z"/><path d="M6.5 10.5L4 17l6.5-2.5-4-4z"/></svg></button></td>
+        <td class="nm">Broom (current)</td><td class="ds">What is drawn today. You had to ask what it was, which is the answer.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M8.5 16.5H16"/><path d="M11.8 3.9l4.3 4.3a1.2 1.2 0 010 1.7l-6 6a1.2 1.2 0 01-1.7 0L4.1 11.6a1.2 1.2 0 010-1.7l6-6a1.2 1.2 0 011.7 0z"/><path d="M7 7l5.5 5.5"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M8.5 16.5H16"/><path d="M11.8 3.9l4.3 4.3a1.2 1.2 0 010 1.7l-6 6a1.2 1.2 0 01-1.7 0L4.1 11.6a1.2 1.2 0 010-1.7l6-6a1.2 1.2 0 011.7 0z"/><path d="M7 7l5.5 5.5"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M8.5 16.5H16"/><path d="M11.8 3.9l4.3 4.3a1.2 1.2 0 010 1.7l-6 6a1.2 1.2 0 01-1.7 0L4.1 11.6a1.2 1.2 0 010-1.7l6-6a1.2 1.2 0 011.7 0z"/><path d="M7 7l5.5 5.5"/></svg></button></td>
+        <td class="nm">Eraser</td><td class="ds">Rubs out content and leaves the thing. That is exactly what clearing does.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M7 4.5h9A1.5 1.5 0 0117.5 6v8A1.5 1.5 0 0116 15.5H7L2.5 10z"/><path d="M13.5 7.5l-4 5M9.5 7.5l4 5"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M7 4.5h9A1.5 1.5 0 0117.5 6v8A1.5 1.5 0 0116 15.5H7L2.5 10z"/><path d="M13.5 7.5l-4 5M9.5 7.5l4 5"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M7 4.5h9A1.5 1.5 0 0117.5 6v8A1.5 1.5 0 0116 15.5H7L2.5 10z"/><path d="M13.5 7.5l-4 5M9.5 7.5l4 5"/></svg></button></td>
+        <td class="nm">Backspace</td><td class="ds">The erase key. Instantly legible to anyone who types, but reads as undo not empty.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4.5h4V6M6 6l.7 10.5A1 1 0 007.7 17.5h4.6a1 1 0 001-1L14 6"/><path d="M8.5 9v5.5M11.5 9v5.5"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4.5h4V6M6 6l.7 10.5A1 1 0 007.7 17.5h4.6a1 1 0 001-1L14 6"/><path d="M8.5 9v5.5M11.5 9v5.5"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><path d="M4 6h12M8 6V4.5h4V6M6 6l.7 10.5A1 1 0 007.7 17.5h4.6a1 1 0 001-1L14 6"/><path d="M8.5 9v5.5M11.5 9v5.5"/></svg></button></td>
+        <td class="nm">Bin</td><td class="ds">Understood by everyone — and wrong. A bin removes the row; clearing empties it and the row stays.</td></tr><tr><td class="cc"><button class="ico"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M5 5l10 10"/></svg></button></td><td class="cc"><button class="ico on"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M5 5l10 10"/></svg></button></td>
+        <td class="cc"><button class="ico sm"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7"/><path d="M5 5l10 10"/></svg></button></td>
+        <td class="nm">Circle with a slash</td><td class="ds">Says forbidden, not empty. Reads as a blocked action.</td></tr></tbody></table>
+<div class="note-b"><b>My reading: pencil for edit, eraser for clear.</b> The pencil is the most used
+  mark for editing anywhere and needs no thought. The eraser is the only one of the five that means
+  <i>rub out the contents and leave the thing</i> — which is precisely what clearing does, and
+  precisely what a bin does not. The bin is the most recognisable and the most wrong: it says the row
+  is going away.</div>
+<div class="note-b"><b>If you would rather avoid icons for the destructive one,</b> the clear control
+  can stay a word. A rare, irreversible action is the one place where a label costs little and
+  removes all doubt.</div>
+</div></body></html>

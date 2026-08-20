@@ -1,0 +1,459 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Two tabs — Performance and Strategy, with reporting folded in</title>
+<style>
+:root{
+  --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+  --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+  --panel:#16325C; --panel-ink:#FFFFFF;
+  --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --r:2px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.mocktop{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}
+.mocktop b{color:var(--gold)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 30px 70px}
+.screenlab{display:flex;align-items:baseline;gap:12px;margin:38px 0 6px;flex-wrap:wrap}
+.screenlab b{font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);
+  background:#FBF6E9;border:1px solid #E8D9AE;border-radius:20px;padding:5px 10px;white-space:nowrap}
+.screenlab span{font:400 19px/1.3 var(--serif)}
+.why-s{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:86ch}
+
+.nav.sub{background:var(--stone-soft);display:flex;gap:18px;padding:0 16px;align-items:center;flex-wrap:wrap}
+.nav.sub button{background:none;border:0;color:#C3CEE0;font:inherit;font-size:13.5px;padding:11px 3px;
+  border-bottom:2px solid transparent;cursor:default}
+.nav.sub button.on{color:#fff;font-weight:600;border-bottom-color:var(--gold)}
+.nav.sub .cyc{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:11.5px;
+  color:#C3CEE0;padding:6px 0}
+.nav.sub .cyc .dot{width:7px;height:7px;border-radius:99px;background:var(--gold)}
+.nav.third{background:var(--surface-2);display:flex;gap:16px;padding:0 16px;border-bottom:1px solid var(--line);
+  flex-wrap:wrap}
+.nav.third button{background:none;border:0;color:var(--ink-3);font:inherit;font-size:13px;padding:9px 3px;
+  border-bottom:2px solid transparent;cursor:default}
+.nav.third button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--stone-soft)}
+.nav.third button.appear{color:var(--gold-deep);font-weight:700}
+.nav.third button.appear.on{border-bottom-color:var(--gold)}
+.shell{border:1px solid var(--line);border-radius:var(--r);background:var(--ground);overflow:hidden}
+.shell .body{padding:18px 20px 22px}
+.kv{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;margin:0 0 14px}
+.kv h2{font:400 21px/1.2 var(--serif);margin:0}
+.kv .who{color:var(--ink-3);font-size:13px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px}
+.card.tight{padding:14px 16px 13px}
+.card.primary-card{border-color:var(--stone-soft);border-top:3px solid var(--stone-soft)}
+.scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:16px;margin:4px 0 18px}
+.score-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+.score-h h4{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0}
+.score-h .rank{font-size:9.5px;letter-spacing:.1em;color:var(--gold-deep);font-weight:700}
+.headline{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.big{font-family:var(--mono);font-size:31px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big small{font-size:17px}
+.headline .ofplan{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  font-weight:700;margin:0 0 5px}
+.minirow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:11px;padding-top:10px;
+  border-top:1px solid var(--line-soft)}
+.minirow div{display:flex;flex-direction:column;gap:1px}
+.minirow em{font-style:normal;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:700}
+.minirow b{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:14px}
+
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;letter-spacing:.04em;
+  padding:3px 8px;border-radius:99px;white-space:nowrap}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.attn{background:var(--attn-bg);color:var(--attn)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.bad{background:var(--bad-bg);color:var(--bad)}
+.pill.kind{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+
+h4.mini{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700;
+  margin:18px 0 8px}
+h4.mini em{font-style:normal;font-weight:400;text-transform:none;letter-spacing:0;font-size:12px}
+
+.split{display:grid;grid-template-columns:236px 1fr;gap:16px;align-items:start}
+.rail{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden;
+  position:sticky;top:12px}
+.rail .rhead{background:var(--panel);color:var(--panel-ink);font-size:10.5px;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;padding:9px 14px;display:flex;justify-content:space-between;gap:8px}
+.rail .rhead span{color:rgba(255,255,255,.65);font-weight:400}
+.rail a{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
+  padding:11px 14px 11px 11px;border-bottom:1px solid var(--line-soft);text-decoration:none;color:inherit;
+  border-left:3px solid transparent}
+.rail a:last-of-type{border-bottom:0}
+.rail a b{font-size:13px;font-weight:500;line-height:1.35}
+.rail a .rsub{grid-column:1/-1;font-size:11px;color:var(--ink-3);margin-top:2px}
+.rail a .rnum{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;color:var(--ink-3)}
+.rail a.on{background:var(--surface-2);border-left-color:var(--gold)}
+.rail a.on b{font-weight:700}
+.rail .rfoot{padding:9px 14px;border-top:1px solid var(--line);background:var(--surface-2);
+  font-size:11.5px;color:var(--ink-3)}
+.pane{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:16px 18px 20px}
+.pane .ptitle{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;
+  padding-bottom:12px;border-bottom:1px solid var(--line-soft)}
+.pane .ptitle h3{font:400 19px/1.25 var(--serif);margin:0}
+.pane .ptitle .pmeta{color:var(--ink-3);font-size:12.5px;margin-top:3px}
+
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+thead th{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  background:var(--panel);color:var(--panel-ink);border-bottom:0;white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:nth-child(even) > td{background:#F7F9FC}
+th.cc,td.cc{text-align:center}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:center}
+th.idx,td.idx{width:36px;text-align:center;font-family:var(--mono);color:var(--ink-3);font-size:12px}
+td.final{font-weight:700;font-size:14px}
+.why{display:block;font-size:12px;color:var(--ink-3);margin-top:3px}
+tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+.qs{display:inline-flex;gap:3px}
+.qs i{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;
+  border:1px solid var(--line);border-radius:2px;font-style:normal;font-size:9.5px;color:var(--none);
+  font-family:var(--mono)}
+.qs i.on{background:var(--stone-soft);border-color:var(--stone-soft);color:#fff}
+
+.rep-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 18px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r);margin:0 0 16px}
+.rep-bar.live{border-left:3px solid var(--gold);background:#FBF6E9}
+.rep-bar.done{border-left:3px solid var(--good);background:var(--good-bg)}
+.kpi{display:flex;align-items:baseline;gap:8px}
+.kpi b{font:400 26px/1 var(--serif)}
+.kpi span{color:var(--ink-3);font-size:12.5px}
+.repbar{display:block;height:6px;background:var(--surface-2);border-radius:20px;overflow:hidden;flex:1;
+  min-width:110px;max-width:230px}
+.repbar i{display:block;height:100%;background:var(--attn)}
+.rep-bar .why{margin-left:auto;margin-top:0}
+.rtally{font-family:var(--mono);font-size:12px;color:var(--ink-3);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:20px;padding:2px 8px}
+.rtally.full{color:var(--good);background:var(--good-bg);border-color:var(--good)}
+.rtally.none{color:var(--attn);background:var(--attn-bg);border-color:var(--attn)}
+.entry{display:inline-flex;align-items:stretch;border:1px solid var(--line);border-radius:var(--r);
+  overflow:hidden;background:var(--surface)}
+.entry.filled{border-color:var(--good)}
+.entry.filled .field{background:var(--good-bg)}
+.entry .field{font:inherit;font-family:var(--mono);font-size:13px;padding:5px 9px;width:62px;border:0;
+  text-align:right;background:var(--surface);color:var(--ink)}
+.unitsuf{display:flex;align-items:center;padding:0 8px;background:var(--surface-2);
+  border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+.notefld{font:inherit;font-size:13px;width:100%;padding:5px 8px;border:1px solid var(--line);
+  border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.editbtn{font:inherit;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:7px 14px;border:1px solid var(--gold);background:#FBF6E9;color:var(--gold-deep);
+  border-radius:var(--r);cursor:default}
+.editbtn.plain{border-color:var(--line);background:var(--surface);color:var(--ink-2)}
+
+.note{border-left:3px solid var(--gold);background:var(--surface-2);padding:12px 16px;margin:18px 0;
+  font-size:13.5px;color:var(--ink-2);border-radius:0 var(--r) var(--r) 0}
+.note b{color:var(--ink)}
+.note.ask{border-left-color:var(--stone-soft);background:#EEF2F8}
+.note.warn-note{border-left-color:var(--warn);background:var(--warn-bg)}
+.note.bad-note{border-left-color:var(--bad);background:var(--bad-bg)}
+.note ul{margin:8px 0 0;padding-left:18px}
+.note li{margin:6px 0}
+.tabmap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.tabmap{grid-template-columns:1fr}}
+.tabmap .card{padding:0;overflow:hidden}
+.tabmap .th{padding:12px 16px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.tabmap ol{margin:0;padding:8px 16px 16px 30px;font-size:13.5px}
+.tabmap li{margin:9px 0}
+.tabmap li ul{margin:5px 0 0;padding-left:18px;list-style:circle}
+.tabmap li li{margin:3px 0;color:var(--ink-2)}
+.tabmap .old{color:var(--none);text-decoration:line-through}
+.states{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:900px){.states{grid-template-columns:1fr}}
+.states .col{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.states .ch{padding:11px 14px;border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:700}
+.states .cb{padding:12px 14px;font-size:13px;color:var(--ink-2)}
+.states .cb b{color:var(--ink)}
+.states .cb .tabs{display:flex;gap:9px;flex-wrap:wrap;margin:9px 0;padding:7px 9px;
+  background:var(--surface-2);border-radius:var(--r);font-size:11.5px}
+.states .cb .tabs em{font-style:normal;color:var(--none)}
+.states .cb .tabs b{color:var(--gold-deep)}
+hr.sep{border:0;border-top:1px solid var(--line);margin:44px 0 0}
+</style></head><body>
+
+<div class="mocktop">Mockup — <b>two tabs for a business unit</b>, with reporting folded into Performance
+and appearing only while a cycle is open. Nothing here is built.</div>
+
+<div class="wrap">
+
+<div class="screenlab"><b>Screen A</b><span>What changes</span></div>
+<p class="why-s">Five tabs become two. Foundation, SWOT and Plan are all the plan, so they belong together
+under Strategy. Reporting is not a page you visit — it is something a cycle asks of you, four times a year,
+and the rest of the time it is a tab that does nothing.</p>
+
+<div class="tabmap">
+  <div class="card">
+    <div class="th">Today — five tabs</div>
+    <ol>
+      <li class="old"><b>Performance</b></li>
+      <li class="old"><b>Foundation</b></li>
+      <li class="old"><b>SWOT</b></li>
+      <li class="old"><b>Strategy</b></li>
+      <li class="old"><b>My reporting</b></li>
+    </ol>
+  </div>
+  <div class="card">
+    <div class="th">Proposed — two</div>
+    <ol>
+      <li><b>Performance</b> — opens here
+        <ul>
+          <li>The unit's cards, then its items on the rail</li>
+          <li><b>Report</b> — appears only while a cycle is open and unsubmitted</li>
+        </ul>
+      </li>
+      <li><b>Strategy</b>
+        <ul>
+          <li>Foundation</li>
+          <li>SWOT</li>
+          <li>Plan</li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<div class="note"><b>Why this is right.</b> The top row stops being a list of pages and becomes the only
+question that matters: <i>how is it going</i>, or <i>what did we agree</i>. Everything else is detail inside
+one of those two. And a tab that is dead eleven months of the year stops taking a permanent seat.</div>
+
+<div class="screenlab"><b>Screen B</b><span>Performance — cycle open, nothing entered yet</span></div>
+<p class="why-s">The Report tab appears in gold, because it is the only thing on this screen that is asking
+for something rather than telling you something. The bar underneath says what is owed and by when.</p>
+
+<div class="shell">
+  <div class="nav sub"><button class="on">Performance</button><button>Strategy</button>
+    <span class="cyc"><span class="dot"></span>Q2 2026 open &middot; due 15 Jul</span></div>
+  <div class="nav third"><button class="on">Performance</button>
+    <button class="appear">Report &nbsp;<span class="rtally none">0/27</span></button></div>
+
+  <div class="body">
+    <div class="kv"><h2>Mobile</h2><span class="who">Business unit &middot; Ashraf Laithy</span></div>
+
+    <div class="rep-bar live">
+      <div class="kpi"><b>0</b><span>of 27 entries given</span></div>
+      <div class="repbar"><i style="width:0%"></i></div>
+      <span class="why">Q2 2026 &middot; due 15 Jul 2026 &middot; 8 days left</span>
+      <button class="editbtn">Enter this cycle's figures</button>
+    </div>
+
+    <div class="scores">
+      <div class="card tight primary-card">
+        <div class="score-h"><h4>Key objectives <span class="rank">primary</span></h4>
+          <span class="pill warn">Behind plan</span></div>
+        <div class="headline"><span class="big" style="color:var(--warn)">62<small>%</small></span></div>
+        <div class="minirow"><div><em>Objectives</em><b>4</b></div><div><em>Reported</em><b>4 / 4</b></div>
+          <div><em>Lowest</em><b>44%</b></div></div>
+      </div>
+      <div class="card tight">
+        <div class="score-h"><h4>Directions</h4><span class="pill bad">Off track</span></div>
+        <div class="headline"><span class="big" style="color:var(--bad)">49<small>%</small></span></div>
+        <div class="minirow"><div><em>Items</em><b>4</b></div><div><em>Measures</em><b>23</b></div>
+          <div><em>Lowest</em><b>33%</b></div></div>
+      </div>
+      <div class="card tight">
+        <div class="score-h"><h4>Execution</h4><span class="pill bad">Off track</span></div>
+        <div class="headline"><span class="big" style="color:var(--bad)">45<small>%</small></span>
+          <span class="ofplan">against 50% planned</span></div>
+        <div class="minirow"><div><em>Tactics</em><b>22</b></div><div><em>In progress</em><b>22</b></div>
+          <div><em>Planned</em><b>50%</b></div></div>
+      </div>
+    </div>
+
+    <h4 class="mini">Directions and capabilities</h4>
+    <div class="split">
+      <div class="rail">
+        <div class="rhead">Items <span>4</span></div>
+        <a><b>01&nbsp; Digital &amp; Data-Driven Operations</b><span class="rnum">&mdash;</span>
+          <span class="rsub">No measures reading &middot; execution 38%</span></a>
+        <a class="on"><b>02&nbsp; Channel Preference &amp; Development</b>
+          <span class="rnum" style="color:var(--attn);font-weight:700">61%</span>
+          <span class="rsub">Execution 45% &middot; Mohamed Rizk</span></a>
+        <a><b>03&nbsp; Portfolio &amp; Value Chain Expansion</b>
+          <span class="rnum" style="color:var(--warn);font-weight:700">52%</span>
+          <span class="rsub">Execution 40% &middot; Karim</span></a>
+        <a><b>04&nbsp; Asset-Light Model Regional Expansion</b>
+          <span class="rnum" style="color:var(--bad);font-weight:700">33%</span>
+          <span class="rsub">Execution 55% &middot; Abdelhamid</span></a>
+        <div class="rfoot">Figure shown is key measures</div>
+      </div>
+
+      <div class="pane">
+        <div class="ptitle"><div><h3>02&nbsp; Channel Preference &amp; Development</h3>
+          <div class="pmeta">Direction &middot; theme OT &middot; Mohamed Rizk</div></div>
+          <span class="pill attn">61%</span></div>
+        <h4 class="mini" style="margin-top:14px">Key measures</h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Dir.</th><th class="cc">Target</th>
+            <th class="cc">Actual</th><th class="cc">Reads</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Average delivery time</td><td class="cc">&le;</td><td class="num">24 h</td>
+              <td class="num">31 h</td><td class="num final" style="color:var(--attn)">77%</td></tr>
+            <tr><td class="idx">2</td><td>Key retailer revenue growth</td><td class="cc">&ge;</td>
+              <td class="num">50%</td><td class="num">24%</td>
+              <td class="num final" style="color:var(--bad)">48%</td></tr>
+            <tr><td class="idx">3</td><td>Tier 2 merchants enrolled</td><td class="cc">&ge;</td>
+              <td class="num">100</td><td class="num">58</td>
+              <td class="num final" style="color:var(--warn)">58%</td></tr>
+            <tr><td class="idx">4</td><td>Tier 2 segment revenue growth</td><td class="cc">&ge;</td>
+              <td class="num">100%</td><td class="num">62%</td>
+              <td class="num final" style="color:var(--warn)">62%</td></tr>
+          </tbody></table></div>
+        <h4 class="mini">Tactics</h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Tactic</th><th class="cc">Owner</th><th class="cc">Quarters</th>
+            <th class="cc">Reads</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Retailer preference index workshop</td><td class="cc">Karim</td>
+              <td class="cc"><span class="qs"><i>1</i><i class="on">2</i><i class="on">3</i><i>4</i></span></td>
+              <td class="num final" style="color:var(--warn)">60%</td></tr>
+            <tr><td class="idx">2</td><td>Joint business planning with key retailers</td><td class="cc">Mohamed Rizk</td>
+              <td class="cc"><span class="qs"><i>1</i><i class="on">2</i><i class="on">3</i><i class="on">4</i></span></td>
+              <td class="num final" style="color:var(--bad)">45%</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screenlab"><b>Screen C</b><span>The Report tab — the same rail, in entry mode</span></div>
+<p class="why-s">Not a different page. The same unit, the same rail, the same order — the figures become
+boxes and the rail carries how much of each item is still outstanding. Someone entering item 02 can see that
+03 has not been started.</p>
+
+<div class="shell">
+  <div class="nav sub"><button class="on">Performance</button><button>Strategy</button>
+    <span class="cyc"><span class="dot"></span>Q2 2026 open &middot; due 15 Jul</span></div>
+  <div class="nav third"><button>Performance</button>
+    <button class="appear on">Report &nbsp;<span class="rtally none">14/27</span></button></div>
+
+  <div class="body">
+    <div class="note bad-note" style="margin-top:0"><b>2 figures need a note.</b> Anything at risk or off
+    track carries an explanation before it can be submitted.</div>
+
+    <div class="rep-bar live">
+      <div class="kpi"><b>14</b><span>of 27 entries given</span></div>
+      <div class="repbar"><i style="width:52%"></i></div>
+      <span class="why">Q2 2026 &middot; due 15 Jul 2026</span>
+      <button class="editbtn plain">Save and come back</button>
+      <button class="editbtn">Submit to the SMO</button>
+    </div>
+
+    <h4 class="mini" style="margin-top:0">Key objectives <span class="rtally full">4/4</span></h4>
+    <div class="scroll" style="margin-bottom:4px"><table>
+      <thead><tr><th class="idx">#</th><th>Objective</th><th class="cc">Target</th><th class="cc">Reported</th>
+        <th style="width:30%">Note</th></tr></thead>
+      <tbody>
+        <tr><td class="idx">1</td><td>Distribution revenue</td><td class="num">6.2B EGP</td>
+          <td class="cc"><span class="entry filled"><input class="field" value="2.7" readonly><span class="unitsuf">B</span></span></td>
+          <td><input class="notefld" placeholder="Note, if there is one" readonly></td></tr>
+        <tr class="wantnote"><td class="idx">4</td><td>App coverage rate</td><td class="num">50%</td>
+          <td class="cc"><span class="entry filled"><input class="field" value="22" readonly><span class="unitsuf">%</span></span></td>
+          <td><input class="notefld" style="border-color:var(--bad);background:var(--bad-bg)" value="Rollout gated on the merchant app release." readonly></td></tr>
+      </tbody></table></div>
+
+    <h4 class="mini">Directions and capabilities</h4>
+    <div class="split">
+      <div class="rail">
+        <div class="rhead">Items <span>4</span></div>
+        <a><b>01&nbsp; Digital &amp; Data-Driven Operations</b>
+          <span class="rnum"><span class="rtally full">9/9</span></span>
+          <span class="rsub">Complete</span></a>
+        <a class="on"><b>02&nbsp; Channel Preference &amp; Development</b>
+          <span class="rnum"><span class="rtally none">1/8</span></span>
+          <span class="rsub">7 still to enter</span></a>
+        <a><b>03&nbsp; Portfolio &amp; Value Chain Expansion</b>
+          <span class="rnum"><span class="rtally none">0/6</span></span>
+          <span class="rsub">Nothing entered yet</span></a>
+        <a><b>04&nbsp; Asset-Light Model Regional Expansion</b>
+          <span class="rnum"><span class="rtally">&mdash;</span></span>
+          <span class="rsub">Not asked this cycle</span></a>
+        <div class="rfoot">14 of 27 across the unit</div>
+      </div>
+
+      <div class="pane">
+        <div class="ptitle"><div><h3>02&nbsp; Channel Preference &amp; Development</h3>
+          <div class="pmeta">Q2 2026 &middot; 8 entries asked, 1 given</div></div>
+          <span class="pill attn">1 / 8</span></div>
+        <h4 class="mini" style="margin-top:14px">Key measures</h4>
+        <div class="scroll"><table>
+          <thead><tr><th class="idx">#</th><th>Measure</th><th class="cc">Target</th><th class="cc">Reported</th>
+            <th style="width:32%">Note</th></tr></thead>
+          <tbody>
+            <tr><td class="idx">1</td><td>Average delivery time</td><td class="num">24 h</td>
+              <td class="cc"><span class="entry filled"><input class="field" value="31" readonly><span class="unitsuf">h</span></span></td>
+              <td><input class="notefld" placeholder="Note, if there is one" readonly></td></tr>
+            <tr class="wantnote"><td class="idx">2</td><td>Key retailer revenue growth</td><td class="num">50%</td>
+              <td class="cc"><span class="entry"><input class="field" placeholder="&mdash;" readonly><span class="unitsuf">%</span></span></td>
+              <td><input class="notefld" style="border-color:var(--bad);background:var(--bad-bg)" placeholder="Why, and what is being done" readonly></td></tr>
+            <tr><td class="idx">3</td><td>Tier 2 merchants enrolled</td><td class="num">100</td>
+              <td class="cc"><span class="entry"><input class="field" placeholder="&mdash;" readonly></span></td>
+              <td><input class="notefld" placeholder="Note, if there is one" readonly></td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="screenlab"><b>Screen D</b><span>The three states of that third row</span></div>
+<p class="why-s">The tab appearing is easy. What happens after submission is the part that needs deciding,
+and I have drawn what I think is right rather than what you described — the difference is in the middle
+column and it matters.</p>
+
+<div class="states">
+  <div class="col"><div class="ch">Cycle open, not submitted</div>
+    <div class="cb">
+      <div class="tabs"><em>Performance</em> &nbsp; <b>Report 14/27</b></div>
+      <b>The tab is there and gold.</b> The bar on Performance says what is owed and offers the way in.
+      This is the state a unit head is in for about two weeks a quarter.</div></div>
+
+  <div class="col"><div class="ch">Submitted</div>
+    <div class="cb">
+      <div class="tabs"><em>Performance</em> &nbsp; <b style="color:var(--good)">Submitted</b></div>
+      <b>It does not disappear — it goes quiet.</b> You said it should disappear after submission. I would
+      keep it, unstyled and read-only, saying <i>Submitted 12 Jul</i>. Someone who has just sent figures to
+      the SMO will want to check what they sent, and if the tab is gone there is nowhere to look.</div></div>
+
+  <div class="col"><div class="ch">Cycle closed</div>
+    <div class="cb">
+      <div class="tabs"><em>Performance</em></div>
+      <b>Now it is gone.</b> The figures are a record, there is nothing to enter and nothing pending. If the
+      SMO reopens the cycle it comes back, gold again.</div></div>
+</div>
+
+<div class="note ask"><b>The one disagreement, stated plainly.</b> Disappearing on submission and
+disappearing on close are two different rules that look like one. On submission the work is done but the
+cycle is still live and the SMO may reopen it — the person still has a stake in what they sent. On close
+there is genuinely nothing there. Hiding it at submission saves one row of chrome and costs someone the
+answer to <i>what did I actually submit</i>. Overrule me if you want it gone at submission; it is one line
+either way.</div>
+
+<div class="note warn-note"><b>Three things this restructure costs.</b>
+  <ul>
+    <li><b>A third row of navigation.</b> Two tabs, then subtabs, then in Strategy nothing further — but on
+      Performance the Report tab is a third level. That is one more row of chrome than the platform has
+      anywhere today, and on a phone it is a lot of header before any content.</li>
+    <li><b>Foundation and SWOT get further away.</b> They are one click today and two after this. They are
+      read rarely, so that is probably right, but it is a real loss for whoever edits them.</li>
+    <li><b>The capability side stops matching.</b> A capability would have Performance / Projects /
+      Reporting while a unit has Performance / Strategy. Either capabilities take the same shape —
+      Performance with Report folded in, and Projects renamed Strategy — or the two halves diverge again,
+      which is what A13 exists to prevent. My recommendation is to do both together or neither.</li>
+  </ul></div>
+
+<hr class="sep">
+
+<div class="note"><b>Data honesty.</b> Mobile's items, owners, themes, measures, targets and actuals are
+<b>real</b> — the platform's own data. The cycle dates, the entry tallies and the due date are
+<b>invented</b> for the mockup.</div>
+
+</div></body></html>

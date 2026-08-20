@@ -1,0 +1,145 @@
+<div class="banner">
+  <span><strong>Sample &middot; arrangement.</strong> Press <b>Arrange</b> to show the handles; press <b>Done</b> to return to the static view.</span>
+  <span>This is the real unit page &mdash; nothing is redrawn for the sample.</span>
+</div>
+
+<div class="chrome">
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform &middot; sample</span>
+      <h1 id="title">Raya Trade</h1>
+    </div>
+    <div class="viewer">
+      <label for="asWho">Viewing as</label>
+      <select id="asWho"></select>
+      <span class="viewer-note" id="viewerNote"></span>
+    </div>
+  </div>
+</header>
+<nav class="units">
+  <div class="units-in" role="tablist" id="units"></div>
+</nav>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
+      <button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div></div>
+
+<script src="DATA"></script>
+<script src="CONFIGDATA"></script>
+<script src="RENDER"></script>
+<script src="CONFIGRENDER"></script>
+<script src="ARRANGE"></script>
+<script>
+  var CUR = "mobile", OPEN = [];
+
+  function render(){
+    var v = viewer();
+    document.getElementById("viewerNote").innerHTML =
+      (v.level === "smo" ? "Super user" : v.level.toUpperCase().replace("N","N-")) +
+      " &middot; " + (v.unit === "group" ? "all units" : UNITS[v.unit].name);
+
+    document.getElementById("units").innerHTML = UNIT_KEYS.map(function(k){
+      return '<button role="tab" aria-selected="' + (k===CUR) + '" data-u="' + k + '">' + UNITS[k].name + '</button>';
+    }).join("");
+
+    document.getElementById("panel").innerHTML = renderUnitPerformance(UNITS[CUR]);
+    document.getElementById("title").textContent = "Raya Trade \u2014 " + UNITS[CUR].name;
+
+    /* Restore whatever was open, so entering arrange mode or dropping a row
+       does not collapse the pillar being worked on. */
+    OPEN.forEach(function(i){
+      var r = document.querySelector('.prow[data-p="' + i + '"]');
+      if (r) { r.setAttribute("aria-expanded","true"); r.nextElementSibling.hidden = false; }
+    });
+    wire();
+  }
+
+  function noteOpen(){
+    OPEN = [];
+    document.querySelectorAll('.prow[aria-expanded="true"]').forEach(function(r){ OPEN.push(+r.dataset.p); });
+  }
+
+  function wire(){
+    document.querySelectorAll("#units button").forEach(function(b){
+      b.addEventListener("click", function(){ CUR = b.dataset.u; OPEN = []; render(); });
+    });
+    document.querySelectorAll("[data-arrange]").forEach(function(b){
+      b.addEventListener("click", function(){ noteOpen(); ARRANGE = !ARRANGE; render(); });
+    });
+    document.querySelectorAll(".prow[data-p]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var open = b.getAttribute("aria-expanded") === "true";
+        b.setAttribute("aria-expanded", String(!open));
+        b.nextElementSibling.hidden = open;
+        noteOpen();
+      });
+    });
+    document.querySelectorAll("[data-modal]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal);
+      });
+    });
+
+    document.querySelectorAll(".sortable").forEach(function(c){
+      var kind = c.dataset.kind;
+      var isTable = kind === "measures" || kind === "tactics";
+      makeSortable(c, isTable ? "tr" : ".prow-wrap", function(order){
+        noteOpen();
+        if (kind === "pillars") applyOrder(UNITS[CUR].items, order);
+        else {
+          var body = c.closest(".pbody");
+          var pi = +body.previousElementSibling.dataset.p;
+          var it = UNITS[CUR].items[pi];
+          applyOrder(kind === "measures" ? it.measures : it.tactics, order);
+        }
+        render();
+      });
+    });
+  }
+
+  var overlay = document.getElementById("overlay");
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
+    overlay.classList.add("on");
+  }
+  document.getElementById("modal-x").addEventListener("click", function(){ overlay.classList.remove("on"); });
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) overlay.classList.remove("on"); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") overlay.classList.remove("on"); });
+
+  var sel = document.getElementById("asWho");
+  sel.innerHTML = PEOPLE.filter(function(p){ return p.unit !== "group" || p.level === "smo"; })
+    .concat(PEOPLE.filter(function(p){ return p.unit === "group" && p.level !== "smo"; }))
+    .map(function(p){ return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>'; }).join("");
+  sel.value = VIEWER;
+  sel.addEventListener("change", function(){ VIEWER = sel.value; ARRANGE = false; render(); });
+
+  var chromeEl = document.querySelector(".chrome");
+  new ResizeObserver(function(){
+    document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
+  }).observe(chromeEl);
+
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY, on = document.body.classList.contains("scrolled");
+      if (!on && y > 70) document.body.classList.add("scrolled");
+      else if (on && y < 20) document.body.classList.remove("scrolled");
+      ticking = false;
+    });
+  }, { passive: true });
+
+  render();
+</script>

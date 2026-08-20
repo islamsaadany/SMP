@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Navigation — options</title>
+<style>
+:root{--panel:#16325C;--stone-2:#24487A;--gold:#C9A24D;--gold-deep:#A8842F;--ground:#F7F8FA;
+--surface:#FFF;--surface-2:#EFF2F6;--line:#D6DCE5;--ink:#171B22;--ink-2:#414A58;--ink-3:#6B7583;
+--good:#2E7D5B;--serif:Georgia,serif;--sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+--mono:ui-monospace,Menlo,Consolas,monospace;--r:2px}
+*{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.6 var(--sans)}
+.top{background:var(--panel);color:#C3CEE0;padding:12px 30px;font-size:12.5px}.top b{color:var(--gold)}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 30px 70px}
+.opt{margin:0 0 42px}
+.optlab{display:flex;align-items:baseline;gap:12px;margin:0 0 4px}
+.optlab b{font:700 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);
+background:#FBF6E9;border:1px solid #E8D9AE;border-radius:20px;padding:5px 10px}
+.optlab span{font:400 19px/1.3 var(--serif)}
+.verdict{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:88ch}
+.case{margin:0 0 18px}
+.who{display:block;font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+color:var(--ink-3);margin:0 0 6px}
+.nav{background:var(--panel);display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:0 16px;
+border-radius:var(--r) var(--r) 0 0}
+.nav button{background:none;border:0;color:#C3CEE0;font:inherit;font-size:13.5px;padding:11px 0;
+cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.nav button.on{color:#fff;font-weight:600;border-bottom-color:var(--gold)}
+.nav .sep{width:1px;height:18px;background:rgba(255,255,255,.22)}
+.nav.sub{background:var(--stone-2);border-radius:0}
+.nav.sub2{background:var(--surface);border:1px solid var(--line);border-top:0;border-radius:0 0 var(--r) var(--r)}
+.nav.sub2 button{color:var(--ink-3)}
+.nav.sub2 button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--gold)}
+.chrome{margin-left:auto;display:flex;gap:8px;align-items:center}
+.chrome button{border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 12px;
+font-size:11.5px;letter-spacing:.05em;color:#C3CEE0}
+.chrome .rep{border-color:var(--gold);color:var(--gold);font-weight:700}
+.cn{color:var(--ink-3);font-size:12.5px;margin:7px 0 0}
+.note-b{border-left:3px solid var(--gold);background:#FBF6E9;padding:13px 17px;font-size:13px;
+color:var(--ink-2);border-radius:0 var(--r) var(--r) 0;margin-top:8px}
+.note-b b{color:var(--ink)}
+.tbl{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);
+border-radius:var(--r);overflow:hidden;margin-top:10px}
+.tbl th{background:var(--panel);color:#fff;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+text-align:left;padding:9px 12px;font-weight:700}
+.tbl td{padding:10px 12px;border-bottom:1px solid #E6EAF0;font-size:13.5px;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr:nth-child(even) td{background:#F7F9FC}
+</style></head><body>
+<div class="top"><b>Navigation options</b> — same platform, four ways in. Nothing is built.</div>
+<div class="wrap">
+
+<div class="opt"><div class="optlab"><b>Option A</b><span>One row, a divider before the capabilities</span></div>
+  <p class="verdict">No new depth and no extra click, at the cost of a very long row for the two roles
+     who reach everything.</p><div class="case"><span class="who">SMO — reaches everything</span><div class="nav"><button class="on">Group</button><button class="">Mobile</button><button class="">Retail Stores</button><button class="">B2B Ecomm</button><button class="">Consumer Electronics</button><button class="">Online Shop</button><button class="">Corporate</button><button class="">Care</button><button class="">IT</button><button class="">Logistics</button><button class="">Nigeria</button><span class="sep"></span><button class="">Operational Excellence</button><button class="">People</button><button class="">Innovation and Tech</button><button class="">…</button><button class="">⚙ Setup</button></div>
+      <p class="cn">Eighteen entries in one row. It wraps to two lines at this width, three on a laptop.</p></div><div class="case"><span class="who">Finance — owns one capability</span><div class="nav"><button class="">Group</button><span class="sep"></span><button class="on">Financial Infrastructure</button></div><div class="nav sub"><button class="">Projects</button><button class="on">Reporting</button></div>
+      <p class="cn">Direct, one click. The divider does nothing when there is one of each.</p></div><div class="case"><span class="who">Mobile&#x27;s owner — owns one unit</span><div class="nav"><button class="">Group</button><button class="on">Mobile</button></div><div class="nav sub"><button class="">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="on">My reporting</button></div>
+      </div></div>
+
+<div class="opt"><div class="optlab"><b>Option B</b><span>A category row: Business units, Supporting functions</span></div>
+  <p class="verdict">Cleanest conceptually and it scales, but it charges every person a row of chrome and
+     a click &mdash; including the ones who own exactly one thing.</p><div class="case"><span class="who">SMO — reaches everything</span><div class="nav"><button class="">Group</button><button class="on">Business units</button><button class="">Supporting functions</button><button class="">⚙ Setup</button></div><div class="nav sub"><button class="on">Mobile</button><button class="">Retail Stores</button><button class="">B2B Ecomm</button><button class="">Consumer Electronics</button><button class="">Online Shop</button><button class="">Corporate</button><button class="">Care</button><button class="">IT</button><button class="">Logistics</button><button class="">Nigeria</button></div><div class="nav sub2"><button class="on">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="">My reporting</button></div>
+      <p class="cn">Three rows of chrome on every page, and Mobile's SWOT is three clicks deep.</p></div><div class="case"><span class="who">Finance — owns one capability</span><div class="nav"><button class="">Group</button><button class="on">Supporting functions</button></div><div class="nav sub"><button class="on">Financial Infrastructure</button></div><div class="nav sub2"><button class="">Projects</button><button class="on">Reporting</button></div>
+      <p class="cn">A category row and a list, both holding exactly one thing.</p></div><div class="case"><span class="who">Mobile&#x27;s owner — owns one unit</span><div class="nav"><button class="">Group</button><button class="on">Business units</button></div><div class="nav sub"><button class="on">Mobile</button></div><div class="nav sub2"><button class="">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="on">My reporting</button></div>
+      <p class="cn">Two extra clicks to reach the only thing this person can see.</p></div></div>
+
+<div class="opt"><div class="optlab"><b>Option C</b><span>Capabilities under Group, direct entry for the owner</span></div>
+  <p class="verdict">A business unit is a place you go; a capability is a thing you open. The SMO reads
+     eight rows on one page instead of eight tabs, and the owner still gets a direct entry.</p><div class="case"><span class="who">SMO — reaches everything</span><div class="nav"><button class="on">Group</button><button class="">Mobile</button><button class="">Retail Stores</button><button class="">B2B Ecomm</button><button class="">Consumer Electronics</button><button class="">Online Shop</button><button class="">Corporate</button><button class="">Care</button><button class="">IT</button><button class="">Logistics</button><button class="">Nigeria</button><button class="">⚙ Setup</button></div><div class="nav sub"><button class="">Performance</button><button class="">Foundation</button><button class="on">Capabilities</button><button class="">Focus</button><button class="">Temple</button><button class="">Weighting</button></div>
+      <p class="cn">Nav unchanged. All eight capabilities are rows on one page, not eight tabs.</p></div><div class="case"><span class="who">Finance — owns one capability</span><div class="nav"><button class="">Group</button><button class="on">Financial Infrastructure</button></div><div class="nav sub"><button class="">Projects</button><button class="on">Reporting</button></div>
+      <p class="cn">The owner gets a direct entry; only the SMO reads them from the Group page.</p></div><div class="case"><span class="who">Mobile&#x27;s owner — owns one unit</span><div class="nav"><button class="">Group</button><button class="on">Mobile</button></div><div class="nav sub"><button class="">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="on">My reporting</button></div>
+      <p class="cn">Untouched.</p></div></div>
+
+<div class="opt"><div class="optlab"><b>Option D</b><span>C, plus a Reporting button in the chrome</span></div>
+  <p class="verdict">Not an alternative &mdash; it sits on top of any of the three. The button means one
+     thing for everyone: <i>what I owe this cycle</i>. It goes to a unit's reporting, a capability's
+     reporting, or the SMO's cycle board, depending on who is looking.</p><div class="case"><span class="who">SMO — reaches everything</span><div class="nav"><button class="on">Group</button><button class="">Mobile</button><button class="">Retail Stores</button><button class="">B2B Ecomm</button><button class="">Consumer Electronics</button><button class="">Online Shop</button><button class="">Corporate</button><button class="">Care</button><button class="">IT</button><button class="">Logistics</button><button class="">Nigeria</button><button class="">⚙ Setup</button><span class="chrome"><button class="rep">&#9679; Reporting</button><button class="info">Info</button></span></div><div class="nav sub"><button class="">Performance</button><button class="">Foundation</button><button class="on">Capabilities</button><button class="">Focus</button><button class="">Temple</button><button class="">Weighting</button></div>
+      <p class="cn">The button shows what the SMO is waiting on, from any page.</p></div><div class="case"><span class="who">Finance — owns one capability</span><div class="nav"><button class="">Group</button><button class="on">Financial Infrastructure</button><span class="chrome"><button class="rep">&#9679; Reporting</button><button class="info">Info</button></span></div><div class="nav sub"><button class="on">Projects</button><button class="">Reporting</button></div>
+      <p class="cn">One click to what they owe, from wherever they are.</p></div><div class="case"><span class="who">Mobile&#x27;s owner — owns one unit</span><div class="nav"><button class="">Group</button><button class="on">Mobile</button><span class="chrome"><button class="rep">&#9679; Reporting</button><button class="info">Info</button></span></div><div class="nav sub"><button class="on">Performance</button><button class="">Foundation</button><button class="">SWOT</button><button class="">My reporting</button></div>
+      <p class="cn">Same button, same meaning: everything you owe this cycle.</p></div>
+  <div class="note-b"><b>The button is a shortcut, not a place.</b> It takes you to the page that
+    already exists rather than assembling a new one &mdash; which is where the last attempt went wrong.
+    Reporting still lives with the thing being reported.</div></div>
+
+<table class="tbl"><thead><tr><th>&nbsp;</th><th>Clicks to report</th><th>Rows of chrome</th>
+  <th>SMO's row length</th><th>Scales past 8 capabilities</th></tr></thead><tbody>
+  <tr><td><b>A</b> divider</td><td>2</td><td>2</td><td>18 entries, wraps</td><td>Poorly</td></tr>
+  <tr><td><b>B</b> categories</td><td>3</td><td>3</td><td>4 entries</td><td>Well</td></tr>
+  <tr><td><b>C</b> under Group</td><td>2</td><td>2</td><td>11 entries</td><td>Well</td></tr>
+  <tr><td><b>D</b> = C + button</td><td><b>1</b></td><td>2</td><td>11 entries</td><td>Well</td></tr>
+</tbody></table>
+
+<div class="note-b"><b>My reading:</b> D. The button answers the question people actually arrive with
+  &mdash; <i>what do I owe?</i> &mdash; in one click from anywhere, and C keeps a capability at its true
+  weight instead of promoting it to the same rank as a business unit. B is the right answer only if
+  capabilities are going to multiply.</div>
+
+</div></body></html>

@@ -1,0 +1,157 @@
+<div class="banner">
+  <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
+  <span><strong>Retail, Mazaya and every reported actual are invented</strong> so the structure can be judged.</span>
+</div>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="eyebrow">Strategy Management Platform &middot; Spec 012</span>
+      <h1 id="title">Raya Trade</h1>
+    </div>
+    <span class="shapetag">Group &middot; 3 business units &middot; H1 2026</span>
+  </div>
+</header>
+
+<nav class="units">
+  <div class="units-in" role="tablist" id="units">
+    <button role="tab" aria-selected="true" data-u="group">Group</button>
+    <span class="sep"></span>
+    <button role="tab" aria-selected="false" data-u="mobile">Mobile</button>
+    <button role="tab" aria-selected="false" data-u="retail">Retail</button>
+    <button role="tab" aria-selected="false" data-u="mazaya">Mazaya</button>
+  </div>
+</nav>
+
+<nav class="tabs">
+  <div class="tabs-in" role="tablist" id="subtabs"></div>
+</nav>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
+      <button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div>
+
+<footer class="end">
+  Spec <b>012-strategy-temple</b> &middot; group shape &middot; prototype for functional review, no database work done.
+  Mobile's plan content comes from the Raya Trade 2026 group and Mobile decks. Retail and Mazaya are invented,
+  and every reported actual throughout is illustrative rather than real performance.
+</footer>
+</div>
+
+<script src="DATA"></script>
+<script src="RENDER"></script>
+<script>
+  var SUBS = {
+    group: [
+      { k:"performance", label:"Performance", primary:true, render:renderGroupPerformance },
+      { k:"foundation",  label:"Foundation",                render:renderGroupFoundation },
+      { k:"temple",      label:"Temple",                    render:renderTemple },
+      { k:"weighting",   label:"Weighting",                 render:renderWeighting }
+    ],
+    unit: [
+      { k:"performance", label:"Performance", primary:true, render:renderUnitPerformance },
+      { k:"foundation",  label:"Foundation",                render:renderUnitFoundation },
+      { k:"analysis",    label:"Analysis",                  render:renderUnitAnalysis }
+    ]
+  };
+
+  var current = "group", currentSub = "performance";
+
+  function paint(){
+    var isGroup = current === "group";
+    var defs = isGroup ? SUBS.group : SUBS.unit;
+    if (!defs.some(function(d){ return d.k === currentSub; })) currentSub = defs[0].k;
+
+    document.getElementById("subtabs").innerHTML = defs.map(function(d){
+      return '<button role="tab" data-s="' + d.k + '"' +
+        (d.primary ? ' class="primary"' : '') +
+        ' aria-selected="' + (d.k === currentSub) + '">' + d.label + '</button>';
+    }).join("");
+
+    var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    document.getElementById("panel").innerHTML = isGroup ? def.render() : def.render(UNITS[current]);
+    document.getElementById("title").textContent = isGroup ? "Raya Trade" : "Raya Trade — " + UNITS[current].name;
+
+    document.querySelectorAll("#subtabs button").forEach(function(b){
+      b.addEventListener("click", function(){ currentSub = b.dataset.s; paint(); window.scrollTo(0,0); });
+    });
+    document.querySelectorAll("[data-modal]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault();
+        openModal(b.dataset.modal);
+      });
+    });
+    /* Impact is the one factor a person sets; editing it recomputes the
+       composite immediately so the model is visible rather than asserted. */
+    document.querySelectorAll("[data-imp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.weighting.units[+b.dataset.imp].imp = +b.dataset.val;
+        currentSub = "weighting"; paint();
+        var d = document.querySelector("details.cfgwrap");
+        if (d) d.open = true;   /* editing must not close the panel under you */
+      });
+    });
+    document.querySelectorAll("[data-go]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault();
+        current = b.dataset.go; currentSub = "performance"; syncUnits(); paint(); window.scrollTo(0,0);
+      });
+    });
+  }
+
+  var overlay = document.getElementById("overlay");
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
+    overlay.classList.add("on");
+    document.getElementById("modal-x").focus();
+  }
+  function closeModal(){ overlay.classList.remove("on"); }
+  document.getElementById("modal-x").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+
+  function syncUnits(){
+    document.querySelectorAll("#units button").forEach(function(x){
+      x.setAttribute("aria-selected", String(x.dataset.u === current));
+    });
+  }
+
+  document.querySelectorAll("#units button").forEach(function(b){
+    b.addEventListener("click", function(){
+      current = b.dataset.u; currentSub = "performance"; syncUnits(); paint(); window.scrollTo(0,0);
+    });
+  });
+
+  /* Sticky offsets are measured, not guessed — the header condenses on scroll
+     and both nav rows must stay pinned beneath it without overlapping. */
+  function measure(){
+    var top = document.querySelector("header.top");
+    var units = document.querySelector("nav.units");
+    document.documentElement.style.setProperty("--top-h", top.offsetHeight + "px");
+    document.documentElement.style.setProperty("--units-h", units.offsetHeight + "px");
+  }
+
+  var ticking = false;
+  window.addEventListener("scroll", function(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      document.body.classList.toggle("scrolled", window.scrollY > 40);
+      measure();
+      ticking = false;
+    });
+  }, { passive: true });
+  window.addEventListener("resize", measure);
+
+  paint();
+  measure();
+</script>

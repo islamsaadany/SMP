@@ -485,9 +485,19 @@ function section(eyebrow, title, note, body, tipText, action){
 
 /* ── Weighting configuration. Impact is the one factor a human sets, so it
    is editable here and the composite recomputes live. ─────────────── */
+/* A share of nothing is not zero. Until 2026-08-20 every value here was a
+   number because the demo data filled the table; a tenant that has not entered
+   its factors yet has no values at all, and dividing by a total of nothing gave
+   every unit a 0% share — which reads as "contributes nothing" rather than
+   "not entered". Absent stays absent (§5.7). Within a factor that HAS been
+   started, a unit still missing its figure counts nothing toward the total,
+   because that is what a share of a total is. */
+function num(v){ var n = Number(v); return (v === "" || v == null || isNaN(n)) ? null : n; }
 function shareOf(vals){
-  var t = vals.reduce(function(a,b){ return a + b; }, 0);
-  return vals.map(function(v){ return t ? (v / t) * 100 : 0; });
+  var ns = vals.map(num);
+  var t = ns.reduce(function(a,b){ return a + (b == null ? 0 : b); }, 0);
+  if (!t) return ns.map(function(){ return null; });
+  return ns.map(function(v){ return v == null ? null : (v / t) * 100; });
 }
 
 /* Unit weights are derived from the factor table and written back onto each
@@ -510,6 +520,21 @@ function syncWeights(){
   return res;
 }
 
+/* The column always reads exactly 100, as the table's footer promises.
+   Contributions are normalised to the total first and only the rounding
+   remainder is given to the largest unit. Handing the whole shortfall to one
+   row is what the old code did, and it was invisible while the table was full
+   (the contributions already summed to 100); with a half-filled table it made
+   whoever happened to be first read 100%. */
+function settle(raw){
+  var tot = raw.reduce(function(a,b){ return a + b; }, 0);
+  var comp = tot ? raw.map(function(x){ return Math.round(x / tot * 100); })
+                 : raw.map(function(){ return 0; });
+  var drift = 100 - comp.reduce(function(a,b){ return a + b; }, 0);
+  if (drift && comp.length) comp[comp.indexOf(Math.max.apply(null, comp))] += drift;
+  return comp;
+}
+
 function computeWeights(){
   var w = GROUP.weighting;
   /* Retired units leave the composite entirely \u2014 their factor values stop
@@ -519,39 +544,54 @@ function computeWeights(){
   GROUP.weighting.units.forEach(function(row){
     if (UNITS[row.key] && UNITS[row.key].active === false) UNITS[row.key].weight = 0;
   });
-  var sh = {
-    rev:    shareOf(us.map(function(u){ return u.rev; })),
-    prof:   shareOf(us.map(function(u){ return u.prof; })),
-    imp:    shareOf(us.map(function(u){ return u.imp; })),
-    growth: shareOf(us.map(function(u){ return u.growth; }))
-  };
+  /* One share list per FACTOR, taken from the factor table rather than from
+     four hardcoded names — the whole point of factors being rows is that a
+     tenant can add or drop one, and a share list that only knew the original
+     four left any added factor without one. */
+  var sh = {};
+  w.factors.forEach(function(f){
+    sh[f.key] = shareOf(us.map(function(u){ return u[f.key]; }));
+  });
   var fw = {};
   w.factors.forEach(function(f){ fw[f.key] = f.weight / 100; });
-  var raw = us.map(function(u, i){
-    return fw.rev * sh.rev[i] + fw.prof * sh.prof[i] + fw.imp * sh.imp[i] + fw.growth * sh.growth[i];
+  /* Nothing entered anywhere: every unit counts the same. Equal weight is the
+     default nobody has to defend — the same answer the Key Objectives take
+     when no weights are set. Without this the whole column computed to zero and
+     the rounding correction below handed all 100% to whichever unit happened to
+     be first, which is a claim the tenant never made. */
+  var anySet = us.some(function(u){
+    return w.factors.some(function(f){ return num(u[f.key]) != null; });
   });
-  var comp = raw.map(function(x){ return Math.round(x); });
-  /* Rounding can leave the composite at 99 or 101; give the drift to the
-     largest unit so the column always reads exactly 100. */
-  var drift = 100 - comp.reduce(function(a,b){ return a + b; }, 0);
-  if (drift) {
-    var big = comp.indexOf(Math.max.apply(null, comp));
-    comp[big] += drift;
+  if (!anySet) {
+    var even = us.map(function(){ return Math.floor(100 / (us.length || 1)); });
+    return { shares: sh, composite: settle(even), entered: false };
   }
-  return { shares: sh, composite: comp };
+  var raw = us.map(function(u, i){
+    return w.factors.reduce(function(a, f){
+      var sv = sh[f.key] && sh[f.key][i];
+      return a + (fw[f.key] || 0) * (sv == null ? 0 : sv);
+    }, 0);
+  });
+  return { shares: sh, composite: settle(raw.map(function(x){ return Math.round(x); })), entered: true };
 }
 
 /* The equation, written out, plus the first unit's own numbers substituted in.
    A formula nobody can check against the row above it is not an explanation. */
 function weightingFormula(f, res){
   var u0 = GROUP.weighting.units[0];
+  var base = "share of a factor = that unit's value \u00f7 the sum of all units' values. " +
+    "contribution = " + f.map(function(){ return "(weight \u00d7 share)"; }).join(" + ") + ", summed. ";
+  /* With nothing entered there is no worked example to show, and inventing one
+     from empty cells would be the opposite of an explanation. */
+  if (!u0 || !res.entered)
+    return base + "The contributions always total 100%. Until the factors are " +
+      "filled in, every business unit counts equally.";
   var terms = f.map(function(x){
-    return "(" + x.weight + "% \u00d7 " + Math.round(res.shares[x.key][0]) + "%)";
+    var sv = res.shares[x.key] && res.shares[x.key][0];
+    return "(" + x.weight + "% \u00d7 " + (sv == null ? "\u2014" : Math.round(sv) + "%") + ")";
   }).join(" + ");
-  return "share of a factor = that unit's value \u00f7 the sum of all units' values. " +
-    "contribution = " + f.map(function(x){ return "(weight \u00d7 share)"; }).join(" + ") + ", summed. " +
-    "For " + u0.unit + ": " + terms + " = " + res.composite[0] + "%. " +
-    "The ten contributions always total 100%.";
+  return base + "For " + u0.unit + ": " + terms + " = " + res.composite[0] + "%. " +
+    "The contributions always total 100%.";
 }
 
 /* A bound input that is not tied to a page's EDIT_PAGE flag. */
@@ -564,8 +604,18 @@ function inputOr2(value, label, setter){
 function renderWeighting(){
   var w = GROUP.weighting, f = w.factors;
   var res = syncWeights();
-  var fmt = { rev:function(u){ return u.rev + "B"; }, prof:function(u){ return u.prof + "M"; },
-              growth:function(u){ return u.growth + "%"; } };
+  /* The suffix is display; what is stored is the number. A cell nobody has
+     filled in shows a dash, not "undefinedB". */
+  var SUFFIX = { rev:"B", prof:"M", growth:"%" };
+  var shown = function(u, key){
+    var n = num(u[key]);
+    return n == null ? "\u2014" : n + (SUFFIX[key] || "");
+  };
+  var typed = function(u, key){ var n = num(u[key]); return n == null ? "" : String(n); };
+  var shareCell = function(key, i){
+    var sv = res.shares[key] && res.shares[key][i];
+    return '<span class="why fw">' + (sv == null ? "share \u2014" : "share " + Math.round(sv) + "%") + '</span>';
+  };
 
   var head = '<tr><th>Business unit</th>' + f.map(function(x){
       var kindNote = x.kind === "derived" ? "derived" : x.kind === "judgement" ? "set by hand" : "estimated";
@@ -597,22 +647,28 @@ function renderWeighting(){
                (live ? (function(uu){
                    var fi = FIELDS.push(function(v){ uu.why = v; }) - 1;
                    return '<textarea class="fld why-f" rows="2" data-fld="' + fi +
-                     '" aria-label="Reason for ' + esc(uu.unit) + '">' + esc(uu.why) + '</textarea>';
+                     '" aria-label="Reason for ' + esc(uu.unit) + '">' + esc(uu.why || "") + '</textarea>';
                  })(u) : '') +
-               '<span class="why fw">share ' + Math.round(res.shares.imp[i]) + '%</span></td>';
+               shareCell(x.key, i) + '</td>';
       }
       /* Bound like every other editable field. These rendered as bare inputs
          for two sessions \u2014 looked editable, saved nothing \u2014 which is exactly
          the failure the FIELDS registry exists to prevent. The suffix (B, M,
          %) is display; what is stored is the number. */
       var setVal = (function(uu, key){
-        return function(v){ var n = parseFloat(String(v).replace(/[^0-9.\-]/g, ""));
-                            if (!isNaN(n)) uu[key] = n; };
+        return function(v){
+          /* Emptying a cell must unset it, not silently keep the old figure.
+             The guard was there to ignore junk typing; a blank field is not
+             junk, it is the tenant saying "not this one". */
+          if (String(v).trim() === "") { delete uu[key]; return; }
+          var n = parseFloat(String(v).replace(/[^0-9.\-]/g, ""));
+          if (!isNaN(n)) uu[key] = n;
+        };
       })(u, x.key);
       return '<td>' + (live
-          ? inputOr2(fmt[x.key](u), x.name + " for " + u.unit, setVal)
-          : '<span class="mono val">' + fmt[x.key](u) + '</span>') +
-             '<span class="why fw">share ' + Math.round(res.shares[x.key][i]) + '%</span></td>';
+          ? inputOr2(typed(u, x.key), x.name + " for " + u.unit, setVal)
+          : '<span class="mono val">' + shown(u, x.key) + '</span>') +
+             shareCell(x.key, i) + '</td>';
     }).join("");
     return '<tr><td><b>' + esc(UNITS[u.key] ? UNITS[u.key].name : u.unit) + '</b></td>' + cells +
            '<td class="num"><b data-comp="' + i + '">' + res.composite[i] + '%</b></td></tr>';
@@ -625,7 +681,10 @@ function renderWeighting(){
     '<tfoot><tr><td>Always totals</td>' + f.map(function(){ return '<td></td>'; }).join("") +
     '<td class="num">100%</td></tr></tfoot></table></div>';
 
-  return section("", "Business unit weighting", null,
+  return section("", "Business unit weighting",
+      res.entered ? null
+        : "No factor values have been entered yet, so every business unit counts " +
+          "equally in the group compile. Press Edit and fill the table to weight them.",
       '<div class="cfgwrap open">' +
         '<div class="cfg-bar">' +
           '<span class="cfg-lab">' + liveRows.length + ' business units' +

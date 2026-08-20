@@ -74,7 +74,11 @@ var SYNC = (function () {
     window.CYCLE = state.cycle;
     window.REVIEW = state.review;
     window.HISTORY = state.history;
-    if (state.priorCycle) window.PRIOR_CYCLE = state.priorCycle;
+    /* Rebound unconditionally, like every other global here. Assigning only
+       when present meant a tenant with no previous cycle kept the baked-in
+       example's 2025 split on screen — the Weighting factors table showed
+       deltas against a year that never happened for them. */
+    window.PRIOR_CYCLE = state.priorCycle || { factors: [] };
     UNIT_KEYS.forEach(function (k) { UNITS[k].ukey = k; });
     syncWeights();
   }

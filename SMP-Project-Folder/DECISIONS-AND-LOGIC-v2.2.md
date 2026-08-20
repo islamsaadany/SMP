@@ -1704,9 +1704,10 @@ Not designed yet.
 
 ### v2.2 — the clean slate, and the Demo button
 
-The demo tenant became the client's own: the companies, the business units and
-the supporting functions stayed, every invented plan, foundation, person, cycle
-and capability content went (§21). The full worked example did not go with it —
+The demo tenant became the client's own: the companies, the business units, the
+supporting functions and the configuration stayed, every invented plan,
+foundation, person, cycle, capability content and weighting value went
+(§21, §21.5). The full worked example did not go with it —
 a **Demo data** button switches the whole product to it for explaining, labels
 it while it is on screen, and cannot write it to the database. Three defects
 that only an empty tenant could expose were fixed on the way: "Clear all plans"
@@ -2087,9 +2088,8 @@ definition, key objectives and projects · the reporting cycle, its focus marks
 and its closed history · the invented people and the role assignments pointing
 at them.
 
-**Deliberately not removed, and flagged:** the weighting factor *values*
-(§13 invented them). They were not in the instruction and a weighting table
-with no values reads as broken rather than as empty — say the word and they go.
+*(The weighting factor values were held back here and flagged; Islam cleared
+them the same day — see §21.5.)*
 
 Nothing is lost. The full example is still in `db/seed-state.json` and baked
 into the platform file, which is what the Demo button shows.
@@ -2136,14 +2136,61 @@ colouring its dials red for having nothing in them.
 
 ### 21.4 Verified before handover
 
-- The clean-slate migration applied to a database seeded from scratch, then the
+- The clean-slate migrations applied to a database seeded from scratch, then the
   counts read back: units 10, supporting functions 7, themes 3, capabilities 8,
-  people 1 — pillars, measures, tactics, unit and group key objectives, clauses,
-  SWOT items, projects, capability key objectives and history all **0**; the
-  cycle and the review empty; `smo` the only account that can sign in.
+  people 1, weighting factors 4, weighting rows 10 — pillars, measures, tactics,
+  unit and group key objectives, clauses, SWOT items, projects, capability key
+  objectives, history, weighting values and the prior cycle all **0**; the cycle
+  and the review empty; `smo` the only account that can sign in.
 - Every page walked as every viewer, live and in demo, with the console
   watched — no errors in either.
 - The database read before, during and after a demo session: **unchanged**,
   including across the autosave interval.
 - Round-trip still deep-equal, and the file still opens and runs offline on the
   baked example.
+
+### 21.5 The weighting values go too — and what an unentered table means
+
+*Islam, 2026-08-20: "Clear the weighting values as well and proceed."*
+
+Cleared as migration `005-clear-weighting.sql`: every per-unit factor value,
+every written reason beside an impact judgement, and the prior cycle carried for
+comparison — a 2025 split that never happened, against units the group no longer
+has.
+
+**What stays is the model, not the content.** The four factors — Revenue
+contribution, Profit contribution, Impact on group, Potential growth — keep
+their types, their bases and their 40/30/20/10 weights, because that is
+configuration: it says how a unit's weight is *composed*. One row per business
+unit stays too, so every unit still has somewhere to enter its figures and still
+receives a composite.
+
+**An empty table had to be given a meaning, and the choice matters**, because
+the composite feeds the group's compile:
+
+- **Nothing entered at all → every unit counts equally.** Equal weight is the
+  default nobody has to defend — the same answer the Key Objectives already take
+  when no weights are set (§5.1). The alternative the code actually produced was
+  worse than wrong: every share computed to zero, and the rounding correction
+  handed the whole 100% to whichever unit happened to be listed first.
+- **A share of nothing is a dash, not 0%.** §5.7 again: a factor nobody has
+  filled in is not a factor on which every unit scored zero.
+- **Partly entered → the units with figures carry the composite.** Contributions
+  are now normalised to their own total rather than having the shortfall dumped
+  on the largest row. This is invisible on a full table — the contributions
+  already sum to 100 — and is the difference between a half-filled table reading
+  honestly and reading like a decision.
+- The page says so in words while the table is empty, rather than leaving a
+  column of identical 10%s to be interpreted.
+
+**Two more defects surfaced.** Emptying a cell did nothing: the setter ignored
+anything that did not parse as a number, so a blank field kept the old figure —
+a value could be changed but never unset. And the share lists were built from
+four hardcoded factor keys, so a factor added through the editor — the whole
+point of factors being rows — got no share at all. Both are fixed; shares are
+now built from the factor table itself.
+
+The prior-cycle column reads **"Previous cycle · new this cycle"** for a tenant
+in its first cycle. `PRIOR_CYCLE` is also rebound on hydration now: it was
+assigned only when the payload carried one, so a tenant without a previous cycle
+kept the baked-in example's 2025 split on screen.

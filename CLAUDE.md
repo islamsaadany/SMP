@@ -146,12 +146,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
 - **Database (since v2.0):** Neon Postgres via the Vercel integration's env vars
   (`DATABASE_URL` and friends — the API tries the standard names; never ask for or paste
   a connection string in chat). The first request against an empty database applies
-  `db/schema.sql` and seeds it from `db/seed-state.json` under an advisory lock — nobody
-  runs SQL by hand. The seed is **generated from the platform sources** by
-  `node scripts/extract-state.js`. Served over http(s) the platform hydrates from
-  GET /api/state and autosaves on change; opened from file:// it runs on baked data.
-  Access grants persist but are **not yet enforced server-side** (§16.9 pending) — the
-  deployed state is writable by anyone who reaches the URL; the gate is a latch, not a lock.
+  `db/schema.sql` + `db/migrations/*.sql` (registry `_sql_migrations`) and seeds it from
+  `db/seed-state.json` under an advisory lock — nobody runs SQL by hand. The seed is
+  **generated from the platform sources** by `node scripts/extract-state.js`. Served over
+  http(s) the platform hydrates from GET /api/state and autosaves on change; opened from
+  file:// it runs on baked data.
+- **Identity (since v2.1, §19):** the gate is a real login (person key + password,
+  scrypt-hashed, httpOnly session); `/api/state` requires a session; a signed-in person
+  sees their own view; the SMO issues temporary passwords from Levels & access (forced
+  change on first sign-in; bootstrap: `smo` / `4123`, must-change). Enforcement is at the
+  door — per-action authorization and the change log are Phase 2 (§19.2).
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (must print PASS twice) and
   `DATABASE_URL=... node scripts/dev-server.js` + drive the platform in a browser.

@@ -1,4 +1,4 @@
-# SMP Project Folder — v2.0
+# SMP Project Folder — v2.1
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -9,7 +9,7 @@ Everything needed to pick this project up cold. Read in this order.
 **`CLAUDE-RULES.md`** — how Islam and Claude work together. Read before doing
 anything. The first rule is the important one: **mock before building, always.**
 
-**`DECISIONS-AND-LOGIC-v2.0.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v2.1.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -24,7 +24,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v2.0.html`** — the built prototype. One file,
+**`strategy-management-platform-v2.1.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -107,12 +107,15 @@ cleared).
 
 Version **2.0** moved the platform's state into the database (§18): served on
 Vercel it loads from and saves to Neon, self-building and self-seeding on
-first contact; opened as a file it is unchanged. Access persists but is not
-yet enforced — that arrives with §16.9.
+first contact; opened as a file it is unchanged. Version **2.1** put real
+sign-in on top (§19): the gate is a login, the platform requires a session,
+each person sees their own view, and the SMO issues passwords from Levels &
+access. The viewer switcher survives only as the SMO's read-only simulation
+and in the offline file.
 
-**Next:** nothing mid-flight. The backlog is the longer-term set below, plus
-the open model questions in §11 — §16.9 (people, credentials, enforced
-access) is now the natural first pick, since the database it needs exists.
+**Next:** Phase 2 of the real build — per-action writes with server-side rule
+checks and the per-figure change log (§16.0a, §19.2). Then the longer-term
+set below and the open model questions in §11.
 
 **Longer term:** source teams (§16.7), the help box (§16.8), people and
 credentials (§16.9), strategy versions (§16.10).

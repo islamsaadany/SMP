@@ -271,7 +271,7 @@ function focusTally(u){
    there were roughly eleven build rounds before this, so the first numbered
    release is 1.0. It lives in the FILENAME, not on screen: the platform is shown
    to clients and a version badge in the chrome is noise to them. */
-var VERSION = "2.0";
+var VERSION = "2.1";
 
 /* A function carries the same fields a unit does, in the same shapes: an
    editable name, a short name for the navigation, a code prefix for numbering

@@ -105,9 +105,16 @@ function renderAccess(){
       '</td><td><span class="why" style="margin:0">' + esc(l.note) + '</span></td></tr>';
   }).join("");
 
+  /* Credentials exist only where the platform is served with a database
+     behind it (\u00a719). The SMO issues a temporary password per person \u2014
+     usernames are the person keys shown here \u2014 and the person is forced to
+     choose their own on first sign-in. Offline, none of this renders and the
+     page is exactly the prototype's. */
+  var credentialed = typeof SYNC !== "undefined" && SYNC.isLive() && viewer().level === "smo";
   var peopleRows = PEOPLE.map(function(p){
     var lv = p.level === "smo" ? SMO_ROLE : LEVELS.filter(function(x){ return x.key === p.level; })[0];
-    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title) + '</span></td>' +
+    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title) +
+      (credentialed ? ' &middot; <span class="mono">key ' + esc(p.key) + '</span>' : '') + '</span></td>' +
       '<td><span class="pill kind">' + esc(lv.name) + '</span></td>' +
       '<td><span class="pill ' + (p.unit === "group" ? "theme" : "kind") + '">' +
         /* A person may belong to a supporting function rather than a business
@@ -116,7 +123,9 @@ function renderAccess(){
          : p.unit && UNITS[p.unit] ? esc(UNITS[p.unit].name)
          : p.fn && FUNCTIONS[p.fn] ? esc(FUNCTIONS[p.fn].name) + " &mdash; function"
          : "\u2014") + '</span></td>' +
-      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button></td></tr>';
+      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button>' +
+      (credentialed ? ' <button class="linkbu" data-setpw="' + p.key + '">Set password</button>' : '') +
+      '</td></tr>';
   }).join("");
 
   return '<p class="lede">Access is <strong>page level only</strong>. If a level can open a page, it sees everything on that page &mdash; restriction happens by removing the page, never by trimming its contents. A person carries a <strong>level</strong>, which decides which pages, and a <strong>unit attachment</strong>, which decides whose.</p>' +

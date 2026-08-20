@@ -83,25 +83,81 @@ var SYNC = (function () {
     });
   }
 
+  /* Real identity replaces the prototype's viewer switcher on the deployed
+     product (§16.9, built in §19): the page shows the signed-in person's own
+     view. The switcher survives for the SMO as a read-only simulation — what
+     is rendered changes, who is acting does not: the server authorizes by
+     session, never by the simulated view. Offline, everything stays as it
+     always was. */
+  var person = null;
+  function chromeFor(paint) {
+    var box = document.querySelector(".viewer");
+    var sel = document.getElementById("asWho");
+    if (!box || !sel) return;
+    if (PEOPLE.some(function (p) { return p.key === person.key; })) {
+      window.VIEWER = person.key;
+      sel.value = person.key;
+    }
+    if (person.level !== "smo") {
+      sel.hidden = true;
+      var label = box.querySelector("label");
+      if (label) label.textContent = "Signed in as";
+      var nm = document.createElement("span");
+      nm.className = "viewer-note";
+      nm.innerHTML = "<b></b>";
+      nm.firstChild.textContent = person.name;
+      box.insertBefore(nm, sel);
+    }
+    var out = document.createElement("button");
+    out.className = "infobtn";
+    out.textContent = "Sign out";
+    out.addEventListener("click", function () {
+      fetch("/api/auth", { method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: '{"action":"logout"}'
+      }).finally(function () { location.replace("/"); });
+    });
+    box.appendChild(out);
+    paint();
+  }
+
   return {
+    isLive: function () { return live; },
+    person: function () { return person; },
+    /* The SMO issues or resets a password from Levels & access. The server
+       checks the policy and the issuer; the password is temporary and forces
+       a change on first sign-in. */
+    setPassword: function (key, pw, done) {
+      fetch("/api/auth", { method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "setPassword", person: key, password: pw })
+      }).then(function (r) { return r.json(); })
+        .then(function (j) { done(j.ok ? null : (j.error || "failed")); })
+        .catch(function (e) { done(String(e.message || e)); });
+    },
     boot: function (paint) {
       paint();
       if (!enabled) return;
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
+          /* Deployed and not signed in: the gate is the way in. */
+          if (r.status === 401) { location.replace("/"); throw new Error("sign in"); }
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         })
         .then(function (data) {
           if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+          if (data.person && data.person.mustChange) { location.replace("/"); return; }
           hydrate(data.state);
           live = true;
-          paint();
+          person = data.person || null;
+          if (person) chromeFor(paint); else paint();
           lastSaved = serialize();
           setInterval(save, 5000);
         })
         .catch(function (e) {
-          console.info("SMP: running on the baked-in data (" + e.message + ")");
+          if (e.message !== "sign in")
+            console.info("SMP: running on the baked-in data (" + e.message + ")");
         });
     },
     afterPaint: function () {

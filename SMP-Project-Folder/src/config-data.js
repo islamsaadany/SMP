@@ -1079,6 +1079,14 @@ function capSnapshotCounts(s){
 /* "1 pillars" is the kind of thing that makes a product feel unfinished. */
 function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
 
+/* The horizon is the year a tenant is planning TO, and it is theirs to enter —
+   never a default the platform supplies. Until it is entered every page that
+   leans on it has to read as though it were not there, rather than trailing a
+   dangling "by". */
+function horizonSet(){ return !!String(GROUP.horizon == null ? "" : GROUP.horizon).trim(); }
+function horizonBy(){ return horizonSet() ? " by " + esc(GROUP.horizon) : ""; }
+function horizonLabel(){ return horizonSet() ? esc(GROUP.horizon) : "not set"; }
+
 function planIsEmpty(counts){
   return !counts.pillars && !counts.objectives && !counts.projects;
 }

@@ -240,7 +240,10 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.5: the company level ported from Islam's own build
+*Last Updated: 2026-08-20 — v2.6: the horizon is the tenant's to set, not a baked
+default (§23.5); Distribution and B2C confirmed as real companies.*
+
+*Earlier: 2026-08-20 — v2.5: the company level ported from Islam's own build
 (§23), plus the two defects a real uploaded plan exposed — a pillar with no code, and
 the triple-pinned sticky chrome.*
 

@@ -1,0 +1,12 @@
+-- 007 · The horizon is the tenant's to set (2026-08-20, Islam's instruction:
+--       "the horizon in the excel templates is 2029 — the horizon is something
+--        we input, not a default").
+--
+-- 2029 came from the demo data and the clean slate (004) missed it, so it
+-- survived into the client's tenant and the plan template shipped pre-filled
+-- with it. A year nobody chose reads as a decision somebody already made.
+--
+-- Cleared ONLY if it is still the seeded value. If a horizon has since been
+-- entered — on the Temple page or through a plan upload — it is the tenant's
+-- own and is left exactly as it is.
+UPDATE org SET horizon = '' WHERE horizon = '2029';

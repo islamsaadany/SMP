@@ -297,6 +297,7 @@ function readme(kind, pickLabel, pickList){
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
+       ["Horizon", "On the Aspiration sheet: the year this plan runs to. Yours to set \u2014 the platform does not assume one \u2014 and it is what every \"by <year>\" on screen reads from."],
        ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
@@ -348,7 +349,10 @@ function planWorkbook(u){
       rows:[
         ["Winning aspiration", u.aspiration],
         ["End in mind (optional)", u.endInMind || ""],
-        ["Horizon", GROUP.horizon]
+        /* Blank until the tenant has set one. The horizon is the year they
+           are planning TO — an input, not a default the platform hands them,
+           and a pre-filled year reads as a decision somebody already made. */
+        ["Horizon (the year this plan runs to)", GROUP.horizon || ""]
       ] },
 
     { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],

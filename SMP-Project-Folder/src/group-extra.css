@@ -109,13 +109,13 @@
      smeared it as you scrolled. Pinning the container and nothing else cannot
      drift, because there is only one offset and the browser owns it. */
   header.top { transition:padding .18s ease; }
-  .top-in { padding:12px 24px; transition:padding .18s ease; }
-  .brand h1 { font-size:22px; transition:font-size .18s ease; }
-  body.scrolled .top-in { padding:6px 24px; }
-  body.scrolled .brand h1 { font-size:16px; }
-  /* Shrinks with the name beside it - held at 14px against a 16px h1 the two
-     read as one run-on title rather than a name and its owner. */
-  body.scrolled .orgname { font-size:12px; }
+  .top-in { padding:8px 24px; transition:padding .18s ease; }
+  body.scrolled .top-in { padding:5px 24px; }
+  /* The h1 and the tenant name used to shrink here too, from 22px to 16px.
+     There is nothing left to condense: the line is 13px and 40px tall before
+     you scroll, so a condense would be a 3px twitch and the transition on it
+     was a font resizing under the reader for no gain. Only the padding moves
+     now, which is the part that was ever worth reclaiming. */
   /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
      of the header. Their rules went with them: `.eyebrow` is also the deck
      slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
@@ -158,13 +158,30 @@
   .tip { position:relative; display:inline-flex; align-items:center; justify-content:center;
          width:14px; height:14px; border-radius:50%; border:1px solid var(--ink-3);
          color:var(--ink-3); font-size:9px; font-weight:700; margin-left:5px; cursor:help; vertical-align:middle; }
+  /* display:none, NOT opacity:0 - and this is the fix for the sideways drift
+     that made the whole chrome look broken.
+
+     An absolutely positioned box contributes to the document's scrollable
+     overflow whether or not you can see it. Every one of these tooltips is
+     255-320px wide, anchored to a 14px icon, and was laid out at all times at
+     opacity 0. Wherever an icon sat near the right of the content column the
+     invisible bubble hung past it, the page grew a horizontal scroll nobody
+     could account for, and the sticky chrome - which scrolls sideways with the
+     page, as sticky is defined to - slid off and showed the seams. It looked
+     like a header bug and lived here. It appeared and vanished depending on
+     which page you were on, because it depended on where the icons landed.
+
+     The cost is the .13s fade, which cannot survive display:none. A hover note
+     appearing instantly is a fair price for a product that never scrolls
+     sideways. */
   .tip::after {
-    content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    content:attr(data-tip); display:none;
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
     background:var(--ink); color:var(--ground); font-size:12px; font-weight:400; line-height:1.4;
     letter-spacing:0; text-transform:none; padding:9px 12px; border-radius:3px; width:255px;
-    opacity:0; pointer-events:none; transition:opacity .13s; z-index:20; text-align:left;
+    pointer-events:none; z-index:20; text-align:left;
   }
-  .tip:hover::after, .tip:focus::after { opacity:1; }
+  .tip:hover::after, .tip:focus::after { display:block; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
   .base-grid { grid-template-columns:repeat(4,1fr); }

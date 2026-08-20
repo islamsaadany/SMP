@@ -319,13 +319,13 @@
      smeared it as you scrolled. Pinning the container and nothing else cannot
      drift, because there is only one offset and the browser owns it. */
   header.top { transition:padding .18s ease; }
-  .top-in { padding:12px 24px; transition:padding .18s ease; }
-  .brand h1 { font-size:22px; transition:font-size .18s ease; }
-  body.scrolled .top-in { padding:6px 24px; }
-  body.scrolled .brand h1 { font-size:16px; }
-  /* Shrinks with the name beside it - held at 14px against a 16px h1 the two
-     read as one run-on title rather than a name and its owner. */
-  body.scrolled .orgname { font-size:12px; }
+  .top-in { padding:8px 24px; transition:padding .18s ease; }
+  body.scrolled .top-in { padding:5px 24px; }
+  /* The h1 and the tenant name used to shrink here too, from 22px to 16px.
+     There is nothing left to condense: the line is 13px and 40px tall before
+     you scroll, so a condense would be a 3px twitch and the transition on it
+     was a font resizing under the reader for no gain. Only the padding moves
+     now, which is the part that was ever worth reclaiming. */
   /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
      of the header. Their rules went with them: `.eyebrow` is also the deck
      slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
@@ -368,13 +368,30 @@
   .tip { position:relative; display:inline-flex; align-items:center; justify-content:center;
          width:14px; height:14px; border-radius:50%; border:1px solid var(--ink-3);
          color:var(--ink-3); font-size:9px; font-weight:700; margin-left:5px; cursor:help; vertical-align:middle; }
+  /* display:none, NOT opacity:0 - and this is the fix for the sideways drift
+     that made the whole chrome look broken.
+
+     An absolutely positioned box contributes to the document's scrollable
+     overflow whether or not you can see it. Every one of these tooltips is
+     255-320px wide, anchored to a 14px icon, and was laid out at all times at
+     opacity 0. Wherever an icon sat near the right of the content column the
+     invisible bubble hung past it, the page grew a horizontal scroll nobody
+     could account for, and the sticky chrome - which scrolls sideways with the
+     page, as sticky is defined to - slid off and showed the seams. It looked
+     like a header bug and lived here. It appeared and vanished depending on
+     which page you were on, because it depended on where the icons landed.
+
+     The cost is the .13s fade, which cannot survive display:none. A hover note
+     appearing instantly is a fair price for a product that never scrolls
+     sideways. */
   .tip::after {
-    content:attr(data-tip); position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    content:attr(data-tip); display:none;
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
     background:var(--ink); color:var(--ground); font-size:12px; font-weight:400; line-height:1.4;
     letter-spacing:0; text-transform:none; padding:9px 12px; border-radius:3px; width:255px;
-    opacity:0; pointer-events:none; transition:opacity .13s; z-index:20; text-align:left;
+    pointer-events:none; z-index:20; text-align:left;
   }
-  .tip:hover::after, .tip:focus::after { opacity:1; }
+  .tip:hover::after, .tip:focus::after { display:block; }
 
   /* ── Enabler cards (temple base) ──────────────────────── */
   .base-grid { grid-template-columns:repeat(4,1fr); }
@@ -743,7 +760,8 @@
      truncates instead; the note beside it already says the level and the
      reach, so nothing is lost that is not said twice. */
   .viewer select { font:inherit; font-size:13px; padding:5px 9px; border:1px solid var(--line);
-                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:170px; }
+                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:150px;
+                   font-size:12px; padding:3px 7px; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
                  letter-spacing:.06em; text-transform:uppercase; }
@@ -1084,19 +1102,59 @@
              min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
 
-  /* THE FIRST LINE IS ONE LINE. It was not, before this: brand 400 + viewer 467
-     + buttons 257 + two 20px gaps came to 1164 against a 1132px column, so the
-     buttons wrapped onto a row of their own for everyone signed in - the wrap
-     was already there in 2.9 and the client name and the theme mark made it
-     worse. Three items on one row, and what gives when the window narrows is
-     stated rather than left to the browser: the buttons never shrink, the
-     tenant name and the person picker do. flex-wrap stays `wrap` so a genuinely
-     narrow window still breaks the row instead of overflowing it - the fix is
-     to stop it happening at ordinary widths, not to forbid it. */
-  .top-in { gap:16px; }
-  .viewer { min-width:0; }
-  .viewer select { flex:0 1 auto; min-width:92px; }
-  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* THE FIRST LINE IS ONE LINE, AND IT IS SMALL.
+
+     Three attempts got here, so the reasoning is worth keeping. 2.9 asked for
+     one line and measured 1164px of content against a 1132px column, so the
+     buttons wrapped for everyone signed in. 3.0 shrank the pieces enough to
+     fit at 1180 and called it done - which was true only at 1180 and above,
+     and Islam's laptop is a ~1000px CSS viewport, so it still arrived as two
+     lines. Fitting at one width is not fitting.
+
+     So the row no longer WRAPS at all: flex-wrap is `nowrap` and every item
+     that can lose characters without losing meaning is allowed to. The
+     buttons never shrink - they are the controls, and a truncated "SIGN OU"
+     is worse than no header at all. Everything left of them shrinks and
+     ellipses in this order, because that is the order they are least missed:
+     the person note, the product name, the tenant name, the picker.
+
+     `nowrap` is what makes it unconditional. There is no width at which this
+     becomes two rows, which is the whole point - a header that reflows is a
+     header that moves the page under you every time the viewport changes. */
+  .top-in { flex-wrap:nowrap; gap:12px; }
+
+  /* The backstop, for a tooltip that is genuinely open near the right edge.
+     `clip`, deliberately, and never `hidden`: overflow:hidden makes the
+     element a scroll container, which would break every position:sticky
+     inside it - the rail among them, and this project has spent two versions
+     on that already. `clip` clips without scrolling and lets the other axis
+     stay visible, so a tooltip can still open upwards past the top of a card.
+     Horizontal only: nothing in this product should ever scroll sideways. */
+  .wrap { overflow-x:clip; }
+
+  /* Small, because the product name is not the thing you came to read. It was
+     a 26px serif h1 - the largest text in the entire product, restating the
+     name of the tab you are already in, above a page whose own heading is
+     smaller than it was. 13px, and the tenant name beside it at 12px carries
+     more weight than the product does. */
+  .brand h1 { font-family:var(--serif); font-size:13px; letter-spacing:0;
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+              flex-shrink:2; min-width:38px; }
+  .orgname { font-size:12px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
+             min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+             flex-shrink:3; }
+  .viewer { min-width:0; flex-wrap:nowrap; gap:7px; flex-shrink:1; }
+  .viewer label { font-size:9px; letter-spacing:.1em; white-space:nowrap; flex-shrink:0; }
+  .viewer select { flex:0 1 auto; min-width:74px; }
+  /* Shrinks first and hardest: the level and the reach are both said again on
+     the page itself, so this is the one line of the header nobody loses
+     anything by having clipped. */
+  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                 font-size:9.5px; flex-shrink:9; }
+  .topacts { flex-shrink:0; gap:6px; }
+  .infobtn { font-size:9.5px; padding:4px 10px; letter-spacing:.08em; }
+  .themebtn { width:24px; height:24px; padding:0; }
+  .themesvg { width:14px; height:14px; }
 
   /* The theme control. Round rather than a pill because it carries a mark and
      no word - a pill with a 17px glyph floating in it reads as a button whose
@@ -1723,11 +1781,13 @@
    missing was a way to choose it. The product followed the laptop silently
    and a person who wanted the other one had nowhere to say so.
 
-   Three states, not two. Auto is the starting position and keeps following
-   the device, which is what most people want and what the CSS already did;
-   Light and Dark are a person overriding it for this screen. A two-state
-   toggle would have had to guess an initial side and would have lost the
-   ability to go back to following.
+   Two states. Light and Dark, and nothing else - Auto was here for one
+   version and went: a third state whose whole job is to be invisible is a
+   third state people have to work out, on a control they press once a month.
+   The device still decides where you START, so the default is unchanged for
+   anyone who never touches it; it just stops being a position on the switch.
+   Nothing is written to storage until someone actually chooses, so a browser
+   that has never been told keeps following the device across sessions.
 
    The choice is a property of the SCREEN, not of the person and not of the
    tenant, so it lives in localStorage and NEVER in the state graph. Putting
@@ -1742,7 +1802,18 @@ var THEME = (function () {
   /* Shared with index.html — the gate reads this key so signing in does not
      change the colours under you. Changing it means changing both. */
   var KEY = "smp.theme";
-  var ORDER = ["auto", "light", "dark"];
+  var ORDER = ["light", "dark"];
+
+  /* Where the switch starts when nobody has chosen: whatever the device says.
+     matchMedia is absent in very old engines and returns a stub in some test
+     runners, hence the guard - light is the safe fall-through because it is
+     what the bare :root block already paints. */
+  function fromDevice() {
+    try {
+      return window.matchMedia &&
+             window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    } catch (e) { return "light"; }
+  }
 
   /* Storage is unavailable in a private window and on some file:// origins,
      and reading it throws rather than returning null. Auto is the fallback
@@ -1750,8 +1821,8 @@ var THEME = (function () {
   function read() {
     try {
       var v = localStorage.getItem(KEY);
-      return ORDER.indexOf(v) === -1 ? "auto" : v;
-    } catch (e) { return "auto"; }
+      return ORDER.indexOf(v) === -1 ? fromDevice() : v;
+    } catch (e) { return fromDevice(); }
   }
   function write(v) {
     try { localStorage.setItem(KEY, v); } catch (e) {}
@@ -1760,30 +1831,27 @@ var THEME = (function () {
   var mode = read();
 
   function apply() {
-    /* Auto REMOVES the attribute rather than setting it to "auto": the
-       stylesheet keys off :root[data-theme="dark"] and
-       :root:not([data-theme="light"]), so absence is what hands the decision
-       back to prefers-color-scheme. An "auto" value would just be a third
-       string neither selector matches — which happens to work today, and
-       would quietly stop working the moment a rule tested for "light". */
-    var el = document.documentElement;
-    if (mode === "auto") el.removeAttribute("data-theme");
-    else el.setAttribute("data-theme", mode);
+    /* Always an explicit attribute now, even when the value came from the
+       device rather than from a person. With only two states there is nothing
+       left for the prefers-color-scheme block to decide, and stating it
+       outright means one selector paints the page instead of two that have to
+       agree. The media block stays in the stylesheet for the gate, which has
+       no switch of its own and no script beyond reading storage. */
+    document.documentElement.setAttribute("data-theme", mode);
   }
 
-  /* Half-filled circle, sun, moon. Drawn at the same 20px box as the rest of
-     the chrome's marks. Auto is deliberately the half circle: it reads as
-     "either", which is what following the device means. */
+  /* Sun and moon, drawn in the same 20px box as the rest of the chrome's
+     marks. The mark shows the state you are IN, and the title says what the
+     press will do - the other way round (showing what you would switch to) is
+     the convention nobody agrees on and everyone has to test by clicking. */
   var ICONS = {
-    auto: '<circle cx="10" cy="10" r="6.4" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
-          '<path d="M10 3.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/>',
     light: '<circle cx="10" cy="10" r="3.7" fill="currentColor"/>' +
            '<g stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' +
            '<path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/>' +
            '<path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>',
     dark: '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>'
   };
-  var WORDS = { auto: "following your device", light: "light", dark: "dark" };
+  var WORDS = { light: "light", dark: "dark" };
 
   function paintBtn(btn) {
     btn.innerHTML = '<svg viewBox="0 0 20 20" class="themesvg" aria-hidden="true">' +
@@ -1853,7 +1921,7 @@ THEME.apply();
          full worked example, for explaining how it works. Appears only
          where there is a live dataset to tell the example apart from. -->
     <div class="topacts" id="topacts">
-      <!-- Auto, Light, Dark. First of the three because it changes how the
+      <!-- Light and Dark. First of the three because it changes how the
            product LOOKS; the two beside it change what it shows or end the
            session. Hidden until THEME.wire() draws its mark. -->
       <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
@@ -4343,17 +4411,34 @@ function groupUnitsObjectives(){
   });
   return tot ? Math.round(acc/tot) : null;
 }
+/* NULL IS NEVER ZERO (§5.7), and it is never NaN either.
+
+   A tenant with no tactics loaded has nothing delivered and nothing planned,
+   so both of these were dividing by a total of zero and groupRatio was doing
+   0/0. Math.round(NaN) is NaN, and the group's own front page - the first
+   screen anyone opens - read "NaN%" under a "No data" chip, above the words
+   "Delivered 0% against 0% planned". Every clean slate showed it; the demo
+   dataset never did, which is why it survived to production.
+
+   The honest answer when there is no plan is not zero and not a stack of
+   letters: it is nothing, and the card already knows how to say that -
+   drillCard renders null as "Not yet measurable", which is what the two cards
+   beside it were doing correctly all along. splitCard had the same guard for
+   the same reason; this is that guard, one level up. */
 function groupExec(){
   var acc=0, tot=0;
   UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
-  return Math.round(acc/tot);
+  return tot ? Math.round(acc/tot) : null;
 }
 function groupPlan(){
   var acc=0, tot=0;
   UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
-  return Math.round(acc/tot);
+  return tot ? Math.round(acc/tot) : null;
 }
-function groupRatio(){ return Math.round(groupExec()/groupPlan()*100); }
+function groupRatio(){
+  var e = groupExec(), p = groupPlan();
+  return (e == null || !p) ? null : Math.round(e/p*100);
+}
 
 </script>
 <script>
@@ -7995,8 +8080,13 @@ function renderGroupPerformance(){
           drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
         drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
-          sub: "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
-               "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>. Read as a share of plan, not of the whole year.",
+          /* The sentence has to survive the empty tenant too. Reading
+             "Delivered 0% against 0% planned - variance +0" under a card that
+             says "Not yet measurable" is three false precisions in a row. */
+          sub: groupRatio() == null
+               ? "No tactic anywhere in the group has a plan against it yet, so there is nothing to deliver against."
+               : "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
+                 "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>. Read as a share of plan, not of the whole year.",
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
       '</div>') });

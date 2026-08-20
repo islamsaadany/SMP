@@ -245,7 +245,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.1: installable. `manifest.webmanifest`,
+*Last Updated: 2026-08-20 — v3.2: one line, at every width. Three
+rules came out of it. **A layout verified at the widths that pass is not
+verified** — v3.0 measured the first line, fixed it at 1180+, and said so in the
+note claiming it was done; Islam's laptop is 1000px. Sweep 1920→600 and assert,
+or do not claim it. **`opacity:0` hides a box, it does not remove it** — every
+`.tip::after` hover note is a ~320px absolutely positioned bubble that was laid
+out at all times, so wherever an icon sat near the right edge the page grew a
+horizontal scroll and the sticky chrome slid with it; that was the "glitchy
+header", for versions. Hidden tooltips are `display:none` now, with
+`overflow-x:**clip**` on `.wrap` as the backstop — never `hidden`, which makes a
+scroll container and breaks every `position:sticky` inside it. **Null is never
+zero, and never NaN** (§5.7 extended): `groupRatio()` did 0/0 on a tenant with no
+tactics and printed `NaN%` on the group's front page. Every clean slate showed
+it and the demo dataset never did — check against the data that can expose the
+bug, not the data that looks good. Theme is Light/Dark only now; the device
+decides where the switch starts, not a third state (§27).*
+
+*Earlier: 2026-08-20 — v3.1: installable. `manifest.webmanifest`,
 `sw.js` and `icons/` at the repo root make SMP a PWA — own icon, own window, opens
 offline. **The service worker never caches `/api/*`**: a cached `/api/state` is
 last quarter's actuals wearing this quarter's chrome, and a platform showing stale

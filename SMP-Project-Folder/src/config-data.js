@@ -1365,14 +1365,31 @@ function groupUnitsObjectives(){
   });
   return tot ? Math.round(acc/tot) : null;
 }
+/* NULL IS NEVER ZERO (§5.7), and it is never NaN either.
+
+   A tenant with no tactics loaded has nothing delivered and nothing planned,
+   so both of these were dividing by a total of zero and groupRatio was doing
+   0/0. Math.round(NaN) is NaN, and the group's own front page - the first
+   screen anyone opens - read "NaN%" under a "No data" chip, above the words
+   "Delivered 0% against 0% planned". Every clean slate showed it; the demo
+   dataset never did, which is why it survived to production.
+
+   The honest answer when there is no plan is not zero and not a stack of
+   letters: it is nothing, and the card already knows how to say that -
+   drillCard renders null as "Not yet measurable", which is what the two cards
+   beside it were doing correctly all along. splitCard had the same guard for
+   the same reason; this is that guard, one level up. */
 function groupExec(){
   var acc=0, tot=0;
   UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
-  return Math.round(acc/tot);
+  return tot ? Math.round(acc/tot) : null;
 }
 function groupPlan(){
   var acc=0, tot=0;
   UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
-  return Math.round(acc/tot);
+  return tot ? Math.round(acc/tot) : null;
 }
-function groupRatio(){ return Math.round(groupExec()/groupPlan()*100); }
+function groupRatio(){
+  var e = groupExec(), p = groupPlan();
+  return (e == null || !p) ? null : Math.round(e/p*100);
+}

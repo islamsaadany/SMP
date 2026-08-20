@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.1 · **Last updated:** 2026-08-20
+**Latest version:** v3.2 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,28 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.1 — installable *(current)*
+### v3.2 — one line, and the thing that was really moving it *(current)*
+The first line is now **one line at every width**, not just at 1180 and above —
+which is what v3.0 actually verified, and why it still arrived as two rows on
+your laptop. It no longer wraps at all; the pieces shrink instead, buttons last.
+The product name went from 26px to 13px (it was the largest text in the whole
+product, restating the tab you are already on), and the header went **from 108px
+tall to 47px**. Auto is gone: Light and Dark only, with your device still
+deciding where the switch starts.
+
+The "glitchy header" was never the header. Every explanatory icon's hover note
+is a ~320px box that was laid out **at all times** at `opacity: 0` — invisible,
+but still counted. Wherever one sat near the right edge it pushed the page wider
+than the window, the page scrolled sideways, and the sticky chrome slid with it,
+as sticky is defined to do. Hidden tooltips are `display: none` now, so nothing
+in the product scrolls sideways any more.
+
+One thing fixed that you did not ask for: the group's front page read **`NaN%`**
+under BUSINESS UNITS — EXECUTION. With no tactics loaded it was computing 0/0.
+It reads "Not yet measurable" now, like the two cards beside it. Every clean
+slate showed it; the demo dataset never did.
+
+### v3.1 — installable
 SMP installs to a dock or a home screen: its own icon, its own window with no
 browser chrome, and it opens with no network. The one thing a service worker
 must **not** do is the thing it exists for — `/api/*` is never cached, because a
@@ -460,8 +481,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.1.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.1.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.2.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.2.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

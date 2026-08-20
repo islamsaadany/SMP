@@ -1,4 +1,4 @@
-# SMP Project Folder — v3.1
+# SMP Project Folder — v3.2
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.1.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.2.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.1.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.2.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -181,6 +181,19 @@ own window, and it opens with no network. `sw.js` holds the shell — the gate, 
 built platform file, the icons — and **never `/api/*`**, because a cached
 `/api/state` is last quarter's actuals wearing this quarter's chrome. Offline you
 get the platform on its baked data, which it already says on screen.
+
+Version **3.2** made the first line one line at *every* width (§27) — v3.0 had
+verified it only at 1180 and above, which is why it still arrived as two rows on
+a 1000px laptop. The product name dropped from 26px to 13px and the header from
+108px to 47px. Auto went; Light and Dark only.
+
+And the header that kept looking "glitchy" turned out not to be the header:
+`.tip::after`, the hover note on every explanatory icon, is a ~320px absolutely
+positioned box that was laid out **at all times** at `opacity:0`. Near the right
+edge it made the page wider than the window, the page scrolled sideways, and the
+sticky chrome slid with it. Hidden tooltips are `display:none` now.
+`groupRatio()`'s `NaN%` on the group front page — 0/0 on a tenant with no
+tactics — went with it.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

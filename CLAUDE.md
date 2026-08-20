@@ -240,7 +240,14 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.7: the rail was pinned 12px from the top of the
+*Last Updated: 2026-08-20 — v2.8: v2.7's rail cap closed a feedback loop —
+measured height → page height → scroll clamp → header condense → measured height —
+and it oscillated forever. **A sticky offset changes nobody's height; a max-height
+does. Never size anything against a JS-measured value that the size itself can
+change.** The header also no longer condenses on a page with no room to scroll
+(§23.7).*
+
+*Earlier: 2026-08-20 — v2.7: the rail was pinned 12px from the top of the
 window, under a sticky chrome up to 258px tall, so the chrome swallowed its clicks;
 and `.chrome` had no background of its own, which is what showed through mid-condense
 (§23.6). **When a control "does not work", check what the click actually hits.***

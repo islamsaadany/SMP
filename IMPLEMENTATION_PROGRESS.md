@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.7 · **Last updated:** 2026-08-20
+**Latest version:** v2.8 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,35 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.7 — the rail was pinned under the chrome *(current)*
+### v2.8 — the cap that would not settle *(current)*
+You asked me to test the rail again, so I tested it the way you actually use it:
+**served, signed in, on a cleared tenant, against an uploaded plan, clicked while
+scrolled.** The browser driver would not click at all — *element is not stable*,
+retried for thirty seconds. And the cause was v2.7's own fix.
+
+Capping the rail against the measured chrome height closes a loop: the cap
+follows the chrome, the cap changes the page height, that re-clamps the scroll,
+that flips the header, that changes the measured height. Traced at
+240 → 243 → 290 → 240 → 290, forever. **A sticky offset changes nobody's height;
+a max-height does.** The cap is a constant now.
+
+The loop had a second door: the chrome is in flow, so condensing it shortens
+every page by ~40px, and where a page is barely taller than the window that
+alone flips the header back. The header no longer condenses when there is no
+room to scroll — reclaiming 40px on a page with 60px of scroll was never worth
+it anyway.
+
+*Verified across three window sizes — desktop, short, and a 620px laptop — on
+both Performance and Strategy → Plan, at four scroll depths each: **every rail
+click selected the pillar pressed**, no row covered by the chrome on any normal
+window, and the rail's position dead steady across 22 consecutive frames.*
+
+One residual, honestly stated: on a very short window the first rail row can sit
+behind the chrome — because a sticky element cannot float outside its container,
+and on a short page the whole section has scrolled up with it. That is what
+sticky does; making the rail escape its container would be worse.
+
+### v2.7 — the rail was pinned under the chrome
 You were right that neither was fixed. The rail was `top:12px` — twelve pixels
 from the top of the **window**, while the header above it is a sticky bar up to
 258px tall. So the moment you scrolled, the rail's first rows slid underneath the
@@ -261,7 +289,7 @@ suite per feature.
 ## In flight
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
-v2.7 single file as it always has; nothing anyone uses runs on the new stack
+v2.8 single file as it always has; nothing anyone uses runs on the new stack
 yet.
 
 What R1 proved, in `smp-app/`:
@@ -290,14 +318,14 @@ driver the old endpoints used.
 **D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
 genuinely new things), and the cutover is **early, page group by page group** —
 the new app becomes the live site while un-ported screens still link back to
-the v2.7 build. Those two answers work together: because the stylesheet is the
+the v2.8 build. Those two answers work together: because the stylesheet is the
 same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
 | ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
-| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.7 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.8 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
 | **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
 | **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
@@ -362,8 +390,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.7.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.7.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v2.8.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.8.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

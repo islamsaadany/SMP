@@ -1245,13 +1245,34 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
   }).observe(chromeEl);
 
+  /* Condensing the header reclaims vertical space, which is only worth doing
+     when there is a lot of page to scroll. On a page barely taller than the
+     window it is worse than pointless, it is UNSTABLE: the chrome is in flow,
+     so condensing it shortens the document by ~40px, which re-clamps the scroll
+     position, which crosses a threshold, which flips the header back — forever.
+     Measured at 240 → 290 → 240, and while it ran the rail (pinned below the
+     chrome, which moves with it) never stopped moving, so its rows could not be
+     clicked at all.
+
+     The hysteresis — condense at 70, expand at 20 — was already there to stop
+     one flip causing the next. It cannot help here, because the flip comes from
+     the document changing height rather than from the reader scrolling. So the
+     condition is checked first: no room to scroll, no condensing. */
+  var ROOM = 200;   /* px of scrollable page below the fold worth condensing for */
+  function scrollRoom(){
+    return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
+           - window.innerHeight;
+  }
   var ticking = false;
   window.addEventListener("scroll", function(){
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(function(){
       var y = window.scrollY, on = document.body.classList.contains("scrolled");
-      if (!on && y > 70) document.body.classList.add("scrolled");
+      /* Room is measured against the CONDENSED page when already condensed, so
+         un-condensing cannot immediately re-qualify it. */
+      if (on && scrollRoom() < ROOM - 40) document.body.classList.remove("scrolled");
+      else if (!on && y > 70 && scrollRoom() > ROOM) document.body.classList.add("scrolled");
       else if (on && y < 20) document.body.classList.remove("scrolled");
       ticking = false;
     });

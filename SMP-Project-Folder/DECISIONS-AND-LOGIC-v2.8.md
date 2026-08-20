@@ -1702,6 +1702,14 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.8 — the cap that would not settle
+
+v2.7's own fix carried a feedback loop: a rail capped against the measured
+chrome height changes the page height, which re-clamps the scroll, which flips
+the header, which changes the measured height. It oscillated forever and nothing
+in the rail could be clicked. The cap is a constant now, and the header will not
+condense on a page with no room to scroll — the loop's second door (§23.7).
+
 ### v2.7 — the rail was pinned under the chrome
 
 The rail was `position:sticky; top:12px` — twelve pixels from the top of the
@@ -2551,7 +2559,48 @@ not answer the question. What proved this one was asking what the user's click
 would actually hit, and what a transparent container shows when its children
 briefly do not cover it.*
 
-### 23.7 Verified before handover
+### 23.7 The cap that would not settle — v2.8
+
+Testing v2.7 the way Islam uses it — **served, signed in, on a cleared tenant,
+against a plan that arrived by upload, clicked while scrolled** — the browser
+driver refused to click at all: *element is not stable*, retried for thirty
+seconds. An element that never stops moving cannot be clicked, which is the
+same complaint by another route, and this one was **introduced by v2.7's own
+fix**.
+
+The cap added beside the offset was the cause:
+
+```
+max-height: calc(100vh - var(--chrome-h) - 24px);
+```
+
+It closes a loop. The cap follows the measured chrome; the cap changes the
+page's height; the page's height re-clamps the scroll position; the scroll
+position crosses a condense threshold; the chrome changes height; the measured
+value changes. Traced at 240 → 243 → 290 → 240 → 290, forever.
+
+**A sticky OFFSET is safe because it changes nobody's height. A max-height is
+not.** The cap is now a constant — `calc(100vh - 320px)`, 320 being the tallest
+the chrome gets plus the gap — and 100vh does not move.
+
+**And the loop had a second door, which the constant alone did not close.** The
+chrome is in flow, so condensing it shortens the document by ~40px on every
+page, not just this one. Where a page is barely taller than the window that
+shortening re-clamps the scroll and flips the header straight back. The
+hysteresis (condense at 70, expand at 20) was built to stop one flip causing the
+next, and cannot help here, because the flip comes from *the document changing
+height*, not from anybody scrolling. So the handler now asks first whether there
+is any point: **no room to scroll, no condensing.** Reclaiming 40px on a page
+with 60px of scroll was never worth it.
+
+**One residual, and it is not a defect.** On a very short window, the first rail
+row can sit behind the chrome — because a sticky element cannot float outside
+its container, and on a short page the whole section has scrolled up with it.
+`--chrome-h` measures correctly (258) and the rail is pinned correctly; the
+container simply ended. That is what sticky does, and making the rail escape its
+container would be worse than the symptom.
+
+### 23.8 Verified before handover
 
 - The company model on the real screens: Distribution (3 units), B2C (3), four
   standing alone; both Setup sections rendering; the Company column on the units

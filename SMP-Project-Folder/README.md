@@ -1,4 +1,4 @@
-# SMP Project Folder — v3.2
+# SMP Project Folder — v3.3
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.2.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.3.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.2.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.3.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -194,6 +194,19 @@ edge it made the page wider than the window, the page scrolled sideways, and the
 sticky chrome slid with it. Hidden tooltips are `display:none` now.
 `groupRatio()`'s `NaN%` on the group front page — 0/0 on a tenant with no
 tactics — went with it.
+
+Version **3.3** took six changes off the deployed product and, with them, the
+scroll-up glitch at its source (§28). The footer sentence went; **Manage is a
+gear** with the word in its tooltip; the **rail expands to any number of
+directions** instead of cutting the list off mid-row; the headings above it went
+on both Plan and Performance; and a business unit opens on **Strategy › Plan**.
+
+The glitch: three versions had fixed real causes underneath it. What remained
+was the condense-on-scroll itself — at scroll position 25 the chrome settled at
+190px arriving downward and 168px arriving upward, so scrolling back up dropped
+22px of chrome into the page in one step. It bought 22px on a header that is now
+47px. The mechanism is gone and the chrome reports one single height, in both
+directions.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

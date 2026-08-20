@@ -245,7 +245,23 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.2: one line, at every width. Three
+*Last Updated: 2026-08-20 — v3.3: the condense-on-scroll is gone,
+and the scroll-up glitch with it. Three versions had fixed real causes
+underneath that symptom; this one removed the **mechanism**. Measured: at scroll
+25 the chrome settled at 190px arriving downward and 168px arriving upward, and
+stayed — the hysteresis working as designed, costing a 22px animated step into
+the page every time you scrolled back up. **A component whose size depends on
+scroll position will eventually depend on scroll DIRECTION, and then it is a
+state machine nobody drew** — removing it is cheaper than getting it right. It
+bought 22px on a 47px header. Gone: the listener, the `scrolled` class, every
+`body.scrolled` rule. `--chrome-h` stays and now reports a constant. Also: the
+rail lost its `max-height` (a capped rail cut lists off mid-row — a navigation
+list must never say "it ends here"); **the sticky OFFSET may read `--chrome-h`,
+a max-height never may** (§28.3, the v2.8 loop); Manage is a gear with the word
+in its `title`; a unit opens on Strategy › Plan; and `section()` omits an empty
+header rather than rendering a blank `<h2>` that still spends its margin (§28).*
+
+*Earlier: 2026-08-20 — v3.2: one line, at every width. Three
 rules came out of it. **A layout verified at the widths that pass is not
 verified** — v3.0 measured the first line, fixed it at 1180+, and said so in the
 note claiming it was done; Islam's laptop is 1000px. Sweep 1920→600 and assert,

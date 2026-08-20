@@ -1,0 +1,399 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model sql_migrations {
+  name       String   @id
+  applied_at DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("_sql_migrations")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model access_grants {
+  level_key String
+  page_key  String
+  grant_    String
+
+  @@id([level_key, page_key])
+}
+
+model bands {
+  idx   Int    @id
+  key   String
+  floor Int
+  label String @default("")
+}
+
+model cap_key_objectives {
+  id           String       @id
+  cap_id       String
+  idx          Int
+  name         String       @default("")
+  dir          String       @default("≥")
+  target       String?
+  compile      String?
+  weight       Decimal?     @db.Decimal
+  actual       String?
+  progress     Decimal?     @db.Decimal
+  note         String?
+  extra        Json         @default("{}")
+  capabilities capabilities @relation(fields: [cap_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model capabilities {
+  id                 String               @id
+  idx                Int
+  name               String               @default("")
+  def                String               @default("")
+  fn_key             String?
+  extra              Json                 @default("{}")
+  cap_key_objectives cap_key_objectives[]
+  projects           projects[]
+}
+
+model credentials {
+  person_key    String   @id
+  password_hash String
+  must_change   Boolean  @default(true)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model cycle {
+  id        Int     @id @default(1)
+  name      String  @default("")
+  reward_at Decimal @default(100) @db.Decimal
+  locked    Boolean @default(false)
+  focus     Json    @default("{}")
+  extra     Json    @default("{}")
+}
+
+model deliverables {
+  id         String   @id
+  project_id String
+  idx        Int
+  name       String   @default("")
+  kind       String   @default("binary")
+  due        String?
+  owner      String?
+  actual     String?
+  note       String?
+  extra      Json     @default("{}")
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model functions {
+  key         String  @id
+  idx         Int
+  name        String  @default("")
+  nav_name    String?
+  code_prefix String?
+  head        String?
+  custodian   String?
+  active      Boolean @default(true)
+  extra       Json    @default("{}")
+}
+
+model group_clauses {
+  idx   Int     @id
+  label String  @default("")
+  text_ String  @default("")
+  cid   String?
+}
+
+model group_key_objectives {
+  idx      Int      @id
+  id       String?
+  name     String   @default("")
+  grp      String?
+  dir      String   @default("≥")
+  target3y String?
+  target   String?
+  compile  String?
+  actual   String?
+  progress Decimal? @db.Decimal
+  extra    Json     @default("{}")
+}
+
+model history {
+  idx         Int      @id
+  name        String   @default("")
+  group_score Decimal? @db.Decimal
+  units       Json     @default("{}")
+  extra       Json     @default("{}")
+}
+
+model ko_weights {
+  unit_key String @id
+  weights  Json
+}
+
+model labels {
+  key      String  @id
+  idx      Int
+  internal String  @default("")
+  grp      String?
+  bu       String?
+  note     String?
+  extra    Json    @default("{}")
+}
+
+model levels {
+  key    String  @id
+  idx    Int
+  name   String  @default("")
+  titles String?
+  note   String?
+  extra  Json    @default("{}")
+}
+
+model measures {
+  id        String   @id
+  pillar_id String
+  idx       Int
+  name      String   @default("")
+  dir       String   @default("≥")
+  target    String?
+  target3y  String?
+  compile   String?
+  actual    String?
+  progress  Decimal? @db.Decimal
+  note      String?
+  horizon   String?
+  extra     Json     @default("{}")
+  pillars   pillars  @relation(fields: [pillar_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model milestones {
+  id         String   @id
+  project_id String
+  idx        Int
+  name       String   @default("")
+  covers     String?
+  owner      String?
+  finish     String?
+  status     String?
+  note       String?
+  extra      Json     @default("{}")
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model org {
+  id            Int    @id @default(1)
+  org_name      String
+  horizon       String @default("")
+  as_of_quarter Int    @default(2)
+  aspiration    String @default("")
+  end_in_mind   String @default("")
+  mission       String @default("")
+  extra         Json   @default("{}")
+}
+
+model outcomes {
+  id         String   @id
+  project_id String
+  idx        Int
+  name       String   @default("")
+  dir        String   @default("≥")
+  target     String?
+  measure_at String?
+  actual     String?
+  progress   Decimal? @db.Decimal
+  note       String?
+  extra      Json     @default("{}")
+  projects   projects @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model people {
+  key      String  @id
+  idx      Int
+  name     String  @default("")
+  level    String  @default("")
+  unit_key String?
+  fn_key   String?
+  title    String?
+  extra    Json    @default("{}")
+}
+
+model pillars {
+  id       String     @id
+  unit_key String
+  idx      Int
+  code     String?
+  name     String     @default("")
+  sub      String?
+  kind     String     @default("Direction")
+  theme    String?
+  owner    String?
+  extra    Json       @default("{}")
+  measures measures[]
+  units    units      @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+  tactics  tactics[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model prior_cycle {
+  id   Int  @id @default(1)
+  data Json @default("{}")
+}
+
+model projects {
+  id           String         @id
+  cap_id       String
+  idx          Int
+  name         String         @default("")
+  brief        String         @default("")
+  owner        String         @default("")
+  timeline     String         @default("quarter")
+  start_label  String         @default("")
+  end_label    String         @default("")
+  stakeholders Json?
+  extra        Json           @default("{}")
+  deliverables deliverables[]
+  milestones   milestones[]
+  outcomes     outcomes[]
+  capabilities capabilities   @relation(fields: [cap_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model review {
+  id           Int     @id @default(1)
+  name         String  @default("")
+  from_label   String  @default("")
+  to_label     String  @default("")
+  due_label    String  @default("")
+  ends_quarter Int     @default(2)
+  state        String  @default("open")
+  cadence      String?
+  notes        Json    @default("{}")
+  submitted    Json    @default("{}")
+  extra        Json    @default("{}")
+}
+
+model sessions {
+  token_hash String   @id
+  person_key String
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  expires_at DateTime @db.Timestamptz(6)
+
+  @@index([person_key], map: "sessions_person")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model swot_items {
+  unit_key String
+  cat      String
+  idx      Int
+  text_    String @default("")
+  units    units  @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([unit_key, cat, idx])
+}
+
+model tactics {
+  id            String   @id
+  pillar_id     String
+  idx           Int
+  name          String   @default("")
+  owner         String?
+  collaborators Json?
+  q1            Boolean  @default(false)
+  q2            Boolean  @default(false)
+  q3            Boolean  @default(false)
+  q4            Boolean  @default(false)
+  status        String?
+  actual        Decimal? @db.Decimal
+  note          String?
+  extra         Json     @default("{}")
+  pillars       pillars  @relation(fields: [pillar_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model themes {
+  idx   Int     @id
+  ab    String
+  name  String  @default("")
+  note  String?
+  extra Json    @default("{}")
+}
+
+model unit_clauses {
+  unit_key String
+  idx      Int
+  label    String  @default("")
+  text_    String  @default("")
+  cid      String?
+  units    units   @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([unit_key, idx])
+}
+
+model unit_key_objectives {
+  id       String   @id
+  unit_key String
+  idx      Int
+  name     String   @default("")
+  dir      String   @default("≥")
+  target3y String?
+  target   String?
+  compile  String?
+  actual   String?
+  progress Decimal? @db.Decimal
+  note     String?
+  extra    Json     @default("{}")
+  units    units    @relation(fields: [unit_key], references: [key], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model unit_roles {
+  unit_key  String  @id
+  head      String?
+  custodian String?
+}
+
+model units {
+  key                 String                @id
+  idx                 Int
+  name                String                @default("")
+  nav_name            String?
+  code_prefix         String                @default("")
+  active              Boolean               @default(true)
+  real                Boolean               @default(false)
+  aspiration          String                @default("")
+  end_in_mind         String                @default("")
+  extra               Json                  @default("{}")
+  pillars             pillars[]
+  swot_items          swot_items[]
+  unit_clauses        unit_clauses[]
+  unit_key_objectives unit_key_objectives[]
+}
+
+model weighting_factors {
+  key    String  @id
+  idx    Int
+  name   String  @default("")
+  kind   String  @default("judgement")
+  basis  String?
+  weight Decimal @default(0) @db.Decimal
+  extra  Json    @default("{}")
+}
+
+model weighting_rows {
+  unit_key  String  @id
+  idx       Int
+  unit_name String?
+  why       String?
+  extra     Json    @default("{}")
+}
+
+model weighting_values {
+  unit_key   String
+  factor_key String
+  value      Decimal? @db.Decimal
+
+  @@id([unit_key, factor_key])
+}

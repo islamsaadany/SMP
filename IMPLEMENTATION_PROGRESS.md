@@ -73,18 +73,41 @@ suite per feature.
 
 ## In flight
 
-Nothing being built. The stack move (§20) is decided and its plan is with
-Islam for approval (D4). v2.1 is merged to `main` and deployed.
+**R1 — the Next.js scaffold — is done, on the branch only.** `main` still
+serves v2.1 exactly as before; nothing anyone uses has changed.
+
+What R1 proved, in `smp-app/`:
+
+- **Prisma reads the existing database.** All 35 tables introspected with
+  `prisma db pull` — no new tables, no data moved, no migration. The schema
+  stays owned by `db/schema.sql` and `db/migrations/`, which the platform
+  applies itself.
+- **The design crosses intact.** `scripts/sync-css.mjs` generates the app's
+  stylesheet from the platform's own `src/*.css` in build.py's order — carried,
+  never hand-copied. A card rendered with the real class names comes out with
+  the navy header and the 112px dial, unaltered.
+- **The scoring engine ports exactly.** `lib/scoring.ts` (nulls dropped, one
+  band function, optional KO weights) computes **the same figure as the live
+  platform for all ten units**, Nigeria's dash included.
+- Typecheck and production build both pass.
+
+Stack note: Prisma 7 keeps the connection URL in `prisma.config.ts` and
+connects through a driver adapter (`@prisma/adapter-pg`) — the same `pg`
+driver the old endpoints used.
 
 ---
 
 ## Next — the rebuild on the HR_ERP stack
 
-Proposed order, **awaiting approval (D4)**. Nothing below is started.
+**D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
+genuinely new things), and the cutover is **early, page group by page group** —
+the new app becomes the live site while un-ported screens still link back to
+the v2.1 build. Those two answers work together: because the stylesheet is the
+same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
-| **R1** | **Scaffold beside the live product.** Next.js + TypeScript + Prisma pointed at the **existing** Neon tables (`prisma db pull` — no new schema, no data moved), NextAuth over the existing credentials, SMP's CSS carried over verbatim. Nothing user-facing changes yet. | Proves the new stack reads the real data before a single screen is ported. |
+| ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
 | **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.1 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |

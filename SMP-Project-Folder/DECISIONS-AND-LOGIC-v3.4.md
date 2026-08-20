@@ -3254,3 +3254,133 @@ nobody drew.* Removing it is cheaper than getting it right.
   carries `title` and `aria-label`.
 - Three themes × 31 viewers, zero console errors. Contrast unchanged at 3
   distinct in dark. Seed byte-identical, rebuild byte-identical.
+
+---
+
+## 29 · Seven from the deployed product — v3.4
+
+### 29.1 The folds died whenever the menu was touched
+
+*"the units and functions button in the navigation are not working for multiple
+times and then work. some sort of lag I guess"*
+
+Not lag. Reproduced in three clicks: **open the Manage menu, close it any way at
+all, and the Units and Functions folds are dead** until something forces a full
+repaint.
+
+`paintUnits()` replaces `#units` innerHTML, so every handler inside that row is
+destroyed on each call and has to be re-attached. It re-attached the unit tabs
+and the menu — but the folds were wired in `wire()`, which only runs on a full
+`paint()`. Three paths call `paintUnits()` **alone**: opening the menu, closing
+it with Escape, and closing it by clicking anywhere else. After any of them the
+folds were listening to nothing.
+
+The rule was already written, on the fold's own handler, in its own comment:
+*"paint() rather than paintUnits() because rewriting the row destroys its own
+handlers, and a fold that works once is worse than one that does not work at
+all."* The fold obeyed it. The menu, added later, broke it from the other side —
+the handler was correct and something else pulled the DOM out from under it.
+
+**So the rule is now structural rather than remembered: whoever rewrites the
+DOM re-wires it, in the same function, and there is exactly one function that
+rewrites this row.** The fold wiring moved into `paintUnits()`.
+
+### 29.2 The menu's group labels
+
+Ten entries under two whispered labels read as one list of ten. The labels now
+sit on a `--surface-2` band: visibly a different *kind* of row from the things
+they head, which is the whole job of a group label.
+
+### 29.3 The first line at half height
+
+47px → **27px**. The padding was already 8px a side and the controls 31px, so
+squeezing padding alone could never have got below 31 — the content had to
+shrink, and the tallest item sets the row.
+
+The tallest was the theme button at 30px, and it was 30px because **there were
+two `.themebtn` rules**: a 20px one written for this change and a 30px one left
+from §25, with the later of the two winning. A duplicated rule does not fail
+loudly; it just quietly ignores you. One rule now.
+
+Everything else came down with it: the select to 19px, the pills to 19px, the
+product name to 12px, `.top-in` padding to 3px.
+
+### 29.4 The rail's 10px slide, and why the fix is one number
+
+A sticky element sits where the flow puts it and only pins once scrolling
+carries it up to its offset. If the flow puts it **lower** than the offset, it
+slides exactly that difference on the first scroll and then stops — which is the
+small lurch, and it is not a bug in `position: sticky`, it is two numbers that
+were supposed to be the same and were not.
+
+Measured: `.view` had `padding-top: 22px`, `.split` added `margin-top: 12px`,
+and the sticky offset was `--chrome-h + 12`. Flow position 34px below the
+chrome, pin position 12px below it, travel 22px.
+
+**Fixed by making it impossible rather than by choosing a better number.** One
+variable, `--rail-gap`, is the panel's top padding *and* the sticky offset, and
+`.split` contributes nothing. The flow position and the pin position are now the
+same expression, so the difference cannot be non-zero. Measured after: the rail
+top reads 192 at every scroll position from 0 to 1200. **Zero travel.**
+
+### 29.5 Direction and Capability, hidden behind one flag
+
+*"across the platform hide the distinction of direction and capability. it will
+be brought later not now."*
+
+`SHOW_KIND = false`, and five call sites read it: the pill on a pillar, the meta
+line above it, the accordion row, the Kind column in the drill table (the column
+goes with its values — a header labelling a blank column is worse than either)
+and the Performance rail's sub-line. Flipping one flag brings all five back.
+
+The field itself is untouched: still in the data, still round-tripped through
+the database, still a column in the import template's Pillars sheet with its
+dropdown. **There is no Setup screen for it** — it has only ever been authored
+by upload — so "keep it in Setup" turned out to be a question about something
+that does not exist.
+
+What is deliberately NOT hidden: the **"Direction" column** in a key-objective
+table, which means the direction of travel — whether higher is better. Same
+word, unrelated thing.
+
+The meta line is also built from its non-empty parts now. It used to concatenate
+kind, theme and owner with fixed separators, so a pillar with neither theme nor
+owner read `Direction · theme ·` — two separators pointing at nothing, visible
+in Islam's own screenshot.
+
+### 29.6 "Plan only", and the rail footer that explained a number
+
+The Plan page carried *"Plan only — Nothing here has been reported"* above
+tables whose headings already say "as planned" and whose actual columns are all
+em-dashes, on a tab labelled Plan. Four statements of one thing. Gone — and gone
+from the project pane too, where the identical notice sat in the identical
+position.
+
+The rail's footer said *"Figure shown is key measures"*, explaining a bare
+number on the right of each row. On the **Plan** page there is no figure to
+explain — nothing has been reported — so the footer was describing a count as
+if it were a score.
+
+### 29.7 The rail rows say what their numbers are
+
+They used to carry two numbers: the tactics count in small grey on the left, and
+the measures count as a **bare unlabelled number** on the right. Two numbers,
+one of them unexplained, and a footer at the bottom trying to explain it.
+
+One line now, both labelled: `3 measures · 2 tactics · Abuelenien`. The bare
+number went, and the footer with it.
+
+### 29.8 Verified
+
+- **The folds after every way of closing the menu** — Escape, an outside click,
+  and pressing the button again — plus twice in a row. All live. Before this,
+  all three left them dead.
+- **The first line measures 27px**, with the select, both pills and the mark all
+  at 19–20px.
+- **Rail travel is 0px**, sampled at eight scroll positions from 0 to 1200.
+- **No kind anywhere a reader goes** on Plan or Performance, and the meta line
+  no longer ends in a dangling separator; the field still round-trips.
+- **The rail rows read "N measures · N tactics"**, no bare number, no footer.
+- Three themes × 31 viewers, zero console errors. The chrome still reports one
+  single height across a full scroll sweep in both directions. Contrast
+  unchanged. Seed and rebuild byte-identical.

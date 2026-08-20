@@ -474,28 +474,8 @@
      height, scroll clamp, condense, measured height - that oscillated
      forever. A sticky OFFSET changes nobody's height. A max-height does. */
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
-    position:sticky; top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px));
+    position:sticky; top:calc(var(--chrome-h, 118px) + 12px);
     align-self:start; }
-
-  /* ZERO TRAVEL. A sticky element sits where the flow puts it until scrolling
-     carries it up to its offset, and only then pins - so if the flow puts it
-     LOWER than the offset, it slides that difference on the first scroll and
-     stops. Measured: the rail sat 212px down and pinned at 202, so it dropped
-     10px and settled, which is exactly the small lurch Islam is describing.
-
-     The fix is not a smaller offset, it is the same number twice. The gap
-     above the rail is now one variable used in both places - as the section's
-     top margin, and as the sticky offset - so the flow position and the pin
-     position are the same by construction and the difference cannot be
-     non-zero. Change the gap and both move together. */
-  :root { --rail-gap:22px; }
-  /* Nothing between the panel's padding and the rail. `.split` used to add its
-     own 12px on top, which is a second gap the sticky offset knew nothing
-     about - so the rail sat 34px down, pinned at 34, and slid the difference.
-     Measured before this: the panel's padding-top was 22px, the split's margin
-     12px, the offset 12px, and the rail travelled exactly 22px. One gap now,
-     named once, read in both places. */
-  .split { margin-top:0; }
 
   .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;

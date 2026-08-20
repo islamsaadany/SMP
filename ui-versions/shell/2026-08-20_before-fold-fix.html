@@ -299,29 +299,6 @@
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
-    /* WIRED HERE, NOT IN wire(). paintUnits() replaces this row's innerHTML, so
-       every handler inside it dies on each call and has to be re-attached by
-       the same function that destroyed them. The fold used to be wired in
-       wire(), which only runs on a full paint() - and three paths call
-       paintUnits() ALONE: opening the Manage menu, closing it with Escape, and
-       closing it by clicking anywhere else. After any of those the Units and
-       Functions folds were dead until something else forced a full repaint,
-       which is why they "worked after a few tries".
-
-       The rule was already written on the fold's own handler in 2.x - rewriting
-       the row destroys its handlers - and then the menu was added and broke it
-       from the other side. So: whoever rewrites the DOM re-wires it, and there
-       is only one place that does. */
-    document.querySelectorAll("#units [data-fold]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* Browsing, not going: `current` is untouched, so the page and its tabs
-           stay exactly as they are. Toggle, not switch: pressing the open one
-           closes it and returns the row to its shortest state. */
-        NAVFOLD = (NAVFOLD === b.dataset.fold) ? null : b.dataset.fold;
-        MENU_OPEN = false;
-        paintUnits();
-      });
-    });
     document.querySelectorAll("#units button[data-u]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Edit is a decision about the thing being edited, not a lamp that
@@ -625,6 +602,18 @@
     if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
     var pf = document.querySelector("[data-present-fn]");
     if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
+    document.querySelectorAll("[data-fold]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Browsing, not going: `current` is untouched, so the page and its tabs
+           stay exactly as they are. paint() rather than paintUnits() because
+           rewriting the row destroys its own handlers, and a fold that works
+           once is worse than one that does not work at all. */
+        /* Toggle, not switch: pressing the open one closes it and returns the
+           row to its shortest state. */
+        NAVFOLD = (NAVFOLD === b.dataset.fold) ? null : b.dataset.fold;
+        paint();
+      });
+    });
     /* A capability's reporting writes back. Before the project model these
        inputs rendered and were bound to nothing at all, so a figure could be
        typed and lost on the next repaint. */

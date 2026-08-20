@@ -245,7 +245,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.3: the condense-on-scroll is gone,
+*Last Updated: 2026-08-20 — v3.4: seven fixes, three rules.
+**Whoever rewrites the DOM re-wires it, in the same function** — `paintUnits()`
+replaces the nav row's innerHTML, so the fold handlers wired over in `wire()`
+died every time the Manage menu opened or closed, and three paths call
+`paintUnits()` alone. The fold's own comment had already stated the rule; the
+menu broke it from the other side, so the wiring moved into the function that
+destroys it. **A duplicated CSS rule does not fail loudly, it quietly ignores
+you** — two `.themebtn` rules (20px and a 30px left from §25) held the first line
+at 31px of content no matter what the new number said; it is 27px now, half of
+47. **A sticky element that pins lower than it sits will slide the difference,
+so make it one number, not two** — `--rail-gap` is now both the panel's
+top padding and the sticky offset, and rail travel measures 0px at every scroll
+position (§29.4). Also: `SHOW_KIND=false` hides Direction/Capability at five
+call sites (the data and the import template keep it); the "Plan only" notice
+and the rail's "Figure shown" footer are gone; rail rows read "N measures · N
+tactics" rather than a bare number (§29).*
+
+*Earlier: 2026-08-20 — v3.3: the condense-on-scroll is gone,
 and the scroll-up glitch with it. Three versions had fixed real causes
 underneath that symptom; this one removed the **mechanism**. Measured: at scroll
 25 the chrome settled at 190px arriving downward and 168px arriving upward, and

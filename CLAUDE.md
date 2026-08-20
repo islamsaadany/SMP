@@ -139,7 +139,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
 
 ### Repository
 - **GitHub:** `islamsaadany/SMP`
-- **Production URL:** none yet.
+- **Deployment:** Vercel, as a **static site** — no build step, no server, no config file
+  needed; `index.html` (the AdminSMO gate) serves at the root and links to the shipped
+  platform file. Production tracks `main`. **There is no database**: the prototype carries
+  its entire dataset inside the platform HTML, so nothing is built or seeded on deploy.
+  A Neon-backed real build (server, schema, real sign-in replacing the viewer switcher)
+  is a future structural project to align on first — see §16.9 of the decisions document.
+- **On each version bump:** update the gate's link in `index.html` to the new
+  `strategy-management-platform-vX.Y.html` filename.
 
 ### Current Directory Layout
 ```

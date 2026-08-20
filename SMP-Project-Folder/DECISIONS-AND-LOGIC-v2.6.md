@@ -1702,6 +1702,14 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.6 — the horizon stops being a default
+
+`2029` came from the demo data and the clean slate missed it, so the plan
+template shipped pre-filled with a year nobody had chosen (§23.5). Blank now
+until the tenant sets one, with every page that reads it saying "not set"
+rather than trailing a dangling "by". Distribution and B2C confirmed as the
+client's real companies (§23.4).
+
 ### v2.5 — the company level, and two bugs an authored plan exposed
 
 The company level (§15.13), built by Islam outside the repo and ported here: a
@@ -2466,7 +2474,37 @@ earlier one. It is the same accident as the double `IMP` found in §22, and it i
 what made Islam's copy look as though the Focus measures page were broken. The
 dead copy is gone.
 
-### 23.4 Verified before handover
+### 23.4 Confirmed real
+
+*Islam, 2026-08-20, asked whether Distribution and B2C with those six units are
+the client's own companies: "yes they are."*
+
+So the company level is **real content**, not invented — the same standing as
+the business units and the supporting functions (§13, §21). It is written into
+the tenant by `006-companies.sql` and survives the clean slate.
+
+### 23.5 The horizon is the tenant's to set
+
+*Islam, 2026-08-20: "the horizon in the excel templates is 2029 — the horizon is
+something we input, not a default."*
+
+Right, and it was neither. `2029` came from the demo data, the clean slate
+missed it, and it therefore survived into the client's tenant and shipped
+pre-filled in the plan template. **A year nobody chose reads as a decision
+somebody already made.**
+
+- The template's Aspiration sheet now carries *"Horizon (the year this plan runs
+  to)"* and leaves it **blank** until the tenant has set one; where they have,
+  it is shown so a later plan neither hides nor silently overwrites it. The Read
+  me says it is theirs to set.
+- Every page that leans on it reads correctly when it is unset: the Temple's
+  heading drops its dangling "by", and the horizon pill says **not set** rather
+  than trailing a separator into nothing. Same rule as §5.7 — absent is absent,
+  never a stand-in value.
+- `007-horizon-is-yours.sql` clears it, **but only if it is still the seeded
+  `2029`**. A horizon entered since is the tenant's own and is left alone.
+
+### 23.6 Verified before handover
 
 - The company model on the real screens: Distribution (3 units), B2C (3), four
   standing alone; both Setup sections rendering; the Company column on the units

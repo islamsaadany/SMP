@@ -41,9 +41,10 @@ function deckSlides(u){
         ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') +
     '</div><div class="aimbottom"><span class="dlab">' + L("keyobj","bu") +
-      ' by ' + esc(GROUP.horizon) + '</span>' +
+      horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">Dir.</th><th class="num">By ' + esc(GROUP.horizon) + '</th>' +
+      '<th class="num">Dir.</th><th class="num">' +
+        (horizonSet() ? "By " + esc(GROUP.horizon) : "3-year") + '</th>' +
       '<th class="num">This year</th></tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
 

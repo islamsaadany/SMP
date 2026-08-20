@@ -84,14 +84,18 @@ function firstDiff(a, b, at) {
     /* The company level survives the clean slate: companies, like the units
        and the supporting functions, are the client's own (§15.13, §21). */
     companies:    await count("SELECT count(*) n FROM companies"),
-    inCompany:    await count("SELECT count(*) n FROM units WHERE company IS NOT NULL")
+    inCompany:    await count("SELECT count(*) n FROM units WHERE company IS NOT NULL"),
+    /* The horizon is the tenant's to enter (§23.5), so a fresh deployment must
+       not arrive carrying the demo's 2029. */
+    horizonSet:   await count("SELECT count(*) n FROM org WHERE coalesce(horizon,'') <> ''")
   };
   const slateOk = slate.units === 10 && slate.functions === 7 && slate.themes === 3 &&
     slate.capabilities === 8 && slate.people === 1 && slate.pillars === 0 &&
     slate.measures === 0 && slate.tactics === 0 && slate.unitKOs === 0 &&
     slate.groupKOs === 0 && slate.projects === 0 && slate.history === 0 &&
     slate.wFactors === 4 && slate.wRows === 10 && slate.wValues === 0 &&
-    slate.priorCycle === 0 && slate.companies === 2 && slate.inCompany === 6;
+    slate.priorCycle === 0 && slate.companies === 2 && slate.inCompany === 6 &&
+    slate.horizonSet === 0;
   console.log("clean slate after first deploy:", slateOk ? "PASS" : "FAIL", JSON.stringify(slate));
 
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));

@@ -3812,6 +3812,14 @@ function capSnapshotCounts(s){
 /* "1 pillars" is the kind of thing that makes a product feel unfinished. */
 function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
 
+/* The horizon is the year a tenant is planning TO, and it is theirs to enter —
+   never a default the platform supplies. Until it is entered every page that
+   leans on it has to read as though it were not there, rather than trailing a
+   dangling "by". */
+function horizonSet(){ return !!String(GROUP.horizon == null ? "" : GROUP.horizon).trim(); }
+function horizonBy(){ return horizonSet() ? " by " + esc(GROUP.horizon) : ""; }
+function horizonLabel(){ return horizonSet() ? esc(GROUP.horizon) : "not set"; }
+
 function planIsEmpty(counts){
   return !counts.pillars && !counts.objectives && !counts.projects;
 }
@@ -6244,6 +6252,7 @@ function readme(kind, pickLabel, pickList){
        ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
+       ["Horizon", "On the Aspiration sheet: the year this plan runs to. Yours to set \u2014 the platform does not assume one \u2014 and it is what every \"by <year>\" on screen reads from."],
        ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
@@ -6295,7 +6304,10 @@ function planWorkbook(u){
       rows:[
         ["Winning aspiration", u.aspiration],
         ["End in mind (optional)", u.endInMind || ""],
-        ["Horizon", GROUP.horizon]
+        /* Blank until the tenant has set one. The horizon is the year they
+           are planning TO — an input, not a default the platform hands them,
+           and a pre-filled year reads as a decision somebody already made. */
+        ["Horizon (the year this plan runs to)", GROUP.horizon || ""]
       ] },
 
     { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
@@ -7875,7 +7887,7 @@ function renderTemple(){
            '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
            '<span class="ns-dir">' + esc(m.dir) + ' &middot; ' + esc(m.compile).toLowerCase() + '</span></div>';
   };
-  var ns = '<span class="ko-head">' + L("keyobj","group") + ' by ' + esc(GROUP.horizon) + '</span>' +
+  var ns = '<span class="ko-head">' + L("keyobj","group") + horizonBy() + '</span>' +
     Object.keys(groups).map(function(k){
       var inner = groups[k].map(cell).join("");
       return k ? '<div class="ns-group"><span class="ns-group-h">' + esc(k) + '</span><div class="ns-group-in">' + inner + '</div></div>' : inner;
@@ -8149,7 +8161,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
   return '<div class="card"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
       (editing ? '<label class="horizon-f">Horizon ' +
                  inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
-               : '<span class="pill horizon">Horizon &middot; ' + esc(GROUP.horizon) + '</span>') +
+               : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
     '<p class="statement">' + fieldOr(page, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears
@@ -8977,7 +8989,7 @@ function renderFnFoundation(fnKey){
           fieldOr("capfoundation", c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-        '<span class="pill horizon">Horizon &middot; ' + esc(GROUP.horizon) + '</span></div>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
         koBlock + '</div>' +
     '</div></div>';
   }).join("");
@@ -10175,9 +10187,10 @@ function deckSlides(u){
         ? '<div><span class="dlab">End in mind</span><p class="asp3">' + esc(u.endInMind) + '</p></div>'
         : '') +
     '</div><div class="aimbottom"><span class="dlab">' + L("keyobj","bu") +
-      ' by ' + esc(GROUP.horizon) + '</span>' +
+      horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">Dir.</th><th class="num">By ' + esc(GROUP.horizon) + '</th>' +
+      '<th class="num">Dir.</th><th class="num">' +
+        (horizonSet() ? "By " + esc(GROUP.horizon) : "3-year") + '</th>' +
       '<th class="num">This year</th></tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
 

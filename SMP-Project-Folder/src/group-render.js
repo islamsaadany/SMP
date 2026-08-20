@@ -1027,7 +1027,7 @@ function renderTemple(){
            '<span class="ns-target">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
            '<span class="ns-dir">' + esc(m.dir) + ' &middot; ' + esc(m.compile).toLowerCase() + '</span></div>';
   };
-  var ns = '<span class="ko-head">' + L("keyobj","group") + ' by ' + esc(GROUP.horizon) + '</span>' +
+  var ns = '<span class="ko-head">' + L("keyobj","group") + horizonBy() + '</span>' +
     Object.keys(groups).map(function(k){
       var inner = groups[k].map(cell).join("");
       return k ? '<div class="ns-group"><span class="ns-group-h">' + esc(k) + '</span><div class="ns-group-in">' + inner + '</div></div>' : inner;
@@ -1301,7 +1301,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
   return '<div class="card"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
       (editing ? '<label class="horizon-f">Horizon ' +
                  inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
-               : '<span class="pill horizon">Horizon &middot; ' + esc(GROUP.horizon) + '</span>') +
+               : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
     '<p class="statement">' + fieldOr(page, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears
@@ -2129,7 +2129,7 @@ function renderFnFoundation(fnKey){
           fieldOr("capfoundation", c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
-        '<span class="pill horizon">Horizon &middot; ' + esc(GROUP.horizon) + '</span></div>' +
+        '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
         koBlock + '</div>' +
     '</div></div>';
   }).join("");

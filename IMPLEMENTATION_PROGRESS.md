@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.5 · **Last updated:** 2026-08-20
+**Latest version:** v2.6 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -18,11 +18,14 @@ Nothing proceeds past this line without an answer.
 
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
-| **D7** | **Are Distribution and B2C your real companies**, with Mobile / Consumer Electronics / IT and Retail Stores / Online Shop / Care under them? | They came from your own build and are now in the client tenant. Everything else invented was cleared in §21, so this is the one thing standing on your word. Change it in Setup → Business units, or say and I will. | §23 |
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
 
 **Answered:**
 
+- **D7 · The companies — ANSWERED 2026-08-20: Distribution and B2C are real**,
+  with Mobile / Consumer Electronics / IT and Retail Stores / Online Shop / Care
+  under them. They stand alongside the units and the supporting functions as the
+  client's own, and survive the clean slate (§23.4).
 - **D6 · The weighting values — ANSWERED 2026-08-20: cleared too.** The factor
   model stays (the four factors, their types and their 40/30/20/10 weights); the
   per-unit figures, the written reasons and the prior cycle are gone. With
@@ -48,7 +51,21 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.5 — the company level, and two bugs a real plan exposed *(current)*
+### v2.6 — the horizon stops being a default *(current)*
+You spotted that the plan template shipped with **2029** already in it. That came
+from the demo data, the clean slate missed it, and it had therefore survived into
+your tenant — a year nobody chose, reading as a decision somebody had made.
+
+The Aspiration sheet now says *"Horizon (the year this plan runs to)"* and leaves
+it **blank** until you set one; once you have, it shows what is in force so a
+later plan neither hides it nor overwrites it silently. Every page that reads the
+horizon copes with it being unset: the Temple heading drops its dangling "by",
+and the pill says **not set**.
+
+`007-horizon-is-yours.sql` clears it from your tenant — **but only if it is still
+the seeded 2029**. Anything you have entered since is yours and is left alone.
+
+### v2.5 — the company level, and two bugs a real plan exposed
 **Companies**, ported from the build you did outside the repo (§23). A layer
 between the group and the business unit — Distribution and B2C today, with four
 units standing alone. It is **visibility, not strategy**: a company carries no
@@ -221,7 +238,7 @@ suite per feature.
 ## In flight
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
-v2.5 single file as it always has; nothing anyone uses runs on the new stack
+v2.6 single file as it always has; nothing anyone uses runs on the new stack
 yet.
 
 What R1 proved, in `smp-app/`:
@@ -250,14 +267,14 @@ driver the old endpoints used.
 **D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
 genuinely new things), and the cutover is **early, page group by page group** —
 the new app becomes the live site while un-ported screens still link back to
-the v2.5 build. Those two answers work together: because the stylesheet is the
+the v2.6 build. Those two answers work together: because the stylesheet is the
 same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
 | ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
-| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.5 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.6 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
 | **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
 | **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
@@ -322,8 +339,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.5.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.5.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v2.6.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.6.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

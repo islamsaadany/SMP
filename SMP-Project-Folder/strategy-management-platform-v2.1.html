@@ -2983,7 +2983,7 @@ function focusTally(u){
    there were roughly eleven build rounds before this, so the first numbered
    release is 1.0. It lives in the FILENAME, not on screen: the platform is shown
    to clients and a version badge in the chrome is noise to them. */
-var VERSION = "2.0";
+var VERSION = "2.1";
 
 /* A function carries the same fields a unit does, in the same shapes: an
    editable name, a short name for the navigation, a code prefix for numbering
@@ -8516,9 +8516,16 @@ function renderAccess(){
       '</td><td><span class="why" style="margin:0">' + esc(l.note) + '</span></td></tr>';
   }).join("");
 
+  /* Credentials exist only where the platform is served with a database
+     behind it (\u00a719). The SMO issues a temporary password per person \u2014
+     usernames are the person keys shown here \u2014 and the person is forced to
+     choose their own on first sign-in. Offline, none of this renders and the
+     page is exactly the prototype's. */
+  var credentialed = typeof SYNC !== "undefined" && SYNC.isLive() && viewer().level === "smo";
   var peopleRows = PEOPLE.map(function(p){
     var lv = p.level === "smo" ? SMO_ROLE : LEVELS.filter(function(x){ return x.key === p.level; })[0];
-    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title) + '</span></td>' +
+    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title) +
+      (credentialed ? ' &middot; <span class="mono">key ' + esc(p.key) + '</span>' : '') + '</span></td>' +
       '<td><span class="pill kind">' + esc(lv.name) + '</span></td>' +
       '<td><span class="pill ' + (p.unit === "group" ? "theme" : "kind") + '">' +
         /* A person may belong to a supporting function rather than a business
@@ -8527,7 +8534,9 @@ function renderAccess(){
          : p.unit && UNITS[p.unit] ? esc(UNITS[p.unit].name)
          : p.fn && FUNCTIONS[p.fn] ? esc(FUNCTIONS[p.fn].name) + " &mdash; function"
          : "\u2014") + '</span></td>' +
-      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button></td></tr>';
+      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button>' +
+      (credentialed ? ' <button class="linkbu" data-setpw="' + p.key + '">Set password</button>' : '') +
+      '</td></tr>';
   }).join("");
 
   return '<p class="lede">Access is <strong>page level only</strong>. If a level can open a page, it sees everything on that page &mdash; restriction happens by removing the page, never by trimming its contents. A person carries a <strong>level</strong>, which decides which pages, and a <strong>unit attachment</strong>, which decides whose.</p>' +
@@ -10040,25 +10049,81 @@ var SYNC = (function () {
     });
   }
 
+  /* Real identity replaces the prototype's viewer switcher on the deployed
+     product (§16.9, built in §19): the page shows the signed-in person's own
+     view. The switcher survives for the SMO as a read-only simulation — what
+     is rendered changes, who is acting does not: the server authorizes by
+     session, never by the simulated view. Offline, everything stays as it
+     always was. */
+  var person = null;
+  function chromeFor(paint) {
+    var box = document.querySelector(".viewer");
+    var sel = document.getElementById("asWho");
+    if (!box || !sel) return;
+    if (PEOPLE.some(function (p) { return p.key === person.key; })) {
+      window.VIEWER = person.key;
+      sel.value = person.key;
+    }
+    if (person.level !== "smo") {
+      sel.hidden = true;
+      var label = box.querySelector("label");
+      if (label) label.textContent = "Signed in as";
+      var nm = document.createElement("span");
+      nm.className = "viewer-note";
+      nm.innerHTML = "<b></b>";
+      nm.firstChild.textContent = person.name;
+      box.insertBefore(nm, sel);
+    }
+    var out = document.createElement("button");
+    out.className = "infobtn";
+    out.textContent = "Sign out";
+    out.addEventListener("click", function () {
+      fetch("/api/auth", { method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: '{"action":"logout"}'
+      }).finally(function () { location.replace("/"); });
+    });
+    box.appendChild(out);
+    paint();
+  }
+
   return {
+    isLive: function () { return live; },
+    person: function () { return person; },
+    /* The SMO issues or resets a password from Levels & access. The server
+       checks the policy and the issuer; the password is temporary and forces
+       a change on first sign-in. */
+    setPassword: function (key, pw, done) {
+      fetch("/api/auth", { method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "setPassword", person: key, password: pw })
+      }).then(function (r) { return r.json(); })
+        .then(function (j) { done(j.ok ? null : (j.error || "failed")); })
+        .catch(function (e) { done(String(e.message || e)); });
+    },
     boot: function (paint) {
       paint();
       if (!enabled) return;
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
+          /* Deployed and not signed in: the gate is the way in. */
+          if (r.status === 401) { location.replace("/"); throw new Error("sign in"); }
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         })
         .then(function (data) {
           if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
+          if (data.person && data.person.mustChange) { location.replace("/"); return; }
           hydrate(data.state);
           live = true;
-          paint();
+          person = data.person || null;
+          if (person) chromeFor(paint); else paint();
           lastSaved = serialize();
           setInterval(save, 5000);
         })
         .catch(function (e) {
-          console.info("SMP: running on the baked-in data (" + e.message + ")");
+          if (e.message !== "sign in")
+            console.info("SMP: running on the baked-in data (" + e.message + ")");
         });
     },
     afterPaint: function () {
@@ -10825,6 +10890,21 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         VIEWER = b.dataset.as;
         document.getElementById("asWho").value = VIEWER;
         current = null; currentSub = null; paint(); window.scrollTo(0,0);
+      });
+    });
+    /* The SMO issues a temporary password; the server checks the policy and
+       forces a change on first sign-in. */
+    document.querySelectorAll("[data-setpw]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.setpw;
+        var pw = prompt("Temporary password for " + key +
+          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
+          "\nThey will be asked to choose their own on first sign-in.");
+        if (!pw) return;
+        SYNC.setPassword(key, pw, function(err){
+          alert(err ? "Not set: " + err
+                    : "Set. " + key + " signs in with it once, then chooses their own.");
+        });
       });
     });
   }

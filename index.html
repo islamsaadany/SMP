@@ -63,7 +63,7 @@
     color: var(--navy);
     margin-bottom: 18px;
   }
-  input[type="password"] {
+  input[type="password"], input[type="text"] {
     width: 100%;
     border: 1px solid #d8dee8;
     border-radius: 8px;
@@ -72,7 +72,7 @@
     margin-bottom: 18px;
     outline: none;
   }
-  input[type="password"]:focus { border-color: var(--gold); }
+  input[type="password"]:focus, input[type="text"]:focus { border-color: var(--gold); }
   button {
     width: 100%;
     background: var(--navy);
@@ -91,8 +91,14 @@
     margin-bottom: 14px;
     display: none;
   }
+  .hint {
+    color: #45536a;
+    font-size: 12.5px;
+    margin: -8px 0 14px;
+  }
   /* Starting page after access */
-  #home { display: none; text-align: center; }
+  #home, #change { display: none; }
+  #home { text-align: center; }
   #home .card-body p { color: #45536a; font-size: 15px; margin-bottom: 24px; }
   .open-btn {
     display: block;
@@ -127,7 +133,7 @@
 </head>
 <body>
 
-  <!-- Login -->
+  <!-- Sign in -->
   <div class="card" id="login">
     <div class="card-header">
       <h1>S<span>M</span>P</h1>
@@ -135,12 +141,35 @@
     </div>
     <div class="card-body">
       <form id="loginForm">
-        <label>Access</label>
-        <div class="access-name">AdminSMO</div>
+        <label id="accessLabel" for="password">Access</label>
+        <!-- Served with a database behind it, sign-in is a real account (a
+             person key issued by the SMO). Without one — the local file, or
+             static hosting — the original AdminSMO gate stands. -->
+        <input type="text" id="user" autocomplete="username" autocapitalize="none" hidden>
+        <div class="access-name" id="fixedAccess">AdminSMO</div>
         <label for="password">Password</label>
         <input type="password" id="password" autocomplete="current-password" autofocus>
         <div class="error" id="error">Incorrect password. Please try again.</div>
         <button type="submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- First sign-in: the issued password is temporary -->
+  <div class="card" id="change">
+    <div class="card-header">
+      <h1>S<span>M</span>P</h1>
+      <p>Choose your own password</p>
+    </div>
+    <div class="card-body">
+      <form id="changeForm">
+        <label for="newpw">New password</label>
+        <input type="password" id="newpw" autocomplete="new-password">
+        <p class="hint">At least 8 characters, with an uppercase letter, a number and a special character.</p>
+        <label for="newpw2">Repeat it</label>
+        <input type="password" id="newpw2" autocomplete="new-password">
+        <div class="error" id="changeError"></div>
+        <button type="submit">Set password</button>
       </form>
     </div>
   </div>
@@ -152,50 +181,138 @@
       <p>Starting Page</p>
     </div>
     <div class="card-body">
-      <div class="badge">AdminSMO</div>
+      <div class="badge" id="whoBadge">AdminSMO</div>
       <p>Welcome! You are signed in.</p>
       <!-- The link carries the shipped version's filename (version lives in the
            filename, never in the app) — update it on each version bump. -->
-      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v2.0.html">Open the Strategy Management Platform</a>
+      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v2.1.html">Open the Strategy Management Platform</a>
       <button class="logout" id="logoutBtn">Sign Out</button>
     </div>
   </div>
 
 <script>
-  var ACCESS = { user: "AdminSMO", password: "4123" };
+  /* Two modes, decided once at load.
+
+     SERVER — the page is served next to /api/auth with a database behind it:
+     sign-in is a real account checked on the server, an issued password must
+     be changed on first use, and the session is an httpOnly cookie.
+
+     LEGACY — the local file, or hosting with no database: the original
+     client-side AdminSMO gate, which was always a latch rather than a lock
+     and remains labelled as such in the decisions document (§19). */
+  var LEGACY = { user: "AdminSMO", password: "4123" };
+  var MODE = "legacy";
+  var PERSON = null;
 
   var loginCard = document.getElementById("login");
+  var changeCard = document.getElementById("change");
   var homeCard = document.getElementById("home");
   var errorEl = document.getElementById("error");
+  var changeErrorEl = document.getElementById("changeError");
+  var userEl = document.getElementById("user");
   var passwordEl = document.getElementById("password");
 
-  function show(signedIn) {
-    loginCard.style.display = signedIn ? "none" : "block";
-    homeCard.style.display = signedIn ? "block" : "none";
+  function show(which) {
+    loginCard.style.display = which === "login" ? "block" : "none";
+    changeCard.style.display = which === "change" ? "block" : "none";
+    homeCard.style.display = which === "home" ? "block" : "none";
+    if (which === "login") passwordEl.focus();
+    if (which === "change") document.getElementById("newpw").focus();
+  }
+  function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
+  function clearFail(el) { el.style.display = "none"; }
+
+  function api(body) {
+    return fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
+
+  function enterServerMode() {
+    MODE = "server";
+    userEl.hidden = false;
+    document.getElementById("fixedAccess").style.display = "none";
+    document.getElementById("accessLabel").setAttribute("for", "user");
+  }
+  function signedIn(person) {
+    PERSON = person;
+    document.getElementById("whoBadge").textContent = person.name || "AdminSMO";
+    show(person && person.mustChange ? "change" : "home");
   }
 
   document.getElementById("loginForm").addEventListener("submit", function (e) {
     e.preventDefault();
-    if (passwordEl.value === ACCESS.password) {
-      sessionStorage.setItem("smp_access", ACCESS.user);
+    clearFail(errorEl);
+    if (MODE === "server") {
+      api({ action: "login", user: userEl.value.trim(), password: passwordEl.value })
+        .then(function (j) {
+          passwordEl.value = "";
+          if (j.ok) signedIn(j.person);
+          else fail(errorEl, j.error || "Sign-in failed.");
+        })
+        .catch(function () { fail(errorEl, "Could not reach the server."); });
+      return;
+    }
+    if (passwordEl.value === LEGACY.password) {
+      sessionStorage.setItem("smp_access", LEGACY.user);
       passwordEl.value = "";
-      errorEl.style.display = "none";
-      show(true);
+      signedIn({ name: LEGACY.user, mustChange: false });
     } else {
-      errorEl.style.display = "block";
+      fail(errorEl, "Incorrect password. Please try again.");
       passwordEl.value = "";
       passwordEl.focus();
     }
   });
 
-  document.getElementById("logoutBtn").addEventListener("click", function () {
-    sessionStorage.removeItem("smp_access");
-    show(false);
-    passwordEl.focus();
+  document.getElementById("changeForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearFail(changeErrorEl);
+    var a = document.getElementById("newpw").value;
+    var b = document.getElementById("newpw2").value;
+    if (a !== b) return fail(changeErrorEl, "The two entries differ.");
+    api({ action: "change", password: a }).then(function (j) {
+      if (j.ok) {
+        document.getElementById("newpw").value = "";
+        document.getElementById("newpw2").value = "";
+        PERSON.mustChange = false;
+        show("home");
+      } else fail(changeErrorEl, j.error || "Could not set the password.");
+    }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
   });
 
-  // Keep the session across refreshes within the same tab.
-  show(sessionStorage.getItem("smp_access") === ACCESS.user);
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    if (MODE === "server") {
+      api({ action: "logout" }).finally(function () { PERSON = null; show("login"); });
+    } else {
+      sessionStorage.removeItem("smp_access");
+      show("login");
+    }
+  });
+
+  /* Decide the mode. file:// can never reach an API; over http(s) the answer
+     comes from /api/auth itself — a 503 means hosting with no database, and
+     the legacy gate stands. */
+  function legacyStart() {
+    if (sessionStorage.getItem("smp_access") === LEGACY.user) signedIn({ name: LEGACY.user, mustChange: false });
+    else show("login");
+  }
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    fetch("/api/auth", { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 503) throw new Error("no db");
+        return r.json();
+      })
+      .then(function (j) {
+        enterServerMode();
+        if (j.ok && j.person) signedIn(j.person);
+        else show("login");
+      })
+      .catch(legacyStart);
+  } else {
+    legacyStart();
+  }
 </script>
 </body>
 </html>

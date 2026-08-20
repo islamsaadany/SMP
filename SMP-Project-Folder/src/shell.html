@@ -831,6 +831,21 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         current = null; currentSub = null; paint(); window.scrollTo(0,0);
       });
     });
+    /* The SMO issues a temporary password; the server checks the policy and
+       forces a change on first sign-in. */
+    document.querySelectorAll("[data-setpw]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.setpw;
+        var pw = prompt("Temporary password for " + key +
+          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
+          "\nThey will be asked to choose their own on first sign-in.");
+        if (!pw) return;
+        SYNC.setPassword(key, pw, function(err){
+          alert(err ? "Not set: " + err
+                    : "Set. " + key + " signs in with it once, then chooses their own.");
+        });
+      });
+    });
   }
 
   /* Arrangement. One button turns handles on everywhere the viewer is

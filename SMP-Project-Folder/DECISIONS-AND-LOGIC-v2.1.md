@@ -1702,6 +1702,16 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.1 — identity: real sign-in replaces the viewer switcher
+
+Phase 1 of the real build, on the chosen Path A (the approved front end,
+real machinery underneath — §19). The gate became a real login; the platform
+requires a session; a signed-in person sees their own view; the SMO issues
+temporary passwords from Levels & access and every issued password must be
+changed on first use. The switcher survives only as the SMO's read-only
+simulation and in the offline file. Enforcement is at the door; per-action
+authorization and the change log are Phase 2.
+
 ### v2.0 — the state moves into the database
 
 Major, because it changes the platform's structure — where its state lives —
@@ -1856,3 +1866,71 @@ graph) and `write(read())` a fixed point; a browser session editing a
 foundation, an access cell and a reported figure, each landing in its exact
 row and visible to a fresh browser; the full QA walk clean for all 29 viewers
 both over HTTP (database mode) and from file:// (offline fallback).
+
+---
+
+## 19 · Identity — v2.1, Phase 1 of the real build
+
+Islam chose the architecture path on 2026-08-20 after the branding question
+was answered: **Path A — the approved front end stays exactly as it is, and
+the real machinery is built underneath it.** For the record: Path B (a
+Next.js rebuild) would have changed the stack only, never the colors or the
+branding; it was set aside because re-implementing every settled screen risks
+drift across precisely the decisions that took longest to settle, and the
+schema and server work built here carry over unchanged if B is ever chosen.
+
+### 19.1 What was decided and built
+
+- **Sign-in is real on the deployed product.** The AdminSMO gate became the
+  login: a person key and a password, checked on the server, with the session
+  an httpOnly cookie. The platform page requires a session — opened without
+  one it returns to the gate. The original client-side AdminSMO/4123 gate
+  survives only where there is no server to ask: the local file, or hosting
+  with no database.
+- **The viewer switcher is replaced by identity** (§16.9 said it must not
+  survive into a real build). A signed-in person sees their own view — the
+  navigation the access matrix grants them, nothing else — with *Signed in
+  as* and a Sign out in the chrome. The SMO alone keeps the switcher, as a
+  **read-only simulation**: it changes what is rendered, never who is acting,
+  because the server authorizes by session and nothing else.
+- **The SMO issues credentials.** On Levels & access, each person carries a
+  Set password control (deployed mode only): the SMO issues a temporary
+  password, hands it over outside the platform, and the person is **forced to
+  choose their own on first sign-in**. Policy adopted from HR_ERP as
+  proposed: at least 8 characters, an uppercase letter, a number, a special
+  character. No self-service recovery yet — a forgotten password is reset by
+  the SMO, which also ends that person's sessions.
+- **Bootstrap:** an empty database seeds one credential — the SMO, with the
+  gate's original 4123 — flagged must-change, so the first real sign-in
+  immediately replaces it.
+- **Passwords are scrypt-hashed** with per-password salts; sessions are
+  stored by SHA-256 of the token; both live outside the state graph so a
+  state save can never touch them. Wrong name and wrong password return one
+  message — a login screen should not confirm which usernames exist.
+- **The migrations registry arrived** with the schema's first change
+  (002-identity), exactly as §18 promised.
+
+### 19.2 Limits, stated
+
+- **Enforcement is at the door, not per action.** A signed-in person's
+  writes are authenticated but not yet authorized per field — a custodian's
+  browser is trusted about *what* changed. Phase 2 (per-action writes with
+  server-side rule checks and the per-figure change log of §16.0a) closes
+  this; until then the exposure is limited to people the SMO has issued
+  credentials to.
+- **Usernames are person keys** (`own_mob`, `mobhead`) shown to the SMO
+  beside the Set password control. Real emails and richer person records
+  remain §16.9 work.
+- **No rate limiting on sign-in yet**; noted for Phase 2.
+
+### 19.3 Verified before handover
+
+On a throwaway local Postgres: the full flow in a real browser — bootstrap
+sign-in with 4123 forced a password change; the SMO issued Mennah Farouk a
+temporary password from Levels & access; she signed in, was forced to choose
+her own, saw only Group and Mobile with the switcher hidden and her name in
+the chrome, reported a figure that landed in its exact row, and her old
+temporary password was refused afterwards. An unauthenticated visit to the
+platform bounced to the gate; /api/state answered 401 without a session.
+Offline: the QA walk stayed clean for all 29 viewers and the legacy gate
+behaved exactly as before.

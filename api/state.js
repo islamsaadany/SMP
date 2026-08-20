@@ -13,6 +13,7 @@
 
 const pg = require("pg");
 const { writeState, readState, ensureReady, tuneTypes } = require("../lib/state-io.js");
+const auth = require("../lib/auth.js");
 
 let pool = null;
 function getPool() {
@@ -62,9 +63,15 @@ module.exports = async function handler(req, res) {
     client = await getPool().connect();
     const ready = await ensureReady(client);
 
+    /* Since v2.1 the state is for signed-in people only (§19). Phase 1
+       enforces WHO at the door; per-action WHAT enforcement is Phase 2 and
+       recorded as such. */
+    const person = await auth.getSession(client, req);
+    if (!person) return send(res, 401, { ok: false, auth: true, error: "sign in required" });
+
     if (req.method === "GET") {
       const state = await readState(client);
-      return send(res, 200, { ok: true, seeded: ready.seeded, state: state });
+      return send(res, 200, { ok: true, seeded: ready.seeded, person: person, state: state });
     }
     if (req.method === "POST") {
       const body = await readBody(req);

@@ -206,7 +206,7 @@ function readme(kind, unitName){
        ["Blank rows", "Ignored. Delete a row only if you mean to stop tracking it \u2014 removing a row here does not delete anything already recorded."],
        ["Targets", "Put the number in Target and the unit in Unit \u2014 30 and %, not \"30%\". A blank target is allowed: the measure is recorded and left unscored."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Setup \u2192 Import."]]
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Unit", unitName],
        ["", ""],
@@ -216,7 +216,7 @@ function readme(kind, unitName){
        ["Tactics", "Enter percent complete, as a number. Due % is what the plan says should be delivered by now."],
        ["Not yet due", "Rows marked so are outside the current review. Leave them blank."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Setup \u2192 Import."]];
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };
 }
@@ -529,6 +529,210 @@ function progressFromWorkbook(u, sheets){
       out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC" : name === "Measures" ? "MEASURE" : "NORTHSTAR",
                  parent_name:r["Pillar"] || "", name:r["Measure"] || r["Tactic"] || r["Objective"],
                  new_value:String(v).trim() });
+    });
+  });
+  return out;
+}
+
+/* ── Capability workbooks (§16.4) ─────────────────────────────────────────
+   The same discipline as a unit's workbook: one sheet per kind of thing, each
+   with only its own columns, relationships from a dropdown of names, and the
+   ID column grey and last. The sheets are the project model's — Objectives,
+   Projects, Deliverables, Outcomes, Milestones — because that is what a
+   capability plans. */
+
+var DELIV_KINDS = ["Delivered / not", "% delivered"];
+var TIMELINES = ["Quarters", "Dates"];
+var MS_STATUSES = ["Not started", "In progress", "Completed"];
+
+function capReadme(kind, capName){
+  var lines = kind === "plan"
+    ? [["Plan workbook", ""],
+       ["Capability", capName],
+       ["", ""],
+       ["How to fill it", "One sheet per part of the plan. Fill Projects first — Deliverables, Outcomes and Milestones choose their project from a list of what you typed."],
+       ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Type nothing else in them."],
+       ["The ID column", "Grey, always last. Leave it alone. Blank means a new item; filled means the platform already has it and will update rather than duplicate."],
+       ["Blank rows", "Ignored. Delete a row only if you mean to stop tracking it — removing a row here does not delete anything already recorded."],
+       ["Targets", "Put the number in Target and the unit in Unit — 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
+       ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
+       ["", ""],
+       ["When you are done", "Save as .xlsx and upload it on Manage → Import."]]
+    : [["Progress workbook", ""],
+       ["Capability", capName],
+       ["", ""],
+       ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
+       ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
+       ["Objectives and outcomes", "Enter the actual, in the same unit as the target. What it means against the target is worked out on arrival."],
+       ["Deliverables", "Yes or No where it is delivered-or-not; a number where it is a percentage."],
+       ["Milestones", "Not started, In progress or Completed."],
+       ["Not yet due", "Rows marked so are outside the current review. Leave them blank."],
+       ["", ""],
+       ["When you are done", "Save as .xlsx and upload it on Manage → Import."]];
+  return { name:"Read me", widths:[22, 96],
+           rows:lines.map(function(l){ return [l[0], l[1]]; }) };
+}
+
+function capPlanWorkbook(c){
+  var projNames = (c.projects || []).map(function(p){ return p.name; });
+  return [
+    capReadme("plan", c.name),
+
+    { name:"Objectives", widths:[40, 11, 14, 10, 10, 12, 16], lockedCols:[6],
+      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "ID"],
+      validations:[{ range:"B2:B60", list:DIRS }, { range:"F2:F60", list:COMPILES }],
+      rows:(c.keyObjectives || []).map(function(m){
+        var a = splitTarget(m.target);
+        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile, m.id];
+      }) },
+
+    { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14, 16], lockedCols:[7],
+      head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "ID"],
+      validations:[{ range:"E2:E100", list:TIMELINES }],
+      rows:(c.projects || []).map(function(p){
+        return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
+                p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "", p.id];
+      }) },
+
+    { name:"Deliverables", widths:[34, 44, 16, 10, 20, 16], lockedCols:[5],
+      head:["Project", "Deliverable", "Kind", "Due", "Owner", "ID"],
+      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." },
+                   { range:"C2:C400", list:DELIV_KINDS }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.deliverables || []).forEach(function(d){
+          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
+                    d.due || "", d.owner || "", d.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Outcomes", widths:[34, 44, 11, 12, 10, 14, 16], lockedCols:[6],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measured at", "ID"],
+      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." },
+                   { range:"C2:C400", list:DIRS }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.outcomes || []).forEach(function(o){
+          var a = splitTarget(o.target);
+          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || "", o.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Milestones", widths:[34, 38, 52, 16, 14, 16], lockedCols:[5],
+      head:["Project", "Milestone", "What it covers", "Owner", "Finish", "ID"],
+      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.milestones || []).forEach(function(m){
+          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || "", m.id]);
+        });
+        return acc;
+      }, []) }
+  ];
+}
+
+function capProgressWorkbook(c){
+  return [
+    capReadme("progress", c.name),
+
+    { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
+      head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
+      rows:(c.keyObjectives || []).map(function(m){
+        return [m.name, m.dir, m.target || "no target",
+                m.actual == null ? "" : String(m.actual), "", m.id];
+      }) },
+
+    { name:"Deliverables", widths:[30, 40, 16, 10, 18, 18, 16], lockedCols:[6],
+      head:["Project", "Deliverable", "Kind", "Due", "Currently recorded", "New value", "ID"],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.deliverables || []).forEach(function(d){
+          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
+                    d.due || "", d.actual == null ? "" : String(d.actual), "", d.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Outcomes", widths:[30, 40, 14, 14, 18, 18, 16], lockedCols:[6],
+      head:["Project", "Outcome", "Target", "Measured at", "Currently recorded", "New value", "ID"],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.outcomes || []).forEach(function(o){
+          acc.push([p.name, o.name, o.target || "no target", o.measureAt || "",
+                    o.actual == null ? "" : String(o.actual), "", o.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Milestones", widths:[30, 40, 14, 16, 18, 16], lockedCols:[5],
+      head:["Project", "Milestone", "Finish", "Current status", "New status", "ID"],
+      validations:[{ range:"E2:E400", list:MS_STATUSES }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.milestones || []).forEach(function(m){
+          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "", m.id]);
+        });
+        return acc;
+      }, []) }
+  ];
+}
+
+/* Workbook back to the flat rows the capability importer understands. A child
+   names its project; anything already known falls back to the parent the
+   platform records — the same rename protection a unit's workbook has. */
+function capPlanFromWorkbook(c, sheets){
+  var rows = [], projId = {};
+  var nextP = (c.projects || []).length;
+  var childN = { D:0, O:0, M:0 };
+
+  function parentFor(projName, childId){
+    if (projId[projName]) return projId[projName];
+    var hit = childId ? capFindById(c, childId) : null;
+    return hit && hit.proj ? hit.proj.id : "";
+  }
+
+  sheetObjects(sheets["Projects"]).forEach(function(r){
+    var id = r["ID"] || (c.id + "-P" + (++nextP));
+    projId[r["Project"]] = id;
+    rows.push({ id:id, type:"PROJECT", name:r["Project"], description:r["Brief"],
+      owner:r["Owner"], stakeholders:(r["Stakeholders"] || "").split(/[,|]/)
+        .map(function(x){ return x.trim(); }).filter(Boolean).join("|"),
+      timeline:timelineKey(r["Timeline"]) || "", start:r["Start"], end:r["End"] });
+  });
+  sheetObjects(sheets["Objectives"]).forEach(function(r, i){
+    rows.push({ id:r["ID"] || (c.id + "-KO-new" + (i + 1)), type:"CAPOBJECTIVE",
+      name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
+      weight:r["Weight"], compile:r["Compile"] });
+  });
+  sheetObjects(sheets["Deliverables"]).forEach(function(r){
+    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-D-new" + (++childN.D)), type:"DELIVERABLE",
+      parent_id:parentFor(r["Project"], r["ID"]), name:r["Deliverable"],
+      kind:delivKindKey(r["Kind"]) || r["Kind"], due:r["Due"], owner:r["Owner"] });
+  });
+  sheetObjects(sheets["Outcomes"]).forEach(function(r){
+    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-O-new" + (++childN.O)), type:"OUTCOME",
+      parent_id:parentFor(r["Project"], r["ID"]), name:r["Outcome"],
+      direction:r["Direction"], value:r["Target"], unit:r["Unit"], measure_at:r["Measured at"] });
+  });
+  sheetObjects(sheets["Milestones"]).forEach(function(r){
+    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-M-new" + (++childN.M)), type:"MILESTONE",
+      parent_id:parentFor(r["Project"], r["ID"]), name:r["Milestone"],
+      covers:r["What it covers"], owner:r["Owner"], finish:r["Finish"] });
+  });
+
+  return rows.map(function(r){
+    CAPP_COLS.forEach(function(k){ if (r[k] == null) r[k] = ""; });
+    return r;
+  });
+}
+
+function capProgressFromWorkbook(c, sheets){
+  var out = [];
+  [["Objectives","CAPOBJECTIVE","Objective"],
+   ["Deliverables","DELIVERABLE","Deliverable"],
+   ["Outcomes","OUTCOME","Outcome"],
+   ["Milestones","MILESTONE","Milestone"]].forEach(function(def){
+    sheetObjects(sheets[def[0]]).forEach(function(r){
+      var v = r["New value"] != null ? r["New value"] : r["New status"];
+      if (!v) return;
+      out.push({ id:r["ID"], type:def[1], parent_name:r["Project"] || "",
+                 name:r[def[2]], new_value:String(v).trim() });
     });
   });
   return out;

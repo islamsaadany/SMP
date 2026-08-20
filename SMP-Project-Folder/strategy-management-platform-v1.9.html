@@ -2983,7 +2983,7 @@ function focusTally(u){
    there were roughly eleven build rounds before this, so the first numbered
    release is 1.0. It lives in the FILENAME, not on screen: the platform is shown
    to clients and a version badge in the chrome is noise to them. */
-var VERSION = "1.6";
+var VERSION = "1.9";
 
 /* A function carries the same fields a unit does, in the same shapes: an
    editable name, a short name for the navigation, a code prefix for numbering
@@ -3977,7 +3977,12 @@ var PAGE_INFO = {
        "own right &mdash; they carry no theme because they support all of them."],
       ["Order is not influence",
        "Arranging units, themes or capabilities changes where they sit and nothing else. Weight determines " +
-       "how much a unit counts; position determines nothing."]
+       "how much a unit counts; position determines nothing."],
+      ["Cards to judge, a table to scan",
+       "The Business units and Group capabilities sections each carry a Cards/Table switch. The table shows " +
+       "the same derived figures as the cards, laid out to compare down a column. The capabilities table is " +
+       "<b>ranked on project performance</b> &mdash; the one reading all of them have &mdash; while the units " +
+       "table keeps the arranged order. Arranging is a cards-view act."]
     ]
   },
 
@@ -4309,10 +4314,11 @@ var PAGE_INFO = {
        "Cross-cutting work the whole group depends on, improved by a supporting function. It belongs " +
        "to no business unit and no unit is accountable for it \u2014 which is why it is <b>scored by the " +
        "group</b> and never folds into the owning function's unit, if it has one."],
-      ["Measures and initiatives are on their way out",
-       "They were inherited from when a capability was modelled as a pillar. <b>Enhancement " +
-       "projects</b> replace them next \u2014 each with a brief, stakeholders, deliverables and " +
-       "milestones, and progress derived from milestones completed rather than typed."],
+      ["Projects are the plan",
+       "Each carries a brief, stakeholders, <b>deliverables</b>, <b>outcomes</b> and " +
+       "<b>milestones</b>. Nothing on this page has been reported \u2014 progress is entered on " +
+       "Reporting and read on Performance. Projects arrive by template on Manage &rarr; Import, " +
+       "the way a unit's plan does."],
       ["Who reaches this page",
        "The head of the function that carries it, its Strategy custodians, the SMO and the CEO. A " +
        "business unit has no business in another function's improvement work."]
@@ -4375,10 +4381,11 @@ var PAGE_INFO = {
        "and is its own reading, shown beside the group figure rather than folded into it \u2014 folding " +
        "it in would mean giving capabilities a weight, and make the group figure something no unit " +
        "head could reconcile against their own page."],
-      ["Measures and initiatives are on their way out",
-       "They were inherited from when a capability was modelled as a pillar. A capability has no " +
-       "targets of its own; its health is whether its projects land. <b>Enhancement projects</b> \u2014 " +
-       "brief, deliverables and milestones \u2014 replace them next."]
+      ["Projects carry the work",
+       "A capability holds <b>enhancement projects</b> \u2014 brief, stakeholders, deliverables, " +
+       "outcomes and milestones \u2014 and, where it has any, key objectives. Its performance is its " +
+       "projects' (half deliverables, half outcomes); its execution is milestones completed. " +
+       "Projects arrive by template on Manage &rarr; Import, scoped to the capability."]
     ]
   },
 
@@ -4408,6 +4415,13 @@ var PAGE_INFO = {
        "with both horizons, and every pillar with its measures and tactics. It carries no actuals. " +
        "<b>Progress</b> carries only what is reported: an actual against each measure and a percent complete " +
        "against each tactic. It cannot create anything and cannot change a target."],
+      ["A capability is a scope of its own",
+       "Capability projects arrive the way a unit's plan does \u2014 here, never from the capability's own " +
+       "pages. Its plan workbook carries the project model: <b>Objectives, Projects, Deliverables, " +
+       "Outcomes, Milestones</b>, each sheet with only its own columns and the children choosing their " +
+       "project from a dropdown of names. Its progress workbook mirrors the capability's reporting page. " +
+       "Same parser, same review, same id rules underneath \u2014 and a milestone finishing after its " +
+       "project's end date is noted, never refused."],
       ["Who may upload what",
        "Creating a plan is the SMO's, by sheet or in the platform. Progress is normally entered directly by " +
        "the unit's head or owner; a progress upload by sheet is the SMO's alone, so one hand is accountable " +
@@ -4480,6 +4494,10 @@ var PAGE_INFO = {
        "This unit's Key Objectives, every key measure carrying a target, and the tactics whose " +
        "quarters fall inside the open cycle. A tactic outside the window reads <i>not asked</i> " +
        "rather than sitting there as an empty box that looks like a chore somebody forgot."],
+      ["The rail carries the pillars",
+       "Each rail row shows its pillar's tally — entries given of asked — so while entering one " +
+       "pillar the state of the others stays visible. Which pillar is open belongs to the unit, so " +
+       "it keeps its place across Performance, Strategy and here."],
       ["The box states its unit",
        "Type the number; the unit sits beside it as a fixed suffix taken from the measure's own " +
        "target \u2014 <b>2.7</b> B EGP, <b>28</b> %, <b>3,180</b> with none at all, and a tactic plainly " +
@@ -5086,6 +5104,433 @@ function applyProgress(u, d){
   });
 }
 
+/* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
+   Capability projects arrive the way a unit's plan does: Manage → Import,
+   with the capability as the scope. Same parser, same validation shape, same
+   id rules underneath — but its own columns and sheets, because the thing
+   being planned is a project with deliverables, outcomes and milestones, not
+   a pillar with measures and tactics.
+
+   PLAN carries the authored work: key objectives (optional), each project's
+   brief, and its deliverables, outcomes and milestones. No actuals and no
+   statuses — a plan states what was committed to.
+
+   PROGRESS mirrors the capability's reporting page: an actual against each
+   objective and outcome, delivered-or-not (or a percentage) against each
+   deliverable, and a status against each milestone. Only new values are read.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
+                 "direction","value","unit","kind","due","measure_at","start","end",
+                 "finish","covers","weight","compile","timeline","notes"];
+var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
+                    "due","measure_at","finish","current","new_value","notes"];
+
+/* Address any row inside ONE capability — the import must never write into a
+   neighbour, which is what scoping the finder (rather than reusing the global
+   capItemById) guarantees. */
+function capFindById(c, id){
+  if (id === c.id + "-PLAN") return { kind:"PLAN", obj:c };
+  var hit = null;
+  (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"CAPOBJECTIVE", obj:m }; });
+  (c.projects || []).forEach(function(p){
+    if (p.id === id) hit = { kind:"PROJECT", obj:p };
+    (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"DELIVERABLE", obj:d, proj:p }; });
+    (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"OUTCOME", obj:o, proj:p }; });
+    (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"MILESTONE", obj:m, proj:p }; });
+  });
+  return hit;
+}
+
+function capPlanTemplate(c){
+  var rows = [CAPP_COLS.join(",")];
+  rows.push(csvRow(CAPP_COLS, { id:c.id + "-PLAN", type:"PLAN", name:c.name + " capability plan",
+    description:c.def, notes:"Generated by the platform" }));
+  (c.keyObjectives || []).forEach(function(m){
+    var a = splitTarget(m.target);
+    rows.push(csvRow(CAPP_COLS, { id:m.id, type:"CAPOBJECTIVE", name:m.name, direction:m.dir,
+      value:a.value, unit:a.unit, weight:(m.weight == null ? "" : m.weight),
+      compile:m.compile, notes:m.notes }));
+  });
+  (c.projects || []).forEach(function(p){
+    rows.push(csvRow(CAPP_COLS, { id:p.id, type:"PROJECT", name:p.name, description:p.brief,
+      owner:p.owner, stakeholders:(p.stakeholders || []).join("|"),
+      timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
+    (p.deliverables || []).forEach(function(d){
+      rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
+        kind:d.kind, due:d.due, owner:d.owner }));
+    });
+    (p.outcomes || []).forEach(function(o){
+      var a = splitTarget(o.target);
+      rows.push(csvRow(CAPP_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id, name:o.name,
+        direction:o.dir, value:a.value, unit:a.unit, measure_at:o.measureAt }));
+    });
+    (p.milestones || []).forEach(function(m){
+      rows.push(csvRow(CAPP_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id, name:m.name,
+        covers:m.covers, owner:m.owner, finish:m.finish }));
+    });
+  });
+  return rows.join("\n");
+}
+
+/* Progress statuses are written as words and read back as either the words or
+   the stored keys — a sheet filled by hand should not need to know that "In
+   progress" is spelled "wip" inside the platform. */
+function msStatusWord(s){
+  return s === "done" ? "Completed" : s === "wip" ? "In progress" : s === "todo" ? "Not started" : "";
+}
+function msStatusKey(v){
+  var s = String(v == null ? "" : v).trim().toLowerCase();
+  if (!s) return "";
+  if (s === "done" || s === "completed" || s === "complete") return "done";
+  if (s === "wip" || s === "in progress") return "wip";
+  if (s === "todo" || s === "not started") return "todo";
+  return null;
+}
+function delivKindKey(v){
+  var s = String(v == null ? "" : v).trim().toLowerCase();
+  if (s === "binary" || s.indexOf("delivered") === 0) return "binary";
+  if (s === "pct" || s.indexOf("%") > -1) return "pct";
+  return s ? null : "";
+}
+function timelineKey(v){
+  var s = String(v == null ? "" : v).trim().toLowerCase();
+  if (!s) return "";
+  if (s === "date" || s === "dates" || s.indexOf("date") === 0) return "date";
+  if (s === "quarter" || s === "quarters" || s.indexOf("quarter") === 0) return "quarter";
+  return null;
+}
+
+function capProgressTemplate(c){
+  var rows = [CAPPROG_COLS.join(",")];
+  (c.keyObjectives || []).forEach(function(m){
+    rows.push(csvRow(CAPPROG_COLS, { id:m.id, type:"CAPOBJECTIVE", parent_name:c.name,
+      name:m.name, target:m.target || "no target",
+      current:(m.actual == null ? "" : m.actual), new_value:"",
+      notes:m.target ? "" : "no target set — recorded, not scored" }));
+  });
+  (c.projects || []).forEach(function(p){
+    (p.deliverables || []).forEach(function(d){
+      rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
+        parent_name:p.name, name:d.name,
+        kind:d.kind === "pct" ? "% delivered" : "Delivered / not", due:d.due,
+        current:(d.actual == null ? "" : d.actual), new_value:"",
+        notes:delivDue(d) ? "" : "not yet due — due " + d.due }));
+    });
+    (p.outcomes || []).forEach(function(o){
+      rows.push(csvRow(CAPPROG_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id,
+        parent_name:p.name, name:o.name, target:o.target, measure_at:o.measureAt,
+        current:(o.actual == null ? "" : o.actual), new_value:"",
+        notes:outcomeDue(o) ? "" : "not asked — measured at " + o.measureAt }));
+    });
+    (p.milestones || []).forEach(function(m){
+      rows.push(csvRow(CAPPROG_COLS, { id:m.id, type:"MILESTONE", parent_id:p.id,
+        parent_name:p.name, name:m.name, finish:m.finish,
+        current:msStatusWord(m.status), new_value:"" }));
+    });
+  });
+  return rows.join("\n");
+}
+
+/* The same two whole-file refusals a unit's import makes (§9.4), scoped to
+   capabilities: a file whose ids mostly belong to another capability — or to a
+   business unit — is refused whole, and a file of the wrong kind is named. */
+function checkCapFileShape(c, rows, kind){
+  var problems = [];
+  var foreignCap = {}, own = 0, unitIds = {};
+  rows.forEach(function(r){
+    if (!r.id) return;
+    var m = /^(cap\d+)\b/.exec(r.id);
+    if (m) {
+      if (m[1] === c.id) own++;
+      else foreignCap[m[1]] = (foreignCap[m[1]] || 0) + 1;
+      return;
+    }
+    var u = /^([a-z0-9]+)-/i.exec(r.id);
+    if (u && UNITS[u[1]]) unitIds[u[1]] = (unitIds[u[1]] || 0) + 1;
+  });
+  var uk = Object.keys(unitIds);
+  if (uk.length && uk.reduce(function(a, k){ return a + unitIds[k]; }, 0) > own) {
+    var wu = uk.sort(function(a, b){ return unitIds[b] - unitIds[a]; })[0];
+    problems.push({ at:"the whole file",
+      msg:"this looks like " + UNITS[wu].name + "'s file — " + unitIds[wu] +
+          " rows carry a business unit's ids, and the capability " + c.name +
+          " is selected. Switch the scope above, or download this capability's own template." });
+  }
+  var fk = Object.keys(foreignCap);
+  if (fk.length && fk.reduce(function(a, k){ return a + foreignCap[k]; }, 0) > own) {
+    var worst = fk.sort(function(a, b){ return foreignCap[b] - foreignCap[a]; })[0];
+    var other = capById(worst);
+    problems.push({ at:"the whole file",
+      msg:"this looks like " + (other ? other.name : worst) + "'s file — " + foreignCap[worst] +
+          " rows carry its ids, and " + c.name + " is selected. Switch the capability above, or " +
+          "download " + c.name + "'s own template." });
+  }
+  var hasNewValue = rows.some(function(r){ return r.new_value != null && r.new_value !== undefined; });
+  var hasPlanTypes = rows.some(function(r){ return r.type === "PROJECT" || r.type === "PLAN"; });
+  if (kind === "plan" && hasNewValue && !hasPlanTypes)
+    problems.push({ at:"the whole file",
+      msg:"this is a PROGRESS file — it carries new_value columns and no project rows. Switch the toggle above to Progress." });
+  if (kind === "progress" && hasPlanTypes)
+    problems.push({ at:"the whole file",
+      msg:"this is a PLAN file — it carries project and brief rows, not reported values. Switch the toggle above to Plan." });
+  return problems;
+}
+
+var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE"];
+
+function validateCapPlan(c, rows){
+  var problems = checkCapFileShape(c, rows, "plan"), notices = [], seen = {};
+  var ids = {};
+  rows.forEach(function(r){ if (r.id) ids[r.id] = true; });
+
+  /* The overrun rule (§15.4): a milestone finishing after its project's end is
+     saved exactly as entered and said out loud — a notice, never a refusal. */
+  var projEnd = {};
+  (c.projects || []).forEach(function(p){
+    if (p.timeline === "date") projEnd[p.id] = p.end;
+  });
+  rows.forEach(function(r){
+    if (r.type === "PROJECT" && timelineKey(r.timeline) === "date" && r.end) projEnd[r.id] = r.end;
+  });
+
+  rows.forEach(function(r, n){
+    var at = "row " + (n + 2) + (r.name ? " — " + r.name : "");
+    if (!r.id)   { problems.push({ at:at, msg:"no id" }); return; }
+    if (!r.type) { problems.push({ at:at, msg:"no type" }); return; }
+    if (seen[r.id]) problems.push({ at:at, msg:"id " + r.id + " appears more than once" });
+    seen[r.id] = true;
+    if (CAP_TYPES.indexOf(r.type) < 0) {
+      problems.push({ at:at, msg:'type "' + r.type + '" is not one of ' + CAP_TYPES.join(", ") });
+      return;
+    }
+    if (r.type === "DELIVERABLE" || r.type === "OUTCOME" || r.type === "MILESTONE") {
+      if (!r.parent_id) problems.push({ at:at, msg:"its project could not be matched — check the Project column" });
+      else {
+        var known = ids[r.parent_id] || (function(){
+          var h = capFindById(c, r.parent_id);
+          return h && h.kind === "PROJECT";
+        })();
+        if (!known) problems.push({ at:at, msg:"parent_id " + r.parent_id + " matches no project" });
+      }
+    }
+    if (r.direction && ["≥","≤",">=","<="].indexOf(r.direction) < 0)
+      problems.push({ at:at, msg:'direction "' + r.direction + '" is not ≥ or ≤' });
+    if (r.type === "CAPOBJECTIVE") {
+      if (r.compile && ["Sum","Latest","Average"].indexOf(r.compile) < 0)
+        problems.push({ at:at, msg:'compile "' + r.compile + '" is not Sum, Latest or Average' });
+      if (r.weight !== "" && r.weight != null && isNaN(parseFloat(r.weight)))
+        problems.push({ at:at, msg:'weight "' + r.weight + '" is not a number' });
+      if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
+    }
+    if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
+      problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
+    if (r.type === "DELIVERABLE" && delivKindKey(r.kind) == null)
+      problems.push({ at:at, msg:'kind "' + r.kind + '" is not "Delivered / not" or "% delivered"' });
+    if (r.type === "OUTCOME") {
+      if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
+      if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });
+    }
+    if (r.type === "MILESTONE" && r.finish && r.parent_id && projEnd[r.parent_id]) {
+      var f = Date.parse(r.finish), e = Date.parse(projEnd[r.parent_id]);
+      if (!isNaN(f) && !isNaN(e) && f > e)
+        notices.push({ at:at, msg:"finishes after its project ends on " + projEnd[r.parent_id] +
+          " — saved as entered; either the timeline moves or the overrun stands" });
+    }
+  });
+  return { problems:problems, notices:notices };
+}
+
+function diffCapPlan(c, rows){
+  var out = [], seen = {};
+  rows.forEach(function(r){
+    if (!r.id) return;
+    seen[r.id] = true;
+    var hit = capFindById(c, r.id);
+    var changes = [];
+    var cmp = function(label, was, now){
+      now = now == null ? "" : String(now);
+      was = was == null ? "" : String(was);
+      if (now !== "" && now !== was) changes.push({ f:label, was:was, now:now });
+    };
+    if (!hit) { out.push({ id:r.id, type:r.type, name:r.name || r.description, status:"new", changes:[], raw:r }); return; }
+    if (hit.kind === "PLAN") {
+      cmp("definition", c.def, r.description);
+    } else if (hit.kind === "CAPOBJECTIVE") {
+      cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
+      if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
+        changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+      cmp("weight", hit.obj.weight == null ? "" : hit.obj.weight, r.weight);
+      cmp("compile", hit.obj.compile, r.compile);
+    } else if (hit.kind === "PROJECT") {
+      cmp("name", hit.obj.name, r.name);
+      cmp("brief", hit.obj.brief, r.description);
+      cmp("owner", hit.obj.owner, r.owner);
+      cmp("stakeholders", (hit.obj.stakeholders || []).join("|"), r.stakeholders);
+      cmp("timeline", hit.obj.timeline || "quarter", timelineKey(r.timeline) || "");
+      cmp("start", hit.obj.start, r.start);
+      cmp("end", hit.obj.end, r.end);
+    } else if (hit.kind === "DELIVERABLE") {
+      cmp("name", hit.obj.name, r.name);
+      cmp("kind", hit.obj.kind, delivKindKey(r.kind) || "");
+      cmp("due", hit.obj.due, r.due);
+      cmp("owner", hit.obj.owner, r.owner);
+    } else if (hit.kind === "OUTCOME") {
+      cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
+      if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
+        changes.push({ f:"target", was:hit.obj.target || "", now:joinTarget(hit.obj.target, r.value, r.unit) });
+      cmp("measured at", hit.obj.measureAt, r.measure_at);
+    } else if (hit.kind === "MILESTONE") {
+      cmp("name", hit.obj.name, r.name);
+      cmp("what it covers", hit.obj.covers, r.covers);
+      cmp("owner", hit.obj.owner, r.owner);
+      cmp("finish", hit.obj.finish, r.finish);
+    }
+    out.push({ id:r.id, type:hit.kind, name:hit.obj.name || c.name,
+               status:changes.length ? "changed" : "same", changes:changes, hit:hit, raw:r });
+  });
+  /* Absent is reported, never removed — the same rule as a unit's plan. */
+  var missing = [];
+  (c.keyObjectives || []).forEach(function(m){ if (!seen[m.id]) missing.push({ id:m.id, type:"CAPOBJECTIVE", name:m.name }); });
+  (c.projects || []).forEach(function(p){
+    if (!seen[p.id]) missing.push({ id:p.id, type:"PROJECT", name:p.name });
+    (p.deliverables || []).forEach(function(d){ if (!seen[d.id]) missing.push({ id:d.id, type:"DELIVERABLE", name:d.name }); });
+    (p.outcomes || []).forEach(function(o){ if (!seen[o.id]) missing.push({ id:o.id, type:"OUTCOME", name:o.name }); });
+    (p.milestones || []).forEach(function(m){ if (!seen[m.id]) missing.push({ id:m.id, type:"MILESTONE", name:m.name }); });
+  });
+  return { rows:out, missing:missing };
+}
+
+/* Projects are created before their children, so a deliverable always finds
+   its parent whatever the file order — the same rule as pillars (§9.5). New
+   children arrive with nothing reported, never at zero. */
+function createFromCapPlan(c, d){
+  var news = d.rows.filter(function(r){ return r.status === "new"; });
+  var order = { CAPOBJECTIVE:0, PROJECT:0, DELIVERABLE:1, OUTCOME:1, MILESTONE:1, PLAN:9 };
+  news.sort(function(a, b){ return (order[a.type] == null ? 5 : order[a.type]) -
+                                   (order[b.type] == null ? 5 : order[b.type]); });
+  var made = 0;
+  var projectById = function(id){
+    return (c.projects || []).filter(function(p){ return p.id === id; })[0];
+  };
+  news.forEach(function(r){
+    var x = r.raw; if (!x) return;
+    if (x.type === "PROJECT") {
+      c.projects.push({ id:x.id, capId:c.id, name:x.name, brief:x.description || "",
+        owner:x.owner || "",
+        stakeholders:(x.stakeholders || "").split(/[,|]/).map(function(s){ return s.trim(); }).filter(Boolean),
+        timeline:timelineKey(x.timeline) || "quarter", start:x.start || "", end:x.end || "",
+        deliverables:[], outcomes:[], milestones:[] });
+      made++;
+    } else if (x.type === "CAPOBJECTIVE") {
+      var w = parseFloat(x.weight);
+      c.keyObjectives.push({ id:x.id, name:x.name, dir:x.direction || "≥",
+        target:joinTarget("", x.value, x.unit), compile:x.compile || "Latest",
+        weight:isNaN(w) ? null : w, actual:null, progress:null });
+      made++;
+    } else if (x.type === "DELIVERABLE") {
+      var p = projectById(x.parent_id); if (!p) return;
+      p.deliverables.push({ id:x.id, name:x.name, kind:delivKindKey(x.kind) || "binary",
+        due:x.due || "", owner:x.owner || "", actual:null });
+      made++;
+    } else if (x.type === "OUTCOME") {
+      var p2 = projectById(x.parent_id); if (!p2) return;
+      p2.outcomes.push({ id:x.id, name:x.name, dir:x.direction || "≥",
+        target:joinTarget("", x.value, x.unit), measureAt:x.measure_at || "",
+        actual:null, progress:null });
+      made++;
+    } else if (x.type === "MILESTONE") {
+      var p3 = projectById(x.parent_id); if (!p3) return;
+      p3.milestones.push({ id:x.id, name:x.name, covers:x.covers || "",
+        owner:x.owner || "", finish:x.finish || "", status:null });
+      made++;
+    }
+  });
+  return made;
+}
+
+function applyCapPlan(c, d){
+  createFromCapPlan(c, d);
+  d.rows.forEach(function(r){
+    if (!r.hit || !r.changes.length) return;
+    var o = r.hit.obj;
+    r.changes.forEach(function(ch){
+      if (r.hit.kind === "PLAN" && ch.f === "definition") { c.def = ch.now; return; }
+      if (ch.f === "name")           o.name = ch.now;
+      if (ch.f === "direction")      o.dir = ch.now;
+      if (ch.f === "target")         o.target = ch.now;
+      if (ch.f === "compile")        o.compile = ch.now;
+      if (ch.f === "weight")         { var w = parseFloat(ch.now); o.weight = isNaN(w) ? null : w; }
+      if (ch.f === "brief")          o.brief = ch.now;
+      if (ch.f === "owner")          o.owner = ch.now;
+      if (ch.f === "stakeholders")   o.stakeholders = ch.now ? ch.now.split("|").map(function(s){ return s.trim(); }).filter(Boolean) : [];
+      if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
+      if (ch.f === "start")          o.start = ch.now;
+      if (ch.f === "end")            o.end = ch.now;
+      if (ch.f === "kind")           o.kind = delivKindKey(ch.now) || o.kind;
+      if (ch.f === "due")            o.due = ch.now;
+      if (ch.f === "measured at")    o.measureAt = ch.now;
+      if (ch.f === "what it covers") o.covers = ch.now;
+      if (ch.f === "finish")         o.finish = ch.now;
+    });
+  });
+}
+
+function diffCapProgress(c, rows){
+  var out = [];
+  rows.forEach(function(r){
+    if (!r.id || (r.new_value || "") === "") return;
+    var hit = capFindById(c, r.id);
+    if (!hit) { out.push({ id:r.id, name:r.name, status:"unknown" }); return; }
+    var was, now = String(r.new_value).trim();
+    if (hit.kind === "MILESTONE") {
+      was = msStatusWord(hit.obj.status);
+      var key = msStatusKey(now);
+      if (key == null) { out.push({ id:r.id, name:hit.obj.name, status:"unknown",
+        pillar:hit.proj ? hit.proj.name : "" }); return; }
+      now = msStatusWord(key);
+    } else if (hit.kind === "DELIVERABLE") {
+      was = hit.obj.actual == null ? "" : String(hit.obj.actual);
+      if (hit.obj.kind === "binary") now = /^(y|yes|delivered)$/i.test(now) ? "yes" : "no";
+    } else if (hit.kind === "OUTCOME" || hit.kind === "CAPOBJECTIVE") {
+      was = hit.obj.actual == null ? "" : String(hit.obj.actual);
+    } else return;
+    if (String(was) === String(now)) return;
+    out.push({ id:r.id, type:hit.kind, name:hit.obj.name,
+               pillar:hit.proj ? hit.proj.name : (r.parent_name || c.name),
+               was:was, now:now, status:"changed", hit:hit });
+  });
+  return { rows:out, missing:[] };
+}
+
+function applyCapProgress(c, d){
+  d.rows.forEach(function(r){
+    if (!r.hit || r.status !== "changed") return;
+    var o = r.hit.obj;
+    if (r.hit.kind === "MILESTONE") {
+      o.status = msStatusKey(r.now) || o.status;
+    } else if (r.hit.kind === "DELIVERABLE") {
+      if (o.kind === "pct") {
+        var n = parseFloat(String(r.now).replace("%",""));
+        if (!isNaN(n)) o.actual = Math.max(0, Math.min(100, Math.round(n)));
+      } else {
+        o.actual = /^(y|yes|delivered)$/i.test(String(r.now)) ? "yes" : "no";
+      }
+    } else if (r.hit.kind === "OUTCOME" || r.hit.kind === "CAPOBJECTIVE") {
+      o.actual = r.now;
+      /* Progress is what the actual implies against the target, worked out on
+         arrival — a stale percentage in a sheet can never contradict the
+         platform (§9.5). */
+      var t = parseFloat(String(o.target).replace(/[^0-9.\-]/g, ""));
+      var a = parseFloat(String(r.now).replace(/[^0-9.\-]/g, ""));
+      if (!isNaN(t) && !isNaN(a) && t !== 0) {
+        var pctv = o.dir === "≤" ? (t / a) * 100 : (a / t) * 100;
+        o.progress = Math.max(0, Math.min(150, Math.round(pctv)));
+      } else o.progress = null;
+    }
+  });
+}
+
 </script>
 <script>
 /* ── xlsx, written by hand ────────────────────────────────────────────────
@@ -5296,7 +5741,7 @@ function readme(kind, unitName){
        ["Blank rows", "Ignored. Delete a row only if you mean to stop tracking it \u2014 removing a row here does not delete anything already recorded."],
        ["Targets", "Put the number in Target and the unit in Unit \u2014 30 and %, not \"30%\". A blank target is allowed: the measure is recorded and left unscored."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Setup \u2192 Import."]]
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Unit", unitName],
        ["", ""],
@@ -5306,7 +5751,7 @@ function readme(kind, unitName){
        ["Tactics", "Enter percent complete, as a number. Due % is what the plan says should be delivered by now."],
        ["Not yet due", "Rows marked so are outside the current review. Leave them blank."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Setup \u2192 Import."]];
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };
 }
@@ -5619,6 +6064,210 @@ function progressFromWorkbook(u, sheets){
       out.push({ id:r["ID"], type:name === "Tactics" ? "TACTIC" : name === "Measures" ? "MEASURE" : "NORTHSTAR",
                  parent_name:r["Pillar"] || "", name:r["Measure"] || r["Tactic"] || r["Objective"],
                  new_value:String(v).trim() });
+    });
+  });
+  return out;
+}
+
+/* ── Capability workbooks (§16.4) ─────────────────────────────────────────
+   The same discipline as a unit's workbook: one sheet per kind of thing, each
+   with only its own columns, relationships from a dropdown of names, and the
+   ID column grey and last. The sheets are the project model's — Objectives,
+   Projects, Deliverables, Outcomes, Milestones — because that is what a
+   capability plans. */
+
+var DELIV_KINDS = ["Delivered / not", "% delivered"];
+var TIMELINES = ["Quarters", "Dates"];
+var MS_STATUSES = ["Not started", "In progress", "Completed"];
+
+function capReadme(kind, capName){
+  var lines = kind === "plan"
+    ? [["Plan workbook", ""],
+       ["Capability", capName],
+       ["", ""],
+       ["How to fill it", "One sheet per part of the plan. Fill Projects first — Deliverables, Outcomes and Milestones choose their project from a list of what you typed."],
+       ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Type nothing else in them."],
+       ["The ID column", "Grey, always last. Leave it alone. Blank means a new item; filled means the platform already has it and will update rather than duplicate."],
+       ["Blank rows", "Ignored. Delete a row only if you mean to stop tracking it — removing a row here does not delete anything already recorded."],
+       ["Targets", "Put the number in Target and the unit in Unit — 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
+       ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
+       ["", ""],
+       ["When you are done", "Save as .xlsx and upload it on Manage → Import."]]
+    : [["Progress workbook", ""],
+       ["Capability", capName],
+       ["", ""],
+       ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
+       ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
+       ["Objectives and outcomes", "Enter the actual, in the same unit as the target. What it means against the target is worked out on arrival."],
+       ["Deliverables", "Yes or No where it is delivered-or-not; a number where it is a percentage."],
+       ["Milestones", "Not started, In progress or Completed."],
+       ["Not yet due", "Rows marked so are outside the current review. Leave them blank."],
+       ["", ""],
+       ["When you are done", "Save as .xlsx and upload it on Manage → Import."]];
+  return { name:"Read me", widths:[22, 96],
+           rows:lines.map(function(l){ return [l[0], l[1]]; }) };
+}
+
+function capPlanWorkbook(c){
+  var projNames = (c.projects || []).map(function(p){ return p.name; });
+  return [
+    capReadme("plan", c.name),
+
+    { name:"Objectives", widths:[40, 11, 14, 10, 10, 12, 16], lockedCols:[6],
+      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "ID"],
+      validations:[{ range:"B2:B60", list:DIRS }, { range:"F2:F60", list:COMPILES }],
+      rows:(c.keyObjectives || []).map(function(m){
+        var a = splitTarget(m.target);
+        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile, m.id];
+      }) },
+
+    { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14, 16], lockedCols:[7],
+      head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "ID"],
+      validations:[{ range:"E2:E100", list:TIMELINES }],
+      rows:(c.projects || []).map(function(p){
+        return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
+                p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "", p.id];
+      }) },
+
+    { name:"Deliverables", widths:[34, 44, 16, 10, 20, 16], lockedCols:[5],
+      head:["Project", "Deliverable", "Kind", "Due", "Owner", "ID"],
+      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." },
+                   { range:"C2:C400", list:DELIV_KINDS }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.deliverables || []).forEach(function(d){
+          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
+                    d.due || "", d.owner || "", d.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Outcomes", widths:[34, 44, 11, 12, 10, 14, 16], lockedCols:[6],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measured at", "ID"],
+      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." },
+                   { range:"C2:C400", list:DIRS }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.outcomes || []).forEach(function(o){
+          var a = splitTarget(o.target);
+          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || "", o.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Milestones", widths:[34, 38, 52, 16, 14, 16], lockedCols:[5],
+      head:["Project", "Milestone", "What it covers", "Owner", "Finish", "ID"],
+      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.milestones || []).forEach(function(m){
+          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || "", m.id]);
+        });
+        return acc;
+      }, []) }
+  ];
+}
+
+function capProgressWorkbook(c){
+  return [
+    capReadme("progress", c.name),
+
+    { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
+      head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
+      rows:(c.keyObjectives || []).map(function(m){
+        return [m.name, m.dir, m.target || "no target",
+                m.actual == null ? "" : String(m.actual), "", m.id];
+      }) },
+
+    { name:"Deliverables", widths:[30, 40, 16, 10, 18, 18, 16], lockedCols:[6],
+      head:["Project", "Deliverable", "Kind", "Due", "Currently recorded", "New value", "ID"],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.deliverables || []).forEach(function(d){
+          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
+                    d.due || "", d.actual == null ? "" : String(d.actual), "", d.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Outcomes", widths:[30, 40, 14, 14, 18, 18, 16], lockedCols:[6],
+      head:["Project", "Outcome", "Target", "Measured at", "Currently recorded", "New value", "ID"],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.outcomes || []).forEach(function(o){
+          acc.push([p.name, o.name, o.target || "no target", o.measureAt || "",
+                    o.actual == null ? "" : String(o.actual), "", o.id]);
+        });
+        return acc;
+      }, []) },
+
+    { name:"Milestones", widths:[30, 40, 14, 16, 18, 16], lockedCols:[5],
+      head:["Project", "Milestone", "Finish", "Current status", "New status", "ID"],
+      validations:[{ range:"E2:E400", list:MS_STATUSES }],
+      rows:(c.projects || []).reduce(function(acc, p){
+        (p.milestones || []).forEach(function(m){
+          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "", m.id]);
+        });
+        return acc;
+      }, []) }
+  ];
+}
+
+/* Workbook back to the flat rows the capability importer understands. A child
+   names its project; anything already known falls back to the parent the
+   platform records — the same rename protection a unit's workbook has. */
+function capPlanFromWorkbook(c, sheets){
+  var rows = [], projId = {};
+  var nextP = (c.projects || []).length;
+  var childN = { D:0, O:0, M:0 };
+
+  function parentFor(projName, childId){
+    if (projId[projName]) return projId[projName];
+    var hit = childId ? capFindById(c, childId) : null;
+    return hit && hit.proj ? hit.proj.id : "";
+  }
+
+  sheetObjects(sheets["Projects"]).forEach(function(r){
+    var id = r["ID"] || (c.id + "-P" + (++nextP));
+    projId[r["Project"]] = id;
+    rows.push({ id:id, type:"PROJECT", name:r["Project"], description:r["Brief"],
+      owner:r["Owner"], stakeholders:(r["Stakeholders"] || "").split(/[,|]/)
+        .map(function(x){ return x.trim(); }).filter(Boolean).join("|"),
+      timeline:timelineKey(r["Timeline"]) || "", start:r["Start"], end:r["End"] });
+  });
+  sheetObjects(sheets["Objectives"]).forEach(function(r, i){
+    rows.push({ id:r["ID"] || (c.id + "-KO-new" + (i + 1)), type:"CAPOBJECTIVE",
+      name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
+      weight:r["Weight"], compile:r["Compile"] });
+  });
+  sheetObjects(sheets["Deliverables"]).forEach(function(r){
+    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-D-new" + (++childN.D)), type:"DELIVERABLE",
+      parent_id:parentFor(r["Project"], r["ID"]), name:r["Deliverable"],
+      kind:delivKindKey(r["Kind"]) || r["Kind"], due:r["Due"], owner:r["Owner"] });
+  });
+  sheetObjects(sheets["Outcomes"]).forEach(function(r){
+    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-O-new" + (++childN.O)), type:"OUTCOME",
+      parent_id:parentFor(r["Project"], r["ID"]), name:r["Outcome"],
+      direction:r["Direction"], value:r["Target"], unit:r["Unit"], measure_at:r["Measured at"] });
+  });
+  sheetObjects(sheets["Milestones"]).forEach(function(r){
+    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-M-new" + (++childN.M)), type:"MILESTONE",
+      parent_id:parentFor(r["Project"], r["ID"]), name:r["Milestone"],
+      covers:r["What it covers"], owner:r["Owner"], finish:r["Finish"] });
+  });
+
+  return rows.map(function(r){
+    CAPP_COLS.forEach(function(k){ if (r[k] == null) r[k] = ""; });
+    return r;
+  });
+}
+
+function capProgressFromWorkbook(c, sheets){
+  var out = [];
+  [["Objectives","CAPOBJECTIVE","Objective"],
+   ["Deliverables","DELIVERABLE","Deliverable"],
+   ["Outcomes","OUTCOME","Outcome"],
+   ["Milestones","MILESTONE","Milestone"]].forEach(function(def){
+    sheetObjects(sheets[def[0]]).forEach(function(r){
+      var v = r["New value"] != null ? r["New value"] : r["New status"];
+      if (!v) return;
+      out.push({ id:r["ID"], type:def[1], parent_name:r["Project"] || "",
+                 name:r[def[2]], new_value:String(v).trim() });
     });
   });
   return out;
@@ -6039,6 +6688,69 @@ function arrangeBtn(scope, unitKey){
     ? '<button class="editbtn" data-arrange="1">' + (ARRANGE ? "Done" : "Arrange") + '</button>' : '';
 }
 
+/* ── Cards or a table (§16.6) ────────────────────────────────────────
+   Cards to judge, a table to scan: ten units or eight capabilities are quick
+   to compare in a table and slow in a grid, and the reverse is true when one
+   has to stand out. The toggle sits on BOTH sections or neither, or the two
+   stop matching. A view preference, held for the session and stored on
+   nothing — it changes how a section is laid out, not what anything is. */
+var GVIEW = { units:"cards", caps:"cards" };
+
+function viewToggle(key){
+  return '<span class="minisw" role="group" aria-label="Cards or table">' +
+    '<button data-gview="' + key + '|cards" aria-pressed="' + (GVIEW[key] === "cards") + '">Cards</button>' +
+    '<button data-gview="' + key + '|table" aria-pressed="' + (GVIEW[key] === "table") + '">Table</button></span>';
+}
+
+/* The table mirrors the card: nothing is computed differently, only laid out
+   differently. The row's conclusion is the last column and carries the band
+   colour, as every table in the platform reads. */
+function unitsTable(keys){
+  var rows = keys.map(function(k){
+    var u = UNITS[k], ko = unitObjectives(u), r = unitRatio(u);
+    return '<tr><td><button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>' +
+      (u.real ? '' : '<span class="why">illustrative</span>') + '</td>' +
+      '<td class="num">' + u.weight + '%</td>' +
+      '<td class="num">' + u.items.length + '</td>' +
+      '<td class="num">' + pct(r) + '</td>' +
+      '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td>' +
+      '<td class="num final" style="color:var(--' + band(ko) + ')">' + pct(ko) + '</td></tr>';
+  }).join("");
+  return '<div class="cfg"><table><thead><tr>' +
+    '<th style="width:30%">Business unit</th><th class="num">Weight</th>' +
+    '<th class="num">' + L("pillar","bu") + '</th><th class="num">Execution of plan</th>' +
+    '<th class="num">Var.</th><th class="num">Objectives</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+/* Ranked on project performance — the one reading all eight capabilities
+   have (§15.1). Key objectives are optional, so ranking on them would order
+   the haves above the have-nots by shape rather than by standing. */
+function capsTable(){
+  var sorted = GROUP.capabilities.slice().sort(function(a, b){
+    var pa = capPerf(a), pb = capPerf(b);
+    return (pb == null ? -1 : pb) - (pa == null ? -1 : pa);
+  });
+  var rows = sorted.map(function(c){
+    var perf = capPerf(c), ce = capExec(c), fn = functionOf(c.fn);
+    var headName = fn && personName(fn.head);
+    return '<tr><td>' + esc(c.name) +
+      (fn ? '<span class="why">' + esc(fn.name) +
+        (headName && headName !== fn.name ? " &middot; " + esc(headName) : "") + '</span>' : '') + '</td>' +
+      '<td class="num">' + c.projects.length + '</td>' +
+      '<td class="cc"><span class="mono">' +
+        '<b style="color:var(--good)">' + ce.done + '</b> / ' +
+        '<b style="color:var(--attn)">' + ce.wip + '</b> / ' +
+        '<span style="color:var(--none)">' + ce.todo + '</span></span></td>' +
+      '<td class="num final" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</td></tr>';
+  }).join("");
+  return '<div class="cfg"><table><thead><tr>' +
+    '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
+    '<th class="cc">Milestones</th><th class="num">Performance</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<p class="sub">Ranked on project performance. Milestones read completed / in progress / not started.</p>';
+}
+
 
 function section(eyebrow, title, note, body, tipText, action){
   return '<div class="section"><div class="section-h">' +
@@ -6316,6 +7028,7 @@ function renderGroupPerformance(){
        its execution is milestones completed. Key objectives are optional and
        sit beside both rather than inside them. */
     var perf = capPerf(c), ce = capExec(c), ko = capKOScore(c);
+    var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
       (ko == null
         ? '<p class="sub">No key objectives of its own. This capability is judged by its projects.</p>'
@@ -6345,11 +7058,42 @@ function renderGroupPerformance(){
         }).join("")) +
       '<p class="sub"><b>' + ce.done + '</b> of <b>' + ce.total +
       '</b> milestones completed across <b>' + c.projects.length + '</b> projects.</p>';
-    return '<div class="gwrap" data-oi="' + ci + '">' +
-      splitCard(esc(c.name), c.projects.length + " project" + (c.projects.length === 1 ? "" : "s") +
-          (ko == null ? "" : " &middot; " + c.keyObjectives.length + " key objectives"),
-        perf, ce.pct, null, pd, ed, c.name,
-        arranging("group") ? handle("Reorder " + c.name) : '') + '</div>';
+    /* §16.6, settled by mock-capcard option 2: the same two-box card a business
+       unit carries. The dial reads project performance; the right box holds the
+       milestones that produce its execution — the workings behind the number,
+       exactly as Execution explains itself with delivered, planned and
+       variance. A one-box card was tried in the mockup and its labels clipped;
+       the card is sized for two. */
+    var pid = modalFor(c.name + " — performance", "Where the performance figure comes from", pd);
+    var eid = modalFor(c.name + " — milestones", "Where the execution figure comes from", ed);
+    /* The head is skipped where it repeats the function's own name — the SMO
+       "function" is headed by the SMO, and one name twice reads as a stutter. */
+    var fnHeadName = fn && personName(fn.head);
+    var sub = (fn ? esc(fn.name) +
+        (fnHeadName && fnHeadName !== fn.name ? " &middot; " + esc(fnHeadName) : "") + " &middot; " : "") +
+      c.projects.length + " project" + (c.projects.length === 1 ? "" : "s");
+    var msBody = !ce.total
+      ? '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
+        '<span class="ratio-l">no milestones</span>'
+      : '<div class="ratio">' + ce.done + '<small> of ' + ce.total + '</small></div>' +
+        '<span class="ratio-l">completed</span>' +
+        '<dl class="led">' +
+          '<dt>In progress</dt><dd>' + ce.wip + '</dd>' +
+          '<dt>Not started</dt><dd>' + ce.todo + '</dd>' +
+          '<dt>Projects</dt><dd>' + c.projects.length + '</dd>' +
+        '</dl>';
+    return '<div class="gwrap" data-oi="' + ci + '"><div class="gcard">' +
+      '<div class="card-head">' + (arranging("group") ? handle("Reorder " + c.name) : '') +
+        '<div class="gname">' + esc(c.name) + '</div>' +
+        '<div class="gsub">' + sub + '</div></div>' +
+      '<div class="two">' +
+        '<div class="box-obj"><div class="boxlabel"><span>Performance</span>' +
+          plus(pid, "Performance breakdown for " + c.name) + '</div>' +
+          gauge(perf, "") + '</div>' +
+        '<div class="box-exec"><div class="boxlabel"><span>Milestones</span>' +
+          plus(eid, "Milestones behind " + c.name) + '</div>' +
+          msBody + '</div>' +
+      '</div></div></div>';
   }).join("");
 
   var SECS = [];
@@ -6378,8 +7122,11 @@ function renderGroupPerformance(){
 
   SECS.push({ t: "Business units", h: section("", "Business units",
       null,
-      arrangeBar("business units", UNIT_KEYS.length) +
-      '<div class="gauges g3 sortable" data-kind="units">' + units + '</div>', TIP_PERF) });
+      GVIEW.units === "table"
+        ? unitsTable(keys)
+        : arrangeBar("business units", UNIT_KEYS.length) +
+          '<div class="gauges g3 sortable" data-kind="units">' + units + '</div>',
+      TIP_PERF, viewToggle("units")) });
 
   SECS.push({ t: "Group themes", h: section("", "Group themes",
       null,
@@ -6388,8 +7135,11 @@ function renderGroupPerformance(){
 
   SECS.push({ t: "Group capabilities", h: section("", "Group capabilities",
       null,
-      arrangeBar("capabilities", GROUP.capabilities.length) +
-      '<div class="gauges g4 sortable" data-kind="caps">' + caps + '</div>', TIP_CAP) });
+      GVIEW.caps === "table"
+        ? capsTable()
+        : arrangeBar("capabilities", GROUP.capabilities.length) +
+          '<div class="gauges g4 sortable" data-kind="caps">' + caps + '</div>',
+      TIP_CAP, viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
   return bands(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
@@ -6956,12 +7706,14 @@ function renderReport(u){
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
 
-  /* ── One collapsible row per pillar, the same accordion the Performance page
-     uses, so the two pages read as the same product. Each carries how much of
-     it is done, which is what the person filling it in actually wants to know. */
-  var pillars = u.items.map(function(p, pi){
-    var ms = reportItems(u).filter(function(x){ return x.kind === "measure" && x.obj.pid === p.id; });
-    ms = [];
+  /* ── The rail carries the pillars (§15.12, the second half of the move that
+     put it on Performance in 1.8). Where it earns most is exactly here: each
+     rail row carries its pillar's tally, so while entering one pillar the
+     state of the others stays visible — which an accordion cannot show from
+     inside an open body. The selection belongs to the unit and is shared with
+     Performance and Strategy. No reordering here: entry, not arrangement. */
+  var reportPillarPane = function(p, pi){
+    var ms = [];
     p.measures.forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
     var ts = [];
     p.tactics.forEach(function(t){
@@ -7004,29 +7756,58 @@ function renderReport(u){
           }).join(""))
       : "";
 
-    return '<div class="prow-wrap">' +
-      '<button class="prow rprow" aria-expanded="false" data-p="' + pi + '">' +
-        '<span class="pname"><b><span class="pcode">' + pillarCode(u, pi) + '</span> ' + esc(p.name) + '</b>' +
-          '<span class="psub">' + ms.length + ' measures &middot; ' + askedT.length + ' tactics asked' +
-          (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
-          '</span></span>' +
-        '<span class="cc"><span class="pill kind">' + esc(p.kind) + '</span></span>' +
-        '<span class="num">' + ms.length + '</span>' +
-        '<span class="num">' + askedT.length + '</span>' +
-        '<span class="cc">' + tally(done, total) + '</span>' +
-        '<span class="chev">\u25b8</span>' +
-      '</button>' +
-      '<div class="pbody" hidden>' + mTable + tTable + '</div></div>';
-  }).join("");
+    return '<div class="ptitle"><div><h3><span class="pcode">' + pillarCode(u, pi) + '</span> ' +
+        esc(p.name) + '</h3>' +
+        '<div class="pmeta">' + esc(p.kind) + ' &middot; ' + ms.length + ' measures &middot; ' +
+        askedT.length + ' tactics asked' +
+        (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
+        '</div></div>' +
+        tally(done, total) + '</div>' +
+      mTable + tTable;
+  };
 
-  /* Column meanings stated once at the top, as the Performance page does. */
-  /* Wrapped in pheadwrap, which is what makes a header pin \u2014 the Performance
-     page has done this all along and reporting simply was not using it. */
-  pillars = '<div class="plist"><div class="pheadwrap"><div class="phead rphead">' +
-      '<span class="hfirst">' + L("pillar","bu") + allToggle() + '</span><span class="cc">Kind</span>' +
-      '<span class="num">Measures</span><span class="num">Tactics</span>' +
-      '<span class="cc">Reported</span><span></span></div></div>' +
-    pillars + '</div>';
+  /* Entries given of asked, per pillar \u2014 what the rail rows and the pane pill
+     both read, so they can never disagree. */
+  var pillarTally = function(p){
+    var done = 0, total = 0;
+    p.measures.forEach(function(m){
+      total++;
+      if (m.actual != null && m.actual !== "") done++;
+    });
+    p.tactics.forEach(function(t){
+      if (!tacticDue(t)) return;
+      total++;
+      if (t.actual != null && t.actual !== "") done++;
+    });
+    return { done: done, total: total };
+  };
+
+  var sel = unitRailPick(u);
+  var pillars;
+  if (!sel) {
+    pillars = '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
+      ' yet, so there is nothing to report against.</div>';
+  } else {
+    var railRows = u.items.map(function(p, pi){
+      var t = pillarTally(p);
+      var sub = t.total === 0 ? 'Not asked this cycle'
+              : t.done >= t.total ? 'Complete'
+              : (t.total - t.done) + ' still to enter';
+      return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
+          esc(u.ukey) + '|' + esc(p.code) + '">' +
+        '<b>' + pillarCode(u, pi) + '&nbsp; ' + esc(p.name) + '</b>' +
+        '<span class="rnum"><span class="rtally' + (t.total && t.done >= t.total ? " full" : "") + '">' +
+          t.done + '/' + t.total + '</span></span>' +
+        '<span class="rsub">' + sub + '</span></button>';
+    }).join("");
+    var rail = '<div class="rail"><div class="rhead">' + L("pillar","bu") +
+      ' <span>' + u.items.length + '</span></div>' + railRows +
+      '<div class="rfoot">Tally is entries given of asked</div></div>';
+    var pane = reportPillarPane(sel, u.items.indexOf(sel));
+    pillars = u.items.length >= 2
+      ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
+      : '<div class="pane">' + pane + '</div>';
+  }
 
   var bar =
     '<div class="rep-bar">' +
@@ -7265,7 +8046,12 @@ function projPerformanceBody(p){
 
 function renderFnPerformance(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return fnHead(fk) + caps.map(function(c){
+  /* The same Present a unit's Performance page carries (§8.8): available to
+     anyone who can view this page, assembling the review from whatever the
+     platform holds at that moment. */
+  return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
+      '" title="Present this function">Present</button></div>' +
+    fnHead(fk) + caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
@@ -8227,25 +9013,50 @@ function renderFocusSetup(){
         '<b>Focus changes no score</b>; it is a lens and an incentive, not a second weighting.</div>');
 }
 
+/* The scope is a business unit OR a capability (§16.4): capability projects
+   arrive the way a unit's plan does — same page, same three steps, same
+   review — with their own sheets, because the thing being planned is a
+   project with deliverables, outcomes and milestones. */
+function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
+function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
+
 function renderImport(){
-  var u = UNITS[IMP.unit];
+  var isCap = impIsCap();
+  var u = isCap ? impCap() : UNITS[IMP.unit];
   var isPlan = IMP.kind === "plan";
   var d = IMP.diff;
 
-  var unitPick = '<select class="fld" id="imp-unit">' + UNIT_KEYS.map(function(k){
+  var unitPick = '<select class="fld" id="imp-unit">' +
+    '<optgroup label="Business units">' + UNIT_KEYS.map(function(k){
       return '<option value="' + k + '"' + (k === IMP.unit ? " selected" : "") + '>' + esc(UNITS[k].name) + '</option>';
-    }).join("") + '</select>';
+    }).join("") + '</optgroup>' +
+    '<optgroup label="Capabilities">' + GROUP.capabilities.map(function(c){
+      return '<option value="cap:' + c.id + '"' + ("cap:" + c.id === IMP.unit ? " selected" : "") + '>' +
+        esc(c.name) + '</option>';
+    }).join("") + '</optgroup></select>';
 
   var kindPick = '<span class="minisw">' +
     '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
     '<button data-impkind="progress" aria-pressed="' + !isPlan + '">Progress</button></span>';
 
-  var counts = isPlan
-    ? u.clauses.length + " clauses &middot; " + u.keyObjectives.length + " objectives &middot; " +
-      u.items.length + " pillars &middot; " +
-      u.items.reduce(function(a,p){ return a + p.measures.length; }, 0) + " measures &middot; " +
-      u.items.reduce(function(a,p){ return a + p.tactics.length; }, 0) + " tactics"
-    : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
+  var counts;
+  if (isCap) {
+    var nd = 0, no = 0, nm = 0;
+    u.projects.forEach(function(p){
+      nd += p.deliverables.length; no += p.outcomes.length; nm += p.milestones.length;
+    });
+    counts = isPlan
+      ? u.keyObjectives.length + " objectives &middot; " + u.projects.length + " projects &middot; " +
+        nd + " deliverables &middot; " + no + " outcomes &middot; " + nm + " milestones"
+      : capReported(u).total + " reportable rows";
+  } else {
+    counts = isPlan
+      ? u.clauses.length + " clauses &middot; " + u.keyObjectives.length + " objectives &middot; " +
+        u.items.length + " pillars &middot; " +
+        u.items.reduce(function(a,p){ return a + p.measures.length; }, 0) + " measures &middot; " +
+        u.items.reduce(function(a,p){ return a + p.tactics.length; }, 0) + " tactics"
+      : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
+  }
 
   var step1 =
     '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
@@ -8293,7 +9104,11 @@ function renderImport(){
      stated, with the way there. */
   var receipt = IMP.done
     ? '<div class="applied"><b>Applied to ' + esc(IMP.done.unit) + '.</b> ' + IMP.done.what +
-      ' <button class="linkbu" data-gounit="' + IMP.done.key + '">Open ' + esc(IMP.done.unit) + '</button></div>'
+      (IMP.done.fn
+        ? ' <button class="linkbu" data-gofn="fn:' + esc(IMP.done.fn) + '">Open ' +
+          esc(FUNCTIONS[IMP.done.fn] ? FUNCTIONS[IMP.done.fn].name : IMP.done.fn) + '</button>'
+        : ' <button class="linkbu" data-gounit="' + IMP.done.key + '">Open ' + esc(IMP.done.unit) + '</button>') +
+      '</div>'
     : '';
 
   var step3 = receipt;
@@ -8324,7 +9139,7 @@ function renderImport(){
         : '<div class="note">Nothing differs from what is recorded.</div>';
     } else {
       body = changed.length
-        ? '<div class="scroll"><table><thead><tr><th>' + L("pillar","bu") + '</th><th>Item</th>' +
+        ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
             return '<tr><td>' + esc(r.pillar) + '</td><td>' + esc(r.name) + '</td>' +
@@ -8361,7 +9176,7 @@ function renderImport(){
   }
 
   return '<div class="kv"><span class="pill kind">SMO only</span>' +
-      '<span class="pill kind">One file per unit</span></div>' +
+      '<span class="pill kind">One file per unit or capability</span></div>' +
     section("", (isPlan ? "Plan" : "Progress") + " import", null,
       '<div class="imp">' + step1 + step2 + step3 + '</div>');
 }
@@ -8810,12 +9625,209 @@ function deckPillarHead(u, p, pi, which){
     '<span><i>Planned</i><b>' + dPct(pillarPlan(p)) + '</b></span></div></div>';
 }
 
+/* ── A supporting function's review (§15.12) ──────────────────────────────
+   The same deck, carrying the project model's content: no measures, no
+   tactics. One system — a function's review must read as the same product as
+   a unit's, which is why every slide reuses the unit deck's shapes. */
+
+function deckSlidesFn(fk){
+  var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
+  var S = [];
+
+  S.push('<section class="dslide d-cover">' +
+    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
+    '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Capability review &middot; ' + esc(REVIEW.name) +
+    ' &middot; ' + caps.length + (caps.length === 1 ? ' capability' : ' capabilities') + '</p></section>');
+
+  caps.forEach(function(c){
+    var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
+
+    /* The capability's cover carries its definition and its readings — key
+       objectives only where it has any (§15.1: absent, never zero). */
+    S.push('<section class="dslide d-cover"><span class="seclab">Capability &middot; ' +
+        esc(f.name) + '</span>' +
+      '<h1 class="cover">' + esc(c.name) + '</h1>' +
+      '<p class="coversub">' + esc(c.def) + '</p>' +
+      '<div class="coverrule"></div><div class="leadstats">' +
+        (c.keyObjectives.length
+          ? '<div><span class="dlab">Key objectives</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
+          : '') +
+        '<div><span class="dlab">Project performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
+        '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
+      '</div></section>');
+
+    if (c.keyObjectives.length) {
+      var kRows = c.keyObjectives.map(function(m, i){
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(m.name) + '</td>' +
+          '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
+          '<td class="num">' + esc(m.dir) + '</td>' +
+          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
+          '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
+          (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide"><h2>Key objectives &mdash; where we stand' +
+        '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+        '<th class="num">Weight</th><th class="num">Dir.</th><th class="num">Target</th>' +
+        '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
+        '<tbody>' + kRows + '</tbody></table></section>');
+    }
+
+    var pRows = c.projects.map(function(p, i){
+      var mst = projMilestones(p);
+      return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+        '<b>' + esc(p.name) + '</b>' +
+        '<span class="dsub">' + esc(p.owner || "") + ' &middot; ' + esc(p.start) + ' &rarr; ' + esc(p.end) + '</span></td>' +
+        '<td class="num">' + dPct(projDeliverySide(p)) + '</td>' +
+        '<td class="num">' + dPct(projOutcomeSide(p)) + '</td>' +
+        '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
+        '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
+    }).join("");
+    S.push('<section class="dslide"><h2>Projects<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Project</th>' +
+      '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
+      '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
+      '<tbody>' + (pRows || '<tr><td colspan="6">No projects yet.</td></tr>') + '</tbody></table>' +
+      '<p class="headfoot">Performance is half deliverables, half outcomes, per side. Milestones are completed of total.</p></section>');
+
+    c.projects.forEach(function(p){
+      var mst = projMilestones(p);
+      S.push('<section class="dslide d-cover"><span class="seclab">' + esc(c.name) +
+          ' &middot; ' + esc(p.owner || "") + ' &middot; ' + esc(p.start) + ' &rarr; ' + esc(p.end) + '</span>' +
+        '<h1 class="pillarname">' + esc(p.name) + '</h1>' +
+        '<p class="coversub">' + esc(p.brief || "") + '</p>' +
+        '<div class="coverrule"></div><div class="leadstats">' +
+          '<div><span class="dlab">Performance</span><b class="' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</b></div>' +
+          '<div><span class="dlab">Deliverables</span><b class="' + dBand(projDeliverySide(p)) + '">' + dPct(projDeliverySide(p)) + '</b></div>' +
+          '<div><span class="dlab">Outcomes</span><b class="' + dBand(projOutcomeSide(p)) + '">' + dPct(projOutcomeSide(p)) + '</b></div>' +
+          '<div><span class="dlab">Milestones</span><b class="plain">' + mst.done + ' of ' + mst.total + '</b></div>' +
+        '</div></section>');
+
+      var dRows = p.deliverables.map(function(d, i){
+        var v = delivReads(d);
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(d.name) + '</td>' +
+          '<td>' + esc(d.owner || "—") + '</td>' +
+          '<td class="num">' + esc(d.due || "—") + '</td>' +
+          '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
+            : d.kind === "pct" ? esc(String(d.actual)) + "%"
+            : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
+          '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
+          (d.note ? '<td class="dnote">' + esc(d.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
+        '<th>Owner</th><th class="num">Due</th><th class="num">Reported</th><th class="num">Reads</th>' +
+        '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
+
+      var oRows = p.outcomes.map(function(o, i){
+        if (o.progress == null) {
+          return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
+            '<td class="lead">' + esc(o.name) + '</td>' +
+            '<td class="num">' + esc(o.target) + '</td>' +
+            '<td colspan="2" class="cc">Measured at ' + esc(o.measureAt || "—") + '</td>' +
+            '<td class="dnote empty">&mdash;</td></tr>';
+        }
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(o.name) + '</td>' +
+          '<td class="num">' + esc(o.target) + '</td>' +
+          '<td class="num">' + esc(o.actual) + '</td>' +
+          '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
+          (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'O">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Outcomes</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Outcome</th>' +
+        '<th class="num">Target</th><th class="num">Actual</th><th class="num">Reads</th>' +
+        '<th>Note</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
+
+      var over = projOverruns(p).map(function(m){ return m.id; });
+      var mRows = p.milestones.map(function(m, i){
+        var word = m.status === "done" ? "Completed" : m.status === "wip" ? "In progress" : "Not started";
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(m.name) +
+          (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
+          '<td>' + esc(m.owner || "—") + '</td>' +
+          '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
+          (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
+          '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
+          (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
+        '<th>Owner</th><th class="num">Finish</th><th class="num">Status</th>' +
+        '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
+    });
+  });
+
+  /* Everything at risk or off track across the function, with what is being
+     done — the same closing gather a unit's deck makes. */
+  var att = [], n = 0;
+  caps.forEach(function(c){
+    c.projects.forEach(function(p){
+      p.deliverables.forEach(function(d){
+        var v = delivReads(d);
+        if (delivDue(d) && v != null && v < 70) {
+          n++;
+          att.push('<tr><td class="idx">' + n + '</td>' +
+            '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
+            '<td class="num">' + esc(d.due || "—") + '</td>' +
+            '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
+            '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
+        }
+      });
+      p.outcomes.forEach(function(o){
+        if (o.progress != null && o.progress < 70) {
+          n++;
+          att.push('<tr><td class="idx">' + n + '</td>' +
+            '<td class="lead">' + esc(o.name) + '<span class="dsub">' + esc(p.name) + ' &middot; outcome</span></td>' +
+            '<td class="num">' + esc(o.target) + '</td>' +
+            '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
+            '<td class="dnote' + (o.note ? '' : ' empty') + '">' + (o.note ? esc(o.note) : "&mdash;") + '</td></tr>');
+        }
+      });
+      projOverruns(p).forEach(function(m){
+        n++;
+        att.push('<tr><td class="idx">' + n + '</td>' +
+          '<td class="lead">' + esc(m.name) + '<span class="dsub">' + esc(p.name) + ' &middot; milestone overrun</span></td>' +
+          '<td class="num">' + esc(m.finish) + '</td>' +
+          '<td class="num">ends ' + esc(p.end) + '</td>' +
+          '<td class="dnote' + (m.note ? '' : ' empty') + '">' + (m.note ? esc(m.note) : "&mdash;") + '</td></tr>');
+      });
+    });
+  });
+  if (att.length) {
+    S.push('<section class="dslide" data-split="FNATT"><h2>What needs attention' +
+      '<span class="dwhich">' + att.length + ' at risk, off track or overrunning</span></h2>' +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
+      '<th class="num">Target / due</th><th class="num">Reads</th>' +
+      '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
+  }
+
+  S.push('<section class="dslide"><h2>Notes and achievements</h2>' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + esc(fk) + '">' +
+      esc(REVIEW.note["fn:" + fk] || "") + '</div>' +
+    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
+    'platform, not in a deck that is already wrong.</p></section>');
+
+  S.push('<section class="dslide d-cover d-thanks"><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+
+  return S.join("");
+}
+
 /* ── Opening, moving and closing ──────────────────────────────────────── */
 
-function openDeck(u){
+function openDeckWith(titleHtml, slides){
   var root = document.getElementById("deckroot");
-  root.querySelector(".deck").innerHTML = deckSlides(u);
-  root.querySelector(".dtitle").innerHTML = "<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name);
+  root.querySelector(".deck").innerHTML = slides;
+  root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
   deckFitPass();
@@ -8823,6 +9835,12 @@ function openDeck(u){
   deckShow(0);
   deckScale();
   root.focus();
+}
+function openDeck(u){
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), deckSlides(u));
+}
+function openDeckFn(fk){
+  openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name), deckSlidesFn(fk));
 }
 function closeDeck(){
   var root = document.getElementById("deckroot");
@@ -9348,6 +10366,8 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     var pb = document.querySelector("[data-present]");
     if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
+    var pf = document.querySelector("[data-present-fn]");
+    if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
     document.querySelectorAll("[data-fold]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Browsing, not going: `current` is untouched, so the page and its tabs
@@ -9655,6 +10675,16 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     document.querySelectorAll("[data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
     });
+    /* Cards or a table, per section (§16.6). A view preference — it changes
+       how a section is laid out, never what anything is or in what order it
+       is stored. */
+    document.querySelectorAll("[data-gview]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.gview.split("|");
+        GVIEW[p[0]] = p[1];
+        paint();
+      });
+    });
     document.querySelectorAll("[data-edit]").forEach(function(b){
       b.addEventListener("click", function(){
         var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
@@ -9718,17 +10748,36 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
      because a sandboxed frame may refuse the download and leaving the SMO with
      nothing would be worse than a copy box. */
   function csvFor(){
+    if (impIsCap()) {
+      var c = impCap();
+      return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
+    }
     var u = UNITS[IMP.unit];
     return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
   }
   function fileName(){
-    return UNITS[IMP.unit].name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
+    var name = impIsCap() ? impCap().name : UNITS[IMP.unit].name;
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
       "-" + IMP.kind + "-template.csv";
   }
   function loadCSV(text){
     IMP.done = null;
     IMP.text = text;
-    var u = UNITS[IMP.unit], rows = parseCSV(text);
+    var rows = parseCSV(text);
+    if (impIsCap()) {
+      var c = impCap();
+      if (IMP.kind === "plan") {
+        IMP.check = validateCapPlan(c, rows);
+        IMP.diff = diffCapPlan(c, rows);
+      } else {
+        var cShape = checkCapFileShape(c, rows, "progress");
+        IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+        IMP.diff = diffCapProgress(c, rows);
+      }
+      paint();
+      return;
+    }
+    var u = UNITS[IMP.unit];
     if (IMP.kind === "plan") {
       IMP.check = validatePlan(u, rows);
       IMP.diff = diffPlan(u, rows);
@@ -9750,8 +10799,14 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
 
     var dlx = document.querySelector("[data-dlx]");
     if (dlx) dlx.addEventListener("click", function(){
-      var u = UNITS[IMP.unit];
-      var sheets = IMP.kind === "plan" ? planWorkbook(u) : progressWorkbook(u);
+      var sheets;
+      if (impIsCap()) {
+        var c = impCap();
+        sheets = IMP.kind === "plan" ? capPlanWorkbook(c) : capProgressWorkbook(c);
+      } else {
+        var u = UNITS[IMP.unit];
+        sheets = IMP.kind === "plan" ? planWorkbook(u) : progressWorkbook(u);
+      }
       var bytes = buildXlsx(sheets);
       var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       var a = document.createElement("a");
@@ -9786,6 +10841,20 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         var rx = new FileReader();
         rx.onload = function(){
           readXlsx(rx.result).then(function(sheets){
+            if (impIsCap()) {
+              var c = impCap();
+              var cRows = IMP.kind === "plan" ? capPlanFromWorkbook(c, sheets) : capProgressFromWorkbook(c, sheets);
+              if (IMP.kind === "plan") {
+                IMP.check = validateCapPlan(c, cRows);
+                IMP.diff = diffCapPlan(c, cRows);
+              } else {
+                var cShape = checkCapFileShape(c, cRows, "progress");
+                IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+                IMP.diff = diffCapProgress(c, cRows);
+              }
+              paint();
+              return;
+            }
             var u = UNITS[IMP.unit];
             var rows = IMP.kind === "plan" ? planFromWorkbook(u, sheets) : progressFromWorkbook(u, sheets);
             if (IMP.kind === "plan") {
@@ -9828,16 +10897,30 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
 
     var ap = document.querySelector("[data-apply]");
     if (ap) ap.addEventListener("click", function(){
-      var u = UNITS[IMP.unit];
       var ch = IMP.diff.rows.filter(function(r){ return r.status === "changed"; }).length;
       var nu = IMP.diff.rows.filter(function(r){ return r.status === "new"; }).length;
-      if (IMP.kind === "plan") applyPlan(u, IMP.diff); else applyProgress(u, IMP.diff);
-      IMP.done = { unit:u.name, key:u.ukey,
-        what: IMP.kind === "plan"
-          ? ch + " changed" + (nu ? ", " + nu + " created" : "") + "."
-          : ch + " figure" + (ch === 1 ? "" : "s") + " updated." };
+      var what = IMP.kind === "plan"
+        ? ch + " changed" + (nu ? ", " + nu + " created" : "") + "."
+        : ch + " figure" + (ch === 1 ? "" : "s") + " updated.";
+      if (impIsCap()) {
+        var c = impCap();
+        if (IMP.kind === "plan") applyCapPlan(c, IMP.diff); else applyCapProgress(c, IMP.diff);
+        IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
+      } else {
+        var u = UNITS[IMP.unit];
+        if (IMP.kind === "plan") applyPlan(u, IMP.diff); else applyProgress(u, IMP.diff);
+        IMP.done = { unit:u.name, key:u.ukey, what:what };
+      }
       IMP.diff = null; IMP.text = ""; IMP.check = null;
       paint();
+    });
+    /* The receipt's way back for a capability: its function's pages. */
+    document.querySelectorAll("[data-gofn]").forEach(function(b){
+      b.addEventListener("click", function(){
+        IMP.done = null;
+        current = b.dataset.gofn; currentSub = null;
+        paint(); window.scrollTo(0,0);
+      });
     });
     document.querySelectorAll("[data-gounit]").forEach(function(b){
       b.addEventListener("click", function(){

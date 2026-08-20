@@ -1289,19 +1289,27 @@ version. The handle sits in the rail row rather than a wide table row — a
 vertical list of four is exactly what the pointer-based sorter was written for,
 and the row still clicks to select, so the two gestures never compete.
 
-### 15.12 Still to build
+### 15.12 Still to build — CLEARED in 1.9
 
-- **The rail on a unit's Performance and My reporting.** Built on Strategy only.
-  Those two pages carry the drag-to-reorder pillar list, and moving them to the
-  rail means moving reordering with them — the most-used screens in the platform,
-  so not in the same pass as everything else.
-- **Import and export for projects.** The template still carries measures and
-  tactics for capabilities. Until it is rewritten, a project round trip loses
-  the deliverables, outcomes and milestones.
-- **Presentation mode** still renders a capability the old way.
+All three were built. Recorded here rather than deleted, because this list is
+how 1.8's edges were remembered:
 
-Settled in discussion and recorded here so nothing lives only in a conversation.
-None of it is in the code.
+- **The rail on a unit's Performance and My reporting.** Performance took it in
+  1.8, with reordering. **My reporting followed in 1.9**: each rail row carries
+  its pillar's tally — entries given of asked — so while entering one pillar the
+  state of the others stays visible, which is where the rail earns most
+  (§15.6). No reordering on Reporting: entry, not arrangement. The selection is
+  the unit's and travels between Performance, Strategy and Report.
+- **Import and export for projects.** Built in 1.9 — see §16.4, which it
+  closes.
+- **Presentation mode** for a capability. Built in 1.9: a **Present** button on
+  a supporting function's Performance page, same place and same rule as a
+  unit's (anyone who can view the page). The deck covers each capability the
+  function carries with the project model's content — key objectives only
+  where they exist, projects overview, then per project its deliverables,
+  outcomes and milestones — closing with everything at risk, off track or
+  overrunning, and an editable note. One deck system; the function deck adds
+  content shapes, not chrome.
 
 ## 16 · Backlog — agreed, not yet built
 
@@ -1409,12 +1417,31 @@ milestones, and they are the only way to say where it has got to.
 date. The real sample had exactly that — a project ending 30 Apr with a milestone
 finishing 31 May.
 
-### 16.4 The import template
+### 16.4 The import template — BUILT in 1.9
 
-Capability projects arrive the way a unit's plan does: **Setup → Import**, not
+Capability projects arrive the way a unit's plan does: **Manage → Import**, not
 from the capability's own page. The file needs its **own scope** — a capability
 rather than a unit — and its own sheets: Brief, Deliverables, Milestones. Same
 parser, same validation, same id rules underneath.
+
+*As built, extended to the §15 project model.* The scope list offers business
+units and capabilities in one dropdown. The **plan workbook** carries
+Objectives (with weight — capability objectives weight like a unit's), Projects
+(the brief: owner, stakeholders, timeline, start, end), Deliverables (kind:
+delivered-or-not, or a percentage), **Outcomes** (direction, target split into
+value and unit, measured at — a sheet §16.4 predates, added because §15.2 split
+outcomes from deliverables), and Milestones (what it covers, owner, finish).
+Children choose their **project from a dropdown of names**; the ID column is
+grey and last; a renamed project does not orphan its children. A **progress
+workbook** mirrors the capability's reporting page — Yes/No or a percentage per
+deliverable, an actual per objective and outcome, a status per milestone — with
+progress recomputed on arrival, never typed. The whole-file refusals hold
+(wrong capability, a business unit's file, wrong kind), problems block and
+notices do not, absent is reported and never removed, and a milestone finishing
+after its project's end is a **notice, never a refusal** (§15.4). The test that
+matters passes: export any capability, re-import untouched, zero changes —
+verified for all eight, CSV and workbook, plan and progress. A project round
+trip no longer loses anything.
 
 ### 16.5 Navigation — one row that folds — BUILT in 1.2 — BUILT
 
@@ -1444,7 +1471,7 @@ the page to Group, making a fold navigate. And the nav handler bound **every**
 button in the row including the folds, setting `current` to `undefined`. A fold
 must go nowhere, and both of those made it go somewhere.
 
-### 16.6 The capability card, and a view toggle
+### 16.6 The capability card, and a view toggle — BUILT in 1.9
 
 A capability uses the **same card as a business unit**: the delivery dial on the
 left, and on the right the milestones that produce it — *2 of 3*, with in
@@ -1454,6 +1481,24 @@ its labels clipped, because the card is sized for two.
 
 Both Group Performance sections gain a **Cards / Table toggle** — cards to judge,
 a table to scan. It goes on both or neither, or the two sections stop matching.
+
+*As built, mapped onto the §15 model.* The mockup predated the project model,
+so its "delivery" dial became **project performance** — the one reading all
+eight capabilities have, and what the card's dial reads. The right box is the
+milestones exactly as drawn. The header sub-line names the owning function and
+its head, per the mockup; the two ⓘ drills stay. This **replaces the 1.8
+card**, whose right box read "no plan" forever — it still expected the tactic
+data a capability stopped carrying in 1.7, and its dial was labelled
+Objectives while reading project performance.
+
+The toggle sits on **Business units and Group capabilities** (themes, at
+three, have no scanning problem). The tables show the same derived figures as
+the cards; the conclusion is the last column and carries the band colour. The
+**capabilities table ranks on project performance** (§15.1), unscored last;
+the units table keeps the arranged order — unit order is a deliberate act,
+weights decide influence, and re-sorting it would make the arrangement look
+like it did not take. Arranging is a cards-view act; the toggle is a session
+view preference, stored on nothing.
 
 ### 16.7 Source teams — a number is reported by whoever owns it
 
@@ -1656,6 +1701,33 @@ Not designed yet.
 ---
 
 ## 17 · Version history
+
+### v1.9 — the 1.8 edges closed: cards, sheets, decks, and the last rail
+
+Built without check-ins on Islam's instruction, against what was already
+recorded — every item below was settled in §15.12, §16.4 or §16.6 (and
+`mock-capcard.html`) before this session started. Specs for the four features
+live in `specs/` (spec-kit, adopted this version).
+
+- **The capability card** (§16.6): the two-box card from the settled mockup,
+  mapped onto the project model — performance dial left, milestones right.
+  Replaces the 1.8 card whose execution box was permanently dead.
+- **Cards / Table toggle** on Business units and Group capabilities; the
+  capabilities table ranks on project performance (§15.1), the units table
+  keeps the arranged order.
+- **Capability project import and export** (§16.4): capability scope on
+  Manage → Import, plan and progress workbooks and CSVs, idempotent round
+  trip verified for all eight capabilities. Projects, deliverables, outcomes
+  and milestones now survive a round trip.
+- **Presentation mode for a supporting function** (§15.12): Present on the
+  function's Performance page; the deck carries the project model.
+- **The rail on My reporting** (§15.12): per-pillar tallies beside the entry
+  tables; selection shared with Performance and Strategy.
+- *Doc fixes:* the workbook read-mes said "Setup → Import" (Import moved to
+  Manage in 1.5); two Info panels still said projects "replace measures and
+  initiatives next" (they did, in 1.7). Both corrected to match the product.
+- *Housekeeping:* the unused `VERSION` constant read "1.6"; now tracks the
+  filename.
 
 ### v1.8 — two tabs, and the rail everywhere
 

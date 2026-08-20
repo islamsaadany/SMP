@@ -1,4 +1,4 @@
-# SMP Project Folder — v1.8
+# SMP Project Folder — v1.9
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -9,18 +9,22 @@ Everything needed to pick this project up cold. Read in this order.
 **`CLAUDE-RULES.md`** — how Islam and Claude work together. Read before doing
 anything. The first rule is the important one: **mock before building, always.**
 
-**`DECISIONS-AND-LOGIC-v1.8.md`** — 1,600 lines. Every decision with its
-reasoning, including reversals recorded as reversals. Three sections matter most:
+**`DECISIONS-AND-LOGIC-v1.9.md`** — every decision with its reasoning,
+including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
-- **§12** — agreed but not built. This is the backlog.
-- **§13** — version history
+- **§16** — the backlog: agreed, and marked BUILT as each lands
+- **§17** — version history
+
+**`specs/`** (repo root) — spec-kit feature specifications, one folder per
+feature, adopted in 1.9. The decisions document stays authoritative; a spec
+records how one feature was cut against it.
 
 ---
 
 ## The platform
 
-**`strategy-management-platform-v1.8.html`** — the built prototype. One file,
+**`strategy-management-platform-v1.9.html`** — the built prototype. One file,
 opens in a browser, no server.
 
 **`src/`** — the sources it is built from, and the tooling:
@@ -49,19 +53,19 @@ of it was rejected — which is the point of keeping it.
 | `mock-navA.html` | The Units / Functions fold, **with the width measurements** |
 | `mock-setuphead.html` | One header for both configuration tables |
 | `mock-icons2.html` | Edit and clear icons, compared at real size |
-| `mock-capcard.html` | The capability card, and the Cards/Table toggle |
+| `mock-capcard.html` | The capability card, and the Cards/Table toggle. **Built in 1.9** |
 
-### Settled, not yet built
+### Settled — build status noted
 
 | File | What it holds |
 |---|---|
 | `mock-capproject.html` | The first project sketch. Superseded — kept for the reasoning |
 | `mock-capproject2.html` | The project model on the platform's own components. **Built in 1.8** |
 | `mock-caprail.html` | The rail on a capability, all three tabs. **Built in 1.8** |
-| `mock-unitrail.html` | The rail on a business unit, drawn with Mobile's real content. **Strategy built in 1.8; Performance and Reporting still to do** |
-| `mock-foundationtab.html` | Foundation as a subtab — the page reproduced unchanged, plus the capability version |
-| `mock-strategytab.html` | The Strategy tab and its three subtabs, with Mobile's real content. **Decide with `mock-twotab`** |
-| `mock-twotab.html` | Two tabs for a unit — Performance and Strategy — with reporting folded into Performance. **Agreed in principle, not built** |
+| `mock-unitrail.html` | The rail on a business unit, drawn with Mobile's real content. **All three pages built — Strategy in 1.7, Performance in 1.8, Reporting in 1.9** |
+| `mock-foundationtab.html` | Foundation as a subtab — the page reproduced unchanged, plus the capability version. **Built in 1.8** |
+| `mock-strategytab.html` | The Strategy tab and its three subtabs, with Mobile's real content. **Decided with `mock-twotab`, built in 1.8** |
+| `mock-twotab.html` | Two tabs for a unit — Performance and Strategy — with reporting folded into Performance. **Built in 1.8** |
 | `mock-capability.html` | The capability pages and their Setup screens |
 | `mock-capline.html` | The one-line capability band, and projects expanded |
 
@@ -85,13 +89,17 @@ of it was rejected — which is the point of keeping it.
 **Built:** the group and unit model, scoring, the temple, arrangement, import
 and export, focus measures, the reporting cycle with snapshots and deltas,
 presentation mode, supporting functions and capability ownership, the folding
-navigation, and Setup split from Manage.
+navigation, Setup split from Manage, the project model with the rail and two
+tabs (1.7–1.8), and — in 1.9 — the capability card with the Cards/Table
+toggle (§16.6), capability project import and export (§16.4), presentation
+mode for a supporting function, and the rail on My reporting (§15.12, now
+cleared).
 
-**Next, in dependency order:** the project model (§12.3), then the capability
-card and view toggle (§12.6), then the import template scope (§12.4).
+**Next:** nothing mid-flight. The backlog is the longer-term set below, plus
+the open model questions in §11.
 
-**Longer term:** source teams (§12.7), the help box (§12.8), people and
-credentials (§12.9), strategy versions (§12.10).
+**Longer term:** source teams (§16.7), the help box (§16.8), people and
+credentials (§16.9), strategy versions (§16.10).
 
 ---
 

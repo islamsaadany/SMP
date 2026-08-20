@@ -411,6 +411,69 @@ function arrangeBtn(scope, unitKey){
     ? '<button class="editbtn" data-arrange="1">' + (ARRANGE ? "Done" : "Arrange") + '</button>' : '';
 }
 
+/* ── Cards or a table (§16.6) ────────────────────────────────────────
+   Cards to judge, a table to scan: ten units or eight capabilities are quick
+   to compare in a table and slow in a grid, and the reverse is true when one
+   has to stand out. The toggle sits on BOTH sections or neither, or the two
+   stop matching. A view preference, held for the session and stored on
+   nothing — it changes how a section is laid out, not what anything is. */
+var GVIEW = { units:"cards", caps:"cards" };
+
+function viewToggle(key){
+  return '<span class="minisw" role="group" aria-label="Cards or table">' +
+    '<button data-gview="' + key + '|cards" aria-pressed="' + (GVIEW[key] === "cards") + '">Cards</button>' +
+    '<button data-gview="' + key + '|table" aria-pressed="' + (GVIEW[key] === "table") + '">Table</button></span>';
+}
+
+/* The table mirrors the card: nothing is computed differently, only laid out
+   differently. The row's conclusion is the last column and carries the band
+   colour, as every table in the platform reads. */
+function unitsTable(keys){
+  var rows = keys.map(function(k){
+    var u = UNITS[k], ko = unitObjectives(u), r = unitRatio(u);
+    return '<tr><td><button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>' +
+      (u.real ? '' : '<span class="why">illustrative</span>') + '</td>' +
+      '<td class="num">' + u.weight + '%</td>' +
+      '<td class="num">' + u.items.length + '</td>' +
+      '<td class="num">' + pct(r) + '</td>' +
+      '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td>' +
+      '<td class="num final" style="color:var(--' + band(ko) + ')">' + pct(ko) + '</td></tr>';
+  }).join("");
+  return '<div class="cfg"><table><thead><tr>' +
+    '<th style="width:30%">Business unit</th><th class="num">Weight</th>' +
+    '<th class="num">' + L("pillar","bu") + '</th><th class="num">Execution of plan</th>' +
+    '<th class="num">Var.</th><th class="num">Objectives</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+/* Ranked on project performance — the one reading all eight capabilities
+   have (§15.1). Key objectives are optional, so ranking on them would order
+   the haves above the have-nots by shape rather than by standing. */
+function capsTable(){
+  var sorted = GROUP.capabilities.slice().sort(function(a, b){
+    var pa = capPerf(a), pb = capPerf(b);
+    return (pb == null ? -1 : pb) - (pa == null ? -1 : pa);
+  });
+  var rows = sorted.map(function(c){
+    var perf = capPerf(c), ce = capExec(c), fn = functionOf(c.fn);
+    var headName = fn && personName(fn.head);
+    return '<tr><td>' + esc(c.name) +
+      (fn ? '<span class="why">' + esc(fn.name) +
+        (headName && headName !== fn.name ? " &middot; " + esc(headName) : "") + '</span>' : '') + '</td>' +
+      '<td class="num">' + c.projects.length + '</td>' +
+      '<td class="cc"><span class="mono">' +
+        '<b style="color:var(--good)">' + ce.done + '</b> / ' +
+        '<b style="color:var(--attn)">' + ce.wip + '</b> / ' +
+        '<span style="color:var(--none)">' + ce.todo + '</span></span></td>' +
+      '<td class="num final" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</td></tr>';
+  }).join("");
+  return '<div class="cfg"><table><thead><tr>' +
+    '<th style="width:44%">Capability</th><th class="num">Projects</th>' +
+    '<th class="cc">Milestones</th><th class="num">Performance</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    '<p class="sub">Ranked on project performance. Milestones read completed / in progress / not started.</p>';
+}
+
 
 function section(eyebrow, title, note, body, tipText, action){
   return '<div class="section"><div class="section-h">' +
@@ -688,6 +751,7 @@ function renderGroupPerformance(){
        its execution is milestones completed. Key objectives are optional and
        sit beside both rather than inside them. */
     var perf = capPerf(c), ce = capExec(c), ko = capKOScore(c);
+    var fn = functionOf(c.fn);
     var pd = '<p class="sub" style="margin:0 0 14px">' + esc(c.def) + '</p>' +
       (ko == null
         ? '<p class="sub">No key objectives of its own. This capability is judged by its projects.</p>'
@@ -717,11 +781,42 @@ function renderGroupPerformance(){
         }).join("")) +
       '<p class="sub"><b>' + ce.done + '</b> of <b>' + ce.total +
       '</b> milestones completed across <b>' + c.projects.length + '</b> projects.</p>';
-    return '<div class="gwrap" data-oi="' + ci + '">' +
-      splitCard(esc(c.name), c.projects.length + " project" + (c.projects.length === 1 ? "" : "s") +
-          (ko == null ? "" : " &middot; " + c.keyObjectives.length + " key objectives"),
-        perf, ce.pct, null, pd, ed, c.name,
-        arranging("group") ? handle("Reorder " + c.name) : '') + '</div>';
+    /* §16.6, settled by mock-capcard option 2: the same two-box card a business
+       unit carries. The dial reads project performance; the right box holds the
+       milestones that produce its execution — the workings behind the number,
+       exactly as Execution explains itself with delivered, planned and
+       variance. A one-box card was tried in the mockup and its labels clipped;
+       the card is sized for two. */
+    var pid = modalFor(c.name + " — performance", "Where the performance figure comes from", pd);
+    var eid = modalFor(c.name + " — milestones", "Where the execution figure comes from", ed);
+    /* The head is skipped where it repeats the function's own name — the SMO
+       "function" is headed by the SMO, and one name twice reads as a stutter. */
+    var fnHeadName = fn && personName(fn.head);
+    var sub = (fn ? esc(fn.name) +
+        (fnHeadName && fnHeadName !== fn.name ? " &middot; " + esc(fnHeadName) : "") + " &middot; " : "") +
+      c.projects.length + " project" + (c.projects.length === 1 ? "" : "s");
+    var msBody = !ce.total
+      ? '<div class="ratio" style="font-size:15px;color:var(--none);font-family:var(--sans)">&mdash;</div>' +
+        '<span class="ratio-l">no milestones</span>'
+      : '<div class="ratio">' + ce.done + '<small> of ' + ce.total + '</small></div>' +
+        '<span class="ratio-l">completed</span>' +
+        '<dl class="led">' +
+          '<dt>In progress</dt><dd>' + ce.wip + '</dd>' +
+          '<dt>Not started</dt><dd>' + ce.todo + '</dd>' +
+          '<dt>Projects</dt><dd>' + c.projects.length + '</dd>' +
+        '</dl>';
+    return '<div class="gwrap" data-oi="' + ci + '"><div class="gcard">' +
+      '<div class="card-head">' + (arranging("group") ? handle("Reorder " + c.name) : '') +
+        '<div class="gname">' + esc(c.name) + '</div>' +
+        '<div class="gsub">' + sub + '</div></div>' +
+      '<div class="two">' +
+        '<div class="box-obj"><div class="boxlabel"><span>Performance</span>' +
+          plus(pid, "Performance breakdown for " + c.name) + '</div>' +
+          gauge(perf, "") + '</div>' +
+        '<div class="box-exec"><div class="boxlabel"><span>Milestones</span>' +
+          plus(eid, "Milestones behind " + c.name) + '</div>' +
+          msBody + '</div>' +
+      '</div></div></div>';
   }).join("");
 
   var SECS = [];
@@ -750,8 +845,11 @@ function renderGroupPerformance(){
 
   SECS.push({ t: "Business units", h: section("", "Business units",
       null,
-      arrangeBar("business units", UNIT_KEYS.length) +
-      '<div class="gauges g3 sortable" data-kind="units">' + units + '</div>', TIP_PERF) });
+      GVIEW.units === "table"
+        ? unitsTable(keys)
+        : arrangeBar("business units", UNIT_KEYS.length) +
+          '<div class="gauges g3 sortable" data-kind="units">' + units + '</div>',
+      TIP_PERF, viewToggle("units")) });
 
   SECS.push({ t: "Group themes", h: section("", "Group themes",
       null,
@@ -760,8 +858,11 @@ function renderGroupPerformance(){
 
   SECS.push({ t: "Group capabilities", h: section("", "Group capabilities",
       null,
-      arrangeBar("capabilities", GROUP.capabilities.length) +
-      '<div class="gauges g4 sortable" data-kind="caps">' + caps + '</div>', TIP_CAP) });
+      GVIEW.caps === "table"
+        ? capsTable()
+        : arrangeBar("capabilities", GROUP.capabilities.length) +
+          '<div class="gauges g4 sortable" data-kind="caps">' + caps + '</div>',
+      TIP_CAP, viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
   return bands(arrangeBtn("group")) + SECS[Math.min(GSEC, SECS.length - 1)].h;
@@ -1328,12 +1429,14 @@ function renderReport(u){
         '<td class="notecol">' + noteCell(x) + '</td></tr>';
     }).join(""));
 
-  /* ── One collapsible row per pillar, the same accordion the Performance page
-     uses, so the two pages read as the same product. Each carries how much of
-     it is done, which is what the person filling it in actually wants to know. */
-  var pillars = u.items.map(function(p, pi){
-    var ms = reportItems(u).filter(function(x){ return x.kind === "measure" && x.obj.pid === p.id; });
-    ms = [];
+  /* ── The rail carries the pillars (§15.12, the second half of the move that
+     put it on Performance in 1.8). Where it earns most is exactly here: each
+     rail row carries its pillar's tally, so while entering one pillar the
+     state of the others stays visible — which an accordion cannot show from
+     inside an open body. The selection belongs to the unit and is shared with
+     Performance and Strategy. No reordering here: entry, not arrangement. */
+  var reportPillarPane = function(p, pi){
+    var ms = [];
     p.measures.forEach(function(m){ ms.push({ id:m.id, obj:m, kind:"measure" }); });
     var ts = [];
     p.tactics.forEach(function(t){
@@ -1376,29 +1479,58 @@ function renderReport(u){
           }).join(""))
       : "";
 
-    return '<div class="prow-wrap">' +
-      '<button class="prow rprow" aria-expanded="false" data-p="' + pi + '">' +
-        '<span class="pname"><b><span class="pcode">' + pillarCode(u, pi) + '</span> ' + esc(p.name) + '</b>' +
-          '<span class="psub">' + ms.length + ' measures &middot; ' + askedT.length + ' tactics asked' +
-          (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
-          '</span></span>' +
-        '<span class="cc"><span class="pill kind">' + esc(p.kind) + '</span></span>' +
-        '<span class="num">' + ms.length + '</span>' +
-        '<span class="num">' + askedT.length + '</span>' +
-        '<span class="cc">' + tally(done, total) + '</span>' +
-        '<span class="chev">\u25b8</span>' +
-      '</button>' +
-      '<div class="pbody" hidden>' + mTable + tTable + '</div></div>';
-  }).join("");
+    return '<div class="ptitle"><div><h3><span class="pcode">' + pillarCode(u, pi) + '</span> ' +
+        esc(p.name) + '</h3>' +
+        '<div class="pmeta">' + esc(p.kind) + ' &middot; ' + ms.length + ' measures &middot; ' +
+        askedT.length + ' tactics asked' +
+        (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
+        '</div></div>' +
+        tally(done, total) + '</div>' +
+      mTable + tTable;
+  };
 
-  /* Column meanings stated once at the top, as the Performance page does. */
-  /* Wrapped in pheadwrap, which is what makes a header pin \u2014 the Performance
-     page has done this all along and reporting simply was not using it. */
-  pillars = '<div class="plist"><div class="pheadwrap"><div class="phead rphead">' +
-      '<span class="hfirst">' + L("pillar","bu") + allToggle() + '</span><span class="cc">Kind</span>' +
-      '<span class="num">Measures</span><span class="num">Tactics</span>' +
-      '<span class="cc">Reported</span><span></span></div></div>' +
-    pillars + '</div>';
+  /* Entries given of asked, per pillar \u2014 what the rail rows and the pane pill
+     both read, so they can never disagree. */
+  var pillarTally = function(p){
+    var done = 0, total = 0;
+    p.measures.forEach(function(m){
+      total++;
+      if (m.actual != null && m.actual !== "") done++;
+    });
+    p.tactics.forEach(function(t){
+      if (!tacticDue(t)) return;
+      total++;
+      if (t.actual != null && t.actual !== "") done++;
+    });
+    return { done: done, total: total };
+  };
+
+  var sel = unitRailPick(u);
+  var pillars;
+  if (!sel) {
+    pillars = '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
+      ' yet, so there is nothing to report against.</div>';
+  } else {
+    var railRows = u.items.map(function(p, pi){
+      var t = pillarTally(p);
+      var sub = t.total === 0 ? 'Not asked this cycle'
+              : t.done >= t.total ? 'Complete'
+              : (t.total - t.done) + ' still to enter';
+      return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
+          esc(u.ukey) + '|' + esc(p.code) + '">' +
+        '<b>' + pillarCode(u, pi) + '&nbsp; ' + esc(p.name) + '</b>' +
+        '<span class="rnum"><span class="rtally' + (t.total && t.done >= t.total ? " full" : "") + '">' +
+          t.done + '/' + t.total + '</span></span>' +
+        '<span class="rsub">' + sub + '</span></button>';
+    }).join("");
+    var rail = '<div class="rail"><div class="rhead">' + L("pillar","bu") +
+      ' <span>' + u.items.length + '</span></div>' + railRows +
+      '<div class="rfoot">Tally is entries given of asked</div></div>';
+    var pane = reportPillarPane(sel, u.items.indexOf(sel));
+    pillars = u.items.length >= 2
+      ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
+      : '<div class="pane">' + pane + '</div>';
+  }
 
   var bar =
     '<div class="rep-bar">' +
@@ -1637,7 +1769,12 @@ function projPerformanceBody(p){
 
 function renderFnPerformance(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return fnHead(fk) + caps.map(function(c){
+  /* The same Present a unit's Performance page carries (§8.8): available to
+     anyone who can view this page, assembling the review from whatever the
+     platform holds at that moment. */
+  return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
+      '" title="Present this function">Present</button></div>' +
+    fnHead(fk) + caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';

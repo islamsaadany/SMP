@@ -602,25 +602,50 @@ function renderFocusSetup(){
         '<b>Focus changes no score</b>; it is a lens and an incentive, not a second weighting.</div>');
 }
 
+/* The scope is a business unit OR a capability (§16.4): capability projects
+   arrive the way a unit's plan does — same page, same three steps, same
+   review — with their own sheets, because the thing being planned is a
+   project with deliverables, outcomes and milestones. */
+function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
+function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
+
 function renderImport(){
-  var u = UNITS[IMP.unit];
+  var isCap = impIsCap();
+  var u = isCap ? impCap() : UNITS[IMP.unit];
   var isPlan = IMP.kind === "plan";
   var d = IMP.diff;
 
-  var unitPick = '<select class="fld" id="imp-unit">' + UNIT_KEYS.map(function(k){
+  var unitPick = '<select class="fld" id="imp-unit">' +
+    '<optgroup label="Business units">' + UNIT_KEYS.map(function(k){
       return '<option value="' + k + '"' + (k === IMP.unit ? " selected" : "") + '>' + esc(UNITS[k].name) + '</option>';
-    }).join("") + '</select>';
+    }).join("") + '</optgroup>' +
+    '<optgroup label="Capabilities">' + GROUP.capabilities.map(function(c){
+      return '<option value="cap:' + c.id + '"' + ("cap:" + c.id === IMP.unit ? " selected" : "") + '>' +
+        esc(c.name) + '</option>';
+    }).join("") + '</optgroup></select>';
 
   var kindPick = '<span class="minisw">' +
     '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
     '<button data-impkind="progress" aria-pressed="' + !isPlan + '">Progress</button></span>';
 
-  var counts = isPlan
-    ? u.clauses.length + " clauses &middot; " + u.keyObjectives.length + " objectives &middot; " +
-      u.items.length + " pillars &middot; " +
-      u.items.reduce(function(a,p){ return a + p.measures.length; }, 0) + " measures &middot; " +
-      u.items.reduce(function(a,p){ return a + p.tactics.length; }, 0) + " tactics"
-    : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
+  var counts;
+  if (isCap) {
+    var nd = 0, no = 0, nm = 0;
+    u.projects.forEach(function(p){
+      nd += p.deliverables.length; no += p.outcomes.length; nm += p.milestones.length;
+    });
+    counts = isPlan
+      ? u.keyObjectives.length + " objectives &middot; " + u.projects.length + " projects &middot; " +
+        nd + " deliverables &middot; " + no + " outcomes &middot; " + nm + " milestones"
+      : capReported(u).total + " reportable rows";
+  } else {
+    counts = isPlan
+      ? u.clauses.length + " clauses &middot; " + u.keyObjectives.length + " objectives &middot; " +
+        u.items.length + " pillars &middot; " +
+        u.items.reduce(function(a,p){ return a + p.measures.length; }, 0) + " measures &middot; " +
+        u.items.reduce(function(a,p){ return a + p.tactics.length; }, 0) + " tactics"
+      : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
+  }
 
   var step1 =
     '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
@@ -668,7 +693,11 @@ function renderImport(){
      stated, with the way there. */
   var receipt = IMP.done
     ? '<div class="applied"><b>Applied to ' + esc(IMP.done.unit) + '.</b> ' + IMP.done.what +
-      ' <button class="linkbu" data-gounit="' + IMP.done.key + '">Open ' + esc(IMP.done.unit) + '</button></div>'
+      (IMP.done.fn
+        ? ' <button class="linkbu" data-gofn="fn:' + esc(IMP.done.fn) + '">Open ' +
+          esc(FUNCTIONS[IMP.done.fn] ? FUNCTIONS[IMP.done.fn].name : IMP.done.fn) + '</button>'
+        : ' <button class="linkbu" data-gounit="' + IMP.done.key + '">Open ' + esc(IMP.done.unit) + '</button>') +
+      '</div>'
     : '';
 
   var step3 = receipt;
@@ -699,7 +728,7 @@ function renderImport(){
         : '<div class="note">Nothing differs from what is recorded.</div>';
     } else {
       body = changed.length
-        ? '<div class="scroll"><table><thead><tr><th>' + L("pillar","bu") + '</th><th>Item</th>' +
+        ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
             return '<tr><td>' + esc(r.pillar) + '</td><td>' + esc(r.name) + '</td>' +
@@ -736,7 +765,7 @@ function renderImport(){
   }
 
   return '<div class="kv"><span class="pill kind">SMO only</span>' +
-      '<span class="pill kind">One file per unit</span></div>' +
+      '<span class="pill kind">One file per unit or capability</span></div>' +
     section("", (isPlan ? "Plan" : "Progress") + " import", null,
       '<div class="imp">' + step1 + step2 + step3 + '</div>');
 }

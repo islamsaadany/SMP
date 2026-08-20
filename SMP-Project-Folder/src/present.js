@@ -220,12 +220,209 @@ function deckPillarHead(u, p, pi, which){
     '<span><i>Planned</i><b>' + dPct(pillarPlan(p)) + '</b></span></div></div>';
 }
 
+/* ── A supporting function's review (§15.12) ──────────────────────────────
+   The same deck, carrying the project model's content: no measures, no
+   tactics. One system — a function's review must read as the same product as
+   a unit's, which is why every slide reuses the unit deck's shapes. */
+
+function deckSlidesFn(fk){
+  var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
+  var S = [];
+
+  S.push('<section class="dslide d-cover">' +
+    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
+    '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
+    '<p class="coversub">Capability review &middot; ' + esc(REVIEW.name) +
+    ' &middot; ' + caps.length + (caps.length === 1 ? ' capability' : ' capabilities') + '</p></section>');
+
+  caps.forEach(function(c){
+    var ko = capKOScore(c), perf = capPerf(c), ce = capExec(c);
+
+    /* The capability's cover carries its definition and its readings — key
+       objectives only where it has any (§15.1: absent, never zero). */
+    S.push('<section class="dslide d-cover"><span class="seclab">Capability &middot; ' +
+        esc(f.name) + '</span>' +
+      '<h1 class="cover">' + esc(c.name) + '</h1>' +
+      '<p class="coversub">' + esc(c.def) + '</p>' +
+      '<div class="coverrule"></div><div class="leadstats">' +
+        (c.keyObjectives.length
+          ? '<div><span class="dlab">Key objectives</span><b class="' + dBand(ko) + '">' + dPct(ko) + '</b></div>'
+          : '') +
+        '<div><span class="dlab">Project performance</span><b class="' + dBand(perf) + '">' + dPct(perf) + '</b></div>' +
+        '<div><span class="dlab">Milestones</span><b class="plain">' + ce.done + ' of ' + ce.total + '</b></div>' +
+      '</div></section>');
+
+    if (c.keyObjectives.length) {
+      var kRows = c.keyObjectives.map(function(m, i){
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(m.name) + '</td>' +
+          '<td class="num">' + (m.weight == null ? "&mdash;" : m.weight + "%") + '</td>' +
+          '<td class="num">' + esc(m.dir) + '</td>' +
+          '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
+          '<td class="num">' + (m.actual == null || m.actual === "" ? "&mdash;" : esc(m.actual)) + '</td>' +
+          '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
+          (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide"><h2>Key objectives &mdash; where we stand' +
+        '<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Objective</th>' +
+        '<th class="num">Weight</th><th class="num">Dir.</th><th class="num">Target</th>' +
+        '<th class="num">Actual</th><th class="num">Score</th><th>Note</th></tr></thead>' +
+        '<tbody>' + kRows + '</tbody></table></section>');
+    }
+
+    var pRows = c.projects.map(function(p, i){
+      var mst = projMilestones(p);
+      return '<tr><td class="idx">' + (i+1) + '</td><td class="dirname">' +
+        '<b>' + esc(p.name) + '</b>' +
+        '<span class="dsub">' + esc(p.owner || "") + ' &middot; ' + esc(p.start) + ' &rarr; ' + esc(p.end) + '</span></td>' +
+        '<td class="num">' + dPct(projDeliverySide(p)) + '</td>' +
+        '<td class="num">' + dPct(projOutcomeSide(p)) + '</td>' +
+        '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
+        '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
+    }).join("");
+    S.push('<section class="dslide"><h2>Projects<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+      '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Project</th>' +
+      '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
+      '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
+      '<tbody>' + (pRows || '<tr><td colspan="6">No projects yet.</td></tr>') + '</tbody></table>' +
+      '<p class="headfoot">Performance is half deliverables, half outcomes, per side. Milestones are completed of total.</p></section>');
+
+    c.projects.forEach(function(p){
+      var mst = projMilestones(p);
+      S.push('<section class="dslide d-cover"><span class="seclab">' + esc(c.name) +
+          ' &middot; ' + esc(p.owner || "") + ' &middot; ' + esc(p.start) + ' &rarr; ' + esc(p.end) + '</span>' +
+        '<h1 class="pillarname">' + esc(p.name) + '</h1>' +
+        '<p class="coversub">' + esc(p.brief || "") + '</p>' +
+        '<div class="coverrule"></div><div class="leadstats">' +
+          '<div><span class="dlab">Performance</span><b class="' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</b></div>' +
+          '<div><span class="dlab">Deliverables</span><b class="' + dBand(projDeliverySide(p)) + '">' + dPct(projDeliverySide(p)) + '</b></div>' +
+          '<div><span class="dlab">Outcomes</span><b class="' + dBand(projOutcomeSide(p)) + '">' + dPct(projOutcomeSide(p)) + '</b></div>' +
+          '<div><span class="dlab">Milestones</span><b class="plain">' + mst.done + ' of ' + mst.total + '</b></div>' +
+        '</div></section>');
+
+      var dRows = p.deliverables.map(function(d, i){
+        var v = delivReads(d);
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(d.name) + '</td>' +
+          '<td>' + esc(d.owner || "—") + '</td>' +
+          '<td class="num">' + esc(d.due || "—") + '</td>' +
+          '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
+            : d.kind === "pct" ? esc(String(d.actual)) + "%"
+            : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
+          '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
+          (d.note ? '<td class="dnote">' + esc(d.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
+        '<th>Owner</th><th class="num">Due</th><th class="num">Reported</th><th class="num">Reads</th>' +
+        '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
+
+      var oRows = p.outcomes.map(function(o, i){
+        if (o.progress == null) {
+          return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
+            '<td class="lead">' + esc(o.name) + '</td>' +
+            '<td class="num">' + esc(o.target) + '</td>' +
+            '<td colspan="2" class="cc">Measured at ' + esc(o.measureAt || "—") + '</td>' +
+            '<td class="dnote empty">&mdash;</td></tr>';
+        }
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(o.name) + '</td>' +
+          '<td class="num">' + esc(o.target) + '</td>' +
+          '<td class="num">' + esc(o.actual) + '</td>' +
+          '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
+          (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'O">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Outcomes</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Outcome</th>' +
+        '<th class="num">Target</th><th class="num">Actual</th><th class="num">Reads</th>' +
+        '<th>Note</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
+
+      var over = projOverruns(p).map(function(m){ return m.id; });
+      var mRows = p.milestones.map(function(m, i){
+        var word = m.status === "done" ? "Completed" : m.status === "wip" ? "In progress" : "Not started";
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(m.name) +
+          (m.covers ? '<span class="dsub">' + esc(m.covers) + '</span>' : '') + '</td>' +
+          '<td>' + esc(m.owner || "—") + '</td>' +
+          '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
+          (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
+          '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
+          (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
+        '<th>Owner</th><th class="num">Finish</th><th class="num">Status</th>' +
+        '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
+    });
+  });
+
+  /* Everything at risk or off track across the function, with what is being
+     done — the same closing gather a unit's deck makes. */
+  var att = [], n = 0;
+  caps.forEach(function(c){
+    c.projects.forEach(function(p){
+      p.deliverables.forEach(function(d){
+        var v = delivReads(d);
+        if (delivDue(d) && v != null && v < 70) {
+          n++;
+          att.push('<tr><td class="idx">' + n + '</td>' +
+            '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
+            '<td class="num">' + esc(d.due || "—") + '</td>' +
+            '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
+            '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
+        }
+      });
+      p.outcomes.forEach(function(o){
+        if (o.progress != null && o.progress < 70) {
+          n++;
+          att.push('<tr><td class="idx">' + n + '</td>' +
+            '<td class="lead">' + esc(o.name) + '<span class="dsub">' + esc(p.name) + ' &middot; outcome</span></td>' +
+            '<td class="num">' + esc(o.target) + '</td>' +
+            '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
+            '<td class="dnote' + (o.note ? '' : ' empty') + '">' + (o.note ? esc(o.note) : "&mdash;") + '</td></tr>');
+        }
+      });
+      projOverruns(p).forEach(function(m){
+        n++;
+        att.push('<tr><td class="idx">' + n + '</td>' +
+          '<td class="lead">' + esc(m.name) + '<span class="dsub">' + esc(p.name) + ' &middot; milestone overrun</span></td>' +
+          '<td class="num">' + esc(m.finish) + '</td>' +
+          '<td class="num">ends ' + esc(p.end) + '</td>' +
+          '<td class="dnote' + (m.note ? '' : ' empty') + '">' + (m.note ? esc(m.note) : "&mdash;") + '</td></tr>');
+      });
+    });
+  });
+  if (att.length) {
+    S.push('<section class="dslide" data-split="FNATT"><h2>What needs attention' +
+      '<span class="dwhich">' + att.length + ' at risk, off track or overrunning</span></h2>' +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
+      '<th class="num">Target / due</th><th class="num">Reads</th>' +
+      '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
+  }
+
+  S.push('<section class="dslide"><h2>Notes and achievements</h2>' +
+    '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + esc(fk) + '">' +
+      esc(REVIEW.note["fn:" + fk] || "") + '</div>' +
+    '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
+    'platform, not in a deck that is already wrong.</p></section>');
+
+  S.push('<section class="dslide d-cover d-thanks"><h1 class="cover">Thank you</h1>' +
+    '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
+    ' &middot; ' + esc(REVIEW.name) + '</p></section>');
+
+  return S.join("");
+}
+
 /* ── Opening, moving and closing ──────────────────────────────────────── */
 
-function openDeck(u){
+function openDeckWith(titleHtml, slides){
   var root = document.getElementById("deckroot");
-  root.querySelector(".deck").innerHTML = deckSlides(u);
-  root.querySelector(".dtitle").innerHTML = "<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name);
+  root.querySelector(".deck").innerHTML = slides;
+  root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
   deckFitPass();
@@ -233,6 +430,12 @@ function openDeck(u){
   deckShow(0);
   deckScale();
   root.focus();
+}
+function openDeck(u){
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), deckSlides(u));
+}
+function openDeckFn(fk){
+  openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name), deckSlidesFn(fk));
 }
 function closeDeck(){
   var root = document.getElementById("deckroot");

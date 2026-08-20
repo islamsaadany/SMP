@@ -485,6 +485,8 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     var pb = document.querySelector("[data-present]");
     if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
+    var pf = document.querySelector("[data-present-fn]");
+    if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
     document.querySelectorAll("[data-fold]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Browsing, not going: `current` is untouched, so the page and its tabs
@@ -792,6 +794,16 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     document.querySelectorAll("[data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
     });
+    /* Cards or a table, per section (§16.6). A view preference — it changes
+       how a section is laid out, never what anything is or in what order it
+       is stored. */
+    document.querySelectorAll("[data-gview]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.gview.split("|");
+        GVIEW[p[0]] = p[1];
+        paint();
+      });
+    });
     document.querySelectorAll("[data-edit]").forEach(function(b){
       b.addEventListener("click", function(){
         var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
@@ -855,17 +867,36 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
      because a sandboxed frame may refuse the download and leaving the SMO with
      nothing would be worse than a copy box. */
   function csvFor(){
+    if (impIsCap()) {
+      var c = impCap();
+      return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
+    }
     var u = UNITS[IMP.unit];
     return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
   }
   function fileName(){
-    return UNITS[IMP.unit].name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
+    var name = impIsCap() ? impCap().name : UNITS[IMP.unit].name;
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
       "-" + IMP.kind + "-template.csv";
   }
   function loadCSV(text){
     IMP.done = null;
     IMP.text = text;
-    var u = UNITS[IMP.unit], rows = parseCSV(text);
+    var rows = parseCSV(text);
+    if (impIsCap()) {
+      var c = impCap();
+      if (IMP.kind === "plan") {
+        IMP.check = validateCapPlan(c, rows);
+        IMP.diff = diffCapPlan(c, rows);
+      } else {
+        var cShape = checkCapFileShape(c, rows, "progress");
+        IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+        IMP.diff = diffCapProgress(c, rows);
+      }
+      paint();
+      return;
+    }
+    var u = UNITS[IMP.unit];
     if (IMP.kind === "plan") {
       IMP.check = validatePlan(u, rows);
       IMP.diff = diffPlan(u, rows);
@@ -887,8 +918,14 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
 
     var dlx = document.querySelector("[data-dlx]");
     if (dlx) dlx.addEventListener("click", function(){
-      var u = UNITS[IMP.unit];
-      var sheets = IMP.kind === "plan" ? planWorkbook(u) : progressWorkbook(u);
+      var sheets;
+      if (impIsCap()) {
+        var c = impCap();
+        sheets = IMP.kind === "plan" ? capPlanWorkbook(c) : capProgressWorkbook(c);
+      } else {
+        var u = UNITS[IMP.unit];
+        sheets = IMP.kind === "plan" ? planWorkbook(u) : progressWorkbook(u);
+      }
       var bytes = buildXlsx(sheets);
       var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       var a = document.createElement("a");
@@ -923,6 +960,20 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         var rx = new FileReader();
         rx.onload = function(){
           readXlsx(rx.result).then(function(sheets){
+            if (impIsCap()) {
+              var c = impCap();
+              var cRows = IMP.kind === "plan" ? capPlanFromWorkbook(c, sheets) : capProgressFromWorkbook(c, sheets);
+              if (IMP.kind === "plan") {
+                IMP.check = validateCapPlan(c, cRows);
+                IMP.diff = diffCapPlan(c, cRows);
+              } else {
+                var cShape = checkCapFileShape(c, cRows, "progress");
+                IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+                IMP.diff = diffCapProgress(c, cRows);
+              }
+              paint();
+              return;
+            }
             var u = UNITS[IMP.unit];
             var rows = IMP.kind === "plan" ? planFromWorkbook(u, sheets) : progressFromWorkbook(u, sheets);
             if (IMP.kind === "plan") {
@@ -965,16 +1016,30 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
 
     var ap = document.querySelector("[data-apply]");
     if (ap) ap.addEventListener("click", function(){
-      var u = UNITS[IMP.unit];
       var ch = IMP.diff.rows.filter(function(r){ return r.status === "changed"; }).length;
       var nu = IMP.diff.rows.filter(function(r){ return r.status === "new"; }).length;
-      if (IMP.kind === "plan") applyPlan(u, IMP.diff); else applyProgress(u, IMP.diff);
-      IMP.done = { unit:u.name, key:u.ukey,
-        what: IMP.kind === "plan"
-          ? ch + " changed" + (nu ? ", " + nu + " created" : "") + "."
-          : ch + " figure" + (ch === 1 ? "" : "s") + " updated." };
+      var what = IMP.kind === "plan"
+        ? ch + " changed" + (nu ? ", " + nu + " created" : "") + "."
+        : ch + " figure" + (ch === 1 ? "" : "s") + " updated.";
+      if (impIsCap()) {
+        var c = impCap();
+        if (IMP.kind === "plan") applyCapPlan(c, IMP.diff); else applyCapProgress(c, IMP.diff);
+        IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
+      } else {
+        var u = UNITS[IMP.unit];
+        if (IMP.kind === "plan") applyPlan(u, IMP.diff); else applyProgress(u, IMP.diff);
+        IMP.done = { unit:u.name, key:u.ukey, what:what };
+      }
       IMP.diff = null; IMP.text = ""; IMP.check = null;
       paint();
+    });
+    /* The receipt's way back for a capability: its function's pages. */
+    document.querySelectorAll("[data-gofn]").forEach(function(b){
+      b.addEventListener("click", function(){
+        IMP.done = null;
+        current = b.dataset.gofn; currentSub = null;
+        paint(); window.scrollTo(0,0);
+      });
     });
     document.querySelectorAll("[data-gounit]").forEach(function(b){
       b.addEventListener("click", function(){

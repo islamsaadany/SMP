@@ -28,7 +28,12 @@ var PAGE_INFO = {
        "own right &mdash; they carry no theme because they support all of them."],
       ["Order is not influence",
        "Arranging units, themes or capabilities changes where they sit and nothing else. Weight determines " +
-       "how much a unit counts; position determines nothing."]
+       "how much a unit counts; position determines nothing."],
+      ["Cards to judge, a table to scan",
+       "The Business units and Group capabilities sections each carry a Cards/Table switch. The table shows " +
+       "the same derived figures as the cards, laid out to compare down a column. The capabilities table is " +
+       "<b>ranked on project performance</b> &mdash; the one reading all of them have &mdash; while the units " +
+       "table keeps the arranged order. Arranging is a cards-view act."]
     ]
   },
 
@@ -360,10 +365,11 @@ var PAGE_INFO = {
        "Cross-cutting work the whole group depends on, improved by a supporting function. It belongs " +
        "to no business unit and no unit is accountable for it \u2014 which is why it is <b>scored by the " +
        "group</b> and never folds into the owning function's unit, if it has one."],
-      ["Measures and initiatives are on their way out",
-       "They were inherited from when a capability was modelled as a pillar. <b>Enhancement " +
-       "projects</b> replace them next \u2014 each with a brief, stakeholders, deliverables and " +
-       "milestones, and progress derived from milestones completed rather than typed."],
+      ["Projects are the plan",
+       "Each carries a brief, stakeholders, <b>deliverables</b>, <b>outcomes</b> and " +
+       "<b>milestones</b>. Nothing on this page has been reported \u2014 progress is entered on " +
+       "Reporting and read on Performance. Projects arrive by template on Manage &rarr; Import, " +
+       "the way a unit's plan does."],
       ["Who reaches this page",
        "The head of the function that carries it, its Strategy custodians, the SMO and the CEO. A " +
        "business unit has no business in another function's improvement work."]
@@ -426,10 +432,11 @@ var PAGE_INFO = {
        "and is its own reading, shown beside the group figure rather than folded into it \u2014 folding " +
        "it in would mean giving capabilities a weight, and make the group figure something no unit " +
        "head could reconcile against their own page."],
-      ["Measures and initiatives are on their way out",
-       "They were inherited from when a capability was modelled as a pillar. A capability has no " +
-       "targets of its own; its health is whether its projects land. <b>Enhancement projects</b> \u2014 " +
-       "brief, deliverables and milestones \u2014 replace them next."]
+      ["Projects carry the work",
+       "A capability holds <b>enhancement projects</b> \u2014 brief, stakeholders, deliverables, " +
+       "outcomes and milestones \u2014 and, where it has any, key objectives. Its performance is its " +
+       "projects' (half deliverables, half outcomes); its execution is milestones completed. " +
+       "Projects arrive by template on Manage &rarr; Import, scoped to the capability."]
     ]
   },
 
@@ -459,6 +466,13 @@ var PAGE_INFO = {
        "with both horizons, and every pillar with its measures and tactics. It carries no actuals. " +
        "<b>Progress</b> carries only what is reported: an actual against each measure and a percent complete " +
        "against each tactic. It cannot create anything and cannot change a target."],
+      ["A capability is a scope of its own",
+       "Capability projects arrive the way a unit's plan does \u2014 here, never from the capability's own " +
+       "pages. Its plan workbook carries the project model: <b>Objectives, Projects, Deliverables, " +
+       "Outcomes, Milestones</b>, each sheet with only its own columns and the children choosing their " +
+       "project from a dropdown of names. Its progress workbook mirrors the capability's reporting page. " +
+       "Same parser, same review, same id rules underneath \u2014 and a milestone finishing after its " +
+       "project's end date is noted, never refused."],
       ["Who may upload what",
        "Creating a plan is the SMO's, by sheet or in the platform. Progress is normally entered directly by " +
        "the unit's head or owner; a progress upload by sheet is the SMO's alone, so one hand is accountable " +
@@ -531,6 +545,10 @@ var PAGE_INFO = {
        "This unit's Key Objectives, every key measure carrying a target, and the tactics whose " +
        "quarters fall inside the open cycle. A tactic outside the window reads <i>not asked</i> " +
        "rather than sitting there as an empty box that looks like a chore somebody forgot."],
+      ["The rail carries the pillars",
+       "Each rail row shows its pillar's tally — entries given of asked — so while entering one " +
+       "pillar the state of the others stays visible. Which pillar is open belongs to the unit, so " +
+       "it keeps its place across Performance, Strategy and here."],
       ["The box states its unit",
        "Type the number; the unit sits beside it as a fixed suffix taken from the measure's own " +
        "target \u2014 <b>2.7</b> B EGP, <b>28</b> %, <b>3,180</b> with none at all, and a tactic plainly " +

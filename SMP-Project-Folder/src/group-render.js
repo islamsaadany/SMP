@@ -640,7 +640,6 @@ function renderWeighting(){
 
 function renderGroupPerformance(){
   syncWeights();
-  var p = GROUP.portfolio;
   /* The one shared list — reordering business units mutates UNIT_KEYS, so a
      local copy here would silently ignore the new order. */
   var keys = activeKeys();
@@ -652,7 +651,8 @@ function renderGroupPerformance(){
         '<td>' + esc(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
-    '<p class="sub">Mean of the six: <b>' + GROUP.keyObjectivesScore + '%</b>. Every objective carries a target, so none is excluded from the average.</p>';
+    '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
+      pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
   var perfDrill = miniTable(["Business unit","Objectives performance","Weight","Weighted contribution"],
     keys.map(function(k){
@@ -822,8 +822,8 @@ function renderGroupPerformance(){
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
-        drillCard("Group Key Objectives" + tip("The six objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), GROUP.keyObjectivesScore, {
-          primary: true, sub: "The group\'s own scorecard. All <b>6</b> objectives have a target set.",
+        drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
+          primary: true, sub: "The group\'s own scorecard. All <b>" + GROUP.keyObjectives.length + "</b> objectives have a target set.",
           drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF) + deltaTag("group"), groupUnitsObjectives(), {
@@ -1014,7 +1014,7 @@ function renderGroupFoundation(){
 
     '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
-      GROUP.values.map(function(v){
+      (GROUP.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr("foundation", v.def, "",
             function(x){ v.def = x; }) + '</div></details>';

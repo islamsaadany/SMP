@@ -1576,7 +1576,7 @@
 
 </style>
 
-<div class="banner">
+<div class="banner" id="banner">
   <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
   <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
 </div>
@@ -1595,6 +1595,10 @@
       <span class="viewer-note" id="viewerNote"></span>
     </div>
     <button class="infobtn" id="pageinfo" hidden>Info</button>
+    <!-- Switches the whole product between the client's own data and the
+         full worked example, for explaining how it works. Appears only
+         where there is a live dataset to tell the example apart from. -->
+    <button class="infobtn" id="demobtn" hidden>Demo data</button>
   </div>
 </header>
 
@@ -1635,10 +1639,13 @@
 
 <div class="wrap"><div class="view" id="panel"></div>
 
+<!-- The footer used to claim "no database work done" and describe the demo
+     content as if it were the only content. Both stopped being true: the
+     platform runs on a database (\u00a718), and a live tenant holds the client's
+     own data. The invented-data notice now lives in the demo banner, where it
+     is true \u2014 stated once, in the one place it applies. -->
 <footer class="end">
-  <b>Strategy Management Platform</b> &middot; spec 012, the strategy layer &middot; group shape &middot; prototype for functional review, no database work done.
-  Mobile's plan content comes from the Raya Trade 2026 group and Mobile decks. The other nine business units are
-  invented, and every reported actual throughout is illustrative rather than real performance.
+  <b>Strategy Management Platform</b> &middot; spec 012, the strategy layer &middot; group shape.
 </footer>
 </div>
 
@@ -1688,7 +1695,6 @@ var GROUP = {
     { name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
     { name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
   ],
-  keyObjectivesScore: 75,
   themes: [
     { ab: "OT",  name: "One Trade",          note: "New for 2026" },
     { ab: "VC",  name: "Deepen Value Chain", note: "Standing" },
@@ -3217,8 +3223,15 @@ function fnsReachable(){
    its plan, so it survives both. */
 function clearCapability(cap, what){
   if (what === "plan") {
-    cap.measures.length = 0;
-    cap.tactics.length = 0;
+    /* A capability's plan is its key objectives and its PROJECTS, each
+       carrying deliverables, outcomes and milestones. Until 2026-08-20 this
+       emptied `cap.measures` and `cap.tactics` — the fields a capability
+       stopped having in 1.7 when the project model replaced them. The line
+       threw on a missing array, so "Clear all plans" on Supporting functions
+       had done nothing at all since then. The definition survives: it is the
+       capability's identity, not its plan. */
+    if (cap.keyObjectives) cap.keyObjectives.length = 0;
+    if (cap.projects) cap.projects.length = 0;
     return;
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
@@ -3388,7 +3401,22 @@ function unitState(u){
 
 var VIEWER = "smo";
 
-function viewer(){ return PEOPLE.filter(function(p){ return p.key === VIEWER; })[0]; }
+/* Every caller treats this as a person, not a maybe — `grant`, `reaches`,
+   `paint` and the pages all read straight off the result. So it resolves
+   rather than returning nothing: if the name being viewed as is no longer in
+   the list, the first person stands in and VIEWER is corrected to match, so
+   the switcher and the screen cannot disagree. The list changes under a live
+   page in two ways — hydration replaces the baked-in example with the tenant's
+   own people, and the Demo button swaps the two datasets — and before
+   2026-08-20 either one left a departed key selected and threw on the next
+   repaint. */
+function viewer(){
+  var v = PEOPLE.filter(function(p){ return p.key === VIEWER; })[0];
+  if (v) return v;
+  if (!PEOPLE.length) return { key: VIEWER, name: "\u2014", title: "", level: "smo", unit: "group" };
+  VIEWER = PEOPLE[0].key;
+  return PEOPLE[0];
+}
 function grant(pageKey){
   var v = viewer();
   return (ACCESS[v.level] || {})[pageKey] || "none";
@@ -3487,7 +3515,7 @@ var BANDS = {
 };
 
 function bandOf(v){
-  if (v == null) return { key:"none", label:"No data" };
+  if (v == null || isNaN(v)) return { key:"none", label:"No data" };
   var b = BANDS.bands;
   for (var i=0;i<b.length;i++) if (v >= b[i].floor) return b[i];
   return b[b.length-1];
@@ -3767,6 +3795,14 @@ function activeUnits(){ return UNIT_KEYS.filter(function(k){ return UNITS[k].act
 /* A unit's headline is its Key Objectives, optionally weighted. Equal weight
    is the default nobody has to defend. */
 function unitObjectives(u){ return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]); }
+
+/* The group's own scorecard, on the same footing as a unit's: computed from
+   the objectives that are actually there, never read from a stored number
+   (§5.1). It was a field on GROUP until 2026-08-20 — which agreed with the
+   mean while the demo data was the only data, and read "undefined%" the moment
+   a tenant had no objectives of its own. Unweighted: weights are a per-unit
+   mechanism, and the group has never had a row in the weight table. */
+function groupKeyObjectives(){ return koScore(GROUP.keyObjectives); }
 
 /* Themes aggregate from the pillars that actually carry them, across every
    unit — derived rather than a hand-kept list, which is how the earlier
@@ -6917,7 +6953,6 @@ function renderWeighting(){
 
 function renderGroupPerformance(){
   syncWeights();
-  var p = GROUP.portfolio;
   /* The one shared list — reordering business units mutates UNIT_KEYS, so a
      local copy here would silently ignore the new order. */
   var keys = activeKeys();
@@ -6929,7 +6964,8 @@ function renderGroupPerformance(){
         '<td>' + esc(m.compile) + '</td><td class="num">' + esc(m.actual) + '</td>' +
         '<td class="num">' + m.progress + '%</td></tr>';
     }).join("")) +
-    '<p class="sub">Mean of the six: <b>' + GROUP.keyObjectivesScore + '%</b>. Every objective carries a target, so none is excluded from the average.</p>';
+    '<p class="sub">Mean of the ' + GROUP.keyObjectives.length + ': <b>' +
+      pct(groupKeyObjectives()) + '</b>. Every objective carries a target, so none is excluded from the average.</p>';
 
   var perfDrill = miniTable(["Business unit","Objectives performance","Weight","Weighted contribution"],
     keys.map(function(k){
@@ -7099,8 +7135,8 @@ function renderGroupPerformance(){
   var SECS = [];
   SECS.push({ t: "Overall performance", h: section("", "Overall performance", null,
       '<div class="scores">' +
-        drillCard("Group Key Objectives" + tip("The six objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), GROUP.keyObjectivesScore, {
-          primary: true, sub: "The group\'s own scorecard. All <b>6</b> objectives have a target set.",
+        drillCard("Group Key Objectives" + tip("The objectives the group set itself \u2014 each actual against its target, averaged. Authored by the group, never summed from the business units."), groupKeyObjectives(), {
+          primary: true, sub: "The group\'s own scorecard. All <b>" + GROUP.keyObjectives.length + "</b> objectives have a target set.",
           drill: koDrill, modalTitle: "Group Key Objectives", modalSub: "The group\'s own scorecard, authored not compiled"
         }) +
         drillCard("Business units &mdash; performance" + tip(TIP_PERF) + deltaTag("group"), groupUnitsObjectives(), {
@@ -7291,7 +7327,7 @@ function renderGroupFoundation(){
 
     '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
-      GROUP.values.map(function(v){
+      (GROUP.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
           '<div class="valcard-body">' + fieldOr("foundation", v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
@@ -9990,6 +10026,21 @@ var SYNC = (function () {
   var timer = null;
   var saving = false;
 
+  /* Two datasets, one product.
+
+     DEMO is the full worked example baked into this file — Raya Trade with
+     every unit, capability, figure and person. LIVE is what the database
+     holds, which after a clean slate is the client's own and mostly empty.
+
+     The Demo button switches between them so the platform can be EXPLAINED
+     with a complete example without that example ever being mistaken for, or
+     written into, the real thing. Demo mode never saves (§B3: invented data
+     is labelled every time, and it must not leak into a client's tenant). */
+  var DEMO = null;
+  var LIVE = null;
+  var mode = "live";
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
   function graph() {
     return {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
@@ -10031,7 +10082,8 @@ var SYNC = (function () {
   }
 
   function save() {
-    if (!live || saving) return;
+    /* The guard that matters: demo data must never reach the database. */
+    if (!live || mode === "demo" || saving) return;
     var now = serialize();
     if (now === lastSaved) return;
     saving = true;
@@ -10087,8 +10139,43 @@ var SYNC = (function () {
     paint();
   }
 
+  /* Switching datasets. Leaving live remembers where the client's data was,
+     so returning restores it exactly rather than the snapshot taken at boot —
+     otherwise an edit made before opening the demo would vanish from the
+     screen. Anything typed while in demo is discarded, by design. */
+  function setMode(next, paint) {
+    if (!DEMO || next === mode) return;
+    if (mode === "live") LIVE = clone(graph());
+    mode = next;
+    hydrate(clone(mode === "demo" ? DEMO : LIVE));
+    markMode();
+    paint();
+    if (mode === "live") lastSaved = serialize();
+  }
+
+  /* Demo data is labelled the whole time it is on screen. The banner is the
+     platform's own — it carries the invented-data notice, which is true of the
+     example and NOT true of the client's own tenant, so it shows in demo mode
+     and is hidden in live. */
+  function markMode() {
+    var btn = document.getElementById("demobtn");
+    if (btn) btn.textContent = mode === "demo" ? "Exit demo" : "Demo data";
+    var ban = document.getElementById("banner");
+    if (ban) {
+      ban.hidden = mode !== "demo";
+      if (mode === "demo") {
+        ban.innerHTML =
+          '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
+          'example, for explaining how the platform works.</span>' +
+          '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
+          'capability\u2019s content and every reported figure is invented.</span>';
+      }
+    }
+  }
+
   return {
     isLive: function () { return live; },
+    isDemo: function () { return mode === "demo"; },
     person: function () { return person; },
     /* The SMO issues or resets a password from Levels & access. The server
        checks the policy and the issuer; the password is temporary and forces
@@ -10104,6 +10191,9 @@ var SYNC = (function () {
     boot: function (paint) {
       paint();
       if (!enabled) return;
+      /* Taken before hydration, while the globals still hold the baked-in
+         example — after hydration it is gone from memory. */
+      DEMO = clone(graph());
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. */
@@ -10115,11 +10205,24 @@ var SYNC = (function () {
           if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
           if (data.person && data.person.mustChange) { location.replace("/"); return; }
           hydrate(data.state);
+          LIVE = clone(data.state);
           live = true;
           person = data.person || null;
           if (person) chromeFor(paint); else paint();
           lastSaved = serialize();
           setInterval(save, 5000);
+
+          /* The Demo button exists only where there is a live dataset to tell
+             the example apart from. Opened as a file the whole product IS the
+             example, so the button would mean nothing. */
+          var btn = document.getElementById("demobtn");
+          if (btn) {
+            btn.hidden = false;
+            btn.addEventListener("click", function () {
+              setMode(mode === "demo" ? "live" : "demo", paint);
+            });
+          }
+          markMode();
         })
         .catch(function (e) {
           if (e.message !== "sign in")
@@ -10337,6 +10440,7 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
+    fillViewers();
     paintUnits();
     /* Derived, not typed — the count was hardcoded at three and quietly lied
        the moment the group grew. */
@@ -11148,11 +11252,26 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
 
+  /* The switcher lists the people the platform actually has. It was filled
+     once, at load, from the baked-in example \u2014 so on the deployed product it
+     went on offering all 29 of them after hydration had replaced them with the
+     tenant's own, and picking someone who had gone threw on the next repaint.
+     It is refilled whenever the list itself changes, which is cheap because
+     the signature says when nothing has. */
   var sel = document.getElementById("asWho");
-  sel.innerHTML = PEOPLE.map(function(p){
-    return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
-  }).join("");
-  sel.value = VIEWER;
+  var viewerSig = null;
+  function fillViewers(){
+    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    if (sig !== viewerSig) {
+      viewerSig = sig;
+      sel.innerHTML = PEOPLE.map(function(p){
+        return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+      }).join("");
+    }
+    viewer();               /* corrects VIEWER if the person selected has gone */
+    sel.value = VIEWER;
+  }
+  fillViewers();
   sel.addEventListener("change", function(){
     VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
   });

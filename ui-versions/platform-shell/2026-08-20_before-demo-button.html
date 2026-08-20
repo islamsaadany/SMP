@@ -1,4 +1,4 @@
-<div class="banner" id="banner">
+<div class="banner">
   <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
   <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
 </div>
@@ -17,10 +17,6 @@
       <span class="viewer-note" id="viewerNote"></span>
     </div>
     <button class="infobtn" id="pageinfo" hidden>Info</button>
-    <!-- Switches the whole product between the client's own data and the
-         full worked example, for explaining how it works. Appears only
-         where there is a live dataset to tell the example apart from. -->
-    <button class="infobtn" id="demobtn" hidden>Demo data</button>
   </div>
 </header>
 
@@ -61,13 +57,10 @@
 
 <div class="wrap"><div class="view" id="panel"></div>
 
-<!-- The footer used to claim "no database work done" and describe the demo
-     content as if it were the only content. Both stopped being true: the
-     platform runs on a database (\u00a718), and a live tenant holds the client's
-     own data. The invented-data notice now lives in the demo banner, where it
-     is true \u2014 stated once, in the one place it applies. -->
 <footer class="end">
-  <b>Strategy Management Platform</b> &middot; spec 012, the strategy layer &middot; group shape.
+  <b>Strategy Management Platform</b> &middot; spec 012, the strategy layer &middot; group shape &middot; prototype for functional review, no database work done.
+  Mobile's plan content comes from the Raya Trade 2026 group and Mobile decks. The other nine business units are
+  invented, and every reported actual throughout is illustrative rather than real performance.
 </footer>
 </div>
 
@@ -283,7 +276,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
-    fillViewers();
     paintUnits();
     /* Derived, not typed — the count was hardcoded at three and quietly lied
        the moment the group grew. */
@@ -1095,26 +1087,11 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
 
-  /* The switcher lists the people the platform actually has. It was filled
-     once, at load, from the baked-in example \u2014 so on the deployed product it
-     went on offering all 29 of them after hydration had replaced them with the
-     tenant's own, and picking someone who had gone threw on the next repaint.
-     It is refilled whenever the list itself changes, which is cheap because
-     the signature says when nothing has. */
   var sel = document.getElementById("asWho");
-  var viewerSig = null;
-  function fillViewers(){
-    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
-    if (sig !== viewerSig) {
-      viewerSig = sig;
-      sel.innerHTML = PEOPLE.map(function(p){
-        return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
-      }).join("");
-    }
-    viewer();               /* corrects VIEWER if the person selected has gone */
-    sel.value = VIEWER;
-  }
-  fillViewers();
+  sel.innerHTML = PEOPLE.map(function(p){
+    return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+  }).join("");
+  sel.value = VIEWER;
   sel.addEventListener("change", function(){
     VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
   });

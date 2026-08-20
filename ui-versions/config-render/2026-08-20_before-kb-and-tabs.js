@@ -42,7 +42,13 @@ function renderLabels(){
       'two different objects rendering under one word on the same screen is not recoverable by the reader.</div>'
     : '<div class="note"><b>No collisions.</b> Every display label at each level is unique, so no two entities can render under the same word.</div>';
 
-  return section("", "Labels", null,
+  return '<p class="lede">Every level of the model carries an <strong>internal name</strong> the platform is built on, and a <strong>display label</strong> the tenant sees. The internal name never changes. <strong>The SMO manages this, not the client</strong> &mdash; which is what stops a label collision reaching a screen.</p>' +
+
+    '<div class="kv"><span class="pill kind">Scope: per tenant</span>' +
+    '<span class="pill kind">Managed by: SMO</span>' +
+    '<span class="pill ' + (editable ? "good" : "none") + '">' + (editable ? "Editable" : "Read only for this viewer") + '</span></div>' +
+
+    section("", "Labels", null,
       '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
       '<th style="width:33%">Display at group level</th>' +
@@ -122,7 +128,13 @@ function renderAccess(){
       '</td></tr>';
   }).join("");
 
-  return section("", "The visibility matrix",
+  return '<p class="lede">Access is <strong>page level only</strong>. If a level can open a page, it sees everything on that page &mdash; restriction happens by removing the page, never by trimming its contents. A person carries a <strong>level</strong>, which decides which pages, and a <strong>unit attachment</strong>, which decides whose.</p>' +
+
+    '<div class="kv"><span class="pill kind">Page level, never per element</span>' +
+    '<span class="pill kind">Three states: none / view / edit</span>' +
+    '<span class="pill ' + (editable ? "good" : "none") + '">' + (editable ? "Editable" : "Read only for this viewer") + '</span></div>' +
+
+    section("", "The visibility matrix",
       "Pre-filled with a working default. Change any cell and the navigation above re-renders immediately for whoever is currently being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -235,7 +247,13 @@ function renderBands(){
   var ok = true;
   for (var i = 1; i < b.length; i++) if (b[i].floor >= b[i-1].floor) ok = false;
 
-  return section("", "Scoring bands",
+  return '<p class="lede">One scale for every figure scored against a benchmark. <strong>Performance is actual over target; execution is delivered over plan</strong> &mdash; the same kind of number, so both read on these bands. The colour and the status word come from the same place, so they can never contradict each other.</p>' +
+
+    '<div class="kv"><span class="pill kind">Scope: per tenant</span>' +
+    '<span class="pill kind">One standing scale</span>' +
+    '<span class="pill ' + (editable ? "good" : "none") + '">' + (editable ? "Editing" : "View only") + '</span></div>' +
+
+    section("", "Scoring bands",
       "The lowest band has no floor to set &mdash; it catches everything beneath the band above it.",
       '<div class="cfg-bar plain"><span class="cfg-lab">' + b.length + ' bands</span>' +
         (grant("c_bands") === "edit"
@@ -407,6 +425,34 @@ function renderUnits(){
       "units", grant("c_units") === "edit", "all",
       ["Clear all progress", "Clear all plans"]) +
 
+    section("", "Companies", null,
+      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+        '<th class="idx" style="width:38px">#</th><th style="width:22%">Company</th>' +
+        '<th class="cc" style="width:10%">Units</th>' +
+        '<th class="cc" style="width:20%">Sees other companies</th>' +
+        '<th class="cc" style="width:20%">Sees the group</th></tr></thead><tbody>' +
+      COMPANY_KEYS.map(function(ck, i){
+        var co = COMPANIES[ck], flag = function(field, val){
+          if (!editable) return '<span class="pill ' + (val ? "good" : "none") + '">' +
+            (val ? "Yes" : "No") + '</span>';
+          return '<select class="fld" data-coflag="' + ck + '|' + field + '">' +
+            '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+            '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+        };
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td><b>' + esc(co.name) + '</b><span class="why mono">key ' + ck + '</span></td>' +
+          '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
+          '<td class="cc">' + flag("seeOthers", co.seeOthers) + '</td>' +
+          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
+      'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
+      'more. Supporting functions belong to no company: they serve all of them. ' +
+      (soloUnits().length
+        ? soloUnits().length + ' unit' + (soloUnits().length === 1 ? ' stands' : 's stand') +
+          ' alone: ' + soloUnits().map(function(k){ return esc(UNITS[k].name); }).join(", ") + '.'
+        : 'Every unit belongs to a company.') + '</div>') +
+
     section("", "Business units", null,
       '<div class="cfg"><table class="unitcfg"><thead><tr>' +
         '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
@@ -421,6 +467,35 @@ function renderUnits(){
       (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
 }
 
+
+/* The reward rule is a property of the cycle, not of each measure \u2014 set once,
+   read by every focus measure. A stretch target per measure would mean the line
+   is negotiated one row at a time, which is how a scheme stops being a scheme. */
+function renderBandsExtra(){
+  var can = grant("c_bands") === "edit";
+  var rows =
+    '<div class="cfg"><table><tbody>' +
+      '<tr><td style="width:46%">Reward begins at</td><td>' +
+        (can && EDITING.bands
+          ? inputOr2(CYCLE.rewardAt + "%", "Reward threshold", function(v){
+              var n = parseFloat(String(v).replace(/[^0-9.]/g, ""));
+              if (!isNaN(n)) CYCLE.rewardAt = Math.max(1, Math.round(n));
+            })
+          : '<span class="mono val">' + CYCLE.rewardAt + '%</span>') +
+        ' <span class="why" style="margin:0 0 0 8px;display:inline">of target</span></td></tr>' +
+      '<tr><td>Marks locked</td><td>' +
+        (can && EDITING.bands
+          ? '<button class="rmbtn' + (CYCLE.locked ? ' on' : '') + '" data-lockcycle="1">' +
+            (CYCLE.locked ? "Locked" : "Open") + '</button>'
+          : '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
+            (CYCLE.locked ? "Locked" : "Open for marking") + '</span>') + '</td></tr>' +
+    '</tbody></table></div>' +
+    '<div class="note">At <b>100%</b> delivering the commitment earns. Set it higher and a ' +
+      'measure can meet its target without clearing the reward line \u2014 a fourth standing, ' +
+      '<i>met, not earning</i>, appears between short and earning. Either way the measure is ' +
+      'scored against its own target exactly as before: <b>focus changes no score</b>.</div>';
+  return section("", "Focus and reward", null, rows);
+}
 
 /* ── Setup · Focus measures ─────────────────────────────────────────
    Marking is a configuration act, not something to be done while reading a
@@ -449,190 +524,6 @@ var FSET = { unit:"mobile" };
    second silently won. One declaration now. ── */
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
             read:"", check:null, done:null };
-
-
-/* ── Setup · Companies ──────────────────────────────────────────────
-   Its own page since 3.5. It sat above the Business units table, which put two
-   different questions on one screen: which units exist, and who is allowed to
-   see whom. They are edited at different times by different reasoning, and the
-   units table is long enough to push the company rules off the top. */
-function renderCompanies(){
-  var editable = grant("c_units") === "edit" && EDITING.units;
-  return cfgHead("Companies",
-      ['<span class="pill kind">SMO</span>',
-       COMPANY_KEYS.length + ' ' + (COMPANY_KEYS.length === 1 ? 'company' : 'companies'),
-       plural(soloUnits().length, "unit") + ' standing alone'],
-      "units", grant("c_units") === "edit") +
-    section("", "Companies", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:22%">Company</th>' +
-        '<th class="cc" style="width:10%">Units</th>' +
-        '<th class="cc" style="width:20%">Sees other companies</th>' +
-        '<th class="cc" style="width:20%">Sees the group</th></tr></thead><tbody>' +
-      COMPANY_KEYS.map(function(ck, i){
-        var co = COMPANIES[ck], flag = function(field, val){
-          if (!editable) return '<span class="pill ' + (val ? "good" : "none") + '">' +
-            (val ? "Yes" : "No") + '</span>';
-          return '<select class="fld" data-coflag="' + ck + '|' + field + '">' +
-            '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
-            '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
-        };
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td><b>' + esc(co.name) + '</b><span class="why mono">key ' + ck + '</span></td>' +
-          '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
-          '<td class="cc">' + flag("seeOthers", co.seeOthers) + '</td>' +
-          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td></tr>';
-      }).join("") + '</tbody></table></div>' +
-      '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
-      'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
-      'more. Supporting functions belong to no company: they serve all of them. ' +
-      (soloUnits().length
-        ? soloUnits().length + ' unit' + (soloUnits().length === 1 ? ' stands' : 's stand') +
-          ' alone: ' + soloUnits().map(function(k){ return esc(UNITS[k].name); }).join(", ") + '.'
-        : 'Every unit belongs to a company.') + '</div>');
-}
-
-
-/* ── Knowledge base ─────────────────────────────────────────────────
-   Added 3.5. How the platform works, in one place, so the answer to "why does
-   it do that" has an address instead of living in an Info modal on whichever
-   page happened to prompt the question.
-
-   It is a PAGE, not a set of tooltips. The Info button and its modals were
-   removed in 2.9 for a reason - an explanation that only appears where you
-   already are cannot be read before you get there, or sent to someone, or
-   scanned. This is written to be read start to finish by someone new, and
-   added to every time we settle something.
-
-   What lives here versus in DECISIONS-AND-LOGIC: this says how the platform
-   BEHAVES, in the words a client would use. The decisions document says why we
-   chose it and what we rejected, in ours. They are different readers. */
-function kbSection(id, title, blocks){
-  return '<div class="kb-sec" id="kb-' + id + '"><h3>' + title + '</h3>' +
-    blocks.map(function(b){
-      return b.h ? '<h4 class="mini">' + b.h + '</h4><p class="kb-p">' + b.p + '</p>'
-                 : '<p class="kb-p">' + b.p + '</p>';
-    }).join("") + '</div>';
-}
-
-function renderKB(){
-  var L1 = L("pillar","bu");
-  var secs = [
-    kbSection("scoring", "Scoring — how every figure is judged", [
-      { p: 'One scale for every figure scored against a benchmark. <b>Performance is ' +
-           'actual over target; execution is delivered over plan</b> — the same kind of ' +
-           'number, so both read on the same bands. The colour and the status word come ' +
-           'from the same place, so they can never contradict each other.' },
-      { h: "Nothing is stored as a score",
-        p: 'Every score is derived when the page is drawn, from the figures beneath it. ' +
-           'Nothing is written down as a percentage, so a number can never disagree with ' +
-           'what it was calculated from.' },
-      { h: "Nothing is not zero",
-        p: 'A measure with no actual reported is <b>not scored</b>, not scored as zero. ' +
-           'Where there is nothing to compute from, the platform says so — ' +
-           '"Not yet measurable" — rather than printing a figure it cannot stand behind.' },
-      { h: "The reward line",
-        p: 'At <b>100%</b> delivering the commitment earns. Set it higher and a measure ' +
-           'can meet its target without clearing the reward line — a fourth standing, ' +
-           '<i>met, not earning</i>, appears between short and earning. Either way the ' +
-           'measure is scored against its own target exactly as before: ' +
-           '<b>focus changes no score</b>.' }
-    ]),
-    kbSection("access", "Access — who sees what", [
-      { p: 'Access is <b>page level only</b>. If a level can open a page, it sees ' +
-           'everything on that page — restriction happens by removing the page, never by ' +
-           'trimming its contents. A person carries a <b>level</b>, which decides which ' +
-           'pages, and a <b>unit attachment</b>, which decides whose.' },
-      { h: "Three states, never more",
-        p: 'Each page is <b>none</b>, <b>view</b> or <b>edit</b> for each level. Two would ' +
-           'not be enough: a business unit head reads the weighting table but does not ' +
-           'manage it, and that is not expressible in two.' },
-      { h: "Companies decide reach",
-        p: 'A company groups business units so a company CEO sees their own. It carries ' +
-           '<b>no score and no page</b> — it decides who sees what, nothing more. ' +
-           'Supporting functions belong to no company: they serve all of them.' },
-      { h: "The gate is real, the rest is Phase 2",
-        p: 'Signing in is checked on the server against a stored password. Per-action ' +
-           'authorisation and the change log are not built yet: today the enforcement is ' +
-           'at the door, not at each button.' }
-    ]),
-    kbSection("labels", "Labels — what each level is called", [
-      { p: 'Every level of the model carries an <b>internal name</b> the platform is built ' +
-           'on, and a <b>display label</b> the tenant sees. The internal name never ' +
-           'changes. <b>The SMO manages this, not the client</b> — which is what stops a ' +
-           'label collision reaching a screen.' },
-      { h: "One label, two places",
-        p: 'A level can read differently at group and at business unit — what the group ' +
-           'calls a ' + L1.toLowerCase() + ' a unit may call something else — and both ' +
-           'are set on the Labels page.' }
-    ]),
-    kbSection("units", "Business units and supporting functions", [
-      { h: "The short name is for the navigation only",
-        p: 'Leave it blank and the full name is used. Page titles and every export keep ' +
-           'the full name.' },
-      { h: "A function is not a small unit",
-        p: 'A function carries <b>no plan, no weight and no ' + L1.toLowerCase() + '</b> — ' +
-           'it improves a cross-cutting capability the whole group depends on. The ' +
-           '<b>code prefix</b> numbers the work it owns, the way a unit’s prefix numbers ' +
-           'its ' + L1.toLowerCase() + '.' },
-      { h: "Retired, never deleted",
-        p: 'A unit or a function is <b>retired</b>, not removed: it carries reported ' +
-           'history, and deleting it would rewrite what was already said. ' +
-           '<b>The custodian slot is optional</b> — where the head does the work ' +
-           'themselves they already have access as head.' },
-      { h: "One function each",
-        p: 'A function may hold several capabilities, which is why a custodian is named ' +
-           'after the function and never after a capability: naming someone after one ' +
-           'breaks the moment a second is assigned.' }
-    ]),
-    kbSection("plans", "Plans — how one arrives", [
-      { h: "An upload authors, it does not amend",
-        p: 'A plan arrives as a whole. That is why the template carries <b>no codes</b>: ' +
-           'the platform mints them on arrival, so nobody has to keep a numbering scheme ' +
-           'in their head or risk colliding with one.' },
-      { h: "One unit per file",
-        p: 'The unit is chosen on the template’s Read me sheet. A plan cannot arrive as ' +
-           'a CSV, because a CSV cannot say whose plan it is.' },
-      { h: "Nothing an import does is a deletion",
-        p: 'Replacing a plan <b>archives</b> the outgoing one first. Archived plans are ' +
-           'listed under Manage and can be restored.' }
-    ]),
-    kbSection("cycle", "The reporting cycle", [
-      { p: 'Reporting is not a page you visit: it is what a cycle asks of you for a couple ' +
-           'of weeks a quarter. It appears inside Performance while the window is open and ' +
-           'leaves again when it closes.' },
-      { h: "Closing takes a snapshot",
-        p: 'Closing a cycle writes what was reported into history. What was said stays ' +
-           'said — later edits do not reach back into a closed cycle.' }
-    ]),
-    kbSection("data", "Where the data lives", [
-      { p: 'The platform holds <b>your own tenant</b>. Everything you enter is saved to the ' +
-           'database as you work.' },
-      { h: "Demo data is separate, and never saved",
-        p: 'The <b>Demo data</b> button swaps the whole platform to a full worked example ' +
-           'for explaining how it works. It is labelled while you are in it and it ' +
-           '<b>refuses to save</b>. Nothing invented ever reaches your database.' },
-      { h: "It works offline",
-        p: 'Installed, the platform opens with no network on the data baked into the file, ' +
-           'and says so. Live figures are never cached — a stale actual shown as current ' +
-           'is worse than one that will not load.' }
-    ])
-  ];
-
-  var toc = '<div class="kb-toc">' + [
-      ["scoring","Scoring"],["access","Access"],["labels","Labels"],
-      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"]
-    ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
-
-  return cfgHead("Knowledge base",
-      ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
-      null, false) +
-    '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
-      'settle that a reader would need to know belongs here rather than in a note under ' +
-      'the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + secs.join("") + '</div>';
-}
-
 
 /* The reward rule is a property of the cycle, not of each measure \u2014 set once,
    read by every focus measure. A stretch target per measure would mean the line
@@ -1141,11 +1032,15 @@ function renderFunctions(){
         '<th class="cc" style="width:16%">Head</th><th class="cc" style="width:16%">Strategy custodian</th>' +
         '<th class="cc" style="width:10%">Status</th></tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      /* The three notes that sat here are in the knowledge base now (§30). A
-         setup table is where you change a thing; it is not where the thing is
-         explained, and three paragraphs of prose under every table is how a
-         configuration screen stops being scannable. */
-      (editable ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>' : ''));
+      (editable ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>' : '') +
+      '<div class="note"><b>The short name is for the navigation only.</b> Leave it blank and the ' +
+        'full name is used. Page titles and every export keep the full name.</div>' +
+      '<div class="note">A function carries no plan, no weight and no pillars \u2014 it improves a ' +
+        'cross-cutting capability the whole group depends on. The <b>code prefix</b> numbers the work ' +
+        'it owns, the way a unit\'s prefix numbers its pillars.</div>' +
+      '<div class="note">A function is <b>retired, never deleted</b>: it carries reported history, ' +
+        'and removing it would rewrite what was already said. <b>The custodian slot is optional</b> \u2014 ' +
+        'where the head does the work themselves they already have access as head.</div>');
 }
 
 /* ── Setup · Capabilities ───────────────────────────────────────────

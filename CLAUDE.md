@@ -245,7 +245,23 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.4: seven fixes, three rules.
+*Last Updated: 2026-08-20 — v3.5: the knowledge base, and two
+rules with teeth. **A handler that rewrites the DOM must not run in the middle
+of an interaction with that DOM** — field `change` fires on blur, so pressing
+Done saved the field, repainted, and destroyed the button mid-click; a repaint
+asked for while the mouse is down now waits for the click (§30.1). This is the
+third of that family after §29.1 and the React modal note. **An access key
+absent from a tenant's stored map means "not answered yet", not "denied"** —
+the map is stored per tenant and only holds keys that existed when it was
+written, so every new page was invisible on existing deployments while working
+on fresh ones; `grant()` falls back to the shipped default (§30.2). Also: the
+Knowledge Base page (`c_kb`, view for everyone) is where explanation lives now —
+a setup table is where you change a thing, not where it is explained; Companies
+has its own tab; the pen-on-hover replaces the Edit bar where an edit mode
+exists — **and not on Plan, which has none by design (§22)**; and a third
+byte-identical duplicate function was found and removed.*
+
+*Earlier: 2026-08-20 — v3.4: seven fixes, three rules.
 **Whoever rewrites the DOM re-wires it, in the same function** — `paintUnits()`
 replaces the nav row's innerHTML, so the fold handlers wired over in `wire()`
 died every time the Manage menu opened or closed, and three paths call

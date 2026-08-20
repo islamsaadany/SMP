@@ -80,11 +80,6 @@ var PAGES = [
   { key:"k_report",scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
   { key:"g_focus", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
   { key:"c_focus", scope:"manage", label:"Focus measures",  note:"Choose what carries reward this cycle" },
-  /* Reference, not configuration - but it is a PAGE, and in this platform a
-     page is reached only by holding its key. Everyone holds it: the knowledge
-     base explains how the thing works, and an explanation nobody can open is
-     not an explanation. */
-  { key:"c_kb",    scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
   { key:"c_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
   { key:"u_report",scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
 ];
@@ -105,15 +100,15 @@ var EDITING = { weights:false, factors:false, bands:false, units:false };
    table but does not manage it, and that is not expressible in two. */
 var ACCESS = {
   smo: { g_perf:"edit", g_found:"edit", g_temple:"edit", g_weight:"edit",
-         u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_import:"edit", g_focus:"edit", c_focus:"edit", c_cycle:"edit", c_kb:"view", c_fns:"edit", c_caps:"edit", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"edit" },
+         u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_import:"edit", g_focus:"edit", c_focus:"edit", c_cycle:"edit", c_fns:"edit", c_caps:"edit", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"edit" },
   ceo: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view",
-         u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"edit", c_focus:"edit", c_cycle:"view", c_kb:"view", c_fns:"view", c_caps:"view", k_perf:"view", k_found:"view", k_proj:"view", k_report:"view", u_report:"none" },
+         u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"edit", c_focus:"edit", c_cycle:"view", c_fns:"view", c_caps:"view", k_perf:"view", k_found:"view", k_proj:"view", k_report:"view", u_report:"none" },
   n1:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none",
-         u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_kb:"view", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"edit" },
+         u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"edit" },
   n2:  { g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none",
-         u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_kb:"view", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"none" },
+         u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"none" },
   n3:  { g_perf:"none", g_found:"none", g_temple:"view", g_weight:"none",
-         u_perf:"view", u_found:"none", u_anal:"none", u_plan:"none", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_kb:"view", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"none" }
+         u_perf:"view", u_found:"none", u_anal:"none", u_plan:"none", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"none" }
 };
 
 /* Who is signed in. Changing this re-renders the whole shell against the
@@ -769,22 +764,9 @@ function viewer(){
   VIEWER = PEOPLE[0].key;
   return PEOPLE[0];
 }
-/* The access map is stored PER TENANT, in the database, so it only ever holds
-   the page keys that existed when that tenant was written. A page added in a
-   later version has no row, and "no row" used to read as "none" - so the new
-   page was invisible on every existing deployment while working perfectly on a
-   fresh one. The knowledge base was the first to hit it (3.5).
-
-   An absent key now falls back to the SHIPPED default for that level, which is
-   what the tenant would have got had the page existed when it was seeded.
-   Absent means "not answered yet", not "denied": denial is a stored "none",
-   and that still wins. */
-var ACCESS_DEFAULTS = JSON.parse(JSON.stringify(ACCESS));
 function grant(pageKey){
   var v = viewer();
-  var mine = ACCESS[v.level] || {};
-  if (Object.prototype.hasOwnProperty.call(mine, pageKey)) return mine[pageKey] || "none";
-  return (ACCESS_DEFAULTS[v.level] || {})[pageKey] || "none";
+  return (ACCESS[v.level] || {})[pageKey] || "none";
 }
 /* A person attached to the group reaches every unit; a person attached to a
    unit reaches only their own. This is the whole of scope — no page ever

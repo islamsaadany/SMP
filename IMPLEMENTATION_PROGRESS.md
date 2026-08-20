@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.4 · **Last updated:** 2026-08-20
+**Latest version:** v3.5 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,36 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.4 — seven from the deployed product *(current)*
+### v3.5 — the knowledge base, and the two-click save *(current)*
+**The two-click save.** Fields commit on `change`, which fires on *blur* — so
+pressing Done blurred the field, which saved, which repainted, which destroyed
+the button you were pressing. Your value was saved on click one; what needed the
+second click was leaving edit mode. Fixed once for every field: a repaint asked
+for while the mouse is down waits until the click lands.
+
+**The Knowledge Base is live**, first in the Manage menu, open to everyone.
+Seven sections with a contents strip — scoring, access, labels, units and
+functions, plans, the cycle, and where the data lives. Everything I removed from
+the four setup screens is in it, plus rules that were previously only in the
+decisions document.
+
+Building it caught something worse: **a page added in a new version was
+invisible on every existing tenant.** The access map is stored per tenant, so it
+only holds the keys that existed when it was written, and a missing key read as
+"denied". It now falls back to the shipped default. That would have bitten every
+future page, silently, and only in production.
+
+Also: **Companies is its own tab**; the **pen icon** replaces the bare Edit bar
+on Foundation and SWOT, appearing on hover and staying while you edit; a third
+byte-identical **dead duplicate function** removed.
+
+Two things not done, both deliberate. The **Plan page has no pen**: it has no
+edit mode because plans are authored by upload (§22), so adding one is a real
+change to how plans work, not a seventh tweak. The **scroll step that reverts**
+did not reproduce under real wheel input — one candidate named in §30.8, not
+fixed on a guess.
+
+### v3.4 — seven from the deployed product
 **The Units/Functions buttons weren't lagging — they were dead.** Open the
 Manage menu, close it any way at all, and both folds stopped listening until
 something else forced a repaint. The row's HTML is rewritten whenever the menu
@@ -524,8 +553,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.4.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.4.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.5.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.5.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

@@ -4,7 +4,8 @@ css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
 shell = open('shell.html').read()
 for tag, f in [("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
-               ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("PRESENT","present.js")]:
+               ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("PRESENT","present.js"),
+               ("SYNC","sync.js")]:
     shell = shell.replace('<script src="%s"></script>' % tag, '<script>\n' + open(f).read() + '\n</script>')
 out = ("<!doctype html>\n<meta charset='utf-8'>\n"
        "<meta name='viewport' content='width=device-width,initial-scale=1'>\n"

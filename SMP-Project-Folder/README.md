@@ -1,4 +1,4 @@
-# SMP Project Folder — v1.9
+# SMP Project Folder — v2.0
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -9,7 +9,7 @@ Everything needed to pick this project up cold. Read in this order.
 **`CLAUDE-RULES.md`** — how Islam and Claude work together. Read before doing
 anything. The first rule is the important one: **mock before building, always.**
 
-**`DECISIONS-AND-LOGIC-v1.9.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v2.0.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -24,8 +24,11 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v1.9.html`** — the built prototype. One file,
-opens in a browser, no server.
+**`strategy-management-platform-v2.0.html`** — the built prototype. One file,
+opens in a browser, no server needed — **and, served on Vercel, it reads and
+writes its whole state through `/api/state` against Neon Postgres** (§18 of
+the decisions document). Opened from disk it runs on its baked-in demo data,
+exactly as every version before it.
 
 **`src/`** — the sources it is built from, and the tooling:
 
@@ -33,6 +36,13 @@ opens in a browser, no server.
   to the shipped HTML; if it does not, something is out of step.
 - `python3 qa.py` walks every viewer against every page they can reach and
   reports crashes. Run it after every change.
+- `sync.js` is the persistence module — hydrate from the database, save on
+  change, silently local on file://.
+
+The database layer itself lives at the **repo root** (`db/`, `api/`, `lib/`,
+`scripts/`): schema, seed generated from these sources
+(`node scripts/extract-state.js`), the endpoint, the round-trip test and a
+local dev server.
 
 **Edit the sources, never the built file.**
 
@@ -95,8 +105,14 @@ toggle (§16.6), capability project import and export (§16.4), presentation
 mode for a supporting function, and the rail on My reporting (§15.12, now
 cleared).
 
+Version **2.0** moved the platform's state into the database (§18): served on
+Vercel it loads from and saves to Neon, self-building and self-seeding on
+first contact; opened as a file it is unchanged. Access persists but is not
+yet enforced — that arrives with §16.9.
+
 **Next:** nothing mid-flight. The backlog is the longer-term set below, plus
-the open model questions in §11.
+the open model questions in §11 — §16.9 (people, credentials, enforced
+access) is now the natural first pick, since the database it needs exists.
 
 **Longer term:** source teams (§16.7), the help box (§16.8), people and
 credentials (§16.9), strategy versions (§16.10).

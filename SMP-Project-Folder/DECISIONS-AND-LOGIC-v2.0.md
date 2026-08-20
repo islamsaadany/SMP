@@ -1702,6 +1702,16 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.0 — the state moves into the database
+
+Major, because it changes the platform's structure — where its state lives —
+while changing nothing on screen. Full record in **§18**. In one line: served
+on Vercel the platform reads and writes its whole state through `/api/state`
+against Neon Postgres (schema and seed applied on first contact, seed
+generated from the sources); opened as a file it remains the same
+self-contained prototype. Access persists but is not yet enforced — that is
+§16.9, still open.
+
 ### v1.9 — the 1.8 edges closed: cards, sheets, decks, and the last rail
 
 Built without check-ins on Islam's instruction, against what was already
@@ -1781,3 +1791,68 @@ major for a structural one.
 | **1.3** | Navigation by **function**, not by capability. The Functions fold lists Finance, HR, Marketing and the rest; the capabilities each carries are named inside its pages, on one line each. A function may carry more than one, the custodian is named after the function, and the capabilities already appear in the temple — so the row offers the organisation and the pages name the work. |
 | **1.2** | The folding navigation and capability pages. **Both folds start closed** and toggle — pressing the open one closes it — so the row arrives at its shortest and someone who never opens one is never shown eighteen entries. Fold contrast raised: the closed state was pale grey on navy and the open state a 14% gold wash, neither legible as a button; open is now solid gold, and the nav's own type went from 62% to 82% opacity.  Two folds beside Group — **Units** and **Functions** — appearing only for someone who reaches more than one unit *and* more than one capability, which today means the SMO and the CEO. Expanding is browsing, not going: the page does not change, and the closed fold carries the location. A capability became a destination with its own **Projects** and **Reporting** tabs, reachable by the people of the function that carries it. |
 | **1.1** | Supporting functions and capability ownership. `FUNCTIONS` with a head and optional Strategy custodians; every capability allocated to exactly one function; Setup pages for both; people attached to a function rather than a unit, and the access guard that stops them reaching every business unit. Shared-access confirmation moved to the moment a custodian is added. |
+
+---
+
+## 18 · The database — v2.0
+
+Instructed by Islam (2026-08-20): everything in the configuration, the access
+model and the platform's content lives in the database, built and seeded on
+deployment. This is the first slice of the "real build" §16.9 anticipates,
+and it is a **major version** because it changes the platform's structure —
+where its state lives — while changing **nothing on screen**.
+
+### 18.1 What was decided
+
+- **The product is unchanged; its state moves.** Served on Vercel, the
+  platform loads its state from Neon Postgres through one endpoint
+  (`/api/state`) and writes every change back — edits survive reloads and
+  every viewer shares one state. Opened as a local file it behaves exactly as
+  before, on the baked-in demo data: the offline handover property survives,
+  and that baked data is precisely what seeds a fresh database.
+- **Real tables, from §4.** The schema is the hierarchy this document already
+  gives — organization → themes and capabilities → units → foundation, key
+  objectives, SWOT, pillars → measures and tactics; capabilities → projects →
+  deliverables, outcomes, milestones — plus configuration (labels, levels,
+  access grants, bands, units, functions, people, roles, weighting factors
+  and values) and the cycle (review, focus marks, KO weights, history).
+  Stable ids are the keys; names stay display-only. Each entity carries an
+  `extra` JSONB for provenance and display fields, so a round trip loses
+  nothing — proven by a deep-equal test, not assumed.
+- **Derived is still never stored (§5.1).** The tables hold what was authored
+  and what was reported. A unit's weight is dropped on write and recomputed
+  from the factor table after every load.
+- **The seed is the sources, mechanically.** `db/seed-state.json` is
+  generated from `group-data.js` and `config-data.js` by a script, and
+  applied through the same writer the save path uses — one writer, so the
+  seed, the save and the read can never disagree.
+- **Building and seeding happen on deployment** — the first request against
+  an empty database applies the idempotent schema and seeds it, under an
+  advisory lock so concurrent cold starts cannot double-seed. Nobody runs SQL
+  by hand; the connection comes from the Neon integration's environment
+  variables in Vercel, never from a chat or a file.
+
+### 18.2 Costs and limits, stated so they are not found later
+
+- **Access is stored, not yet enforced.** People, levels and the grant matrix
+  persist and are editable in Setup, but enforcement remains client-side and
+  the viewer switcher remains the way in — real identity is §16.9, whose
+  product decisions (credential flow, password policy) are still open. The
+  deployed state is therefore shared and world-writable to anyone who reaches
+  the URL; the AdminSMO gate in front of it is a latch, not a lock.
+- **Last writer wins.** Saves replace the whole state transactionally; two
+  people editing at once will not corrupt anything, but the second save
+  overwrites the first. §16.0a's change-log reasoning becomes live the moment
+  more than one person can act; it is not built yet.
+- **A migrations registry is deliberately absent** until the schema first
+  changes — machinery with nothing to record. The DDL is idempotent
+  (`CREATE TABLE IF NOT EXISTS`).
+
+### 18.3 What was verified before handover
+
+Against a throwaway local Postgres 16: schema + seed on first contact, no
+re-seed on second; **round trip deep-equal** (seed → write → read → identical
+graph) and `write(read())` a fixed point; a browser session editing a
+foundation, an access cell and a reported figure, each landing in its exact
+row and visible to a fresh browser; the full QA walk clean for all 29 viewers
+both over HTTP (database mode) and from file:// (offline fallback).

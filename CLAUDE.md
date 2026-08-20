@@ -139,14 +139,24 @@ console errors (in this cloud environment, run it via a wrapper that points Play
 
 ### Repository
 - **GitHub:** `islamsaadany/SMP`
-- **Deployment:** Vercel, as a **static site** — no build step, no server, no config file
-  needed; `index.html` (the AdminSMO gate) serves at the root and links to the shipped
-  platform file. Production tracks `main`. **There is no database**: the prototype carries
-  its entire dataset inside the platform HTML, so nothing is built or seeded on deploy.
-  A Neon-backed real build (server, schema, real sign-in replacing the viewer switcher)
-  is a future structural project to align on first — see §16.9 of the decisions document.
-- **On each version bump:** update the gate's link in `index.html` to the new
-  `strategy-management-platform-vX.Y.html` filename.
+- **Deployment:** Vercel — static files plus **`/api/state`** as a serverless function
+  (`package.json` deliberately has **no build script**, so the static serve is untouched;
+  `vercel.json` only bundles `db/**` into the function). `index.html` (the AdminSMO gate)
+  serves at the root and links to the shipped platform file. Production tracks `main`.
+- **Database (since v2.0):** Neon Postgres via the Vercel integration's env vars
+  (`DATABASE_URL` and friends — the API tries the standard names; never ask for or paste
+  a connection string in chat). The first request against an empty database applies
+  `db/schema.sql` and seeds it from `db/seed-state.json` under an advisory lock — nobody
+  runs SQL by hand. The seed is **generated from the platform sources** by
+  `node scripts/extract-state.js`. Served over http(s) the platform hydrates from
+  GET /api/state and autosaves on change; opened from file:// it runs on baked data.
+  Access grants persist but are **not yet enforced server-side** (§16.9 pending) — the
+  deployed state is writable by anyone who reaches the URL; the gate is a latch, not a lock.
+- **DB verification loop:** start a throwaway Postgres 16, then
+  `DATABASE_URL=... node scripts/test-roundtrip.js` (must print PASS twice) and
+  `DATABASE_URL=... node scripts/dev-server.js` + drive the platform in a browser.
+- **On each version bump:** update the gate's link in `index.html`, regenerate
+  `db/seed-state.json`, and re-run the round-trip test.
 
 ### Current Directory Layout
 ```
@@ -169,9 +179,11 @@ SMP/
 
 ## Configuration
 
-- **Env vars:** none yet. Record every variable here as it is introduced.
-- **Database:** none yet. When one arrives, migrations are Claude's job, not the user's —
-  never ask the user to paste SQL or a `DATABASE_URL` into chat.
+- **Env vars:** `DATABASE_URL` (or the other standard Neon names) — set by the Neon
+  integration in the Vercel project, read by `api/state.js`. Nothing else.
+- **Database:** Neon Postgres (see Repository above). Schema and seed are applied by the
+  platform itself on first contact with an empty database; migrations are Claude's job —
+  never ask the user to paste SQL or a connection string into chat.
 
 ### Build Commands
 ```bash

@@ -73,6 +73,7 @@
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
 <script src="PRESENT"></script>
+<script src="SYNC"></script>
 <script>
 /* Drawn rather than typed: a glyph at this size renders differently in every
    font, and these two are the only way into configuration and management. */
@@ -364,6 +365,8 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       : GROUP.org + " \u2014 " + UNITS[current].name;
 
     wire();
+    /* Every mutation repaints, so this is where a change becomes a save. */
+    SYNC.afterPaint();
   }
 
   function wire(){
@@ -1156,5 +1159,7 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     });
   }
 
-  paint();
+  /* Paint immediately from the baked data, then hydrate from the database
+     where one is reachable and repaint. On file:// this is just paint(). */
+  SYNC.boot(paint);
 </script>

@@ -444,8 +444,26 @@
      `--chrome-h` is measured by the ResizeObserver in the shell, so this
      follows the header as it condenses instead of guessing at its height. */
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
-    overflow:hidden; position:sticky; top:calc(var(--chrome-h, 118px) + 12px);
-    max-height:calc(100vh - var(--chrome-h, 118px) - 24px); overflow-y:auto; }
+    position:sticky; top:calc(var(--chrome-h, 118px) + 12px);
+    max-height:calc(100vh - 320px); overflow:hidden auto; }
+
+  /* The cap is a CONSTANT, and that is the whole point of it.
+
+     A rail taller than the space under the chrome has its first rows scrolled
+     up behind the chrome, where they cannot be clicked — the same fault as the
+     wrong offset, arriving a different way, and it bites on a short window.
+     So it is capped and scrolls inside itself.
+
+     But the cap must not be measured. `calc(100vh - var(--chrome-h) - 24px)`
+     closes a feedback loop: the cap follows the measured chrome, the cap
+     changes the page's height, that re-clamps the scroll position, that crosses
+     a condense threshold, and the chrome changes height again. Measured
+     oscillating 240 → 290 → 240 forever, and while it ran the rail never
+     stopped moving, so nothing in it could be clicked at all.
+
+     320px is the tallest the chrome gets (307) plus the 12px gap. On a page
+     whose chrome is shorter the rail is capped a little sooner than it needs to
+     be, which costs nothing anyone can see, and 100vh does not move. */
   .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
     display:flex; justify-content:space-between; gap:8px; }

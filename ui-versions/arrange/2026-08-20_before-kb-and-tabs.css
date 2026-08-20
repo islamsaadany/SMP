@@ -210,51 +210,6 @@
      `nowrap` is what makes it unconditional. There is no width at which this
      becomes two rows, which is the whole point - a header that reflows is a
      header that moves the page under you every time the viewport changes. */
-  /* ── Knowledge base ──────────────────────────────────────────────
-     Reading width, not table width. This is the one page in the platform meant
-     to be read as prose rather than scanned, so the measure is capped where a
-     line stops being comfortable rather than stretched to the column.
-     scroll-margin so a jump from the contents does not land a heading
-     underneath the sticky chrome. */
-  .kb-lede { font-size:15px; color:var(--ink-2); max-width:62ch; margin:0 0 18px; }
-  .kb-toc { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 22px; }
-  .kb-toc a { font-size:11px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
-              color:var(--ink-3); text-decoration:none; border:1px solid var(--line);
-              border-radius:99px; padding:5px 12px; }
-  .kb-toc a:hover { border-color:var(--gold); color:var(--gold-deep); }
-  .kb-sec { border-top:1px solid var(--line-soft); padding:22px 0 4px;
-            scroll-margin-top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px)); }
-  .kb-sec:first-child { border-top:0; padding-top:0; }
-  .kb-sec h3 { font:400 21px/1.25 var(--serif); margin:0 0 4px; }
-  .kb-sec h4.mini { margin:16px 0 4px; }
-  .kb-p { font-size:14.5px; line-height:1.62; color:var(--ink-2); max-width:74ch; margin:0 0 10px; }
-
-  /* ── The pen, in the corner of the box it edits ──────────────────
-     visibility rather than display, so the button always holds its box and a
-     card never reflows when you hover it. It stays visible while editing: a
-     control that disappears while you are using it is worse than one that was
-     never subtle. :focus-within keeps it reachable by keyboard, which a
-     hover-only control otherwise is not. */
-  .hoverpen { position:relative; }
-  .penbtn { position:absolute; top:10px; right:10px; z-index:3;
-            width:28px; height:28px; padding:0; border-radius:50%;
-            display:inline-flex; align-items:center; justify-content:center;
-            background:var(--surface); border:1px solid var(--line);
-            color:var(--ink-3); cursor:pointer;
-            visibility:hidden; opacity:0; transition:opacity .12s ease; }
-  .penbtn svg { width:15px; height:15px; display:block; }
-  /* Descendant, not child: the pen sits inside the card's head, beside the
-     heading, not as a direct child of the card. */
-  .hoverpen:hover .penbtn,
-  .hoverpen:focus-within .penbtn,
-  .penbtn:focus-visible,
-  .penbtn.on { visibility:visible; opacity:1; }
-  .penbtn:hover { border-color:var(--gold); color:var(--gold-deep); }
-  .penbtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
-  /* The card head has to leave room for it, or a long label runs underneath. */
-  .hoverpen .cardhead { padding-right:34px; }
-
   /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
      the padding was 8px a side and the controls 31px, so squeezing the padding
      alone could never have got below 31. The tallest thing in the row sets the

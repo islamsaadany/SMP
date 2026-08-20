@@ -1099,7 +1099,7 @@ function renderTemple(){
 }
 
 function renderGroupFoundation(){
-  return
+  return editBar("foundation", "g_found") +
     '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       GROUP.clauses.map(function(c){
@@ -1111,7 +1111,7 @@ function renderGroupFoundation(){
         '<p class="statement">' + fieldOr("foundation", GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
-          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found") +
+          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }) +
       '</div>' +
     '</div>' +
 
@@ -1283,32 +1283,6 @@ function editBar(page, acKey){
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
 
-/* The pen, in the corner of the box it edits.
-
-   A bare "Edit" bar floating above a page says a page is editable; a pen in
-   the corner of a card says THIS is. It appears on hover and on keyboard
-   focus, and stays put once you are editing - a control that vanishes while
-   you are using it is worse than one that was never subtle.
-
-   `visibility`, not `display`: the button keeps its box at all times, so
-   hovering a card never reflows it. (Note what §27 taught: an invisible box
-   still contributes to layout - which is a problem for a 320px tooltip
-   hanging off the page, and exactly what is wanted for a 26px button that
-   must not move anything when it appears.)
-
-   Same data-page contract as editBar, so the shell's wiring is untouched. */
-function penBtn(page, acKey){
-  if (grant(acKey || "u_found") !== "edit") return '';
-  var on = EDIT_PAGE[page];
-  return '<button class="penbtn' + (on ? " on" : "") + '" data-page="' + page + '"' +
-    ' title="' + (on ? "Done editing" : "Edit") + '" aria-label="' + (on ? "Done editing" : "Edit") + '">' +
-    (on ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" ' +
-            'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-        : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" ' +
-            'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>') +
-    '</button>';
-}
-
 /* An edit field has to know where to write. Every field registers its own
    setter and carries the index; the shell wires them generically. Before this
    the foundation rendered inputs that were bound to nothing, so every edit
@@ -1372,10 +1346,9 @@ function koEdit(list){
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
    End in Mind as the same thing under two labels; the client's own deck carries
    both, saying different things. */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey){
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd){
   var editing = EDIT_PAGE[page];
-  return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
-    penBtn(page, acKey) +
+  return '<div class="card"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
       (editing ? '<label class="horizon-f">Horizon ' +
                  inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
                : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
@@ -1397,14 +1370,15 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
 }
 
 function renderUnitFoundation(u){
-  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  return editBar("foundation", "u_found") +
+    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
           fieldOr("foundation", c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found") +
+        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }) +
     '</div>';
 }
 
@@ -1422,8 +1396,10 @@ function renderUnitAnalysis(u){
             : '<span>' + esc(x) + '</span>') + '</li>';
       }).join("") + '</ol></section>';
   };
-  return '<div class="swot hoverpen">' + penBtn("analysis", "u_anal") +
-    box("s","s","Strengths") + box("w","w","Weaknesses") +
+  return (grant("u_anal") === "edit"
+      ? '<div class="pageact"><button class="editbtn" data-page="analysis">' +
+        (EDIT_PAGE.analysis ? "Done" : "Edit") + '</button></div>' : '') +
+    '<div class="swot">' + box("s","s","Strengths") + box("w","w","Weaknesses") +
     box("o","o","Opportunities") + box("t","t","Threats") + '</div>';
 }
 

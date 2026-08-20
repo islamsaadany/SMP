@@ -146,10 +146,6 @@
       { k:"access", ac:"c_access", label:"Levels & access",               render:renderAccess },
       { k:"bands",  ac:"c_bands",  label:"Scoring bands",                 render:function(){ return renderBands() + renderBandsExtra(); } },
       { k:"units",  ac:"c_units",  label:"Business units",                render:renderUnits },
-      /* Its own tab since 3.5. It shares c_units - the same person manages
-         both - but it answers a different question from "which units exist",
-         and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
       { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
@@ -157,8 +153,6 @@
        loading plans, marking what carries reward \u2014 activities, not structure.
        They sat in Setup only because that was the only place that existed. */
     manage: [
-      /* First in the list: it is the page you open before the others. */
-      { k:"kb",       ac:"c_kb",     label:"Knowledge base",                render:renderKB },
       { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
       { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
@@ -420,44 +414,7 @@
     });
   }
 
-  /* THE TWO-CLICK SAVE.
-
-     Every editable field in Setup commits on `change` and then repaints. But
-     `change` on a text input fires on BLUR, and the blur is caused by pressing
-     something else - usually the Done button in the same table. So the order
-     was: mousedown on Done, input blurs, change fires, paint() rewrites the
-     panel and destroys the very button being pressed, and the click lands on
-     nothing. The value was saved; leaving edit mode took a second press. That
-     is the "two clicks to save".
-
-     Fixed once, here, rather than in twenty handlers: a repaint requested
-     while the mouse is down is held until the click it belongs to has landed.
-     mouseup and click are dispatched in the same task, and timers run after
-     it, so a setTimeout scheduled on mouseup is reliably after the click.
-
-     Deliberately not solved by committing on `input` instead: that works for
-     the button, but a field committing on every keystroke also has to not
-     repaint on every keystroke, and then nothing derived updates until
-     something else happens to paint. This keeps the repaint, and only moves
-     it a few milliseconds. */
-  var CLICKING = false, PAINT_HELD = false, holdTimer = null;
-  function releasePaint(){
-    CLICKING = false;
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-    if (PAINT_HELD) { PAINT_HELD = false; paint(); }
-  }
-  document.addEventListener("mousedown", function(){
-    CLICKING = true;
-    /* A mousedown whose mouseup lands outside the window never releases, and a
-       stuck flag means the page silently stops repainting. Nothing is worth
-       that, so it always releases on its own. */
-    if (holdTimer) clearTimeout(holdTimer);
-    holdTimer = setTimeout(releasePaint, 500);
-  }, true);
-  document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
-
   function paint(){
-    if (CLICKING) { PAINT_HELD = true; return; }
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;

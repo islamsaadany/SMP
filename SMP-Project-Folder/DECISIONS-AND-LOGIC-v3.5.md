@@ -1700,6 +1700,31 @@ Not designed yet.
 
 ---
 
+### 16.11 The people register — agreed, not yet built
+
+Islam, v3.5: *"enable me to add names not only from a list … which will need
+that we have an employees list in the setup pages for the employees with ID,
+names, titles, Units, numbers, and reset password functionality in that table,
+adding employee and removing employee etc. which will serve later for the
+password management and access management."*
+
+A Setup page listing everyone: id, name, title, unit, contact number, with add,
+remove and **reset password** on the row. The owner fields on Business units and
+Supporting functions become type-or-pick rather than pick-only, and a typed name
+that is not yet known **creates a person** in the register rather than a loose
+string.
+
+Why it is its own version and not an item in a list: `people` is already a table
+that everything references by key, and password reset already exists as a server
+action bound to Levels & access. Joining those two, and making a free-text field
+mint a person, touches the data model, the round trip and identity — not a
+screen. It also has a decision inside it that has not been taken: **removing a
+person who has reported.** Units and functions are retired rather than deleted
+for exactly that reason (§30.3), and a person carries reported history the same
+way.
+
+Sequenced immediately after v3.5 at Islam's direction.
+
 ## 17 · Version history
 
 ### v2.9 — two lines of chrome, and one way in
@@ -3384,3 +3409,171 @@ number went, and the footer with it.
 - Three themes × 31 viewers, zero console errors. The chrome still reports one
   single height across a full scroll sweep in both directions. Contrast
   unchanged. Seed and rebuild byte-identical.
+
+---
+
+## 30 · The knowledge base, and the two-click save — v3.5
+
+Nine items came off the deployed product. Two of them — a people register and
+the knowledge base — were features rather than tweaks, so they were split:
+**this version is the seven, plus the knowledge base**, and the people register
+(§16.11) is its own piece of work with the data model and password handling it
+deserves.
+
+### 30.1 The two-click save
+
+*"the edit in the business units and functions table in the setup requires 2
+clicks to save. not sure why"*
+
+Every editable field commits on `change` and then repaints. But `change` on a
+text input fires on **blur**, and the blur is caused by pressing something else
+— usually the Done button in the same table. So the order was:
+
+1. mousedown on Done
+2. the input blurs → `change` fires → the value is written
+3. `paint()` rewrites the panel **and destroys the button being pressed**
+4. mouseup, and the click lands on nothing
+
+The value was saved on the first click. What took a second click was *leaving
+edit mode*, which is indistinguishable from "it didn't save" to the person
+doing it.
+
+**Fixed once rather than in twenty handlers: a repaint requested while the
+mouse is down is held until the click it belongs to has landed.** `mouseup` and
+`click` are dispatched in the same task and timers run after it, so a
+`setTimeout(…, 0)` scheduled on `mouseup` is reliably after the click. A
+mousedown whose mouseup never arrives releases on its own after 500ms — a stuck
+flag would silently stop the page repainting, and nothing is worth that.
+
+Deliberately *not* solved by committing on `input` instead. That fixes the
+button, but a field committing on every keystroke must also not repaint on every
+keystroke, and then nothing derived updates until something else happens to
+paint. This keeps the repaint and moves it a few milliseconds.
+
+**The general form, which is the third of its family this month:** a handler
+that rewrites the DOM must not run in the middle of an interaction with that
+DOM. §29.1 was the same shape (the menu rewriting the row the folds lived in);
+so was the React note in CLAUDE.md about closing a modal from a submit button.
+
+### 30.2 A new page was invisible on every existing tenant
+
+Building the knowledge base exposed something worse than the page itself.
+
+The access map is stored **per tenant, in the database**, so it only ever holds
+the page keys that existed when that tenant was written. A page added in a later
+version has no row — and "no row" read as `"none"`. So the knowledge base worked
+perfectly on a fresh deployment and could not be opened at all on the live one.
+
+`grant()` now falls back to the **shipped default** for that level when the key
+is absent, which is what the tenant would have been given had the page existed
+when it was seeded. **Absent means "not answered yet", not "denied"** — a stored
+`"none"` is a decision and still wins.
+
+This was going to bite every future page, silently, and only ever in
+production. The seed carries the new key too, so fresh tenants and existing ones
+arrive at the same place by different routes.
+
+### 30.3 The knowledge base
+
+*"we need to have the KB as a page … from now and keep adding to it"*
+
+Seven sections — scoring, access, labels, units and functions, plans, the cycle,
+and where the data lives — with a contents strip, written to be read start to
+finish by someone new rather than sampled.
+
+**It is a page, not a set of tooltips.** The Info button and its modals went in
+§24 for a reason: an explanation that only appears where you already are cannot
+be read *before* you get there, cannot be sent to someone, and cannot be
+scanned. Everything removed from the setup screens in §30.4 landed here, joined
+by the rules that were only ever in the decisions document.
+
+**What lives here versus in this document:** the knowledge base says how the
+platform *behaves*, in the words a client would use. This document says why we
+chose it and what we rejected, in ours. Different readers, different books.
+
+Access is `c_kb`, granted **view to every level**. An explanation nobody can
+open is not an explanation.
+
+### 30.4 Four screens lose their essays
+
+Scoring bands, Levels & access and Labels each opened with a paragraph and a row
+of fact-pills; Supporting functions closed with three more paragraphs. All of it
+is true and none of it belonged there: **a setup table is where you change a
+thing, not where the thing is explained**, and prose above and below every table
+is how a configuration screen stops being scannable.
+
+Moved, not deleted — §30.3 is where it went.
+
+### 30.5 Companies gets its own tab
+
+It sat above the Business units table, putting two different questions on one
+screen: which units exist, and who is allowed to see whom. They are edited at
+different times for different reasons, and a ten-row units table pushed the
+company rules off the top. Same access key, since the same person manages both.
+
+### 30.6 The pen, in the corner of the box it edits
+
+A bare "Edit" bar floating above a page says *a page* is editable. A pen in the
+corner of a card says *this* is. It appears on hover and on keyboard focus
+(`:focus-within`, or a hover-only control is unreachable without a mouse) and
+**stays visible while editing** — a control that vanishes while you are using it
+is worse than one that was never subtle.
+
+`visibility`, not `display`, so the button always holds its box and hovering a
+card never reflows it. Note the inversion of §27: an invisible box still
+contributes to layout, which was a bug for a 320px tooltip hanging off the page
+and is exactly what is wanted for a 28px button that must not move anything when
+it appears.
+
+**The Plan page did not get one, and that is a decision, not an omission.** The
+Plan page has no edit mode at all: a plan is *authored by upload* (§22), which
+is why the template carries no codes and why replacing one archives it. Putting
+a pen there means editing a plan in place — a real change to how plans are
+authored, and one to take deliberately rather than as the seventh item in a
+list. Raised rather than built.
+
+### 30.7 A third dead duplicate
+
+`renderBandsExtra` was defined **twice, byte-identically**, so the first had
+never once run. That is three this month: `renderFocusSetup` (§21), the two
+`.themebtn` rules (§29.3), and now this. The first was found because a page
+misbehaved, the second because a number would not change, this one by reading.
+
+A duplicate definition never fails loudly. It quietly picks one.
+
+### 30.8 The scroll step that reverts — not reproduced
+
+*"when I'm scrolling in a page there is always a last small step of scrolling
+that reverts. it happens on my way up or down."*
+
+Driven with real wheel events, four steps each way on a long page, sampling the
+scroll position immediately and again 800ms later: **it never moved on its
+own**. Programmatic scrolling did not either. The chrome is one fixed height
+since §28, so the mechanism that caused the earlier drift is gone.
+
+The remaining candidate is the browser's own **scroll anchoring**
+(`overflow-anchor`, currently `auto`), which nudges the scroll position when
+content above the viewport changes size — plausible on a trackpad, and not
+reproducible in headless Chromium on Linux. **Not "fixed" speculatively**:
+disabling scroll anchoring has its own failure mode, and shipping a guess as a
+fix is what §28 was written about. Open, pending which input device and which
+pages.
+
+### 30.9 Verified
+
+- **One click saves and closes** in Setup › Business units: the value written
+  and edit mode left in a single press, where it previously took two.
+- **`grant('c_kb')` resolves to `view`** on a tenant seeded before the key
+  existed, and the knowledge base appears in the Manage menu.
+- **The knowledge base renders all seven sections** with its contents strip, and
+  carries every block removed from the four setup screens.
+- **All four screens keep their tables** and lose only the prose.
+- **Companies renders as its own tab** with every column, and Business units no
+  longer carries it.
+- **The pen** is hidden at rest, visible on hover, turns edit on in one click,
+  stays visible while editing, and turns it off again in one — on Foundation and
+  on SWOT.
+- Three themes × 31 viewers, zero console errors. The chrome still reports one
+  height across a full scroll sweep both ways. PWA suite green. Round trip,
+  fixed point and archived-plan round trip PASS. Rebuild byte-identical; the
+  seed gains exactly one key per level, which is the point.

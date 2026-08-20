@@ -1,4 +1,4 @@
-# SMP Project Folder — v3.4
+# SMP Project Folder — v3.5
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.4.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.5.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.4.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.5.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -219,7 +219,23 @@ one flag everywhere a reader goes, with the field untouched in the data and the
 import template. The "Plan only" notice and the rail footer went, and rail rows
 now read "3 measures · 2 tactics" instead of a bare unlabelled number.
 
-**Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
+Version **3.5** added the **Knowledge base** (§30) — first in the Manage menu,
+open to everyone, seven sections written to be read start to finish. The essays
+that sat above and below four setup tables moved into it: a setup table is where
+you change a thing, not where the thing is explained. Also: the **two-click
+save** in Setup is one click (a field's blur was repainting the page and
+destroying the button mid-press), **Companies** has its own tab, and the **pen
+on hover** replaces the bare Edit bar wherever an edit mode exists.
+
+Building the KB caught a defect worth naming: **a page added in a new version
+was invisible on every existing tenant**, because the access map is stored per
+tenant and a missing key read as denied. It falls back to the shipped default
+now.
+
+**Next:** the people register (§16.11) — an employees page with IDs, titles,
+units and password resets, which is also what item 2 of Islam's list needs
+before a name can be typed rather than picked. Then the rebuild on the HR_ERP
+stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side
 rule checks and the per-figure change log (§16.0a, §19.2). Then the longer-term
 set below and the open model questions in §11.

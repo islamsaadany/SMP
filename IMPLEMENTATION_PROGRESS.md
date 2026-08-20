@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.1 · **Last updated:** 2026-08-20
+**Latest version:** v2.2 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -18,15 +18,23 @@ Nothing proceeds past this line without an answer.
 
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
-| **D4** | **Approve the rebuild plan** — order of work, what happens to the live product meanwhile, and whether the CSS is carried over verbatim (strongly recommended) rather than re-expressed in Tailwind. | The stack move is decided; **how** it is done is not, and nothing is built until it is (A1). | §20 |
-| **D3** | Is the deployed demo content acceptable in the open? | Only Mobile's plan is real; everything else is invented and labelled. Anyone with the URL and the SMO password sees it. | §13 |
+| **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
+| **D6** | Should the **weighting factor values** be cleared too? | They were invented (§13) but were not in the clear-out instruction, and an empty weighting table reads as broken rather than empty. Left in place meanwhile. | §21.2 |
 
 **Answered:**
 
+- **D4 · The rebuild plan — ANSWERED 2026-08-20:** CSS carried **verbatim**
+  (Tailwind only for genuinely new things); cutover **early, page group by page
+  group**, the new app becoming the live site while un-ported screens link back
+  to the frozen build.
+- **D3 · The demo content in the open — ANSWERED by v2.2.** It is no longer in
+  the tenant at all. It lives in the demo dataset, behind a button, labelled
+  while it is on screen, and it cannot be written to the database (§21).
 - **D1 · Stack — ANSWERED 2026-08-20: move to the HR_ERP stack** (Next.js,
   React, TypeScript, Prisma, NextAuth). Reverses §19's Path A. The database,
   the identity model and every recorded decision carry across; the glue is
-  discarded; the offline single-file prototype stops gaining features at v2.1.
+  discarded; the offline single-file prototype stops gaining features at v2.1
+  (it still takes corrections and the client's own instructions — §20, clarified).
   Recorded as §20.
 - **D2 · Phase 2 as it stood** — superseded by the stack move. Its content
   (per-action writes, server-side rule enforcement, the change log) does not go
@@ -36,7 +44,46 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.1 — identity *(current)*
+### v2.2 — the clean slate, and the Demo button *(current)*
+The deployed tenant is now the client's own. **Kept:** the company, the ten
+business units, the supporting functions, the three group themes, the eight
+capability names with their owning function, and all configuration (labels,
+bands, levels, the access matrix, the weighting factors and their values).
+**Cleared:** every unit plan, foundation and SWOT · the group's foundation,
+purpose, values and key objectives · every capability's definition, key
+objectives and projects · the reporting cycle, its focus marks and its history ·
+the invented people and their role assignments. Only `SMO` can sign in.
+
+The worked example did not go: a **Demo data** button top-right switches the
+whole product to the full Raya Trade dataset for explaining, shows the
+invented-data banner the whole time it is up, and **cannot be saved** — the
+autosave refuses to run in demo mode, and returning restores the client's data
+exactly as it was left. Offline the button is hidden, because the file *is* the
+example.
+
+Three defects only an empty tenant could expose, fixed on the way: "Clear all
+plans" on Supporting functions had been inert since 1.7 (it cleared fields a
+capability stopped having); capability key objectives and projects were being
+stored twice, so a cleared capability would have refilled itself on the next
+save; and the group's own scorecard was a stored number that read `undefined%`
+with no objectives set — it is computed on read now, like everything else
+(§5.1). The viewer switcher was also filled once at load, so after hydration it
+still offered the example's 29 people and threw when one was picked.
+
+*Verified:* clean-slate counts read back from a database seeded and migrated
+from scratch (units 10, functions 7, themes 3, capabilities 8, people 1;
+pillars, measures, tactics, key objectives, clauses, SWOT, projects and history
+all 0; cycle and review empty; `smo` the only account) · every page walked as
+every viewer, **live and demo, no console errors** · the database read before,
+during and after a demo session and across the autosave interval: **unchanged**
+· round trip and fixed point still PASS · the offline file walks clean for all
+29 viewers.
+
+**Weighting factor values were left in place** — they were not in the
+instruction, and a weighting table with no values reads as broken rather than
+empty. Say the word and they go.
+
+### v2.1 — identity
 Real sign-in on the deployed product. The gate is a login (person key +
 password, scrypt-hashed, httpOnly session); `/api/state` requires a session; a
 signed-in person sees their own view; the SMO issues temporary passwords from
@@ -73,8 +120,9 @@ suite per feature.
 
 ## In flight
 
-**R1 — the Next.js scaffold — is done, on the branch only.** `main` still
-serves v2.1 exactly as before; nothing anyone uses has changed.
+**R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
+v2.2 single file as it always has; nothing anyone uses runs on the new stack
+yet.
 
 What R1 proved, in `smp-app/`:
 
@@ -102,14 +150,14 @@ driver the old endpoints used.
 **D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
 genuinely new things), and the cutover is **early, page group by page group** —
 the new app becomes the live site while un-ported screens still link back to
-the v2.1 build. Those two answers work together: because the stylesheet is the
+the v2.2 build. Those two answers work together: because the stylesheet is the
 same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
 | ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
-| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.1 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.2 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
 | **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
 | **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
@@ -126,6 +174,10 @@ shape, optional pillar-measure weighting).
 
 Stated here rather than discovered later.
 
+0. **The tenant is nearly empty, and that is the point.** Until the plans are
+   authored, most screens show "No data" rather than figures — which is correct,
+   not broken. Press **Demo data** to show anyone what a filled-in platform
+   looks like.
 1. **Authorization is at the door, not per action.** A signed-in person is
    authenticated, but their browser is still trusted about *what* changed.
    Step R4 of the rebuild closes it.
@@ -150,13 +202,14 @@ Stated here rather than discovered later.
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.1.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.1.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v2.2.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.2.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |
 | `specs/` | Per-feature specifications (spec-kit) |
 
 **The verification loop before any handover:** rebuild byte-identical → `qa.py`
-walk → `DATABASE_URL=… node scripts/test-roundtrip.js` (must print PASS twice) →
-`node scripts/dev-server.js` and drive it in a browser.
+walk → `DATABASE_URL=… node scripts/test-roundtrip.js` (clean slate, round trip
+and fixed point must all print PASS) → `node scripts/dev-server.js` and drive it
+in a browser, **in both live and demo mode**.

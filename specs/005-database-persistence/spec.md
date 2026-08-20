@@ -87,12 +87,22 @@ measures with their targets and actuals; `access_grants` returns the matrix.
   state transactionally (wipe-and-write by the same writer). Connection from
   the standard env names the Neon/Vercel integration sets; never from chat.
 - **FR-004**: `ensureReady` on each request: applies the idempotent schema,
-  seeds only when empty, under a Postgres advisory lock.
+  seeds only when empty, then applies pending migrations from
+  `db/migrations/` (registry `_sql_migrations`), all under a Postgres advisory
+  lock. *Amended 2026-08-20 (§21): the seed is the baseline and migrations run
+  **after** it, not before — otherwise a migration that edits tenant content
+  runs against an empty database and the seed then undoes it.*
 - **FR-005**: Front-end sync (`src/sync.js`, part of the built file): on an
   http(s) origin, hydrate the globals from GET before the second paint; after
   any repaint, serialize, compare against the last saved state, and save when
   different (debounced). On file:// or API failure: silently local, exactly
   v1.9 behaviour.
+- **FR-007** *(added 2026-08-20, §21)*: The baked-in dataset is captured before
+  hydration and kept as the **demo** dataset. A Demo button switches between it
+  and the tenant's own; **saving is refused in demo mode**, so demo content can
+  never reach the database. Leaving live snapshots the tenant's data first, so
+  returning restores it as it was left rather than as it was at boot. The button
+  appears only where hydration succeeded — offline, the file *is* the example.
 - **FR-006**: Round-trip fidelity is proven, not assumed: seed → write → read
   → deep-equal against the canonical state, byte-for-byte after
   normalization.

@@ -24,6 +24,21 @@ var SYNC = (function () {
   var timer = null;
   var saving = false;
 
+  /* Two datasets, one product.
+
+     DEMO is the full worked example baked into this file — Raya Trade with
+     every unit, capability, figure and person. LIVE is what the database
+     holds, which after a clean slate is the client's own and mostly empty.
+
+     The Demo button switches between them so the platform can be EXPLAINED
+     with a complete example without that example ever being mistaken for, or
+     written into, the real thing. Demo mode never saves (§B3: invented data
+     is labelled every time, and it must not leak into a client's tenant). */
+  var DEMO = null;
+  var LIVE = null;
+  var mode = "live";
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
   function graph() {
     return {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
@@ -65,7 +80,8 @@ var SYNC = (function () {
   }
 
   function save() {
-    if (!live || saving) return;
+    /* The guard that matters: demo data must never reach the database. */
+    if (!live || mode === "demo" || saving) return;
     var now = serialize();
     if (now === lastSaved) return;
     saving = true;
@@ -121,8 +137,43 @@ var SYNC = (function () {
     paint();
   }
 
+  /* Switching datasets. Leaving live remembers where the client's data was,
+     so returning restores it exactly rather than the snapshot taken at boot —
+     otherwise an edit made before opening the demo would vanish from the
+     screen. Anything typed while in demo is discarded, by design. */
+  function setMode(next, paint) {
+    if (!DEMO || next === mode) return;
+    if (mode === "live") LIVE = clone(graph());
+    mode = next;
+    hydrate(clone(mode === "demo" ? DEMO : LIVE));
+    markMode();
+    paint();
+    if (mode === "live") lastSaved = serialize();
+  }
+
+  /* Demo data is labelled the whole time it is on screen. The banner is the
+     platform's own — it carries the invented-data notice, which is true of the
+     example and NOT true of the client's own tenant, so it shows in demo mode
+     and is hidden in live. */
+  function markMode() {
+    var btn = document.getElementById("demobtn");
+    if (btn) btn.textContent = mode === "demo" ? "Exit demo" : "Demo data";
+    var ban = document.getElementById("banner");
+    if (ban) {
+      ban.hidden = mode !== "demo";
+      if (mode === "demo") {
+        ban.innerHTML =
+          '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
+          'example, for explaining how the platform works.</span>' +
+          '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
+          'capability\u2019s content and every reported figure is invented.</span>';
+      }
+    }
+  }
+
   return {
     isLive: function () { return live; },
+    isDemo: function () { return mode === "demo"; },
     person: function () { return person; },
     /* The SMO issues or resets a password from Levels & access. The server
        checks the policy and the issuer; the password is temporary and forces
@@ -138,6 +189,9 @@ var SYNC = (function () {
     boot: function (paint) {
       paint();
       if (!enabled) return;
+      /* Taken before hydration, while the globals still hold the baked-in
+         example — after hydration it is gone from memory. */
+      DEMO = clone(graph());
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. */
@@ -149,11 +203,24 @@ var SYNC = (function () {
           if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
           if (data.person && data.person.mustChange) { location.replace("/"); return; }
           hydrate(data.state);
+          LIVE = clone(data.state);
           live = true;
           person = data.person || null;
           if (person) chromeFor(paint); else paint();
           lastSaved = serialize();
           setInterval(save, 5000);
+
+          /* The Demo button exists only where there is a live dataset to tell
+             the example apart from. Opened as a file the whole product IS the
+             example, so the button would mean nothing. */
+          var btn = document.getElementById("demobtn");
+          if (btn) {
+            btn.hidden = false;
+            btn.addEventListener("click", function () {
+              setMode(mode === "demo" ? "live" : "demo", paint);
+            });
+          }
+          markMode();
         })
         .catch(function (e) {
           if (e.message !== "sign in")

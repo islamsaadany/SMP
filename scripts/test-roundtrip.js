@@ -1,8 +1,13 @@
-/* The fidelity proof: ensureReady seeds an empty database from
-   db/seed-state.json; readState must give back a graph deep-equal to the
-   seed (after normalization: key order ignored, null and absent treated as
-   the same word — which is how the codebase reads every optional field).
-   A second ensureReady must not re-seed.
+/* The fidelity proof: writeState then readState must give back a graph
+   deep-equal to db/seed-state.json (after normalization: key order ignored,
+   null and absent treated as the same word — which is how the codebase reads
+   every optional field). A second ensureReady must not re-seed.
+
+   Fidelity is asserted against an EXPLICIT write of the seed rather than
+   against what ensureReady leaves behind. Since the clean slate (§21) a fresh
+   database is seeded and then cleared by migration 004, so what ensureReady
+   leaves is the client's empty tenant — which this file also checks, because
+   that is now the thing a first deployment gets.
 
      DATABASE_URL=postgres://... node scripts/test-roundtrip.js
 */
@@ -56,7 +61,31 @@ function firstDiff(a, b, at) {
   const r2 = await io.ensureReady(client);
   console.log("second ensureReady seeded:", r2.seeded, "(must be false)");
 
+  /* What a first deployment actually gets: seeded, then cleared. */
+  const count = async function (sql) { return Number((await client.query(sql)).rows[0].n); };
+  const slate = {
+    units:        await count("SELECT count(*) n FROM units"),
+    functions:    await count("SELECT count(*) n FROM functions"),
+    themes:       await count("SELECT count(*) n FROM themes"),
+    capabilities: await count("SELECT count(*) n FROM capabilities"),
+    people:       await count("SELECT count(*) n FROM people"),
+    pillars:      await count("SELECT count(*) n FROM pillars"),
+    measures:     await count("SELECT count(*) n FROM measures"),
+    tactics:      await count("SELECT count(*) n FROM tactics"),
+    unitKOs:      await count("SELECT count(*) n FROM unit_key_objectives"),
+    groupKOs:     await count("SELECT count(*) n FROM group_key_objectives"),
+    projects:     await count("SELECT count(*) n FROM projects"),
+    history:      await count("SELECT count(*) n FROM history")
+  };
+  const slateOk = slate.units === 10 && slate.functions === 7 && slate.themes === 3 &&
+    slate.capabilities === 8 && slate.people === 1 && slate.pillars === 0 &&
+    slate.measures === 0 && slate.tactics === 0 && slate.unitKOs === 0 &&
+    slate.groupKOs === 0 && slate.projects === 0 && slate.history === 0;
+  console.log("clean slate after first deploy:", slateOk ? "PASS" : "FAIL", JSON.stringify(slate));
+
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+  /* Fidelity is the writer's and the reader's business, not the migration's. */
+  await io.writeState(client, seed);
   const back = await io.readState(client);
 
   const a = normalize(seed), b = normalize(back);
@@ -80,5 +109,5 @@ function firstDiff(a, b, at) {
 
   client.release();
   await pool.end();
-  if (!equal) process.exit(1);
+  if (!equal || !slateOk) process.exit(1);
 })().catch(function (e) { console.error("FAIL:", e); process.exit(1); });

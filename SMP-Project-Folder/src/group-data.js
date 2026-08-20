@@ -43,7 +43,6 @@ var GROUP = {
     { name: "CE Distribution",        group: "Market share", dir: "≥", target3y: "24%", target: "18%",     compile: "Latest", actual: "14%",   progress: 78 },
     { name: "Retail",                 group: "Market share", dir: "≥", target3y: "18%", target: "12%",     compile: "Latest", actual: "9%",    progress: 75 }
   ],
-  keyObjectivesScore: 75,
   themes: [
     { ab: "OT",  name: "One Trade",          note: "New for 2026" },
     { ab: "VC",  name: "Deepen Value Chain", note: "Standing" },

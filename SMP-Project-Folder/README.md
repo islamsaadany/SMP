@@ -1,4 +1,4 @@
-# SMP Project Folder — v2.1
+# SMP Project Folder — v2.2
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -7,9 +7,13 @@ Everything needed to pick this project up cold. Read in this order.
 ## Read first
 
 **`CLAUDE-RULES.md`** — how Islam and Claude work together. Read before doing
-anything. The first rule is the important one: **mock before building, always.**
+anything. The first rule is the important one: **align before building** — a
+question returned is not an answer, and nothing is built until the answer is
+given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
+the prototype era and was retired when Islam said so. The approval it protected
+did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v2.1.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v2.2.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -24,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v2.1.html`** — the built prototype. One file,
+**`strategy-management-platform-v2.2.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -113,8 +117,16 @@ each person sees their own view, and the SMO issues passwords from Levels &
 access. The viewer switcher survives only as the SMO's read-only simulation
 and in the offline file.
 
-**Next:** Phase 2 of the real build — per-action writes with server-side rule
-checks and the per-figure change log (§16.0a, §19.2). Then the longer-term
+Version **2.2** turned the demo tenant into the client's own (§21): the
+companies, the business units, the supporting functions, the themes, the
+capability names and all configuration stayed; every invented plan, foundation,
+person, cycle and capability content went. The worked example is still there —
+a **Demo data** button switches the whole product to it for explaining, labels
+it while it is on screen, and cannot save it.
+
+**Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
+the read-only screens, then editing and reporting per action with server-side
+rule checks and the per-figure change log (§16.0a, §19.2). Then the longer-term
 set below and the open model questions in §11.
 
 **Longer term:** source teams (§16.7), the help box (§16.8), people and
@@ -126,5 +138,10 @@ credentials (§16.9), strategy versions (§16.10).
 
 Only Mobile's plan comes from a real deck. **Every other unit, every capability
 and every reported figure is invented** so the structure could be judged. It is
-labelled as such in the product and in §13 of the decisions document. Nothing
-invented should reach a client.
+labelled as such in §13 of the decisions document.
+
+Since v2.2 that invented content lives in one place only: **the demo dataset,
+behind the Demo button, labelled every second it is on screen.** The deployed
+tenant no longer holds any of it, and demo data cannot be written to the
+database. Nothing invented reaches a client's own data by construction rather
+than by care.

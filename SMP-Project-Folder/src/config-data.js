@@ -505,8 +505,15 @@ function fnsReachable(){
    its plan, so it survives both. */
 function clearCapability(cap, what){
   if (what === "plan") {
-    cap.measures.length = 0;
-    cap.tactics.length = 0;
+    /* A capability's plan is its key objectives and its PROJECTS, each
+       carrying deliverables, outcomes and milestones. Until 2026-08-20 this
+       emptied `cap.measures` and `cap.tactics` — the fields a capability
+       stopped having in 1.7 when the project model replaced them. The line
+       threw on a missing array, so "Clear all plans" on Supporting functions
+       had done nothing at all since then. The definition survives: it is the
+       capability's identity, not its plan. */
+    if (cap.keyObjectives) cap.keyObjectives.length = 0;
+    if (cap.projects) cap.projects.length = 0;
     return;
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
@@ -676,7 +683,22 @@ function unitState(u){
 
 var VIEWER = "smo";
 
-function viewer(){ return PEOPLE.filter(function(p){ return p.key === VIEWER; })[0]; }
+/* Every caller treats this as a person, not a maybe — `grant`, `reaches`,
+   `paint` and the pages all read straight off the result. So it resolves
+   rather than returning nothing: if the name being viewed as is no longer in
+   the list, the first person stands in and VIEWER is corrected to match, so
+   the switcher and the screen cannot disagree. The list changes under a live
+   page in two ways — hydration replaces the baked-in example with the tenant's
+   own people, and the Demo button swaps the two datasets — and before
+   2026-08-20 either one left a departed key selected and threw on the next
+   repaint. */
+function viewer(){
+  var v = PEOPLE.filter(function(p){ return p.key === VIEWER; })[0];
+  if (v) return v;
+  if (!PEOPLE.length) return { key: VIEWER, name: "\u2014", title: "", level: "smo", unit: "group" };
+  VIEWER = PEOPLE[0].key;
+  return PEOPLE[0];
+}
 function grant(pageKey){
   var v = viewer();
   return (ACCESS[v.level] || {})[pageKey] || "none";
@@ -775,7 +797,7 @@ var BANDS = {
 };
 
 function bandOf(v){
-  if (v == null) return { key:"none", label:"No data" };
+  if (v == null || isNaN(v)) return { key:"none", label:"No data" };
   var b = BANDS.bands;
   for (var i=0;i<b.length;i++) if (v >= b[i].floor) return b[i];
   return b[b.length-1];
@@ -1055,6 +1077,14 @@ function activeUnits(){ return UNIT_KEYS.filter(function(k){ return UNITS[k].act
 /* A unit's headline is its Key Objectives, optionally weighted. Equal weight
    is the default nobody has to defend. */
 function unitObjectives(u){ return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]); }
+
+/* The group's own scorecard, on the same footing as a unit's: computed from
+   the objectives that are actually there, never read from a stored number
+   (§5.1). It was a field on GROUP until 2026-08-20 — which agreed with the
+   mean while the demo data was the only data, and read "undefined%" the moment
+   a tenant had no objectives of its own. Unweighted: weights are a per-unit
+   mechanism, and the group has never had a row in the weight table. */
+function groupKeyObjectives(){ return koScore(GROUP.keyObjectives); }
 
 /* Themes aggregate from the pillars that actually carry them, across every
    unit — derived rather than a hand-kept list, which is how the earlier

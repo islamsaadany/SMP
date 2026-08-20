@@ -155,9 +155,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   sees their own view; the SMO issues temporary passwords from Levels & access (forced
   change on first sign-in; sign-in: `SMO` / `1234`, no forced change — §19.4). Enforcement is at the
   door — per-action authorization and the change log are Phase 2 (§19.2).
+- **Two datasets (since v2.2, §21):** the database holds the **client's own** tenant;
+  the full Raya Trade worked example is baked into the platform file and reachable
+  only through the **Demo data** button, which labels it and refuses to save it.
+  A first deployment seeds the example and then clears it — `db/migrations/004-clean-slate.sql`
+  runs after the seed, which is why `ensureReady` seeds first and migrates second.
+  **Never put invented content in the database**; it belongs in the demo dataset.
 - **DB verification loop:** start a throwaway Postgres 16, then
-  `DATABASE_URL=... node scripts/test-roundtrip.js` (must print PASS twice) and
-  `DATABASE_URL=... node scripts/dev-server.js` + drive the platform in a browser.
+  `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
+  fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
+  in a browser, in **both** live and demo mode.
 - **On each version bump:** update the gate's link in `index.html`, regenerate
   `db/seed-state.json`, and re-run the round-trip test.
 
@@ -222,6 +229,10 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 (SMP identified as the Strategy Management Platform: project folder
+*Last Updated: 2026-08-20 — v2.2: the clean slate and the Demo button (§21); the
+seed-then-migrate order and the "no invented content in the database" rule recorded
+above.*
+
+*Earlier: 2026-08-20 (SMP identified as the Strategy Management Platform: project folder
 imported into the repo, spec-kit installed (.specify/ + specs/), project context, stack, layout,
 build commands, and doc-currency rules rewritten around SMP-Project-Folder/.)*

@@ -1702,6 +1702,18 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.2 — the clean slate, and the Demo button
+
+The demo tenant became the client's own: the companies, the business units and
+the supporting functions stayed, every invented plan, foundation, person, cycle
+and capability content went (§21). The full worked example did not go with it —
+a **Demo data** button switches the whole product to it for explaining, labels
+it while it is on screen, and cannot write it to the database. Three defects
+that only an empty tenant could expose were fixed on the way: "Clear all plans"
+on Supporting functions had been inert since 1.7, capability content was being
+stored twice, and the group's own scorecard was a stored figure that read
+`undefined%` with no objectives set (§21.3).
+
 ### v2.1 — identity: real sign-in replaces the viewer switcher
 
 Phase 1 of the real build, on the chosen Path A (the approved front end,
@@ -2000,11 +2012,138 @@ construction instead of by eye. Tailwind may be used for anything genuinely
 new. *(Nothing about the move changes the navy/gold, the layouts or the
 branding — that question was asked and answered before the decision.)*
 
-**The offline single-file prototype stops gaining features.** v2.1 is its last
-build; it remains as the frozen demo artefact and as the reference the rebuild
-is measured against. This is the real cost of the move and it is taken
-knowingly.
+**The offline single-file prototype stops gaining features.** v2.1 was its last
+build of new capability; it remains as the frozen demo artefact and as the
+reference the rebuild is measured against. This is the real cost of the move and
+it is taken knowingly.
+
+*Clarified 2026-08-20, on building v2.2:* "stops gaining features" is the rule;
+"stops changing" is not. The single file **is** the live product until the
+rebuild reaches each screen, so it still takes the client's own instructions
+(§21's clean slate) and the fixes those expose. New capability goes to the new
+stack; corrections go where the product actually runs.
 
 *The plan itself — order of work, how the live product behaves during the
 rebuild, and what "done" means for each slice — is not settled here. It goes to
 Islam for approval before any of it is built (A1).*
+
+---
+
+## 21 · The clean slate, and the Demo button — v2.2
+
+*Decided and built 2026-08-20, on Islam's instruction: "what's super actual for
+now are the companies, the business units and the supporting functions … but as
+mentioned keep the demo view with all data so we can explain."*
+
+### 21.1 Two datasets, one product
+
+The prototype's content did two jobs at once and could only do one of them
+well. It had to be **the client's tenant** — the real companies, the real
+business units, the real supporting functions — and it had to be **the worked
+example** that explains what a filled-in platform looks like. As long as both
+lived in the same rows, every screen was ambiguous: nobody could tell Raya's own
+figures from the invented ones except by reading §13.
+
+They are now separate, and the separation is structural rather than a label:
+
+- **LIVE** is what the database holds. After the clean slate that is the
+  client's own — the company, the ten business units, the supporting functions,
+  the three group themes, the eight capability names, the configuration, and one
+  account. Everything else is empty and waiting to be authored.
+- **DEMO** is the full Raya Trade example, baked into the platform file exactly
+  as it always was. It is captured in memory at boot, *before* the database
+  answers, and never written anywhere.
+
+A **Demo data** button in the top-right switches between them. In demo the
+platform's own banner carries the invented-data notice, which is true of the
+example and is no longer true of the client's tenant; live, the banner is gone.
+
+**The guard that matters:** the autosave refuses to run in demo mode. Demo
+content cannot reach the database even if someone types in it — anything typed
+there is discarded on the way back. Leaving live snapshots the client's data
+first, so returning restores it exactly rather than the state it had at boot;
+an edit made before opening the demo survives the round trip.
+
+The button exists only where there is a live dataset to tell the example apart
+from. Opened as a file, the whole product **is** the example, so the button
+stays hidden and nothing changes about the offline handover file.
+
+### 21.2 What the clean slate kept, and what it removed
+
+Applied as migration `004-clean-slate.sql` — recorded in the registry, so it
+runs once and can never re-clear a tenant that has real work in it.
+
+**Kept:** the company and its horizon · the ten business units · the supporting
+functions · the three group themes and the eight capability **names** with their
+owning function (§13 records these as real, drawn from Raya's own Strategy
+Temple slide — only their content was invented) · all configuration: labels,
+scoring bands, levels, the access matrix, the weighting factors and their
+values · the SMO account, because it is the account the platform is entered
+with.
+
+**Removed:** every business unit's plan, foundation and SWOT · the group's
+foundation — clauses, purpose, core values, key objectives · every capability's
+definition, key objectives and projects · the reporting cycle, its focus marks
+and its closed history · the invented people and the role assignments pointing
+at them.
+
+**Deliberately not removed, and flagged:** the weighting factor *values*
+(§13 invented them). They were not in the instruction and a weighting table
+with no values reads as broken rather than as empty — say the word and they go.
+
+Nothing is lost. The full example is still in `db/seed-state.json` and baked
+into the platform file, which is what the Demo button shows.
+
+### 21.3 Four bugs the clean slate exposed
+
+An empty tenant is a test the product had never been given, and it failed four
+ways. All four were real defects, not consequences of clearing:
+
+1. **"Clear all plans" on Supporting functions did nothing at all.** It emptied
+   `cap.measures` and `cap.tactics` — fields a capability stopped having in 1.7,
+   when it gained key objectives and projects instead (§15). The line threw on
+   the missing array before it reached anything real, so the button had been
+   inert since 1.7. It now clears a capability's key objectives and its
+   projects, which is what its plan is.
+
+2. **Capability content was stored twice.** Key objectives and projects have
+   their own tables, and the writer *also* copied them into
+   `capabilities.extra`. Reading merged the blob back over the rows, so a
+   cleared capability would have refilled itself with invented projects on the
+   next save. The two fields are now declared as owned by their tables and
+   dropped from the blob.
+
+3. **The group's own scorecard was a stored number.** `GROUP.keyObjectivesScore`
+   sat in the data at 75 — which agreed with the mean of the six objectives
+   while the demo data was the only data, and read `undefined%` the moment a
+   tenant had none. It is now computed on read like every other figure (§5.1),
+   from the objectives that are actually there; the copy that said "mean of the
+   six" and "all 6 objectives have a target" now counts them. Two further
+   pre-computed group figures (`portfolio`, and the theme roll-ups) were found
+   to be read by nothing at all and are gone from the tenant.
+
+4. **The viewer switcher was filled once, at load.** It listed the baked-in
+   example's 29 people — and went on listing them after hydration had replaced
+   them with the tenant's own, so picking one of the departed threw on the next
+   repaint. It is refilled whenever the list changes, and `viewer()` now
+   resolves rather than returning nothing: if the person being viewed as has
+   gone, the first person stands in and the selection is corrected to match. The
+   Demo button swaps the same list, so both paths needed the same fix.
+
+Alongside them, `bandOf` was given the same treatment as §5.7's nulls: a score
+that cannot be computed is **No data**, not **Off track**. An empty tenant was
+colouring its dials red for having nothing in them.
+
+### 21.4 Verified before handover
+
+- The clean-slate migration applied to a database seeded from scratch, then the
+  counts read back: units 10, supporting functions 7, themes 3, capabilities 8,
+  people 1 — pillars, measures, tactics, unit and group key objectives, clauses,
+  SWOT items, projects, capability key objectives and history all **0**; the
+  cycle and the review empty; `smo` the only account that can sign in.
+- Every page walked as every viewer, live and in demo, with the console
+  watched — no errors in either.
+- The database read before, during and after a demo session: **unchanged**,
+  including across the autosave interval.
+- Round-trip still deep-equal, and the file still opens and runs offline on the
+  baked example.

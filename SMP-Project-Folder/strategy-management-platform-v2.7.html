@@ -624,8 +624,16 @@
      because it is visible \u2014 so it is what you would expect rather than
      hidden state. */
   .split { display:grid; grid-template-columns:236px 1fr; gap:16px; align-items:start; }
+  /* Pinned BELOW the chrome, not 12px from the top of the window. It used to
+     be `top:12px`, which put it under a sticky header 169–258px tall: the
+     rail's first rows slid beneath the chrome, and because the chrome sits
+     above them in the stacking order it swallowed the clicks — so the item you
+     pressed was a navigation button and the rail appeared not to work at all.
+     `--chrome-h` is measured by the ResizeObserver in the shell, so this
+     follows the header as it condenses instead of guessing at its height. */
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
-    overflow:hidden; position:sticky; top:12px; }
+    overflow:hidden; position:sticky; top:calc(var(--chrome-h, 118px) + 12px);
+    max-height:calc(100vh - var(--chrome-h, 118px) - 24px); overflow-y:auto; }
   .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
     display:flex; justify-content:space-between; gap:8px; }
@@ -734,7 +742,13 @@
   .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
 
   /* ── Chrome: one sticky container, nothing measured ─────────────── */
-  .chrome { position:sticky; top:0; z-index:9; }
+  /* A background of its own, not just its children's. The container was
+     transparent and relied on the header, the nav row and the tab row tiling
+     it exactly — which they do at rest, but not mid-condense: the rows animate
+     their padding over .18s while the container animates its height, and every
+     frame where the two disagree by even a fraction let the page show through
+     the gap. That was the haze on scrolling. A floor cannot have a gap. */
+  .chrome { position:sticky; top:0; z-index:9; background:var(--surface); }
   header.top { position:static; }
   nav.units, nav.tabs { position:static; }
 

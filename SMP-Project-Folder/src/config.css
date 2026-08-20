@@ -53,7 +53,13 @@
   .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
 
   /* ── Chrome: one sticky container, nothing measured ─────────────── */
-  .chrome { position:sticky; top:0; z-index:9; }
+  /* A background of its own, not just its children's. The container was
+     transparent and relied on the header, the nav row and the tab row tiling
+     it exactly — which they do at rest, but not mid-condense: the rows animate
+     their padding over .18s while the container animates its height, and every
+     frame where the two disagree by even a fraction let the page show through
+     the gap. That was the haze on scrolling. A floor cannot have a gap. */
+  .chrome { position:sticky; top:0; z-index:9; background:var(--surface); }
   header.top { position:static; }
   nav.units, nav.tabs { position:static; }
 

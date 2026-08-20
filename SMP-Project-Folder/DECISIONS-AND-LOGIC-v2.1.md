@@ -1934,3 +1934,77 @@ temporary password was refused afterwards. An unauthenticated visit to the
 platform bounced to the gate; /api/state answered 401 without a session.
 Offline: the QA walk stayed clean for all 29 viewers and the legacy gate
 behaved exactly as before.
+
+### 19.4 The SMO's own sign-in is one step — reversal within v2.1
+
+*Instructed by Islam, 2026-08-20: "don't ask me to do new passwords now on the
+app, just let me access with SMO and 1234."*
+
+The SMO signs in with **SMO / 1234** and is **not** asked to choose a new
+password. This reverses, for that one account, the forced-change rule §19.1
+had just introduced.
+
+What did **not** change: sessions are still real, passwords are still hashed,
+`/api/state` still requires a session, and passwords the SMO **issues to other
+people** are still temporary and still force a change on first use. The
+reversal is scoped to the one account that has to get in quickly.
+
+*How it reaches an already-seeded database.* Changing the starting credential
+in code would only ever affect an empty database, and the deployed one already
+carried the old `4123` with the must-change flag. So it is a **migration**
+(`003-simple-smo-access.sql`), applied once and recorded in the registry — the
+first request after the deploy corrects the existing row. Being once-only is
+what stops it from clobbering a real password later: change the SMO password
+from inside the product and the migration never runs again.
+
+**Stated plainly, because it is a step back:** `1234` on a product reachable
+from the internet is weak, and the old `4123` stops working the moment this
+deploys. It is a demo convenience and should be replaced before anything
+client-confidential goes into the platform.
+
+---
+
+## 20 · The stack — reversal of §19's Path A
+
+*Decided by Islam, 2026-08-20:* **SMP moves to the HR_ERP stack** — Next.js,
+React, TypeScript, Prisma, NextAuth on Vercel and Neon. His reasoning, in his
+words: it *"looks more solid and will handle a lot of complex work… we are
+going to do a lot on this platform with lots of users."*
+
+**This reverses §19's Path A**, which kept the hand-built single-file front end
+and put a real server underneath it. Recorded as a reversal rather than
+overwritten: §19 remains the record of what v2.1 was built on and why, and the
+reasoning there — that Path A protected the settled design from porting drift —
+is still the risk this move has to manage, not a reason it was wrong to choose.
+
+**What carries across unchanged**, and why the reversal is cheap rather than
+wasteful:
+
+- **The database.** The schema, the migrations and the seeded content stay
+  exactly as they are; Prisma is pointed at the existing tables rather than
+  generating new ones. No data migration, nothing re-entered.
+- **The identity model.** Scrypt-hashed passwords, server sessions, the SMO
+  issuing temporary credentials — the same design NextAuth will carry.
+- **Every decision in this document.** The model, the scoring, the vocabulary,
+  the access rules and the screen behaviour are stack-independent; that is what
+  makes them a rebuild contract rather than notes about one codebase.
+
+**What is thrown away:** the glue — `api/state.js`, `api/auth.js` and
+`src/sync.js`, a few hundred lines.
+
+**What is at risk, and the decision that protects it:** every screen is
+re-implemented, so the settled design can drift a shade or a few pixels at a
+time. **SMP's existing CSS is therefore carried over verbatim rather than
+re-expressed in Tailwind**, which is what makes an identical look achievable by
+construction instead of by eye. Tailwind may be used for anything genuinely
+new. *(Nothing about the move changes the navy/gold, the layouts or the
+branding — that question was asked and answered before the decision.)*
+
+**The offline single-file prototype stops gaining features.** v2.1 is its last
+build; it remains as the frozen demo artefact and as the reference the rebuild
+is measured against. This is the real cost of the move and it is taken
+knowingly.
+
+*The plan itself — order of work, how the live product behaves during the
+rebuild, and what "done" means for each slice — is not settled here. It goes to
+Islam for approval before any of it is built (A1).*

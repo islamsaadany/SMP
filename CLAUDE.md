@@ -9,14 +9,13 @@
 
 ## Steering Documents
 
-SMP adopts the same steering system as HR_ERP — but only `CLAUDE.md` exists so far.
-As the project's scope is defined, the companion files are created and become mandatory reading:
+SMP adopts the same steering system as HR_ERP. Read these:
 
 1. **`CLAUDE.md`** (this file) — how to work, conventions, house rules. *(exists)*
-2. **`PROJECT_DETAILS.md`** — technical reference: stack, schema, modules, settled decisions. *(create when the stack is decided)*
-3. **`IMPLEMENTATION_PLAN.md`** — phases, scope, and the decisions log. *(create when scope is defined)*
-4. **`IMPLEMENTATION_PROGRESS.md`** — live tracker of built / in-progress / next. *(create with the plan)*
-5. **`specs/`** — per-feature specifications via spec-kit. *(adopt when feature work starts; spec-kit is not installed in this repo yet)*
+2. **`PROJECT_DETAILS.md`** — technical reference: stack, schema, modules. *(not created; `db/schema.sql` and `DECISIONS-AND-LOGIC-vX.Y.md` carry this today)*
+3. **`IMPLEMENTATION_PLAN.md`** — phases, scope, and the decisions log. *(not created; the phase plan lives in `IMPLEMENTATION_PROGRESS.md` and the decisions log in `DECISIONS-AND-LOGIC-vX.Y.md`)*
+4. **`IMPLEMENTATION_PROGRESS.md`** — **live tracker of built / in flight / next / waiting on Islam. This is how progress is reported — updated in the same commit as the work it describes.** *(exists)*
+5. **`specs/`** — per-feature specifications via spec-kit. *(installed and in use)*
 
 **When any steering file changes materially, update it in the same commit as the code.**
 A drift between specs and code is a documentation bug — report it before silently realigning.
@@ -45,7 +44,7 @@ A drift between specs and code is a documentation bug — report it before silen
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**
 - **Product design language is navy/gold** (carried over from the Forefront house style; the SMP starting page already uses it).
 - **When restoring a design, match the original EXACTLY.**
-- **MOCKUP-FIRST (NON-NEGOTIABLE): never adjust a design — layout, structure, section order, styling, or any visual element — without first showing the user a static HTML mockup of the proposed look and getting explicit sign-off on that HTML view.** Build the mockup (self-contained HTML, navy/gold palette, saved under `design-mockups/<feature>/<YYYY-MM-DD>_<desc>.html` and published as an Artifact for review), wait for approval, and only then touch the real components. No "I'll just build it and you review at the end" for visual/structural changes.
+- **Describe the change in words and get approval before making it** — what moves, what it replaces, what it costs. *(Superseded 2026-08-20: this used to demand a static HTML mockup before any visual change. That belonged to the prototype era and is retired — the approval it protected is not. `design-mockups/` is no longer produced; `SMP-Project-Folder/mockups/` stays as the historical record of what was settled and what was rejected.)*
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
 
 ### 2. Think Before Acting
@@ -154,7 +153,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
 - **Identity (since v2.1, §19):** the gate is a real login (person key + password,
   scrypt-hashed, httpOnly session); `/api/state` requires a session; a signed-in person
   sees their own view; the SMO issues temporary passwords from Levels & access (forced
-  change on first sign-in; bootstrap: `smo` / `4123`, must-change). Enforcement is at the
+  change on first sign-in; sign-in: `SMO` / `1234`, no forced change — §19.4). Enforcement is at the
   door — per-action authorization and the change log are Phase 2 (§19.2).
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (must print PASS twice) and

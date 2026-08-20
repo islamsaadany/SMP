@@ -19,10 +19,13 @@ Nothing proceeds past this line without an answer.
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
-| **D6** | Should the **weighting factor values** be cleared too? | They were invented (§13) but were not in the clear-out instruction, and an empty weighting table reads as broken rather than empty. Left in place meanwhile. | §21.2 |
 
 **Answered:**
 
+- **D6 · The weighting values — ANSWERED 2026-08-20: cleared too.** The factor
+  model stays (the four factors, their types and their 40/30/20/10 weights); the
+  per-unit figures, the written reasons and the prior cycle are gone. With
+  nothing entered, every unit counts equally (§21.5).
 - **D4 · The rebuild plan — ANSWERED 2026-08-20:** CSS carried **verbatim**
   (Tailwind only for genuinely new things); cutover **early, page group by page
   group**, the new app becoming the live site while un-ported screens link back
@@ -52,7 +55,8 @@ bands, levels, the access matrix, the weighting factors and their values).
 **Cleared:** every unit plan, foundation and SWOT · the group's foundation,
 purpose, values and key objectives · every capability's definition, key
 objectives and projects · the reporting cycle, its focus marks and its history ·
-the invented people and their role assignments. Only `SMO` can sign in.
+the invented people and their role assignments · every weighting factor value,
+the written reasons beside them, and the prior cycle. Only `SMO` can sign in.
 
 The worked example did not go: a **Demo data** button top-right switches the
 whole product to the full Raya Trade dataset for explaining, shows the
@@ -79,9 +83,12 @@ during and after a demo session and across the autosave interval: **unchanged**
 · round trip and fixed point still PASS · the offline file walks clean for all
 29 viewers.
 
-**Weighting factor values were left in place** — they were not in the
-instruction, and a weighting table with no values reads as broken rather than
-empty. Say the word and they go.
+**The weighting table, empty.** The four factors and their 40/30/20/10 weights
+stay — that is the model, not content — and each unit keeps a row to enter its
+figures into. Until anything is entered, **every unit counts equally** in the
+group compile and the page says so; a share of nothing reads as a dash, not 0%.
+Two more defects fell out of this: emptying a cell used to leave the old figure
+in place, and a factor added through the editor never got a share column.
 
 ### v2.1 — identity
 Real sign-in on the deployed product. The gate is a login (person key +
@@ -174,7 +181,7 @@ shape, optional pillar-measure weighting).
 
 Stated here rather than discovered later.
 
-0. **The tenant is nearly empty, and that is the point.** Until the plans are
+0. **The tenant is empty, and that is the point.** Until the plans are
    authored, most screens show "No data" rather than figures — which is correct,
    not broken. Press **Demo data** to show anyone what a filled-in platform
    looks like.

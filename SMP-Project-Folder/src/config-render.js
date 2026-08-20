@@ -157,6 +157,18 @@ function renderAccess(){
 }
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */
+/* The previous cycle's split, carried so a factor change can be read against
+   what it replaces (§6). A tenant in its first cycle has no previous one — the
+   column then says so and every factor reads "new this cycle", rather than
+   showing deltas against a year that never happened. */
+function priorFactors(){
+  return (PRIOR_CYCLE && PRIOR_CYCLE.factors) || [];
+}
+function priorLabel(){
+  if (!priorFactors().length) return "Previous cycle";
+  return (PRIOR_CYCLE.year ? PRIOR_CYCLE.year + " " : "") + "cycle";
+}
+
 function renderFactorEditor(){
   var w = GROUP.weighting;
   var editable = grant("g_weight") === "edit" && EDITING.factors;
@@ -170,7 +182,7 @@ function renderFactorEditor(){
         ? '<input class="fwt" data-f="' + i + '" value="' + f.weight + '" aria-label="Weight for ' + esc(f.name) + '" />'
         : '<b>' + f.weight + '%</b>') + '</td>' +
       '<td class="num"><span class="why" style="margin:0">' + (function(){
-        var pf = PRIOR_CYCLE.factors.filter(function(x){ return x.key === f.key; })[0];
+        var pf = priorFactors().filter(function(x){ return x.key === f.key; })[0];
         if (!pf) return "new this cycle";
         var d = f.weight - pf.weight;
         return pf.weight + "% &rarr; " + (d === 0 ? "unchanged"
@@ -191,7 +203,7 @@ function renderFactorEditor(){
         : '<span class="pill none">View only</span>') + '</div>' +
     '<div class="cfg"><table><thead><tr>' +
       '<th style="width:30%">Factor</th><th style="width:24%">Type</th><th style="width:14%">Weight</th>' +
-      '<th style="width:22%">' + PRIOR_CYCLE.year + ' cycle</th><th style="width:10%"></th>' +
+      '<th style="width:22%">' + priorLabel() + '</th><th style="width:10%"></th>' +
     '</tr></thead><tbody>' + rows + '</tbody>' +
     '<tfoot><tr><td colspan="2"><b>Total</b></td>' +
       '<td class="num"><b class="' + (totalOK ? "" : "overload") + '">' + total + '%</b></td>' +

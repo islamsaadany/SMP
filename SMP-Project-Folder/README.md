@@ -119,10 +119,12 @@ and in the offline file.
 
 Version **2.2** turned the demo tenant into the client's own (§21): the
 companies, the business units, the supporting functions, the themes, the
-capability names and all configuration stayed; every invented plan, foundation,
-person, cycle and capability content went. The worked example is still there —
-a **Demo data** button switches the whole product to it for explaining, labels
-it while it is on screen, and cannot save it.
+capability names and the configuration stayed; every invented plan, foundation,
+person, cycle, capability content and weighting value went. The weighting
+*model* survives — the four factors and their 40/30/20/10 split — and until a
+figure is entered every unit counts equally (§21.5). The worked example is still
+there: a **Demo data** button switches the whole product to it for explaining,
+labels it while it is on screen, and cannot save it.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

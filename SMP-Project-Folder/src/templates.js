@@ -223,20 +223,54 @@ function checkFileShape(u, rows, kind){
   return problems;
 }
 
+/* Codes are the platform's, never the file's. The workbook mints them as it
+   reads, matching a child to its pillar by the NAME typed on the sheet; a raw
+   CSV still carries whatever ids it was exported with, so they are renumbered
+   here and children follow their old parent id to its new one. Two linkages,
+   one scheme. */
+function mintPlanIds(u, rows){
+  var map = {}, p = 0, k = 0, f = 0, a = 0, mN = {}, tN = {};
+  var swotN = { STRENGTH:0, WEAKNESS:0, OPPORTUNITY:0, THREAT:0 };
+  rows.forEach(function(r){
+    if (r.type !== "PILLAR") return;
+    var id = u.ukey + "-P" + (++p);
+    map[r.id] = id; r.id = id;
+  });
+  rows.forEach(function(r){
+    if (r.type === "MEASURE" || r.type === "TACTIC") {
+      var pid = map[r.parent_id] || "";
+      r.parent_id = pid;
+      var box = r.type === "MEASURE" ? mN : tN, letter = r.type === "MEASURE" ? "M" : "T";
+      box[pid] = (box[pid] || 0) + 1;
+      r.id = pid ? pid + "-" + letter + box[pid] : "";
+    }
+    else if (r.type === "NORTHSTAR")  r.id = u.ukey + "-KO"  + (++k);
+    else if (r.type === "FOUNDATION") r.id = u.ukey + "-F"   + (++f);
+    else if (r.type === "ASPIRATION") r.id = u.ukey + "-ASP" + (++a);
+    else if (swotN.hasOwnProperty(r.type))
+      r.id = u.ukey + "-" + r.type[0] + (++swotN[r.type]);
+  });
+  return rows.filter(function(r){ return r.type !== "PLAN"; });
+}
+
+/* Bad data that loads silently is worse than a file that refuses to load.
+   What is checked changed with \u00a722: there are no ids to duplicate and no unit
+   prefix to read, because the file carries neither. What remains is whether
+   each row can be placed \u2014 a measure whose pillar was never typed \u2014 and
+   whether the few coded values are ones the platform knows. */
 function validatePlan(u, rows){
-  var problems = checkFileShape(u, rows, "plan"), notices = [], seen = {};
-  var themes = GROUP.themes.map(function(x){ return x.ab; });
-  var ids = {};
-  rows.forEach(function(r){ if (r.id) ids[r.id] = true; });
+  var problems = [], notices = [], themes = GROUP.themes.map(function(x){ return x.ab; });
+  var pillars = rows.filter(function(r){ return r.type === "PILLAR"; });
+
+  if (!rows.length)
+    problems.push({ at:"the whole file", msg:"nothing to read \u2014 every sheet is empty." });
 
   rows.forEach(function(r, n){
     var at = "row " + (n + 2) + (r.name ? " \u2014 " + r.name : "");
-    if (!r.id)   { problems.push({ at:at, msg:"no id" }); return; }
     if (!r.type) { problems.push({ at:at, msg:"no type" }); return; }
-    if (seen[r.id]) problems.push({ at:at, msg:"id " + r.id + " appears more than once" });
-    seen[r.id] = true;
 
     if (r.type === "PILLAR") {
+      if (!r.name) problems.push({ at:at, msg:"a pillar with no name" });
       if (r.theme && themes.indexOf(r.theme) < 0)
         problems.push({ at:at, msg:'theme "' + r.theme + '" is not one of ' + themes.join(", ") });
       var k = r.kind || kindFromNotes(r.notes);
@@ -245,9 +279,10 @@ function validatePlan(u, rows){
       if (!r.theme) notices.push({ at:at, msg:"no theme \u2014 will read as cross-cutting" });
     }
     if (r.type === "MEASURE" || r.type === "TACTIC") {
-      if (!r.parent_id) problems.push({ at:at, msg:"its pillar could not be matched \u2014 check the Pillar column" });
-      else if (!ids[r.parent_id] && !findById(u, r.parent_id))
-        problems.push({ at:at, msg:"parent_id " + r.parent_id + " matches no pillar" });
+      if (!r.parent_id)
+        problems.push({ at:at, msg: pillars.length
+          ? "its pillar could not be matched \u2014 choose one from the Pillar column"
+          : "there are no pillars in this file, so nothing can hang off one \u2014 fill the Pillars sheet first" });
     }
     if (r.direction && ["\u2265","\u2264",">=","<="].indexOf(r.direction) < 0)
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not \u2265 or \u2264' });
@@ -478,6 +513,70 @@ function applyPlan(u, d){
   });
 }
 
+/* ── A plan upload REPLACES (\u00a722) ────────────────────────────────────────
+   Not a diff. The file is the plan; what is recorded is archived and then
+   written over. This is what let every code leave the template: with nothing
+   to match a row against, no row needs an identity typed into a sheet.
+
+   The summary is what the SMO agrees to before any of it happens \u2014 what is
+   arriving, what is going, and how much of what is going was reported.
+   \u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014 */
+function countRows(rows, type){
+  return rows.filter(function(r){ return r.type === type; }).length;
+}
+function planReplaceSummary(u, rows){
+  var swot = ["STRENGTH","WEAKNESS","OPPORTUNITY","THREAT"]
+    .reduce(function(a, t){ return a + countRows(rows, t); }, 0);
+  return {
+    replace: true,
+    incoming: { pillars:countRows(rows, "PILLAR"), measures:countRows(rows, "MEASURE"),
+                tactics:countRows(rows, "TACTIC"), objectives:countRows(rows, "NORTHSTAR"),
+                swot:swot, clauses:countRows(rows, "FOUNDATION") },
+    current: unitSnapshotCounts(unitPlanSnapshot(u)),
+    rows: rows
+  };
+}
+function capReplaceSummary(c, rows){
+  return {
+    replace: true,
+    incoming: { projects:countRows(rows, "PROJECT"), deliverables:countRows(rows, "DELIVERABLE"),
+                outcomes:countRows(rows, "OUTCOME"), milestones:countRows(rows, "MILESTONE"),
+                objectives:countRows(rows, "CAPOBJECTIVE") },
+    current: capSnapshotCounts(capPlanSnapshot(c)),
+    rows: rows
+  };
+}
+
+/* Every row is a creation, so the existing builder does the whole job \u2014 it is
+   the same code that has always created a new pillar arriving in a file. */
+function applyPlanReplace(u, rows){
+  var archived = archiveUnitPlan(u);
+  clearUnitPlan(u);
+  /* The foundation's LABELS are a skeleton the unit keeps when a file does not
+     carry one. A file that does carry clauses re-authors both label and text,
+     so the old ones are cleared out of the way first. */
+  if (rows.some(function(r){ return r.type === "FOUNDATION"; })) u.clauses.length = 0;
+  createFromPlan(u, { rows: rows.map(function(r){
+    return { status:"new", type:r.type, raw:r };
+  }) });
+  rows.forEach(function(r){
+    if (r.type !== "ASPIRATION") return;
+    if (/end in mind/i.test(r.name || "")) u.endInMind = r.description || "";
+    else u.aspiration = r.description || "";
+  });
+  renumberUnit(u);
+  return archived;
+}
+function applyCapPlanReplace(c, rows){
+  var archived = archiveCapPlan(c);
+  clearCapability(c, "plan");
+  createFromCapPlan(c, { rows: rows.map(function(r){
+    return { status:"new", type:r.type, raw:r };
+  }) });
+  renumberCapability(c);
+  return archived;
+}
+
 function applyProgress(u, d){
   d.rows.forEach(function(r){
     if (!r.hit) return;
@@ -682,10 +781,35 @@ function checkCapFileShape(c, rows, kind){
 
 var CAP_TYPES = ["PLAN","CAPOBJECTIVE","PROJECT","DELIVERABLE","OUTCOME","MILESTONE"];
 
+/* The capability twin of mintPlanIds. */
+function mintCapPlanIds(c, rows){
+  var map = {}, p = 0, k = 0, n = {};
+  rows.forEach(function(r){
+    if (r.type !== "PROJECT") return;
+    var id = c.id + "-P" + (++p);
+    map[r.id] = id; r.id = id;
+  });
+  var letter = { DELIVERABLE:"D", OUTCOME:"O", MILESTONE:"M" };
+  rows.forEach(function(r){
+    if (letter[r.type]) {
+      var pid = map[r.parent_id] || "";
+      r.parent_id = pid;
+      var key = pid + letter[r.type];
+      n[key] = (n[key] || 0) + 1;
+      r.id = pid ? pid + "-" + letter[r.type] + n[key] : "";
+    } else if (r.type === "CAPOBJECTIVE") r.id = c.id + "-KO" + (++k);
+  });
+  return rows.filter(function(r){ return r.type !== "PLAN"; });
+}
+
+/* Same change as a unit's plan (§22): no ids in the file, so nothing to check
+   for duplicates and no capability prefix to read — what matters is whether a
+   deliverable, outcome or milestone found the project it names. */
 function validateCapPlan(c, rows){
-  var problems = checkCapFileShape(c, rows, "plan"), notices = [], seen = {};
-  var ids = {};
-  rows.forEach(function(r){ if (r.id) ids[r.id] = true; });
+  var problems = [], notices = [];
+  var projects = rows.filter(function(r){ return r.type === "PROJECT"; });
+  if (!rows.length)
+    problems.push({ at:"the whole file", msg:"nothing to read — every sheet is empty." });
 
   /* The overrun rule (§15.4): a milestone finishing after its project's end is
      saved exactly as entered and said out loud — a notice, never a refusal. */
@@ -699,23 +823,16 @@ function validateCapPlan(c, rows){
 
   rows.forEach(function(r, n){
     var at = "row " + (n + 2) + (r.name ? " — " + r.name : "");
-    if (!r.id)   { problems.push({ at:at, msg:"no id" }); return; }
     if (!r.type) { problems.push({ at:at, msg:"no type" }); return; }
-    if (seen[r.id]) problems.push({ at:at, msg:"id " + r.id + " appears more than once" });
-    seen[r.id] = true;
     if (CAP_TYPES.indexOf(r.type) < 0) {
       problems.push({ at:at, msg:'type "' + r.type + '" is not one of ' + CAP_TYPES.join(", ") });
       return;
     }
     if (r.type === "DELIVERABLE" || r.type === "OUTCOME" || r.type === "MILESTONE") {
-      if (!r.parent_id) problems.push({ at:at, msg:"its project could not be matched — check the Project column" });
-      else {
-        var known = ids[r.parent_id] || (function(){
-          var h = capFindById(c, r.parent_id);
-          return h && h.kind === "PROJECT";
-        })();
-        if (!known) problems.push({ at:at, msg:"parent_id " + r.parent_id + " matches no project" });
-      }
+      if (!r.parent_id)
+        problems.push({ at:at, msg: projects.length
+          ? "its project could not be matched — choose one from the Project column"
+          : "there are no projects in this file, so nothing can hang off one — fill the Projects sheet first" });
     }
     if (r.direction && ["≥","≤",">=","<="].indexOf(r.direction) < 0)
       problems.push({ at:at, msg:'direction "' + r.direction + '" is not ≥ or ≤' });

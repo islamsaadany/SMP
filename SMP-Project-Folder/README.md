@@ -1,4 +1,4 @@
-# SMP Project Folder — v2.2
+# SMP Project Folder — v2.3
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v2.2.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v2.3.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v2.2.html`** — the built prototype. One file,
+**`strategy-management-platform-v2.3.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -125,6 +125,13 @@ person, cycle, capability content and weighting value went. The weighting
 figure is entered every unit counts equally (§21.5). The worked example is still
 there: a **Demo data** button switches the whole product to it for explaining,
 labels it while it is on screen, and cannot save it.
+
+Version **2.3** took the codes out of the plan template (§22). One generic
+workbook instead of a download per unit; the unit is chosen on its Read me
+sheet; the platform assigns every code on arrival. It rests on one rule — **an
+upload authors a plan, it does not amend one** — which is what removes the need
+to match a row against anything. Replacing a plan **archives** the outgoing one,
+reported figures included, and Manage lists archives with a Restore.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

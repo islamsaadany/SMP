@@ -425,10 +425,6 @@ function renderUnits(){
       (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
 }
 
-/* ── Import ─────────────────────────────────────────────────────────
-   Two templates, one file per unit. Download, fill, upload, review, apply.
-   Nothing is written until the differences have been seen. ── */
-var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, check:null, done:null };
 
 /* The reward rule is a property of the cycle, not of each measure \u2014 set once,
    read by every focus measure. A stretch target per measure would mean the line
@@ -527,9 +523,15 @@ function renderFocusSetup(){
 }
 
 /* ── Import ─────────────────────────────────────────────────────────
-   Two templates, one file per unit. Download, fill, upload, review, apply.
-   Nothing is written until the differences have been seen. ── */
-var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, check:null, done:null };
+   A plan AUTHORS (§22): one generic template, the unit named on its Read me
+   sheet, every code minted on arrival, and the plan it replaces archived.
+   Reporting still amends: download, fill, upload, review the differences,
+   apply. Nothing is written until it has been seen either way.
+
+   `IMP` was declared twice, identically, a few hundred lines apart — the
+   second silently won. One declaration now. ── */
+var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
+            read:"", check:null, done:null };
 
 /* The reward rule is a property of the cycle, not of each measure \u2014 set once,
    read by every focus measure. A stretch target per measure would mean the line
@@ -668,28 +670,41 @@ function renderImport(){
       : u.items.reduce(function(a,p){ return a + p.measures.length + p.tactics.length; }, 0) + " reportable rows";
   }
 
+  /* The plan template is GENERIC (§22): one file, whichever unit is being
+     planned, with the unit chosen on its own Read me sheet. So the picker is
+     not part of downloading a plan — it belongs to reporting, which is per
+     unit and amends rows that already exist. */
   var step1 =
     '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
       '<h4>Download the template</h4>' +
       '<p class="sub">' + (isPlan
-        ? "One sheet per part of the plan, with dropdowns instead of ids. Fill it in Excel; the platform reads it back."
+        ? "The same file whichever unit you are planning. Choose the unit on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
         : "One row per reportable item, with its target and what is currently recorded. Only the New value column is typed.") +
       '</p>' +
-      '<div class="imp-row">' + unitPick + kindPick +
-        '<button class="editbtn" data-dlx="1">Download Excel</button>' +
-        '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
-        '<button class="linkbu" data-showcsv="1">View the CSV</button></div>' +
-      '<p class="sub" style="margin-top:8px">' + counts + '</p>' +
+      '<div class="imp-row">' + (isPlan ? "" : unitPick) + kindPick +
+        '<button class="editbtn" data-dlx="1">' +
+          (isPlan ? "Download the plan template" : "Download Excel") + '</button>' +
+        (isPlan
+          ? '<button class="linkbu" data-dlxcap="1">Capability template</button>'
+          : '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
+            '<button class="linkbu" data-showcsv="1">View the CSV</button>') +
+      '</div>' +
+      '<p class="sub" style="margin-top:8px">' + (isPlan
+        ? UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; }).length +
+          " business units and " + GROUP.themes.length + " themes are in its dropdowns"
+        : counts) + '</p>' +
     '</div></div>';
 
   var step2 =
     '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
       '<h4>Upload the filled file</h4>' +
       '<p class="sub">' + (isPlan
-        ? "Upload the workbook or a CSV. Rows carrying an id are compared against what is recorded; rows without one are new."
+        ? "The file says which unit it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and no other unit is touched."
         : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
       '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv">' +
-        '<button class="linkbu" data-paste="1">or paste the file</button></div>' +
+        (isPlan ? "" : '<button class="linkbu" data-paste="1">or paste the file</button>') +
+        (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
+      '</div>' +
     '</div></div>';
 
   var chk = IMP.check;
@@ -722,33 +737,65 @@ function renderImport(){
     : '';
 
   var step3 = receipt;
-  if (d) {
-    var changed = d.rows.filter(function(r){ return r.status === "changed"; });
-    var added   = d.rows.filter(function(r){ return r.status === "new"; });
-    var same    = d.rows.filter(function(r){ return r.status === "same"; });
-    var unknown = d.rows.filter(function(r){ return r.status === "unknown"; });
 
-    var body = "";
-    if (isPlan) {
-      body = changed.length || added.length
-        ? '<div class="scroll"><table><thead><tr><th>Item</th><th class="cc">Type</th>' +
-            '<th>Field</th><th>Recorded</th><th>In the file</th></tr></thead><tbody>' +
-          changed.map(function(r){
-            return r.changes.map(function(c, i){
-              return '<tr><td>' + (i === 0 ? esc(r.name) : '') + '</td>' +
-                '<td class="cc">' + (i === 0 ? '<span class="pill kind">' + r.type + '</span>' : '') + '</td>' +
-                '<td>' + c.f + '</td><td class="was">' + esc(c.was) + '</td>' +
-                '<td class="now">' + esc(c.now) + '</td></tr>';
-            }).join("");
-          }).join("") +
-          added.map(function(r){
-            return '<tr><td>' + esc(r.name || r.id) + '</td><td class="cc"><span class="pill kind">' + r.type + '</span></td>' +
-              '<td colspan="3"><span class="pill good">New \u2014 will be created</span></td></tr>';
-          }).join("") +
-          '</tbody></table></div>'
-        : '<div class="note">Nothing differs from what is recorded.</div>';
-    } else {
-      body = changed.length
+  /* A plan upload is not a diff any more (§22). What is shown is the exchange:
+     what the file holds, what it displaces, and what of that was reported —
+     and then the one button that makes it happen. */
+  if (isPlan && IMP.summary) {
+    var sm = IMP.summary, inc = sm.incoming, cur = sm.current;
+    var line = isCap
+      ? inc.objectives + " objectives &middot; " + inc.projects + " projects &middot; " +
+        inc.deliverables + " deliverables &middot; " + inc.outcomes + " outcomes &middot; " +
+        inc.milestones + " milestones"
+      : inc.clauses + " clauses &middot; " + inc.objectives + " objectives &middot; " +
+        inc.pillars + " pillars &middot; " + inc.measures + " measures &middot; " +
+        inc.tactics + " tactics" + (inc.swot ? " &middot; " + inc.swot + " SWOT points" : "");
+    var had = isCap
+      ? cur.objectives + " objectives &middot; " + cur.projects + " projects &middot; " +
+        cur.deliverables + " deliverables &middot; " + cur.outcomes + " outcomes &middot; " +
+        cur.milestones + " milestones"
+      : cur.objectives + " objectives &middot; " + cur.pillars + " pillars &middot; " +
+        cur.measures + " measures &middot; " + cur.tactics + " tactics";
+    var hasPlan = !planIsEmpty(cur);
+
+    step3 =
+      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
+        '<h4>Review, then apply</h4>' + checkBlock +
+        '<div class="imp-tally">' +
+          '<span class="pill kind">' + esc(u.name) + '</span>' +
+          (hasPlan
+            ? '<span class="pill attn">Replacing &mdash; the old plan is archived</span>'
+            : '<span class="pill good">First plan &mdash; nothing to lose</span>') +
+        '</div>' +
+        '<div class="scroll"><table><thead><tr><th>What</th><th>Holds</th></tr></thead><tbody>' +
+          '<tr><td><b>In this file</b></td><td>' + line + '</td></tr>' +
+          '<tr><td>' + (hasPlan ? "Recorded now" : "Recorded now") + '</td><td>' +
+            (hasPlan ? had : "nothing yet") + '</td></tr>' +
+        '</tbody></table></div>' +
+        (hasPlan
+          ? '<div class="note"><b>' + esc(u.name) + '\u2019s current plan' +
+            (cur.reported
+              ? ' and its ' + cur.reported + ' reported figure' + (cur.reported === 1 ? '' : 's')
+              : '') +
+            ' come off the screen.</b> ' +
+            (cur.reported
+              ? 'They are kept as an archive dated today and can be restored from Archived plans at any time. '
+              : 'It is kept as an archive dated today and can be restored from Archived plans at any time. ') +
+            'Nothing is destroyed.</div>'
+          : '') +
+        '<div class="imp-row" style="margin-top:14px">' +
+          (blocked
+            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+            : '<button class="editbtn apply" data-apply="1">' +
+              (hasPlan ? "Replace " : "Write ") + esc(u.name) + '\u2019s plan</button>') +
+          '<button class="linkbu" data-cancel="1">Discard</button></div>' +
+      '</div></div>';
+  } else if (d) {
+    /* Reporting is unchanged: it amends figures that already exist, so it is
+       still a difference against what is recorded. */
+    var changed = d.rows.filter(function(r){ return r.status === "changed"; });
+    var unknown = d.rows.filter(function(r){ return r.status === "unknown"; });
+    var body = changed.length
         ? '<div class="scroll"><table><thead><tr><th>' + (isCap ? "Project" : L("pillar","bu")) + '</th><th>Item</th>' +
             '<th class="cc">Type</th><th class="cc">Recorded</th><th class="cc">In the file</th></tr></thead><tbody>' +
           changed.map(function(r){
@@ -757,25 +804,15 @@ function renderImport(){
               '<td class="num was">' + esc(r.was) + '</td><td class="num now">' + esc(r.now) + '</td></tr>';
           }).join("") + '</tbody></table></div>'
         : '<div class="note">No reported figure differs from what is recorded.</div>';
-    }
 
     step3 =
       '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
         '<h4>Review, then apply</h4>' + checkBlock +
         '<div class="imp-tally">' +
           '<span class="pill attn">' + changed.length + ' changed</span>' +
-          (isPlan ? '<span class="pill good">' + added.length + ' new</span>' : '') +
-          (isPlan ? '<span class="pill kind">' + same.length + ' unchanged</span>' : '') +
-          (d.missing.length ? '<span class="pill warn">' + d.missing.length + ' in the platform, absent from the file</span>' : '') +
           (unknown.length ? '<span class="pill bad">' + unknown.length + ' unrecognised id</span>' : '') +
         '</div>' + body +
-        (d.missing.length
-          ? '<div class="note"><b>Absent from the file, kept.</b> ' + d.missing.length +
-            ' item' + (d.missing.length > 1 ? 's are' : ' is') + ' recorded but missing from the upload &mdash; ' +
-            'they are reported, never removed. A missing row is more often an editing slip than a decision to ' +
-            'delete something with reported history against it.</div>'
-          : '') +
-        (changed.length || added.length
+        (changed.length
           ? '<div class="imp-row" style="margin-top:14px">' +
             (blocked
               ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
@@ -786,9 +823,58 @@ function renderImport(){
   }
 
   return '<div class="kv"><span class="pill kind">SMO only</span>' +
-      '<span class="pill kind">One file per unit or capability</span></div>' +
+      '<span class="pill kind">' + (isPlan
+        ? "One generic template &middot; one unit per file"
+        : "One file per unit or capability") + '</span></div>' +
     section("", (isPlan ? "Plan" : "Progress") + " import", null,
       '<div class="imp">' + step1 + step2 + step3 + '</div>');
+}
+
+/* ── Manage · Archived plans (§22) ───────────────────────────────────
+   Every plan an upload displaced, newest first, with what it held and a way
+   back. This is what makes replacing a plan an ordinary act rather than a
+   nervous one: an upload never deletes, and the proof is a list you can read.
+
+   The only destructive control in the import flow is Delete, and it asks. */
+function renderArchives(){
+  var can = grant("c_import") === "edit";
+  if (!ARCHIVES.length)
+    return section("", "Archived plans",
+      "A plan is archived here whenever an upload replaces one. Nothing has been replaced yet.",
+      '<div class="note">Empty. Upload a plan on <b>Import</b> and the plan it displaces will ' +
+      'appear here, with a way to put it back.</div>');
+
+  var rows = ARCHIVES.map(function(a){
+    var c = a.counts || {};
+    var held = a.kind === "unit"
+      ? [c.pillars + " pillars", c.measures + " measures", c.tactics + " tactics",
+         c.objectives + " objectives"].join(" &middot; ")
+      : [c.projects + " projects", c.deliverables + " deliverables",
+         c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
+    var live = a.kind === "unit" ? UNITS[a.key] : capById(a.key);
+    return '<tr><td><b>' + esc(a.name) + '</b>' +
+        (live ? '' : '<span class="why">no longer in the platform &mdash; cannot be restored</span>') +
+        '</td>' +
+      '<td class="cc">' + esc(a.at) + '</td>' +
+      '<td>' + esc(a.by || "\u2014") + '<span class="why">' + esc(a.why || "") + '</span></td>' +
+      '<td>' + held +
+        (c.reported
+          ? '<span class="why">' + c.reported + ' reported figure' + (c.reported === 1 ? '' : 's') + ' kept with it</span>'
+          : '<span class="why">nothing reported</span>') + '</td>' +
+      '<td class="cc">' + (can && live
+        ? '<button class="editbtn" data-restore="' + esc(a.id) + '">Restore</button> ' +
+          '<button class="rmbtn" data-forget="' + esc(a.id) + '">Delete</button>'
+        : '<span class="pill none">View only</span>') + '</td></tr>';
+  }).join("");
+
+  return section("", "Archived plans",
+    "Every plan an upload replaced, newest first. Restoring puts one back and archives whatever " +
+    "is there now \u2014 the same act in reverse, with the same warning.",
+    '<div class="cfg"><table><thead><tr>' +
+      '<th style="width:22%">Plan</th><th class="cc" style="width:12%">Archived</th>' +
+      '<th style="width:20%">Replaced by</th><th>What it held</th>' +
+      '<th class="cc" style="width:16%"></th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
 /* ── Setup · Reporting cycle ────────────────────────────────────────

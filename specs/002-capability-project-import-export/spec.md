@@ -117,3 +117,26 @@ upload.
 - **SC-002**: `qa.py` walk clean; the Import page renders for both scopes.
 - **SC-003**: A project round trip preserves deliverables, outcomes and
   milestones exactly (the §15.12 defect closed).
+
+---
+
+## Amendment — 2026-08-20 (§22 of the decisions document)
+
+The import model changed under this spec and under the business-unit plan
+import alongside it. Where this spec says a filled file is compared against
+what is recorded and applied as a difference, that is now true of **reporting
+only**:
+
+- **A plan upload authors the plan; it does not amend one.** Everything in the
+  file is created and every code is minted on arrival. There is no ID column in
+  the plan template, and no row is matched against anything.
+- **The template is generic.** One workbook for every business unit and one for
+  every capability; which one it is for is a dropdown on its Read me sheet
+  (cell B2), and that is what the platform reads on upload.
+- **Replacing archives.** The outgoing plan and every figure reported against it
+  are kept as a restorable snapshot before the new plan is written. Nothing an
+  import does is a deletion.
+- **A plan must arrive as .xlsx.** A flat CSV has no Read me sheet and so cannot
+  say which unit or capability it is for.
+
+The progress (reporting) half of this spec is unchanged.

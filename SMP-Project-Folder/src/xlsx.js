@@ -98,9 +98,37 @@ var XL_STYLES =
     '<xf xfId="0" fontId="4"><alignment vertical="top" wrapText="1"/></xf>' +
   '</cellXfs></styleSheet>';
 
+/* A number is written as a number.
+
+   Every cell used to go out as an inline string, which put Excel's
+   "number stored as text" warning on every target in the file and stopped the
+   column sorting or totalling. A value the sheet declares numeric and that
+   parses as one is written with no type attribute, which is xlsx for a number;
+   anything else stays a string, so "4,500" typed with a comma is not silently
+   turned into 4.5. */
+function numericCell(v){
+  if (v == null || v === "") return null;
+  var t = String(v).trim();
+  if (!/^-?(\d+\.?\d*|\.\d+)$/.test(t)) return null;
+  var n = Number(t);
+  return isNaN(n) ? null : String(n);
+}
+
 /* A sheet: header row, data rows, column widths, a frozen header and any
-   dropdowns. Values are written as inline strings \u2014 no shared-string table to
-   keep in step with the cells that point into it. */
+   dropdowns. Text is written as inline strings \u2014 no shared-string table to
+   keep in step with the cells that point into it.
+
+   A validation is one of two kinds. `list` is literal values, typed into the
+   file. `from` is a RANGE on another sheet, which is what makes the pillar
+   dropdown live: it reads whatever the Pillars sheet holds at the moment the
+   cell is opened, so a pillar typed two minutes ago is offered here. A fixed
+   list could not do that, and on a unit with no plan it offered nothing at all
+   \u2014 Excel then refused every pillar name typed into the column, which is why
+   a first plan could not be authored from the template.
+
+   `soft` makes a validation a SUGGESTION: the dropdown is offered, anything
+   else is still accepted. Units of measure are a tenant's own vocabulary, so a
+   locked list would block the first legitimate unit nobody thought of. */
 function sheetXml(sh){
   var cols = sh.widths ? '<cols>' + sh.widths.map(function(w, i){
     return '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + w + '" customWidth="1"/>';
@@ -117,14 +145,19 @@ function sheetXml(sh){
     rows.push('<row r="' + n + '">' + r.map(function(v, ci){
       if (v == null || v === "") return "";
       var style = (sh.lockedCols && sh.lockedCols.indexOf(ci) > -1) ? ' s="2"' : ' s="0"';
+      var num = (sh.numCols && sh.numCols.indexOf(ci) > -1) ? numericCell(v) : null;
+      if (num !== null)
+        return '<c r="' + colName(ci) + n + '"' + style + '><v>' + num + '</v></c>';
       return '<c r="' + colName(ci) + n + '"' + style + ' t="inlineStr"><is><t>' + xesc(v) + '</t></is></c>';
     }).join("") + '</row>');
   });
 
   var dv = (sh.validations || []).map(function(v){
-    return '<dataValidation type="list" allowBlank="1" showInputMessage="1" showErrorMessage="1" ' +
+    var f = v.from ? xesc(v.from) : '"' + xesc((v.list || []).join(",")) + '"';
+    return '<dataValidation type="list" allowBlank="1" showInputMessage="1" ' +
+      'showErrorMessage="' + (v.soft ? "0" : "1") + '" ' +
       'errorTitle="Not a valid entry" error="' + xesc(v.error || "Choose one of the listed values.") + '" ' +
-      'sqref="' + v.range + '"><formula1>"' + xesc(v.list.join(",")) + '"</formula1></dataValidation>';
+      'sqref="' + v.range + '"><formula1>' + f + '</formula1></dataValidation>';
   }).join("");
 
   return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
@@ -195,20 +228,83 @@ var COMPILES = ["Latest", "Sum", "Average"];
 var KINDS = ["Direction", "Capability"];
 var YESNO = ["Yes", "No"];
 
-function readme(kind, unitName){
+/* A theme is chosen by NAME, never by its code. The codes (OT, VC, DIV) are
+   the platform's own shorthand and mean nothing to whoever fills the sheet.
+   "— none —" is offered explicitly because a pillar is allowed to belong to no
+   theme — the platform reads that as cross-cutting and shows it on the
+   Temple's base — and the dropdown never used to admit it. */
+var NO_THEME = "\u2014 none \u2014";
+function themeNames(){
+  return GROUP.themes.map(function(t){ return t.name; }).concat([NO_THEME]);
+}
+function themeNameOf(ab){
+  var t = GROUP.themes.filter(function(x){ return x.ab === ab; })[0];
+  return t ? t.name : NO_THEME;
+}
+/* The code is still accepted on the way in, so a file written against an
+   earlier template still loads. */
+function themeAbOf(name){
+  var n = String(name == null ? "" : name).trim();
+  if (!n || n === NO_THEME) return "";
+  var t = GROUP.themes.filter(function(x){ return x.name === n || x.ab === n; })[0];
+  return t ? t.ab : "";
+}
+
+/* Units of measure are a tenant's own vocabulary, so the list SUGGESTS rather
+   than enforces: whatever is already in use, plus the obvious ones. A locked
+   list would refuse the first legitimate unit nobody anticipated. Anything
+   carrying a comma is left out — Excel's literal lists are comma-separated. */
+function unitSuggestions(){
+  var seen = {}, out = [];
+  function add(x){
+    x = String(x == null ? "" : x).trim();
+    if (!x || seen[x] || x.indexOf(",") > -1) return;
+    seen[x] = 1; out.push(x);
+  }
+  ["%", "EGP", "M EGP", "B EGP", "days", "#"].forEach(add);
+  UNIT_KEYS.forEach(function(k){
+    var u = UNITS[k];
+    (u.keyObjectives || []).forEach(function(m){ add(splitTarget(m.target).unit); });
+    (u.items || []).forEach(function(p){
+      (p.measures || []).forEach(function(m){ add(splitTarget(m.target).unit); });
+    });
+  });
+  return out.slice(0, 40);
+}
+
+/* The pillar list, live.
+
+   `Pillars!$A$2:$A$400` is read at the moment the cell is opened, so a pillar
+   typed on the Pillars sheet a minute ago is offered here. The list used to be
+   fixed text baked in at download — which on a unit with no plan was EMPTY,
+   and Excel then refused every pillar name typed into the column. That is why
+   a first plan could not be authored from the template at all. */
+var PILLAR_RANGE = "Pillars!$A$2:$A$400";
+var PROJECT_RANGE = "Projects!$A$2:$A$100";
+
+/* ── The Read me sheet ────────────────────────────────────────────────────
+   The template is GENERIC: the same file whichever unit is being planned, and
+   nothing in it names a unit except one cell. B2 is a dropdown of the tenant's
+   business units, and it is what the platform reads on upload to know whose
+   plan this is. Codes used to carry that — every id began with the unit's key —
+   and with the codes gone this cell is the only thing that says it. */
+function readme(kind, pickLabel, pickList){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
-       ["Unit", unitName],
+       [pickLabel, ""],
        ["", ""],
-       ["How to fill it", "One sheet per part of the plan. Fill the sheets left to right \u2014 Pillars before Measures and Tactics, because those two choose their pillar from a list of what you typed."],
-       ["Dropdowns", "Direction, Compile, Kind, Theme and the quarter columns are lists. Type nothing else in them."],
-       ["The ID column", "Grey, always last. Leave it alone. Blank means a new item; filled means the platform already has it and will update rather than duplicate."],
-       ["Blank rows", "Ignored. Delete a row only if you mean to stop tracking it \u2014 removing a row here does not delete anything already recorded."],
-       ["Targets", "Put the number in Target and the unit in Unit \u2014 30 and %, not \"30%\". A blank target is allowed: the measure is recorded and left unscored."],
+       ["How to fill it", "One sheet per part of the plan. Fill Pillars FIRST \u2014 Measures and Tactics choose their pillar from what you type there."],
+       ["Dropdowns", "Kind, Theme, Direction, Compile, Unit and the quarter columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
+       ["Owners", "Type the person's name."],
+       ["Targets", "The number in Target, the unit beside it \u2014 90 and %, not \"90%\". A blank target is allowed: the measure is recorded and left unscored."],
+       ["Themes", "A pillar may belong to no theme. Choose \"" + NO_THEME + "\" and it reads as cross-cutting."],
+       ["Blank rows", "Ignored."],
+       ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
+       ["What upload does", "Writes this plan from scratch. Whatever is recorded now is archived first and can be restored \u2014 nothing is deleted."],
        ["", ""],
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
-       ["Unit", unitName],
+       [pickLabel, ""],
        ["", ""],
        ["How to fill it", "Type only in the New value column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank New value means nothing changed. Only the rows you fill are read."],
@@ -218,87 +314,111 @@ function readme(kind, unitName){
        ["", ""],
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]];
   return { name:"Read me", widths:[22, 96],
-           rows:lines.map(function(l){ return [l[0], l[1]]; }) };
+           rows:lines.map(function(l){ return [l[0], l[1]]; }),
+           validations:[{ range:"B2:B2", list:pickList,
+                          error:"Choose one from the list." }] };
+}
+
+/* Read the one cell that says whose plan this is. */
+function readmePick(sheets){
+  var rows = sheets["Read me"];
+  if (!rows || !rows[1]) return "";
+  return String(rows[1][1] == null ? "" : rows[1][1]).trim();
 }
 
 function planWorkbook(u){
-  var themes = GROUP.themes.map(function(t){ return t.ab; });
-  var pillarNames = u.items.map(function(p){ return p.name; });
-  var owners = PEOPLE.filter(function(p){ return p.unit === u.ukey || p.unit === "group"; })
-                     .map(function(p){ return p.name; });
+  var themes = themeNames();
+  var units = unitSuggestions();
+  var picked = u ? u.name : "";
+
+  var readmeSheet = readme("plan", "Business unit",
+    UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
+             .map(function(k){ return UNITS[k].name; }));
+  readmeSheet.rows[1][1] = picked;
 
   return [
-    readme("plan", u.name),
+    readmeSheet,
 
-    { name:"Foundation", widths:[20, 78, 16], lockedCols:[2],
-      head:["Label", "Text", "ID"],
-      rows:u.clauses.map(function(c){ return [c[0], c[1], c[2]]; }) },
+    { name:"Foundation", widths:[20, 78],
+      head:["Label", "Text"],
+      rows:u.clauses.map(function(c){ return [c[0], c[1]]; }) },
 
-    { name:"Aspiration", widths:[24, 86, 16], lockedCols:[2],
-      head:["Field", "Text", "ID"],
+    { name:"Aspiration", widths:[24, 86],
+      head:["Field", "Text"],
       rows:[
-        ["Winning aspiration", u.aspiration, u.ukey + "-ASP1"],
-        ["End in mind (optional)", u.endInMind || "", u.ukey + "-ASP2"],
-        ["Horizon", GROUP.horizon, ""]
+        ["Winning aspiration", u.aspiration],
+        ["End in mind (optional)", u.endInMind || ""],
+        ["Horizon", GROUP.horizon]
       ] },
 
-    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12, 16], lockedCols:[7],
-      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile", "ID"],
-      validations:[{ range:"C2:C60", list:DIRS }, { range:"G2:G60", list:COMPILES }],
+    { name:"Objectives", widths:[36, 18, 11, 16, 16, 10, 12],
+      head:["Objective", "Group", "Direction", "3-year target", "This year target", "Unit", "Compile"],
+      numCols:[3, 4],
+      validations:[{ range:"C2:C60", list:DIRS },
+                   { range:"F2:F60", list:units, soft:true },
+                   { range:"G2:G60", list:COMPILES }],
       rows:u.keyObjectives.map(function(m){
         var a = splitTarget(m.target), b = splitTarget(m.target3y);
-        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile, m.id];
+        return [m.name, m.group || "", m.dir, b.value, a.value, a.unit, m.compile];
       }) },
 
-    { name:"SWOT", widths:[16, 78, 16], lockedCols:[2],
-      head:["Type", "Point", "ID"],
+    { name:"SWOT", widths:[16, 78],
+      head:["Type", "Point"],
       validations:[{ range:"A2:A200", list:["Strength","Weakness","Opportunity","Threat"] }],
       rows:[["s","Strength"],["w","Weakness"],["o","Opportunity"],["t","Threat"]]
         .reduce(function(acc, pair){
-          (u.swot[pair[0]] || []).forEach(function(x, i){
-            acc.push([pair[1], x, u.ukey + "-" + pair[1][0].toUpperCase() + (i+1)]);
-          });
+          (u.swot[pair[0]] || []).forEach(function(x){ acc.push([pair[1], x]); });
           return acc;
         }, []) },
 
-    { name:"Pillars", widths:[40, 14, 10, 22, 16], lockedCols:[4],
-      head:["Pillar", "Kind", "Theme", "Owner", "ID"],
+    { name:"Pillars", widths:[40, 14, 22, 22],
+      head:["Pillar", "Kind", "Theme", "Owner"],
       validations:[{ range:"B2:B60", list:KINDS },
-                   { range:"C2:C60", list:themes, error:"Use one of the group's theme codes." }],
-      rows:u.items.map(function(p){ return [p.name, p.kind, p.theme, p.owner, p.id]; }) },
+                   { range:"C2:C60", list:themes,
+                     error:"Choose a theme name, or \u2014 none \u2014 for a cross-cutting pillar." }],
+      rows:u.items.map(function(p){ return [p.name, p.kind, themeNameOf(p.theme), p.owner]; }) },
 
-    { name:"Measures", widths:[34, 40, 11, 14, 10, 12, 16], lockedCols:[6],
-      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile", "ID"],
-      validations:[{ range:"A2:A400", list:pillarNames, error:"Choose a pillar from the Pillars sheet." },
-                   { range:"C2:C400", list:DIRS }, { range:"F2:F400", list:COMPILES }],
+    { name:"Measures", widths:[34, 40, 11, 14, 12, 12],
+      head:["Pillar", "Measure", "Direction", "Target", "Unit", "Compile"],
+      numCols:[3],
+      validations:[{ range:"A2:A400", from:PILLAR_RANGE,
+                     error:"Choose a pillar from the Pillars sheet." },
+                   { range:"C2:C400", list:DIRS },
+                   { range:"E2:E400", list:units, soft:true },
+                   { range:"F2:F400", list:COMPILES }],
       rows:u.items.reduce(function(acc, p){
         p.measures.forEach(function(m){
           var a = splitTarget(m.target);
-          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile, m.id]);
+          acc.push([p.name, m.name, m.dir, a.value, a.unit, m.compile]);
         });
         return acc;
       }, []) },
 
-    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7, 16], lockedCols:[10],
+    { name:"Tactics", widths:[30, 40, 40, 34, 20, 24, 7, 7, 7, 7],
       head:["Pillar", "Tactic", "Description", "Outcome", "Owner", "Collaborators",
-            "Q1", "Q2", "Q3", "Q4", "ID"],
-      validations:[{ range:"A2:A400", list:pillarNames, error:"Choose a pillar from the Pillars sheet." },
+            "Q1", "Q2", "Q3", "Q4"],
+      validations:[{ range:"A2:A400", from:PILLAR_RANGE,
+                     error:"Choose a pillar from the Pillars sheet." },
                    { range:"G2:J400", list:YESNO }],
       rows:u.items.reduce(function(acc, p){
         p.tactics.forEach(function(t){
           acc.push([p.name, t.name, t.description || "", t.outcome || "", t.owner,
             (t.collaborators || []).join(", "),
-            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No",
-            t.id]);
+            t.q1 ? "Yes" : "No", t.q2 ? "Yes" : "No", t.q3 ? "Yes" : "No", t.q4 ? "Yes" : "No"]);
         });
         return acc;
       }, []) }
   ];
 }
 
+/* Reporting is unchanged: it is per unit, it amends rows that already exist,
+   and its ID column is what addresses them. Only the plan template lost its
+   codes, because only the plan template authors rather than amends. */
 function progressWorkbook(u){
+  var sheet = readme("progress", "Business unit", [u.name]);
+  sheet.rows[1][1] = u.name;
   return [
-    readme("progress", u.name),
+    sheet,
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
@@ -452,59 +572,75 @@ function sheetObjects(rows){
 }
 function yes(v){ return /^(y|yes|1|true|x|\u2713)$/i.test(String(v || "").trim()); }
 
+/* Reading the filled workbook.
+
+   Nothing here matches an existing row, because an upload AUTHORS a plan
+   rather than amending one (§22): every item is created and every code is
+   minted, in sheet order. A measure names its pillar and the pillar's freshly
+   minted code is looked up by that name — and because a file holds exactly one
+   unit, every pillar in the file is one of that unit's, so there is nothing to
+   get wrong. */
 function planFromWorkbook(u, sheets){
-  var rows = [], pillarId = {};
-  var next = u.items.length;
+  var rows = [], pillarId = {}, n = 0;
+  var mint = function(suffix){ return u.ukey + "-" + suffix; };
 
-  /* A child names its pillar rather than carrying its id, which is what makes
-     the workbook fillable. The cost is that renaming a pillar on the Pillars
-     sheet leaves every measure and tactic still naming the old one \u2014 the
-     dropdown cannot help, its list is fixed text inside the file. So the name
-     is tried first, and anything already known falls back to the parent the
-     platform currently records for it. */
-  function parentFor(pillarName, childId){
-    if (pillarId[pillarName]) return pillarId[pillarName];
-    var hit = childId ? findById(u, childId) : null;
-    return hit && hit.pillar ? hit.pillar.id : "";
-  }
-
-  (sheetObjects(sheets["Pillars"])).forEach(function(r){
-    var id = r["ID"] || (u.ukey + "-P" + (++next));
+  sheetObjects(sheets["Pillars"]).forEach(function(r){
+    if (!r["Pillar"]) return;
+    var id = mint("P" + (++n));
     pillarId[r["Pillar"]] = id;
     rows.push({ id:id, type:"PILLAR", name:r["Pillar"], kind:r["Kind"],
-                theme:r["Theme"], owner:r["Owner"], notes:"", parent_id:"",
+                theme:themeAbOf(r["Theme"]), owner:r["Owner"], notes:"", parent_id:"",
                 description:"", outcome:"", collaborators:"", direction:"",
                 value:"", value_3y:"", unit:"", horizon:"", compile:"",
                 q1:"", q2:"", q3:"", q4:"", source_slide:"" });
   });
 
+  var fN = 0;
   sheetObjects(sheets["Foundation"]).forEach(function(r){
-    rows.push({ id:r["ID"], type:"FOUNDATION", name:r["Label"], description:r["Text"] });
+    if (!r["Label"] && !r["Text"]) return;
+    rows.push({ id:mint("F" + (++fN)), type:"FOUNDATION",
+                name:r["Label"], description:r["Text"] });
   });
+
+  var aN = 0;
   sheetObjects(sheets["Aspiration"]).forEach(function(r){
     if (/horizon/i.test(r["Field"] || "")) { GROUP.horizon = r["Text"] || GROUP.horizon; return; }
-    rows.push({ id:r["ID"], type:"ASPIRATION", name:r["Field"], description:r["Text"] });
+    if (!r["Text"]) return;
+    rows.push({ id:mint("ASP" + (++aN)), type:"ASPIRATION",
+                name:r["Field"], description:r["Text"] });
   });
+
+  var kN = 0;
   sheetObjects(sheets["Objectives"]).forEach(function(r){
-    rows.push({ id:r["ID"] || (u.ukey + "-KO" + (rows.length + 1)), type:"NORTHSTAR",
-      name:r["Objective"], direction:r["Direction"], value:r["This year target"],
+    if (!r["Objective"]) return;
+    rows.push({ id:mint("KO" + (++kN)), type:"NORTHSTAR", name:r["Objective"],
+      group:r["Group"], direction:r["Direction"], value:r["This year target"],
       value_3y:r["3-year target"], unit:r["Unit"], compile:r["Compile"] });
   });
+
   var swotN = { Strength:0, Weakness:0, Opportunity:0, Threat:0 };
   sheetObjects(sheets["SWOT"]).forEach(function(r){
-    var t = r["Type"]; if (!swotN.hasOwnProperty(t)) return;
+    var t = r["Type"];
+    if (!swotN.hasOwnProperty(t) || !r["Point"]) return;
     swotN[t]++;
-    rows.push({ id:r["ID"] || (u.ukey + "-" + t[0].toUpperCase() + swotN[t]),
-                type:t.toUpperCase(), name:r["Point"] });
+    rows.push({ id:mint(t[0].toUpperCase() + swotN[t]), type:t.toUpperCase(), name:r["Point"] });
   });
-  sheetObjects(sheets["Measures"]).forEach(function(r, i){
-    rows.push({ id:r["ID"] || (u.ukey + "-M-new" + i), type:"MEASURE",
-      parent_id:parentFor(r["Pillar"], r["ID"]), name:r["Measure"], direction:r["Direction"],
+
+  var mN = {}, tN = {};
+  sheetObjects(sheets["Measures"]).forEach(function(r){
+    if (!r["Measure"]) return;
+    var pid = pillarId[r["Pillar"]] || "";
+    mN[pid] = (mN[pid] || 0) + 1;
+    rows.push({ id:pid ? pid + "-M" + mN[pid] : "", type:"MEASURE",
+      parent_id:pid, name:r["Measure"], direction:r["Direction"],
       value:r["Target"], unit:r["Unit"], compile:r["Compile"] });
   });
-  sheetObjects(sheets["Tactics"]).forEach(function(r, i){
-    rows.push({ id:r["ID"] || (u.ukey + "-T-new" + i), type:"TACTIC",
-      parent_id:parentFor(r["Pillar"], r["ID"]), name:r["Tactic"],
+  sheetObjects(sheets["Tactics"]).forEach(function(r){
+    if (!r["Tactic"]) return;
+    var pid = pillarId[r["Pillar"]] || "";
+    tN[pid] = (tN[pid] || 0) + 1;
+    rows.push({ id:pid ? pid + "-T" + tN[pid] : "", type:"TACTIC",
+      parent_id:pid, name:r["Tactic"],
       description:r["Description"], outcome:r["Outcome"], owner:r["Owner"],
       collaborators:(r["Collaborators"] || "").split(/[,|]/).map(function(x){ return x.trim(); })
         .filter(Boolean).join("|"),
@@ -515,7 +651,7 @@ function planFromWorkbook(u, sheets){
   return rows.map(function(r){
     ["parent_id","source_slide","name","description","outcome","owner","collaborators",
      "direction","value","value_3y","unit","horizon","compile","q1","q2","q3","q4",
-     "theme","kind","notes"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
+     "theme","kind","notes","group"].forEach(function(k){ if (r[k] == null) r[k] = ""; });
     return r;
   });
 }
@@ -545,21 +681,23 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 
-function capReadme(kind, capName){
+function capReadme(kind, capNames, picked){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
-       ["Capability", capName],
+       ["Capability", ""],
        ["", ""],
-       ["How to fill it", "One sheet per part of the plan. Fill Projects first — Deliverables, Outcomes and Milestones choose their project from a list of what you typed."],
-       ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Type nothing else in them."],
-       ["The ID column", "Grey, always last. Leave it alone. Blank means a new item; filled means the platform already has it and will update rather than duplicate."],
-       ["Blank rows", "Ignored. Delete a row only if you mean to stop tracking it — removing a row here does not delete anything already recorded."],
-       ["Targets", "Put the number in Target and the unit in Unit — 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
+       ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
+       ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
+       ["Owners", "Type the person's name."],
+       ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
        ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
+       ["Blank rows", "Ignored."],
+       ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
+       ["What upload does", "Writes this plan from scratch. Whatever is recorded now is archived first and can be restored \u2014 nothing is deleted."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Manage → Import."]]
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
-       ["Capability", capName],
+       ["Capability", ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -568,62 +706,75 @@ function capReadme(kind, capName){
        ["Milestones", "Not started, In progress or Completed."],
        ["Not yet due", "Rows marked so are outside the current review. Leave them blank."],
        ["", ""],
-       ["When you are done", "Save as .xlsx and upload it on Manage → Import."]];
-  return { name:"Read me", widths:[22, 96],
-           rows:lines.map(function(l){ return [l[0], l[1]]; }) };
+       ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]];
+  var sheet = { name:"Read me", widths:[22, 96],
+                rows:lines.map(function(l){ return [l[0], l[1]]; }),
+                validations:[{ range:"B2:B2", list:capNames,
+                               error:"Choose one from the list." }] };
+  sheet.rows[1][1] = picked || "";
+  return sheet;
 }
 
 function capPlanWorkbook(c){
-  var projNames = (c.projects || []).map(function(p){ return p.name; });
+  var names = GROUP.capabilities.map(function(x){ return x.name; });
+  var units = unitSuggestions();
   return [
-    capReadme("plan", c.name),
+    capReadme("plan", names, c ? c.name : ""),
 
-    { name:"Objectives", widths:[40, 11, 14, 10, 10, 12, 16], lockedCols:[6],
-      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile", "ID"],
-      validations:[{ range:"B2:B60", list:DIRS }, { range:"F2:F60", list:COMPILES }],
+    { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
+      head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
+      numCols:[2, 4],
+      validations:[{ range:"B2:B60", list:DIRS },
+                   { range:"D2:D60", list:units, soft:true },
+                   { range:"F2:F60", list:COMPILES }],
       rows:(c.keyObjectives || []).map(function(m){
         var a = splitTarget(m.target);
-        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile, m.id];
+        return [m.name, m.dir, a.value, a.unit, m.weight == null ? "" : String(m.weight), m.compile];
       }) },
 
-    { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14, 16], lockedCols:[7],
-      head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End", "ID"],
+    { name:"Projects", widths:[38, 70, 20, 30, 12, 14, 14],
+      head:["Project", "Brief", "Owner", "Stakeholders", "Timeline", "Start", "End"],
       validations:[{ range:"E2:E100", list:TIMELINES }],
       rows:(c.projects || []).map(function(p){
         return [p.name, p.brief || "", p.owner || "", (p.stakeholders || []).join(", "),
-                p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || "", p.id];
+                p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || ""];
       }) },
 
-    { name:"Deliverables", widths:[34, 44, 16, 10, 20, 16], lockedCols:[5],
-      head:["Project", "Deliverable", "Kind", "Due", "Owner", "ID"],
-      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." },
+    { name:"Deliverables", widths:[34, 44, 16, 12, 20],
+      head:["Project", "Deliverable", "Kind", "Due", "Owner"],
+      validations:[{ range:"A2:A400", from:PROJECT_RANGE,
+                     error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
           acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
-                    d.due || "", d.owner || "", d.id]);
+                    d.due || "", d.owner || ""]);
         });
         return acc;
       }, []) },
 
-    { name:"Outcomes", widths:[34, 44, 11, 12, 10, 14, 16], lockedCols:[6],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measured at", "ID"],
-      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." },
-                   { range:"C2:C400", list:DIRS }],
+    { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measured at"],
+      numCols:[3],
+      validations:[{ range:"A2:A400", from:PROJECT_RANGE,
+                     error:"Choose a project from the Projects sheet." },
+                   { range:"C2:C400", list:DIRS },
+                   { range:"E2:E400", list:units, soft:true }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.outcomes || []).forEach(function(o){
           var a = splitTarget(o.target);
-          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || "", o.id]);
+          acc.push([p.name, o.name, o.dir, a.value, a.unit, o.measureAt || ""]);
         });
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[34, 38, 52, 16, 14, 16], lockedCols:[5],
-      head:["Project", "Milestone", "What it covers", "Owner", "Finish", "ID"],
-      validations:[{ range:"A2:A400", list:projNames, error:"Choose a project from the Projects sheet." }],
+    { name:"Milestones", widths:[34, 38, 52, 16, 14],
+      head:["Project", "Milestone", "What it covers", "Owner", "Finish"],
+      validations:[{ range:"A2:A400", from:PROJECT_RANGE,
+                     error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || "", m.id]);
+          acc.push([p.name, m.name, m.covers || "", m.owner || "", m.finish || ""]);
         });
         return acc;
       }, []) }
@@ -632,7 +783,7 @@ function capPlanWorkbook(c){
 
 function capProgressWorkbook(c){
   return [
-    capReadme("progress", c.name),
+    capReadme("progress", [c.name], c.name),
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
@@ -676,44 +827,52 @@ function capProgressWorkbook(c){
 /* Workbook back to the flat rows the capability importer understands. A child
    names its project; anything already known falls back to the parent the
    platform records — the same rename protection a unit's workbook has. */
+/* Same rule as a unit's plan: everything is created, every code is minted,
+   children find their project by the name typed on the Projects sheet. */
 function capPlanFromWorkbook(c, sheets){
-  var rows = [], projId = {};
-  var nextP = (c.projects || []).length;
-  var childN = { D:0, O:0, M:0 };
-
-  function parentFor(projName, childId){
-    if (projId[projName]) return projId[projName];
-    var hit = childId ? capFindById(c, childId) : null;
-    return hit && hit.proj ? hit.proj.id : "";
-  }
+  var rows = [], projId = {}, n = 0;
+  var childN = {};
 
   sheetObjects(sheets["Projects"]).forEach(function(r){
-    var id = r["ID"] || (c.id + "-P" + (++nextP));
+    if (!r["Project"]) return;
+    var id = c.id + "-P" + (++n);
     projId[r["Project"]] = id;
     rows.push({ id:id, type:"PROJECT", name:r["Project"], description:r["Brief"],
       owner:r["Owner"], stakeholders:(r["Stakeholders"] || "").split(/[,|]/)
         .map(function(x){ return x.trim(); }).filter(Boolean).join("|"),
       timeline:timelineKey(r["Timeline"]) || "", start:r["Start"], end:r["End"] });
   });
-  sheetObjects(sheets["Objectives"]).forEach(function(r, i){
-    rows.push({ id:r["ID"] || (c.id + "-KO-new" + (i + 1)), type:"CAPOBJECTIVE",
+
+  var kN = 0;
+  sheetObjects(sheets["Objectives"]).forEach(function(r){
+    if (!r["Objective"]) return;
+    rows.push({ id:c.id + "-KO" + (++kN), type:"CAPOBJECTIVE",
       name:r["Objective"], direction:r["Direction"], value:r["Target"], unit:r["Unit"],
       weight:r["Weight"], compile:r["Compile"] });
   });
-  sheetObjects(sheets["Deliverables"]).forEach(function(r){
-    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-D-new" + (++childN.D)), type:"DELIVERABLE",
-      parent_id:parentFor(r["Project"], r["ID"]), name:r["Deliverable"],
-      kind:delivKindKey(r["Kind"]) || r["Kind"], due:r["Due"], owner:r["Owner"] });
+
+  function child(sheet, type, nameCol, letter, extra){
+    sheetObjects(sheets[sheet]).forEach(function(r){
+      if (!r[nameCol]) return;
+      var pid = projId[r["Project"]] || "";
+      var key = pid + letter;
+      childN[key] = (childN[key] || 0) + 1;
+      var row = { id:pid ? pid + "-" + letter + childN[key] : "", type:type,
+                  parent_id:pid, name:r[nameCol] };
+      extra(row, r);
+      rows.push(row);
+    });
+  }
+  child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
+    row.kind = delivKindKey(r["Kind"]) || r["Kind"];
+    row.due = r["Due"]; row.owner = r["Owner"];
   });
-  sheetObjects(sheets["Outcomes"]).forEach(function(r){
-    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-O-new" + (++childN.O)), type:"OUTCOME",
-      parent_id:parentFor(r["Project"], r["ID"]), name:r["Outcome"],
-      direction:r["Direction"], value:r["Target"], unit:r["Unit"], measure_at:r["Measured at"] });
+  child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
+    row.direction = r["Direction"]; row.value = r["Target"];
+    row.unit = r["Unit"]; row.measure_at = r["Measured at"];
   });
-  sheetObjects(sheets["Milestones"]).forEach(function(r){
-    rows.push({ id:r["ID"] || (parentFor(r["Project"]) + "-M-new" + (++childN.M)), type:"MILESTONE",
-      parent_id:parentFor(r["Project"], r["ID"]), name:r["Milestone"],
-      covers:r["What it covers"], owner:r["Owner"], finish:r["Finish"] });
+  child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
+    row.covers = r["What it covers"]; row.owner = r["Owner"]; row.finish = r["Finish"];
   });
 
   return rows.map(function(r){

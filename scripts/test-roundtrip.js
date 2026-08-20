@@ -106,6 +106,30 @@ function firstDiff(a, b, at) {
   console.log("write(read()) fixed point:",
     JSON.stringify(normalize(again)) === JSON.stringify(b) ? "PASS" : "FAIL");
 
+  /* Archived plans (§22). The seed carries none — the demo tenant has never
+     had a plan replaced — so one is written here on purpose: a snapshot is the
+     largest single document the state holds, and if it did not survive the
+     round trip a restore would hand back something subtly different from what
+     was archived. */
+  const withArchive = JSON.parse(JSON.stringify(back));
+  const mob = withArchive.units.mobile;
+  withArchive.archives = [{
+    id: "arch1", kind: "unit", key: "mobile", name: "Mobile",
+    at: "20 Aug 2026", by: "Strategy Management Officer", why: "replaced by an upload",
+    counts: { pillars: mob.items.length, measures: 19, tactics: 21, objectives: 4, reported: 14 },
+    plan: { clauses: mob.clauses, aspiration: mob.aspiration, endInMind: mob.endInMind,
+            keyObjectives: mob.keyObjectives, swot: mob.swot, items: mob.items }
+  }];
+  await io.writeState(client, withArchive);
+  const archBack = await io.readState(client);
+  const archOk = JSON.stringify(normalize(archBack.archives)) ===
+                 JSON.stringify(normalize(withArchive.archives));
+  console.log("archived plan round trip:", archOk ? "PASS" : "FAIL");
+  if (!archOk) console.log("  first difference:",
+    firstDiff(normalize(withArchive.archives), normalize(archBack.archives), "archives"));
+  console.log("  archive holds:", (archBack.archives[0] || {}).name,
+    "|", ((archBack.archives[0] || {}).plan || {}).items?.length, "pillars restorable");
+
   /* SQL spot checks — the exact rows the pages read */
   const spot = async function (sql) { return (await client.query(sql)).rows; };
   console.log("mobile measures:", (await spot(
@@ -116,5 +140,5 @@ function firstDiff(a, b, at) {
 
   client.release();
   await pool.end();
-  if (!equal || !slateOk) process.exit(1);
+  if (!equal || !slateOk || !archOk) process.exit(1);
 })().catch(function (e) { console.error("FAIL:", e); process.exit(1); });

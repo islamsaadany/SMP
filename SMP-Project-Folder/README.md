@@ -1,4 +1,4 @@
-# SMP Project Folder — v2.8
+# SMP Project Folder — v2.9
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v2.8.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v2.9.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v2.8.html`** — the built prototype. One file,
+**`strategy-management-platform-v2.9.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -140,6 +140,23 @@ flags deciding whether they also see the other companies and the group. Two
 defects that only a real uploaded plan could expose went with it: a pillar
 arriving from an upload had no code, so the rail could not navigate; and the
 sticky chrome was pinned three times over, which smeared the header on scroll.
+
+Versions **2.6–2.8** were what a real uploaded plan and a real screen exposed:
+the horizon stopped being a baked default and became the tenant's to set; the
+rail was found pinned twelve pixels from the top of the window, under a chrome
+up to 258px tall that was swallowing its clicks; and the fix for that carried a
+feedback loop — a rail capped against the measured chrome height — that had to
+be broken with a constant.
+
+Version **2.9** cut the chrome to two lines (§24). The header had been saying
+where you are five times over, above a navigation row that already said it:
+product name, org name, unit name, a derived "Group · 10 business units" tag and
+an Info button. It is now the product on the left, **Viewing as** in the middle,
+Demo data and Sign out on the right — then the navigation, then the tabs. Setup
+and Manage, two glyphs at the right of the nav row, became one worded **Manage**
+button with a menu listing all ten destinations in two labelled groups. Nothing
+about the pages moved: each entry opens exactly the page its icon used to, with
+the same tab row underneath.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

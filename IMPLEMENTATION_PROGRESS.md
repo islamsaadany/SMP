@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.8 · **Last updated:** 2026-08-20
+**Latest version:** v2.9 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,40 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.8 — the cap that would not settle *(current)*
+### v2.9 — two lines of chrome, and one way in *(current)*
+Your six changes, all of them, plus the Info button you asked to remove.
+
+The first line was carrying five statements of where you are — "Strategy
+Management Platform · Spec 012", "Raya Trade — B2B eComm", "Group · 10 business
+units · H1 2026", Info, Demo data — stacked above a navigation row that already
+highlights the unit you are on and a tab row that names the page. It is three
+things now: **Strategy Management Platform** on the left, **Viewing as** in the
+middle, **Demo data** and **Sign out** on the far right. Then the navigation.
+Then the tabs.
+
+Setup and Manage were a gear and a stacked-list glyph pinned at the right of the
+nav row, holding ten pages between them, and which glyph held which was
+something you had to remember rather than read. They are one **Manage ▾** button
+now, with the ten listed under two headings — MANAGE (Reporting cycle, Import,
+Archived plans, Focus measures) and SETUP (Labels, Levels & access, Scoring
+bands, Business units, Supporting functions, Capabilities). To your test: **every
+entry still takes you to its own place**, with the same tab row underneath it.
+Nothing about the pages changed — only the way in.
+
+*Verified served and signed in: all ten entries opened their own page with the
+right tab selected; the menu closes on an outside click and on Escape; `qa.py`
+now walks the menu as well as the row, 31 viewers, zero console errors. The rail
+re-proven rather than assumed — three window sizes, four scroll depths,
+`elementFromPoint` returning the rail on every row every time. Round trip, fixed
+point and archived-plan round trip PASS; the seed is byte-identical, because
+none of this touched the data.*
+
+*One thing the removals also fixed: `.eyebrow` was styled for the header but is
+also the deck slide's kicker, so a `max-height:20px` clip and a `body.scrolled`
+fade written for a condensing header were reaching a full-screen presentation
+slide. Deleting the element took its CSS with it.*
+
+### v2.8 — the cap that would not settle
 You asked me to test the rail again, so I tested it the way you actually use it:
 **served, signed in, on a cleared tenant, against an uploaded plan, clicked while
 scrolled.** The browser driver would not click at all — *element is not stable*,
@@ -289,7 +322,7 @@ suite per feature.
 ## In flight
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
-v2.8 single file as it always has; nothing anyone uses runs on the new stack
+v2.9 single file as it always has; nothing anyone uses runs on the new stack
 yet.
 
 What R1 proved, in `smp-app/`:
@@ -318,14 +351,14 @@ driver the old endpoints used.
 **D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
 genuinely new things), and the cutover is **early, page group by page group** —
 the new app becomes the live site while un-ported screens still link back to
-the v2.8 build. Those two answers work together: because the stylesheet is the
+the v2.9 build. Those two answers work together: because the stylesheet is the
 same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
 | ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
-| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.8 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.9 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
 | **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
 | **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
@@ -390,8 +423,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.8.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.8.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v2.9.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.9.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

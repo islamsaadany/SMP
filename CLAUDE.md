@@ -240,7 +240,15 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.8: v2.7's rail cap closed a feedback loop —
+*Last Updated: 2026-08-20 — v2.9: the chrome is two lines. The header
+said where you are five times over, above a nav row that already said it, so the
+org name, the unit name, the shape tag, the eyebrow and the Info button all went;
+Setup and Manage became one worded **Manage** button with a menu of all ten
+destinations. **Delete an element and delete its CSS with it** — `.eyebrow` was
+also the deck slide's kicker, and a `max-height` written for a condensing header
+was reaching a full-screen slide (§24).*
+
+*Earlier: 2026-08-20 — v2.8: v2.7's rail cap closed a feedback loop —
 measured height → page height → scroll clamp → header condense → measured height —
 and it oscillated forever. **A sticky offset changes nobody's height; a max-height
 does. Never size anything against a JS-measured value that the size itself can

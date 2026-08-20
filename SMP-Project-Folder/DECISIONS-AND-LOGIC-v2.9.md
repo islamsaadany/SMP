@@ -1702,6 +1702,17 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.9 — two lines of chrome, and one way in
+
+The header carried the product name, the org name, the unit name, a derived
+"Group · 10 business units · H1 2026" tag and an Info button, on top of the two
+nav rows below it — five statements of where you are, above a row that already
+says it. It is two lines now: the product on the left, who you are looking as in
+the middle, Demo data and Sign out on the right; then the navigation. Setup and
+Manage, two glyphs at the right of the nav row, became one worded **Manage**
+button with a menu listing all ten destinations. Nothing about the pages moved
+(§24).
+
 ### v2.8 — the cap that would not settle
 
 v2.7's own fix carried a feedback loop: a rail capped against the measured
@@ -2617,3 +2628,122 @@ container would be worse than the symptom.
   content bleeds through.
 - Round trip, fixed point and archived-plan round trip PASS, with the clean
   slate now asserting 2 companies and 6 assigned units.
+
+---
+
+## 24 · The chrome becomes two lines — v2.9
+
+### 24.1 What Islam asked for
+
+Six changes, in his words:
+
+1. Remove the "Group · 10 business units · H1 2026" line.
+2. The Demo data button moves to the top right.
+3. Remove the title of "B2B eComm" — i.e. the org-and-unit heading.
+4. The navigation bar becomes the second line of the system.
+5. The first line: **Strategy Management Platform** on the left, Demo and Sign
+   out on the far right, "Viewing as" in between.
+6. Merge Setup and Manage into one **Manage** button with a dropdown to reach
+   each.
+
+Asked what he meant by (6), he answered with the test: *"we are just combining
+them under 1 list … but still every button will take us to their place."* That
+is the whole contract — the merge is about the way IN, not about the pages. Each
+of the ten entries opens exactly the page its icon used to open, with the same
+tab row underneath it. And he asked for the per-page **Info** button to go.
+
+### 24.2 What the header was carrying
+
+The first line held five things that all answered the same question:
+
+| Element | Said |
+|---|---|
+| `.eyebrow` | "Strategy Management Platform · Spec 012" |
+| `#title` | "Raya Trade — B2B eComm" |
+| `#shapetag` | "Group · 10 business units · H1 2026" |
+| `#pageinfo` | Info |
+| `#demobtn` | Demo data |
+
+Below it, the nav row already highlights the unit you are on, and the tab row
+below that names the page. The header was repeating the row twice and spending a
+whole line to do it. What survives is what the row below cannot say: which
+product this is, whose eyes you are looking through, and the two controls that
+leave.
+
+### 24.3 Merging the two icons into one menu
+
+A gear and a stacked list sat pinned at the right of the nav row. Between them
+they held ten destinations, and which glyph held which page was something you
+had to remember rather than read. One worded button reads instead:
+
+```
+MANAGE ▾      MANAGE            SETUP
+              Reporting cycle   Labels
+              Import            Levels & access
+              Archived plans    Scoring bands
+              Focus measures    Business units
+                                Supporting functions
+                                Capabilities
+```
+
+The two groups stay **named** inside the one list, because they are genuinely
+different kinds of thing — what the SMO does every cycle, and what was decided
+once (§15.14's distinction, unchanged). Merging them into an unlabelled run of
+ten would have thrown away the only thing the two buttons were ever telling you.
+
+`SUBS.manage` and `SUBS.setup` are untouched, and so is `defsFor` — the menu
+sets `current` to `"manage"` or `"setup"` and `currentSub` to the entry's own
+key, then paints. That is precisely what clicking the icon and then its tab did.
+The sub-tab row stays: the menu is the way **in**, the tab row the way **around**
+once you are there.
+
+Three details the menu had to get right:
+
+- **Access.** An entry appears only where `grant()` allows the page, and a group
+  heading only where that group has at least one entry left. The button itself
+  disappears when neither has any — the same rule the two icons followed.
+- **Where it is anchored.** The panel is absolutely positioned, so however long
+  the list grows it never widens the nav row or shoves the unit tabs along.
+  `.units-in` is `overflow-x:visible` (arrange.css overrides the base sheet's
+  `auto`), which is what lets the panel hang below the row rather than be
+  clipped by it.
+- **`here` and `open` are different states.** The button is gold when you are on
+  one of its pages, lit when the menu is showing, and both can be true at once,
+  so they do not share a style.
+
+### 24.4 What the removals took with them
+
+Deleting an element and leaving its CSS behind is how dead rules become live
+bugs somewhere else. Two of these already were:
+
+- `.eyebrow { overflow:hidden; max-height:20px }` and
+  `body.scrolled .eyebrow { opacity:0; max-height:0 }` were written for the
+  header's kicker — but `.eyebrow` is also the **deck slide's** kicker, at 17px.
+  A 20px clip and a `body.scrolled` fade meant for a condensing header were
+  reaching a full-screen slide that has neither. Entering presentation mode
+  while scrolled would have faded the slide's own kicker to nothing.
+- `.shapetag` and its `body.scrolled` size rule had no other user at all.
+
+Both went with the elements. `PAGEINFO` itself stays — the explanations are
+still reachable from the `[data-modal]` links inside the pages.
+
+### 24.5 Verified
+
+- **The ten destinations, over HTTP, signed in as the SMO.** Every entry opened
+  its own page with the right sub-tab selected — `manage/cycle` → "Reporting
+  cycle" … `setup/caps` → "Capabilities" — and the button read as gold on all
+  ten. Zero console errors.
+- **The menu closes** on an outside click and on Escape, and choosing an entry
+  closes it.
+- **`qa.py` now walks the menu**, not just the row: it opens each fold, walks
+  every destination and every sub-tab, then reopens the menu before each of its
+  ten entries. 31 viewers, no console errors.
+- **The rail still navigates** — the v2.7/v2.8 regression, re-proven rather than
+  assumed. At 1400×900, 1280×720 and 1600×1000, at scroll 0/200/600/1400,
+  `elementFromPoint` over the first four rail rows returned the rail every time,
+  never the chrome, and a rail click changed the pane. `--chrome-h` measures
+  202px unscrolled and 169px condensed — the header is 56px shorter than the
+  258px that swallowed the rail in v2.6.
+- **Presentation mode** renders with the deck's own kicker unclipped.
+- **Round trip, fixed point and archived-plan round trip PASS**; `db/seed-state.json`
+  regenerated and byte-identical, because none of this touched the data.

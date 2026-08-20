@@ -55,8 +55,6 @@
   .brand { display:flex; flex-direction:column; gap:2px; margin-right:auto; }
   .eyebrow { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); font-weight:600; }
   .brand h1 { font-family:var(--serif); font-size:26px; letter-spacing:-.01em; }
-  .shapetag { font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700;
-              color:var(--gold-deep); border:1px solid var(--gold); border-radius:99px; padding:4px 12px; }
 
   nav.units { background:var(--panel); }
   .units-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
@@ -299,11 +297,12 @@
   header.top { transition:padding .18s ease; }
   .top-in { padding:12px 24px; transition:padding .18s ease; }
   .brand h1 { font-size:22px; transition:font-size .18s ease; }
-  .eyebrow { transition:opacity .18s ease, max-height .18s ease; overflow:hidden; max-height:20px; }
   body.scrolled .top-in { padding:6px 24px; }
   body.scrolled .brand h1 { font-size:16px; }
-  body.scrolled .eyebrow { opacity:0; max-height:0; }
-  body.scrolled .shapetag { font-size:10px; padding:2px 9px; }
+  /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
+     of the header. Their rules went with them: `.eyebrow` is also the deck
+     slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
+     header was reaching a full-screen slide that has neither. */
   nav.units { position:relative; z-index:7; }
   nav.tabs  { position:relative; z-index:6; }
   body.scrolled nav.units button { padding:9px 18px; }
@@ -1038,12 +1037,10 @@
   .bands-act { margin-left:auto; display:inline-flex; }
   .bands-act .editbtn { padding:5px 14px; }
 
-  /* Info holds the top-right corner on every page. The tenant tag moves into
-     the brand block so nothing can wrap between the two and displace it. */
+  /* The two buttons that leave hold the far right of the first line, grouped
+     so nothing can wrap between them. */
   .brand { gap:4px; }
-  .brand .shapetag { align-self:flex-start; margin-top:3px; }
-  .top-in > .infobtn { margin-left:4px; align-self:center; }
-  body.scrolled .brand .shapetag { display:none; }
+  .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
 
   /* 5. The rule above a section heading and the gap it sat in. A section is
      already announced by its heading; the line was doing the job twice. */
@@ -1426,12 +1423,44 @@
     text-transform:uppercase;color:var(--ink-3);font-weight:700}
   .capkpi b{font:400 22px/1.2 var(--serif)}
 
-  /* Setup and Manage are icons, not words. */
-  .units button.navicon{padding:11px 12px;display:inline-flex;align-items:center}
-  .units button.navicon .navsvg{width:19px;height:19px;fill:none;stroke:currentColor;
-    stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-  .units button.navicon[aria-selected="true"] .navsvg{stroke-width:1.9}
+  /* ── Manage: one worded button, one menu ───────────────────────
+     It replaced a gear and a stacked-list glyph. Ten destinations behind two
+     icons asked people to remember which mark held which page; behind one
+     word they are simply listed. Nothing about the pages changed — each entry
+     opens exactly the page its icon used to, with its own tab row underneath.
+
+     The panel is absolutely positioned, so however long the list grows it
+     never widens the row or shoves the unit tabs along. `.units-in` is
+     `overflow-x:visible` here (it is `auto` in the base sheet), which is what
+     lets the panel hang below the row instead of being clipped by it. */
   .units .sep.pinsep{margin-left:auto}
+  .navmenu{position:relative;display:inline-flex;align-items:center}
+  .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+    opacity:1;border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
+  .units .navmenu-btn:hover{color:#fff;background:rgba(255,255,255,.18);
+    border-color:rgba(255,255,255,.65)}
+  .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  /* `here` is where you ARE, `open` is the menu showing. They are different
+     states and both can be true, so they do not share a style. */
+  .units .navmenu-btn.here{color:var(--panel);background:var(--gold);border-color:var(--gold)}
+  .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
+    border-color:rgba(255,255,255,.7)}
+  .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}
+  .navmenu-tw{font-size:9px;opacity:.85}
+  .navmenu-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:212px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:0 14px 34px rgba(11,31,59,.22);padding:6px;text-align:left}
+  .navmenu-grp{font:700 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);padding:9px 10px 5px}
+  .navmenu-grp:first-child{padding-top:5px}
+  .units .navmenu-panel button{display:block;width:100%;text-align:left;background:none;
+    border:0;opacity:1;color:var(--ink);font:400 13.5px/1.2 var(--sans);letter-spacing:0;
+    text-transform:none;padding:8px 10px;border-radius:6px;cursor:pointer}
+  .units .navmenu-panel button:hover{background:var(--surface-2);color:var(--ink)}
+  .units .navmenu-panel button.on{background:var(--gold);color:var(--panel);font-weight:700}
+  .units .navmenu-panel button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
@@ -1629,23 +1658,27 @@
 </div>
 
 <div class="chrome">
+<!-- Three things on the first line and nothing else: who the product is, who
+     you are looking as, and the two buttons that leave. The org name, the unit
+     name and the "Group, N units" tag all left in 2.9 - the row below already
+     says where you are, and repeating it cost the whole first line. -->
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <span class="eyebrow">Strategy Management Platform &middot; Spec 012</span>
-      <h1 id="title"></h1>
-      <span class="shapetag" id="shapetag"></span>
+      <h1>Strategy Management Platform</h1>
     </div>
     <div class="viewer">
       <label for="asWho">Viewing as</label>
       <select id="asWho"></select>
       <span class="viewer-note" id="viewerNote"></span>
     </div>
-    <button class="infobtn" id="pageinfo" hidden>Info</button>
-    <!-- Switches the whole product between the client's own data and the
+    <!-- Far right, together: Demo data, then Sign out (appended by SYNC).
+         Switches the whole product between the client's own data and the
          full worked example, for explaining how it works. Appears only
          where there is a live dataset to tell the example apart from. -->
-    <button class="infobtn" id="demobtn" hidden>Demo data</button>
+    <div class="topacts" id="topacts">
+      <button class="infobtn" id="demobtn" hidden>Demo data</button>
+    </div>
   </div>
 </header>
 
@@ -10875,7 +10908,10 @@ var SYNC = (function () {
         body: '{"action":"logout"}'
       }).finally(function () { location.replace("/"); });
     });
-    box.appendChild(out);
+    /* Far right of the first line, beside Demo data — the two controls that
+       leave the product sit together, away from the one that changes what you
+       are looking at. Falls back to the viewer box if the group is missing. */
+    (document.getElementById("topacts") || box).appendChild(out);
     paint();
   }
 
@@ -10979,13 +11015,9 @@ var SYNC = (function () {
 
 </script>
 <script>
-/* Drawn rather than typed: a glyph at this size renders differently in every
-   font, and these two are the only way into configuration and management. */
-var ICON_SETUP = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' +
-  '<circle cx="10" cy="10" r="3"/><path d="M10 1.6v2.2M10 16.2v2.2M3.1 3.1l1.6 1.6M15.3 15.3l1.6 1.6' +
-  'M1.6 10h2.2M16.2 10h2.2M3.1 16.9l1.6-1.6M15.3 4.7l1.6-1.6"/></svg>';
-var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' +
-  '<path d="M3 5h14M3 10h14M3 15h9"/><circle cx="15.5" cy="15" r="2.2"/></svg>';
+/* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
+   a stacked list for Manage. They were replaced in 2.9 by one worded button
+   with a menu: the same ten destinations, but named rather than guessed at. */
 
   /* Page definitions carry the access key the matrix is keyed on, so a page
      is never rendered without a grant having been checked first. */
@@ -11110,17 +11142,30 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     }
-    /* Two icons, no words. A gear is universal; the manage mark is a stacked
-       list, and both carry a title and an aria-label so nothing depends on
-       recognising a glyph. */
-    /* Anchored right rather than trailing the row: they are the same two
-       destinations wherever you are, and a control that moves as the list
-       beside it grows is a control you have to look for. */
-    if (allowed(SUBS.manage).length)
-      out.push({ k:"manage", label:ICON_MANAGE, icon:true, first:true, title:"Manage" });
-    if (allowed(SUBS.setup).length)
-      out.push({ k:"setup", label:ICON_SETUP, icon:true, title:"Setup" });
+    /* Manage and Setup used to be two glyph buttons here. They are now one
+       worded button with a menu, rendered separately (paintMenu) so it can sit
+       anchored right and open downward without the row's layout owning it.
+       Anchored right rather than trailing the row: it is the same destination
+       wherever you are, and a control that moves as the list beside it grows
+       is a control you have to look for. */
     return out;
+  }
+
+  /* MENU_OPEN is chrome state, not a destination \u2014 it never survives a paint
+     of the page below, only of the row itself. */
+  var MENU_OPEN = false;
+
+  /* One list, two labelled groups. Merging the two buttons was about the way
+     IN, not about the pages: every entry still opens exactly the page it
+     always opened, with its own tab row underneath. The groups stay named
+     because "Reporting cycle" and "Scoring bands" are different kinds of
+     thing \u2014 what the SMO does each cycle, and what was decided once. */
+  function menuGroups(){
+    var gs = [];
+    var m = allowed(SUBS.manage), st = allowed(SUBS.setup);
+    if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
+    if (st.length) gs.push({ dest:"setup",  label:"Setup",  items:st });
+    return gs;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
@@ -11154,12 +11199,9 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
           '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
       }
       return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
-        (t.first ? '<span class="sep pinsep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
-        (t.icon ? ' class="navicon' + (t.first ? " pinned" : "") + '" title="' + esc(t.title) +
-          '" aria-label="' + esc(t.title) + '"' : '') +
         '>' + t.label + '</button>';
-    }).join("");
+    }).join("") + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -11178,6 +11220,58 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         current = b.dataset.u;
         var d = allowed(defsFor(current));
         currentSub = d.length ? d[0].k : null;
+        MENU_OPEN = false;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+    wireMenu();
+  }
+
+  /* The menu lives inside the row so it sits on the same baseline as the tabs,
+     but its panel is absolutely positioned, so a long list never widens the
+     row or pushes the units along. */
+  function menuHTML(){
+    var gs = menuGroups();
+    if (!gs.length) return "";
+    var on = current === "manage" || current === "setup";
+    var body = gs.map(function(g){
+      return '<div class="navmenu-grp">' + esc(g.label) + '</div>' +
+        g.items.map(function(d){
+          return '<button type="button" data-md="' + g.dest + '" data-ms="' + d.k + '"' +
+            (current === g.dest && currentSub === d.k ? ' class="on"' : '') +
+            '>' + esc(d.label) + '</button>';
+        }).join("");
+    }).join("");
+    return '<span class="sep pinsep"></span>' +
+      '<div class="navmenu' + (MENU_OPEN ? " open" : "") + '">' +
+      '<button type="button" class="navmenu-btn' + (on ? " here" : "") + '" id="navmenu-btn" ' +
+      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '">Manage' +
+      '<span class="navmenu-tw" aria-hidden="true">\u25be</span></button>' +
+      '<div class="navmenu-panel"' + (MENU_OPEN ? "" : " hidden") + '>' + body + '</div></div>';
+  }
+
+  function wireMenu(){
+    var btn = document.getElementById("navmenu-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      MENU_OPEN = !MENU_OPEN;
+      paintUnits();
+    });
+    document.querySelectorAll("#units [data-md]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        /* Same rule as a unit tab: going somewhere else drops every edit mode,
+           or you land editing a page you never pressed Edit on. */
+        if (current !== b.dataset.md) {
+          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
+          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
+          if (typeof ARRANGE !== "undefined") ARRANGE = false;
+          CLEARING = null;
+        }
+        current = b.dataset.md;
+        currentSub = b.dataset.ms;
+        MENU_OPEN = false;
         paint(); window.scrollTo(0,0);
       });
     });
@@ -11189,10 +11283,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     FIELDS.length = 0;
     fillViewers();
     paintUnits();
-    /* Derived, not typed — the count was hardcoded at three and quietly lied
-       the moment the group grew. */
-    document.getElementById("shapetag").innerHTML =
-      "Group &middot; " + UNIT_KEYS.length + " business units &middot; H1 2026";
     var v = viewer();
     /* Guarded even though every person currently has a unit: reading
        UNITS[null].name throws inside paint, which aborts the repaint and
@@ -11238,12 +11328,9 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       def = secs.filter(function(s){ return s.k === CURSEC[def.k]; })[0];
     }
 
-    /* One Info per page, in the same place on every page, explaining how that
-       page works rather than what one figure means. */
-    var ib = document.getElementById("pageinfo");
-    var iid = pageInfoFor(def.ac);
-    ib.hidden = !iid;
-    if (iid) ib.dataset.modal = iid;
+    /* The per-page Info button left the header in 2.9. The explanations in
+       PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
+       inside the pages themselves. */
     document.getElementById("panel").innerHTML =
       (current === "group" || current === "setup" || current === "manage") ? def.render()
         : isFn(current) ? def.render(current)
@@ -11269,13 +11356,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         }).join("");
       }
     }
-    document.getElementById("title").textContent =
-      current === "setup" ? GROUP.org + " \u2014 configuration"
-      : current === "manage" ? GROUP.org + " \u2014 management"
-      : current === "group" ? GROUP.org
-      : isFn(current) ? GROUP.org + " \u2014 " + FUNCTIONS[fnKeyOf(current)].name
-      : GROUP.org + " \u2014 " + UNITS[current].name;
-
     wire();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
@@ -12085,7 +12165,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     if (cx) cx.addEventListener("click", function(){ IMP.diff = null; paint(); });
   }
 
-  document.getElementById("title").textContent = GROUP.org;
   wireDeck();
 
   var overlay = document.getElementById("overlay");
@@ -12101,6 +12180,15 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
   document.getElementById("modal-x").addEventListener("click", closeModal);
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+
+  /* A menu that stays open after you have looked away is a menu you have to
+     dismiss. Bound once, at boot, rather than on every repaint. */
+  document.addEventListener("click", function(){
+    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
+  });
 
   /* The switcher lists the people the platform actually has. It was filled
      once, at load, from the baked-in example \u2014 so on the deployed product it

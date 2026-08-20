@@ -179,10 +179,12 @@
   .bands-act { margin-left:auto; display:inline-flex; }
   .bands-act .editbtn { padding:5px 14px; }
 
-  /* The two buttons that leave hold the far right of the first line, grouped
-     so nothing can wrap between them. */
+  /* Info holds the top-right corner on every page. The tenant tag moves into
+     the brand block so nothing can wrap between the two and displace it. */
   .brand { gap:4px; }
-  .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .brand .shapetag { align-self:flex-start; margin-top:3px; }
+  .top-in > .infobtn { margin-left:4px; align-self:center; }
+  body.scrolled .brand .shapetag { display:none; }
 
   /* 5. The rule above a section heading and the gap it sat in. A section is
      already announced by its heading; the line was doing the job twice. */
@@ -565,44 +567,12 @@
     text-transform:uppercase;color:var(--ink-3);font-weight:700}
   .capkpi b{font:400 22px/1.2 var(--serif)}
 
-  /* ── Manage: one worded button, one menu ───────────────────────
-     It replaced a gear and a stacked-list glyph. Ten destinations behind two
-     icons asked people to remember which mark held which page; behind one
-     word they are simply listed. Nothing about the pages changed — each entry
-     opens exactly the page its icon used to, with its own tab row underneath.
-
-     The panel is absolutely positioned, so however long the list grows it
-     never widens the row or shoves the unit tabs along. `.units-in` is
-     `overflow-x:visible` here (it is `auto` in the base sheet), which is what
-     lets the panel hang below the row instead of being clipped by it. */
+  /* Setup and Manage are icons, not words. */
+  .units button.navicon{padding:11px 12px;display:inline-flex;align-items:center}
+  .units button.navicon .navsvg{width:19px;height:19px;fill:none;stroke:currentColor;
+    stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .units button.navicon[aria-selected="true"] .navsvg{stroke-width:1.9}
   .units .sep.pinsep{margin-left:auto}
-  .navmenu{position:relative;display:inline-flex;align-items:center}
-  .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
-    opacity:1;border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
-    text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;
-    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
-  .units .navmenu-btn:hover{color:#fff;background:rgba(255,255,255,.18);
-    border-color:rgba(255,255,255,.65)}
-  .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-  /* `here` is where you ARE, `open` is the menu showing. They are different
-     states and both can be true, so they do not share a style. */
-  .units .navmenu-btn.here{color:var(--panel);background:var(--gold);border-color:var(--gold)}
-  .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
-    border-color:rgba(255,255,255,.7)}
-  .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}
-  .navmenu-tw{font-size:9px;opacity:.85}
-  .navmenu-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:212px;
-    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
-    box-shadow:0 14px 34px rgba(11,31,59,.22);padding:6px;text-align:left}
-  .navmenu-grp{font:700 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ink-3);padding:9px 10px 5px}
-  .navmenu-grp:first-child{padding-top:5px}
-  .units .navmenu-panel button{display:block;width:100%;text-align:left;background:none;
-    border:0;opacity:1;color:var(--ink);font:400 13.5px/1.2 var(--sans);letter-spacing:0;
-    text-transform:none;padding:8px 10px;border-radius:6px;cursor:pointer}
-  .units .navmenu-panel button:hover{background:var(--surface-2);color:var(--ink)}
-  .units .navmenu-panel button.on{background:var(--gold);color:var(--panel);font-weight:700}
-  .units .navmenu-panel button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}

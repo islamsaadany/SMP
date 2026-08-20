@@ -111,12 +111,11 @@
   header.top { transition:padding .18s ease; }
   .top-in { padding:12px 24px; transition:padding .18s ease; }
   .brand h1 { font-size:22px; transition:font-size .18s ease; }
+  .eyebrow { transition:opacity .18s ease, max-height .18s ease; overflow:hidden; max-height:20px; }
   body.scrolled .top-in { padding:6px 24px; }
   body.scrolled .brand h1 { font-size:16px; }
-  /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
-     of the header. Their rules went with them: `.eyebrow` is also the deck
-     slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
-     header was reaching a full-screen slide that has neither. */
+  body.scrolled .eyebrow { opacity:0; max-height:0; }
+  body.scrolled .shapetag { font-size:10px; padding:2px 9px; }
   nav.units { position:relative; z-index:7; }
   nav.tabs  { position:relative; z-index:6; }
   body.scrolled nav.units button { padding:9px 18px; }

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.6 · **Last updated:** 2026-08-20
+**Latest version:** v2.7 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,30 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.6 — the horizon stops being a default *(current)*
+### v2.7 — the rail was pinned under the chrome *(current)*
+You were right that neither was fixed. The rail was `top:12px` — twelve pixels
+from the top of the **window**, while the header above it is a sticky bar up to
+258px tall. So the moment you scrolled, the rail's first rows slid underneath the
+chrome, and because the chrome sits above them the **chrome took the clicks**.
+You were pressing a navigation button. That is why it failed on Performance and
+on Plan alike, and why it looked fine to me sitting at the top of the page.
+
+Pinned below the chrome now, at the same measured height the pillar header
+already used, so it follows the header as it condenses.
+
+**The haze had a second cause:** `.chrome` had no background of its own. It
+relied on its three rows tiling it exactly — true at rest, not mid-condense,
+when the rows animate their padding while the container animates its height.
+Measured 169px against children summing to 170: in that gap, the page showed
+through. It has a floor now.
+
+*Verified by asking what a click actually lands on:* `elementFromPoint` over
+every rail row at four scroll positions — at rest each row hits itself; before
+the fix, past 500px the first row hit `BUTTON.primary` in the nav; after it, no
+row is covered at any position. Then clicked through, scrolled, on both
+Performance and Plan: every click selects the pillar pressed.
+
+### v2.6 — the horizon stops being a default
 You spotted that the plan template shipped with **2029** already in it. That came
 from the demo data, the clean slate missed it, and it had therefore survived into
 your tenant — a year nobody chose, reading as a decision somebody had made.
@@ -238,7 +261,7 @@ suite per feature.
 ## In flight
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
-v2.6 single file as it always has; nothing anyone uses runs on the new stack
+v2.7 single file as it always has; nothing anyone uses runs on the new stack
 yet.
 
 What R1 proved, in `smp-app/`:
@@ -267,14 +290,14 @@ driver the old endpoints used.
 **D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
 genuinely new things), and the cutover is **early, page group by page group** —
 the new app becomes the live site while un-ported screens still link back to
-the v2.6 build. Those two answers work together: because the stylesheet is the
+the v2.7 build. Those two answers work together: because the stylesheet is the
 same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
 | ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
-| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.6 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.7 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
 | **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
 | **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
@@ -339,8 +362,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.6.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.6.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v2.7.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.7.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

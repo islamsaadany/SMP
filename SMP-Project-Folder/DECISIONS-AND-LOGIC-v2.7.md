@@ -1702,6 +1702,15 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.7 — the rail was pinned under the chrome
+
+The rail was `position:sticky; top:12px` — twelve pixels from the top of the
+window, beneath a sticky header up to 258px tall. Scrolled, its first rows slid
+under the chrome, which then swallowed the clicks: the rail could not navigate
+on any page. Pinned below the chrome now. And the chrome itself had no
+background, so mid-condense the page showed through the gap between a container
+animating its height and children animating their padding — the haze (§23.6).
+
 ### v2.6 — the horizon stops being a default
 
 `2029` came from the demo data and the clean slate missed it, so the plan
@@ -2504,7 +2513,45 @@ somebody already made.**
 - `007-horizon-is-yours.sql` clears it, **but only if it is still the seeded
   `2029`**. A horizon entered since is the tenant's own and is left alone.
 
-### 23.6 Verified before handover
+### 23.6 The rail was pinned under the chrome — v2.7
+
+*Islam, after v2.5 shipped: "I still can't navigate", and "the glitch of the
+scrolling up still is there."*
+
+Both were still true, and §23.3's two fixes — real, and both needed — had not
+reached the cause. The cause was one line:
+
+```
+.rail { position:sticky; top:12px; }
+```
+
+**Twelve pixels from the top of the window**, while the chrome above it is a
+sticky bar 169px tall condensed and 258px expanded. So the moment the page
+scrolled, the rail's first rows slid *underneath* the chrome — and since the
+chrome sits above them in the stacking order, **it swallowed the clicks**. The
+item pressed was a navigation button. Proved with `elementFromPoint` over each
+rail row: at rest every row hits itself; past 500px of scroll the first row
+hits `BUTTON.primary` in the nav.
+
+Pinned below the chrome now, at `calc(var(--chrome-h) + 12px)` — the same
+measured height `.pheadwrap` already used, so it follows the header as it
+condenses instead of guessing. A `max-height` keeps a long rail inside the
+window rather than running past the bottom.
+
+**And the haze had a second cause: `.chrome` had no background of its own.** It
+relied on its three children tiling it exactly, which they do at rest — but not
+mid-condense, when the rows animate their padding over .18s while the container
+animates its height. Measured at 169px against children summing to 170: every
+frame where the two disagree, the page showed through a transparent parent.
+A floor cannot have a gap.
+
+*The lesson worth keeping: v2.5's fix removed three competing sticky offsets and
+was verified by geometry — rows stacking contiguously — which was true and did
+not answer the question. What proved this one was asking what the user's click
+would actually hit, and what a transparent container shows when its children
+briefly do not cover it.*
+
+### 23.7 Verified before handover
 
 - The company model on the real screens: Distribution (3 units), B2C (3), four
   standing alone; both Setup sections rendering; the Company column on the units

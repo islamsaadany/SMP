@@ -2998,3 +2998,131 @@ is the light one — it is the install-time colour and cannot be conditional.
   headers `vercel.json` sets in production.
 - **Three themes × 31 viewers**, round trip, fixed point, archived-plan round
   trip: all still PASS, seed byte-identical, rebuild byte-identical.
+
+---
+
+## 27 · One line, and the thing that was really moving it — v3.2
+
+Islam, on the deployed v3.1: *"all the effort was to make the first line very
+small you made 2 lines"*, *"decrase very much the name of the platform that's
+not the thing"*, *"no ned to auto. just light and dark"* — and, with a screenshot
+of the chrome sliding sideways, *"the header here is still glitchy. you need to
+fix this once and for all"*.
+
+### 27.1 Fitting at one width is not fitting
+
+§25.7 measured the first line, fixed it, and verified it at 1180px and above.
+Islam's laptop is a ~1000px CSS viewport. Below 1180 the row still wrapped —
+and the version note said so, in the sentence claiming it was fixed.
+
+That is the lesson, and it is not about pixels: **a layout verified at the
+widths that pass is not verified.** The measurement was real and the conclusion
+was wrong, because the range tested was chosen to contain the answer already
+expected. The check now sweeps 1920 → 600 and asserts one line at every step.
+
+The row no longer wraps at all — `flex-wrap: nowrap` — so there is no width at
+which it can become two. Everything left of the buttons shrinks and ellipses,
+in the order they are least missed: the person note first (the level and reach
+are both said again on the page), then the product name, then the tenant name,
+then the picker. **The buttons never shrink**: they are the controls, and a
+truncated "SIGN OU" is worse than no header at all.
+
+### 27.2 The product name was the largest text in the product
+
+26px serif — bigger than any page heading — spending the first line restating
+the name of the tab you are already looking at. It is 13px now, with the tenant
+name beside it at 12px carrying more weight than the product does. Every other
+item shrank with it, and the header went from **108px tall to 47px**, 41px
+scrolled.
+
+The condense-on-scroll for the title went with it: at 13px there was nothing
+left to condense, and a font resizing under the reader to save three pixels is
+a twitch, not a feature. Only the padding still moves.
+
+### 27.3 Auto is gone
+
+Three states where the third one's whole job is to be invisible. The device
+still decides where the switch STARTS — so the default is unchanged for anyone
+who never touches it — it just stops being a position you can land on. Nothing
+is written to storage until someone actually chooses, so a browser that has
+never been told still follows the device across sessions.
+
+With two states the attribute is now always set explicitly, so one selector
+paints the page instead of two that have to agree. The `prefers-color-scheme`
+block stays for the gate, which has no switch and no script beyond reading
+storage.
+
+### 27.4 The "glitchy header" was never the header
+
+The chrome sliding sideways, leaving its seams showing, was the symptom of a
+**horizontal page scroll**, and `position: sticky` is defined to scroll
+horizontally with the page. So the question was never why the header moved. It
+was what made the page wider than the window.
+
+`.tip::after` — the hover note on every explanatory icon. A 255–320px
+absolutely positioned bubble, anchored to a 14px icon, laid out **at all times**
+at `opacity: 0`. An absolutely positioned box contributes to the document's
+scrollable overflow whether or not you can see it. Wherever one of those icons
+sat near the right of the content column, an invisible 320px box hung past the
+edge and the whole product grew a horizontal scroll nobody could account for.
+
+It came and went depending on which page you were on, because it depended on
+where the icons happened to land — which is exactly why it read as a flickering
+header bug rather than as a layout defect with a cause.
+
+**The rule: `opacity: 0` hides a box. It does not remove it from the page.**
+The tooltip is `display: none` until hover now. The cost is the .13s fade, which
+cannot survive `display: none`, and that is a fair price.
+
+`.wrap` also gets `overflow-x: clip` as the backstop for a tooltip genuinely
+open near the right edge. **`clip`, deliberately, and never `hidden`:**
+`overflow: hidden` makes the element a scroll container and would break every
+`position: sticky` inside it — the rail among them, which this project has
+already spent two versions repairing. `clip` clips without scrolling and lets
+the other axis stay `visible`, so a note can still open upward past the top of
+a card.
+
+### 27.5 NaN on the group's front page
+
+Not asked for, and fixed anyway, because it was on the first screen of the
+deployed product: **BUSINESS UNITS — EXECUTION read `NaN%`**, under a "No data"
+chip, above the sentence "Delivered 0% against 0% planned — variance +0".
+
+`groupRatio()` was `groupExec()/groupPlan()*100`. A tenant with no tactics has
+nothing delivered and nothing planned, so both sides were dividing by a weight
+total of zero and the ratio was `0/0`. `Math.round(NaN)` is `NaN`.
+
+This is §5.7 again — **null is never zero** — with a corollary: *and it is never
+NaN either.* The honest answer when there is no plan is nothing, and the card
+already knew how to say it: `drillCard` renders null as "Not yet measurable",
+which is what the two cards beside it had been doing correctly all along.
+`splitCard` had carried the same guard for the same reason; this is that guard
+one level up. The sub-sentence is replaced too, because three false precisions
+under a card that says "Not yet measurable" is worse than the NaN.
+
+**Every clean slate showed this. The demo dataset never did** — which is how it
+reached production: the dataset used for checking was the one that could not
+expose it.
+
+### 27.6 Verified
+
+- **One line at 1920 / 1440 / 1280 / 1100 / 1000 / 900 / 820 / 760 / 680 / 600**,
+  signed in, with all three buttons present — and at scroll depths 0 / 200 /
+  600 / 1400.
+- **No horizontal page scroll**: 8 widths × 13 pages, `scrollWidth` vs
+  `clientWidth` asserted zero on every one; and zero again with a tooltip open.
+- **The chrome's left edge is identical at every scroll depth** — the sideways
+  drift is gone at the source.
+- **The rail still works** with `overflow-x: clip` in place: `position: sticky`
+  intact, `elementFromPoint` returns the rail for every on-screen row at scroll
+  0 / 300 / 900, and a rail click still changes the pane.
+- **Two theme states only**: four presses asserted to alternate light/dark, the
+  attribute always set, no "auto" reachable in the value, the storage key or
+  the control's label.
+- **NaN gone against a genuinely clean-slate database** — a fresh tenant seeded
+  and cleared, signed into over HTTP: `groupRatio()` returns null, the card
+  reads "Not yet measurable", and the string "NaN" appears nowhere on the page.
+  The demo dataset is unchanged at 102% of plan.
+- Three themes × 31 viewers, zero console errors. PWA suite green. Round trip,
+  fixed point and archived-plan round trip PASS, seed byte-identical, rebuild
+  byte-identical.

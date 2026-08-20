@@ -192,59 +192,19 @@
              min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
 
-  /* THE FIRST LINE IS ONE LINE, AND IT IS SMALL.
-
-     Three attempts got here, so the reasoning is worth keeping. 2.9 asked for
-     one line and measured 1164px of content against a 1132px column, so the
-     buttons wrapped for everyone signed in. 3.0 shrank the pieces enough to
-     fit at 1180 and called it done - which was true only at 1180 and above,
-     and Islam's laptop is a ~1000px CSS viewport, so it still arrived as two
-     lines. Fitting at one width is not fitting.
-
-     So the row no longer WRAPS at all: flex-wrap is `nowrap` and every item
-     that can lose characters without losing meaning is allowed to. The
-     buttons never shrink - they are the controls, and a truncated "SIGN OU"
-     is worse than no header at all. Everything left of them shrinks and
-     ellipses in this order, because that is the order they are least missed:
-     the person note, the product name, the tenant name, the picker.
-
-     `nowrap` is what makes it unconditional. There is no width at which this
-     becomes two rows, which is the whole point - a header that reflows is a
-     header that moves the page under you every time the viewport changes. */
-  .top-in { flex-wrap:nowrap; gap:12px; }
-
-  /* The backstop, for a tooltip that is genuinely open near the right edge.
-     `clip`, deliberately, and never `hidden`: overflow:hidden makes the
-     element a scroll container, which would break every position:sticky
-     inside it - the rail among them, and this project has spent two versions
-     on that already. `clip` clips without scrolling and lets the other axis
-     stay visible, so a tooltip can still open upwards past the top of a card.
-     Horizontal only: nothing in this product should ever scroll sideways. */
-  .wrap { overflow-x:clip; }
-
-  /* Small, because the product name is not the thing you came to read. It was
-     a 26px serif h1 - the largest text in the entire product, restating the
-     name of the tab you are already in, above a page whose own heading is
-     smaller than it was. 13px, and the tenant name beside it at 12px carries
-     more weight than the product does. */
-  .brand h1 { font-family:var(--serif); font-size:13px; letter-spacing:0;
-              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-              flex-shrink:2; min-width:38px; }
-  .orgname { font-size:12px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
-             min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-             flex-shrink:3; }
-  .viewer { min-width:0; flex-wrap:nowrap; gap:7px; flex-shrink:1; }
-  .viewer label { font-size:9px; letter-spacing:.1em; white-space:nowrap; flex-shrink:0; }
-  .viewer select { flex:0 1 auto; min-width:74px; }
-  /* Shrinks first and hardest: the level and the reach are both said again on
-     the page itself, so this is the one line of the header nobody loses
-     anything by having clipped. */
-  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-                 font-size:9.5px; flex-shrink:9; }
-  .topacts { flex-shrink:0; gap:6px; }
-  .infobtn { font-size:9.5px; padding:4px 10px; letter-spacing:.08em; }
-  .themebtn { width:24px; height:24px; padding:0; }
-  .themesvg { width:14px; height:14px; }
+  /* THE FIRST LINE IS ONE LINE. It was not, before this: brand 400 + viewer 467
+     + buttons 257 + two 20px gaps came to 1164 against a 1132px column, so the
+     buttons wrapped onto a row of their own for everyone signed in - the wrap
+     was already there in 2.9 and the client name and the theme mark made it
+     worse. Three items on one row, and what gives when the window narrows is
+     stated rather than left to the browser: the buttons never shrink, the
+     tenant name and the person picker do. flex-wrap stays `wrap` so a genuinely
+     narrow window still breaks the row instead of overflowing it - the fix is
+     to stop it happening at ordinary widths, not to forbid it. */
+  .top-in { gap:16px; }
+  .viewer { min-width:0; }
+  .viewer select { flex:0 1 auto; min-width:92px; }
+  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   /* The theme control. Round rather than a pill because it carries a mark and
      no word - a pill with a 17px glyph floating in it reads as a button whose

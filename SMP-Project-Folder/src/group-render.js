@@ -890,8 +890,13 @@ function renderGroupPerformance(){
           drill: perfDrill, modalTitle: "Business units \u2014 performance", modalSub: "Weighted compile across the three units"
         }) +
         drillCard("Business units &mdash; execution" + tip(TIP_EXEC), groupRatio(), {
-          sub: "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
-               "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>. Read as a share of plan, not of the whole year.",
+          /* The sentence has to survive the empty tenant too. Reading
+             "Delivered 0% against 0% planned - variance +0" under a card that
+             says "Not yet measurable" is three false precisions in a row. */
+          sub: groupRatio() == null
+               ? "No tactic anywhere in the group has a plan against it yet, so there is nothing to deliver against."
+               : "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
+                 "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>. Read as a share of plan, not of the whole year.",
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
       '</div>') });

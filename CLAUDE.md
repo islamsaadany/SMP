@@ -235,7 +235,11 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.3: the plan template loses its codes; upload authors
+*Last Updated: 2026-08-20 — v2.4: the SMP icon — `favicon.svg` / `favicon.png` at
+the repo root, and the same mark inlined by `build.py` so the single file carries it
+offline. Regenerate both together if the mark changes.*
+
+*Earlier: 2026-08-20 — v2.3: the plan template loses its codes; upload authors
 and archives (§22).*
 
 *Earlier: 2026-08-20 — v2.2: the clean slate and the Demo button (§21); the

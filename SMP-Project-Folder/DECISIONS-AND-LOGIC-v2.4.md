@@ -1702,6 +1702,14 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.4 — SMP gets an icon
+
+The Strategy Temple as the tab and bookmark icon, in the house navy and gold —
+the platform's own drawing, not a stock glyph. Real files at the repo root for
+the served site; the same mark inlined as a data URI in the built single file,
+so it carries its own icon offline (A5: the handover file needs nothing but
+itself).
+
 ### v2.3 — the plan template loses its codes
 
 One generic template instead of a download per unit, and no code in it anywhere:

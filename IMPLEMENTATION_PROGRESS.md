@@ -7,6 +7,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** v2.1 · **Last updated:** 2026-08-20
+**Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
+**Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
 ---
 
@@ -16,9 +18,19 @@ Nothing proceeds past this line without an answer.
 
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
-| **D1** | **Stack: stay on the current one, or move to the HR_ERP stack?** | v2.1 was built on the current stack **without this being confirmed** — the question was asked, came back as a question, and the build went ahead anyway. Everything from Phase 2 onward compounds on the answer. | §19 of the decisions doc, and the answer written out in chat 2026-08-20 |
-| **D2** | Phase 2 scope — go ahead as described below, or reshape it? | It is the next build and it is not started. | §19.2 |
-| **D3** | Is the deployed demo content acceptable in the open? | Only Mobile's plan is real; everything else is invented and labelled. Anyone with the URL and an issued password sees it. | §13 |
+| **D4** | **Approve the rebuild plan** — order of work, what happens to the live product meanwhile, and whether the CSS is carried over verbatim (strongly recommended) rather than re-expressed in Tailwind. | The stack move is decided; **how** it is done is not, and nothing is built until it is (A1). | §20 |
+| **D3** | Is the deployed demo content acceptable in the open? | Only Mobile's plan is real; everything else is invented and labelled. Anyone with the URL and the SMO password sees it. | §13 |
+
+**Answered:**
+
+- **D1 · Stack — ANSWERED 2026-08-20: move to the HR_ERP stack** (Next.js,
+  React, TypeScript, Prisma, NextAuth). Reverses §19's Path A. The database,
+  the identity model and every recorded decision carry across; the glue is
+  discarded; the offline single-file prototype stops gaining features at v2.1.
+  Recorded as §20.
+- **D2 · Phase 2 as it stood** — superseded by the stack move. Its content
+  (per-action writes, server-side rule enforcement, the change log) does not go
+  away; it becomes part of the rebuild rather than a patch on the old stack.
 
 ---
 
@@ -30,7 +42,8 @@ password, scrypt-hashed, httpOnly session); `/api/state` requires a session; a
 signed-in person sees their own view; the SMO issues temporary passwords from
 Levels & access and every issued password must be changed on first use. The
 viewer switcher survives only as the SMO's read-only simulation and in the
-offline file. Bootstrap: `smo` / `4123`, must-change.
+offline file. Sign-in for the SMO is `SMO` / `1234` with no forced change
+(§19.4, 2026-08-20).
 
 *Verified:* full flow in a real browser against a throwaway Postgres 16 —
 bootstrap forced a change; the SMO issued Mennah Farouk a password; she was
@@ -60,18 +73,23 @@ suite per feature.
 
 ## In flight
 
-Nothing. The last build (v2.1) is merged to `main` and the working tree is
-clean.
+Nothing being built. The stack move (§20) is decided and its plan is with
+Islam for approval (D4). v2.1 is merged to `main` and deployed.
 
 ---
 
-## Next, in order
+## Next — the rebuild on the HR_ERP stack
 
-| Phase | What it is | Blocked by |
+Proposed order, **awaiting approval (D4)**. Nothing below is started.
+
+| Step | What it is | Why this order |
 |---|---|---|
-| **2** | **Per-action writes.** The whole-state save is replaced by one endpoint per action (report a figure, edit a plan, change a config, mark focus, submit/reopen), each **validated on the server** against the cycle rules — so enforcement stops being the browser's word. Carries the **per-figure change log** (§16.0a): *this measure read 48%, changed to 62% by Omar at 11:40*. Also: sign-in rate limiting. | D1, D2 |
-| **3** | **The cycle, server-side.** Closing a cycle writes real snapshot rows; deltas read from them; import review and apply move to the server. | Phase 2 |
-| **4** | Multi-tenant (Raya beside ELABD, §1) and strategy versions (§16.10). | Phase 3 |
+| **R1** | **Scaffold beside the live product.** Next.js + TypeScript + Prisma pointed at the **existing** Neon tables (`prisma db pull` — no new schema, no data moved), NextAuth over the existing credentials, SMP's CSS carried over verbatim. Nothing user-facing changes yet. | Proves the new stack reads the real data before a single screen is ported. |
+| **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.1 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
+| **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
+| **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
 
 **Longer-term backlog**, unchanged and unstarted: source teams (§16.7), the help
 box (§16.8), the rest of people-and-credentials (§16.9 — Phase 1 took the login
@@ -87,11 +105,14 @@ Stated here rather than discovered later.
 
 1. **Authorization is at the door, not per action.** A signed-in person is
    authenticated, but their browser is still trusted about *what* changed.
-   Phase 2 closes it.
+   Step R4 of the rebuild closes it.
 2. **Last writer wins.** Saves replace the whole state transactionally; two
    people editing at once will not corrupt anything, but the second overwrites
    the first.
-3. **No self-service password recovery.** A forgotten password is reset by the
+3. **The SMO password is `1234`** and is not forced to change (§19.4) — weak,
+   deliberate, and to be replaced before anything client-confidential goes in.
+   Passwords the SMO issues to other people are still temporary and still force
+   a change. **No self-service recovery:** a forgotten password is reset by the
    SMO, which also ends that person's sessions.
 4. **Usernames are person keys** (`own_mob`, `mobhead`), shown to the SMO beside
    the Set-password control. Real emails are §16.9 work.

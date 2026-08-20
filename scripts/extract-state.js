@@ -33,6 +33,9 @@ const state = {
   review: ctx.REVIEW,
   history: ctx.HISTORY,
   priorCycle: ctx.PRIOR_CYCLE,
+  /* The demo dataset has never had a plan replaced, so this is empty — but it
+     travels, so the seed and the round trip agree on the shape. */
+  archives: ctx.ARCHIVES || [],
 };
 /* weighting lives on group; do not store it twice. */
 delete state.weighting;

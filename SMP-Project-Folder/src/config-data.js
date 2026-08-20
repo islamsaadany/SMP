@@ -902,8 +902,8 @@ Object.keys(UNITS).forEach(function(k){ if (UNITS[k].active == null) UNITS[k].ac
    corrected target from a new measure, and would duplicate a plan every time
    the sheet was loaded. The platform generates these; the template carries
    them; nobody types them. */
-UNIT_KEYS.forEach(function(k){
-  var u = UNITS[k];
+function renumberUnit(u){
+  var k = u.ukey;
   u.clauses.forEach(function(c, i){ c[2] = k + "-F" + (i + 1); });
   u.keyObjectives.forEach(function(m, i){ m.id = k + "-KO" + (i + 1); });
   u.items.forEach(function(p, pi){
@@ -911,7 +911,153 @@ UNIT_KEYS.forEach(function(k){
     p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
   });
-});
+}
+UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });
+
+/* The generic template is built against an EMPTY shape, not against a chosen
+   unit: the file is the same whichever unit it will end up describing, and the
+   only thing that makes it one unit's is the cell chosen on its Read me sheet.
+   The clause LABELS come along because they are the group's own skeleton and
+   give whoever fills the sheet something to answer. */
+function blankUnitShape(){
+  return { ukey:"", name:"", codePrefix:"", clauses:GROUP.clauses.map(function(c){ return [c[0], "", ""]; }),
+           aspiration:"", endInMind:"", keyObjectives:[], swot:{ s:[], w:[], o:[], t:[] },
+           items:[] };
+}
+function blankCapShape(){
+  return { id:"", name:"", def:"", fn:"", keyObjectives:[], projects:[] };
+}
+
+/* ── Archived plans (\u00a722) ────────────────────────────────────────────────
+   An upload AUTHORS a plan: it writes one from scratch rather than amending
+   what is there. That is what let every code leave the template \u2014 there is
+   never a row to match \u2014 and it is why replacing has to be safe: the outgoing
+   plan, and every figure reported against it, are kept before the new one is
+   written. Nothing an upload does is a deletion.
+
+   Kept in the state graph rather than in a corner of the database, so an
+   archive travels with everything else: it is saved, read back and shown by
+   the same machinery as the plan it came from.
+   \u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014 */
+var ARCHIVES = [];
+
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
+
+/* A date the SMO would write, not a timestamp nobody reads. */
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function todayLabel(){
+  var d = new Date();
+  return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
+}
+/* Who is acting, not who is being simulated: the signed-in person where there
+   is one, and the viewer offline. */
+function actingName(){
+  var p = (typeof SYNC !== "undefined" && SYNC.person) ? SYNC.person() : null;
+  if (p && p.name) return p.name;
+  var v = viewer();
+  return v ? v.name : "";
+}
+
+function unitPlanSnapshot(u){
+  return { clauses:clone(u.clauses), aspiration:u.aspiration, endInMind:u.endInMind,
+           keyObjectives:clone(u.keyObjectives), swot:clone(u.swot), items:clone(u.items) };
+}
+function capPlanSnapshot(c){
+  return { def:c.def, keyObjectives:clone(c.keyObjectives || []),
+           projects:clone(c.projects || []) };
+}
+
+/* What the archive HELD, counted once and stored \u2014 so the list reads without
+   walking every snapshot, and still reads if the model later grows a field. */
+function unitSnapshotCounts(s){
+  var m = 0, t = 0, rep = 0;
+  (s.items || []).forEach(function(p){
+    m += (p.measures || []).length; t += (p.tactics || []).length;
+    (p.measures || []).forEach(function(x){ if (x.progress != null) rep++; });
+    (p.tactics  || []).forEach(function(x){ if (x.actual != null) rep++; });
+  });
+  (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
+  return { pillars:(s.items || []).length, measures:m, tactics:t,
+           objectives:(s.keyObjectives || []).length, reported:rep };
+}
+function capSnapshotCounts(s){
+  var d = 0, o = 0, ms = 0, rep = 0;
+  (s.projects || []).forEach(function(p){
+    d += (p.deliverables || []).length; o += (p.outcomes || []).length;
+    ms += (p.milestones || []).length;
+    (p.outcomes || []).forEach(function(x){ if (x.progress != null) rep++; });
+    (p.deliverables || []).forEach(function(x){ if (x.actual != null) rep++; });
+  });
+  (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
+  return { projects:(s.projects || []).length, deliverables:d, outcomes:o,
+           milestones:ms, objectives:(s.keyObjectives || []).length, reported:rep };
+}
+
+/* "1 pillars" is the kind of thing that makes a product feel unfinished. */
+function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
+
+function planIsEmpty(counts){
+  return !counts.pillars && !counts.objectives && !counts.projects;
+}
+
+var ARCH_N = 0;
+function archiveId(){
+  /* Unique against what is already stored, so a restored file cannot collide
+     with an archive taken in the same session. */
+  do { ARCH_N++; } while (ARCHIVES.some(function(a){ return a.id === "arch" + ARCH_N; }));
+  return "arch" + ARCH_N;
+}
+
+/* Returns the archive taken, or null when there was nothing worth keeping \u2014
+   a first plan for an empty unit archives nothing and says so. */
+function archiveUnitPlan(u, why){
+  var snap = unitPlanSnapshot(u), counts = unitSnapshotCounts(snap);
+  if (planIsEmpty(counts)) return null;
+  var a = { id:archiveId(), kind:"unit", key:u.ukey, name:u.name, at:todayLabel(),
+            by:actingName(), why:why || "replaced by an upload", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+function archiveCapPlan(c, why){
+  var snap = capPlanSnapshot(c), counts = capSnapshotCounts(snap);
+  if (planIsEmpty(counts)) return null;
+  var a = { id:archiveId(), kind:"cap", key:c.id, name:c.name, at:todayLabel(),
+            by:actingName(), why:why || "replaced by an upload", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
+/* Restoring is the same act in reverse: what is on screen now is archived
+   first, so a restore can itself be undone. */
+function restoreArchive(id){
+  var a = ARCHIVES.filter(function(x){ return x.id === id; })[0];
+  if (!a) return false;
+  if (a.kind === "unit") {
+    var u = UNITS[a.key];
+    if (!u) return false;
+    archiveUnitPlan(u, "replaced by restoring the " + a.at + " archive");
+    var s = a.plan;
+    u.clauses = clone(s.clauses); u.aspiration = s.aspiration; u.endInMind = s.endInMind;
+    u.keyObjectives = clone(s.keyObjectives); u.swot = clone(s.swot); u.items = clone(s.items);
+    renumberUnit(u);
+  } else {
+    var c = capById(a.key);
+    if (!c) return false;
+    archiveCapPlan(c, "replaced by restoring the " + a.at + " archive");
+    c.def = a.plan.def;
+    c.keyObjectives = clone(a.plan.keyObjectives);
+    c.projects = clone(a.plan.projects);
+    renumberCapability(c);
+  }
+  ARCHIVES = ARCHIVES.filter(function(x){ return x.id !== id; });
+  window.ARCHIVES = ARCHIVES;
+  return true;
+}
+
+function forgetArchive(id){
+  ARCHIVES = ARCHIVES.filter(function(x){ return x.id !== id; });
+  window.ARCHIVES = ARCHIVES;
+}
 
 /* Emptying a unit so a plan can be loaded fresh. The unit itself survives \u2014
    its name, code, roles and weight are configuration, not plan content. What
@@ -992,16 +1138,19 @@ function clearUnitNumbers(u){
    addressed, reported against and matched on import \u2014 without them a
    capability could be rendered but not written to. Projects, and the three
    lists inside them, are addressed the same way. */
-GROUP.capabilities.forEach(function(c, ci){
-  c.id = "cap" + (ci + 1);
-  c.keyObjectives.forEach(function(m, i){ m.id = c.id + "-KO" + (i + 1); });
-  c.projects.forEach(function(p, pi){
+function renumberCapability(c){
+  (c.keyObjectives || []).forEach(function(m, i){ m.id = c.id + "-KO" + (i + 1); });
+  (c.projects || []).forEach(function(p, pi){
     p.id = c.id + "-P" + (pi + 1);
     p.capId = c.id;
-    p.deliverables.forEach(function(d, i){ d.id = p.id + "-D" + (i + 1); });
-    p.outcomes.forEach(function(o, i){ o.id = p.id + "-O" + (i + 1); });
-    p.milestones.forEach(function(m, i){ m.id = p.id + "-M" + (i + 1); });
+    (p.deliverables || []).forEach(function(d, i){ d.id = p.id + "-D" + (i + 1); });
+    (p.outcomes || []).forEach(function(o, i){ o.id = p.id + "-O" + (i + 1); });
+    (p.milestones || []).forEach(function(m, i){ m.id = p.id + "-M" + (i + 1); });
   });
+}
+GROUP.capabilities.forEach(function(c, ci){
+  c.id = "cap" + (ci + 1);
+  renumberCapability(c);
 });
 
 /* Address any row inside a capability by its id: a key objective, or a

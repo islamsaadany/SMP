@@ -149,7 +149,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     manage: [
       { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
-      { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
       { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup }
     ]
   };
@@ -906,57 +905,32 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     return name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
       "-" + IMP.kind + "-template.csv";
   }
-  /* A plan file is READ into a summary, not diffed: it authors the plan, so
-     what matters is what it holds and what that displaces (§22). Reporting is
-     still a difference against what is recorded. */
-  function readPlanRows(rows, label){
-    IMP.read = label;
-    if (impIsCap()) {
-      var c = impCap();
-      IMP.check = validateCapPlan(c, rows);
-      IMP.summary = capReplaceSummary(c, rows);
-    } else {
-      var u = UNITS[IMP.unit];
-      IMP.check = validatePlan(u, rows);
-      IMP.summary = planReplaceSummary(u, rows);
-    }
-    IMP.diff = null;
-    paint();
-  }
-  function impFail(msg){
-    IMP.check = { problems:[{ at:"the whole file", msg:msg }], notices:[] };
-    IMP.summary = null; IMP.diff = null; IMP.read = "";
-    paint();
-  }
-
   function loadCSV(text){
     IMP.done = null;
     IMP.text = text;
-    /* A plan arrives as a workbook, because a workbook has a Read me sheet and
-       a plan file has to say which unit it is for. A flat CSV cannot say it,
-       and guessing would write one unit's plan into another \u2014 the worst
-       accident this flow can have. Reporting still takes a CSV: it is per unit
-       and the unit is chosen on screen. */
-    if (IMP.kind === "plan") {
-      impFail("a plan has to arrive as the .xlsx template \u2014 its Read me sheet is what says " +
-              "which unit the plan is for. Download the plan template above and fill that.");
-      return;
-    }
     var rows = parseCSV(text);
     if (impIsCap()) {
       var c = impCap();
-      var cShape = checkCapFileShape(c, rows, "progress");
-      IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
-      IMP.diff = diffCapProgress(c, rows);
-      IMP.summary = null;
+      if (IMP.kind === "plan") {
+        IMP.check = validateCapPlan(c, rows);
+        IMP.diff = diffCapPlan(c, rows);
+      } else {
+        var cShape = checkCapFileShape(c, rows, "progress");
+        IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+        IMP.diff = diffCapProgress(c, rows);
+      }
       paint();
       return;
     }
     var u = UNITS[IMP.unit];
-    var shape = checkFileShape(u, rows, "progress");
-    IMP.check = shape.length ? { problems: shape, notices: [] } : null;
-    IMP.diff = diffProgress(u, rows);
-    IMP.summary = null;
+    if (IMP.kind === "plan") {
+      IMP.check = validatePlan(u, rows);
+      IMP.diff = diffPlan(u, rows);
+    } else {
+      var shape = checkFileShape(u, rows, "progress");
+      IMP.check = shape.length ? { problems: shape, notices: [] } : null;
+      IMP.diff = diffProgress(u, rows);
+    }
     paint();
   }
 
@@ -968,29 +942,23 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
     });
 
-    function sendXlsx(sheets, name){
+    var dlx = document.querySelector("[data-dlx]");
+    if (dlx) dlx.addEventListener("click", function(){
+      var sheets;
+      if (impIsCap()) {
+        var c = impCap();
+        sheets = IMP.kind === "plan" ? capPlanWorkbook(c) : capProgressWorkbook(c);
+      } else {
+        var u = UNITS[IMP.unit];
+        sheets = IMP.kind === "plan" ? planWorkbook(u) : progressWorkbook(u);
+      }
       var bytes = buildXlsx(sheets);
       var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       var a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = name;
+      a.download = fileName().replace(/\.csv$/, ".xlsx");
       document.body.appendChild(a); a.click();
       setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-    }
-    /* The plan template is the same file whichever unit it is for, so it is
-       built against an empty shape rather than a chosen unit's content. */
-    var dlx = document.querySelector("[data-dlx]");
-    if (dlx) dlx.addEventListener("click", function(){
-      if (IMP.kind === "plan") {
-        sendXlsx(planWorkbook(blankUnitShape()), "SMP - plan template.xlsx");
-        return;
-      }
-      var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(UNITS[IMP.unit]);
-      sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
-    });
-    var dlxc = document.querySelector("[data-dlxcap]");
-    if (dlxc) dlxc.addEventListener("click", function(){
-      sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - capability template.xlsx");
     });
 
     var dl = document.querySelector("[data-dl]");
@@ -1018,54 +986,34 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         var rx = new FileReader();
         rx.onload = function(){
           readXlsx(rx.result).then(function(sheets){
-            /* The template is generic, so the file itself says whose plan it
-               is: one cell on the Read me sheet. Nothing else in the workbook
-               names a unit, and with the codes gone nothing else could. */
-            if (IMP.kind === "plan") {
-              var picked = readmePick(sheets);
-              if (!picked) {
-                impFail(impIsCap()
-                  ? "no capability chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is."
-                  : "no business unit chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is.");
-                return;
-              }
-              var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              var cp = GROUP.capabilities.filter(function(x){ return x.name === picked; })[0];
-              if (!uk && !cp) {
-                impFail('no business unit or capability called "' + picked +
-                  '". Open the Read me sheet and choose one from the dropdown in B2.');
-                return;
-              }
-              IMP.unit = uk ? uk : "cap:" + cp.id;
-              if (cp) {
-                var cRows = capPlanFromWorkbook(cp, sheets);
-                readPlanRows(cRows, cp.name + " \u00b7 " + cRows.length + " rows");
-              } else {
-                var pRows = planFromWorkbook(UNITS[uk], sheets);
-                readPlanRows(pRows, UNITS[uk].name + " \u00b7 " + pRows.length + " rows");
-              }
-              return;
-            }
             if (impIsCap()) {
               var c = impCap();
-              var cpRows = capProgressFromWorkbook(c, sheets);
-              var cShape = checkCapFileShape(c, cpRows, "progress");
-              IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
-              IMP.diff = diffCapProgress(c, cpRows);
-              IMP.summary = null;
+              var cRows = IMP.kind === "plan" ? capPlanFromWorkbook(c, sheets) : capProgressFromWorkbook(c, sheets);
+              if (IMP.kind === "plan") {
+                IMP.check = validateCapPlan(c, cRows);
+                IMP.diff = diffCapPlan(c, cRows);
+              } else {
+                var cShape = checkCapFileShape(c, cRows, "progress");
+                IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+                IMP.diff = diffCapProgress(c, cRows);
+              }
               paint();
               return;
             }
             var u = UNITS[IMP.unit];
-            var rows = progressFromWorkbook(u, sheets);
-            var shape = checkFileShape(u, rows, "progress");
-            IMP.check = shape.length ? { problems: shape, notices: [] } : null;
-            IMP.diff = diffProgress(u, rows);
-            IMP.summary = null;
+            var rows = IMP.kind === "plan" ? planFromWorkbook(u, sheets) : progressFromWorkbook(u, sheets);
+            if (IMP.kind === "plan") {
+              IMP.check = validatePlan(u, rows);
+              IMP.diff = diffPlan(u, rows);
+            } else {
+              var shape = checkFileShape(u, rows, "progress");
+              IMP.check = shape.length ? { problems: shape, notices: [] } : null;
+              IMP.diff = diffProgress(u, rows);
+            }
             paint();
           }).catch(function(e){
             IMP.check = { problems:[{ at:file.name, msg:"could not be read as a workbook \u2014 " + e.message }], notices:[] };
-            IMP.diff = null; IMP.summary = null; IMP.read = "";
+            IMP.diff = { rows:[], missing:[] };
             paint();
           });
         };
@@ -1094,59 +1042,22 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
 
     var ap = document.querySelector("[data-apply]");
     if (ap) ap.addEventListener("click", function(){
-      var what, arch;
-      if (IMP.kind === "plan") {
-        var sm = IMP.summary, inc = sm.incoming;
-        if (impIsCap()) {
-          var cc = impCap();
-          arch = applyCapPlanReplace(cc, sm.rows);
-          what = plural(inc.projects, "project") + ", " +
-                 plural(inc.objectives, "objective") + " written.";
-          IMP.done = { unit:cc.name, key:cc.id, fn:cc.fn, what:what, archived:arch };
-        } else {
-          var uu = UNITS[IMP.unit];
-          arch = applyPlanReplace(uu, sm.rows);
-          /* The tenant's own word for a pillar, which the label registry holds
-             in the plural because that is how it is used in headings. */
-          what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
-                 plural(inc.measures, "measure") + ", " +
-                 plural(inc.tactics, "tactic") + " written.";
-          IMP.done = { unit:uu.name, key:uu.ukey, what:what, archived:arch };
-        }
+      var ch = IMP.diff.rows.filter(function(r){ return r.status === "changed"; }).length;
+      var nu = IMP.diff.rows.filter(function(r){ return r.status === "new"; }).length;
+      var what = IMP.kind === "plan"
+        ? ch + " changed" + (nu ? ", " + nu + " created" : "") + "."
+        : ch + " figure" + (ch === 1 ? "" : "s") + " updated.";
+      if (impIsCap()) {
+        var c = impCap();
+        if (IMP.kind === "plan") applyCapPlan(c, IMP.diff); else applyCapProgress(c, IMP.diff);
+        IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
       } else {
-        var ch = IMP.diff.rows.filter(function(r){ return r.status === "changed"; }).length;
-        what = ch + " figure" + (ch === 1 ? "" : "s") + " updated.";
-        if (impIsCap()) {
-          var c = impCap();
-          applyCapProgress(c, IMP.diff);
-          IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
-        } else {
-          var u = UNITS[IMP.unit];
-          applyProgress(u, IMP.diff);
-          IMP.done = { unit:u.name, key:u.ukey, what:what };
-        }
+        var u = UNITS[IMP.unit];
+        if (IMP.kind === "plan") applyPlan(u, IMP.diff); else applyProgress(u, IMP.diff);
+        IMP.done = { unit:u.name, key:u.ukey, what:what };
       }
-      IMP.diff = null; IMP.summary = null; IMP.text = ""; IMP.check = null; IMP.read = "";
+      IMP.diff = null; IMP.text = ""; IMP.check = null;
       paint();
-    });
-
-    /* Archived plans: restore one, or forget it for good. Forgetting asks,
-       because it is the only act in the import flow that actually destroys
-       something. */
-    document.querySelectorAll("[data-restore]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (restoreArchive(b.dataset.restore)) paint();
-      });
-    });
-    document.querySelectorAll("[data-forget]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var a = ARCHIVES.filter(function(x){ return x.id === b.dataset.forget; })[0];
-        if (!a) return;
-        if (!confirm("Delete " + a.name + "'s archive of " + a.at +
-                     " for good? This is the one thing here that cannot be undone.")) return;
-        forgetArchive(a.id);
-        paint();
-      });
     });
     /* The receipt's way back for a capability: its function's pages. */
     document.querySelectorAll("[data-gofn]").forEach(function(b){

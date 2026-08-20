@@ -350,3 +350,20 @@ CREATE TABLE IF NOT EXISTS prior_cycle (
   id    int PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   data  jsonb NOT NULL DEFAULT '{}'
 );
+
+-- Archived plans (§22). An upload authors a plan and archives the one it
+-- displaces, so nothing an import does is a deletion. The snapshot is the
+-- whole plan as the platform held it, reported figures included, kept as one
+-- document because it is restored as one.
+CREATE TABLE IF NOT EXISTS plan_archives (
+  id        text PRIMARY KEY,
+  idx       integer NOT NULL,
+  kind      text NOT NULL,
+  key       text NOT NULL,
+  name      text NOT NULL,
+  at_label  text,
+  by_name   text,
+  why       text,
+  counts    jsonb,
+  plan      jsonb NOT NULL
+);

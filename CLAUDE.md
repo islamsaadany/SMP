@@ -161,6 +161,12 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   A first deployment seeds the example and then clears it — `db/migrations/004-clean-slate.sql`
   runs after the seed, which is why `ensureReady` seeds first and migrates second.
   **Never put invented content in the database**; it belongs in the demo dataset.
+- **Plan import (since v2.3, §22):** an upload **authors** a plan rather than amending
+  one, which is why the template carries no codes — the platform mints them on arrival.
+  One generic `.xlsx` template; the unit is chosen on its Read me sheet (cell B2); a plan
+  cannot arrive as a CSV, because a CSV cannot say whose plan it is. Replacing archives
+  the outgoing plan into `plan_archives` (state field `archives`); **nothing an import
+  does is a deletion**.
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
@@ -229,7 +235,10 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.2: the clean slate and the Demo button (§21); the
+*Last Updated: 2026-08-20 — v2.3: the plan template loses its codes; upload authors
+and archives (§22).*
+
+*Earlier: 2026-08-20 — v2.2: the clean slate and the Demo button (§21); the
 seed-then-migrate order and the "no invented content in the database" rule recorded
 above.*
 

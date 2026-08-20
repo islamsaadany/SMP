@@ -1702,6 +1702,17 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.3 — the plan template loses its codes
+
+One generic template instead of a download per unit, and no code in it anywhere:
+the platform assigns every one on arrival. What made that possible is a rule
+rather than a clever matcher — **an upload authors a plan, it does not amend
+one** — so there is never a row to match a code against (§22). A file says which
+unit it is for on its own Read me sheet. Replacing a plan archives the outgoing
+one, reported figures included, and Manage lists archives with a Restore. The
+Pillar and Owner dropdowns, which were empty on a unit with no plan and so made
+a first plan impossible to author, are fixed.
+
 ### v2.2 — the clean slate, and the Demo button
 
 The demo tenant became the client's own: the companies, the business units, the
@@ -2194,3 +2205,128 @@ The prior-cycle column reads **"Previous cycle · new this cycle"** for a tenant
 in its first cycle. `PRIOR_CYCLE` is also rebound on hydration now: it was
 assigned only when the payload carried one, so a tenant without a previous cycle
 kept the baked-in example's 2025 split on screen.
+
+---
+
+## 22 · The plan template loses its codes — v2.3
+
+*Islam, 2026-08-20: "in the uploading template of the business units or the
+functions there is some sort of coding for the items, can we keep the template
+without coding — the platform handles the coding on behalf of the SMO … not to
+confuse the uploader with coding and mistakes that might endanger the integrity
+of data?"*
+
+### 22.1 The rule that made it possible
+
+Codes were in the template for one reason: to answer *is this row an update, or
+a new item?* Every attempt to remove them ran into that question, and every
+answer to it was worse than the codes — matching by name turns a rename into a
+duplicate; a hidden key is a key someone can still break.
+
+The question was dissolved rather than answered. **An upload authors a plan; it
+does not amend one.** After a plan is loaded, editing happens on screen. A
+second upload is a new plan, not a correction to the last. With no row ever
+matched, no row needs an identity typed into a sheet, and the whole ID column
+goes — along with the class of mistake it carried.
+
+The coding system itself is untouched. `MB01`, `mobile-P1`, `mobile-P1-M1` are
+minted on arrival exactly as they are when a pillar is added on screen, and
+renumbered the same way when things are reordered. *A code that is never typed
+is a code that can never be typed wrong.*
+
+### 22.2 One generic template, one unit per file
+
+The template is the same file whichever unit is being planned. Nothing in it
+names a unit except **one cell on the Read me sheet** — a dropdown of the
+tenant's business units — and that cell is what the platform reads to know
+whose plan it is.
+
+*(This reverses an intermediate decision taken the same day. Islam's words were
+"one template without the need of downloading a template for each unit"; that
+was first built as one file carrying ALL ten units, with a Business unit column
+on every sheet. Islam corrected it: the upload is one unit at a time. The
+single-unit reading is both what he asked for and the better design — with one
+unit per file, every pillar in the file belongs to that unit, so the Pillar
+dropdown cannot offer a pillar from somewhere else and there is nothing left to
+validate about it.)*
+
+The capability template works the same way, with a Capability dropdown. It is a
+separate file because a capability is a different shape — projects with
+deliverables, outcomes and milestones, not pillars with measures and tactics —
+not because it belongs to someone else.
+
+**A plan must arrive as the .xlsx template.** A flat CSV has no Read me sheet
+and so cannot say which unit it is for; guessing would write one unit's plan
+into another, which is the worst accident this flow can have. Reporting still
+takes a CSV, because reporting is per unit and the unit is chosen on screen.
+
+### 22.3 Replacing archives, it does not delete
+
+*Islam: "the replacing of any plan shouldn't delete the old but archive it
+silently after the warning so we can retrieve later if needed."*
+
+Before a plan is written, the outgoing plan is snapshotted whole — foundation,
+aspiration, objectives, SWOT, pillars, measures, tactics **and every figure
+reported against them** — and kept. The review says what is coming off the
+screen and what it holds; confirming archives it and writes the new plan.
+
+**Archived plans** on Manage lists them newest first with what each held, who
+replaced it and when, and a **Restore**. Restoring is the same act in reverse:
+it archives whatever is on screen now, so a restore can itself be undone. The
+only control in the whole flow that destroys anything is Delete on an archive,
+and it asks first.
+
+Archives live in the state graph, not in a corner of the database, so they are
+saved, read back and shown by the same machinery as the plan they came from.
+
+**This is not §16.10.** Strategy versions — last year's plan readable *beside*
+this year's, browsable and comparable — remains on the backlog. An archive is
+restorable, not browsable, and that distinction is deliberate: it is the safety
+net the replace rule needs, not the feature it will eventually become.
+
+### 22.4 What the file asks for, in the tenant's own words
+
+- **Theme is chosen by NAME**, never by its code. `OT` means nothing to whoever
+  fills the sheet. **"— none —"** is offered explicitly, because a pillar is
+  allowed to belong to no theme and the dropdown never used to admit it.
+- **Owner is typed**, not chosen. After the clean slate the tenant has one
+  person, so a list of people would be one name long and Excel would refuse
+  every other name typed into it. It becomes a suggestion list once there are
+  people to suggest — helping without ever blocking.
+- **The Pillar list is live**: `Pillars!$A$2:$A$400`, read at the moment the
+  cell is opened, so a pillar typed a minute ago is offered on the next sheet.
+- **Units of measure suggest rather than insist.** A locked list would refuse
+  the first legitimate unit nobody anticipated; a tenant's units are its own
+  vocabulary.
+- **Targets are written as numbers.** Every cell used to go out as text, which
+  put Excel's "number stored as text" warning on every target in the file and
+  stopped the column sorting or totalling.
+
+### 22.5 The defect that made this urgent
+
+On a unit with no plan, the Pillar dropdown on the Measures and Tactics sheets
+was **empty** — its list was baked in at download from the pillars that already
+existed — and Excel then refused every pillar name typed into the column. The
+same hole sat in the capability workbook's Project column. **A first plan could
+not be authored from the template at all**, which the clean slate (§21) turned
+from a latent bug into a blocker on the only path into the product.
+
+### 22.6 Verified before handover
+
+- The generic template built and inspected: no ID column on any sheet, Pillar
+  list live, theme names with "— none —", Owner with no list, unit list
+  non-enforcing, Target numeric, Read me B2 offering all ten units.
+- A template filled as a person would fill it, written to .xlsx, read back:
+  every code minted in order, every measure and tactic hanging off the right
+  pillar, theme names resolved to codes, "— none —" resolved to no theme.
+- The flow driven on the real screens: upload → the unit read from the file →
+  the review naming it and the 16 reported figures at stake → apply → the plan
+  written, the archive listed → restore → the plan back and the replacement
+  archived in its place.
+- The same over HTTP against Postgres: a first plan writing 2 pillars and
+  archiving nothing; a second archiving the first; the archive surviving a page
+  reload; a restore landing in the database.
+- Round trip and fixed point PASS, with an archived plan written and read back
+  deep-equal — a snapshot is the largest single document the state holds.
+- Every page walked as every viewer, live and demo, no console errors; the
+  offline file clean for all 29 viewers; byte-identical rebuild.

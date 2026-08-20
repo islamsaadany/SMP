@@ -37,7 +37,7 @@ var SYNC = (function () {
   var DEMO = null;
   var LIVE = null;
   var mode = "live";
-  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+  /* `clone` is the platform's own, defined once beside the archive model. */
 
   function graph() {
     return {
@@ -45,7 +45,8 @@ var SYNC = (function () {
       functionKeys: FUNCTION_KEYS, functions: FUNCTIONS,
       people: PEOPLE, unitRoles: UNIT_ROLES, levels: LEVELS, access: ACCESS,
       labels: LABELS.entries, bands: BANDS.bands, koWeights: KO_WEIGHTS,
-      cycle: CYCLE, review: REVIEW, history: HISTORY, priorCycle: PRIOR_CYCLE
+      cycle: CYCLE, review: REVIEW, history: HISTORY, priorCycle: PRIOR_CYCLE,
+      archives: ARCHIVES
     };
   }
 
@@ -74,6 +75,7 @@ var SYNC = (function () {
     window.CYCLE = state.cycle;
     window.REVIEW = state.review;
     window.HISTORY = state.history;
+    window.ARCHIVES = state.archives || [];
     /* Rebound unconditionally, like every other global here. Assigning only
        when present meant a tenant with no previous cycle kept the baked-in
        example's 2025 split on screen — the Weighting factors table showed

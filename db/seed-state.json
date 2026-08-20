@@ -2586,6 +2586,7 @@
      "id": "mobile-P4"
     }
    ],
+   "company": "distribution",
    "ukey": "mobile",
    "active": true
   },
@@ -2908,6 +2909,7 @@
      "id": "retailstores-P3"
     }
    ],
+   "company": "b2c",
    "ukey": "retailstores",
    "active": true
   },
@@ -3199,6 +3201,7 @@
      "id": "b2becomm-P3"
     }
    ],
+   "company": null,
    "ukey": "b2becomm",
    "active": true
   },
@@ -3449,6 +3452,7 @@
      "id": "onlineshop-P2"
     }
    ],
+   "company": "b2c",
    "ukey": "onlineshop",
    "active": true
   },
@@ -3699,6 +3703,7 @@
      "id": "consumerelectronics-P2"
     }
    ],
+   "company": "distribution",
    "ukey": "consumerelectronics",
    "active": true
   },
@@ -3949,6 +3954,7 @@
      "id": "corporate-P2"
     }
    ],
+   "company": null,
    "ukey": "corporate",
    "active": true
   },
@@ -4199,6 +4205,7 @@
      "id": "care-P2"
     }
    ],
+   "company": "b2c",
    "ukey": "care",
    "active": true
   },
@@ -4449,6 +4456,7 @@
      "id": "it-P2"
     }
    ],
+   "company": "distribution",
    "ukey": "it",
    "active": true
   },
@@ -4699,6 +4707,7 @@
      "id": "logistics-P2"
     }
    ],
+   "company": null,
    "ukey": "logistics",
    "active": true
   },
@@ -4949,6 +4958,7 @@
      "id": "nigeria-P2"
     }
    ],
+   "company": null,
    "ukey": "nigeria",
    "active": true
   }
@@ -5228,6 +5238,22 @@
    "level": "n2",
    "unit": "mobile",
    "title": "Director, Digital Operations"
+  },
+  {
+   "key": "co_dist",
+   "name": "Company CEO, Distribution",
+   "level": "n1",
+   "unit": null,
+   "company": "distribution",
+   "title": "CEO, Distribution"
+  },
+  {
+   "key": "co_b2c",
+   "name": "Company CEO, B2C",
+   "level": "n1",
+   "unit": null,
+   "company": "b2c",
+   "title": "CEO, B2C"
   }
  ],
  "unitRoles": {
@@ -5595,5 +5621,23 @@
    "Mazaya": 22
   }
  },
- "archives": []
+ "archives": [],
+ "companies": {
+  "distribution": {
+   "name": "Distribution",
+   "ceo": null,
+   "seeOthers": false,
+   "seeGroup": true
+  },
+  "b2c": {
+   "name": "B2C",
+   "ceo": null,
+   "seeOthers": false,
+   "seeGroup": true
+  }
+ },
+ "companyKeys": [
+  "distribution",
+  "b2c"
+ ]
 }

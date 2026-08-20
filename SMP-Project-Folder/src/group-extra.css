@@ -94,8 +94,21 @@
              color:var(--ink-3); font-weight:700; margin-bottom:-4px; }
   .cap.plain { justify-content:flex-start; }
 
-  /* ── Condensing sticky chrome ─────────────────────────── */
-  header.top { position:sticky; top:0; z-index:8; transition:padding .18s ease; }
+  /* ── Condensing sticky chrome ───────────────────────────
+     ONE sticky container, nothing measured. `.chrome` wraps the header and
+     both nav rows and is the only thing pinned (config.css); the rows inside
+     it simply stack.
+
+     They used to be pinned individually as well, at hardcoded offsets —
+     nav.units at 58px, nav.tabs at 103px — read from --top-h and --units-h.
+     Those two custom properties are set by group-shell.html, which is NOT the
+     shell the platform is built from, so in the shipped file they never had a
+     value and the fallbacks stood in. The header CONDENSES on scroll, so its
+     real height left those offsets: the rows drifted out of register, page
+     content showed through the seams between them, and the .18s transitions
+     smeared it as you scrolled. Pinning the container and nothing else cannot
+     drift, because there is only one offset and the browser owns it. */
+  header.top { transition:padding .18s ease; }
   .top-in { padding:12px 24px; transition:padding .18s ease; }
   .brand h1 { font-size:22px; transition:font-size .18s ease; }
   .eyebrow { transition:opacity .18s ease, max-height .18s ease; overflow:hidden; max-height:20px; }
@@ -103,8 +116,8 @@
   body.scrolled .brand h1 { font-size:16px; }
   body.scrolled .eyebrow { opacity:0; max-height:0; }
   body.scrolled .shapetag { font-size:10px; padding:2px 9px; }
-  nav.units { position:sticky; top:var(--top-h,58px); z-index:7; transition:top .18s ease; }
-  nav.tabs  { position:sticky; top:calc(var(--top-h,58px) + var(--units-h,45px)); z-index:6; }
+  nav.units { position:relative; z-index:7; }
+  nav.tabs  { position:relative; z-index:6; }
   body.scrolled nav.units button { padding:9px 18px; }
   body.scrolled .tabs button { padding:9px 15px; }
   .banner { font-size:12px; padding:7px 24px; }

@@ -142,7 +142,14 @@ var PEOPLE = [
   { key:"fn_tre",  name:"Fayad Sobhy",       level:"n1", unit:null, fn:"treasury",  title:"Head of Treasury" },
   { key:"fn_mkt",  name:"Yara Kamal",        level:"n1", unit:null, fn:"marketing", title:"Head of Marketing" },
   { key:"fn_mkt2", name:"Tarek Nour",        level:"n1", unit:null, fn:"marketing", title:"Strategy custodian, Marketing" },
-  { key:"dir",     name:"Ramy Behairy",               level:"n2",  unit:"mobile", title:"Director, Digital Operations" }
+  { key:"dir",     name:"Ramy Behairy",               level:"n2",  unit:"mobile", title:"Director, Digital Operations" },
+  /* Company CEOs. Attached to a COMPANY rather than a unit — a new kind of
+     attachment, not a new level: they hold the same pages an N-1 does, on a
+     different set of units (§15.13). */
+  { key:"co_dist", name:"Company CEO, Distribution", level:"n1", unit:null, company:"distribution",
+    title:"CEO, Distribution" },
+  { key:"co_b2c",  name:"Company CEO, B2C",          level:"n1", unit:null, company:"b2c",
+    title:"CEO, B2C" }
 ];
 
 /* Each unit names two people. The HEAD is accountable for the unit; the OWNER
@@ -289,6 +296,64 @@ var FUNCTIONS = {
   care:      { name:"Care",      navName:null, codePrefix:"CAF", head:"cahead",  custodian:"own_ca", active:true },
   smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true }
 };
+/* ── Companies (§15.13) ──────────────────────────────────────────────
+   A layer between the group and the business unit. A company is a group of
+   business units, and each company has its own CEO.
+
+       Group — Group CEO
+         Company — Company CEO        e.g. Distribution, B2C
+           Business unit — BU head
+             Custodian
+       Supporting functions sit beside all of it, at group level
+
+   In this version the company level is for VISIBILITY, not strategy: it
+   carries no score and no page of its own. Its purpose is that a company CEO
+   can see their own units without wading through everyone else's.
+
+   It does NOT group the navigation row. That was built and taken out in the
+   same version — the SMO and the group CEO see everything and already have the
+   Units fold, and a company CEO sees only their own three or four units, so
+   there was nothing to group. The grouping solved a problem neither viewer had.
+
+   Supporting functions belong to no company. They serve every company and
+   therefore every unit, and stay beside the companies rather than inside one.
+
+   Both visibility flags are per company rather than global, because a client
+   may want one company CEO measured against the whole and another not.
+   ──────────────────────────────────────────────────────────────────── */
+var COMPANIES = {
+  distribution: { name:"Distribution", ceo:null, seeOthers:false, seeGroup:true },
+  b2c:          { name:"B2C",          ceo:null, seeOthers:false, seeGroup:true }
+};
+var COMPANY_KEYS = ["distribution", "b2c"];
+
+/* A unit belongs to a company or is its own — never neither. "Its own" is a
+   decision and is stored as null, which the Setup table names explicitly so an
+   empty cell can never read as somebody having forgotten. */
+var UNIT_COMPANY = {
+  mobile:              "distribution",
+  consumerelectronics: "distribution",
+  it:                  "distribution",
+  retailstores:        "b2c",
+  onlineshop:          "b2c",
+  care:                "b2c"
+};
+Object.keys(UNITS).forEach(function(k){
+  if (UNITS[k].company === undefined) UNITS[k].company = UNIT_COMPANY[k] || null;
+});
+
+function companyOf(unitKey){
+  var u = UNITS[unitKey];
+  return u && u.company ? COMPANIES[u.company] : null;
+}
+function unitsOfCompany(ck){
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].company === ck; });
+}
+/* Units standing alone, in the order they are declared. */
+function soloUnits(){
+  return UNIT_KEYS.filter(function(k){ return !UNITS[k].company; });
+}
+
 var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo"];
 
 /* Each capability is allocated to exactly one function. A function may hold
@@ -708,7 +773,18 @@ function grant(pageKey){
    renders a trimmed version of itself. */
 function reaches(unitKey){
   var v = viewer();
-  if (unitKey === "group" || unitKey === "setup") return true;
+  if (unitKey === "setup") return true;
+  /* A company CEO is attached to a company rather than a unit. Whether they
+     reach the group figure, and whether they see the other companies at all,
+     are per-company settings — a client may want one company measured against
+     the whole and another not (§15.13). */
+  if (v.company) {
+    var co = COMPANIES[v.company] || {};
+    if (unitKey === "group") return co.seeGroup !== false;
+    if (unitsOfCompany(v.company).indexOf(unitKey) > -1) return true;
+    return !!co.seeOthers;
+  }
+  if (unitKey === "group") return true;
   /* Someone attached to a supporting function rather than a business unit
      reaches no unit pages. Attaching them to "group" would hand them all ten,
      because that is what group attachment means here. */
@@ -908,6 +984,13 @@ function renumberUnit(u){
   u.keyObjectives.forEach(function(m, i){ m.id = k + "-KO" + (i + 1); });
   u.items.forEach(function(p, pi){
     p.id = k + "-P" + (pi + 1);
+    /* A pillar's CODE is what the rail keys off and what its title leads with.
+       Baked pillars carry one; a pillar arriving from an upload does not, and
+       every one of them then read "undefined" and shared a rail key, so the
+       rail could not select between them. Filled in when absent, positionally.
+       An existing code is left alone: nine units carry hand-set ones and
+       renumbering them would rewrite codes that are already in decks. */
+    if (!p.code) p.code = pillarCode(u, pi);
     p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
   });

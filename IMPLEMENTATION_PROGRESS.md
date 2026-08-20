@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.4 · **Last updated:** 2026-08-20
+**Latest version:** v2.5 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -18,6 +18,7 @@ Nothing proceeds past this line without an answer.
 
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
+| **D7** | **Are Distribution and B2C your real companies**, with Mobile / Consumer Electronics / IT and Retail Stores / Online Shop / Care under them? | They came from your own build and are now in the client tenant. Everything else invented was cleared in §21, so this is the one thing standing on your word. Change it in Setup → Business units, or say and I will. | §23 |
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
 
 **Answered:**
@@ -47,7 +48,45 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.4 — SMP gets an icon *(current)*
+### v2.5 — the company level, and two bugs a real plan exposed *(current)*
+**Companies**, ported from the build you did outside the repo (§23). A layer
+between the group and the business unit — Distribution and B2C today, with four
+units standing alone. It is **visibility, not strategy**: a company carries no
+score and no page. A company CEO sees their own units, and two flags **per
+company** decide whether they also see the other companies (default no) and the
+group (default yes). Supporting functions belong to no company.
+
+Set up on **Setup → Business units**, which now leads with a Companies table and
+gives each unit a Company column. Standing alone is named in words rather than
+left as an empty cell, because it is a decision. The navigation row does **not**
+group by company — you built that and took it out in the same version, and the
+reasoning is recorded rather than deleted.
+
+**Two defects you found by actually using the upload:**
+
+- **A pillar arriving from an upload had no code.** Its title read "undefined"
+  and every rail button carried the same key, so the rail could not select
+  between pillars. Codes are filled in when absent now, positionally; hand-set
+  ones are left alone, because nine units carry codes already printed in decks.
+- **The sticky chrome was pinned three times over**, at offsets read from two
+  custom properties that the shipped file never sets. The header condenses on
+  scroll, so the rows drifted out of register and content showed through the
+  seams — the haze. One container is pinned now, and the browser owns the
+  offset.
+
+**And one found while porting:** `renderFocusSetup` was defined twice, the first
+56 lines dead and returning the wrong screen. That is what made your copy look
+as though the Focus measures page were broken. Removed.
+
+*Verified:* the access rule proved for both company CEOs and for both flags ·
+the code fix through the real upload path, with the rail navigating to the right
+pillar · the chrome screenshotted at four scroll positions, rows stacking
+contiguously · round trip, fixed point and archived-plan round trip PASS, with
+the clean slate now asserting 2 companies and 6 assigned units · every page as
+every viewer, live and demo, no console errors · offline walk clean for all 31
+viewers · byte-identical rebuild.
+
+### v2.4 — SMP gets an icon
 The Strategy Temple, in the house navy and gold, as the browser-tab and bookmark
 icon: pediment, architrave, three pillars, stylobate — the platform's own
 drawing rather than a generic mark. It reads at 16px, which is the only size
@@ -182,7 +221,7 @@ suite per feature.
 ## In flight
 
 **R1 — the Next.js scaffold — is done, on the branch only.** `main` serves the
-v2.4 single file as it always has; nothing anyone uses runs on the new stack
+v2.5 single file as it always has; nothing anyone uses runs on the new stack
 yet.
 
 What R1 proved, in `smp-app/`:
@@ -211,14 +250,14 @@ driver the old endpoints used.
 **D4 answered 2026-08-20:** the CSS is carried **verbatim** (Tailwind only for
 genuinely new things), and the cutover is **early, page group by page group** —
 the new app becomes the live site while un-ported screens still link back to
-the v2.4 build. Those two answers work together: because the stylesheet is the
+the v2.5 build. Those two answers work together: because the stylesheet is the
 same one, the mixed period looks consistent rather than like two products.
 
 | Step | What it is | Why this order |
 |---|---|---|
 | ~~**R1**~~ | ~~Scaffold beside the live product.~~ **Done** — see *In flight*. NextAuth itself moves to R2, where the shell needs it. | Proved the new stack reads the real data before a single screen is ported. |
 | **R2** | **Sign-in and the shell.** The gate, the session, the navigation, the access matrix — the frame every page hangs in. | Everything else needs the frame and the person. |
-| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.4 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
+| **R3** | **Read-only screens first:** Group Performance, unit Performance, Foundation, SWOT, Temple, Strategy/Plan, capability pages. Measured against the frozen v2.5 file screen by screen. | Reading is the bulk of the product and the highest drift risk — port it while there is a reference to compare against. |
 | **R4** | **Editing and reporting, per action.** Each write its own server operation, validated against the cycle rules, carrying the **change log** (§16.0a) — the old Phase 2, now built the right way rather than patched on. | Enforcement stops being the browser's word. |
 | **R5** | **The heavy machinery:** import/export (Excel + CSV), presentation mode, cycle close and snapshots. | Self-contained; safest to move last. |
 | **R6** | **Cutover**, then multi-tenant (§1) and strategy versions (§16.10). | — |
@@ -261,14 +300,30 @@ Stated here rather than discovered later.
 
 ---
 
+## Working outside the repo, and bringing it back
+
+You develop in the project folder outside this repo and bring it back. One rule
+makes that safe: **start each outside session from the current folder.** Ask me
+for a zip, or pull from GitHub. The v2.5 round arrived on a pre-1.9 base, so
+taking it wholesale would have deleted four shipped features and everything from
+2.0 on — measured at 409, 191 and 187 lines of pure removal in three files.
+
+- **Quick features and adjustments:** just say so here. Nothing to transfer,
+  nothing to reconcile, and it lands verified against the real database.
+- **Bigger design rounds outside:** fine, from a fresh copy. Then the difference
+  is your new work and it merges cleanly.
+- **Never send the built HTML as the thing to merge.** It is generated from
+  `src/` by `build.py`; an edit made directly to it cannot go back into the
+  sources. Edit sources only.
+
 ## Where the pieces live
 
 | Path | What |
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.4.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.4.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v2.5.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.5.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

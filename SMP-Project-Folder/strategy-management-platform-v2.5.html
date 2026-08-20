@@ -282,8 +282,21 @@
              color:var(--ink-3); font-weight:700; margin-bottom:-4px; }
   .cap.plain { justify-content:flex-start; }
 
-  /* ── Condensing sticky chrome ─────────────────────────── */
-  header.top { position:sticky; top:0; z-index:8; transition:padding .18s ease; }
+  /* ── Condensing sticky chrome ───────────────────────────
+     ONE sticky container, nothing measured. `.chrome` wraps the header and
+     both nav rows and is the only thing pinned (config.css); the rows inside
+     it simply stack.
+
+     They used to be pinned individually as well, at hardcoded offsets —
+     nav.units at 58px, nav.tabs at 103px — read from --top-h and --units-h.
+     Those two custom properties are set by group-shell.html, which is NOT the
+     shell the platform is built from, so in the shipped file they never had a
+     value and the fallbacks stood in. The header CONDENSES on scroll, so its
+     real height left those offsets: the rows drifted out of register, page
+     content showed through the seams between them, and the .18s transitions
+     smeared it as you scrolled. Pinning the container and nothing else cannot
+     drift, because there is only one offset and the browser owns it. */
+  header.top { transition:padding .18s ease; }
   .top-in { padding:12px 24px; transition:padding .18s ease; }
   .brand h1 { font-size:22px; transition:font-size .18s ease; }
   .eyebrow { transition:opacity .18s ease, max-height .18s ease; overflow:hidden; max-height:20px; }
@@ -291,8 +304,8 @@
   body.scrolled .brand h1 { font-size:16px; }
   body.scrolled .eyebrow { opacity:0; max-height:0; }
   body.scrolled .shapetag { font-size:10px; padding:2px 9px; }
-  nav.units { position:sticky; top:var(--top-h,58px); z-index:7; transition:top .18s ease; }
-  nav.tabs  { position:sticky; top:calc(var(--top-h,58px) + var(--units-h,45px)); z-index:6; }
+  nav.units { position:relative; z-index:7; }
+  nav.tabs  { position:relative; z-index:6; }
   body.scrolled nav.units button { padding:9px 18px; }
   body.scrolled .tabs button { padding:9px 15px; }
   .banner { font-size:12px; padding:7px 24px; }
@@ -2862,7 +2875,14 @@ var PEOPLE = [
   { key:"fn_tre",  name:"Fayad Sobhy",       level:"n1", unit:null, fn:"treasury",  title:"Head of Treasury" },
   { key:"fn_mkt",  name:"Yara Kamal",        level:"n1", unit:null, fn:"marketing", title:"Head of Marketing" },
   { key:"fn_mkt2", name:"Tarek Nour",        level:"n1", unit:null, fn:"marketing", title:"Strategy custodian, Marketing" },
-  { key:"dir",     name:"Ramy Behairy",               level:"n2",  unit:"mobile", title:"Director, Digital Operations" }
+  { key:"dir",     name:"Ramy Behairy",               level:"n2",  unit:"mobile", title:"Director, Digital Operations" },
+  /* Company CEOs. Attached to a COMPANY rather than a unit — a new kind of
+     attachment, not a new level: they hold the same pages an N-1 does, on a
+     different set of units (§15.13). */
+  { key:"co_dist", name:"Company CEO, Distribution", level:"n1", unit:null, company:"distribution",
+    title:"CEO, Distribution" },
+  { key:"co_b2c",  name:"Company CEO, B2C",          level:"n1", unit:null, company:"b2c",
+    title:"CEO, B2C" }
 ];
 
 /* Each unit names two people. The HEAD is accountable for the unit; the OWNER
@@ -3009,6 +3029,64 @@ var FUNCTIONS = {
   care:      { name:"Care",      navName:null, codePrefix:"CAF", head:"cahead",  custodian:"own_ca", active:true },
   smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true }
 };
+/* ── Companies (§15.13) ──────────────────────────────────────────────
+   A layer between the group and the business unit. A company is a group of
+   business units, and each company has its own CEO.
+
+       Group — Group CEO
+         Company — Company CEO        e.g. Distribution, B2C
+           Business unit — BU head
+             Custodian
+       Supporting functions sit beside all of it, at group level
+
+   In this version the company level is for VISIBILITY, not strategy: it
+   carries no score and no page of its own. Its purpose is that a company CEO
+   can see their own units without wading through everyone else's.
+
+   It does NOT group the navigation row. That was built and taken out in the
+   same version — the SMO and the group CEO see everything and already have the
+   Units fold, and a company CEO sees only their own three or four units, so
+   there was nothing to group. The grouping solved a problem neither viewer had.
+
+   Supporting functions belong to no company. They serve every company and
+   therefore every unit, and stay beside the companies rather than inside one.
+
+   Both visibility flags are per company rather than global, because a client
+   may want one company CEO measured against the whole and another not.
+   ──────────────────────────────────────────────────────────────────── */
+var COMPANIES = {
+  distribution: { name:"Distribution", ceo:null, seeOthers:false, seeGroup:true },
+  b2c:          { name:"B2C",          ceo:null, seeOthers:false, seeGroup:true }
+};
+var COMPANY_KEYS = ["distribution", "b2c"];
+
+/* A unit belongs to a company or is its own — never neither. "Its own" is a
+   decision and is stored as null, which the Setup table names explicitly so an
+   empty cell can never read as somebody having forgotten. */
+var UNIT_COMPANY = {
+  mobile:              "distribution",
+  consumerelectronics: "distribution",
+  it:                  "distribution",
+  retailstores:        "b2c",
+  onlineshop:          "b2c",
+  care:                "b2c"
+};
+Object.keys(UNITS).forEach(function(k){
+  if (UNITS[k].company === undefined) UNITS[k].company = UNIT_COMPANY[k] || null;
+});
+
+function companyOf(unitKey){
+  var u = UNITS[unitKey];
+  return u && u.company ? COMPANIES[u.company] : null;
+}
+function unitsOfCompany(ck){
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].company === ck; });
+}
+/* Units standing alone, in the order they are declared. */
+function soloUnits(){
+  return UNIT_KEYS.filter(function(k){ return !UNITS[k].company; });
+}
+
 var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo"];
 
 /* Each capability is allocated to exactly one function. A function may hold
@@ -3428,7 +3506,18 @@ function grant(pageKey){
    renders a trimmed version of itself. */
 function reaches(unitKey){
   var v = viewer();
-  if (unitKey === "group" || unitKey === "setup") return true;
+  if (unitKey === "setup") return true;
+  /* A company CEO is attached to a company rather than a unit. Whether they
+     reach the group figure, and whether they see the other companies at all,
+     are per-company settings — a client may want one company measured against
+     the whole and another not (§15.13). */
+  if (v.company) {
+    var co = COMPANIES[v.company] || {};
+    if (unitKey === "group") return co.seeGroup !== false;
+    if (unitsOfCompany(v.company).indexOf(unitKey) > -1) return true;
+    return !!co.seeOthers;
+  }
+  if (unitKey === "group") return true;
   /* Someone attached to a supporting function rather than a business unit
      reaches no unit pages. Attaching them to "group" would hand them all ten,
      because that is what group attachment means here. */
@@ -3628,6 +3717,13 @@ function renumberUnit(u){
   u.keyObjectives.forEach(function(m, i){ m.id = k + "-KO" + (i + 1); });
   u.items.forEach(function(p, pi){
     p.id = k + "-P" + (pi + 1);
+    /* A pillar's CODE is what the rail keys off and what its title leads with.
+       Baked pillars carry one; a pillar arriving from an upload does not, and
+       every one of them then read "undefined" and shared a rail key, so the
+       rail could not select between them. Filled in when absent, positionally.
+       An existing code is left alone: nine units carry hand-set ones and
+       renumbering them would rewrite codes that are already in decks. */
+    if (!p.code) p.code = pillarCode(u, pi);
     p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
     p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
   });
@@ -4357,8 +4453,20 @@ var PAGE_INFO = {
   },
 
   c_units: {
-    title: "Business units",
+    title: "Business units and companies",
     body: [
+      ["A company groups business units, and has its own CEO",
+       "In this version a company is a level of <b>visibility, not of strategy</b>: it carries no " +
+       "score and no page. Its purpose is that a company CEO sees their own units without wading " +
+       "through everyone else's. Both flags are <b>per company</b> rather than global &mdash; " +
+       "whether that CEO sees the other companies (default no), and whether they reach the group " +
+       "at all (default yes) &mdash; because a client may want one company measured against the " +
+       "whole and another not. Supporting functions belong to no company: they serve all of them."],
+      ["A unit belongs to a company, or is its own",
+       "Never neither. <b>Standing alone is a decision</b>, so the table names it in words rather " +
+       "than leaving an empty cell that reads as somebody having forgotten. A company CEO is an " +
+       "<b>attachment, not a level</b>: they sit at N-1 and hold the same pages a unit head does, " +
+       "on a different set of units."],
       ["The one place a unit is named",
        "Everything else in the platform references a unit's <b>key</b>, not its name. The name is display " +
        "only, the same as any other label, so renaming a unit here cannot detach it from its weight, its " +
@@ -9314,6 +9422,19 @@ function renderUnits(){
       '<td class="cc"><span class="mono">' + u.items.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
+      /* A unit belongs to a company or is its own — never neither. "Its own"
+         is an explicit choice rather than an empty cell, because an empty cell
+         reads as somebody having forgotten and standing alone is a decision. */
+      '<td>' + (editable
+        ? '<select class="fld" data-ucomp="' + k + '">' +
+            COMPANY_KEYS.map(function(ck){
+              return '<option value="' + ck + '"' + (u.company === ck ? " selected" : "") + '>' +
+                esc(COMPANIES[ck].name) + '</option>';
+            }).join("") +
+            '<option value=""' + (u.company ? "" : " selected") + '>\u2014 its own company \u2014</option>' +
+          '</select>'
+        : (u.company ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
+                     : '<span class="why" style="margin:0">its own company</span>')) + '</td>' +
       '<td class="cc">' + pick("head", roles.head) + '</td>' +
       '<td class="cc">' + pick("custodian", roles.custodian) + '</td>' +
       '<td class="cc">' + (editable
@@ -9345,15 +9466,44 @@ function renderUnits(){
       "units", grant("c_units") === "edit", "all",
       ["Clear all progress", "Clear all plans"]) +
 
-    section("", "", null,
+    section("", "Companies", null,
       '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:20%">Unit</th>' +
+        '<th class="idx" style="width:38px">#</th><th style="width:22%">Company</th>' +
+        '<th class="cc" style="width:10%">Units</th>' +
+        '<th class="cc" style="width:20%">Sees other companies</th>' +
+        '<th class="cc" style="width:20%">Sees the group</th></tr></thead><tbody>' +
+      COMPANY_KEYS.map(function(ck, i){
+        var co = COMPANIES[ck], flag = function(field, val){
+          if (!editable) return '<span class="pill ' + (val ? "good" : "none") + '">' +
+            (val ? "Yes" : "No") + '</span>';
+          return '<select class="fld" data-coflag="' + ck + '|' + field + '">' +
+            '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+            '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+        };
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td><b>' + esc(co.name) + '</b><span class="why mono">key ' + ck + '</span></td>' +
+          '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
+          '<td class="cc">' + flag("seeOthers", co.seeOthers) + '</td>' +
+          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
+      'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
+      'more. Supporting functions belong to no company: they serve all of them. ' +
+      (soloUnits().length
+        ? soloUnits().length + ' unit' + (soloUnits().length === 1 ? ' stands' : 's stand') +
+          ' alone: ' + soloUnits().map(function(k){ return esc(UNITS[k].name); }).join(", ") + '.'
+        : 'Every unit belongs to a company.') + '</div>') +
+
+    section("", "Business units", null,
+      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+        '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
-        '<th class="cc" style="width:8%">Weight</th>' +
-        '<th class="cc" style="width:16%">BU head</th><th class="cc" style="width:18%">Strategy custodian</th>' +
-        '<th class="cc" style="width:10%">Status</th>' +
+        '<th class="cc" style="width:7%">Weight</th>' +
+        '<th style="width:12%">Company</th>' +
+        '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
+        '<th class="cc" style="width:9%">Status</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
       (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
 }
@@ -9398,62 +9548,12 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
-function renderFocusSetup(){
-  var editable = grant("c_focus") === "edit" && !CYCLE.locked;
-  var u = UNITS[FSET.unit];
-
-  var pick = function(m, src){
-    var on = isFocus(m.id);
-    return '<div class="pick ' + (on ? "on" : "off") + '">' +
-      (editable
-        ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
-          'aria-pressed="' + on + '" aria-label="' + (on ? "Unmark " : "Mark ") + esc(m.name) + '"></button>'
-        : '<span class="fmark-btn' + (on ? ' on' : '') + '" style="cursor:default"></span>') +
-      '<span>' + esc(m.name) + ' <span class="src">' + esc(src) + '</span></span>' +
-      '<span class="num why" style="margin:0">target ' +
-        (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
-      '<span class="why" style="margin:0;min-width:74px;text-align:right">' +
-        (on ? "marked" : (editable ? "click to mark" : "")) + '</span>' +
-    '</div>';
-  };
-
-  var blocks =
-    '<div class="grouphead">' + L("keyobj","bu") + '</div>' +
-    (u.keyObjectives.length
-      ? u.keyObjectives.map(function(m){ return pick(m, "objective"); }).join("")
-      : '<div class="fstrip-empty">None set for this unit.</div>') +
-    u.items.map(function(p, pi){
-      return '<div class="grouphead">' + pillarCode(u, pi) + ' ' + esc(p.name) +
-             ' &middot; ' + esc(p.kind).toLowerCase() + '</div>' +
-        (p.measures.length
-          ? p.measures.map(function(m){ return pick(m, ""); }).join("")
-          : '<div class="fstrip-empty">No key measures.</div>');
-    }).join("");
-
-  var n = unitFocus(u).length;
-  var unitPick = '<select class="fld" id="fset-unit">' + activeKeys().map(function(k){
-      var c = unitFocus(UNITS[k]).length;
-      return '<option value="' + k + '"' + (k === FSET.unit ? " selected" : "") + '>' +
-        esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
-    }).join("") + '</select>';
-
-  return cfgHead("Business units",
-      ['<span class="pill kind">SMO</span>', UNIT_KEYS.length + ' units',
-       activeKeys().length + ' active'],
-      "units", grant("c_units") === "edit", "all",
-      ["Clear all progress", "Clear all plans"]) +
-    section("", "", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:20%">Unit</th>' +
-        '<th style="width:14%">Shown in the nav</th>' +
-        '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
-        '<th class="cc" style="width:8%">Weight</th>' +
-        '<th class="cc" style="width:16%">BU head</th><th class="cc" style="width:18%">Strategy custodian</th>' +
-        '<th class="cc" style="width:10%">Status</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
-}
+/* `renderFocusSetup` was defined TWICE, and the first one — 56 lines that
+   returned the Business units screen rather than the focus one — was dead:
+   a function declaration later in the file silently replaces an earlier one,
+   so only the second ever ran. Removed. It is the same accident as the double
+   `IMP` below, and it is what made a copy of this file taken outside look as
+   though the Focus measures page were broken. */
 
 /* ── Import ─────────────────────────────────────────────────────────
    A plan AUTHORS (§22): one generic template, the unit named on its Read me
@@ -10629,6 +10729,7 @@ var SYNC = (function () {
     return {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
       functionKeys: FUNCTION_KEYS, functions: FUNCTIONS,
+      companyKeys: COMPANY_KEYS, companies: COMPANIES,
       people: PEOPLE, unitRoles: UNIT_ROLES, levels: LEVELS, access: ACCESS,
       labels: LABELS.entries, bands: BANDS.bands, koWeights: KO_WEIGHTS,
       cycle: CYCLE, review: REVIEW, history: HISTORY, priorCycle: PRIOR_CYCLE,
@@ -10651,6 +10752,10 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
+    /* A tenant that predates the company level has neither, and an empty
+       company list is a valid answer: every unit is then its own. */
+    window.COMPANY_KEYS = state.companyKeys || [];
+    window.COMPANIES = state.companies || {};
     window.PEOPLE = state.people;
     window.UNIT_ROLES = state.unitRoles;
     window.LEVELS = state.levels;
@@ -10937,16 +11042,23 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     var us = myUnits(), cs = myFns(), fold = foldsNeeded();
 
     if (fold) {
-      var inUnits = us.indexOf(current) > -1;
-      var inCaps  = cs.some(function(k){ return "fn:" + k === current; });
-      out.push({ fold:"units", label:"Units",
-                 open:NAVFOLD === "units",
-                 here:(NAVFOLD !== "units" && inUnits) ? navName(UNITS[current]) : null });
+      /* The row does NOT group by company (§15.13). It was built that way and
+         taken out in the same version: the SMO and the group CEO see
+         everything and already have this fold, so companies added a second
+         layer of folding to a row that was working; and a company CEO sees
+         only their own three or four units, so there is nothing to group. The
+         grouping solved a problem neither viewer had. The company level
+         survives where it does work — deciding who reaches what.
+
+         REVERSAL of the 1.2 rule: a closed fold no longer announces where you
+         are. It remembers silently — reopening puts you back, and the page
+         below already says it. Repeating it made the row noisier the more
+         folds there were. Worth revisiting if the row ever feels lost, since
+         with the company folds gone there are only two folds again. */
+      out.push({ fold:"units", label:"Units", open:NAVFOLD === "units" });
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      out.push({ fold:"caps", label:"Functions",
-                 open:NAVFOLD === "caps",
-                 here:(NAVFOLD !== "caps" && inCaps) ? FUNCTIONS[fnKeyOf(current)].name : null });
+      out.push({ fold:"caps", label:"Functions", open:NAVFOLD === "caps" });
       if (NAVFOLD === "caps")
         cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     } else {
@@ -10994,7 +11106,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       if (t.fold) {
         return '<span class="sep"></span><button class="navfold' + (t.open ? " open" : "") +
           '" data-fold="' + t.fold + '" aria-expanded="' + t.open + '">' + t.label +
-          (t.here ? '<span class="foldhere">' + esc(t.here) + '</span>' : '') +
           '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
       }
       return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
@@ -11577,6 +11688,21 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       inp.addEventListener("change", function(){
         var n = parseInt(inp.value, 10);
         if (!isNaN(n)) BANDS.bands[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
+        paint();
+      });
+    });
+    /* A unit's company, and a company's two visibility flags. Both are
+       configuration: they change who reaches what, never a figure. */
+    document.querySelectorAll("[data-ucomp]").forEach(function(el){
+      el.addEventListener("change", function(){
+        UNITS[el.dataset.ucomp].company = el.value || null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-coflag]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var p = el.dataset.coflag.split("|");
+        COMPANIES[p[0]][p[1]] = el.value === "yes";
         paint();
       });
     });

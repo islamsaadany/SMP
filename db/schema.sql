@@ -129,9 +129,26 @@ CREATE TABLE IF NOT EXISTS milestones (
   extra      jsonb NOT NULL DEFAULT '{}'
 );
 
+-- Companies (§15.13). A layer between the group and the business unit: a
+-- group of units, each with its own CEO. In this version it is VISIBILITY,
+-- not strategy — no score, no page — so it holds only its name and the two
+-- flags that decide what its CEO reaches.
+CREATE TABLE IF NOT EXISTS companies (
+  key         text PRIMARY KEY,
+  idx         int NOT NULL,
+  name        text NOT NULL DEFAULT '',
+  ceo         text,
+  see_others  boolean NOT NULL DEFAULT false,
+  see_group   boolean NOT NULL DEFAULT true
+);
+
 CREATE TABLE IF NOT EXISTS units (
   key         text PRIMARY KEY,
   idx         int NOT NULL,
+  -- A unit belongs to a company or is its own — never neither. NULL is the
+  -- explicit "its own company", which the Setup table names in words so an
+  -- empty cell can never read as somebody having forgotten.
+  company     text,
   name        text NOT NULL DEFAULT '',
   nav_name    text,
   code_prefix text NOT NULL DEFAULT '',

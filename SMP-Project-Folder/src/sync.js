@@ -43,6 +43,7 @@ var SYNC = (function () {
     return {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
       functionKeys: FUNCTION_KEYS, functions: FUNCTIONS,
+      companyKeys: COMPANY_KEYS, companies: COMPANIES,
       people: PEOPLE, unitRoles: UNIT_ROLES, levels: LEVELS, access: ACCESS,
       labels: LABELS.entries, bands: BANDS.bands, koWeights: KO_WEIGHTS,
       cycle: CYCLE, review: REVIEW, history: HISTORY, priorCycle: PRIOR_CYCLE,
@@ -65,6 +66,10 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
+    /* A tenant that predates the company level has neither, and an empty
+       company list is a valid answer: every unit is then its own. */
+    window.COMPANY_KEYS = state.companyKeys || [];
+    window.COMPANIES = state.companies || {};
     window.PEOPLE = state.people;
     window.UNIT_ROLES = state.unitRoles;
     window.LEVELS = state.levels;

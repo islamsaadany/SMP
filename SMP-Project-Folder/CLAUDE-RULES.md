@@ -9,20 +9,30 @@ adopted**, which are open to confirmation or removal.
 
 ## A · Rules Islam set
 
-### A1 · Mock before building. Always.
+### A1 · Align before building. Always.
 
-Concept or mockup → Islam's approval → then build. Never the other way. This is
-the most repeated instruction and the one most sharply enforced: *"NEVER AGAIN
-CREATE THE WHOLE PROJECT FILE WITHOUT ALIGNMENT."*
+Proposal → Islam's approval → then build. Never the other way. This is the most
+repeated instruction and the one most sharply enforced: *"NEVER AGAIN CREATE THE
+WHOLE PROJECT FILE WITHOUT ALIGNMENT."*
 
-A question is not authorisation. "What do you think of X?" means answer, not
-build X and show it.
+**A question is not authorisation.** "What do you think of X?" means answer, not
+build X and show it. **A question returned is not an answer either:** if Islam
+replies to a choice with a question of his own, the choice is still open —
+answer it and wait. *(Broken once, 2026-08-20: the A-or-B stack question came
+back as "which is better, and does B change the branding?", and v2.1 was built
+on A regardless. Recorded here rather than quietly fixed.)*
+
+*Changed 2026-08-20:* this rule used to require a **static HTML mockup** before
+any visual or structural change, because the product was itself a mockup. That
+requirement is retired — SMP is now implemented against a real database and
+server, and the artefact to align on is a written proposal, not a drawn page.
+What survives unchanged is the alignment: agree the shape first, in plain words.
 
 ### A2 · Don't send the project file unless asked
 
-Send mockups freely. The built product goes only when Islam asks for it, or when
-he has approved the change it contains. Sending it because a bug was fixed in
-passing is not a reason.
+*Changed 2026-08-20:* the built HTML and the project zip are no longer sent as a
+matter of course. Send them only when Islam asks. **`IMPLEMENTATION_PROGRESS.md`
+is what reports how things are going** — keep it current instead.
 
 ### A3 · Ask, don't assume
 
@@ -67,51 +77,24 @@ question twice in different words.
 No preamble, no instructional labels, no explanatory framing around a
 deliverable. Documents and screens should be directly usable.
 
-### A11 · "Handover" sends two things, always
+### A11 · Report progress in the progress file, not in attachments
 
-The word is **handover**. It sends **both**, every time:
+*Changed 2026-08-20.* This rule used to say the word **handover** always sent
+two things — the loose `strategy-management-platform-vX.Y.html` and the
+`SMP-Project-Folder-vX.Y.zip`. That belonged to the mockup era, when a file in
+Islam's hand was the only way to see the product. It is now deployed, so the
+files are sent **only when asked for**.
 
-1. **`strategy-management-platform-vX.Y.html`** — loose, so it opens in one
-   click. This is the file Islam actually views and reviews.
-2. **`SMP-Project-Folder-vX.Y.zip`** — everything, including a copy of that
-   same HTML.
+What reports how things are going is **`IMPLEMENTATION_PROGRESS.md`** at the
+repo root: what is built, what is in flight, what is next, what is waiting on a
+decision from Islam, and what was verified. It is updated in the same commit as
+the work it describes — a progress file written afterwards is a report, not a
+tracker.
 
-The duplication is deliberate. The loose file is for **use**; the zip is for
-**reference and for starting a fresh chat**. Sending only the zip costs a
-download, an unzip and a hunt before anything can be looked at.
-
-The zip contains everything needed to pick the project up cold:
-
-| | |
-|---|---|
-| `README.md` | What each file is, and whether it is still live |
-| `CLAUDE-RULES.md` | This file |
-| `DECISIONS-AND-LOGIC-vX.Y.md` | Every decision with its reasoning |
-| `strategy-management-platform-vX.Y.html` | The built prototype |
-| `src/` | The sources, `build.py` and `qa.py` |
-| `mockups/` | Every mockup, marked settled, pending or rejected |
-
-**`src/` is not optional.** Without it the next session edits a 500KB compiled
-file by hand, and the byte-identical rebuild check — which has caught several
-mistakes — is gone.
-
-**The README is not optional either.** A folder of eighteen mockups with no map
-is a filing cabinet. It says which are settled, which are pending, and which
-were **rejected and why** — so old ground is not retrod.
-
-No commentary beyond one line naming what changed since the last handover.
-
-*Why not "snapshot" or "export":* both already mean something specific in this
-product — a snapshot is what closing a reporting cycle writes, an export is the
-Excel file. Reusing either would make the request ambiguous in the one project
-where it matters. *"Ship"* was rejected for turning up in ordinary conversation
-and firing when it was not meant.
-
-*Why not "snapshot" or "export":* both already mean something specific in this
-product — a snapshot is what closing a reporting cycle writes, an export is the
-Excel file. Reusing either would make the request ambiguous in the one project
-where it matters. *"Ship"* was rejected for turning up in ordinary conversation
-and firing when it was not meant.
+The zip still exists as a thing that can be produced on request, and `src/`
+and the README are still not optional inside it: without the sources the next
+session edits a 600KB compiled file by hand, and without the README a folder of
+eighteen mockups is a filing cabinet.
 
 ### A12 · Ask in plain language, not in code
 

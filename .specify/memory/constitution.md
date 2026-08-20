@@ -7,13 +7,17 @@ and this file is corrected.
 
 ## Core Principles
 
-### I. Mock before building (NON-NEGOTIABLE)
+### I. Align before building (NON-NEGOTIABLE)
 
-Concept or mockup → Islam's approval → then build. Never the other way. A
-question is not authorisation. A feature whose design is already settled by an
-approved mockup in `mockups/` or a recorded decision in the decisions document
-may be built against that record; anything visually or structurally new is
-drawn first.
+Proposal → Islam's approval → then build. Never the other way. **A question is
+not authorisation, and a question returned is not an answer** — if a choice put
+to Islam comes back as a question of his own, the choice is still open: answer
+it and wait. A feature already settled by a recorded decision may be built
+against that record; anything new is agreed in words first.
+
+*Amended 2026-08-20:* this principle previously required a static HTML mockup
+before any visual or structural change. That belonged to the prototype era and
+is retired; the alignment it protected is not.
 
 ### II. The decisions document is the contract
 

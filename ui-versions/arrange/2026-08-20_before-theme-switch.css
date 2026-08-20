@@ -139,7 +139,7 @@
                    cursor:pointer; background:var(--surface); color:var(--ink-3);
                    border-right:1px solid var(--line); }
   .minisw button:last-child { border-right:0; }
-  .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:var(--on-fill); }
+  .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:#fff; }
   .minisw button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
 
   .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
@@ -181,39 +181,8 @@
 
   /* The two buttons that leave hold the far right of the first line, grouped
      so nothing can wrap between them. */
-  /* The brand is a ROW now, not a column: the product name and the client's
-     name are one statement read left to right, not two stacked labels. Baseline
-     alignment, not centre, so the serif h1 and the smaller sans name sit on the
-     same line rather than floating against each other's box. */
-  .brand { flex-direction:row; align-items:baseline; gap:9px; flex-wrap:nowrap;
-           min-width:0; }
-  .brand h1 { white-space:nowrap; }
-  .orgname { font-size:14px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
-             min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .brand { gap:4px; }
   .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
-
-  /* THE FIRST LINE IS ONE LINE. It was not, before this: brand 400 + viewer 467
-     + buttons 257 + two 20px gaps came to 1164 against a 1132px column, so the
-     buttons wrapped onto a row of their own for everyone signed in - the wrap
-     was already there in 2.9 and the client name and the theme mark made it
-     worse. Three items on one row, and what gives when the window narrows is
-     stated rather than left to the browser: the buttons never shrink, the
-     tenant name and the person picker do. flex-wrap stays `wrap` so a genuinely
-     narrow window still breaks the row instead of overflowing it - the fix is
-     to stop it happening at ordinary widths, not to forbid it. */
-  .top-in { gap:16px; }
-  .viewer { min-width:0; }
-  .viewer select { flex:0 1 auto; min-width:92px; }
-  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
-  /* The theme control. Round rather than a pill because it carries a mark and
-     no word - a pill with a 17px glyph floating in it reads as a button whose
-     label failed to load. Everything else it needs it inherits from .infobtn,
-     including the colour the glyph draws itself in. */
-  .themebtn { padding:0; width:30px; height:30px; border-radius:50%;
-              display:inline-flex; align-items:center; justify-content:center;
-              flex-shrink:0; }
-  .themesvg { width:17px; height:17px; display:block; }
 
   /* 5. The rule above a section heading and the gap it sat in. A section is
      already announced by its heading; the line was doing the job twice. */
@@ -384,7 +353,7 @@
 
   .badge{display:inline-block;font:700 10px/1 var(--sans);letter-spacing:.06em;
     text-transform:uppercase;padding:5px 9px;border-radius:20px;white-space:nowrap}
-  .b-over{background:var(--over-bg);color:var(--gold-deep);border:1px solid var(--over-line)}
+  .b-over{background:#FBF6E9;color:var(--gold-deep);border:1px solid #E8D9AE}
   .b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
   .b-short{background:var(--bad-bg);color:var(--bad)}
   .b-none{background:var(--surface-2);color:var(--none)}
@@ -483,7 +452,7 @@
   .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
   .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
   /* Arrange mode still has to be visible against the dark band. */
-  .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
+  .plist.arranging .phead{background:var(--gold-deep);color:#fff}
 
 
 
@@ -500,11 +469,11 @@
      light tint only: it has to help the eye track a wide row without competing
      with the marks that carry meaning \u2014 the red edge on a figure needing a
      note, the gold edge on a focus measure, a dimmed not-yet-due row. */
-  tbody tr:nth-child(even) > td { background:var(--zebra); }
-  tbody tr:nth-child(even) > td.was { background:var(--zebra); }
+  tbody tr:nth-child(even) > td { background:#F7F9FC; }
+  tbody tr:nth-child(even) > td.was { background:#F7F9FC; }
   /* Rows that already say something keep saying it. */
   .board tbody tr.alt td { background:var(--surface-2); }
-  tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
+  tbody tr.focusrow:nth-child(even) > td { background:#FDFAF1; }
   tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
 
   /* Each obligation announces whose it is: a unit's plan counts toward that

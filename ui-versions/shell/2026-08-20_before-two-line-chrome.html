@@ -4,37 +4,23 @@
 </div>
 
 <div class="chrome">
-<!-- Three things on the first line and nothing else: who the product is, who
-     you are looking as, and the two buttons that leave. The org name, the unit
-     name and the "Group, N units" tag all left in 2.9 - the row below already
-     says where you are, and repeating it cost the whole first line. -->
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <h1>Strategy Management Platform</h1>
-      <!-- Whose strategy this is. The product name alone never said it, and a
-           consulting product shown to a client should. Set in paint() from
-           GROUP.org, so it follows the demo switch: the worked example says
-           Raya Trade, the client's own tenant says the client. textContent,
-           never innerHTML - the org name is typed in Labels. -->
-      <span class="orgname" id="orgname"></span>
+      <span class="eyebrow">Strategy Management Platform &middot; Spec 012</span>
+      <h1 id="title"></h1>
+      <span class="shapetag" id="shapetag"></span>
     </div>
     <div class="viewer">
       <label for="asWho">Viewing as</label>
       <select id="asWho"></select>
       <span class="viewer-note" id="viewerNote"></span>
     </div>
-    <!-- Far right, together: Demo data, then Sign out (appended by SYNC).
-         Switches the whole product between the client's own data and the
+    <button class="infobtn" id="pageinfo" hidden>Info</button>
+    <!-- Switches the whole product between the client's own data and the
          full worked example, for explaining how it works. Appears only
          where there is a live dataset to tell the example apart from. -->
-    <div class="topacts" id="topacts">
-      <!-- Auto, Light, Dark. First of the three because it changes how the
-           product LOOKS; the two beside it change what it shows or end the
-           session. Hidden until THEME.wire() draws its mark. -->
-      <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
-      <button class="infobtn" id="demobtn" hidden>Demo data</button>
-    </div>
+    <button class="infobtn" id="demobtn" hidden>Demo data</button>
   </div>
 </header>
 
@@ -96,9 +82,13 @@
 <script src="PRESENT"></script>
 <script src="SYNC"></script>
 <script>
-/* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
-   a stacked list for Manage. They were replaced in 2.9 by one worded button
-   with a menu: the same ten destinations, but named rather than guessed at. */
+/* Drawn rather than typed: a glyph at this size renders differently in every
+   font, and these two are the only way into configuration and management. */
+var ICON_SETUP = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' +
+  '<circle cx="10" cy="10" r="3"/><path d="M10 1.6v2.2M10 16.2v2.2M3.1 3.1l1.6 1.6M15.3 15.3l1.6 1.6' +
+  'M1.6 10h2.2M16.2 10h2.2M3.1 16.9l1.6-1.6M15.3 4.7l1.6-1.6"/></svg>';
+var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' +
+  '<path d="M3 5h14M3 10h14M3 15h9"/><circle cx="15.5" cy="15" r="2.2"/></svg>';
 
   /* Page definitions carry the access key the matrix is keyed on, so a page
      is never rendered without a grant having been checked first. */
@@ -223,30 +213,17 @@
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     }
-    /* Manage and Setup used to be two glyph buttons here. They are now one
-       worded button with a menu, rendered separately (paintMenu) so it can sit
-       anchored right and open downward without the row's layout owning it.
-       Anchored right rather than trailing the row: it is the same destination
-       wherever you are, and a control that moves as the list beside it grows
-       is a control you have to look for. */
+    /* Two icons, no words. A gear is universal; the manage mark is a stacked
+       list, and both carry a title and an aria-label so nothing depends on
+       recognising a glyph. */
+    /* Anchored right rather than trailing the row: they are the same two
+       destinations wherever you are, and a control that moves as the list
+       beside it grows is a control you have to look for. */
+    if (allowed(SUBS.manage).length)
+      out.push({ k:"manage", label:ICON_MANAGE, icon:true, first:true, title:"Manage" });
+    if (allowed(SUBS.setup).length)
+      out.push({ k:"setup", label:ICON_SETUP, icon:true, title:"Setup" });
     return out;
-  }
-
-  /* MENU_OPEN is chrome state, not a destination \u2014 it never survives a paint
-     of the page below, only of the row itself. */
-  var MENU_OPEN = false;
-
-  /* One list, two labelled groups. Merging the two buttons was about the way
-     IN, not about the pages: every entry still opens exactly the page it
-     always opened, with its own tab row underneath. The groups stay named
-     because "Reporting cycle" and "Scoring bands" are different kinds of
-     thing \u2014 what the SMO does each cycle, and what was decided once. */
-  function menuGroups(){
-    var gs = [];
-    var m = allowed(SUBS.manage), st = allowed(SUBS.setup);
-    if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
-    if (st.length) gs.push({ dest:"setup",  label:"Setup",  items:st });
-    return gs;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
@@ -280,9 +257,12 @@
           '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
       }
       return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
+        (t.first ? '<span class="sep pinsep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
+        (t.icon ? ' class="navicon' + (t.first ? " pinned" : "") + '" title="' + esc(t.title) +
+          '" aria-label="' + esc(t.title) + '"' : '') +
         '>' + t.label + '</button>';
-    }).join("") + menuHTML();
+    }).join("");
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -301,58 +281,6 @@
         current = b.dataset.u;
         var d = allowed(defsFor(current));
         currentSub = d.length ? d[0].k : null;
-        MENU_OPEN = false;
-        paint(); window.scrollTo(0,0);
-      });
-    });
-    wireMenu();
-  }
-
-  /* The menu lives inside the row so it sits on the same baseline as the tabs,
-     but its panel is absolutely positioned, so a long list never widens the
-     row or pushes the units along. */
-  function menuHTML(){
-    var gs = menuGroups();
-    if (!gs.length) return "";
-    var on = current === "manage" || current === "setup";
-    var body = gs.map(function(g){
-      return '<div class="navmenu-grp">' + esc(g.label) + '</div>' +
-        g.items.map(function(d){
-          return '<button type="button" data-md="' + g.dest + '" data-ms="' + d.k + '"' +
-            (current === g.dest && currentSub === d.k ? ' class="on"' : '') +
-            '>' + esc(d.label) + '</button>';
-        }).join("");
-    }).join("");
-    return '<span class="sep pinsep"></span>' +
-      '<div class="navmenu' + (MENU_OPEN ? " open" : "") + '">' +
-      '<button type="button" class="navmenu-btn' + (on ? " here" : "") + '" id="navmenu-btn" ' +
-      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '">Manage' +
-      '<span class="navmenu-tw" aria-hidden="true">\u25be</span></button>' +
-      '<div class="navmenu-panel"' + (MENU_OPEN ? "" : " hidden") + '>' + body + '</div></div>';
-  }
-
-  function wireMenu(){
-    var btn = document.getElementById("navmenu-btn");
-    if (!btn) return;
-    btn.addEventListener("click", function(e){
-      e.stopPropagation();
-      MENU_OPEN = !MENU_OPEN;
-      paintUnits();
-    });
-    document.querySelectorAll("#units [data-md]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        /* Same rule as a unit tab: going somewhere else drops every edit mode,
-           or you land editing a page you never pressed Edit on. */
-        if (current !== b.dataset.md) {
-          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
-          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
-          if (typeof ARRANGE !== "undefined") ARRANGE = false;
-          CLEARING = null;
-        }
-        current = b.dataset.md;
-        currentSub = b.dataset.ms;
-        MENU_OPEN = false;
         paint(); window.scrollTo(0,0);
       });
     });
@@ -364,12 +292,10 @@
     FIELDS.length = 0;
     fillViewers();
     paintUnits();
-    /* Repainted rather than set once: the demo switch swaps the whole graph,
-       and Labels can rename the tenant while you are looking at it. The
-       separator lives with the name so an unnamed tenant shows nothing at all
-       rather than a stranded middot. */
-    document.getElementById("orgname").textContent =
-      GROUP.org ? "\u00b7 " + GROUP.org : "";
+    /* Derived, not typed — the count was hardcoded at three and quietly lied
+       the moment the group grew. */
+    document.getElementById("shapetag").innerHTML =
+      "Group &middot; " + UNIT_KEYS.length + " business units &middot; H1 2026";
     var v = viewer();
     /* Guarded even though every person currently has a unit: reading
        UNITS[null].name throws inside paint, which aborts the repaint and
@@ -415,9 +341,12 @@
       def = secs.filter(function(s){ return s.k === CURSEC[def.k]; })[0];
     }
 
-    /* The per-page Info button left the header in 2.9. The explanations in
-       PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
-       inside the pages themselves. */
+    /* One Info per page, in the same place on every page, explaining how that
+       page works rather than what one figure means. */
+    var ib = document.getElementById("pageinfo");
+    var iid = pageInfoFor(def.ac);
+    ib.hidden = !iid;
+    if (iid) ib.dataset.modal = iid;
     document.getElementById("panel").innerHTML =
       (current === "group" || current === "setup" || current === "manage") ? def.render()
         : isFn(current) ? def.render(current)
@@ -443,6 +372,13 @@
         }).join("");
       }
     }
+    document.getElementById("title").textContent =
+      current === "setup" ? GROUP.org + " \u2014 configuration"
+      : current === "manage" ? GROUP.org + " \u2014 management"
+      : current === "group" ? GROUP.org
+      : isFn(current) ? GROUP.org + " \u2014 " + FUNCTIONS[fnKeyOf(current)].name
+      : GROUP.org + " \u2014 " + UNITS[current].name;
+
     wire();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
@@ -1252,6 +1188,7 @@
     if (cx) cx.addEventListener("click", function(){ IMP.diff = null; paint(); });
   }
 
+  document.getElementById("title").textContent = GROUP.org;
   wireDeck();
 
   var overlay = document.getElementById("overlay");
@@ -1267,15 +1204,6 @@
   document.getElementById("modal-x").addEventListener("click", closeModal);
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
-
-  /* A menu that stays open after you have looked away is a menu you have to
-     dismiss. Bound once, at boot, rather than on every repaint. */
-  document.addEventListener("click", function(){
-    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
-  });
-  document.addEventListener("keydown", function(e){
-    if (e.key === "Escape" && MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
-  });
 
   /* The switcher lists the people the platform actually has. It was filled
      once, at load, from the baked-in example \u2014 so on the deployed product it
@@ -1402,8 +1330,5 @@
 
   /* Paint immediately from the baked data, then hydrate from the database
      where one is reachable and repaint. On file:// this is just paint(). */
-  /* The colours are already applied - THEME.apply() ran in the head. This
-     only hangs the control on the chrome, which has to exist first. */
-  THEME.wire();
   SYNC.boot(paint);
 </script>

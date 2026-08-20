@@ -144,10 +144,7 @@ var SYNC = (function () {
         body: '{"action":"logout"}'
       }).finally(function () { location.replace("/"); });
     });
-    /* Far right of the first line, beside Demo data — the two controls that
-       leave the product sit together, away from the one that changes what you
-       are looking at. Falls back to the viewer box if the group is missing. */
-    (document.getElementById("topacts") || box).appendChild(out);
+    box.appendChild(out);
     paint();
   }
 

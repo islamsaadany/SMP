@@ -1702,6 +1702,17 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.9 — two lines of chrome, and one way in
+
+The header carried the product name, the org name, the unit name, a derived
+"Group · 10 business units · H1 2026" tag and an Info button, on top of the two
+nav rows below it — five statements of where you are, above a row that already
+says it. It is two lines now: the product on the left, who you are looking as in
+the middle, Demo data and Sign out on the right; then the navigation. Setup and
+Manage, two glyphs at the right of the nav row, became one worded **Manage**
+button with a menu listing all ten destinations. Nothing about the pages moved
+(§24).
+
 ### v2.8 — the cap that would not settle
 
 v2.7's own fix carried a feedback loop: a rail capped against the measured
@@ -2617,3 +2628,373 @@ container would be worse than the symptom.
   content bleeds through.
 - Round trip, fixed point and archived-plan round trip PASS, with the clean
   slate now asserting 2 companies and 6 assigned units.
+
+---
+
+## 24 · The chrome becomes two lines — v2.9
+
+### 24.1 What Islam asked for
+
+Six changes, in his words:
+
+1. Remove the "Group · 10 business units · H1 2026" line.
+2. The Demo data button moves to the top right.
+3. Remove the title of "B2B eComm" — i.e. the org-and-unit heading.
+4. The navigation bar becomes the second line of the system.
+5. The first line: **Strategy Management Platform** on the left, Demo and Sign
+   out on the far right, "Viewing as" in between.
+6. Merge Setup and Manage into one **Manage** button with a dropdown to reach
+   each.
+
+Asked what he meant by (6), he answered with the test: *"we are just combining
+them under 1 list … but still every button will take us to their place."* That
+is the whole contract — the merge is about the way IN, not about the pages. Each
+of the ten entries opens exactly the page its icon used to open, with the same
+tab row underneath it. And he asked for the per-page **Info** button to go.
+
+### 24.2 What the header was carrying
+
+The first line held five things that all answered the same question:
+
+| Element | Said |
+|---|---|
+| `.eyebrow` | "Strategy Management Platform · Spec 012" |
+| `#title` | "Raya Trade — B2B eComm" |
+| `#shapetag` | "Group · 10 business units · H1 2026" |
+| `#pageinfo` | Info |
+| `#demobtn` | Demo data |
+
+Below it, the nav row already highlights the unit you are on, and the tab row
+below that names the page. The header was repeating the row twice and spending a
+whole line to do it. What survives is what the row below cannot say: which
+product this is, whose eyes you are looking through, and the two controls that
+leave.
+
+### 24.3 Merging the two icons into one menu
+
+A gear and a stacked list sat pinned at the right of the nav row. Between them
+they held ten destinations, and which glyph held which page was something you
+had to remember rather than read. One worded button reads instead:
+
+```
+MANAGE ▾      MANAGE            SETUP
+              Reporting cycle   Labels
+              Import            Levels & access
+              Archived plans    Scoring bands
+              Focus measures    Business units
+                                Supporting functions
+                                Capabilities
+```
+
+The two groups stay **named** inside the one list, because they are genuinely
+different kinds of thing — what the SMO does every cycle, and what was decided
+once (§15.14's distinction, unchanged). Merging them into an unlabelled run of
+ten would have thrown away the only thing the two buttons were ever telling you.
+
+`SUBS.manage` and `SUBS.setup` are untouched, and so is `defsFor` — the menu
+sets `current` to `"manage"` or `"setup"` and `currentSub` to the entry's own
+key, then paints. That is precisely what clicking the icon and then its tab did.
+The sub-tab row stays: the menu is the way **in**, the tab row the way **around**
+once you are there.
+
+Three details the menu had to get right:
+
+- **Access.** An entry appears only where `grant()` allows the page, and a group
+  heading only where that group has at least one entry left. The button itself
+  disappears when neither has any — the same rule the two icons followed.
+- **Where it is anchored.** The panel is absolutely positioned, so however long
+  the list grows it never widens the nav row or shoves the unit tabs along.
+  `.units-in` is `overflow-x:visible` (arrange.css overrides the base sheet's
+  `auto`), which is what lets the panel hang below the row rather than be
+  clipped by it.
+- **`here` and `open` are different states.** The button is gold when you are on
+  one of its pages, lit when the menu is showing, and both can be true at once,
+  so they do not share a style.
+
+### 24.4 What the removals took with them
+
+Deleting an element and leaving its CSS behind is how dead rules become live
+bugs somewhere else. Two of these already were:
+
+- `.eyebrow { overflow:hidden; max-height:20px }` and
+  `body.scrolled .eyebrow { opacity:0; max-height:0 }` were written for the
+  header's kicker — but `.eyebrow` is also the **deck slide's** kicker, at 17px.
+  A 20px clip and a `body.scrolled` fade meant for a condensing header were
+  reaching a full-screen slide that has neither. Entering presentation mode
+  while scrolled would have faded the slide's own kicker to nothing.
+- `.shapetag` and its `body.scrolled` size rule had no other user at all.
+
+Both went with the elements. `PAGEINFO` itself stays — the explanations are
+still reachable from the `[data-modal]` links inside the pages.
+
+### 24.5 Verified
+
+- **The ten destinations, over HTTP, signed in as the SMO.** Every entry opened
+  its own page with the right sub-tab selected — `manage/cycle` → "Reporting
+  cycle" … `setup/caps` → "Capabilities" — and the button read as gold on all
+  ten. Zero console errors.
+- **The menu closes** on an outside click and on Escape, and choosing an entry
+  closes it.
+- **`qa.py` now walks the menu**, not just the row: it opens each fold, walks
+  every destination and every sub-tab, then reopens the menu before each of its
+  ten entries. 31 viewers, no console errors.
+- **The rail still navigates** — the v2.7/v2.8 regression, re-proven rather than
+  assumed. At 1400×900, 1280×720 and 1600×1000, at scroll 0/200/600/1400,
+  `elementFromPoint` over the first four rail rows returned the rail every time,
+  never the chrome, and a rail click changed the pane. `--chrome-h` measures
+  202px unscrolled and 169px condensed — the header is 56px shorter than the
+  258px that swallowed the rail in v2.6.
+- **Presentation mode** renders with the deck's own kicker unclipped.
+- **Round trip, fixed point and archived-plan round trip PASS**; `db/seed-state.json`
+  regenerated and byte-identical, because none of this touched the data.
+
+---
+
+## 25 · Light and dark, by choice — v3.0
+
+Islam: *"Add dark and light mood for the page as well."*
+
+### 25.1 The dark palette was already there. The choice was not.
+
+`_shared.css` has carried a complete dark palette since the beginning — every
+token, every state band, redefined under `@media (prefers-color-scheme: dark)`
+and again under `:root[data-theme="dark"]`. Nothing set `data-theme`, so the
+second block had never once been used, and the product followed the laptop
+silently with no way for a person to say otherwise.
+
+So this was not building dark mode. It was **adding the switch, and then finding
+out how much of the existing dark palette actually worked** — which is a
+different and more useful piece of work, because a palette nothing has ever
+selected is a palette nobody has ever checked.
+
+### 25.2 Three states, not two
+
+Auto · Light · Dark, cycled by one round control in the first line, left of
+Demo data.
+
+Auto is the starting position and keeps following the device. A two-state
+toggle would have had to guess a side at first load and, worse, would have
+thrown away the ability to go back to following — the state most people
+should be in.
+
+**Auto REMOVES the attribute rather than setting it to `"auto"`.** The
+stylesheet keys off `:root[data-theme="dark"]` and
+`:root:not([data-theme="light"])`, so *absence* is what hands the decision back
+to `prefers-color-scheme`. Setting `data-theme="auto"` would be a third string
+neither selector matches — which happens to work today, and would quietly stop
+working the moment a rule tested for `"light"`.
+
+### 25.3 The choice belongs to the screen, not to the graph
+
+It lives in `localStorage` under `smp.theme`, and **never in the state graph**.
+Putting it in the graph would autosave it to the database, and one person
+picking dark would turn the platform dark for everyone in the tenant. It is a
+property of the screen you are sitting at — which is also why the gate reads
+the same key rather than having a switch of its own: same browser, same choice,
+so signing in never changes the colours under you.
+
+Applied inline **from the head**, before the body is parsed, so a person who
+chose dark never watches the page paint light and flip. `THEME.apply()` runs at
+parse time; `THEME.wire()` runs after the chrome exists and only hangs the
+control on it.
+
+Nothing else in the product had to learn about any of this: no JS reads a
+colour, so setting one attribute is the whole of the change.
+
+### 25.4 What the switch exposed: colours written as literals
+
+Turning the palette on for the first time made a class of latent defect
+visible at once. A hardcoded colour in a rule is a **light** value with no dark
+counterpart, so it survives into dark unchanged:
+
+- **`tbody tr:nth-child(even) > td { background:#F7F9FC }`** — the zebra stripe
+  on every table in the product. In dark it painted a near-white band under
+  near-white text. This one defect accounted for 482 of the 482 failing runs
+  measured (13 of 52 distinct pairs, but by far the most-repeated).
+- `tbody tr.focusrow:nth-child(even) > td { background:#FDFAF1 }` — the same,
+  gold-tinted, on focus rows.
+- `.b-over { background:#FBF6E9; border:1px solid #E8D9AE }` — the "earning" badge.
+- **`color:#fff` on a `--stone` / `--stone-soft` / `--gold-deep` fill.** In light
+  those tokens are dark navy and deep gold, so white is right. In dark they are
+  deliberately *lighter than the page*, so white on them fell to 1.94–3.91.
+
+Five new tokens close the class: `--zebra`, `--zebra-focus`, `--over-bg`,
+`--over-line`, and `--on-fill` — the ink for text sitting **on** a stone or gold
+fill, white in light and near-black in dark. `--on-fill` is deliberately *not*
+used on `--panel` fills, which stay dark navy in both themes and keep white.
+
+**The rule this leaves behind: a colour with no entry in the palette block
+cannot follow the theme.** Every literal in a rule is a light-mode assumption.
+
+`--ink-3` and `--none` were also nudged in dark only (`#868F9C`→`#949DAA`,
+`#7B838F`→`#8E97A3`) — both sat just under AA on `--surface-2`, which is what a
+card header and a chip are painted on.
+
+### 25.5 Dark is now cleaner than light — and light is not this version's job
+
+Measured with a WCAG AA audit over 19 pages, every visible run of text against
+the background actually painted behind it:
+
+| | before | after |
+|---|---|---|
+| **dark** | 482 failing runs, 52 distinct | **11 failing runs, 3 distinct** |
+| **light** | 391 failing runs, 61 distinct | *unchanged* |
+
+The three left in dark are worth naming honestly:
+
+- `--ink-3` on a `--panel` band (a `.why` note on navy), 3.36 — **this fails
+  worse in light**, at 2.73. Pre-existing, both themes.
+- `.editbtn.danger` on `--surface-2`, 4.49 against a 4.50 threshold. Inside the
+  rounding of the measurement itself.
+
+**Light mode has 61 distinct AA failures and this version did not touch them.**
+They are shipped, pre-existing, and fixing them means re-tuning the house
+palette — a design decision, not a dark-mode fix, and not something to do
+without asking. Recorded here as backlog, not quietly corrected.
+
+### 25.6 The client's name comes back
+
+Removing the org-and-unit title in §24 left the product never saying whose
+strategy it was showing. `Strategy Management Platform · Raya Trade` — product
+name in the serif h1, tenant name after it in smaller sans. Repainted in
+`paint()` rather than set once, because the Demo button swaps the whole graph
+and Labels can rename the tenant while you are looking at it. `textContent`,
+never `innerHTML`: the org name is typed by a person.
+
+### 25.7 The first line was never actually one line
+
+§24 asked for three things on the first line. Measured against the running
+product, signed in, they had never fit: brand 400 + viewer 467 + buttons 257 +
+two 20px gaps = **1164px against a 1132px column**, so the two buttons wrapped
+onto a row of their own for everyone with a session. The wrap was already in
+v2.9; the client name and the theme mark made it worse.
+
+Fixed by stating what gives instead of leaving it to the browser: the buttons
+never shrink, the tenant name and the person picker do (`min-width:0` plus
+ellipsis; the viewer `select` cap 250px → 170px, since it sizes itself to its
+longest option and "Strategy Management Office — all units" pinned it wide).
+`.top-in`'s gap 20px → 16px.
+
+`flex-wrap` deliberately stays `wrap`: a genuinely narrow window should still
+break the row rather than overflow it. The fix is to stop it happening at
+ordinary widths, not to forbid it. One line holds at **1180px and above** —
+1180 being the content column, below which the whole page is already
+compromised.
+
+### 25.8 Verified
+
+- **Three themes × 31 viewers × every destination and sub-tab**, via `qa.py`
+  driven at this container's Chromium: device-light, device-dark, and
+  device-light-with-dark-chosen (a different CSS selector from device dark).
+  **Zero console errors in all three.**
+- **The cycle**, at both device settings: auto → light → dark → auto, each step
+  asserted on the attribute, on `localStorage`, and on the colour actually
+  painted; auto proven to return to the *device's* colour, not to light.
+- **Remembered across a reload**, and **inherited by the gate** in the same
+  browser — asserted on the gate's card and on the password field, which is the
+  one box that would keep the user agent's white if `background` and `color`
+  were not both stated.
+- **The gate with no stored choice**, at both device settings: follows the
+  device, sets no attribute.
+- **Served and signed in** against a throwaway Postgres: hydrate, repaint,
+  theme switch, reload, gate, and the Demo button — banner up, dataset swapped,
+  refusing to save. Zero console errors.
+- **One line at 1920 / 1600 / 1400 / 1280 / 1180**, and in the condensed
+  (scrolled) state.
+- **Round trip, fixed point and archived-plan round trip PASS**;
+  `db/seed-state.json` regenerated and byte-identical — none of this touched
+  the data.
+
+### 25.9 Open
+
+- **Light mode's 61 AA failures** (§25.5). Needs a palette decision.
+- **`--ink-3` on `--panel`** — a `.why` note on a navy band, failing in both
+  themes, worse in light.
+
+---
+
+## 26 · The platform becomes installable — v3.1
+
+Islam: *"When you finish we want to make the platform pwa."*
+
+Installed to a dock or a home screen: its own icon, opening in its own window
+with no browser chrome, and opening at all when there is no network.
+
+### 26.1 The rule this is built around: `/api/*` is never cached
+
+A service worker's whole job is serving things without asking the network, and
+that is exactly the wrong behaviour for `/api/state`. A cached response there is
+**last quarter's actuals wearing this quarter's chrome** — and a strategy
+platform that shows stale figures as if they were current is worse than one
+that will not open.
+
+So `/api/` requests are passed straight through and allowed to fail. `sync.js`
+already handles an unreachable API by falling back to the data baked into the
+file, and the platform says on screen that it is doing so. Non-GET requests
+(sign-in, save) are passed through for the same reason.
+
+Asserted, not assumed: the cache is read after a full signed-in session,
+including a hydrate and an autosave, and checked to contain no `/api/` entry.
+
+### 26.2 Network first, cache as the fallback
+
+Cache-first would pin every person to the shell they happened to load first, and
+a deploy would not reach them until someone cleared a cache by hand. Network
+first means the cache is only ever what you get when there is no network.
+
+The cache name (`smp-shell-v3.1`) **is** the cache-busting mechanism: `activate`
+deletes every cache that is not the current one, so bumping the name on a
+release retires everything from the last one. It has to be bumped whenever the
+shell list changes.
+
+Assets are added one at a time rather than with `addAll`, which is
+all-or-nothing: a single 404 would fail the install and leave no worker at all,
+so one missing icon would cost the offline gate.
+
+### 26.3 Registered from the gate only
+
+The worker's scope is the whole origin, and reaching the platform file requires
+having signed in at the gate first — so by the time anyone opens the platform
+the worker is installed and has already precached it. A second registration
+inside the built file would be the same five lines kept in step by hand for
+nothing.
+
+Guarded on `location.protocol` as well as on support: opened from a memory stick
+the platform is a `file://` page, where there is no worker to register.
+
+### 26.4 The icon, and why there are two shapes
+
+`icons/` carries 192 and 512 "any" plus a 512 **maskable**, generated from the
+same Strategy Temple drawing as `favicon.svg` by rendering it through Chromium
+(there is no rsvg or cairo in the build container).
+
+The maskable one is a different drawing, not a resize: a maskable icon is
+cropped by the platform to whatever shape it likes — a circle on Android — so it
+is full-bleed navy with no corner radius and the temple pulled in to about 62%,
+inside the 80% safe zone. Shipping the rounded tile as maskable would have had
+its corners cut off. **Re-run `scripts` icon generation if `favicon.svg` changes.**
+
+### 26.5 The window chrome follows the theme
+
+Two `theme-color` tags, one per `prefers-color-scheme`, because the attribute
+takes a media query but not a class. Without them an installed app in dark mode
+keeps a navy title bar above a near-black page. The manifest's own `theme_color`
+is the light one — it is the install-time colour and cannot be conditional.
+
+### 26.6 Verified
+
+- **Worker registers and reaches `activated`**, scope the whole origin.
+- **Manifest fetched and parsed** as `application/manifest+json`, with every
+  installability field asserted individually: `name`, `short_name`,
+  `start_url`, `scope`, `display: standalone`, both colours, a 192, a 512 and a
+  maskable — and all three icon files fetched and confirmed as real PNGs.
+- **`/api/` absent from the cache** both after first load and after a complete
+  signed-in session.
+- **Offline, with the network genuinely cut**: the gate opens and the platform
+  opens, paints, and populates its navigation from the baked fallback.
+- `dev-server.js` learned `.webmanifest`, `.png` and `.svg` content types —
+  a manifest served as `octet-stream` is ignored and a worker that does not
+  arrive as JavaScript is refused, so testing this locally needed the same
+  headers `vercel.json` sets in production.
+- **Three themes × 31 viewers**, round trip, fixed point, archived-plan round
+  trip: all still PASS, seed byte-identical, rebuild byte-identical.

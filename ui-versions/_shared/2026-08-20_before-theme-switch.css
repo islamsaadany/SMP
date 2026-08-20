@@ -6,18 +6,6 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
-    /* Surfaces and inks that used to be written into the rules as literals.
-       Every one of them was a LIGHT value sitting in a rule with no light/dark
-       counterpart, so it survived unchanged into dark: the zebra stripe painted
-       a near-white band under near-white text on every table in the product.
-       A colour with no entry here cannot follow the theme. */
-    --zebra:#F7F9FC; --zebra-focus:#FDFAF1;
-    --over-bg:#FBF6E9; --over-line:#E8D9AE;
-    /* Ink for text sitting ON a stone or gold fill. White in light, where those
-       fills are dark navy and deep gold; near-black in dark, where the same
-       tokens are deliberately LIGHTER than the page. Not for --panel fills,
-       which stay dark in both themes and keep white. */
-    --on-fill:#FFFFFF;
     --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
@@ -28,29 +16,20 @@
       --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
       --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
       --line:#333A45; --line-soft:#2A303A;
-      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
-      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
       --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
       --panel:#24487A; --panel-ink:#EAF0FA;
-      --zebra:#22272F; --zebra-focus:#2A2720;
-      --over-bg:#332C16; --over-line:#4A3F1E;
-      --on-fill:#14161A;
     }
   }
-  /* Same values as the block above, for the person who CHOSE dark rather than
-     inheriting it. The duplication is deliberate and has to be kept in step:
-     change one, change the other. */
   :root[data-theme="dark"] {
     --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
     --line:#333A45; --line-soft:#2A303A;
-    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
-    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#24487A; --panel-ink:#EAF0FA;
-    --zebra:#22272F; --zebra-focus:#2A2720;
-    --over-bg:#332C16; --over-line:#4A3F1E;
-    --on-fill:#14161A;
   }
 
   * { box-sizing:border-box; }

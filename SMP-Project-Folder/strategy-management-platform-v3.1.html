@@ -3,6 +3,9 @@
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2232%22%20height=%2232%22%20viewBox=%220%200%2032%2032%22%3E%20%3Crect%20width=%2232%22%20height=%2232%22%20rx=%226%22%20fill=%22%2316325C%22/%3E%20%3Cpath%20d=%22M16%205.2%2027.4%2012H4.6z%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%225.2%22%20y=%2213.2%22%20width=%2221.6%22%20height=%222.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%227.2%22%20y=%2217%22%20width=%223.2%22%20height=%227.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%2214.4%22%20y=%2217%22%20width=%223.2%22%20height=%227.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%2221.6%22%20y=%2217%22%20width=%223.2%22%20height=%227.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%224.4%22%20y=%2225.6%22%20width=%2223.2%22%20height=%222.8%22%20rx=%220.6%22%20fill=%22%23C9A24D%22/%3E%20%3C/svg%3E">
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACh0lEQVR4nOyXy2sTURTGvzuZacb4qpY+sEhc+FhowUQUQSmUgHFZQS3WulBEfHSh/huCbnwUETfaCnVRXYitEAKiKIqNUgXRLAw+aCOVWGOcaWZyvHdC2wRjOknTSRf9LZIzdy5zvjln7j33yMihwdd5hMDaubmTMbYGFYSIvvG/5wx0Lx7puzU1zsRPra/TqzB2nYHtgQMQ6FGa6EQi0heTxIAC1uuUc4HwpTDptmXX+7uO8jDcRBUg4BiPAHWgalCHzAhbs19CaUgSYZ9v0rIHIjXIZEp/iPAtg7FGlMiWZgOnAymsXU3WdWCzjqshD95+lVES3Ddr8HeR3fl1y0wcb9Wwe6NR8P6TDzJuPFYxnnTBLrYEKC4ebr+OAzs0qErxUGtpwt0XKgaG3Uibs6dlVgF+bxqn2v6gqdZ2oCxGEwzXwkswHFNQloCmlSZOtmnYts7AXHj1SUZPWMXoT5c9AapC2L9d5yHXUCOXsTwKMGkQT4nKU+OGbrDiApym4Lo5HxRLzEQl+fzDhYtDHtgSIJyvb8zACQoKeBZVEI1XVsD3CQm2BfS/VOEURffOS4d+TafickjF0Ih7+t4ZvhXvbUlb9uCIgiuhmfwGW3R0BzTLjo5JOHdneXkCnGBRwKKAhS2gnxePFZ5sqXj3JX9q+H0N36yyFU5ss7mIuWLZCiZSxQvaP8XIW2di14Y05oOnHxXExvPFyrxlGcs9Fx7kp57WTXM7A/yP5lUmLjxcOjPAfUvE8Dp30m+9MmeAQiS1/HogfMv8ON3jkhCcGnzwxo1ESsJ8IFKQi/BtvW69//Agb5eCcBKi+/FIb7v1qhmWOcv7JB0OwTvlpGGiW9h5Ca9Ge/4XAAD//5ZnhOIAAAAGSURBVAMAdNLgS2NC1g8AAAAASUVORK5CYII=">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
 <title>Raya Trade — Strategy Management Platform</title>
 <style>
   :root {
@@ -13,6 +16,18 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
+    /* Surfaces and inks that used to be written into the rules as literals.
+       Every one of them was a LIGHT value sitting in a rule with no light/dark
+       counterpart, so it survived unchanged into dark: the zebra stripe painted
+       a near-white band under near-white text on every table in the product.
+       A colour with no entry here cannot follow the theme. */
+    --zebra:#F7F9FC; --zebra-focus:#FDFAF1;
+    --over-bg:#FBF6E9; --over-line:#E8D9AE;
+    /* Ink for text sitting ON a stone or gold fill. White in light, where those
+       fills are dark navy and deep gold; near-black in dark, where the same
+       tokens are deliberately LIGHTER than the page. Not for --panel fills,
+       which stay dark in both themes and keep white. */
+    --on-fill:#FFFFFF;
     --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
     --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
@@ -23,20 +38,29 @@
       --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
       --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
       --line:#333A45; --line-soft:#2A303A;
-      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
-      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
       --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
       --panel:#24487A; --panel-ink:#EAF0FA;
+      --zebra:#22272F; --zebra-focus:#2A2720;
+      --over-bg:#332C16; --over-line:#4A3F1E;
+      --on-fill:#14161A;
     }
   }
+  /* Same values as the block above, for the person who CHOSE dark rather than
+     inheriting it. The duplication is deliberate and has to be kept in step:
+     change one, change the other. */
   :root[data-theme="dark"] {
     --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
     --line:#333A45; --line-soft:#2A303A;
-    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#868F9C;
-    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#7B838F;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#24487A; --panel-ink:#EAF0FA;
+    --zebra:#22272F; --zebra-focus:#2A2720;
+    --over-bg:#332C16; --over-line:#4A3F1E;
+    --on-fill:#14161A;
   }
 
   * { box-sizing:border-box; }
@@ -55,8 +79,6 @@
   .brand { display:flex; flex-direction:column; gap:2px; margin-right:auto; }
   .eyebrow { font-size:11px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); font-weight:600; }
   .brand h1 { font-family:var(--serif); font-size:26px; letter-spacing:-.01em; }
-  .shapetag { font-size:11.5px; letter-spacing:.1em; text-transform:uppercase; font-weight:700;
-              color:var(--gold-deep); border:1px solid var(--gold); border-radius:99px; padding:4px 12px; }
 
   nav.units { background:var(--panel); }
   .units-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
@@ -299,11 +321,15 @@
   header.top { transition:padding .18s ease; }
   .top-in { padding:12px 24px; transition:padding .18s ease; }
   .brand h1 { font-size:22px; transition:font-size .18s ease; }
-  .eyebrow { transition:opacity .18s ease, max-height .18s ease; overflow:hidden; max-height:20px; }
   body.scrolled .top-in { padding:6px 24px; }
   body.scrolled .brand h1 { font-size:16px; }
-  body.scrolled .eyebrow { opacity:0; max-height:0; }
-  body.scrolled .shapetag { font-size:10px; padding:2px 9px; }
+  /* Shrinks with the name beside it - held at 14px against a 16px h1 the two
+     read as one run-on title rather than a name and its owner. */
+  body.scrolled .orgname { font-size:12px; }
+  /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
+     of the header. Their rules went with them: `.eyebrow` is also the deck
+     slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
+     header was reaching a full-screen slide that has neither. */
   nav.units { position:relative; z-index:7; }
   nav.tabs  { position:relative; z-index:6; }
   body.scrolled nav.units button { padding:9px 18px; }
@@ -502,7 +528,7 @@
   .qual button { width:22px; height:22px; border-radius:2px; border:1px solid var(--line);
                  background:var(--surface); cursor:pointer; padding:0; font:inherit; font-size:11px;
                  color:var(--ink-3); font-family:var(--mono); }
-  .qual button.on { background:var(--stone-soft); border-color:var(--stone-soft); color:#fff; }
+  .qual button.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .qual button:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .edithint { font-size:10.5px; letter-spacing:.08em; text-transform:uppercase;
               color:var(--gold-deep); font-weight:700; }
@@ -709,8 +735,15 @@
   .viewer { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
   .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
                   color:var(--ink-3); font-weight:700; }
+  /* Capped, because the select sizes itself to its LONGEST option and the
+     first line is a fixed 1180px column. "Strategy Management Office - all
+     units" reached the old 250px cap, which pushed the two buttons past the end of the
+     row and wrapped them onto a second line - so the one-line chrome asked
+     for in 2.9 was never actually one line for anyone signed in. The name
+     truncates instead; the note beside it already says the level and the
+     reach, so nothing is lost that is not said twice. */
   .viewer select { font:inherit; font-size:13px; padding:5px 9px; border:1px solid var(--line);
-                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:250px; }
+                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:170px; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
                  letter-spacing:.06em; text-transform:uppercase; }
@@ -736,8 +769,8 @@
   .stbtn:hover { background:var(--surface-2); }
   .stbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .stbtn.on.none { background:var(--none); border-color:var(--none); color:var(--surface); }
-  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:#fff; }
-  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:#fff; }
+  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:var(--on-fill); }
+  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:var(--on-fill); }
 
   .chart-legend i.st { margin-right:2px; }
 
@@ -854,7 +887,7 @@
                    display:inline-flex; align-items:center; justify-content:center;
                    font-style:normal; font-size:10px; font-family:var(--mono);
                    color:var(--ink-3); background:var(--surface); }
-  .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:#fff; }
+  .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
 
   /* ── Drag handle ────────────────────────────────────────────────────
@@ -998,7 +1031,7 @@
                    cursor:pointer; background:var(--surface); color:var(--ink-3);
                    border-right:1px solid var(--line); }
   .minisw button:last-child { border-right:0; }
-  .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:#fff; }
+  .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:var(--on-fill); }
   .minisw button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
 
   .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
@@ -1038,12 +1071,41 @@
   .bands-act { margin-left:auto; display:inline-flex; }
   .bands-act .editbtn { padding:5px 14px; }
 
-  /* Info holds the top-right corner on every page. The tenant tag moves into
-     the brand block so nothing can wrap between the two and displace it. */
-  .brand { gap:4px; }
-  .brand .shapetag { align-self:flex-start; margin-top:3px; }
-  .top-in > .infobtn { margin-left:4px; align-self:center; }
-  body.scrolled .brand .shapetag { display:none; }
+  /* The two buttons that leave hold the far right of the first line, grouped
+     so nothing can wrap between them. */
+  /* The brand is a ROW now, not a column: the product name and the client's
+     name are one statement read left to right, not two stacked labels. Baseline
+     alignment, not centre, so the serif h1 and the smaller sans name sit on the
+     same line rather than floating against each other's box. */
+  .brand { flex-direction:row; align-items:baseline; gap:9px; flex-wrap:nowrap;
+           min-width:0; }
+  .brand h1 { white-space:nowrap; }
+  .orgname { font-size:14px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
+             min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+
+  /* THE FIRST LINE IS ONE LINE. It was not, before this: brand 400 + viewer 467
+     + buttons 257 + two 20px gaps came to 1164 against a 1132px column, so the
+     buttons wrapped onto a row of their own for everyone signed in - the wrap
+     was already there in 2.9 and the client name and the theme mark made it
+     worse. Three items on one row, and what gives when the window narrows is
+     stated rather than left to the browser: the buttons never shrink, the
+     tenant name and the person picker do. flex-wrap stays `wrap` so a genuinely
+     narrow window still breaks the row instead of overflowing it - the fix is
+     to stop it happening at ordinary widths, not to forbid it. */
+  .top-in { gap:16px; }
+  .viewer { min-width:0; }
+  .viewer select { flex:0 1 auto; min-width:92px; }
+  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* The theme control. Round rather than a pill because it carries a mark and
+     no word - a pill with a 17px glyph floating in it reads as a button whose
+     label failed to load. Everything else it needs it inherits from .infobtn,
+     including the colour the glyph draws itself in. */
+  .themebtn { padding:0; width:30px; height:30px; border-radius:50%;
+              display:inline-flex; align-items:center; justify-content:center;
+              flex-shrink:0; }
+  .themesvg { width:17px; height:17px; display:block; }
 
   /* 5. The rule above a section heading and the gap it sat in. A section is
      already announced by its heading; the line was doing the job twice. */
@@ -1214,7 +1276,7 @@
 
   .badge{display:inline-block;font:700 10px/1 var(--sans);letter-spacing:.06em;
     text-transform:uppercase;padding:5px 9px;border-radius:20px;white-space:nowrap}
-  .b-over{background:#FBF6E9;color:var(--gold-deep);border:1px solid #E8D9AE}
+  .b-over{background:var(--over-bg);color:var(--gold-deep);border:1px solid var(--over-line)}
   .b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
   .b-short{background:var(--bad-bg);color:var(--bad)}
   .b-none{background:var(--surface-2);color:var(--none)}
@@ -1313,7 +1375,7 @@
   .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
   .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
   /* Arrange mode still has to be visible against the dark band. */
-  .plist.arranging .phead{background:var(--gold-deep);color:#fff}
+  .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
 
 
 
@@ -1330,11 +1392,11 @@
      light tint only: it has to help the eye track a wide row without competing
      with the marks that carry meaning \u2014 the red edge on a figure needing a
      note, the gold edge on a focus measure, a dimmed not-yet-due row. */
-  tbody tr:nth-child(even) > td { background:#F7F9FC; }
-  tbody tr:nth-child(even) > td.was { background:#F7F9FC; }
+  tbody tr:nth-child(even) > td { background:var(--zebra); }
+  tbody tr:nth-child(even) > td.was { background:var(--zebra); }
   /* Rows that already say something keep saying it. */
   .board tbody tr.alt td { background:var(--surface-2); }
-  tbody tr.focusrow:nth-child(even) > td { background:#FDFAF1; }
+  tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
   tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
 
   /* Each obligation announces whose it is: a unit's plan counts toward that
@@ -1426,12 +1488,44 @@
     text-transform:uppercase;color:var(--ink-3);font-weight:700}
   .capkpi b{font:400 22px/1.2 var(--serif)}
 
-  /* Setup and Manage are icons, not words. */
-  .units button.navicon{padding:11px 12px;display:inline-flex;align-items:center}
-  .units button.navicon .navsvg{width:19px;height:19px;fill:none;stroke:currentColor;
-    stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-  .units button.navicon[aria-selected="true"] .navsvg{stroke-width:1.9}
+  /* ── Manage: one worded button, one menu ───────────────────────
+     It replaced a gear and a stacked-list glyph. Ten destinations behind two
+     icons asked people to remember which mark held which page; behind one
+     word they are simply listed. Nothing about the pages changed — each entry
+     opens exactly the page its icon used to, with its own tab row underneath.
+
+     The panel is absolutely positioned, so however long the list grows it
+     never widens the row or shoves the unit tabs along. `.units-in` is
+     `overflow-x:visible` here (it is `auto` in the base sheet), which is what
+     lets the panel hang below the row instead of being clipped by it. */
   .units .sep.pinsep{margin-left:auto}
+  .navmenu{position:relative;display:inline-flex;align-items:center}
+  .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+    opacity:1;border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
+  .units .navmenu-btn:hover{color:#fff;background:rgba(255,255,255,.18);
+    border-color:rgba(255,255,255,.65)}
+  .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  /* `here` is where you ARE, `open` is the menu showing. They are different
+     states and both can be true, so they do not share a style. */
+  .units .navmenu-btn.here{color:var(--panel);background:var(--gold);border-color:var(--gold)}
+  .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
+    border-color:rgba(255,255,255,.7)}
+  .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}
+  .navmenu-tw{font-size:9px;opacity:.85}
+  .navmenu-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:212px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:0 14px 34px rgba(11,31,59,.22);padding:6px;text-align:left}
+  .navmenu-grp{font:700 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);padding:9px 10px 5px}
+  .navmenu-grp:first-child{padding-top:5px}
+  .units .navmenu-panel button{display:block;width:100%;text-align:left;background:none;
+    border:0;opacity:1;color:var(--ink);font:400 13.5px/1.2 var(--sans);letter-spacing:0;
+    text-transform:none;padding:8px 10px;border-radius:6px;cursor:pointer}
+  .units .navmenu-panel button:hover{background:var(--surface-2);color:var(--ink)}
+  .units .navmenu-panel button.on{background:var(--gold);color:var(--panel);font-weight:700}
+  .units .navmenu-panel button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
@@ -1503,7 +1597,7 @@
                border-bottom:1px solid var(--line-soft); }
   .dslide table.dbig td { font-size:26px; padding:24px 18px; }
   .dslide tbody tr:last-child td { border-bottom:0; }
-  .dslide table.zebra tbody tr:nth-child(even) td { background:#F7F9FC; }
+  .dslide table.zebra tbody tr:nth-child(even) td { background:var(--zebra); }
   .dslide td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .dslide td.final { font-weight:700; }
   /* Band colours are applied inline elsewhere in the platform; the deck needs
@@ -1622,6 +1716,111 @@
   .ddot.on { background:var(--gold); transform:scale(1.35); }
 
 </style>
+<script>
+/* THEME — Auto, Light, Dark.
+
+   The dark palette has been in _shared.css since the beginning; what was
+   missing was a way to choose it. The product followed the laptop silently
+   and a person who wanted the other one had nowhere to say so.
+
+   Three states, not two. Auto is the starting position and keeps following
+   the device, which is what most people want and what the CSS already did;
+   Light and Dark are a person overriding it for this screen. A two-state
+   toggle would have had to guess an initial side and would have lost the
+   ability to go back to following.
+
+   The choice is a property of the SCREEN, not of the person and not of the
+   tenant, so it lives in localStorage and NEVER in the state graph. Putting
+   it in the graph would autosave it to the database and one person picking
+   dark would turn the platform dark for everyone. That is also why the gate
+   reads the same key: it is the same browser, so it is the same choice.
+
+   Applied from the head, before the body is parsed, so the page never paints
+   light and then flips. Nothing else has to know: no JS reads a colour, so
+   changing the attribute is the whole of the change. */
+var THEME = (function () {
+  /* Shared with index.html — the gate reads this key so signing in does not
+     change the colours under you. Changing it means changing both. */
+  var KEY = "smp.theme";
+  var ORDER = ["auto", "light", "dark"];
+
+  /* Storage is unavailable in a private window and on some file:// origins,
+     and reading it throws rather than returning null. Auto is the fallback
+     everywhere, so a browser that cannot remember still follows the device. */
+  function read() {
+    try {
+      var v = localStorage.getItem(KEY);
+      return ORDER.indexOf(v) === -1 ? "auto" : v;
+    } catch (e) { return "auto"; }
+  }
+  function write(v) {
+    try { localStorage.setItem(KEY, v); } catch (e) {}
+  }
+
+  var mode = read();
+
+  function apply() {
+    /* Auto REMOVES the attribute rather than setting it to "auto": the
+       stylesheet keys off :root[data-theme="dark"] and
+       :root:not([data-theme="light"]), so absence is what hands the decision
+       back to prefers-color-scheme. An "auto" value would just be a third
+       string neither selector matches — which happens to work today, and
+       would quietly stop working the moment a rule tested for "light". */
+    var el = document.documentElement;
+    if (mode === "auto") el.removeAttribute("data-theme");
+    else el.setAttribute("data-theme", mode);
+  }
+
+  /* Half-filled circle, sun, moon. Drawn at the same 20px box as the rest of
+     the chrome's marks. Auto is deliberately the half circle: it reads as
+     "either", which is what following the device means. */
+  var ICONS = {
+    auto: '<circle cx="10" cy="10" r="6.4" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+          '<path d="M10 3.6a6.4 6.4 0 0 0 0 12.8z" fill="currentColor"/>',
+    light: '<circle cx="10" cy="10" r="3.7" fill="currentColor"/>' +
+           '<g stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' +
+           '<path d="M10 1.6v2.2M10 16.2v2.2M18.4 10h-2.2M3.8 10H1.6"/>' +
+           '<path d="M15.9 4.1l-1.6 1.6M5.7 14.3l-1.6 1.6M15.9 15.9l-1.6-1.6M5.7 5.7L4.1 4.1"/></g>',
+    dark: '<path d="M15.8 12.6A6.6 6.6 0 0 1 7.4 4.2a6.9 6.9 0 1 0 8.4 8.4z" fill="currentColor"/>'
+  };
+  var WORDS = { auto: "following your device", light: "light", dark: "dark" };
+
+  function paintBtn(btn) {
+    btn.innerHTML = '<svg viewBox="0 0 20 20" class="themesvg" aria-hidden="true">' +
+                    ICONS[mode] + '</svg>';
+    /* The glyph is never the only carrier — same rule the nav marks follow.
+       The title says the state; the aria-label says the state AND what the
+       press will do, because a screen reader gets no hover. */
+    var next = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
+    btn.title = "Theme: " + WORDS[mode] + " — click for " + WORDS[next];
+    btn.setAttribute("aria-label", btn.title);
+  }
+
+  function set(v, btn) {
+    mode = v;
+    write(mode);
+    apply();
+    if (btn) paintBtn(btn);
+  }
+
+  return {
+    apply: apply,
+    mode: function () { return mode; },
+    /* Called once, after the chrome exists. */
+    wire: function () {
+      var btn = document.getElementById("themebtn");
+      if (!btn) return;
+      btn.hidden = false;
+      paintBtn(btn);
+      btn.addEventListener("click", function () {
+        set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
+      });
+    }
+  };
+})();
+THEME.apply();
+
+</script>
 
 <div class="banner" id="banner">
   <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
@@ -1629,23 +1828,37 @@
 </div>
 
 <div class="chrome">
+<!-- Three things on the first line and nothing else: who the product is, who
+     you are looking as, and the two buttons that leave. The org name, the unit
+     name and the "Group, N units" tag all left in 2.9 - the row below already
+     says where you are, and repeating it cost the whole first line. -->
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <span class="eyebrow">Strategy Management Platform &middot; Spec 012</span>
-      <h1 id="title"></h1>
-      <span class="shapetag" id="shapetag"></span>
+      <h1>Strategy Management Platform</h1>
+      <!-- Whose strategy this is. The product name alone never said it, and a
+           consulting product shown to a client should. Set in paint() from
+           GROUP.org, so it follows the demo switch: the worked example says
+           Raya Trade, the client's own tenant says the client. textContent,
+           never innerHTML - the org name is typed in Labels. -->
+      <span class="orgname" id="orgname"></span>
     </div>
     <div class="viewer">
       <label for="asWho">Viewing as</label>
       <select id="asWho"></select>
       <span class="viewer-note" id="viewerNote"></span>
     </div>
-    <button class="infobtn" id="pageinfo" hidden>Info</button>
-    <!-- Switches the whole product between the client's own data and the
+    <!-- Far right, together: Demo data, then Sign out (appended by SYNC).
+         Switches the whole product between the client's own data and the
          full worked example, for explaining how it works. Appears only
          where there is a live dataset to tell the example apart from. -->
-    <button class="infobtn" id="demobtn" hidden>Demo data</button>
+    <div class="topacts" id="topacts">
+      <!-- Auto, Light, Dark. First of the three because it changes how the
+           product LOOKS; the two beside it change what it shows or end the
+           session. Hidden until THEME.wire() draws its mark. -->
+      <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
+      <button class="infobtn" id="demobtn" hidden>Demo data</button>
+    </div>
   </div>
 </header>
 
@@ -10875,7 +11088,10 @@ var SYNC = (function () {
         body: '{"action":"logout"}'
       }).finally(function () { location.replace("/"); });
     });
-    box.appendChild(out);
+    /* Far right of the first line, beside Demo data — the two controls that
+       leave the product sit together, away from the one that changes what you
+       are looking at. Falls back to the viewer box if the group is missing. */
+    (document.getElementById("topacts") || box).appendChild(out);
     paint();
   }
 
@@ -10979,13 +11195,9 @@ var SYNC = (function () {
 
 </script>
 <script>
-/* Drawn rather than typed: a glyph at this size renders differently in every
-   font, and these two are the only way into configuration and management. */
-var ICON_SETUP = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' +
-  '<circle cx="10" cy="10" r="3"/><path d="M10 1.6v2.2M10 16.2v2.2M3.1 3.1l1.6 1.6M15.3 15.3l1.6 1.6' +
-  'M1.6 10h2.2M16.2 10h2.2M3.1 16.9l1.6-1.6M15.3 4.7l1.6-1.6"/></svg>';
-var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' +
-  '<path d="M3 5h14M3 10h14M3 15h9"/><circle cx="15.5" cy="15" r="2.2"/></svg>';
+/* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
+   a stacked list for Manage. They were replaced in 2.9 by one worded button
+   with a menu: the same ten destinations, but named rather than guessed at. */
 
   /* Page definitions carry the access key the matrix is keyed on, so a page
      is never rendered without a grant having been checked first. */
@@ -11110,17 +11322,30 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     }
-    /* Two icons, no words. A gear is universal; the manage mark is a stacked
-       list, and both carry a title and an aria-label so nothing depends on
-       recognising a glyph. */
-    /* Anchored right rather than trailing the row: they are the same two
-       destinations wherever you are, and a control that moves as the list
-       beside it grows is a control you have to look for. */
-    if (allowed(SUBS.manage).length)
-      out.push({ k:"manage", label:ICON_MANAGE, icon:true, first:true, title:"Manage" });
-    if (allowed(SUBS.setup).length)
-      out.push({ k:"setup", label:ICON_SETUP, icon:true, title:"Setup" });
+    /* Manage and Setup used to be two glyph buttons here. They are now one
+       worded button with a menu, rendered separately (paintMenu) so it can sit
+       anchored right and open downward without the row's layout owning it.
+       Anchored right rather than trailing the row: it is the same destination
+       wherever you are, and a control that moves as the list beside it grows
+       is a control you have to look for. */
     return out;
+  }
+
+  /* MENU_OPEN is chrome state, not a destination \u2014 it never survives a paint
+     of the page below, only of the row itself. */
+  var MENU_OPEN = false;
+
+  /* One list, two labelled groups. Merging the two buttons was about the way
+     IN, not about the pages: every entry still opens exactly the page it
+     always opened, with its own tab row underneath. The groups stay named
+     because "Reporting cycle" and "Scoring bands" are different kinds of
+     thing \u2014 what the SMO does each cycle, and what was decided once. */
+  function menuGroups(){
+    var gs = [];
+    var m = allowed(SUBS.manage), st = allowed(SUBS.setup);
+    if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
+    if (st.length) gs.push({ dest:"setup",  label:"Setup",  items:st });
+    return gs;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
@@ -11154,12 +11379,9 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
           '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
       }
       return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
-        (t.first ? '<span class="sep pinsep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
-        (t.icon ? ' class="navicon' + (t.first ? " pinned" : "") + '" title="' + esc(t.title) +
-          '" aria-label="' + esc(t.title) + '"' : '') +
         '>' + t.label + '</button>';
-    }).join("");
+    }).join("") + menuHTML();
     /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
        binding it here set current to undefined and reset the page to Group, which
        made expanding a fold navigate. */
@@ -11178,6 +11400,58 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         current = b.dataset.u;
         var d = allowed(defsFor(current));
         currentSub = d.length ? d[0].k : null;
+        MENU_OPEN = false;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+    wireMenu();
+  }
+
+  /* The menu lives inside the row so it sits on the same baseline as the tabs,
+     but its panel is absolutely positioned, so a long list never widens the
+     row or pushes the units along. */
+  function menuHTML(){
+    var gs = menuGroups();
+    if (!gs.length) return "";
+    var on = current === "manage" || current === "setup";
+    var body = gs.map(function(g){
+      return '<div class="navmenu-grp">' + esc(g.label) + '</div>' +
+        g.items.map(function(d){
+          return '<button type="button" data-md="' + g.dest + '" data-ms="' + d.k + '"' +
+            (current === g.dest && currentSub === d.k ? ' class="on"' : '') +
+            '>' + esc(d.label) + '</button>';
+        }).join("");
+    }).join("");
+    return '<span class="sep pinsep"></span>' +
+      '<div class="navmenu' + (MENU_OPEN ? " open" : "") + '">' +
+      '<button type="button" class="navmenu-btn' + (on ? " here" : "") + '" id="navmenu-btn" ' +
+      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '">Manage' +
+      '<span class="navmenu-tw" aria-hidden="true">\u25be</span></button>' +
+      '<div class="navmenu-panel"' + (MENU_OPEN ? "" : " hidden") + '>' + body + '</div></div>';
+  }
+
+  function wireMenu(){
+    var btn = document.getElementById("navmenu-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      MENU_OPEN = !MENU_OPEN;
+      paintUnits();
+    });
+    document.querySelectorAll("#units [data-md]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        /* Same rule as a unit tab: going somewhere else drops every edit mode,
+           or you land editing a page you never pressed Edit on. */
+        if (current !== b.dataset.md) {
+          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
+          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
+          if (typeof ARRANGE !== "undefined") ARRANGE = false;
+          CLEARING = null;
+        }
+        current = b.dataset.md;
+        currentSub = b.dataset.ms;
+        MENU_OPEN = false;
         paint(); window.scrollTo(0,0);
       });
     });
@@ -11189,10 +11463,12 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     FIELDS.length = 0;
     fillViewers();
     paintUnits();
-    /* Derived, not typed — the count was hardcoded at three and quietly lied
-       the moment the group grew. */
-    document.getElementById("shapetag").innerHTML =
-      "Group &middot; " + UNIT_KEYS.length + " business units &middot; H1 2026";
+    /* Repainted rather than set once: the demo switch swaps the whole graph,
+       and Labels can rename the tenant while you are looking at it. The
+       separator lives with the name so an unnamed tenant shows nothing at all
+       rather than a stranded middot. */
+    document.getElementById("orgname").textContent =
+      GROUP.org ? "\u00b7 " + GROUP.org : "";
     var v = viewer();
     /* Guarded even though every person currently has a unit: reading
        UNITS[null].name throws inside paint, which aborts the repaint and
@@ -11238,12 +11514,9 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       def = secs.filter(function(s){ return s.k === CURSEC[def.k]; })[0];
     }
 
-    /* One Info per page, in the same place on every page, explaining how that
-       page works rather than what one figure means. */
-    var ib = document.getElementById("pageinfo");
-    var iid = pageInfoFor(def.ac);
-    ib.hidden = !iid;
-    if (iid) ib.dataset.modal = iid;
+    /* The per-page Info button left the header in 2.9. The explanations in
+       PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
+       inside the pages themselves. */
     document.getElementById("panel").innerHTML =
       (current === "group" || current === "setup" || current === "manage") ? def.render()
         : isFn(current) ? def.render(current)
@@ -11269,13 +11542,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
         }).join("");
       }
     }
-    document.getElementById("title").textContent =
-      current === "setup" ? GROUP.org + " \u2014 configuration"
-      : current === "manage" ? GROUP.org + " \u2014 management"
-      : current === "group" ? GROUP.org
-      : isFn(current) ? GROUP.org + " \u2014 " + FUNCTIONS[fnKeyOf(current)].name
-      : GROUP.org + " \u2014 " + UNITS[current].name;
-
     wire();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
@@ -12085,7 +12351,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     if (cx) cx.addEventListener("click", function(){ IMP.diff = null; paint(); });
   }
 
-  document.getElementById("title").textContent = GROUP.org;
   wireDeck();
 
   var overlay = document.getElementById("overlay");
@@ -12101,6 +12366,15 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
   document.getElementById("modal-x").addEventListener("click", closeModal);
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+
+  /* A menu that stays open after you have looked away is a menu you have to
+     dismiss. Bound once, at boot, rather than on every repaint. */
+  document.addEventListener("click", function(){
+    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
+  });
 
   /* The switcher lists the people the platform actually has. It was filled
      once, at load, from the baked-in example \u2014 so on the deployed product it
@@ -12227,5 +12501,8 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
 
   /* Paint immediately from the baked data, then hydrate from the database
      where one is reachable and repaint. On file:// this is just paint(). */
+  /* The colours are already applied - THEME.apply() ran in the head. This
+     only hangs the control on the chrome, which has to exist first. */
+  THEME.wire();
   SYNC.boot(paint);
 </script>

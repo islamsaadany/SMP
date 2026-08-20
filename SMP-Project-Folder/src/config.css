@@ -2,8 +2,15 @@
   .viewer { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
   .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
                   color:var(--ink-3); font-weight:700; }
+  /* Capped, because the select sizes itself to its LONGEST option and the
+     first line is a fixed 1180px column. "Strategy Management Office - all
+     units" reached the old 250px cap, which pushed the two buttons past the end of the
+     row and wrapped them onto a second line - so the one-line chrome asked
+     for in 2.9 was never actually one line for anyone signed in. The name
+     truncates instead; the note beside it already says the level and the
+     reach, so nothing is lost that is not said twice. */
   .viewer select { font:inherit; font-size:13px; padding:5px 9px; border:1px solid var(--line);
-                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:250px; }
+                   border-radius:var(--r); background:var(--surface); color:var(--ink); max-width:170px; }
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
                  letter-spacing:.06em; text-transform:uppercase; }
@@ -29,8 +36,8 @@
   .stbtn:hover { background:var(--surface-2); }
   .stbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .stbtn.on.none { background:var(--none); border-color:var(--none); color:var(--surface); }
-  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:#fff; }
-  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:#fff; }
+  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:var(--on-fill); }
+  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:var(--on-fill); }
 
   .chart-legend i.st { margin-right:2px; }
 
@@ -147,5 +154,5 @@
                    display:inline-flex; align-items:center; justify-content:center;
                    font-style:normal; font-size:10px; font-family:var(--mono);
                    color:var(--ink-3); background:var(--surface); }
-  .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:#fff; }
+  .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }

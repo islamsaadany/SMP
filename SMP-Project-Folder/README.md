@@ -1,4 +1,4 @@
-# SMP Project Folder — v2.8
+# SMP Project Folder — v3.1
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v2.8.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.1.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v2.8.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.1.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -36,6 +36,8 @@ exactly as every version before it.
 
 **`src/`** — the sources it is built from, and the tooling:
 
+- `theme.js` is inlined by `build.py` into the **head**, not the body — the
+  stored theme has to be applied before the page paints or it flips.
 - `python3 build.py` assembles the single file. It must rebuild **byte-identical**
   to the shipped HTML; if it does not, something is out of step.
 - `python3 qa.py` walks every viewer against every page they can reach and
@@ -140,6 +142,45 @@ flags deciding whether they also see the other companies and the group. Two
 defects that only a real uploaded plan could expose went with it: a pillar
 arriving from an upload had no code, so the rail could not navigate; and the
 sticky chrome was pinned three times over, which smeared the header on scroll.
+
+Versions **2.6–2.8** were what a real uploaded plan and a real screen exposed:
+the horizon stopped being a baked default and became the tenant's to set; the
+rail was found pinned twelve pixels from the top of the window, under a chrome
+up to 258px tall that was swallowing its clicks; and the fix for that carried a
+feedback loop — a rail capped against the measured chrome height — that had to
+be broken with a constant.
+
+Version **2.9** cut the chrome to two lines (§24). The header had been saying
+where you are five times over, above a navigation row that already said it:
+product name, org name, unit name, a derived "Group · 10 business units" tag and
+an Info button. It is now the product on the left, **Viewing as** in the middle,
+Demo data and Sign out on the right — then the navigation, then the tabs. Setup
+and Manage, two glyphs at the right of the nav row, became one worded **Manage**
+button with a menu listing all ten destinations in two labelled groups. Nothing
+about the pages moved: each entry opens exactly the page its icon used to, with
+the same tab row underneath.
+
+Version **3.0** added the light/dark switch (§25). The dark palette had been in
+`_shared.css` from the beginning with nothing to select it — the product followed
+your laptop silently. **Auto · Light · Dark** now cycles from a round mark left
+of Demo data, remembered on that screen only (never in the database, or one
+person's choice would recolour the whole tenant), and the sign-in gate reads the
+same choice so signing in never changes the colours under you. The gate's dark
+colours were built; it had none.
+
+Selecting the palette for the first time is what exposed the real defect: the
+zebra stripe on **every table** was a hardcoded `#F7F9FC`, painting a near-white
+band under near-white text. Five new tokens closed that class of bug and dark
+went from 482 failing contrast runs to 11. **Light mode's 61 are pre-existing,
+untouched and recorded** (§25.5) — a palette decision, not a dark-mode fix. The
+client's name came back beside the product name, and the first line was measured
+and made to *actually* be one line, which it had not been for anyone signed in.
+
+Version **3.1** made it installable (§26). To a dock or a home screen: own icon,
+own window, and it opens with no network. `sw.js` holds the shell — the gate, the
+built platform file, the icons — and **never `/api/*`**, because a cached
+`/api/state` is last quarter's actuals wearing this quarter's chrome. Offline you
+get the platform on its baked data, which it already says on screen.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

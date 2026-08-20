@@ -12,12 +12,6 @@
   <div class="top-in">
     <div class="brand">
       <h1>Strategy Management Platform</h1>
-      <!-- Whose strategy this is. The product name alone never said it, and a
-           consulting product shown to a client should. Set in paint() from
-           GROUP.org, so it follows the demo switch: the worked example says
-           Raya Trade, the client's own tenant says the client. textContent,
-           never innerHTML - the org name is typed in Labels. -->
-      <span class="orgname" id="orgname"></span>
     </div>
     <div class="viewer">
       <label for="asWho">Viewing as</label>
@@ -29,10 +23,6 @@
          full worked example, for explaining how it works. Appears only
          where there is a live dataset to tell the example apart from. -->
     <div class="topacts" id="topacts">
-      <!-- Auto, Light, Dark. First of the three because it changes how the
-           product LOOKS; the two beside it change what it shows or end the
-           session. Hidden until THEME.wire() draws its mark. -->
-      <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
       <button class="infobtn" id="demobtn" hidden>Demo data</button>
     </div>
   </div>
@@ -364,12 +354,6 @@
     FIELDS.length = 0;
     fillViewers();
     paintUnits();
-    /* Repainted rather than set once: the demo switch swaps the whole graph,
-       and Labels can rename the tenant while you are looking at it. The
-       separator lives with the name so an unnamed tenant shows nothing at all
-       rather than a stranded middot. */
-    document.getElementById("orgname").textContent =
-      GROUP.org ? "\u00b7 " + GROUP.org : "";
     var v = viewer();
     /* Guarded even though every person currently has a unit: reading
        UNITS[null].name throws inside paint, which aborts the repaint and
@@ -1402,8 +1386,5 @@
 
   /* Paint immediately from the baked data, then hydrate from the database
      where one is reachable and repaint. On file:// this is just paint(). */
-  /* The colours are already applied - THEME.apply() ran in the head. This
-     only hangs the control on the chrome, which has to exist first. */
-  THEME.wire();
   SYNC.boot(paint);
 </script>

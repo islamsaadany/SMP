@@ -176,8 +176,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
   in a browser, in **both** live and demo mode.
-- **On each version bump:** update the gate's link in `index.html`, regenerate
-  `db/seed-state.json`, and re-run the round-trip test.
+- **PWA (since v3.1, §26):** `manifest.webmanifest`, `sw.js` and `icons/` at the
+  repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
+  carries the same list so it can be tested locally. The worker caches the shell
+  and **never `/api/*`**.
+- **On each version bump:** update the gate's link in `index.html`, bump `SHELL`
+  and the platform filename in `sw.js`, regenerate `db/seed-state.json`, and
+  re-run the round-trip test.
 
 ### Current Directory Layout
 ```
@@ -240,7 +245,40 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.8: v2.7's rail cap closed a feedback loop —
+*Last Updated: 2026-08-20 — v3.1: installable. `manifest.webmanifest`,
+`sw.js` and `icons/` at the repo root make SMP a PWA — own icon, own window, opens
+offline. **The service worker never caches `/api/*`**: a cached `/api/state` is
+last quarter's actuals wearing this quarter's chrome, and a platform showing stale
+figures as current is worse than one that will not open. Network-first for the
+shell, so a deploy still reaches people; the cache NAME is the bust, so bump
+`SHELL` in `sw.js` whenever the shell list changes. Registration lives in the gate
+only — one origin-wide scope covers both pages. Icons are generated from
+`favicon.svg` by `python3 scripts/make-icons.py`; **the maskable one is a
+different drawing, not a resize** (§26.4). Re-run it if the mark changes.*
+
+*Earlier: 2026-08-20 — v3.0: light and dark, by choice. The dark
+palette had been in `_shared.css` since the beginning with nothing to select it.
+The switch (Auto/Light/Dark, `localStorage` key `smp.theme`, shared with the
+gate) is small; what it exposed is the rule worth keeping: **a colour written
+into a rule as a literal is a light-mode assumption that survives into dark** —
+the zebra stripe was a hardcoded `#F7F9FC` painting a near-white band under
+near-white text on every table. Five tokens closed the class; dark went from 482
+failing contrast runs to 11. **Light still has 61, untouched and recorded** —
+fixing them is a palette decision, not a dark-mode fix (§25). Two other rules:
+**a theme is a property of the screen, never of the state graph** (autosaving it
+would turn the platform dark for the whole tenant), and **`auto` removes the
+attribute rather than setting it**, because absence is what hands the decision
+back to `prefers-color-scheme` (§25.2).*
+
+*Earlier: 2026-08-20 — v2.9: the chrome is two lines. The header
+said where you are five times over, above a nav row that already said it, so the
+org name, the unit name, the shape tag, the eyebrow and the Info button all went;
+Setup and Manage became one worded **Manage** button with a menu of all ten
+destinations. **Delete an element and delete its CSS with it** — `.eyebrow` was
+also the deck slide's kicker, and a `max-height` written for a condensing header
+was reaching a full-screen slide (§24).*
+
+*Earlier: 2026-08-20 — v2.8: v2.7's rail cap closed a feedback loop —
 measured height → page height → scroll clamp → header condense → measured height —
 and it oscillated forever. **A sticky offset changes nobody's height; a max-height
 does. Never size anything against a JS-measured value that the size itself can

@@ -108,15 +108,22 @@
      content showed through the seams between them, and the .18s transitions
      smeared it as you scrolled. Pinning the container and nothing else cannot
      drift, because there is only one offset and the browser owns it. */
-  /* One padding, no transition, no body.scrolled counterpart. The condense
-     went entirely in 3.3 (see the note in shell.html): it reclaimed 22px from
-     a 47px chrome, and paid for it with a header whose settled height depended
-     on which direction you had scrolled from. Everything that condensed - the
-     h1, the tenant name, the viewer label, the nav and tab padding - lost its
-     `body.scrolled` rule with it. */
-  .top-in { padding:8px 24px; }
+  header.top { transition:padding .18s ease; }
+  .top-in { padding:8px 24px; transition:padding .18s ease; }
+  body.scrolled .top-in { padding:5px 24px; }
+  /* The h1 and the tenant name used to shrink here too, from 22px to 16px.
+     There is nothing left to condense: the line is 13px and 40px tall before
+     you scroll, so a condense would be a 3px twitch and the transition on it
+     was a font resizing under the reader for no gain. Only the padding moves
+     now, which is the part that was ever worth reclaiming. */
+  /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
+     of the header. Their rules went with them: `.eyebrow` is also the deck
+     slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
+     header was reaching a full-screen slide that has neither. */
   nav.units { position:relative; z-index:7; }
   nav.tabs  { position:relative; z-index:6; }
+  body.scrolled nav.units button { padding:9px 18px; }
+  body.scrolled .tabs button { padding:9px 15px; }
   .banner { font-size:12px; padding:7px 24px; }
 
   /* ── Circular gauges ──────────────────────────────────── */
@@ -457,26 +464,27 @@
      pressed was a navigation button and the rail appeared not to work at all.
      `--chrome-h` is measured by the ResizeObserver in the shell, so this
      follows the header as it condenses instead of guessing at its height. */
-  /* NO CAP, NO INNER SCROLLBAR. A unit with more directions than fitted the
-     cap had its list cut off mid-row, which reads as "the list ends here" -
-     the one thing a navigation rail must never say. It is as tall as its
-     content now, whatever that is.
-
-     It still sticks, so on a page with more detail than rail (the normal
-     shape) the rail holds still and the pane beside it scrolls. Where a unit
-     has more directions than fit the window, the page scrolls until the last
-     of them is reachable and the rail pins from there - the honest behaviour,
-     rather than pretending a 20-item list can be held on one screen.
-
-     `top` follows the measured chrome, so it clears the header as it
-     condenses. NOTHING here is sized against that measurement: v2.8 capped
-     the rail's HEIGHT against it and closed a loop - measured height, page
-     height, scroll clamp, condense, measured height - that oscillated
-     forever. A sticky OFFSET changes nobody's height. A max-height does. */
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
     position:sticky; top:calc(var(--chrome-h, 118px) + 12px);
-    align-self:start; }
+    max-height:calc(100vh - 320px); overflow:hidden auto; }
 
+  /* The cap is a CONSTANT, and that is the whole point of it.
+
+     A rail taller than the space under the chrome has its first rows scrolled
+     up behind the chrome, where they cannot be clicked — the same fault as the
+     wrong offset, arriving a different way, and it bites on a short window.
+     So it is capped and scrolls inside itself.
+
+     But the cap must not be measured. `calc(100vh - var(--chrome-h) - 24px)`
+     closes a feedback loop: the cap follows the measured chrome, the cap
+     changes the page's height, that re-clamps the scroll position, that crosses
+     a condense threshold, and the chrome changes height again. Measured
+     oscillating 240 → 290 → 240 forever, and while it ran the rail never
+     stopped moving, so nothing in it could be clicked at all.
+
+     320px is the tallest the chrome gets (307) plus the 12px gap. On a page
+     whose chrome is shorter the rail is capped a little sooner than it needs to
+     be, which costs nothing anyone can see, and 100vh does not move. */
   .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
     display:flex; justify-content:space-between; gap:8px; }

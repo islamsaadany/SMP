@@ -69,6 +69,7 @@
      is told about. */
   .units-in { flex-wrap:wrap; overflow-x:visible; }
   .units button { padding:11px 14px; }
+  body.scrolled .units button { padding:8px 14px; }
   .units .sep { margin:8px 8px; }
 
   /* The card was designed three-up and its execution box needs that width —
@@ -660,11 +661,6 @@
   .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
     border-color:rgba(255,255,255,.7)}
   .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}
-  /* The face is a mark now, not a word. Tighter padding because a 15px glyph
-     in a pill sized for 11px uppercase text floats; the caret stays, because
-     it is what says this opens a list rather than going somewhere. */
-  .units .navmenu-btn.navmenu-ico{padding:5px 9px;gap:4px}
-  .navmenusvg{width:15px;height:15px;display:block}
   .navmenu-tw{font-size:9px;opacity:.85}
   .navmenu-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:212px;
     background:var(--surface);border:1px solid var(--line);border-radius:var(--r);

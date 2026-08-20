@@ -476,17 +476,10 @@ function capsTable(){
 
 
 function section(eyebrow, title, note, body, tipText, action){
-  /* A section with nothing to say in its header does not get one. Emitting an
-     empty <h2> still spends its line-height and its margin, which on the unit
-     Performance page was pushing the rail a heading's worth further down the
-     page for a heading that rendered as blank. */
-  var head = (eyebrow || title || action)
-    ? '<div class="section-h">' +
-        (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
-        (title ? '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' : '') +
-        (action || '') + '</div>'
-    : '';
-  return '<div class="section">' + head +
+  return '<div class="section"><div class="section-h">' +
+    (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
+    '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' +
+    (action || '') + '</div>' +
     (note ? '<p class="sec-note">' + note + '</p>' : '') + body + '</div>';
 }
 
@@ -1220,13 +1213,7 @@ function renderUnitPerformance(u){
     '</div>' +
 
     focusStrip(u) +
-    /* No heading over the rail. "Pillars - directions and capabilities" sat
-       above a rail whose own header already reads PILLARS and counts them,
-       and it pushed the rail a heading's height further down the page - which
-       is exactly the space the rail needs to stay in view while the pane
-       beside it scrolls. The arrange hint stays: it appears only in arrange
-       mode and says something the rail does not. */
-    section("", "", null,
+    section("", L("pillar","bu") + " &mdash; directions and capabilities", null,
       (canArrange("unit", u.ukey) && ARRANGE
         ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
           ' &middot; drag by the handle to reorder</p>' : '') +
@@ -2108,12 +2095,10 @@ function renderUnitPlan(u){
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table
      that will one day disagree with itself. */
-  /* Neither the unit's name nor a note about the page. The navigation row
-     highlights the unit and the tab row says Plan, so both were restating
-     where you already knew you were - the same redundancy the chrome shed in
-     2.9 - and the PILLARS heading below them repeated the rail's own header
-     word for word. The page opens straight onto the rail and the pillar. */
-  return (u.items.length >= 2
+  return '<div class="kv"><h2>' + esc(u.name) + '</h2>' +
+      '<span class="who">The plan as agreed &middot; no reported figure on this page</span></div>' +
+    '<h4 class="mini">' + L("pillar","bu") + '</h4>' +
+    (u.items.length >= 2
       ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel) + '</div></div>'
       : '<div class="pane">' + unitPlanBody(sel) + '</div>');
 }

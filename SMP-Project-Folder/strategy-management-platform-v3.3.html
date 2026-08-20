@@ -318,22 +318,15 @@
      content showed through the seams between them, and the .18s transitions
      smeared it as you scrolled. Pinning the container and nothing else cannot
      drift, because there is only one offset and the browser owns it. */
-  header.top { transition:padding .18s ease; }
-  .top-in { padding:8px 24px; transition:padding .18s ease; }
-  body.scrolled .top-in { padding:5px 24px; }
-  /* The h1 and the tenant name used to shrink here too, from 22px to 16px.
-     There is nothing left to condense: the line is 13px and 40px tall before
-     you scroll, so a condense would be a 3px twitch and the transition on it
-     was a font resizing under the reader for no gain. Only the padding moves
-     now, which is the part that was ever worth reclaiming. */
-  /* The eyebrow and the shape tag condensed here too, until 2.9 took both out
-     of the header. Their rules went with them: `.eyebrow` is also the deck
-     slide's kicker, and a 20px clip plus a `body.scrolled` fade meant for a
-     header was reaching a full-screen slide that has neither. */
+  /* One padding, no transition, no body.scrolled counterpart. The condense
+     went entirely in 3.3 (see the note in shell.html): it reclaimed 22px from
+     a 47px chrome, and paid for it with a header whose settled height depended
+     on which direction you had scrolled from. Everything that condensed - the
+     h1, the tenant name, the viewer label, the nav and tab padding - lost its
+     `body.scrolled` rule with it. */
+  .top-in { padding:8px 24px; }
   nav.units { position:relative; z-index:7; }
   nav.tabs  { position:relative; z-index:6; }
-  body.scrolled nav.units button { padding:9px 18px; }
-  body.scrolled .tabs button { padding:9px 15px; }
   .banner { font-size:12px; padding:7px 24px; }
 
   /* ── Circular gauges ──────────────────────────────────── */
@@ -674,27 +667,26 @@
      pressed was a navigation button and the rail appeared not to work at all.
      `--chrome-h` is measured by the ResizeObserver in the shell, so this
      follows the header as it condenses instead of guessing at its height. */
+  /* NO CAP, NO INNER SCROLLBAR. A unit with more directions than fitted the
+     cap had its list cut off mid-row, which reads as "the list ends here" -
+     the one thing a navigation rail must never say. It is as tall as its
+     content now, whatever that is.
+
+     It still sticks, so on a page with more detail than rail (the normal
+     shape) the rail holds still and the pane beside it scrolls. Where a unit
+     has more directions than fit the window, the page scrolls until the last
+     of them is reachable and the rail pins from there - the honest behaviour,
+     rather than pretending a 20-item list can be held on one screen.
+
+     `top` follows the measured chrome, so it clears the header as it
+     condenses. NOTHING here is sized against that measurement: v2.8 capped
+     the rail's HEIGHT against it and closed a loop - measured height, page
+     height, scroll clamp, condense, measured height - that oscillated
+     forever. A sticky OFFSET changes nobody's height. A max-height does. */
   .rail { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
     position:sticky; top:calc(var(--chrome-h, 118px) + 12px);
-    max-height:calc(100vh - 320px); overflow:hidden auto; }
+    align-self:start; }
 
-  /* The cap is a CONSTANT, and that is the whole point of it.
-
-     A rail taller than the space under the chrome has its first rows scrolled
-     up behind the chrome, where they cannot be clicked — the same fault as the
-     wrong offset, arriving a different way, and it bites on a short window.
-     So it is capped and scrolls inside itself.
-
-     But the cap must not be measured. `calc(100vh - var(--chrome-h) - 24px)`
-     closes a feedback loop: the cap follows the measured chrome, the cap
-     changes the page's height, that re-clamps the scroll position, that crosses
-     a condense threshold, and the chrome changes height again. Measured
-     oscillating 240 → 290 → 240 forever, and while it ran the rail never
-     stopped moving, so nothing in it could be clicked at all.
-
-     320px is the tallest the chrome gets (307) plus the 12px gap. On a page
-     whose chrome is shorter the rail is capped a little sooner than it needs to
-     be, which costs nothing anyone can see, and 100vh does not move. */
   .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
     display:flex; justify-content:space-between; gap:8px; }
@@ -765,7 +757,6 @@
   .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
                  letter-spacing:.06em; text-transform:uppercase; }
-  body.scrolled .viewer label { display:none; }
 
   /* ── Access matrix ───────────────────────────────────────────────── */
   .acgrid table { table-layout:auto; }
@@ -979,7 +970,6 @@
      is told about. */
   .units-in { flex-wrap:wrap; overflow-x:visible; }
   .units button { padding:11px 14px; }
-  body.scrolled .units button { padding:8px 14px; }
   .units .sep { margin:8px 8px; }
 
   /* The card was designed three-up and its execution box needs that width —
@@ -1571,6 +1561,11 @@
   .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
     border-color:rgba(255,255,255,.7)}
   .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}
+  /* The face is a mark now, not a word. Tighter padding because a 15px glyph
+     in a pill sized for 11px uppercase text floats; the caret stays, because
+     it is what says this opens a list rather than going somewhere. */
+  .units .navmenu-btn.navmenu-ico{padding:5px 9px;gap:4px}
+  .navmenusvg{width:15px;height:15px;display:block}
   .navmenu-tw{font-size:9px;opacity:.85}
   .navmenu-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:212px;
     background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
@@ -1967,14 +1962,10 @@ THEME.apply();
 
 <div class="wrap"><div class="view" id="panel"></div>
 
-<!-- The footer used to claim "no database work done" and describe the demo
-     content as if it were the only content. Both stopped being true: the
-     platform runs on a database (\u00a718), and a live tenant holds the client's
-     own data. The invented-data notice now lives in the demo banner, where it
-     is true \u2014 stated once, in the one place it applies. -->
-<footer class="end">
-  <b>Strategy Management Platform</b> &middot; spec 012, the strategy layer &middot; group shape.
-</footer>
+<!-- No footer. It carried one sentence - the product's name, a spec number
+     and a shape - none of which anyone was reading and all of which the chrome
+     already says. Its last real content (the invented-data notice) moved to
+     the demo banner in 2.2, where it is true; what was left was a signature. -->
 </div>
 
 <script>
@@ -7666,10 +7657,17 @@ function capsTable(){
 
 
 function section(eyebrow, title, note, body, tipText, action){
-  return '<div class="section"><div class="section-h">' +
-    (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
-    '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' +
-    (action || '') + '</div>' +
+  /* A section with nothing to say in its header does not get one. Emitting an
+     empty <h2> still spends its line-height and its margin, which on the unit
+     Performance page was pushing the rail a heading's worth further down the
+     page for a heading that rendered as blank. */
+  var head = (eyebrow || title || action)
+    ? '<div class="section-h">' +
+        (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
+        (title ? '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' : '') +
+        (action || '') + '</div>'
+    : '';
+  return '<div class="section">' + head +
     (note ? '<p class="sec-note">' + note + '</p>' : '') + body + '</div>';
 }
 
@@ -8403,7 +8401,13 @@ function renderUnitPerformance(u){
     '</div>' +
 
     focusStrip(u) +
-    section("", L("pillar","bu") + " &mdash; directions and capabilities", null,
+    /* No heading over the rail. "Pillars - directions and capabilities" sat
+       above a rail whose own header already reads PILLARS and counts them,
+       and it pushed the rail a heading's height further down the page - which
+       is exactly the space the rail needs to stay in view while the pane
+       beside it scrolls. The arrange hint stays: it appears only in arrange
+       mode and says something the rail does not. */
+    section("", "", null,
       (canArrange("unit", u.ukey) && ARRANGE
         ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
           ' &middot; drag by the handle to reorder</p>' : '') +
@@ -9285,10 +9289,12 @@ function renderUnitPlan(u){
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table
      that will one day disagree with itself. */
-  return '<div class="kv"><h2>' + esc(u.name) + '</h2>' +
-      '<span class="who">The plan as agreed &middot; no reported figure on this page</span></div>' +
-    '<h4 class="mini">' + L("pillar","bu") + '</h4>' +
-    (u.items.length >= 2
+  /* Neither the unit's name nor a note about the page. The navigation row
+     highlights the unit and the tab row says Plan, so both were restating
+     where you already knew you were - the same redundancy the chrome shed in
+     2.9 - and the PILLARS heading below them repeated the rail's own header
+     word for word. The page opens straight onto the rail and the pillar. */
+  return (u.items.length >= 2
       ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel) + '</div></div>'
       : '<div class="pane">' + unitPlanBody(sel) + '</div>');
 }
@@ -11438,6 +11444,23 @@ var SYNC = (function () {
     return gs;
   }
 
+  /* Where a destination opens. Everything keeps its own first page except a
+     business unit, which opens on Strategy and, inside it, on Plan. Both are
+     checked against what the viewer holds rather than assumed. */
+  function entrySub(k){
+    var d = allowed(defsFor(k));
+    if (!d.length) return null;
+    if (k !== "group" && k !== "manage" && k !== "setup" && !isFn(k)) {
+      var strat = d.filter(function(x){ return x.k === "strategy"; })[0];
+      if (strat) {
+        var secs = allowed(strat.sections(UNITS[k]));
+        if (secs.some(function(x){ return x.k === "plan"; })) CURSEC.strategy = "plan";
+        if (secs.length) return "strategy";
+      }
+    }
+    return d[0].k;
+  }
+
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
   function defsFor(k){
     return k === "group" ? SUBS.group
@@ -11488,14 +11511,30 @@ var SYNC = (function () {
           CLEARING = null;
         }
         current = b.dataset.u;
-        var d = allowed(defsFor(current));
-        currentSub = d.length ? d[0].k : null;
+        /* A business unit opens on its PLAN, not on Performance. What the unit
+           agreed is the thing people come to read and the thing they come to
+           change; the score is a consequence of it and is one click away.
+           Falls back to the first page the viewer actually holds, so someone
+           without u_plan is not sent to a tab that is not there. */
+        currentSub = entrySub(current);
         MENU_OPEN = false;
         paint(); window.scrollTo(0,0);
       });
     });
     wireMenu();
   }
+
+  /* A gear. It replaced the word "Manage" in 3.3 - at 11px uppercase in a
+     pill, the word was the widest thing in the navigation row and it named a
+     menu rather than a place. The mark is the same 20px box the theme control
+     uses. */
+  var ICON_MANAGE =
+    '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
+    '<circle cx="10" cy="10" r="2.9" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
+    '<path d="M10 1.9l1.2 2.05a6.2 6.2 0 0 1 1.63.68l2.3-.55 1.4 2.42-1.6 1.72a6.2 6.2 0 0 1 0 1.56' +
+    'l1.6 1.72-1.4 2.42-2.3-.55a6.2 6.2 0 0 1-1.63.68L10 18.1l-1.2-2.05a6.2 6.2 0 0 1-1.63-.68' +
+    'l-2.3.55-1.4-2.42 1.6-1.72a6.2 6.2 0 0 1 0-1.56L3.47 8.5l1.4-2.42 2.3.55a6.2 6.2 0 0 1 1.63-.68z" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
 
   /* The menu lives inside the row so it sits on the same baseline as the tabs,
      but its panel is absolutely positioned, so a long list never widens the
@@ -11514,8 +11553,12 @@ var SYNC = (function () {
     }).join("");
     return '<span class="sep pinsep"></span>' +
       '<div class="navmenu' + (MENU_OPEN ? " open" : "") + '">' +
-      '<button type="button" class="navmenu-btn' + (on ? " here" : "") + '" id="navmenu-btn" ' +
-      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '">Manage' +
+      '<button type="button" class="navmenu-btn navmenu-ico' + (on ? " here" : "") + '" id="navmenu-btn" ' +
+      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '" ' +
+      /* The word is gone from the face of the button, so it has to be carried
+         somewhere a pointer and a screen reader can both reach it. Never let a
+         glyph be the only thing that says what a control does. */
+      'title="Manage" aria-label="Manage">' + ICON_MANAGE +
       '<span class="navmenu-tw" aria-hidden="true">\u25be</span></button>' +
       '<div class="navmenu-panel"' + (MENU_OPEN ? "" : " hidden") + '>' + body + '</div></div>';
   }
@@ -12506,38 +12549,35 @@ var SYNC = (function () {
     document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
   }).observe(chromeEl);
 
-  /* Condensing the header reclaims vertical space, which is only worth doing
-     when there is a lot of page to scroll. On a page barely taller than the
-     window it is worse than pointless, it is UNSTABLE: the chrome is in flow,
-     so condensing it shortens the document by ~40px, which re-clamps the scroll
-     position, which crosses a threshold, which flips the header back — forever.
-     Measured at 240 → 290 → 240, and while it ran the rail (pinned below the
-     chrome, which moves with it) never stopped moving, so its rows could not be
-     clicked at all.
+  /* NO CONDENSE-ON-SCROLL. The chrome is one height, always.
 
-     The hysteresis — condense at 70, expand at 20 — was already there to stop
-     one flip causing the next. It cannot help here, because the flip comes from
-     the document changing height rather than from the reader scrolling. So the
-     condition is checked first: no room to scroll, no condensing. */
-  var ROOM = 200;   /* px of scrollable page below the fold worth condensing for */
-  function scrollRoom(){
-    return Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)
-           - window.innerHeight;
-  }
-  var ticking = false;
-  window.addEventListener("scroll", function(){
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function(){
-      var y = window.scrollY, on = document.body.classList.contains("scrolled");
-      /* Room is measured against the CONDENSED page when already condensed, so
-         un-condensing cannot immediately re-qualify it. */
-      if (on && scrollRoom() < ROOM - 40) document.body.classList.remove("scrolled");
-      else if (!on && y > 70 && scrollRoom() > ROOM) document.body.classList.add("scrolled");
-      else if (on && y < 20) document.body.classList.remove("scrolled");
-      ticking = false;
-    });
-  }, { passive: true });
+     This was the last thing in the product that changed size while you
+     scrolled, and it is what Islam had been reporting as the scroll-up glitch
+     for four versions. Two separate causes had already been found and fixed
+     underneath it (a chrome with no background in 2.7, a rail capped against
+     its own measured height in 2.8) and the symptom kept coming back, because
+     the mechanism was still there.
+
+     What it actually did, measured: at scroll position 25 the chrome settled
+     at 190px if you had arrived scrolling DOWN, and 168px if you had arrived
+     scrolling UP - and stayed there. Not a transition mid-flight; the settled
+     state genuinely depended on the direction you came from. That is the
+     hysteresis (condense past 70, expand below 20) working exactly as
+     designed - it is what stopped the header chattering at the threshold - but
+     the consequence is that scrolling back up holds the header condensed and
+     then drops 22px of chrome into the page in one step, moving everything
+     below it. That step, plus the .18s ease it animated with, is the "hazy and
+     damaged" of the original report.
+
+     It bought 22px. The header is 47px now (§27) - it was 108px when the
+     condense was written, and reclaiming a fifth of a tall header was worth
+     something. Reclaiming 22px from a 47px one is not worth a chrome whose
+     height depends on which way you were scrolling.
+
+     The ResizeObserver that publishes --chrome-h stays. The rail's sticky
+     offset still reads it; it simply reports a constant now, which is the
+     easiest possible thing for it to be right about. */
+
 
   /* Pillar rows: accordion, plus pulling the opened row under the chrome so a
      collapsing row above cannot move the page out from under the cursor. */

@@ -3126,3 +3126,131 @@ expose it.
 - Three themes × 31 viewers, zero console errors. PWA suite green. Round trip,
   fixed point and archived-plan round trip PASS, seed byte-identical, rebuild
   byte-identical.
+
+---
+
+## 28 · Six from the deployed product — and the condense finally goes — v3.3
+
+### 28.1 The footer
+
+One sentence — the product's name, a spec number, a shape — under every page.
+Its last real content (the invented-data notice) moved to the demo banner in
+§21, where it is true. What was left was a signature. Gone, and the `<footer>`
+with it.
+
+### 28.2 Manage becomes a mark
+
+At 11px uppercase in a pill, the word was the widest thing in the navigation
+row, and it named a *menu* rather than a place. It is a gear now — the one
+glyph everyone already reads as "the settings are behind here" — in the same
+20px box the theme control uses.
+
+**The word did not disappear, it moved**: `title` and `aria-label` both say
+Manage. A glyph is never the only thing that says what a control does — the
+same rule §24 wrote when the icons went the other way, and the reason those
+icons carried titles even then.
+
+### 28.3 The rail expands. Fully.
+
+`max-height: calc(100vh - 320px)` with `overflow: auto` cut a unit's list off
+mid-row — the one thing a navigation rail must never do, because a list that
+ends in a half-drawn item reads as *the list ends here*.
+
+The cap is gone. The rail is as tall as its content, whatever that is: proven
+against a synthesised unit with **18 directions** — all 18 rendered, nothing
+clipped, no inner scrollbar, and the 18th row reachable and clickable.
+
+It still sticks, so on the normal shape — more detail than rail — the rail
+holds still and the pane beside it scrolls, which is §28.4's ask. Where a unit
+has more directions than fit the window, the page scrolls until the last is
+reachable and the rail pins from there. That is the honest behaviour; the
+alternative was pretending a 20-item list can be held on one screen.
+
+**Nothing here is sized against `--chrome-h`.** The sticky *offset* reads it,
+which changes nobody's height. v2.8's cap read it as a *max-height*, which
+changed the page's height, which re-clamped the scroll, which re-condensed the
+header, which changed the measurement — forever. A sticky offset is safe; a
+measured max-height is a loop.
+
+### 28.4 Nothing above the rail
+
+"Pillars — directions and capabilities" sat above a rail whose own header
+already reads PILLARS and counts them, and it pushed the rail a heading's
+height down the page — which is exactly the room the rail needs to stay in view
+while the pane scrolls. On the Plan page the unit's name and "The plan as
+agreed · no reported figure on this page" went for the same reason the chrome
+shed five statements in §24: the nav row highlights the unit and the tab says
+Plan.
+
+`section()` now omits its header entirely when there is nothing to put in it.
+An empty `<h2>` still spends its line-height and its margin, and a heading that
+renders as blank is worse than no heading.
+
+### 28.5 A unit opens on its Plan
+
+What the unit agreed is what people come to read and what they come to change;
+the score is a consequence of it, and one click away. `entrySub()` decides,
+checking both the tab and the section against what the viewer actually holds —
+so someone without `u_plan` is never sent to a tab that is not there. Group,
+functions, Manage and Setup are untouched, and sign-in still opens on Group.
+
+### 28.6 The condense-on-scroll goes, and the scroll glitch with it
+
+This is the fourth version to carry a fix for "on scrolling up the page starts
+getting hazy and damaged", and the first to remove the *mechanism* rather than
+a cause underneath it.
+
+Two real causes were found and fixed before: a chrome with no background of its
+own (§23.6) and a rail capped against its own measured height (§23.7). Both
+were genuine. The symptom kept coming back.
+
+What was still there, measured directly: **at scroll position 25 the chrome
+settles at 190px if you arrived scrolling DOWN, and 168px if you arrived
+scrolling UP — and stays there.** Not a transition mid-flight; the settled
+state depended on the direction you came from.
+
+That is the hysteresis — condense past 70, expand below 20 — working exactly as
+designed. It is what stopped the header chattering at the threshold, and it was
+right to add. But its consequence is that scrolling back up holds the header
+condensed and then drops 22px of chrome into the page in one step, moving
+everything below it, animated over `.18s ease`. That step is the "hazy and
+damaged" of the original report.
+
+**It bought 22px.** The header was 108px tall when the condense was written and
+reclaiming a fifth of it was worth something. It is 47px now (§27). Reclaiming
+22px from 47 is not worth a chrome whose height depends on which way you were
+scrolling — so the whole mechanism goes: the scroll listener, the `scrolled`
+class, and every `body.scrolled` rule that hung off it (the top padding, the
+viewer label, the nav and tab button padding).
+
+The ResizeObserver that publishes `--chrome-h` stays; the rail's sticky offset
+still reads it. It reports a constant now, which is the easiest possible thing
+for it to be right about.
+
+**The general rule, which is what the four versions actually cost:** *a
+component whose size depends on scroll position will eventually depend on
+scroll direction, and then it is no longer a component, it is a state machine
+nobody drew.* Removing it is cheaper than getting it right.
+
+### 28.7 Verified
+
+- **Scroll sweep, both directions**, 25px steps down and back up on two long
+  pages, plus 65 frames of continuous upward scroll: **the chrome reports one
+  single height throughout — `[190]` — with zero height changes and zero class
+  flips.** Before this change the same sweep found two settled heights at the
+  same position depending on direction.
+- **Nothing shows through the chrome** at any scroll position, either
+  direction; the chrome's left edge is identical throughout; no page scrolls
+  horizontally.
+- **Pixel scan** down through the chrome mid-scroll: solid bands only, and the
+  frame at the top after scrolling up is identical to a fresh load bar 23
+  pixels of ±1 antialiasing on the theme button's curve.
+- **The rail with 18 directions**, on both Plan and Performance: all rows
+  rendered, `scrollHeight ≤ height` (nothing clipped), no inner scrollbar,
+  still `position: sticky`, last row reachable and returning the rail to
+  `elementFromPoint`.
+- **A unit opens on Strategy › Plan** with the Plan section reading as
+  selected; the menu still opens all ten destinations behind the gear, which
+  carries `title` and `aria-label`.
+- Three themes × 31 viewers, zero console errors. Contrast unchanged at 3
+  distinct in dark. Seed byte-identical, rebuild byte-identical.

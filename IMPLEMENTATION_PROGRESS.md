@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.2 · **Last updated:** 2026-08-20
+**Latest version:** v3.3 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,26 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.2 — one line, and the thing that was really moving it *(current)*
+### v3.3 — your six, and the scroll glitch at its source *(current)*
+The footer sentence is gone. **Manage is a gear**, not a word — it was the
+widest thing in the navigation row and it named a menu rather than a place; the
+word moved to its tooltip. The **rail expands to fit any number of directions**
+— the cap that cut lists off mid-row is gone, proven against a unit with 18.
+The heading above it went too, on both Plan and Performance, along with the unit
+name and the "plan as agreed" note: the nav row and the tab already say both. A
+**business unit now opens on Strategy › Plan**.
+
+And the scroll-up glitch, at its source this time. Three earlier versions fixed
+real causes underneath it and the symptom kept returning. What was still there,
+measured: **at scroll position 25 the chrome settled at 190px if you arrived
+scrolling down and 168px if you arrived scrolling up — and stayed there.** That
+is the condense-on-scroll's hysteresis working as designed, and its cost is that
+scrolling back up drops 22px of chrome into the page in one animated step,
+moving everything below it. It bought 22px on a header that is now 47px tall.
+The whole mechanism is gone. The chrome reports **one single height** across a
+full sweep in both directions and 65 frames of continuous upward scroll.
+
+### v3.2 — one line, and the thing that was really moving it
 The first line is now **one line at every width**, not just at 1180 and above —
 which is what v3.0 actually verified, and why it still arrived as two rows on
 your laptop. It no longer wraps at all; the pieces shrink instead, buttons last.
@@ -481,8 +500,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.2.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.2.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.3.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.3.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

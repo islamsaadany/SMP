@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v2.9 · **Last updated:** 2026-08-20
+**Latest version:** v3.0 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,30 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v2.9 — two lines of chrome, and one way in *(current)*
+### v3.0 — light and dark, by choice *(current)*
+The dark palette had been in the stylesheet since the beginning and nothing
+ever selected it, so the product followed your laptop silently. Now there is a
+control: **Auto · Light · Dark**, cycled by the round mark left of Demo data.
+Auto is where everyone starts and keeps following the device. The choice is
+remembered **on that screen only** — never in the database, or one person
+picking dark would turn the platform dark for the whole tenant — and the
+sign-in gate reads the same choice, so signing in never changes the colours
+under you. The gate's own dark colours were built; it had none.
+
+Switching the palette on for the first time exposed what had never been
+checked: colours written into rules as literals. The zebra stripe on **every
+table** was a hardcoded `#F7F9FC`, so in dark it painted a near-white band
+under near-white text. Five new tokens close that class. Measured over 19
+pages, dark went from **482 failing runs to 11**. Light, untouched, still has
+61 — pre-existing, shipped, and a palette decision rather than a dark-mode fix
+(§25.5, open).
+
+Two things came back with it: **the client's name** beside the product name on
+the first line, which §24 had removed entirely, and the first line **actually
+being one line** — measured, it never had been for anyone signed in: the two
+buttons had been wrapping onto a row of their own since v2.9.
+
+### v2.9 — two lines of chrome, and one way in
 Your six changes, all of them, plus the Info button you asked to remove.
 
 The first line was carrying five statements of where you are — "Strategy
@@ -423,8 +446,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v2.9.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v2.9.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.0.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.0.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

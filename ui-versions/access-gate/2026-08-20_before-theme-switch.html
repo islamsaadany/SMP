@@ -8,119 +8,35 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
 <title>SMP — Access</title>
-<script>
-  /* The gate has no theme control of its own — one card and a password field
-     is not the place to be offered a preference. It READS the choice made
-     inside the platform (same browser, same key, so the same choice) and
-     otherwise follows the device. Signing in never changes the colours under
-     you.
-
-     In the head and inline, before the stylesheet is even parsed, so the card
-     never paints light and flips. Absence of the attribute is what hands the
-     decision back to prefers-color-scheme, so "auto" removes rather than sets.
-     Storage throws rather than returning null in a private window, hence the
-     catch: a browser that cannot remember still follows the device. */
-  try {
-    var t = localStorage.getItem("smp.theme");
-    if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
-  } catch (e) {}
-</script>
 <style>
-  /* Light is the definition; dark redefines the same names and nothing else.
-     Every colour on this page is one of these — a hardcoded #fff or #d8dee8
-     left in a rule is a light value that survives into dark, which is exactly
-     how a "dark mode" ends up with one white box in it.
-
-     The values track the platform's own dark palette (_shared.css) so signing
-     in is not a change of scheme, and the three blocks below are the same
-     three the platform uses: bare :root, the device preference, and the
-     explicit choice. Change one, change all three. */
   :root {
-    color-scheme: light;
     --navy: #0f2544;
     --navy-light: #1b3a63;
     --gold: #c9a227;
     --gold-light: #e6c65c;
     --bg: #f4f6f9;
     --danger: #b3261e;
-    --card: #ffffff;
-    --field: #ffffff;
-    --line: #d8dee8;
-    --ink: #171b22;
-    --muted: #45536a;
-    --label: #0f2544;
-    --on-navy: #ffffff;
-    --on-navy-soft: #c8d3e2;
-    --on-gold: #0f2544;
-    --ghost-ink: #0f2544;
-    --ghost-line: #0f2544;
-    --shadow: rgba(15, 37, 68, 0.15);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --navy: #24487a;
-      --navy-light: #2e5794;
-      --gold: #d9b665;
-      --gold-light: #e6c65c;
-      --bg: #14161a;
-      --danger: #d97066;
-      --card: #1c2027;
-      --field: #242932;
-      --line: #333a45;
-      --ink: #e9ecf1;
-      --muted: #b4bcc8;
-      --label: #c3cedc;
-      --on-navy: #eaf0fa;
-      --on-navy-soft: #b9c8de;
-      --on-gold: #14161a;
-      --ghost-ink: #9fbbe4;
-      --ghost-line: #3c5d8c;
-      --shadow: rgba(0, 0, 0, 0.45);
-    }
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --navy: #24487a;
-    --navy-light: #2e5794;
-    --gold: #d9b665;
-    --gold-light: #e6c65c;
-    --bg: #14161a;
-    --danger: #d97066;
-    --card: #1c2027;
-    --field: #242932;
-    --line: #333a45;
-    --ink: #e9ecf1;
-    --muted: #b4bcc8;
-    --label: #c3cedc;
-    --on-navy: #eaf0fa;
-    --on-navy-soft: #b9c8de;
-    --on-gold: #14161a;
-    --ghost-ink: #9fbbe4;
-    --ghost-line: #3c5d8c;
-    --shadow: rgba(0, 0, 0, 0.45);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;
     background: var(--bg);
-    color: var(--ink);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .card {
-    background: var(--card);
+    background: #fff;
     border-radius: 12px;
-    box-shadow: 0 10px 30px var(--shadow);
+    box-shadow: 0 10px 30px rgba(15, 37, 68, 0.15);
     width: 100%;
     max-width: 380px;
     overflow: hidden;
   }
   .card-header {
     background: var(--navy);
-    color: var(--on-navy);
+    color: #fff;
     padding: 28px 32px;
     text-align: center;
   }
@@ -132,44 +48,39 @@
   .card-header p {
     margin-top: 6px;
     font-size: 13px;
-    color: var(--on-navy-soft);
+    color: #c8d3e2;
   }
   .card-body { padding: 28px 32px 32px; }
   label {
     display: block;
     font-size: 13px;
     font-weight: 600;
-    color: var(--label);
+    color: var(--navy);
     margin-bottom: 6px;
   }
   .access-name {
-    background: var(--field);
-    border: 1px solid var(--line);
+    background: var(--bg);
+    border: 1px solid #d8dee8;
     border-radius: 8px;
     padding: 10px 12px;
     font-weight: 600;
-    color: var(--label);
+    color: var(--navy);
     margin-bottom: 18px;
   }
   input[type="password"], input[type="text"] {
     width: 100%;
-    border: 1px solid var(--line);
+    border: 1px solid #d8dee8;
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 15px;
     margin-bottom: 18px;
     outline: none;
-    /* Both stated, or the field keeps the user agent's white-on-black and
-       the one box on the page that takes typing is the one that ignores the
-       theme. */
-    background: var(--field);
-    color: var(--ink);
   }
   input[type="password"]:focus, input[type="text"]:focus { border-color: var(--gold); }
   button {
     width: 100%;
     background: var(--navy);
-    color: var(--on-navy);
+    color: #fff;
     border: none;
     border-radius: 8px;
     padding: 12px;
@@ -185,18 +96,18 @@
     display: none;
   }
   .hint {
-    color: var(--muted);
+    color: #45536a;
     font-size: 12.5px;
     margin: -8px 0 14px;
   }
   /* Starting page after access */
   #home, #change { display: none; }
   #home { text-align: center; }
-  #home .card-body p { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+  #home .card-body p { color: #45536a; font-size: 15px; margin-bottom: 24px; }
   .open-btn {
     display: block;
     background: var(--navy);
-    color: var(--on-navy);
+    color: #fff;
     border-radius: 8px;
     padding: 12px;
     font-size: 15px;
@@ -207,14 +118,14 @@
   .open-btn:hover { background: var(--navy-light); }
   .logout {
     background: transparent;
-    color: var(--ghost-ink);
-    border: 1px solid var(--ghost-line);
+    color: var(--navy);
+    border: 1px solid var(--navy);
   }
   .logout:hover { background: var(--bg); }
   .badge {
     display: inline-block;
     background: var(--gold);
-    color: var(--on-gold);
+    color: var(--navy);
     font-size: 12px;
     font-weight: 700;
     border-radius: 999px;
@@ -278,7 +189,7 @@
       <p>Welcome! You are signed in.</p>
       <!-- The link carries the shipped version's filename (version lives in the
            filename, never in the app) — update it on each version bump. -->
-      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v3.0.html">Open the Strategy Management Platform</a>
+      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v2.9.html">Open the Strategy Management Platform</a>
       <button class="logout" id="logoutBtn">Sign Out</button>
     </div>
   </div>

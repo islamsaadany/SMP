@@ -22,6 +22,11 @@ out = ("<!doctype html>\n<meta charset='utf-8'>\n"
        "<meta name='viewport' content='width=device-width,initial-scale=1'>\n"
        + ICON + "\n"
        "<title>Raya Trade \u2014 Strategy Management Platform</title>\n<style>\n"
-       + css + "\n</style>\n\n" + shell)
+       + css + "\n</style>\n"
+       # The theme is chosen in the HEAD, before the body is parsed, so a
+       # person who picked dark never sees the page paint light and flip.
+       # It has to be inline for the same reason the icon is a data URI:
+       # the file has to carry everything it needs.
+       "<script>\n" + open('theme.js').read() + "\n</script>\n\n" + shell)
 open('strategy-management-platform.html','w').write(out)
 print("built", len(out))

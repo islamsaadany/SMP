@@ -2747,3 +2747,166 @@ still reachable from the `[data-modal]` links inside the pages.
 - **Presentation mode** renders with the deck's own kicker unclipped.
 - **Round trip, fixed point and archived-plan round trip PASS**; `db/seed-state.json`
   regenerated and byte-identical, because none of this touched the data.
+
+---
+
+## 25 · Light and dark, by choice — v3.0
+
+Islam: *"Add dark and light mood for the page as well."*
+
+### 25.1 The dark palette was already there. The choice was not.
+
+`_shared.css` has carried a complete dark palette since the beginning — every
+token, every state band, redefined under `@media (prefers-color-scheme: dark)`
+and again under `:root[data-theme="dark"]`. Nothing set `data-theme`, so the
+second block had never once been used, and the product followed the laptop
+silently with no way for a person to say otherwise.
+
+So this was not building dark mode. It was **adding the switch, and then finding
+out how much of the existing dark palette actually worked** — which is a
+different and more useful piece of work, because a palette nothing has ever
+selected is a palette nobody has ever checked.
+
+### 25.2 Three states, not two
+
+Auto · Light · Dark, cycled by one round control in the first line, left of
+Demo data.
+
+Auto is the starting position and keeps following the device. A two-state
+toggle would have had to guess a side at first load and, worse, would have
+thrown away the ability to go back to following — the state most people
+should be in.
+
+**Auto REMOVES the attribute rather than setting it to `"auto"`.** The
+stylesheet keys off `:root[data-theme="dark"]` and
+`:root:not([data-theme="light"])`, so *absence* is what hands the decision back
+to `prefers-color-scheme`. Setting `data-theme="auto"` would be a third string
+neither selector matches — which happens to work today, and would quietly stop
+working the moment a rule tested for `"light"`.
+
+### 25.3 The choice belongs to the screen, not to the graph
+
+It lives in `localStorage` under `smp.theme`, and **never in the state graph**.
+Putting it in the graph would autosave it to the database, and one person
+picking dark would turn the platform dark for everyone in the tenant. It is a
+property of the screen you are sitting at — which is also why the gate reads
+the same key rather than having a switch of its own: same browser, same choice,
+so signing in never changes the colours under you.
+
+Applied inline **from the head**, before the body is parsed, so a person who
+chose dark never watches the page paint light and flip. `THEME.apply()` runs at
+parse time; `THEME.wire()` runs after the chrome exists and only hangs the
+control on it.
+
+Nothing else in the product had to learn about any of this: no JS reads a
+colour, so setting one attribute is the whole of the change.
+
+### 25.4 What the switch exposed: colours written as literals
+
+Turning the palette on for the first time made a class of latent defect
+visible at once. A hardcoded colour in a rule is a **light** value with no dark
+counterpart, so it survives into dark unchanged:
+
+- **`tbody tr:nth-child(even) > td { background:#F7F9FC }`** — the zebra stripe
+  on every table in the product. In dark it painted a near-white band under
+  near-white text. This one defect accounted for 482 of the 482 failing runs
+  measured (13 of 52 distinct pairs, but by far the most-repeated).
+- `tbody tr.focusrow:nth-child(even) > td { background:#FDFAF1 }` — the same,
+  gold-tinted, on focus rows.
+- `.b-over { background:#FBF6E9; border:1px solid #E8D9AE }` — the "earning" badge.
+- **`color:#fff` on a `--stone` / `--stone-soft` / `--gold-deep` fill.** In light
+  those tokens are dark navy and deep gold, so white is right. In dark they are
+  deliberately *lighter than the page*, so white on them fell to 1.94–3.91.
+
+Five new tokens close the class: `--zebra`, `--zebra-focus`, `--over-bg`,
+`--over-line`, and `--on-fill` — the ink for text sitting **on** a stone or gold
+fill, white in light and near-black in dark. `--on-fill` is deliberately *not*
+used on `--panel` fills, which stay dark navy in both themes and keep white.
+
+**The rule this leaves behind: a colour with no entry in the palette block
+cannot follow the theme.** Every literal in a rule is a light-mode assumption.
+
+`--ink-3` and `--none` were also nudged in dark only (`#868F9C`→`#949DAA`,
+`#7B838F`→`#8E97A3`) — both sat just under AA on `--surface-2`, which is what a
+card header and a chip are painted on.
+
+### 25.5 Dark is now cleaner than light — and light is not this version's job
+
+Measured with a WCAG AA audit over 19 pages, every visible run of text against
+the background actually painted behind it:
+
+| | before | after |
+|---|---|---|
+| **dark** | 482 failing runs, 52 distinct | **11 failing runs, 3 distinct** |
+| **light** | 391 failing runs, 61 distinct | *unchanged* |
+
+The three left in dark are worth naming honestly:
+
+- `--ink-3` on a `--panel` band (a `.why` note on navy), 3.36 — **this fails
+  worse in light**, at 2.73. Pre-existing, both themes.
+- `.editbtn.danger` on `--surface-2`, 4.49 against a 4.50 threshold. Inside the
+  rounding of the measurement itself.
+
+**Light mode has 61 distinct AA failures and this version did not touch them.**
+They are shipped, pre-existing, and fixing them means re-tuning the house
+palette — a design decision, not a dark-mode fix, and not something to do
+without asking. Recorded here as backlog, not quietly corrected.
+
+### 25.6 The client's name comes back
+
+Removing the org-and-unit title in §24 left the product never saying whose
+strategy it was showing. `Strategy Management Platform · Raya Trade` — product
+name in the serif h1, tenant name after it in smaller sans. Repainted in
+`paint()` rather than set once, because the Demo button swaps the whole graph
+and Labels can rename the tenant while you are looking at it. `textContent`,
+never `innerHTML`: the org name is typed by a person.
+
+### 25.7 The first line was never actually one line
+
+§24 asked for three things on the first line. Measured against the running
+product, signed in, they had never fit: brand 400 + viewer 467 + buttons 257 +
+two 20px gaps = **1164px against a 1132px column**, so the two buttons wrapped
+onto a row of their own for everyone with a session. The wrap was already in
+v2.9; the client name and the theme mark made it worse.
+
+Fixed by stating what gives instead of leaving it to the browser: the buttons
+never shrink, the tenant name and the person picker do (`min-width:0` plus
+ellipsis; the viewer `select` cap 250px → 170px, since it sizes itself to its
+longest option and "Strategy Management Office — all units" pinned it wide).
+`.top-in`'s gap 20px → 16px.
+
+`flex-wrap` deliberately stays `wrap`: a genuinely narrow window should still
+break the row rather than overflow it. The fix is to stop it happening at
+ordinary widths, not to forbid it. One line holds at **1180px and above** —
+1180 being the content column, below which the whole page is already
+compromised.
+
+### 25.8 Verified
+
+- **Three themes × 31 viewers × every destination and sub-tab**, via `qa.py`
+  driven at this container's Chromium: device-light, device-dark, and
+  device-light-with-dark-chosen (a different CSS selector from device dark).
+  **Zero console errors in all three.**
+- **The cycle**, at both device settings: auto → light → dark → auto, each step
+  asserted on the attribute, on `localStorage`, and on the colour actually
+  painted; auto proven to return to the *device's* colour, not to light.
+- **Remembered across a reload**, and **inherited by the gate** in the same
+  browser — asserted on the gate's card and on the password field, which is the
+  one box that would keep the user agent's white if `background` and `color`
+  were not both stated.
+- **The gate with no stored choice**, at both device settings: follows the
+  device, sets no attribute.
+- **Served and signed in** against a throwaway Postgres: hydrate, repaint,
+  theme switch, reload, gate, and the Demo button — banner up, dataset swapped,
+  refusing to save. Zero console errors.
+- **One line at 1920 / 1600 / 1400 / 1280 / 1180**, and in the condensed
+  (scrolled) state.
+- **Round trip, fixed point and archived-plan round trip PASS**;
+  `db/seed-state.json` regenerated and byte-identical — none of this touched
+  the data.
+
+### 25.9 Open
+
+- **Light mode's 61 AA failures** (§25.5). Needs a palette decision.
+- **`--ink-3` on `--panel`** — a `.why` note on a navy band, failing in both
+  themes, worse in light.

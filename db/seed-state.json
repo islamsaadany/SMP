@@ -1,0 +1,5599 @@
+{
+ "group": {
+  "org": "Raya Trade",
+  "horizon": "2029",
+  "asOfQuarter": 2,
+  "aspiration": "To be the most trusted & diversified provider for mobile, consumer electronics, IT products & logistics services in Egypt & Nigeria, delivering innovative offerings and unmatched service excellence that enrich lives, empower businesses, and drive regional growth.",
+  "endInMind": "",
+  "mission": "To empower our partners and customers with reliable, accessible, and efficient solutions & services across diverse channels through a seamless distribution & logistical network with solid financial infrastructure and exceptional customer experience, fostering trust, innovation & mutual growth.",
+  "values": [
+   {
+    "name": "Respect for People",
+    "def": "An empathetic employee with a socially positive attitude."
+   },
+   {
+    "name": "Teamwork",
+    "def": "A key team player who portrays a collaborative mindset and adopts a culture of synergy."
+   },
+   {
+    "name": "Excellence",
+    "def": "A proactive, self-developing employee who surpasses expectations and objectives."
+   },
+   {
+    "name": "Customer Focus",
+    "def": "A customer-centric employee with an aptitude for business sustainability."
+   }
+  ],
+  "clauses": [
+   [
+    "We are",
+    "a diversified holding trade company"
+   ],
+   [
+    "Offering",
+    "comprehensive (value added) distribution, retail, care, e-commerce for consumer electronics, IT products, and services in addition to logistics services for diverse sizes of packages"
+   ],
+   [
+    "To",
+    "vendors, retail channels, independent sellers, large enterprises, government sectors, e-commerce platforms and individuals"
+   ],
+   [
+    "Through",
+    "a seamless network of distribution channels, physical retail locations, e-commerce platforms, logistics hubs, and a dedicated sales force"
+   ],
+   [
+    "Covering",
+    "all over Egypt and Nigeria"
+   ],
+   [
+    "Empowered by",
+    "a diversified portfolio, economy of scale, extensive reach, exceptional customer experience, and premium after-sales support (owning the value chain)"
+   ]
+  ],
+  "keyObjectives": [
+   {
+    "name": "Revenue",
+    "group": null,
+    "dir": "≥",
+    "target3y": "34B EGP",
+    "target": "18B EGP",
+    "compile": "Sum",
+    "actual": "7.8B",
+    "progress": 43
+   },
+   {
+    "name": "EBITDA",
+    "group": null,
+    "dir": "≥",
+    "target3y": "8.5%",
+    "target": "6.5%",
+    "compile": "Latest",
+    "actual": "5.1%",
+    "progress": 78
+   },
+   {
+    "name": "Earnings concentration",
+    "group": null,
+    "dir": "≤",
+    "target3y": "30%",
+    "target": "40%",
+    "compile": "Latest",
+    "actual": "46%",
+    "progress": 87
+   },
+   {
+    "name": "Mobile Distribution",
+    "group": "Market share",
+    "dir": "≥",
+    "target3y": "38%",
+    "target": "32%",
+    "compile": "Latest",
+    "actual": "28%",
+    "progress": 88
+   },
+   {
+    "name": "CE Distribution",
+    "group": "Market share",
+    "dir": "≥",
+    "target3y": "24%",
+    "target": "18%",
+    "compile": "Latest",
+    "actual": "14%",
+    "progress": 78
+   },
+   {
+    "name": "Retail",
+    "group": "Market share",
+    "dir": "≥",
+    "target3y": "18%",
+    "target": "12%",
+    "compile": "Latest",
+    "actual": "9%",
+    "progress": 75
+   }
+  ],
+  "keyObjectivesScore": 75,
+  "themes": [
+   {
+    "ab": "OT",
+    "name": "One Trade",
+    "note": "New for 2026"
+   },
+   {
+    "ab": "VC",
+    "name": "Deepen Value Chain",
+    "note": "Standing"
+   },
+   {
+    "ab": "DIV",
+    "name": "Diversification",
+    "note": "Standing"
+   }
+  ],
+  "capabilities": [
+   {
+    "name": "Operational Excellence",
+    "def": "Run the core trading engine so reliably that scale stops costing us margin.",
+    "keyObjectives": [
+     {
+      "name": "Process cycle time",
+      "dir": "≤",
+      "target": "12 d",
+      "compile": "Latest",
+      "actual": "15 d",
+      "progress": 80,
+      "weight": 40,
+      "id": "cap1-KO1"
+     },
+     {
+      "name": "Cost-to-serve",
+      "dir": "≤",
+      "target": "4.2%",
+      "compile": "Latest",
+      "actual": "5.6%",
+      "progress": 75,
+      "weight": 60,
+      "id": "cap1-KO2"
+     }
+    ],
+    "projects": [
+     {
+      "name": "Standardise the core order process across units",
+      "owner": "Ashraf Abdelaty",
+      "brief": "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
+      "stakeholders": [
+       "Operations",
+       "IT"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Single documented order process",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Ashraf Abdelaty",
+        "actual": "yes",
+        "id": "cap1-P1-D1"
+       },
+       {
+        "name": "Unit-by-unit gap assessment",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Hala",
+        "actual": "yes",
+        "id": "cap1-P1-D2"
+       },
+       {
+        "name": "Process rolled out across the three units",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Ashraf Abdelaty",
+        "actual": 55,
+        "id": "cap1-P1-D3"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Order cycle time",
+        "dir": "≤",
+        "target": "12 d",
+        "measureAt": "Q3 2026",
+        "actual": "15 d",
+        "progress": 80,
+        "note": "Retail is on the new process; Mobile cuts over in Q3.",
+        "id": "cap1-P1-O1"
+       },
+       {
+        "name": "First-time-right rate",
+        "dir": "≥",
+        "target": "95%",
+        "measureAt": "Q4 2026",
+        "actual": null,
+        "progress": null,
+        "id": "cap1-P1-O2"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Process design and sign-off",
+        "covers": "The target process agreed with all three unit heads",
+        "owner": "Ashraf Abdelaty",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap1-P1-M1"
+       },
+       {
+        "name": "Gap assessment per unit",
+        "covers": "What each unit has to change to reach it",
+        "owner": "Hala",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap1-P1-M2"
+       },
+       {
+        "name": "Retail and Mazaya cutover",
+        "covers": "Both units running the standard process",
+        "owner": "Hala",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap1-P1-M3"
+       },
+       {
+        "name": "Mobile cutover",
+        "covers": "The last unit, gated on the ERP work",
+        "owner": "Ashraf Abdelaty",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap1-P1-M4"
+       }
+      ],
+      "id": "cap1-P1",
+      "capId": "cap1"
+     },
+     {
+      "name": "Cost-to-serve model and monthly review",
+      "owner": "Fayad Sobhy",
+      "brief": "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
+      "stakeholders": [
+       "Finance",
+       "Operations"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Cost-to-serve model built and validated",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Fayad Sobhy",
+        "actual": "yes",
+        "id": "cap1-P2-D1"
+       },
+       {
+        "name": "Monthly review running with all units",
+        "kind": "pct",
+        "due": "Q3",
+        "owner": "Fayad Sobhy",
+        "actual": 60,
+        "id": "cap1-P2-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Cost-to-serve",
+        "dir": "≤",
+        "target": "4.2%",
+        "measureAt": "Q4 2026",
+        "actual": null,
+        "progress": null,
+        "id": "cap1-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Cost driver mapping",
+        "covers": "Which activities carry the cost, by unit",
+        "owner": "Fayad Sobhy",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap1-P2-M1"
+       },
+       {
+        "name": "Model build and validation",
+        "covers": "Model reconciled against two closed months",
+        "owner": "Fayad Sobhy",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap1-P2-M2"
+       },
+       {
+        "name": "Review cadence embedded",
+        "covers": "A standing monthly session with each unit",
+        "owner": "Hala",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap1-P2-M3"
+       }
+      ],
+      "id": "cap1-P2",
+      "capId": "cap1"
+     },
+     {
+      "name": "First-time-right programme in distribution",
+      "owner": "Hala",
+      "brief": "Cut the rework in distribution by fixing the two failure points that produce most of it.",
+      "stakeholders": [
+       "Operations"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Failure analysis on twelve months of orders",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Hala",
+        "actual": "yes",
+        "id": "cap1-P3-D1"
+       },
+       {
+        "name": "Corrective standard operating procedures",
+        "kind": "pct",
+        "due": "Q3",
+        "owner": "Hala",
+        "actual": 40,
+        "id": "cap1-P3-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "First-time-right rate",
+        "dir": "≥",
+        "target": "95%",
+        "measureAt": "Q4 2026",
+        "actual": "82%",
+        "progress": 86,
+        "id": "cap1-P3-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Failure analysis",
+        "covers": "Where rework originates and what it costs",
+        "owner": "Hala",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap1-P3-M1"
+       },
+       {
+        "name": "Procedure rewrite",
+        "covers": "New procedures for the two main failure points",
+        "owner": "Hala",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap1-P3-M2"
+       },
+       {
+        "name": "Team retraining",
+        "covers": "Distribution teams trained on the new procedures",
+        "owner": "Hala",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap1-P3-M3"
+       }
+      ],
+      "id": "cap1-P3",
+      "capId": "cap1"
+     }
+    ],
+    "fn": "treasury",
+    "id": "cap1"
+   },
+   {
+    "name": "People",
+    "def": "Have the right people in the right roles, and keep them.",
+    "keyObjectives": [
+     {
+      "name": "Key-role coverage",
+      "dir": "≥",
+      "target": "90%",
+      "compile": "Latest",
+      "actual": "62%",
+      "progress": 69,
+      "weight": 50,
+      "id": "cap2-KO1"
+     },
+     {
+      "name": "Voluntary attrition",
+      "dir": "≤",
+      "target": "12%",
+      "compile": "Latest",
+      "actual": "19%",
+      "progress": 63,
+      "weight": 50,
+      "id": "cap2-KO2"
+     }
+    ],
+    "projects": [
+     {
+      "name": "Key-role succession map for every unit",
+      "owner": "Noran Adel",
+      "brief": "Name a successor for every key role in every unit, and know which ones have nobody.",
+      "stakeholders": [
+       "HR",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q3 2026",
+      "deliverables": [
+       {
+        "name": "Key-role definition agreed group-wide",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "Noran Adel",
+        "actual": "yes",
+        "id": "cap2-P1-D1"
+       },
+       {
+        "name": "Succession map per unit",
+        "kind": "pct",
+        "due": "Q3",
+        "owner": "Noran Adel",
+        "actual": 70,
+        "id": "cap2-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Key-role coverage",
+        "dir": "≥",
+        "target": "90%",
+        "measureAt": "Q3 2026",
+        "actual": "62%",
+        "progress": 69,
+        "note": "Six roles across Retail and Mazaya still have no named successor.",
+        "id": "cap2-P1-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Key-role definition",
+        "covers": "What counts as a key role, agreed with the units",
+        "owner": "Noran Adel",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap2-P1-M1"
+       },
+       {
+        "name": "Unit-by-unit mapping",
+        "covers": "Successors named, gaps recorded",
+        "owner": "Noran Adel",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap2-P1-M2"
+       },
+       {
+        "name": "Gap closure plans",
+        "covers": "A plan for every role with no successor",
+        "owner": "Noran Adel",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap2-P1-M3"
+       }
+      ],
+      "id": "cap2-P1",
+      "capId": "cap2"
+     },
+     {
+      "name": "Retention plan for the top two attrition roles",
+      "owner": "Noran Adel",
+      "brief": "Two roles produce most of the voluntary attrition. Find out why, and change it.",
+      "stakeholders": [
+       "HR"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Exit interview analysis",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Noran Adel",
+        "actual": "yes",
+        "id": "cap2-P2-D1"
+       },
+       {
+        "name": "Revised package and progression for both roles",
+        "kind": "binary",
+        "due": "Q3",
+        "owner": "Noran Adel",
+        "actual": "no",
+        "note": "Held pending the compensation review.",
+        "id": "cap2-P2-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Voluntary attrition in the two roles",
+        "dir": "≤",
+        "target": "12%",
+        "measureAt": "Q1 2027",
+        "actual": null,
+        "progress": null,
+        "id": "cap2-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Attrition analysis",
+        "covers": "Which roles, which reasons, which managers",
+        "owner": "Noran Adel",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap2-P2-M1"
+       },
+       {
+        "name": "Package redesign",
+        "covers": "Pay and progression reworked for both roles",
+        "owner": "Noran Adel",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap2-P2-M2"
+       },
+       {
+        "name": "Rollout and communication",
+        "covers": "Both roles moved onto the new terms",
+        "owner": "Noran Adel",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap2-P2-M3"
+       }
+      ],
+      "id": "cap2-P2",
+      "capId": "cap2"
+     },
+     {
+      "name": "Group training calendar and delivery",
+      "owner": "Hala",
+      "brief": "One training calendar for the group, published ahead of the year and actually delivered.",
+      "stakeholders": [
+       "HR",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Annual training calendar published",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "Hala",
+        "actual": "yes",
+        "id": "cap2-P3-D1"
+       },
+       {
+        "name": "Calendar delivered",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Hala",
+        "actual": 44,
+        "id": "cap2-P3-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Training hours per head",
+        "dir": "≥",
+        "target": "24",
+        "measureAt": "Q4 2026",
+        "actual": "5",
+        "progress": 21,
+        "note": "Two of nine planned sessions delivered. Q3 and Q4 carry the rest.",
+        "id": "cap2-P3-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Needs assessment",
+        "covers": "What each unit actually needs, not what it asks for",
+        "owner": "Hala",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap2-P3-M1"
+       },
+       {
+        "name": "Calendar published",
+        "covers": "Dates, trainers and places confirmed for the year",
+        "owner": "Hala",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap2-P3-M2"
+       },
+       {
+        "name": "First-half delivery",
+        "covers": "Sessions scheduled to Q2 delivered",
+        "owner": "Hala",
+        "finish": "Q2",
+        "status": "wip",
+        "id": "cap2-P3-M3"
+       },
+       {
+        "name": "Second-half delivery",
+        "covers": "The remaining sessions",
+        "owner": "Hala",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap2-P3-M4"
+       }
+      ],
+      "id": "cap2-P3",
+      "capId": "cap2"
+     }
+    ],
+    "fn": "hr",
+    "id": "cap2"
+   },
+   {
+    "name": "Innovation and Tech",
+    "def": "Consolidate onto systems that let a decision be made from one number, not five.",
+    "keyObjectives": [
+     {
+      "name": "Systems consolidated",
+      "dir": "≥",
+      "target": "6",
+      "compile": "Sum",
+      "actual": "2",
+      "progress": 33,
+      "weight": 100,
+      "id": "cap3-KO1"
+     }
+    ],
+    "projects": [
+     {
+      "name": "Consolidate ERP instances across units",
+      "owner": "Abdelhamid",
+      "brief": "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
+      "stakeholders": [
+       "IT",
+       "Finance",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Target instance design",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Abdelhamid",
+        "actual": "yes",
+        "id": "cap3-P1-D1"
+       },
+       {
+        "name": "Instances migrated",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Abdelhamid",
+        "actual": 33,
+        "note": "Two of six migrated. Mobile's cutover moved to Q3 with the principal.",
+        "id": "cap3-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Systems consolidated",
+        "dir": "≥",
+        "target": "6",
+        "measureAt": "Q4 2026",
+        "actual": "2",
+        "progress": 33,
+        "id": "cap3-P1-O1"
+       },
+       {
+        "name": "Days to close month-end",
+        "dir": "≤",
+        "target": "5 d",
+        "measureAt": "Q1 2027",
+        "actual": null,
+        "progress": null,
+        "id": "cap3-P1-O2"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Instance audit",
+        "covers": "What is running where, and what depends on it",
+        "owner": "Abdelhamid",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap3-P1-M1"
+       },
+       {
+        "name": "Target design and sequencing",
+        "covers": "One target instance, and the order units move in",
+        "owner": "Abdelhamid",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap3-P1-M2"
+       },
+       {
+        "name": "First two migrations",
+        "covers": "Treasury and Care moved across",
+        "owner": "Abdelhamid",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap3-P1-M3"
+       },
+       {
+        "name": "Remaining migrations",
+        "covers": "Mobile, Retail, Mazaya and B2B",
+        "owner": "Abdelhamid",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap3-P1-M4"
+       }
+      ],
+      "id": "cap3-P1",
+      "capId": "cap3"
+     },
+     {
+      "name": "Group data warehouse and single reporting layer",
+      "owner": "Ramy Behairy",
+      "brief": "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
+      "stakeholders": [
+       "IT",
+       "Finance"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Warehouse built and loading nightly",
+        "kind": "binary",
+        "due": "Q3",
+        "owner": "Ramy Behairy",
+        "actual": "no",
+        "id": "cap3-P2-D1"
+       },
+       {
+        "name": "Reporting layer live for sales and finance",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Ramy Behairy",
+        "actual": 36,
+        "id": "cap3-P2-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Dependency on automated reports",
+        "dir": "≥",
+        "target": "90%",
+        "measureAt": "Q4 2026",
+        "actual": "58%",
+        "progress": 64,
+        "note": "Power BI live for sales; finance stays manual until the warehouse lands.",
+        "id": "cap3-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Model and source mapping",
+        "covers": "What the warehouse holds and where it comes from",
+        "owner": "Ramy Behairy",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap3-P2-M1"
+       },
+       {
+        "name": "Warehouse build",
+        "covers": "Built, loading nightly, reconciled",
+        "owner": "Ramy Behairy",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap3-P2-M2"
+       },
+       {
+        "name": "Reporting layer rollout",
+        "covers": "Sales and finance reporting moved onto it",
+        "owner": "Ramy Behairy",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap3-P2-M3"
+       }
+      ],
+      "id": "cap3-P2",
+      "capId": "cap3"
+     },
+     {
+      "name": "Automation backlog and delivery cadence",
+      "owner": "Ramy Behairy",
+      "brief": "A standing backlog of automation candidates, and a cadence that actually clears it.",
+      "stakeholders": [
+       "IT"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Backlog built and prioritised",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "Ramy Behairy",
+        "actual": "yes",
+        "id": "cap3-P3-D1"
+       },
+       {
+        "name": "Backlog delivered",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Ramy Behairy",
+        "actual": 52,
+        "id": "cap3-P3-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Manual hours removed per month",
+        "dir": "≥",
+        "target": "300",
+        "measureAt": "Q4 2026",
+        "actual": "140",
+        "progress": 47,
+        "id": "cap3-P3-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Candidate assessment",
+        "covers": "Every manual process worth automating, sized",
+        "owner": "Ramy Behairy",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap3-P3-M1"
+       },
+       {
+        "name": "Cadence established",
+        "covers": "A fortnightly release running",
+        "owner": "Ramy Behairy",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap3-P3-M2"
+       },
+       {
+        "name": "Half the backlog delivered",
+        "covers": "The top half by hours removed",
+        "owner": "Ramy Behairy",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap3-P3-M3"
+       }
+      ],
+      "id": "cap3-P3",
+      "capId": "cap3"
+     }
+    ],
+    "fn": "it",
+    "id": "cap3"
+   },
+   {
+    "name": "Brand Positioning",
+    "def": "Be known for something specific, by the people who decide.",
+    "keyObjectives": [],
+    "projects": [
+     {
+      "name": "Brand audit and positioning statement",
+      "owner": "Yara Kamal",
+      "brief": "Establish what the market currently believes about us, and agree what we want it to believe instead.",
+      "stakeholders": [
+       "Marketing"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q3 2026",
+      "deliverables": [
+       {
+        "name": "Market perception study",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Yara Kamal",
+        "actual": "yes",
+        "id": "cap4-P1-D1"
+       },
+       {
+        "name": "Positioning statement agreed by the board",
+        "kind": "binary",
+        "due": "Q3",
+        "owner": "Yara Kamal",
+        "actual": "no",
+        "id": "cap4-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Unaided brand awareness",
+        "dir": "≥",
+        "target": "45%",
+        "measureAt": "Q4 2026",
+        "actual": null,
+        "progress": null,
+        "id": "cap4-P1-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Perception study fielded",
+        "covers": "Study run with trade and end customers",
+        "owner": "Yara Kamal",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap4-P1-M1"
+       },
+       {
+        "name": "Positioning workshop",
+        "covers": "Options developed and tested with the board",
+        "owner": "Yara Kamal",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap4-P1-M2"
+       }
+      ],
+      "id": "cap4-P1",
+      "capId": "cap4"
+     },
+     {
+      "name": "Trade communication programme",
+      "owner": "Tarek Nour",
+      "brief": "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
+      "stakeholders": [
+       "Marketing",
+       "Sales"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Twelve-month communication calendar",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Tarek Nour",
+        "actual": "yes",
+        "id": "cap4-P2-D1"
+       },
+       {
+        "name": "Calendar executed",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Tarek Nour",
+        "actual": 35,
+        "id": "cap4-P2-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Trade partner recall",
+        "dir": "≥",
+        "target": "70%",
+        "measureAt": "Q1 2027",
+        "actual": null,
+        "progress": null,
+        "id": "cap4-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Calendar built",
+        "covers": "Twelve months of trade communication planned",
+        "owner": "Tarek Nour",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap4-P2-M1"
+       },
+       {
+        "name": "First-half execution",
+        "covers": "Q2 and Q3 communication delivered",
+        "owner": "Tarek Nour",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap4-P2-M2"
+       },
+       {
+        "name": "Second-half execution",
+        "covers": "Q4 communication delivered",
+        "owner": "Tarek Nour",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap4-P2-M3"
+       }
+      ],
+      "id": "cap4-P2",
+      "capId": "cap4"
+     }
+    ],
+    "fn": "marketing",
+    "id": "cap4"
+   },
+   {
+    "name": "Customer Centric",
+    "def": "Decide from what the customer actually did, not what we assumed.",
+    "keyObjectives": [
+     {
+      "name": "Net promoter score",
+      "dir": "≥",
+      "target": "40",
+      "compile": "Latest",
+      "actual": "26",
+      "progress": 65,
+      "weight": 100,
+      "id": "cap5-KO1"
+     }
+    ],
+    "projects": [
+     {
+      "name": "Voice of customer loop across units",
+      "owner": "Mennah Farouk",
+      "brief": "One feedback loop, running continuously, whose output reaches the people who can act on it.",
+      "stakeholders": [
+       "Care",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Feedback instrument agreed across units",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "Mennah Farouk",
+        "actual": "yes",
+        "id": "cap5-P1-D1"
+       },
+       {
+        "name": "Loop running in all units",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Mennah Farouk",
+        "actual": 50,
+        "id": "cap5-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Net promoter score",
+        "dir": "≥",
+        "target": "40",
+        "measureAt": "Q4 2026",
+        "actual": "26",
+        "progress": 65,
+        "id": "cap5-P1-O1"
+       },
+       {
+        "name": "Issues closed within SLA",
+        "dir": "≥",
+        "target": "90%",
+        "measureAt": "Q4 2026",
+        "actual": "71%",
+        "progress": 79,
+        "id": "cap5-P1-O2"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Instrument design",
+        "covers": "One question set used by every unit",
+        "owner": "Mennah Farouk",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap5-P1-M1"
+       },
+       {
+        "name": "Pilot in two units",
+        "covers": "Retail and Care running the loop",
+        "owner": "Mennah Farouk",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap5-P1-M2"
+       },
+       {
+        "name": "Rollout to remaining units",
+        "covers": "Mobile, Mazaya and B2B",
+        "owner": "Mennah Farouk",
+        "finish": "Q4",
+        "status": "wip",
+        "id": "cap5-P1-M3"
+       }
+      ],
+      "id": "cap5-P1",
+      "capId": "cap5"
+     },
+     {
+      "name": "Service recovery standard",
+      "owner": "Dalia Sabry",
+      "brief": "A single standard for what happens when we get it wrong, and how quickly.",
+      "stakeholders": [
+       "Care"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Recovery standard published",
+        "kind": "binary",
+        "due": "Q3",
+        "owner": "Dalia Sabry",
+        "actual": "no",
+        "id": "cap5-P2-D1"
+       },
+       {
+        "name": "Care teams trained",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Dalia Sabry",
+        "actual": 20,
+        "id": "cap5-P2-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Repeat complaints",
+        "dir": "≤",
+        "target": "8%",
+        "measureAt": "Q1 2027",
+        "actual": null,
+        "progress": null,
+        "id": "cap5-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Standard drafted",
+        "covers": "What we owe a customer when we fail, by failure type",
+        "owner": "Dalia Sabry",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap5-P2-M1"
+       },
+       {
+        "name": "Training and rollout",
+        "covers": "Every care team working to the standard",
+        "owner": "Dalia Sabry",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap5-P2-M2"
+       }
+      ],
+      "id": "cap5-P2",
+      "capId": "cap5"
+     }
+    ],
+    "fn": "care",
+    "id": "cap5"
+   },
+   {
+    "name": "Product Mindset",
+    "def": "Treat what we sell as a portfolio to be shaped, not a catalogue to be carried.",
+    "keyObjectives": [],
+    "projects": [
+     {
+      "name": "Portfolio review cadence",
+      "owner": "Tarek Nour",
+      "brief": "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
+      "stakeholders": [
+       "Marketing",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Review framework and evidence pack",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Tarek Nour",
+        "actual": "yes",
+        "id": "cap6-P1-D1"
+       },
+       {
+        "name": "Quarterly reviews held",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Tarek Nour",
+        "actual": 50,
+        "id": "cap6-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Revenue from lines added in the last two years",
+        "dir": "≥",
+        "target": "25%",
+        "measureAt": "Q4 2026",
+        "actual": "11%",
+        "progress": 44,
+        "id": "cap6-P1-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Framework agreed",
+        "covers": "What evidence a line is judged on",
+        "owner": "Tarek Nour",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap6-P1-M1"
+       },
+       {
+        "name": "First two reviews",
+        "covers": "Q2 and Q3 reviews held with decisions recorded",
+        "owner": "Tarek Nour",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap6-P1-M2"
+       },
+       {
+        "name": "Second-half reviews",
+        "covers": "Q4 review held",
+        "owner": "Tarek Nour",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap6-P1-M3"
+       }
+      ],
+      "id": "cap6-P1",
+      "capId": "cap6"
+     }
+    ],
+    "fn": "marketing",
+    "id": "cap6"
+   },
+   {
+    "name": "Financial Infrastructure",
+    "def": "Know the cash position, the cost of money and the exposure, on the day rather than after it.",
+    "keyObjectives": [
+     {
+      "name": "Days to close month-end",
+      "dir": "≤",
+      "target": "5 d",
+      "compile": "Latest",
+      "actual": "6 d",
+      "progress": 83,
+      "weight": 60,
+      "note": "One sister company closed late in June.",
+      "id": "cap7-KO1"
+     },
+     {
+      "name": "Days sales outstanding",
+      "dir": "≤",
+      "target": "65",
+      "compile": "Latest",
+      "actual": "72",
+      "progress": 90,
+      "weight": 40,
+      "id": "cap7-KO2"
+     }
+    ],
+    "projects": [
+     {
+      "name": "Average debt utilisation report automation",
+      "owner": "Hossam Abuelenien",
+      "real": true,
+      "brief": "Implementation of an automated debt utilisation report within Oracle, to streamline daily utilisation of debt in banks and factoring companies across sister companies.",
+      "stakeholders": [
+       "Finance Department",
+       "IT Department"
+      ],
+      "timeline": "date",
+      "start": "1 Jan 2026",
+      "end": "30 Apr 2026",
+      "deliverables": [
+       {
+        "name": "Oracle-based interest utilisation form",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "IT",
+        "actual": "yes",
+        "id": "cap7-P1-D1"
+       },
+       {
+        "name": "Tracking interest expense on a daily basis",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "Finance",
+        "actual": "yes",
+        "id": "cap7-P1-D2"
+       },
+       {
+        "name": "Real-time data recalculation for corridor interest and pricing",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "IT",
+        "actual": "no",
+        "note": "Pricing corridor logic reopened with Treasury.",
+        "id": "cap7-P1-D3"
+       },
+       {
+        "name": "Daily treasury monitoring of debt balances",
+        "kind": "pct",
+        "due": "Q2",
+        "owner": "Treasury",
+        "actual": 100,
+        "id": "cap7-P1-D4"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Reduction of manual work",
+        "dir": "≥",
+        "target": "40 h",
+        "measureAt": "Q2 2026",
+        "actual": "20 h",
+        "progress": 50,
+        "note": "Half the manual steps still run outside Oracle.",
+        "id": "cap7-P1-O1"
+       },
+       {
+        "name": "Improving financial accuracy",
+        "dir": "≥",
+        "target": "99%",
+        "measureAt": "Q4 2026",
+        "actual": null,
+        "progress": null,
+        "id": "cap7-P1-O2"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Solution design",
+        "covers": "Treasury requirements and the calculation approach",
+        "owner": "Finance",
+        "finish": "20 Mar 2026",
+        "status": "done",
+        "id": "cap7-P1-M1"
+       },
+       {
+        "name": "Oracle form development",
+        "covers": "Retrieval and calculation screens built",
+        "owner": "IT",
+        "finish": "12 Apr 2026",
+        "status": "done",
+        "id": "cap7-P1-M2"
+       },
+       {
+        "name": "Interest utilisation automation",
+        "covers": "Calculation methodology and finance approval",
+        "owner": "Finance",
+        "finish": "20 Apr 2026",
+        "status": "done",
+        "id": "cap7-P1-M3"
+       },
+       {
+        "name": "Stakeholder validation",
+        "covers": "Treasury validation of the outputs",
+        "owner": "Treasury",
+        "finish": "10 May 2026",
+        "status": "done",
+        "id": "cap7-P1-M4"
+       },
+       {
+        "name": "Reporting and analysis embedment",
+        "covers": "BI integration of the utilisation report",
+        "owner": "IT",
+        "finish": "31 May 2026",
+        "status": "wip",
+        "id": "cap7-P1-M5"
+       }
+      ],
+      "id": "cap7-P1",
+      "capId": "cap7"
+     },
+     {
+      "name": "Credit facility consolidation",
+      "owner": "Fayad Sobhy",
+      "brief": "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
+      "stakeholders": [
+       "Finance Department",
+       "Treasury"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Facility term sheet agreed with lead bank",
+        "kind": "binary",
+        "due": "Q2",
+        "owner": "Treasury",
+        "actual": null,
+        "id": "cap7-P2-D1"
+       },
+       {
+        "name": "Covenant reporting pack rebuilt",
+        "kind": "pct",
+        "due": "Q3",
+        "owner": "Finance",
+        "actual": null,
+        "id": "cap7-P2-D2"
+       },
+       {
+        "name": "Legacy facilities closed",
+        "kind": "binary",
+        "due": "Q4",
+        "owner": "Treasury",
+        "actual": null,
+        "id": "cap7-P2-D3"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Arrangement and commitment fees",
+        "dir": "≤",
+        "target": "-18%",
+        "measureAt": "Q1 2027",
+        "actual": null,
+        "progress": null,
+        "id": "cap7-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Facility review and bank shortlist",
+        "covers": "Every facility held across the four banks, and a shortlist of candidate leads",
+        "owner": "Treasury",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap7-P2-M1"
+       },
+       {
+        "name": "Term sheet negotiation",
+        "covers": "Commercial terms agreed with the appointed lead",
+        "owner": "Treasury",
+        "finish": "Q2",
+        "status": "wip",
+        "id": "cap7-P2-M2"
+       },
+       {
+        "name": "Legal documentation",
+        "covers": "Facility agreement and security package drafted and signed",
+        "owner": "Finance",
+        "finish": "Q3",
+        "status": "todo",
+        "id": "cap7-P2-M3"
+       },
+       {
+        "name": "Drawdown and legacy closure",
+        "covers": "First drawdown, and the four legacy facilities closed",
+        "owner": "Treasury",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap7-P2-M4"
+       }
+      ],
+      "id": "cap7-P2",
+      "capId": "cap7"
+     },
+     {
+      "name": "Working capital programme across units",
+      "owner": "Hossam Abuelenien",
+      "brief": "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
+      "stakeholders": [
+       "Finance Department"
+      ],
+      "timeline": "quarter",
+      "start": "Q3 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Working capital baseline per unit",
+        "kind": "binary",
+        "due": "Q3",
+        "owner": "Finance",
+        "actual": null,
+        "id": "cap7-P3-D1"
+       },
+       {
+        "name": "Unit-level release plans agreed",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Finance",
+        "actual": null,
+        "id": "cap7-P3-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Days sales outstanding",
+        "dir": "≤",
+        "target": "65",
+        "measureAt": "Q4 2026",
+        "actual": null,
+        "progress": null,
+        "id": "cap7-P3-O1"
+       },
+       {
+        "name": "Credit facility headroom",
+        "dir": "≥",
+        "target": "1.5B",
+        "measureAt": "Q4 2026",
+        "actual": null,
+        "progress": null,
+        "id": "cap7-P3-O2"
+       },
+       {
+        "name": "Stock cover",
+        "dir": "≤",
+        "target": "45 d",
+        "measureAt": "Q1 2027",
+        "actual": null,
+        "progress": null,
+        "id": "cap7-P3-O3"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Baseline per unit",
+        "covers": "Receivables and stock position established for each unit",
+        "owner": "Finance",
+        "finish": "Q3",
+        "status": "todo",
+        "id": "cap7-P3-M1"
+       },
+       {
+        "name": "Release plans agreed",
+        "covers": "A target and a plan agreed with every unit head",
+        "owner": "Finance",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap7-P3-M2"
+       },
+       {
+        "name": "First review",
+        "covers": "Progress against plan reviewed with the CFO",
+        "owner": "Finance",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap7-P3-M3"
+       }
+      ],
+      "id": "cap7-P3",
+      "capId": "cap7"
+     }
+    ],
+    "fn": "finance",
+    "id": "cap7"
+   },
+   {
+    "name": "Strategy",
+    "def": "Run the cycle itself well — plan, review, adjust, on time and on evidence.",
+    "keyObjectives": [
+     {
+      "name": "Cycles reviewed on time",
+      "dir": "≥",
+      "target": "4",
+      "compile": "Sum",
+      "actual": "2",
+      "progress": 50,
+      "weight": 50,
+      "id": "cap8-KO1"
+     },
+     {
+      "name": "Plan adherence",
+      "dir": "≥",
+      "target": "80%",
+      "compile": "Latest",
+      "actual": "51%",
+      "progress": 64,
+      "weight": 50,
+      "id": "cap8-KO2"
+     }
+    ],
+    "projects": [
+     {
+      "name": "Quarterly review cadence with every unit",
+      "owner": "Islam Saadany",
+      "brief": "A review with every unit every quarter, on the same evidence, in the same shape.",
+      "stakeholders": [
+       "Strategy Management Office",
+       "Unit heads"
+      ],
+      "timeline": "quarter",
+      "start": "Q1 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "Review format and evidence pack",
+        "kind": "binary",
+        "due": "Q1",
+        "owner": "Islam Saadany",
+        "actual": "yes",
+        "id": "cap8-P1-D1"
+       },
+       {
+        "name": "Reviews held with every unit",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Islam Saadany",
+        "actual": 66,
+        "id": "cap8-P1-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Cycles reviewed on time",
+        "dir": "≥",
+        "target": "4",
+        "measureAt": "Q4 2026",
+        "actual": "2",
+        "progress": 50,
+        "id": "cap8-P1-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Format agreed",
+        "covers": "One review shape used with every unit",
+        "owner": "Islam Saadany",
+        "finish": "Q1",
+        "status": "done",
+        "id": "cap8-P1-M1"
+       },
+       {
+        "name": "First-half reviews",
+        "covers": "Q1 and Q2 reviews held with all units",
+        "owner": "Islam Saadany",
+        "finish": "Q2",
+        "status": "done",
+        "id": "cap8-P1-M2"
+       },
+       {
+        "name": "Second-half reviews",
+        "covers": "Q3 and Q4 reviews",
+        "owner": "Islam Saadany",
+        "finish": "Q4",
+        "status": "wip",
+        "id": "cap8-P1-M3"
+       }
+      ],
+      "id": "cap8-P1",
+      "capId": "cap8"
+     },
+     {
+      "name": "Plan and progress on the platform for all units",
+      "owner": "Islam Saadany",
+      "brief": "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
+      "stakeholders": [
+       "Strategy Management Office"
+      ],
+      "timeline": "quarter",
+      "start": "Q2 2026",
+      "end": "Q4 2026",
+      "deliverables": [
+       {
+        "name": "All units' plans loaded",
+        "kind": "pct",
+        "due": "Q3",
+        "owner": "Islam Saadany",
+        "actual": 70,
+        "id": "cap8-P2-D1"
+       },
+       {
+        "name": "All units reporting through the platform",
+        "kind": "pct",
+        "due": "Q4",
+        "owner": "Islam Saadany",
+        "actual": 40,
+        "id": "cap8-P2-D2"
+       }
+      ],
+      "outcomes": [
+       {
+        "name": "Plan adherence",
+        "dir": "≥",
+        "target": "80%",
+        "measureAt": "Q4 2026",
+        "actual": "51%",
+        "progress": 64,
+        "id": "cap8-P2-O1"
+       }
+      ],
+      "milestones": [
+       {
+        "name": "Plans loaded",
+        "covers": "Every unit's plan entered and checked",
+        "owner": "Islam Saadany",
+        "finish": "Q3",
+        "status": "wip",
+        "id": "cap8-P2-M1"
+       },
+       {
+        "name": "First reporting cycle on the platform",
+        "covers": "A full cycle run without spreadsheets",
+        "owner": "Islam Saadany",
+        "finish": "Q4",
+        "status": "todo",
+        "id": "cap8-P2-M2"
+       }
+      ],
+      "id": "cap8-P2",
+      "capId": "cap8"
+     }
+    ],
+    "fn": "smo",
+    "id": "cap8"
+   }
+  ],
+  "portfolio": {
+   "objectives": 66,
+   "exec": 51
+  },
+  "weighting": {
+   "factors": [
+    {
+     "key": "rev",
+     "name": "Revenue contribution",
+     "kind": "derived",
+     "basis": "FY2025 revenue",
+     "weight": 40
+    },
+    {
+     "key": "prof",
+     "name": "Profit contribution",
+     "kind": "derived",
+     "basis": "FY2025 gross profit",
+     "weight": 30
+    },
+    {
+     "key": "imp",
+     "name": "Impact on group",
+     "kind": "judgement",
+     "basis": "1–4, set conceptually",
+     "weight": 20
+    },
+    {
+     "key": "growth",
+     "name": "Potential growth",
+     "kind": "estimate",
+     "basis": "our view, next 3 years",
+     "weight": 10
+    }
+   ],
+   "units": [
+    {
+     "key": "mobile",
+     "unit": "Mobile",
+     "rev": 8.2,
+     "prof": 410,
+     "imp": 4,
+     "growth": 12,
+     "why": "Largest revenue base and the group's route to market for exclusive brands."
+    },
+    {
+     "key": "retailstores",
+     "unit": "Retail Stores",
+     "rev": 4.6,
+     "prof": 320,
+     "imp": 3,
+     "growth": 18,
+     "why": "Highest margin pool and the only direct consumer signal the group owns."
+    },
+    {
+     "key": "b2becomm",
+     "unit": "B2B Ecomm",
+     "rev": 3,
+     "prof": 160,
+     "imp": 3,
+     "growth": 35,
+     "why": "Small today, but the platform every other unit's One Trade work depends on."
+    },
+    {
+     "key": "consumerelectronics",
+     "unit": "Consumer Electronics",
+     "rev": 5.4,
+     "prof": 290,
+     "imp": 4,
+     "growth": 15,
+     "why": "Second revenue pillar and the anchor for principal relationships."
+    },
+    {
+     "key": "onlineshop",
+     "unit": "Online Shop",
+     "rev": 1.8,
+     "prof": 95,
+     "imp": 3,
+     "growth": 40,
+     "why": "Fastest-growing owned channel and the group's first-party data source."
+    },
+    {
+     "key": "corporate",
+     "unit": "Corporate",
+     "rev": 0.9,
+     "prof": 88,
+     "imp": 4,
+     "growth": 18,
+     "why": "Access to enterprise and government demand no other unit can reach."
+    },
+    {
+     "key": "care",
+     "unit": "Care",
+     "rev": 0.9,
+     "prof": 130,
+     "imp": 3,
+     "growth": 22,
+     "why": "Disproportionate margin, and the reason principals award us their lines."
+    },
+    {
+     "key": "it",
+     "unit": "IT",
+     "rev": 2.2,
+     "prof": 120,
+     "imp": 2,
+     "growth": 14,
+     "why": "Steady contributor; strategically the least differentiated of the lines."
+    },
+    {
+     "key": "logistics",
+     "unit": "Logistics",
+     "rev": 1.6,
+     "prof": 180,
+     "imp": 3,
+     "growth": 28,
+     "why": "Serves every other unit and is close to standing alone commercially."
+    },
+    {
+     "key": "nigeria",
+     "unit": "Nigeria",
+     "rev": 1.1,
+     "prof": 55,
+     "imp": 2,
+     "growth": 45,
+     "why": "Smallest today; the whole regional thesis rests on it working."
+    }
+   ]
+  },
+  "themePillars": {
+   "OT": [
+    [
+     "Mobile",
+     "02 Channel Preference & Development",
+     61,
+     45,
+     50
+    ],
+    [
+     "Retail",
+     "R01 Store Network Expansion",
+     84,
+     78,
+     50
+    ],
+    [
+     "Mazaya",
+     "M01 B2B Platform Scale",
+     38,
+     30,
+     50
+    ]
+   ],
+   "VC": [
+    [
+     "Mobile",
+     "01 Digital & Data-Driven Operations",
+     null,
+     38,
+     50
+    ],
+    [
+     "Mobile",
+     "04 Asset-Light Model Regional Expansion",
+     33,
+     55,
+     50
+    ],
+    [
+     "Retail",
+     "R02 Omnichannel Experience",
+     71,
+     64,
+     70
+    ],
+    [
+     "Retail",
+     "R03 Retail Operations Excellence",
+     null,
+     71,
+     55
+    ],
+    [
+     "Mazaya",
+     "M03 Platform Reliability",
+     null,
+     36,
+     45
+    ]
+   ],
+   "DIV": [
+    [
+     "Mobile",
+     "03 Portfolio & Value Chain Expansion",
+     52,
+     40,
+     43
+    ],
+    [
+     "Mazaya",
+     "M02 Merchant Financing",
+     44,
+     42,
+     33
+    ]
+   ]
+  },
+  "themeView": [
+   {
+    "ab": "OT",
+    "name": "One Trade",
+    "items": 3,
+    "units": "Mobile, Retail, Mazaya",
+    "outcomes": 86,
+    "exec": 51
+   },
+   {
+    "ab": "VC",
+    "name": "Deepen Value Chain",
+    "items": 5,
+    "units": "Mobile, Retail, Mazaya",
+    "outcomes": 47,
+    "exec": 53
+   },
+   {
+    "ab": "DIV",
+    "name": "Diversification",
+    "items": 2,
+    "units": "Mobile, Mazaya",
+    "outcomes": 55,
+    "exec": 41
+   }
+  ]
+ },
+ "unitKeys": [
+  "mobile",
+  "retailstores",
+  "b2becomm",
+  "consumerelectronics",
+  "onlineshop",
+  "corporate",
+  "care",
+  "it",
+  "logistics",
+  "nigeria"
+ ],
+ "units": {
+  "mobile": {
+   "name": "Mobile",
+   "codePrefix": "MB",
+   "weight": 0,
+   "real": true,
+   "perf": {
+    "objectives": 62,
+    "pillars": 49,
+    "exec": 45
+   },
+   "clauses": [
+    [
+     "We are",
+     "consumer electronics distribution company",
+     "mobile-F1"
+    ],
+    [
+     "We provide",
+     "distribution services (account management, logistics services, product management)",
+     "mobile-F2"
+    ],
+    [
+     "For",
+     "e-commerce, retail, operators, hyper markets, IR and OR",
+     "mobile-F3"
+    ],
+    [
+     "All Overall",
+     "Egypt",
+     "mobile-F4"
+    ],
+    [
+     "We facilitate",
+     "sell-in, end to end distribution services (logistics cycle, collection)",
+     "mobile-F5"
+    ],
+    [
+     "Using",
+     "end to end distribution services to both vendor & channel",
+     "mobile-F6"
+    ]
+   ],
+   "aspiration": "To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.",
+   "endInMind": "To be positioned as one of the recognized regional distributors for consumer electronics",
+   "keyObjectives": [
+    {
+     "name": "Distribution revenue",
+     "dir": "≥",
+     "target3y": "9.0B EGP",
+     "target": "6.2B EGP",
+     "compile": "Sum",
+     "actual": "2.7B",
+     "progress": 44,
+     "id": "mobile-KO1"
+    },
+    {
+     "name": "Mobile market share",
+     "dir": "≥",
+     "target3y": "38%",
+     "target": "32%",
+     "compile": "Latest",
+     "actual": "28%",
+     "progress": 88,
+     "id": "mobile-KO2"
+    },
+    {
+     "name": "Active merchant reach",
+     "dir": "≥",
+     "target3y": "6,500",
+     "target": "4,500",
+     "compile": "Latest",
+     "actual": "3,180",
+     "progress": 71,
+     "id": "mobile-KO3"
+    },
+    {
+     "name": "App coverage rate",
+     "dir": "≥",
+     "target3y": "75%",
+     "target": "50%",
+     "compile": "Latest",
+     "actual": "22%",
+     "progress": 44,
+     "note": "Rollout gated on the merchant app release. Recovery plan agreed with Ramy for Q3.",
+     "id": "mobile-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Strong brand equity (Raya & i2)",
+     "Diversified & strong brand portfolio",
+     "Over 90% of revenue from local manufacturing",
+     "Nationwide distribution & retail reach",
+     "Integrated Raya Trade ecosystem",
+     "Access to multi-source data"
+    ],
+    "w": [
+     "Limited control over the value chain",
+     "Low margin on devices",
+     "Multiple systems across Raya Trade business units",
+     "Underutilisation of available automation systems",
+     "Underdeveloped presence in accessories market"
+    ],
+    "o": [
+     "Growth in accessories and wearables market",
+     "Local manufacturing expansion",
+     "Migration of 3G user base",
+     "Regional expansion using a scalable proven model",
+     "Dubai free zone multi-branded concept",
+     "Unlocking value through AI & data"
+    ],
+    "t": [
+     "Direct-to-market strategies by vendors",
+     "Margin pressure (global trend)",
+     "Grey market competition on accessories",
+     "Economic pressure on consumption",
+     "Global supply chain disruption",
+     "Irrational competition"
+    ]
+   },
+   "items": [
+    {
+     "code": "01",
+     "name": "Digital & Data-Driven Operations",
+     "sub": "End-state: unified market intelligence engine",
+     "kind": "Capability",
+     "theme": "VC",
+     "owner": "Ramy Behairy",
+     "outcomes": null,
+     "exec": 38,
+     "planned": 50,
+     "measures": [
+      {
+       "name": "Data duplicate rate",
+       "dir": "≤",
+       "target": "1%",
+       "compile": "Latest",
+       "actual": "1.4%",
+       "progress": 71,
+       "id": "mobile-P1-M1"
+      },
+      {
+       "name": "Orders processed digitally",
+       "dir": "≥",
+       "target": "90%",
+       "compile": "Latest",
+       "actual": "48%",
+       "progress": 53,
+       "note": "ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.",
+       "id": "mobile-P1-M2"
+      },
+      {
+       "name": "App coverage rate",
+       "dir": "≥",
+       "target3y": "75%",
+       "target": "50%",
+       "compile": "Latest",
+       "actual": "22%",
+       "progress": 44,
+       "id": "mobile-P1-M3"
+      },
+      {
+       "name": "Dependency on automated reports",
+       "dir": "≥",
+       "target": "90%",
+       "compile": "Latest",
+       "actual": "58%",
+       "progress": 64,
+       "note": "Power BI live for sales; finance still manual until the warehouse lands.",
+       "id": "mobile-P1-M4"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Clean and standardize customer and SKU base",
+       "owner": "Ramy Behairy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 45,
+       "id": "mobile-P1-T1"
+      },
+      {
+       "name": "End-to-end order-to-cash digitization",
+       "owner": "Mohamed Rizk",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 35,
+       "id": "mobile-P1-T2"
+      },
+      {
+       "name": "Digitize sales reporting via Power BI",
+       "owner": "Ramy Behairy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 40,
+       "id": "mobile-P1-T3"
+      },
+      {
+       "name": "Scale Mobile Digital App across merchants",
+       "owner": "Ashraf Laithy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 30,
+       "id": "mobile-P1-T4"
+      },
+      {
+       "name": "Data integration across business units",
+       "owner": "Abdelhamid",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 22,
+       "id": "mobile-P1-T5"
+      }
+     ],
+     "id": "mobile-P1"
+    },
+    {
+     "code": "02",
+     "name": "Channel Preference & Development",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Mohamed Rizk",
+     "outcomes": 61,
+     "exec": 45,
+     "planned": 50,
+     "measures": [
+      {
+       "name": "Average delivery time",
+       "dir": "≤",
+       "target": "24 h",
+       "compile": "Latest",
+       "actual": "31 h",
+       "progress": 77,
+       "id": "mobile-P2-M1"
+      },
+      {
+       "name": "Key retailer revenue growth",
+       "dir": "≥",
+       "target": "50%",
+       "compile": "Sum",
+       "actual": "24%",
+       "progress": 48,
+       "note": "Two key accounts renegotiated late. Q3 volumes already committed.",
+       "id": "mobile-P2-M2"
+      },
+      {
+       "name": "Tier 2 merchants enrolled",
+       "dir": "≥",
+       "target": "100",
+       "compile": "Latest",
+       "actual": "58",
+       "progress": 58,
+       "note": "Enrolment slowed by the credit check change. 58 of 100 signed.",
+       "id": "mobile-P2-M3"
+      },
+      {
+       "name": "Tier 2 segment revenue growth",
+       "dir": "≥",
+       "target": "100%",
+       "compile": "Sum",
+       "actual": "62%",
+       "progress": 62,
+       "id": "mobile-P2-M4"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Retailer preference index workshop",
+       "owner": "Karim",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 60,
+       "id": "mobile-P2-T1"
+      },
+      {
+       "name": "Joint business planning with key retailers",
+       "owner": "Mohamed Rizk",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 45,
+       "id": "mobile-P2-T2"
+      },
+      {
+       "name": "Tier 2 growth acceleration programme",
+       "owner": "Ashraf Laithy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 35,
+       "id": "mobile-P2-T3"
+      },
+      {
+       "name": "Channel intelligence engine (pilot)",
+       "owner": "Karim",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40,
+       "id": "mobile-P2-T4"
+      }
+     ],
+     "id": "mobile-P2"
+    },
+    {
+     "code": "03",
+     "name": "Portfolio & Value Chain Expansion",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Karim",
+     "outcomes": 52,
+     "exec": 40,
+     "planned": 43,
+     "measures": [
+      {
+       "name": "Non-Samsung revenue",
+       "dir": "≥",
+       "target": "4B EGP",
+       "compile": "Sum",
+       "actual": "1.6B",
+       "progress": 40,
+       "id": "mobile-P3-M1"
+      },
+      {
+       "name": "Samsung market share",
+       "dir": "≥",
+       "target": "30%",
+       "compile": "Latest",
+       "actual": "31%",
+       "progress": 103,
+       "id": "mobile-P3-M2"
+      },
+      {
+       "name": "Vivo market share",
+       "dir": "≥",
+       "target": "60%",
+       "compile": "Latest",
+       "actual": "48%",
+       "progress": 80,
+       "id": "mobile-P3-M3"
+      },
+      {
+       "name": "Accessory revenue",
+       "dir": "≥",
+       "target": "300M EGP",
+       "compile": "Sum",
+       "actual": "96M",
+       "progress": 32,
+       "id": "mobile-P3-M4"
+      },
+      {
+       "name": "Active Sary merchants",
+       "dir": "≥",
+       "target": "800",
+       "compile": "Latest",
+       "actual": "310",
+       "progress": 39,
+       "id": "mobile-P3-M5"
+      },
+      {
+       "name": "Sary revenue",
+       "dir": "≥",
+       "target": "150M EGP",
+       "compile": "Sum",
+       "actual": "42M",
+       "progress": 28,
+       "id": "mobile-P3-M6"
+      },
+      {
+       "name": "Local production devices",
+       "dir": "≥",
+       "target": "1M",
+       "compile": "Sum",
+       "actual": "520K",
+       "progress": 52,
+       "id": "mobile-P3-M7"
+      },
+      {
+       "name": "Sary app downloads",
+       "dir": "≥",
+       "target": "40K",
+       "compile": "Latest",
+       "actual": "18.4K",
+       "progress": 46,
+       "id": "mobile-P3-M8"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Protect and grow share in existing brands",
+       "owner": "Ashraf Abdelaty",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 55,
+       "id": "mobile-P3-T1"
+      },
+      {
+       "name": "Expand high-margin categories",
+       "owner": "Fayad",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40,
+       "id": "mobile-P3-T2"
+      },
+      {
+       "name": "Leverage Sary for entry-to-mid expansion",
+       "owner": "Fayad",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 30,
+       "id": "mobile-P3-T3"
+      },
+      {
+       "name": "Sary-enabled tailored B2B portfolio",
+       "owner": "Fayad",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 25,
+       "id": "mobile-P3-T4"
+      },
+      {
+       "name": "Ongoing scanning for tier-1 brands",
+       "owner": "Karim",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 50,
+       "id": "mobile-P3-T5"
+      },
+      {
+       "name": "Build a light ecosystem (limited SKU)",
+       "owner": "Fayad",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 28,
+       "id": "mobile-P3-T6"
+      },
+      {
+       "name": "Market intelligence partner",
+       "owner": "Karim",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 35,
+       "id": "mobile-P3-T7"
+      }
+     ],
+     "id": "mobile-P3"
+    },
+    {
+     "code": "04",
+     "name": "Asset-Light Model Regional Expansion",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "VC",
+     "owner": "Abdelhamid",
+     "outcomes": 33,
+     "exec": 55,
+     "planned": 50,
+     "measures": [
+      {
+       "name": "Regional hub revenue",
+       "dir": "≥",
+       "target": "2M USD",
+       "compile": "Sum",
+       "actual": "0.5M",
+       "progress": 25,
+       "note": "Hub opens in H2 by design — this is measured at H2, not now.",
+       "id": "mobile-P4-M1"
+      },
+      {
+       "name": "Export markets activated",
+       "dir": "≥",
+       "target": "3",
+       "compile": "Latest",
+       "actual": "1",
+       "progress": 33,
+       "note": "One of three live. Nigeria and Libya in regulatory review.",
+       "id": "mobile-P4-M2"
+      },
+      {
+       "name": "Distribution agreements",
+       "dir": "≥",
+       "target": "2",
+       "compile": "Latest",
+       "actual": "1",
+       "progress": 50,
+       "id": "mobile-P4-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Dubai regional hub multi-branded export concept",
+       "owner": "Karim",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 60,
+       "id": "mobile-P4-T1"
+      },
+      {
+       "name": "Initial agreements with 2–3 tier 2 brands",
+       "owner": "Abdelhamid",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 55,
+       "id": "mobile-P4-T2"
+      },
+      {
+       "name": "Pre-entry market validation",
+       "owner": "Abdelhamid",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 50,
+       "id": "mobile-P4-T3"
+      },
+      {
+       "name": "Regulatory & entry barriers assessment",
+       "owner": "Fayad",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 55,
+       "id": "mobile-P4-T4"
+      },
+      {
+       "name": "Entry model design & B2B e-commerce presence",
+       "owner": "Abuelenien",
+       "q1": 0,
+       "q2": 0,
+       "q3": 0,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 18,
+       "id": "mobile-P4-T5"
+      },
+      {
+       "name": "Go / No-Go regional entry risk assessment",
+       "owner": "Karim",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "Done",
+       "actual": 100,
+       "id": "mobile-P4-T6"
+      }
+     ],
+     "id": "mobile-P4"
+    }
+   ],
+   "ukey": "mobile",
+   "active": true
+  },
+  "retailstores": {
+   "name": "Retail Stores",
+   "codePrefix": "RS",
+   "weight": 0,
+   "real": false,
+   "perf": {
+    "objectives": 86,
+    "pillars": 78,
+    "exec": 71
+   },
+   "clauses": [
+    [
+     "We are",
+     "a consumer electronics retail chain and e-store",
+     "retailstores-F1"
+    ],
+    [
+     "We provide",
+     "in-store and online retail, trade-in, care and after-sales services",
+     "retailstores-F2"
+    ],
+    [
+     "For",
+     "walk-in consumers, online shoppers and corporate buyers",
+     "retailstores-F3"
+    ],
+    [
+     "All Overall",
+     "Egypt, concentrated in Greater Cairo and Delta",
+     "retailstores-F4"
+    ],
+    [
+     "We facilitate",
+     "sell-out, instalment plans, and device lifecycle services",
+     "retailstores-F5"
+    ],
+    [
+     "Using",
+     "an owned store network, the Raya Shop platform, and a national care operation",
+     "retailstores-F6"
+    ]
+   ],
+   "aspiration": "To be the most preferred consumer electronics retailer in Egypt — the destination customers choose first, online and on the high street.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Retail revenue",
+     "dir": "≥",
+     "target3y": "6.8B EGP",
+     "target": "4.5B EGP",
+     "compile": "Sum",
+     "actual": "3.8B",
+     "progress": 84,
+     "id": "retailstores-KO1"
+    },
+    {
+     "name": "Stores operating",
+     "dir": "≥",
+     "target3y": "120",
+     "target": "88",
+     "compile": "Latest",
+     "actual": "91",
+     "progress": 103,
+     "id": "retailstores-KO2"
+    },
+    {
+     "name": "E-store share of revenue",
+     "dir": "≥",
+     "target3y": "38%",
+     "target": "25%",
+     "compile": "Latest",
+     "actual": "21%",
+     "progress": 84,
+     "id": "retailstores-KO3"
+    },
+    {
+     "name": "Net promoter score",
+     "dir": "≥",
+     "target3y": "65",
+     "target": "55",
+     "compile": "Latest",
+     "actual": "45",
+     "progress": 82,
+     "id": "retailstores-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Established high-street presence",
+     "Direct access to consumer demand signal",
+     "Trade-in and care differentiate on service",
+     "Buying power through the group"
+    ],
+    "w": [
+     "Store economics sensitive to footfall",
+     "E-store still a minority of revenue",
+     "Inventory turns behind category benchmark"
+    ],
+    "o": [
+     "Shift of category spend online",
+     "Instalment penetration still low",
+     "Care services as a margin pool"
+    ],
+    "t": [
+     "Vendor direct-to-consumer channels",
+     "Grey market pricing pressure",
+     "Rental cost inflation on prime locations"
+    ]
+   },
+   "items": [
+    {
+     "code": "R01",
+     "name": "Store Network Expansion",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Hossam",
+     "outcomes": 84,
+     "exec": 78,
+     "planned": 50,
+     "measures": [
+      {
+       "name": "New stores opened",
+       "dir": "≥",
+       "target": "14",
+       "compile": "Sum",
+       "actual": "12",
+       "progress": 86,
+       "id": "retailstores-P1-M1"
+      },
+      {
+       "name": "Revenue per store",
+       "dir": "≥",
+       "target": "52M",
+       "compile": "Latest",
+       "actual": "55M",
+       "progress": 106,
+       "id": "retailstores-P1-M2"
+      },
+      {
+       "name": "Prime-location share",
+       "dir": "≥",
+       "target": "60%",
+       "compile": "Latest",
+       "actual": "47%",
+       "progress": 78,
+       "id": "retailstores-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Site selection model using catchment data",
+       "owner": "Hossam",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 70,
+       "id": "retailstores-P1-T1"
+      },
+      {
+       "name": "Standard fit-out programme",
+       "owner": "Dalia",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 65,
+       "id": "retailstores-P1-T2"
+      },
+      {
+       "name": "Landlord framework agreements",
+       "owner": "Hossam",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 55,
+       "id": "retailstores-P1-T3"
+      }
+     ],
+     "id": "retailstores-P1"
+    },
+    {
+     "code": "R02",
+     "name": "Omnichannel Experience",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "VC",
+     "owner": "Dalia",
+     "outcomes": 71,
+     "exec": 64,
+     "planned": 70,
+     "measures": [
+      {
+       "name": "E-store revenue",
+       "dir": "≥",
+       "target": "1.1B EGP",
+       "compile": "Sum",
+       "actual": "0.62B",
+       "progress": 56,
+       "id": "retailstores-P2-M1"
+      },
+      {
+       "name": "Click-and-collect share",
+       "dir": "≥",
+       "target": "30%",
+       "compile": "Latest",
+       "actual": "33%",
+       "progress": 110,
+       "id": "retailstores-P2-M2"
+      },
+      {
+       "name": "Unified stock accuracy",
+       "dir": "≥",
+       "target": "95%",
+       "compile": "Latest",
+       "actual": "67%",
+       "progress": 71,
+       "id": "retailstores-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Single stock view across store and e-store",
+       "owner": "Dalia",
+       "q1": 1,
+       "q2": 1,
+       "q3": 0,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 60,
+       "id": "retailstores-P2-T1"
+      },
+      {
+       "name": "Click-and-collect rollout",
+       "owner": "Dalia",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 55,
+       "id": "retailstores-P2-T2"
+      },
+      {
+       "name": "Unified loyalty across channels",
+       "owner": "Nour",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 50,
+       "id": "retailstores-P2-T3"
+      }
+     ],
+     "id": "retailstores-P2"
+    },
+    {
+     "code": "R03",
+     "name": "Retail Operations Excellence",
+     "sub": "Service, stock and store discipline",
+     "kind": "Capability",
+     "theme": "VC",
+     "owner": "Nour",
+     "outcomes": null,
+     "exec": 71,
+     "planned": 55,
+     "measures": [
+      {
+       "name": "Inventory turns",
+       "dir": "≥",
+       "target": "6.0",
+       "compile": "Latest",
+       "actual": "4.7",
+       "progress": 78,
+       "id": "retailstores-P3-M1"
+      },
+      {
+       "name": "Shrinkage rate",
+       "dir": "≤",
+       "target": "0.4%",
+       "compile": "Latest",
+       "actual": "0.6%",
+       "progress": 67,
+       "id": "retailstores-P3-M2"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Store operating standard and audit cycle",
+       "owner": "Nour",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 60,
+       "id": "retailstores-P3-T1"
+      },
+      {
+       "name": "Replenishment automation",
+       "owner": "Nour",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 50,
+       "id": "retailstores-P3-T2"
+      }
+     ],
+     "id": "retailstores-P3"
+    }
+   ],
+   "ukey": "retailstores",
+   "active": true
+  },
+  "b2becomm": {
+   "name": "B2B Ecomm",
+   "codePrefix": "BE",
+   "weight": 0,
+   "real": false,
+   "perf": {
+    "objectives": 48,
+    "pillars": 41,
+    "exec": 36
+   },
+   "clauses": [
+    [
+     "We are",
+     "a B2B trade platform for independent retailers",
+     "b2becomm-F1"
+    ],
+    [
+     "We provide",
+     "online ordering, credit facilities and fulfilment for small merchants",
+     "b2becomm-F2"
+    ],
+    [
+     "For",
+     "independent retailers, tier 2 dealers and neighbourhood shops",
+     "b2becomm-F3"
+    ],
+    [
+     "All Overall",
+     "Egypt",
+     "b2becomm-F4"
+    ],
+    [
+     "We facilitate",
+     "assortment access, working capital and next-day delivery",
+     "b2becomm-F5"
+    ],
+    [
+     "Using",
+     "a merchant app, a credit engine and the group's logistics network",
+     "b2becomm-F6"
+    ]
+   ],
+   "aspiration": "To be the default ordering platform for Egypt's independent electronics retail — the first app a merchant opens each morning.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Platform GMV",
+     "dir": "≥",
+     "target3y": "9.5B EGP",
+     "target": "900M EGP",
+     "compile": "Sum",
+     "actual": "310M",
+     "progress": 34,
+     "id": "b2becomm-KO1"
+    },
+    {
+     "name": "Monthly active merchants",
+     "dir": "≥",
+     "target3y": "14,000",
+     "target": "2,200",
+     "compile": "Latest",
+     "actual": "980",
+     "progress": 45,
+     "id": "b2becomm-KO2"
+    },
+    {
+     "name": "Repeat order rate",
+     "dir": "≥",
+     "target3y": "72%",
+     "target": "65%",
+     "compile": "Latest",
+     "actual": "31%",
+     "progress": 48,
+     "id": "b2becomm-KO3"
+    },
+    {
+     "name": "Credit default rate",
+     "dir": "≤",
+     "target3y": "1.5%",
+     "target": "2%",
+     "compile": "Latest",
+     "actual": "3.1%",
+     "progress": 65,
+     "id": "b2becomm-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Access to the group's assortment and logistics",
+     "Existing merchant relationships from distribution",
+     "Credit data from trading history"
+    ],
+    "w": [
+     "Low repeat usage after first order",
+     "Manual onboarding limits reach",
+     "Thin margins on platform transactions"
+    ],
+    "o": [
+     "Digitising an entirely offline ordering habit",
+     "Embedded finance as a revenue line",
+     "Cross-sell from distribution's merchant base"
+    ],
+    "t": [
+     "Well-funded horizontal B2B platforms",
+     "Merchant credit risk in a tight economy",
+     "Vendors bypassing platforms entirely"
+    ]
+   },
+   "items": [
+    {
+     "code": "M01",
+     "name": "B2B Platform Scale",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Abuelenien",
+     "outcomes": 38,
+     "exec": 30,
+     "planned": 50,
+     "measures": [
+      {
+       "name": "Merchants onboarded",
+       "dir": "≥",
+       "target": "2,200",
+       "compile": "Latest",
+       "actual": "980",
+       "progress": 45,
+       "id": "b2becomm-P1-M1"
+      },
+      {
+       "name": "Platform GMV",
+       "dir": "≥",
+       "target3y": "9.5B EGP",
+       "target": "900M",
+       "compile": "Sum",
+       "actual": "310M",
+       "progress": 34,
+       "id": "b2becomm-P1-M2"
+      },
+      {
+       "name": "Orders per merchant",
+       "dir": "≥",
+       "target": "8",
+       "compile": "Latest",
+       "actual": "2.8",
+       "progress": 35,
+       "id": "b2becomm-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Self-serve merchant onboarding",
+       "owner": "Abuelenien",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 35,
+       "id": "b2becomm-P1-T1"
+      },
+      {
+       "name": "Field activation programme",
+       "owner": "Hala",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 25,
+       "id": "b2becomm-P1-T2"
+      }
+     ],
+     "id": "b2becomm-P1"
+    },
+    {
+     "code": "M02",
+     "name": "Merchant Financing",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Hala",
+     "outcomes": 44,
+     "exec": 42,
+     "planned": 33,
+     "measures": [
+      {
+       "name": "Credit book",
+       "dir": "≥",
+       "target": "180M EGP",
+       "compile": "Latest",
+       "actual": "74M",
+       "progress": 41,
+       "id": "b2becomm-P2-M1"
+      },
+      {
+       "name": "Merchants with credit",
+       "dir": "≥",
+       "target": "600",
+       "compile": "Latest",
+       "actual": "285",
+       "progress": 48,
+       "id": "b2becomm-P2-M2"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Credit scoring from trading history",
+       "owner": "Hala",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 45,
+       "id": "b2becomm-P2-T1"
+      },
+      {
+       "name": "Partner lender agreements",
+       "owner": "Hala",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40,
+       "id": "b2becomm-P2-T2"
+      }
+     ],
+     "id": "b2becomm-P2"
+    },
+    {
+     "code": "M03",
+     "name": "Platform Reliability",
+     "sub": "Uptime, fulfilment and support",
+     "kind": "Capability",
+     "theme": "VC",
+     "owner": "Mohamed Rizk",
+     "outcomes": null,
+     "exec": 36,
+     "planned": 45,
+     "measures": [
+      {
+       "name": "Order fulfilment rate",
+       "dir": "≥",
+       "target": "97%",
+       "compile": "Latest",
+       "actual": "88%",
+       "progress": 91,
+       "id": "b2becomm-P3-M1"
+      },
+      {
+       "name": "App crash-free rate",
+       "dir": "≥",
+       "target": "99%",
+       "compile": "Latest",
+       "actual": "99.4%",
+       "progress": 100,
+       "id": "b2becomm-P3-M2"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Fulfilment SLA with logistics",
+       "owner": "Mohamed Rizk",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 40,
+       "id": "b2becomm-P3-T1"
+      },
+      {
+       "name": "Platform stability programme",
+       "owner": "Mohamed Rizk",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 32,
+       "id": "b2becomm-P3-T2"
+      }
+     ],
+     "id": "b2becomm-P3"
+    }
+   ],
+   "ukey": "b2becomm",
+   "active": true
+  },
+  "onlineshop": {
+   "name": "Online Shop",
+   "codePrefix": "OS",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "Raya Trade's owned online storefront",
+     "onlineshop-F1"
+    ],
+    [
+     "We sell",
+     "consumer electronics, mobiles, IT and accessories",
+     "onlineshop-F2"
+    ],
+    [
+     "To",
+     "individual consumers across Egypt",
+     "onlineshop-F3"
+    ],
+    [
+     "Through",
+     "web, app and marketplace listings",
+     "onlineshop-F4"
+    ],
+    [
+     "Covering",
+     "all governorates via the group's logistics network",
+     "onlineshop-F5"
+    ],
+    [
+     "Using",
+     "group inventory and shared last-mile capacity",
+     "onlineshop-F6"
+    ]
+   ],
+   "aspiration": "To be the first destination Egyptians open when they shop electronics online — fastest to deliver, widest assortment, and the easiest returns in the market.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Online revenue",
+     "dir": "≥",
+     "target3y": "2.6B EGP",
+     "target": "1.8B EGP",
+     "compile": "Sum",
+     "actual": "1.1B",
+     "progress": 61,
+     "id": "onlineshop-KO1"
+    },
+    {
+     "name": "Site conversion rate",
+     "dir": "≥",
+     "target3y": "3.2%",
+     "target": "2.4%",
+     "compile": "Latest",
+     "actual": "1.8%",
+     "progress": 75,
+     "id": "onlineshop-KO2"
+    },
+    {
+     "name": "Repeat purchase rate",
+     "dir": "≥",
+     "target3y": "40%",
+     "target": "28%",
+     "compile": "Latest",
+     "actual": "19%",
+     "progress": 68,
+     "id": "onlineshop-KO3"
+    },
+    {
+     "name": "Assortment breadth (live SKUs)",
+     "dir": "≥",
+     "target3y": "24,000",
+     "target": "14,000",
+     "compile": "Latest",
+     "actual": "9,400",
+     "progress": 67,
+     "id": "onlineshop-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Owned traffic and first-party data",
+     "Access to full group assortment"
+    ],
+    "w": [
+     "Thin margins after delivery cost",
+     "Brand awareness behind pure-play rivals"
+    ],
+    "o": [
+     "Marketplace expansion",
+     "Subscription-based delivery"
+    ],
+    "t": [
+     "Aggressive discounting by pure-plays",
+     "Rising paid-acquisition cost"
+    ]
+   },
+   "items": [
+    {
+     "code": "OS01",
+     "name": "Assortment & Availability",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Sherif Adel",
+     "measures": [
+      {
+       "name": "Live SKU count",
+       "dir": "≥",
+       "target": "14,000",
+       "compile": "Latest",
+       "actual": "9,400",
+       "progress": 67,
+       "id": "onlineshop-P1-M1"
+      },
+      {
+       "name": "Out-of-stock rate",
+       "dir": "≤",
+       "target": "4%",
+       "compile": "Latest",
+       "actual": "7%",
+       "progress": 57,
+       "id": "onlineshop-P1-M2"
+      },
+      {
+       "name": "Supplier lead time",
+       "dir": "≤",
+       "target": "10 d",
+       "compile": "Latest",
+       "actual": "14 d",
+       "progress": 71,
+       "id": "onlineshop-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Onboard group assortment to storefront",
+       "owner": "Sherif Adel",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 55,
+       "id": "onlineshop-P1-T1"
+      },
+      {
+       "name": "Automated stock sync with warehouses",
+       "owner": "Nadia Fouad",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40,
+       "id": "onlineshop-P1-T2"
+      },
+      {
+       "name": "Third-party seller pilot",
+       "owner": "Sherif Adel",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 25,
+       "id": "onlineshop-P1-T3"
+      }
+     ],
+     "id": "onlineshop-P1"
+    },
+    {
+     "code": "OS02",
+     "name": "Conversion & Retention",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "VC",
+     "owner": "Nadia Fouad",
+     "measures": [
+      {
+       "name": "Conversion rate",
+       "dir": "≥",
+       "target": "2.4%",
+       "compile": "Latest",
+       "actual": "1.8%",
+       "progress": 75,
+       "id": "onlineshop-P2-M1"
+      },
+      {
+       "name": "Cart abandonment",
+       "dir": "≤",
+       "target": "62%",
+       "compile": "Latest",
+       "actual": "71%",
+       "progress": 87,
+       "id": "onlineshop-P2-M2"
+      },
+      {
+       "name": "App install base",
+       "dir": "≥",
+       "target": "900,000",
+       "compile": "Latest",
+       "actual": "540,000",
+       "progress": 60,
+       "id": "onlineshop-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Checkout redesign and one-tap pay",
+       "owner": "Nadia Fouad",
+       "q1": 1,
+       "q2": 1,
+       "q3": 0,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 80,
+       "id": "onlineshop-P2-T1"
+      },
+      {
+       "name": "Loyalty programme launch",
+       "owner": "Sherif Adel",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 45,
+       "id": "onlineshop-P2-T2"
+      },
+      {
+       "name": "Personalised recommendation engine",
+       "owner": "Nadia Fouad",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 30,
+       "id": "onlineshop-P2-T3"
+      }
+     ],
+     "id": "onlineshop-P2"
+    }
+   ],
+   "ukey": "onlineshop",
+   "active": true
+  },
+  "consumerelectronics": {
+   "name": "Consumer Electronics",
+   "codePrefix": "CE",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "the group's consumer electronics distribution arm",
+     "consumerelectronics-F1"
+    ],
+    [
+     "We provide",
+     "value-added distribution and channel development",
+     "consumerelectronics-F2"
+    ],
+    [
+     "For",
+     "brand principals, retail chains and independent dealers",
+     "consumerelectronics-F3"
+    ],
+    [
+     "Through",
+     "a national dealer network and key-account teams",
+     "consumerelectronics-F4"
+    ],
+    [
+     "Covering",
+     "Egypt, with selected export lines",
+     "consumerelectronics-F5"
+    ],
+    [
+     "Using",
+     "group logistics, credit facilities and after-sales",
+     "consumerelectronics-F6"
+    ]
+   ],
+   "aspiration": "To be the distributor every major appliance and electronics brand chooses first for Egypt, with the deepest retail coverage in the category.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "CE distribution revenue",
+     "dir": "≥",
+     "target3y": "7.8B EGP",
+     "target": "5.4B EGP",
+     "compile": "Sum",
+     "actual": "2.4B",
+     "progress": 44,
+     "id": "consumerelectronics-KO1"
+    },
+    {
+     "name": "CE market share",
+     "dir": "≥",
+     "target3y": "24%",
+     "target": "18%",
+     "compile": "Latest",
+     "actual": "14%",
+     "progress": 78,
+     "id": "consumerelectronics-KO2"
+    },
+    {
+     "name": "Active dealer accounts",
+     "dir": "≥",
+     "target3y": "2,600",
+     "target": "1,900",
+     "compile": "Latest",
+     "actual": "1,410",
+     "progress": 74,
+     "id": "consumerelectronics-KO3"
+    },
+    {
+     "name": "Gross margin",
+     "dir": "≥",
+     "target3y": "9.5%",
+     "target": "8.2%",
+     "compile": "Latest",
+     "actual": "7.1%",
+     "progress": 87,
+     "id": "consumerelectronics-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Long-standing principal relationships",
+     "National dealer coverage"
+    ],
+    "w": [
+     "Heavy working-capital requirement",
+     "Exposure to a few large brands"
+    ],
+    "o": [
+     "Premium appliance segment growth",
+     "Own-label accessories"
+    ],
+    "t": [
+     "Direct-to-retail moves by principals",
+     "Currency volatility on imports"
+    ]
+   },
+   "items": [
+    {
+     "code": "CE01",
+     "name": "Brand Portfolio Depth",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Tarek Nassar",
+     "measures": [
+      {
+       "name": "Principal agreements signed",
+       "dir": "≥",
+       "target": "4",
+       "compile": "Sum",
+       "actual": "2",
+       "progress": 50,
+       "id": "consumerelectronics-P1-M1"
+      },
+      {
+       "name": "Revenue from top-2 brands",
+       "dir": "≤",
+       "target": "55%",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "consumerelectronics-P1-M2"
+      },
+      {
+       "name": "New category revenue",
+       "dir": "≥",
+       "target": "900M EGP",
+       "compile": "Sum",
+       "actual": "",
+       "progress": null,
+       "id": "consumerelectronics-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Negotiate two additional principal lines",
+       "owner": "Tarek Nassar",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 50,
+       "id": "consumerelectronics-P1-T1"
+      },
+      {
+       "name": "Own-label accessory range",
+       "owner": "Heba Salem",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 35,
+       "id": "consumerelectronics-P1-T2"
+      },
+      {
+       "name": "Premium segment entry plan",
+       "owner": "Tarek Nassar",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 45,
+       "id": "consumerelectronics-P1-T3"
+      }
+     ],
+     "id": "consumerelectronics-P1"
+    },
+    {
+     "code": "CE02",
+     "name": "Dealer Network Development",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Heba Salem",
+     "measures": [
+      {
+       "name": "Active dealers",
+       "dir": "≥",
+       "target": "1,900",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "consumerelectronics-P2-M1"
+      },
+      {
+       "name": "Dealer credit utilisation",
+       "dir": "≥",
+       "target": "70%",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "consumerelectronics-P2-M2"
+      },
+      {
+       "name": "Dealer churn",
+       "dir": "≤",
+       "target": "8%",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "consumerelectronics-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Tiered dealer incentive scheme",
+       "owner": "Heba Salem",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 60,
+       "id": "consumerelectronics-P2-T1"
+      },
+      {
+       "name": "Regional dealer service hubs",
+       "owner": "Tarek Nassar",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 38,
+       "id": "consumerelectronics-P2-T2"
+      },
+      {
+       "name": "Dealer portal rollout",
+       "owner": "Heba Salem",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 28,
+       "id": "consumerelectronics-P2-T3"
+      }
+     ],
+     "id": "consumerelectronics-P2"
+    }
+   ],
+   "ukey": "consumerelectronics",
+   "active": true
+  },
+  "corporate": {
+   "name": "Corporate",
+   "codePrefix": "CO",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "the group's enterprise and government sales arm",
+     "corporate-F1"
+    ],
+    [
+     "We provide",
+     "end-to-end technology supply, integration and support contracts",
+     "corporate-F2"
+    ],
+    [
+     "For",
+     "large enterprises, banks, telcos and government entities",
+     "corporate-F3"
+    ],
+    [
+     "Through",
+     "direct key-account teams and tender participation",
+     "corporate-F4"
+    ],
+    [
+     "Covering",
+     "Egypt",
+     "corporate-F5"
+    ],
+    [
+     "Using",
+     "group product access, IT services and financing capacity",
+     "corporate-F6"
+    ]
+   ],
+   "aspiration": "To be the single technology supply partner for Egypt's largest enterprises and government programmes, selling solutions rather than boxes.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Corporate revenue",
+     "dir": "≥",
+     "target3y": "1.4B EGP",
+     "target": "0.9B EGP",
+     "compile": "Sum",
+     "actual": "0.42B",
+     "progress": 47,
+     "id": "corporate-KO1"
+    },
+    {
+     "name": "Contracted recurring revenue",
+     "dir": "≥",
+     "target3y": "260M EGP",
+     "target": "150M EGP",
+     "compile": "Sum",
+     "actual": "61M",
+     "progress": 41,
+     "id": "corporate-KO2"
+    },
+    {
+     "name": "Tender win rate",
+     "dir": "≥",
+     "target3y": "35%",
+     "target": "26%",
+     "compile": "Latest",
+     "actual": "19%",
+     "progress": 73,
+     "id": "corporate-KO3"
+    },
+    {
+     "name": "Named enterprise accounts",
+     "dir": "≥",
+     "target3y": "140",
+     "target": "95",
+     "compile": "Latest",
+     "actual": "72",
+     "progress": 76,
+     "id": "corporate-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Breadth of product access across the group",
+     "Established government references"
+    ],
+    "w": [
+     "Long cash-conversion cycles",
+     "Thin technical pre-sales bench"
+    ],
+    "o": [
+     "Public digitisation programmes",
+     "Managed-service contracts"
+    ],
+    "t": [
+     "Global integrators entering tenders",
+     "Budget deferrals in public sector"
+    ]
+   },
+   "items": [
+    {
+     "code": "CO01",
+     "name": "Solution Selling Capability",
+     "sub": "",
+     "kind": "Capability",
+     "theme": "VC",
+     "owner": "Amr Bakr",
+     "measures": [
+      {
+       "name": "Certified pre-sales engineers",
+       "dir": "≥",
+       "target": "18",
+       "compile": "Latest",
+       "actual": "11",
+       "progress": 61,
+       "id": "corporate-P1-M1"
+      },
+      {
+       "name": "Solution-led deal share",
+       "dir": "≥",
+       "target": "45%",
+       "compile": "Latest",
+       "actual": "29%",
+       "progress": 64,
+       "id": "corporate-P1-M2"
+      },
+      {
+       "name": "Average deal size",
+       "dir": "≥",
+       "target": "3.2M EGP",
+       "compile": "Latest",
+       "actual": "2.1M",
+       "progress": 66,
+       "id": "corporate-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Pre-sales academy and certification",
+       "owner": "Amr Bakr",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 55,
+       "id": "corporate-P1-T1"
+      },
+      {
+       "name": "Reference architecture library",
+       "owner": "Laila Zaki",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 60,
+       "id": "corporate-P1-T2"
+      },
+      {
+       "name": "Vendor solution partnerships",
+       "owner": "Amr Bakr",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 42,
+       "id": "corporate-P1-T3"
+      }
+     ],
+     "id": "corporate-P1"
+    },
+    {
+     "code": "CO02",
+     "name": "Public Sector Programmes",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Laila Zaki",
+     "measures": [
+      {
+       "name": "Active public contracts",
+       "dir": "≥",
+       "target": "24",
+       "compile": "Latest",
+       "actual": "16",
+       "progress": 67,
+       "id": "corporate-P2-M1"
+      },
+      {
+       "name": "Tender win rate",
+       "dir": "≥",
+       "target": "26%",
+       "compile": "Latest",
+       "actual": "19%",
+       "progress": 73,
+       "id": "corporate-P2-M2"
+      },
+      {
+       "name": "Public revenue",
+       "dir": "≥",
+       "target": "420M EGP",
+       "compile": "Sum",
+       "actual": "178M",
+       "progress": 42,
+       "id": "corporate-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Framework agreement registrations",
+       "owner": "Laila Zaki",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 70,
+       "id": "corporate-P2-T1"
+      },
+      {
+       "name": "Dedicated bid desk",
+       "owner": "Amr Bakr",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 45,
+       "id": "corporate-P2-T2"
+      },
+      {
+       "name": "Compliance and certification programme",
+       "owner": "Laila Zaki",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 30,
+       "id": "corporate-P2-T3"
+      }
+     ],
+     "id": "corporate-P2"
+    }
+   ],
+   "ukey": "corporate",
+   "active": true
+  },
+  "care": {
+   "name": "Care",
+   "codePrefix": "CA",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "the group's after-sales and service organisation",
+     "care-F1"
+    ],
+    [
+     "We provide",
+     "authorised repair, warranty administration and extended service plans",
+     "care-F2"
+    ],
+    [
+     "For",
+     "brand principals, group business units and end customers",
+     "care-F3"
+    ],
+    [
+     "Through",
+     "service centres, pick-up points and on-site teams",
+     "care-F4"
+    ],
+    [
+     "Covering",
+     "Egypt",
+     "care-F5"
+    ],
+    [
+     "Using",
+     "certified technicians, parts inventory and the group's logistics network",
+     "care-F6"
+    ]
+   ],
+   "aspiration": "To be the after-sales operation brands trust with their reputation — the reason a customer buys the second device from us.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Service revenue",
+     "dir": "≥",
+     "target3y": "1.3B EGP",
+     "target": "0.9B EGP",
+     "compile": "Sum",
+     "actual": "0.44B",
+     "progress": 49,
+     "id": "care-KO1"
+    },
+    {
+     "name": "First-time fix rate",
+     "dir": "≥",
+     "target3y": "92%",
+     "target": "86%",
+     "compile": "Latest",
+     "actual": "89%",
+     "progress": 103,
+     "id": "care-KO2"
+    },
+    {
+     "name": "Average turnaround time",
+     "dir": "≤",
+     "target3y": "3 d",
+     "target": "4 d",
+     "compile": "Latest",
+     "actual": "6 d",
+     "progress": 67,
+     "id": "care-KO3"
+    },
+    {
+     "name": "Extended plan attach rate",
+     "dir": "≥",
+     "target3y": "22%",
+     "target": "15%",
+     "compile": "Latest",
+     "actual": "9%",
+     "progress": 60,
+     "id": "care-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Authorised status with major brands",
+     "National service footprint"
+    ],
+    "w": [
+     "Parts availability drives turnaround",
+     "Technician attrition"
+    ],
+    "o": [
+     "Extended warranty as a margin pool",
+     "Service for third-party retailers"
+    ],
+    "t": [
+     "Brands insourcing service",
+     "Grey-market repair pricing"
+    ]
+   },
+   "items": [
+    {
+     "code": "CA01",
+     "name": "Service Excellence",
+     "sub": "",
+     "kind": "Capability",
+     "theme": "OT",
+     "owner": "Mostafa Deif",
+     "measures": [
+      {
+       "name": "First-time fix rate",
+       "dir": "≥",
+       "target": "86%",
+       "compile": "Latest",
+       "actual": "89%",
+       "progress": 103,
+       "id": "care-P1-M1"
+      },
+      {
+       "name": "Turnaround time",
+       "dir": "≤",
+       "target": "4 d",
+       "compile": "Latest",
+       "actual": "6 d",
+       "progress": 67,
+       "id": "care-P1-M2"
+      },
+      {
+       "name": "Customer satisfaction",
+       "dir": "≥",
+       "target": "4.5",
+       "compile": "Latest",
+       "actual": "4.6",
+       "progress": 102,
+       "id": "care-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Parts availability programme",
+       "owner": "Mostafa Deif",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 65,
+       "id": "care-P1-T1"
+      },
+      {
+       "name": "Technician certification ladder",
+       "owner": "Rania Fahmy",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 50,
+       "id": "care-P1-T2"
+      },
+      {
+       "name": "Service tracking for customers",
+       "owner": "Mostafa Deif",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40,
+       "id": "care-P1-T3"
+      }
+     ],
+     "id": "care-P1"
+    },
+    {
+     "code": "CA02",
+     "name": "Service Revenue Growth",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Rania Fahmy",
+     "measures": [
+      {
+       "name": "Extended plan attach rate",
+       "dir": "≥",
+       "target": "15%",
+       "compile": "Latest",
+       "actual": "9%",
+       "progress": 60,
+       "id": "care-P2-M1"
+      },
+      {
+       "name": "Third-party service revenue",
+       "dir": "≥",
+       "target": "180M EGP",
+       "compile": "Sum",
+       "actual": "62M",
+       "progress": 34,
+       "id": "care-P2-M2"
+      },
+      {
+       "name": "Out-of-warranty revenue",
+       "dir": "≥",
+       "target": "240M EGP",
+       "compile": "Sum",
+       "actual": "112M",
+       "progress": 47,
+       "id": "care-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Extended plan sales at point of sale",
+       "owner": "Rania Fahmy",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 48,
+       "id": "care-P2-T1"
+      },
+      {
+       "name": "Third-party retailer service contracts",
+       "owner": "Mostafa Deif",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 35,
+       "id": "care-P2-T2"
+      },
+      {
+       "name": "Service pricing review",
+       "owner": "Rania Fahmy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 70,
+       "id": "care-P2-T3"
+      }
+     ],
+     "id": "care-P2"
+    }
+   ],
+   "ukey": "care",
+   "active": true
+  },
+  "it": {
+   "name": "IT",
+   "codePrefix": "IT",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "the group's IT products and infrastructure distributor",
+     "it-F1"
+    ],
+    [
+     "We provide",
+     "distribution, configuration and infrastructure services",
+     "it-F2"
+    ],
+    [
+     "For",
+     "resellers, system integrators and corporate buyers",
+     "it-F3"
+    ],
+    [
+     "Through",
+     "a reseller network and direct infrastructure teams",
+     "it-F4"
+    ],
+    [
+     "Covering",
+     "Egypt",
+     "it-F5"
+    ],
+    [
+     "Using",
+     "vendor authorisations, technical staff and group logistics",
+     "it-F6"
+    ]
+   ],
+   "aspiration": "To be the leading distributor of IT products and infrastructure in Egypt, with services attached to every major hardware line we carry.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "IT distribution revenue",
+     "dir": "≥",
+     "target3y": "3.4B EGP",
+     "target": "2.2B EGP",
+     "compile": "Sum",
+     "actual": "0.98B",
+     "progress": 45,
+     "id": "it-KO1"
+    },
+    {
+     "name": "Services attach rate",
+     "dir": "≥",
+     "target3y": "28%",
+     "target": "18%",
+     "compile": "Latest",
+     "actual": "11%",
+     "progress": 61,
+     "id": "it-KO2"
+    },
+    {
+     "name": "Active reseller accounts",
+     "dir": "≥",
+     "target3y": "900",
+     "target": "640",
+     "compile": "Latest",
+     "actual": "471",
+     "progress": 74,
+     "id": "it-KO3"
+    },
+    {
+     "name": "Inventory turns",
+     "dir": "≥",
+     "target3y": "7.0",
+     "target": "5.5",
+     "compile": "Latest",
+     "actual": "4.2",
+     "progress": 76,
+     "id": "it-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Vendor authorisations across major lines",
+     "Technical configuration capability"
+    ],
+    "w": [
+     "Price-led reseller relationships",
+     "Obsolescence risk on stock"
+    ],
+    "o": [
+     "Cloud and infrastructure services",
+     "Refurbished hardware line"
+    ],
+    "t": [
+     "Vendor direct-to-reseller programmes",
+     "Import duty changes"
+    ]
+   },
+   "items": [
+    {
+     "code": "IT01",
+     "name": "Reseller Channel Growth",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Yasser Kamal",
+     "measures": [
+      {
+       "name": "Active resellers",
+       "dir": "≥",
+       "target": "640",
+       "compile": "Latest",
+       "actual": "471",
+       "progress": 74,
+       "id": "it-P1-M1"
+      },
+      {
+       "name": "Revenue per reseller",
+       "dir": "≥",
+       "target": "3.4M EGP",
+       "compile": "Latest",
+       "actual": "2.1M",
+       "progress": 62,
+       "id": "it-P1-M2"
+      },
+      {
+       "name": "Reseller portal adoption",
+       "dir": "≥",
+       "target": "70%",
+       "compile": "Latest",
+       "actual": "44%",
+       "progress": 63,
+       "id": "it-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Reseller tiering and rebate scheme",
+       "owner": "Yasser Kamal",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 58,
+       "id": "it-P1-T1"
+      },
+      {
+       "name": "Self-service ordering portal",
+       "owner": "Dina Shawky",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 42,
+       "id": "it-P1-T2"
+      },
+      {
+       "name": "Regional reseller events",
+       "owner": "Yasser Kamal",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 65,
+       "id": "it-P1-T3"
+      }
+     ],
+     "id": "it-P1"
+    },
+    {
+     "code": "IT02",
+     "name": "Infrastructure Services",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "VC",
+     "owner": "Dina Shawky",
+     "measures": [
+      {
+       "name": "Services revenue",
+       "dir": "≥",
+       "target": "400M EGP",
+       "compile": "Sum",
+       "actual": "178M",
+       "progress": 45,
+       "id": "it-P2-M1"
+      },
+      {
+       "name": "Services attach rate",
+       "dir": "≥",
+       "target": "18%",
+       "compile": "Latest",
+       "actual": "11%",
+       "progress": 61,
+       "id": "it-P2-M2"
+      },
+      {
+       "name": "Certified engineers",
+       "dir": "≥",
+       "target": "24",
+       "compile": "Latest",
+       "actual": "15",
+       "progress": 63,
+       "id": "it-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Managed infrastructure offering",
+       "owner": "Dina Shawky",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 45,
+       "id": "it-P2-T1"
+      },
+      {
+       "name": "Engineer certification programme",
+       "owner": "Yasser Kamal",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 62,
+       "id": "it-P2-T2"
+      },
+      {
+       "name": "Cloud partner accreditation",
+       "owner": "Dina Shawky",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 28,
+       "id": "it-P2-T3"
+      }
+     ],
+     "id": "it-P2"
+    }
+   ],
+   "ukey": "it",
+   "active": true
+  },
+  "logistics": {
+   "name": "Logistics",
+   "codePrefix": "LG",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "the group's logistics and fulfilment operation",
+     "logistics-F1"
+    ],
+    [
+     "We provide",
+     "warehousing, line-haul, last-mile delivery and cash collection",
+     "logistics-F2"
+    ],
+    [
+     "For",
+     "group business units and external e-commerce and retail clients",
+     "logistics-F3"
+    ],
+    [
+     "Through",
+     "hubs, spokes and a contracted fleet",
+     "logistics-F4"
+    ],
+    [
+     "Covering",
+     "all governorates of Egypt",
+     "logistics-F5"
+    ],
+    [
+     "Using",
+     "owned warehousing, routing systems and a managed courier network",
+     "logistics-F6"
+    ]
+   ],
+   "aspiration": "To be a profitable third-party logistics business in its own right, not merely the group's internal delivery arm.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Logistics revenue",
+     "dir": "≥",
+     "target3y": "2.4B EGP",
+     "target": "1.6B EGP",
+     "compile": "Sum",
+     "actual": "0.71B",
+     "progress": 44,
+     "id": "logistics-KO1"
+    },
+    {
+     "name": "External client revenue share",
+     "dir": "≥",
+     "target3y": "45%",
+     "target": "30%",
+     "compile": "Latest",
+     "actual": "18%",
+     "progress": 60,
+     "id": "logistics-KO2"
+    },
+    {
+     "name": "On-time delivery rate",
+     "dir": "≥",
+     "target3y": "96%",
+     "target": "92%",
+     "compile": "Latest",
+     "actual": "94%",
+     "progress": 102,
+     "id": "logistics-KO3"
+    },
+    {
+     "name": "Cost per parcel",
+     "dir": "≤",
+     "target3y": "28 EGP",
+     "target": "33 EGP",
+     "compile": "Latest",
+     "actual": "39 EGP",
+     "progress": 85,
+     "id": "logistics-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "National hub-and-spoke coverage",
+     "Captive group volume as a base load"
+    ],
+    "w": [
+     "Fleet largely contracted, not owned",
+     "Cash-on-delivery reconciliation burden"
+    ],
+    "o": [
+     "Third-party e-commerce fulfilment",
+     "Cross-border into Nigeria"
+    ],
+    "t": [
+     "Well-funded courier startups",
+     "Fuel and fleet cost inflation"
+    ]
+   },
+   "items": [
+    {
+     "code": "LG01",
+     "name": "Network Efficiency",
+     "sub": "",
+     "kind": "Capability",
+     "theme": "OT",
+     "owner": "Hazem Roushdy",
+     "measures": [
+      {
+       "name": "On-time delivery",
+       "dir": "≥",
+       "target": "92%",
+       "compile": "Latest",
+       "actual": "94%",
+       "progress": 102,
+       "id": "logistics-P1-M1"
+      },
+      {
+       "name": "Cost per parcel",
+       "dir": "≤",
+       "target": "33 EGP",
+       "compile": "Latest",
+       "actual": "39 EGP",
+       "progress": 85,
+       "id": "logistics-P1-M2"
+      },
+      {
+       "name": "Hub utilisation",
+       "dir": "≥",
+       "target": "82%",
+       "compile": "Latest",
+       "actual": "68%",
+       "progress": 83,
+       "id": "logistics-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Route optimisation system",
+       "owner": "Hazem Roushdy",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 72,
+       "id": "logistics-P1-T1"
+      },
+      {
+       "name": "Hub capacity rebalancing",
+       "owner": "Mai Sobhy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 44,
+       "id": "logistics-P1-T2"
+      },
+      {
+       "name": "Returns handling redesign",
+       "owner": "Hazem Roushdy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 38,
+       "id": "logistics-P1-T3"
+      }
+     ],
+     "id": "logistics-P1"
+    },
+    {
+     "code": "LG02",
+     "name": "Third-Party Client Growth",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Mai Sobhy",
+     "measures": [
+      {
+       "name": "External client revenue",
+       "dir": "≥",
+       "target": "480M EGP",
+       "compile": "Sum",
+       "actual": "192M",
+       "progress": 40,
+       "id": "logistics-P2-M1"
+      },
+      {
+       "name": "Named 3PL clients",
+       "dir": "≥",
+       "target": "40",
+       "compile": "Latest",
+       "actual": "23",
+       "progress": 58,
+       "id": "logistics-P2-M2"
+      },
+      {
+       "name": "Client retention",
+       "dir": "≥",
+       "target": "85%",
+       "compile": "Latest",
+       "actual": "74%",
+       "progress": 87,
+       "id": "logistics-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "3PL commercial proposition and pricing",
+       "owner": "Mai Sobhy",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 68,
+       "id": "logistics-P2-T1"
+      },
+      {
+       "name": "Client onboarding and SLA framework",
+       "owner": "Hazem Roushdy",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40,
+       "id": "logistics-P2-T2"
+      },
+      {
+       "name": "Fulfilment-as-a-service pilot",
+       "owner": "Mai Sobhy",
+       "q1": 0,
+       "q2": 0,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 26,
+       "id": "logistics-P2-T3"
+      }
+     ],
+     "id": "logistics-P2"
+    }
+   ],
+   "ukey": "logistics",
+   "active": true
+  },
+  "nigeria": {
+   "name": "Nigeria",
+   "codePrefix": "NG",
+   "weight": 0,
+   "real": false,
+   "clauses": [
+    [
+     "We are",
+     "the group's Nigerian distribution operation",
+     "nigeria-F1"
+    ],
+    [
+     "We provide",
+     "mobile and consumer electronics distribution and retail supply",
+     "nigeria-F2"
+    ],
+    [
+     "For",
+     "local retail chains, independent dealers and operators",
+     "nigeria-F3"
+    ],
+    [
+     "Through",
+     "a Lagos hub and regional dealer partners",
+     "nigeria-F4"
+    ],
+    [
+     "Covering",
+     "Nigeria, focused on Lagos, Abuja and Port Harcourt",
+     "nigeria-F5"
+    ],
+    [
+     "Using",
+     "group brand relationships and an asset-light local structure",
+     "nigeria-F6"
+    ]
+   ],
+   "aspiration": "To have proven the group's distribution model outside Egypt, with Nigeria standing on its own commercially and ready to be repeated elsewhere.",
+   "endInMind": "",
+   "keyObjectives": [
+    {
+     "name": "Nigeria revenue",
+     "dir": "≥",
+     "target3y": "2.2B EGP",
+     "target": "1.1B EGP",
+     "compile": "Sum",
+     "actual": "",
+     "progress": null,
+     "id": "nigeria-KO1"
+    },
+    {
+     "name": "Local dealer accounts",
+     "dir": "≥",
+     "target3y": "420",
+     "target": "240",
+     "compile": "Latest",
+     "actual": "",
+     "progress": null,
+     "id": "nigeria-KO2"
+    },
+    {
+     "name": "Contribution margin",
+     "dir": "≥",
+     "target3y": "6.0%",
+     "target": "4.2%",
+     "compile": "Latest",
+     "actual": "",
+     "progress": null,
+     "id": "nigeria-KO3"
+    },
+    {
+     "name": "Working capital cycle",
+     "dir": "≤",
+     "target3y": "55 d",
+     "target": "70 d",
+     "compile": "Latest",
+     "actual": "",
+     "progress": null,
+     "id": "nigeria-KO4"
+    }
+   ],
+   "swot": {
+    "s": [
+     "Group brand relationships transfer",
+     "Asset-light entry keeps risk contained"
+    ],
+    "w": [
+     "Thin local management bench",
+     "Limited local credit history"
+    ],
+    "o": [
+     "Large underserved dealer base",
+     "Second market as a repeatable template"
+    ],
+    "t": [
+     "Currency convertibility and repatriation",
+     "Regulatory and import unpredictability"
+    ]
+   },
+   "items": [
+    {
+     "code": "NG01",
+     "name": "Market Establishment",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "DIV",
+     "owner": "Chidi Okafor",
+     "measures": [
+      {
+       "name": "Dealer accounts",
+       "dir": "≥",
+       "target": "240",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "nigeria-P1-M1"
+      },
+      {
+       "name": "Cities covered",
+       "dir": "≥",
+       "target": "6",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "nigeria-P1-M2"
+      },
+      {
+       "name": "Brand lines carried",
+       "dir": "≥",
+       "target": "5",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "nigeria-P1-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Lagos hub and warehousing",
+       "owner": "Chidi Okafor",
+       "q1": 1,
+       "q2": 1,
+       "q3": 0,
+       "q4": 0,
+       "status": "Not started",
+       "actual": null,
+       "id": "nigeria-P1-T1"
+      },
+      {
+       "name": "Regional dealer recruitment",
+       "owner": "Amaka Eze",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "Not started",
+       "actual": null,
+       "id": "nigeria-P1-T2"
+      },
+      {
+       "name": "Local brand agreements",
+       "owner": "Chidi Okafor",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "Not started",
+       "actual": null,
+       "id": "nigeria-P1-T3"
+      }
+     ],
+     "id": "nigeria-P1"
+    },
+    {
+     "code": "NG02",
+     "name": "Commercial Viability",
+     "sub": "",
+     "kind": "Direction",
+     "theme": "VC",
+     "owner": "Amaka Eze",
+     "measures": [
+      {
+       "name": "Contribution margin",
+       "dir": "≥",
+       "target": "4.2%",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "nigeria-P2-M1"
+      },
+      {
+       "name": "Working capital cycle",
+       "dir": "≤",
+       "target": "70 d",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "nigeria-P2-M2"
+      },
+      {
+       "name": "Overhead ratio",
+       "dir": "≤",
+       "target": "9%",
+       "compile": "Latest",
+       "actual": "",
+       "progress": null,
+       "id": "nigeria-P2-M3"
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Local credit and collections policy",
+       "owner": "Amaka Eze",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "Not started",
+       "actual": null,
+       "id": "nigeria-P2-T1"
+      },
+      {
+       "name": "Cost base review",
+       "owner": "Chidi Okafor",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "Not started",
+       "actual": null,
+       "id": "nigeria-P2-T2"
+      },
+      {
+       "name": "Repatriation and FX hedging plan",
+       "owner": "Amaka Eze",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "Not started",
+       "actual": null,
+       "id": "nigeria-P2-T3"
+      }
+     ],
+     "id": "nigeria-P2"
+    }
+   ],
+   "ukey": "nigeria",
+   "active": true
+  }
+ },
+ "functionKeys": [
+  "finance",
+  "hr",
+  "treasury",
+  "marketing",
+  "it",
+  "care",
+  "smo"
+ ],
+ "functions": {
+  "finance": {
+   "name": "Finance",
+   "navName": null,
+   "codePrefix": "FIN",
+   "head": "fn_fin",
+   "custodian": null,
+   "active": true
+  },
+  "hr": {
+   "name": "HR",
+   "navName": null,
+   "codePrefix": "HR",
+   "head": "fn_hr",
+   "custodian": null,
+   "active": true
+  },
+  "treasury": {
+   "name": "Treasury",
+   "navName": null,
+   "codePrefix": "TRS",
+   "head": "fn_tre",
+   "custodian": null,
+   "active": true
+  },
+  "marketing": {
+   "name": "Marketing",
+   "navName": null,
+   "codePrefix": "MKT",
+   "head": "fn_mkt",
+   "custodian": "fn_mkt2",
+   "active": true
+  },
+  "it": {
+   "name": "IT",
+   "navName": null,
+   "codePrefix": "ITF",
+   "head": "ithead",
+   "custodian": "own_it",
+   "active": true
+  },
+  "care": {
+   "name": "Care",
+   "navName": null,
+   "codePrefix": "CAF",
+   "head": "cahead",
+   "custodian": "own_ca",
+   "active": true
+  },
+  "smo": {
+   "name": "Strategy Management Office",
+   "navName": null,
+   "codePrefix": "SMO",
+   "head": "smo",
+   "custodian": null,
+   "active": true
+  }
+ },
+ "people": [
+  {
+   "key": "smo",
+   "name": "Strategy Management Office",
+   "level": "smo",
+   "unit": "group",
+   "title": "SMO"
+  },
+  {
+   "key": "ceo",
+   "name": "Group CEO",
+   "level": "ceo",
+   "unit": "group",
+   "title": "Chief Executive"
+  },
+  {
+   "key": "mobhead",
+   "name": "Ashraf Laithy",
+   "level": "n1",
+   "unit": "mobile",
+   "title": "Head of Mobile"
+  },
+  {
+   "key": "loghead",
+   "name": "Hazem Roushdy",
+   "level": "n1",
+   "unit": "logistics",
+   "title": "Head of Logistics"
+  },
+  {
+   "key": "rethead",
+   "name": "Hossam Farid",
+   "level": "n1",
+   "unit": "retailstores",
+   "title": "Head of Retail Stores"
+  },
+  {
+   "key": "cfo",
+   "name": "Group CFO",
+   "level": "n1",
+   "unit": "group",
+   "title": "Chief Financial Officer"
+  },
+  {
+   "key": "b2bhead",
+   "name": "Nour Selim",
+   "level": "n1",
+   "unit": "b2becomm",
+   "title": "Head of B2B Ecomm"
+  },
+  {
+   "key": "cehead",
+   "name": "Tarek Nassar",
+   "level": "n1",
+   "unit": "consumerelectronics",
+   "title": "Head of Consumer Electronics"
+  },
+  {
+   "key": "oshead",
+   "name": "Sherif Adel",
+   "level": "n1",
+   "unit": "onlineshop",
+   "title": "Head of Online Shop"
+  },
+  {
+   "key": "cohead",
+   "name": "Amr Bakr",
+   "level": "n1",
+   "unit": "corporate",
+   "title": "Head of Corporate"
+  },
+  {
+   "key": "cahead",
+   "name": "Mostafa Deif",
+   "level": "n1",
+   "unit": "care",
+   "title": "Head of Care"
+  },
+  {
+   "key": "ithead",
+   "name": "Yasser Kamal",
+   "level": "n1",
+   "unit": "it",
+   "title": "Head of IT"
+  },
+  {
+   "key": "nghead",
+   "name": "Chidi Okafor",
+   "level": "n1",
+   "unit": "nigeria",
+   "title": "Head of Nigeria"
+  },
+  {
+   "key": "own_mob",
+   "name": "Mennah Farouk",
+   "level": "n1",
+   "unit": "mobile",
+   "title": "Strategy custodian, Mobile"
+  },
+  {
+   "key": "own_ret",
+   "name": "Dalia Sabry",
+   "level": "n1",
+   "unit": "retailstores",
+   "title": "Strategy custodian, Retail Stores"
+  },
+  {
+   "key": "own_b2b",
+   "name": "Kareem Hafez",
+   "level": "n1",
+   "unit": "b2becomm",
+   "title": "Strategy custodian, B2B Ecomm"
+  },
+  {
+   "key": "own_ce",
+   "name": "Heba Salem",
+   "level": "n1",
+   "unit": "consumerelectronics",
+   "title": "Strategy custodian, Consumer Electronics"
+  },
+  {
+   "key": "own_os",
+   "name": "Nadia Fouad",
+   "level": "n1",
+   "unit": "onlineshop",
+   "title": "Strategy custodian, Online Shop"
+  },
+  {
+   "key": "own_co",
+   "name": "Laila Zaki",
+   "level": "n1",
+   "unit": "corporate",
+   "title": "Strategy custodian, Corporate"
+  },
+  {
+   "key": "own_ca",
+   "name": "Rania Fahmy",
+   "level": "n1",
+   "unit": "care",
+   "title": "Strategy custodian, Care"
+  },
+  {
+   "key": "own_it",
+   "name": "Dina Shawky",
+   "level": "n1",
+   "unit": "it",
+   "title": "Strategy custodian, IT"
+  },
+  {
+   "key": "own_lg",
+   "name": "Mai Sobhy",
+   "level": "n1",
+   "unit": "logistics",
+   "title": "Strategy custodian, Logistics"
+  },
+  {
+   "key": "own_ng",
+   "name": "Amaka Eze",
+   "level": "n1",
+   "unit": "nigeria",
+   "title": "Strategy custodian, Nigeria"
+  },
+  {
+   "key": "fn_fin",
+   "name": "Hossam Abuelenien",
+   "level": "n1",
+   "unit": null,
+   "fn": "finance",
+   "title": "Head of Finance"
+  },
+  {
+   "key": "fn_hr",
+   "name": "Noran Adel",
+   "level": "n1",
+   "unit": null,
+   "fn": "hr",
+   "title": "Head of HR"
+  },
+  {
+   "key": "fn_tre",
+   "name": "Fayad Sobhy",
+   "level": "n1",
+   "unit": null,
+   "fn": "treasury",
+   "title": "Head of Treasury"
+  },
+  {
+   "key": "fn_mkt",
+   "name": "Yara Kamal",
+   "level": "n1",
+   "unit": null,
+   "fn": "marketing",
+   "title": "Head of Marketing"
+  },
+  {
+   "key": "fn_mkt2",
+   "name": "Tarek Nour",
+   "level": "n1",
+   "unit": null,
+   "fn": "marketing",
+   "title": "Strategy custodian, Marketing"
+  },
+  {
+   "key": "dir",
+   "name": "Ramy Behairy",
+   "level": "n2",
+   "unit": "mobile",
+   "title": "Director, Digital Operations"
+  }
+ ],
+ "unitRoles": {
+  "mobile": {
+   "head": "mobhead",
+   "custodian": "own_mob"
+  },
+  "retailstores": {
+   "head": "rethead",
+   "custodian": "own_ret"
+  },
+  "b2becomm": {
+   "head": "b2bhead",
+   "custodian": "own_b2b"
+  },
+  "consumerelectronics": {
+   "head": "cehead",
+   "custodian": "own_ce"
+  },
+  "onlineshop": {
+   "head": "oshead",
+   "custodian": "own_os"
+  },
+  "corporate": {
+   "head": "cohead",
+   "custodian": "own_co"
+  },
+  "care": {
+   "head": "cahead",
+   "custodian": "own_ca"
+  },
+  "it": {
+   "head": "ithead",
+   "custodian": "own_it"
+  },
+  "logistics": {
+   "head": "loghead",
+   "custodian": "own_lg"
+  },
+  "nigeria": {
+   "head": "nghead",
+   "custodian": "own_ng"
+  }
+ },
+ "levels": [
+  {
+   "key": "ceo",
+   "name": "CEO",
+   "titles": "Group Chief Executive",
+   "note": "One person. Sees everything, manages nothing outside their own unit."
+  },
+  {
+   "key": "n1",
+   "name": "N-1",
+   "titles": "Business Unit Head · Group CFO · Group COO",
+   "note": "Runs a business unit, or a group function with no unit of its own."
+  },
+  {
+   "key": "n2",
+   "name": "N-2",
+   "titles": "Director · Pillar owner",
+   "note": "Owns pillars within a unit. Most tactic owners sit here."
+  },
+  {
+   "key": "n3",
+   "name": "N-3",
+   "titles": "Manager · Tactic owner",
+   "note": "Delivers tactics. Reports progress, reads little else."
+  }
+ ],
+ "access": {
+  "smo": {
+   "g_perf": "edit",
+   "g_found": "edit",
+   "g_temple": "edit",
+   "g_weight": "edit",
+   "u_perf": "edit",
+   "u_found": "edit",
+   "u_anal": "edit",
+   "u_plan": "edit",
+   "c_labels": "edit",
+   "c_access": "edit",
+   "c_bands": "edit",
+   "c_units": "edit",
+   "c_import": "edit",
+   "g_focus": "edit",
+   "c_focus": "edit",
+   "c_cycle": "edit",
+   "c_fns": "edit",
+   "c_caps": "edit",
+   "k_perf": "edit",
+   "k_found": "edit",
+   "k_proj": "edit",
+   "k_report": "edit",
+   "u_report": "edit"
+  },
+  "ceo": {
+   "g_perf": "view",
+   "g_found": "view",
+   "g_temple": "view",
+   "g_weight": "view",
+   "u_perf": "view",
+   "u_found": "view",
+   "u_anal": "view",
+   "u_plan": "view",
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_import": "none",
+   "g_focus": "edit",
+   "c_focus": "edit",
+   "c_cycle": "view",
+   "c_fns": "view",
+   "c_caps": "view",
+   "k_perf": "view",
+   "k_found": "view",
+   "k_proj": "view",
+   "k_report": "view",
+   "u_report": "none"
+  },
+  "n1": {
+   "g_perf": "view",
+   "g_found": "view",
+   "g_temple": "view",
+   "g_weight": "none",
+   "u_perf": "edit",
+   "u_found": "edit",
+   "u_anal": "edit",
+   "u_plan": "edit",
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_import": "none",
+   "g_focus": "none",
+   "c_focus": "none",
+   "c_cycle": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "k_perf": "edit",
+   "k_found": "edit",
+   "k_proj": "edit",
+   "k_report": "edit",
+   "u_report": "edit"
+  },
+  "n2": {
+   "g_perf": "none",
+   "g_found": "view",
+   "g_temple": "view",
+   "g_weight": "none",
+   "u_perf": "view",
+   "u_found": "view",
+   "u_anal": "view",
+   "u_plan": "view",
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_import": "none",
+   "g_focus": "none",
+   "c_focus": "none",
+   "c_cycle": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "k_perf": "edit",
+   "k_found": "edit",
+   "k_proj": "edit",
+   "k_report": "edit",
+   "u_report": "none"
+  },
+  "n3": {
+   "g_perf": "none",
+   "g_found": "none",
+   "g_temple": "view",
+   "g_weight": "none",
+   "u_perf": "view",
+   "u_found": "none",
+   "u_anal": "none",
+   "u_plan": "none",
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_import": "none",
+   "g_focus": "none",
+   "c_focus": "none",
+   "c_cycle": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "k_perf": "edit",
+   "k_found": "edit",
+   "k_proj": "edit",
+   "k_report": "edit",
+   "u_report": "none"
+  }
+ },
+ "labels": [
+  {
+   "key": "theme",
+   "internal": "Theme",
+   "group": "Themes",
+   "bu": "Themes",
+   "note": "The group's standing columns. Also called pillars or motto elements by clients."
+  },
+  {
+   "key": "pillar",
+   "internal": "Pillar",
+   "group": "Group capabilities",
+   "bu": "Pillars",
+   "note": "A business unit's direction or capability. Carries key measures and tactics."
+  },
+  {
+   "key": "keyobj",
+   "internal": "Key Objectives",
+   "group": "Key Objectives",
+   "bu": "Key Objectives",
+   "note": "A unit's own scorecard. Previously called North Star and Guiding Objectives."
+  },
+  {
+   "key": "aspiration",
+   "internal": "Winning Aspiration",
+   "group": "Vision",
+   "bu": "Winning Aspiration",
+   "note": "One entity. Vision, End State and Winning Aspiration are display labels for it."
+  },
+  {
+   "key": "purpose",
+   "internal": "Purpose",
+   "group": "Mission",
+   "bu": "—",
+   "note": "Held by the top unit only. Business units inherit it."
+  },
+  {
+   "key": "values",
+   "internal": "Core Values",
+   "group": "Core Values",
+   "bu": "—",
+   "note": "Group-level only. A unit never declares its own."
+  },
+  {
+   "key": "measure",
+   "internal": "Key Measure",
+   "group": "Key measures",
+   "bu": "Key measures",
+   "note": "The measures under a single pillar."
+  },
+  {
+   "key": "tactic",
+   "internal": "Tactic",
+   "group": "Tactics",
+   "bu": "Tactics",
+   "note": "The work under a pillar. Spans quarters, has an owner."
+  }
+ ],
+ "bands": [
+  {
+   "key": "good",
+   "floor": 85,
+   "label": "On track"
+  },
+  {
+   "key": "attn",
+   "floor": 70,
+   "label": "Needs attention"
+  },
+  {
+   "key": "warn",
+   "floor": 50,
+   "label": "At risk"
+  },
+  {
+   "key": "bad",
+   "floor": 0,
+   "label": "Off track"
+  }
+ ],
+ "koWeights": {
+  "mobile": [
+   40,
+   25,
+   20,
+   15
+  ]
+ },
+ "cycle": {
+  "name": "2026",
+  "rewardAt": 100,
+  "locked": false,
+  "focus": {
+   "mobile-KO2": true,
+   "mobile-P1-M3": true,
+   "mobile-P3-M2": true,
+   "retailstores-KO2": true,
+   "retailstores-P1-M2": true,
+   "care-KO2": true,
+   "care-P1-M3": true,
+   "logistics-KO3": true,
+   "logistics-P2-M1": true
+  }
+ },
+ "review": {
+  "name": "H1 2026",
+  "from": "Jan 2026",
+  "to": "Jun 2026",
+  "due": "15 Jul 2026",
+  "endsQuarter": 2,
+  "state": "open",
+  "note": {
+   "mobile": "Digital work is landing but the app rollout slipped a quarter behind the principal's own launch. Q3 recovery agreed with Ramy.",
+   "retailstores": "Strong half on revenue per store. New store programme is one site behind, land permits.",
+   "care": "First-time fix rate now above target for the first time. Headcount is the constraint on the next step."
+  },
+  "submitted": {
+   "retailstores": true,
+   "care": true,
+   "corporate": true,
+   "it": true,
+   "logistics": true,
+   "onlineshop": true
+  },
+  "cadence": "Half-yearly"
+ },
+ "history": [
+  {
+   "name": "H2 2025",
+   "group": 64,
+   "units": {
+    "mobile": 56,
+    "retailstores": 79,
+    "b2becomm": 61,
+    "consumerelectronics": 58,
+    "onlineshop": 66,
+    "corporate": 71,
+    "care": 66,
+    "it": 63,
+    "logistics": 69,
+    "nigeria": 44
+   }
+  }
+ ],
+ "priorCycle": {
+  "year": 2025,
+  "factors": [
+   {
+    "key": "rev",
+    "weight": 45
+   },
+   {
+    "key": "prof",
+    "weight": 30
+   },
+   {
+    "key": "imp",
+    "weight": 15
+   },
+   {
+    "key": "growth",
+    "weight": 10
+   }
+  ],
+  "composite": {
+   "Mobile": 48,
+   "Retail": 30,
+   "Mazaya": 22
+  }
+ }
+}

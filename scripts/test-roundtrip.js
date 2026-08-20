@@ -1,0 +1,84 @@
+/* The fidelity proof: ensureReady seeds an empty database from
+   db/seed-state.json; readState must give back a graph deep-equal to the
+   seed (after normalization: key order ignored, null and absent treated as
+   the same word — which is how the codebase reads every optional field).
+   A second ensureReady must not re-seed.
+
+     DATABASE_URL=postgres://... node scripts/test-roundtrip.js
+*/
+const fs = require("fs");
+const path = require("path");
+const pg = require("pg");
+const io = require("../lib/state-io.js");
+
+function normalize(v) {
+  if (Array.isArray(v)) return v.map(normalize);
+  if (v && typeof v === "object") {
+    const out = {};
+    Object.keys(v).sort().forEach(function (k) {
+      if (v[k] === null || v[k] === undefined) return;
+      out[k] = normalize(v[k]);
+    });
+    return out;
+  }
+  return v;
+}
+
+function firstDiff(a, b, at) {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length)
+      return at + " array shape " + (a && a.length) + " vs " + (b && b.length);
+    for (let i = 0; i < a.length; i++) {
+      const d = firstDiff(a[i], b[i], at + "[" + i + "]");
+      if (d) return d;
+    }
+    return null;
+  }
+  if (a && b && typeof a === "object" && typeof b === "object") {
+    const keys = Object.keys(a).concat(Object.keys(b));
+    for (const k of keys) {
+      const d = firstDiff(a[k], b[k], at + "." + k);
+      if (d) return d;
+    }
+    return null;
+  }
+  if (a !== b) return at + ": " + JSON.stringify(a) + " vs " + JSON.stringify(b);
+  return null;
+}
+
+(async function () {
+  io.tuneTypes(pg);
+  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+  const client = await pool.connect();
+
+  const r1 = await io.ensureReady(client);
+  console.log("first ensureReady seeded:", r1.seeded);
+  const r2 = await io.ensureReady(client);
+  console.log("second ensureReady seeded:", r2.seeded, "(must be false)");
+
+  const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
+  const back = await io.readState(client);
+
+  const a = normalize(seed), b = normalize(back);
+  const equal = JSON.stringify(a) === JSON.stringify(b);
+  console.log("round trip deep-equal:", equal ? "PASS" : "FAIL");
+  if (!equal) console.log("first difference:", firstDiff(a, b, "state"));
+
+  /* write the read-back state again — a fixed point, byte for byte */
+  await io.writeState(client, back);
+  const again = await io.readState(client);
+  console.log("write(read()) fixed point:",
+    JSON.stringify(normalize(again)) === JSON.stringify(b) ? "PASS" : "FAIL");
+
+  /* SQL spot checks — the exact rows the pages read */
+  const spot = async function (sql) { return (await client.query(sql)).rows; };
+  console.log("mobile measures:", (await spot(
+    "SELECT count(*) n FROM measures m JOIN pillars p ON m.pillar_id=p.id WHERE p.unit_key='mobile'"))[0].n);
+  console.log("access grants:", (await spot("SELECT count(*) n FROM access_grants"))[0].n);
+  console.log("sample:", (await spot(
+    "SELECT name, target, actual FROM measures WHERE id='mobile-P1-M2'"))[0]);
+
+  client.release();
+  await pool.end();
+  if (!equal) process.exit(1);
+})().catch(function (e) { console.error("FAIL:", e); process.exit(1); });

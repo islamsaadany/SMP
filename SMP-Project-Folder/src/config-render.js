@@ -381,6 +381,19 @@ function renderUnits(){
       '<td class="cc"><span class="mono">' + u.items.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + u.keyObjectives.length + '</span></td>' +
       '<td class="cc"><span class="mono">' + (wrow ? u.weight + '%' : '&mdash;') + '</span></td>' +
+      /* A unit belongs to a company or is its own — never neither. "Its own"
+         is an explicit choice rather than an empty cell, because an empty cell
+         reads as somebody having forgotten and standing alone is a decision. */
+      '<td>' + (editable
+        ? '<select class="fld" data-ucomp="' + k + '">' +
+            COMPANY_KEYS.map(function(ck){
+              return '<option value="' + ck + '"' + (u.company === ck ? " selected" : "") + '>' +
+                esc(COMPANIES[ck].name) + '</option>';
+            }).join("") +
+            '<option value=""' + (u.company ? "" : " selected") + '>\u2014 its own company \u2014</option>' +
+          '</select>'
+        : (u.company ? '<span class="val">' + esc(COMPANIES[u.company].name) + '</span>'
+                     : '<span class="why" style="margin:0">its own company</span>')) + '</td>' +
       '<td class="cc">' + pick("head", roles.head) + '</td>' +
       '<td class="cc">' + pick("custodian", roles.custodian) + '</td>' +
       '<td class="cc">' + (editable
@@ -412,15 +425,44 @@ function renderUnits(){
       "units", grant("c_units") === "edit", "all",
       ["Clear all progress", "Clear all plans"]) +
 
-    section("", "", null,
+    section("", "Companies", null,
       '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:20%">Unit</th>' +
+        '<th class="idx" style="width:38px">#</th><th style="width:22%">Company</th>' +
+        '<th class="cc" style="width:10%">Units</th>' +
+        '<th class="cc" style="width:20%">Sees other companies</th>' +
+        '<th class="cc" style="width:20%">Sees the group</th></tr></thead><tbody>' +
+      COMPANY_KEYS.map(function(ck, i){
+        var co = COMPANIES[ck], flag = function(field, val){
+          if (!editable) return '<span class="pill ' + (val ? "good" : "none") + '">' +
+            (val ? "Yes" : "No") + '</span>';
+          return '<select class="fld" data-coflag="' + ck + '|' + field + '">' +
+            '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
+            '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
+        };
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td><b>' + esc(co.name) + '</b><span class="why mono">key ' + ck + '</span></td>' +
+          '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
+          '<td class="cc">' + flag("seeOthers", co.seeOthers) + '</td>' +
+          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td></tr>';
+      }).join("") + '</tbody></table></div>' +
+      '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
+      'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
+      'more. Supporting functions belong to no company: they serve all of them. ' +
+      (soloUnits().length
+        ? soloUnits().length + ' unit' + (soloUnits().length === 1 ? ' stands' : 's stand') +
+          ' alone: ' + soloUnits().map(function(k){ return esc(UNITS[k].name); }).join(", ") + '.'
+        : 'Every unit belongs to a company.') + '</div>') +
+
+    section("", "Business units", null,
+      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+        '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
         '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
-        '<th class="cc" style="width:8%">Weight</th>' +
-        '<th class="cc" style="width:16%">BU head</th><th class="cc" style="width:18%">Strategy custodian</th>' +
-        '<th class="cc" style="width:10%">Status</th>' +
+        '<th class="cc" style="width:7%">Weight</th>' +
+        '<th style="width:12%">Company</th>' +
+        '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
+        '<th class="cc" style="width:9%">Status</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
       (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
 }
@@ -465,62 +507,12 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
-function renderFocusSetup(){
-  var editable = grant("c_focus") === "edit" && !CYCLE.locked;
-  var u = UNITS[FSET.unit];
-
-  var pick = function(m, src){
-    var on = isFocus(m.id);
-    return '<div class="pick ' + (on ? "on" : "off") + '">' +
-      (editable
-        ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
-          'aria-pressed="' + on + '" aria-label="' + (on ? "Unmark " : "Mark ") + esc(m.name) + '"></button>'
-        : '<span class="fmark-btn' + (on ? ' on' : '') + '" style="cursor:default"></span>') +
-      '<span>' + esc(m.name) + ' <span class="src">' + esc(src) + '</span></span>' +
-      '<span class="num why" style="margin:0">target ' +
-        (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span>' +
-      '<span class="why" style="margin:0;min-width:74px;text-align:right">' +
-        (on ? "marked" : (editable ? "click to mark" : "")) + '</span>' +
-    '</div>';
-  };
-
-  var blocks =
-    '<div class="grouphead">' + L("keyobj","bu") + '</div>' +
-    (u.keyObjectives.length
-      ? u.keyObjectives.map(function(m){ return pick(m, "objective"); }).join("")
-      : '<div class="fstrip-empty">None set for this unit.</div>') +
-    u.items.map(function(p, pi){
-      return '<div class="grouphead">' + pillarCode(u, pi) + ' ' + esc(p.name) +
-             ' &middot; ' + esc(p.kind).toLowerCase() + '</div>' +
-        (p.measures.length
-          ? p.measures.map(function(m){ return pick(m, ""); }).join("")
-          : '<div class="fstrip-empty">No key measures.</div>');
-    }).join("");
-
-  var n = unitFocus(u).length;
-  var unitPick = '<select class="fld" id="fset-unit">' + activeKeys().map(function(k){
-      var c = unitFocus(UNITS[k]).length;
-      return '<option value="' + k + '"' + (k === FSET.unit ? " selected" : "") + '>' +
-        esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
-    }).join("") + '</select>';
-
-  return cfgHead("Business units",
-      ['<span class="pill kind">SMO</span>', UNIT_KEYS.length + ' units',
-       activeKeys().length + ' active'],
-      "units", grant("c_units") === "edit", "all",
-      ["Clear all progress", "Clear all plans"]) +
-    section("", "", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:20%">Unit</th>' +
-        '<th style="width:14%">Shown in the nav</th>' +
-        '<th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:7%">Pillars</th><th class="cc" style="width:9%">Objectives</th>' +
-        '<th class="cc" style="width:8%">Weight</th>' +
-        '<th class="cc" style="width:16%">BU head</th><th class="cc" style="width:18%">Strategy custodian</th>' +
-        '<th class="cc" style="width:10%">Status</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
-}
+/* `renderFocusSetup` was defined TWICE, and the first one — 56 lines that
+   returned the Business units screen rather than the focus one — was dead:
+   a function declaration later in the file silently replaces an earlier one,
+   so only the second ever ran. Removed. It is the same accident as the double
+   `IMP` below, and it is what made a copy of this file taken outside look as
+   though the Focus measures page were broken. */
 
 /* ── Import ─────────────────────────────────────────────────────────
    A plan AUTHORS (§22): one generic template, the unit named on its Read me

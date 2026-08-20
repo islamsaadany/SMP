@@ -221,8 +221,20 @@ var PAGE_INFO = {
   },
 
   c_units: {
-    title: "Business units",
+    title: "Business units and companies",
     body: [
+      ["A company groups business units, and has its own CEO",
+       "In this version a company is a level of <b>visibility, not of strategy</b>: it carries no " +
+       "score and no page. Its purpose is that a company CEO sees their own units without wading " +
+       "through everyone else's. Both flags are <b>per company</b> rather than global &mdash; " +
+       "whether that CEO sees the other companies (default no), and whether they reach the group " +
+       "at all (default yes) &mdash; because a client may want one company measured against the " +
+       "whole and another not. Supporting functions belong to no company: they serve all of them."],
+      ["A unit belongs to a company, or is its own",
+       "Never neither. <b>Standing alone is a decision</b>, so the table names it in words rather " +
+       "than leaving an empty cell that reads as somebody having forgotten. A company CEO is an " +
+       "<b>attachment, not a level</b>: they sit at N-1 and hold the same pages a unit head does, " +
+       "on a different set of units."],
       ["The one place a unit is named",
        "Everything else in the platform references a unit's <b>key</b>, not its name. The name is display " +
        "only, the same as any other label, so renaming a unit here cannot detach it from its weight, its " +

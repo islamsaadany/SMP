@@ -190,23 +190,16 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
     var us = myUnits(), cs = myFns(), fold = foldsNeeded();
 
     if (fold) {
-      /* The row does NOT group by company (§15.13). It was built that way and
-         taken out in the same version: the SMO and the group CEO see
-         everything and already have this fold, so companies added a second
-         layer of folding to a row that was working; and a company CEO sees
-         only their own three or four units, so there is nothing to group. The
-         grouping solved a problem neither viewer had. The company level
-         survives where it does work — deciding who reaches what.
-
-         REVERSAL of the 1.2 rule: a closed fold no longer announces where you
-         are. It remembers silently — reopening puts you back, and the page
-         below already says it. Repeating it made the row noisier the more
-         folds there were. Worth revisiting if the row ever feels lost, since
-         with the company folds gone there are only two folds again. */
-      out.push({ fold:"units", label:"Units", open:NAVFOLD === "units" });
+      var inUnits = us.indexOf(current) > -1;
+      var inCaps  = cs.some(function(k){ return "fn:" + k === current; });
+      out.push({ fold:"units", label:"Units",
+                 open:NAVFOLD === "units",
+                 here:(NAVFOLD !== "units" && inUnits) ? navName(UNITS[current]) : null });
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      out.push({ fold:"caps", label:"Functions", open:NAVFOLD === "caps" });
+      out.push({ fold:"caps", label:"Functions",
+                 open:NAVFOLD === "caps",
+                 here:(NAVFOLD !== "caps" && inCaps) ? FUNCTIONS[fnKeyOf(current)].name : null });
       if (NAVFOLD === "caps")
         cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     } else {
@@ -254,6 +247,7 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       if (t.fold) {
         return '<span class="sep"></span><button class="navfold' + (t.open ? " open" : "") +
           '" data-fold="' + t.fold + '" aria-expanded="' + t.open + '">' + t.label +
+          (t.here ? '<span class="foldhere">' + esc(t.here) + '</span>' : '') +
           '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
       }
       return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
@@ -836,21 +830,6 @@ var ICON_MANAGE = '<svg viewBox="0 0 20 20" class="navsvg" aria-hidden="true">' 
       inp.addEventListener("change", function(){
         var n = parseInt(inp.value, 10);
         if (!isNaN(n)) BANDS.bands[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
-        paint();
-      });
-    });
-    /* A unit's company, and a company's two visibility flags. Both are
-       configuration: they change who reaches what, never a figure. */
-    document.querySelectorAll("[data-ucomp]").forEach(function(el){
-      el.addEventListener("change", function(){
-        UNITS[el.dataset.ucomp].company = el.value || null;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-coflag]").forEach(function(el){
-      el.addEventListener("change", function(){
-        var p = el.dataset.coflag.split("|");
-        COMPANIES[p[0]][p[1]] = el.value === "yes";
         paint();
       });
     });

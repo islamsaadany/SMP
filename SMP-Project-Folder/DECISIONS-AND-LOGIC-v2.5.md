@@ -1702,6 +1702,16 @@ Not designed yet.
 
 ## 17 · Version history
 
+### v2.5 — the company level, and two bugs an authored plan exposed
+
+The company level (§15.13), built by Islam outside the repo and ported here: a
+layer between the group and the business unit, for **visibility rather than
+strategy**. Two bugs went with it, both in the plan upload built a version
+earlier and both found by Islam the first time he used it in anger: a pillar
+arriving from an upload carried **no code**, so its title read "undefined" and
+the rail could not tell one pillar from another; and the sticky chrome was
+pinned in three places at hardcoded offsets, so scrolling smeared the header.
+
 ### v2.4 — SMP gets an icon
 
 The Strategy Temple as the tab and bookmark icon, in the house navy and gold —
@@ -2338,3 +2348,138 @@ from a latent bug into a blocker on the only path into the product.
   deep-equal — a snapshot is the largest single document the state holds.
 - Every page walked as every viewer, live and demo, no console errors; the
   offline file clean for all 29 viewers; byte-identical rebuild.
+
+---
+
+## 23 · The company level — v2.5, ported from Islam's own build
+
+*Built by Islam in the project folder outside the repo and ported here
+2026-08-20. His §15.13 is reproduced as the decision; what follows records the
+port and what it had to reconcile.*
+
+### 23.1 The decision (Islam's §15.13)
+
+A layer between the group and the business unit. **A company is a group of
+business units, and each company has its own CEO.**
+
+```
+Group — Group CEO
+  Company — Company CEO          e.g. Distribution, B2C
+    Business unit — BU head
+      Custodian
+Supporting functions sit beside all of it, at group level
+```
+
+**In this version the company level is for VISIBILITY, not strategy.** A company
+carries no score and no page of its own. Its purpose is that a company CEO can
+see their own units without wading through everyone else's.
+
+**It does NOT group the navigation row.** Built that way and taken out in the
+same version: the SMO and the group CEO see everything and already have the
+Units fold, so companies added a second layer of folding to a row that was
+working; and a company CEO sees only their own three or four units, so there is
+nothing to group. *The grouping solved a problem neither viewer had.* Recorded
+rather than deleted — the company level is real and useful, and it was the
+navigation that was the wrong place to express it.
+
+**Both visibility flags are per company, not global.** Whether a company CEO
+sees the other companies (default no), and whether they reach the group at all
+(default yes). A client may want one company CEO measured against the whole and
+another not, and that is configuration rather than a rule.
+
+**A unit belongs to a company or is its own — never neither.** *Its own company*
+is an explicit choice in Setup rather than an empty cell: an empty cell reads as
+somebody having forgotten, and standing alone is a decision. B2B Ecomm,
+Corporate, Logistics and Nigeria stand alone today.
+
+**A company CEO is an attachment, not a level.** They sit at N-1 and hold the
+same pages a unit head does, on a different set of units. A new level would have
+meant a new column in the access matrix for a difference that is about *whose*,
+not *which pages* — exactly the split §7.3 already makes.
+
+**A company may have a strategy — optionally.** Closer to *what do you want to
+focus on*, cascading to the units beneath. Not built, and explicitly not scored.
+
+**Supporting functions do not belong to a company.** They serve all companies
+and therefore all units, and stay where they are: scored by the group, carried
+by a function. A company CEO does not own a capability.
+
+**REVERSAL — the closed fold no longer announces where you are.** Since 1.2 a
+closed fold carried the current unit as a gold marker. It now remembers
+silently: reopening puts you back, and the page below already says where you
+are. With the company folds gone there are only two folds again, so the original
+argument partly returns — worth revisiting if the row ever feels lost.
+
+### 23.2 What the port had to reconcile
+
+The folder Islam worked in was **older than the repo** — its sources predated
+1.9 (`VERSION` read "1.6" inside it) while `main` was at 2.4. Taken wholesale it
+would have deleted the capability card and the Cards/Table toggle, capability
+import/export, presentation mode for a function, the reporting rail, and
+everything from 2.0 on. Measured: `templates.js` 0 lines added and 409 removed;
+`present.js` 3 and 191; `xlsx.js` 2 and 187.
+
+So nothing was overwritten. The company work — the model, the access rule, the
+two Setup screens, the help text and the fold reversal — was lifted onto 2.4.
+
+**Companies are stored, not baked.** A `companies` table and a `company` column
+on `units`, carried in the state graph like everything else. `006-companies.sql`
+adds them to a tenant already deployed, since `CREATE TABLE IF NOT EXISTS` skips
+an existing database. **The company level survives the clean slate**: companies
+are the client's own, like the units and the supporting functions (§21).
+
+**The two company CEOs are demo people only.** `co_dist` and `co_b2c` are
+placeholders — "Company CEO, Distribution" is not a person — so they live in the
+baked example and are not written into the client's tenant. The SMO attaches
+real people when there are real people to attach.
+
+### 23.3 Two defects an authored plan exposed
+
+Both were in the upload built in §22, and both surfaced the first time a real
+plan was loaded rather than in any walk:
+
+1. **An uploaded pillar had no code.** `createFromPlan` sets a pillar's id but
+   never its `code`, and the rail keys off `code` while the pillar title leads
+   with it. Every pillar therefore read **"undefined"** and every rail button
+   carried the same key, so the rail could not select between them —
+   *"I'm not able to navigate from the rail."* A code is now filled in when
+   absent, positionally, by `renumberUnit`. An existing code is left alone:
+   nine units carry hand-set ones (`R01`, `CE01`) and renumbering them would
+   rewrite codes already printed in decks.
+
+2. **The sticky chrome was pinned three times.** `header.top`, `nav.units` and
+   `nav.tabs` were each `position:sticky` at offsets read from `--top-h` and
+   `--units-h` — two custom properties set only by `group-shell.html`, which is
+   **not the shell the platform is built from**. In the shipped file they never
+   had a value, so the hardcoded fallbacks (58px, 45px) stood in. The header
+   condenses on scroll, so its real height left those offsets: the rows drifted
+   out of register, page content showed through the seams, and the `.18s`
+   transitions smeared it — *"on scrolling up the page starts getting hazy and
+   damaged, in all pages."* `.chrome` already wraps all three and is already
+   sticky, so it is now the only thing pinned. One offset, owned by the browser,
+   cannot drift.
+
+**And a third, found while porting:** `renderFocusSetup` was defined **twice**,
+and the first — 56 lines returning the Business units screen rather than the
+focus one — was dead, because a later function declaration silently replaces an
+earlier one. It is the same accident as the double `IMP` found in §22, and it is
+what made Islam's copy look as though the Focus measures page were broken. The
+dead copy is gone.
+
+### 23.4 Verified before handover
+
+- The company model on the real screens: Distribution (3 units), B2C (3), four
+  standing alone; both Setup sections rendering; the Company column on the units
+  table.
+- The access rule: the SMO reaches all ten units and the group; the Distribution
+  CEO reaches Mobile, Consumer Electronics and IT; the B2C CEO reaches Retail
+  Stores, Online Shop and Care. Turning `seeGroup` off closes the group to that
+  CEO; turning `seeOthers` on opens the other company's units.
+- The pillar-code fix through the real upload path: an authored plan for Care
+  produced `CA01`, `CA02`, `CA03`, with unique rail keys, and clicking the
+  second and third rail items opened the second and third pillars.
+- The chrome, screenshotted at four scroll positions: the three rows stack
+  contiguously (0→115, 115→161, 161→210) with only `.chrome` sticky, and no
+  content bleeds through.
+- Round trip, fixed point and archived-plan round trip PASS, with the clean
+  slate now asserting 2 companies and 6 assigned units.

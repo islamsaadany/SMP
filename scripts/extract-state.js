@@ -36,6 +36,8 @@ const state = {
   /* The demo dataset has never had a plan replaced, so this is empty — but it
      travels, so the seed and the round trip agree on the shape. */
   archives: ctx.ARCHIVES || [],
+  companies: ctx.COMPANIES,
+  companyKeys: ctx.COMPANY_KEYS,
 };
 /* weighting lives on group; do not store it twice. */
 delete state.weighting;

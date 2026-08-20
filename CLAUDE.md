@@ -167,6 +167,11 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   cannot arrive as a CSV, because a CSV cannot say whose plan it is. Replacing archives
   the outgoing plan into `plan_archives` (state field `archives`); **nothing an import
   does is a deletion**.
+- **Companies (since v2.5, §23):** a layer between the group and the business unit —
+  visibility, not strategy: no score, no page. A unit belongs to a company or is
+  explicitly its own; two per-company flags decide whether its CEO sees the other
+  companies and the group. Stored (`companies` table, `units.company`), survives the
+  clean slate, and `006-companies.sql` adds it to a tenant already deployed.
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
@@ -235,7 +240,11 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v2.4: the SMP icon — `favicon.svg` / `favicon.png` at
+*Last Updated: 2026-08-20 — v2.5: the company level ported from Islam's own build
+(§23), plus the two defects a real uploaded plan exposed — a pillar with no code, and
+the triple-pinned sticky chrome.*
+
+*Earlier: 2026-08-20 — v2.4: the SMP icon — `favicon.svg` / `favicon.png` at
 the repo root, and the same mark inlined by `build.py` so the single file carries it
 offline. Regenerate both together if the mark changes.*
 

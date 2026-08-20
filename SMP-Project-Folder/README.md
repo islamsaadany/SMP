@@ -1,4 +1,4 @@
-# SMP Project Folder — v2.4
+# SMP Project Folder — v2.5
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v2.4.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v2.5.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v2.4.html`** — the built prototype. One file,
+**`strategy-management-platform-v2.5.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -132,6 +132,14 @@ sheet; the platform assigns every code on arrival. It rests on one rule — **an
 upload authors a plan, it does not amend one** — which is what removes the need
 to match a row against anything. Replacing a plan **archives** the outgoing one,
 reported figures included, and Manage lists archives with a Restore.
+
+Version **2.5** brought in the **company level** (§23, built by Islam outside
+the repo): a layer between the group and the business unit, for visibility
+rather than strategy — a company CEO sees their own units, with two per-company
+flags deciding whether they also see the other companies and the group. Two
+defects that only a real uploaded plan could expose went with it: a pillar
+arriving from an upload had no code, so the rail could not navigate; and the
+sticky chrome was pinned three times over, which smeared the header on scroll.
 
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side

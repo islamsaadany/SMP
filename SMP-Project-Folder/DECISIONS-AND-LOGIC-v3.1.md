@@ -2910,3 +2910,91 @@ compromised.
 - **Light mode's 61 AA failures** (§25.5). Needs a palette decision.
 - **`--ink-3` on `--panel`** — a `.why` note on a navy band, failing in both
   themes, worse in light.
+
+---
+
+## 26 · The platform becomes installable — v3.1
+
+Islam: *"When you finish we want to make the platform pwa."*
+
+Installed to a dock or a home screen: its own icon, opening in its own window
+with no browser chrome, and opening at all when there is no network.
+
+### 26.1 The rule this is built around: `/api/*` is never cached
+
+A service worker's whole job is serving things without asking the network, and
+that is exactly the wrong behaviour for `/api/state`. A cached response there is
+**last quarter's actuals wearing this quarter's chrome** — and a strategy
+platform that shows stale figures as if they were current is worse than one
+that will not open.
+
+So `/api/` requests are passed straight through and allowed to fail. `sync.js`
+already handles an unreachable API by falling back to the data baked into the
+file, and the platform says on screen that it is doing so. Non-GET requests
+(sign-in, save) are passed through for the same reason.
+
+Asserted, not assumed: the cache is read after a full signed-in session,
+including a hydrate and an autosave, and checked to contain no `/api/` entry.
+
+### 26.2 Network first, cache as the fallback
+
+Cache-first would pin every person to the shell they happened to load first, and
+a deploy would not reach them until someone cleared a cache by hand. Network
+first means the cache is only ever what you get when there is no network.
+
+The cache name (`smp-shell-v3.1`) **is** the cache-busting mechanism: `activate`
+deletes every cache that is not the current one, so bumping the name on a
+release retires everything from the last one. It has to be bumped whenever the
+shell list changes.
+
+Assets are added one at a time rather than with `addAll`, which is
+all-or-nothing: a single 404 would fail the install and leave no worker at all,
+so one missing icon would cost the offline gate.
+
+### 26.3 Registered from the gate only
+
+The worker's scope is the whole origin, and reaching the platform file requires
+having signed in at the gate first — so by the time anyone opens the platform
+the worker is installed and has already precached it. A second registration
+inside the built file would be the same five lines kept in step by hand for
+nothing.
+
+Guarded on `location.protocol` as well as on support: opened from a memory stick
+the platform is a `file://` page, where there is no worker to register.
+
+### 26.4 The icon, and why there are two shapes
+
+`icons/` carries 192 and 512 "any" plus a 512 **maskable**, generated from the
+same Strategy Temple drawing as `favicon.svg` by rendering it through Chromium
+(there is no rsvg or cairo in the build container).
+
+The maskable one is a different drawing, not a resize: a maskable icon is
+cropped by the platform to whatever shape it likes — a circle on Android — so it
+is full-bleed navy with no corner radius and the temple pulled in to about 62%,
+inside the 80% safe zone. Shipping the rounded tile as maskable would have had
+its corners cut off. **Re-run `scripts` icon generation if `favicon.svg` changes.**
+
+### 26.5 The window chrome follows the theme
+
+Two `theme-color` tags, one per `prefers-color-scheme`, because the attribute
+takes a media query but not a class. Without them an installed app in dark mode
+keeps a navy title bar above a near-black page. The manifest's own `theme_color`
+is the light one — it is the install-time colour and cannot be conditional.
+
+### 26.6 Verified
+
+- **Worker registers and reaches `activated`**, scope the whole origin.
+- **Manifest fetched and parsed** as `application/manifest+json`, with every
+  installability field asserted individually: `name`, `short_name`,
+  `start_url`, `scope`, `display: standalone`, both colours, a 192, a 512 and a
+  maskable — and all three icon files fetched and confirmed as real PNGs.
+- **`/api/` absent from the cache** both after first load and after a complete
+  signed-in session.
+- **Offline, with the network genuinely cut**: the gate opens and the platform
+  opens, paints, and populates its navigation from the baked fallback.
+- `dev-server.js` learned `.webmanifest`, `.png` and `.svg` content types —
+  a manifest served as `octet-stream` is ignored and a worker that does not
+  arrive as JavaScript is refused, so testing this locally needed the same
+  headers `vercel.json` sets in production.
+- **Three themes × 31 viewers**, round trip, fixed point, archived-plan round
+  trip: all still PASS, seed byte-identical, rebuild byte-identical.

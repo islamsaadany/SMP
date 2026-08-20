@@ -13,7 +13,14 @@ const authHandler = require("../api/auth.js");
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
-                ".css": "text/css", ".json": "application/json", ".ico": "image/x-icon" };
+                ".css": "text/css", ".json": "application/json", ".ico": "image/x-icon",
+                /* The PWA's three: a manifest served as octet-stream is ignored,
+                   and a worker has to arrive as JavaScript or registration is
+                   refused outright. Vercel sets these in vercel.json; this is
+                   the same list for the local server, or the thing works in
+                   production and not where it gets tested. */
+                ".webmanifest": "application/manifest+json; charset=utf-8",
+                ".png": "image/png", ".svg": "image/svg+xml" };
 
 http.createServer(function (req, res) {
   const url = new URL(req.url, "http://localhost");

@@ -7,6 +7,15 @@
      served, and a leading slash would find nothing on a file:// path. -->
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<!-- Installable. The gate is the start_url, so this is the page a person
+     installs from and the page the installed app opens on. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- The window chrome around an installed app follows the theme too, or the
+     title bar stays navy-on-white while the page underneath went dark. Two
+     tags, because theme-color takes a media query but not a class. -->
+<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
 <title>SMP — Access</title>
 <script>
   /* The gate has no theme control of its own — one card and a password field
@@ -24,6 +33,23 @@
     var t = localStorage.getItem("smp.theme");
     if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
   } catch (e) {}
+</script>
+<script>
+  /* Registered from the gate ONLY, and deliberately not from the platform.
+     The worker's scope is the whole origin, so one registration covers both,
+     and reaching the platform at all means having signed in here first - so
+     by the time anyone opens it the worker is already installed and has
+     precached it. A second registration in the built file would be the same
+     five lines kept in step by hand for no gain.
+
+     Guarded on protocol as well as support: opened from a memory stick the
+     platform is a file:// page, where there is no worker to register and the
+     attempt throws. */
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").catch(function () {});
+    });
+  }
 </script>
 <style>
   /* Light is the definition; dark redefines the same names and nothing else.
@@ -278,7 +304,7 @@
       <p>Welcome! You are signed in.</p>
       <!-- The link carries the shipped version's filename (version lives in the
            filename, never in the app) — update it on each version bump. -->
-      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v3.0.html">Open the Strategy Management Platform</a>
+      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v3.1.html">Open the Strategy Management Platform</a>
       <button class="logout" id="logoutBtn">Sign Out</button>
     </div>
   </div>

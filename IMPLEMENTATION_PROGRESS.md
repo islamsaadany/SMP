@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.0 · **Last updated:** 2026-08-20
+**Latest version:** v3.1 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,21 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.0 — light and dark, by choice *(current)*
+### v3.1 — installable *(current)*
+SMP installs to a dock or a home screen: its own icon, its own window with no
+browser chrome, and it opens with no network. The one thing a service worker
+must **not** do is the thing it exists for — `/api/*` is never cached, because a
+cached `/api/state` is last quarter's actuals wearing this quarter's chrome.
+Those go straight to the network and are allowed to fail; the platform already
+falls back to its baked data and says so. Everything else — gate, platform file,
+icons, manifest — is held, network-first so a deploy still reaches everyone.
+
+Icons: 192, 512 and a 512 **maskable**, which is a different drawing rather than
+a resize (platforms crop maskable icons to a circle, so the rounded tile would
+have lost its corners). Two `theme-color` tags, one per scheme, or an installed
+app in dark keeps a navy title bar over a near-black page.
+
+### v3.0 — light and dark, by choice
 The dark palette had been in the stylesheet since the beginning and nothing
 ever selected it, so the product followed your laptop silently. Now there is a
 control: **Auto · Light · Dark**, cycled by the round mark left of Demo data.
@@ -446,8 +460,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.0.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.0.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.1.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.1.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

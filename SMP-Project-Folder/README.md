@@ -1,4 +1,4 @@
-# SMP Project Folder — v3.0
+# SMP Project Folder — v3.1
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.0.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.1.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.0.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.1.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -176,8 +176,13 @@ untouched and recorded** (§25.5) — a palette decision, not a dark-mode fix. T
 client's name came back beside the product name, and the first line was measured
 and made to *actually* be one line, which it had not been for anyone signed in.
 
-**Next:** the platform as a PWA — installable, its own icon, opening without
-browser chrome. Then the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
+Version **3.1** made it installable (§26). To a dock or a home screen: own icon,
+own window, and it opens with no network. `sw.js` holds the shell — the gate, the
+built platform file, the icons — and **never `/api/*`**, because a cached
+`/api/state` is last quarter's actuals wearing this quarter's chrome. Offline you
+get the platform on its baked data, which it already says on screen.
+
+**Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action with server-side
 rule checks and the per-figure change log (§16.0a, §19.2). Then the longer-term
 set below and the open model questions in §11.

@@ -21,6 +21,13 @@ ICON = (
 out = ("<!doctype html>\n<meta charset='utf-8'>\n"
        "<meta name='viewport' content='width=device-width,initial-scale=1'>\n"
        + ICON + "\n"
+       # Root-absolute, and harmless when it 404s on file:// — the platform has
+       # to stay openable from a memory stick. The worker itself is registered
+       # by the gate, not here: its scope is the whole origin and you cannot
+       # reach this file without signing in there first.
+       '<link rel="manifest" href="/manifest.webmanifest">\n'
+       '<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">\n'
+       '<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">\n'
        "<title>Raya Trade \u2014 Strategy Management Platform</title>\n<style>\n"
        + css + "\n</style>\n"
        # The theme is chosen in the HEAD, before the body is parsed, so a

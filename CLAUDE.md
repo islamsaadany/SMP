@@ -176,8 +176,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
   in a browser, in **both** live and demo mode.
-- **On each version bump:** update the gate's link in `index.html`, regenerate
-  `db/seed-state.json`, and re-run the round-trip test.
+- **PWA (since v3.1, §26):** `manifest.webmanifest`, `sw.js` and `icons/` at the
+  repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
+  carries the same list so it can be tested locally. The worker caches the shell
+  and **never `/api/*`**.
+- **On each version bump:** update the gate's link in `index.html`, bump `SHELL`
+  and the platform filename in `sw.js`, regenerate `db/seed-state.json`, and
+  re-run the round-trip test.
 
 ### Current Directory Layout
 ```
@@ -240,7 +245,18 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.0: light and dark, by choice. The dark
+*Last Updated: 2026-08-20 — v3.1: installable. `manifest.webmanifest`,
+`sw.js` and `icons/` at the repo root make SMP a PWA — own icon, own window, opens
+offline. **The service worker never caches `/api/*`**: a cached `/api/state` is
+last quarter's actuals wearing this quarter's chrome, and a platform showing stale
+figures as current is worse than one that will not open. Network-first for the
+shell, so a deploy still reaches people; the cache NAME is the bust, so bump
+`SHELL` in `sw.js` whenever the shell list changes. Registration lives in the gate
+only — one origin-wide scope covers both pages. Icons are generated from
+`favicon.svg` by `python3 scripts/make-icons.py`; **the maskable one is a
+different drawing, not a resize** (§26.4). Re-run it if the mark changes.*
+
+*Earlier: 2026-08-20 — v3.0: light and dark, by choice. The dark
 palette had been in `_shared.css` since the beginning with nothing to select it.
 The switch (Auto/Light/Dark, `localStorage` key `smp.theme`, shared with the
 gate) is small; what it exposed is the rule worth keeping: **a colour written

@@ -19,7 +19,7 @@ Nothing proceeds past this line without an answer.
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
-| **D8** | **Does SMP take HR_ERP's design language, or keep its own?** | §20 carries SMP's CSS over **verbatim**, precisely so the look cannot drift during the rebuild. Adopting HR_ERP's language is the opposite instruction, and it has to be given before R2 paints the first screen — after that it is a repaint of everything already ported. | §20, and `SMP-Project-Folder/mockups/mock-hrerp-style.html` |
+| **D8** | **Which design language does SMP take — its own, HR_ERP's, or Strategy Formulation's?** | §20 carries SMP's CSS over **verbatim**, precisely so the look cannot drift during the rebuild. Either of the two options is the opposite instruction, and it has to be given before R2 paints the first screen — after that it is a repaint of everything already ported. Two working samples are drawn on the same five screens so the three can be compared rather than imagined. | §20, `mockups/mock-hrerp-style.html`, `mockups/mock-sf-style.html` |
 
 **Answered:**
 
@@ -52,9 +52,17 @@ Nothing proceeds past this line without an answer.
 
 ## In flight
 
-### The HR_ERP design language, drawn on SMP's own screens
-`SMP-Project-Folder/mockups/mock-hrerp-style.html` — one self-contained file,
-opens in a browser, no network. Five screens: **group performance** (overall and
+### Two design options, drawn on SMP's own screens
+
+Both files are self-contained, open in a browser and reach the network for
+nothing. They carry **the same five screens, the same data and the same
+formulas** — the only variable between them is the design language, which is
+the point.
+
+`SMP-Project-Folder/mockups/mock-hrerp-style.html` — HR_ERP's language.
+`SMP-Project-Folder/mockups/mock-sf-style.html` — Strategy Formulation's.
+
+The five screens: **group performance** (overall and
 the business-unit cards, with the Cards/Table toggle), **a unit's performance**
 (the two headline cards, the focus strip, the pillar rail, measures and tactics),
 **its plan**, **its reporting screen** with the entry fields, and **one setup
@@ -67,28 +75,49 @@ screen says, and every figure. The scoring functions are copied out of
 against the shipped v3.5 build — group 75 / 67 / 102, Mobile 60 / 107, pillar
 MB01 58 / 83, 41 of 41 reported, 10 figures needing a note. All match.
 
-**What changed — the whole of the proposal:** the warm paper palette
-(`#f5f3ee` / `#fefdfb`) in place of the cool grey ground; Fraunces and Hanken
-Grotesk in place of Georgia and system sans, both embedded so the file still
-works offline; 12px cards with a soft shadow and a hover lift in place of 2px
-flat boxes; a gold uppercase eyebrow above a serif title on every page; and
-HR_ERP's own tab treatment. The four scoring bands keep their meaning and their
-thresholds — only their tints warm up to sit on paper.
+**Option A — HR_ERP.** The warm paper palette (`#f5f3ee` / `#fefdfb`) in place
+of the cool grey ground; Fraunces and Hanken Grotesk in place of Georgia and
+system sans, both embedded so the file still works offline; 12px cards with a
+soft shadow and a hover lift in place of 2px flat boxes; a gold uppercase
+eyebrow above a serif title on every page; navy-800 table headers with a zebra
+stripe. Navy and gold stay the product's colours.
 
-**Two things worth knowing before deciding:**
+**Option B — Strategy Formulation.** Tailwind's **default** slate and indigo:
+that platform's `tailwind.config.js` extends nothing and its `globals.css` is
+three lines, so there are no brand tokens at all and the Forefront navy survives
+only as the 36px brand square. No webfont — the system stack, two sizes smaller
+than SMP reads today, and **no display serif anywhere**. Cards are hairline-
+bordered with almost no shadow and **state themselves by border colour**;
+every card and section is titled in `font-black slate-400 uppercase`, which is
+the most recognisable thing in the language. Tables carry a **light slate-50
+header** and separate on hover rather than on a zebra stripe. The unit row is
+slate-900 with the active item an indigo pill carrying a pulsing dot, and the
+pillar rail uses the same treatment.
 
-- **HR_ERP has no dark palette.** Its `globals.css` defines light only, so
-  taking the language wholesale means either dropping SMP's dark theme (§25) or
-  authoring a dark counterpart HR_ERP does not have. The sample is light-only.
-- **A card became clickable where a link used to be.** HR_ERP's dashboard tile
-  is a link end to end, so a unit card here opens on any part of it rather than
-  on its name. It is the one interaction the language changes, and it enlarges
-  the target rather than removing one.
+The four scoring bands keep their thresholds and their words in both. In A their
+tints warm up to sit on paper; in B they map onto emerald / amber / orange / red,
+which keeps four distinguishable steps rather than collapsing the bottom two.
 
-**Verified:** every screen walked as all three viewers with no console errors;
-a width sweep 1920 → 600px with no horizontal page scroll at any width; the
-typefaces confirmed loading with the browser set offline and zero network
-requests.
+**Three things worth knowing before deciding:**
+
+- **Neither platform has a dark palette.** HR_ERP's `globals.css` defines light
+  only, and Strategy Formulation defines no tokens at all. Taking either language
+  wholesale means dropping SMP's dark theme (§25) or authoring a dark half
+  neither product has. Both samples are light-only.
+- **A card became clickable where a link used to be.** Both languages make a
+  tile a link end to end, so a unit card opens on any part of it rather than on
+  its name. It is the one interaction they change, and it enlarges the target
+  rather than removing one.
+- **They are not the same distance from where SMP is now.** A keeps the navy and
+  gold and the serif, and reads as the same product redressed. B removes all
+  three — it is a different product's clothes, and it is the option that makes
+  SMP look like the rest of the Strategy Formulation suite.
+
+**Verified, both files:** every screen walked as all three viewers with no
+console errors; a width sweep 1920 → 600px with no horizontal page scroll at any
+width; every table fits its box at 1440px; and both confirmed to make **zero
+network requests** with the browser set offline — which for A also proves the two
+embedded typefaces load from the file itself.
 
 **Found while building, not fixed here** — `groupExec()` and `groupPlan()` carry
 a unit's weight in the denominator even when that unit has nothing to score,

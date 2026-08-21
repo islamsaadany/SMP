@@ -87,9 +87,17 @@ of it was rejected — which is the point of keeping it.
 
 ### Pending a decision
 
-| File | What it asks |
+**Two design options, drawn on the same five screens** — group performance, a
+unit's performance, its plan, its reporting screen and one setup table — with
+the real Raya Trade data and the real scoring formulas, so the only difference
+between the two files is the design language. Both **re-open the clause in §20
+that carries SMP's CSS over verbatim** — see D8 under *Waiting on Islam* in
+`IMPLEMENTATION_PROGRESS.md`.
+
+| File | The language it proposes |
 |---|---|
-| `mock-hrerp-style.html` | **SMP in HR_ERP's design language.** A working slice — group performance, a unit's performance, its plan, its reporting screen and one setup table — carrying the real Raya Trade data and the real scoring formulas, painted in HR_ERP's warm paper palette, Fraunces/Hanken type, 12px cards and soft elevation. Navigation, page structure and every figure are unchanged; only the paint moved. **It re-opens the clause in §20 that carries SMP's CSS over verbatim** — see *Waiting on Islam* in `IMPLEMENTATION_PROGRESS.md`. |
+| `mock-hrerp-style.html` | **HR_ERP.** Warm paper (`#f5f3ee`), Fraunces display serif over Hanken Grotesk, 12px cards with a soft shadow and a hover lift, a gold uppercase eyebrow above a serif title, navy-800 table headers with a zebra stripe. Navy and gold stay the product's colours. |
+| `mock-sf-style.html` | **Strategy Formulation.** Tailwind's default slate and indigo, no brand tokens at all and no webfont; small type, hairline-bordered cards that state their status by border colour, `font-black slate-400 uppercase` card titles, light slate-50 table headers, and a slate-900 nav whose active item is an indigo pill with a pulsing dot. The Forefront navy survives only as the brand square. |
 
 ---
 

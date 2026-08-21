@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMP in the Strategy Formulation design language — sample</title>
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+  SMP · SAMPLE IN THE STRATEGY FORMULATION DESIGN LANGUAGE
+  ═══════════════════════════════════════════════════════════════════════════
+
+  WHAT THIS IS
+  The second of two design options, drawn on exactly the same five screens and
+  the same Raya Trade data as `mock-hrerp-style.html`, so the only thing that
+  differs between the two files is the design language. Every figure is derived
+  by the real scoring formulas copied out of `src/config-data.js`.
+
+  WHAT DID NOT CHANGE
+  Navigation, page structure, section order, what each screen says, what is
+  clickable and what every number means — the same commitment the HR_ERP option
+  makes, so the two can be judged against each other rather than against two
+  different products.
+
+  THE LANGUAGE, as it is actually built in islamsaadany/Strategy-Formulation
+  (read from `Design_Elements`, `components/layout/Header.tsx`,
+  `components/layout/ProjectLayout.tsx`, `components/foundation/
+  FoundationDashboardView.tsx` and `components/strategy/PillarsTacticsView.tsx`):
+
+  · Palette      Tailwind's DEFAULT slate + indigo. `tailwind.config.js` extends
+                 nothing and `globals.css` is three lines — there are no brand
+                 tokens at all. Slate-50 page, white cards, indigo-600 for every
+                 primary action, emerald / amber / purple / red for state.
+  · Type         no webfont. The system stack, and small: body 14px, labels 12px,
+                 micro 10px. There is no display serif anywhere in the product.
+  · The move     every card and section is titled in
+                 `text-xs font-black text-slate-400 uppercase tracking-widest`.
+                 It is the most recognisable thing in the language.
+  · Shape        rounded-xl cards, rounded-lg controls, rounded-full pills.
+  · Elevation    almost none. A hairline slate-200 border does the work, and a
+                 card states itself by BORDER COLOUR — emerald when complete,
+                 indigo when in progress, slate when pending.
+  · Tables       a LIGHT slate-50 header in bold uppercase slate-600, inside a
+                 rounded-2xl clipped border, rows separating on hover rather
+                 than on a zebra stripe, columns divided by hairlines.
+  · Primary nav  slate-900, with the active item an indigo-600 pill carrying a
+                 pulsing white dot.
+  · State        contextual full-width banners — emerald while working, amber
+                 when something is waiting, indigo to start — each with a
+                 tinted icon circle.
+
+  WHERE THIS DIFFERS FROM SMP TODAY, beyond colour: SMP leads with a serif and
+  a 15px body; this language has no serif and reads two sizes smaller. SMP's
+  tables carry a navy header and a zebra stripe; these carry neither. SMP's
+  navy/gold is absent entirely — the Forefront navy survives only as the brand
+  square, exactly as it does in the real product.
+
+  ONE THING THIS LANGUAGE CANNOT SUPPLY, same as the other option: there is no
+  dark palette anywhere in Strategy-Formulation, so this sample is light-only.
+-->
+<style>
+/* ── Tailwind's default slate + indigo, written out as tokens. Strategy
+      Formulation uses the utility classes directly and extends nothing; these
+      are the same values, named, so a single file can carry them. ────────── */
+:root{
+  --slate-50:#f8fafc; --slate-100:#f1f5f9; --slate-200:#e2e8f0; --slate-300:#cbd5e1;
+  --slate-400:#94a3b8; --slate-500:#64748b; --slate-600:#475569; --slate-700:#334155;
+  --slate-800:#1e293b; --slate-900:#0f172a;
+  --indigo-50:#eef2ff; --indigo-100:#e0e7ff; --indigo-200:#c7d2fe; --indigo-300:#a5b4fc;
+  --indigo-400:#818cf8; --indigo-500:#6366f1; --indigo-600:#4f46e5; --indigo-700:#4338ca;
+  --indigo-800:#3730a3;
+  --emerald-50:#ecfdf5; --emerald-100:#d1fae5; --emerald-200:#a7f3d0; --emerald-500:#10b981;
+  --emerald-600:#059669; --emerald-700:#047857; --emerald-800:#065f46;
+  --amber-50:#fffbeb; --amber-100:#fef3c7; --amber-200:#fde68a; --amber-500:#f59e0b;
+  --amber-600:#d97706; --amber-700:#b45309; --amber-800:#92400e;
+  --orange-50:#fff7ed; --orange-100:#ffedd5; --orange-500:#f97316; --orange-600:#ea580c; --orange-700:#c2410c;
+  --red-50:#fef2f2; --red-100:#fee2e2; --red-200:#fecaca; --red-500:#ef4444; --red-600:#dc2626; --red-700:#b91c1c;
+  --purple-50:#faf5ff; --purple-100:#f3e8ff; --purple-500:#a855f7; --purple-600:#9333ea; --purple-700:#7e22ce;
+  --ff-navy:#0F2C69;                 /* the brand square, and nothing else */
+
+  /* SMP's four scoring bands, mapped onto this palette. The thresholds and the
+     words are untouched — 85 / 70 / 50 / 0, On track / Needs attention / At risk
+     / Off track. Emerald and amber already mean exactly this here; orange and
+     red carry the two below them, which keeps four distinguishable steps
+     instead of collapsing the bottom two into one red. */
+  --good:var(--emerald-600); --attn:var(--amber-600); --warn:var(--orange-600); --bad:var(--red-600);
+  --none:var(--slate-400);
+  --good-bg:var(--emerald-50); --attn-bg:var(--amber-50); --warn-bg:var(--orange-50); --bad-bg:var(--red-50);
+  --good-bd:var(--emerald-200); --attn-bd:var(--amber-200); --warn-bd:#fed7aa; --bad-bd:var(--red-200);
+  --good-tx:var(--emerald-700); --attn-tx:var(--amber-700); --warn-tx:var(--orange-700); --bad-tx:var(--red-700);
+
+  /* No webfont. Strategy Formulation declares none — this is Tailwind's default
+     font-sans, which is whatever the reader's own system serves. */
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--slate-50);color:var(--slate-900);font-family:var(--sans);font-size:14px;
+     line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0}
+:focus-visible{outline:2px solid var(--indigo-500);outline-offset:2px;border-radius:6px}
+[hidden]{display:none !important}
+.wrap{max-width:1152px;margin:0 auto;padding:0 24px 96px}   /* max-w-6xl */
+.wrap.wide{max-width:none}
+
+/* ── The prototype banner. Slate-900, the same band the primary nav uses. ── */
+.banner{background:var(--slate-900);color:#fff;padding:9px 24px;font-size:12px;
+        display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:baseline}
+.banner strong{color:var(--indigo-300);font-weight:700}
+
+/* ── Header. h-14, white, sticky — Header.tsx, including the navy brand square
+      and the two-line brand block beside it. ──────────────────────────────── */
+header.top{background:#fff;border-bottom:1px solid var(--slate-200);position:sticky;top:0;z-index:40}
+.top-in{max-width:1280px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+.brandmark{width:36px;height:36px;border-radius:10px;background:var(--ff-navy);color:#fff;flex:0 0 36px;
+           display:grid;place-items:center;font-weight:800;font-size:16px;
+           box-shadow:0 4px 6px -1px rgb(0 0 0/.1),0 2px 4px -2px rgb(0 0 0/.1)}
+.brand h1{font-size:17px;font-weight:700;color:var(--slate-900);line-height:1.15}
+.brand .sub{font-size:10px;color:var(--slate-500)}
+.viewer{display:flex;align-items:center;gap:8px}
+.viewer label{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--slate-400)}
+.viewer select{font:inherit;font-size:12px;font-weight:500;color:var(--slate-700);background:#fff;
+               border:1px solid var(--slate-200);border-radius:8px;padding:5px 9px}
+.viewer .note{font-size:10px;font-weight:600;color:var(--slate-500)}
+
+/* ── Primary nav. ProjectLayout's sidebar is slate-900 with an indigo-600
+      active item and a pulsing white dot; laid out as a row, that is this. ── */
+nav.units{background:var(--slate-900)}
+.units-in{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;align-items:center;gap:4px;height:46px}
+.units-scroll{display:flex;align-items:center;gap:4px;overflow-x:auto;flex:1;min-width:0}
+.units-fixed{display:flex;align-items:center;gap:4px;flex:0 0 auto;padding-left:12px;margin-left:4px;
+             border-left:1px solid var(--slate-800);align-self:stretch}
+.units button{font:inherit;font-size:12px;font-weight:500;padding:7px 11px;border:0;border-radius:8px;
+              background:none;color:var(--slate-400);cursor:pointer;white-space:nowrap;
+              display:inline-flex;align-items:center;gap:7px;transition:background .15s,color .15s}
+.units button:hover{background:var(--slate-800);color:var(--slate-200)}
+.units button[aria-selected="true"]{background:var(--indigo-600);color:#fff;font-weight:600;
+              box-shadow:0 4px 6px -1px rgb(99 102 241/.2)}
+.units button[aria-selected="true"]::after{content:"";width:6px;height:6px;border-radius:999px;background:#fff;
+              animation:sf-pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+@keyframes sf-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.units button.fold{color:var(--slate-300);background:rgba(30,41,59,.6);font-size:11px;font-weight:600}
+.units button.fold:hover{background:var(--slate-800);color:#fff}
+.units button.fold[aria-expanded="true"]{background:var(--indigo-600);color:#fff}
+.units button.fold::after{content:none}
+
+/* ── Page tabs. Header.tsx's nav pills: rounded-lg, 12px, the active one on a
+      50-tint of the accent. The section row below is the quieter Settings-page
+      treatment, so the two rows cannot be mistaken for each other. ───────── */
+nav.tabs{background:#fff;border-bottom:1px solid var(--slate-200)}
+.tabs-in{max-width:1280px;margin:0 auto;padding:8px 24px;display:flex;gap:4px;overflow-x:auto}
+.tabs button{font:inherit;font-size:12px;font-weight:500;padding:6px 12px;border:0;border-radius:8px;
+             background:none;color:var(--slate-600);cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.tabs button:hover{background:var(--slate-50);color:var(--slate-900)}
+.tabs button[aria-selected="true"]{background:var(--indigo-50);color:var(--indigo-700);font-weight:600}
+nav.tabs.sectionrow{background:var(--slate-50);border-bottom-color:var(--slate-200)}
+nav.tabs.sectionrow .tabs-in{padding:6px 24px}
+.tabs.sectionrow button{border-radius:6px;padding:5px 10px;color:var(--slate-500);font-size:12px}
+.tabs.sectionrow button:hover{background:var(--slate-100);color:var(--slate-900)}
+.tabs.sectionrow button[aria-selected="true"]{background:var(--slate-200);color:var(--slate-900);font-weight:600}
+
+/* ── Page head. No eyebrow rule, no serif: a 10px slate-400 breadcrumb, an
+      18px bold slate-900 title and a 14px slate-500 line under it. ───────── */
+.view{padding-top:28px}
+.pagehead{margin-bottom:22px}
+.pagehead .crumb{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--slate-400)}
+.pagehead h1{font-size:20px;font-weight:700;color:var(--slate-900);margin-top:5px;letter-spacing:-.01em}
+.pagehead p{margin:6px 0 0;color:var(--slate-500);font-size:13.5px;max-width:70ch}
+
+/* THE MOVE: text-xs font-black text-slate-400 uppercase tracking-widest. Every
+   card title and every section label in the product is this and only this. */
+.cardtitle,.sechead b,.tablabel{font-size:11px;font-weight:900;letter-spacing:.12em;
+             text-transform:uppercase;color:var(--slate-400)}
+.sechead{display:flex;align-items:center;gap:10px;margin:34px 0 12px}
+.sechead .rule{flex:1;height:1px;background:var(--slate-200)}
+.sechead .count{font-size:11px;color:var(--slate-400);font-weight:600}
+.tablabel{display:block;margin:24px 0 9px}
+h2.title{font-size:16px;font-weight:700;color:var(--slate-900)}
+.secnote{color:var(--slate-500);font-size:13px;margin:3px 0 0;max-width:66ch}
+
+/* ── Cards. A hairline border and next to no shadow — and the border is where
+      state is said: emerald complete, indigo in progress, slate pending. ─── */
+.card{background:#fff;border:1px solid var(--slate-200);border-radius:12px;transition:border-color .15s,box-shadow .15s}
+.card.pad{padding:18px}
+a.card,.card.clickable{display:block;color:inherit;text-decoration:none;cursor:pointer}
+a.card:hover,.card.clickable:hover{border-color:var(--indigo-200);box-shadow:0 1px 3px rgb(15 23 42/.06)}
+.card.b-good{border-color:var(--good-bd)} .card.b-attn{border-color:var(--attn-bd)}
+.card.b-warn{border-color:var(--warn-bd)} .card.b-bad{border-color:var(--bad-bd)}
+.card.b-none{border-color:var(--slate-200)}
+
+/* ── Pills. rounded-full, a 50-tint behind a 600/700 text — the status badge
+      and the action pill are the same object at different weights. ──────── */
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;
+      font-size:11px;font-weight:600;white-space:nowrap}
+.chip .dot{width:6px;height:6px;border-radius:999px;background:currentColor;flex:0 0 6px}
+.chip.good{background:var(--emerald-50);color:var(--good-tx)}
+.chip.attn{background:var(--amber-50);color:var(--attn-tx)}
+.chip.warn{background:var(--orange-50);color:var(--warn-tx)}
+.chip.bad{background:var(--red-50);color:var(--bad-tx)}
+.chip.none{background:var(--slate-100);color:var(--slate-500)}
+.chip.plain{background:var(--slate-100);color:var(--slate-600)}
+.chip.accent{background:var(--indigo-50);color:var(--indigo-700)}
+.chip.purple{background:var(--purple-50);color:var(--purple-700)}
+.t-good{color:var(--good)} .t-attn{color:var(--attn)} .t-warn{color:var(--warn)}
+.t-bad{color:var(--bad)} .t-none{color:var(--none)}
+
+/* ── The headline figure. Bold sans, tabular, no serif — this language has
+      none, which is most of what tells the two options apart at a glance. ── */
+.big{font-size:34px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.big small{font-size:14px;font-weight:700;margin-left:1px}
+.metric-row{display:flex;gap:22px;margin-top:14px;padding-top:12px;border-top:1px solid var(--slate-100);flex-wrap:wrap}
+.metric-k{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-400)}
+.metric-v{font-size:14px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:999px;background:var(--slate-100);overflow:hidden;margin-top:12px}
+.bar>i{display:block;height:100%;border-radius:999px}
+.link{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;color:var(--indigo-600);text-decoration:none}
+.link:hover{color:var(--indigo-700);text-decoration:underline}
+
+/* ── Buttons. Indigo-600 for the act, slate-100 for everything else. ────── */
+.btn{font:inherit;font-size:12px;font-weight:600;padding:7px 14px;border-radius:8px;border:0;
+     background:var(--indigo-600);color:#fff;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--indigo-700)}
+.btn.ghost{background:var(--slate-100);color:var(--slate-600)}
+.btn.ghost:hover{background:var(--slate-200)}
+.btn.purple{background:var(--purple-50);color:var(--purple-700)}
+.btn.purple:hover{background:var(--purple-100)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.toggle{display:inline-flex;background:var(--slate-100);border-radius:8px;padding:2px}
+.toggle button{font:inherit;font-size:11.5px;font-weight:600;padding:5px 12px;border:0;border-radius:6px;
+               background:none;color:var(--slate-500);cursor:pointer}
+.toggle button[aria-pressed="true"]{background:#fff;color:var(--slate-900);box-shadow:0 1px 2px rgb(15 23 42/.08)}
+
+/* ── Contextual banners. FoundationDashboardView's state bar: a tinted strip,
+      an icon circle, a heading and a quieter line under it. ─────────────── */
+.banner-ctx{display:flex;align-items:center;gap:12px;border:1px solid;border-radius:12px;
+            padding:11px 16px;margin-bottom:20px}
+.banner-ctx .ico{width:32px;height:32px;border-radius:999px;display:grid;place-items:center;
+                 font-size:14px;flex:0 0 32px}
+.banner-ctx .bt{font-size:13px;font-weight:600}
+.banner-ctx .bs{font-size:11.5px;margin-top:1px}
+.banner-ctx .acts{margin-left:auto;display:flex;gap:8px;align-items:center}
+.b-indigo{background:var(--indigo-50);border-color:var(--indigo-200)}
+.b-indigo .ico{background:var(--indigo-100);color:var(--indigo-600)}
+.b-indigo .bt{color:var(--indigo-800)} .b-indigo .bs{color:var(--indigo-600)}
+.b-amber{background:var(--amber-50);border-color:var(--amber-200)}
+.b-amber .ico{background:var(--amber-100);color:var(--amber-600)}
+.b-amber .bt{color:var(--amber-800)} .b-amber .bs{color:var(--amber-600)}
+.b-emerald{background:var(--emerald-50);border-color:var(--emerald-200)}
+.b-emerald .ico{background:var(--emerald-100);color:var(--emerald-600)}
+.b-emerald .bt{color:var(--emerald-800)} .b-emerald .bs{color:var(--emerald-600)}
+.b-red{background:var(--red-50);border-color:var(--red-200)}
+.b-red .ico{background:var(--red-100);color:var(--red-600)}
+.b-red .bt{color:var(--red-700)} .b-red .bs{color:var(--red-600)}
+.banner-ctx.legend{gap:16px;flex-wrap:wrap;background:#fff;border-color:var(--slate-200)}
+.legend .lab{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-400)}
+.legend .b{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--slate-600)}
+.legend .dot{width:8px;height:8px;border-radius:999px;flex:0 0 8px}
+
+/* ── Tables. PillarsTacticsView: a LIGHT slate-50 header, uppercase bold
+      slate-600, inside a rounded-2xl clipped border. No zebra — rows separate
+      on hover — and columns are divided by hairlines instead. ───────────── */
+.tablecard{border:1px solid var(--slate-200);border-radius:16px;overflow-x:auto;background:#fff}
+table.dt{width:100%;border-collapse:collapse;font-size:13px}
+table.dt thead th{position:sticky;top:0;z-index:2;background:var(--slate-50);color:var(--slate-600);
+                  font-weight:700;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+                  text-align:left;padding:10px 13px;white-space:nowrap;border-bottom:1px solid var(--slate-200)}
+table.dt thead th+th{border-left:1px solid var(--slate-200)}
+/* 13px, not the 20px the product's own three-column tables use. Eight columns
+   beside a 264px rail is a different problem from three across a full page, and
+   at 20px the last two columns fell off the right edge of the box. */
+table.dt td{padding:11px 13px;border-top:1px solid var(--slate-100);vertical-align:middle;color:var(--slate-700)}
+table.dt td+td{border-left:1px solid var(--slate-100)}
+table.dt tbody tr:first-child td{border-top:0}
+table.dt tbody tr:hover>td{background:var(--slate-50)}
+table.dt tbody tr.total>td{background:var(--slate-50);font-weight:700;color:var(--slate-900)}
+table.dt td.num,table.dt th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.dt td.mid,table.dt th.mid{text-align:center}
+table.dt td.idx{color:var(--slate-400);width:44px;font-variant-numeric:tabular-nums;font-size:12px}
+table.dt th.grow{width:auto} table.dt td.grow{min-width:206px;color:var(--slate-900);font-weight:500}
+table.dt th.tight,table.dt td.tight{white-space:nowrap;width:1%;padding-left:10px;padding-right:10px}
+table.dt td.notecell{min-width:150px}
+table.dt tbody tr.focus>td:first-child{box-shadow:inset 3px 0 0 var(--indigo-500)}
+table.dt tbody tr.muted td{color:var(--slate-400)}
+.dim{color:var(--slate-400)}
+.mono{font-family:var(--mono);font-size:11.5px}
+
+/* ── The pillar rail. The sidebar's own selected state: indigo-600 with a
+      pulsing white dot, so "which pillar am I on" reads the same way "which
+      phase am I on" does in the real product. ───────────────────────────── */
+/* 224px is w-56 — the width ProjectLayout gives its own sidebar. Following it
+   is both more faithful and 40px the eight-column tactics table needs. */
+.split{display:grid;grid-template-columns:224px 1fr;gap:18px;align-items:start}
+.split>*{min-width:0}
+.rail{border:1px solid var(--slate-200);border-radius:12px;background:#fff;padding:6px;position:sticky;top:72px}
+.rail .rh{display:flex;justify-content:space-between;align-items:center;padding:9px 10px 8px;
+          font-size:10.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-400)}
+.rail button{display:block;width:100%;text-align:left;font:inherit;border:0;background:none;cursor:pointer;
+             padding:10px 11px;border-radius:8px;color:var(--slate-600);transition:background .15s,color .15s}
+.rail button:hover{background:var(--slate-50);color:var(--slate-900)}
+.rail button[aria-current="true"]{background:var(--indigo-600);color:#fff;
+             box-shadow:0 4px 6px -1px rgb(99 102 241/.2)}
+.rail .rt{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+.rail .rn{font-size:12.5px;font-weight:600;line-height:1.35}
+.rail .rn i{font-style:normal;font-weight:700;opacity:.6;margin-right:5px;font-size:11px}
+.rail .rs{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.rail button[aria-current="true"] .rs,.rail button[aria-current="true"] .rm{color:rgba(255,255,255,.85)}
+.rail button[aria-current="true"] .chip{background:rgba(255,255,255,.18);color:#fff}
+.rail .rm{font-size:11px;color:var(--slate-400);margin-top:3px;display:flex;align-items:center;gap:6px}
+.rail button[aria-current="true"] .rm::after{content:"";width:6px;height:6px;border-radius:999px;background:#fff;
+             margin-left:auto;animation:sf-pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+.rail .rfoot{padding:9px 11px;margin-top:4px;border-top:1px solid var(--slate-100);
+             font-size:11px;color:var(--slate-400)}
+
+/* ── The pillar panel. ──────────────────────────────────────────────────── */
+.panel{padding:20px 22px;min-width:0}
+.panel h3{font-size:17px;font-weight:700;color:var(--slate-900)}
+.panel .psub{color:var(--slate-500);font-size:12px;margin-top:3px}
+.panel .phead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+              padding-bottom:14px;border-bottom:1px solid var(--slate-100)}
+.panel .pend{margin:14px 0 0;font-size:13.5px;color:var(--slate-600);background:var(--slate-50);
+             border-radius:8px;padding:10px 12px}
+.twoup{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0 4px}
+.twoup>*{min-width:0}
+
+/* ── Quarter pips. ─────────────────────────────────────────────────────── */
+.qs{display:inline-flex;gap:3px}
+.qs i{width:18px;height:18px;border-radius:6px;display:grid;place-items:center;font-style:normal;
+      font-size:10px;font-weight:700;border:1px solid var(--slate-200);color:var(--slate-300);background:#fff}
+.qs i.on{background:var(--indigo-600);border-color:var(--indigo-600);color:#fff}
+.qs i.past{background:var(--indigo-50);border-color:var(--indigo-200);color:var(--indigo-600)}
+
+/* ── Donut. ────────────────────────────────────────────────────────────── */
+.donut .track{stroke:var(--slate-100)}
+.donutwrap{display:flex;align-items:center;justify-content:center;position:relative}
+.donutwrap .dv{position:absolute;font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.donutwrap .dv small{font-size:10px;font-weight:700}
+
+/* ── Unit card. No navy head: the unit name leads in slate-900 and the card's
+      BORDER carries its standing, which is how a component card works here. ─ */
+.unitcard .uh{padding:14px 16px 12px;border-bottom:1px solid var(--slate-100)}
+.unitcard .uh b{font-size:14.5px;font-weight:700;color:var(--slate-900);display:block}
+.unitcard .uh span{font-size:11px;color:var(--slate-400)}
+.unitcard .ub{display:grid;grid-template-columns:1fr 1fr;min-height:160px}
+.unitcard .ubl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:14px}
+.unitcard .ubr{border-left:1px solid var(--slate-100);padding:14px;display:flex;flex-direction:column;
+               align-items:center;justify-content:center;gap:2px}
+.unitcard .k{font-size:9.5px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--slate-400)}
+.unitcard .exec{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.unitcard .execn{display:grid;grid-template-columns:auto auto;gap:2px 14px;margin-top:9px;font-size:11.5px}
+.unitcard .execn span:nth-child(odd){color:var(--slate-400)}
+.unitcard .execn span:nth-child(even){text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:var(--slate-700)}
+
+/* ── Reporting: the fields people type into. ───────────────────────────── */
+.progline{display:flex;align-items:center;gap:16px;padding:14px 18px;margin-bottom:22px;flex-wrap:wrap}
+.progline .n{font-size:26px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.progline .track{flex:1;height:6px;border-radius:999px;background:var(--slate-100);overflow:hidden;min-width:80px}
+.progline .track>i{display:block;height:100%;background:var(--emerald-500);border-radius:999px}
+input.f,textarea.f{font:inherit;font-size:12.5px;background:#fff;color:var(--slate-800);
+      border:1px solid var(--slate-300);border-radius:8px;padding:6px 9px;width:100%}
+input.f::placeholder,textarea.f::placeholder{color:var(--slate-400)}
+input.f:focus,textarea.f:focus{outline:none;border-color:var(--indigo-500);box-shadow:0 0 0 2px var(--indigo-200)}
+input.f.given{border-color:var(--emerald-200);background:var(--emerald-50)}
+input.f.need,textarea.f.need{border-color:var(--red-200);background:var(--red-50)}
+input.f.need::placeholder{color:var(--red-500)}
+input.f.num{text-align:right;font-variant-numeric:tabular-nums;width:78px;flex:0 0 78px}
+.unitbox{display:inline-flex;align-items:center}
+.unitbox .suffix{font-size:11px;color:var(--slate-500);border:1px solid var(--slate-300);border-left:0;
+      border-radius:0 8px 8px 0;padding:6px 8px;background:var(--slate-50);white-space:nowrap}
+.unitbox input.f{border-radius:8px 0 0 8px}
+
+.tiles{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(min(288px,100%),1fr))}
+.tiles>*{min-width:0}
+.tiles.three{grid-template-columns:repeat(auto-fit,minmax(min(296px,100%),1fr))}
+.headrow{display:flex;align-items:flex-end;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.headrow>div{min-width:0}
+.rowacts{display:flex;gap:8px;align-items:center;margin-left:auto}
+.headrow .rowacts{align-self:center}
+
+/* Staggered fade-in, the product's own `animate-in fade-in`. */
+@keyframes sf-fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ff-stagger>*{animation:sf-fade-up .4s cubic-bezier(.2,.7,.2,1) both}
+.ff-stagger>*:nth-child(2){animation-delay:50ms}
+.ff-stagger>*:nth-child(3){animation-delay:100ms}
+.ff-stagger>*:nth-child(4){animation-delay:150ms}
+.ff-stagger>*:nth-child(5){animation-delay:200ms}
+.ff-stagger>*:nth-child(6){animation-delay:250ms}
+@media (prefers-reduced-motion:reduce){
+  .ff-stagger>*{animation:none}
+  .units button[aria-selected="true"]::after,.rail button[aria-current="true"] .rm::after{animation:none}
+}
+
+/* ── Modal. Modal.tsx: black/50 backdrop, white rounded sheet, shadow-xl. ── */
+.overlay{position:fixed;inset:0;background:rgb(0 0 0/.5);display:none;align-items:center;
+         justify-content:center;padding:24px;z-index:60}
+.overlay.on{display:flex}
+.modal{background:#fff;border-radius:12px;box-shadow:0 20px 25px -5px rgb(0 0 0/.1),0 8px 10px -6px rgb(0 0 0/.1);
+       max-width:576px;width:100%}
+.modal-h{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+         padding:16px 24px;border-bottom:1px solid var(--slate-200)}
+.modal-h h3{font-size:17px;font-weight:700;color:var(--slate-900)}
+.modal-x{font:inherit;font-size:20px;line-height:1;border:0;background:none;color:var(--slate-400);cursor:pointer;padding:0 4px}
+.modal-x:hover{color:var(--slate-600)}
+.modal-b{padding:16px 24px 24px;color:var(--slate-600);font-size:13.5px}
+
+@media (max-width:1000px){ .split{grid-template-columns:1fr} .rail{position:static} .twoup{grid-template-columns:1fr} }
+</style>
+
+<div class="banner">
+  <span><strong>Sample &middot; design language only.</strong> The same screens and the same numbers, in the Strategy Formulation language.</span>
+  <span><strong>Mobile's plan is real; every other unit and every actual are invented.</strong></span>
+</div>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <!-- The Forefront navy survives here and nowhere else, exactly as it does
+           in Strategy Formulation: one 36px square, and the rest is slate. -->
+      <div class="brandmark" aria-hidden="true">F</div>
+      <div>
+        <h1 id="orgname">Raya Trade</h1>
+        <div class="sub">Strategy Management Platform</div>
+      </div>
+    </div>
+    <div class="viewer">
+      <label for="asWho">Viewing as</label>
+      <select id="asWho"></select>
+      <span class="note" id="viewerNote"></span>
+    </div>
+  </div>
+</header>
+
+<nav class="units"><div class="units-in">
+  <div class="units-scroll" role="tablist" id="units"></div>
+  <div class="units-fixed" id="units-right"></div>
+</div></nav>
+<nav class="tabs"><div class="tabs-in" role="tablist" id="subtabs"></div></nav>
+<nav class="tabs sectionrow" id="secrow" hidden><div class="tabs-in" role="tablist" id="secrow-in"></div></nav>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><h3 id="modal-t"></h3><button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   DATA — the Raya Trade demo dataset, lifted unchanged out of the built
+   platform (`src/group-data.js` + `src/config-data.js`) so the sample cannot
+   quietly disagree with the product about what a screen says.
+   ═══════════════════════════════════════════════════════════════════════ */
+var D = {"org":"Raya Trade","horizon":"2029","asOf":2,"groupKO":[{"name":"Revenue","group":null,"dir":"≥","target3y":"34B EGP","target":"18B EGP","compile":"Sum","actual":"7.8B","progress":43},{"name":"EBITDA","group":null,"dir":"≥","target3y":"8.5%","target":"6.5%","compile":"Latest","actual":"5.1%","progress":78},{"name":"Earnings concentration","group":null,"dir":"≤","target3y":"30%","target":"40%","compile":"Latest","actual":"46%","progress":87},{"name":"Mobile Distribution","group":"Market share","dir":"≥","target3y":"38%","target":"32%","compile":"Latest","actual":"28%","progress":88},{"name":"CE Distribution","group":"Market share","dir":"≥","target3y":"24%","target":"18%","compile":"Latest","actual":"14%","progress":78},{"name":"Retail","group":"Market share","dir":"≥","target3y":"18%","target":"12%","compile":"Latest","actual":"9%","progress":75}],"weighting":{"factors":[{"key":"rev","name":"Revenue contribution","kind":"derived","basis":"FY2025 revenue","weight":40},{"key":"prof","name":"Profit contribution","kind":"derived","basis":"FY2025 gross profit","weight":30},{"key":"imp","name":"Impact on group","kind":"judgement","basis":"1–4, set conceptually","weight":20},{"key":"growth","name":"Potential growth","kind":"estimate","basis":"our view, next 3 years","weight":10}],"units":[{"key":"mobile","unit":"Mobile","rev":8.2,"prof":410,"imp":4,"growth":12,"why":"Largest revenue base and the group's route to market for exclusive brands."},{"key":"retailstores","unit":"Retail Stores","rev":4.6,"prof":320,"imp":3,"growth":18,"why":"Highest margin pool and the only direct consumer signal the group owns."},{"key":"b2becomm","unit":"B2B Ecomm","rev":3,"prof":160,"imp":3,"growth":35,"why":"Small today, but the platform every other unit's One Trade work depends on."},{"key":"consumerelectronics","unit":"Consumer Electronics","rev":5.4,"prof":290,"imp":4,"growth":15,"why":"Second revenue pillar and the anchor for principal relationships."},{"key":"onlineshop","unit":"Online Shop","rev":1.8,"prof":95,"imp":3,"growth":40,"why":"Fastest-growing owned channel and the group's first-party data source."},{"key":"corporate","unit":"Corporate","rev":0.9,"prof":88,"imp":4,"growth":18,"why":"Access to enterprise and government demand no other unit can reach."},{"key":"care","unit":"Care","rev":0.9,"prof":130,"imp":3,"growth":22,"why":"Disproportionate margin, and the reason principals award us their lines."},{"key":"it","unit":"IT","rev":2.2,"prof":120,"imp":2,"growth":14,"why":"Steady contributor; strategically the least differentiated of the lines."},{"key":"logistics","unit":"Logistics","rev":1.6,"prof":180,"imp":3,"growth":28,"why":"Serves every other unit and is close to standing alone commercially."},{"key":"nigeria","unit":"Nigeria","rev":1.1,"prof":55,"imp":2,"growth":45,"why":"Smallest today; the whole regional thesis rests on it working."}]},"bands":{"scope":"tenant","bands":[{"key":"good","floor":85,"label":"On track"},{"key":"attn","floor":70,"label":"Needs attention"},{"key":"warn","floor":50,"label":"At risk"},{"key":"bad","floor":0,"label":"Off track"}]},"themes":[{"ab":"OT","name":"One Trade","note":"New for 2026"},{"ab":"VC","name":"Deepen Value Chain","note":"Standing"},{"ab":"DIV","name":"Diversification","note":"Standing"}],"companies":{"distribution":{"name":"Distribution","ceo":null,"seeOthers":false,"seeGroup":true},"b2c":{"name":"B2C","ceo":null,"seeOthers":false,"seeGroup":true}},"unitCompany":{"mobile":"distribution","consumerelectronics":"distribution","it":"distribution","retailstores":"b2c","onlineshop":"b2c","care":"b2c"},"review":{"name":"H1 2026","from":"Jan 2026","to":"Jun 2026","due":"15 Jul 2026","endsQuarter":2,"state":"open","note":{"mobile":"Digital work is landing but the app rollout slipped a quarter behind the principal's own launch. Q3 recovery agreed with Ramy.","retailstores":"Strong half on revenue per store. New store programme is one site behind, land permits.","care":"First-time fix rate now above target for the first time. Headcount is the constraint on the next step."},"submitted":{"retailstores":true,"care":true,"corporate":true,"it":true,"logistics":true,"onlineshop":true},"cadence":"Half-yearly"},"cycle":{"name":"2026","rewardAt":100,"locked":false,"focus":{"mobile-KO2":true,"mobile-P1-M3":true,"mobile-P3-M2":true,"retailstores-KO2":true,"retailstores-P1-M2":true,"care-KO2":true,"care-P1-M3":true,"logistics-KO3":true,"logistics-P2-M1":true}},"unitRoles":{"mobile":{"head":"mobhead","custodian":"own_mob"},"retailstores":{"head":"rethead","custodian":"own_ret"},"b2becomm":{"head":"b2bhead","custodian":"own_b2b"},"consumerelectronics":{"head":"cehead","custodian":"own_ce"},"onlineshop":{"head":"oshead","custodian":"own_os"},"corporate":{"head":"cohead","custodian":"own_co"},"care":{"head":"cahead","custodian":"own_ca"},"it":{"head":"ithead","custodian":"own_it"},"logistics":{"head":"loghead","custodian":"own_lg"},"nigeria":{"head":"nghead","custodian":"own_ng"}},"units":{"mobile":{"name":"Mobile","codePrefix":"MB","weight":21,"real":true,"company":"distribution","active":true,"keyObjectives":[{"name":"Distribution revenue","dir":"≥","target3y":"9.0B EGP","target":"6.2B EGP","compile":"Sum","actual":"2.7B","progress":44,"id":"mobile-KO1"},{"name":"Mobile market share","dir":"≥","target3y":"38%","target":"32%","compile":"Latest","actual":"28%","progress":88,"id":"mobile-KO2"},{"name":"Active merchant reach","dir":"≥","target3y":"6,500","target":"4,500","compile":"Latest","actual":"3,180","progress":71,"id":"mobile-KO3"},{"name":"App coverage rate","dir":"≥","target3y":"75%","target":"50%","compile":"Latest","actual":"22%","progress":44,"note":"Rollout gated on the merchant app release. Recovery plan agreed with Ramy for Q3.","id":"mobile-KO4"}],"items":[{"code":"01","name":"Digital & Data-Driven Operations","theme":"VC","owner":"Ramy Behairy","measures":[{"name":"Data duplicate rate","dir":"≤","target":"1%","compile":"Latest","actual":"1.4%","progress":71,"id":"mobile-P1-M1"},{"name":"Orders processed digitally","dir":"≥","target":"90%","compile":"Latest","actual":"48%","progress":53,"note":"ERP cutover moved to Q3 with the principal. 48% is the pre-cutover ceiling.","id":"mobile-P1-M2"},{"name":"App coverage rate","dir":"≥","target3y":"75%","target":"50%","compile":"Latest","actual":"22%","progress":44,"id":"mobile-P1-M3"},{"name":"Dependency on automated reports","dir":"≥","target":"90%","compile":"Latest","actual":"58%","progress":64,"note":"Power BI live for sales; finance still manual until the warehouse lands.","id":"mobile-P1-M4"}],"tactics":[{"name":"Clean and standardize customer and SKU base","owner":"Ramy Behairy","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":45,"id":"mobile-P1-T1"},{"name":"End-to-end order-to-cash digitization","owner":"Mohamed Rizk","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":35,"id":"mobile-P1-T2"},{"name":"Digitize sales reporting via Power BI","owner":"Ramy Behairy","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":40,"id":"mobile-P1-T3"},{"name":"Scale Mobile Digital App across merchants","owner":"Ashraf Laithy","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":30,"id":"mobile-P1-T4"},{"name":"Data integration across business units","owner":"Abdelhamid","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":22,"id":"mobile-P1-T5"}]},{"code":"02","name":"Channel Preference & Development","theme":"OT","owner":"Mohamed Rizk","measures":[{"name":"Average delivery time","dir":"≤","target":"24 h","compile":"Latest","actual":"31 h","progress":77,"id":"mobile-P2-M1"},{"name":"Key retailer revenue growth","dir":"≥","target":"50%","compile":"Sum","actual":"24%","progress":48,"note":"Two key accounts renegotiated late. Q3 volumes already committed.","id":"mobile-P2-M2"},{"name":"Tier 2 merchants enrolled","dir":"≥","target":"100","compile":"Latest","actual":"58","progress":58,"note":"Enrolment slowed by the credit check change. 58 of 100 signed.","id":"mobile-P2-M3"},{"name":"Tier 2 segment revenue growth","dir":"≥","target":"100%","compile":"Sum","actual":"62%","progress":62,"id":"mobile-P2-M4"}],"tactics":[{"name":"Retailer preference index workshop","owner":"Karim","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":60,"id":"mobile-P2-T1"},{"name":"Joint business planning with key retailers","owner":"Mohamed Rizk","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":45,"id":"mobile-P2-T2"},{"name":"Tier 2 growth acceleration programme","owner":"Ashraf Laithy","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":35,"id":"mobile-P2-T3"},{"name":"Channel intelligence engine (pilot)","owner":"Karim","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":40,"id":"mobile-P2-T4"}]},{"code":"03","name":"Portfolio & Value Chain Expansion","theme":"DIV","owner":"Karim","measures":[{"name":"Non-Samsung revenue","dir":"≥","target":"4B EGP","compile":"Sum","actual":"1.6B","progress":40,"id":"mobile-P3-M1"},{"name":"Samsung market share","dir":"≥","target":"30%","compile":"Latest","actual":"31%","progress":103,"id":"mobile-P3-M2"},{"name":"Vivo market share","dir":"≥","target":"60%","compile":"Latest","actual":"48%","progress":80,"id":"mobile-P3-M3"},{"name":"Accessory revenue","dir":"≥","target":"300M EGP","compile":"Sum","actual":"96M","progress":32,"id":"mobile-P3-M4"},{"name":"Active Sary merchants","dir":"≥","target":"800","compile":"Latest","actual":"310","progress":39,"id":"mobile-P3-M5"},{"name":"Sary revenue","dir":"≥","target":"150M EGP","compile":"Sum","actual":"42M","progress":28,"id":"mobile-P3-M6"},{"name":"Local production devices","dir":"≥","target":"1M","compile":"Sum","actual":"520K","progress":52,"id":"mobile-P3-M7"},{"name":"Sary app downloads","dir":"≥","target":"40K","compile":"Latest","actual":"18.4K","progress":46,"id":"mobile-P3-M8"}],"tactics":[{"name":"Protect and grow share in existing brands","owner":"Ashraf Abdelaty","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":55,"id":"mobile-P3-T1"},{"name":"Expand high-margin categories","owner":"Fayad","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":40,"id":"mobile-P3-T2"},{"name":"Leverage Sary for entry-to-mid expansion","owner":"Fayad","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":30,"id":"mobile-P3-T3"},{"name":"Sary-enabled tailored B2B portfolio","owner":"Fayad","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":25,"id":"mobile-P3-T4"},{"name":"Ongoing scanning for tier-1 brands","owner":"Karim","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":50,"id":"mobile-P3-T5"},{"name":"Build a light ecosystem (limited SKU)","owner":"Fayad","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":28,"id":"mobile-P3-T6"},{"name":"Market intelligence partner","owner":"Karim","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":35,"id":"mobile-P3-T7"}]},{"code":"04","name":"Asset-Light Model Regional Expansion","theme":"VC","owner":"Abdelhamid","measures":[{"name":"Regional hub revenue","dir":"≥","target":"2M USD","compile":"Sum","actual":"0.5M","progress":25,"note":"Hub opens in H2 by design — this is measured at H2, not now.","id":"mobile-P4-M1"},{"name":"Export markets activated","dir":"≥","target":"3","compile":"Latest","actual":"1","progress":33,"note":"One of three live. Nigeria and Libya in regulatory review.","id":"mobile-P4-M2"},{"name":"Distribution agreements","dir":"≥","target":"2","compile":"Latest","actual":"1","progress":50,"id":"mobile-P4-M3"}],"tactics":[{"name":"Dubai regional hub multi-branded export concept","owner":"Karim","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":60,"id":"mobile-P4-T1"},{"name":"Initial agreements with 2–3 tier 2 brands","owner":"Abdelhamid","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":55,"id":"mobile-P4-T2"},{"name":"Pre-entry market validation","owner":"Abdelhamid","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":50,"id":"mobile-P4-T3"},{"name":"Regulatory & entry barriers assessment","owner":"Fayad","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":55,"id":"mobile-P4-T4"},{"name":"Entry model design & B2B e-commerce presence","owner":"Abuelenien","q1":0,"q2":0,"q3":0,"q4":1,"status":"WIP","actual":18,"id":"mobile-P4-T5"},{"name":"Go / No-Go regional entry risk assessment","owner":"Karim","q1":0,"q2":1,"q3":1,"q4":0,"status":"Done","actual":100,"id":"mobile-P4-T6"}]}]},"retailstores":{"name":"Retail Stores","codePrefix":"RS","weight":14,"real":false,"company":"b2c","active":true,"keyObjectives":[{"name":"Retail revenue","dir":"≥","target3y":"6.8B EGP","target":"4.5B EGP","compile":"Sum","actual":"3.8B","progress":84,"id":"retailstores-KO1"},{"name":"Stores operating","dir":"≥","target3y":"120","target":"88","compile":"Latest","actual":"91","progress":103,"id":"retailstores-KO2"},{"name":"E-store share of revenue","dir":"≥","target3y":"38%","target":"25%","compile":"Latest","actual":"21%","progress":84,"id":"retailstores-KO3"},{"name":"Net promoter score","dir":"≥","target3y":"65","target":"55","compile":"Latest","actual":"45","progress":82,"id":"retailstores-KO4"}],"items":[{"code":"R01","name":"Store Network Expansion","theme":"OT","owner":"Hossam","measures":[{"name":"New stores opened","dir":"≥","target":"14","compile":"Sum","actual":"12","progress":86,"id":"retailstores-P1-M1"},{"name":"Revenue per store","dir":"≥","target":"52M","compile":"Latest","actual":"55M","progress":106,"id":"retailstores-P1-M2"},{"name":"Prime-location share","dir":"≥","target":"60%","compile":"Latest","actual":"47%","progress":78,"id":"retailstores-P1-M3"}],"tactics":[{"name":"Site selection model using catchment data","owner":"Hossam","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":70,"id":"retailstores-P1-T1"},{"name":"Standard fit-out programme","owner":"Dalia","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":65,"id":"retailstores-P1-T2"},{"name":"Landlord framework agreements","owner":"Hossam","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":55,"id":"retailstores-P1-T3"}]},{"code":"R02","name":"Omnichannel Experience","theme":"VC","owner":"Dalia","measures":[{"name":"E-store revenue","dir":"≥","target":"1.1B EGP","compile":"Sum","actual":"0.62B","progress":56,"id":"retailstores-P2-M1"},{"name":"Click-and-collect share","dir":"≥","target":"30%","compile":"Latest","actual":"33%","progress":110,"id":"retailstores-P2-M2"},{"name":"Unified stock accuracy","dir":"≥","target":"95%","compile":"Latest","actual":"67%","progress":71,"id":"retailstores-P2-M3"}],"tactics":[{"name":"Single stock view across store and e-store","owner":"Dalia","q1":1,"q2":1,"q3":0,"q4":0,"status":"WIP","actual":60,"id":"retailstores-P2-T1"},{"name":"Click-and-collect rollout","owner":"Dalia","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":55,"id":"retailstores-P2-T2"},{"name":"Unified loyalty across channels","owner":"Nour","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":50,"id":"retailstores-P2-T3"}]},{"code":"R03","name":"Retail Operations Excellence","theme":"VC","owner":"Nour","measures":[{"name":"Inventory turns","dir":"≥","target":"6.0","compile":"Latest","actual":"4.7","progress":78,"id":"retailstores-P3-M1"},{"name":"Shrinkage rate","dir":"≤","target":"0.4%","compile":"Latest","actual":"0.6%","progress":67,"id":"retailstores-P3-M2"}],"tactics":[{"name":"Store operating standard and audit cycle","owner":"Nour","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":60,"id":"retailstores-P3-T1"},{"name":"Replenishment automation","owner":"Nour","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":50,"id":"retailstores-P3-T2"}]}]},"b2becomm":{"name":"B2B Ecomm","codePrefix":"BE","weight":10,"real":false,"company":null,"active":true,"keyObjectives":[{"name":"Platform GMV","dir":"≥","target3y":"9.5B EGP","target":"900M EGP","compile":"Sum","actual":"310M","progress":34,"id":"b2becomm-KO1"},{"name":"Monthly active merchants","dir":"≥","target3y":"14,000","target":"2,200","compile":"Latest","actual":"980","progress":45,"id":"b2becomm-KO2"},{"name":"Repeat order rate","dir":"≥","target3y":"72%","target":"65%","compile":"Latest","actual":"31%","progress":48,"id":"b2becomm-KO3"},{"name":"Credit default rate","dir":"≤","target3y":"1.5%","target":"2%","compile":"Latest","actual":"3.1%","progress":65,"id":"b2becomm-KO4"}],"items":[{"code":"M01","name":"B2B Platform Scale","theme":"OT","owner":"Abuelenien","measures":[{"name":"Merchants onboarded","dir":"≥","target":"2,200","compile":"Latest","actual":"980","progress":45,"id":"b2becomm-P1-M1"},{"name":"Platform GMV","dir":"≥","target3y":"9.5B EGP","target":"900M","compile":"Sum","actual":"310M","progress":34,"id":"b2becomm-P1-M2"},{"name":"Orders per merchant","dir":"≥","target":"8","compile":"Latest","actual":"2.8","progress":35,"id":"b2becomm-P1-M3"}],"tactics":[{"name":"Self-serve merchant onboarding","owner":"Abuelenien","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":35,"id":"b2becomm-P1-T1"},{"name":"Field activation programme","owner":"Hala","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":25,"id":"b2becomm-P1-T2"}]},{"code":"M02","name":"Merchant Financing","theme":"DIV","owner":"Hala","measures":[{"name":"Credit book","dir":"≥","target":"180M EGP","compile":"Latest","actual":"74M","progress":41,"id":"b2becomm-P2-M1"},{"name":"Merchants with credit","dir":"≥","target":"600","compile":"Latest","actual":"285","progress":48,"id":"b2becomm-P2-M2"}],"tactics":[{"name":"Credit scoring from trading history","owner":"Hala","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":45,"id":"b2becomm-P2-T1"},{"name":"Partner lender agreements","owner":"Hala","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":40,"id":"b2becomm-P2-T2"}]},{"code":"M03","name":"Platform Reliability","theme":"VC","owner":"Mohamed Rizk","measures":[{"name":"Order fulfilment rate","dir":"≥","target":"97%","compile":"Latest","actual":"88%","progress":91,"id":"b2becomm-P3-M1"},{"name":"App crash-free rate","dir":"≥","target":"99%","compile":"Latest","actual":"99.4%","progress":100,"id":"b2becomm-P3-M2"}],"tactics":[{"name":"Fulfilment SLA with logistics","owner":"Mohamed Rizk","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":40,"id":"b2becomm-P3-T1"},{"name":"Platform stability programme","owner":"Mohamed Rizk","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":32,"id":"b2becomm-P3-T2"}]}]},"onlineshop":{"name":"Online Shop","codePrefix":"OS","weight":8,"real":false,"company":"b2c","active":true,"keyObjectives":[{"name":"Online revenue","dir":"≥","target3y":"2.6B EGP","target":"1.8B EGP","compile":"Sum","actual":"1.1B","progress":61,"id":"onlineshop-KO1"},{"name":"Site conversion rate","dir":"≥","target3y":"3.2%","target":"2.4%","compile":"Latest","actual":"1.8%","progress":75,"id":"onlineshop-KO2"},{"name":"Repeat purchase rate","dir":"≥","target3y":"40%","target":"28%","compile":"Latest","actual":"19%","progress":68,"id":"onlineshop-KO3"},{"name":"Assortment breadth (live SKUs)","dir":"≥","target3y":"24,000","target":"14,000","compile":"Latest","actual":"9,400","progress":67,"id":"onlineshop-KO4"}],"items":[{"code":"OS01","name":"Assortment & Availability","theme":"OT","owner":"Sherif Adel","measures":[{"name":"Live SKU count","dir":"≥","target":"14,000","compile":"Latest","actual":"9,400","progress":67,"id":"onlineshop-P1-M1"},{"name":"Out-of-stock rate","dir":"≤","target":"4%","compile":"Latest","actual":"7%","progress":57,"id":"onlineshop-P1-M2"},{"name":"Supplier lead time","dir":"≤","target":"10 d","compile":"Latest","actual":"14 d","progress":71,"id":"onlineshop-P1-M3"}],"tactics":[{"name":"Onboard group assortment to storefront","owner":"Sherif Adel","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":55,"id":"onlineshop-P1-T1"},{"name":"Automated stock sync with warehouses","owner":"Nadia Fouad","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":40,"id":"onlineshop-P1-T2"},{"name":"Third-party seller pilot","owner":"Sherif Adel","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":25,"id":"onlineshop-P1-T3"}]},{"code":"OS02","name":"Conversion & Retention","theme":"VC","owner":"Nadia Fouad","measures":[{"name":"Conversion rate","dir":"≥","target":"2.4%","compile":"Latest","actual":"1.8%","progress":75,"id":"onlineshop-P2-M1"},{"name":"Cart abandonment","dir":"≤","target":"62%","compile":"Latest","actual":"71%","progress":87,"id":"onlineshop-P2-M2"},{"name":"App install base","dir":"≥","target":"900,000","compile":"Latest","actual":"540,000","progress":60,"id":"onlineshop-P2-M3"}],"tactics":[{"name":"Checkout redesign and one-tap pay","owner":"Nadia Fouad","q1":1,"q2":1,"q3":0,"q4":0,"status":"WIP","actual":80,"id":"onlineshop-P2-T1"},{"name":"Loyalty programme launch","owner":"Sherif Adel","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":45,"id":"onlineshop-P2-T2"},{"name":"Personalised recommendation engine","owner":"Nadia Fouad","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":30,"id":"onlineshop-P2-T3"}]}]},"consumerelectronics":{"name":"Consumer Electronics","codePrefix":"CE","weight":15,"real":false,"company":"distribution","active":true,"keyObjectives":[{"name":"CE distribution revenue","dir":"≥","target3y":"7.8B EGP","target":"5.4B EGP","compile":"Sum","actual":"2.4B","progress":44,"id":"consumerelectronics-KO1"},{"name":"CE market share","dir":"≥","target3y":"24%","target":"18%","compile":"Latest","actual":"14%","progress":78,"id":"consumerelectronics-KO2"},{"name":"Active dealer accounts","dir":"≥","target3y":"2,600","target":"1,900","compile":"Latest","actual":"1,410","progress":74,"id":"consumerelectronics-KO3"},{"name":"Gross margin","dir":"≥","target3y":"9.5%","target":"8.2%","compile":"Latest","actual":"7.1%","progress":87,"id":"consumerelectronics-KO4"}],"items":[{"code":"CE01","name":"Brand Portfolio Depth","theme":"DIV","owner":"Tarek Nassar","measures":[{"name":"Principal agreements signed","dir":"≥","target":"4","compile":"Sum","actual":"2","progress":50,"id":"consumerelectronics-P1-M1"},{"name":"Revenue from top-2 brands","dir":"≤","target":"55%","compile":"Latest","actual":"","progress":null,"id":"consumerelectronics-P1-M2"},{"name":"New category revenue","dir":"≥","target":"900M EGP","compile":"Sum","actual":"","progress":null,"id":"consumerelectronics-P1-M3"}],"tactics":[{"name":"Negotiate two additional principal lines","owner":"Tarek Nassar","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":50,"id":"consumerelectronics-P1-T1"},{"name":"Own-label accessory range","owner":"Heba Salem","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":35,"id":"consumerelectronics-P1-T2"},{"name":"Premium segment entry plan","owner":"Tarek Nassar","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":45,"id":"consumerelectronics-P1-T3"}]},{"code":"CE02","name":"Dealer Network Development","theme":"OT","owner":"Heba Salem","measures":[{"name":"Active dealers","dir":"≥","target":"1,900","compile":"Latest","actual":"","progress":null,"id":"consumerelectronics-P2-M1"},{"name":"Dealer credit utilisation","dir":"≥","target":"70%","compile":"Latest","actual":"","progress":null,"id":"consumerelectronics-P2-M2"},{"name":"Dealer churn","dir":"≤","target":"8%","compile":"Latest","actual":"","progress":null,"id":"consumerelectronics-P2-M3"}],"tactics":[{"name":"Tiered dealer incentive scheme","owner":"Heba Salem","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":60,"id":"consumerelectronics-P2-T1"},{"name":"Regional dealer service hubs","owner":"Tarek Nassar","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":38,"id":"consumerelectronics-P2-T2"},{"name":"Dealer portal rollout","owner":"Heba Salem","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":28,"id":"consumerelectronics-P2-T3"}]}]},"corporate":{"name":"Corporate","codePrefix":"CO","weight":6,"real":false,"company":null,"active":true,"keyObjectives":[{"name":"Corporate revenue","dir":"≥","target3y":"1.4B EGP","target":"0.9B EGP","compile":"Sum","actual":"0.42B","progress":47,"id":"corporate-KO1"},{"name":"Contracted recurring revenue","dir":"≥","target3y":"260M EGP","target":"150M EGP","compile":"Sum","actual":"61M","progress":41,"id":"corporate-KO2"},{"name":"Tender win rate","dir":"≥","target3y":"35%","target":"26%","compile":"Latest","actual":"19%","progress":73,"id":"corporate-KO3"},{"name":"Named enterprise accounts","dir":"≥","target3y":"140","target":"95","compile":"Latest","actual":"72","progress":76,"id":"corporate-KO4"}],"items":[{"code":"CO01","name":"Solution Selling Capability","theme":"VC","owner":"Amr Bakr","measures":[{"name":"Certified pre-sales engineers","dir":"≥","target":"18","compile":"Latest","actual":"11","progress":61,"id":"corporate-P1-M1"},{"name":"Solution-led deal share","dir":"≥","target":"45%","compile":"Latest","actual":"29%","progress":64,"id":"corporate-P1-M2"},{"name":"Average deal size","dir":"≥","target":"3.2M EGP","compile":"Latest","actual":"2.1M","progress":66,"id":"corporate-P1-M3"}],"tactics":[{"name":"Pre-sales academy and certification","owner":"Amr Bakr","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":55,"id":"corporate-P1-T1"},{"name":"Reference architecture library","owner":"Laila Zaki","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":60,"id":"corporate-P1-T2"},{"name":"Vendor solution partnerships","owner":"Amr Bakr","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":42,"id":"corporate-P1-T3"}]},{"code":"CO02","name":"Public Sector Programmes","theme":"DIV","owner":"Laila Zaki","measures":[{"name":"Active public contracts","dir":"≥","target":"24","compile":"Latest","actual":"16","progress":67,"id":"corporate-P2-M1"},{"name":"Tender win rate","dir":"≥","target":"26%","compile":"Latest","actual":"19%","progress":73,"id":"corporate-P2-M2"},{"name":"Public revenue","dir":"≥","target":"420M EGP","compile":"Sum","actual":"178M","progress":42,"id":"corporate-P2-M3"}],"tactics":[{"name":"Framework agreement registrations","owner":"Laila Zaki","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":70,"id":"corporate-P2-T1"},{"name":"Dedicated bid desk","owner":"Amr Bakr","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":45,"id":"corporate-P2-T2"},{"name":"Compliance and certification programme","owner":"Laila Zaki","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":30,"id":"corporate-P2-T3"}]}]},"care":{"name":"Care","codePrefix":"CA","weight":6,"real":false,"company":"b2c","active":true,"keyObjectives":[{"name":"Service revenue","dir":"≥","target3y":"1.3B EGP","target":"0.9B EGP","compile":"Sum","actual":"0.44B","progress":49,"id":"care-KO1"},{"name":"First-time fix rate","dir":"≥","target3y":"92%","target":"86%","compile":"Latest","actual":"89%","progress":103,"id":"care-KO2"},{"name":"Average turnaround time","dir":"≤","target3y":"3 d","target":"4 d","compile":"Latest","actual":"6 d","progress":67,"id":"care-KO3"},{"name":"Extended plan attach rate","dir":"≥","target3y":"22%","target":"15%","compile":"Latest","actual":"9%","progress":60,"id":"care-KO4"}],"items":[{"code":"CA01","name":"Service Excellence","theme":"OT","owner":"Mostafa Deif","measures":[{"name":"First-time fix rate","dir":"≥","target":"86%","compile":"Latest","actual":"89%","progress":103,"id":"care-P1-M1"},{"name":"Turnaround time","dir":"≤","target":"4 d","compile":"Latest","actual":"6 d","progress":67,"id":"care-P1-M2"},{"name":"Customer satisfaction","dir":"≥","target":"4.5","compile":"Latest","actual":"4.6","progress":102,"id":"care-P1-M3"}],"tactics":[{"name":"Parts availability programme","owner":"Mostafa Deif","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":65,"id":"care-P1-T1"},{"name":"Technician certification ladder","owner":"Rania Fahmy","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":50,"id":"care-P1-T2"},{"name":"Service tracking for customers","owner":"Mostafa Deif","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":40,"id":"care-P1-T3"}]},{"code":"CA02","name":"Service Revenue Growth","theme":"DIV","owner":"Rania Fahmy","measures":[{"name":"Extended plan attach rate","dir":"≥","target":"15%","compile":"Latest","actual":"9%","progress":60,"id":"care-P2-M1"},{"name":"Third-party service revenue","dir":"≥","target":"180M EGP","compile":"Sum","actual":"62M","progress":34,"id":"care-P2-M2"},{"name":"Out-of-warranty revenue","dir":"≥","target":"240M EGP","compile":"Sum","actual":"112M","progress":47,"id":"care-P2-M3"}],"tactics":[{"name":"Extended plan sales at point of sale","owner":"Rania Fahmy","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":48,"id":"care-P2-T1"},{"name":"Third-party retailer service contracts","owner":"Mostafa Deif","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":35,"id":"care-P2-T2"},{"name":"Service pricing review","owner":"Rania Fahmy","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":70,"id":"care-P2-T3"}]}]},"it":{"name":"IT","codePrefix":"IT","weight":7,"real":false,"company":"distribution","active":true,"keyObjectives":[{"name":"IT distribution revenue","dir":"≥","target3y":"3.4B EGP","target":"2.2B EGP","compile":"Sum","actual":"0.98B","progress":45,"id":"it-KO1"},{"name":"Services attach rate","dir":"≥","target3y":"28%","target":"18%","compile":"Latest","actual":"11%","progress":61,"id":"it-KO2"},{"name":"Active reseller accounts","dir":"≥","target3y":"900","target":"640","compile":"Latest","actual":"471","progress":74,"id":"it-KO3"},{"name":"Inventory turns","dir":"≥","target3y":"7.0","target":"5.5","compile":"Latest","actual":"4.2","progress":76,"id":"it-KO4"}],"items":[{"code":"IT01","name":"Reseller Channel Growth","theme":"OT","owner":"Yasser Kamal","measures":[{"name":"Active resellers","dir":"≥","target":"640","compile":"Latest","actual":"471","progress":74,"id":"it-P1-M1"},{"name":"Revenue per reseller","dir":"≥","target":"3.4M EGP","compile":"Latest","actual":"2.1M","progress":62,"id":"it-P1-M2"},{"name":"Reseller portal adoption","dir":"≥","target":"70%","compile":"Latest","actual":"44%","progress":63,"id":"it-P1-M3"}],"tactics":[{"name":"Reseller tiering and rebate scheme","owner":"Yasser Kamal","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":58,"id":"it-P1-T1"},{"name":"Self-service ordering portal","owner":"Dina Shawky","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":42,"id":"it-P1-T2"},{"name":"Regional reseller events","owner":"Yasser Kamal","q1":0,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":65,"id":"it-P1-T3"}]},{"code":"IT02","name":"Infrastructure Services","theme":"VC","owner":"Dina Shawky","measures":[{"name":"Services revenue","dir":"≥","target":"400M EGP","compile":"Sum","actual":"178M","progress":45,"id":"it-P2-M1"},{"name":"Services attach rate","dir":"≥","target":"18%","compile":"Latest","actual":"11%","progress":61,"id":"it-P2-M2"},{"name":"Certified engineers","dir":"≥","target":"24","compile":"Latest","actual":"15","progress":63,"id":"it-P2-M3"}],"tactics":[{"name":"Managed infrastructure offering","owner":"Dina Shawky","q1":1,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":45,"id":"it-P2-T1"},{"name":"Engineer certification programme","owner":"Yasser Kamal","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":62,"id":"it-P2-T2"},{"name":"Cloud partner accreditation","owner":"Dina Shawky","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":28,"id":"it-P2-T3"}]}]},"logistics":{"name":"Logistics","codePrefix":"LG","weight":8,"real":false,"company":null,"active":true,"keyObjectives":[{"name":"Logistics revenue","dir":"≥","target3y":"2.4B EGP","target":"1.6B EGP","compile":"Sum","actual":"0.71B","progress":44,"id":"logistics-KO1"},{"name":"External client revenue share","dir":"≥","target3y":"45%","target":"30%","compile":"Latest","actual":"18%","progress":60,"id":"logistics-KO2"},{"name":"On-time delivery rate","dir":"≥","target3y":"96%","target":"92%","compile":"Latest","actual":"94%","progress":102,"id":"logistics-KO3"},{"name":"Cost per parcel","dir":"≤","target3y":"28 EGP","target":"33 EGP","compile":"Latest","actual":"39 EGP","progress":85,"id":"logistics-KO4"}],"items":[{"code":"LG01","name":"Network Efficiency","theme":"OT","owner":"Hazem Roushdy","measures":[{"name":"On-time delivery","dir":"≥","target":"92%","compile":"Latest","actual":"94%","progress":102,"id":"logistics-P1-M1"},{"name":"Cost per parcel","dir":"≤","target":"33 EGP","compile":"Latest","actual":"39 EGP","progress":85,"id":"logistics-P1-M2"},{"name":"Hub utilisation","dir":"≥","target":"82%","compile":"Latest","actual":"68%","progress":83,"id":"logistics-P1-M3"}],"tactics":[{"name":"Route optimisation system","owner":"Hazem Roushdy","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":72,"id":"logistics-P1-T1"},{"name":"Hub capacity rebalancing","owner":"Mai Sobhy","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":44,"id":"logistics-P1-T2"},{"name":"Returns handling redesign","owner":"Hazem Roushdy","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":38,"id":"logistics-P1-T3"}]},{"code":"LG02","name":"Third-Party Client Growth","theme":"DIV","owner":"Mai Sobhy","measures":[{"name":"External client revenue","dir":"≥","target":"480M EGP","compile":"Sum","actual":"192M","progress":40,"id":"logistics-P2-M1"},{"name":"Named 3PL clients","dir":"≥","target":"40","compile":"Latest","actual":"23","progress":58,"id":"logistics-P2-M2"},{"name":"Client retention","dir":"≥","target":"85%","compile":"Latest","actual":"74%","progress":87,"id":"logistics-P2-M3"}],"tactics":[{"name":"3PL commercial proposition and pricing","owner":"Mai Sobhy","q1":1,"q2":1,"q3":1,"q4":0,"status":"WIP","actual":68,"id":"logistics-P2-T1"},{"name":"Client onboarding and SLA framework","owner":"Hazem Roushdy","q1":0,"q2":1,"q3":1,"q4":1,"status":"WIP","actual":40,"id":"logistics-P2-T2"},{"name":"Fulfilment-as-a-service pilot","owner":"Mai Sobhy","q1":0,"q2":0,"q3":1,"q4":1,"status":"WIP","actual":26,"id":"logistics-P2-T3"}]}]},"nigeria":{"name":"Nigeria","codePrefix":"NG","weight":5,"real":false,"company":null,"active":true,"keyObjectives":[{"name":"Nigeria revenue","dir":"≥","target3y":"2.2B EGP","target":"1.1B EGP","compile":"Sum","actual":"","progress":null,"id":"nigeria-KO1"},{"name":"Local dealer accounts","dir":"≥","target3y":"420","target":"240","compile":"Latest","actual":"","progress":null,"id":"nigeria-KO2"},{"name":"Contribution margin","dir":"≥","target3y":"6.0%","target":"4.2%","compile":"Latest","actual":"","progress":null,"id":"nigeria-KO3"},{"name":"Working capital cycle","dir":"≤","target3y":"55 d","target":"70 d","compile":"Latest","actual":"","progress":null,"id":"nigeria-KO4"}],"items":[{"code":"NG01","name":"Market Establishment","theme":"DIV","owner":"Chidi Okafor","measures":[{"name":"Dealer accounts","dir":"≥","target":"240","compile":"Latest","actual":"","progress":null,"id":"nigeria-P1-M1"},{"name":"Cities covered","dir":"≥","target":"6","compile":"Latest","actual":"","progress":null,"id":"nigeria-P1-M2"},{"name":"Brand lines carried","dir":"≥","target":"5","compile":"Latest","actual":"","progress":null,"id":"nigeria-P1-M3"}],"tactics":[{"name":"Lagos hub and warehousing","owner":"Chidi Okafor","q1":1,"q2":1,"q3":0,"q4":0,"status":"Not started","actual":null,"id":"nigeria-P1-T1"},{"name":"Regional dealer recruitment","owner":"Amaka Eze","q1":1,"q2":1,"q3":1,"q4":1,"status":"Not started","actual":null,"id":"nigeria-P1-T2"},{"name":"Local brand agreements","owner":"Chidi Okafor","q1":0,"q2":1,"q3":1,"q4":1,"status":"Not started","actual":null,"id":"nigeria-P1-T3"}]},{"code":"NG02","name":"Commercial Viability","theme":"VC","owner":"Amaka Eze","measures":[{"name":"Contribution margin","dir":"≥","target":"4.2%","compile":"Latest","actual":"","progress":null,"id":"nigeria-P2-M1"},{"name":"Working capital cycle","dir":"≤","target":"70 d","compile":"Latest","actual":"","progress":null,"id":"nigeria-P2-M2"},{"name":"Overhead ratio","dir":"≤","target":"9%","compile":"Latest","actual":"","progress":null,"id":"nigeria-P2-M3"}],"tactics":[{"name":"Local credit and collections policy","owner":"Amaka Eze","q1":1,"q2":1,"q3":1,"q4":0,"status":"Not started","actual":null,"id":"nigeria-P2-T1"},{"name":"Cost base review","owner":"Chidi Okafor","q1":0,"q2":1,"q3":1,"q4":1,"status":"Not started","actual":null,"id":"nigeria-P2-T2"},{"name":"Repatriation and FX hedging plan","owner":"Amaka Eze","q1":0,"q2":1,"q3":1,"q4":1,"status":"Not started","actual":null,"id":"nigeria-P2-T3"}]}]}},"people":{"smo":{"name":"Strategy Management Office","title":"SMO","level":"smo","unit":"group"},"ceo":{"name":"Group CEO","title":"Chief Executive","level":"ceo","unit":"group"},"mobhead":{"name":"Ashraf Laithy","title":"Head of Mobile","level":"n1","unit":"mobile"},"loghead":{"name":"Hazem Roushdy","title":"Head of Logistics","level":"n1","unit":"logistics"},"rethead":{"name":"Hossam Farid","title":"Head of Retail Stores","level":"n1","unit":"retailstores"},"cfo":{"name":"Group CFO","title":"Chief Financial Officer","level":"n1","unit":"group"},"b2bhead":{"name":"Nour Selim","title":"Head of B2B Ecomm","level":"n1","unit":"b2becomm"},"cehead":{"name":"Tarek Nassar","title":"Head of Consumer Electronics","level":"n1","unit":"consumerelectronics"},"oshead":{"name":"Sherif Adel","title":"Head of Online Shop","level":"n1","unit":"onlineshop"},"cohead":{"name":"Amr Bakr","title":"Head of Corporate","level":"n1","unit":"corporate"},"cahead":{"name":"Mostafa Deif","title":"Head of Care","level":"n1","unit":"care"},"ithead":{"name":"Yasser Kamal","title":"Head of IT","level":"n1","unit":"it"},"nghead":{"name":"Chidi Okafor","title":"Head of Nigeria","level":"n1","unit":"nigeria"},"own_mob":{"name":"Mennah Farouk","title":"Strategy custodian, Mobile","level":"n1","unit":"mobile"},"own_ret":{"name":"Dalia Sabry","title":"Strategy custodian, Retail Stores","level":"n1","unit":"retailstores"},"own_b2b":{"name":"Kareem Hafez","title":"Strategy custodian, B2B Ecomm","level":"n1","unit":"b2becomm"},"own_ce":{"name":"Heba Salem","title":"Strategy custodian, Consumer Electronics","level":"n1","unit":"consumerelectronics"},"own_os":{"name":"Nadia Fouad","title":"Strategy custodian, Online Shop","level":"n1","unit":"onlineshop"},"own_co":{"name":"Laila Zaki","title":"Strategy custodian, Corporate","level":"n1","unit":"corporate"},"own_ca":{"name":"Rania Fahmy","title":"Strategy custodian, Care","level":"n1","unit":"care"},"own_it":{"name":"Dina Shawky","title":"Strategy custodian, IT","level":"n1","unit":"it"},"own_lg":{"name":"Mai Sobhy","title":"Strategy custodian, Logistics","level":"n1","unit":"logistics"},"own_ng":{"name":"Amaka Eze","title":"Strategy custodian, Nigeria","level":"n1","unit":"nigeria"},"fn_fin":{"name":"Hossam Abuelenien","title":"Head of Finance","level":"n1","unit":null},"fn_hr":{"name":"Noran Adel","title":"Head of HR","level":"n1","unit":null},"fn_tre":{"name":"Fayad Sobhy","title":"Head of Treasury","level":"n1","unit":null},"fn_mkt":{"name":"Yara Kamal","title":"Head of Marketing","level":"n1","unit":null},"fn_mkt2":{"name":"Tarek Nour","title":"Strategy custodian, Marketing","level":"n1","unit":null},"dir":{"name":"Ramy Behairy","title":"Director, Digital Operations","level":"n2","unit":"mobile"},"co_dist":{"name":"Company CEO, Distribution","title":"CEO, Distribution","level":"n1","unit":null},"co_b2c":{"name":"Company CEO, B2C","title":"CEO, B2C","level":"n1","unit":null}}};
+var GROUP = { org:D.org, horizon:D.horizon, keyObjectives:D.groupKO, themes:D.themes, weighting:D.weighting };
+var UNITS = D.units, REVIEW = D.review, CYCLE = D.cycle, BANDS = D.bands, PEOPLE = D.people;
+/* The order is the platform's own, not whatever key order survived the trip
+   through JSON: the nav, the cards and the compile all read this one list. */
+var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlineshop",
+                 "corporate","care","it","logistics","nigeria"];
+Object.keys(UNITS).forEach(function(k){ UNITS[k].ukey = k; });
+
+/* Only Mobile has Key Objective weights set, to show the mechanism. Every
+   other unit is equal-weighted — the default nobody has to defend. */
+var KO_WEIGHTS = { mobile:[40,25,20,15] };
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCORING — copied verbatim from src/config-data.js. Nothing here is stored:
+   a pillar's performance comes from its measures and its execution from its
+   tactics; a unit compiles from its pillars; the group compiles from its
+   units. A row and its expansion can therefore never disagree.
+   ═══════════════════════════════════════════════════════════════════════ */
+function avg(a){
+  var v = a.filter(function(x){ return x != null && !isNaN(x); });
+  return v.length ? Math.round(v.reduce(function(x,y){ return x+y; },0)/v.length) : null;
+}
+function koScore(list, weights){
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
+  if (!vals.length) return null;
+  if (!weights) return Math.round(vals.reduce(function(a,m){ return a + m.progress; },0)/vals.length);
+  var tot = 0, acc = 0;
+  list.forEach(function(m,i){
+    if (m.milestone || m.progress == null) return;
+    var w = weights[i] == null ? 0 : weights[i];
+    acc += m.progress * w; tot += w;
+  });
+  return tot ? Math.round(acc/tot) : null;
+}
+function bandOf(v){
+  if (v == null || isNaN(v)) return { key:"none", label:"No data" };
+  var b = BANDS.bands;
+  for (var i=0;i<b.length;i++) if (v >= b[i].floor) return b[i];
+  return b[b.length-1];
+}
+function quartersOf(t){ return [t.q1,t.q2,t.q3,t.q4].map(function(x){ return x ? 1 : 0; }); }
+/* What a tactic SHOULD have delivered by now is the share of its own active
+   quarters that have already passed — which is what makes `planned` derived
+   rather than stored. */
+function tacticPlanned(t){
+  var q = quartersOf(t), total = 0, elapsed = 0;
+  for (var i=0;i<4;i++){ if (!q[i]) continue; total++; if (i+1 <= REVIEW.endsQuarter) elapsed++; }
+  if (!total) return null;
+  return Math.round(elapsed/total*100);
+}
+/* A tactic whose quarters have not begun is not behind — it is not yet due,
+   and averaging a zero into execution would say otherwise. */
+function tacticDue(t){ return tacticPlanned(t) > 0; }
+function tacticRatio(t){ var p = tacticPlanned(t); return p && t.actual != null ? Math.round(t.actual/p*100) : null; }
+function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
+function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
+function dueTactics(p){ return p.tactics.filter(tacticDue); }
+/* A tactic that is due but has nothing reported is not delivering zero — it is
+   unreported, and averaging a zero would say the plan is failing. */
+function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
+function pillarExec(p){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); }
+function pillarPlan(p){ return avg(reportedTactics(p).map(tacticPlanned)); }
+function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
+function unitObjectives(u){ return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]); }
+function unitExec(u){ return avg(u.items.map(pillarExec)); }
+function unitPlan(u){ return avg(u.items.map(pillarPlan)); }
+function unitRatio(u){ var pl = unitPlan(u); return pl ? Math.round(unitExec(u)/pl*100) : null; }
+function groupKeyObjectives(){ return koScore(GROUP.keyObjectives); }
+function groupUnitsObjectives(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){
+    var v = unitObjectives(UNITS[k]); if (v == null) return;
+    acc += v*UNITS[k].weight; tot += UNITS[k].weight;
+  });
+  return tot ? Math.round(acc/tot) : null;
+}
+/* Copied as it stands, including the asymmetry with groupUnitsObjectives above:
+   that one SKIPS a unit with nothing to score, these two carry its weight in the
+   denominator anyway. Nigeria has no plan, so its 5% dilutes both figures — which
+   is why the group reads 102% here and not 104%. Reproduced rather than corrected:
+   this sample changes the design, not the arithmetic. Flagged for Islam. */
+function groupExec(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return tot ? Math.round(acc/tot) : null;
+}
+function groupPlan(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return tot ? Math.round(acc/tot) : null;
+}
+/* NULL IS NEVER ZERO, and it is never NaN either: a tenant with no tactics has
+   nothing delivered and nothing planned, and 0/0 printed "NaN%" on the group's
+   own front page for three versions. */
+function groupRatio(){ var e = groupExec(), p = groupPlan(); return (e == null || !p) ? null : Math.round(e/p*100); }
+function pillarCode(u,i){ return (u.codePrefix||"") + String(i+1).padStart(2,"0"); }
+
+/* ── Small helpers ─────────────────────────────────────────────────────── */
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function pct(v){ return v == null ? "&mdash;" : v + "<small>%</small>"; }
+function chip(v){ var b = bandOf(v); return '<span class="chip ' + b.key + '"><i class="dot"></i>' + b.label + '</span>'; }
+function tone(v){ return "t-" + bandOf(v).key; }
+function bandColour(v){ return "var(--" + (bandOf(v).key === "none" ? "none" : bandOf(v).key) + ")"; }
+function isFocus(id){ return !!CYCLE.focus[id]; }
+function focusMark(id){ return isFocus(id) ? ' <span title="A focus measure this cycle" style="color:var(--indigo-500)">&#9670;</span>' : ""; }
+
+/* The donut the platform already draws, at HR_ERP's radius and on its track. */
+function donut(v, size){
+  size = size || 112;
+  var r = (size-14)/2, c = 2*Math.PI*r, on = v == null ? 0 : Math.max(0, Math.min(100, v));
+  return '<div class="donutwrap" style="width:' + size + 'px;height:' + size + 'px">' +
+    '<svg class="donut" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+      '<circle class="track" cx="' + size/2 + '" cy="' + size/2 + '" r="' + r + '" fill="none" stroke-width="12"></circle>' +
+      (v == null ? "" :
+      '<circle cx="' + size/2 + '" cy="' + size/2 + '" r="' + r + '" fill="none" stroke-width="12" stroke-linecap="round" ' +
+        'stroke="' + bandColour(v) + '" stroke-dasharray="' + (c*on/100).toFixed(1) + ' ' + c.toFixed(1) + '" ' +
+        'transform="rotate(-90 ' + size/2 + ' ' + size/2 + ')"></circle>') +
+    '</svg>' +
+    '<span class="dv ' + tone(v) + '">' + (v == null ? "&ndash;" : v + '<small>%</small>') + '</span></div>';
+}
+function quarterPips(t){
+  var q = quartersOf(t);
+  return '<span class="qs">' + q.map(function(on,i){
+    var past = on && (i+1) <= REVIEW.endsQuarter;
+    return '<i class="' + (on ? (past ? "on" : "past") : "") + '">' + (i+1) + '</i>';
+  }).join("") + '</span>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHARED PIECES — the legend strip and the "how this is calculated" panel are
+   the same on every scored page, which is how it is today.
+   ═══════════════════════════════════════════════════════════════════════ */
+function legend(acts){
+  return '<div class="banner-ctx legend">' +
+    '<span class="lab">Reading the colours</span>' +
+    BANDS.bands.map(function(b,i){
+      var next = i ? BANDS.bands[i-1].floor - 1 : null;
+      var range = i === 0 ? b.floor + "%+" : (b.floor ? b.floor + "–" + next + "%" : "below " + (next+1) + "%");
+      return '<span class="b"><i class="dot" style="background:var(--' + b.key + ')"></i>' +
+             esc(b.label) + ' &mdash; ' + range + '</span>';
+    }).join("") +
+    '<span class="acts">' + (acts || "") + '</span></div>';
+}
+function pagehead(crumb, title, lede){
+  return '<div class="pagehead"><p class="crumb">' + esc(crumb) + '</p><h1>' + esc(title) + '</h1>' +
+         (lede ? '<p>' + lede + '</p>' : "") + '</div>';
+}
+function sechead(label, count){
+  return '<div class="sechead"><b>' + esc(label) + '</b><i class="rule"></i>' +
+         (count == null ? "" : '<span class="count">' + count + '</span>') + '</div>';
+}
+function howLink(key){ return '<a class="link" href="#" data-how="' + key + '">How this is calculated &rarr;</a>'; }
+
+/* Every explanation below is the formula the page above it actually ran —
+   written out, not restated from memory. */
+var HOW = {
+  gko: ["The group's own scorecard",
+    "Every Key Objective the group holds reports a progress figure. The headline is their plain mean — " +
+    "unweighted, because weights are a per-unit mechanism and the group has never had a row in the weight table. " +
+    "An objective with no target set is not an objective scoring zero: it cannot be scored, so it is dropped rather than averaged in."],
+  gunits: ["Business units — performance",
+    "Each unit compiles its own Key Objectives into one figure, weighted where the unit has set weights and equally where it has not. " +
+    "Those unit figures are then combined on the unit weights set on the Weighting tab. Nothing here is stored: a unit's card and this headline read the same numbers."],
+  gexec: ["Business units — execution",
+    "A tactic's plan is the share of its own active quarters that have already passed, so a tactic running Q2–Q4 is due at a third at H1. " +
+    "Delivered over planned gives the ratio, and it is read as a share of plan rather than of the whole year — which is why it can pass 100%. " +
+    "A tactic whose quarters have not begun is not behind; it is not yet due, and it is left out rather than counted as zero."],
+  uobj: ["This unit's Key Objectives",
+    "The unit's Key Objectives compiled into one figure. Mobile is the one unit with weights set (40 / 25 / 20 / 15), to show the mechanism; every other unit is equal-weighted."],
+  uexec: ["This unit's execution",
+    "Each pillar averages the tactics that are due and reported — delivered on one side, planned on the other — and the unit averages its pillars. " +
+    "A due tactic with nothing reported is unreported, not zero, so it waits rather than dragging the figure down."]
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GROUP · PERFORMANCE · OVERALL
+   ═══════════════════════════════════════════════════════════════════════ */
+function drillCard(eyebrow, value, body, how, primary){
+  return '<div class="card pad b-' + bandOf(value).key + '">' +
+    '<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">' +
+      '<p class="cardtitle" style="max-width:20ch">' + esc(eyebrow) + '</p>' + chip(value) + '</div>' +
+    /* The slot is drawn either way. Without it the card with no Primary pill
+       pulls its headline up and the row of three loses its baseline. */
+    '<div style="min-height:20px;margin-top:8px">' + (primary
+      ? '<span class="chip accent">Primary</span>' : "") + '</div>' +
+    '<div class="big ' + tone(value) + '" style="margin-top:8px">' + pct(value) + '</div>' +
+    '<div class="bar"><i style="width:' + Math.min(100, value == null ? 0 : value) + '%;background:' + bandColour(value) + '"></i></div>' +
+    '<p style="margin:12px 0 0;font-size:13px;color:var(--slate-500)">' + body + '</p>' +
+    howLink(how) + '</div>';
+}
+function renderGroupOverall(){
+  var gko = groupKeyObjectives(), gunits = groupUnitsObjectives(), ratio = groupRatio();
+  var e = groupExec(), p = groupPlan();
+  var weights = UNIT_KEYS.map(function(k){ return UNITS[k].weight; }).join(" / ");
+  return pagehead("Group · Performance", "Overall performance",
+      "Three figures, and none of them stored. The group's own scorecard, what its units are achieving, and how much of the plan has actually landed.") +
+    legend('<button class="btn ghost" data-noop="Arrange">Arrange</button>') +
+    '<div class="tiles three ff-stagger">' +
+      drillCard("Group Key Objectives", gko,
+        "The group's own scorecard. All <b>" + GROUP.keyObjectives.length + "</b> objectives have a target set.", "gko", true) +
+      drillCard("Business units — performance", gunits,
+        "Each unit's own Key Objectives, weighted " + weights + " — composed on the Weighting tab.", "gunits", true) +
+      drillCard("Business units — execution", ratio,
+        "Delivered <b>" + e + "%</b> against <b>" + p + "%</b> planned — variance <b class=\"" + (e-p >= 0 ? "t-good" : "t-bad") + "\">" +
+        (e-p >= 0 ? "+" : "") + (e-p) + "</b>. Read as a share of plan, not of the whole year.", "gexec") +
+    '</div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GROUP · PERFORMANCE · BUSINESS UNITS
+   ═══════════════════════════════════════════════════════════════════════ */
+var GVIEW = "cards";
+function unitCard(k){
+  var u = UNITS[k], obj = unitObjectives(u), r = unitRatio(u), e = unitExec(u), p = unitPlan(u);
+  return '<div class="card unitcard clickable b-' + bandOf(obj).key + '" data-go="' + k + '">' +
+    '<div class="uh"><b>' + esc(u.name) + '</b><span>' + u.weight + '% weight · ' + u.items.length +
+      ' pillars' + (u.real ? "" : " · illustrative") + '</span></div>' +
+    '<div class="ub"><div class="ubl"><span class="k">Objectives</span>' + donut(obj) + '</div>' +
+      '<div class="ubr"><span class="k">Execution</span>' +
+        (r == null
+          ? '<span class="exec t-none">—</span><span class="k" style="margin-top:4px">No plan</span>'
+          : '<span class="exec ' + tone(r) + '">' + r + '<small style="font-size:14px">%</small></span>' +
+            '<span class="k" style="margin-top:2px">of plan</span>' +
+            '<span class="execn"><span>Delivered</span><span>' + e + '%</span>' +
+            '<span>Planned</span><span>' + p + '%</span>' +
+            '<span>Variance</span><span class="' + (e-p >= 0 ? "t-good" : "t-bad") + '">' + (e-p >= 0 ? "+" : "") + (e-p) + '</span></span>') +
+      '</div></div></div>';
+}
+function unitTable(){
+  return '<div class="tablecard"><table class="dt"><thead><tr>' +
+    '<th class="idx">#</th><th>Unit</th><th class="num">Weight</th><th class="num">Pillars</th>' +
+    '<th class="num">Objectives</th><th class="num">Delivered</th><th class="num">Planned</th>' +
+    '<th class="num">Of plan</th><th>Status</th></tr></thead><tbody>' +
+    UNIT_KEYS.map(function(k,i){
+      var u = UNITS[k], obj = unitObjectives(u), r = unitRatio(u);
+      return '<tr class="' + (i%2 ? "zebra" : "") + '" data-go="' + k + '" style="cursor:pointer">' +
+        '<td class="idx">' + (i+1) + '</td>' +
+        '<td><b>' + esc(u.name) + '</b>' + (u.real ? "" : ' <span class="dim">· illustrative</span>') + '</td>' +
+        '<td class="num">' + u.weight + '%</td><td class="num">' + u.items.length + '</td>' +
+        '<td class="num ' + tone(obj) + '"><b>' + (obj == null ? "—" : obj + "%") + '</b></td>' +
+        '<td class="num">' + (unitExec(u) == null ? "—" : unitExec(u) + "%") + '</td>' +
+        '<td class="num">' + (unitPlan(u) == null ? "—" : unitPlan(u) + "%") + '</td>' +
+        '<td class="num ' + tone(r) + '"><b>' + (r == null ? "—" : r + "%") + '</b></td>' +
+        '<td>' + chip(obj) + '</td></tr>';
+    }).join("") + '</tbody></table></div>';
+}
+function renderGroupUnits(){
+  return pagehead("Group · Performance", "Business units",
+      "Every active unit, its own objectives on the left and what it has delivered against plan on the right. Open one to see its pillars.") +
+    legend('<button class="btn ghost" data-noop="Arrange">Arrange</button>') +
+    '<div class="headrow"><div><h2 class="title">' + UNIT_KEYS.length + ' business units</h2>' +
+      '<p class="secnote">Weights total 100% and are set on the Weighting tab.</p></div>' +
+      '<div class="rowacts"><span class="toggle"><button data-gview="cards" aria-pressed="' + (GVIEW==="cards") + '">Cards</button>' +
+      '<button data-gview="table" aria-pressed="' + (GVIEW==="table") + '">Table</button></span></div></div>' +
+    (GVIEW === "cards"
+      ? '<div class="tiles ff-stagger">' + UNIT_KEYS.map(unitCard).join("") + '</div>'
+      : unitTable());
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UNIT · PERFORMANCE
+   ═══════════════════════════════════════════════════════════════════════ */
+var RAIL = {};                       /* which pillar each unit is opened on */
+function railIndex(k){ return RAIL[k] || 0; }
+
+function splitCard(title, value, suffix, how, metrics){
+  return '<div class="card pad b-' + bandOf(value).key + '">' +
+    '<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">' +
+      '<p class="cardtitle">' + esc(title) + '</p>' + chip(value) + '</div>' +
+    '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap">' +
+      '<span class="big ' + tone(value) + '" style="margin-top:8px">' + pct(value) +
+        (suffix ? ' <span class="metric-k" style="font-size:11px">' + esc(suffix) + '</span>' : "") + '</span>' +
+      howLink(how) + '</div>' +
+    '<div class="metric-row">' + metrics.map(function(m){
+      return '<div><div class="metric-k">' + esc(m[0]) + '</div><div class="metric-v ' + (m[2]||"") + '">' + m[1] + '</div></div>';
+    }).join("") + '</div></div>';
+}
+
+/* The focus strip. Focus measures are chosen for the cycle and carry reward;
+   a measure earns once it reaches the reward line, which is 100% of target. */
+function focusStrip(k){
+  var u = UNITS[k], marked = [];
+  u.keyObjectives.forEach(function(m){ if (isFocus(m.id)) marked.push(m); });
+  u.items.forEach(function(p){ p.measures.forEach(function(m){ if (isFocus(m.id)) marked.push(m); }); });
+  if (!marked.length) return "";
+  var earning = marked.filter(function(m){ return m.progress != null && m.progress >= CYCLE.rewardAt; }).length;
+  var short = marked.length - earning;
+  return '<div class="banner-ctx ' + (short ? "b-amber" : "b-emerald") + '">' +
+    '<span class="ico">&#9670;</span>' +
+    '<div><div class="bt">Focus this cycle &mdash; ' + earning + ' of ' + marked.length + ' earning</div>' +
+    '<div class="bs">Reward begins at ' + CYCLE.rewardAt + '% of target. Focus changes no score.</div></div>' +
+    '<span class="acts"><span class="chip good">' + earning + ' earning</span>' +
+    (short ? '<span class="chip warn">' + short + ' short</span>' : "") + '</span></div>';
+}
+
+function measureRows(list, cols){
+  return list.map(function(m,i){
+    return '<tr class="' + (i%2 ? "zebra " : "") + (isFocus(m.id) ? "focus" : "") + '">' +
+      '<td class="idx">' + (i+1) + '</td>' +
+      '<td class="grow">' + esc(m.name) + focusMark(m.id) + '</td>' +
+      '<td class="mid tight">' + esc(m.dir) + '</td>' +
+      '<td class="num tight">' + esc(m.target || "—") + '</td>' +
+      (cols.horizon ? '<td class="num dim">' + esc(m.target3y || "—") + '</td>' : "") +
+      '<td class="mid dim">' + esc(m.compile || "—") + '</td>' +
+      (cols.actual ? '<td class="num">' + esc(m.actual === "" || m.actual == null ? "—" : m.actual) + '</td>' : "") +
+      (cols.progress ? '<td class="num ' + tone(m.progress) + '"><b>' + (m.progress == null ? "—" : m.progress + "%") + '</b></td>' : "") +
+    '</tr>';
+  }).join("");
+}
+function measureTable(list, cols){
+  return '<div class="tablecard"><table class="dt"><thead><tr>' +
+    '<th class="idx">#</th><th class="grow">Measure</th><th class="mid tight">Dir.</th><th class="num tight">Target</th>' +
+    (cols.horizon ? '<th class="num tight">' + esc(GROUP.horizon) + '</th>' : "") +
+    '<th class="mid tight">Compile</th>' +
+    (cols.actual ? '<th class="num">' + esc(REVIEW.name) + ' actual</th>' : "") +
+    (cols.progress ? '<th class="num">Progress</th>' : "") +
+    '</tr></thead><tbody>' + measureRows(list, cols) + '</tbody></table></div>';
+}
+function tacticTable(p, reported){
+  return '<div class="tablecard"><table class="dt"><thead><tr>' +
+    '<th class="idx">#</th><th class="grow">Tactic</th><th class="tight">Owner</th><th class="tight">Quarters</th>' +
+    (reported ? '<th class="tight">Status</th><th class="num tight">Deliv. / plan</th><th class="num tight">Var.</th><th class="num tight">Of plan</th>' : "") +
+    '</tr></thead><tbody>' + p.tactics.map(function(t,i){
+      var pl = tacticPlanned(t), r = tacticRatio(t), due = tacticDue(t);
+      return '<tr class="' + (i%2 ? "zebra " : "") + (due ? "" : "muted") + '">' +
+        '<td class="idx">' + (i+1) + '</td><td class="grow">' + esc(t.name) + '</td>' +
+        '<td class="tight">' + esc(t.owner || "—") + '</td><td class="tight">' + quarterPips(t) + '</td>' +
+        (reported ? (
+          '<td><span class="chip accent">' + esc(t.status || "—") + '</span></td>' +
+          (due
+            ? '<td class="num"><b>' + t.actual + '</b> <span class="dim">/ ' + pl + '</span></td>' +
+              '<td class="num ' + (t.actual - pl >= 0 ? "t-good" : "t-bad") + '">' + (t.actual - pl >= 0 ? "+" : "") + (t.actual - pl) + '</td>' +
+              '<td class="num ' + tone(r) + '"><b>' + r + '%</b></td>'
+            : '<td class="num" colspan="3"><span class="chip none">Not yet due</span></td>')
+        ) : "") + '</tr>';
+    }).join("") + '</tbody></table></div>';
+}
+
+function pillarRail(k, mode){
+  var u = UNITS[k], cur = railIndex(k);
+  return '<div class="rail"><div class="rh">Pillars<span>' + u.items.length + '</span></div>' +
+    u.items.map(function(p,i){
+      var s = pillarPerf(p), r = pillarRatio(p);
+      return '<button data-rail="' + i + '" aria-current="' + (i === cur) + '">' +
+        '<span class="rt"><span class="rn"><i>' + esc(pillarCode(u,i)) + '</i>' + esc(p.name) + '</span>' +
+        (mode === "perf" ? '<span class="rs ' + tone(s) + '">' + (s == null ? "—" : s + "%") + '</span>' : "") + '</span>' +
+        '<span class="rm">' + (mode === "perf"
+            ? "execution " + (r == null ? "—" : r + "%") + (p.owner ? " · " + esc(p.owner) : "")
+            : p.measures.length + " measures · " + p.tactics.length + " tactics" + (p.owner ? " · " + esc(p.owner) : "")) +
+        '</span></button>';
+    }).join("") +
+    (mode === "perf"
+      ? '<div class="rfoot">' + (avg(u.items.map(pillarPerf)) || "—") + '% across ' + u.items.length +
+        ' · execution ' + (unitRatio(u) == null ? "—" : unitRatio(u) + "%") + '</div>'
+      : "") +
+    '</div>';
+}
+
+function renderUnitPerformance(k){
+  var u = UNITS[k], obj = unitObjectives(u), r = unitRatio(u), e = unitExec(u), p = unitPlan(u);
+  var scored = u.keyObjectives.filter(function(m){ return m.progress != null; }).map(function(m){ return m.progress; });
+  var pi = railIndex(k), pl = u.items[pi];
+  var ps = pillarPerf(pl), pr = pillarRatio(pl), pe = pillarExec(pl), pp = pillarPlan(pl);
+  return pagehead("Business unit · Performance", u.name,
+      "What this unit is achieving against its own Key Objectives, and how much of its plan has landed by " + esc(REVIEW.name) + ".") +
+    legend('<button class="btn ghost" data-noop="Present">Present</button><button class="btn ghost" data-noop="Arrange">Arrange</button>') +
+    '<div class="tiles ff-stagger" style="margin-bottom:24px">' +
+      splitCard("Key Objectives performance", obj, "", "uobj", [
+        ["Objectives", u.keyObjectives.length],
+        ["Highest", Math.max.apply(null, scored) + "%", "t-good"],
+        ["Lowest", Math.min.apply(null, scored) + "%", tone(Math.min.apply(null, scored))]
+      ]) +
+      splitCard("Execution performance", r, "of plan", "uexec", [
+        ["Delivered", e + "%"], ["Planned", p + "%"],
+        ["Variance", (e-p >= 0 ? "+" : "") + (e-p), e-p >= 0 ? "t-good" : "t-bad"]
+      ]) +
+    '</div>' +
+    focusStrip(k) +
+    '<div class="split">' + pillarRail(k, "perf") +
+      '<div class="card panel">' +
+        '<div class="phead"><div><h3>' + esc(pl.name) + '</h3>' +
+          '<p class="psub">' + esc(pillarCode(u,pi)) + ' · theme ' + esc(pl.theme || "—") + (pl.owner ? " · " + esc(pl.owner) : "") + '</p></div>' +
+          '<span class="chip ' + bandOf(ps).key + '">' + (ps == null ? "No data" : ps + "%") + '</span></div>' +
+        '<div class="twoup">' +
+          splitCard("Key measures performance", ps, "", "uobj", [
+            ["Measures", pl.measures.length],
+            ["Highest", Math.max.apply(null, scorableMeasures(pl).map(function(m){ return m.progress; })) + "%"],
+            ["Lowest", Math.min.apply(null, scorableMeasures(pl).map(function(m){ return m.progress; })) + "%"]
+          ]) +
+          splitCard("Execution performance", pr, "of plan", "uexec", [
+            ["Delivered", pe + "%"], ["Planned", pp + "%"],
+            ["Variance", (pe-pp >= 0 ? "+" : "") + (pe-pp), pe-pp >= 0 ? "t-good" : "t-bad"]
+          ]) +
+        '</div>' +
+        '<p class="tablabel">Key measures</p>' + measureTable(pl.measures, { actual:true, progress:true }) +
+        '<p class="tablabel">Tactics</p>' + tacticTable(pl, true) +
+      '</div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UNIT · STRATEGY · PLAN — the plan as agreed. No reported figure on it, by
+   design: this is the page you go to when you want to know what was promised.
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderUnitPlan(k){
+  var u = UNITS[k], pi = railIndex(k), pl = u.items[pi];
+  return pagehead("Business unit · Strategy", u.name + " — plan",
+      "The plan as agreed: pillars, the measures each one is judged on, and who carries which tactic in which quarter. " +
+      "No reported figure appears here — <b>Performance</b> is where the numbers live.") +
+    '<div class="split">' + pillarRail(k, "plan") +
+      '<div class="card panel">' +
+        '<div class="phead"><div><h3><span class="chip plain" style="margin-right:8px;vertical-align:middle">' +
+          esc(pillarCode(u,pi)) + '</span>' + esc(pl.name) + '</h3>' +
+          '<p class="psub">theme ' + esc(pl.theme || "—") + (pl.owner ? " · " + esc(pl.owner) : "") + '</p></div></div>' +
+        (pl.sub ? '<p class="pend">' + esc(pl.sub) + '</p>' : "") +
+        '<p class="tablabel">Key measures — as planned: target, horizon, how it compiles</p>' +
+        measureTable(pl.measures, { horizon:true }) +
+        '<p class="tablabel">Tactics — who carries it, and in which quarters</p>' + tacticTable(pl, false) +
+      '</div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   UNIT · REPORTING — the one screen people TYPE into. Entries are held in
+   memory here exactly as the platform holds them before a save.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* A figure that is at risk or off track carries an explanation before it can
+   be submitted. A red number with nothing beside it is where a review meeting
+   stalls, so the page counts them and says so at the top. */
+function needsNote(m){
+  var floor = BANDS.bands[1].floor;          /* the "needs attention" floor: 70 */
+  return m.progress != null && m.progress < floor && !(m.note && String(m.note).trim());
+}
+/* The entry box shows the number; the unit comes off the TARGET, which is where
+   the unit was agreed. "6.2B EGP" makes the box read 2.7 with "B EGP" beside it. */
+function splitNum(v){ var m = String(v == null ? "" : v).match(/^\s*(-?[\d.,]+)\s*(.*)$/); return m ? m[1] : ""; }
+function unitOf(target){ var m = String(target == null ? "" : target).match(/^\s*-?[\d.,]+\s*(.*)$/); return m ? m[1] : ""; }
+
+function entryBox(value, suffix, given, cls){
+  var box = '<input class="f num ' + (given ? "given " : "") + (cls || "") + '" value="' + esc(value) + '">';
+  return suffix ? '<span class="unitbox">' + box + '<span class="suffix">' + esc(suffix) + '</span></span>' : box;
+}
+function noteBox(m){
+  var need = needsNote(m);
+  return '<input class="f' + (need ? " need" : "") + '" value="' + esc(m.note || "") + '" placeholder="' +
+         (need ? "Why, and what is being done" : "Note, if there is one") + '">';
+}
+function askedOf(u){
+  var asked = u.keyObjectives.length, given = u.keyObjectives.filter(function(m){ return m.actual !== "" && m.actual != null; }).length;
+  u.items.forEach(function(p){
+    asked += p.measures.length + dueTactics(p).length;
+    given += p.measures.filter(function(m){ return m.actual !== "" && m.actual != null; }).length +
+             dueTactics(p).filter(function(t){ return t.actual != null; }).length;
+  });
+  return { asked:asked, given:given };
+}
+function pillarTally(p){
+  var asked = p.measures.length + dueTactics(p).length;
+  var given = p.measures.filter(function(m){ return m.actual !== "" && m.actual != null; }).length +
+              dueTactics(p).filter(function(t){ return t.actual != null; }).length;
+  return { asked:asked, given:given };
+}
+function reportRail(k){
+  var u = UNITS[k], cur = railIndex(k);
+  return '<div class="rail"><div class="rh">Pillars<span>' + u.items.length + '</span></div>' +
+    u.items.map(function(p,i){
+      var t = pillarTally(p), done = t.given >= t.asked;
+      return '<button data-rail="' + i + '" aria-current="' + (i === cur) + '">' +
+        '<span class="rt"><span class="rn"><i>' + esc(pillarCode(u,i)) + '</i>' + esc(p.name) + '</span>' +
+        '<span class="chip ' + (done ? "good" : "attn") + '" style="font-size:11px">' + t.given + '/' + t.asked + '</span></span>' +
+        '<span class="rm">' + (done ? "Complete" : (t.asked - t.given) + " still to give") + '</span></button>';
+    }).join("") +
+    '<div class="rfoot">Tally is entries given of asked</div></div>';
+}
+function renderUnitReport(k){
+  var u = UNITS[k], tot = askedOf(u), pi = railIndex(k), p = u.items[pi], t = pillarTally(p);
+  var flagged = 0;
+  u.keyObjectives.forEach(function(m){ if (needsNote(m)) flagged++; });
+  u.items.forEach(function(x){ x.measures.forEach(function(m){ if (needsNote(m)) flagged++; }); });
+  var outside = p.tactics.length - dueTactics(p).length;
+  var complete = tot.given >= tot.asked;
+
+  return pagehead("Business unit · Reporting", REVIEW.name + " — " + u.name,
+      "Enter this cycle's figures. Nothing here recalculates a target: a reported number is set against the target that was agreed.") +
+    (flagged
+      ? '<div class="banner-ctx b-red"><span class="ico">!</span>' +
+        '<div><div class="bt">' + flagged + ' figures need a note</div>' +
+        '<div class="bs">Anything at risk or off track carries an explanation before it can be submitted — ' +
+        'a red number with nothing beside it is where a review meeting stalls.</div></div></div>'
+      : "") +
+    '<div class="card progline">' +
+      '<span class="n">' + tot.given + '</span><span class="dim">of ' + tot.asked + ' reported</span>' +
+      '<span class="track"><i style="width:' + Math.round(tot.given/tot.asked*100) + '%"></i></span>' +
+      '<span class="dim" style="font-size:13px">' + esc(REVIEW.name) + ' · due ' + esc(REVIEW.due) + '</span>' +
+      '<button class="btn ghost" data-noop="Submit to the SMO"' + (complete && !flagged ? "" : " disabled") + '>Submit to the SMO</button>' +
+    '</div>' +
+
+    sechead("Key Objectives", u.keyObjectives.filter(function(m){ return m.actual !== "" && m.actual != null; }).length + " / " + u.keyObjectives.length) +
+    '<div class="tablecard"><table class="dt"><thead><tr>' +
+      '<th class="idx">#</th><th class="grow">Key objective</th><th class="mid tight">Dir.</th><th class="num tight">Target</th>' +
+      '<th class="tight">Reported</th><th>Note</th></tr></thead><tbody>' +
+      u.keyObjectives.map(function(m,i){
+        return '<tr class="' + (i%2 ? "zebra " : "") + (needsNote(m) ? "focus" : "") + '">' +
+          '<td class="idx">' + (i+1) + '</td><td class="grow">' + esc(m.name) + focusMark(m.id) + '</td>' +
+          '<td class="mid tight">' + esc(m.dir) + '</td><td class="num tight">' + esc(m.target) + '</td>' +
+          '<td class="tight">' + entryBox(splitNum(m.actual), unitOf(m.target), m.actual !== "" && m.actual != null) + '</td>' +
+          '<td class="notecell">' + noteBox(m) + '</td></tr>';
+      }).join("") + '</tbody></table></div>' +
+
+    sechead("Pillars — measures and tactics", u.items.length) +
+    '<div class="split">' + reportRail(k) +
+      '<div class="card panel">' +
+        '<div class="phead"><div><h3><span class="chip plain" style="margin-right:8px;vertical-align:middle">' +
+          esc(pillarCode(u,pi)) + '</span>' + esc(p.name) + '</h3>' +
+          '<p class="psub">' + p.measures.length + ' measures · ' + dueTactics(p).length + ' tactics asked' +
+          (outside ? ' · ' + outside + ' outside this cycle' : "") + '</p></div>' +
+          '<span class="chip ' + (t.given >= t.asked ? "good" : "attn") + '">' + t.given + '/' + t.asked + '</span></div>' +
+
+        '<p class="tablabel">Key measures</p>' +
+        '<div class="tablecard"><table class="dt"><thead><tr>' +
+          '<th class="idx">#</th><th class="grow">Measure</th><th class="mid tight">Dir.</th><th class="num tight">Target</th>' +
+          '<th class="tight">Reported</th><th>Note</th></tr></thead><tbody>' +
+          p.measures.map(function(m,i){
+            return '<tr class="' + (i%2 ? "zebra " : "") + (needsNote(m) ? "focus" : "") + '">' +
+              '<td class="idx">' + (i+1) + '</td><td class="grow">' + esc(m.name) + focusMark(m.id) + '</td>' +
+              '<td class="mid tight">' + esc(m.dir) + '</td><td class="num tight">' + esc(m.target) + '</td>' +
+              '<td class="tight">' + entryBox(splitNum(m.actual), unitOf(m.target), m.actual !== "" && m.actual != null) + '</td>' +
+              '<td class="notecell">' + noteBox(m) + '</td></tr>';
+          }).join("") + '</tbody></table></div>' +
+
+        '<p class="tablabel">Tactics</p>' +
+        '<div class="tablecard"><table class="dt"><thead><tr>' +
+          '<th class="idx">#</th><th class="grow">Tactic</th><th class="tight">Owner</th><th class="tight">Quarters</th><th class="num tight">Due at</th>' +
+          '<th class="tight">Reported</th><th>Note</th></tr></thead><tbody>' +
+          p.tactics.map(function(x,i){
+            var due = tacticDue(x), pl = tacticPlanned(x);
+            return '<tr class="' + (i%2 ? "zebra " : "") + (due ? "" : "muted") + '">' +
+              '<td class="idx">' + (i+1) + '</td><td class="grow">' + esc(x.name) + '</td><td class="tight">' + esc(x.owner || "—") + '</td>' +
+              '<td class="tight">' + quarterPips(x) + '</td>' +
+              (due
+                ? '<td class="num tight">' + pl + '%</td><td class="tight">' + entryBox(x.actual, "%", x.actual != null) + '</td>' +
+                  '<td class="notecell"><input class="f" value="" placeholder="Note, if there is one"></td>'
+                : '<td colspan="3"><span class="chip none">Not asked — outside this cycle</span></td>') +
+            '</tr>';
+          }).join("") + '</tbody></table></div>' +
+      '</div></div>' +
+
+    '<p class="tablabel">The owner\'s note on this cycle</p>' +
+    '<div class="card" style="padding:4px"><textarea class="f" rows="3" style="border:0;box-shadow:none;background:transparent">' +
+      esc(REVIEW.note[k] || "") + '</textarea></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MANAGE · BUSINESS UNITS — a configuration table. Read is the normal state;
+   editing is entered deliberately, which is what makes a change to a weight
+   an act rather than a slip.
+   ═══════════════════════════════════════════════════════════════════════ */
+function personName(key){ return PEOPLE[key] ? PEOPLE[key].name : "—"; }
+function renderSetupUnits(){
+  var active = UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; }).length;
+  return pagehead("Manage · Setup", "Business units",
+      "Names, codes and which units are active. A weight decides how much a unit counts in the group's composite; " +
+      "the company column is visibility, not strategy.") +
+    '<div class="headrow"><div><h2 class="title">' + UNIT_KEYS.length + ' units</h2>' +
+      '<p class="secnote">Weights total ' + UNIT_KEYS.reduce(function(a,k){ return a + UNITS[k].weight; },0) + '%.</p></div>' +
+      '<div class="rowacts"><span class="chip accent">SMO</span>' +
+      '<span class="chip plain">' + active + ' active</span>' +
+      '<button class="btn ghost" data-noop="Edit">Edit</button></div></div>' +
+    '<div class="tablecard"><table class="dt"><thead><tr>' +
+      '<th class="idx">#</th><th class="grow">Unit</th><th>Shown in the nav</th><th class="mid tight">Code</th>' +
+      '<th class="num">Pillars</th><th class="num">Objectives</th><th class="num">Weight</th>' +
+      '<th>Company</th><th>BU head</th><th>Strategy custodian</th><th>Status</th>' +
+      '</tr></thead><tbody>' +
+      UNIT_KEYS.map(function(k,i){
+        var u = UNITS[k], roles = D.unitRoles[k] || {}, co = u.company;
+        return '<tr class="' + (i%2 ? "zebra" : "") + '">' +
+          '<td class="idx">' + (i+1) + '</td>' +
+          '<td class="grow"><b>' + esc(u.name) + '</b><div class="mono dim">key ' + esc(k) + '</div></td>' +
+          '<td class="dim">' + esc(u.name) + '</td>' +
+          '<td class="mid mono">' + esc(u.codePrefix) + '</td>' +
+          '<td class="num">' + u.items.length + '</td>' +
+          '<td class="num">' + u.keyObjectives.length + '</td>' +
+          '<td class="num"><b>' + u.weight + '%</b></td>' +
+          '<td>' + (co && D.companies[co] ? esc(D.companies[co].name) : '<span class="dim">its own company</span>') + '</td>' +
+          '<td>' + esc(personName(roles.head)) + '</td>' +
+          '<td>' + esc(personName(roles.custodian)) + '</td>' +
+          '<td>' + (u.active === false ? '<span class="chip none">Retired</span>' : '<span class="chip good">Active</span>') + '</td>' +
+        '</tr>';
+      }).join("") + '</tbody></table></div>' +
+    '<div class="banner-ctx b-indigo" style="margin-top:22px"><span class="ico">i</span>' +
+      '<div><div class="bt">Retirement means retirement everywhere</div>' +
+      '<div class="bs">One helper decides which units the product is currently about, so the nav, the cards, ' +
+      'the compile and the weighting cannot disagree about whether a unit still counts.</div></div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SHELL — the same three rows the platform has today. Unit row, page tabs,
+   section row. The folds are the folds; the gear is Manage.
+   ═══════════════════════════════════════════════════════════════════════ */
+var STATE = { unit:"group", page:"performance", section:"overall", who:"smo" };
+var FOLD  = { units:false, manage:false };
+
+/* Who can see what. The real matrix lives in `src/config-data.js`; the three
+   viewers here read from it unchanged — the SMO sees everything, the group CEO
+   sees the whole group but manages nothing, and a unit head sees the group and
+   their own unit and reports it. */
+var VIEWERS = [
+  { key:"smo",     label:"Strategy Management Office — SMO", note:"Super user · all units", unit:null,     manage:true,  report:false },
+  { key:"ceo",     label:"Group CEO — Chief Executive",      note:"Group · view only",      unit:null,     manage:false, report:false },
+  { key:"mobhead", label:"Ashraf Laithy — Head of Mobile",   note:"Mobile",                 unit:"mobile", manage:false, report:true }
+];
+function viewer(){ return VIEWERS.filter(function(v){ return v.key === STATE.who; })[0]; }
+function visibleUnits(){ var v = viewer(); return v.unit ? [v.unit] : UNIT_KEYS; }
+
+/* Which pages a screen carries, and which sections sit under each page. This
+   is SMP's own two-row shape: the page tabs say what kind of screen, the
+   section row says which part of it. */
+/* Which screens take the full width. Same test hr_erp applies: one wide,
+   many-column table on the page and nothing else that wants a reading measure. */
+function isWide(){ return STATE.unit === "setup"; }
+
+function pagesFor(){
+  var v = viewer();
+  if (STATE.unit === "group") return [{ k:"performance", label:"Performance", sections:[
+    { k:"overall", label:"Overall performance", render:renderGroupOverall },
+    { k:"units",   label:"Business units",      render:renderGroupUnits }
+  ]}];
+  if (STATE.unit === "setup") return [{ k:"setup", label:"Business units", sections:[
+    { k:"units", label:"Business units", render:renderSetupUnits }
+  ]}];
+  var perf = [{ k:"perf", label:"Performance", render:renderUnitPerformance }];
+  if (v.report || v.manage) perf.push({ k:"report", label:"Report", render:renderUnitReport });
+  return [
+    { k:"performance", label:"Performance", sections:perf },
+    { k:"strategy",    label:"Strategy",    sections:[{ k:"plan", label:"Plan", render:renderUnitPlan }] }
+  ];
+}
+
+function paintViewer(){
+  document.getElementById("asWho").innerHTML = VIEWERS.map(function(v){
+    return '<option value="' + v.key + '"' + (v.key === STATE.who ? " selected" : "") + '>' + esc(v.label) + '</option>';
+  }).join("");
+  document.getElementById("viewerNote").textContent = viewer().note;
+}
+
+/* WHOEVER REWRITES THE ROW RE-WIRES IT, IN THE SAME FUNCTION. This row's
+   innerHTML is replaced on every fold, so wiring it anywhere else means the
+   handlers die the first time a fold opens. */
+function paintUnits(){
+  var v = viewer(), out = [];
+  var me = visibleUnits();
+  out.push(btn("Group", STATE.unit === "group", 'data-u="group"'));
+  if (me.length === 1) {
+    out.push(btn(UNITS[me[0]].name, STATE.unit === me[0], 'data-u="' + me[0] + '"'));
+  } else {
+    out.push('<button class="fold" data-fold="units" aria-expanded="' + FOLD.units + '">Units ' + (FOLD.units ? "&#9662;" : "&#9656;") + '</button>');
+    if (FOLD.units) me.forEach(function(k){ out.push(btn(UNITS[k].name, STATE.unit === k, 'data-u="' + k + '"')); });
+  }
+  var right = [];
+  if (v.manage) {
+    if (FOLD.manage) right.push(btn("Business units", STATE.unit === "setup", 'data-u="setup"'));
+    right.push('<button class="fold" data-fold="manage" aria-expanded="' + FOLD.manage + '" title="Manage">&#9881; Manage ' + (FOLD.manage ? "&#9662;" : "&#9656;") + '</button>');
+  }
+  var row = document.getElementById("units"), rrow = document.getElementById("units-right");
+  row.innerHTML = out.join("");
+  rrow.innerHTML = right.join("");
+  [row, rrow].forEach(function(el){
+    el.querySelectorAll("[data-fold]").forEach(function(b){
+      b.addEventListener("click", function(){ FOLD[b.dataset.fold] = !FOLD[b.dataset.fold]; paintUnits(); });
+    });
+    el.querySelectorAll("[data-u]").forEach(function(b){
+      b.addEventListener("click", function(){ go(b.dataset.u); });
+    });
+  });
+  function btn(label, on, attrs){
+    return '<button role="tab" aria-selected="' + !!on + '" ' + attrs + '>' + esc(label) + '</button>';
+  }
+}
+
+function go(unit){
+  STATE.unit = unit;
+  var defs = pagesFor();
+  STATE.page = defs[0].k;
+  STATE.section = defs[0].sections[0].k;
+  paint(); window.scrollTo(0,0);
+}
+
+function paint(){
+  var defs = pagesFor();
+  if (!defs.some(function(d){ return d.k === STATE.page; })) STATE.page = defs[0].k;
+  var page = defs.filter(function(d){ return d.k === STATE.page; })[0];
+  if (!page.sections.some(function(s){ return s.k === STATE.section; })) STATE.section = page.sections[0].k;
+  var sec = page.sections.filter(function(s){ return s.k === STATE.section; })[0];
+
+  paintViewer();
+  paintUnits();
+
+  document.getElementById("subtabs").innerHTML = defs.map(function(d){
+    return '<button role="tab" data-p="' + d.k + '" aria-selected="' + (d.k === STATE.page) + '">' + esc(d.label) + '</button>';
+  }).join("");
+  /* A section row with one section says nothing the page tab did not already
+     say, so it is not drawn — an empty row still spends its height. */
+  var showSec = page.sections.length > 1;
+  document.getElementById("secrow").hidden = !showSec;
+  document.getElementById("secrow-in").innerHTML = !showSec ? "" : page.sections.map(function(s){
+    return '<button role="tab" data-s="' + s.k + '" aria-selected="' + (s.k === STATE.section) + '">' + esc(s.label) + '</button>';
+  }).join("");
+
+  document.querySelector(".wrap").classList.toggle("wide", isWide());
+  document.getElementById("panel").innerHTML = sec.render(STATE.unit);
+  document.getElementById("orgname").textContent = GROUP.org;
+  wire();
+}
+
+function wire(){
+  document.querySelectorAll("#subtabs [data-p]").forEach(function(b){
+    b.addEventListener("click", function(){ STATE.page = b.dataset.p; STATE.section = null; paint(); window.scrollTo(0,0); });
+  });
+  document.querySelectorAll("#secrow-in [data-s]").forEach(function(b){
+    b.addEventListener("click", function(){ STATE.section = b.dataset.s; paint(); window.scrollTo(0,0); });
+  });
+  document.querySelectorAll("[data-go]").forEach(function(b){
+    b.addEventListener("click", function(e){ e.preventDefault(); go(b.dataset.go); });
+  });
+  document.querySelectorAll("[data-rail]").forEach(function(b){
+    b.addEventListener("click", function(){ RAIL[STATE.unit] = +b.dataset.rail; paint(); });
+  });
+  document.querySelectorAll("[data-gview]").forEach(function(b){
+    b.addEventListener("click", function(){ GVIEW = b.dataset.gview; paint(); });
+  });
+  document.querySelectorAll("[data-how]").forEach(function(b){
+    b.addEventListener("click", function(e){ e.preventDefault(); openHow(b.dataset.how); });
+  });
+  document.querySelectorAll("[data-noop]").forEach(function(b){
+    b.addEventListener("click", function(){
+      openText(b.dataset.noop, "Present, Arrange, Edit and Submit are live in the platform. This sample carries the same five " +
+        "screens as the HR_ERP option so the two can be compared, so the button is drawn and does nothing here.");
+    });
+  });
+}
+
+/* ── The explanation panel behind "How this is calculated". ──────────────── */
+function openHow(key){ var h = HOW[key]; if (h) openText(h[0], h[1]); }
+function openText(title, body){
+  var o = document.getElementById("overlay");
+  document.getElementById("modal-t").textContent = title;
+  document.getElementById("modal-b").innerHTML = body;
+  o.classList.add("on");
+  document.getElementById("modal-x").focus();
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("on"); }
+
+document.getElementById("asWho").addEventListener("change", function(e){
+  STATE.who = e.target.value;
+  FOLD.units = false; FOLD.manage = false;
+  var v = viewer();
+  /* Land the new viewer somewhere they can actually see. */
+  if (v.unit) STATE.unit = (STATE.unit === "group") ? "group" : v.unit;
+  else if (STATE.unit === "setup" && !v.manage) STATE.unit = "group";
+  go(STATE.unit);
+});
+document.getElementById("modal-x").addEventListener("click", closeModal);
+document.getElementById("overlay").addEventListener("click", function(e){ if (e.target.id === "overlay") closeModal(); });
+document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+
+paint();
+</script>

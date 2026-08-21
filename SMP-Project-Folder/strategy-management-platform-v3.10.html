@@ -1082,6 +1082,19 @@
   .pickfoot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
               border-top:1px solid var(--line); padding-top:6px; }
 
+  /* ── Branding (§39) ──────────────────────────────────────────────
+     A colour is shown as a colour. The swatch is the control on the picker and
+     a read-only chip everywhere else, so the page reads the same whether or
+     not you may change it. */
+  .brandpick { display:inline-flex; align-items:center; gap:8px; }
+  .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
+               display:inline-block; flex:none; }
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+                     border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
+  input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
+  input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
+  input.brandhex { max-width:96px; text-transform:uppercase; }
+
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
 
@@ -2213,21 +2226,44 @@ var THEME = (function () {
     try { localStorage.setItem(KEY, v); } catch (e) {}
   }
 
-  function readPalette() {
+  /* ── The tenant's branding sits UNDER the personal switches (§39) ──
+     Precedence, and it is the whole model in three lines:
+
+         a person's own choice   (localStorage)      wins
+         the tenant's branding   (the state graph)   otherwise
+         the shipped palette                         otherwise
+
+     Which is why `chosen` is null rather than a default when nobody has
+     pressed anything: only an actual choice may outrank the tenant's brand,
+     and "the value that happened to be first in the list" is not a choice.
+
+     BRAND is handed in after the data loads, because theme.js runs in the head
+     before any of it exists. Until then the shipped palette paints, which is
+     the honest thing to show while the tenant's own colours are still on the
+     wire. */
+  var BRAND = null;
+
+  function chosenPalette() {
     try {
       var v = localStorage.getItem(PKEY);
-      return PALETTES.indexOf(v) === -1 ? PALETTES[0] : v;
-    } catch (e) { return PALETTES[0]; }
+      return PALETTES.indexOf(v) === -1 ? null : v;
+    } catch (e) { return null; }
+  }
+  function readPalette() {
+    return chosenPalette() || (BRAND && BRAND.palette) || PALETTES[0];
   }
   function writePalette(v) {
     try { localStorage.setItem(PKEY, v); } catch (e) {}
   }
 
-  function readFont() {
+  function chosenFont() {
     try {
       var v = localStorage.getItem(FKEY);
-      return FONTS.indexOf(v) === -1 ? FONTS[0] : v;
-    } catch (e) { return FONTS[0]; }
+      return FONTS.indexOf(v) === -1 ? null : v;
+    } catch (e) { return null; }
+  }
+  function readFont() {
+    return chosenFont() || (BRAND && BRAND.font) || FONTS[0];
   }
   function writeFont(v) {
     try { localStorage.setItem(FKEY, v); } catch (e) {}
@@ -2256,7 +2292,21 @@ var THEME = (function () {
        because there is nothing for it to say. */
     if (font === "system") document.documentElement.removeAttribute("data-font");
     else document.documentElement.setAttribute("data-font", font);
+
+    /* The tenant's own colours, written as inline custom properties on the
+       root so they outrank the stylesheet's palette blocks without any of them
+       having to know a tenant exists. Cleared first, or a colour removed on
+       the Branding page would keep painting until the next full reload. */
+    var root = document.documentElement;
+    (BRAND_APPLIED || []).forEach(function (k) { root.style.removeProperty(k); });
+    BRAND_APPLIED = [];
+    var t = (BRAND && BRAND.tokens) || {};
+    Object.keys(t).forEach(function (k) {
+      root.style.setProperty(k, t[k]);
+      BRAND_APPLIED.push(k);
+    });
   }
+  var BRAND_APPLIED = [];
 
   /* Sun and moon, drawn in the same 20px box as the rest of the chrome's
      marks. The mark shows the state you are IN, and the title says what the
@@ -2322,6 +2372,19 @@ var THEME = (function () {
 
   return {
     apply: apply,
+    /* Called by the shell once the data exists, and again after the Branding
+       page changes anything. Re-reads the two axes because a tenant default
+       only takes effect where the person has not chosen for themselves. */
+    setBrand: function (b) {
+      BRAND = b || null;
+      palette = readPalette();
+      font = readFont();
+      apply();
+      var pal = document.getElementById("palettebtn");
+      if (pal && !pal.hidden) paintPal(pal);
+      var fb = document.getElementById("fontbtn");
+      if (fb && !fb.hidden) paintFont(fb);
+    },
     mode: function () { return mode; },
     palette: function () { return palette; },
     font: function () { return font; },
@@ -3673,6 +3736,10 @@ var PAGES = [
      database is behind it — whether they have a password yet. SMO only, at
      Islam's direction: creating a person creates an identity. */
   { key:"c_people", area:"a_setup", scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
+  /* The tenant's own colours (§39). In Setup, so the SMO alone — a brand is
+     not a screen preference and must not be changeable by whoever happens
+     to be looking. */
+  { key:"c_brand",  area:"a_setup", scope:"setup", label:"Branding",         note:"The tenant's colours, and the type they carry" },
   { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
 
   { key:"c_fns", area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
@@ -3873,6 +3940,133 @@ var UNIT_ROLES = {
 function personName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BRANDING (§39) — the tenant's own colours, derived from two of them
+
+   A brand is not seven colours. Asking somebody to supply an accent, a darker
+   accent for text, an ink to sit on the accent, a glow, a bar, a quiet ink for
+   the bar and a hover is asking them to do the work the platform should do.
+   So the page takes TWO — the accent and the dark bar — and derives the rest,
+   which is also the only way §38.4 can be guaranteed rather than remembered:
+   a brand colour that is unreadable as text is DARKENED UNTIL IT IS READABLE
+   instead of being accepted and discovered later.
+
+   Stored on GROUP, so it rides in the org row's `extra` jsonb and needs no
+   schema change — and so it is TENANT data, autosaved and the same for
+   everyone, which is exactly what a brand is and exactly what a theme is not
+   (§25.2). A person may still override it on their own screen; the top-bar
+   switches write localStorage and localStorage wins.
+   ══════════════════════════════════════════════════════════════════ */
+
+function hexRgb(h){
+  h = String(h || "").replace("#", "").trim();
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+function rgbHex(c){
+  return "#" + c.map(function(v){
+    var n = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+    return n.length === 1 ? "0"+n : n;
+  }).join("").toUpperCase();
+}
+function relLum(c){
+  var s = c.map(function(v){ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2];
+}
+/* The WCAG ratio, the same number the contrast sweep measures. */
+function contrastOf(a, b){
+  var l1 = relLum(a), l2 = relLum(b);
+  return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
+}
+function mixRgb(a, b, t){
+  return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+}
+/* Black or white, whichever can actually be read on this colour. This is the
+   fix for "white on the house gold is 2.4:1" made automatic. */
+function inkFor(bg){
+  var w = [255,255,255], k = [12,17,26];
+  return contrastOf(bg, w) >= contrastOf(bg, k) ? w : k;
+}
+/* Walk a colour toward black (or toward white, on a dark ground) until it
+   clears the ratio a word needs. Returns the colour unchanged if it already
+   does — a brand's own accent is used as given wherever it is legible. */
+function readableOn(fg, bg, need){
+  need = need || 4.5;
+  var target = relLum(bg) > 0.5 ? [0,0,0] : [255,255,255];
+  for (var t = 0; t <= 1.001; t += 0.04) {
+    var c = mixRgb(fg, target, t);
+    if (contrastOf(c, bg) >= need) return c;
+  }
+  return target;
+}
+
+/* The tenant's branding. `null` anywhere means "use the shipped palette",
+   which is why an untouched tenant carries no branding at all rather than a
+   copy of the defaults — a stored copy would silently stop tracking the
+   shipped palette the moment it improved. */
+var BRAND_DEFAULT = { palette:null, font:null, accent:null, bar:null };
+function branding(){
+  if (!GROUP.branding) GROUP.branding = {};
+  var b = GROUP.branding;
+  Object.keys(BRAND_DEFAULT).forEach(function(k){
+    if (!(k in b)) b[k] = BRAND_DEFAULT[k];
+  });
+  return b;
+}
+
+/* Every token the two inputs decide, worked out here so the page, the live
+   preview and the applied result cannot disagree — one function, three
+   readers. Returns {} when the tenant has set nothing. */
+function brandTokens(){
+  var b = branding(), out = {}, rgb;
+  if (b.accent && (rgb = hexRgb(b.accent))) {
+    var onLight = [255,255,255];
+    out["--gold"] = rgbHex(rgb);
+    /* TEXT weight: the accent as a word, on the page's own surface. */
+    out["--gold-deep"] = rgbHex(readableOn(rgb, onLight, 4.5));
+    /* And the ink that sits ON the accent when it is a fill. */
+    out["--on-accent"] = rgbHex(inkFor(rgb));
+    out["--accent-glow"] = "rgba(" + rgb.map(Math.round).join(",") + ",.22)";
+  }
+  if (b.bar && (rgb = hexRgb(b.bar))) {
+    out["--panel"] = rgbHex(rgb);
+    var ink = inkFor(rgb);
+    out["--panel-ink"] = rgbHex(ink);
+    /* The bar's own quiet ink and hover — never the page's --ink-3 and
+       --surface-2, which is the mistake §38.4 caught. Quiet is the bar mixed
+       most of the way to its own ink, so it stays legible ON the bar whatever
+       colour the bar is; hover is a step away from the bar toward that ink. */
+    out["--panel-quiet"] = rgbHex(mixRgb(rgb, ink, 0.55));
+    out["--panel-hover"] = rgbHex(mixRgb(rgb, ink, 0.12));
+  }
+  return out;
+}
+
+/* What the page shows beside each input, and what refuses a save. Reported
+   rather than silently corrected: somebody typing their own brand colour is
+   entitled to know it needed darkening, and by how much. */
+function brandChecks(){
+  var b = branding(), t = brandTokens(), out = [];
+  var white = [255,255,255];
+  if (b.accent && hexRgb(b.accent)) {
+    var a = hexRgb(b.accent);
+    out.push({ what:"Accent as a fill, with its ink on top",
+               ratio:+contrastOf(a, hexRgb(t["--on-accent"])).toFixed(2), need:4.5 });
+    out.push({ what:"Accent as text on the page",
+               ratio:+contrastOf(hexRgb(t["--gold-deep"]), white).toFixed(2), need:4.5,
+               note: t["--gold-deep"].toUpperCase() !== rgbHex(a) ? "darkened to " + t["--gold-deep"] : null });
+  }
+  if (b.bar && hexRgb(b.bar)) {
+    var p = hexRgb(b.bar);
+    out.push({ what:"Navigation bar, with its own ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-ink"])).toFixed(2), need:4.5 });
+    out.push({ what:"Navigation bar, its quiet ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-quiet"])).toFixed(2), need:4.5 });
+  }
+  return out;
 }
 
 /* ── The register (§16.11, §35) ──────────────────────────────────────
@@ -10935,6 +11129,104 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    different questions on one screen: which units exist, and who is allowed to
    see whom. They are edited at different times by different reasoning, and the
    units table is long enough to push the company rules off the top. */
+/* ── Branding (§39) ─────────────────────────────────────────────────
+   The tenant's own colours and typeface, for everyone in the tenant. Two
+   colours in, seven tokens out — see brandTokens() — and the contrast of every
+   derived pair reported as you type, because a brand colour that cannot be
+   read is a thing to be told about at the moment you enter it, not discovered
+   in a screenshot three weeks later. */
+function renderBranding(){
+  var mayEdit = grant("c_brand") === "edit";
+  var b = branding(), checks = brandChecks(), t = brandTokens();
+  var set = !!(b.accent || b.bar || b.palette || b.font);
+
+  function swatch(key, label, value, note){
+    var shown = value || "";
+    return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
+      '<td class="cc">' + (mayEdit
+        ? '<span class="brandpick">' +
+            '<input type="color" class="brandcolor" data-brand="' + key + '" value="' +
+              esc(shown || "#4F46E5") + '" aria-label="' + esc(label) + '">' +
+            '<input type="text" class="fld mono brandhex" data-brandhex="' + key +
+              '" value="' + esc(shown) + '" placeholder="not set" spellcheck="false" size="9">' +
+            (shown ? '<button class="linkbu" data-brandclear="' + key + '">Clear</button>' : '') +
+          '</span>'
+        : (shown
+            ? '<span class="brandpick"><i class="brandchip" style="background:' + esc(shown) + '"></i>' +
+              '<span class="mono">' + esc(shown) + '</span></span>'
+            : '<span class="why" style="margin:0">the palette’s own</span>')) +
+      '</td></tr>';
+  }
+
+  var rows =
+    swatch("accent", "Accent", b.accent,
+           "The selected tab, the rail’s current pillar, links and every primary control") +
+    swatch("bar", "Navigation bar", b.bar,
+           "The dark band the units sit on");
+
+  var derived = Object.keys(t).length
+    ? '<div class="cfg"><table><thead><tr><th style="width:34%">Derived from those two</th>' +
+        '<th style="width:22%">Colour</th><th>Why it is not asked for</th></tr></thead><tbody>' +
+      [["--gold-deep","The accent as TEXT","Darkened until a word in it is readable on the page — a fill and a word are not the same job (§38.4)"],
+       ["--on-accent","Ink on the accent","Black or white, whichever can actually be read on it. White on the house gold is 2.4:1"],
+       ["--panel-ink","Ink on the bar","The same choice, for the bar"],
+       ["--panel-quiet","The bar’s quiet ink","The bar mixed toward its own ink — never the page’s, which on a dark bar is 2.5:1"],
+       ["--panel-hover","The bar’s hover","One step from the bar toward its ink, so a hover never paints a page colour onto it"]]
+      .filter(function(r){ return t[r[0]]; })
+      .map(function(r){
+        return '<tr><td><b>' + esc(r[1]) + '</b><span class="why mono">' + r[0] + '</span></td>' +
+          '<td class="cc"><span class="brandpick"><i class="brandchip" style="background:' + t[r[0]] +
+          '"></i><span class="mono">' + t[r[0]] + '</span></span></td>' +
+          '<td><span class="why" style="margin:0">' + esc(r[2]) + '</span></td></tr>';
+      }).join("") + '</tbody></table></div>'
+    : '';
+
+  var checkRows = checks.length
+    ? '<div class="cfg"><table><thead><tr><th>What was checked</th>' +
+      '<th class="cc" style="width:14%">Ratio</th><th class="cc" style="width:14%">Verdict</th></tr></thead><tbody>' +
+      checks.map(function(c){
+        var ok = c.ratio >= c.need;
+        return '<tr><td><b>' + esc(c.what) + '</b>' +
+          (c.note ? '<span class="why">' + esc(c.note) + '</span>' : '') + '</td>' +
+          '<td class="cc"><span class="mono">' + c.ratio + ':1</span></td>' +
+          '<td class="cc"><span class="pill ' + (ok ? "good" : "bad") + '">' +
+            (ok ? "Readable" : "Too close") + '</span></td></tr>';
+      }).join("") + '</tbody></table></div>'
+    : '';
+
+  return cfgHead("Branding",
+      ['<span class="pill kind">SMO</span>',
+       set ? 'set for this tenant' : 'using the shipped palette'],
+      "brand", mayEdit, null) +
+
+    section("", "The tenant’s colours",
+      "Two colours, and the platform works out the rest. They apply to everyone here — " +
+      "unlike the switches in the top bar, which are your own screen and nobody else’s.",
+      '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
+      '<th class="cc">Colour</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (mayEdit && set ? '<div style="margin-top:12px"><button class="linkbu" data-brandreset="1">' +
+                        'Reset to the shipped palette</button></div>' : '')) +
+
+    (derived ? section("", "What follows from them", null, derived) : "") +
+
+    (checkRows ? section("", "Is it readable?",
+      "Run on every derived pair, every time you change one. A brand colour that cannot be read " +
+      "is worth knowing about here rather than in a screenshot three weeks from now.",
+      checkRows) : "") +
+
+    section("", "Typeface", null,
+      '<div class="note"><b>The tenant’s face is set with the switch in the top bar for now</b> ' +
+      '(§38.7). Four are embedded so they can be compared in the real product; once one is ' +
+      'settled it moves here and the rest leave the file.</div>') +
+
+    section("", null, null,
+      '<div class="note"><b>Branding is the tenant’s, not the screen’s.</b> It is saved with ' +
+      'everything else and is what everyone here sees on opening. Light and dark stay personal — ' +
+      'that is about the room somebody is sitting in, not about the brand — and anyone who ' +
+      'prefers a different palette on their own screen may still pick one, without changing ' +
+      'what anybody else sees.</div>');
+}
+
 /* ── The register (§35) ─────────────────────────────────────────────
    Everyone the platform knows, in one table. It replaces the People section
    that used to sit at the bottom of Roles & access — a matrix page is where
@@ -12785,6 +13077,9 @@ var SYNC = (function () {
          people who hold them. It used to be a section at the bottom of Roles &
          access, which is a matrix page — a staff list is not a matrix. */
       { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
+      /* Last in Setup: it changes how everything else LOOKS, which is a thing
+         you do once the things themselves exist (§39). */
+      { k:"brand",  ac:"c_brand",  label:"Branding",                      render:renderBranding },
       { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
     /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
@@ -13099,6 +13394,14 @@ var SYNC = (function () {
     holdTimer = setTimeout(releasePaint, 500);
   }, true);
   document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
+
+  /* The tenant's branding, handed to THEME. One function, called on boot and
+     after every change on the Branding page, so the applied colours and the
+     page's own preview cannot drift apart (§39). */
+  function applyBrand(){
+    var b = branding();
+    THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
+  }
 
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
@@ -13795,6 +14098,40 @@ var SYNC = (function () {
        request goes out, which is what stops every repaint asking again. Empty
        renders as a dash, not as "none": not knowing is not the same as knowing
        there is no password (§30.2, the same distinction). */
+    /* ── Branding (§39) ─────────────────────────────────────────────
+       The colour input fires `input` continuously while the picker is dragged,
+       so it repaints on `change` — once, when the picker closes — and the hex
+       field on `change` too. A repaint per frame of a drag would rebuild the
+       control being dragged, which is §30.1 again. */
+    document.querySelectorAll("[data-brand]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        branding()[inp.dataset.brand] = inp.value.toUpperCase();
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandhex]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var v = inp.value.trim();
+        /* An unreadable value is refused rather than stored: a half-typed hex
+           would blank the colour and look like the platform had lost it. */
+        if (v && !hexRgb(v)) { inp.value = branding()[inp.dataset.brandhex] || ""; return; }
+        branding()[inp.dataset.brandhex] = v ? rgbHex(hexRgb(v)) : null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        branding()[b.dataset.brandclear] = null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandreset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.branding = {};
+        applyBrand(); paint();
+      });
+    });
+
     wirePicker();
 
     if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
@@ -14352,5 +14689,10 @@ var SYNC = (function () {
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
-  SYNC.boot(paint);
+  /* Before the first paint, so the tenant's own colours are on screen from the
+     start rather than arriving a frame later. SYNC.boot repaints after
+     hydration and applyBrand runs again there, because the branding that
+     matters is the one in the DATABASE, not the one baked into the file. */
+  applyBrand();
+  SYNC.boot(function(){ applyBrand(); paint(); });
 </script>

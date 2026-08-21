@@ -80,21 +80,44 @@ var THEME = (function () {
     try { localStorage.setItem(KEY, v); } catch (e) {}
   }
 
-  function readPalette() {
+  /* ── The tenant's branding sits UNDER the personal switches (§39) ──
+     Precedence, and it is the whole model in three lines:
+
+         a person's own choice   (localStorage)      wins
+         the tenant's branding   (the state graph)   otherwise
+         the shipped palette                         otherwise
+
+     Which is why `chosen` is null rather than a default when nobody has
+     pressed anything: only an actual choice may outrank the tenant's brand,
+     and "the value that happened to be first in the list" is not a choice.
+
+     BRAND is handed in after the data loads, because theme.js runs in the head
+     before any of it exists. Until then the shipped palette paints, which is
+     the honest thing to show while the tenant's own colours are still on the
+     wire. */
+  var BRAND = null;
+
+  function chosenPalette() {
     try {
       var v = localStorage.getItem(PKEY);
-      return PALETTES.indexOf(v) === -1 ? PALETTES[0] : v;
-    } catch (e) { return PALETTES[0]; }
+      return PALETTES.indexOf(v) === -1 ? null : v;
+    } catch (e) { return null; }
+  }
+  function readPalette() {
+    return chosenPalette() || (BRAND && BRAND.palette) || PALETTES[0];
   }
   function writePalette(v) {
     try { localStorage.setItem(PKEY, v); } catch (e) {}
   }
 
-  function readFont() {
+  function chosenFont() {
     try {
       var v = localStorage.getItem(FKEY);
-      return FONTS.indexOf(v) === -1 ? FONTS[0] : v;
-    } catch (e) { return FONTS[0]; }
+      return FONTS.indexOf(v) === -1 ? null : v;
+    } catch (e) { return null; }
+  }
+  function readFont() {
+    return chosenFont() || (BRAND && BRAND.font) || FONTS[0];
   }
   function writeFont(v) {
     try { localStorage.setItem(FKEY, v); } catch (e) {}
@@ -123,7 +146,21 @@ var THEME = (function () {
        because there is nothing for it to say. */
     if (font === "system") document.documentElement.removeAttribute("data-font");
     else document.documentElement.setAttribute("data-font", font);
+
+    /* The tenant's own colours, written as inline custom properties on the
+       root so they outrank the stylesheet's palette blocks without any of them
+       having to know a tenant exists. Cleared first, or a colour removed on
+       the Branding page would keep painting until the next full reload. */
+    var root = document.documentElement;
+    (BRAND_APPLIED || []).forEach(function (k) { root.style.removeProperty(k); });
+    BRAND_APPLIED = [];
+    var t = (BRAND && BRAND.tokens) || {};
+    Object.keys(t).forEach(function (k) {
+      root.style.setProperty(k, t[k]);
+      BRAND_APPLIED.push(k);
+    });
   }
+  var BRAND_APPLIED = [];
 
   /* Sun and moon, drawn in the same 20px box as the rest of the chrome's
      marks. The mark shows the state you are IN, and the title says what the
@@ -189,6 +226,19 @@ var THEME = (function () {
 
   return {
     apply: apply,
+    /* Called by the shell once the data exists, and again after the Branding
+       page changes anything. Re-reads the two axes because a tenant default
+       only takes effect where the person has not chosen for themselves. */
+    setBrand: function (b) {
+      BRAND = b || null;
+      palette = readPalette();
+      font = readFont();
+      apply();
+      var pal = document.getElementById("palettebtn");
+      if (pal && !pal.hidden) paintPal(pal);
+      var fb = document.getElementById("fontbtn");
+      if (fb && !fb.hidden) paintFont(fb);
+    },
     mode: function () { return mode; },
     palette: function () { return palette; },
     font: function () { return font; },

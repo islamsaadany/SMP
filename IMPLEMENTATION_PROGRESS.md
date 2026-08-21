@@ -64,6 +64,12 @@ light and dark. When multi-tenant lands, a client's branding will arrive as a
 palette, never a language — so they get their colours without getting a
 different product.
 
+**Branding is a Setup page** (§39). Two colours — the accent and the navigation
+bar — and the platform works out the other five, including darkening a colour
+that cannot be read as text and telling you it did. Every derived pair is
+contrast-checked as you type. It is saved with everything else, so it is what
+everyone in the tenant sees; the switches in the top bar remain your own screen.
+
 **Typeface is a third switch, for now.** Four faces are embedded in the file:
 Inter, Source Sans 3, Manrope, IBM Plex Sans. Try them on your own screens with
 your own numbers, then tell me which face belongs to which palette — at that

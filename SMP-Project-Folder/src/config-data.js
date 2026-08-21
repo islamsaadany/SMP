@@ -154,6 +154,10 @@ var PAGES = [
      database is behind it — whether they have a password yet. SMO only, at
      Islam's direction: creating a person creates an identity. */
   { key:"c_people", area:"a_setup", scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
+  /* The tenant's own colours (§39). In Setup, so the SMO alone — a brand is
+     not a screen preference and must not be changeable by whoever happens
+     to be looking. */
+  { key:"c_brand",  area:"a_setup", scope:"setup", label:"Branding",         note:"The tenant's colours, and the type they carry" },
   { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
 
   { key:"c_fns", area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
@@ -354,6 +358,133 @@ var UNIT_ROLES = {
 function personName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BRANDING (§39) — the tenant's own colours, derived from two of them
+
+   A brand is not seven colours. Asking somebody to supply an accent, a darker
+   accent for text, an ink to sit on the accent, a glow, a bar, a quiet ink for
+   the bar and a hover is asking them to do the work the platform should do.
+   So the page takes TWO — the accent and the dark bar — and derives the rest,
+   which is also the only way §38.4 can be guaranteed rather than remembered:
+   a brand colour that is unreadable as text is DARKENED UNTIL IT IS READABLE
+   instead of being accepted and discovered later.
+
+   Stored on GROUP, so it rides in the org row's `extra` jsonb and needs no
+   schema change — and so it is TENANT data, autosaved and the same for
+   everyone, which is exactly what a brand is and exactly what a theme is not
+   (§25.2). A person may still override it on their own screen; the top-bar
+   switches write localStorage and localStorage wins.
+   ══════════════════════════════════════════════════════════════════ */
+
+function hexRgb(h){
+  h = String(h || "").replace("#", "").trim();
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+function rgbHex(c){
+  return "#" + c.map(function(v){
+    var n = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+    return n.length === 1 ? "0"+n : n;
+  }).join("").toUpperCase();
+}
+function relLum(c){
+  var s = c.map(function(v){ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2];
+}
+/* The WCAG ratio, the same number the contrast sweep measures. */
+function contrastOf(a, b){
+  var l1 = relLum(a), l2 = relLum(b);
+  return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
+}
+function mixRgb(a, b, t){
+  return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+}
+/* Black or white, whichever can actually be read on this colour. This is the
+   fix for "white on the house gold is 2.4:1" made automatic. */
+function inkFor(bg){
+  var w = [255,255,255], k = [12,17,26];
+  return contrastOf(bg, w) >= contrastOf(bg, k) ? w : k;
+}
+/* Walk a colour toward black (or toward white, on a dark ground) until it
+   clears the ratio a word needs. Returns the colour unchanged if it already
+   does — a brand's own accent is used as given wherever it is legible. */
+function readableOn(fg, bg, need){
+  need = need || 4.5;
+  var target = relLum(bg) > 0.5 ? [0,0,0] : [255,255,255];
+  for (var t = 0; t <= 1.001; t += 0.04) {
+    var c = mixRgb(fg, target, t);
+    if (contrastOf(c, bg) >= need) return c;
+  }
+  return target;
+}
+
+/* The tenant's branding. `null` anywhere means "use the shipped palette",
+   which is why an untouched tenant carries no branding at all rather than a
+   copy of the defaults — a stored copy would silently stop tracking the
+   shipped palette the moment it improved. */
+var BRAND_DEFAULT = { palette:null, font:null, accent:null, bar:null };
+function branding(){
+  if (!GROUP.branding) GROUP.branding = {};
+  var b = GROUP.branding;
+  Object.keys(BRAND_DEFAULT).forEach(function(k){
+    if (!(k in b)) b[k] = BRAND_DEFAULT[k];
+  });
+  return b;
+}
+
+/* Every token the two inputs decide, worked out here so the page, the live
+   preview and the applied result cannot disagree — one function, three
+   readers. Returns {} when the tenant has set nothing. */
+function brandTokens(){
+  var b = branding(), out = {}, rgb;
+  if (b.accent && (rgb = hexRgb(b.accent))) {
+    var onLight = [255,255,255];
+    out["--gold"] = rgbHex(rgb);
+    /* TEXT weight: the accent as a word, on the page's own surface. */
+    out["--gold-deep"] = rgbHex(readableOn(rgb, onLight, 4.5));
+    /* And the ink that sits ON the accent when it is a fill. */
+    out["--on-accent"] = rgbHex(inkFor(rgb));
+    out["--accent-glow"] = "rgba(" + rgb.map(Math.round).join(",") + ",.22)";
+  }
+  if (b.bar && (rgb = hexRgb(b.bar))) {
+    out["--panel"] = rgbHex(rgb);
+    var ink = inkFor(rgb);
+    out["--panel-ink"] = rgbHex(ink);
+    /* The bar's own quiet ink and hover — never the page's --ink-3 and
+       --surface-2, which is the mistake §38.4 caught. Quiet is the bar mixed
+       most of the way to its own ink, so it stays legible ON the bar whatever
+       colour the bar is; hover is a step away from the bar toward that ink. */
+    out["--panel-quiet"] = rgbHex(mixRgb(rgb, ink, 0.55));
+    out["--panel-hover"] = rgbHex(mixRgb(rgb, ink, 0.12));
+  }
+  return out;
+}
+
+/* What the page shows beside each input, and what refuses a save. Reported
+   rather than silently corrected: somebody typing their own brand colour is
+   entitled to know it needed darkening, and by how much. */
+function brandChecks(){
+  var b = branding(), t = brandTokens(), out = [];
+  var white = [255,255,255];
+  if (b.accent && hexRgb(b.accent)) {
+    var a = hexRgb(b.accent);
+    out.push({ what:"Accent as a fill, with its ink on top",
+               ratio:+contrastOf(a, hexRgb(t["--on-accent"])).toFixed(2), need:4.5 });
+    out.push({ what:"Accent as text on the page",
+               ratio:+contrastOf(hexRgb(t["--gold-deep"]), white).toFixed(2), need:4.5,
+               note: t["--gold-deep"].toUpperCase() !== rgbHex(a) ? "darkened to " + t["--gold-deep"] : null });
+  }
+  if (b.bar && hexRgb(b.bar)) {
+    var p = hexRgb(b.bar);
+    out.push({ what:"Navigation bar, with its own ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-ink"])).toFixed(2), need:4.5 });
+    out.push({ what:"Navigation bar, its quiet ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-quiet"])).toFixed(2), need:4.5 });
+  }
+  return out;
 }
 
 /* ── The register (§16.11, §35) ──────────────────────────────────────

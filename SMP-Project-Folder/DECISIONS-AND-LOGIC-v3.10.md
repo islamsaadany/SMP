@@ -4487,3 +4487,83 @@ nothing.
 - Each embedded face actually becomes the body font rather than silently
   falling back; "System" removes the attribute; the choice survives a reload.
 - The built file is 994 KB with all four faces inside it, up from 792 KB.
+
+
+---
+
+## 39 · Branding — the tenant's own colours
+
+Islam: *"where is the branding adjustment section?"* — and there wasn't one.
+§38 built the palette LAYER and stopped there, on the reading that branding was
+the multi-tenant thing. The seam was right; the missing part was a place to
+type a colour, and he was right to look for it.
+
+### 39.1 Branding is tenant data. A theme is not.
+
+This is the whole design, and it is the inverse of §25.2. A theme must NEVER go
+in the state graph, because it autosaves and one person choosing dark would
+turn the platform dark for the entire company. Branding is the opposite case
+for exactly the same reason: a client's colours have to be the same for
+everyone in that tenant, so they belong in the graph and nowhere else.
+
+So the precedence is three lines:
+
+    a person's own choice   (localStorage)      wins
+    the tenant's branding   (the state graph)   otherwise
+    the shipped palette                         otherwise
+
+Which is why `chosenPalette()` returns **null** rather than a default when
+nobody has pressed anything: only an actual choice may outrank the tenant's
+brand, and "whatever was first in the list" is not a choice. Getting that
+backwards would have meant a tenant's branding never applied to anybody,
+because everybody already had a default.
+
+Islam chose brand-as-default-with-personal-override. Light and dark stay
+personal regardless — that is about the room somebody is sitting in, not about
+the brand.
+
+### 39.2 A brand is two colours, not seven
+
+Asking for an accent, a darker accent for text, an ink to sit on the accent, a
+glow, a bar, a quiet ink for the bar and a hover is asking somebody to do the
+work the platform should do. The page takes **the accent and the dark bar** and
+derives the other five.
+
+That is also the only way §38.4 can be *guaranteed* rather than remembered. A
+brand colour that is unreadable as text is **darkened until it is readable**,
+by walking it toward black (or toward white on a dark ground) until it clears
+4.5:1 — and the page says so: *"darkened to #896E34"*. The house gold makes the
+point on its own: as a fill it gets ink `#0C111A` for **7.89:1** where white
+would have given 2.4:1, and as a word it becomes `#896E34` for 4.83:1.
+
+The bar's quiet ink is derived the same way — the bar mixed 55% toward its own
+ink — so it is legible ON the bar whatever colour the bar is, which is the
+§38.4 mistake made impossible instead of merely fixed.
+
+### 39.3 Reported, never silently corrected
+
+Every derived pair is contrast-checked and shown, with the ratio and a verdict,
+every time a colour changes. Somebody typing their own brand colour is entitled
+to know it needed darkening and by how much. A half-typed hex is refused rather
+than stored — storing it would blank the colour and look like the platform had
+lost it.
+
+### 39.4 No schema change
+
+`GROUP.branding` rides in the org row's `extra` jsonb, exactly as `phone` and
+`active` do for people (§35.7). Anything on the group that is not an org column
+and not a tabled key lands there already.
+
+### 39.5 Verified
+
+- Two colours derive seven; **every derived pair clears 4.5:1** for the house
+  navy and gold, including the two that fail if taken naively.
+- It paints: the accent reaches `--gold` and the nav bar takes the brand colour
+  live, on the same repaint.
+- **A personal choice still outranks it**, and with no personal choice the
+  tenant's brand decides — both directions checked.
+- Clearing the brand removes the inline properties rather than leaving them
+  behind, so the shipped palette comes back.
+- Round trip against Postgres: branding survives, lands in `org.extra`, and
+  `write(read())` is still a fixed point with it set.
+- 31 viewers × every page, zero console errors.

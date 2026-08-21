@@ -537,6 +537,104 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    different questions on one screen: which units exist, and who is allowed to
    see whom. They are edited at different times by different reasoning, and the
    units table is long enough to push the company rules off the top. */
+/* ── Branding (§39) ─────────────────────────────────────────────────
+   The tenant's own colours and typeface, for everyone in the tenant. Two
+   colours in, seven tokens out — see brandTokens() — and the contrast of every
+   derived pair reported as you type, because a brand colour that cannot be
+   read is a thing to be told about at the moment you enter it, not discovered
+   in a screenshot three weeks later. */
+function renderBranding(){
+  var mayEdit = grant("c_brand") === "edit";
+  var b = branding(), checks = brandChecks(), t = brandTokens();
+  var set = !!(b.accent || b.bar || b.palette || b.font);
+
+  function swatch(key, label, value, note){
+    var shown = value || "";
+    return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
+      '<td class="cc">' + (mayEdit
+        ? '<span class="brandpick">' +
+            '<input type="color" class="brandcolor" data-brand="' + key + '" value="' +
+              esc(shown || "#4F46E5") + '" aria-label="' + esc(label) + '">' +
+            '<input type="text" class="fld mono brandhex" data-brandhex="' + key +
+              '" value="' + esc(shown) + '" placeholder="not set" spellcheck="false" size="9">' +
+            (shown ? '<button class="linkbu" data-brandclear="' + key + '">Clear</button>' : '') +
+          '</span>'
+        : (shown
+            ? '<span class="brandpick"><i class="brandchip" style="background:' + esc(shown) + '"></i>' +
+              '<span class="mono">' + esc(shown) + '</span></span>'
+            : '<span class="why" style="margin:0">the palette’s own</span>')) +
+      '</td></tr>';
+  }
+
+  var rows =
+    swatch("accent", "Accent", b.accent,
+           "The selected tab, the rail’s current pillar, links and every primary control") +
+    swatch("bar", "Navigation bar", b.bar,
+           "The dark band the units sit on");
+
+  var derived = Object.keys(t).length
+    ? '<div class="cfg"><table><thead><tr><th style="width:34%">Derived from those two</th>' +
+        '<th style="width:22%">Colour</th><th>Why it is not asked for</th></tr></thead><tbody>' +
+      [["--gold-deep","The accent as TEXT","Darkened until a word in it is readable on the page — a fill and a word are not the same job (§38.4)"],
+       ["--on-accent","Ink on the accent","Black or white, whichever can actually be read on it. White on the house gold is 2.4:1"],
+       ["--panel-ink","Ink on the bar","The same choice, for the bar"],
+       ["--panel-quiet","The bar’s quiet ink","The bar mixed toward its own ink — never the page’s, which on a dark bar is 2.5:1"],
+       ["--panel-hover","The bar’s hover","One step from the bar toward its ink, so a hover never paints a page colour onto it"]]
+      .filter(function(r){ return t[r[0]]; })
+      .map(function(r){
+        return '<tr><td><b>' + esc(r[1]) + '</b><span class="why mono">' + r[0] + '</span></td>' +
+          '<td class="cc"><span class="brandpick"><i class="brandchip" style="background:' + t[r[0]] +
+          '"></i><span class="mono">' + t[r[0]] + '</span></span></td>' +
+          '<td><span class="why" style="margin:0">' + esc(r[2]) + '</span></td></tr>';
+      }).join("") + '</tbody></table></div>'
+    : '';
+
+  var checkRows = checks.length
+    ? '<div class="cfg"><table><thead><tr><th>What was checked</th>' +
+      '<th class="cc" style="width:14%">Ratio</th><th class="cc" style="width:14%">Verdict</th></tr></thead><tbody>' +
+      checks.map(function(c){
+        var ok = c.ratio >= c.need;
+        return '<tr><td><b>' + esc(c.what) + '</b>' +
+          (c.note ? '<span class="why">' + esc(c.note) + '</span>' : '') + '</td>' +
+          '<td class="cc"><span class="mono">' + c.ratio + ':1</span></td>' +
+          '<td class="cc"><span class="pill ' + (ok ? "good" : "bad") + '">' +
+            (ok ? "Readable" : "Too close") + '</span></td></tr>';
+      }).join("") + '</tbody></table></div>'
+    : '';
+
+  return cfgHead("Branding",
+      ['<span class="pill kind">SMO</span>',
+       set ? 'set for this tenant' : 'using the shipped palette'],
+      "brand", mayEdit, null) +
+
+    section("", "The tenant’s colours",
+      "Two colours, and the platform works out the rest. They apply to everyone here — " +
+      "unlike the switches in the top bar, which are your own screen and nobody else’s.",
+      '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
+      '<th class="cc">Colour</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (mayEdit && set ? '<div style="margin-top:12px"><button class="linkbu" data-brandreset="1">' +
+                        'Reset to the shipped palette</button></div>' : '')) +
+
+    (derived ? section("", "What follows from them", null, derived) : "") +
+
+    (checkRows ? section("", "Is it readable?",
+      "Run on every derived pair, every time you change one. A brand colour that cannot be read " +
+      "is worth knowing about here rather than in a screenshot three weeks from now.",
+      checkRows) : "") +
+
+    section("", "Typeface", null,
+      '<div class="note"><b>The tenant’s face is set with the switch in the top bar for now</b> ' +
+      '(§38.7). Four are embedded so they can be compared in the real product; once one is ' +
+      'settled it moves here and the rest leave the file.</div>') +
+
+    section("", null, null,
+      '<div class="note"><b>Branding is the tenant’s, not the screen’s.</b> It is saved with ' +
+      'everything else and is what everyone here sees on opening. Light and dark stay personal — ' +
+      'that is about the room somebody is sitting in, not about the brand — and anyone who ' +
+      'prefers a different palette on their own screen may still pick one, without changing ' +
+      'what anybody else sees.</div>');
+}
+
 /* ── The register (§35) ─────────────────────────────────────────────
    Everyone the platform knows, in one table. It replaces the People section
    that used to sit at the bottom of Roles & access — a matrix page is where

@@ -165,6 +165,9 @@
          people who hold them. It used to be a section at the bottom of Roles &
          access, which is a matrix page — a staff list is not a matrix. */
       { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
+      /* Last in Setup: it changes how everything else LOOKS, which is a thing
+         you do once the things themselves exist (§39). */
+      { k:"brand",  ac:"c_brand",  label:"Branding",                      render:renderBranding },
       { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
     /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
@@ -479,6 +482,14 @@
     holdTimer = setTimeout(releasePaint, 500);
   }, true);
   document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
+
+  /* The tenant's branding, handed to THEME. One function, called on boot and
+     after every change on the Branding page, so the applied colours and the
+     page's own preview cannot drift apart (§39). */
+  function applyBrand(){
+    var b = branding();
+    THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
+  }
 
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
@@ -1175,6 +1186,40 @@
        request goes out, which is what stops every repaint asking again. Empty
        renders as a dash, not as "none": not knowing is not the same as knowing
        there is no password (§30.2, the same distinction). */
+    /* ── Branding (§39) ─────────────────────────────────────────────
+       The colour input fires `input` continuously while the picker is dragged,
+       so it repaints on `change` — once, when the picker closes — and the hex
+       field on `change` too. A repaint per frame of a drag would rebuild the
+       control being dragged, which is §30.1 again. */
+    document.querySelectorAll("[data-brand]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        branding()[inp.dataset.brand] = inp.value.toUpperCase();
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandhex]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var v = inp.value.trim();
+        /* An unreadable value is refused rather than stored: a half-typed hex
+           would blank the colour and look like the platform had lost it. */
+        if (v && !hexRgb(v)) { inp.value = branding()[inp.dataset.brandhex] || ""; return; }
+        branding()[inp.dataset.brandhex] = v ? rgbHex(hexRgb(v)) : null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        branding()[b.dataset.brandclear] = null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandreset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.branding = {};
+        applyBrand(); paint();
+      });
+    });
+
     wirePicker();
 
     if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
@@ -1732,5 +1777,10 @@
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
-  SYNC.boot(paint);
+  /* Before the first paint, so the tenant's own colours are on screen from the
+     start rather than arriving a frame later. SYNC.boot repaints after
+     hydration and applyBrand runs again there, because the branding that
+     matters is the one in the DATABASE, not the one baked into the file. */
+  applyBrand();
+  SYNC.boot(function(){ applyBrand(); paint(); });
 </script>

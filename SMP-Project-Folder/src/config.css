@@ -127,6 +127,19 @@
   .pickfoot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
               border-top:1px solid var(--line); padding-top:6px; }
 
+  /* ── Branding (§39) ──────────────────────────────────────────────
+     A colour is shown as a colour. The swatch is the control on the picker and
+     a read-only chip everywhere else, so the page reads the same whether or
+     not you may change it. */
+  .brandpick { display:inline-flex; align-items:center; gap:8px; }
+  .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
+               display:inline-block; flex:none; }
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+                     border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
+  input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
+  input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
+  input.brandhex { max-width:96px; text-transform:uppercase; }
+
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
 

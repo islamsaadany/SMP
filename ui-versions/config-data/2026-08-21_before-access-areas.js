@@ -34,6 +34,13 @@ var LABELS = {
   ]
 };
 
+/* ── Levels ───────────────────────────────────────────────────────────────
+   Levels replace job titles so the model travels between clients. Each tenant
+   maps its own titles onto them. A person carries a level AND a unit
+   attachment: the level decides WHICH pages, the attachment decides WHOSE.
+   The SMO sits outside the ladder entirely — it is a super user, not a rank.
+   ──────────────────────────────────────────────────────────────────────── */
+
 /* ── ROLES, which replaced LEVELS in 3.8 ────────────────────────────
    N-1 / N-2 / N-3 were org DEPTH, invented before anyone knew what the
    platform would need, and the giveaway was already in the code: each level
@@ -115,7 +122,7 @@ function personRoles(p){
   /* Named on nothing: a contributor, wherever they are attached — including
      the group, which is where a Group CFO or COO sits. Attachment is scope and
      scope alone: contrib@group reaches the GROUP pages and no unit, because
-     roleOwns() matches the attachment exactly. The old model could not say
+     roleReaches() matches the attachment exactly. The old model could not say
      this — "unit: group" there meant all ten units — which is why a group
      function head had to be given a level that overshot. */
   if (!out.length && p.unit) out.push({ role:"contrib", at:p.unit });
@@ -129,48 +136,43 @@ function personRoleKeys(p){
    that knows a person holds several. */
 function hasRole(k){ return personRoleKeys(viewer()).indexOf(k) > -1; }
 
-/* Every page in the platform, and which AREA answers for it (§37). This list
-   is the single source: PAGE_AREA is built from it below rather than written
-   out beside it, because two lists of the same keys are two lists that will
-   disagree. `scope` is what KIND of destination the page belongs to; `area` is
-   what decides who may open it.
-
-   "unit" and "fn" as an area mean the answer depends on WHOSE unit — resolved
-   per role by areaFor(). "always" means it is not a setting at all. */
+/* The eleven pages, grouped by the seven page TYPES the matrix actually
+   controls. A page type resolves against the person's unit attachment, so
+   \"N-1 sees BU Performance\" means their own unit's, automatically. */
 var PAGES = [
-  { key:"g_perf", area:"a_group", scope:"group", label:"Performance", note:"Group headline, business units, themes, capabilities" },
-  { key:"g_found", area:"a_group", scope:"group", label:"Foundation",  note:"Purpose, aspiration, core values, who we are" },
-  { key:"g_temple", area:"a_group", scope:"group", label:"Temple",      note:"The strategy on one page. No performance figures" },
-  { key:"g_weight", area:"a_group", scope:"group", label:"Weighting",   note:"How much each business unit counts" },
-  { key:"u_perf", area:"unit", scope:"unit",  label:"Performance", note:"The unit's headline and its pillars" },
-  { key:"u_found", area:"unit", scope:"unit",  label:"Foundation",  note:"The unit's own words and Key Objectives" },
-  { key:"u_plan", area:"unit", scope:"unit",  label:"Strategy",    note:"The plan as agreed, with no reported figure on it" },
-  { key:"u_anal", area:"unit", scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
-  { key:"c_labels", area:"a_setup", scope:"setup", label:"Labels",      note:"Internal names and tenant display labels" },
-  { key:"c_access", area:"a_setup", scope:"setup", label:"Roles & access", note:"Which roles reach which kinds of page" },
-  { key:"c_bands", area:"a_setup", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
-  { key:"c_units", area:"a_setup", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
+  { key:"g_perf",  scope:"group", label:"Performance", note:"Group headline, business units, themes, capabilities" },
+  { key:"g_found", scope:"group", label:"Foundation",  note:"Purpose, aspiration, core values, who we are" },
+  { key:"g_temple",scope:"group", label:"Temple",      note:"The strategy on one page. No performance figures" },
+  { key:"g_weight",scope:"group", label:"Weighting",   note:"How much each business unit counts" },
+  { key:"u_perf",  scope:"unit",  label:"Performance", note:"The unit's headline and its pillars" },
+  { key:"u_found", scope:"unit",  label:"Foundation",  note:"The unit's own words and Key Objectives" },
+  { key:"u_plan",  scope:"unit",  label:"Strategy",    note:"The plan as agreed, with no reported figure on it" },
+  { key:"u_anal",  scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
+  { key:"c_labels",scope:"setup", label:"Labels",      note:"Internal names and tenant display labels" },
+  { key:"c_access",scope:"setup", label:"Roles & access", note:"This matrix" },
+  { key:"c_bands", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
+  { key:"c_units", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
   /* The register. Everyone the platform knows, their role, and — where a
      database is behind it — whether they have a password yet. SMO only, at
      Islam's direction: creating a person creates an identity. */
-  { key:"c_people", area:"a_setup", scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
-  { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
+  { key:"c_people",scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
+  { key:"c_import",scope:"manage", label:"Import",          note:"Plan and progress templates" },
 
-  { key:"c_fns", area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
-  { key:"c_caps", area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
-  { key:"k_perf", area:"fn", scope:"fn",    label:"Performance",     note:"What this function's capabilities read" },
-  { key:"k_found", area:"fn", scope:"fn",    label:"Capability foundation", note:"What each capability is, and its key objectives" },
-  { key:"k_proj", area:"fn", scope:"fn",    label:"Projects",        note:"The plan behind each project, with no reported figure on it" },
-  { key:"k_report", area:"fn", scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
-  { key:"g_focus", area:"a_group", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
-  { key:"c_focus", area:"a_cycle", scope:"manage", label:"Focus measures",  note:"Choose what carries reward this cycle" },
+  { key:"c_fns",   scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
+  { key:"c_caps",  scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
+  { key:"k_perf",  scope:"fn",    label:"Performance",     note:"What this function's capabilities read" },
+  { key:"k_found", scope:"fn",    label:"Capability foundation", note:"What each capability is, and its key objectives" },
+  { key:"k_proj",  scope:"fn",    label:"Projects",        note:"The plan behind each project, with no reported figure on it" },
+  { key:"k_report",scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
+  { key:"g_focus", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
+  { key:"c_focus", scope:"manage", label:"Focus measures",  note:"Choose what carries reward this cycle" },
   /* Reference, not configuration - but it is a PAGE, and in this platform a
      page is reached only by holding its key. Everyone holds it: the knowledge
      base explains how the thing works, and an explanation nobody can open is
      not an explanation. */
-  { key:"c_kb", area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
-  { key:"c_cycle", area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
-  { key:"u_report", area:"unit", scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
+  { key:"c_kb",    scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
+  { key:"c_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
+  { key:"u_report",scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
 ];
 
 /* Foundation and Analysis are static pages that can be put into edit. They
@@ -196,95 +198,71 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 var PICKING = null, PICKQ = "";
 
-/* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
-   Rebuilt again in 3.10, at Islam's direction: *"we just need the roles on the
-   left and the types of pages they might see/edit on the horizontal access."*
+/* none | view | edit — three states, because the CEO can see the weighting
+   table but does not manage it, and that is not expressible in two. */
+/* ── ACCESS, by ROLE ────────────────────────────────────────────────
+   Rebuilt from scratch in 3.8 rather than mapped across from the level
+   matrix, at Islam's direction: the rows mean something different now, so a
+   grant carried over would be an old answer to a new question.
 
-   The old matrix had a column per role and a ROW PER PAGE — 25 pages × 7 roles,
-   drawn as three buttons a cell, so 525 controls on one screen. Nobody reads a
-   grid that size; they look up one role, or one page. It answered a question
-   nobody asks, at a size nobody can hold.
+   Three states, never more (§19): none, view, edit. Two would not be enough —
+   a unit owner reads the weighting table but does not manage it.
 
-   Seven AREAS replace the 25 pages. Two of them are the same pages seen from
-   different distances — your own unit and everybody else's — which is the
-   second half of Islam's design: *"a business unit head and custodian of Mobile
-   owns Mobile. A CEO of Retail owns all the units below him. I see this as a
-   logic thing not a settings thing."*
-
-   So OWN IS NEVER TYPED IN. It is read from what the role is attached to, by
-   roleOwns() below — the same attachment §33 already stores on the thing. A
-   Company CEO owns their company's units; the SMO and the Group CEO own
-   everything; a function head owns their function and no unit at all.
-
-   Three states, never more (§19). Edit includes view, so they are a ladder
-   rather than three independent flags.
-
-   WHAT IS DELIBERATELY NOT HERE, because it is a rule and not a setting:
-     · the Knowledge base, which is view for everyone, always. A column whose
-       every cell holds the same answer is a question with no second answer —
-       and an explanation nobody can open is not an explanation (§30).
-     · correcting a PLAN, which is the SMO's alone (§22, §31), whatever this
-       matrix says about the unit the plan belongs to.
-     · marking a measure as FOCUS, which is the CEO's and the SMO's — it is
-       what carries reward, and that is a decision the office makes, not a page
-       permission.
-   Each of those used to be a cell here. Each is a sentence now. */
-var AREAS = [
-  { key:"a_group",      label:"Group",
-    note:"Performance, Foundation, Temple, Weighting, Focus" },
-  { key:"a_unit_own",   label:"Own business unit",
-    note:"The units they hold a role in" },
-  { key:"a_unit_other", label:"Other business units",
-    note:"Every unit they do not" },
-  { key:"a_fn_own",     label:"Own supporting function",
-    note:"The functions they hold a role in" },
-  { key:"a_fn_other",   label:"Other supporting functions",
-    note:"Every function they do not" },
-  { key:"a_cycle",      label:"Reporting cycle",
-    note:"Open, chase and close \u00b7 Import \u00b7 Archived plans \u00b7 Focus measures" },
-  { key:"a_setup",      label:"Setup",
-    note:"Units, Companies, Functions, People, Labels, Bands, Capabilities, this page" }
-];
-var AREA_KEYS = AREAS.map(function(a){ return a.key; });
-function areaName(k){
-  var a = AREAS.filter(function(x){ return x.key === k; })[0];
-  return a ? a.label : k;
-}
-
-/* Built from PAGES, never written out beside it. */
-var PAGE_AREA = {};
-PAGES.forEach(function(p){ PAGE_AREA[p.key] = p.area; });
-
+   Scope is NOT expressed here. "owner: u_plan edit" means their OWN unit's
+   plan; which unit that is comes from what the role is attached to, resolved
+   by reaches(). A page is never rendered as a trimmed version of itself. */
 var ACCESS = {
-  /* The SMO. Everything, everywhere — this is the role the platform is
-     administered from. */
-  super:     { a_group:"edit", a_unit_own:"edit", a_unit_other:"edit",
-               a_fn_own:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
-  /* Sees the whole organisation and manages none of it. Every unit is "own" to
-     the group CEO, so the other-units column never comes up for them. */
-  gceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
-               a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
-  /* Their company's units are theirs. Whether they also see the group, or the
-     other companies, stays a property of the COMPANY (§23) — those two flags
-     can only narrow what this row allows, never widen it, so a company set to
-     keep to itself does, whatever the matrix says. */
-  cceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
-               a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+  super: { g_perf:"edit", g_found:"edit", g_temple:"edit", g_weight:"edit", g_focus:"edit",
+           u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", u_report:"edit",
+           k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_fns:"edit",
+           c_people:"edit",
+           c_caps:"edit", c_import:"edit", c_cycle:"edit", c_focus:"edit", c_kb:"view" },
+  /* Sees everything, manages the scheme rather than the plans. */
+  gceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view", g_focus:"edit",
+           u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
+           k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
+           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"view",
+           c_caps:"view", c_import:"none", c_cycle:"view", c_focus:"edit", c_kb:"view" },
+  /* The same reading, bounded to their company by reaches(). */
+  cceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"view",
+           u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
+           k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
+           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
+           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Accountable for the unit: authors its words, reports its figures. The plan
-     itself stays read-only for them — by the rule above, not by this row. */
-  owner:     { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-               a_fn_own:"view", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
-  /* The same reach, and the function work too — this is the person who
-     actually fills the foundation in and chases the reporting. */
-  custodian: { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-               a_fn_own:"edit", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
-  /* Carries a function and no unit. */
-  fnhead:    { a_group:"view", a_unit_own:"none", a_unit_other:"none",
-               a_fn_own:"edit", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
-  /* Named on a measure or a tactic. Reports their own work and reads what they
-     are being measured against. */
-  contrib:   { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-               a_fn_own:"view", a_fn_other:"none", a_cycle:"view", a_setup:"none" }
+     itself is read-only — it arrives by upload and only the SMO corrects it
+     (§22, §31). */
+  owner: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
+           u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
+           k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
+           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
+           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
+  /* Carries the strategy work beside the head, so the same reach — this is the
+     person who actually fills the foundation in and chases the reporting. */
+  custodian: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
+           u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
+           k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_people:"none",
+           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
+           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
+  fnhead:{ g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
+           u_perf:"none", u_found:"none", u_anal:"none", u_plan:"none", u_report:"none",
+           k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_people:"none",
+           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
+           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
+  /* Named on a measure or a tactic. Reports their own work and reads the plan
+     they are being measured against — nothing else. */
+  contrib:{ g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
+           u_perf:"view", u_found:"view", u_anal:"none", u_plan:"view", u_report:"edit",
+           k_perf:"view", k_found:"view", k_proj:"view", k_report:"edit",
+           c_people:"none",
+           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
+           c_caps:"none", c_import:"none", c_cycle:"none", c_focus:"none", c_kb:"view" }
 };
 
 /* Who is signed in. Changing this re-renders the whole shell against the
@@ -874,9 +852,11 @@ function navName(x){ return (x && x.navName) ? x.navName : (x ? x.name : ""); }
 
 /* A function is reached by anyone who sees everything, or by whoever is named
    on it — its head, its custodian, or a person carrying its work. */
-/* Same rule as reaches(), for a supporting function: the area answering for it
-   decides, and "own" is whether they hold a role in that function. */
-function reachesFn(key){ return grantAt("k_perf", "fn:" + key) !== "none"; }
+function reachesFn(key){
+  var rs = personRoleKeys(viewer());
+  if (rs.indexOf("super") > -1 || rs.indexOf("gceo") > -1) return true;
+  return functionPeople(key).indexOf(viewer().key) > -1;
+}
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){
     return FUNCTIONS[k].active !== false && reachesFn(k) && capsOfFunction(k).length;
@@ -1106,117 +1086,51 @@ var STATE_RANK = { none:0, view:1, edit:2 };
 
    Scope is separate and is NOT relaxed this way: reaches() still decides which
    unit, so "edit" from owning Care never reaches Mobile. */
-function grantFor(roleKey, areaKey){
+function grantFor(roleKey, pageKey){
   var row = ACCESS[roleKey];
-  if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "none";
+  if (row && Object.prototype.hasOwnProperty.call(row, pageKey)) return row[pageKey] || "none";
   /* An absent key means "not answered yet", not "denied" — the map is stored
-     per tenant and only holds the keys that existed when it was written, so an
-     area added in a later version has no row (§30.2). */
-  return (ACCESS_DEFAULTS[roleKey] || {})[areaKey] || "none";
+     per tenant and only holds the keys that existed when it was written, so a
+     page added in a later version has no row (§30.2). */
+  return (ACCESS_DEFAULTS[roleKey] || {})[pageKey] || "none";
 }
-
-/* ── OWN, and how it is decided ─────────────────────────────────────
-   Islam: *"own is always about what they have a role in … I see this as a
-   logic thing not a settings thing."*
-
-   So there is no control for it anywhere. roleOwns() reads it off the role's
-   attachment, which §33 already stores on the thing being attached to. It
-   differs from the old roleReaches() in one deliberate way: reaching and
-   OWNING are no longer the same word. A Company CEO whose company may see the
-   others REACHES those units — but it does not own them, and the matrix's
-   other-units column is what says whether reaching them is allowed at all. */
-function roleOwns(r, target){
-  if (r.role === "super" || r.role === "gceo") return true;
-  var at = String(r.at || "");
-  if (String(target).indexOf("fn:") === 0) return at === target;
-  if (at.indexOf("fn:") === 0) return false;      /* holds a function, owns no unit */
-  if (r.role === "cceo") {
-    var ck = at.replace(/^co:/, "");
-    if (target === "group") return false;         /* the group is nobody's own */
-    return unitsOfCompany(ck).indexOf(target) > -1;
-  }
-  return at === target;
-}
-
-/* The company's own two flags (§23) still stand, and they can only ever
-   NARROW. A company set to keep to itself does, whatever the matrix says —
-   because the matrix is about the role and those flags are about one company,
-   and the more restrictive of two true statements is the one to obey. */
-function companyAllows(r, target){
-  if (r.role !== "cceo") return true;
-  var co = COMPANIES[String(r.at || "").replace(/^co:/, "")] || {};
-  if (target === "group") return co.seeGroup !== false;
-  if (String(target).indexOf("fn:") === 0) return true;
-  if (roleOwns(r, target)) return true;
-  return !!co.seeOthers;
-}
-
-/* Which area answers, for THIS role looking at THIS thing. */
-function areaFor(pageKey, target, r){
-  var a = PAGE_AREA[pageKey];
-  if (a !== "unit" && a !== "fn") return a;
-  var own = roleOwns(r, target);
-  return a === "unit" ? (own ? "a_unit_own" : "a_unit_other")
-                      : (own ? "a_fn_own" : "a_fn_other");
-}
-
-/* The most generous answer across the roles somebody holds — each role
-   resolving its own OWN, so a person who owns Mobile and sits on Finance gets
-   the owner's answer for Mobile and the other-unit answer for Retail, from the
-   same two roles, without either being consulted about the wrong thing. */
-function grantAt(pageKey, target){
-  if (PAGE_AREA[pageKey] === "always") return "view";
-  var rs = personRoles(viewer()), best = "none";
-  for (var i = 0; i < rs.length; i++) {
-    if (!companyAllows(rs[i], target)) continue;
-    var g = grantFor(rs[i].role, areaFor(pageKey, target, rs[i]));
+function grant(pageKey){
+  var keys = personRoleKeys(viewer()), best = "none";
+  for (var i = 0; i < keys.length; i++) {
+    var g = grantFor(keys[i], pageKey);
     if (STATE_RANK[g] > STATE_RANK[best]) best = g;
   }
   return best;
 }
 
-/* TARGET is what the screen is currently showing — a unit key, "group", or
-   "fn:<key>". It is a property of the PAINT, not of the call, which is why it
-   is set once at the top of paint() rather than threaded through forty call
-   sites that would all pass the same value. Same shape as VIEWER. */
-var TARGET = "group";
-function grant(pageKey){ return grantAt(pageKey, TARGET); }
-
 /* A person attached to the group reaches every unit; a person attached to a
    unit reaches only their own. This is the whole of scope — no page ever
    renders a trimmed version of itself. */
-/* Which units and functions a person reaches. Reaching is now DERIVED from the
-   matrix rather than decided beside it: a thing is reachable when the area
-   answering for it is not "none". That is what makes "Other business units:
-   view" mean something — the unit appears in the navigation, at view.
-
-   roleReaches() is gone. It used to answer both "is this theirs" and "may they
-   see it" with one boolean, which is exactly the conflation the area model
-   takes apart: roleOwns() answers the first, the matrix answers the second. */
+/* Which units a person reaches, from every role they hold. A role is attached
+   to something — the group, a company, a unit, a function — and that
+   attachment is the whole of scope. No page ever renders a trimmed version of
+   itself (§19). */
+function roleReaches(r, unitKey){
+  if (r.role === "super" || r.role === "gceo") return true;
+  if (r.role === "cceo") {
+    var ck = String(r.at || "").replace(/^co:/, ""), co = COMPANIES[ck] || {};
+    if (unitKey === "group") return co.seeGroup !== false;
+    if (unitsOfCompany(ck).indexOf(unitKey) > -1) return true;
+    return !!co.seeOthers;
+  }
+  /* Attached to a supporting function rather than a unit: reaches no unit
+     pages. Attaching them to "group" would hand them all ten, because that is
+     what group attachment means here. */
+  if (String(r.at || "").indexOf("fn:") === 0) return false;
+  return r.at === unitKey;
+}
 function reaches(unitKey){
   if (unitKey === "setup") return true;
-  if (unitKey === "group") return grantAt("g_perf", "group") !== "none";
-  return grantAt("u_perf", unitKey) !== "none";
+  var rs = personRoles(viewer());
+  for (var i = 0; i < rs.length; i++) if (roleReaches(rs[i], unitKey)) return true;
+  return false;
 }
 
-/* ── The three rules that are rules, not settings ──────────────────
-   Each was a cell in the old 25-row matrix. Each is a sentence now, because
-   each is true regardless of what anybody sets. */
-
-/* A plan ARRIVES by upload and is corrected by the SMO alone (§22, §31). A
-   unit owner holding edit on their own unit still cannot rewrite the plan they
-   are measured against — that is the point of the rule, and it does not depend
-   on a grant. */
-function mayEditPlan(){
-  return hasRole("super") && grant("u_plan") === "edit";
-}
-
-/* What carries reward is the office's decision, not a page permission. The
-   group CEO marks it and the SMO can too; nobody else, at any grant. */
-function mayMarkFocus(){
-  var rs = personRoleKeys(viewer());
-  return (rs.indexOf("gceo") > -1 || rs.indexOf("super") > -1) && !CYCLE.locked;
-}
 
 /* ── Key Objective weights ────────────────────────────────────────────────
    Optional. Unweighted means equal weight, which is the one default nobody

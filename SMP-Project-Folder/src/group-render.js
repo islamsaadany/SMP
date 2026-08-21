@@ -2152,9 +2152,8 @@ function unitRailFor(u, sel){
    person measured against it is a different decision from a plan being
    correctable by its custodian. When per-action authorisation and the change
    log arrive (§19.2) this is the first thing to revisit. */
-function mayEditPlan(){
-  return hasRole("super") && grant("u_plan") === "edit";
-}
+/* mayEditPlan() moved to config-data.js in 3.10, beside the other two rules
+   that are rules rather than settings. One definition, not two. */
 function unitPlanBody(it){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var cell = function(v, setter, cls){

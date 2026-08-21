@@ -17,32 +17,8 @@
                  letter-spacing:.06em; text-transform:uppercase; }
 
   /* ── Access matrix ───────────────────────────────────────────────── */
-  /* Seven roles down, seven areas across (§37). The role column is fixed and
-     the seven area columns share what is left equally — table-layout:fixed, or
-     the browser sizes columns by their longest word and one long header note
-     steals the width the controls need. */
-  .acgrid table { table-layout:fixed; width:100%; }
-  /* table-layout:fixed takes every column width from the FIRST row, which is
-     the header — so the widths have to be set on th, not only on td. `.cfg
-     th:first-child` was still claiming 15% for the role column and
-     `th:last-child` 15% for Setup, quietly overriding both numbers below. */
-  .acgrid th.ac, .acgrid td.ac { text-align:center; width:11.6%; padding-left:4px; padding-right:4px; }
-  .acgrid th.ac:last-child, .acgrid td.ac:last-child { width:11.6%; }
-  .acgrid th:first-child, .acgrid td.rolecell { width:19%; }
-  /* _shared.css sets `thead th { white-space:nowrap }`, which is right for a
-     one-word header and wrong for a column that explains what it covers: the
-     note did not wrap, it ran straight across its neighbours. Seven headers
-     that each say what is inside them have to be allowed to wrap. */
-  .acgrid thead th { white-space:normal; overflow-wrap:anywhere; }
-  .acgrid td.rolecell b { display:block; font-size:13px; line-height:1.3; }
-  .acgrid td.rolecell .why { margin-top:2px; }
-  .acgrid .factor-h b { font-size:11px; line-height:1.25; }
-  .acgrid .factor-h span { font-size:9.5px; line-height:1.3; display:block; margin-top:3px; }
-  /* Below the width where seven columns of controls fit, the table scrolls
-     inside its own box rather than pushing the page sideways — a horizontal
-     page scroll breaks every position:sticky above it (§27.2). */
-  .acgrid { overflow-x:auto; }
-  .acgrid table { min-width:940px; }
+  .acgrid table { table-layout:auto; }
+  .acgrid th.ac, .acgrid td.ac { text-align:center; width:auto; }
   .acgrid tr.grouprow td { background:var(--panel); color:var(--panel-ink);
                            font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
                            font-weight:700; padding:7px 13px; }

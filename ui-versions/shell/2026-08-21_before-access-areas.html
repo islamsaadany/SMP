@@ -176,12 +176,8 @@
      globally so moving between Performance and Strategy does not reset both. */
   var CURSEC = {};
 
-  /* Which of a destination's tabs the viewer holds. The TARGET matters now:
-     the same five unit tabs answer differently for a unit somebody owns and
-     one they do not (§37), so asking without saying which unit would give the
-     currently-open unit's answer for every unit in the navigation. */
-  function allowed(defs, target){
-    return defs.filter(function(d){ return grantAt(d.ac, target || TARGET) !== "none"; });
+  function allowed(defs){
+    return defs.filter(function(d){ return grant(d.ac) !== "none"; });
   }
 
   /* A unit tab appears only if the viewer reaches that unit AND holds at least
@@ -195,13 +191,10 @@
   var NAVFOLD = null;
 
   function myUnits(){
-    return activeKeys().filter(function(k){ return allowed(SUBS.unit, k).length; });
+    return activeKeys().filter(function(k){ return reaches(k) && allowed(SUBS.unit).length; });
   }
   function myFns(){
-    return FUNCTION_KEYS.filter(function(k){
-      return FUNCTIONS[k].active !== false && capsOfFunction(k).length &&
-             allowed(SUBS.fn, "fn:" + k).length;
-    });
+    return allowed(SUBS.fn).length ? fnsReachable() : [];
   }
   /* The folds appear only for someone who reaches more than one unit AND more
      than one capability — today the SMO and the CEO. Everyone else sees the row
@@ -210,7 +203,7 @@
 
   function unitTabs(){
     var out = [];
-    if (allowed(SUBS.group, "group").length) out.push({ k:"group", label:"Group" });
+    if (reaches("group") && allowed(SUBS.group).length) out.push({ k:"group", label:"Group" });
     var us = myUnits(), cs = myFns(), fold = foldsNeeded();
 
     if (fold) {
@@ -257,10 +250,7 @@
      thing \u2014 what the SMO does each cycle, and what was decided once. */
   function menuGroups(){
     var gs = [];
-    /* Neither depends on the unit you happen to be looking at — Setup and the
-       cycle belong to nobody's unit — but they are asked explicitly so they
-       cannot start depending on it by accident. */
-    var m = allowed(SUBS.manage, "group"), st = allowed(SUBS.setup, "group");
+    var m = allowed(SUBS.manage), st = allowed(SUBS.setup);
     if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
     if (st.length) gs.push({ dest:"setup",  label:"Setup",  items:st });
     return gs;
@@ -300,9 +290,9 @@
        fold navigate \u2014 which is exactly what a fold must not do. Only reset when
        the destination is genuinely unreachable for this viewer. */
     var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }));
-    if (allowed(SUBS.group, "group").length) everything.push("group");
-    if (allowed(SUBS.setup, "group").length) everything.push("setup");
-    if (allowed(SUBS.manage, "group").length) everything.push("manage");
+    if (allowed(SUBS.group).length) everything.push("group");
+    if (allowed(SUBS.setup).length) everything.push("setup");
+    if (allowed(SUBS.manage).length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
       current = dests.length ? dests[0].k : null;
@@ -473,15 +463,6 @@
 
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
-    /* WHAT THIS PAINT IS ABOUT, set before anything renders. Every grant() with
-       no target of its own answers for this — the unit, the function or the
-       group currently on screen — because "own business unit" and "other
-       business units" are different answers to the same page (§37), and a
-       render has exactly one subject. Anything asking about a DIFFERENT thing
-       (the navigation, listing every unit) passes its own target to grantAt().
-       "setup" is deliberately mapped to the group: the Setup pages belong to
-       nobody's unit, and their area does not depend on the target at all. */
-    TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
@@ -510,8 +491,8 @@
     if (!current) {
       document.getElementById("subtabs").innerHTML = "";
       document.getElementById("panel").innerHTML =
-        '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> The roles this person holds reach nothing. ' +
-        'That is the table working as configured, not an error &mdash; open <b>Manage &rarr; Roles &amp; access</b> as the SMO to change it.</div>';
+        '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> This level holds no access to any page in the matrix. ' +
+        'That is the matrix working as configured, not an error &mdash; open <b>Setup &rarr; Levels &amp; access</b> as the SMO to change it.</div>';
       return;
     }
 

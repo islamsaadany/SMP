@@ -54,107 +54,86 @@ function renderLabels(){
 }
 
 /* ── Roles & access ─────────────────────────────────────────────────── */
-function stateCell(roleKey, areaKey, editable, disabled){
-  /* grantFor(), never ACCESS[role][area]. A tenant carried across from an
-     earlier version has an EMPTY access map by design — the rows were rebuilt
-     rather than migrated (§33, §37) — so a direct read was undefined[key] and
+function stateCell(roleKey, pageKey, editable){
+  /* grantFor(), never ACCESS[role][page]. A tenant migrated from the level
+     matrix has an EMPTY access map by design — the rows were rebuilt rather
+     than carried across (§33) — so the direct read was undefined[pageKey] and
      the whole page threw. The cell shows what the platform would actually
-     answer, which is the shipped default until somebody changes it. */
-  var v = grantFor(roleKey, areaKey);
-  /* A cell that cannot come up is drawn as a dash rather than as "none". The
-     group CEO owns every unit, so "other business units" is an empty set for
-     them: saying "none" there would read as a denial of something, when there
-     is no something. */
-  if (disabled) {
-    return '<td class="ac"><span class="why" style="margin:0" title="' + esc(disabled) +
-      '">&mdash;</span></td>';
-  }
+     answer, which is the shipped default until someone changes it. */
+  var v = grantFor(roleKey, pageKey);
   if (!editable) {
     return '<td class="ac"><span class="st st-' + v + '">' + v + '</span></td>';
   }
   var opts = ["none","view","edit"].map(function(o){
     return '<button type="button" class="stbtn' + (o === v ? " on " + o : "") + '" data-ac="' +
-      roleKey + '|' + areaKey + '|' + o + '" aria-label="' + o + '">' +
+      roleKey + '|' + pageKey + '|' + o + '" aria-label="' + o + '">' +
       (o === "none" ? "&minus;" : o === "view" ? "&#128065;" : "&#9998;") + '</button>';
   }).join("");
   return '<td class="ac"><span class="stset">' + opts + '</span></td>';
 }
 
-/* ── Roles &amp; access (§37) ─────────────────────────────────────────
-   Islam: *"we just need the roles on the left and the types of pages they
-   might see/edit on the horizontal access."*
-
-   Seven roles down, seven areas across. Forty-nine cells, on one screen,
-   in place of the 525 controls the page carried before. */
 function renderAccess(){
   var editable = grant("c_access") === "edit";
 
-  /* Whether an area can come up at all for a role. Only the own/other pair
-     ever collapses, and only upwards: somebody who owns everything has no
-     "other", and somebody who owns no unit has no "own". Returning a REASON
-     rather than a boolean, because the cell shows it on hover. */
-  function notApplicable(roleKey, areaKey){
-    var ownsAll = roleKey === "super" || roleKey === "gceo";
-    if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
-      return "Every unit and function is theirs, so there is no “other”.";
-    }
-    if (roleKey === "fnhead" && areaKey === "a_unit_own") {
-      return "A function head holds no business unit.";
-    }
-    if (roleKey === "cceo" && areaKey === "a_fn_own") {
-      return "A company CEO holds no supporting function.";
-    }
-    return null;
-  }
+  /* Every page the matrix controls, grouped the way a reader thinks about
+     them rather than by key prefix. Every page is listed: a matrix that shows
+     some of the pages is a matrix you cannot trust to answer "who can see
+     this". */
+  var groups = [
+    { name:"Group pages",           keys:["g_perf","g_found","g_temple","g_weight","g_focus"] },
+    { name:"Business unit pages",   keys:["u_perf","u_found","u_anal","u_plan","u_report"] },
+    { name:"Supporting function pages", keys:["k_perf","k_found","k_proj","k_report"] },
+    { name:"Manage",                keys:["c_cycle","c_import","c_focus","c_kb"] },
+    { name:"Setup",                 keys:["c_labels","c_access","c_bands","c_units","c_fns","c_caps"] }
+  ];
 
-  var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
-    return '<th class="ac"><div class="factor-h"><b>' + esc(a.label) + '</b><span>' +
-      esc(a.note) + '</span></div></th>';
+  var head = '<tr><th style="width:22%">Page</th>' + ROLES.map(function(r){
+    return '<th class="ac"><div class="factor-h"><b>' + esc(r.name) + '</b><span>' +
+      esc(r.scope === "group" ? "group-wide"
+        : r.scope === "company" ? "their company"
+        : r.scope === "fn" ? "their function"
+        : r.scope === "unitfn" ? "their unit or function"
+        : "their unit") + '</span></div></th>';
   }).join("") + '</tr>';
 
-  var body = ROLES.map(function(r){
-    var n = PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
-    /* Two lines, never more. The role's description is a sentence, and a
-       sentence in a 19% column wraps to eight lines and makes every row of a
-       49-cell table a hundred pixels tall — the exact fault this page was
-       rebuilt to remove. It is on hover instead. */
-    return '<tr><td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
-        '<span class="why">' +
-        (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
-        '</span></td>' +
-      AREAS.map(function(a){
-        return stateCell(r.key, a.key, editable, notApplicable(r.key, a.key));
-      }).join("") + '</tr>';
+  var body = groups.map(function(g){
+    return '<tr class="grouprow"><td colspan="' + (ROLES.length + 1) + '">' + esc(g.name) + '</td></tr>' +
+      g.keys.map(function(pk){
+        var p = PAGES.filter(function(x){ return x.key === pk; })[0];
+        if (!p) return '';
+        return '<tr><td><b>' + esc(p.label) + '</b><span class="why">' + esc(p.note) + '</span></td>' +
+          ROLES.map(function(r){ return stateCell(r.key, pk, editable); }).join("") + '</tr>';
+      }).join("");
   }).join("");
 
-  return section("", "Who may see what",
-      "Seven roles, and the kinds of page each may reach. Edit includes view. " +
-      "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
+  var roleRows = ROLES.map(function(r){
+    var n = PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+    return '<tr><td><b>' + esc(r.name) + '</b></td>' +
+      '<td class="cc"><span class="mono">' + n + '</span></td>' +
+      '<td><span class="why" style="margin:0">' + esc(r.note) + '</span></td></tr>';
+  }).join("");
+
+
+  return section("", "The visibility matrix",
+      "Pre-filled with a working default. Change any cell and the navigation above re-renders immediately for whoever is currently being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-none">none</i> hidden entirely</span>' +
+        '<span><i class="st st-none">none</i> no access, page hidden</span>' +
         '<span><i class="st st-view">view</i> reads, cannot change</span>' +
-        '<span><i class="st st-edit">edit</i> reads and changes</span>' +
-        '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>') +
+        '<span><i class="st st-edit">edit</i> reads and changes</span></div>' +
+      '') +
 
-    section("", "Own is not a setting",
-      null,
-      '<div class="note"><b>&ldquo;Own&rdquo; is whatever they hold a role in.</b> ' +
-      'The head and the custodian of Mobile own Mobile. A company CEO owns every unit ' +
-      'in their company. The SMO and the group CEO own all of it. Nobody types that in ' +
-      'anywhere &mdash; it is read from who is attached to what on ' +
-      '<b>Business units</b>, <b>Supporting functions</b> and <b>People</b>, which is why ' +
-      'those pages and this one cannot disagree.' +
-      '<div style="margin-top:10px">Two things a company decides for itself still apply on top, ' +
-      'and can only ever narrow this table: whether its CEO sees <b>the group</b>, and whether ' +
-      'they see <b>the other companies</b>. Both are on the Companies page.</div></div>' +
-      '<div class="note"><b>Three things are rules, not settings, so they are not in the table.</b> ' +
-      'The <b>Knowledge base</b> is readable by everyone, always &mdash; an explanation nobody ' +
-      'can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much ' +
-      'access the unit&rsquo;s own people hold, because a plan you are measured against is not ' +
-      'yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked ' +
-      'by the group CEO and the SMO. Each of these used to be a cell here.</div>');
+    section("", "The roles",
+      "A role says what someone does in the platform, never what their job title is. Where a role is attached \u2014 a unit, a function, a company \u2014 is what bounds it.",
+      '<div class="cfg"><table><thead><tr><th style="width:22%">Role</th><th class="cc" style="width:8%">People</th><th>What it is</th></tr></thead><tbody>' +
+      roleRows + '</tbody></table></div>') +
+
+    /* The People list that used to close this page is a page of its own now
+       (§35). A matrix is where you set what a role may reach; a staff list is
+       not a matrix, and carrying both on one screen is most of why this one
+       reads as exhausting. */
+    section("", null, null,
+      '<div class="note"><b>Two unit owners hold the same row of this matrix.</b> It grants both the same page types; what each role is attached to is what sends one to Mobile and the other to Retail. Someone holding several roles gets the most generous answer of them &mdash; but only ever within the reach each role carries. Who holds which role is on <b>People</b>.</div>');
 }
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */
@@ -778,40 +757,18 @@ function renderKB(){
            '<b>focus changes no score</b>.' }
     ]),
     kbSection("access", "Access — who sees what", [
-      { p: 'Access is <b>page level only</b>. If a role can open a page it sees everything ' +
-           'on that page — restriction happens by removing the page, never by trimming its ' +
-           'contents. A person carries one or more <b>roles</b>, and each role is attached ' +
-           'to something: the group, a company, a unit, a function.' },
-      { h: "Seven roles, seven kinds of page",
-        p: 'The table on <b>Roles &amp; access</b> is roles down the side and kinds of page ' +
-           'across the top. Not individual pages — a unit\u2019s five pages answer together, ' +
-           'because &ldquo;may they open this unit&rdquo; is one question, not five.' },
-      { h: "Own is not a setting",
-        p: '<b>Own business unit</b> means the units they hold a role in. The head and the ' +
-           'custodian of Mobile own Mobile; a company CEO owns every unit in their company; ' +
-           'the SMO and the group CEO own all of it. Nobody types that in — it is read from ' +
-           'who is attached to what, so this table and the unit pages cannot disagree.' },
+      { p: 'Access is <b>page level only</b>. If a level can open a page, it sees ' +
+           'everything on that page — restriction happens by removing the page, never by ' +
+           'trimming its contents. A person carries a <b>level</b>, which decides which ' +
+           'pages, and a <b>unit attachment</b>, which decides whose.' },
       { h: "Three states, never more",
-        p: 'Each cell is <b>none</b>, <b>view</b> or <b>edit</b>. Edit includes view. Two ' +
-           'would not be enough: a unit head reads the weighting table but does not manage ' +
-           'it, and that is not expressible in two.' },
-      { h: "Someone holding several roles",
-        p: 'They get the <b>most generous</b> answer of them — but each role answers only ' +
-           'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
-           'owner\u2019s answer for Mobile and the other-unit answer for Retail, from the ' +
-           'same two roles, without either being asked about the wrong thing.' },
-      { h: "Three things the table does not decide",
-        p: 'The <b>knowledge base</b> is readable by everyone, always. A <b>plan</b> is ' +
-           'corrected by the SMO alone, however much access the unit\u2019s people hold — a ' +
-           'plan you are measured against is not yours to rewrite. And <b>focus measures</b>, ' +
-           'what carries reward, are marked by the group CEO and the SMO. These are rules; ' +
-           'they do not change when the table does.' },
+        p: 'Each page is <b>none</b>, <b>view</b> or <b>edit</b> for each level. Two would ' +
+           'not be enough: a business unit head reads the weighting table but does not ' +
+           'manage it, and that is not expressible in two.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
-           '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
-           'flags, whether its CEO sees the group and the other companies, can only ever ' +
-           '<b>narrow</b> what the table allows. Supporting functions belong to no company: ' +
-           'they serve all of them.' },
+           '<b>no score and no page</b> — it decides who sees what, nothing more. ' +
+           'Supporting functions belong to no company: they serve all of them.' },
       { h: "The gate is real, the rest is Phase 2",
         p: 'Signing in is checked on the server against a stored password. Per-action ' +
            'authorisation and the change log are not built yet: today the enforcement is ' +
@@ -946,9 +903,7 @@ function renderBandsExtra(){
 var FSET = { unit:"mobile" };
 
 function renderFocusSetup(){
-  /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
-     mayMarkFocus() carries the lock too, so there is one gate, not two. */
-  var editable = mayMarkFocus();
+  var editable = grant("c_focus") === "edit" && !CYCLE.locked;
   var u = UNITS[FSET.unit];
 
   var pick = function(m, src){

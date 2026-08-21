@@ -1,0 +1,15 @@
+-- Access moves from PAGES to AREAS (§37).
+--
+-- A data migration, so no phase marker: it runs AFTER the seed. That ordering
+-- is what makes the WHERE clause safe in both directions. On a fresh deploy the
+-- seed has already written area rows (a_group, a_unit_own, …) and this deletes
+-- none of them. On a tenant carried across from v3.9 or earlier every row is a
+-- PAGE key (g_perf, u_plan, c_labels, …) and every one of them goes.
+--
+-- Deleting rather than mapping, for the same reason §33 rebuilt the matrix
+-- rather than carrying it over: the columns mean something different now.
+-- "u_plan: view" was an answer to "may this role open the Plan page"; there is
+-- no such question any more, and a converted answer would be an old answer to a
+-- new question. With the rows gone, grant() falls back to the shipped defaults
+-- (§30.2) — which is the platform's own considered answer, not an empty one.
+DELETE FROM access_grants WHERE page_key NOT LIKE 'a\_%';

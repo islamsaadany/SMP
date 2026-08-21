@@ -245,7 +245,26 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.8: roles replace levels (§33).
+*Last Updated: 2026-08-21 — v3.9 (in progress): the door gets a wall (§34).
+The sign-in page was one 400px card asked to carry the whole product, so every
+line of brand had to be squeezed above the password box. Strategy-Formulation's
+strong concept is **not in its form — it is in the split**: a navy wall arguing
+the product's case beside a pale dotted field the form floats on. Taken: the
+split, the glass card, icon-inset fields with a focus RING rather than a border
+swap, one staggered entrance. Deliberately not taken: their `AUTH_001` error
+codes (theatre for a product with one SMO issuing passwords by hand), their
+blue (we are navy/gold), their light-only palette. Three rules came out of it.
+**The wall may only claim what SMP actually does** — the front door is the last
+place invented capability belongs (§21, one surface further out). **Height is a
+constraint a width query cannot see**: at 1024x560 the quote fell below the fold
+while every max-width query reported the layout fine, so §27.1's sweep now runs
+on both axes. **Whoever hides a field hides its furniture** — the unit of
+showing and hiding is the composed control, never the one element inside it that
+happens to have the id. And the tool lesson: **a contrast check that cannot see
+gradients passes everything**, because reading only `backgroundColor` walks
+straight past a gradient to the white body beneath.*
+
+*Earlier: 2026-08-20 — v3.8: roles replace levels (§33).
 N-1/N-2/N-3 were org depth, and the giveaway was in the code: each level carried
 a `titles` string stapling real job titles onto the abstraction. **The role is
 the thing; a job title never decides access.** Seven roles. **Where a role lives

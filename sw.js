@@ -16,11 +16,11 @@
    Bump SHELL when anything in the shell list changes — the name IS the
    cache-busting mechanism, and the activate handler deletes every cache that
    is not the current one. */
-const SHELL = "smp-shell-v3.6";
+const SHELL = "smp-shell-v3.7";
 const ASSETS = [
   "/",
   "/index.html",
-  "/SMP-Project-Folder/strategy-management-platform-v3.6.html",
+  "/SMP-Project-Folder/strategy-management-platform-v3.7.html",
   "/manifest.webmanifest",
   "/favicon.svg",
   "/favicon.png",

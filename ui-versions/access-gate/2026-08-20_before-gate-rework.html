@@ -81,8 +81,6 @@
     --ghost-ink: #0f2544;
     --ghost-line: #0f2544;
     --shadow: rgba(15, 37, 68, 0.15);
-    --ground: #0f2544;
-    --danger-bg: #fdecea;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -105,8 +103,6 @@
       --ghost-ink: #9fbbe4;
       --ghost-line: #3c5d8c;
       --shadow: rgba(0, 0, 0, 0.45);
-      --ground: #0b0e13;
-      --danger-bg: #33201e;
     }
   }
   :root[data-theme="dark"] {
@@ -133,62 +129,38 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: "Segoe UI", Arial, sans-serif;
-    /* Navy ground, not pale grey. A sign-in page is a front door, and a door
-       set into a wall reads as deliberate where a form floating on grey reads
-       as unfinished. Taken from HR_ERP's sign-in. */
-    background: var(--ground);
+    background: var(--bg);
     color: var(--ink);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 24px;
   }
-  /* Nothing until the session check answers - see show() below. Opacity rather
-     than display so the card does not jump the layout when it arrives. */
-  .card { opacity: 0; transition: opacity .16s ease; }
-  body.ready .card { opacity: 1; }
   .card {
     background: var(--card);
-    border-radius: 16px;
-    box-shadow: 0 18px 50px var(--shadow);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px var(--shadow);
     width: 100%;
-    max-width: 400px;
+    max-width: 380px;
     overflow: hidden;
   }
   .card-header {
     background: var(--navy);
     color: var(--on-navy);
-    padding: 34px 34px 28px;
+    padding: 28px 32px;
     text-align: center;
   }
-  /* A gold eyebrow above the name, so the mark is not the only thing carrying
-     the brand at a glance. */
-  .eyebrow {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gold-light);
-  }
   .card-header h1 {
-    margin-top: 8px;
-    font-size: 30px;
-    letter-spacing: 3px;
+    font-size: 28px;
+    letter-spacing: 2px;
   }
   .card-header h1 span { color: var(--gold-light); }
   .card-header p {
-    margin-top: 8px;
+    margin-top: 6px;
     font-size: 13px;
     color: var(--on-navy-soft);
   }
-  .card-body { padding: 30px 34px 34px; }
-  .foot {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 11.5px;
-    color: var(--muted);
-  }
+  .card-body { padding: 28px 32px 32px; }
   label {
     display: block;
     font-size: 13px;
@@ -225,8 +197,8 @@
     background: var(--navy);
     color: var(--on-navy);
     border: none;
-    border-radius: 10px;
-    padding: 13px;
+    border-radius: 8px;
+    padding: 12px;
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
@@ -234,9 +206,6 @@
   button:hover { background: var(--navy-light); }
   .error {
     color: var(--danger);
-    background: var(--danger-bg);
-    border-radius: 8px;
-    padding: 10px 12px;
     font-size: 13px;
     margin-bottom: 14px;
     display: none;
@@ -286,7 +255,6 @@
   <!-- Sign in -->
   <div class="card" id="login">
     <div class="card-header">
-      <span class="eyebrow">Strategy Management Platform</span>
       <h1>S<span>M</span>P</h1>
       <p>Sign in to continue</p>
     </div>
@@ -303,17 +271,12 @@
         <div class="error" id="error">Incorrect password. Please try again.</div>
         <button type="submit">Sign In</button>
       </form>
-      <!-- Stated because it is a promise the product keeps: the session cookie
-           is 30 days (lib/auth.js SESSION_DAYS), so signing in once on a
-           device holds for a month. -->
-      <p class="foot">You will stay signed in on this device for 30 days.</p>
     </div>
   </div>
 
   <!-- First sign-in: the issued password is temporary -->
   <div class="card" id="change">
     <div class="card-header">
-      <span class="eyebrow">Strategy Management Platform</span>
       <h1>S<span>M</span>P</h1>
       <p>Choose your own password</p>
     </div>
@@ -330,11 +293,21 @@
     </div>
   </div>
 
-  <!-- The "Starting page" card - a badge, a welcome line and a button that
-       went to the platform - was removed in 3.7. Signing in IS the request to
-       open the platform; a page whose only purpose is to offer a button to the
-       thing you just asked for is a door behind a door. Sign out lives in the
-       platform's own top bar, which is where you are when you want it. -->
+  <!-- Starting page -->
+  <div class="card" id="home">
+    <div class="card-header">
+      <h1>S<span>M</span>P</h1>
+      <p>Starting Page</p>
+    </div>
+    <div class="card-body">
+      <div class="badge" id="whoBadge">AdminSMO</div>
+      <p>Welcome! You are signed in.</p>
+      <!-- The link carries the shipped version's filename (version lives in the
+           filename, never in the app) — update it on each version bump. -->
+      <a class="open-btn" href="SMP-Project-Folder/strategy-management-platform-v3.6.html">Open the Strategy Management Platform</a>
+      <button class="logout" id="logoutBtn">Sign Out</button>
+    </div>
+  </div>
 
 <script>
   /* Two modes, decided once at load.
@@ -352,33 +325,19 @@
 
   var loginCard = document.getElementById("login");
   var changeCard = document.getElementById("change");
+  var homeCard = document.getElementById("home");
   var errorEl = document.getElementById("error");
   var changeErrorEl = document.getElementById("changeError");
   var userEl = document.getElementById("user");
   var passwordEl = document.getElementById("password");
 
-  /* NOTHING IS SHOWN UNTIL THE ANSWER IS KNOWN.
-
-     The gate used to paint the sign-in card immediately, then reveal the user
-     field when /api/auth answered, then - if a session was already valid -
-     swap the whole card for a starting page. Three states in about a second,
-     which is what Islam saw as "it opens on user and password, lags, then
-     shifts to another window".
-
-     There is one honest thing to show before the answer arrives, and it is
-     nothing. The card is hidden until the session check resolves; if a session
-     is live the platform is opened and the gate is never seen at all. */
   function show(which) {
     loginCard.style.display = which === "login" ? "block" : "none";
     changeCard.style.display = which === "change" ? "block" : "none";
-    document.body.classList.add("ready");
+    homeCard.style.display = which === "home" ? "block" : "none";
     if (which === "login") passwordEl.focus();
     if (which === "change") document.getElementById("newpw").focus();
   }
-
-  /* Version lives in the filename, never in the app - update on each bump. */
-  var PLATFORM = "SMP-Project-Folder/strategy-management-platform-v3.7.html";
-  function openPlatform() { location.replace(PLATFORM); }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }
 
@@ -398,11 +357,8 @@
   }
   function signedIn(person) {
     PERSON = person;
-    /* A temporary password is the one thing that stands between signing in and
-       being in: it has to be replaced before the session is any use. Anything
-       else goes straight through. */
-    if (person && person.mustChange) show("change");
-    else openPlatform();
+    document.getElementById("whoBadge").textContent = person.name || "AdminSMO";
+    show(person && person.mustChange ? "change" : "home");
   }
 
   document.getElementById("loginForm").addEventListener("submit", function (e) {
@@ -440,16 +396,19 @@
         document.getElementById("newpw").value = "";
         document.getElementById("newpw2").value = "";
         PERSON.mustChange = false;
-        /* The password is theirs now - straight in, same as any other
-           successful sign-in. */
-        openPlatform();
+        show("home");
       } else fail(changeErrorEl, j.error || "Could not set the password.");
     }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
   });
 
-  /* Sign out lived on the starting page, which no longer exists. It is in the
-     platform's own top bar, which posts to /api/auth and returns here - and
-     here, with no session, is the sign-in card. */
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    if (MODE === "server") {
+      api({ action: "logout" }).finally(function () { PERSON = null; show("login"); });
+    } else {
+      sessionStorage.removeItem("smp_access");
+      show("login");
+    }
+  });
 
   /* Decide the mode. file:// can never reach an API; over http(s) the answer
      comes from /api/auth itself — a 503 means hosting with no database, and

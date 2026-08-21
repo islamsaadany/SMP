@@ -245,7 +245,21 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.6: the Plan page gains a pen,
+*Last Updated: 2026-08-20 — v3.7: one door (§32). The gate was
+**three** states every time — the sign-in card painted immediately in its legacy
+shape, reshaped when `/api/auth` answered, then swapped for a Starting page
+offering a button to the platform. **Before the answer is known there is exactly
+one honest thing to show, and it is nothing**: the card is hidden until the
+session check resolves, a live session opens the platform without the gate ever
+being seen, and the Starting page is gone — a page whose only content is a
+button to the page you just asked for is a door behind a door. The 30-day
+session was always true (`SESSION_DAYS` in `lib/auth.js`); the Starting page is
+what made it feel otherwise, so the promise is now stated under the button. The
+door's design follows HR_ERP's sign-in. Also: the Labels page's last three notes
+moved to the knowledge base, but **the collision alarm stayed** — a blocked save
+must say why where the save is.*
+
+*Earlier: 2026-08-20 — v3.6: the Plan page gains a pen,
 **for the SMO only** (§31). §22 is unchanged — a plan is still authored by
 upload, codes are still minted on arrival, replacing still archives — this adds
 correcting a plan afterwards without re-uploading a unit to fix a word. The gate

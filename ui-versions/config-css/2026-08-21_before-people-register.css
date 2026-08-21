@@ -49,56 +49,6 @@
   .rmbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .addrow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
   .addrow .why { margin:0; }
-  /* ── The register (§35) ──────────────────────────────────────────
-     A role is two facts — which role, and what it is attached to — so the
-     chip carries both. Never a bare role name: "Custodian" alone is the half
-     of the answer that does not tell you whose plan they can touch. */
-  .rolechip { display:inline-flex; align-items:baseline; gap:6px; margin:0 6px 6px 0;
-              padding:4px 6px 4px 10px; border:1px solid var(--line); border-radius:99px;
-              background:var(--surface-2); }
-  .rolechip b { font-size:12px; }
-  .rolechip .why { font-size:11px; }
-  .xbtn { font:inherit; font-size:14px; line-height:1; color:var(--none); background:none;
-          border:none; cursor:pointer; padding:0 4px; border-radius:99px; }
-  .xbtn:hover { color:var(--bad); background:var(--bad-bg); }
-  .xbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .roleadd { display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
-  .roleadd select.fld { max-width:170px; }
-  /* The add-a-person row is a table row, not the flex .addrow above it — a
-     display:flex on a <tr> collapses the cells it was meant to lay out. */
-  .newrow td { background:var(--surface-2); }
-  .newrow input.fld { width:100%; max-width:320px; }
-  /* A retired person reads as past tense without being unreadable: the row is
-     dimmed, never greyed to the point where the name cannot be checked. */
-  tr.retired td { opacity:.62; }
-
-  /* ── The assignment picker (§35) ─────────────────────────────────
-     Closed it is a button that reads as the current answer; open it is a
-     search box over a scrolling list. The list is capped and scrolls rather
-     than growing the row, because a tenant with two hundred people would
-     otherwise push the rest of the table off the screen. */
-  .pickbtn { font:inherit; font-size:13px; font-weight:600; color:var(--ink);
-             background:var(--surface); border:1px solid var(--line); border-radius:8px;
-             padding:6px 10px; cursor:pointer; text-align:left; width:100%; }
-  .pickbtn:hover { border-color:var(--gold); }
-  .pickbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .pickbtn.empty { color:var(--none); font-weight:500; font-style:italic; }
-  .picker { border:1px solid var(--gold); border-radius:10px; background:var(--surface);
-            padding:8px; text-align:left; min-width:210px; }
-  .picker input.fld { width:100%; margin-bottom:6px; }
-  .picklist { max-height:190px; overflow-y:auto; margin-bottom:6px; }
-  .pickhead { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
-              color:var(--none); padding:6px 4px 3px; }
-  .pickrow { display:block; width:100%; text-align:left; font:inherit; background:none;
-             border:none; border-radius:6px; padding:5px 8px; cursor:pointer; }
-  .pickrow b { display:block; font-size:13px; font-weight:600; }
-  .pickrow .why { display:block; font-size:11px; }
-  .pickrow:hover { background:var(--surface-2); }
-  .pickrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-  .pickempty { font-size:12px; color:var(--none); padding:8px 4px; }
-  .pickfoot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
-              border-top:1px solid var(--line); padding-top:6px; }
-
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
 

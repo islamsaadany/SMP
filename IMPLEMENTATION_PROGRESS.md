@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.8 · **Last updated:** 2026-08-20
+**Latest version:** v3.9 · **Last updated:** 2026-08-21
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,50 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.8 — roles replace levels *(current)*
+### v3.9 — the sign-in page, and the register *(current)*
+
+**The sign-in page** (§34). One 400px card was carrying the whole product, so
+every line of brand had to be squeezed above the password box. It is a split
+now: a navy wall arguing the product's case, a pale dotted field the form floats
+on. Glass card, icon-inset fields with a gold focus ring, one staggered
+entrance. Everything the wall claims is something SMP actually does — the front
+door is the last place invented capability belongs.
+
+**The register** (§35). A People page: everyone the platform knows, their job
+title (which never decides access), contact, roles with what each is attached
+to, password state, and standing. SMO only.
+
+Your "these three tables should interact together" needed no synchronising. §33
+had already put a responsibility role on the **thing**, so the People page
+writes `UNIT_ROLES.mobile.head` — the same field the Business units page writes,
+through the same function. There is one copy, so they cannot disagree.
+
+The role dropdown is a **search** now, with **+ Add new**. The old `<select>`
+could offer only people already attached to the unit, which meant a new unit
+could never be given its first head; and it could not offer somebody who does
+not exist, which is the normal case when a plan arrived yesterday. Typing a name
+nobody has creates the person and gives them the role in one act, and they are
+in the register immediately.
+
+**Passwords.** Per-row set and reset, plus one shared temporary password issued
+to everyone who has none — the **server** picks that set, so a stale screen can
+only ever issue to fewer people, never more. Each person is forced to choose
+their own on first sign-in.
+
+**People are retired, never deleted** — snapshots name whoever entered a figure.
+Retiring revokes every role they hold and closes the door on the server: a
+retired person is refused with the correct password.
+
+**The URL** (§35.6). It read `/SMP-Project-Folder/strategy-management-platform-v3.8.html`;
+it reads `/raya-trade` now. The version stays in the filename, because the
+version is the cache bust — it just stops being something a person has to look
+at.
+
+**Multi-tenant** (§36) is assessed, not built: one Postgres schema per tenant
+when the time comes, never a tenant column — person keys are short and global,
+so a column forces composite keys through credentials and sessions.
+
+### v3.8 — roles replace levels
 N-1 / N-2 / N-3 are gone. **The role is the thing**, and job titles never decide
 access — they are information about a person. Seven roles: Super user, Group
 CEO, Company CEO, Business unit owner, Strategy custodian, Supporting function
@@ -623,8 +666,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.8.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.8.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.9.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.9.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

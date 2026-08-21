@@ -114,6 +114,43 @@ function renderAccess(){
   }).join("");
 
 
+  /* Credentials exist only where the platform is served with a database
+     behind it (\u00a719). The SMO issues a temporary password per person \u2014
+     usernames are the person keys shown here \u2014 and the person is forced to
+     choose their own on first sign-in. Offline, none of this renders and the
+     page is exactly the prototype's. */
+  var credentialed = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
+  /* The roles a person holds, with what each is attached to. Several is normal
+     and the row shows all of them, because "which of these gave her access to
+     Mobile" is the question this table exists to answer. The official title
+     sits underneath as information: it is never consulted for access (§33). */
+  function atLabel(at){
+    if (!at || at === "group") return "group";
+    if (String(at).indexOf("fn:") === 0) {
+      var f = FUNCTIONS[String(at).slice(3)];
+      return f ? f.name : String(at).slice(3);
+    }
+    if (String(at).indexOf("co:") === 0) {
+      var c = COMPANIES[String(at).slice(3)];
+      return c ? c.name : String(at).slice(3);
+    }
+    return UNITS[at] ? UNITS[at].name : at;
+  }
+  var peopleRows = PEOPLE.map(function(p){
+    var rs = personRoles(p);
+    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title || "") +
+      (credentialed ? ' &middot; <span class="mono">key ' + esc(p.key) + '</span>' : '') + '</span></td>' +
+      '<td>' + (rs.length
+        ? rs.map(function(r){
+            return '<span class="pill kind">' + esc(roleName(r.role)) + '</span>' +
+              '<span class="why" style="margin:0 0 0 6px;display:inline">' + esc(atLabel(r.at)) + '</span>';
+          }).join('<br>')
+        : '<span class="pill none">No role</span>') + '</td>' +
+      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button>' +
+      (credentialed ? ' <button class="linkbu" data-setpw="' + p.key + '">Set password</button>' : '') +
+      '</td></tr>';
+  }).join("");
+
   return section("", "The visibility matrix",
       "Pre-filled with a working default. Change any cell and the navigation above re-renders immediately for whoever is currently being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
@@ -128,12 +165,13 @@ function renderAccess(){
       '<div class="cfg"><table><thead><tr><th style="width:22%">Role</th><th class="cc" style="width:8%">People</th><th>What it is</th></tr></thead><tbody>' +
       roleRows + '</tbody></table></div>') +
 
-    /* The People list that used to close this page is a page of its own now
-       (§35). A matrix is where you set what a role may reach; a staff list is
-       not a matrix, and carrying both on one screen is most of why this one
-       reads as exhausting. */
-    section("", null, null,
-      '<div class="note"><b>Two unit owners hold the same row of this matrix.</b> It grants both the same page types; what each role is attached to is what sends one to Mobile and the other to Retail. Someone holding several roles gets the most generous answer of them &mdash; but only ever within the reach each role carries. Who holds which role is on <b>People</b>.</div>');
+    section("", "People",
+      "Role plus what it is attached to. Two people holding the same role reach the same page types but different units &mdash; which is why the matrix alone cannot express access.",
+      '<div class="cfg"><table><thead><tr><th style="width:32%">Person</th>' +
+      '<th style="width:40%">Roles in the platform<span class="why">Not their job title \u2014 the title never decides access</span></th>' +
+      '<th>Simulate</th></tr></thead><tbody>' +
+      peopleRows + '</tbody></table></div>' +
+      '<div class="note"><b>Two unit owners hold the same row of this matrix.</b> It grants both the same page types; what each role is attached to is what sends one to Mobile and the other to Retail. Someone holding several roles gets the most generous answer of them &mdash; but only ever within the reach each role carries.</div>');
 }
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */
@@ -283,13 +321,6 @@ function cfgHead(title, chips, editKey, mayEdit, clearScope, labels){
               '" title="' + (editing ? "Done" : "Edit") + '" aria-label="' +
               (editing ? "Done editing" : "Edit this page") + '">' +
               (editing ? ICO_DONE : ICO_EDIT) + '</button>' +
-            /* No clear scope, no clear button. Companies and People have
-               nothing to clear — a page's rows are retired one at a time — and
-               Companies was rendering the control anyway: it shares the
-               "units" edit key, so opening the menu there read labels[0] off
-               an argument nobody had passed and threw. A control that cannot
-               work should not be drawn. */
-            (!clearScope ? '' :
             '<button class="ico' + (open ? " on" : "") + '" data-clearmenu="' + editKey +
               '" title="Clear" aria-label="Clear plans or progress" aria-expanded="' + open + '">' +
               ICO_CLEAR + '</button>' +
@@ -315,67 +346,9 @@ function cfgHead(title, chips, editKey, mayEdit, clearScope, labels){
                   '<button data-clear="' + clearScope + '||nums">' + labels[0] + '</button>' +
                   '<button data-clear="' + clearScope + '||plan">' + labels[1] + '</button>' +
                 '</div>'
-              : '')) +
+              : '') +
           '</span>'
         : '') +
-    '</div></div>';
-}
-
-/* ── Assigning a person to a thing (§35) ────────────────────────────
-   Islam: "a search field with a list that appears below with relevant names
-   but with an Add new button that creates only the name and the Role."
-
-   It replaces a plain <select>, which had two faults. It could only offer
-   people already attached to this unit — so the first person on a new unit
-   could never be chosen, because nobody was attached yet. And it could not
-   offer somebody who does not exist, which is the normal case when a unit is
-   being set up from a plan that arrived yesterday.
-
-   The list is ORDERED, not filtered: this unit's people first under their own
-   heading, then everybody else. A picker that hides the rest cannot move a
-   person between units, and people move between units.
-
-   `where` is the same encoding personRoles() reports — a unit key, or
-   "fn:<function>" — so one picker serves Business units and Supporting
-   functions without either knowing about the other. */
-function assignPicker(where, roleKey, current, editable){
-  var id = where + "|" + roleKey;
-  if (!editable) {
-    var n = personName(current);
-    return n ? esc(n) : '<span class="why" style="margin:0">unassigned</span>';
-  }
-  if (PICKING !== id) {
-    var held = personName(current);
-    return '<button class="pickbtn' + (held ? '' : ' empty') + '" data-pick-open="' + esc(id) + '">' +
-      (held ? esc(held) : 'unassigned') + '</button>';
-  }
-  var pool = peopleFor(where);
-  var row = function(p){
-    return '<button class="pickrow" data-name="' + esc(p.name.toLowerCase()) + '" ' +
-      'data-pick-set="' + esc(id + '|' + p.key) + '">' +
-      '<b>' + esc(p.name) + '</b>' +
-      (p.title ? '<span class="why" style="margin:0">' + esc(p.title) + '</span>' : '') +
-      '</button>';
-  };
-  var group = function(label, list){
-    return list.length
-      ? '<div class="pickhead">' + label + '</div>' + list.map(row).join("")
-      : '';
-  };
-  return '<div class="picker">' +
-    '<input class="fld" id="pickQ" placeholder="Search people…" autocomplete="off" ' +
-      'aria-label="Search people">' +
-    '<div class="picklist">' +
-      group(String(where).indexOf("fn:") === 0 ? "In this function" : "In this unit", pool.here) +
-      group("Everyone else", pool.rest) +
-      '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
-    '</div>' +
-    '<div class="pickfoot">' +
-      '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
-      '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
-      (current ? '<button class="linkbu" data-pick-clear="' + esc(id + '|' + current) +
-                 '">Unassign</button>' : '') +
-      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
     '</div></div>';
 }
 
@@ -387,10 +360,20 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
-    /* Was a <select> limited to people already attached to this unit, which
-       meant a new unit could never be given its first head. It is the shared
-       picker now — search, the unit's own people first, and Add new (§35). */
-    var pick = function(role, sel){ return assignPicker(k, role === "head" ? "owner" : "custodian", sel, editable); };
+    var pick = function(role, sel){
+      /* Only people attached to this unit can hold either role — the dropdown
+         cannot offer someone from another unit. */
+      var opts = PEOPLE.filter(function(p){ return p.unit === k; });
+      if (!editable) {
+        var n = personName(sel);
+        return n ? esc(n) : '<span class="why" style="margin:0">unassigned</span>';
+      }
+      return '<select class="fld" data-urole="' + k + '|' + role + '">' +
+        '<option value="">unassigned</option>' +
+        opts.map(function(p){
+          return '<option value="' + p.key + '"' + (p.key === sel ? " selected" : "") + '>' + esc(p.name) + '</option>';
+        }).join("") + '</select>';
+    };
     return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
@@ -503,177 +486,6 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    different questions on one screen: which units exist, and who is allowed to
    see whom. They are edited at different times by different reasoning, and the
    units table is long enough to push the company rules off the top. */
-/* ── The register (§35) ─────────────────────────────────────────────
-   Everyone the platform knows, in one table. It replaces the People section
-   that used to sit at the bottom of Roles & access — a matrix page is where
-   you set what a role may reach, not where you keep a staff list, and putting
-   both on one screen is most of why that page reads as exhausting.
-
-   SMO only, at Islam's direction: adding a person creates an identity, and an
-   identity is the SMO's to create. The whole page is gated on c_people, which
-   only `super` holds.
-
-   PASSWORD STATE IS NOT IN THE STATE GRAPH and never will be — credentials
-   live in their own table (§19). The column is filled by a separate ask
-   (SYNC.passwordStates) and simply absent when the platform is opened from a
-   file, where there are no credentials to have a state. */
-var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
-
-function renderPeople(){
-  var mayEdit = grant("c_people") === "edit";
-  var editable = mayEdit && EDITING.people;
-  var live = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
-  var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
-  var noPw = live && PWSTATES
-    ? PEOPLE.filter(function(p){ return personActive(p) && PWSTATES[p.key] === "none"; }).length
-    : 0;
-
-  /* A unit and a supporting function may share a name — Care and IT are both,
-     in this tenant — and one person is often custodian of each. Unqualified,
-     the row then reads "Strategy custodian · Care" twice and looks like a
-     duplicate rather than two real roles over two different things. The kind
-     is part of the answer, so it is part of the label. */
-  function whereLabel(at){
-    if (!at || at === "group") return "the group";
-    if (String(at).indexOf("fn:") === 0) {
-      var f = FUNCTIONS[String(at).slice(3)];
-      return (f ? f.name : String(at).slice(3)) + " (function)";
-    }
-    if (String(at).indexOf("co:") === 0) {
-      var c = COMPANIES[String(at).slice(3)];
-      return c ? c.name : String(at).slice(3);
-    }
-    return UNITS[at] ? UNITS[at].name : at;
-  }
-
-  /* The role cell. Read-only it is a list of what they hold and where; in edit
-     it gains an X per role and one add control. Two selects rather than one
-     long list of every role-times-place, because "where" depends on which
-     role was chosen and a combined list would offer Company CEO of Mobile. */
-  function roleCell(p){
-    var rs = personRoles(p);
-    var held = rs.length
-      ? rs.map(function(r){
-          return '<span class="rolechip"><b>' + esc(roleName(r.role)) + '</b>' +
-            '<span class="why" style="margin:0">' + esc(whereLabel(r.at)) + '</span>' +
-            (editable
-              ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
-                '" title="Remove this role" aria-label="Remove this role">&times;</button>'
-              : '') + '</span>';
-        }).join("")
-      : '<span class="pill none">No role</span>';
-    if (!editable) return held;
-    var addRole = ADDROLE === p.key;
-    return held +
-      (addRole
-        ? '<span class="roleadd">' +
-            '<select class="fld" data-prole-pick="' + p.key + '">' +
-              ROLES.map(function(r){
-                return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
-                  '>' + esc(r.name) + '</option>';
-              }).join("") + '</select>' +
-            '<select class="fld" data-prole-where="' + p.key + '">' +
-              roleWheres(ADDROLE_KIND).map(function(w){
-                return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
-              }).join("") + '</select>' +
-            '<button class="linkbu" data-prole-add="' + p.key + '">Give</button>' +
-            '<button class="linkbu" data-prole-cancel="1">Cancel</button>' +
-          '</span>'
-        : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
-  }
-
-  function pwCell(p){
-    if (!live) return '';
-    if (!personActive(p)) {
-      return '<td class="cc"><span class="why" style="margin:0">cannot sign in</span></td>';
-    }
-    var st = PWSTATES ? PWSTATES[p.key] : null;
-    var pill = st === "set"       ? '<span class="pill good">Set</span>'
-             : st === "temporary" ? '<span class="pill warn">Temporary</span>'
-             : st === "none"      ? '<span class="pill none">None yet</span>'
-             : '<span class="why" style="margin:0">&mdash;</span>';
-    return '<td class="cc">' + pill +
-      '<button class="linkbu" data-setpw="' + p.key + '">' +
-      (st === "none" || !st ? "Set" : "Reset") + '</button></td>';
-  }
-
-  var rows = PEOPLE.map(function(p, i){
-    return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + (editable
-        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc(p.name) + '</b>') +
-        '<span class="why mono">' + esc(p.key) + '</span></td>' +
-      /* The job title is information and nothing else. It sits in the register
-         because "who is Mennah" is a fair question; it is never read when
-         deciding what anyone may see (§33). */
-      '<td>' + (editable
-        ? '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
-          '" placeholder="Job title">'
-        : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
-                   : '<span class="why" style="margin:0">not given</span>')) + '</td>' +
-      '<td>' + (editable
-        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
-          '" placeholder="Contact number">'
-        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' +
-      '<td>' + roleCell(p) + '</td>' +
-      pwCell(p) +
-      '<td class="cc">' + (editable
-        ? '<button class="rmbtn' + (personActive(p) ? '' : ' on') + '" data-pact="' + p.key + '">' +
-            (personActive(p) ? "Retire" : "Restore") + '</button>'
-        : '<span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
-            (personActive(p) ? "Active" : "Retired") + '</span>' +
-          /* Moved here with the rest of the register. Seeing the platform as
-             somebody else is how a grant is checked, and it belongs beside the
-             person rather than under a matrix. */
-          (personActive(p)
-            ? '<button class="linkbu" data-as="' + p.key + '">View as</button>' : '')) +
-      '</td></tr>';
-  }).join("");
-
-  var cols = live ? 7 : 6;
-  var addRow = editable
-    ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
-        '<input class="fld" id="newPersonName" placeholder="Full name" ' +
-          'value="' + esc(NEWPERSON) + '">' +
-      '</td><td class="cc"><button class="linkbu" data-padd="1">Add</button></td></tr>'
-    : '';
-
-  return cfgHead("People",
-      ['<span class="pill kind">SMO</span>',
-       plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
-        retired ? [retired + ' retired'] : []).concat(
-        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []),
-      "people", mayEdit, null) +
-
-    section("", "The register",
-      "Everyone the platform knows. A role is given here or on the unit's own page — " +
-      "it is the same fact either way, so the two can never disagree.",
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th>' +
-        '<th style="width:20%">Person<span class="why">Their key is their username</span></th>' +
-        '<th style="width:16%">Job title<span class="why">Never decides access</span></th>' +
-        '<th style="width:12%">Contact</th>' +
-        '<th>Roles, and what each is attached to</th>' +
-        (live ? '<th class="cc" style="width:13%">Password</th>' : '') +
-        '<th class="cc" style="width:10%">Standing</th>' +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
-      (live && noPw
-        ? '<div class="note"><b>' + plural(noPw, "person").replace("persons", "people") +
-          ' cannot sign in yet.</b> Issue one temporary password to all of them at once — ' +
-          'each is asked to choose their own the first time they use it, so the same ' +
-          'password never works twice for the same person. Nobody who already has a ' +
-          'password is touched.' +
-          '<div style="margin-top:10px"><button class="linkbu" data-pwbulk="1">' +
-          'Issue temporary passwords</button></div></div>'
-        : '') +
-      '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
-      'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
-      'reported. Retiring takes away every role they hold and closes the door — they ' +
-      'cannot sign in — while everything already attributed to them stays true.</div>');
-}
-
 function renderCompanies(){
   var editable = grant("c_units") === "edit" && EDITING.units;
   return cfgHead("Companies",
@@ -1299,12 +1111,17 @@ function renderCycle(){
    not behave differently. */
 function renderFunctions(){
   var editable = grant("c_fns") === "edit" && EDITING.fns;
-  /* The same picker the Business units page uses, addressed at "fn:<key>"
-     rather than a unit key — search, this function's own people first, and Add
-     new (§35). It replaces a <select> that listed every person in the tenant
-     in one flat list, retired ones included. */
   var pick = function(role, current, fk){
-    return assignPicker("fn:" + fk, role === "head" ? "fnhead" : "custodian", current, editable);
+    if (!editable) {
+      var n = personName(current);
+      return n ? esc(n) : '<span class="why" style="margin:0">unassigned</span>';
+    }
+    return '<select class="fld" data-fnrole="' + fk + '|' + role + '">' +
+      '<option value="">unassigned</option>' +
+      PEOPLE.map(function(p){
+        return '<option value="' + p.key + '"' + (p.key === current ? " selected" : "") + '>' +
+          esc(p.name) + '</option>';
+      }).join("") + '</select>';
   };
 
   var rows = FUNCTION_KEYS.map(function(fk, i){

@@ -23,6 +23,10 @@ var SYNC = (function () {
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
   var saving = false;
+  /* Kept from boot() so a save can ask the screen to repaint itself. The
+     only thing that needs it is the register's password column, which
+     cannot be right until the save that created the person has landed. */
+  var repaint = null;
 
   /* Two datasets, one product.
 
@@ -101,7 +105,23 @@ var SYNC = (function () {
       body: '{"state":' + now + "}"
     }).then(function (r) {
       saving = false;
-      if (r.ok) lastSaved = now;
+      if (r.ok) {
+        lastSaved = now;
+        /* A person created in the register does not exist to the SERVER until
+           this save lands — and credentials are keyed on people, so until then
+           they can be given no password and the password column has nothing
+           true to say about them. Dropping the cached states makes the next
+           paint ask again, which is the first moment the answer can be right.
+           Guarded on the symbol existing so sync.js stays independent of which
+           pages happen to be built into the file. */
+        if (typeof PWSTATES !== "undefined" && PWSTATES !== null) {
+          PWSTATES = null;
+          /* Only when that column is actually on screen. A repaint nobody can
+             see is a repaint that can only cost — and this one fires after
+             every save. */
+          if (repaint && document.querySelector('[data-edit="people"]')) repaint();
+        }
+      }
       else console.warn("SMP: save failed (HTTP " + r.status + ") — will retry on the next change");
     }).catch(function (e) {
       saving = false;
@@ -184,22 +204,42 @@ var SYNC = (function () {
     }
   }
 
+  /* One shape for every /api/auth call this object makes: post JSON, hand
+     back (error, body). Three callers with the same six lines is where a typo
+     lives in exactly one of them. */
+  function authPost(body, done) {
+    fetch("/api/auth", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
+      .catch(function (e) { done(String(e.message || e), null); });
+  }
+
   return {
     isLive: function () { return live; },
     isDemo: function () { return mode === "demo"; },
     person: function () { return person; },
-    /* The SMO issues or resets a password from Levels & access. The server
-       checks the policy and the issuer; the password is temporary and forces
-       a change on first sign-in. */
+    /* The three password operations, all SMO-only and all checked again on
+       the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
-      fetch("/api/auth", { method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "setPassword", person: key, password: pw })
-      }).then(function (r) { return r.json(); })
-        .then(function (j) { done(j.ok ? null : (j.error || "failed")); })
-        .catch(function (e) { done(String(e.message || e)); });
+      authPost({ action: "setPassword", person: key, password: pw },
+        function (err) { done(err); });
+    },
+    /* One temporary password for everyone who has none. The server picks the
+       set, so this sends a password and nothing else. */
+    issueTemporary: function (pw, done) {
+      authPost({ action: "issueTemporary", password: pw },
+        function (err, j) { done(err, err ? null : (j.issued || [])); });
+    },
+    /* "none" / "temporary" / "set" per person key. Credentials never enter the
+       state graph, so the People page has to ask for this separately. */
+    passwordStates: function (done) {
+      authPost({ action: "passwordStates" },
+        function (err, j) { done(err, err ? null : (j.states || {})); });
     },
     boot: function (paint) {
+      repaint = paint;
       paint();
       if (!enabled) return;
       /* Taken before hydration, while the globals still hold the baked-in

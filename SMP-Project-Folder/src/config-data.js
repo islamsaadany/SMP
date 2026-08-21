@@ -98,6 +98,10 @@ function roleName(k){
    added to the registry but not yet given a job. */
 function personRoles(p){
   if (!p) return [];
+  /* A retired person holds nothing. Retiring already revokes their roles,
+     so this is the second lock rather than the first — but access is the
+     one place where being wrong twice is worth the two lines. */
+  if (!personActive(p)) return [];
   var out = [];
   var seat = p.role || (p.level === "smo" ? "super"
                       : p.level === "ceo" ? (p.company ? "cceo" : "gceo") : null);
@@ -148,6 +152,10 @@ var PAGES = [
   { key:"c_access",scope:"setup", label:"Roles & access", note:"This matrix" },
   { key:"c_bands", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
   { key:"c_units", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
+  /* The register. Everyone the platform knows, their role, and — where a
+     database is behind it — whether they have a password yet. SMO only, at
+     Islam's direction: creating a person creates an identity. */
+  { key:"c_people",scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
   { key:"c_import",scope:"manage", label:"Import",          note:"Plan and progress templates" },
 
   { key:"c_fns",   scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
@@ -177,7 +185,18 @@ var KO_VIEW = "chips";
 
 /* Configuration screens open read-only. Editing is entered deliberately, which
    is what makes a change to a weight or a threshold an act rather than a slip. */
-var EDITING = { weights:false, factors:false, bands:false, units:false };
+var EDITING = { weights:false, factors:false, bands:false, units:false, people:false, fns:false };
+
+/* Transient register state. None of this is the tenant's data — it is which
+   control happens to be open — so none of it is saved (§25.2: a property of
+   the screen never belongs in the state graph).
+     ADDROLE      whose "+ role" control is open, by person key
+     ADDROLE_KIND which role that control currently shows
+     NEWPERSON    what has been typed into the add-a-person row
+     PICKING      which assignment picker is open, "<unit>|<role>"
+     PICKQ        what has been typed into it */
+var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
+var PICKING = null, PICKQ = "";
 
 /* none | view | edit — three states, because the CEO can see the weighting
    table but does not manage it, and that is not expressible in two. */
@@ -197,17 +216,20 @@ var ACCESS = {
            u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", u_report:"edit",
            k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
            c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_fns:"edit",
+           c_people:"edit",
            c_caps:"edit", c_import:"edit", c_cycle:"edit", c_focus:"edit", c_kb:"view" },
   /* Sees everything, manages the scheme rather than the plans. */
   gceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view", g_focus:"edit",
            u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"view",
            c_caps:"view", c_import:"none", c_cycle:"view", c_focus:"edit", c_kb:"view" },
   /* The same reading, bounded to their company by reaches(). */
   cceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"view",
            u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Accountable for the unit: authors its words, reports its figures. The plan
@@ -216,6 +238,7 @@ var ACCESS = {
   owner: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Carries the strategy work beside the head, so the same reach — this is the
@@ -223,11 +246,13 @@ var ACCESS = {
   custodian: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
            k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   fnhead:{ g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"none", u_found:"none", u_anal:"none", u_plan:"none", u_report:"none",
            k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Named on a measure or a tactic. Reports their own work and reads the plan
@@ -235,6 +260,7 @@ var ACCESS = {
   contrib:{ g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"view", u_found:"view", u_anal:"none", u_plan:"view", u_report:"edit",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"edit",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"none", c_focus:"none", c_kb:"view" }
 };
@@ -306,6 +332,156 @@ var UNIT_ROLES = {
 function personName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+
+/* ── The register (§16.11, §35) ──────────────────────────────────────
+   People are RETIRED, never deleted. A person carries reported history the
+   same way a unit does (§30.3): snapshots attribute figures to whoever
+   entered them, and removing the row would rewrite a closed cycle into one
+   nobody reported. Retired means cannot sign in, cannot hold a role, still
+   named wherever they already are.
+
+   `active` and `phone` are not columns — they ride in the people table's
+   `extra` jsonb and come back through it. Deliberate: neither has any
+   relational meaning, and adding a real column to a table that already exists
+   needs a pre-phase migration (§33.5) for nothing gained. */
+function personActive(p){ return !!p && p.active !== false; }
+function personBy(key){
+  return PEOPLE.filter(function(x){ return x.key === key; })[0] || null;
+}
+
+/* A person arrives with a name and a role; the key is minted here, the same
+   way a plan's codes are minted on arrival rather than typed (§22). Letters
+   and digits from the name, then a numeric suffix if that is taken — never a
+   silent collision, because the key IS the username. */
+function mintPersonKey(name){
+  var base = String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14);
+  if (!base) base = "person";
+  if (!personBy(base)) return base;
+  var n = 2;
+  while (personBy(base + n)) n++;
+  return base + n;
+}
+
+/* Create and return the key. `where` follows the same encoding personRoles()
+   reports: "group", "co:<company>", "fn:<function>", or a unit key. */
+function addPerson(o){
+  var key = mintPersonKey(o.name);
+  var p = { key: key, name: String(o.name || "").trim(), title: o.title || "" };
+  if (o.phone) p.phone = o.phone;
+  PEOPLE.push(p);
+  if (o.role) grantPersonRole(key, o.role, o.where);
+  return key;
+}
+
+/* ── One fact, two editing surfaces ─────────────────────────────────
+   A SEAT role (super, group CEO, company CEO) is a property of the PERSON and
+   is stored on them. RESPONSIBILITY FOR A THING (unit owner, custodian,
+   function head) is a property of the THING, so granting it writes the
+   thing's pointer — which is the same pointer the Business units page edits.
+   That is why the register and the unit page cannot disagree: there is only
+   one place the answer lives, and both screens write it (§33, §35).
+
+   A responsibility role is singular by nature — one head per unit — so
+   granting it to someone takes it from whoever held it. That is not a side
+   effect to guard against; it is what "this is now their unit" means. */
+function unitRolesFor(k){
+  if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
+  return UNIT_ROLES[k];
+}
+function grantPersonRole(personKey, roleKey, where){
+  var p = personBy(personKey);
+  if (!p) return;
+  var at = where || "group";
+  if (roleKey === "super" || roleKey === "gceo") {
+    p.role = roleKey; delete p.company; if (!p.unit) p.unit = "group";
+  } else if (roleKey === "cceo") {
+    p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
+  } else if (roleKey === "owner") {
+    unitRolesFor(at).head = personKey; p.unit = at;
+  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
+    FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "custodian") {
+    unitRolesFor(at).custodian = personKey; p.unit = at;
+  } else if (roleKey === "fnhead") {
+    FUNCTIONS[at.slice(3)].head = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "contrib") {
+    p.unit = at;
+  }
+}
+function revokePersonRole(personKey, roleKey, where){
+  var p = personBy(personKey);
+  var at = where || "group";
+  if (roleKey === "super" || roleKey === "gceo" || roleKey === "cceo") {
+    if (p) { delete p.role; delete p.company; }
+  } else if (roleKey === "owner") {
+    if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
+  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[at.slice(3)];
+    if (f && f.custodian === personKey) f.custodian = null;
+  } else if (roleKey === "custodian") {
+    if (UNIT_ROLES[at] && UNIT_ROLES[at].custodian === personKey) UNIT_ROLES[at].custodian = null;
+  } else if (roleKey === "fnhead") {
+    var g = FUNCTIONS[at.slice(3)];
+    if (g && g.head === personKey) g.head = null;
+  }
+  /* contrib is p.unit, which is also how a person is FOUND — clearing it would
+     hide them from every unit dropdown, so it stands until they are given
+     somewhere else to be. */
+}
+
+/* Retiring REVOKES every role the person holds, rather than leaving them
+   pointed at while unable to act. The unit then reads "unassigned", which is
+   the true state of a unit whose head has left — and it is visible, where a
+   retired person still named as head is a unit that looks staffed and is not.
+   Reported history is untouched: it lives in snapshots, not in these
+   pointers. */
+function retirePerson(key){
+  var p = personBy(key);
+  if (!p) return;
+  personRoles(p).forEach(function(r){ revokePersonRole(key, r.role, r.at); });
+  p.active = false;
+}
+function restorePerson(key){
+  var p = personBy(key);
+  if (p) delete p.active;
+}
+
+/* Where a role can be attached, for the second half of the picker. A role
+   whose scope is the group has exactly one answer, and the control says so
+   rather than offering a list of one. */
+function roleWheres(roleKey){
+  if (roleKey === "super" || roleKey === "gceo") return [{ v:"group", label:"the group" }];
+  if (roleKey === "cceo") {
+    return COMPANY_KEYS.map(function(c){ return { v:"co:" + c, label: COMPANIES[c].name }; });
+  }
+  if (roleKey === "fnhead") {
+    return FUNCTION_KEYS.map(function(f){ return { v:"fn:" + f, label: FUNCTIONS[f].name }; });
+  }
+  var units = UNIT_KEYS.map(function(k){ return { v:k, label: UNITS[k].name }; });
+  if (roleKey === "custodian") {
+    return units.concat(FUNCTION_KEYS.map(function(f){
+      return { v:"fn:" + f, label: FUNCTIONS[f].name + " (function)" };
+    }));
+  }
+  return units;
+}
+
+/* The order a picker offers people in: the ones already attached to this unit
+   or function first, then everyone else, retired people never. "Relevant
+   names first" was Islam's word for it — the list still holds everyone,
+   because a person moving between units is normal and a picker that hides
+   them makes the move impossible. */
+function peopleFor(where){
+  var here = [], rest = [];
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var mine = String(where || "").indexOf("fn:") === 0
+      ? p.fn === String(where).slice(3)
+      : p.unit === where;
+    (mine ? here : rest).push(p);
+  });
+  return { here: here, rest: rest };
 }
 
 /* The owner reaches the same pages as the head, for the same unit. */

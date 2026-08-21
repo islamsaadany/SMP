@@ -151,11 +151,6 @@
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
-      /* The register (§35). It sits after the things people are attached TO,
-         because that is the order the SMO works in: the units exist, then the
-         people who hold them. It used to be a section at the bottom of Roles &
-         access, which is a matrix page — a staff list is not a matrix. */
-      { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
       { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
     /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
@@ -734,6 +729,13 @@
         paint();
       });
     });
+    document.querySelectorAll("[data-fnrole]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var p = el.dataset.fnrole.split("|");
+        FUNCTIONS[p[0]][p[1]] = el.value || null;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-clearmenu]").forEach(function(b){
       b.addEventListener("click", function(ev){
         ev.stopPropagation();
@@ -865,8 +867,13 @@
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
     });
-    /* Both role <select>s are gone — Business units and Supporting functions
-       share one picker now, wired in wirePicker() below (§35). */
+    document.querySelectorAll("select[data-urole]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var p = sel.dataset.urole.split("|");
+        UNIT_ROLES[p[0]][p[1]] = sel.value || null;
+        paint();
+      });
+    });
     var au = document.getElementById("addunit");
     if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
     /* Choosing from the menu closes it and raises the confirmation, so the
@@ -1017,231 +1024,11 @@
           "\nThey will be asked to choose their own on first sign-in.");
         if (!pw) return;
         SYNC.setPassword(key, pw, function(err){
-          if (err) return alert("Not set: " + err);
-          /* The register shows a password COLUMN now, so a reset that does not
-             repaint it leaves the screen claiming the old state. Ask again
-             rather than assuming — the server is what knows. */
-          if (PWSTATES) PWSTATES[key] = "temporary";
-          paint();
-          alert("Set. " + key + " signs in with it once, then chooses their own.");
+          alert(err ? "Not set: " + err
+                    : "Set. " + key + " signs in with it once, then chooses their own.");
         });
       });
     });
-
-    /* ── The register (§35) ─────────────────────────────────────────
-       Three text fields, a standing toggle, an add row, the role controls and
-       the bulk issue. Everything writes the same data the Business units page
-       writes — there is no second copy to keep in step. */
-    function fieldWire(attr, apply){
-      document.querySelectorAll("[data-" + attr + "]").forEach(function(inp){
-        inp.addEventListener("change", function(){
-          var p = personBy(inp.dataset[attr]);
-          if (p) apply(p, inp.value.trim());
-          paint();
-        });
-      });
-    }
-    fieldWire("pname",  function(p, v){ if (v) p.name = v; });
-    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
-    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
-
-    document.querySelectorAll("[data-pact]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var key = b.dataset.pact;
-        var p = personBy(key);
-        if (!p) return;
-        if (personActive(p)) {
-          var held = personRoles(p).length;
-          if (held && !confirm(p.name + " holds " + plural(held, "role") +
-              ". Retiring takes " + (held === 1 ? "it" : "them") +
-              " away and closes their sign-in. Everything already reported in their name stays.\n\nRetire " +
-              p.name + "?")) return;
-          retirePerson(key);
-        } else {
-          restorePerson(key);
-        }
-        paint();
-      });
-    });
-
-    /* The typed name is held in a global rather than read off the input at
-       submit time, because the repaint that follows any other change would
-       otherwise throw it away mid-typing. */
-    var newName = document.getElementById("newPersonName");
-    if (newName) {
-      newName.addEventListener("input", function(){ NEWPERSON = newName.value; });
-      newName.addEventListener("keydown", function(e){
-        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(); }
-      });
-    }
-    function addTypedPerson(){
-      var name = (NEWPERSON || "").trim();
-      if (!name) return;
-      addPerson({ name: name });
-      NEWPERSON = "";
-      paint();
-    }
-    document.querySelectorAll("[data-padd]").forEach(function(b){
-      b.addEventListener("click", addTypedPerson);
-    });
-
-    document.querySelectorAll("[data-prole-open]").forEach(function(b){
-      b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = "owner"; paint();
-      });
-    });
-    document.querySelectorAll("[data-prole-cancel]").forEach(function(b){
-      b.addEventListener("click", function(){ ADDROLE = null; paint(); });
-    });
-    /* Choosing the role repaints, because the SECOND select's options depend
-       on the first: a company CEO is attached to a company, a function head to
-       a function. One list of every role-times-place would offer Company CEO
-       of Mobile. */
-    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){ ADDROLE_KIND = sel.value; paint(); });
-    });
-    document.querySelectorAll("[data-prole-add]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var key = b.dataset.proleAdd;
-        var where = document.querySelector('[data-prole-where="' + key + '"]');
-        grantPersonRole(key, ADDROLE_KIND, where ? where.value : "group");
-        ADDROLE = null;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-prole-off]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.proleOff.split("|");
-        revokePersonRole(p[0], p[1], p[2]);
-        paint();
-      });
-    });
-
-    /* One temporary password for everyone who has none. The SERVER picks the
-       set — this sends a password and nothing else — so the worst a stale
-       screen can do is issue to a shorter list than it showed. */
-    document.querySelectorAll("[data-pwbulk]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var pw = prompt("One temporary password, for everyone who has none." +
-          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-          "\nEach of them is asked to choose their own the first time they use it.");
-        if (!pw) return;
-        SYNC.issueTemporary(pw, function(err, issued){
-          if (err) return alert("Not issued: " + err);
-          issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
-          paint();
-          alert(issued.length
-            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") +
-              ": " + issued.join(", ") + "."
-            : "Nobody needed one \u2014 everybody already has a password.");
-        });
-      });
-    });
-
-    /* Asked ONCE, the first time the register is on screen with a database
-       behind it. Credentials are not in the state graph and never will be
-       (§19), so this is a separate question — and it is a question about other
-       people's accounts, so the server answers it only for the SMO.
-
-       PWSTATES starts null meaning "not asked" and is set to {} before the
-       request goes out, which is what stops every repaint asking again. Empty
-       renders as a dash, not as "none": not knowing is not the same as knowing
-       there is no password (§30.2, the same distinction). */
-    wirePicker();
-
-    if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
-        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
-      PWSTATES = {};
-      SYNC.passwordStates(function(err, st){
-        if (err) return;
-        PWSTATES = st;
-        paint();
-      });
-    }
-  }
-
-  /* ── The assignment picker (§35) ────────────────────────────────
-     Open one, search it, choose a name or add a new one. Used by Business
-     units and by Supporting functions, which is why it addresses everything
-     through grantPersonRole() rather than writing UNIT_ROLES or FUNCTIONS
-     itself — the register writes through the same door, so the two screens
-     cannot drift apart.
-
-     TYPING DOES NOT REPAINT. The filter hides rows in place instead, because
-     a repaint would replace the very input being typed into, taking its focus
-     and its caret with it — the same family of fault as §30.1, where a change
-     handler rewrote the DOM under a button mid-click. A search box is an
-     interaction that lasts several keystrokes; nothing may rebuild it while
-     it is running. */
-  function wirePicker(){
-    document.querySelectorAll("[data-pick-open]").forEach(function(b){
-      b.addEventListener("click", function(){
-        PICKING = b.dataset.pickOpen; PICKQ = ""; paint();
-      });
-    });
-    document.querySelectorAll("[data-pick-cancel]").forEach(function(b){
-      b.addEventListener("click", function(){ PICKING = null; PICKQ = ""; paint(); });
-    });
-    document.querySelectorAll("[data-pick-set]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.pickSet.split("|");
-        grantPersonRole(p[2], p[1], p[0]);
-        PICKING = null; PICKQ = ""; paint();
-      });
-    });
-    document.querySelectorAll("[data-pick-clear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.pickClear.split("|");
-        revokePersonRole(p[2], p[1], p[0]);
-        PICKING = null; PICKQ = ""; paint();
-      });
-    });
-    /* Add new: the typed name becomes a person AND takes the role in one act,
-       which is the whole point — "create only the name and the Role", in
-       Islam's words. They appear in the register immediately, for the rest of
-       their details. */
-    document.querySelectorAll("[data-pick-new]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var name = (PICKQ || "").trim();
-        if (!name) return;
-        var p = b.dataset.pickNew.split("|");
-        addPerson({ name: name, role: p[1], where: p[0] });
-        PICKING = null; PICKQ = ""; paint();
-      });
-    });
-
-    var q = document.getElementById("pickQ");
-    if (!q) return;
-    q.addEventListener("input", function(){
-      PICKQ = q.value;
-      var needle = PICKQ.trim().toLowerCase();
-      var any = false;
-      document.querySelectorAll(".pickrow").forEach(function(r){
-        var hit = !needle || r.dataset.name.indexOf(needle) > -1;
-        r.hidden = !hit;
-        if (hit) any = true;
-      });
-      /* A heading with nothing under it is a heading that lies about what the
-         list contains. */
-      document.querySelectorAll(".pickhead").forEach(function(h){
-        var n = h.nextElementSibling, shown = false;
-        while (n && n.classList.contains("pickrow")) {
-          if (!n.hidden) shown = true;
-          n = n.nextElementSibling;
-        }
-        h.hidden = !shown;
-      });
-      var empty = document.querySelector(".pickempty");
-      if (empty) empty.hidden = any;
-      var add = document.querySelector("[data-pick-new]");
-      if (add) {
-        add.hidden = !needle;
-        add.textContent = '+ Add \u201c' + PICKQ.trim() + '\u201d';
-      }
-      var hint = document.querySelector(".pickhint");
-      if (hint) hint.hidden = !!needle;
-    });
-    q.focus();
   }
 
   /* Arrangement. One button turns handles on everywhere the viewer is

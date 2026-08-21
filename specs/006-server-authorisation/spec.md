@@ -1,6 +1,6 @@
 # 006 · The server decides who may change what
 
-**Status:** proposed, awaiting Islam's read of §3.
+**Status:** BUILT (2026-08-21). §7's three questions answered by Islam and folded in below.
 **Closes:** §19.2 (per-action authorisation) and the change log, as one piece
 of work rather than two.
 
@@ -125,26 +125,62 @@ nothing to save to, so the rules are only ever the browser's own answer there
 
 ---
 
-## 7 · What I need Islam to decide
+## 7 · Answered
 
-1. **A locked cycle.** Should the server refuse reporting saves once a cycle
-   is locked? I propose yes — a locked cycle that still accepts numbers is not
-   locked. The SMO stays able to correct.
-2. **Contributors.** A contributor is named on a particular measure or tactic.
-   Should they be able to write only the rows they are named on, or all of
-   their unit's reporting? The matrix today says the whole unit. Narrowing it
-   is stricter and more work; I propose leaving it as the matrix says.
-3. **A tactic's quarters** (which quarters it runs in) — plan, or reporting? I
-   propose plan, so only the SMO changes them.
+1. **A locked cycle refuses reporting.** Yes. The SMO stays able to correct.
+2. **Contributors view; if allowed, their own lines only.** Both halves are
+   built. The shipped default for a contributor's own unit moves from `edit`
+   to `view` (migration 011, and only where the tenant still holds the old
+   default). And "their lines only" is a RULE WITH TEETH in `lib/rules.js`, so
+   a tenant that has `edit` stored still cannot touch anybody else's rows.
+   Submitting the report, and the unit's note on the cycle, speak for the whole
+   unit — so a contributor limited to their own lines does neither.
+
+   One weakness, recorded rather than hidden: `owner` and `collaborators` hold
+   a TYPED NAME, not a link to a person, so "named on" is matched against the
+   key and the name. Two people with the same name collide, and a renamed
+   person loses their rows. A measure names nobody at all, so it is matched
+   against the owner of the pillar it sits under. **The Finance custodian work
+   adds a real per-measure owner; this tightens the day that lands.**
+3. **A tactic's quarters are plan.** Only the SMO moves them — otherwise a
+   tactic that was due in Q2 and did not happen can be dragged to Q4, and the
+   record of what was promised stops being a record.
+
+## 8 · One thing the browser found that the tests did not
+
+`branding()` created `GROUP.branding = {palette:null, font:null, accent:null,
+bar:null}` the first time anything asked, while an untouched tenant's database
+held no branding at all. The two could never become equal, so **every save
+carried a group change nobody made** — and the moment the server started
+checking, every non-SMO save was refused, permanently, with a message naming
+nothing useful.
+
+Sixty-seven unit tests and ten end-to-end API tests all passed while this was
+true, because they built their payloads from the seed rather than from a
+running browser. It took signing in as a unit head and typing a number.
+
+Two things came out of it. `sync.js` drops an all-null branding the same way
+it already zeroes a derived weight — **what is not the tenant's own is not
+sent**. And the unrecognised-change refusal now NAMES the fields that moved:
+a refusal nobody can diagnose is a bug report addressed to nobody.
 
 ---
 
-## 8 · How it will be verified
+## 9 · Verified
 
-- A throwaway Postgres, and a scripted attempt at the escalation in §1 —
-  it must be refused, and the refusal must name the reason.
-- Every role in the demo tenant saving what they are entitled to save, and
-  being refused what they are not. This is the test that catches a rule
-  written too tightly, which is the real risk of this change.
-- The existing round trip, clean slate and fixed-point tests unchanged.
-- QA's 31 viewers, zero console errors; byte-identical rebuild.
+- `node scripts/test-authorize.js` — **67 checks, 0 failures**. Escalation,
+  reach, the locked cycle, the contributor rule, a retired person, and — the
+  half that matters more — every role doing its own legitimate work without
+  being refused.
+- A throwaway Postgres 16 and the real API end to end: sign in, save, be
+  refused. **10 checks, 0 failures.** A unit head cannot make themselves the
+  SMO, cannot rewrite their own plan, cannot widen the matrix; can report their
+  own figure, and it lands.
+- The change log holds `mobhead · Data duplicate rate · actual · 1.4% → 51%`.
+- The platform driven in a browser as a unit head and as the SMO: 12 reportable
+  fields offered, a legitimate report saved silently, a plan change refused
+  with the banner shown, no console errors.
+- Round trip, clean slate and fixed point unchanged: PASS.
+- QA's 31 viewers × every page, zero console errors; byte-identical rebuild.
+- Cost: **~240ms** per save against a local Postgres with the ten-unit example,
+  where the extra read is the whole of the added work.

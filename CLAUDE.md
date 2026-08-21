@@ -176,6 +176,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   explicitly its own; two per-company flags decide whether its CEO sees the other
   companies and the group. Stored (`companies` table, `units.company`), survives the
   clean slate, and `006-companies.sql` adds it to a tenant already deployed.
+- **Authorisation (since v3.12, §42):** `/api/state` authorises every save.
+  `lib/rules.js` is the SHARED rules module — roles, areas, access defaults and
+  every pure "may this person…" function; `build.py` inlines it into the
+  platform, `api/state.js` requires it, `scripts/extract-state.js` runs it
+  before the sources. **Never write a second copy of a rule.** `lib/authorize.js`
+  classifies the diff between the stored and incoming graphs and refuses what
+  the person's roles disallow — always resolved against the **stored** world.
+  An unclassified change is the SMO's, by design. `change_log` (migration 010)
+  is written from the same diff and lives outside the state graph.
+  Run `node scripts/test-authorize.js` after touching either file.
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
@@ -260,7 +270,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.11 (in progress): a design LANGUAGE, and
+*Last Updated: 2026-08-21 — v3.12 (in progress): THE SERVER DECIDES WHO MAY
+CHANGE WHAT (§42, spec 006). `POST /api/state` checked that you were signed in
+and nothing else, then truncated thirty tables and wrote back whatever
+arrived — register and access matrix included — so the lowest-privilege person
+in the tenant could post a state making themselves the SMO. **Everything §37
+built decided what a screen OFFERED; nothing decided what the server
+ACCEPTED.** Two lines carry the fix. **The world is the STORED state, never the
+incoming one** — authorise against what is being written and a save grants
+itself the role that authorises it, in the same request. And **an unrecognised
+change is the SMO's**: every classifier falls through to `unknown`, so a field
+added later is guarded the day it is added, not the day somebody remembers.
+**The rules are ONE file run on both sides** (`lib/rules.js`, inlined by
+build.py and required by Node) — two copies drift, and the drift is silent: a
+screen that offers an edit the server then refuses. **The diff that authorises
+IS the change log** (`change_log`, outside the state graph beside credentials —
+a log a save can erase is not a log), so "who moved this target" is answerable
+for the first time. Three rules from Islam: a locked cycle refuses reporting;
+contributors view, and if granted edit reach **their own lines only** (a rule
+with teeth, so a stored `edit` still reaches nobody else's rows) and never
+submit, because submitting speaks for the unit; **a tactic's quarters are
+plan** — if a unit moves its own ticks, a tactic due in Q2 that did not happen
+is dragged to Q4 and the record stops being a record. Also: `canReport()`
+stopped being a hard-coded `head or custodian or SMO` and asks the matrix —
+**a control that changes nothing is worse than no control**. And a refused save
+now says so ON THE PAGE (§32's rule, one surface in) rather than warning a
+console nobody has open. THE LESSON: **a reader that mutates what it reads will
+be caught by whoever compares before and after** — `branding()` created a
+four-null object the database never held, so every save carried a phantom group
+change and every non-SMO save would have been refused for ever. 67 unit tests
+and 10 end-to-end API tests passed while that was true, because all 77 built
+their payloads from the seed rather than from a running browser. **Signing in
+and typing one number found it.** Still open, in order: the `1234` SMO,
+`must_change` unenforced on /api/state, no rate limit or lockout, no security
+headers, raw DB errors reaching the browser, sessions never pruned.*
+
+*Earlier: 2026-08-21 — v3.11 (in progress): a design LANGUAGE, and
 palettes under it (§38). Ported from Strategy-Formulation at Islam's direction.
 Two token layers, and the line between them is the point: LAYER 1 is the
 language (type scale, shape, weight) — one set, never themed; LAYER 2 is the

@@ -51,6 +51,39 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.12 — the server decides who may change what *(in progress)*
+
+**The hole.** Saving used to check that you were signed in and nothing else,
+then write back whatever the browser sent — the whole tenant, register and
+permissions included. Anyone with a login could make themselves the SMO. The
+access page we built in v3.10 decided what a screen *showed*; it decided
+nothing about what the server *accepted*.
+
+**Closed.** The server now compares every save against what it already holds,
+works out what actually changed, and refuses anything that person's roles do
+not allow. You see nothing different — same screens, same saving.
+
+**And you get the history for free.** The comparison that decides the save is
+the one that gets written down: *Mobile · Data duplicate rate · actual · 1.4%
+→ 51% · Ashraf Laithy.* "Who moved this target" has an answer now.
+
+**Your three answers, built.** A locked cycle takes no more figures from
+anyone but you. Contributors view by default, and if you give one edit they
+can only touch the lines they are named on — and they cannot submit the unit's
+report, because that speaks for the whole unit. A tactic's quarters are part
+of the plan, so only you move them.
+
+**A refused save now says so, on the page.** Before, a failed save warned a
+console nobody has open and retried for ever — which with this change would
+have meant an edit sitting on screen as though it had landed.
+
+**One defect this found:** the platform was quietly sending a "branding" the
+database never had, on every single save. Sixty-seven tests missed it; signing
+in as a unit head and typing one number found it in a minute.
+
+**Not closed, and next:** the `1234` password, the temporary-password gap, no
+limit on password guessing, and the missing security headers.
+
 ### v3.11 — a new look, and colours and fonts you can swap *(in progress)*
 
 The Strategy-Formulation design language, ported onto SMP's own screens: 14px

@@ -204,16 +204,6 @@
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
   .banner strong { color:var(--panel-accent); font-weight:700; }
-  /* The refusal banner. Same shape as the one above it so it is plainly part
-     of the product's chrome, in the bad-news colour so it is not read as
-     information. It carries the server's own sentence, never a paraphrase. */
-  /* The tint and its TEXT twin, not the solid fill: a colour that works as a
-     fill fails as type (§38.4), and this banner is nothing but type. */
-  .banner.refused { background:var(--bad-bg); color:var(--bad-tx); display:block;
-                    border-bottom:2px solid var(--bad); }
-  .banner.refused strong { color:inherit; }
-  .banner.refused ul { margin:4px 0 0; padding-left:18px; }
-  .banner.refused li { margin:2px 0; }
 
   header.top { border-bottom:1px solid var(--line); background:var(--surface); }
   .top-in { max-width:1180px; margin:0 auto; padding:18px 24px; display:flex;

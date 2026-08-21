@@ -4730,3 +4730,149 @@ is there for that reason, not for decoration.
   runs while it is open. A treatment nothing measures is a treatment nothing
   checks.
 - 31 viewers × every page, zero console errors; byte-identical rebuild.
+
+---
+
+## 42 · The server decides who may change what
+
+*(Spec 006. The first item of the security work Islam asked for, and the only
+one that was exploitable by a real user rather than a hypothetical one.)*
+
+### 42.1 What was wrong
+
+`POST /api/state` checked that you were signed in and nothing else. It then
+truncated all thirty tables and wrote back whatever arrived — including
+`people`, `unit_roles` and `access_grants`.
+
+So the lowest-privilege person in the tenant could post a state making
+themselves the SMO, and on their next request they were: issuing passwords,
+resetting anyone's, reading and changing everything. No flaw was needed. The
+browser already builds and sends that object; one field had to be edited on
+its way out.
+
+**Everything §37 built decided what a screen OFFERED. Nothing decided what the
+server ACCEPTED.** The forty-nine cells were a suggestion.
+
+### 42.2 The two lines that carry the design
+
+**The world is the STORED state, never the incoming one.** Roles, the access
+map, unit ownership and the company flags are all read from what the database
+already holds. Authorise against the incoming state and a save can grant
+itself the role that authorises it, in the same request. It is one line in
+`authorize()` — `const w = R.worldOf(stored)` — and it is the whole security
+property.
+
+**An unrecognised change is the SMO's.** Every classifier ends in a
+fall-through that lands on `unknown`. A field the platform gains in a later
+version is guarded on the day it is added rather than the day somebody
+remembers to guard it. It fails CLOSED, and the cost of failing closed is a
+refusal the SMO can always make instead — never a silent hole. That bucket
+caught a real defect within an hour (§42.5).
+
+### 42.3 One copy of the rules, run on both sides
+
+The browser already answered "may this person edit this?" to decide what to
+draw. The server needed the same answer to decide what to accept. Two copies
+would drift, and the drift is silent in the worst way: **a screen that offers
+an edit the server then refuses.**
+
+So `lib/rules.js` holds the roles, the areas, the shipped access defaults and
+every pure function that reads them — `personRoles`, `roleOwns`,
+`companyAllows`, `areaFor`, `grantIn`, `namedOn`, `onlyVia`. `build.py` inlines
+it into the single file; `api/state.js` requires it; `scripts/extract-state.js`
+runs it before the sources so the seed is generated from the same list.
+`config-data.js` keeps every name it had and aliases them, so the forty call
+sites did not move.
+
+This is §33's pattern — one fact, two editing surfaces, cannot disagree —
+applied to authorisation. It was not optional: the moment the contributor
+default moved to `view`, the two copies already disagreed.
+
+### 42.4 The diff IS the change log
+
+The comparison that authorises the save is the comparison that gets written
+down, so the log costs nothing extra. `change_log` (migration 010) sits
+outside the state graph beside `credentials` and `sessions` — **a log a save
+can erase is not a log** — and carries, for each figure that actually moved,
+its row, its name, its field, and its before and after.
+
+    mobhead | unitReporting | mobile | reported figures
+             {"id":"mobile-P1-M1","name":"Data duplicate rate",
+              "field":"actual","from":"1.4%","to":"51%"}
+
+Whole-area changes (the register, the matrix, the cycle) carry no values — a
+diff of the people array is not a sentence anybody reads — so for those the
+WHAT is the record. The itemised list is capped at 200 rows: a plan import
+moves thousands at once, and a log entry nobody can read is not a record.
+
+### 42.5 What the browser found that seventy-seven tests did not
+
+`branding()` created `GROUP.branding = {palette:null, font:null, accent:null,
+bar:null}` the first time anything asked, while an untouched tenant's database
+held no branding at all. The two could never become equal again, so **every
+save carried a group change nobody had made** — and once the server started
+checking, every non-SMO save was refused for ever, with a message naming
+nothing useful.
+
+Sixty-seven unit tests and ten end-to-end API tests passed while this was
+true, because every one of them built its payload from the seed rather than
+from a running browser. It took signing in as a unit head and typing a number.
+
+**A reader that mutates what it reads will eventually be caught by whoever
+compares before and after.** The fix follows the rule `weight` already
+established: `sync.js` drops an all-null branding on the way out — what is not
+the tenant's own is not sent. And the unrecognised-change refusal now NAMES
+the fields that moved, because a refusal nobody can diagnose is a bug report
+addressed to nobody.
+
+### 42.6 A refused save says so, where the save is
+
+Before this, a failed save logged a warning to a console nobody has open and
+retried for ever. With authorisation that becomes the worst failure the
+feature could have: a change made, refused, and still on screen as though it
+had landed. The banner carries the server's own sentence, never a paraphrase,
+and the refused payload is remembered so the identical body is not posted
+again — remembered separately from `lastSaved`, which would claim it had
+landed. This is §32's rule from the Labels page, one surface further in.
+
+### 42.7 Islam's three answers
+
+- **A locked cycle refuses reporting**, from everyone but the SMO. Both the
+  screen and the server check it, or the page invites a figure the server will
+  turn away.
+- **Contributors view; if allowed, their own lines only.** The default moves
+  to `view` (migration 011, only where the tenant still holds the old default —
+  *a migration that overwrites a setting somebody made is a migration lying
+  about being a default*). "Their lines only" is a rule with teeth, so a stored
+  `edit` still reaches nobody else's rows. Submitting, and the unit's note on
+  the cycle, speak for the whole unit, so a contributor does neither.
+- **A tactic's quarters are plan.** If a unit can move its own ticks, a tactic
+  due in Q2 that did not happen is dragged to Q4 and the unit is no longer
+  late. The record of what was promised stops being a record.
+
+`canReport()` also stopped being a hard-coded `head or custodian or SMO` and
+now asks the matrix — **a control that changes nothing is worse than no
+control**, and the contributor row could not do anything even when the SMO set
+it to edit.
+
+### 42.8 Verified
+
+- `scripts/test-authorize.js`: **67 checks, 0 failures.** Escalation, reach,
+  the locked cycle, the contributor rule, a retired person — and the half that
+  matters more, every role doing its own legitimate work unrefused.
+- Throwaway Postgres 16 and the real API end to end: **10 checks, 0 failures.**
+- The platform driven in a browser as a unit head and as the SMO: 12 reportable
+  fields offered, a legitimate report saved silently, a plan change refused
+  with the banner shown, no console errors.
+- Round trip, clean slate, fixed point: PASS. QA 31 viewers, zero console
+  errors. Byte-identical rebuild.
+- Cost: **~240ms** per save on a local Postgres with the ten-unit example.
+
+### 42.9 What this did NOT close
+
+The rest of the security floor, in the order proposed: the `1234` SMO
+(migration 003) still exists; `must_change` is still not enforced on
+`/api/state`, so a temporary password buys a full session; there is still no
+rate limit or lockout on sign-in; there are still no security headers; raw
+database errors still reach the browser; expired sessions are never pruned and
+a password change does not end the others.

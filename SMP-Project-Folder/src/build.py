@@ -2,7 +2,12 @@ css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('config.css').read() + "\n" + open('arrange.css').read()
        + "\n" + open('present.css').read())
 shell = open('shell.html').read()
-for tag, f in [("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
+# lib/rules.js is the SHARED one — the same file api/state.js requires. It is
+# inlined FIRST so config-data.js can alias it. Two copies of "may this person
+# edit this" would drift, and the drift is silent: a screen that offers an edit
+# the server then refuses (spec 006 §2).
+for tag, f in [("RULES","../../lib/rules.js"),
+               ("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("PRESENT","present.js"),
                ("SYNC","sync.js")]:

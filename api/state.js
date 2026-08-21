@@ -14,6 +14,7 @@
 const pg = require("pg");
 const { writeState, readState, ensureReady, tuneTypes } = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
+const { authorize } = require("../lib/authorize.js");
 
 let pool = null;
 function getPool() {
@@ -57,6 +58,31 @@ function send(res, code, obj) {
   res.end(JSON.stringify(obj));
 }
 
+/* One row per kind of change. `rows` is capped: a plan import moves thousands
+   of figures at once, and a log entry nobody can read is not a record — the
+   count stays exact, the itemised before-and-after stops at the cap. */
+const LOG_ROW_CAP = 200;
+
+async function logChanges(client, person, changes) {
+  if (!changes || !changes.length) return;
+  try {
+    for (const ch of changes) {
+      const rows = ch.rows && ch.rows.length
+        ? { count: ch.rows.length, moved: ch.rows.slice(0, LOG_ROW_CAP) }
+        : null;
+      await client.query(
+        "INSERT INTO change_log (person_key, person_name, kind, target, what, rows_) " +
+        "VALUES ($1,$2,$3,$4,$5,$6)",
+        [person.key, person.name || null, ch.kind, ch.target, ch.what,
+         rows ? JSON.stringify(rows) : null]);
+    }
+  } catch (e) {
+    /* A log that cannot be written must not lose a save that already landed.
+       It is reported to the function's own output, where it is visible. */
+    console.error("change_log write failed:", e.message);
+  }
+}
+
 module.exports = async function handler(req, res) {
   let client;
   try {
@@ -81,7 +107,31 @@ module.exports = async function handler(req, res) {
       if (!state || !state.group || !state.units || !Array.isArray(state.unitKeys) || !state.unitKeys.length) {
         return send(res, 400, { ok: false, error: "state is missing or not shaped like the platform's graph" });
       }
+
+      /* WHO MAY CHANGE WHAT (spec 006). Until this existed, being signed in
+         was the whole check: any signed-in person could post a state making
+         themselves the SMO, because the save rewrites the register and the
+         access matrix along with everything else.
+
+         The person is looked up in the STORED graph, not taken from the
+         session and not read from the incoming state — the session carries
+         only the seat role, and the incoming state is exactly what must not
+         be trusted. Somebody the graph does not know holds no roles, so their
+         save is refused rather than waved through. */
+      const stored = await readState(client);
+      const me = (stored.people || []).filter(function (p) { return p.key === person.key; })[0]
+              || { key: person.key, name: person.name };
+      const verdict = authorize(stored, state, me);
+      if (!verdict.ok) {
+        return send(res, 403, { ok: false, refused: true,
+                                error: verdict.refusals.join(" "),
+                                refusals: verdict.refusals });
+      }
+
       await writeState(client, state);
+      /* Logged AFTER the write and outside its transaction on purpose: a log
+         entry for a save that did not land is worse than a missing one. */
+      await logChanges(client, me, verdict.changes);
       return send(res, 200, { ok: true });
     }
     res.setHeader("Allow", "GET, POST");

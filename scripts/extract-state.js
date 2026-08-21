@@ -11,6 +11,12 @@ const vm = require("vm");
 
 const SRC = path.join(__dirname, "..", "SMP-Project-Folder", "src");
 const ctx = vm.createContext({});
+/* lib/rules.js first, exactly as build.py inlines it — config-data.js aliases
+   the roles, areas and access defaults off it, so the seed and the platform
+   read one list rather than two (spec 006 §2). */
+ctx.self = ctx;
+vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "lib", "rules.js"), "utf8"),
+                ctx, { filename: "rules.js" });
 ["group-data.js", "config-data.js"].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(SRC, f), "utf8"), ctx, { filename: f });
 });

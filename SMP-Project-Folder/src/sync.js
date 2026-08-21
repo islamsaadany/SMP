@@ -58,6 +58,16 @@ var SYNC = (function () {
   function serialize() {
     var s = JSON.parse(JSON.stringify(graph()));
     s.unitKeys.forEach(function (k) { if (s.units[k]) s.units[k].weight = 0; });
+    /* A branding that sets NOTHING is not a branding. branding() fills the
+       four keys with nulls the first time anything asks, so an untouched
+       tenant grows a {palette:null,font:null,accent:null,bar:null} on screen
+       while the database holds no branding at all — and the two never became
+       equal again. That is a phantom difference in every save, and once the
+       server started checking who may change what (spec 006) it meant every
+       non-SMO save carried an unexplained group change and was refused.
+       Same rule as `weight` above: what is not the tenant's own is not sent. */
+    var b = s.group && s.group.branding;
+    if (b && Object.keys(b).every(function (k) { return b[k] == null; })) delete s.group.branding;
     return JSON.stringify(s);
   }
 
@@ -93,11 +103,29 @@ var SYNC = (function () {
     syncWeights();
   }
 
+  /* The exact payload the server last refused, so it is not posted again. Not
+     `lastSaved`: that would claim it landed, and the platform would go on
+     showing a change the database never took. */
+  var refusedBody = null;
+
+  function showRefusal(list) {
+    var el = document.getElementById("refused");
+    if (!el) return;
+    if (!list || !list.length) { el.hidden = true; el.innerHTML = ""; return; }
+    el.innerHTML = "<span><strong>Not saved.</strong> " +
+      (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
+      (list.length === 1
+        ? "<span>" + esc(list[0]) + "</span>"
+        : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>");
+    el.hidden = false;
+  }
+
   function save() {
     /* The guard that matters: demo data must never reach the database. */
     if (!live || mode === "demo" || saving) return;
     var now = serialize();
     if (now === lastSaved) return;
+    if (now === refusedBody) return;
     saving = true;
     fetch("/api/state", {
       method: "POST",
@@ -105,7 +133,19 @@ var SYNC = (function () {
       body: '{"state":' + now + "}"
     }).then(function (r) {
       saving = false;
+      /* REFUSED, not failed (spec 006). The server has decided this person may
+         not make one of these changes, and retrying the identical body would
+         refuse identically for ever — silently, which is the worst failure
+         this feature could have. So the body is remembered as refused, the
+         sentence the server sent is shown, and the next DIFFERENT change is
+         tried normally. */
+      if (r.status === 403) {
+        refusedBody = now;
+        return r.json().then(function (j) { showRefusal(j && j.refusals); },
+                             function () { showRefusal(null); });
+      }
       if (r.ok) {
+        showRefusal(null);
         lastSaved = now;
         /* A person created in the register does not exist to the SERVER until
            this save lands — and credentials are keyed on people, so until then

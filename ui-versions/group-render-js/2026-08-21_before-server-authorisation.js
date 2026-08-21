@@ -1505,10 +1505,6 @@ function renderFocusBoard(){
    a target cannot be moved from the screen where it is being reported against. */
 function renderReport(u){
   var may = canReport(u.ukey);
-  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
-     contributor limited to their own lines does neither — the server refuses
-     both, so the screen does not offer them (spec 006 §7.2). */
-  var mayAll = may && !SMPRules.onlyVia(world(), viewer(), "unit", u.ukey, "contrib");
   var c = reportedCount(u);
   var subd = !!REVIEW.submitted[u.ukey];
   var miss = missingNotes(u);
@@ -1531,9 +1527,7 @@ function renderReport(u){
     var unit = isT ? "%" : splitTarget(x.obj.target).unit;
     var cur = x.obj.actual, has = cur != null && cur !== "";
     var shown = !has ? "" : (isT ? String(cur) : splitTarget(cur).value || String(cur));
-    /* Per ROW, not per page: a contributor is limited to the lines they are
-       named on, and the server refuses the rest (spec 006 §7.2). */
-    if (!canReportRow(u.ukey, x)) return '<span class="mono">' + (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>';
+    if (!may) return '<span class="mono">' + (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>';
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
@@ -1541,7 +1535,7 @@ function renderReport(u){
   };
   var noteCell = function(x){
     var want = needsNote(x);
-    return canReportRow(u.ukey, x)
+    return may
       ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
         esc(x.obj.note || "") + '" placeholder="' +
         (want ? "Why, and what is being done" : "Note, if there is one") + '">'
@@ -1678,7 +1672,7 @@ function renderReport(u){
       '<div class="kpi"><b>' + c.done + '</b><span>of ' + c.total + ' reported</span></div>' +
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (mayAll
+      (may
         ? (subd
             ? '<span class="badge b-done">Submitted</span>' +
               '<button class="linkbu" data-unsubmit="' + u.ukey + '">Reopen my report</button>'
@@ -1688,7 +1682,7 @@ function renderReport(u){
 
   var summary =
     '<h4 class="mini">The owner\'s note on this cycle</h4>' +
-    '<div class="card" style="padding:14px 16px">' + (mayAll
+    '<div class="card" style="padding:14px 16px">' + (may
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
         esc(REVIEW.note[u.ukey] || "") + '</textarea>'
@@ -2059,10 +2053,7 @@ function projReportBody(p, may){
 }
 
 function capReportBody(c){
-  /* Same two gates as a unit's reporting: the cycle has to be open AND
-     unlocked, or the server refuses the figures the page is inviting. */
-  var may = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
-            grant("k_report") === "edit";
+  var may = REVIEW.state === "open" && grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +

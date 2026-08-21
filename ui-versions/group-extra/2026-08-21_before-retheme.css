@@ -231,7 +231,7 @@
   .section { margin-top:46px; padding-top:26px; border-top:2px solid var(--stone-soft); }
   .section:first-of-type { margin-top:8px; padding-top:0; border-top:0; }
   .section-h { display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:5px; }
-  .section-h h2 { font-size:var(--fs-title); font-weight:700; letter-spacing:-.01em; }
+  .section-h h2 { font-family:var(--serif); font-size:25px; letter-spacing:-.01em; }
   .section-h .eyebrow2 { font-size:10px; letter-spacing:.16em; text-transform:uppercase;
                          color:var(--gold-deep); font-weight:700; border:1px solid var(--gold);
                          border-radius:99px; padding:3px 10px; }
@@ -401,8 +401,7 @@
 
   /* Section number leads the title */
   .section-h { align-items:baseline; gap:11px; }
-  .section-n { font-size:var(--fs-label); font-weight:900; letter-spacing:var(--track);
-               text-transform:uppercase;
+  .section-n { font-family:var(--mono); font-size:12px; font-weight:700;
                letter-spacing:.04em; color:var(--gold-deep); border:1px solid var(--gold);
                border-radius:99px; padding:3px 11px; white-space:nowrap; }
 
@@ -498,32 +497,26 @@
      named once, read in both places. */
   .split { margin-top:0; }
 
-  .rail .rhead { background:var(--surface); color:var(--ink-3); font-weight:900;
-                 letter-spacing:var(--track); border-bottom:1px solid var(--line-soft); font-size:10.5px;
+  .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
     display:flex; justify-content:space-between; gap:8px; }
-  .rail .rhead span { color:var(--none); font-weight:600; }
+  .rail .rhead span { color:rgba(255,255,255,.65); font-weight:400; }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
   .rail button.ritem { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
-                       border-radius:var(--r);
     width:100%; text-align:left; font:inherit; color:inherit; background:none;
     padding:11px 14px 11px 11px; border:0; border-bottom:1px solid var(--line-soft);
     border-left:3px solid transparent; cursor:pointer; }
   .rail button.ritem:last-of-type { border-bottom:0; }
-  .rail button.ritem:hover { background:var(--surface-2); }
+  .rail button.ritem:hover { background:var(--zebra); }
   .rail .ritem b { font-size:13px; font-weight:500; line-height:1.35; }
   .rail .ritem .rsub { grid-column:1/-1; font-size:11px; color:var(--ink-3); margin-top:2px; }
-  .rail .ritem .rnum { font-variant-numeric:tabular-nums; font-weight:700;
+  .rail .ritem .rnum { font-family:var(--mono); font-variant-numeric:tabular-nums;
     font-size:13px; color:var(--ink-3); }
-  /* The selected row is the ACCENT PILL the primary nav uses, so "which pillar
-     am I on" reads the same way "which unit am I on" does one row up. The gold
-     left-edge went with the rest of the old language. */
-  .rail button.ritem.on { background:var(--gold); border-left-color:transparent; color:var(--on-accent); }
+  .rail button.ritem.on { background:var(--surface-2); border-left-color:var(--gold); }
   .rail .ritem.on b { font-weight:700; }
-  .rail .ritem.on .rnum,
-  .rail .ritem.on .rsub { color:var(--on-accent); opacity:.86; }
+  .rail .ritem.on .rnum { color:var(--ink); }
   .rail .rfoot { padding:9px 14px; border-top:1px solid var(--line); background:var(--surface-2);
     font-size:11.5px; color:var(--ink-3); }
   .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);

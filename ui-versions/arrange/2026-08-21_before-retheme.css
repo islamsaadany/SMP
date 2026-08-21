@@ -535,7 +535,7 @@
   .repcell .repbar{max-width:none}
   .delta{font-family:var(--mono);font-size:12px;margin-left:10px;font-weight:600;
     vertical-align:middle;letter-spacing:.02em}
-  .delta.up{color:var(--good-tx)} .delta.down{color:var(--bad-tx)}
+  .delta.up{color:var(--good)} .delta.down{color:var(--bad)}
   .headline .delta{align-self:center}
 
   /* Reporting reuses the pillar accordion so the two pages read as one product,
@@ -565,26 +565,19 @@
   .phead.rphead .num{text-align:right}
   .phead.rphead .cc{text-align:center}
 
-  /* ── Table headers, LIGHT since 3.11 ──────────────────────────────
-     They were a navy band with white type, and that band was one of the two
-     things (with the serif) that made SMP read as a different product from the
-     reference. The new language puts a QUIET header over the rows — the same
-     surface, one step down, in uppercase bold — and lets the rounded clipped
-     box do the containing that the dark band used to do.
-
-     The rule that matters is still the one this replaces: EVERY table and
-     every grid header that behaves like one is styled here, so no screen ends
-     up with two different ideas of what a header looks like. The !important
-     stays for the same reason it was written — several stylesheets set a
-     background on th, and this is the one that must win. */
+  /* ── Table headers, dark ──────────────────────────────────────────
+     Navy ground, white type. A column header is a label for what sits under
+     it, and at this weight it reads as one band rather than as a first row of
+     data. Applied to every table and to the grid headers that behave like
+     one — the pillar lists and the grouped lists in Setup — so no screen has
+     two different ideas of what a header looks like. */
   thead th, table thead th, .cfg table thead th, .scroll table thead th{
-    background:var(--surface-2) !important; color:var(--ink-2) !important;
-    border-bottom:1px solid var(--line) !important}
-  thead th .tip{color:var(--ink-3);border-color:var(--line)}
-  thead th .tip:hover{color:var(--ink);border-color:var(--ink-3)}
-  .phead, .plist .phead{background:var(--surface-2) !important; color:var(--ink-2) !important;
-    border-bottom:1px solid var(--line)}
-  .phead span, .phead > *{color:var(--ink-2)}
+    background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
+  thead th .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
+  thead th .tip:hover{color:#fff;border-color:#fff}
+  .phead, .plist .phead{background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0}
+  .phead span, .phead > *{color:var(--panel-ink)}
   .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
   .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
   /* Arrange mode still has to be visible against the dark band. */

@@ -200,7 +200,7 @@ function renderFactorEditor(){
         if (!pf) return "new this cycle";
         var d = f.weight - pf.weight;
         return pf.weight + "% &rarr; " + (d === 0 ? "unchanged"
-          : '<b style="color:' + (d > 0 ? "var(--good)" : "var(--warn)") + '">' + (d > 0 ? "+" : "\u2212") + Math.abs(d) + '</b>');
+          : '<b style="color:' + (d > 0 ? "var(--good-tx)" : "var(--warn-tx)") + '">' + (d > 0 ? "+" : "\u2212") + Math.abs(d) + '</b>');
       })() + '</span></td>' +
       '<td>' + (editable ? '<button class="rmbtn" data-rmf="' + i + '" aria-label="Remove ' + esc(f.name) + '">Remove</button>' : '') + '</td></tr>';
   }).join("");

@@ -4319,3 +4319,106 @@ in" — the one thing it must never be mistaken for.
   **49 grants** — seven roles by seven areas.
 - Live against that database through the real gate at `/raya-trade`: 49 cells,
   and changing one moved the navigation on the next paint.
+
+---
+
+## 38 · A design language, and palettes under it — v3.11
+
+Islam sent back `mock-sfstyle.html` — the Strategy-Formulation option drawn on
+SMP's own screens — and asked for *"a theme adjustment for the overall design …
+after choosing the theme we can identify the colors and shades of the palette
+colors used so we can amend upon the company branding."* On branding he was
+specific: *"when we do the multitenant we have the ability to adjust the
+branding of the platform based on the company who is using the platform."*
+
+### 38.1 The measurement that shaped the answer
+
+Colour in SMP was already tokenised — that is what made dark mode possible in
+§25. The type scale and the shape were not: **287 literal font-sizes and 50
+literal radii** across about 1,040 rules. Which decided the scope, because the
+reference's character is not the indigo. It is the 14px body with no serif, the
+`font-black uppercase tracking-widest` micro-labels, hairline cards that state
+themselves by border colour, and a LIGHT table header where SMP had a navy band
+and a zebra stripe. A palette swap would have produced SMP in different colours
+and nothing more.
+
+### 38.2 Two layers, and the line between them is the point
+
+**LAYER 1 — the LANGUAGE.** Type scale, shape, weight. One set, never themed,
+never per tenant.
+
+**LAYER 2 — the PALETTE.** Colours and nothing else. Four blocks: two palettes
+× light and dark.
+
+Islam chose one language with several palettes over two languages side by side,
+and the reason is maintenance: two languages means every page built from here is
+drawn twice and tested twice, and they drift the first time one is fixed and the
+other is not.
+
+The line is drawn exactly there because of §36. **A tenant's branding will
+supply a PALETTE, never a language** — a client can be given their colours
+without being given a different product. Nothing was scaffolded for it; the
+seam is simply in the right place.
+
+### 38.3 Nothing was renamed, because the names were never about colour
+
+A thousand rules read the colour tokens. Renaming them would have meant editing
+every one of those rules to change none of their meaning. Instead three slots
+started carrying a JOB rather than a colour:
+
+| token | was | is now, in slate |
+|---|---|---|
+| `--panel` | navy | slate-900 — the dark bar |
+| `--gold`  | gold | indigo-600 — **the accent** |
+| `--stone` | navy | slate-700 — neutral-strong |
+
+Which is why nothing had to move: **"gold" was never really gold, it was
+whatever the accent happened to be.** The rename would have been a rename of
+the comment, not of the code.
+
+### 38.4 A colour that works as a FILL usually fails as TYPE
+
+The first contrast sweep across all four combinations returned 15 failures, and
+every one was the same mistake: one token doing both jobs. `--good` at #059669
+is a fine dot and a fine bar, and 3.77:1 as a figure. White on the house gold is
+**2.4:1**.
+
+So the palette gained a second rank — `--good-tx`, `--attn-tx`, `--warn-tx`,
+`--bad-tx`, and `--on-accent` for text sitting on the accent fill. The bare
+token stays the fill; the -tx pair is the same meaning one or two steps darker,
+for words. **Getting this wrong is not a wrong shade, it is a word nobody can
+read.**
+
+Two more for the same reason: the dark bar took `--panel-quiet` and
+`--panel-hover` rather than borrowing `--ink-3` and `--surface-2`. Those are
+PAGE colours, and the nav bar is not the page — `--ink-3` on it was a dark grey
+on near-black at about 2.5:1, and `--surface-2` as a hover painted a near-white
+block onto a dark bar. **A surface with its own background needs its own ink.**
+
+### 38.5 The dark variant had to be designed, not copied
+
+Strategy-Formulation has no dark palette anywhere, so slate-dark is SMP's own:
+a #0B1120 ground, #131C2E surfaces, indigo-400 accents, and the four scoring
+colours lifted to their 300/400 shades so they still separate on a dark ground.
+Islam chose this over dropping dark, and it was the right call — dark already
+worked and taking it away would have been a visible regression.
+
+### 38.6 An !important is a decision that has to be revisited when the decision changes
+
+The navy table header was enforced with `!important` in `arrange.css`, because
+several stylesheets set a background on `th` and one of them had to win. Changing
+`_shared.css` therefore did nothing at all — the headers stayed navy through the
+whole first pass and only the screenshots showed it. The rule is now the light
+header, still `!important`, still for the same reason. **A rule written to win
+an argument keeps winning it after the argument has changed.**
+
+### 38.7 Verified
+
+- **Zero contrast failures across all four combinations** — slate and forefront,
+  light and dark. Light mode had carried 61 known failures since §25; those are
+  gone with the palette rather than fixed one at a time.
+- 31 viewers × every page, zero console errors; byte-identical rebuild.
+- Width sweep 1920→900 on the densest page (a unit's Plan, rail plus two wide
+  tables): no horizontal page scroll at any width.
+- All four palette/theme pairs load from storage, paint the right attributes and
+  survive a reload.

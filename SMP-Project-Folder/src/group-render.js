@@ -39,7 +39,7 @@ function pctBig(v){ return v == null || isNaN(v) ? '<span class="nodata">&mdash;
 function varCell(a, p){
   if (a == null || p == null) return '<span class="pill none">&mdash;</span>';
   var d = a - p;
-  var c = d >= 0 ? "var(--good)" : d <= -8 ? "var(--bad)" : "var(--warn)";
+  var c = d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)";
   return '<span style="color:' + c + '">' + (d >= 0 ? "+" : "−") + Math.abs(d) + '</span>';
 }
 
@@ -148,7 +148,9 @@ function drillCard(title, val, opts){
    (1/3, figures). Execution is a RATIO TO PLAN, so one number replaces two the
    reader would otherwise have to subtract. Colour appears exactly twice: the
    dial, and the variance. */
-function varColour(d){ return d >= 0 ? "var(--good)" : d <= -8 ? "var(--bad)" : "var(--warn)"; }
+/* TEXT, so the text-weight tokens (§38): the bare --good is the fill and
+   the dot, and at 3.77:1 it was not readable as a figure. */
+function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
 function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip){
   var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
@@ -462,7 +464,7 @@ function capsTable(){
         (headName && headName !== fn.name ? " &middot; " + esc(headName) : "") + '</span>' : '') + '</td>' +
       '<td class="num">' + c.projects.length + '</td>' +
       '<td class="cc"><span class="mono">' +
-        '<b style="color:var(--good)">' + ce.done + '</b> / ' +
+        '<b style="color:var(--good-tx)">' + ce.done + '</b> / ' +
         '<b style="color:var(--attn)">' + ce.wip + '</b> / ' +
         '<span style="color:var(--none)">' + ce.todo + '</span></span></td>' +
       '<td class="num final" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</td></tr>';

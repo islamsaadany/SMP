@@ -1,4 +1,4 @@
-/* THEME — light or dark, and which PALETTE (§38).
+/* THEME — Auto, Light, Dark.
 
    The dark palette has been in _shared.css since the beginning; what was
    missing was a way to choose it. The product followed the laptop silently
@@ -27,22 +27,6 @@ var THEME = (function () {
   var KEY = "smp.theme";
   var ORDER = ["light", "dark"];
 
-  /* ── The PALETTE, added in 3.11 (§38) ────────────────────────────
-     Two axes now, and they are deliberately separate things. LIGHT/DARK is
-     about the room you are sitting in. PALETTE is about whose colours the
-     product wears. They multiply rather than combining into one list of four,
-     because "dark" means the same thing whichever palette is on, and a single
-     four-position switch would make you hunt for the pair you wanted.
-
-     Both are properties of the SCREEN and neither goes near the state graph
-     (§25.2) — a palette in the graph would autosave, and one person choosing
-     slate would repaint the platform for the whole tenant. When multi-tenant
-     lands (§36) a tenant's own branding arrives as a palette DEFAULT, which a
-     person may still override for their own screen. */
-  var PKEY = "smp.palette";
-  var PALETTES = ["slate", "forefront"];
-  var PNAMES = { slate: "Slate", forefront: "Forefront" };
-
   /* Where the switch starts when nobody has chosen: whatever the device says.
      matchMedia is absent in very old engines and returns a stub in some test
      runners, hence the guard - light is the safe fall-through because it is
@@ -67,18 +51,7 @@ var THEME = (function () {
     try { localStorage.setItem(KEY, v); } catch (e) {}
   }
 
-  function readPalette() {
-    try {
-      var v = localStorage.getItem(PKEY);
-      return PALETTES.indexOf(v) === -1 ? PALETTES[0] : v;
-    } catch (e) { return PALETTES[0]; }
-  }
-  function writePalette(v) {
-    try { localStorage.setItem(PKEY, v); } catch (e) {}
-  }
-
   var mode = read();
-  var palette = readPalette();
 
   function apply() {
     /* Always an explicit attribute now, even when the value came from the
@@ -88,11 +61,6 @@ var THEME = (function () {
        agree. The media block stays in the stylesheet for the gate, which has
        no switch of its own and no script beyond reading storage. */
     document.documentElement.setAttribute("data-theme", mode);
-    /* Always stated, never left to a bare :root fallback. The stylesheet does
-       list the slate values on bare :root as well, so a page whose script
-       failed still paints something coherent rather than nothing — but the
-       attribute is what the four blocks are actually keyed on. */
-    document.documentElement.setAttribute("data-palette", palette);
   }
 
   /* Sun and moon, drawn in the same 20px box as the rest of the chrome's
@@ -126,43 +94,18 @@ var THEME = (function () {
     if (btn) paintBtn(btn);
   }
 
-  /* The palette control. A word, not a glyph: there is no icon that says
-     "Forefront" and inventing one would be a second thing to learn. */
-  function paintPal(btn) {
-    btn.textContent = PNAMES[palette];
-    var next = PALETTES[(PALETTES.indexOf(palette) + 1) % PALETTES.length];
-    btn.title = "Palette: " + PNAMES[palette] + " — click for " + PNAMES[next];
-    btn.setAttribute("aria-label", btn.title);
-  }
-  function setPalette(v, btn) {
-    palette = v;
-    writePalette(palette);
-    apply();
-    if (btn) paintPal(btn);
-  }
-
   return {
     apply: apply,
     mode: function () { return mode; },
-    palette: function () { return palette; },
     /* Called once, after the chrome exists. */
     wire: function () {
       var btn = document.getElementById("themebtn");
-      if (btn) {
-        btn.hidden = false;
-        paintBtn(btn);
-        btn.addEventListener("click", function () {
-          set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
-        });
-      }
-      var pal = document.getElementById("palettebtn");
-      if (pal) {
-        pal.hidden = false;
-        paintPal(pal);
-        pal.addEventListener("click", function () {
-          setPalette(PALETTES[(PALETTES.indexOf(palette) + 1) % PALETTES.length], pal);
-        });
-      }
+      if (!btn) return;
+      btn.hidden = false;
+      paintBtn(btn);
+      btn.addEventListener("click", function () {
+        set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
+      });
     }
   };
 })();

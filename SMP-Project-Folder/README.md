@@ -72,6 +72,7 @@ of it was rejected — which is the point of keeping it.
 | `mock-capcard.html` | The capability card, and the Cards/Table toggle. **Built in 1.9** |
 | `2026-08-21_design-language-strategy-formulation_SETTLED.html` | The Strategy-Formulation language on SMP's own screens. **Built in 3.11** (&sect;38) |
 | `2026-08-21_accent-budget_SETTLED.html` | Four rail treatments, three navigation, two pips, in both palettes. Settled **B / C / A** (&sect;41) |
+| `2026-08-21_fold-accent_SETTLED.html` | Five treatments for the OPEN navigation fold, both palettes. Settled **D**, accent words with no fill (&sect;41.4) |
 
 ### Settled — build status noted
 

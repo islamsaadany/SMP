@@ -659,18 +659,12 @@
     text-transform:uppercase;padding:6px 11px;cursor:pointer;display:inline-flex;
     align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
   .units .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
-  /* The accent budget (§41): open is accent WORDS, not an accent fill. A solid
-     pill here was louder than the underlined page it sat beside, and spent the
-     accent twice within two inches. The fill and the border both go, so the
-     open fold reads as a heading rather than as a second selected tab — which
-     costs the border the closed state has, a price taken knowingly. */
-  .units .navfold.open{color:var(--panel-accent);background:none;border-color:transparent;
+  /* --on-accent, not --panel. The bar's own colour as ink on the accent fill
+     is 2.84:1 — a colour picked for one ground used on another (§38.4). */
+  .units .navfold.open{color:var(--on-accent);background:var(--gold);border-color:var(--gold);
     font-weight:700;opacity:1}
-  /* .open beats :hover on source order alone (same specificity), so without
-     this an opened fold would stop answering the mouse entirely. */
-  .units .navfold.open:hover{color:var(--panel-accent);background:rgba(255,255,255,.10);
-    border-color:transparent}
   .units .navfold.open .foldtw{opacity:1}
+  .units .navfold.open .foldhere{color:var(--on-accent)}
   .navfold .foldtw{font-size:9px;opacity:.85}
   /* The closed fold carries the location, or browsing one side while sitting on
      the other leaves the navigation saying nothing about where you are. */

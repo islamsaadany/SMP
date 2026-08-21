@@ -4694,9 +4694,39 @@ The pulsing dot, and with it `@keyframes sf-pulse` and its reduced-motion
 guard — nothing else referenced them (§24: delete an element and delete its CSS
 with it).
 
-### 41.4 Verified
+### 41.4 The last item on the budget: the open fold
 
-- Contrast: still **0 failures** across 19 pages × 2 palettes × 2 themes. B
-  changes which inks sit on which grounds, so this had to be re-run rather
-  than assumed.
+The rail, the navigation and the pips were the five; the **open navigation
+fold** was the sixth and was not touched, because it was gold before the
+retheme rather than because of it. With the navigation back to an underline
+that became the visible fault: the opened MENU was louder than the page you
+were ON, and the accent was being spent twice within two inches of itself.
+
+Drawn again rather than described — five treatments, the same moment in each
+(`mockups/2026-08-21_fold-accent_PENDING.html`): A the solid pill as shipped,
+B the closed shape kept with the accent on the caret alone, C an accent edge
+instead of a fill, D accent words with no fill, E the rail's answer borrowed
+literally. **Chosen: D.**
+
+The recommendation had been C, and the note against D was recorded before the
+choice and stands: the open state loses the border the closed state has, which
+is the wrong way round if you read the border as "this is a control". Islam
+took D anyway, and the reading that makes it right is a different one — an
+open fold is not a button any more, it is a **heading over the list it just
+revealed**, and a heading does not need a box. What the choice buys is that
+the underlined page is now unambiguously the loudest thing on the bar, which
+was the whole point of the budget.
+
+One rule fell out of implementing it. **`.open` beats `:hover` on source order
+alone** — both are `0,3,0` — so replacing the open fill without adding an open
+hover would have left the fold silent under the mouse. The `.open:hover` rule
+is there for that reason, not for decoration.
+
+### 41.5 Verified
+
+- Contrast: **0 failures** across 4 combinations × 20 pages and states. The
+  sweep gained a state rather than a page: **an open fold is not reachable by
+  navigating to it**, so it was never being measured — `scan("group/units-fold-open")`
+  runs while it is open. A treatment nothing measures is a treatment nothing
+  checks.
 - 31 viewers × every page, zero console errors; byte-identical rebuild.

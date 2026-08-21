@@ -55,6 +55,9 @@ with sync_playwright() as p:
             pg.wait_for_timeout(400); scan("group/"+tab)
         pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Units')===0);if(f)f.click()}")
         pg.wait_for_timeout(250)
+        # The OPEN fold is a state, not a page — it has to be scanned while it is
+        # open or the treatment it carries is never measured (§41).
+        scan("group/units-fold-open")
         try:
             pg.locator('#units button[data-u="mobile"]').click(); pg.wait_for_timeout(500); scan("unit/perf")
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.indexOf('Strategy')>-1);if(x)x.click()}")
@@ -69,6 +72,6 @@ with sync_playwright() as p:
                 except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 19 pages\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 20 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

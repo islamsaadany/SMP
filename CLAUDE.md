@@ -291,7 +291,16 @@ description: the rail takes a quiet ground with an accent EDGE (the score keeps
 its own scoring colour instead of being swallowed), the navigation goes back to
 the underline, the pips stay solid because a 20px pip is a mark not a slab. The
 rail and the nav no longer match, which was deliberate before and is the price
-of the quieter register. **Consistency at the wrong volume is still wrong.**
+of the quieter register. **Consistency at the wrong volume is still wrong.** The
+last item on the budget was the OPEN navigation fold (§41.4) — settled from the
+same kind of drawn comparison as D, accent words with no fill: **an open fold is
+a heading over the list it just revealed, and a heading needs no box.** Two
+things came out of building it. **`.open` beats `:hover` on source order alone**
+(both `0,3,0`), so replacing an open fill without adding an open hover leaves the
+control silent under the mouse. And **an open fold is not reachable by navigating
+to it** — the contrast sweep had never measured it, because a sweep that walks
+pages only ever sees states that are pages; it scans the open fold explicitly
+now.
 TYPEFACE (§38.7): four faces embedded as latin subsets
 of variable fonts (148 KB for all four, because a linked webfont would break
 the offline single-file handover). It is its own axis for now — **B is how you

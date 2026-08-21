@@ -81,6 +81,16 @@ memory stick and still look like itself.
 been carrying 61 known failures since v3.0; the new palette clears them rather
 than fixing them one at a time.
 
+**The accent budget** (§41). The retheme gave a solid accent fill to five
+things at once, and one solid fill is a mark where nine is a colour scheme —
+it is a strategy platform, it should be quietly coloured. The rail's selected
+direction went back to a grey ground with an accent EDGE, the navigation went
+back to the underline, and the pips stayed solid because a 20px pip is a mark,
+not a slab. The **open Units / Functions fold** was the last one left: with the
+navigation quiet again, the menu you had opened was louder than the page you
+were on. It is accent words with no fill now — an open fold is a heading over
+the list it just revealed, and a heading does not need a box.
+
 The file is 994 KB with all four typefaces inside, up from 792 KB.
 
 **Not merged, and not finished:** some deeper reporting and config surfaces

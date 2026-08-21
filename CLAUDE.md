@@ -276,7 +276,27 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.12 (in progress): ONE DECISION, THEN TICKS
+*Last Updated: 2026-08-21 — **v3.12, MERGED**: the folds become ONE CONTROL
+(§41.8, treatment 4) — a single segmented box divided by a hairline instead of
+two capsules. One box on a row that has no other box; the container **says
+outright that Units and Functions are the same kind of thing**; and the two
+folds STOP MOVING, because they used to be separated by whichever list was open
+so the control you had just pressed changed position every time. Open is **the
+segment lit, not the word coloured** — §41.4's accent words had nowhere to sit
+inside a filled container, and lighting the segment is what a segmented control
+already means. The divider is an INSET SHADOW, not a border, or it would widen
+the segment and shift the one beside it. §41.9: **every fold mockup this round
+contained an element the product does not have** — `.foldhere` ("· Mobile"
+beside the closed fold) was removed from the markup long ago and its CSS was
+left behind, and I drew from the stylesheet. §24 exists precisely so leftover
+CSS cannot be mistaken for the product; **a mockup drawn from the STYLESHEET is
+drawn from what the product could look like, not from what it does.** Also
+§43.8: an explicit once-only reset of the SMO password to 1234, asked for
+outright — it runs AFTER the retirement (or that would undo it in the same
+request) and ONCE (or it would put 1234 back every time a real password was
+chosen, which is the backdoor §43.1 removed).*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): ONE DECISION, THEN TICKS
 (§16.7a). Islam on the first Source-of-figures screen: *"that's a huge setup to
 do and not practical … he just needs the measure and target so he can tick if
 he owns this or not."* Right, and the number says why — **116 figures across ten

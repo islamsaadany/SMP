@@ -260,20 +260,11 @@
          below already says it. Repeating it made the row noisier the more
          folds there were. Worth revisiting if the row ever feels lost, since
          with the company folds gone there are only two folds again. */
-      /* THE TWO FOLDS TRAVEL TOGETHER, in one container (§41.8, treatment 4).
-         They used to be separated by whichever list was open, so the control
-         you had just pressed moved every time you pressed it and the second
-         fold ended up in a different place depending on the first. As one
-         segmented box they stay put, the bar carries one box instead of two,
-         and the shared container says outright that Units and Functions are
-         the same kind of thing. The opened list follows BOTH of them. */
-      out.push({ folds: [
-        { fold:"units", label:"Units",     open:NAVFOLD === "units" },
-        { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
-      ] });
+      out.push({ fold:"units", label:"Units", open:NAVFOLD === "units" });
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      else if (NAVFOLD === "caps")
+      out.push({ fold:"caps", label:"Functions", open:NAVFOLD === "caps" });
+      if (NAVFOLD === "caps")
         cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
@@ -350,15 +341,12 @@
       current = dests.length ? dests[0].k : null;
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
-      if (t.folds) {
-        return '<span class="sep"></span><span class="foldgroup">' +
-          t.folds.map(function(f){
-            return '<button class="navfold' + (f.open ? " open" : "") +
-              '" data-fold="' + f.fold + '" aria-expanded="' + f.open + '">' + f.label +
-              '<span class="foldtw">' + (f.open ? "\u25be" : "\u25b8") + '</span></button>';
-          }).join("") + '</span>';
+      if (t.fold) {
+        return '<span class="sep"></span><button class="navfold' + (t.open ? " open" : "") +
+          '" data-fold="' + t.fold + '" aria-expanded="' + t.open + '">' + t.label +
+          '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
       }
-      return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
+      return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
     }).join("") + menuHTML();

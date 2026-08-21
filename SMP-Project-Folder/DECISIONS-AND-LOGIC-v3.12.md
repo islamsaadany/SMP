@@ -4894,6 +4894,51 @@ Why not B, which was the recommendation and dropped the container entirely: a
 fold is **a group of things rather than a page**, and the container is what
 says so. D keeps that and drops the shouting.
 
+### 41.8 The folds become one control
+
+The soft ghost (§41.7) was chosen from four treatments and never reached
+Islam's screen — `main` was four versions behind — so when he looked at the
+deployed bar he was looking at the capsule it replaced. Six were drawn again,
+closed AND open, and **4 was chosen: one shared container.**
+
+Both folds now sit in a single segmented box divided by a hairline. Three
+things it buys. The bar carries **one box instead of two**, on a row that has
+no other box. The shared container **says outright that Units and Functions
+are the same kind of thing**, which two separate capsules only implied. And
+the two folds **stop moving**: they used to be separated by whichever list was
+open, so the control you had just pressed changed position every time you
+pressed it, and Functions sat somewhere different depending on Units. The
+opened list now follows both of them.
+
+Open is **the segment lit, not the word coloured**. §41.4's accent words had
+nowhere to sit inside a filled container — a coloured word on a filled ground
+reads as the disabled segment rather than the open one — and lighting the
+segment is what a segmented control already means. The accent budget is
+untouched: this spends a lighter wash, not the accent.
+
+One implementation note worth keeping: the divider between the segments is an
+**inset shadow, not a border**, because a border would add a pixel to the
+segment's width and shift the one beside it.
+
+### 41.9 The phantom in every mockup
+
+Islam: *"why is the sample you show showing a unit while closed, we already
+removed this long ago."*
+
+He was right. `.foldhere` — the "· Mobile" beside the closed Units fold — was
+removed from the markup in an earlier version (the reversal is recorded in
+`unitTabs()`'s own comment) and **its CSS was left behind**. Every fold mockup
+in this round was drawn by reading that stylesheet, so every option put in
+front of him contained an element the product does not have.
+
+The rule §24 already states — delete an element and delete its CSS with it —
+exists precisely so that leftover CSS cannot later be mistaken for the product.
+This is what happens when it is not followed. The rule is now deleted.
+
+**And the lesson underneath it: a mockup drawn from the STYLESHEET is drawn
+from what the product could look like, not from what it does.** Draw from the
+rendered page.
+
 ### 41.5 Verified
 
 - Contrast: **0 failures** across 4 combinations × 20 pages and states. The
@@ -5156,6 +5201,24 @@ is a bug that looks like one.
 - Fresh database: clean slate, round trip, fixed point PASS — and the
   bootstrap SMO arrives with `must_change` set.
 - QA 31 viewers, zero console errors; byte-identical rebuild.
+
+### 43.8 An explicit reset, asked for and once
+
+Islam, 2026-08-21: *"Please reset my admin password to 1234 for now until
+later adjustment."* Asked for outright, so done — and written where it can be
+seen rather than done quietly, because four digits on a public URL is not a
+password and the whole of §43 exists because of that.
+
+Two things make it safe enough to write down. It runs **AFTER**
+`retireTheSimplePassword`, or the retirement would set `must_change` back in
+the same request — order is the whole of the correctness. And it runs **ONCE**,
+recorded in the migration registry: a reset that ran on every deployment would
+put the password back to 1234 every time a real one was chosen, which is a
+permanent backdoor and the exact thing §43.1 removed.
+
+Changing the password from Setup › People from then on is what it is for, and
+this step will not fight it. Delete the function and its registry row to end
+it.
 
 ### 43.7 What is still not done
 

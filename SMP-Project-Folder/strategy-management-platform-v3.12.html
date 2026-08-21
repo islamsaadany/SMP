@@ -1922,31 +1922,38 @@
   /* Scoped inside .units, or `.units button {background:none}` wins on
      specificity and the fold renders with no fill at all \u2014 and its opacity is
      reset, since a control must not inherit the dimming meant for plain tabs. */
-  /* CLOSED: a soft ghost (§41.7, treatment D). It was an 11px uppercase
-     letterspaced label in a bordered capsule — a different typographic species
-     from the 13.5px sentence-case tabs beside it, which is most of why it read
-     as bolted on. It keeps a container, because a fold is a group of things
-     rather than a page and the container is what says so; what it drops is the
-     border and the shouting. */
-  .units .navfold{background:rgba(255,255,255,.07);border:0;opacity:1;
-    border-radius:6px;color:#D7E0EE;font:600 13px/1 var(--sans);letter-spacing:0;
-    text-transform:none;padding:8px 12px;cursor:pointer;display:inline-flex;
-    align-items:center;gap:7px;white-space:nowrap;margin:0 3px}
-  .units .navfold:hover{color:#fff;background:rgba(255,255,255,.16)}
-  /* The accent budget (§41): open is accent WORDS, not an accent fill. A solid
-     pill here was louder than the underlined page it sat beside, and spent the
-     accent twice within two inches. The fill and the border both go, so the
-     open fold reads as a heading rather than as a second selected tab — which
-     costs the border the closed state has, a price taken knowingly. */
-  .units .navfold.open{color:var(--panel-accent);background:none;border-color:transparent;
+  /* ONE SHARED CONTAINER (§41.8, treatment 4). The two folds were an 11px
+     uppercase letterspaced label in a bordered capsule EACH — a different
+     typographic species from the 13.5px sentence-case tabs beside them, and
+     two boxes on a bar that has no other box. They are now one segmented
+     control divided by a hairline: half the boxes, the row's own type, and a
+     shared container that says outright that Units and Functions are the same
+     kind of thing.
+     `align-self:center` because the group is shorter than the 47px row and
+     must not be stretched to it. */
+  .units .foldgroup{display:inline-flex;align-items:center;align-self:center;
+    background:rgba(255,255,255,.08);border-radius:7px;margin:0 4px;overflow:hidden}
+  .units .foldgroup .navfold{background:none;border:0;opacity:1;border-radius:0;
+    color:#D2DCEC;font:600 13px/1 var(--sans);letter-spacing:0;text-transform:none;
+    padding:8px 13px;cursor:pointer;display:inline-flex;align-items:center;
+    gap:7px;white-space:nowrap;margin:0;height:auto}
+  /* The divider is an INSET SHADOW rather than a border, so it cannot add a
+     pixel to the segment's width and shift the one beside it. */
+  .units .foldgroup .navfold + .navfold{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+  .units .navfold:hover{color:#fff;background:rgba(255,255,255,.13)}
+  /* OPEN is the SEGMENT lit, not the word coloured. Inside a shared container
+     the accent-words treatment (§41.4) had nowhere to sit — a coloured word on
+     a filled ground reads as a disabled segment rather than the open one — and
+     lighting the segment is what a segmented control already means. The accent
+     budget is untouched by it: this spends a lighter wash, not the accent.
+     .open beats :hover on source order alone, so the open hover is stated or
+     the segment stops answering the mouse. */
+  .units .foldgroup .navfold.open{color:#fff;background:rgba(255,255,255,.2);
     font-weight:700;opacity:1}
-  /* .open beats :hover on source order alone (same specificity), so without
-     this an opened fold would stop answering the mouse entirely. */
-  .units .navfold.open:hover{color:var(--panel-accent);background:rgba(255,255,255,.10);
-    border-color:transparent}
-  .units .navfold.open .foldtw{opacity:1}
-  .navfold .foldtw{font-size:10px;opacity:.7}
+  .units .foldgroup .navfold.open:hover{background:rgba(255,255,255,.26);color:#fff}
+  .navfold .foldtw{font-size:10px;opacity:.65}
   .units .navfold:hover .foldtw{opacity:1}
+  .units .navfold.open .foldtw{opacity:1}
 
   .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface-2);
     color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;
@@ -1969,7 +1976,8 @@
      spacing tightens. Everyone else keeps today's roomier row. */
   .units-in.folded{max-width:none;padding-left:16px;padding-right:16px}
   .units-in.folded button[data-u]{padding-left:9px;padding-right:9px;font-size:13.5px}
-  .units-in.folded .navfold{padding:7px 10px;font-size:12.5px;margin:0 2px}
+  .units-in.folded .foldgroup{margin:0 3px}
+  .units-in.folded .foldgroup .navfold{padding:7px 11px;font-size:12.5px}
   .units-in.folded .sep{margin:0 3px}
 
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
@@ -13758,11 +13766,20 @@ var SYNC = (function () {
          below already says it. Repeating it made the row noisier the more
          folds there were. Worth revisiting if the row ever feels lost, since
          with the company folds gone there are only two folds again. */
-      out.push({ fold:"units", label:"Units", open:NAVFOLD === "units" });
+      /* THE TWO FOLDS TRAVEL TOGETHER, in one container (§41.8, treatment 4).
+         They used to be separated by whichever list was open, so the control
+         you had just pressed moved every time you pressed it and the second
+         fold ended up in a different place depending on the first. As one
+         segmented box they stay put, the bar carries one box instead of two,
+         and the shared container says outright that Units and Functions are
+         the same kind of thing. The opened list follows BOTH of them. */
+      out.push({ folds: [
+        { fold:"units", label:"Units",     open:NAVFOLD === "units" },
+        { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
+      ] });
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      out.push({ fold:"caps", label:"Functions", open:NAVFOLD === "caps" });
-      if (NAVFOLD === "caps")
+      else if (NAVFOLD === "caps")
         cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
@@ -13839,12 +13856,15 @@ var SYNC = (function () {
       current = dests.length ? dests[0].k : null;
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
-      if (t.fold) {
-        return '<span class="sep"></span><button class="navfold' + (t.open ? " open" : "") +
-          '" data-fold="' + t.fold + '" aria-expanded="' + t.open + '">' + t.label +
-          '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
+      if (t.folds) {
+        return '<span class="sep"></span><span class="foldgroup">' +
+          t.folds.map(function(f){
+            return '<button class="navfold' + (f.open ? " open" : "") +
+              '" data-fold="' + f.fold + '" aria-expanded="' + f.open + '">' + f.label +
+              '<span class="foldtw">' + (f.open ? "\u25be" : "\u25b8") + '</span></button>';
+          }).join("") + '</span>';
       }
-      return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
+      return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
     }).join("") + menuHTML();

@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.10.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.12.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.10.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.12.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -74,6 +74,7 @@ of it was rejected — which is the point of keeping it.
 | `2026-08-21_accent-budget_SETTLED.html` | Four rail treatments, three navigation, two pips, in both palettes. Settled **B / C / A** (&sect;41) |
 | `2026-08-21_fold-accent_SETTLED.html` | Five treatments for the OPEN navigation fold, both palettes. Settled **D**, accent words with no fill (&sect;41.4) |
 | `2026-08-21_closed-fold_SETTLED.html` | Four treatments for the CLOSED navigation fold. Settled **D**, a soft ghost — quiet fill, no border, the row's own type (&sect;41.7) |
+| `2026-08-21_fold-six_SETTLED.html` | Six treatments, closed AND open, redrawn without the phantom `.foldhere`. Settled **4**, one shared segmented container (&sect;41.8) |
 
 ### Settled — build status noted
 

@@ -143,7 +143,7 @@
     /* Setup is what EXISTS: decided once, revisited rarely. */
     setup: [
       { k:"labels", ac:"c_labels", label:"Labels",          primary:true, render:renderLabels },
-      { k:"access", ac:"c_access", label:"Levels & access",               render:renderAccess },
+      { k:"access", ac:"c_access", label:"Roles & access",                render:renderAccess },
       { k:"bands",  ac:"c_bands",  label:"Scoring bands",                 render:function(){ return renderBands() + renderBandsExtra(); } },
       { k:"units",  ac:"c_units",  label:"Business units",                render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
@@ -477,7 +477,10 @@
     var where = v.unit === "group" ? "all units"
               : (v.unit && UNITS[v.unit] ? UNITS[v.unit].name : "\u2014");
     document.getElementById("viewerNote").innerHTML =
-      (v.level === "smo" ? "Super user" : v.level.toUpperCase().replace("N","N-")) +
+      /* The roles they hold, not a level. Several is normal — group CEO who
+         also owns Care reads "Group CEO · Business unit owner". */
+      (personRoles(v).map(function(r){ return roleName(r.role); })
+        .filter(function(x, i, a){ return a.indexOf(x) === i; }).join(" &middot; ") || "No role") +
       " &middot; " + where;
 
     if (!current) {
@@ -627,19 +630,18 @@
         paint();
       });
     });
-    document.querySelectorAll("input.lvl").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        LEVELS.filter(function(l){ return l.key === inp.dataset.lvl; })[0].titles = inp.value;
-        paint();
-      });
-    });
+    /* The "titles at this level" field went with LEVELS in 3.8. A title is
+       information about a person, not a rung anyone is standing on. */
 
     /* Access matrix — changing a cell re-renders the navigation immediately,
        so the grid is judged by using it rather than by reading it. */
     document.querySelectorAll("[data-ac]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.ac.split("|");
-        ACCESS[p[0]][p[1]] = p[2];
+        /* The row may not exist yet: a migrated tenant starts with an empty
+           map and every answer coming from the shipped default. Writing a cell
+           is the moment that role gets a row of its own. */
+        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
         paint();
       });
     });

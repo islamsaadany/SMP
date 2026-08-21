@@ -253,7 +253,9 @@ CREATE TABLE IF NOT EXISTS people (
   key      text PRIMARY KEY,
   idx      int NOT NULL,
   name     text NOT NULL DEFAULT '',
-  level    text NOT NULL DEFAULT '',
+  -- The SEAT role only: super / gceo / cceo, or '' for someone whose role is
+  -- read from what points at them (§33).
+  role     text NOT NULL DEFAULT '',
   unit_key text,
   fn_key   text,
   title    text,
@@ -266,20 +268,14 @@ CREATE TABLE IF NOT EXISTS unit_roles (
   custodian text
 );
 
-CREATE TABLE IF NOT EXISTS levels (
-  key    text PRIMARY KEY,
-  idx    int NOT NULL,
-  name   text NOT NULL DEFAULT '',
-  titles text,
-  note   text,
-  extra  jsonb NOT NULL DEFAULT '{}'
-);
+-- The `levels` table went in 008. Roles are a fixed list in the platform, not
+-- per-tenant data, so there is nothing to store.
 
 CREATE TABLE IF NOT EXISTS access_grants (
-  level_key text NOT NULL,
-  page_key  text NOT NULL,
-  grant_    text NOT NULL CHECK (grant_ IN ('none','view','edit')),
-  PRIMARY KEY (level_key, page_key)
+  role_key text NOT NULL,
+  page_key text NOT NULL,
+  grant_   text NOT NULL CHECK (grant_ IN ('none','view','edit')),
+  PRIMARY KEY (role_key, page_key)
 );
 
 CREATE TABLE IF NOT EXISTS labels (

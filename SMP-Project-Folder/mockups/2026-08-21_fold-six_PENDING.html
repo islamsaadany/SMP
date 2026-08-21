@@ -1,0 +1,156 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>The navigation fold — six treatments</title>
+<style>
+:root{
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-hover:#24487A;
+  --gold:#C9A24D; --panel-accent:#E6C65C;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+body{margin:0;font-family:var(--sans);background:#F1F4F9;color:#1B2437}
+.wrap{max-width:1180px;margin:0 auto;padding:30px 20px 80px}
+h1{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+p.lede{margin:0 0 22px;color:#5A6883;font-size:14px;max-width:76ch;line-height:1.6}
+.row{margin:34px 0 0}
+.row h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#8592AB;margin:0 0 3px}
+.row h2 b{color:#16325C;font-size:14px;letter-spacing:0;text-transform:none;margin-right:8px}
+.row p{font-size:13px;color:#5A6883;margin:0 0 12px;line-height:1.55;max-width:84ch}
+.cap{font:700 9.5px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;
+     color:#9AA6BC;margin:12px 0 5px}
+
+/* ── the bar, exactly as it ships ─────────────────────────────── */
+nav.units{background:var(--panel);display:flex;align-items:stretch;padding:0 16px;
+  overflow:hidden;border-radius:7px}
+.units button{appearance:none;border:0;background:none;padding:0 13px;height:47px;
+  font:600 13.5px/1 var(--sans);color:var(--panel-quiet);cursor:pointer;white-space:nowrap;
+  border-bottom:3px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.units button:hover{color:var(--panel-ink)}
+.units button[aria-selected="true"]{color:var(--panel-ink);font-weight:700;
+  border-bottom-color:var(--gold)}
+.units .sep{width:1px;background:var(--panel-ink);opacity:.22;margin:12px 8px;flex:0 0 1px}
+.foldwrap{display:flex;align-items:center}
+.foldhere{color:var(--gold);font-weight:700;font-size:12.5px}
+.foldhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
+.navfold{cursor:pointer;display:inline-flex;align-items:center;white-space:nowrap}
+.foldn{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.55)}
+
+/* ── 1 · as deployed today ────────────────────────────────────── */
+.t1 .navfold{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+  border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+  text-transform:uppercase;padding:6px 11px;gap:6px;margin:0 2px}
+.t1 .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
+.t1 .foldtw{font-size:9px;opacity:.85}
+.t1 .navfold.open{background:var(--gold);border-color:var(--gold);color:#16325C}
+.t1 .navfold.open .foldhere{color:#16325C}
+
+/* ── 2 · soft ghost (the D already built) ─────────────────────── */
+.t2 .navfold{background:rgba(255,255,255,.07);border:0;border-radius:6px;color:#D7E0EE;
+  font:600 13px/1 var(--sans);padding:8px 12px;margin:0 3px;gap:7px}
+.t2 .navfold:hover{background:rgba(255,255,255,.16);color:#fff}
+.t2 .foldtw{font-size:10px;opacity:.7}
+.t2 .navfold.open{background:none;color:var(--panel-accent);font-weight:700}
+
+/* ── 3 · bare words ───────────────────────────────────────────── */
+.t3 .navfold{background:none;border:0;border-bottom:3px solid transparent;
+  color:var(--panel-quiet);font:600 13.5px/1 var(--sans);padding:0 13px;height:47px;gap:7px}
+.t3 .navfold:hover{color:var(--panel-ink)}
+.t3 .foldtw{font-size:10px;opacity:.6}
+.t3 .navfold:hover .foldtw{opacity:1}
+.t3 .navfold.open{color:var(--panel-accent);font-weight:700}
+.t3 .navfold.open .foldtw{opacity:1}
+
+/* ── 4 · one shared container ─────────────────────────────────── */
+.t4 .foldgroup{display:inline-flex;align-items:center;align-self:center;
+  background:rgba(255,255,255,.08);border-radius:7px;margin:0 4px;overflow:hidden}
+.t4 .foldgroup .navfold{background:none;border:0;color:#D2DCEC;
+  font:600 13px/1 var(--sans);padding:8px 13px;gap:7px}
+.t4 .foldgroup .navfold + .navfold{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+.t4 .navfold:hover{background:rgba(255,255,255,.13);color:#fff}
+.t4 .foldtw{font-size:10px;opacity:.65}
+.t4 .navfold.open{background:rgba(255,255,255,.2);color:#fff;font-weight:700}
+
+/* ── 5 · the word carries its count ───────────────────────────── */
+.t5 .navfold{background:none;border:0;border-bottom:3px solid transparent;
+  color:var(--panel-quiet);font:600 13.5px/1 var(--sans);padding:0 13px;height:47px;gap:8px}
+.t5 .navfold:hover{color:var(--panel-ink)}
+.t5 .navfold:hover .foldn{color:rgba(255,255,255,.85)}
+.t5 .foldtw{display:none}
+.t5 .navfold.open{color:var(--panel-accent);font-weight:700}
+.t5 .navfold.open .foldn{color:var(--panel-accent);opacity:.8}
+
+/* ── 6 · a mark instead of a caret ────────────────────────────── */
+.t6 .navfold{background:none;border:0;border-bottom:3px solid transparent;
+  color:var(--panel-quiet);font:600 13.5px/1 var(--sans);padding:0 13px;height:47px;gap:9px}
+.t6 .navfold:hover{color:var(--panel-ink)}
+.t6 .foldtw{font-size:0;width:11px;height:11px;position:relative;display:inline-block;opacity:.7}
+.t6 .foldtw::before,.t6 .foldtw::after{content:"";position:absolute;left:0;right:0;height:2px;
+  background:currentColor;border-radius:1px}
+.t6 .foldtw::before{top:1px}
+.t6 .foldtw::after{top:5px;right:4px}
+.t6 .navfold:hover .foldtw{opacity:1}
+.t6 .navfold.open{color:var(--panel-accent);font-weight:700}
+.t6 .navfold.open .foldtw{opacity:1}
+</style></head><body><div class="wrap">
+
+<h1>The navigation fold — six treatments</h1>
+<p class="lede">Each shown twice: <b>closed</b> on the Group page with Mobile behind the fold, and
+<b>open</b> beside the selected unit. Everything else on the bar is exactly as it ships — the tabs,
+the selected underline, the separators. Only the two folds change.</p>
+
+<div class="row t1"><h2><b>1</b> as deployed today</h2>
+<p>11px uppercase letterspaced in a bordered capsule, beside 13.5px sentence-case tabs. A different
+typographic species, which is why it reads as bolted on — and the open state is a solid accent
+slab, louder than the page you are actually on.</p><div class="pair"></div></div>
+
+<div class="row t2"><h2><b>2</b> soft ghost <span style="color:#8592AB;font-size:11px">— what is on the branch now</span></h2>
+<p>Keeps a container, so the fold still reads as a group of things rather than a page, and drops
+the border and the uppercase. Open is accent words with no fill.</p><div class="pair"></div></div>
+
+<div class="row t3"><h2><b>3</b> bare words</h2>
+<p>No container at all. The fold is a tab that happens to open a list — same size, weight, height
+and hover as Group beside it, with the caret the only thing saying it does something different.
+The quietest of the six.</p><div class="pair"></div></div>
+
+<div class="row t4"><h2><b>4</b> one shared container</h2>
+<p>Both folds in a single box divided by a hairline, like a segmented control. Halves the number of
+boxes on the bar and says outright that these two are the same kind of thing. Open is the
+segment lit rather than the word coloured.</p><div class="pair"></div></div>
+
+<div class="row t5"><h2><b>5</b> the word carries its count</h2>
+<p>No caret; the numeral does the work. <b>Units 10</b> tells you what is behind the fold before
+you open it, which no other option here does. Open turns the word and its count to the accent.</p>
+<div class="pair"></div></div>
+
+<div class="row t6"><h2><b>6</b> a mark instead of a caret</h2>
+<p>Bare words, but a small stack glyph replaces the caret — two rules suggesting a list. Reads as
+&ldquo;a list opens here&rdquo; rather than relying on a triangle nobody looks at.</p>
+<div class="pair"></div></div>
+
+<script>
+function bar(open, opts){
+  opts = opts || {};
+  var fold = function(label, n, isOpen){
+    return '<button class="navfold' + (isOpen ? ' open' : '') + '">' + label +
+      (opts.count ? ' <span class="foldn">' + n + '</span>' : '') +
+      ' <span class="foldtw">' + (isOpen ? '▾' : '▸') + '</span>' +
+      (label === 'Units' && !isOpen ? '<span class="foldhere">Mobile</span>' : '') + '</button>';
+  };
+  var u = open
+    ? '<button aria-selected="true">Mobile</button><button>Retail Stores</button>' +
+      '<button>B2B Ecomm</button><button>Consumer Electronics</button><button>Online Shop</button>'
+    : '';
+  var folds = opts.group
+    ? '<span class="foldgroup">' + fold('Units', 10, open) + fold('Functions', 7, false) + '</span>' + u
+    : '<span class="foldwrap">' + fold('Units', 10, open) + '</span>' + u +
+      '<span class="foldwrap">' + fold('Functions', 7, false) + '</span>';
+  return '<nav class="units"><button' + (open ? '' : ' aria-selected="true"') + '>Group</button>' +
+    '<span class="sep"></span>' + folds +
+    '<span class="sep"></span><button>⚙</button></nav>';
+}
+[['t1',{}],['t2',{}],['t3',{}],['t4',{group:1}],['t5',{count:1}],['t6',{}]].forEach(function(p){
+  document.querySelector('.' + p[0] + ' .pair').innerHTML =
+    '<div class="cap">closed</div>' + bar(false, p[1]) +
+    '<div class="cap">open</div>' + bar(true, p[1]);
+});
+</script>
+</div></body></html>

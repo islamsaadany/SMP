@@ -120,10 +120,6 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
-/* Which unit the source-of-figures page is showing. A property of the screen,
-   never of the state graph (§25.2). */
-var SRCSET = { unit: null };
-
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 var PICKING = null, PICKQ = "";
 
@@ -1022,55 +1018,6 @@ function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
   if (!SMPRules.onlyVia(world(), viewer(), "unit", unitKey, "contrib")) return true;
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
-}
-
-/* ── The source of a figure (§16.7) ────────────────────────────────
-   A key objective or a measure may carry `src` — the team that is master of
-   the number and the person in it who enters it. Where it does, the UNIT sees
-   the figure and does not type it, and the source enters it once for every
-   unit that uses it.
-
-   The note is a separate question and always the unit's: the number is the
-   source's, the performance is the unit's, and the explanation belongs to
-   whoever owns the performance. */
-function srcOf(x){ var o = x && (x.obj || x); return (o && o.src && o.src.by) ? o.src : null; }
-function srcTeamName(src){
-  if (!src) return "";
-  var f = FUNCTIONS[src.team];
-  return f ? (f.navName || f.name) : (src.team || "another team");
-}
-/* May THIS viewer type THIS figure? Three answers in one function, because a
-   screen that asks them separately will eventually answer them differently
-   from the server (§42.3). */
-function canEnterFigure(unitKey, x){
-  var src = srcOf(x);
-  if (!src) return canReportRow(unitKey, x);
-  if (hasRole("super")) return canReport(unitKey);
-  return src.by === viewer().key && REVIEW.state === "open" &&
-         !(CYCLE.locked && !hasRole("super"));
-}
-/* The note stays with the unit whatever the figure does. */
-function canEnterNote(unitKey, x){
-  var src = srcOf(x);
-  if (src && !hasRole("super") && src.by === viewer().key &&
-      grantAt("u_report", unitKey) !== "edit") return false;
-  return canReportRow(unitKey, x);
-}
-/* Every figure this person is master of, across every unit. Their reporting
-   surface is built from it, and so is the answer to "does this person have
-   one at all". */
-function mySourceRows(){
-  return SMPRules.sourcesFor(world(), viewer());
-}
-function ownsAnySource(){ return mySourceRows().length > 0; }
-/* What a unit is still waiting on from somebody else. A blocked Submit with
-   no explanation is hostile: the page has to say what is outstanding and who
-   owes it (§16.7, settled). */
-function outstandingSources(u){
-  return askedItems(u).filter(function(x){
-    var src = srcOf(x);
-    return !!src && (x.obj.actual == null || x.obj.actual === "");
-  });
 }
 
 /* What this cycle asks a unit for: its objectives, every measure carrying a

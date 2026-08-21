@@ -63,8 +63,19 @@ with sync_playwright() as p:
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.indexOf('Strategy')>-1);if(x)x.click()}")
             pg.wait_for_timeout(500); scan("unit/strategy")
         except Exception: pass
-        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand"]),
-                         ("manage",["cycle","import","focusset","kb"])]:
+        # "Figures I report" is hidden for anybody named on nothing (16.7), so
+        # without this the menu entry does not exist and the sweep walks past
+        # it - 41.5's lesson: a page that cannot be reached by navigating is a
+        # page nothing measures. One figure is sourced to the viewer and left
+        # outstanding, so the unit's waiting note gets measured too.
+        pg.evaluate("() => { var u = UNITS[UNIT_KEYS[0]];"
+                    "  if (u.keyObjectives[0]) {"
+                    "    u.keyObjectives[0].src = { team: FUNCTION_KEYS[0], by: viewer().key };"
+                    "    u.keyObjectives[0].actual = null; }"
+                    "  paint(); }")
+        pg.wait_for_timeout(300)
+        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand","source"]),
+                         ("manage",["cycle","import","focusset","kb","myfig"])]:
             for sub in subs:
                 pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
                 try:
@@ -72,6 +83,6 @@ with sync_playwright() as p:
                 except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 20 pages and states\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 22 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

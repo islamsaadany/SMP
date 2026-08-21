@@ -51,6 +51,38 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.12 — Finance enters the numbers Finance owns *(in progress)*
+
+Your Finance custodian, built. §16.7 in the decisions document had already
+designed this; your description matched it, so nothing was reinvented.
+
+**Setup › Source of figures.** One unit at a time, every key objective and key
+measure listed, and against each you say which **team** is master of the number
+and which **person** enters it. Leave a row empty and the unit enters it itself,
+as now.
+
+**Manage › Figures I report.** The custodian's own screen: every figure they are
+master of, across every unit, in one place. Finance enters revenue once per unit
+without visiting ten pages. Nobody else sees this page — it is hidden outright
+for anyone named on nothing.
+
+**On the unit's own page**, a sourced figure shows greyed with the team's name
+beside it. The unit cannot type it — the server refuses, not just the screen.
+
+**Three things worth knowing, all of them already settled in §16.7:**
+
+- **The unit still writes the note.** The number is Finance's; the performance is
+  the unit's; the explanation belongs to whoever owns the performance.
+- **A sourced figure still counts toward the unit's total**, so a unit cannot
+  submit around a missing Finance number. That looks like a defect and is not
+  one: it means the unit chases too, instead of the SMO being the only one. The
+  page names what is outstanding and which team owes it.
+- **Who is master of a figure is yours alone to set.** A unit that could nominate
+  the source of its own numbers could nominate itself.
+
+**Not sourced yet:** capability projects — deliverables, outcomes and milestones.
+Unit key objectives and key measures are what you described, and what is built.
+
 ### v3.12 — the security floor *(in progress)*
 
 Everything in the list I gave you, built.

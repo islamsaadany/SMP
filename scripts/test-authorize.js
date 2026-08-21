@@ -197,6 +197,67 @@ console.log("\n6 · a contributor");
   check("with the shipped default a contributor reports nothing", !v3.ok, v3.refusals.join(" / "));
 })();
 
+/* ── 6b · The source of a figure (§16.7) ────────────────────────── */
+console.log("\n6b · a sourced figure");
+(function () {
+  /* Give the head of Finance the first measure in the unit under test. */
+  const base = clone(SEED);
+  const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
+  if (!fin) { console.log("  (no finance person in the seed — skipped)"); return; }
+  const m = base.units[UNIT].items[0].measures[0];
+  m.src = { team: "finance", by: fin.key };
+  const other = base.units[UNIT].items[0].measures[1];
+  console.log("  " + m.name + " is now reported by " + fin.name + " (finance)");
+
+  const move = function (state, id, to) {
+    state.units[UNIT].items[0].measures.forEach(function (x) { if (x.id === id) x.actual = to; });
+  };
+  const note = function (state, id, txt) {
+    state.units[UNIT].items[0].measures.forEach(function (x) { if (x.id === id) x.note = txt; });
+  };
+  const verdict = function (who, mutate) {
+    const inc = clone(base); mutate(inc);
+    return A.authorize(base, inc, personOf(base, who));
+  };
+
+  let v = verdict(headKey, function (s) { move(s, m.id, "77%"); });
+  check("the unit head cannot enter a sourced figure", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { move(s, m.id, "77%"); });
+  check("the named source can", v.ok, v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { move(s, other.id, "77%"); });
+  check("but not a figure they are not named on", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(headKey, function (s) { note(s, m.id, "Why it landed there."); });
+  check("the UNIT still writes the note on a sourced figure", v.ok, v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { note(s, m.id, "Finance's opinion."); });
+  check("and the source does not", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(headKey, function (s) { move(s, other.id, "12%"); });
+  check("the unit still reports its own unsourced figures", v.ok, v.refusals.join(" / "));
+
+  v = verdict("smo", function (s) { move(s, m.id, "77%"); });
+  check("the SMO can correct anything", v.ok, v.refusals.join(" / "));
+
+  /* Naming yourself as the source, in the same save that uses it. */
+  const inc = clone(base);
+  inc.units[UNIT].items[0].measures.forEach(function (x) {
+    if (x.id === other.id) { x.src = { team: "finance", by: headKey }; x.actual = "99%"; }
+  });
+  v = A.authorize(base, inc, personOf(base, headKey));
+  check("nobody can name themselves the source and use it in one save", !v.ok,
+        v.refusals.join(" / "));
+
+  /* And a locked cycle stops the source too. */
+  const locked = clone(base); locked.cycle.locked = true;
+  const li = clone(locked); move(li, m.id, "88%");
+  v = A.authorize(locked, li, personOf(locked, fin.key));
+  check("a locked cycle stops the source as well", !v.ok, v.refusals.join(" / "));
+})();
+
 /* ── 7 · A retired person can do nothing ───────────────────────── */
 console.log("\n7 · a retired person");
 (function () {

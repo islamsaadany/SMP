@@ -1553,6 +1553,53 @@ reported, exactly as it cannot while a unit has not.
 error in the cycle, and it makes the platform's answer to *where did this number
 come from* a real one rather than a convention.
 
+#### BUILT in v3.12 (2026-08-21) — what the build settled
+
+Islam brought it back in his own words: a *"Finance Strategy custodian … more
+of the Finance SMO custodian"* who chooses which of the units' numbers he is
+master of and enters them when the cycle opens — *"the finance enters and the
+unit has no permission to change."* That is this section, and the design above
+stands unchanged. Five things the build had to decide:
+
+**The team is STORED, not read off the person.** §33's instinct is to read a
+role from what it is attached to, and here that fails: the person may sit with
+the SMO rather than in the function whose number it is — which is exactly
+Islam's Finance SMO custodian, who is not Finance's own custodian. The
+attribution has to name the number's HOME, not the reporter's desk. So
+`row.src = { team, by }`.
+
+**It is a rule, not a matrix cell** (§37). A source's reach is defined entirely
+by what it is named on: it crosses units without owning them, and reaches
+nothing it is not named on. There is no column to set, because every cell would
+hold the same answer.
+
+**The figure and the note had to be split in the authoriser.** Until now a
+reported row moved as one thing. `actual` and `progress` are the source's;
+`note` is the unit's, always. Splitting them is what makes §16.7's first
+settled question enforceable rather than a convention.
+
+**Who is master of a figure is SETUP, not plan and not report.** It is
+classified separately so a refusal says *"Setup is the SMO's"* rather than
+*"a plan is corrected by the SMO"* — both true, but only one of them sends the
+person to the right screen.
+
+**A half-set row is KEPT.** The first build deleted `src` whenever one end was
+empty, which made the control impossible to complete: choosing a team dropped
+it because no person was set, and choosing a person dropped it because the team
+had just been dropped. **A control that cannot be completed is broken**, and it
+was only visible by driving the real page. A half-set row is now stored, shown
+as *Needs both*, and does nothing until both ends are set.
+
+Two screens: **Setup › Source of figures** (the SMO assigns, one unit at a
+time, like Focus measures) and **Manage › Figures I report** (the source's own
+surface, every unit at once — the point is that Finance enters revenue once
+per unit in ONE place rather than visiting ten pages). The second is hidden
+outright for anybody named on nothing: a menu entry that opens an empty page is
+worse than no entry.
+
+**Scope, stated:** unit key objectives and unit key measures. Capability
+projects — deliverables, outcomes and milestones — are not sourced yet.
+
 ### 16.8 A help box — self-service for the questions the SMO gets asked
 
 **The idea.** A small chat box in the platform answering the questions people
@@ -1691,6 +1738,62 @@ versions — they are the organisation, not the plan. Pillars, measures and tact
 do not; they are the plan. Key Objectives sit awkwardly between the two and will
 need a decision: carried forward by default and edited, or written fresh each
 time.
+
+### 16.14 The Strategy Copilot inside SMP — one surface, two products
+
+*(Islam, 2026-08-21, parked by him: "I want to keep it with you and I will come
+back to it later." Recorded because the one question he asked outright has an
+answer, and answering it later from memory is how answers drift.)*
+
+**What he wants.** SMP's users able to use the Strategy Copilot to refine their
+plan, talk through challenges, and search what was written and reviewed before —
+eventually with a plan built in the Copilot arriving in SMP's planning cycle as
+a submission.
+
+**His question: the same repository, or two?** **Two, and one surface.** The
+user never sees two products: they are on their plan, they open a Copilot panel
+beside it, and it already knows which unit and which cycle they are looking at.
+But SMP holds the client's authoritative numbers and answers only to its own
+database, while the Copilot talks to a model provider. One repository means one
+deploy, one dependency tree and one blast radius — a Copilot change could take
+down the system of record, and every Copilot dependency becomes a dependency of
+the thing holding a client's strategy.
+
+**Where the line sits, in one sentence: the Copilot may PROPOSE, SMP DECIDES.**
+The panel is the Copilot's, rendered inside SMP's page, and every request it
+makes carries the SMP session — so it can only see what that signed-in person
+can already see. It reads plans and past reviews, and writes a DRAFT. A draft
+becomes a plan only when a person submits it through SMP's own cycle, which is
+where §42's authorisation and change log already are.
+
+**Two consequences, so they are not surprises later.** The panel exists only in
+the hosted platform: the single-file handover has no server to talk to, so
+there is no Copilot there and it simply does not appear. And **the read scope is
+a security question, not an AI one** — "the Copilot can search previous plans"
+means a model provider sees a client's strategy. It belongs with §43's open
+items, not after them.
+
+### 16.13 The assignment memory — Forefront's own, not a tenant's
+
+*(Islam, 2026-08-21. Captured on arrival, per rule A8. He has previous work on
+this to share, which comes in before anything is designed.)*
+
+**The idea.** A conversational bot that asks Forefront's consultants about the
+assignments they worked on — what was achieved, what was learned, what went
+wrong — and turns those answers into a **standardised corporate memory**. The
+purpose is not the record: it is that the next assignment starts from the last
+one, and that Forefront's position is argued from what it has actually done.
+
+**The one structural thing already clear**, and it is the reason this is
+recorded here rather than in a tenant's backlog: **this lives ABOVE the
+tenants.** A client's tenant holds that client's strategy and nothing else
+(§21, §36). Forefront's memory of an assignment is Forefront's, spans clients,
+and must never be reachable from inside a tenant. It is a different product on
+the same shelf, exactly as the Copilot is (§16.14).
+
+**Not designed.** Waiting on the previous efforts Islam is bringing, so the
+standard it produces is built on what has already been tried rather than
+invented beside it.
 
 ### 16.12 Later
 

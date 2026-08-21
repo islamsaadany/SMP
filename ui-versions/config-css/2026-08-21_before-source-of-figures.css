@@ -145,16 +145,6 @@
 
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
-  .note.attn-note { border-left:3px solid var(--attn); background:var(--attn-bg); }
-
-  /* ── A figure somebody else enters (§16.7) ────────────────────────
-     Quieter than a typed one, and ATTRIBUTED — a greyed number with nothing
-     beside it reads as broken; the same number with the team's name beside it
-     reads as somebody else's. */
-  .mono.sourced { color:var(--ink-3); }
-  .srcby { font:700 9px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase;
-           color:var(--ink-3); background:var(--surface-2); border:1px solid var(--line);
-           border-radius:20px; padding:3px 7px; margin-left:6px; white-space:nowrap; }
 
   /* Config tables breathe more than data tables — these are settings, read
      slowly and one row at a time, not scanned for a number. */

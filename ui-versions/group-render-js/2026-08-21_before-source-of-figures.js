@@ -1531,17 +1531,9 @@ function renderReport(u){
     var unit = isT ? "%" : splitTarget(x.obj.target).unit;
     var cur = x.obj.actual, has = cur != null && cur !== "";
     var shown = !has ? "" : (isT ? String(cur) : splitTarget(cur).value || String(cur));
-    /* Per ROW, not per page. A contributor is limited to the lines they are
-       named on (spec 006 §7.2); a figure with a SOURCE is entered by that
-       source and by nobody in the unit (§16.7). Both are refused by the
-       server, so neither is offered here. */
-    if (!canEnterFigure(u.ukey, x)) {
-      var src = srcOf(x);
-      return '<span class="mono' + (src ? " sourced" : "") + '">' +
-        (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>' +
-        (src ? ' <span class="srcby" title="Entered by ' + esc(srcTeamName(src)) +
-               '">' + esc(srcTeamName(src)) + '</span>' : '');
-    }
+    /* Per ROW, not per page: a contributor is limited to the lines they are
+       named on, and the server refuses the rest (spec 006 §7.2). */
+    if (!canReportRow(u.ukey, x)) return '<span class="mono">' + (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>';
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
@@ -1549,7 +1541,7 @@ function renderReport(u){
   };
   var noteCell = function(x){
     var want = needsNote(x);
-    return canEnterNote(u.ukey, x)
+    return canReportRow(u.ukey, x)
       ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
         esc(x.obj.note || "") + '" placeholder="' +
         (want ? "Why, and what is being done" : "Note, if there is one") + '">'
@@ -1703,22 +1695,7 @@ function renderReport(u){
       : '<span class="why" style="margin:0">' + (REVIEW.note[u.ukey] ? esc(REVIEW.note[u.ukey]) : "None.") + '</span>') +
     '</div>';
 
-  /* A blocked Submit with no explanation is hostile. If the unit is waiting on
-     somebody else's figures, the page names them and who owes them — the person
-     is accountable for the completeness, so they need a route to act on it
-     (§16.7, settled). */
-  var waiting = outstandingSources(u);
-  var waitingNote = waiting.length && may
-    ? '<div class="note attn-note"><b>' + waiting.length + ' figure' +
-      (waiting.length > 1 ? 's are' : ' is') + ' entered by another team, and not in yet.</b> ' +
-      waiting.map(function(x){
-        return esc(x.obj.name) + " (" + esc(srcTeamName(srcOf(x))) + ")";
-      }).join(" &middot; ") +
-      '. Your report is not complete until they arrive \u2014 ask them, the SMO cannot ' +
-      'be the only one chasing.</div>'
-    : '';
-
-  return waitingNote + (miss.length && may
+  return (miss.length && may
       ? '<div class="note bad-note"><b>' + miss.length + ' figure' + (miss.length > 1 ? 's need' : ' needs') +
         ' a note.</b> Anything at risk or off track carries an explanation before it can be submitted \u2014 ' +
         'a red number with nothing beside it is where a review meeting stalls.</div>'

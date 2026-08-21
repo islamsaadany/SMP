@@ -276,7 +276,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.12 (in progress): THE SECURITY FLOOR (§43,
+*Last Updated: 2026-08-21 — v3.12 (in progress): FINANCE ENTERS THE NUMBERS
+FINANCE OWNS (§16.7, built). A key objective or a key measure may carry
+`src = { team, by }` — the team that is master of the number and the person who
+enters it. **The team is STORED, not read off the person**: §33's instinct fails
+here, because the person may sit with the SMO rather than in the function whose
+number it is (Islam's "Finance SMO custodian"), and the attribution must name
+the number's HOME rather than the reporter's desk. **It is a rule, not a matrix
+cell** — a source's reach is entirely what it is named on, crossing units
+without owning them. Two consequences in the authoriser: the FIGURE
+(`actual`/`progress`) and the NOTE had to be split, because the number is the
+source's and the explanation is always the unit's; and **who is master of a
+figure is SETUP** — classified separately so a refusal says "Setup is the SMO's"
+rather than "a plan is corrected by the SMO", both true but only one sending
+somebody to the right screen. A sourced figure **still counts toward the unit's
+total**, so a unit cannot submit around a missing Finance number — the unit
+chases too, and the page names what is outstanding and who owes it. THE LESSON:
+**a control that cannot be completed is broken** — deleting `src` whenever one
+end was empty made it impossible to set (team dropped for want of a person,
+person dropped because the team had just gone); a half-set row is kept, shown as
+"Needs both", and does nothing. Only visible by driving the real page. Two
+screens: Setup › Source of figures, and Manage › Figures I report (hidden
+outright for anybody named on nothing). Not sourced yet: capability projects.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): THE SECURITY FLOOR (§43,
 spec 007), on top of §42. **§19.4 is REVERSED**: the `1234` SMO is RETIRED, not
 removed — the bootstrap still creates it (a deployment with no way in is not a
 deployment) but with `must_change`, and a one-off JS step sets the flag on an

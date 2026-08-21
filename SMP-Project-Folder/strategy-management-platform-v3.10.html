@@ -1129,6 +1129,16 @@
 
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
+  .note.attn-note { border-left:3px solid var(--attn); background:var(--attn-bg); }
+
+  /* ── A figure somebody else enters (§16.7) ────────────────────────
+     Quieter than a typed one, and ATTRIBUTED — a greyed number with nothing
+     beside it reads as broken; the same number with the team's name beside it
+     reads as somebody else's. */
+  .mono.sourced { color:var(--ink-3); }
+  .srcby { font:700 9px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase;
+           color:var(--ink-3); background:var(--surface-2); border:1px solid var(--line);
+           border-radius:20px; padding:3px 7px; margin-left:6px; white-space:nowrap; }
 
   /* Config tables breathe more than data tables — these are settings, read
      slowly and one row at a time, not scanned for a number. */
@@ -2695,6 +2705,12 @@ THEME.apply();
     { key:"k_report", area:"fn", scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
     { key:"g_focus",  area:"a_group", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
     { key:"c_focus",  area:"a_cycle", scope:"manage", label:"Focus measures",  note:"Choose what carries reward this cycle" },
+    /* Who is master of which figure — Setup, so the SMO alone (§16.7). */
+    { key:"c_source", area:"a_setup", scope:"setup", label:"Source of figures", note:"Which numbers another team enters, and who enters them" },
+    /* A source team's own reporting surface. AREA "always", because its reach
+       is not a setting: it is whatever that person has been named on, and the
+       page is hidden outright when they have been named on nothing. */
+    { key:"c_myfig",  area:"always", scope:"manage", label:"Figures I report", note:"Every figure you are master of, across the units" },
     { key:"c_kb",     area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
     { key:"c_cycle",  area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
     { key:"u_report", area:"unit", scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
@@ -2813,6 +2829,77 @@ THEME.apply();
 
   function isSMO(w, person) { return personRoleKeys(w, person).indexOf("super") > -1; }
 
+  /* ── 5 · Source of a figure (§16.7) ───────────────────────────────
+     Many measures are not the business unit's number at all. Revenue, margin
+     and most financial figures already exist in Finance before a unit is asked
+     for them, and asking the unit to type them achieves two bad things at
+     once: the same figure is entered ten times, and it can be entered WRONG
+     ten times, because the person typing is not the person who knows it.
+
+     So a key objective or a measure may carry a SOURCE — a team, and the
+     person in it who is master of that number:
+
+         row.src = { team: "<function key>", by: "<person key>" }
+
+     The team is stored rather than read off the person, because the person may
+     sit with the SMO rather than in the function whose number it is — Islam's
+     "Finance SMO custodian", who is not the supporting function's own
+     custodian. The attribution has to name the number's home, not the
+     reporter's desk.
+
+     THE FIGURE MOVES, THE NOTE DOES NOT. The source enters actual and
+     progress; the UNIT always writes the note. The number is the source's,
+     the performance is the unit's, and the explanation belongs to whoever owns
+     the performance (§16.7, settled).
+
+     THIS IS A RULE, NOT A MATRIX CELL. A source's reach is defined entirely by
+     what it is named on — it crosses units without owning them, and it reaches
+     nothing it is not named on. A column whose every cell holds the same
+     answer is a question with no second answer (§37). */
+  function isSourced(row) { return !!(row && row.src && row.src.by); }
+  function sourcedBy(row, person) {
+    return isSourced(row) && person && row.src.by === person.key;
+  }
+
+  /* Every sourced figure in the tenant, flattened. Small by construction —
+     a tenant has tens of measures, not thousands — and the callers all want
+     the same shape: which unit, which row, whose. */
+  function sourceRows(w) {
+    const out = [];
+    w.unitKeys.forEach(function (k) {
+      const u = w.units[k] || {};
+      (u.keyObjectives || []).forEach(function (m) {
+        if (isSourced(m)) out.push({ unit: k, kind: "objective", id: m.id, row: m, src: m.src });
+      });
+      (u.items || []).forEach(function (p) {
+        (p.measures || []).forEach(function (m) {
+          if (isSourced(m)) out.push({ unit: k, kind: "measure", id: m.id, row: m, src: m.src,
+                                       pillar: p.name });
+        });
+      });
+    });
+    return out;
+  }
+  function sourcesFor(w, person) {
+    if (!person) return [];
+    return sourceRows(w).filter(function (r) { return r.src.by === person.key; });
+  }
+  function ownsSources(w, person) { return sourcesFor(w, person).length > 0; }
+
+  /* Find one row by id, wherever it lives. The authoriser needs the STORED
+     row to ask whose figure it is — asking the incoming one would let a save
+     name itself as the source in the same request, which is §42.2 again. */
+  function rowById(w, unitKey, id) {
+    const u = (w.units || {})[unitKey] || {};
+    let hit = null;
+    (u.keyObjectives || []).forEach(function (m) { if (m.id === id) hit = m; });
+    (u.items || []).forEach(function (p) {
+      (p.measures || []).forEach(function (m) { if (m.id === id) hit = m; });
+      (p.tactics || []).forEach(function (t) { if (t.id === id) hit = t; });
+    });
+    return hit;
+  }
+
   /* ── 5 · Named on a line ──────────────────────────────────────────
      "Contributors only view, and if we allow them they should be allowed to
      their lines only" (spec 006 §7.2). A tactic names its own owner and
@@ -2860,7 +2947,9 @@ THEME.apply();
     unitsOfCompany: unitsOfCompany, grantFor: grantFor,
     roleOwns: roleOwns, companyAllows: companyAllows, areaFor: areaFor,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO,
-    namedOn: namedOn, editingRoles: editingRoles, onlyVia: onlyVia
+    namedOn: namedOn, editingRoles: editingRoles, onlyVia: onlyVia,
+    isSourced: isSourced, sourcedBy: sourcedBy, sourceRows: sourceRows,
+    sourcesFor: sourcesFor, ownsSources: ownsSources, rowById: rowById
   };
 });
 
@@ -4054,6 +4143,10 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
+/* Which unit the source-of-figures page is showing. A property of the screen,
+   never of the state graph (§25.2). */
+var SRCSET = { unit: null };
+
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 var PICKING = null, PICKQ = "";
 
@@ -4952,6 +5045,55 @@ function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
   if (!SMPRules.onlyVia(world(), viewer(), "unit", unitKey, "contrib")) return true;
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
+}
+
+/* ── The source of a figure (§16.7) ────────────────────────────────
+   A key objective or a measure may carry `src` — the team that is master of
+   the number and the person in it who enters it. Where it does, the UNIT sees
+   the figure and does not type it, and the source enters it once for every
+   unit that uses it.
+
+   The note is a separate question and always the unit's: the number is the
+   source's, the performance is the unit's, and the explanation belongs to
+   whoever owns the performance. */
+function srcOf(x){ var o = x && (x.obj || x); return (o && o.src && o.src.by) ? o.src : null; }
+function srcTeamName(src){
+  if (!src) return "";
+  var f = FUNCTIONS[src.team];
+  return f ? (f.navName || f.name) : (src.team || "another team");
+}
+/* May THIS viewer type THIS figure? Three answers in one function, because a
+   screen that asks them separately will eventually answer them differently
+   from the server (§42.3). */
+function canEnterFigure(unitKey, x){
+  var src = srcOf(x);
+  if (!src) return canReportRow(unitKey, x);
+  if (hasRole("super")) return canReport(unitKey);
+  return src.by === viewer().key && REVIEW.state === "open" &&
+         !(CYCLE.locked && !hasRole("super"));
+}
+/* The note stays with the unit whatever the figure does. */
+function canEnterNote(unitKey, x){
+  var src = srcOf(x);
+  if (src && !hasRole("super") && src.by === viewer().key &&
+      grantAt("u_report", unitKey) !== "edit") return false;
+  return canReportRow(unitKey, x);
+}
+/* Every figure this person is master of, across every unit. Their reporting
+   surface is built from it, and so is the answer to "does this person have
+   one at all". */
+function mySourceRows(){
+  return SMPRules.sourcesFor(world(), viewer());
+}
+function ownsAnySource(){ return mySourceRows().length > 0; }
+/* What a unit is still waiting on from somebody else. A blocked Submit with
+   no explanation is hostile: the page has to say what is outstanding and who
+   owes it (§16.7, settled). */
+function outstandingSources(u){
+  return askedItems(u).filter(function(x){
+    var src = srcOf(x);
+    return !!src && (x.obj.actual == null || x.obj.actual === "");
+  });
 }
 
 /* What this cycle asks a unit for: its objectives, every measure carrying a
@@ -10006,9 +10148,17 @@ function renderReport(u){
     var unit = isT ? "%" : splitTarget(x.obj.target).unit;
     var cur = x.obj.actual, has = cur != null && cur !== "";
     var shown = !has ? "" : (isT ? String(cur) : splitTarget(cur).value || String(cur));
-    /* Per ROW, not per page: a contributor is limited to the lines they are
-       named on, and the server refuses the rest (spec 006 §7.2). */
-    if (!canReportRow(u.ukey, x)) return '<span class="mono">' + (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>';
+    /* Per ROW, not per page. A contributor is limited to the lines they are
+       named on (spec 006 §7.2); a figure with a SOURCE is entered by that
+       source and by nobody in the unit (§16.7). Both are refused by the
+       server, so neither is offered here. */
+    if (!canEnterFigure(u.ukey, x)) {
+      var src = srcOf(x);
+      return '<span class="mono' + (src ? " sourced" : "") + '">' +
+        (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>' +
+        (src ? ' <span class="srcby" title="Entered by ' + esc(srcTeamName(src)) +
+               '">' + esc(srcTeamName(src)) + '</span>' : '');
+    }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
@@ -10016,7 +10166,7 @@ function renderReport(u){
   };
   var noteCell = function(x){
     var want = needsNote(x);
-    return canReportRow(u.ukey, x)
+    return canEnterNote(u.ukey, x)
       ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
         esc(x.obj.note || "") + '" placeholder="' +
         (want ? "Why, and what is being done" : "Note, if there is one") + '">'
@@ -10170,7 +10320,22 @@ function renderReport(u){
       : '<span class="why" style="margin:0">' + (REVIEW.note[u.ukey] ? esc(REVIEW.note[u.ukey]) : "None.") + '</span>') +
     '</div>';
 
-  return (miss.length && may
+  /* A blocked Submit with no explanation is hostile. If the unit is waiting on
+     somebody else's figures, the page names them and who owes them — the person
+     is accountable for the completeness, so they need a route to act on it
+     (§16.7, settled). */
+  var waiting = outstandingSources(u);
+  var waitingNote = waiting.length && may
+    ? '<div class="note attn-note"><b>' + waiting.length + ' figure' +
+      (waiting.length > 1 ? 's are' : ' is') + ' entered by another team, and not in yet.</b> ' +
+      waiting.map(function(x){
+        return esc(x.obj.name) + " (" + esc(srcTeamName(srcOf(x))) + ")";
+      }).join(" &middot; ") +
+      '. Your report is not complete until they arrive \u2014 ask them, the SMO cannot ' +
+      'be the only one chasing.</div>'
+    : '';
+
+  return waitingNote + (miss.length && may
       ? '<div class="note bad-note"><b>' + miss.length + ' figure' + (miss.length > 1 ? 's need' : ' needs') +
         ' a note.</b> Anything at risk or off track carries an explanation before it can be submitted \u2014 ' +
         'a red number with nothing beside it is where a review meeting stalls.</div>'
@@ -11904,6 +12069,155 @@ function renderFocusSetup(){
         '<b>Focus changes no score</b>; it is a lens and an incentive, not a second weighting.</div>');
 }
 
+/* ── Source of figures (§16.7) ───────────────────────────────────────
+   Many measures are not the business unit's number at all. This is where the
+   SMO says so: which figures another team is master of, and who in that team
+   enters them.
+
+   It is a SETUP page, not a cycle page, because the answer holds across
+   cycles — revenue does not stop being Finance's in March. And it is the SMO's
+   alone: a unit that could nominate the source of its own numbers could
+   nominate itself.
+
+   The pool is large (every key objective and every key measure in every unit),
+   so it is filtered by unit, exactly as Focus measures is — one unit at a
+   time is how the question is actually asked. */
+function renderSourceSetup(){
+  var editable = grant("c_source") === "edit";
+  var u = UNITS[SRCSET.unit] || UNITS[activeKeys()[0]];
+  if (!u) return '<div class="note">No business units yet.</div>';
+
+  /* Anyone the platform knows can be named. NOT only people attached to the
+     function: Islam's Finance SMO custodian sits with the office rather than
+     in Finance, and a picker that could not offer them would make the feature
+     unusable for the one person it was described for. */
+  var peopleOptions = function(sel){
+    return '<option value="">\u2014</option>' + PEOPLE.filter(personActive).map(function(p){
+      return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
+        esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+    }).join("");
+  };
+  var teamOptions = function(sel){
+    return '<option value="">\u2014</option>' + FUNCTION_KEYS.map(function(k){
+      return '<option value="' + esc(k) + '"' + (k === sel ? " selected" : "") + '>' +
+        esc(FUNCTIONS[k].name) + '</option>';
+    }).join("");
+  };
+
+  var row = function(m){
+    var src = m.src && m.src.by ? m.src : null;
+    var half = !src && m.src && (m.src.team || m.src.by);
+    return '<tr' + (src ? ' class="has-src"' : (half ? ' class="wantnote"' : '')) + '>' +
+      '<td>' + esc(m.name) + '</td>' +
+      '<td class="cc mono">' + (m.target ? esc(m.target) : '<span class="missing">\u2014</span>') + '</td>' +
+      '<td>' + (editable
+        ? '<select class="fld" data-srcteam="' + esc(m.id) + '">' +
+          teamOptions((src || m.src || {}).team) + '</select>'
+        : (src ? esc(srcTeamName(src)) : '<span class="why" style="margin:0">The unit</span>')) + '</td>' +
+      '<td>' + (editable
+        ? '<select class="fld" data-srcby="' + esc(m.id) + '">' +
+          peopleOptions((src || m.src || {}).by) + '</select>'
+        : (src ? esc((personBy(src.by) || {}).name || src.by) : "")) +
+        (half ? ' <span class="why" style="margin:0">Needs both</span>' : '') + '</td>' +
+    '</tr>';
+  };
+
+  var body =
+    '<tr class="grouprow"><td colspan="4"><b>' + esc(L("keyobj","bu")) + '</b></td></tr>' +
+    (u.keyObjectives.length ? u.keyObjectives.map(row).join("")
+      : '<tr><td colspan="4" class="why">None set for this unit.</td></tr>') +
+    u.items.map(function(p, pi){
+      return '<tr class="grouprow"><td colspan="4"><b>' + pillarCode(u, pi) + " " + esc(p.name) +
+             '</b></td></tr>' +
+        (p.measures.length ? p.measures.map(row).join("")
+          : '<tr><td colspan="4" class="why">No key measures.</td></tr>');
+    }).join("");
+
+  var unitPick = '<select class="fld" id="srcset-unit">' + activeKeys().map(function(k){
+      var n = SMPRules.sourceRows(world()).filter(function(r){ return r.unit === k; }).length;
+      return '<option value="' + k + '"' + (k === u.ukey ? " selected" : "") + '>' +
+        esc(UNITS[k].name) + (n ? "  \u2014 " + n + " sourced" : "") + '</option>';
+    }).join("") + '</select>';
+
+  var total = SMPRules.sourceRows(world()).length;
+
+  return '<div class="kv"><span class="pill kind">SMO</span>' +
+      '<span class="pill kind">' + total + ' figure' + (total === 1 ? "" : "s") +
+      ' sourced across the group</span></div>' +
+    section("", "Source of figures", null,
+      '<div class="imp-row" style="margin:0 0 16px">' + unitPick + '</div>' +
+      '<table class="cfg"><thead><tr>' +
+        '<th style="width:44%">Figure</th><th class="cc" style="width:14%">Target</th>' +
+        '<th style="width:21%">Team</th><th style="width:21%">Entered by</th>' +
+      '</tr></thead><tbody>' + body + '</tbody></table>' +
+      '<div class="note"><b>A sourced figure is entered once, by the team that owns the number.</b> ' +
+        'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
+        'note</b> \u2014 the number is Finance\u2019s, the performance is the unit\u2019s, and the ' +
+        'explanation belongs to whoever owns the performance. Leave a row empty and the unit ' +
+        'enters it itself.</div>');
+}
+
+/* The other half of §16.7: a source team is a reporting party like any other,
+   so it gets its own surface for the window. Rows come from every unit at
+   once — that is the point, Finance enters revenue once per unit in one
+   place rather than visiting ten pages. */
+function renderMySources(){
+  var rows = mySourceRows();
+  if (!rows.length) {
+    return '<div class="note">You are not named as the source of any figure. ' +
+      'The SMO assigns these on <b>Setup &rsaquo; Source of figures</b>.</div>';
+  }
+  var open = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super"));
+  var byUnit = {};
+  rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
+
+  var entry = function(r){
+    var m = r.row, cur = m.actual, has = cur != null && cur !== "";
+    var unit = splitTarget(m.target).unit;
+    var shown = !has ? "" : (splitTarget(cur).value || String(cur));
+    if (!open) return '<span class="mono">' + (has ? esc(String(cur)) : "\u2014") + '</span>';
+    /* The suffix lives INSIDE .entry, as it does on the unit's own page — put
+       outside, it wraps to its own line and the box loses its unit (§A13:
+       follow what the platform already does). */
+    return '<span class="entry' + (has ? " filled" : "") + '">' +
+      '<input class="field" data-rep="' + esc(m.id) + '" data-repu="' + esc(r.unit) + '" ' +
+      'data-unit="' + esc(unit) + '" value="' + esc(shown) + '" placeholder="\u2014" ' +
+      'aria-label="Report ' + esc(m.name) + ' for ' + esc(UNITS[r.unit].name) + '">' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
+  };
+
+  var done = rows.filter(function(r){ return r.row.actual != null && r.row.actual !== ""; }).length;
+
+  var blocks = Object.keys(byUnit).map(function(k){
+    var list = byUnit[k];
+    var n = list.filter(function(r){ return r.row.actual != null && r.row.actual !== ""; }).length;
+    return section("", esc(UNITS[k].name) +
+      ' <span class="rtally' + (n === list.length ? " full" : "") + '">' + n + '/' + list.length + '</span>',
+      null,
+      '<table class="cfg"><thead><tr>' +
+        '<th style="width:46%">Figure</th><th class="cc" style="width:16%">Target</th>' +
+        '<th class="cc" style="width:20%">Reported</th><th style="width:18%">The unit\u2019s note</th>' +
+      '</tr></thead><tbody>' + list.map(function(r){
+        return '<tr><td>' + esc(r.row.name) +
+            (r.pillar ? ' <span class="why" style="margin:0">' + esc(r.pillar) + '</span>' : '') + '</td>' +
+          '<td class="cc mono">' + (r.row.target ? esc(r.row.target) : "\u2014") + '</td>' +
+          '<td class="cc">' + entry(r) + '</td>' +
+          '<td class="why" style="margin:0">' + (r.row.note ? esc(r.row.note) : "\u2014") + '</td></tr>';
+      }).join("") + '</tbody></table>');
+  }).join("");
+
+  return '<div class="kv">' +
+      '<span class="pill kind">' + done + ' of ' + rows.length + ' entered</span>' +
+      '<span class="pill ' + (open ? "good" : "none") + '">' +
+        (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
+    (open ? '' : '<div class="note">Figures can be entered while a cycle is open. ' +
+      'This is a record until the SMO opens the next one.</div>') +
+    blocks +
+    '<div class="note"><b>You enter the figure; the unit writes the note.</b> ' +
+      'The number is yours, the performance is theirs, and a unit cannot complete its ' +
+      'report until these are in \u2014 which is why they will ask.</div>';
+}
+
 /* The scope is a business unit OR a capability (§16.4): capability projects
    arrive the way a unit's plan does — same page, same three steps, same
    review — with their own sheets, because the thing being planned is a
@@ -13320,6 +13634,9 @@ var SYNC = (function () {
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
+      /* §16.7. It sits beside the functions because the thing it assigns IS a
+         function — which team is master of a number. */
+      { k:"source", ac:"c_source", label:"Source of figures",             render:renderSourceSetup },
       /* The register (§35). It sits after the things people are attached TO,
          because that is the order the SMO works in: the units exist, then the
          people who hold them. It used to be a section at the bottom of Roles &
@@ -13339,7 +13656,13 @@ var SYNC = (function () {
       { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
       { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
-      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup }
+      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup },
+      /* Only for somebody who has actually been named on a figure. Its reach
+         is not a setting (§16.7), so `when` hides it outright rather than the
+         matrix answering "none" — a menu entry that opens an empty page is
+         worse than no entry. */
+      { k:"myfig",    ac:"c_myfig",  label:"Figures I report",
+        when: ownsAnySource,                                render:renderMySources }
     ]
   };
 
@@ -13353,7 +13676,10 @@ var SYNC = (function () {
      one they do not (§37), so asking without saying which unit would give the
      currently-open unit's answer for every unit in the navigation. */
   function allowed(defs, target){
-    return defs.filter(function(d){ return grantAt(d.ac, target || TARGET) !== "none"; });
+    return defs.filter(function(d){
+      if (d.when && !d.when()) return false;
+      return grantAt(d.ac, target || TARGET) !== "none";
+    });
   }
 
   /* A unit tab appears only if the viewer reaches that unit AND holds at least
@@ -14009,7 +14335,11 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-rep]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = findById(UNITS[current], el.dataset.rep);
+        /* `current` is the open destination, which is the unit on its own
+           reporting page and is NOT a unit on "Figures I report" — that page
+           carries rows from several units at once, so each field names its
+           own. One handler, because two would drift (§42.3). */
+        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
         if (!hit) return;
         var v = el.value.trim();
         /* The field holds the bare number; the unit lives in the suffix beside
@@ -14061,6 +14391,34 @@ var SYNC = (function () {
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
       b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
     });
+    /* Source of figures (§16.7). The two selects write one field, so both
+       handlers read the other's current value rather than assuming it —
+       picking a person before a team must not silently drop the team. */
+    var srcUnit = document.getElementById("srcset-unit");
+    if (srcUnit) srcUnit.addEventListener("change", function(){ SRCSET.unit = srcUnit.value; paint(); });
+    var setSrc = function(id, field, value){
+      var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], id);
+      if (!hit) return;
+      var src = hit.src || {};
+      src[field] = value || null;
+      /* A HALF-SET row is kept, not thrown away. Deleting the field whenever
+         one end was empty made the control impossible to complete: choosing a
+         team dropped it again because no person was set yet, and choosing a
+         person dropped it because the team had just been dropped. Setting BOTH
+         ends is what makes a source real — isSourced() asks for `by` — so a
+         half-set row is stored, shown as unfinished, and does nothing.
+         Clearing both is what removes it. */
+      if (!src.team && !src.by) delete hit.src;
+      else hit.src = { team: src.team || null, by: src.by || null };
+      paint();
+    };
+    document.querySelectorAll("[data-srcteam]").forEach(function(el){
+      el.addEventListener("change", function(){ setSrc(el.dataset.srcteam, "team", el.value); });
+    });
+    document.querySelectorAll("[data-srcby]").forEach(function(el){
+      el.addEventListener("change", function(){ setSrc(el.dataset.srcby, "by", el.value); });
+    });
+
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
     });

@@ -168,9 +168,6 @@
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
-      /* §16.7. It sits beside the functions because the thing it assigns IS a
-         function — which team is master of a number. */
-      { k:"source", ac:"c_source", label:"Source of figures",             render:renderSourceSetup },
       /* The register (§35). It sits after the things people are attached TO,
          because that is the order the SMO works in: the units exist, then the
          people who hold them. It used to be a section at the bottom of Roles &
@@ -190,13 +187,7 @@
       { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
       { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
-      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup },
-      /* Only for somebody who has actually been named on a figure. Its reach
-         is not a setting (§16.7), so `when` hides it outright rather than the
-         matrix answering "none" — a menu entry that opens an empty page is
-         worse than no entry. */
-      { k:"myfig",    ac:"c_myfig",  label:"Figures I report",
-        when: ownsAnySource,                                render:renderMySources }
+      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup }
     ]
   };
 
@@ -210,10 +201,7 @@
      one they do not (§37), so asking without saying which unit would give the
      currently-open unit's answer for every unit in the navigation. */
   function allowed(defs, target){
-    return defs.filter(function(d){
-      if (d.when && !d.when()) return false;
-      return grantAt(d.ac, target || TARGET) !== "none";
-    });
+    return defs.filter(function(d){ return grantAt(d.ac, target || TARGET) !== "none"; });
   }
 
   /* A unit tab appears only if the viewer reaches that unit AND holds at least
@@ -869,11 +857,7 @@
     });
     document.querySelectorAll("[data-rep]").forEach(function(el){
       el.addEventListener("change", function(){
-        /* `current` is the open destination, which is the unit on its own
-           reporting page and is NOT a unit on "Figures I report" — that page
-           carries rows from several units at once, so each field names its
-           own. One handler, because two would drift (§42.3). */
-        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
+        var hit = findById(UNITS[current], el.dataset.rep);
         if (!hit) return;
         var v = el.value.trim();
         /* The field holds the bare number; the unit lives in the suffix beside
@@ -925,34 +909,6 @@
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
       b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
     });
-    /* Source of figures (§16.7). The two selects write one field, so both
-       handlers read the other's current value rather than assuming it —
-       picking a person before a team must not silently drop the team. */
-    var srcUnit = document.getElementById("srcset-unit");
-    if (srcUnit) srcUnit.addEventListener("change", function(){ SRCSET.unit = srcUnit.value; paint(); });
-    var setSrc = function(id, field, value){
-      var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], id);
-      if (!hit) return;
-      var src = hit.src || {};
-      src[field] = value || null;
-      /* A HALF-SET row is kept, not thrown away. Deleting the field whenever
-         one end was empty made the control impossible to complete: choosing a
-         team dropped it again because no person was set yet, and choosing a
-         person dropped it because the team had just been dropped. Setting BOTH
-         ends is what makes a source real — isSourced() asks for `by` — so a
-         half-set row is stored, shown as unfinished, and does nothing.
-         Clearing both is what removes it. */
-      if (!src.team && !src.by) delete hit.src;
-      else hit.src = { team: src.team || null, by: src.by || null };
-      paint();
-    };
-    document.querySelectorAll("[data-srcteam]").forEach(function(el){
-      el.addEventListener("change", function(){ setSrc(el.dataset.srcteam, "team", el.value); });
-    });
-    document.querySelectorAll("[data-srcby]").forEach(function(el){
-      el.addEventListener("change", function(){ setSrc(el.dataset.srcby, "by", el.value); });
-    });
-
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
     });

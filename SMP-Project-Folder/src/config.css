@@ -52,6 +52,10 @@
   .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
   .st-edit { color:var(--gold-deep); background:var(--attn-bg); border:1px solid var(--gold); }
   .stset { display:inline-flex; gap:2px; }
+  /* A cell with neither button lit IS the answer — "no access" — not an
+     unanswered cell. The pair sits on a dashed tray so it reads as a state
+     somebody chose rather than a control nobody has reached yet. */
+  .stset.off { border:1px dashed var(--none); border-radius:4px; padding:1px; }
   .stbtn { width:26px; height:24px; border:1px solid var(--line); background:var(--surface);
            color:var(--ink-3); cursor:pointer; font-size:11px; padding:0; border-radius:2px;
            font-family:var(--sans); line-height:1; }

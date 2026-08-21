@@ -268,7 +268,9 @@ them, so the own column and the other column can now say different things. Three
 cells became **rules**: the knowledge base is readable by everyone, a plan is
 corrected by the SMO alone, and focus measures are marked by the CEO — each true
 whatever the table says. **A column whose every cell holds the same answer is a
-question with no second answer.** Two layout lessons: a full sentence in a 19%
+question with no second answer** — and **none is not a third thing you choose,
+it is the absence of the other two**, so the cell is two toggles rather than
+three buttons and nothing lit is itself the answer. Two layout lessons: a full sentence in a 19%
 column makes a 49-cell table taller than the 175-cell one it replaced, and
 **a width set on the body cells of a `table-layout:fixed` table does nothing** —
 fixed layout takes every width from the header row. Also: the intermediate

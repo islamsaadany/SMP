@@ -72,12 +72,25 @@ function stateCell(roleKey, areaKey, editable, disabled){
   if (!editable) {
     return '<td class="ac"><span class="st st-' + v + '">' + v + '</span></td>';
   }
-  var opts = ["none","view","edit"].map(function(o){
-    return '<button type="button" class="stbtn' + (o === v ? " on " + o : "") + '" data-ac="' +
-      roleKey + '|' + areaKey + '|' + o + '" aria-label="' + o + '">' +
-      (o === "none" ? "&minus;" : o === "view" ? "&#128065;" : "&#9998;") + '</button>';
+  /* TWO buttons, not three. Islam: "no need for the none box that's the
+     default no need to grow the matrix" — and he is right that none is not a
+     third thing you choose, it is the absence of the other two. So each button
+     is a TOGGLE: pressing the lit one turns it off and the cell falls back to
+     none. The state each press produces is worked out here rather than in the
+     handler, so the click still says only "set this cell to this". */
+  var opts = ["view","edit"].map(function(o){
+    var on = o === v;
+    return '<button type="button" class="stbtn' + (on ? " on " + o : "") + '" data-ac="' +
+      roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
+      (on ? "Turn off — leaves no access" : o === "view" ? "May read" : "May read and change") +
+      '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
+      (o === "view" ? "&#128065;" : "&#9998;") + '</button>';
   }).join("");
-  return '<td class="ac"><span class="stset">' + opts + '</span></td>';
+  /* Nothing lit IS the answer, so the cell says so rather than looking
+     unanswered — a blank cell in a permissions table reads as "not filled in",
+     which is the one thing it must never be mistaken for. */
+  return '<td class="ac"><span class="stset' + (v === "none" ? " off" : "") + '">' +
+    opts + '</span></td>';
 }
 
 /* ── Roles &amp; access (§37) ─────────────────────────────────────────
@@ -132,9 +145,9 @@ function renderAccess(){
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-none">none</i> hidden entirely</span>' +
-        '<span><i class="st st-view">view</i> reads, cannot change</span>' +
-        '<span><i class="st st-edit">edit</i> reads and changes</span>' +
+        '<span><i class="st st-view">&#128065;</i> may read</span>' +
+        '<span><i class="st st-edit">&#9998;</i> may read and change</span>' +
+        '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
       '</div>') +
 

@@ -4262,7 +4262,28 @@ contributor is somebody named on a measure inside that unit — and it is
 reversible by setting Contributor to *view*, at the cost of their reporting.
 Recorded rather than hidden.
 
-### 37.7 Two layout faults the first build had
+### 37.7 Two buttons a cell, not three
+
+Islam: *"No need for the none box that's the default no need to grow the
+matrix."*
+
+Right, and the reason is worth writing down: **none is not a third thing you
+choose, it is the absence of the other two.** Giving it a button of its own made
+the cell 50% wider for a state that needs no control at all — on a table that
+was rebuilt to stop being too wide.
+
+Each button is a toggle now. Pressing the lit one turns it off and the cell
+falls back to none. The state a press produces is worked out at render, so the
+click handler still says only "set this cell to this" and never has to know
+what it is replacing.
+
+A cell with neither lit sits on a dashed tray. **Nothing lit IS the answer**,
+and a blank cell in a permissions table would read as "nobody has filled this
+in" — the one thing it must never be mistaken for.
+
+49 cells, 86 buttons.
+
+### 37.8 Two layout faults the first build had
 
 - **The role column was 19% and the role's description a full sentence**, so
   every one of seven rows wrapped to eight lines and the 49-cell table was
@@ -4275,10 +4296,13 @@ Recorded rather than hidden.
   was still claiming 15% for a column the `td` rule set to 19%. **A width set
   on the body cells of a fixed-layout table is a width that does nothing.**
 
-### 37.8 Verified
+### 37.9 Verified
 
 - 31 viewers × every page, zero console errors; byte-identical rebuild; no
   horizontal scroll at 1560, 1000 or below.
+- The cell toggles through every path: lit edit → none, none → view, view →
+  edit, edit → view, lit view → none, and back. No none button survives
+  anywhere, and 86 buttons stand where 147 did.
 - The model, per role: a unit head edits their own unit and reaches no other;
   a company CEO owns their company's three units and is held off the rest by
   `seeOthers`; the group CEO sees all ten at view and no Setup; a function head

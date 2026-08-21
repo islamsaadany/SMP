@@ -9630,18 +9630,17 @@ function renderLabels(){
     ? '<div class="note bad-note"><b>Label collision.</b> <span class="mono">' + esc(clashes[0]) +
       '</span> is in use by two entities at the same level. Saving is blocked until one of them changes &mdash; ' +
       'two different objects rendering under one word on the same screen is not recoverable by the reader.</div>'
-    : '<div class="note"><b>No collisions.</b> Every display label at each level is unique, so no two entities can render under the same word.</div>';
+    /* The "all clear" note went to the knowledge base with the rest of the
+       explanation (§30.4). A collision still shouts, because that is not an
+       explanation - it is a state that blocks saving and has to be seen. */
+    : '';
 
   return section("", "Labels", null,
       '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
       '<th style="width:33%">Display at group level</th>' +
       '<th style="width:33%">Display at business unit level</th>' +
-      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn) +
-
-    '<div class="note"><b>Labels are per tenant, not per strategy cycle.</b> A cycle-scoped label would let 2026 and 2027 use different words for the same object, and no report spanning both could be read without a glossary.</div>' +
-
-    '<div class="note"><b>Vision, End State and Winning Aspiration are one entity.</b> They are three display labels for the same statement, which is why a unit holds exactly one of them and never two.</div>';
+      '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
 }
 
 /* ── Levels & access ────────────────────────────────────────────────── */
@@ -10154,7 +10153,18 @@ function renderKB(){
       { h: "One label, two places",
         p: 'A level can read differently at group and at business unit — what the group ' +
            'calls a ' + L1.toLowerCase() + ' a unit may call something else — and both ' +
-           'are set on the Labels page.' }
+           'are set on the Labels page.' },
+      { h: "No collisions",
+        p: 'Every display label at each level is unique, so no two entities can render ' +
+           'under the same word. A collision blocks saving until one of them changes: two ' +
+           'different objects under one word on the same screen is not something the ' +
+           'reader can recover from.' },
+      { h: "Per tenant, not per strategy cycle",
+        p: 'A cycle-scoped label would let 2026 and 2027 use different words for the same ' +
+           'object, and no report spanning both could be read without a glossary.' },
+      { h: "Vision, End State and Winning Aspiration are one entity",
+        p: 'They are three display labels for the same statement, which is why a unit ' +
+           'holds exactly one of them and never two.' }
     ]),
     kbSection("units", "Business units and supporting functions", [
       { h: "The short name is for the navigation only",

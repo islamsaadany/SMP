@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.6 · **Last updated:** 2026-08-20
+**Latest version:** v3.7 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,29 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.6 — the plan is correctable, for the SMO *(current)*
+### v3.7 — one door *(current)*
+**The gate was three states, not two.** It painted the sign-in card
+immediately in its old shape, then reshaped it when `/api/auth` answered, then —
+if your session was already valid — swapped the whole thing for a Starting page
+whose only content was a button to the platform. Every time.
+
+Now: nothing paints until the session check answers. **Session live → the
+platform opens and the gate is never seen.** No session → the sign-in card,
+once, in its final shape. Temporary password → the change-password step, because
+that is the one thing standing between signing in and being in. The Starting
+page is gone entirely; sign out lives in the platform's top bar.
+
+The **30 days were already true** (`SESSION_DAYS = 30`) — what made it feel
+untrue was being asked to press a button every time. The gate now says it out
+loud under the button.
+
+The door itself follows HR_ERP: navy ground rather than pale grey, a gold
+eyebrow above the mark, deeper corners, more padding, errors as a tinted block.
+
+Also: the Labels page loses its last three notes to the knowledge base. The
+**collision alarm stays** — that is a blocked save, not an explanation.
+
+### v3.6 — the plan is correctable, for the SMO
 The pen you asked for is on the Plan page, **for the SMO only**. §22 still
 stands: a plan is authored by upload, the template still carries no codes, and
 replacing one still archives it. What this adds is the correction afterwards —
@@ -570,8 +592,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.6.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.6.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.7.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.7.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

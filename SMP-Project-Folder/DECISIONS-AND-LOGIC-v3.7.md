@@ -3626,3 +3626,89 @@ there is exactly one place to change.
 - Three themes × 31 viewers, zero console errors; chrome one height across a
   full scroll sweep; PWA green; round trip, fixed point and archived-plan round
   trip PASS; seed and rebuild byte-identical.
+
+---
+
+## 32 · One door — v3.7
+
+Islam: *"on opening the platform every time the access page opens on user and
+password and lags for a moment then it shifts to another window of a button to
+access. this behaviour is odd there shouldn't be 2 pages of access just the user
+and password."*
+
+### 32.1 It was three states, not two
+
+Traced rather than guessed:
+
+1. The page painted, and the sign-in card was visible **immediately** — in its
+   legacy shape, with the fixed "AdminSMO" block rather than a user field.
+2. `fetch("/api/auth")` answered → `enterServerMode()` replaced that block with
+   the user field. The layout shifted.
+3. If a session was already valid → `signedIn()` → the whole card was swapped
+   for the **Starting page**: a badge, a welcome line, and a button to open the
+   platform.
+
+Three states in about a second, every single time, and the third one existed
+only to offer a button to the thing you had already asked for.
+
+**There is exactly one honest thing to show before the answer is known, and it
+is nothing.** The card is hidden until the session check resolves. Then:
+
+- **session live → the platform opens.** The gate is never seen at all.
+- **no session → the sign-in card**, in its final shape, once.
+- **a temporary password → the change-password card**, because that is the one
+  thing standing between signing in and being in.
+
+### 32.2 The Starting page is gone
+
+A page whose only content is a button to the page you just asked for is a door
+behind a door. Signing in **is** the request to open the platform.
+
+Sign out went with it, which is right: it lives in the platform's own top bar,
+where you are when you want it. It posts to `/api/auth` and returns to `/` —
+and `/`, with no session, is the sign-in card.
+
+### 32.3 The 30 days were already true, and now they are said
+
+`SESSION_DAYS = 30` in `lib/auth.js`, with the cookie's `Max-Age` set to match.
+What made it *feel* untrue was the Starting page: being asked to press a button
+every time reads as being asked to sign in every time. The gate now says the
+promise out loud — *"You will stay signed in on this device for 30 days"* —
+under the button, because a promise the product keeps is worth stating.
+
+### 32.4 The door itself
+
+Taken from HR_ERP's sign-in, which had already settled this: **a navy ground
+rather than pale grey**, a gold letterspaced eyebrow above the mark, deeper
+corners and a stronger shadow, more generous padding, and errors as a tinted
+block rather than a bare red line. A front door set into a wall reads as
+deliberate; a form floating on grey reads as unfinished.
+
+Both cards carry the eyebrow, so the change-password step is visibly the same
+product rather than a stray form.
+
+### 32.5 The Labels page loses its last three notes
+
+*No collisions*, *labels are per tenant not per cycle*, and *Vision / End State
+/ Winning Aspiration are one entity* — all true, none of them a control. They
+are in the knowledge base's Labels section now, joining the essay that left in
+§30.4.
+
+**A collision itself still shouts on the page.** That is not an explanation, it
+is a state that blocks saving, and a blocked save has to say why where the save
+is. The "all clear" note went; the alarm stayed.
+
+### 32.6 Verified
+
+- **Sampled every 60ms through the load:** the states are `-`, `-`, then
+  `login`, and never two cards at once. Before this it was login → login
+  (reshaped) → home.
+- **`#home` does not exist in the document.**
+- **Signing in lands on the platform**, not on a second page.
+- **Reopening with a live session goes straight in** — the gate is never
+  rendered.
+- The dark gate is still one card; the 30-day line is present.
+- Three themes × 31 viewers, zero console errors; scroll sweep one height; PWA
+  suite green (its sign-in assertion updated — it was asserting on the Starting
+  page this version deletes); round trip, fixed point and archived-plan round
+  trip PASS; seed and rebuild byte-identical.

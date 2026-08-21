@@ -3,6 +3,13 @@
   <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
 </div>
 
+<!-- A REFUSED SAVE HAS TO SAY SO, WHERE THE SAVE IS (spec 006 §4, and the
+     rule §32 set for the Labels page). The server now decides who may change
+     what; without this the failure mode is silent - a change is made, the
+     server refuses it, and the platform goes on showing it as though it had
+     landed. Hidden until there is something to say. -->
+<div class="banner refused" id="refused" hidden></div>
+
 <div class="chrome">
 <!-- Three things on the first line and nothing else: who the product is, who
      you are looking as, and the two buttons that leave. The org name, the unit
@@ -33,6 +40,16 @@
            product LOOKS; the two beside it change what it shows or end the
            session. Hidden until THEME.wire() draws its mark. -->
       <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
+      <!-- The palette switch was here until 3.12. It is gone at Islam's
+           direction: "I don't need to have slate, the branding covers this
+           from inside." Which colours the product wears is the TENANT's
+           decision, set once on Setup › Branding, not a per-screen preference
+           that leaves two people looking at different products. Light and dark
+           stay each viewer's own — those are about the room they sit in. -->
+      <!-- The typeface, while the four are being compared (§38.8). It renders
+           its own name in the face it names, so you can see one without
+           pressing it. It goes when the choice is settled. -->
+      <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
       <button class="infobtn" id="demobtn" hidden>Demo data</button>
     </div>
   </div>
@@ -81,6 +98,7 @@
      the demo banner in 2.2, where it is true; what was left was a signature. -->
 </div>
 
+<script src="RULES"></script>
 <script src="DATA"></script>
 <script src="CONFIGDATA"></script>
 <script src="ARRANGE"></script>
@@ -151,11 +169,17 @@
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
+      /* §16.7. It sits beside the functions because the thing it assigns IS a
+         function — which team is master of a number. */
+      { k:"source", ac:"c_source", label:"Source of figures",             render:renderSourceSetup },
       /* The register (§35). It sits after the things people are attached TO,
          because that is the order the SMO works in: the units exist, then the
          people who hold them. It used to be a section at the bottom of Roles &
          access, which is a matrix page — a staff list is not a matrix. */
       { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
+      /* Last in Setup: it changes how everything else LOOKS, which is a thing
+         you do once the things themselves exist (§39). */
+      { k:"brand",  ac:"c_brand",  label:"Branding",                      render:renderBranding },
       { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
     /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
@@ -167,7 +191,13 @@
       { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
       { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
-      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup }
+      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup },
+      /* Only for somebody who has actually been named on a figure. Its reach
+         is not a setting (§16.7), so `when` hides it outright rather than the
+         matrix answering "none" — a menu entry that opens an empty page is
+         worse than no entry. */
+      { k:"myfig",    ac:"c_myfig",  label:"Figures I report",
+        when: ownsAnySource,                                render:renderMySources }
     ]
   };
 
@@ -181,7 +211,10 @@
      one they do not (§37), so asking without saying which unit would give the
      currently-open unit's answer for every unit in the navigation. */
   function allowed(defs, target){
-    return defs.filter(function(d){ return grantAt(d.ac, target || TARGET) !== "none"; });
+    return defs.filter(function(d){
+      if (d.when && !d.when()) return false;
+      return grantAt(d.ac, target || TARGET) !== "none";
+    });
   }
 
   /* A unit tab appears only if the viewer reaches that unit AND holds at least
@@ -227,11 +260,20 @@
          below already says it. Repeating it made the row noisier the more
          folds there were. Worth revisiting if the row ever feels lost, since
          with the company folds gone there are only two folds again. */
-      out.push({ fold:"units", label:"Units", open:NAVFOLD === "units" });
+      /* THE TWO FOLDS TRAVEL TOGETHER, in one container (§41.8, treatment 4).
+         They used to be separated by whichever list was open, so the control
+         you had just pressed moved every time you pressed it and the second
+         fold ended up in a different place depending on the first. As one
+         segmented box they stay put, the bar carries one box instead of two,
+         and the shared container says outright that Units and Functions are
+         the same kind of thing. The opened list follows BOTH of them. */
+      out.push({ folds: [
+        { fold:"units", label:"Units",     open:NAVFOLD === "units" },
+        { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
+      ] });
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      out.push({ fold:"caps", label:"Functions", open:NAVFOLD === "caps" });
-      if (NAVFOLD === "caps")
+      else if (NAVFOLD === "caps")
         cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
@@ -308,12 +350,15 @@
       current = dests.length ? dests[0].k : null;
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
-      if (t.fold) {
-        return '<span class="sep"></span><button class="navfold' + (t.open ? " open" : "") +
-          '" data-fold="' + t.fold + '" aria-expanded="' + t.open + '">' + t.label +
-          '<span class="foldtw">' + (t.open ? "\u25be" : "\u25b8") + '</span></button>';
+      if (t.folds) {
+        return '<span class="sep"></span><span class="foldgroup">' +
+          t.folds.map(function(f){
+            return '<button class="navfold' + (f.open ? " open" : "") +
+              '" data-fold="' + f.fold + '" aria-expanded="' + f.open + '">' + f.label +
+              '<span class="foldtw">' + (f.open ? "\u25be" : "\u25b8") + '</span></button>';
+          }).join("") + '</span>';
       }
-      return ((i === 1 && !tabs[1].fold) ? '<span class="sep"></span>' : '') +
+      return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
     }).join("") + menuHTML();
@@ -470,6 +515,14 @@
     holdTimer = setTimeout(releasePaint, 500);
   }, true);
   document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
+
+  /* The tenant's branding, handed to THEME. One function, called on boot and
+     after every change on the Branding page, so the applied colours and the
+     page's own preview cannot drift apart (§39). */
+  function applyBrand(){
+    var b = branding();
+    THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
+  }
 
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
@@ -829,7 +882,11 @@
     });
     document.querySelectorAll("[data-rep]").forEach(function(el){
       el.addEventListener("change", function(){
-        var hit = findById(UNITS[current], el.dataset.rep);
+        /* `current` is the open destination, which is the unit on its own
+           reporting page and is NOT a unit on "Figures I report" — that page
+           carries rows from several units at once, so each field names its
+           own. One handler, because two would drift (§42.3). */
+        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
         if (!hit) return;
         var v = el.value.trim();
         /* The field holds the bare number; the unit lives in the suffix beside
@@ -881,6 +938,29 @@
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
       b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
     });
+    /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
+       top; each row is then a single mark. The half-set problem the first
+       build had cannot arise: a mark is only offered once both ends are set,
+       and it writes both at once. */
+    document.querySelectorAll("[data-srcunit]").forEach(function(b){
+      b.addEventListener("click", function(){ SRCSET.unit = b.dataset.srcunit; paint(); });
+    });
+    var st = document.getElementById("srcset-team");
+    if (st) st.addEventListener("change", function(){ SRCSET.team = st.value || null; paint(); });
+    var sb = document.getElementById("srcset-by");
+    if (sb) sb.addEventListener("change", function(){ SRCSET.by = sb.value || null; paint(); });
+    document.querySelectorAll("[data-srcpick]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!SRCSET.team || !SRCSET.by) return;
+        var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], b.dataset.srcpick);
+        if (!hit) return;
+        var mine = hit.src && hit.src.team === SRCSET.team && hit.src.by === SRCSET.by;
+        if (mine) delete hit.src;
+        else hit.src = { team: SRCSET.team, by: SRCSET.by };
+        paint();
+      });
+    });
+
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
     });
@@ -1166,6 +1246,40 @@
        request goes out, which is what stops every repaint asking again. Empty
        renders as a dash, not as "none": not knowing is not the same as knowing
        there is no password (§30.2, the same distinction). */
+    /* ── Branding (§39) ─────────────────────────────────────────────
+       The colour input fires `input` continuously while the picker is dragged,
+       so it repaints on `change` — once, when the picker closes — and the hex
+       field on `change` too. A repaint per frame of a drag would rebuild the
+       control being dragged, which is §30.1 again. */
+    document.querySelectorAll("[data-brand]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        branding()[inp.dataset.brand] = inp.value.toUpperCase();
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandhex]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var v = inp.value.trim();
+        /* An unreadable value is refused rather than stored: a half-typed hex
+           would blank the colour and look like the platform had lost it. */
+        if (v && !hexRgb(v)) { inp.value = branding()[inp.dataset.brandhex] || ""; return; }
+        branding()[inp.dataset.brandhex] = v ? rgbHex(hexRgb(v)) : null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        branding()[b.dataset.brandclear] = null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandreset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.branding = {};
+        applyBrand(); paint();
+      });
+    });
+
     wirePicker();
 
     if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
@@ -1723,5 +1837,10 @@
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
-  SYNC.boot(paint);
+  /* Before the first paint, so the tenant's own colours are on screen from the
+     start rather than arriving a frame later. SYNC.boot repaints after
+     hydration and applyBrand runs again there, because the branding that
+     matters is the one in the DATABASE, not the one baked into the file. */
+  applyBrand();
+  SYNC.boot(function(){ applyBrand(); paint(); });
 </script>

@@ -1,0 +1,252 @@
+  /* ── Viewer switcher ─────────────────────────────────────────────── */
+  .viewer { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+  .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
+                  color:var(--ink-3); font-weight:700; }
+  /* Capped, because the select sizes itself to its LONGEST option and the
+     first line is a fixed 1180px column. "Strategy Management Office - all
+     units" reached the old 250px cap, which pushed the two buttons past the end of the
+     row and wrapped them onto a second line - so the one-line chrome asked
+     for in 2.9 was never actually one line for anyone signed in. The name
+     truncates instead; the note beside it already says the level and the
+     reach, so nothing is lost that is not said twice. */
+  .viewer select { font:inherit; border:1px solid var(--line);
+                   border-radius:var(--r); background:var(--surface); color:var(--ink);
+                   max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
+  .viewer select:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .viewer-note { font-size:11px; color:var(--gold-deep); font-weight:700;
+                 letter-spacing:.06em; text-transform:uppercase; }
+
+  /* ── Access matrix ───────────────────────────────────────────────── */
+  /* Seven roles down, seven areas across (§37). The role column is fixed and
+     the seven area columns share what is left equally — table-layout:fixed, or
+     the browser sizes columns by their longest word and one long header note
+     steals the width the controls need. */
+  .acgrid table { table-layout:fixed; width:100%; }
+  /* table-layout:fixed takes every column width from the FIRST row, which is
+     the header — so the widths have to be set on th, not only on td. `.cfg
+     th:first-child` was still claiming 15% for the role column and
+     `th:last-child` 15% for Setup, quietly overriding both numbers below. */
+  .acgrid th.ac, .acgrid td.ac { text-align:center; width:11.6%; padding-left:4px; padding-right:4px; }
+  .acgrid th.ac:last-child, .acgrid td.ac:last-child { width:11.6%; }
+  .acgrid th:first-child, .acgrid td.rolecell { width:19%; }
+  /* _shared.css sets `thead th { white-space:nowrap }`, which is right for a
+     one-word header and wrong for a column that explains what it covers: the
+     note did not wrap, it ran straight across its neighbours. Seven headers
+     that each say what is inside them have to be allowed to wrap. */
+  .acgrid thead th { white-space:normal; overflow-wrap:anywhere; }
+  .acgrid td.rolecell b { display:block; font-size:13px; line-height:1.3; }
+  .acgrid td.rolecell .why { margin-top:2px; }
+  .acgrid .factor-h b { font-size:11px; line-height:1.25; }
+  .acgrid .factor-h span { font-size:9.5px; line-height:1.3; display:block; margin-top:3px; }
+  /* Below the width where seven columns of controls fit, the table scrolls
+     inside its own box rather than pushing the page sideways — a horizontal
+     page scroll breaks every position:sticky above it (§27.2). */
+  .acgrid { overflow-x:auto; }
+  .acgrid table { min-width:940px; }
+  .acgrid tr.grouprow td { background:var(--panel); color:var(--panel-ink);
+                           font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+                           font-weight:700; padding:7px 13px; }
+  .st { display:inline-block; font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+        font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
+  .st-none { color:var(--none); border:1px dashed var(--none); }
+  .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
+  /* The ACCENT tint, not the warning tint. "May edit" is not a warning, and
+     gold-deep on the amber ground was 4.34:1 as well as saying the wrong
+     thing. */
+  .st-edit { color:var(--gold-deep); background:var(--over-bg); border:1px solid var(--over-line); }
+  .stset { display:inline-flex; gap:2px; }
+  /* A cell with neither button lit IS the answer — "no access" — not an
+     unanswered cell. The pair sits on a dashed tray so it reads as a state
+     somebody chose rather than a control nobody has reached yet. */
+  .stset.off { border:1px dashed var(--none); border-radius:4px; padding:1px; }
+  .stbtn { width:26px; height:24px; border:1px solid var(--line); background:var(--surface);
+           color:var(--ink-3); cursor:pointer; font-size:11px; padding:0; border-radius:2px;
+           font-family:var(--sans); line-height:1; }
+  .stbtn:first-child { border-radius:2px 0 0 2px; }
+  .stbtn:last-child { border-radius:0 2px 2px 0; }
+  .stbtn:hover { background:var(--surface-2); }
+  .stbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .stbtn.on.none { background:var(--none); border-color:var(--none); color:var(--surface); }
+  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:var(--on-fill); }
+  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:var(--on-fill); }
+
+  .chart-legend i.st { margin-right:2px; }
+
+  /* ── Factor editor ───────────────────────────────────────────────── */
+  .rmbtn { font:inherit; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+           font-weight:700; color:var(--bad); background:none; border:1px solid var(--line);
+           border-radius:99px; padding:4px 11px; cursor:pointer; }
+  .rmbtn:hover { background:var(--bad-bg); border-color:var(--bad); }
+  .rmbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .addrow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
+  .addrow .why { margin:0; }
+  /* ── The register (§35) ──────────────────────────────────────────
+     A role is two facts — which role, and what it is attached to — so the
+     chip carries both. Never a bare role name: "Custodian" alone is the half
+     of the answer that does not tell you whose plan they can touch. */
+  .rolechip { display:inline-flex; align-items:baseline; gap:6px; margin:0 6px 6px 0;
+              padding:4px 6px 4px 10px; border:1px solid var(--line); border-radius:99px;
+              background:var(--surface-2); }
+  .rolechip b { font-size:12px; }
+  .rolechip .why { font-size:11px; }
+  .xbtn { font:inherit; font-size:14px; line-height:1; color:var(--none); background:none;
+          border:none; cursor:pointer; padding:0 4px; border-radius:99px; }
+  .xbtn:hover { color:var(--bad); background:var(--bad-bg); }
+  .xbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .roleadd { display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .roleadd select.fld { max-width:170px; }
+  /* The add-a-person row is a table row, not the flex .addrow above it — a
+     display:flex on a <tr> collapses the cells it was meant to lay out. */
+  .newrow td { background:var(--surface-2); }
+  .newrow input.fld { width:100%; max-width:320px; }
+  /* A retired person reads as past tense without being unreadable: the row is
+     dimmed, never greyed to the point where the name cannot be checked. */
+  tr.retired td { opacity:.62; }
+
+  /* ── The assignment picker (§35) ─────────────────────────────────
+     Closed it is a button that reads as the current answer; open it is a
+     search box over a scrolling list. The list is capped and scrolls rather
+     than growing the row, because a tenant with two hundred people would
+     otherwise push the rest of the table off the screen. */
+  .pickbtn { font:inherit; font-size:13px; font-weight:600; color:var(--ink);
+             background:var(--surface); border:1px solid var(--line); border-radius:8px;
+             padding:6px 10px; cursor:pointer; text-align:left; width:100%; }
+  .pickbtn:hover { border-color:var(--gold); }
+  .pickbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .pickbtn.empty { color:var(--none); font-weight:500; font-style:italic; }
+  .picker { border:1px solid var(--gold); border-radius:10px; background:var(--surface);
+            padding:8px; text-align:left; min-width:210px; }
+  .picker input.fld { width:100%; margin-bottom:6px; }
+  .picklist { max-height:190px; overflow-y:auto; margin-bottom:6px; }
+  .pickhead { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+              color:var(--none); padding:6px 4px 3px; }
+  .pickrow { display:block; width:100%; text-align:left; font:inherit; background:none;
+             border:none; border-radius:6px; padding:5px 8px; cursor:pointer; }
+  .pickrow b { display:block; font-size:13px; font-weight:600; }
+  .pickrow .why { display:block; font-size:11px; }
+  .pickrow:hover { background:var(--surface-2); }
+  .pickrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .pickempty { font-size:12px; color:var(--none); padding:8px 4px; }
+  .pickfoot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+              border-top:1px solid var(--line); padding-top:6px; }
+
+  /* ── Branding (§39) ──────────────────────────────────────────────
+     A colour is shown as a colour. The swatch is the control on the picker and
+     a read-only chip everywhere else, so the page reads the same whether or
+     not you may change it. */
+  .brandpick { display:inline-flex; align-items:center; gap:8px; }
+  .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
+               display:inline-block; flex:none; }
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+                     border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
+  input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
+  input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
+  input.brandhex { max-width:96px; text-transform:uppercase; }
+
+  b.overload { color:var(--bad); }
+  .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
+
+  /* Config tables breathe more than data tables — these are settings, read
+     slowly and one row at a time, not scanned for a number. */
+  .cfg td .why { margin-top:4px; }
+  .cfg input.lbl, .cfg input.lvl { width:100%; max-width:none; text-align:left;
+                                    font-family:var(--sans); font-size:13px; }
+  .cfg input.fwt, .cfg input.kow { width:64px; max-width:64px; }
+
+  /* ── Chrome: one sticky container, nothing measured ─────────────── */
+  /* A background of its own, not just its children's. The container was
+     transparent and relied on the header, the nav row and the tab row tiling
+     it exactly — which they do at rest, but not mid-condense: the rows animate
+     their padding over .18s while the container animates its height, and every
+     frame where the two disagree by even a fraction let the page show through
+     the gap. That was the haze on scrolling. A floor cannot have a gap. */
+  .chrome { position:sticky; top:0; z-index:9; background:var(--surface); }
+  header.top { position:static; }
+  nav.units, nav.tabs { position:static; }
+
+  /* ── Section heading: the numeral leads, no badge ───────────────── */
+  .section-n { font-family:var(--serif); font-size:34px; line-height:1; color:var(--gold);
+               border:0; border-radius:0; padding:0; letter-spacing:0; }
+  .section-h { gap:14px; }
+
+  /* ── Pillar list: a table that expands ─────────────────────────── */
+  .plist { border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+  .pheadwrap { position:sticky; top:var(--chrome-h,118px); z-index:5; }
+  .phead, .prow, .ptotal { display:grid; gap:12px; align-items:center; padding:12px 16px; }
+  .phead { background:var(--surface-2); border-bottom:1px solid var(--line);
+           font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+           color:var(--ink-3); font-weight:700; padding-top:9px; padding-bottom:9px; }
+  .prow { width:100%; text-align:left; font:inherit; color:inherit; background:none;
+          border:0; border-bottom:1px solid var(--line-soft); cursor:pointer; }
+  .prow:hover { background:var(--surface-2); }
+  .prow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .prow[aria-expanded="true"] { background:var(--surface-2); }
+  .pname { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .pname b { font-size:14.5px; font-weight:600; }
+  .pname .psub { font-size:11.5px; color:var(--ink-3); font-weight:400; }
+  .powner { font-size:12.5px; color:var(--ink-2); }
+  .prow .num, .ptotal .num, .phead .num { text-align:right;
+        font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  .phead .num { font-family:var(--sans); }
+  .prow .num.lead { font-weight:700; font-size:15px; }
+  .chev { color:var(--ink-3); font-size:12px; transition:transform .15s ease; text-align:center; }
+  .prow[aria-expanded="true"] .chev { transform:rotate(90deg); }
+  .ptotal { background:var(--panel); color:var(--panel-ink); font-weight:700; }
+  .ptotal .num { color:var(--panel-ink); }
+  .ptotal .tsub { display:block; font-size:11px; font-weight:400; opacity:.75; }
+  .pbody { padding:8px 16px 22px; border-bottom:1px solid var(--line-soft); background:var(--surface); }
+  .pbody[hidden] { display:none; }
+
+  /* ── Compact score pair ────────────────────────────────────────── */
+  .card.tight { padding:14px 16px 13px; }
+  .card.tight .score-h { margin-bottom:6px; }
+  .headline { display:flex; align-items:flex-end; gap:12px; flex-wrap:wrap; }
+  .headline .big { font-size:31px; }
+  .headline .ofplan { font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
+                      color:var(--ink-3); font-weight:700; margin:0 0 5px; }
+  .minirow { display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+             margin-top:11px; padding-top:10px; border-top:1px solid var(--line-soft); }
+  .minirow div { display:flex; flex-direction:column; gap:1px; }
+  .minirow em { font-style:normal; font-size:9.5px; letter-spacing:.09em;
+                text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .minirow b { font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:14px; }
+
+  /* ── Tables: name left, figures centred, conclusion coloured ───── */
+  th.cc, td.cc { text-align:center; }
+  td.num, th.num.cc { text-align:center; }
+  .pbody td.num, .pbody th.cc { text-align:center; }
+  th.idx, td.idx { width:38px; text-align:center; font-family:var(--mono);
+                   font-variant-numeric:tabular-nums; color:var(--ink-3); font-size:12px; }
+  td.final { font-weight:700; font-size:14px; }
+  .pair { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .pair b { font-weight:700; }
+  .pbody .qs { justify-content:flex-start; }
+
+  @media (max-width:900px) {
+    .phead { display:none; }
+    .prow, .ptotal { grid-template-columns:1fr 74px 60px 18px !important; }
+    .prow > span:nth-child(2), .prow > span:nth-child(3), .powner { display:none; }
+    .ptotal > span:nth-child(2), .ptotal > span:nth-child(3), .ptotal > span:nth-child(4) { display:none; }
+  }
+
+  /* ── Configuration: read-only until Edit is pressed ─────────────── */
+  .cfgwrap.open { border:1px solid var(--line); border-radius:var(--r);
+                  background:var(--surface); }
+  .cfg-bar { display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+             padding:14px 18px; border-bottom:1px solid var(--line-soft); }
+  .cfg-bar.plain { border:1px solid var(--line); border-bottom:0;
+                   border-radius:var(--r) var(--r) 0 0; background:var(--surface); }
+  .cfg-bar .cfg-sum { flex:1; margin:0; }
+  .cfg-lab { flex:1; font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; }
+  .swatch { display:inline-block; width:11px; height:11px; border-radius:50%;
+            margin-right:9px; vertical-align:baseline; }
+  .cfg input.blabel { width:100%; max-width:none; text-align:left;
+                      font-family:var(--sans); font-size:13px; }
+  .cfg input.bfloor { width:64px; max-width:64px; }
+  .qual.static i { width:20px; height:20px; border:1px solid var(--line); border-radius:2px;
+                   display:inline-flex; align-items:center; justify-content:center;
+                   font-style:normal; font-size:10px; font-family:var(--mono);
+                   color:var(--ink-3); background:var(--surface); }
+  .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
+  .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }

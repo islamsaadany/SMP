@@ -50,7 +50,10 @@
         font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
   .st-none { color:var(--none); border:1px dashed var(--none); }
   .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
-  .st-edit { color:var(--gold-deep); background:var(--attn-bg); border:1px solid var(--gold); }
+  /* The ACCENT tint, not the warning tint. "May edit" is not a warning, and
+     gold-deep on the amber ground was 4.34:1 as well as saying the wrong
+     thing. */
+  .st-edit { color:var(--gold-deep); background:var(--over-bg); border:1px solid var(--over-line); }
   .stset { display:inline-flex; gap:2px; }
   /* A cell with neither button lit IS the answer — "no access" — not an
      unanswered cell. The pair sits on a dashed tray so it reads as a state
@@ -127,8 +130,45 @@
   .pickfoot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
               border-top:1px solid var(--line); padding-top:6px; }
 
+  /* ── Branding (§39) ──────────────────────────────────────────────
+     A colour is shown as a colour. The swatch is the control on the picker and
+     a read-only chip everywhere else, so the page reads the same whether or
+     not you may change it. */
+  .brandpick { display:inline-flex; align-items:center; gap:8px; }
+  .brandchip { width:22px; height:22px; border-radius:var(--r-sm); border:1px solid var(--line);
+               display:inline-block; flex:none; }
+  input.brandcolor { width:34px; height:26px; padding:0; border:1px solid var(--line);
+                     border-radius:var(--r-sm); background:var(--surface); cursor:pointer; }
+  input.brandcolor::-webkit-color-swatch-wrapper { padding:2px; }
+  input.brandcolor::-webkit-color-swatch { border:0; border-radius:3px; }
+  input.brandhex { max-width:96px; text-transform:uppercase; }
+
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
+  .note.attn-note { border-left:3px solid var(--attn); background:var(--attn-bg); }
+
+  /* ── A figure somebody else enters (§16.7) ────────────────────────
+     Quieter than a typed one, and ATTRIBUTED — a greyed number with nothing
+     beside it reads as broken; the same number with the team's name beside it
+     reads as somebody else's. */
+  /* Units as buttons rather than a dropdown (§16.7a). Ten of them fit on one
+     line at 1000px, and a list you can see is a list you can move through. */
+  .unitpick { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; }
+  .upick { font:600 12.5px/1 var(--sans); color:var(--ink-2); background:var(--surface);
+           border:1px solid var(--line); border-radius:var(--r); padding:7px 11px;
+           cursor:pointer; display:inline-flex; align-items:center; gap:7px; }
+  .upick:hover { border-color:var(--gold); color:var(--ink); }
+  .upick.on { background:var(--surface-2); border-color:var(--gold); color:var(--ink);
+              font-weight:700; box-shadow:inset 3px 0 0 var(--gold); padding-left:12px; }
+  .upick:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .upick-n { font-family:var(--mono); font-size:11px; color:var(--ink-3);
+             background:var(--surface-2); border-radius:20px; padding:2px 6px; }
+  .upick.on .upick-n { background:var(--surface); color:var(--ink-2); }
+
+  .mono.sourced { color:var(--ink-3); }
+  .srcby { font:700 9px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase;
+           color:var(--ink-3); background:var(--surface-2); border:1px solid var(--line);
+           border-radius:20px; padding:3px 7px; margin-left:6px; white-space:nowrap; }
 
   /* Config tables breathe more than data tables — these are settings, read
      slowly and one row at a time, not scanned for a number. */

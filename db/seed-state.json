@@ -5328,7 +5328,7 @@
   },
   "contrib": {
    "a_group": "view",
-   "a_unit_own": "edit",
+   "a_unit_own": "view",
    "a_unit_other": "none",
    "a_fn_own": "view",
    "a_fn_other": "none",

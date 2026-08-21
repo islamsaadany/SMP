@@ -1,0 +1,1792 @@
+/* ── CONFIGURATION ────────────────────────────────────────────────────────
+   Everything a tenant can configure. The internal name is the contract the
+   platform is built on and never changes; the display label is what a tenant
+   sees on screen. The SMO manages this, not the client.
+
+   Decisions this file implements:
+     · Labels are per TENANT, not per cycle — renaming mid-history would make
+       a 2026 report and a 2027 report use different words for one object.
+     · Every level of the model is configurable, group and business unit alike.
+     · Two entities may never share a display label; the collision is blocked
+       at save time rather than discovered in a client demo.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var LABELS = {
+  scope: "tenant",              /* not per-cycle */
+  managedBy: "SMO",
+  entries: [
+    { key:"theme",       internal:"Theme",              group:"Themes",            bu:"Themes",
+      note:"The group's standing columns. Also called pillars or motto elements by clients." },
+    { key:"pillar",      internal:"Pillar",             group:"Group capabilities", bu:"Pillars",
+      note:"A business unit's direction or capability. Carries key measures and tactics." },
+    { key:"keyobj",      internal:"Key Objectives",     group:"Key Objectives",    bu:"Key Objectives",
+      note:"A unit's own scorecard. Previously called North Star and Guiding Objectives." },
+    { key:"aspiration",  internal:"Winning Aspiration", group:"Vision",            bu:"Winning Aspiration",
+      note:"One entity. Vision, End State and Winning Aspiration are display labels for it." },
+    { key:"purpose",     internal:"Purpose",            group:"Mission",           bu:"—",
+      note:"Held by the top unit only. Business units inherit it." },
+    { key:"values",      internal:"Core Values",        group:"Core Values",       bu:"—",
+      note:"Group-level only. A unit never declares its own." },
+    { key:"measure",     internal:"Key Measure",        group:"Key measures",      bu:"Key measures",
+      note:"The measures under a single pillar." },
+    { key:"tactic",      internal:"Tactic",             group:"Tactics",           bu:"Tactics",
+      note:"The work under a pillar. Spans quarters, has an owner." }
+  ]
+};
+
+/* ── ROLES, which replaced LEVELS in 3.8 ────────────────────────────
+   N-1 / N-2 / N-3 were org DEPTH, invented before anyone knew what the
+   platform would need, and the giveaway was already in the code: each level
+   carried a `titles` string — "N-1 · Business Unit Head · Group CFO · Group
+   COO" — stapling real job titles onto an abstraction to explain what it meant.
+
+   Islam: "the titles should not be relevant in the platform accessibility, the
+   activity and visibility should be role based." So the role IS the thing. A
+   person's official title (Senior Director, Senior Manager) stays in the
+   registry as information ABOUT them and is never consulted for access. Two
+   people with the same title can hold different roles, which is correct.
+
+   WHERE A ROLE LIVES depends on what kind of role it is, and this is the whole
+   design:
+
+     A role that names a SEAT in the organisation — super user, group CEO,
+     company CEO — is a property of the PERSON. Nothing else points at it.
+
+     A role that names RESPONSIBILITY FOR A THING — business unit owner,
+     strategy custodian, supporting function head — is a property of the THING.
+     Mobile already has a head field and a custodian field; those pointers ARE
+     the role, read from the other end.
+
+   So there is one fact, editable from either side, and it cannot disagree with
+   itself: setting Mobile's owner on the unit page and setting it in the
+   registry are the same write. It also gives multiple roles for free — one
+   person can be group CEO and own Care, because those are two records in two
+   different places rather than one field fighting itself. */
+/* The list itself lives in lib/rules.js — the SAME file api/state.js requires,
+   so the roles the screen draws and the roles the server enforces are one
+   list, not two (spec 006 §2). */
+var ROLES = SMPRules.ROLES;
+var ROLE_KEYS = SMPRules.ROLE_KEYS;
+function roleName(k){
+  var r = ROLES.filter(function(x){ return x.key === k; })[0];
+  return r ? r.name : k;
+}
+
+/* Every role a person holds, with what each is attached to. Derived, never
+   stored: the seat roles come from the person, the responsibility roles from
+   whatever points at them. A person who holds nothing gets an empty list and
+   therefore no access, which is the honest answer for someone who has been
+   added to the registry but not yet given a job. */
+function world(){
+  return SMPRules.W({ unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
+                      functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
+                      companies:COMPANIES, access:ACCESS });
+}
+function personRoles(p){ return SMPRules.personRoles(world(), p); }
+function personRoleKeys(p){ return SMPRules.personRoleKeys(world(), p); }
+
+/* Does the person currently being viewed as hold this role at all? The
+   question almost every "can they" check actually wants, and the one place
+   that knows a person holds several. */
+function hasRole(k){ return personRoleKeys(viewer()).indexOf(k) > -1; }
+
+/* Every page in the platform, and which AREA answers for it (§37). This list
+   is the single source: PAGE_AREA is built from it below rather than written
+   out beside it, because two lists of the same keys are two lists that will
+   disagree. `scope` is what KIND of destination the page belongs to; `area` is
+   what decides who may open it.
+
+   "unit" and "fn" as an area mean the answer depends on WHOSE unit — resolved
+   per role by areaFor(). "always" means it is not a setting at all. */
+var PAGES = SMPRules.PAGES;
+
+/* Foundation and Analysis are static pages that can be put into edit. They
+   hold authored content, not reported numbers, so reading is the normal state. */
+var EDIT_PAGE = { foundation:false, analysis:false, temple:false };
+
+/* How the objectives box reads. A view preference, not stored on the object —
+   it changes nothing about the strategy, only how one box is laid out. */
+var KO_VIEW = "chips";
+
+/* Configuration screens open read-only. Editing is entered deliberately, which
+   is what makes a change to a weight or a threshold an act rather than a slip. */
+var EDITING = { weights:false, factors:false, bands:false, units:false, people:false, fns:false };
+
+/* Transient register state. None of this is the tenant's data — it is which
+   control happens to be open — so none of it is saved (§25.2: a property of
+   the screen never belongs in the state graph).
+     ADDROLE      whose "+ role" control is open, by person key
+     ADDROLE_KIND which role that control currently shows
+     NEWPERSON    what has been typed into the add-a-person row
+     PICKING      which assignment picker is open, "<unit>|<role>"
+     PICKQ        what has been typed into it */
+var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
+var PICKING = null, PICKQ = "";
+
+/* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
+   Rebuilt again in 3.10, at Islam's direction: *"we just need the roles on the
+   left and the types of pages they might see/edit on the horizontal access."*
+
+   The old matrix had a column per role and a ROW PER PAGE — 25 pages × 7 roles,
+   drawn as three buttons a cell, so 525 controls on one screen. Nobody reads a
+   grid that size; they look up one role, or one page. It answered a question
+   nobody asks, at a size nobody can hold.
+
+   Seven AREAS replace the 25 pages. Two of them are the same pages seen from
+   different distances — your own unit and everybody else's — which is the
+   second half of Islam's design: *"a business unit head and custodian of Mobile
+   owns Mobile. A CEO of Retail owns all the units below him. I see this as a
+   logic thing not a settings thing."*
+
+   So OWN IS NEVER TYPED IN. It is read from what the role is attached to, by
+   roleOwns() below — the same attachment §33 already stores on the thing. A
+   Company CEO owns their company's units; the SMO and the Group CEO own
+   everything; a function head owns their function and no unit at all.
+
+   Three states, never more (§19). Edit includes view, so they are a ladder
+   rather than three independent flags.
+
+   WHAT IS DELIBERATELY NOT HERE, because it is a rule and not a setting:
+     · the Knowledge base, which is view for everyone, always. A column whose
+       every cell holds the same answer is a question with no second answer —
+       and an explanation nobody can open is not an explanation (§30).
+     · correcting a PLAN, which is the SMO's alone (§22, §31), whatever this
+       matrix says about the unit the plan belongs to.
+     · marking a measure as FOCUS, which is the CEO's and the SMO's — it is
+       what carries reward, and that is a decision the office makes, not a page
+       permission.
+   Each of those used to be a cell here. Each is a sentence now. */
+var AREAS = SMPRules.AREAS;
+var AREA_KEYS = SMPRules.AREA_KEYS;
+function areaName(k){
+  var a = AREAS.filter(function(x){ return x.key === k; })[0];
+  return a ? a.label : k;
+}
+var PAGE_AREA = SMPRules.PAGE_AREA;
+
+/* The tenant's own map starts as the shipped default and is replaced by
+   whatever the database holds. The DEFAULT itself is in lib/rules.js, because
+   an absent key falls back to it on both sides (§30.2). */
+var ACCESS = JSON.parse(JSON.stringify(SMPRules.ACCESS_DEFAULTS));
+
+/* Who is signed in. Changing this re-renders the whole shell against the
+   matrix above, so the grid can be judged by using it rather than reading it. */
+var PEOPLE = [
+  { key:"smo",     name:"Strategy Management Office", role:"super", unit:"group",  title:"SMO" },
+  { key:"ceo",     name:"Group CEO",                  role:"gceo",  unit:"group",  title:"Chief Executive" },
+  { key:"mobhead", name:"Ashraf Laithy",              unit:"mobile", title:"Head of Mobile" },
+  { key:"loghead", name:"Hazem Roushdy",              unit:"logistics", title:"Head of Logistics" },
+  { key:"rethead", name:"Hossam Farid",               unit:"retailstores", title:"Head of Retail Stores" },
+  { key:"cfo",     name:"Group CFO",                  unit:"group",  title:"Chief Financial Officer" },
+  { key:"b2bhead", name:"Nour Selim",      unit:"b2becomm",            title:"Head of B2B Ecomm" },
+  { key:"cehead",  name:"Tarek Nassar",    unit:"consumerelectronics", title:"Head of Consumer Electronics" },
+  { key:"oshead",  name:"Sherif Adel",     unit:"onlineshop",          title:"Head of Online Shop" },
+  { key:"cohead",  name:"Amr Bakr",        unit:"corporate",           title:"Head of Corporate" },
+  { key:"cahead",  name:"Mostafa Deif",    unit:"care",                title:"Head of Care" },
+  { key:"ithead",  name:"Yasser Kamal",    unit:"it",                  title:"Head of IT" },
+  { key:"nghead",  name:"Chidi Okafor",    unit:"nigeria",             title:"Head of Nigeria" },
+  { key:"own_mob", name:"Mennah Farouk",   unit:"mobile",              title:"Strategy custodian, Mobile" },
+  { key:"own_ret", name:"Dalia Sabry",     unit:"retailstores",        title:"Strategy custodian, Retail Stores" },
+  { key:"own_b2b", name:"Kareem Hafez",    unit:"b2becomm",            title:"Strategy custodian, B2B Ecomm" },
+  { key:"own_ce",  name:"Heba Salem",      unit:"consumerelectronics", title:"Strategy custodian, Consumer Electronics" },
+  { key:"own_os",  name:"Nadia Fouad",     unit:"onlineshop",          title:"Strategy custodian, Online Shop" },
+  { key:"own_co",  name:"Laila Zaki",      unit:"corporate",           title:"Strategy custodian, Corporate" },
+  { key:"own_ca",  name:"Rania Fahmy",     unit:"care",                title:"Strategy custodian, Care" },
+  { key:"own_it",  name:"Dina Shawky",     unit:"it",                  title:"Strategy custodian, IT" },
+  { key:"own_lg",  name:"Mai Sobhy",       unit:"logistics",           title:"Strategy custodian, Logistics" },
+  { key:"own_ng",  name:"Amaka Eze",       unit:"nigeria",             title:"Strategy custodian, Nigeria" },
+  { key:"fn_fin",  name:"Hossam Abuelenien", unit:null, fn:"finance",   title:"Head of Finance" },
+  { key:"fn_hr",   name:"Noran Adel",        unit:null, fn:"hr",        title:"Head of HR" },
+  { key:"fn_tre",  name:"Fayad Sobhy",       unit:null, fn:"treasury",  title:"Head of Treasury" },
+  { key:"fn_mkt",  name:"Yara Kamal",        unit:null, fn:"marketing", title:"Head of Marketing" },
+  { key:"fn_mkt2", name:"Tarek Nour",        unit:null, fn:"marketing", title:"Strategy custodian, Marketing" },
+  { key:"dir",     name:"Ramy Behairy",               unit:"mobile", title:"Director, Digital Operations" },
+  /* Company CEOs. Attached to a COMPANY rather than a unit — a new kind of
+     attachment: the Company CEO role, bounded to their company (§15.13, §33). */
+  { key:"co_dist", name:"Company CEO, Distribution", role:"cceo", unit:null, company:"distribution",
+    title:"CEO, Distribution" },
+  { key:"co_b2c",  name:"Company CEO, B2C",          role:"cceo", unit:null, company:"b2c",
+    title:"CEO, B2C" }
+];
+
+/* Each unit names two people. The HEAD is accountable for the unit; the OWNER
+   holds the same access and does the actual work — entering results, adjusting
+   the plan, reporting. Separating them stops "who can edit this" and "whose
+   number is this" from being the same question, which they are not. */
+/* head = the unit's owner by default; the head IS the owner, so nothing else
+   should claim that word. The second role holds the strategy on the head's
+   behalf: keeps the plan current, makes the entries, reports, and often
+   presents. Custodian says exactly that \u2014 keeps it, does not own it.
+
+   "Owner" survives on pillars and tactics, where it means responsibility for a
+   piece of work rather than access to a unit. */
+var UNIT_ROLES = {
+  mobile:              { head:"mobhead", custodian:"own_mob" },
+  retailstores:        { head:"rethead", custodian:"own_ret" },
+  b2becomm:            { head:"b2bhead", custodian:"own_b2b" },
+  consumerelectronics: { head:"cehead",  custodian:"own_ce"  },
+  onlineshop:          { head:"oshead",  custodian:"own_os"  },
+  corporate:           { head:"cohead",  custodian:"own_co"  },
+  care:                { head:"cahead",  custodian:"own_ca"  },
+  it:                  { head:"ithead",  custodian:"own_it"  },
+  logistics:           { head:"loghead", custodian:"own_lg"  },
+  nigeria:             { head:"nghead",  custodian:"own_ng"  }
+};
+
+function personName(key){
+  var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
+  return p ? p.name : null;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BRANDING (§39) — the tenant's own colours, derived from two of them
+
+   A brand is not seven colours. Asking somebody to supply an accent, a darker
+   accent for text, an ink to sit on the accent, a glow, a bar, a quiet ink for
+   the bar and a hover is asking them to do the work the platform should do.
+   So the page takes TWO — the accent and the dark bar — and derives the rest,
+   which is also the only way §38.4 can be guaranteed rather than remembered:
+   a brand colour that is unreadable as text is DARKENED UNTIL IT IS READABLE
+   instead of being accepted and discovered later.
+
+   Stored on GROUP, so it rides in the org row's `extra` jsonb and needs no
+   schema change — and so it is TENANT data, autosaved and the same for
+   everyone, which is exactly what a brand is and exactly what a theme is not
+   (§25.2). A person may still override it on their own screen; the top-bar
+   switches write localStorage and localStorage wins.
+   ══════════════════════════════════════════════════════════════════ */
+
+function hexRgb(h){
+  h = String(h || "").replace("#", "").trim();
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+function rgbHex(c){
+  return "#" + c.map(function(v){
+    var n = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+    return n.length === 1 ? "0"+n : n;
+  }).join("").toUpperCase();
+}
+function relLum(c){
+  var s = c.map(function(v){ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2];
+}
+/* The WCAG ratio, the same number the contrast sweep measures. */
+function contrastOf(a, b){
+  var l1 = relLum(a), l2 = relLum(b);
+  return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
+}
+function mixRgb(a, b, t){
+  return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+}
+/* Black or white, whichever can actually be read on this colour. This is the
+   fix for "white on the house gold is 2.4:1" made automatic. */
+function inkFor(bg){
+  var w = [255,255,255], k = [12,17,26];
+  return contrastOf(bg, w) >= contrastOf(bg, k) ? w : k;
+}
+/* Walk a colour toward black (or toward white, on a dark ground) until it
+   clears the ratio a word needs. Returns the colour unchanged if it already
+   does — a brand's own accent is used as given wherever it is legible. */
+function readableOn(fg, bg, need){
+  need = need || 4.5;
+  var target = relLum(bg) > 0.5 ? [0,0,0] : [255,255,255];
+  for (var t = 0; t <= 1.001; t += 0.04) {
+    var c = mixRgb(fg, target, t);
+    if (contrastOf(c, bg) >= need) return c;
+  }
+  return target;
+}
+
+/* The tenant's branding. `null` anywhere means "use the shipped palette",
+   which is why an untouched tenant carries no branding at all rather than a
+   copy of the defaults — a stored copy would silently stop tracking the
+   shipped palette the moment it improved. */
+var BRAND_DEFAULT = { palette:null, font:null, accent:null, bar:null };
+function branding(){
+  if (!GROUP.branding) GROUP.branding = {};
+  var b = GROUP.branding;
+  Object.keys(BRAND_DEFAULT).forEach(function(k){
+    if (!(k in b)) b[k] = BRAND_DEFAULT[k];
+  });
+  return b;
+}
+
+/* Every token the two inputs decide, worked out here so the page, the live
+   preview and the applied result cannot disagree — one function, three
+   readers. Returns {} when the tenant has set nothing. */
+function brandTokens(){
+  var b = branding(), out = {}, rgb;
+  if (b.accent && (rgb = hexRgb(b.accent))) {
+    var onLight = [255,255,255];
+    out["--gold"] = rgbHex(rgb);
+    /* TEXT weight: the accent as a word, on the page's own surface. */
+    out["--gold-deep"] = rgbHex(readableOn(rgb, onLight, 4.5));
+    /* And the ink that sits ON the accent when it is a fill. */
+    out["--on-accent"] = rgbHex(inkFor(rgb));
+    out["--accent-glow"] = "rgba(" + rgb.map(Math.round).join(",") + ",.22)";
+  }
+  if (b.bar && (rgb = hexRgb(b.bar))) {
+    out["--panel"] = rgbHex(rgb);
+    var ink = inkFor(rgb);
+    out["--panel-ink"] = rgbHex(ink);
+    /* The bar's own quiet ink and hover — never the page's --ink-3 and
+       --surface-2, which is the mistake §38.4 caught. Quiet is the bar mixed
+       most of the way to its own ink, so it stays legible ON the bar whatever
+       colour the bar is; hover is a step away from the bar toward that ink. */
+    out["--panel-quiet"] = rgbHex(mixRgb(rgb, ink, 0.55));
+    out["--panel-hover"] = rgbHex(mixRgb(rgb, ink, 0.12));
+  }
+  return out;
+}
+
+/* What the page shows beside each input, and what refuses a save. Reported
+   rather than silently corrected: somebody typing their own brand colour is
+   entitled to know it needed darkening, and by how much. */
+function brandChecks(){
+  var b = branding(), t = brandTokens(), out = [];
+  var white = [255,255,255];
+  if (b.accent && hexRgb(b.accent)) {
+    var a = hexRgb(b.accent);
+    out.push({ what:"Accent as a fill, with its ink on top",
+               ratio:+contrastOf(a, hexRgb(t["--on-accent"])).toFixed(2), need:4.5 });
+    out.push({ what:"Accent as text on the page",
+               ratio:+contrastOf(hexRgb(t["--gold-deep"]), white).toFixed(2), need:4.5,
+               note: t["--gold-deep"].toUpperCase() !== rgbHex(a) ? "darkened to " + t["--gold-deep"] : null });
+  }
+  if (b.bar && hexRgb(b.bar)) {
+    var p = hexRgb(b.bar);
+    out.push({ what:"Navigation bar, with its own ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-ink"])).toFixed(2), need:4.5 });
+    out.push({ what:"Navigation bar, its quiet ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-quiet"])).toFixed(2), need:4.5 });
+  }
+  return out;
+}
+
+/* ── The register (§16.11, §35) ──────────────────────────────────────
+   People are RETIRED, never deleted. A person carries reported history the
+   same way a unit does (§30.3): snapshots attribute figures to whoever
+   entered them, and removing the row would rewrite a closed cycle into one
+   nobody reported. Retired means cannot sign in, cannot hold a role, still
+   named wherever they already are.
+
+   `active` and `phone` are not columns — they ride in the people table's
+   `extra` jsonb and come back through it. Deliberate: neither has any
+   relational meaning, and adding a real column to a table that already exists
+   needs a pre-phase migration (§33.5) for nothing gained. */
+function personActive(p){ return SMPRules.personActive(p); }
+function personBy(key){
+  return PEOPLE.filter(function(x){ return x.key === key; })[0] || null;
+}
+
+/* A person arrives with a name and a role; the key is minted here, the same
+   way a plan's codes are minted on arrival rather than typed (§22). Letters
+   and digits from the name, then a numeric suffix if that is taken — never a
+   silent collision, because the key IS the username. */
+function mintPersonKey(name){
+  var base = String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14);
+  if (!base) base = "person";
+  if (!personBy(base)) return base;
+  var n = 2;
+  while (personBy(base + n)) n++;
+  return base + n;
+}
+
+/* Create and return the key. `where` follows the same encoding personRoles()
+   reports: "group", "co:<company>", "fn:<function>", or a unit key. */
+function addPerson(o){
+  var key = mintPersonKey(o.name);
+  var p = { key: key, name: String(o.name || "").trim(), title: o.title || "" };
+  if (o.phone) p.phone = o.phone;
+  PEOPLE.push(p);
+  if (o.role) grantPersonRole(key, o.role, o.where);
+  return key;
+}
+
+/* ── One fact, two editing surfaces ─────────────────────────────────
+   A SEAT role (super, group CEO, company CEO) is a property of the PERSON and
+   is stored on them. RESPONSIBILITY FOR A THING (unit owner, custodian,
+   function head) is a property of the THING, so granting it writes the
+   thing's pointer — which is the same pointer the Business units page edits.
+   That is why the register and the unit page cannot disagree: there is only
+   one place the answer lives, and both screens write it (§33, §35).
+
+   A responsibility role is singular by nature — one head per unit — so
+   granting it to someone takes it from whoever held it. That is not a side
+   effect to guard against; it is what "this is now their unit" means. */
+function unitRolesFor(k){
+  if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
+  return UNIT_ROLES[k];
+}
+function grantPersonRole(personKey, roleKey, where){
+  var p = personBy(personKey);
+  if (!p) return;
+  var at = where || "group";
+  if (roleKey === "super" || roleKey === "gceo") {
+    p.role = roleKey; delete p.company; if (!p.unit) p.unit = "group";
+  } else if (roleKey === "cceo") {
+    p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
+  } else if (roleKey === "owner") {
+    unitRolesFor(at).head = personKey; p.unit = at;
+  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
+    FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "custodian") {
+    unitRolesFor(at).custodian = personKey; p.unit = at;
+  } else if (roleKey === "fnhead") {
+    FUNCTIONS[at.slice(3)].head = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "contrib") {
+    p.unit = at;
+  }
+}
+function revokePersonRole(personKey, roleKey, where){
+  var p = personBy(personKey);
+  var at = where || "group";
+  if (roleKey === "super" || roleKey === "gceo" || roleKey === "cceo") {
+    if (p) { delete p.role; delete p.company; }
+  } else if (roleKey === "owner") {
+    if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
+  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[at.slice(3)];
+    if (f && f.custodian === personKey) f.custodian = null;
+  } else if (roleKey === "custodian") {
+    if (UNIT_ROLES[at] && UNIT_ROLES[at].custodian === personKey) UNIT_ROLES[at].custodian = null;
+  } else if (roleKey === "fnhead") {
+    var g = FUNCTIONS[at.slice(3)];
+    if (g && g.head === personKey) g.head = null;
+  }
+  /* contrib is p.unit, which is also how a person is FOUND — clearing it would
+     hide them from every unit dropdown, so it stands until they are given
+     somewhere else to be. */
+}
+
+/* Retiring REVOKES every role the person holds, rather than leaving them
+   pointed at while unable to act. The unit then reads "unassigned", which is
+   the true state of a unit whose head has left — and it is visible, where a
+   retired person still named as head is a unit that looks staffed and is not.
+   Reported history is untouched: it lives in snapshots, not in these
+   pointers. */
+function retirePerson(key){
+  var p = personBy(key);
+  if (!p) return;
+  personRoles(p).forEach(function(r){ revokePersonRole(key, r.role, r.at); });
+  p.active = false;
+}
+function restorePerson(key){
+  var p = personBy(key);
+  if (p) delete p.active;
+}
+
+/* Where a role can be attached, for the second half of the picker. A role
+   whose scope is the group has exactly one answer, and the control says so
+   rather than offering a list of one. */
+function roleWheres(roleKey){
+  if (roleKey === "super" || roleKey === "gceo") return [{ v:"group", label:"the group" }];
+  if (roleKey === "cceo") {
+    return COMPANY_KEYS.map(function(c){ return { v:"co:" + c, label: COMPANIES[c].name }; });
+  }
+  if (roleKey === "fnhead") {
+    return FUNCTION_KEYS.map(function(f){ return { v:"fn:" + f, label: FUNCTIONS[f].name }; });
+  }
+  var units = UNIT_KEYS.map(function(k){ return { v:k, label: UNITS[k].name }; });
+  if (roleKey === "custodian") {
+    return units.concat(FUNCTION_KEYS.map(function(f){
+      return { v:"fn:" + f, label: FUNCTIONS[f].name + " (function)" };
+    }));
+  }
+  return units;
+}
+
+/* The order a picker offers people in: the ones already attached to this unit
+   or function first, then everyone else, retired people never. "Relevant
+   names first" was Islam's word for it — the list still holds everyone,
+   because a person moving between units is normal and a picker that hides
+   them makes the move impossible. */
+function peopleFor(where){
+  var here = [], rest = [];
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var mine = String(where || "").indexOf("fn:") === 0
+      ? p.fn === String(where).slice(3)
+      : p.unit === where;
+    (mine ? here : rest).push(p);
+  });
+  return { here: here, rest: rest };
+}
+
+/* The owner reaches the same pages as the head, for the same unit. */
+function unitRoleOf(personKey, unitKey){
+  var r = UNIT_ROLES[unitKey];
+  if (!r) return null;
+  if (r.head === personKey) return "head";
+  if (r.custodian === personKey) return "custodian";
+  return null;
+}
+
+/* ── Focus measures ───────────────────────────────────────────────────────
+   The CEO marks a few measures per unit as the ones carrying reward. A mark is
+   stored against the CYCLE, not against the measure \u2014 every cycle starts
+   unmarked, so last year's emphasis cannot quietly become this year's default.
+
+   Where reward begins is one rule for the whole cycle, not a second target on
+   each measure. Focus changes no score anywhere: the unit headline, the pillar
+   figures and the group compile are computed exactly as before. Unit weights
+   already decide how much a unit counts, and letting focus alter scoring would
+   count the same emphasis twice. No compensation arithmetic lives here \u2014 the
+   platform reports standing; the scheme pays.
+
+   Focus is a business-unit idea only. The group unit carries none. */
+var CYCLE = {
+  name: "2026",
+  rewardAt: 100,     /* percent of target at which reward begins */
+  locked: false,     /* true once the cycle opens */
+  /* Chosen so the demo carries every standing the rule can produce \u2014 earning,
+     short, and one with nothing reported. A board on which every row says the
+     same word demonstrates nothing. */
+  focus: {
+    "mobile-KO2": true, "mobile-P1-M3": true, "mobile-P3-M2": true,
+    "retailstores-KO2": true, "retailstores-P1-M2": true,
+    "care-KO2": true, "care-P1-M3": true,
+    "logistics-KO3": true, "logistics-P2-M1": true
+  }
+};
+
+function isFocus(id){ return !!CYCLE.focus[id]; }
+function toggleFocus(id){
+  if (CYCLE.locked) return false;
+  if (CYCLE.focus[id]) delete CYCLE.focus[id]; else CYCLE.focus[id] = true;
+  return true;
+}
+function canMarkFocus(){
+  var v = viewer();
+  return !CYCLE.locked && (hasRole("super") || hasRole("gceo"));
+}
+
+/* Standing is derived from the one rule. Three states at a rule of 100%, four
+   above it \u2014 a measure can deliver its commitment without clearing the reward
+   line, and that is neither short nor earning. */
+function focusStanding(progress){
+  if (progress == null) return { key:"none",  label:"Not reported" };
+  if (progress >= CYCLE.rewardAt) return { key:"over", label:"Earning" };
+  if (progress >= 100) return { key:"met",  label:"Met, not earning" };
+  return { key:"short", label:"Short" };
+}
+
+/* Every marked item in a unit, objectives and pillar measures alike. */
+function unitFocus(u){
+  var out = [];
+  u.keyObjectives.forEach(function(m){
+    if (isFocus(m.id)) out.push({ m:m, src:L("keyobj","bu").toLowerCase() });
+  });
+  u.items.forEach(function(p, pi){
+    p.measures.forEach(function(m){
+      if (isFocus(m.id)) out.push({ m:m, src:pillarCode(u, pi) });
+    });
+  });
+  return out;
+}
+function focusTally(u){
+  var t = { over:0, met:0, short:0, none:0, total:0, mean:null };
+  var vals = [];
+  unitFocus(u).forEach(function(x){
+    t.total++;
+    t[focusStanding(x.m.progress).key]++;
+    if (x.m.progress != null) vals.push(x.m.progress);
+  });
+  t.mean = avg(vals);
+  return t;
+}
+
+/* ── Supporting functions ─────────────────────────────────────────────────
+   A capability is cross-cutting: the whole group depends on it, and a supporting
+   function improves it through enhancement work. Finance, HR and Treasury are
+   not business units and never will be \u2014 they carry no plan and no weight \u2014 so
+   they are their own list rather than units in disguise.
+
+   A function has a head and, optionally, one Strategy custodian \u2014 the same two
+   roles a business unit has, in the same shape. Where the head does the work
+   themselves the slot stays empty: they already have access as head, and a
+   second record for the same person would put one person on the board twice. */
+/* Version. Counted from the point versioning began rather than from nothing \u2014
+   there were roughly eleven build rounds before this, so the first numbered
+   release is 1.0. It lives in the FILENAME, not on screen: the platform is shown
+   to clients and a version badge in the chrome is noise to them. */
+var VERSION = "2.1";
+
+/* A function carries the same fields a unit does, in the same shapes: an
+   editable name, a short name for the navigation, a code prefix for numbering
+   its work, one head and one Strategy custodian, and a retired flag. Two
+   configuration screens that mean the same thing should not behave differently.
+
+   navName is left empty deliberately \u2014 what appears in the navigation is a
+   choice for whoever runs the platform, not a default anybody inherits. */
+var FUNCTIONS = {
+  finance:   { name:"Finance",   navName:null, codePrefix:"FIN", head:"fn_fin",  custodian:null,     active:true },
+  hr:        { name:"HR",        navName:null, codePrefix:"HR",  head:"fn_hr",   custodian:null,     active:true },
+  treasury:  { name:"Treasury",  navName:null, codePrefix:"TRS", head:"fn_tre",  custodian:null,     active:true },
+  marketing: { name:"Marketing", navName:null, codePrefix:"MKT", head:"fn_mkt",  custodian:"fn_mkt2",active:true },
+  it:        { name:"IT",        navName:null, codePrefix:"ITF", head:"ithead",  custodian:"own_it", active:true },
+  care:      { name:"Care",      navName:null, codePrefix:"CAF", head:"cahead",  custodian:"own_ca", active:true },
+  smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true }
+};
+/* ── Companies (§15.13) ──────────────────────────────────────────────
+   A layer between the group and the business unit. A company is a group of
+   business units, and each company has its own CEO.
+
+       Group — Group CEO
+         Company — Company CEO        e.g. Distribution, B2C
+           Business unit — BU head
+             Custodian
+       Supporting functions sit beside all of it, at group level
+
+   In this version the company level is for VISIBILITY, not strategy: it
+   carries no score and no page of its own. Its purpose is that a company CEO
+   can see their own units without wading through everyone else's.
+
+   It does NOT group the navigation row. That was built and taken out in the
+   same version — the SMO and the group CEO see everything and already have the
+   Units fold, and a company CEO sees only their own three or four units, so
+   there was nothing to group. The grouping solved a problem neither viewer had.
+
+   Supporting functions belong to no company. They serve every company and
+   therefore every unit, and stay beside the companies rather than inside one.
+
+   Both visibility flags are per company rather than global, because a client
+   may want one company CEO measured against the whole and another not.
+   ──────────────────────────────────────────────────────────────────── */
+var COMPANIES = {
+  distribution: { name:"Distribution", ceo:null, seeOthers:false, seeGroup:true },
+  b2c:          { name:"B2C",          ceo:null, seeOthers:false, seeGroup:true }
+};
+var COMPANY_KEYS = ["distribution", "b2c"];
+
+/* A unit belongs to a company or is its own — never neither. "Its own" is a
+   decision and is stored as null, which the Setup table names explicitly so an
+   empty cell can never read as somebody having forgotten. */
+var UNIT_COMPANY = {
+  mobile:              "distribution",
+  consumerelectronics: "distribution",
+  it:                  "distribution",
+  retailstores:        "b2c",
+  onlineshop:          "b2c",
+  care:                "b2c"
+};
+Object.keys(UNITS).forEach(function(k){
+  if (UNITS[k].company === undefined) UNITS[k].company = UNIT_COMPANY[k] || null;
+});
+
+function companyOf(unitKey){
+  var u = UNITS[unitKey];
+  return u && u.company ? COMPANIES[u.company] : null;
+}
+function unitsOfCompany(ck){
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].company === ck; });
+}
+/* Units standing alone, in the order they are declared. */
+function soloUnits(){
+  return UNIT_KEYS.filter(function(k){ return !UNITS[k].company; });
+}
+
+var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo"];
+
+/* Each capability is allocated to exactly one function. A function may hold
+   more than one \u2014 Marketing carries both Brand Positioning and Product Mindset
+   \u2014 which is why a custodian is named after the FUNCTION and never after a
+   capability. */
+var CAP_FUNCTION = {
+  "Operational Excellence":  "treasury",
+  "People":                  "hr",
+  "Innovation and Tech":     "it",
+  "Brand Positioning":       "marketing",
+  "Customer Centric":        "care",
+  "Product Mindset":         "marketing",
+  "Financial Infrastructure":"finance",
+  "Strategy":                "smo"
+};
+GROUP.capabilities.forEach(function(c){ c.fn = CAP_FUNCTION[c.name] || null; });
+
+function functionOf(key){ return FUNCTIONS[key] || null; }
+function capById(id){
+  return GROUP.capabilities.filter(function(c){ return c.id === id; })[0] || null;
+}
+/* Who reaches a capability: the SMO and CEO see all of them; a function's own
+   people see theirs. A unit head has no business in a capability at all. */
+
+/* ── What a capability reads ──────────────────────────────────────────
+   Three numbers, never folded into one, and one of them is optional.
+
+   KEY OBJECTIVES — optional. Weighted exactly as a unit's are. A capability
+   with none does not show the card at all; it is not shown at zero.
+
+   PROJECT PERFORMANCE — half from the deliverables side, half from the
+   outcomes side, PER SIDE and not per row. Four deliverables and one outcome
+   still weigh 50/50, because they are two different kinds of evidence that a
+   project achieved what it set out to, not six comparable items.
+
+   EXECUTION — milestones completed, and nothing else.
+
+   An outcome whose measurement time has not arrived is absent from the
+   arithmetic. It is not a zero. A project that has delivered everything and
+   cannot yet be measured reads on its deliverables alone, which is why its
+   number can FALL later when the outcomes arrive below target. That is the
+   project's real story rather than a defect. */
+
+function capKOScore(c){
+  var list = (c.keyObjectives || []).filter(function(m){ return m.progress != null; });
+  if (!list.length) return null;
+  var tw = 0, sum = 0;
+  list.forEach(function(m){ var w = m.weight == null ? 1 : m.weight; tw += w; sum += m.progress * w; });
+  return tw ? Math.round(sum / tw) : null;
+}
+
+/* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
+   percentage when it is a percentage. Nothing reported is absent, not zero. */
+function delivReads(d){
+  if (d.actual == null || d.actual === "") return null;
+  if (d.kind === "pct") return Math.max(0, Math.min(100, Number(d.actual)));
+  return String(d.actual).toLowerCase() === "yes" ? 100 : 0;
+}
+function sideAvg(vals){
+  var v = vals.filter(function(x){ return x != null && !isNaN(x); });
+  if (!v.length) return null;
+  return Math.round(v.reduce(function(a, b){ return a + b; }, 0) / v.length);
+}
+function projDeliverySide(p){
+  return sideAvg((p.deliverables || []).map(delivReads));
+}
+function projOutcomeSide(p){
+  return sideAvg((p.outcomes || []).map(function(o){ return o.progress; }));
+}
+function projPerf(p){
+  var d = projDeliverySide(p), o = projOutcomeSide(p);
+  if (d == null && o == null) return null;
+  if (d == null) return o;
+  if (o == null) return d;
+  return Math.round(d * 0.5 + o * 0.5);
+}
+function projMilestones(p){
+  var ms = p.milestones || [], done = 0, wip = 0, todo = 0;
+  ms.forEach(function(m){
+    if (m.status === "done") done++;
+    else if (m.status === "wip") wip++;
+    else todo++;
+  });
+  return { done: done, wip: wip, todo: todo, total: ms.length };
+}
+/* A milestone whose finish date falls after its project's end date is saved
+   exactly as entered. The platform never refuses it \u2014 it says so, and offers
+   the two things that might be true. */
+function projOverruns(p){
+  if (p.timeline !== "date" || !p.end) return [];
+  var endT = Date.parse(p.end);
+  if (isNaN(endT)) return [];
+  return (p.milestones || []).filter(function(m){
+    var t = Date.parse(m.finish);
+    return !isNaN(t) && t > endT;
+  });
+}
+function capPerf(c){
+  return sideAvg((c.projects || []).map(projPerf));
+}
+function capExec(c){
+  var done = 0, total = 0, wip = 0, todo = 0;
+  (c.projects || []).forEach(function(p){
+    var m = projMilestones(p);
+    done += m.done; wip += m.wip; todo += m.todo; total += m.total;
+  });
+  return { done: done, wip: wip, todo: todo, total: total,
+           pct: total ? Math.round(done / total * 100) : null };
+}
+function capDeliverySide(c){ return sideAvg((c.projects || []).map(projDeliverySide)); }
+function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSide)); }
+
+/* What a capability asks for this cycle: its key objectives, plus everything in
+   its projects whose time has come. An outcome measured at Q4 is not an empty
+   box somebody forgot in Q2 \u2014 it is not asked. */
+function outcomeDue(o){
+  if (!o.measureAt) return true;
+  var q = String(o.measureAt).match(/Q([1-4])\s*(\d{4})?/);
+  if (!q) return true;
+  var cq = String(REVIEW.name || "").match(/Q([1-4])\s*(\d{4})?/);
+  if (!cq) return true;
+  var oy = q[2] ? +q[2] : 0, cy = cq[2] ? +cq[2] : 0;
+  if (oy && cy && oy !== cy) return oy < cy;
+  return +q[1] <= +cq[1];
+}
+function delivDue(d){
+  if (!d.due) return true;
+  var q = String(d.due).match(/Q([1-4])/);
+  var cq = String(REVIEW.name || "").match(/Q([1-4])/);
+  if (!q || !cq) return true;
+  return +q[1] <= +cq[1];
+}
+function projReported(p){
+  var n = 0, total = 0;
+  (p.deliverables || []).forEach(function(d){
+    if (!delivDue(d)) return;
+    total++;
+    if (d.actual != null && d.actual !== "") n++;
+  });
+  (p.outcomes || []).forEach(function(o){
+    if (!outcomeDue(o)) return;
+    total++;
+    if (o.actual != null && o.actual !== "") n++;
+  });
+  (p.milestones || []).forEach(function(m){
+    total++;
+    if (m.status) n++;
+  });
+  return { done: n, total: total };
+}
+function capReported(c){
+  var n = 0, total = 0;
+  (c.keyObjectives || []).forEach(function(m){
+    total++;
+    if (m.actual != null && m.actual !== "") n++;
+  });
+  (c.projects || []).forEach(function(p){
+    var r = projReported(p);
+    n += r.done; total += r.total;
+  });
+  return { done: n, total: total };
+}
+
+function capsReachable(){
+  return GROUP.capabilities.filter(function(c){ return reachesCap(c.id); });
+}
+function capsOfFunction(key){
+  return GROUP.capabilities.filter(function(c){ return c.fn === key; });
+}
+/* Everyone who can act for a function: the head, and the custodian if there is one. */
+function functionPeople(key){
+  var f = FUNCTIONS[key];
+  if (!f) return [];
+  return [f.head, f.custodian].filter(Boolean);
+}
+/* Who can reach a capability: the people of the function that carries it, plus
+   the SMO and the CEO. Nobody else \u2014 a business unit has no business in another
+   function's improvement work. */
+/* Navigation is by FUNCTION, not by capability. The custodian is named after
+   the function, a function may carry more than one capability, and the
+   capabilities themselves already appear in the temple \u2014 so the row offers the
+   organisation you belong to, and the capability names appear inside its
+   pages. */
+/* A short name for the navigation only. "Consumer Electronics" costs more of
+   the row than it earns, and a unit may be known internally by a brand the
+   formal name does not carry \u2014 B2B Ecomm trading as Mazaya.
+
+   It is deliberately NOT used anywhere else. Page titles, group cards, the
+   deck and every export keep the full name, or a board pack ends up saying
+   "CE" to people who have never heard it. */
+function navName(x){ return (x && x.navName) ? x.navName : (x ? x.name : ""); }
+
+/* A function is reached by anyone who sees everything, or by whoever is named
+   on it — its head, its custodian, or a person carrying its work. */
+/* Same rule as reaches(), for a supporting function: the area answering for it
+   decides, and "own" is whether they hold a role in that function. */
+function reachesFn(key){ return grantAt("k_perf", "fn:" + key) !== "none"; }
+function fnsReachable(){
+  return FUNCTION_KEYS.filter(function(k){
+    return FUNCTIONS[k].active !== false && reachesFn(k) && capsOfFunction(k).length;
+  });
+}
+/* A function is retired, never deleted \u2014 it carries reported history, exactly
+   as a unit does. */
+/* Clearing a capability. Its PLAN is the work it intends \u2014 today measures and
+   initiatives, tomorrow enhancement projects. Its PROGRESS is what has been
+   reported against that work. The definition is the capability's identity, not
+   its plan, so it survives both. */
+function clearCapability(cap, what){
+  if (what === "plan") {
+    /* A capability's plan is its key objectives and its PROJECTS, each
+       carrying deliverables, outcomes and milestones. Until 2026-08-20 this
+       emptied `cap.measures` and `cap.tactics` — the fields a capability
+       stopped having in 1.7 when the project model replaced them. The line
+       threw on a missing array, so "Clear all plans" on Supporting functions
+       had done nothing at all since then. The definition survives: it is the
+       capability's identity, not its plan. */
+    if (cap.keyObjectives) cap.keyObjectives.length = 0;
+    if (cap.projects) cap.projects.length = 0;
+    return;
+  }
+  (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
+  (cap.projects || []).forEach(function(p){
+    (p.deliverables || []).forEach(function(d){ d.actual = null; d.note = ""; });
+    (p.outcomes || []).forEach(function(o){ o.actual = null; o.progress = null; o.note = ""; });
+    (p.milestones || []).forEach(function(m){ m.status = null; m.note = ""; });
+  });
+}
+/* One function may carry several capabilities \u2014 Marketing carries two \u2014 so
+   clearing at the function level names how many it will take with it. */
+function clearFunction(fnKey, what){
+  capsOfFunction(fnKey).forEach(function(c){ clearCapability(c, what); });
+}
+function functionCapCount(fnKey){ return capsOfFunction(fnKey).length; }
+
+function activeFunctionKeys(){
+  return FUNCTION_KEYS.filter(function(k){ return FUNCTIONS[k].active !== false; });
+}
+function reachesCap(cap){ return !!cap.fn && reachesFn(cap.fn); }
+function capsReachable(){ return GROUP.capabilities.filter(reachesCap); }
+function unitsReachable(){
+  return activeKeys().filter(reaches);
+}
+/* The folds exist for the length problem, and only two roles have one. Someone
+   who reaches a single unit never meets the concept. */
+function navFolds(){
+  return unitsReachable().length > 1 && fnsReachable().length > 1;
+}
+
+function functionsOfPerson(personKey){
+  return FUNCTION_KEYS.filter(function(k){
+    return functionPeople(k).indexOf(personKey) > -1;
+  });
+}
+
+/* ── The reporting cycle ──────────────────────────────────────────────────
+   A window the SMO opens. It becomes a request sitting with each unit's owner,
+   and closing it snapshots everything \u2014 which is what finally gives the
+   product a past to compare against.
+
+   The window's end is where `as-of` comes from. It was a constant of 2 sitting
+   in the data; a review that covers Jan\u2013Jun and one that covers the full year
+   cannot both be measured from the same quarter. */
+var REVIEW = {
+  name: "H1 2026",
+  from: "Jan 2026", to: "Jun 2026", due: "15 Jul 2026",
+  endsQuarter: 2,
+  state: "open",              /* open | closed */
+  /* Seeded mid-cycle: most units have reported and submitted, a few are still
+     working, one has not begun. A board on which every row says the same thing
+     demonstrates nothing \u2014 the same lesson the focus board taught. */
+  note: {
+    mobile: "Digital work is landing but the app rollout slipped a quarter behind the principal's own launch. Q3 recovery agreed with Ramy.",
+    retailstores: "Strong half on revenue per store. New store programme is one site behind, land permits.",
+    care: "First-time fix rate now above target for the first time. Headcount is the constraint on the next step."
+  },
+  submitted: { retailstores:true, care:true, corporate:true, it:true, logistics:true, onlineshop:true },
+  cadence: "Half-yearly"
+};
+
+/* Prior closes. Only the headline per unit is kept here; a real build snapshots
+   every figure and the target it was judged against. Seeded with one earlier
+   cycle so deltas have something to read \u2014 these numbers are invented. */
+var HISTORY = [
+  { name:"H2 2025", group:64,
+    units:{ mobile:56, retailstores:79, b2becomm:61, consumerelectronics:58, onlineshop:66,
+            corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
+];
+function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
+function deltaFor(key){
+  var h = lastClose(); if (!h) return null;
+  var was = key === "group" ? h.group : h.units[key];
+  var now = key === "group" ? groupUnitsObjectives() : unitObjectives(UNITS[key]);
+  if (was == null || now == null) return null;
+  return { was:was, d:now - was };
+}
+
+/* Whether the plan may be edited. Opening a cycle does not freeze the plan
+   outright \u2014 it makes changes the SMO's alone for the span, so a mid-cycle
+   correction still goes through one accountable hand rather than a unit
+   quietly moving its own target while reporting against it. */
+function planEditable(){
+  return REVIEW.state !== "open" || hasRole("super");
+}
+
+/* Reporting reaches the unit's owner and its head; the owner is the primary
+   user. The SMO can enter on anyone's behalf, and enters the group's own
+   objectives and capabilities directly \u2014 nobody is asked for those. */
+/* Reporting now asks the MATRIX, not a hard-coded list of two role names.
+   Before spec 006 this was `head or custodian or SMO`, which meant the
+   contributor row of the access page could not do anything even when the SMO
+   set it to edit — a control that changes nothing is worse than no control.
+   It also means the screen and the server answer from the same function. */
+function canReport(unitKey){
+  if (REVIEW.state !== "open") return false;
+  /* A locked cycle takes no more figures, from anyone but the SMO — the
+     server refuses them, so the screen must not offer them (spec 006 §7.1). */
+  if (CYCLE.locked && !hasRole("super")) return false;
+  return grantAt("u_report", unitKey) === "edit";
+}
+
+/* ONE ROW, for the one role that is limited to its own. Everybody else whose
+   grant reaches the unit reports all of it; a contributor reports the lines
+   they are named on. The same two functions the server uses (spec 006 §7.2) —
+   offering a field the server will refuse is the fault this is here to avoid. */
+function canReportRow(unitKey, x){
+  if (!canReport(unitKey)) return false;
+  if (!SMPRules.onlyVia(world(), viewer(), "unit", unitKey, "contrib")) return true;
+  return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
+}
+
+/* What this cycle asks a unit for: its objectives, every measure carrying a
+   target, and the tactics whose quarters fall inside the window. A tactic
+   outside it is not an empty box somebody forgot \u2014 it is not asked. */
+function reportItems(u){
+  var out = [];
+  u.keyObjectives.forEach(function(m){
+    out.push({ id:m.id, obj:m, kind:"objective", group:L("keyobj","bu"), sub:"" });
+  });
+  u.items.forEach(function(p, pi){
+    var head = pillarCode(u, pi) + " " + p.name;
+    /* `owner` travels with the row so canReportRow() can answer without
+       walking back up to the pillar. A MEASURE names nobody of its own, so it
+       carries its pillar's owner — the nearest thing the data supports until
+       a measure has an owner of its own. */
+    p.measures.forEach(function(m){
+      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"", owner:p.owner });
+    });
+    p.tactics.forEach(function(t){
+      out.push({ id:t.id, obj:t, kind:"tactic", group:head,
+                 sub:spanLabel(t), asked:tacticDue(t),
+                 owner:t.owner, collaborators:t.collaborators });
+    });
+  });
+  return out;
+}
+function askedItems(u){
+  return reportItems(u).filter(function(x){ return x.kind !== "tactic" || x.asked; });
+}
+function reportedCount(u){
+  var a = askedItems(u), n = 0;
+  a.forEach(function(x){
+    var v = x.kind === "tactic" ? x.obj.actual : x.obj.actual;
+    if (v != null && v !== "") n++;
+  });
+  return { done:n, total:a.length };
+}
+/* A note is required where a figure lands in the bottom two bands. A red
+   number with no explanation is the thing a review meeting stalls on. */
+function needsNote(x){
+  var p = x.kind === "tactic" ? tacticRatio(x.obj) : x.obj.progress;
+  if (p == null) return false;
+  var k = bandOf(p).key;
+  return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
+}
+function missingNotes(u){ return askedItems(u).filter(needsNote); }
+function unitState(u){
+  if (REVIEW.submitted[u.ukey]) return { key:"done", label:"Submitted" };
+  var c = reportedCount(u);
+  if (!c.done) return { key:"late", label:"Not started" };
+  return { key:"part", label:"In progress" };
+}
+
+/* Two units are genuinely mid-report: some figures in, some not. Without this
+   every row on the SMO's board reads 100% and the screen cannot show what it
+   exists to show. */
+(function seedPartialReporting(){
+  var partial = { consumerelectronics:5, nigeria:99 };
+  Object.keys(partial).forEach(function(k){
+    var u = UNITS[k], left = partial[k], seen = 0;
+    var wipe = function(m){
+      seen++;
+      if (seen > left) { m.actual = ""; m.progress = null; }
+    };
+    u.keyObjectives.forEach(wipe);
+    u.items.forEach(function(p){ p.measures.forEach(wipe); });
+    if (k === "nigeria") {
+      u.keyObjectives.forEach(function(m){ m.actual = ""; m.progress = null; });
+      u.items.forEach(function(p){
+        p.measures.forEach(function(m){ m.actual = ""; m.progress = null; });
+        p.tactics.forEach(function(t){ t.actual = null; t.status = "Not started"; });
+      });
+    }
+  });
+})();
+
+var VIEWER = "smo";
+
+/* Every caller treats this as a person, not a maybe — `grant`, `reaches`,
+   `paint` and the pages all read straight off the result. So it resolves
+   rather than returning nothing: if the name being viewed as is no longer in
+   the list, the first person stands in and VIEWER is corrected to match, so
+   the switcher and the screen cannot disagree. The list changes under a live
+   page in two ways — hydration replaces the baked-in example with the tenant's
+   own people, and the Demo button swaps the two datasets — and before
+   2026-08-20 either one left a departed key selected and threw on the next
+   repaint. */
+function viewer(){
+  var v = PEOPLE.filter(function(p){ return p.key === VIEWER; })[0];
+  if (v) return v;
+  if (!PEOPLE.length) return { key: VIEWER, name: "\u2014", title: "", level: "smo", unit: "group" };
+  VIEWER = PEOPLE[0].key;
+  return PEOPLE[0];
+}
+/* The access map is stored PER TENANT, in the database, so it only ever holds
+   the page keys that existed when that tenant was written. A page added in a
+   later version has no row, and "no row" used to read as "none" - so the new
+   page was invisible on every existing deployment while working perfectly on a
+   fresh one. The knowledge base was the first to hit it (3.5).
+
+   An absent key now falls back to the SHIPPED default for that level, which is
+   what the tenant would have got had the page existed when it was seeded.
+   Absent means "not answered yet", not "denied": denial is a stored "none",
+   and that still wins. */
+var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
+var STATE_RANK = SMPRules.STATE_RANK;
+function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
+
+/* ── OWN, and how it is decided ─────────────────────────────────────
+   Islam: *"own is always about what they have a role in … I see this as a
+   logic thing not a settings thing."*
+
+   So there is no control for it anywhere. roleOwns() reads it off the role's
+   attachment, which §33 already stores on the thing being attached to. It
+   differs from the old roleReaches() in one deliberate way: reaching and
+   OWNING are no longer the same word. A Company CEO whose company may see the
+   others REACHES those units — but it does not own them, and the matrix's
+   other-units column is what says whether reaching them is allowed at all. */
+function roleOwns(r, target){ return SMPRules.roleOwns(world(), r, target); }
+function companyAllows(r, target){ return SMPRules.companyAllows(world(), r, target); }
+function areaFor(pageKey, target, r){
+  return SMPRules.areaFor(PAGE_AREA[pageKey], world(), r, target);
+}
+function grantAt(pageKey, target){
+  return SMPRules.grantAtPage(world(), viewer(), pageKey, target);
+}
+
+/* TARGET is what the screen is currently showing — a unit key, "group", or
+   "fn:<key>". It is a property of the PAINT, not of the call, which is why it
+   is set once at the top of paint() rather than threaded through forty call
+   sites that would all pass the same value. Same shape as VIEWER. */
+var TARGET = "group";
+function grant(pageKey){ return grantAt(pageKey, TARGET); }
+
+/* A person attached to the group reaches every unit; a person attached to a
+   unit reaches only their own. This is the whole of scope — no page ever
+   renders a trimmed version of itself. */
+/* Which units and functions a person reaches. Reaching is now DERIVED from the
+   matrix rather than decided beside it: a thing is reachable when the area
+   answering for it is not "none". That is what makes "Other business units:
+   view" mean something — the unit appears in the navigation, at view.
+
+   roleReaches() is gone. It used to answer both "is this theirs" and "may they
+   see it" with one boolean, which is exactly the conflation the area model
+   takes apart: roleOwns() answers the first, the matrix answers the second. */
+function reaches(unitKey){
+  if (unitKey === "setup") return true;
+  if (unitKey === "group") return grantAt("g_perf", "group") !== "none";
+  return grantAt("u_perf", unitKey) !== "none";
+}
+
+/* ── The three rules that are rules, not settings ──────────────────
+   Each was a cell in the old 25-row matrix. Each is a sentence now, because
+   each is true regardless of what anybody sets. */
+
+/* A plan ARRIVES by upload and is corrected by the SMO alone (§22, §31). A
+   unit owner holding edit on their own unit still cannot rewrite the plan they
+   are measured against — that is the point of the rule, and it does not depend
+   on a grant. */
+function mayEditPlan(){
+  return hasRole("super") && grant("u_plan") === "edit";
+}
+
+/* What carries reward is the office's decision, not a page permission. The
+   group CEO marks it and the SMO can too; nobody else, at any grant. */
+function mayMarkFocus(){
+  var rs = personRoleKeys(viewer());
+  return (rs.indexOf("gceo") > -1 || rs.indexOf("super") > -1) && !CYCLE.locked;
+}
+
+/* ── Key Objective weights ────────────────────────────────────────────────
+   Optional. Unweighted means equal weight, which is the one default nobody
+   has to argue for. Where weights are set they must total 100 within the unit.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Only Mobile has weights set, to show the mechanism. Every other unit is
+   equal-weighted, which is the default nobody has to defend. */
+var KO_WEIGHTS = { mobile: [40, 25, 20, 15] };
+
+function koScore(list, weights){
+  var vals = list.filter(function(m){ return !m.milestone && m.progress != null; });
+  if (!vals.length) return null;
+  if (!weights) {
+    return Math.round(vals.reduce(function(a, m){ return a + m.progress; }, 0) / vals.length);
+  }
+  var tot = 0, acc = 0;
+  list.forEach(function(m, i){
+    if (m.milestone || m.progress == null) return;
+    var w = weights[i] == null ? 0 : weights[i];
+    acc += m.progress * w; tot += w;
+  });
+  return tot ? Math.round(acc / tot) : null;
+}
+
+/* ── Weighting factors: configurable from the start ───────────────────────
+   Stored as rows rather than four fixed columns, so adding a fifth factor is
+   data entry rather than a migration. Each factor declares its own type,
+   which decides how its values are captured.
+
+   Per cycle, not per tenant — each year takes insight from the last, so the
+   previous cycle's split is carried here to be shown beside the new one.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var FACTOR_TYPES = {
+  derived:   { label:"Derived",   note:"Read from a stored figure. Not typed by hand." },
+  judgement: { label:"Judgement", note:"Set on a scale, carries a written reason." },
+  estimate:  { label:"Estimate",  note:"A view, entered as a figure." }
+};
+
+var PRIOR_CYCLE = {
+  year: 2025,
+  factors: [ { key:"rev", weight:45 }, { key:"prof", weight:30 },
+             { key:"imp", weight:15 }, { key:"growth", weight:10 } ],
+  composite: { Mobile:48, Retail:30, Mazaya:22 }
+};
+
+/* Set true once a review cycle has been reported. Any factor change from here
+   moves a number that has already been seen, so it warns first. */
+var CYCLE_REPORTED = true;
+
+/* Units carry their own key so a render function can look up configuration
+   that lives outside the unit object. */
+Object.keys(UNITS).forEach(function(k){ UNITS[k].ukey = k; });
+
+
+
+/* ── Scoring bands ────────────────────────────────────────────────────────
+   ONE scale for every achievement-against-benchmark figure. Performance is
+   actual over target; execution is delivered over plan. Both are the same kind
+   of number, so both read on the same bands — and the status word is derived
+   from the same function as the colour, which is what stops a green figure
+   sitting beside a contradicting word.
+
+   Per tenant, one standing scale. Moving a threshold silently rewrites how
+   every past report reads, so a change warns the same way a weighting change
+   does. 70 and 50 match the platform's existing STATUS_THRESHOLDS so the
+   strategy layer and the functional layer never disagree about a colour;
+   85 is the added top edge.
+   ──────────────────────────────────────────────────────────────────────── */
+
+var BANDS = {
+  scope: "tenant",
+  bands: [
+    { key:"good", floor:85, label:"On track" },
+    { key:"attn", floor:70, label:"Needs attention" },
+    { key:"warn", floor:50, label:"At risk" },
+    { key:"bad",  floor:0,  label:"Off track" }
+  ]
+};
+
+function bandOf(v){
+  if (v == null || isNaN(v)) return { key:"none", label:"No data" };
+  var b = BANDS.bands;
+  for (var i=0;i<b.length;i++) if (v >= b[i].floor) return b[i];
+  return b[b.length-1];
+}
+
+/* ── Derived scores ───────────────────────────────────────────────────────
+   Nothing below is stored. A pillar's performance comes from its measures and
+   its execution from its tactics; a unit compiles from its pillars; the group
+   compiles from its units. A row and its expansion can therefore never
+   disagree, which is the failure the earlier prototype had built in.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ── Quarters ─────────────────────────────────────────────────────────────
+   A tactic carries a flag per quarter rather than a start and an end, because
+   real work skips quarters — a plan can run Q2 and Q4 with nothing in Q3, and
+   a span cannot say that.
+
+   This is what finally makes `planned` derived rather than stored. What a
+   tactic SHOULD have delivered by now is the share of its own active quarters
+   that have already passed. A tactic running Q1–Q2, reviewed at H1, is due at
+   100%; one running Q2–Q4 is due at a third.
+   ──────────────────────────────────────────────────────────────────────── */
+
+function quartersOf(t){
+  return [t.q1, t.q2, t.q3, t.q4].map(function(x){ return x ? 1 : 0; });
+}
+function tacticPlanned(t){
+  var q = quartersOf(t), total = 0, elapsed = 0;
+  for (var i = 0; i < 4; i++) {
+    if (!q[i]) continue;
+    total++;
+    if (i + 1 <= REVIEW.endsQuarter) elapsed++;
+  }
+  if (!total) return null;
+  return Math.round(elapsed / total * 100);
+}
+/* A tactic whose quarters have not begun is not behind — it is not yet due,
+   and averaging a zero into execution would say otherwise. */
+function tacticDue(t){ return tacticPlanned(t) > 0; }
+function tacticRatio(t){
+  var p = tacticPlanned(t);
+  return p && t.actual != null ? Math.round(t.actual / p * 100) : null;
+}
+function spanLabel(t){
+  var q = quartersOf(t), on = [];
+  for (var i = 0; i < 4; i++) if (q[i]) on.push("Q" + (i + 1));
+  return on.join(", ");
+}
+
+/* Nulls are dropped rather than counted. A measure with no target set is not
+   a measure scoring zero \u2014 it is a measure that cannot be scored, and averaging
+   a zero in would report a plan as failing because a target was left blank. */
+function avg(a){
+  var v = a.filter(function(x){ return x != null && !isNaN(x); });
+  return v.length ? Math.round(v.reduce(function(x,y){ return x+y; },0)/v.length) : null;
+}
+
+/* The code is positional, not an identifier — it references nothing outside
+   the platform, so reordering renumbers it. The unit prefix is kept because it
+   still says which unit a pillar belongs to when pillars are listed together
+   at group level. */
+function pillarCode(u, i){
+  return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
+}
+
+function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
+function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
+function dueTactics(p){ return p.tactics.filter(tacticDue); }
+/* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
+   unreported, and averaging a zero would say the plan is failing. */
+function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
+function pillarExec(p){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); }
+function pillarPlan(p){ return avg(reportedTactics(p).map(tacticPlanned)); }
+function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
+
+function unitPillars(u){ return avg(u.items.map(pillarPerf)); }
+function unitExec(u){ return avg(u.items.map(pillarExec)); }
+function unitPlan(u){ return avg(u.items.map(pillarPlan)); }
+function unitRatio(u){ var pl = unitPlan(u); return pl ? Math.round(unitExec(u)/pl*100) : null; }
+
+var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlineshop",
+                 "corporate","care","it","logistics","nigeria"];
+
+/* A unit is identified by its KEY everywhere. The name is display only, the
+   same as any other label — so renaming one cannot break a lookup. The
+   weighting table used to match on the name string, which meant a rename
+   silently detached a unit from its weight with no error anywhere. */
+GROUP.weighting.units.forEach(function(row){
+  row.key = UNIT_KEYS.filter(function(k){ return UNITS[k].name === row.unit; })[0] || null;
+});
+
+/* Inactive units keep every pillar, measure, tactic and reported figure. They
+   simply stop appearing — retiring a unit must never destroy a cycle's record. */
+Object.keys(UNITS).forEach(function(k){ if (UNITS[k].active == null) UNITS[k].active = true; });
+
+/* Seeded at zero and filled by syncWeights() from the factor table. A weight
+   stored in the data would be a second source that looks authoritative and is
+   overwritten on first render — which is how a stale 45% survived long after
+   the composite said 21%. */
+
+/* Every item carries a stable id. Without one, a re-upload cannot tell a
+   corrected target from a new measure, and would duplicate a plan every time
+   the sheet was loaded. The platform generates these; the template carries
+   them; nobody types them. */
+function renumberUnit(u){
+  var k = u.ukey;
+  u.clauses.forEach(function(c, i){ c[2] = k + "-F" + (i + 1); });
+  u.keyObjectives.forEach(function(m, i){ m.id = k + "-KO" + (i + 1); });
+  u.items.forEach(function(p, pi){
+    p.id = k + "-P" + (pi + 1);
+    /* A pillar's CODE is what the rail keys off and what its title leads with.
+       Baked pillars carry one; a pillar arriving from an upload does not, and
+       every one of them then read "undefined" and shared a rail key, so the
+       rail could not select between them. Filled in when absent, positionally.
+       An existing code is left alone: nine units carry hand-set ones and
+       renumbering them would rewrite codes that are already in decks. */
+    if (!p.code) p.code = pillarCode(u, pi);
+    p.measures.forEach(function(m, mi){ m.id = p.id + "-M" + (mi + 1); });
+    p.tactics.forEach(function(t, ti){ t.id = p.id + "-T" + (ti + 1); });
+  });
+}
+UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });
+
+/* The generic template is built against an EMPTY shape, not against a chosen
+   unit: the file is the same whichever unit it will end up describing, and the
+   only thing that makes it one unit's is the cell chosen on its Read me sheet.
+   The clause LABELS come along because they are the group's own skeleton and
+   give whoever fills the sheet something to answer. */
+function blankUnitShape(){
+  return { ukey:"", name:"", codePrefix:"", clauses:GROUP.clauses.map(function(c){ return [c[0], "", ""]; }),
+           aspiration:"", endInMind:"", keyObjectives:[], swot:{ s:[], w:[], o:[], t:[] },
+           items:[] };
+}
+function blankCapShape(){
+  return { id:"", name:"", def:"", fn:"", keyObjectives:[], projects:[] };
+}
+
+/* ── Archived plans (\u00a722) ────────────────────────────────────────────────
+   An upload AUTHORS a plan: it writes one from scratch rather than amending
+   what is there. That is what let every code leave the template \u2014 there is
+   never a row to match \u2014 and it is why replacing has to be safe: the outgoing
+   plan, and every figure reported against it, are kept before the new one is
+   written. Nothing an upload does is a deletion.
+
+   Kept in the state graph rather than in a corner of the database, so an
+   archive travels with everything else: it is saved, read back and shown by
+   the same machinery as the plan it came from.
+   \u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014 */
+var ARCHIVES = [];
+
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
+
+/* A date the SMO would write, not a timestamp nobody reads. */
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function todayLabel(){
+  var d = new Date();
+  return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear();
+}
+/* Who is acting, not who is being simulated: the signed-in person where there
+   is one, and the viewer offline. */
+function actingName(){
+  var p = (typeof SYNC !== "undefined" && SYNC.person) ? SYNC.person() : null;
+  if (p && p.name) return p.name;
+  var v = viewer();
+  return v ? v.name : "";
+}
+
+function unitPlanSnapshot(u){
+  return { clauses:clone(u.clauses), aspiration:u.aspiration, endInMind:u.endInMind,
+           keyObjectives:clone(u.keyObjectives), swot:clone(u.swot), items:clone(u.items) };
+}
+function capPlanSnapshot(c){
+  return { def:c.def, keyObjectives:clone(c.keyObjectives || []),
+           projects:clone(c.projects || []) };
+}
+
+/* What the archive HELD, counted once and stored \u2014 so the list reads without
+   walking every snapshot, and still reads if the model later grows a field. */
+function unitSnapshotCounts(s){
+  var m = 0, t = 0, rep = 0;
+  (s.items || []).forEach(function(p){
+    m += (p.measures || []).length; t += (p.tactics || []).length;
+    (p.measures || []).forEach(function(x){ if (x.progress != null) rep++; });
+    (p.tactics  || []).forEach(function(x){ if (x.actual != null) rep++; });
+  });
+  (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
+  return { pillars:(s.items || []).length, measures:m, tactics:t,
+           objectives:(s.keyObjectives || []).length, reported:rep };
+}
+function capSnapshotCounts(s){
+  var d = 0, o = 0, ms = 0, rep = 0;
+  (s.projects || []).forEach(function(p){
+    d += (p.deliverables || []).length; o += (p.outcomes || []).length;
+    ms += (p.milestones || []).length;
+    (p.outcomes || []).forEach(function(x){ if (x.progress != null) rep++; });
+    (p.deliverables || []).forEach(function(x){ if (x.actual != null) rep++; });
+  });
+  (s.keyObjectives || []).forEach(function(x){ if (x.progress != null) rep++; });
+  return { projects:(s.projects || []).length, deliverables:d, outcomes:o,
+           milestones:ms, objectives:(s.keyObjectives || []).length, reported:rep };
+}
+
+/* "1 pillars" is the kind of thing that makes a product feel unfinished. */
+function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
+
+/* The horizon is the year a tenant is planning TO, and it is theirs to enter —
+   never a default the platform supplies. Until it is entered every page that
+   leans on it has to read as though it were not there, rather than trailing a
+   dangling "by". */
+function horizonSet(){ return !!String(GROUP.horizon == null ? "" : GROUP.horizon).trim(); }
+function horizonBy(){ return horizonSet() ? " by " + esc(GROUP.horizon) : ""; }
+function horizonLabel(){ return horizonSet() ? esc(GROUP.horizon) : "not set"; }
+
+function planIsEmpty(counts){
+  return !counts.pillars && !counts.objectives && !counts.projects;
+}
+
+var ARCH_N = 0;
+function archiveId(){
+  /* Unique against what is already stored, so a restored file cannot collide
+     with an archive taken in the same session. */
+  do { ARCH_N++; } while (ARCHIVES.some(function(a){ return a.id === "arch" + ARCH_N; }));
+  return "arch" + ARCH_N;
+}
+
+/* Returns the archive taken, or null when there was nothing worth keeping \u2014
+   a first plan for an empty unit archives nothing and says so. */
+function archiveUnitPlan(u, why){
+  var snap = unitPlanSnapshot(u), counts = unitSnapshotCounts(snap);
+  if (planIsEmpty(counts)) return null;
+  var a = { id:archiveId(), kind:"unit", key:u.ukey, name:u.name, at:todayLabel(),
+            by:actingName(), why:why || "replaced by an upload", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+function archiveCapPlan(c, why){
+  var snap = capPlanSnapshot(c), counts = capSnapshotCounts(snap);
+  if (planIsEmpty(counts)) return null;
+  var a = { id:archiveId(), kind:"cap", key:c.id, name:c.name, at:todayLabel(),
+            by:actingName(), why:why || "replaced by an upload", counts:counts, plan:snap };
+  ARCHIVES.unshift(a);
+  return a;
+}
+
+/* Restoring is the same act in reverse: what is on screen now is archived
+   first, so a restore can itself be undone. */
+function restoreArchive(id){
+  var a = ARCHIVES.filter(function(x){ return x.id === id; })[0];
+  if (!a) return false;
+  if (a.kind === "unit") {
+    var u = UNITS[a.key];
+    if (!u) return false;
+    archiveUnitPlan(u, "replaced by restoring the " + a.at + " archive");
+    var s = a.plan;
+    u.clauses = clone(s.clauses); u.aspiration = s.aspiration; u.endInMind = s.endInMind;
+    u.keyObjectives = clone(s.keyObjectives); u.swot = clone(s.swot); u.items = clone(s.items);
+    renumberUnit(u);
+  } else {
+    var c = capById(a.key);
+    if (!c) return false;
+    archiveCapPlan(c, "replaced by restoring the " + a.at + " archive");
+    c.def = a.plan.def;
+    c.keyObjectives = clone(a.plan.keyObjectives);
+    c.projects = clone(a.plan.projects);
+    renumberCapability(c);
+  }
+  ARCHIVES = ARCHIVES.filter(function(x){ return x.id !== id; });
+  window.ARCHIVES = ARCHIVES;
+  return true;
+}
+
+function forgetArchive(id){
+  ARCHIVES = ARCHIVES.filter(function(x){ return x.id !== id; });
+  window.ARCHIVES = ARCHIVES;
+}
+
+/* Emptying a unit so a plan can be loaded fresh. The unit itself survives \u2014
+   its name, code, roles and weight are configuration, not plan content. What
+   goes is everything a plan template carries, which is exactly what a fresh
+   upload will put back. */
+/* A theme's code is what every pillar points at. Renaming it has to carry the
+   pillars with it, or they silently detach and stop appearing under any theme
+   \u2014 the same failure the unit-name rename had before keys were introduced. */
+function renameTheme(oldAb, newAb){
+  if (!newAb || oldAb === newAb) return;
+  UNIT_KEYS.forEach(function(k){
+    UNITS[k].items.forEach(function(p){ if (p.theme === oldAb) p.theme = newAb; });
+  });
+}
+function pillarsUsingTheme(ab){
+  var n = 0;
+  UNIT_KEYS.forEach(function(k){
+    UNITS[k].items.forEach(function(p){ if (p.theme === ab) n++; });
+  });
+  return n;
+}
+
+/* Group capabilities carry their own reported figures rather than tactics, so
+   clearing progress everywhere has to reach them too or the group page would
+   still show numbers after every unit had been emptied. */
+/* A new unit must be born with every list a page will read, or the first
+   click into it crashes on a missing array. It arrives inactive-in-content
+   but active in the nav, weighted at zero until the SMO fills its factor row,
+   and with the group's clause labels as a starting skeleton. */
+function addBusinessUnit(){
+  var n = 1, key, name;
+  do { key = "newunit" + n; name = "New unit " + n; n++; } while (UNITS[key]);
+  UNITS[key] = {
+    name: name, codePrefix: "NU", weight: 0, real: false, active: true, ukey: key,
+    clauses: GROUP.clauses.map(function(c, i){ return [c[0], "", key + "-F" + (i + 1)]; }),
+    aspiration: "", endInMind: "",
+    keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
+  };
+  UNIT_KEYS.push(key);
+  UNIT_ROLES[key] = { head: null, custodian: null };
+  GROUP.weighting.units.push({ key: key, unit: name, rev: 0, prof: 0, imp: 1, growth: 0,
+    why: "" });
+  syncWeights();
+  return key;
+}
+
+function clearGroupNumbers(){
+  GROUP.capabilities.forEach(function(c){ c.perf = null; c.exec = null; });
+  GROUP.keyObjectives.forEach(function(m){ m.actual = ""; m.progress = null; });
+}
+function clearAllNumbers(){ UNIT_KEYS.forEach(function(k){ clearUnitNumbers(UNITS[k]); }); clearGroupNumbers(); }
+function clearAllPlans(){ UNIT_KEYS.forEach(function(k){ clearUnitPlan(UNITS[k]); }); }
+
+function clearUnitPlan(u){
+  u.items = [];
+  u.keyObjectives = [];
+  u.swot = { s:[], w:[], o:[], t:[] };
+  u.clauses.forEach(function(c){ c[1] = ""; });
+  u.aspiration = "";
+  u.endInMind = "";
+}
+
+/* Clearing what was REPORTED, keeping what was COMMITTED TO. This is the start
+   of a reporting cycle: the plan stands, the numbers go.
+
+   Cleared means null, never zero. A measure with no actual is unreported, not
+   a measure that achieved nothing, and a tactic reset to 0% would read as
+   started-and-delivered-nothing rather than not-yet-reported. */
+function clearUnitNumbers(u){
+  u.keyObjectives.forEach(function(m){ m.actual = ""; m.progress = null; });
+  u.items.forEach(function(p){
+    p.measures.forEach(function(m){ m.actual = ""; m.progress = null; });
+    p.tactics.forEach(function(t){ t.actual = null; t.status = "Not started"; });
+  });
+}
+
+/* Capabilities never got ids. Every other item has one, which is how a row is
+   addressed, reported against and matched on import \u2014 without them a
+   capability could be rendered but not written to. Projects, and the three
+   lists inside them, are addressed the same way. */
+function renumberCapability(c){
+  (c.keyObjectives || []).forEach(function(m, i){ m.id = c.id + "-KO" + (i + 1); });
+  (c.projects || []).forEach(function(p, pi){
+    p.id = c.id + "-P" + (pi + 1);
+    p.capId = c.id;
+    (p.deliverables || []).forEach(function(d, i){ d.id = p.id + "-D" + (i + 1); });
+    (p.outcomes || []).forEach(function(o, i){ o.id = p.id + "-O" + (i + 1); });
+    (p.milestones || []).forEach(function(m, i){ m.id = p.id + "-M" + (i + 1); });
+  });
+}
+GROUP.capabilities.forEach(function(c, ci){
+  c.id = "cap" + (ci + 1);
+  renumberCapability(c);
+});
+
+/* Address any row inside a capability by its id: a key objective, or a
+   deliverable, outcome or milestone inside one of its projects. Reporting
+   needs this to write an entry back — without it a figure could be typed and
+   silently lost, which is what happened before the project model landed. */
+/* Whether the Report section appears at all, and how loudly.
+
+   Three states, and the middle one is the reason this is a function rather
+   than a boolean. While the cycle is OPEN and unsubmitted it is gold: it is the
+   only thing on the screen asking for something. Once SUBMITTED it stays, but
+   quiet \u2014 somebody who has just sent figures to the SMO will want to see what
+   they sent, and if the tab were gone there would be nowhere to look. Once the
+   cycle is CLOSED there is genuinely nothing there, and it goes.
+
+   Submission and closure look like one rule and are not: after submitting, the
+   cycle is still live and the SMO may reopen it. */
+function reportSectionState(){
+  if (!REVIEW || REVIEW.state !== "open") return null;
+  var submitted = !!(REVIEW.submitted && REVIEW.submitted[CURRENT_REPORT_KEY]);
+  return submitted
+    ? { cls:"quiet", badge:' <span class="pill good">Submitted</span>' }
+    : { cls:"appear", badge:"" };
+}
+var CURRENT_REPORT_KEY = null;
+
+function capItemById(id){
+  var hit = null;
+  GROUP.capabilities.forEach(function(c){
+    (c.keyObjectives || []).forEach(function(m){ if (m.id === id) hit = { kind:"ko", obj:m, cap:c }; });
+    (c.projects || []).forEach(function(p){
+      (p.deliverables || []).forEach(function(d){ if (d.id === id) hit = { kind:"deliverable", obj:d, cap:c, proj:p }; });
+      (p.outcomes || []).forEach(function(o){ if (o.id === id) hit = { kind:"outcome", obj:o, cap:c, proj:p }; });
+      (p.milestones || []).forEach(function(m){ if (m.id === id) hit = { kind:"milestone", obj:m, cap:c, proj:p }; });
+    });
+  });
+  return hit;
+}
+function capOfProjectId(id){
+  var hit = null;
+  GROUP.capabilities.forEach(function(c){
+    (c.projects || []).forEach(function(p){ if (p.id === id) hit = c; });
+  });
+  return hit;
+}
+
+function findById(u, id){
+  var hit = null;
+  /* The aspiration is a single field on the unit rather than a row in a list,
+     so it needs its own id or a round trip reports it as a new item. */
+  if (id === u.ukey + "-ASP1") return { kind:"ASPIRATION", obj:u, which:"aspiration" };
+  if (id === u.ukey + "-ASP2") return { kind:"ASPIRATION", obj:u, which:"end" };
+  if (id === u.ukey + "-PLAN") return { kind:"PLAN", obj:u };
+  var sw = id.match(/^(.+)-([SWOT])(\d+)$/);
+  if (sw && sw[1] === u.ukey) {
+    var key = { S:"s", W:"w", O:"o", T:"t" }[sw[2]];
+    var arr = u.swot[key] || [];
+    var idx = +sw[3] - 1;
+    if (arr[idx] != null) return { kind:sw[2] === "S" ? "STRENGTH" : sw[2] === "W" ? "WEAKNESS" : sw[2] === "O" ? "OPPORTUNITY" : "THREAT",
+                                   obj:{ name:arr[idx] }, swot:{ arr:arr, idx:idx } };
+  }
+  u.keyObjectives.forEach(function(m){ if (m.id === id) hit = { kind:"OBJECTIVE", obj:m }; });
+  u.items.forEach(function(p){
+    if (p.id === id) hit = { kind:"PILLAR", obj:p };
+    p.measures.forEach(function(m){ if (m.id === id) hit = { kind:"MEASURE", obj:m, pillar:p }; });
+    p.tactics.forEach(function(t){ if (t.id === id) hit = { kind:"TACTIC", obj:t, pillar:p }; });
+  });
+  u.clauses.forEach(function(c){ if (c[2] === id) hit = { kind:"FOUNDATION", obj:c }; });
+  return hit;
+}
+function activeUnits(){ return UNIT_KEYS.filter(function(k){ return UNITS[k].active; }); }
+
+/* A unit's headline is its Key Objectives, optionally weighted. Equal weight
+   is the default nobody has to defend. */
+function unitObjectives(u){ return koScore(u.keyObjectives, KO_WEIGHTS[u.ukey]); }
+
+/* The group's own scorecard, on the same footing as a unit's: computed from
+   the objectives that are actually there, never read from a stored number
+   (§5.1). It was a field on GROUP until 2026-08-20 — which agreed with the
+   mean while the demo data was the only data, and read "undefined%" the moment
+   a tenant had no objectives of its own. Unweighted: weights are a per-unit
+   mechanism, and the group has never had a row in the weight table. */
+function groupKeyObjectives(){ return koScore(GROUP.keyObjectives); }
+
+/* Themes aggregate from the pillars that actually carry them, across every
+   unit — derived rather than a hand-kept list, which is how the earlier
+   prototype ended up with a theme table that no longer matched its pillars. */
+function themePillars(ab){
+  var out = [];
+  UNIT_KEYS.forEach(function(k){
+    UNITS[k].items.forEach(function(it, i){
+      if (it.theme === ab) out.push({ unit: UNITS[k].name, ukey: k, code: pillarCode(UNITS[k], i), it: it });
+    });
+  });
+  return out;
+}
+function themeStats(ab){
+  var list = themePillars(ab);
+  return {
+    list: list,
+    units: list.map(function(x){ return x.unit; }).filter(function(v,i,a){ return a.indexOf(v)===i; }),
+    perf: avg(list.map(function(x){ return pillarPerf(x.it); })),
+    exec: avg(list.map(function(x){ return pillarExec(x.it); })),
+    plan: avg(list.map(function(x){ return pillarPlan(x.it); }))
+  };
+}
+
+/* Retirement means retirement everywhere. One helper decides which units the
+   product is currently about; the nav, the cards, the compile and the
+   weighting all ask it, so a retired unit cannot linger in one of them. */
+function activeKeys(){
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
+}
+
+function groupUnitsObjectives(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){
+    var v = unitObjectives(UNITS[k]);
+    if (v == null) return;
+    acc += v * UNITS[k].weight; tot += UNITS[k].weight;
+  });
+  return tot ? Math.round(acc/tot) : null;
+}
+/* NULL IS NEVER ZERO (§5.7), and it is never NaN either.
+
+   A tenant with no tactics loaded has nothing delivered and nothing planned,
+   so both of these were dividing by a total of zero and groupRatio was doing
+   0/0. Math.round(NaN) is NaN, and the group's own front page - the first
+   screen anyone opens - read "NaN%" under a "No data" chip, above the words
+   "Delivered 0% against 0% planned". Every clean slate showed it; the demo
+   dataset never did, which is why it survived to production.
+
+   The honest answer when there is no plan is not zero and not a stack of
+   letters: it is nothing, and the card already knows how to say that -
+   drillCard renders null as "Not yet measurable", which is what the two cards
+   beside it were doing correctly all along. splitCard had the same guard for
+   the same reason; this is that guard, one level up. */
+function groupExec(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return tot ? Math.round(acc/tot) : null;
+}
+function groupPlan(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return tot ? Math.round(acc/tot) : null;
+}
+function groupRatio(){
+  var e = groupExec(), p = groupPlan();
+  return (e == null || !p) ? null : Math.round(e/p*100);
+}

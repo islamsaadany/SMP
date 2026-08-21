@@ -1,0 +1,773 @@
+  /* ── Drag handle ────────────────────────────────────────────────────
+     The handle is the only drag target, so opening a pillar and moving it are
+     never confused with one another. */
+  .grip { display:inline-flex; flex-direction:column; justify-content:center; gap:3px;
+          width:20px; height:26px; padding:0 5px; cursor:grab; touch-action:none;
+          border-radius:2px; opacity:.55; transition:opacity .12s ease; }
+  .grip i { display:block; height:2px; background:var(--ink-3); border-radius:1px; }
+  .prow:hover .grip, tr:hover .grip, .grip:focus-visible { opacity:1; }
+  .grip:hover { background:var(--surface-2); }
+  .grip:active { cursor:grabbing; }
+  .grip:focus-visible { outline:2px solid var(--gold); outline-offset:1px; opacity:1; }
+  .grip-off { display:inline-block; width:20px; }
+
+  .prow.arrangeable { align-items:center; }
+  .prow.static { display:grid; gap:12px; padding:14px 16px;
+                 border-bottom:1px solid var(--line-soft); background:var(--surface); }
+  .prow.static:last-child { border-bottom:0; }
+  .prow-wrap { display:block; }
+
+  .dragging { opacity:.9; background:var(--attn-bg) !important;
+              box-shadow:0 6px 18px rgba(0,0,0,.14); position:relative; z-index:3; }
+  tr.dragging td { background:var(--attn-bg); }
+  .sorting { cursor:grabbing; }
+  .sorting .prow, .sorting tr { transition:transform .12s ease; }
+
+  /* The number doubles as the handle's home, so reordering costs no column. */
+  td.idx { white-space:nowrap; }
+  td.idx .grip { vertical-align:middle; margin-right:2px; height:18px; }
+  td.idx .idx-n { display:inline-block; min-width:14px; }
+
+  /* Arrange mode reads as a distinct state, so nobody drags a row believing
+     they are in the normal view. */
+  .plist.arranging { border-color:var(--gold); }
+  .plist.arranging .phead { background:var(--attn-bg); }
+  .editbtn[data-arrange] { white-space:nowrap; }
+
+  /* The drill sits on the headline row, so it costs no height. It replaces the
+     hover note: a modal explains and shows the breakdown in one place, and
+     works on touch, which a hover note never did. */
+  .drill { font:inherit; font-size:12px; background:none; border:0; padding:0;
+           margin-left:auto; color:var(--stone); cursor:pointer;
+           text-decoration:underline; text-underline-offset:3px; white-space:nowrap; }
+  .drill:hover { color:var(--gold-deep); }
+  .drill:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  nav.tabs.sectionrow { background:var(--surface-2); border-bottom:1px solid var(--line); }
+  nav.tabs.sectionrow button[aria-selected="true"] { border-bottom-color:var(--stone-soft); }
+  .gwrap { display:block; }
+  .gwrap .card-head { position:relative; }
+  .gwrap .card-head .grip { position:absolute; left:8px; top:50%; transform:translateY(-50%); opacity:.75; }
+  .gwrap .card-head .grip i { background:var(--panel-ink); }
+  .gauges.sorting .gwrap { transition:transform .12s ease; }
+  .gwrap.dragging { opacity:.92; box-shadow:0 8px 22px rgba(0,0,0,.2); }
+
+  /* Foundation and analysis in edit: the field replaces the text in place, so
+     the page keeps its shape and nothing moves when the mode changes. */
+  .fld { font:inherit; font-size:14px; width:100%; padding:6px 9px; resize:vertical;
+         border:1px solid var(--line); border-radius:var(--r);
+         background:var(--surface); color:var(--ink); font-family:var(--sans); }
+  .fld:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .big-field { font-family:var(--serif); font-size:15px; }
+  .swot .fld { font-size:13px; }
+  td.horizon { color:var(--ink-3); }
+  td.annual  { font-weight:700; }
+  th.cc + th.cc { white-space:nowrap; }
+
+  /* Ten units will not fit one line at every width. Wrapping keeps every unit
+     reachable; a horizontal scroll hides the last one behind a gesture nobody
+     is told about. */
+  .units-in { flex-wrap:wrap; overflow-x:visible; }
+  .units button { padding:11px 14px; }
+  .units .sep { margin:8px 8px; }
+
+  /* The card was designed three-up and its execution box needs that width —
+     at four across the labels truncate. Ten units become four rows rather than
+     three, which the section tabs have already paid for. */
+  .gauges.g3 { grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); }
+
+  .arrangebar { display:flex; justify-content:flex-end; margin:-10px 0 20px; }
+
+  /* ── Narrow cards ──────────────────────────────────────────────────
+     Both grids now auto-fit, so a card can be 255px wide in either. The
+     compact sizing that capabilities were given when they were designed
+     four-across has to apply to any narrow card, not to one grid class. */
+  .gauges .box-obj .gauge { width:112px; height:112px; }
+  .gauges .box-obj .gauge::before { inset:12px; }
+  .gauges .box-obj .gauge-in b { font-size:25px; }
+  .gauges .ratio { font-size:24px; }
+  .box-obj { padding-left:8px; padding-right:8px; }
+  .box-exec { padding-left:8px; padding-right:8px; }
+  dl.led { grid-template-columns:minmax(0,1fr) auto; gap:3px 10px; font-size:11.5px; }
+  dl.led dt { white-space:nowrap; }
+  dl.led dd { font-size:12.5px; }
+  .gcard .card-head .gsub { font-size:11px; }
+
+  /* Grid tracks default to min-width:auto, so a track never shrinks below its
+     content and the card is pushed open from the inside. Clamping with
+     minmax(0,·) is what actually stops the overflow — the font sizes above
+     only delayed it. */
+  .two { grid-template-columns:minmax(0,2fr) minmax(0,1fr); }
+  .box-obj, .box-exec { min-width:0; }
+  .gcard, .gwrap { min-width:0; }
+  .gauges { min-width:0; }
+
+  /* The label row reserves a mirrored gutter so the word stays centred whether
+     or not the button is showing. At 73px those fixed 19px gutters no longer
+     fit, so they become flexible and the button overlays the right gutter
+     instead of demanding its own track. */
+  .boxlabel { grid-template-columns:minmax(0,19px) minmax(0,1fr) minmax(0,19px); }
+  .boxlabel .plusbtn { justify-self:end; }
+  .box-exec .boxlabel > span { font-size:9px; letter-spacing:.08em; }
+
+  /* Capabilities were four-up from the start and truncated their labels there
+     too — it simply never showed until the units grid made it obvious. Same
+     minimum, so a card is the same card wherever it appears. */
+  .gauges.g4 { grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); }
+  .gauges.g4 .box-obj .gauge { width:112px; height:112px; }
+  .gauges.g4 .box-obj .gauge::before { inset:12px; }
+  .gauges.g4 .box-obj .gauge-in b { font-size:25px; }
+  .gauges.g4 .ratio { font-size:24px; }
+
+  /* ── Foundation: the aspiration card holds the objectives box ────── */
+  .fgrid { grid-template-columns:1.05fr 1fr; }
+  .fcol { display:flex; flex-direction:column; gap:20px; }
+  .cardhead { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:2px; }
+  .cardhead h2.sec { margin:0; }
+  .pill.horizon { color:var(--gold-deep); border:1px solid var(--gold); background:none; }
+  .horizon-f { font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+               color:var(--ink-3); display:inline-flex; align-items:center; gap:8px; }
+  .horizon-f input.yr { width:78px; text-align:center; }
+  .divide { border-top:1px solid var(--line-soft); margin:18px 0 14px; }
+  .boxhead { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .boxlab { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+            color:var(--ink-3); font-weight:700; }
+  .minisw { display:inline-flex; margin-left:auto; border:1px solid var(--line);
+            border-radius:var(--r); overflow:hidden; }
+  .minisw button { font:inherit; font-size:11px; line-height:1; padding:5px 9px; border:0;
+                   cursor:pointer; background:var(--surface); color:var(--ink-3);
+                   border-right:1px solid var(--line); }
+  .minisw button:last-child { border-right:0; }
+  .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:var(--on-fill); }
+  .minisw button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+  .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
+           padding-bottom:8px; border-bottom:1px solid var(--line); font-size:10px;
+           letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
+  .ohead span:not(:first-child) { text-align:right; }
+  .orow { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
+          align-items:baseline; padding:10px 0; border-bottom:1px solid var(--line-soft); }
+  .orow:last-child { border-bottom:0; }
+  .orow .on { font-size:14.5px; }
+  .orow .ot { font-family:var(--mono); font-variant-numeric:tabular-nums;
+              text-align:right; font-size:14px; }
+  .orow .ot.h { color:var(--ink-3); font-size:13px; }
+
+  .ochips { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px; }
+  .ochip { border:1px solid var(--line); border-radius:var(--r); padding:11px 13px;
+           background:var(--surface-2); min-width:0; }
+  .ochip b { display:block; font-size:13.5px; font-weight:600; margin-bottom:6px; }
+  .ochip .v { font-family:var(--mono); font-size:17px; font-variant-numeric:tabular-nums; }
+  .ochip .h { font-family:var(--mono); font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+
+  .fld.mono { font-family:var(--mono); text-align:center; }
+  select.fld { padding:5px 8px; }
+
+  /* Info sits in the chrome, apart from anything that changes data. */
+  .infobtn { font:inherit; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+             font-weight:700; color:var(--ink-3); background:none;
+             border:1px solid var(--line); border-radius:99px; padding:5px 14px; cursor:pointer; }
+  .infobtn:hover { border-color:var(--stone-soft); color:var(--ink); }
+  .infobtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+  /* A bare action above the columns, replacing the labelled bar. */
+  .pageact { display:flex; justify-content:flex-end; margin:0 0 16px; }
+
+  /* Arrange rides in the legend row rather than a row of its own. */
+  .bands { justify-content:flex-start; }
+  .bands-act { margin-left:auto; display:inline-flex; }
+  .bands-act .editbtn { padding:5px 14px; }
+
+  /* The two buttons that leave hold the far right of the first line, grouped
+     so nothing can wrap between them. */
+  /* The brand is a ROW now, not a column: the product name and the client's
+     name are one statement read left to right, not two stacked labels. Baseline
+     alignment, not centre, so the serif h1 and the smaller sans name sit on the
+     same line rather than floating against each other's box. */
+  .brand { flex-direction:row; align-items:baseline; gap:9px; flex-wrap:nowrap;
+           min-width:0; }
+  .brand h1 { white-space:nowrap; }
+  .orgname { font-size:14px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
+             min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topacts { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+
+  /* THE FIRST LINE IS ONE LINE, AND IT IS SMALL.
+
+     Three attempts got here, so the reasoning is worth keeping. 2.9 asked for
+     one line and measured 1164px of content against a 1132px column, so the
+     buttons wrapped for everyone signed in. 3.0 shrank the pieces enough to
+     fit at 1180 and called it done - which was true only at 1180 and above,
+     and Islam's laptop is a ~1000px CSS viewport, so it still arrived as two
+     lines. Fitting at one width is not fitting.
+
+     So the row no longer WRAPS at all: flex-wrap is `nowrap` and every item
+     that can lose characters without losing meaning is allowed to. The
+     buttons never shrink - they are the controls, and a truncated "SIGN OU"
+     is worse than no header at all. Everything left of them shrinks and
+     ellipses in this order, because that is the order they are least missed:
+     the person note, the product name, the tenant name, the picker.
+
+     `nowrap` is what makes it unconditional. There is no width at which this
+     becomes two rows, which is the whole point - a header that reflows is a
+     header that moves the page under you every time the viewport changes. */
+  /* ── Knowledge base ──────────────────────────────────────────────
+     Reading width, not table width. This is the one page in the platform meant
+     to be read as prose rather than scanned, so the measure is capped where a
+     line stops being comfortable rather than stretched to the column.
+     scroll-margin so a jump from the contents does not land a heading
+     underneath the sticky chrome. */
+  .kb-lede { font-size:15px; color:var(--ink-2); max-width:62ch; margin:0 0 18px; }
+  .kb-toc { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 22px; }
+  .kb-toc a { font-size:11px; letter-spacing:.07em; text-transform:uppercase; font-weight:700;
+              color:var(--ink-3); text-decoration:none; border:1px solid var(--line);
+              border-radius:99px; padding:5px 12px; }
+  .kb-toc a:hover { border-color:var(--gold); color:var(--gold-deep); }
+  .kb-sec { border-top:1px solid var(--line-soft); padding:22px 0 4px;
+            scroll-margin-top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px)); }
+  .kb-sec:first-child { border-top:0; padding-top:0; }
+  .kb-sec h3 { font:400 21px/1.25 var(--serif); margin:0 0 4px; }
+  .kb-sec h4.mini { margin:16px 0 4px; }
+  .kb-p { font-size:14.5px; line-height:1.62; color:var(--ink-2); max-width:74ch; margin:0 0 10px; }
+
+  /* ── The pen, in the corner of the box it edits ──────────────────
+     visibility rather than display, so the button always holds its box and a
+     card never reflows when you hover it. It stays visible while editing: a
+     control that disappears while you are using it is worse than one that was
+     never subtle. :focus-within keeps it reachable by keyboard, which a
+     hover-only control otherwise is not. */
+  .hoverpen { position:relative; }
+  .penbtn { position:absolute; top:10px; right:10px; z-index:3;
+            width:28px; height:28px; padding:0; border-radius:50%;
+            display:inline-flex; align-items:center; justify-content:center;
+            background:var(--surface); border:1px solid var(--line);
+            color:var(--ink-3); cursor:pointer;
+            visibility:hidden; opacity:0; transition:opacity .12s ease; }
+  .penbtn svg { width:15px; height:15px; display:block; }
+  /* Descendant, not child: the pen sits inside the card's head, beside the
+     heading, not as a direct child of the card. */
+  .hoverpen:hover .penbtn,
+  .hoverpen:focus-within .penbtn,
+  .penbtn:focus-visible,
+  .penbtn.on { visibility:visible; opacity:1; }
+  .penbtn:hover { border-color:var(--gold); color:var(--gold-deep); }
+  .penbtn:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
+  /* The card head has to leave room for it, or a long label runs underneath. */
+  .hoverpen .cardhead { padding-right:34px; }
+  /* The plan's title row is a flex header, not a card head; the pen sits in the
+     same corner and the row leaves it room. */
+  .ptitle.hoverpen { padding-right:34px; }
+  .ptitle.hoverpen .penbtn { top:0; right:0; }
+
+  /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
+     the padding was 8px a side and the controls 31px, so squeezing the padding
+     alone could never have got below 31. The tallest thing in the row sets the
+     row, and it was the theme button at 30px. Everything is sized off ~20px
+     now - the select, the two pills, the mark - with 3px of padding around it. */
+  .top-in { flex-wrap:nowrap; gap:10px; padding:3px 24px; }
+
+  /* The backstop, for a tooltip that is genuinely open near the right edge.
+     `clip`, deliberately, and never `hidden`: overflow:hidden makes the
+     element a scroll container, which would break every position:sticky
+     inside it - the rail among them, and this project has spent two versions
+     on that already. `clip` clips without scrolling and lets the other axis
+     stay visible, so a tooltip can still open upwards past the top of a card.
+     Horizontal only: nothing in this product should ever scroll sideways. */
+  .wrap { overflow-x:clip; }
+
+  /* Small, because the product name is not the thing you came to read. It was
+     a 26px serif h1 - the largest text in the entire product, restating the
+     name of the tab you are already in, above a page whose own heading is
+     smaller than it was. 13px, and the tenant name beside it at 12px carries
+     more weight than the product does. */
+  .brand h1 { font-family:var(--serif); font-size:12px; letter-spacing:0; line-height:1.1;
+              white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+              flex-shrink:2; min-width:34px; }
+  .orgname { font-size:11px; letter-spacing:.01em; color:var(--ink-3); font-weight:600;
+             line-height:1.1; min-width:0; overflow:hidden; text-overflow:ellipsis;
+             white-space:nowrap; flex-shrink:3; }
+  .viewer { min-width:0; flex-wrap:nowrap; gap:6px; flex-shrink:1; }
+  .viewer label { font-size:8.5px; letter-spacing:.1em; white-space:nowrap; flex-shrink:0; }
+  .viewer select { flex:0 1 auto; min-width:70px; }
+  /* Shrinks first and hardest: the level and the reach are both said again on
+     the page itself, so this is the one line of the header nobody loses
+     anything by having clipped. */
+  .viewer-note { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+                 font-size:8.5px; flex-shrink:9; }
+  .topacts { flex-shrink:0; gap:5px; }
+  .infobtn { font-size:8.5px; padding:3px 9px; letter-spacing:.08em; line-height:1.3; }
+  /* The theme control. Round rather than a pill because it carries a mark and
+     no word - a pill with a glyph floating in it reads as a button whose label
+     failed to load. Everything else it inherits from .infobtn, including the
+     colour the glyph draws itself in.
+
+     ONE RULE. There were two: a 20px one written for the half-height line and
+     a 30px one left from 3.0, and the later of the two won, so the row stayed
+     31px tall no matter what the new number said. It is the tallest item in
+     the row, so it alone was setting the height of the whole first line. */
+  .themebtn { padding:0; width:20px; height:20px; border-radius:50%;
+              display:inline-flex; align-items:center; justify-content:center;
+              flex-shrink:0; }
+  .themesvg { width:12px; height:12px; display:block; }
+
+  /* 5. The rule above a section heading and the gap it sat in. A section is
+     already announced by its heading; the line was doing the job twice. */
+  .section { margin-top:26px; padding-top:0; border-top:0; }
+  .section:first-of-type { margin-top:14px; }
+  /* The single gap between the chrome and the page. The rail's sticky offset
+     is calc(--chrome-h + this), so the rail's flow position and its pin
+     position are the same number by construction and it cannot slide. */
+  .view { padding-top:var(--rail-gap, 22px); }
+
+  /* Retired units stay listed and stay legible — greyed, not hidden, so the
+     record of what once existed is still readable. */
+  tr.retired td { opacity:.5; }
+  tr.retired td.idx { opacity:.35; }
+  .rmbtn.on { color:var(--good); border-color:var(--good); }
+  .cfg td .why.mono { font-size:10.5px; letter-spacing:.02em; }
+  th.wcol { line-height:1.25; }
+  .why-f { margin-top:6px; font-size:12px; }
+
+  /* The units table is edited, not scanned, so its fields need room to show
+     what they hold. Fixed column widths stop the name box collapsing when a
+     dropdown beside it grows. */
+  .cfg table.unitcfg { table-layout:fixed; }
+  .cfg .unitcfg input.fld { text-align:left; font-family:var(--sans); }
+  .cfg .unitcfg select.fld { min-width:100%; max-width:none; }
+  .cfg .unitcfg td { vertical-align:middle; }
+  .cfg .unitcfg input.fld { max-width:none; width:100%; }
+
+  /* A tooltip inherits white-space from its cell. Inside a table header, where
+     nowrap keeps column titles on one line, the tooltip inherited it too and
+     ran off the edge as a single line. It sets its own wrapping. */
+  .tip::after { white-space:normal; text-transform:none; letter-spacing:0;
+                font-weight:400; width:min(320px,70vw); }
+
+  /* A tooltip on the last column would open past the right edge, so tips near
+     an edge anchor to it instead of centring on the icon. */
+  th:last-child .tip::after, td:last-child .tip::after {
+    left:auto; right:0; transform:none;
+  }
+
+  /* ── Import ─────────────────────────────────────────────────────── */
+  .imp { display:flex; flex-direction:column; gap:0; }
+  .imp-step { display:grid; grid-template-columns:34px 1fr; gap:16px;
+              padding:20px 0; border-bottom:1px solid var(--line-soft); }
+  .imp-step:last-child { border-bottom:0; }
+  .imp-n { width:28px; height:28px; border-radius:50%; background:var(--panel);
+           color:var(--panel-ink); font-family:var(--mono); font-size:13px;
+           display:flex; align-items:center; justify-content:center; }
+  .imp-b h4 { margin:0 0 4px; font-family:var(--serif); font-size:18px; }
+  .imp-b .sub { margin:0; max-width:74ch; }
+  .imp-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
+  .imp-row select.fld { width:auto; min-width:190px; max-width:none; }
+  .imp-row input[type=file] { font:inherit; font-size:13px; }
+  .imp-tally { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px; }
+  .csvbox { width:100%; height:340px; font-family:var(--mono); font-size:12px;
+            line-height:1.5; padding:12px; border:1px solid var(--line);
+            border-radius:var(--r); background:var(--surface-2); color:var(--ink);
+            white-space:pre; overflow:auto; }
+  td.was { color:var(--ink-3); text-decoration:line-through; }
+  td.now { color:var(--ink); font-weight:600; }
+  .editbtn.apply { border-color:var(--good); color:var(--good); }
+  .editbtn.apply:hover { background:var(--good-bg); }
+
+  /* Three states, and the first two were too close to tell apart: a quarter
+     the tactic runs in but which has not arrived looked almost identical to a
+     quarter it does not run in at all. A marked quarter is now tinted and
+     bordered whether or not it has passed; only the fill separates past from
+     ahead. */
+  .qs i { border-style:dashed; border-color:var(--line); color:var(--none);
+          background:none; font-weight:400; }
+  .qs i.on { background:var(--attn-bg); border:1px solid var(--stone-soft);
+             color:var(--stone); font-weight:700; }
+  .qs i.on.past { background:var(--panel); border-color:var(--panel);
+                  color:var(--panel-ink); font-weight:700; }
+  tr.notdue td { opacity:.62; }
+  .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
+  .endin .boxlab { display:block; margin-bottom:6px; }
+  .endin .statement { font-size:15px; }
+  .minirow .sub-n { font-size:9.5px; color:var(--ink-3); letter-spacing:.06em;
+                    text-transform:uppercase; font-weight:700; margin-top:2px; }
+
+  .imp-checks { display:flex; flex-direction:column; gap:6px; margin:0 0 14px; }
+  .chk { display:grid; grid-template-columns:88px 1fr; gap:10px; align-items:baseline;
+         padding:8px 12px; border-radius:var(--r); font-size:13px; }
+  .chk.bad { background:var(--bad-bg); }
+  .chk.note-c { background:var(--attn-bg); }
+  .chk b { font-weight:600; }
+  .chk span:last-child { grid-column:2; color:var(--ink-2); font-size:12.5px; }
+  .chk b + span { display:block; }
+  .rowacts { display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .confirm { display:flex; flex-direction:column; gap:5px; align-items:center;
+             background:var(--bad-bg); border-radius:var(--r); padding:8px 10px; }
+  .confirm b { font-size:11.5px; color:var(--bad); }
+  .big .nodata { color:var(--none); font-family:var(--sans); font-size:19px; font-style:italic; }
+
+  /* The code is a reference, not part of the name it sits beside. */
+  .pcode { color:var(--ink-3); font-weight:400; font-family:var(--mono);
+           font-size:12.5px; letter-spacing:.02em; margin-right:2px; }
+
+  /* A target nobody set is worth noticing \u2014 it silently removes a measure
+     from the score. */
+  .missing { color:var(--bad); font-style:italic; font-family:var(--sans);
+             font-size:12.5px; font-weight:400; }
+  .ochip .h .missing { font-size:11.5px; }
+
+  /* SWOT points are numbered so they can be referred to in a review; the
+     numbers stay quiet so they never compete with the text. */
+  .swotlist { list-style:none; margin:0; padding:0; }
+  .swotlist li { display:grid; grid-template-columns:22px 1fr; gap:8px;
+                 align-items:baseline; padding:5px 0; font-size:13.5px; }
+  .swot-n { font-family:var(--mono); font-size:11.5px; color:var(--none);
+            font-variant-numeric:tabular-nums; }
+
+  /* Temple editing: tables, with the statements in labelled rows above them. */
+  .templeedit h4.mini:first-child { margin-top:0; }
+  .tcard { background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r); padding:14px 16px; }
+  .trow { display:grid; grid-template-columns:120px 1fr; gap:14px;
+          align-items:start; padding:9px 0; border-bottom:1px solid var(--line-soft); }
+  .trow:last-child { border-bottom:0; }
+  .trow > label { font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+                  color:var(--ink-3); font-weight:700; padding-top:7px; }
+  .trow .fld { width:100%; max-width:none; }
+  .trow input.yr { max-width:90px; }
+  .cfg .fld { width:100%; max-width:none; text-align:left; }
+  .cfg .fld.mono { text-align:center; }
+
+  .masterbar { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+               border:1px solid var(--line); border-radius:var(--r);
+               background:var(--surface); padding:12px 16px; margin:0 0 18px; }
+  .masterbar .cfg-lab { flex:1; }
+  .editbtn.danger { color:var(--bad); border-color:var(--bad); }
+  .editbtn.danger:hover { background:var(--bad-bg); }
+  .confirm.row { flex-direction:row; align-items:center; flex-wrap:wrap; gap:10px; }
+  .confirm.row .why { max-width:46ch; }
+
+  .applied { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+             background:var(--good-bg); border:1px solid var(--good);
+             border-radius:var(--r); padding:12px 16px; margin:0 0 16px;
+             font-size:13.5px; }
+
+  /* ── Focus measures ─────────────────────────────────────────────── */
+  .fmark{display:inline-block;width:7px;height:7px;background:var(--gold);
+    transform:rotate(45deg);margin-left:8px;vertical-align:middle;flex:none}
+  .fmark-btn{width:11px;height:11px;padding:0;margin-left:8px;background:none;
+    border:1.5px solid var(--line);transform:rotate(45deg);cursor:pointer;
+    vertical-align:middle;border-radius:1px}
+  .fmark-btn.on{background:var(--gold);border-color:var(--gold-deep)}
+  .fmark-btn:hover{border-color:var(--gold-deep)}
+  .fmark-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  tr.focusrow td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+
+  .fstrip{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    margin:0 0 22px;overflow:hidden}
+  .fstrip-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:var(--surface-2);border-bottom:1px solid var(--line);padding:12px 18px}
+  .fstrip-t{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+    font-weight:700;color:var(--ink-2)}
+  .fstrip-meta{color:var(--ink-3);font-size:12px;margin-right:auto}
+  .fstrip-body{display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding:16px 18px 14px}
+  .fcount{display:flex;align-items:baseline;gap:6px;font-family:var(--serif)}
+  .fcount b{font-size:30px;font-weight:400;color:var(--good)}
+  .fcount span{font-size:19px;color:var(--ink-3)}
+  .fcount em{font-style:normal;font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink-3);font-family:var(--sans);font-weight:700;margin-left:8px}
+  .fchips{display:flex;gap:7px;flex-wrap:wrap}
+  .fmean{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink-3)}
+  .fstrip-empty{padding:16px 18px;color:var(--ink-3);font-size:13px}
+  .fstrip .cfg{border-top:1px solid var(--line-soft)}
+  .fstrip .cfg table{border:0}
+
+  .badge{display:inline-block;font:700 10px/1 var(--sans);letter-spacing:.06em;
+    text-transform:uppercase;padding:5px 9px;border-radius:20px;white-space:nowrap}
+  .b-over{background:var(--over-bg);color:var(--gold-deep);border:1px solid var(--over-line)}
+  .b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+  .b-short{background:var(--bad-bg);color:var(--bad)}
+  .b-none{background:var(--surface-2);color:var(--none)}
+  .board tbody tr.alt td{background:var(--surface-2)}
+  .board tbody tr.unitstart td{border-top:1px solid var(--line)}
+  .board tbody tr:first-child td{border-top:0}
+  .board td.unitcell{vertical-align:top;padding-top:14px}
+
+  /* The focus panel is closed until asked for: it is a lens on a few measures,
+     not the unit's headline. */
+  details.fstrip > summary{list-style:none;cursor:pointer}
+  details.fstrip > summary::-webkit-details-marker{display:none}
+  .fstrip-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .fstrip-head::after{content:"▸";margin-left:4px;color:var(--ink-3);font-size:11px;
+    transition:transform .15s ease}
+  details.fstrip[open] > summary .fstrip-head::after,
+  details.fstrip[open] > summary::after{transform:rotate(90deg)}
+  .fstrip-sum{font-family:var(--mono);font-size:13px;color:var(--ink-2)}
+  .fstrip-sum b{color:var(--good);font-size:15px}
+  .fstrip-meta{margin-left:auto}
+  .fstrip .fstrip-body{padding:12px 18px 10px}
+  .fstrip .fmean{margin:0;font-size:12px}
+  .cfg .pick{display:grid;grid-template-columns:26px 1fr auto 90px;gap:14px;align-items:center;
+    padding:10px 16px;border-bottom:1px solid var(--line-soft)}
+  .cfg .pick .src{font-size:11px;color:var(--ink-3)}
+
+  /* ── Reporting ──────────────────────────────────────────────────── */
+  .rep-bar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:14px 18px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 16px}
+  .kpi{display:flex;align-items:baseline;gap:8px}
+  .kpi b{font:400 26px/1 var(--serif)}
+  .kpi span{color:var(--ink-3);font-size:12.5px}
+  /* Named repbar, not bar: .bar is already a three-column grid component in
+     group-extra.css, and reusing it turned this fill into a grid track. */
+  .repbar{display:block;height:6px;background:var(--surface-2);border-radius:20px;
+    overflow:hidden;flex:1;min-width:120px;max-width:260px}
+  .repbar i{display:block;height:100%;background:var(--good)}
+  .repbar.part i{background:var(--attn)}
+  .rep-bar .why{margin-left:auto}
+  input.field{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;width:104px;
+    border:1px solid var(--line);border-radius:var(--r);text-align:right;background:var(--surface);
+    color:var(--ink)}
+  input.field.filled{border-color:var(--good);background:var(--good-bg)}
+  input.field:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+  .notefld{width:100%;max-width:none;text-align:left;font-size:13px}
+  .notefld.needed{border-color:var(--bad);background:var(--bad-bg)}
+  tr.wantnote td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+  .bad-note{border-left:3px solid var(--bad);background:var(--bad-bg)}
+  .repcell{display:flex;align-items:center;gap:10px}
+  .repcell .repbar{max-width:none}
+  .delta{font-family:var(--mono);font-size:12px;margin-left:10px;font-weight:600;
+    vertical-align:middle;letter-spacing:.02em}
+  .delta.up{color:var(--good)} .delta.down{color:var(--bad)}
+  .headline .delta{align-self:center}
+
+  /* Reporting reuses the pillar accordion so the two pages read as one product,
+     but its row carries how much is done rather than a score \u2014 that is what
+     the person filling it in wants to know at a glance. */
+  .prow.rprow{grid-template-columns:1fr 90px 26px}
+  .rtally{font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
+    background:var(--surface-2);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  .rtally.full{color:var(--good);background:var(--good-bg);border-color:var(--good)}
+  .prow.rprow .chev{color:var(--ink-3);font-size:11px;transition:transform .15s ease}
+  .prow.rprow[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .notecol{width:30%}
+  .notecol .notefld{width:100%}
+
+  /* The reported box states its unit rather than asking for it to be typed. */
+  .entry{display:inline-flex;align-items:stretch;border:1px solid var(--line);
+    border-radius:var(--r);overflow:hidden;background:var(--surface)}
+  .entry.filled{border-color:var(--good)}
+  .entry.filled .field{background:var(--good-bg)}
+  .entry .field{border:0;width:78px;border-radius:0}
+  .entry .field:focus-visible{outline:none}
+  .entry:focus-within{outline:2px solid var(--gold);outline-offset:1px}
+  .unitsuf{display:flex;align-items:center;padding:0 9px;background:var(--surface-2);
+    border-left:1px solid var(--line);font-family:var(--mono);font-size:12px;
+    color:var(--ink-3);white-space:nowrap}
+  .phead.rphead,.prow.rprow{grid-template-columns:1fr 110px 84px 84px 78px 20px;gap:14px}
+  .phead.rphead .num{text-align:right}
+  .phead.rphead .cc{text-align:center}
+
+  /* ── Table headers, dark ──────────────────────────────────────────
+     Navy ground, white type. A column header is a label for what sits under
+     it, and at this weight it reads as one band rather than as a first row of
+     data. Applied to every table and to the grid headers that behave like
+     one — the pillar lists and the grouped lists in Setup — so no screen has
+     two different ideas of what a header looks like. */
+  thead th, table thead th, .cfg table thead th, .scroll table thead th{
+    background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
+  thead th .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
+  thead th .tip:hover{color:#fff;border-color:#fff}
+  .phead, .plist .phead{background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0}
+  .phead span, .phead > *{color:var(--panel-ink)}
+  .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
+  .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
+  /* Arrange mode still has to be visible against the dark band. */
+  .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
+
+
+
+  /* Expand or collapse every panel, beside the first column header. */
+  .phead .hfirst{display:inline-flex;align-items:center;gap:9px}
+  .foldall{background:none;border:0;padding:0;cursor:pointer;line-height:0;
+    color:rgba(255,255,255,.7);display:inline-flex;align-items:center}
+  .foldall:hover{color:#fff}
+  .foldall:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:2px}
+  .foldall svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.6;fill:none;
+    stroke-linecap:round;stroke-linejoin:round}
+
+  /* Alternating rows across the platform's tables, matching the deck. A very
+     light tint only: it has to help the eye track a wide row without competing
+     with the marks that carry meaning \u2014 the red edge on a figure needing a
+     note, the gold edge on a focus measure, a dimmed not-yet-due row. */
+  tbody tr:nth-child(even) > td { background:var(--zebra); }
+  tbody tr:nth-child(even) > td.was { background:var(--zebra); }
+  /* Rows that already say something keep saying it. */
+  .board tbody tr.alt td { background:var(--surface-2); }
+  tbody tr.focusrow:nth-child(even) > td { background:var(--zebra-focus); }
+  tbody tr.wantnote:nth-child(even) > td { background:#FBF1EF; }
+
+  /* Each obligation announces whose it is: a unit's plan counts toward that
+     unit, a group capability never does. */
+  .oblband{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;
+    background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;
+    margin:22px 0 0}
+  .oblband.cap{background:var(--panel);color:#fff;border-color:var(--panel)}
+  .obl-lab{font-size:10px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-3)}
+  .oblband.cap .obl-lab{color:var(--gold)}
+  .obl-nm{font-size:16px;font-weight:600}
+  .obl-meta{font-size:12.5px;color:var(--ink-3)}
+  .oblband.cap .obl-meta{color:#C3CEE0}
+  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
+    border-radius:0 0 var(--r) var(--r);padding:16px 18px 20px}
+  .capbody h4.mini:first-child{margin-top:0}
+  .whoami{font:400 19px/1.2 var(--serif)}
+
+  /* A build should be identifiable from a screenshot. */
+  .vstamp{color:var(--gold-deep);font-family:var(--mono);letter-spacing:0;
+    text-transform:none;font-weight:700;margin-left:6px}
+  .cfg td.nowrapcell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:0}
+
+  /* ── The navigation fold ──────────────────────────────────────────
+     One row that folds rather than two that wrap. Short labels are what buy
+     the single line: with the words spelled out the row needed 1377px and
+     wrapped at every width tested; folded with short labels it needs 1223. */
+  /* A navigation control has to be legible before it is subtle. The closed
+     state was #8FA3C0 on navy and the open state a 14% gold wash \u2014 both too
+     faint to read as buttons at all. */
+  /* Scoped inside .units, or `.units button {background:none}` wins on
+     specificity and the fold renders with no fill at all \u2014 and its opacity is
+     reset, since a control must not inherit the dimming meant for plain tabs. */
+  .units .navfold{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+    opacity:1;
+    border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;padding:6px 11px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
+  .units .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
+  .units .navfold.open{color:var(--panel);background:var(--gold);border-color:var(--gold);
+    font-weight:700;opacity:1}
+  .units .navfold.open .foldtw{opacity:1}
+  .units .navfold.open .foldhere{color:var(--panel)}
+  .navfold .foldtw{font-size:9px;opacity:.85}
+  /* The closed fold carries the location, or browsing one side while sitting on
+     the other leaves the navigation saying nothing about where you are. */
+  .foldhere{color:var(--gold);font-weight:700;text-transform:none;letter-spacing:0;
+    font-size:12.5px}
+  .foldhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
+
+  .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);
+    color:#fff;padding:11px 16px;border-radius:var(--r) var(--r) 0 0}
+  .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--panel);background:var(--gold);border-radius:20px;padding:4px 8px}
+  .capnm{font-size:15.5px;font-weight:600}
+  .capmeta{font-size:12.5px;color:#AFC0D8}
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:#fff;
+    background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px}
+  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
+    border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
+  .capbody h4.mini:first-child{margin-top:0}
+
+  /* The folded row carries more entries than the flat one ever did, and the
+     content column is 1180px. Tightened only when the folds are present, so
+     everyone else keeps the roomier spacing they have today. */
+  /* Two changes, only when the folds are present. The row is allowed past the
+     content column's width \u2014 a navigation bar is chrome, not content \u2014 and the
+     spacing tightens. Everyone else keeps today's roomier row. */
+  .units-in.folded{max-width:none;padding-left:16px;padding-right:16px}
+  .units-in.folded button[data-u]{padding-left:9px;padding-right:9px;font-size:13.5px}
+  .units-in.folded .navfold{padding:5px 9px;font-size:10.5px;margin:0}
+  .units-in.folded .sep{margin:0 3px}
+
+  .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
+    color:#fff;padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px}
+  .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--panel);background:var(--gold);border-radius:20px;padding:4px 8px}
+  .capnm{font-size:15.5px;font-weight:600}
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:#fff;
+    background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
+  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
+    border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
+  .capbody h4.mini:first-child{margin-top:0}
+  .caphdr{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;padding:16px 18px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 18px}
+  .capname{font:400 21px/1.2 var(--serif)}
+  .capkpi{margin-left:auto;display:flex;gap:24px;text-align:right}
+  .capkpi i{display:block;font-style:normal;font-size:10px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .capkpi b{font:400 22px/1.2 var(--serif)}
+
+  /* ── Manage: one worded button, one menu ───────────────────────
+     It replaced a gear and a stacked-list glyph. Ten destinations behind two
+     icons asked people to remember which mark held which page; behind one
+     word they are simply listed. Nothing about the pages changed — each entry
+     opens exactly the page its icon used to, with its own tab row underneath.
+
+     The panel is absolutely positioned, so however long the list grows it
+     never widens the row or shoves the unit tabs along. `.units-in` is
+     `overflow-x:visible` here (it is `auto` in the base sheet), which is what
+     lets the panel hang below the row instead of being clipped by it. */
+  .units .sep.pinsep{margin-left:auto}
+  .navmenu{position:relative;display:inline-flex;align-items:center}
+  .units .navmenu-btn{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+    opacity:1;border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
+  .units .navmenu-btn:hover{color:#fff;background:rgba(255,255,255,.18);
+    border-color:rgba(255,255,255,.65)}
+  .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  /* `here` is where you ARE, `open` is the menu showing. They are different
+     states and both can be true, so they do not share a style. */
+  .units .navmenu-btn.here{color:var(--panel);background:var(--gold);border-color:var(--gold)}
+  .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
+    border-color:rgba(255,255,255,.7)}
+  .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}
+  /* The face is a mark now, not a word. Tighter padding because a 15px glyph
+     in a pill sized for 11px uppercase text floats; the caret stays, because
+     it is what says this opens a list rather than going somewhere. */
+  .units .navmenu-btn.navmenu-ico{padding:5px 9px;gap:4px}
+  .navmenusvg{width:15px;height:15px;display:block}
+  .navmenu-tw{font-size:9px;opacity:.85}
+  .navmenu-panel{position:absolute;top:calc(100% + 6px);right:0;z-index:20;min-width:212px;
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:0 14px 34px rgba(11,31,59,.22);padding:6px;text-align:left}
+  /* A band, not just smaller type. Ten entries under two whispered labels read
+     as one list of ten; the labels have to be visibly a different KIND of row
+     from the things they head, or the grouping is doing no work. */
+  .navmenu-grp{font:700 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-2);background:var(--surface-2);border-radius:4px;
+    padding:7px 10px;margin:6px 0 4px}
+  .navmenu-grp:first-child{margin-top:0}
+  .units .navmenu-panel button{display:block;width:100%;text-align:left;background:none;
+    border:0;opacity:1;color:var(--ink);font:400 13.5px/1.2 var(--sans);letter-spacing:0;
+    text-transform:none;padding:8px 10px;border-radius:6px;cursor:pointer}
+  .units .navmenu-panel button:hover{background:var(--surface-2);color:var(--ink)}
+  .units .navmenu-panel button.on{background:var(--gold);color:var(--panel);font-weight:700}
+  .units .navmenu-panel button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+
+  /* ── One header for the configuration tables ─────────────────────── */
+  .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
+  .phead2 .secttl{font:400 24px/1.2 var(--serif);margin:0}
+  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .phead2 .chip{font-size:11.5px;color:var(--ink-3);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap}
+  .iconwrap{position:relative;display:flex;gap:6px;margin-left:6px}
+  .ico{background:var(--surface);border:1px solid var(--line);border-radius:50%;width:34px;height:34px;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-2);padding:0}
+  .ico:hover{border-color:var(--gold);color:var(--gold-deep)}
+  .ico.on{background:var(--gold);border-color:var(--gold);color:var(--panel)}
+  .ico:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round}
+  .ico.sm{width:26px;height:26px}
+  .ico.sm svg{width:13px;height:13px}
+  .iconwrap .menu{position:absolute;top:40px;right:0;background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 22px rgba(16,32,60,.16);
+    min-width:190px;z-index:12;overflow:hidden}
+  .iconwrap .menu button{display:block;width:100%;text-align:left;background:none;border:0;
+    font:inherit;font-size:13.5px;padding:10px 14px;cursor:pointer;color:var(--ink-2)}
+  .iconwrap .menu button:hover{background:var(--surface-2);color:var(--bad)}
+
+  /* Setup and Manage sit at the right edge and stay there. */
+  .units .sep.pin{margin-left:auto}
+  .iconwrap .menu.confirmwrap{min-width:250px;padding:4px 0}
+  .iconwrap .menu .cq{padding:11px 14px 8px;border-bottom:1px solid var(--line-soft)}
+  .iconwrap .menu .cq b{font-size:13.5px}
+  .iconwrap .menu button.danger{color:var(--bad);font-weight:600}

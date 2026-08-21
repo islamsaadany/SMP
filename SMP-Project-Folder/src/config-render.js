@@ -200,7 +200,7 @@ function renderFactorEditor(){
         if (!pf) return "new this cycle";
         var d = f.weight - pf.weight;
         return pf.weight + "% &rarr; " + (d === 0 ? "unchanged"
-          : '<b style="color:' + (d > 0 ? "var(--good)" : "var(--warn)") + '">' + (d > 0 ? "+" : "\u2212") + Math.abs(d) + '</b>');
+          : '<b style="color:' + (d > 0 ? "var(--good-tx)" : "var(--warn-tx)") + '">' + (d > 0 ? "+" : "\u2212") + Math.abs(d) + '</b>');
       })() + '</span></td>' +
       '<td>' + (editable ? '<button class="rmbtn" data-rmf="' + i + '" aria-label="Remove ' + esc(f.name) + '">Remove</button>' : '') + '</td></tr>';
   }).join("");
@@ -537,6 +537,104 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    different questions on one screen: which units exist, and who is allowed to
    see whom. They are edited at different times by different reasoning, and the
    units table is long enough to push the company rules off the top. */
+/* ── Branding (§39) ─────────────────────────────────────────────────
+   The tenant's own colours and typeface, for everyone in the tenant. Two
+   colours in, seven tokens out — see brandTokens() — and the contrast of every
+   derived pair reported as you type, because a brand colour that cannot be
+   read is a thing to be told about at the moment you enter it, not discovered
+   in a screenshot three weeks later. */
+function renderBranding(){
+  var mayEdit = grant("c_brand") === "edit";
+  var b = branding(), checks = brandChecks(), t = brandTokens();
+  var set = !!(b.accent || b.bar || b.palette || b.font);
+
+  function swatch(key, label, value, note){
+    var shown = value || "";
+    return '<tr><td><b>' + esc(label) + '</b><span class="why">' + esc(note) + '</span></td>' +
+      '<td class="cc">' + (mayEdit
+        ? '<span class="brandpick">' +
+            '<input type="color" class="brandcolor" data-brand="' + key + '" value="' +
+              esc(shown || "#4F46E5") + '" aria-label="' + esc(label) + '">' +
+            '<input type="text" class="fld mono brandhex" data-brandhex="' + key +
+              '" value="' + esc(shown) + '" placeholder="not set" spellcheck="false" size="9">' +
+            (shown ? '<button class="linkbu" data-brandclear="' + key + '">Clear</button>' : '') +
+          '</span>'
+        : (shown
+            ? '<span class="brandpick"><i class="brandchip" style="background:' + esc(shown) + '"></i>' +
+              '<span class="mono">' + esc(shown) + '</span></span>'
+            : '<span class="why" style="margin:0">the palette’s own</span>')) +
+      '</td></tr>';
+  }
+
+  var rows =
+    swatch("accent", "Accent", b.accent,
+           "The selected tab, the rail’s current pillar, links and every primary control") +
+    swatch("bar", "Navigation bar", b.bar,
+           "The dark band the units sit on");
+
+  var derived = Object.keys(t).length
+    ? '<div class="cfg"><table><thead><tr><th style="width:34%">Derived from those two</th>' +
+        '<th style="width:22%">Colour</th><th>Why it is not asked for</th></tr></thead><tbody>' +
+      [["--gold-deep","The accent as TEXT","Darkened until a word in it is readable on the page — a fill and a word are not the same job (§38.4)"],
+       ["--on-accent","Ink on the accent","Black or white, whichever can actually be read on it. White on the house gold is 2.4:1"],
+       ["--panel-ink","Ink on the bar","The same choice, for the bar"],
+       ["--panel-quiet","The bar’s quiet ink","The bar mixed toward its own ink — never the page’s, which on a dark bar is 2.5:1"],
+       ["--panel-hover","The bar’s hover","One step from the bar toward its ink, so a hover never paints a page colour onto it"]]
+      .filter(function(r){ return t[r[0]]; })
+      .map(function(r){
+        return '<tr><td><b>' + esc(r[1]) + '</b><span class="why mono">' + r[0] + '</span></td>' +
+          '<td class="cc"><span class="brandpick"><i class="brandchip" style="background:' + t[r[0]] +
+          '"></i><span class="mono">' + t[r[0]] + '</span></span></td>' +
+          '<td><span class="why" style="margin:0">' + esc(r[2]) + '</span></td></tr>';
+      }).join("") + '</tbody></table></div>'
+    : '';
+
+  var checkRows = checks.length
+    ? '<div class="cfg"><table><thead><tr><th>What was checked</th>' +
+      '<th class="cc" style="width:14%">Ratio</th><th class="cc" style="width:14%">Verdict</th></tr></thead><tbody>' +
+      checks.map(function(c){
+        var ok = c.ratio >= c.need;
+        return '<tr><td><b>' + esc(c.what) + '</b>' +
+          (c.note ? '<span class="why">' + esc(c.note) + '</span>' : '') + '</td>' +
+          '<td class="cc"><span class="mono">' + c.ratio + ':1</span></td>' +
+          '<td class="cc"><span class="pill ' + (ok ? "good" : "bad") + '">' +
+            (ok ? "Readable" : "Too close") + '</span></td></tr>';
+      }).join("") + '</tbody></table></div>'
+    : '';
+
+  return cfgHead("Branding",
+      ['<span class="pill kind">SMO</span>',
+       set ? 'set for this tenant' : 'using the shipped palette'],
+      "brand", mayEdit, null) +
+
+    section("", "The tenant’s colours",
+      "Two colours, and the platform works out the rest. They apply to everyone here — " +
+      "unlike the switches in the top bar, which are your own screen and nobody else’s.",
+      '<div class="cfg"><table><thead><tr><th style="width:34%">What it colours</th>' +
+      '<th class="cc">Colour</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      (mayEdit && set ? '<div style="margin-top:12px"><button class="linkbu" data-brandreset="1">' +
+                        'Reset to the shipped palette</button></div>' : '')) +
+
+    (derived ? section("", "What follows from them", null, derived) : "") +
+
+    (checkRows ? section("", "Is it readable?",
+      "Run on every derived pair, every time you change one. A brand colour that cannot be read " +
+      "is worth knowing about here rather than in a screenshot three weeks from now.",
+      checkRows) : "") +
+
+    section("", "Typeface", null,
+      '<div class="note"><b>The tenant’s face is set with the switch in the top bar for now</b> ' +
+      '(§38.7). Four are embedded so they can be compared in the real product; once one is ' +
+      'settled it moves here and the rest leave the file.</div>') +
+
+    section("", null, null,
+      '<div class="note"><b>Branding is the tenant’s, not the screen’s.</b> It is saved with ' +
+      'everything else and is what everyone here sees on opening. Light and dark stay personal — ' +
+      'that is about the room somebody is sitting in, not about the brand — and anyone who ' +
+      'prefers a different palette on their own screen may still pick one, without changing ' +
+      'what anybody else sees.</div>');
+}
+
 /* ── The register (§35) ─────────────────────────────────────────────
    Everyone the platform knows, in one table. It replaces the People section
    that used to sit at the bottom of Roles & access — a matrix page is where
@@ -1011,6 +1109,177 @@ function renderFocusSetup(){
         'starts unmarked</b>, so last year\'s emphasis cannot quietly become this year\'s. ' +
         'There is no cap: three is the usual choice and it stays a choice. ' +
         '<b>Focus changes no score</b>; it is a lens and an incentive, not a second weighting.</div>');
+}
+
+/* ── Source of figures (§16.7) ───────────────────────────────────────
+   Many measures are not the business unit's number at all. This is where the
+   SMO says so: which figures another team is master of, and who in that team
+   enters them.
+
+   It is a SETUP page, not a cycle page, because the answer holds across
+   cycles — revenue does not stop being Finance's in March. And it is the SMO's
+   alone: a unit that could nominate the source of its own numbers could
+   nominate itself.
+
+   The pool is large (every key objective and every key measure in every unit),
+   so it is filtered by unit, exactly as Focus measures is — one unit at a
+   time is how the question is actually asked. */
+function renderSourceSetup(){
+  var editable = grant("c_source") === "edit";
+  var u = UNITS[SRCSET.unit] || UNITS[activeKeys()[0]];
+  if (!u) return '<div class="note">No business units yet.</div>';
+
+  /* ONE decision at the top, then ticks. The first build asked for a team and
+     a person on EVERY row, which meant 116 pairs of dropdowns across ten
+     units before the feature did anything for anybody. Islam: "that's a huge
+     setup to do and not practical ... he just needs the measure and target so
+     he can tick if he owns this or not."
+
+     So the WHO is chosen once, and each row is a single mark — the same shape
+     as Focus measures, which asks the same kind of question (§A13: follow what
+     the platform already does). */
+  var team = SRCSET.team, by = SRCSET.by;
+  var ready = !!(team && by);
+
+  var teamPick = '<select class="fld" id="srcset-team"' + (editable ? '' : ' disabled') + '>' +
+    '<option value="">Choose a team\u2026</option>' + FUNCTION_KEYS.map(function(k){
+      return '<option value="' + esc(k) + '"' + (k === team ? " selected" : "") + '>' +
+        esc(FUNCTIONS[k].name) + '</option>';
+    }).join("") + '</select>';
+  var byPick = '<select class="fld" id="srcset-by"' + (editable ? '' : ' disabled') + '>' +
+    '<option value="">Choose a person\u2026</option>' + PEOPLE.filter(personActive).map(function(p){
+      return '<option value="' + esc(p.key) + '"' + (p.key === by ? " selected" : "") + '>' +
+        esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+    }).join("") + '</select>';
+
+  /* Units as buttons rather than a dropdown (Islam): ten of them fit on one
+     line, and a list you can see is a list you can move through. The count is
+     on the button, so where the work is left is visible without opening
+     anything. */
+  var unitBtns = '<div class="unitpick">' + activeKeys().map(function(k){
+      var n = SMPRules.sourceRows(world()).filter(function(r){ return r.unit === k; }).length;
+      return '<button class="upick' + (k === u.ukey ? " on" : "") + '" data-srcunit="' + esc(k) + '">' +
+        esc(UNITS[k].navName || UNITS[k].name) +
+        (n ? ' <span class="upick-n">' + n + '</span>' : '') + '</button>';
+    }).join("") + '</div>';
+
+  /* A row is one of three things: unclaimed, mine, or somebody else's. The
+     third is shown as the team's name rather than a tick you could overwrite
+     without noticing. */
+  var row = function(m){
+    var src = m.src && m.src.by ? m.src : null;
+    var mine = !!(src && ready && src.team === team && src.by === by);
+    var theirs = src && !mine;
+    return '<div class="pick ' + (mine ? "on" : "off") + '">' +
+      (editable && ready && !theirs
+        ? '<button class="fmark-btn' + (mine ? ' on' : '') + '" data-srcpick="' + esc(m.id) + '" ' +
+          'aria-pressed="' + mine + '" aria-label="' + (mine ? "Release " : "Claim ") + esc(m.name) + '"></button>'
+        : '<span class="fmark-btn' + (mine ? ' on' : '') + '" style="cursor:default"></span>') +
+      '<span>' + esc(m.name) + '</span>' +
+      '<span class="num why" style="margin:0">' +
+        (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
+      '<span class="why" style="margin:0;min-width:120px;text-align:right">' +
+        (theirs
+          ? esc(srcTeamName(src))
+          : (mine ? "marked" : (editable && ready ? "click to mark" : ""))) + '</span>' +
+    '</div>';
+  };
+
+  var blocks =
+    '<div class="grouphead">' + L("keyobj","bu") + '</div>' +
+    (u.keyObjectives.length
+      ? u.keyObjectives.map(row).join("")
+      : '<div class="fstrip-empty">None set for this unit.</div>') +
+    u.items.map(function(p, pi){
+      return '<div class="grouphead">' + pillarCode(u, pi) + ' ' + esc(p.name) + '</div>' +
+        (p.measures.length
+          ? p.measures.map(row).join("")
+          : '<div class="fstrip-empty">No key measures.</div>');
+    }).join("");
+
+  var all = SMPRules.sourceRows(world());
+  var forThis = ready ? all.filter(function(r){
+      return r.src.team === team && r.src.by === by; }).length : 0;
+
+  return '<div class="kv"><span class="pill kind">SMO</span>' +
+      '<span class="pill kind">' + all.length + ' figure' + (all.length === 1 ? "" : "s") +
+      ' sourced across the group</span>' +
+      (ready ? '<span class="pill good">' + forThis + ' marked for ' + esc(FUNCTIONS[team].name) +
+               '</span>' : '') + '</div>' +
+    section("", "Source of figures", null,
+      '<div class="imp-row" style="margin:0 0 12px">' +
+        '<span class="cfg-lab">Marking for</span>' + teamPick + byPick + '</div>' +
+      (ready ? '' : '<div class="note">Choose the team and the person first. ' +
+        'Every mark below is stored against them, so one pass through the units ' +
+        'sets everything that team owns.</div>') +
+      unitBtns +
+      '<div class="cfg" style="padding:0">' + blocks + '</div>' +
+      '<div class="note"><b>A marked figure is entered once, by the person named above.</b> ' +
+        'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
+        'note</b> \u2014 the number is theirs, the performance is the unit\u2019s, and the ' +
+        'explanation belongs to whoever owns the performance. A row already marked for another ' +
+        'team shows that team\u2019s name; switch to them above to release it.</div>');
+}
+
+/* The other half of §16.7: a source team is a reporting party like any other,
+   so it gets its own surface for the window. Rows come from every unit at
+   once — that is the point, Finance enters revenue once per unit in one
+   place rather than visiting ten pages. */
+function renderMySources(){
+  var rows = mySourceRows();
+  if (!rows.length) {
+    return '<div class="note">You are not named as the source of any figure. ' +
+      'The SMO assigns these on <b>Setup &rsaquo; Source of figures</b>.</div>';
+  }
+  var open = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super"));
+  var byUnit = {};
+  rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
+
+  var entry = function(r){
+    var m = r.row, cur = m.actual, has = cur != null && cur !== "";
+    var unit = splitTarget(m.target).unit;
+    var shown = !has ? "" : (splitTarget(cur).value || String(cur));
+    if (!open) return '<span class="mono">' + (has ? esc(String(cur)) : "\u2014") + '</span>';
+    /* The suffix lives INSIDE .entry, as it does on the unit's own page — put
+       outside, it wraps to its own line and the box loses its unit (§A13:
+       follow what the platform already does). */
+    return '<span class="entry' + (has ? " filled" : "") + '">' +
+      '<input class="field" data-rep="' + esc(m.id) + '" data-repu="' + esc(r.unit) + '" ' +
+      'data-unit="' + esc(unit) + '" value="' + esc(shown) + '" placeholder="\u2014" ' +
+      'aria-label="Report ' + esc(m.name) + ' for ' + esc(UNITS[r.unit].name) + '">' +
+      (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
+  };
+
+  var done = rows.filter(function(r){ return r.row.actual != null && r.row.actual !== ""; }).length;
+
+  var blocks = Object.keys(byUnit).map(function(k){
+    var list = byUnit[k];
+    var n = list.filter(function(r){ return r.row.actual != null && r.row.actual !== ""; }).length;
+    return section("", esc(UNITS[k].name) +
+      ' <span class="rtally' + (n === list.length ? " full" : "") + '">' + n + '/' + list.length + '</span>',
+      null,
+      '<table class="cfg"><thead><tr>' +
+        '<th style="width:46%">Figure</th><th class="cc" style="width:16%">Target</th>' +
+        '<th class="cc" style="width:20%">Reported</th><th style="width:18%">The unit\u2019s note</th>' +
+      '</tr></thead><tbody>' + list.map(function(r){
+        return '<tr><td>' + esc(r.row.name) +
+            (r.pillar ? ' <span class="why" style="margin:0">' + esc(r.pillar) + '</span>' : '') + '</td>' +
+          '<td class="cc mono">' + (r.row.target ? esc(r.row.target) : "\u2014") + '</td>' +
+          '<td class="cc">' + entry(r) + '</td>' +
+          '<td class="why" style="margin:0">' + (r.row.note ? esc(r.row.note) : "\u2014") + '</td></tr>';
+      }).join("") + '</tbody></table>');
+  }).join("");
+
+  return '<div class="kv">' +
+      '<span class="pill kind">' + done + ' of ' + rows.length + ' entered</span>' +
+      '<span class="pill ' + (open ? "good" : "none") + '">' +
+        (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
+    (open ? '' : '<div class="note">Figures can be entered while a cycle is open. ' +
+      'This is a record until the SMO opens the next one.</div>') +
+    blocks +
+    '<div class="note"><b>You enter the figure; the unit writes the note.</b> ' +
+      'The number is yours, the performance is theirs, and a unit cannot complete its ' +
+      'report until these are in \u2014 which is why they will ask.</div>';
 }
 
 /* The scope is a business unit OR a capability (§16.4): capability projects

@@ -62,23 +62,11 @@ var LABELS = {
    registry are the same write. It also gives multiple roles for free — one
    person can be group CEO and own Care, because those are two records in two
    different places rather than one field fighting itself. */
-var ROLES = [
-  { key:"super", name:"Super user", scope:"group",
-    note:"The SMO. Sees and edits everything, including configuration." },
-  { key:"gceo",  name:"Group CEO",  scope:"group",
-    note:"Sees the whole group. Manages nothing outside their own unit." },
-  { key:"cceo",  name:"Company CEO", scope:"company",
-    note:"Sees their company's units. Whether they also see the group and the other companies is set per company." },
-  { key:"owner", name:"Business unit owner", scope:"unit",
-    note:"Accountable for one unit's strategy. Named on the unit itself." },
-  { key:"custodian", name:"Strategy custodian", scope:"unitfn",
-    note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
-  { key:"fnhead", name:"Supporting function head", scope:"fn",
-    note:"Runs a supporting function and the capabilities it owns." },
-  { key:"contrib", name:"Contributor", scope:"unit",
-    note:"Named on a measure or a tactic. Reports against their own work and reads their unit." }
-];
-var ROLE_KEYS = ROLES.map(function(r){ return r.key; });
+/* The list itself lives in lib/rules.js — the SAME file api/state.js requires,
+   so the roles the screen draws and the roles the server enforces are one
+   list, not two (spec 006 §2). */
+var ROLES = SMPRules.ROLES;
+var ROLE_KEYS = SMPRules.ROLE_KEYS;
 function roleName(k){
   var r = ROLES.filter(function(x){ return x.key === k; })[0];
   return r ? r.name : k;
@@ -89,41 +77,14 @@ function roleName(k){
    whatever points at them. A person who holds nothing gets an empty list and
    therefore no access, which is the honest answer for someone who has been
    added to the registry but not yet given a job. */
-function personRoles(p){
-  if (!p) return [];
-  /* A retired person holds nothing. Retiring already revokes their roles,
-     so this is the second lock rather than the first — but access is the
-     one place where being wrong twice is worth the two lines. */
-  if (!personActive(p)) return [];
-  var out = [];
-  var seat = p.role || (p.level === "smo" ? "super"
-                      : p.level === "ceo" ? (p.company ? "cceo" : "gceo") : null);
-  if (seat) out.push({ role: seat, at: p.company ? "co:" + p.company : (p.at || "group") });
-
-  /* A unit's head and custodian live in UNIT_ROLES, beside the unit rather than
-     on it — the pointer is the role, read from the other end. */
-  UNIT_KEYS.forEach(function(k){
-    var r = UNIT_ROLES[k] || {};
-    if (r.head === p.key)      out.push({ role:"owner",     at:k });
-    if (r.custodian === p.key) out.push({ role:"custodian", at:k });
-  });
-  FUNCTION_KEYS.forEach(function(k){
-    if (FUNCTIONS[k].head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
-    if (FUNCTIONS[k].custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
-  });
-
-  /* Named on nothing: a contributor, wherever they are attached — including
-     the group, which is where a Group CFO or COO sits. Attachment is scope and
-     scope alone: contrib@group reaches the GROUP pages and no unit, because
-     roleOwns() matches the attachment exactly. The old model could not say
-     this — "unit: group" there meant all ten units — which is why a group
-     function head had to be given a level that overshot. */
-  if (!out.length && p.unit) out.push({ role:"contrib", at:p.unit });
-  return out;
+function world(){
+  return SMPRules.W({ unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
+                      functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
+                      companies:COMPANIES, access:ACCESS });
 }
-function personRoleKeys(p){
-  return personRoles(p).map(function(r){ return r.role; });
-}
+function personRoles(p){ return SMPRules.personRoles(world(), p); }
+function personRoleKeys(p){ return SMPRules.personRoleKeys(world(), p); }
+
 /* Does the person currently being viewed as hold this role at all? The
    question almost every "can they" check actually wants, and the one place
    that knows a person holds several. */
@@ -137,41 +98,7 @@ function hasRole(k){ return personRoleKeys(viewer()).indexOf(k) > -1; }
 
    "unit" and "fn" as an area mean the answer depends on WHOSE unit — resolved
    per role by areaFor(). "always" means it is not a setting at all. */
-var PAGES = [
-  { key:"g_perf", area:"a_group", scope:"group", label:"Performance", note:"Group headline, business units, themes, capabilities" },
-  { key:"g_found", area:"a_group", scope:"group", label:"Foundation",  note:"Purpose, aspiration, core values, who we are" },
-  { key:"g_temple", area:"a_group", scope:"group", label:"Temple",      note:"The strategy on one page. No performance figures" },
-  { key:"g_weight", area:"a_group", scope:"group", label:"Weighting",   note:"How much each business unit counts" },
-  { key:"u_perf", area:"unit", scope:"unit",  label:"Performance", note:"The unit's headline and its pillars" },
-  { key:"u_found", area:"unit", scope:"unit",  label:"Foundation",  note:"The unit's own words and Key Objectives" },
-  { key:"u_plan", area:"unit", scope:"unit",  label:"Strategy",    note:"The plan as agreed, with no reported figure on it" },
-  { key:"u_anal", area:"unit", scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
-  { key:"c_labels", area:"a_setup", scope:"setup", label:"Labels",      note:"Internal names and tenant display labels" },
-  { key:"c_access", area:"a_setup", scope:"setup", label:"Roles & access", note:"Which roles reach which kinds of page" },
-  { key:"c_bands", area:"a_setup", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
-  { key:"c_units", area:"a_setup", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
-  /* The register. Everyone the platform knows, their role, and — where a
-     database is behind it — whether they have a password yet. SMO only, at
-     Islam's direction: creating a person creates an identity. */
-  { key:"c_people", area:"a_setup", scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
-  { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
-
-  { key:"c_fns", area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
-  { key:"c_caps", area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
-  { key:"k_perf", area:"fn", scope:"fn",    label:"Performance",     note:"What this function's capabilities read" },
-  { key:"k_found", area:"fn", scope:"fn",    label:"Capability foundation", note:"What each capability is, and its key objectives" },
-  { key:"k_proj", area:"fn", scope:"fn",    label:"Projects",        note:"The plan behind each project, with no reported figure on it" },
-  { key:"k_report", area:"fn", scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
-  { key:"g_focus", area:"a_group", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
-  { key:"c_focus", area:"a_cycle", scope:"manage", label:"Focus measures",  note:"Choose what carries reward this cycle" },
-  /* Reference, not configuration - but it is a PAGE, and in this platform a
-     page is reached only by holding its key. Everyone holds it: the knowledge
-     base explains how the thing works, and an explanation nobody can open is
-     not an explanation. */
-  { key:"c_kb", area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
-  { key:"c_cycle", area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
-  { key:"u_report", area:"unit", scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
-];
+var PAGES = SMPRules.PAGES;
 
 /* Foundation and Analysis are static pages that can be put into edit. They
    hold authored content, not reported numbers, so reading is the normal state. */
@@ -193,6 +120,11 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
+/* The source-of-figures page: which unit is open, and WHO the marks are being
+   made for. All three are properties of the screen, never of the state graph
+   (§25.2) — the marks themselves live on the measures. */
+var SRCSET = { unit: null, team: null, by: null };
+
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 var PICKING = null, PICKQ = "";
 
@@ -229,63 +161,18 @@ var PICKING = null, PICKQ = "";
        what carries reward, and that is a decision the office makes, not a page
        permission.
    Each of those used to be a cell here. Each is a sentence now. */
-var AREAS = [
-  { key:"a_group",      label:"Group",
-    note:"Performance, Foundation, Temple, Weighting, Focus" },
-  { key:"a_unit_own",   label:"Own business unit",
-    note:"The units they hold a role in" },
-  { key:"a_unit_other", label:"Other business units",
-    note:"Every unit they do not" },
-  { key:"a_fn_own",     label:"Own supporting function",
-    note:"The functions they hold a role in" },
-  { key:"a_fn_other",   label:"Other supporting functions",
-    note:"Every function they do not" },
-  { key:"a_cycle",      label:"Reporting cycle",
-    note:"Open, chase and close \u00b7 Import \u00b7 Archived plans \u00b7 Focus measures" },
-  { key:"a_setup",      label:"Setup",
-    note:"Units, Companies, Functions, People, Labels, Bands, Capabilities, this page" }
-];
-var AREA_KEYS = AREAS.map(function(a){ return a.key; });
+var AREAS = SMPRules.AREAS;
+var AREA_KEYS = SMPRules.AREA_KEYS;
 function areaName(k){
   var a = AREAS.filter(function(x){ return x.key === k; })[0];
   return a ? a.label : k;
 }
+var PAGE_AREA = SMPRules.PAGE_AREA;
 
-/* Built from PAGES, never written out beside it. */
-var PAGE_AREA = {};
-PAGES.forEach(function(p){ PAGE_AREA[p.key] = p.area; });
-
-var ACCESS = {
-  /* The SMO. Everything, everywhere — this is the role the platform is
-     administered from. */
-  super:     { a_group:"edit", a_unit_own:"edit", a_unit_other:"edit",
-               a_fn_own:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
-  /* Sees the whole organisation and manages none of it. Every unit is "own" to
-     the group CEO, so the other-units column never comes up for them. */
-  gceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
-               a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
-  /* Their company's units are theirs. Whether they also see the group, or the
-     other companies, stays a property of the COMPANY (§23) — those two flags
-     can only narrow what this row allows, never widen it, so a company set to
-     keep to itself does, whatever the matrix says. */
-  cceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
-               a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
-  /* Accountable for the unit: authors its words, reports its figures. The plan
-     itself stays read-only for them — by the rule above, not by this row. */
-  owner:     { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-               a_fn_own:"view", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
-  /* The same reach, and the function work too — this is the person who
-     actually fills the foundation in and chases the reporting. */
-  custodian: { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-               a_fn_own:"edit", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
-  /* Carries a function and no unit. */
-  fnhead:    { a_group:"view", a_unit_own:"none", a_unit_other:"none",
-               a_fn_own:"edit", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
-  /* Named on a measure or a tactic. Reports their own work and reads what they
-     are being measured against. */
-  contrib:   { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-               a_fn_own:"view", a_fn_other:"none", a_cycle:"view", a_setup:"none" }
-};
+/* The tenant's own map starts as the shipped default and is replaced by
+   whatever the database holds. The DEFAULT itself is in lib/rules.js, because
+   an absent key falls back to it on both sides (§30.2). */
+var ACCESS = JSON.parse(JSON.stringify(SMPRules.ACCESS_DEFAULTS));
 
 /* Who is signed in. Changing this re-renders the whole shell against the
    matrix above, so the grid can be judged by using it rather than reading it. */
@@ -356,6 +243,133 @@ function personName(key){
   return p ? p.name : null;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   BRANDING (§39) — the tenant's own colours, derived from two of them
+
+   A brand is not seven colours. Asking somebody to supply an accent, a darker
+   accent for text, an ink to sit on the accent, a glow, a bar, a quiet ink for
+   the bar and a hover is asking them to do the work the platform should do.
+   So the page takes TWO — the accent and the dark bar — and derives the rest,
+   which is also the only way §38.4 can be guaranteed rather than remembered:
+   a brand colour that is unreadable as text is DARKENED UNTIL IT IS READABLE
+   instead of being accepted and discovered later.
+
+   Stored on GROUP, so it rides in the org row's `extra` jsonb and needs no
+   schema change — and so it is TENANT data, autosaved and the same for
+   everyone, which is exactly what a brand is and exactly what a theme is not
+   (§25.2). A person may still override it on their own screen; the top-bar
+   switches write localStorage and localStorage wins.
+   ══════════════════════════════════════════════════════════════════ */
+
+function hexRgb(h){
+  h = String(h || "").replace("#", "").trim();
+  if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+  if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+function rgbHex(c){
+  return "#" + c.map(function(v){
+    var n = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+    return n.length === 1 ? "0"+n : n;
+  }).join("").toUpperCase();
+}
+function relLum(c){
+  var s = c.map(function(v){ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2];
+}
+/* The WCAG ratio, the same number the contrast sweep measures. */
+function contrastOf(a, b){
+  var l1 = relLum(a), l2 = relLum(b);
+  return (Math.max(l1,l2) + 0.05) / (Math.min(l1,l2) + 0.05);
+}
+function mixRgb(a, b, t){
+  return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+}
+/* Black or white, whichever can actually be read on this colour. This is the
+   fix for "white on the house gold is 2.4:1" made automatic. */
+function inkFor(bg){
+  var w = [255,255,255], k = [12,17,26];
+  return contrastOf(bg, w) >= contrastOf(bg, k) ? w : k;
+}
+/* Walk a colour toward black (or toward white, on a dark ground) until it
+   clears the ratio a word needs. Returns the colour unchanged if it already
+   does — a brand's own accent is used as given wherever it is legible. */
+function readableOn(fg, bg, need){
+  need = need || 4.5;
+  var target = relLum(bg) > 0.5 ? [0,0,0] : [255,255,255];
+  for (var t = 0; t <= 1.001; t += 0.04) {
+    var c = mixRgb(fg, target, t);
+    if (contrastOf(c, bg) >= need) return c;
+  }
+  return target;
+}
+
+/* The tenant's branding. `null` anywhere means "use the shipped palette",
+   which is why an untouched tenant carries no branding at all rather than a
+   copy of the defaults — a stored copy would silently stop tracking the
+   shipped palette the moment it improved. */
+var BRAND_DEFAULT = { palette:null, font:null, accent:null, bar:null };
+function branding(){
+  if (!GROUP.branding) GROUP.branding = {};
+  var b = GROUP.branding;
+  Object.keys(BRAND_DEFAULT).forEach(function(k){
+    if (!(k in b)) b[k] = BRAND_DEFAULT[k];
+  });
+  return b;
+}
+
+/* Every token the two inputs decide, worked out here so the page, the live
+   preview and the applied result cannot disagree — one function, three
+   readers. Returns {} when the tenant has set nothing. */
+function brandTokens(){
+  var b = branding(), out = {}, rgb;
+  if (b.accent && (rgb = hexRgb(b.accent))) {
+    var onLight = [255,255,255];
+    out["--gold"] = rgbHex(rgb);
+    /* TEXT weight: the accent as a word, on the page's own surface. */
+    out["--gold-deep"] = rgbHex(readableOn(rgb, onLight, 4.5));
+    /* And the ink that sits ON the accent when it is a fill. */
+    out["--on-accent"] = rgbHex(inkFor(rgb));
+    out["--accent-glow"] = "rgba(" + rgb.map(Math.round).join(",") + ",.22)";
+  }
+  if (b.bar && (rgb = hexRgb(b.bar))) {
+    out["--panel"] = rgbHex(rgb);
+    var ink = inkFor(rgb);
+    out["--panel-ink"] = rgbHex(ink);
+    /* The bar's own quiet ink and hover — never the page's --ink-3 and
+       --surface-2, which is the mistake §38.4 caught. Quiet is the bar mixed
+       most of the way to its own ink, so it stays legible ON the bar whatever
+       colour the bar is; hover is a step away from the bar toward that ink. */
+    out["--panel-quiet"] = rgbHex(mixRgb(rgb, ink, 0.55));
+    out["--panel-hover"] = rgbHex(mixRgb(rgb, ink, 0.12));
+  }
+  return out;
+}
+
+/* What the page shows beside each input, and what refuses a save. Reported
+   rather than silently corrected: somebody typing their own brand colour is
+   entitled to know it needed darkening, and by how much. */
+function brandChecks(){
+  var b = branding(), t = brandTokens(), out = [];
+  var white = [255,255,255];
+  if (b.accent && hexRgb(b.accent)) {
+    var a = hexRgb(b.accent);
+    out.push({ what:"Accent as a fill, with its ink on top",
+               ratio:+contrastOf(a, hexRgb(t["--on-accent"])).toFixed(2), need:4.5 });
+    out.push({ what:"Accent as text on the page",
+               ratio:+contrastOf(hexRgb(t["--gold-deep"]), white).toFixed(2), need:4.5,
+               note: t["--gold-deep"].toUpperCase() !== rgbHex(a) ? "darkened to " + t["--gold-deep"] : null });
+  }
+  if (b.bar && hexRgb(b.bar)) {
+    var p = hexRgb(b.bar);
+    out.push({ what:"Navigation bar, with its own ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-ink"])).toFixed(2), need:4.5 });
+    out.push({ what:"Navigation bar, its quiet ink",
+               ratio:+contrastOf(p, hexRgb(t["--panel-quiet"])).toFixed(2), need:4.5 });
+  }
+  return out;
+}
+
 /* ── The register (§16.11, §35) ──────────────────────────────────────
    People are RETIRED, never deleted. A person carries reported history the
    same way a unit does (§30.3): snapshots attribute figures to whoever
@@ -367,7 +381,7 @@ function personName(key){
    `extra` jsonb and come back through it. Deliberate: neither has any
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
-function personActive(p){ return !!p && p.active !== false; }
+function personActive(p){ return SMPRules.personActive(p); }
 function personBy(key){
   return PEOPLE.filter(function(x){ return x.key === key; })[0] || null;
 }
@@ -988,12 +1002,76 @@ function planEditable(){
 /* Reporting reaches the unit's owner and its head; the owner is the primary
    user. The SMO can enter on anyone's behalf, and enters the group's own
    objectives and capabilities directly \u2014 nobody is asked for those. */
+/* Reporting now asks the MATRIX, not a hard-coded list of two role names.
+   Before spec 006 this was `head or custodian or SMO`, which meant the
+   contributor row of the access page could not do anything even when the SMO
+   set it to edit — a control that changes nothing is worse than no control.
+   It also means the screen and the server answer from the same function. */
 function canReport(unitKey){
-  var v = viewer();
   if (REVIEW.state !== "open") return false;
-  if (hasRole("super")) return true;
-  var r = UNIT_ROLES[unitKey];
-  return !!r && (r.head === v.key || r.custodian === v.key);
+  /* A locked cycle takes no more figures, from anyone but the SMO — the
+     server refuses them, so the screen must not offer them (spec 006 §7.1). */
+  if (CYCLE.locked && !hasRole("super")) return false;
+  return grantAt("u_report", unitKey) === "edit";
+}
+
+/* ONE ROW, for the one role that is limited to its own. Everybody else whose
+   grant reaches the unit reports all of it; a contributor reports the lines
+   they are named on. The same two functions the server uses (spec 006 §7.2) —
+   offering a field the server will refuse is the fault this is here to avoid. */
+function canReportRow(unitKey, x){
+  if (!canReport(unitKey)) return false;
+  if (!SMPRules.onlyVia(world(), viewer(), "unit", unitKey, "contrib")) return true;
+  return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
+}
+
+/* ── The source of a figure (§16.7) ────────────────────────────────
+   A key objective or a measure may carry `src` — the team that is master of
+   the number and the person in it who enters it. Where it does, the UNIT sees
+   the figure and does not type it, and the source enters it once for every
+   unit that uses it.
+
+   The note is a separate question and always the unit's: the number is the
+   source's, the performance is the unit's, and the explanation belongs to
+   whoever owns the performance. */
+function srcOf(x){ var o = x && (x.obj || x); return (o && o.src && o.src.by) ? o.src : null; }
+function srcTeamName(src){
+  if (!src) return "";
+  var f = FUNCTIONS[src.team];
+  return f ? (f.navName || f.name) : (src.team || "another team");
+}
+/* May THIS viewer type THIS figure? Three answers in one function, because a
+   screen that asks them separately will eventually answer them differently
+   from the server (§42.3). */
+function canEnterFigure(unitKey, x){
+  var src = srcOf(x);
+  if (!src) return canReportRow(unitKey, x);
+  if (hasRole("super")) return canReport(unitKey);
+  return src.by === viewer().key && REVIEW.state === "open" &&
+         !(CYCLE.locked && !hasRole("super"));
+}
+/* The note stays with the unit whatever the figure does. */
+function canEnterNote(unitKey, x){
+  var src = srcOf(x);
+  if (src && !hasRole("super") && src.by === viewer().key &&
+      grantAt("u_report", unitKey) !== "edit") return false;
+  return canReportRow(unitKey, x);
+}
+/* Every figure this person is master of, across every unit. Their reporting
+   surface is built from it, and so is the answer to "does this person have
+   one at all". */
+function mySourceRows(){
+  return SMPRules.sourcesFor(world(), viewer());
+}
+function ownsAnySource(){ return mySourceRows().length > 0; }
+/* What a unit is still waiting on from somebody else. A blocked Submit with
+   no explanation is hostile: the page has to say what is outstanding and who
+   owes it (§16.7, settled). */
+function outstandingSources(u){
+  return askedItems(u).filter(function(x){
+    var src = srcOf(x);
+    return !!src && (x.obj.actual == null || x.obj.actual === "");
+  });
 }
 
 /* What this cycle asks a unit for: its objectives, every measure carrying a
@@ -1006,12 +1084,17 @@ function reportItems(u){
   });
   u.items.forEach(function(p, pi){
     var head = pillarCode(u, pi) + " " + p.name;
+    /* `owner` travels with the row so canReportRow() can answer without
+       walking back up to the pillar. A MEASURE names nobody of its own, so it
+       carries its pillar's owner — the nearest thing the data supports until
+       a measure has an owner of its own. */
     p.measures.forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"" });
+      out.push({ id:m.id, obj:m, kind:"measure", group:head, sub:"", owner:p.owner });
     });
     p.tactics.forEach(function(t){
       out.push({ id:t.id, obj:t, kind:"tactic", group:head,
-                 sub:spanLabel(t), asked:tacticDue(t) });
+                 sub:spanLabel(t), asked:tacticDue(t),
+                 owner:t.owner, collaborators:t.collaborators });
     });
   });
   return out;
@@ -1094,26 +1177,9 @@ function viewer(){
    what the tenant would have got had the page existed when it was seeded.
    Absent means "not answered yet", not "denied": denial is a stored "none",
    and that still wins. */
-var ACCESS_DEFAULTS = JSON.parse(JSON.stringify(ACCESS));
-var STATE_RANK = { none:0, view:1, edit:2 };
-
-/* A person holds several roles, so the answer is the MOST GENEROUS of them.
-   Anything else would be surprising: a group CEO who also owns Care would lose
-   the ability to edit Care's foundation because their CEO row says view, and
-   nobody would be able to work out why. Least-privilege is the right instinct
-   for a role a person was GIVEN; it is the wrong instinct across roles the same
-   person legitimately holds at once.
-
-   Scope is separate and is NOT relaxed this way: reaches() still decides which
-   unit, so "edit" from owning Care never reaches Mobile. */
-function grantFor(roleKey, areaKey){
-  var row = ACCESS[roleKey];
-  if (row && Object.prototype.hasOwnProperty.call(row, areaKey)) return row[areaKey] || "none";
-  /* An absent key means "not answered yet", not "denied" — the map is stored
-     per tenant and only holds the keys that existed when it was written, so an
-     area added in a later version has no row (§30.2). */
-  return (ACCESS_DEFAULTS[roleKey] || {})[areaKey] || "none";
-}
+var ACCESS_DEFAULTS = SMPRules.ACCESS_DEFAULTS;
+var STATE_RANK = SMPRules.STATE_RANK;
+function grantFor(roleKey, areaKey){ return SMPRules.grantFor(world(), roleKey, areaKey); }
 
 /* ── OWN, and how it is decided ─────────────────────────────────────
    Islam: *"own is always about what they have a role in … I see this as a
@@ -1125,54 +1191,13 @@ function grantFor(roleKey, areaKey){
    OWNING are no longer the same word. A Company CEO whose company may see the
    others REACHES those units — but it does not own them, and the matrix's
    other-units column is what says whether reaching them is allowed at all. */
-function roleOwns(r, target){
-  if (r.role === "super" || r.role === "gceo") return true;
-  var at = String(r.at || "");
-  if (String(target).indexOf("fn:") === 0) return at === target;
-  if (at.indexOf("fn:") === 0) return false;      /* holds a function, owns no unit */
-  if (r.role === "cceo") {
-    var ck = at.replace(/^co:/, "");
-    if (target === "group") return false;         /* the group is nobody's own */
-    return unitsOfCompany(ck).indexOf(target) > -1;
-  }
-  return at === target;
-}
-
-/* The company's own two flags (§23) still stand, and they can only ever
-   NARROW. A company set to keep to itself does, whatever the matrix says —
-   because the matrix is about the role and those flags are about one company,
-   and the more restrictive of two true statements is the one to obey. */
-function companyAllows(r, target){
-  if (r.role !== "cceo") return true;
-  var co = COMPANIES[String(r.at || "").replace(/^co:/, "")] || {};
-  if (target === "group") return co.seeGroup !== false;
-  if (String(target).indexOf("fn:") === 0) return true;
-  if (roleOwns(r, target)) return true;
-  return !!co.seeOthers;
-}
-
-/* Which area answers, for THIS role looking at THIS thing. */
+function roleOwns(r, target){ return SMPRules.roleOwns(world(), r, target); }
+function companyAllows(r, target){ return SMPRules.companyAllows(world(), r, target); }
 function areaFor(pageKey, target, r){
-  var a = PAGE_AREA[pageKey];
-  if (a !== "unit" && a !== "fn") return a;
-  var own = roleOwns(r, target);
-  return a === "unit" ? (own ? "a_unit_own" : "a_unit_other")
-                      : (own ? "a_fn_own" : "a_fn_other");
+  return SMPRules.areaFor(PAGE_AREA[pageKey], world(), r, target);
 }
-
-/* The most generous answer across the roles somebody holds — each role
-   resolving its own OWN, so a person who owns Mobile and sits on Finance gets
-   the owner's answer for Mobile and the other-unit answer for Retail, from the
-   same two roles, without either being consulted about the wrong thing. */
 function grantAt(pageKey, target){
-  if (PAGE_AREA[pageKey] === "always") return "view";
-  var rs = personRoles(viewer()), best = "none";
-  for (var i = 0; i < rs.length; i++) {
-    if (!companyAllows(rs[i], target)) continue;
-    var g = grantFor(rs[i].role, areaFor(pageKey, target, rs[i]));
-    if (STATE_RANK[g] > STATE_RANK[best]) best = g;
-  }
-  return best;
+  return SMPRules.grantAtPage(world(), viewer(), pageKey, target);
 }
 
 /* TARGET is what the screen is currently showing — a unit key, "group", or

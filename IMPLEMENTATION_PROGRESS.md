@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.10 · **Last updated:** 2026-08-21
+**Latest version:** v3.12 · **Last updated:** 2026-08-21
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,162 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.10 — roles and access, at the size you can read *(current)*
+### v3.12 — Finance enters the numbers Finance owns
+
+Your Finance custodian, built. §16.7 in the decisions document had already
+designed this; your description matched it, so nothing was reinvented.
+
+**Setup › Source of figures.** You choose the **team and the person once**, at
+the top. Then the units are buttons in a row — with a count on each, so you can
+see where the work is left — and every figure is a single tick: *is this theirs
+or not.* Measure and target, nothing else. A figure already marked for another
+team shows that team's name instead of a tick, so you cannot overwrite it
+without noticing.
+
+The first version asked for two dropdowns on every row, one unit at a time —
+116 of them. You were right that it was impractical; this is one choice and a
+run of ticks.
+
+**Manage › Figures I report.** The custodian's own screen: every figure they are
+master of, across every unit, in one place. Finance enters revenue once per unit
+without visiting ten pages. Nobody else sees this page — it is hidden outright
+for anyone named on nothing.
+
+**On the unit's own page**, a sourced figure shows greyed with the team's name
+beside it. The unit cannot type it — the server refuses, not just the screen.
+
+**Three things worth knowing, all of them already settled in §16.7:**
+
+- **The unit still writes the note.** The number is Finance's; the performance is
+  the unit's; the explanation belongs to whoever owns the performance.
+- **A sourced figure still counts toward the unit's total**, so a unit cannot
+  submit around a missing Finance number. That looks like a defect and is not
+  one: it means the unit chases too, instead of the SMO being the only one. The
+  page names what is outstanding and which team owes it.
+- **Who is master of a figure is yours alone to set.** A unit that could nominate
+  the source of its own numbers could nominate itself.
+
+**Not sourced yet:** capability projects — deliverables, outcomes and milestones.
+Unit key objectives and key measures are what you described, and what is built.
+
+### v3.12 — the security floor
+
+Everything in the list I gave you, built.
+
+**The `1234` password is retired, not deleted.** You can still sign in with it
+— a deployment with no way in is not a deployment — but it now takes you
+straight to "choose your own password", once. If you have already changed it,
+nothing happens: the check asks whether the stored password is still the
+shipped one, and only nags if it is. **It cannot lock you out.**
+
+**A temporary password now buys nothing.** Before, someone you issued a
+password to could ignore the change screen and still open the whole tenant for
+thirty days. The server refuses until they have chosen their own.
+
+**Guessing is slowed down.** Eight wrong attempts on one person, or twenty-five
+from one address, in fifteen minutes, and it stops answering. It clears itself
+— no lock for anyone to lift. One thing to know: anyone who knows a username
+can push that account over the limit on purpose. That is the price of having a
+limit at all, and a short self-clearing window is the cheaper half of the
+trade.
+
+**Security headers, on every page.** The platform can no longer be put in a
+frame on someone else's site, cannot load anything from anywhere else, and
+cannot send anything anywhere else. One honest limit: the single-file design
+means the strictest form of this is not available yet — recorded, with what it
+would cost.
+
+**Database errors stop reaching the browser.** They named tables and columns —
+a free map for anyone probing. One plain sentence now; the real error goes to
+our log.
+
+**Sessions.** Expired ones are cleaned up. And changing your password now signs
+out every other device you were signed in on — which is the point of changing
+it.
+
+**Still open, and these need decisions rather than code:** who at Forefront can
+read the production database, backups and what happens to a client's data when
+an engagement ends, and an outside penetration test before go-live.
+
+### v3.12 — the server decides who may change what
+
+**The hole.** Saving used to check that you were signed in and nothing else,
+then write back whatever the browser sent — the whole tenant, register and
+permissions included. Anyone with a login could make themselves the SMO. The
+access page we built in v3.10 decided what a screen *showed*; it decided
+nothing about what the server *accepted*.
+
+**Closed.** The server now compares every save against what it already holds,
+works out what actually changed, and refuses anything that person's roles do
+not allow. You see nothing different — same screens, same saving.
+
+**And you get the history for free.** The comparison that decides the save is
+the one that gets written down: *Mobile · Data duplicate rate · actual · 1.4%
+→ 51% · Ashraf Laithy.* "Who moved this target" has an answer now.
+
+**Your three answers, built.** A locked cycle takes no more figures from
+anyone but you. Contributors view by default, and if you give one edit they
+can only touch the lines they are named on — and they cannot submit the unit's
+report, because that speaks for the whole unit. A tactic's quarters are part
+of the plan, so only you move them.
+
+**A refused save now says so, on the page.** Before, a failed save warned a
+console nobody has open and retried for ever — which with this change would
+have meant an edit sitting on screen as though it had landed.
+
+**One defect this found:** the platform was quietly sending a "branding" the
+database never had, on every single save. Sixty-seven tests missed it; signing
+in as a unit head and typing one number found it in a minute.
+
+**Not closed, and next:** the `1234` password, the temporary-password gap, no
+limit on password guessing, and the missing security headers.
+
+### v3.11 — a new look, and colours and fonts you can swap
+
+The Strategy-Formulation design language, ported onto SMP's own screens: 14px
+body, no serif, black-weight uppercase micro-labels, hairline cards that state
+themselves by border colour, and a light table header where SMP had a navy band
+and a zebra stripe.
+
+**Two layers.** The *language* — type, shape, weight — is one set and never
+changes. The *palette* is colours only: **Slate** and **Forefront**, each in
+light and dark. When multi-tenant lands, a client's branding will arrive as a
+palette, never a language — so they get their colours without getting a
+different product.
+
+**Branding is a Setup page** (§39). Two colours — the accent and the navigation
+bar — and the platform works out the other five, including darkening a colour
+that cannot be read as text and telling you it did. Every derived pair is
+contrast-checked as you type. It is saved with everything else, so it is what
+everyone in the tenant sees; the switches in the top bar remain your own screen.
+
+**Typeface is a third switch, for now.** Four faces are embedded in the file:
+Inter, Source Sans 3, Manrope, IBM Plex Sans. Try them on your own screens with
+your own numbers, then tell me which face belongs to which palette — at that
+point the switch folds into the palette and the ones you did not pick come out
+of the file. Embedded rather than linked because the file has to open from a
+memory stick and still look like itself.
+
+**Zero contrast failures across all four colour combinations.** Light mode had
+been carrying 61 known failures since v3.0; the new palette clears them rather
+than fixing them one at a time.
+
+**The accent budget** (§41). The retheme gave a solid accent fill to five
+things at once, and one solid fill is a mark where nine is a colour scheme —
+it is a strategy platform, it should be quietly coloured. The rail's selected
+direction went back to a grey ground with an accent EDGE, the navigation went
+back to the underline, and the pips stayed solid because a 20px pip is a mark,
+not a slab. The **open Units / Functions fold** was the last one left: with the
+navigation quiet again, the menu you had opened was louder than the page you
+were on. It is accent words with no fill now — an open fold is a heading over
+the list it just revealed, and a heading does not need a box.
+
+The file is 994 KB with all four typefaces inside, up from 792 KB.
+
+**Merged in v3.12.** Some deeper reporting and config surfaces still carry old
+shapes. The login page is untouched — it has its own design you approved.
+
+### v3.10 — roles and access, at the size you can read
 
 The page you called exhausting was 25 pages × 7 roles, three buttons a cell —
 **525 controls on one screen**. It is **seven roles down and seven kinds of page
@@ -696,7 +851,7 @@ taking it wholesale would have deleted four shipped features and everything from
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
 | `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.10.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.12.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

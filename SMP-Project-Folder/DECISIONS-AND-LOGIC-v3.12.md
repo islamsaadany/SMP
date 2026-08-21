@@ -1553,6 +1553,81 @@ reported, exactly as it cannot while a unit has not.
 error in the cycle, and it makes the platform's answer to *where did this number
 come from* a real one rather than a convention.
 
+#### BUILT in v3.12 (2026-08-21) — what the build settled
+
+Islam brought it back in his own words: a *"Finance Strategy custodian … more
+of the Finance SMO custodian"* who chooses which of the units' numbers he is
+master of and enters them when the cycle opens — *"the finance enters and the
+unit has no permission to change."* That is this section, and the design above
+stands unchanged. Five things the build had to decide:
+
+**The team is STORED, not read off the person.** §33's instinct is to read a
+role from what it is attached to, and here that fails: the person may sit with
+the SMO rather than in the function whose number it is — which is exactly
+Islam's Finance SMO custodian, who is not Finance's own custodian. The
+attribution has to name the number's HOME, not the reporter's desk. So
+`row.src = { team, by }`.
+
+**It is a rule, not a matrix cell** (§37). A source's reach is defined entirely
+by what it is named on: it crosses units without owning them, and reaches
+nothing it is not named on. There is no column to set, because every cell would
+hold the same answer.
+
+**The figure and the note had to be split in the authoriser.** Until now a
+reported row moved as one thing. `actual` and `progress` are the source's;
+`note` is the unit's, always. Splitting them is what makes §16.7's first
+settled question enforceable rather than a convention.
+
+**Who is master of a figure is SETUP, not plan and not report.** It is
+classified separately so a refusal says *"Setup is the SMO's"* rather than
+*"a plan is corrected by the SMO"* — both true, but only one of them sends the
+person to the right screen.
+
+**A half-set row is KEPT.** The first build deleted `src` whenever one end was
+empty, which made the control impossible to complete: choosing a team dropped
+it because no person was set, and choosing a person dropped it because the team
+had just been dropped. **A control that cannot be completed is broken**, and it
+was only visible by driving the real page. A half-set row is now stored, shown
+as *Needs both*, and does nothing until both ends are set.
+
+Two screens: **Setup › Source of figures** (the SMO assigns, one unit at a
+time, like Focus measures) and **Manage › Figures I report** (the source's own
+surface, every unit at once — the point is that Finance enters revenue once
+per unit in ONE place rather than visiting ten pages). The second is hidden
+outright for anybody named on nothing: a menu entry that opens an empty page is
+worse than no entry.
+
+**Scope, stated:** unit key objectives and unit key measures. Capability
+projects — deliverables, outcomes and milestones — are not sourced yet.
+
+#### RESHAPED the same day: one decision, then ticks
+
+Islam, on seeing it: *"that's a huge setup to do and not practical … he just
+needs the measure and target so he can tick if he owns this or not."* He was
+right, and the number says why: **116 figures across ten units**, each asking
+for a team AND a person before the feature did anything for anybody.
+
+What the data also said, measured rather than assumed: only ONE measure name
+repeats across units, so "set it once by name" would have saved nothing —
+but **27 of the 116 are money** (B EGP, M EGP, EGP), spread across all ten
+units. The thing that separates a team's number from the unit's is not its
+name; it is what it is measured in. Which means the work is one selection and
+a run of ticks, not 116 decisions.
+
+So: **WHO is chosen once at the top**, and every row below is a single mark —
+the same shape as Focus measures, which asks the same kind of question (A13).
+The units are **buttons in a row rather than a dropdown**, with their counts on
+them, so where the work is left is visible without opening anything. And the
+row shows the measure and its target and nothing else: the direction, the
+compile rule and the pillar are the plan's business, not the custodian's.
+
+Three states per row, not two: unclaimed, mine, or **another team's** — the
+third shown as that team's name rather than a tick that could be overwritten
+without noticing. Switching the team at the top is how you release it.
+
+This also retires the half-set problem that the first build had: a mark is
+only offered once both ends are set, and it writes both at once.
+
 ### 16.8 A help box — self-service for the questions the SMO gets asked
 
 **The idea.** A small chat box in the platform answering the questions people
@@ -1691,6 +1766,62 @@ versions — they are the organisation, not the plan. Pillars, measures and tact
 do not; they are the plan. Key Objectives sit awkwardly between the two and will
 need a decision: carried forward by default and edited, or written fresh each
 time.
+
+### 16.14 The Strategy Copilot inside SMP — one surface, two products
+
+*(Islam, 2026-08-21, parked by him: "I want to keep it with you and I will come
+back to it later." Recorded because the one question he asked outright has an
+answer, and answering it later from memory is how answers drift.)*
+
+**What he wants.** SMP's users able to use the Strategy Copilot to refine their
+plan, talk through challenges, and search what was written and reviewed before —
+eventually with a plan built in the Copilot arriving in SMP's planning cycle as
+a submission.
+
+**His question: the same repository, or two?** **Two, and one surface.** The
+user never sees two products: they are on their plan, they open a Copilot panel
+beside it, and it already knows which unit and which cycle they are looking at.
+But SMP holds the client's authoritative numbers and answers only to its own
+database, while the Copilot talks to a model provider. One repository means one
+deploy, one dependency tree and one blast radius — a Copilot change could take
+down the system of record, and every Copilot dependency becomes a dependency of
+the thing holding a client's strategy.
+
+**Where the line sits, in one sentence: the Copilot may PROPOSE, SMP DECIDES.**
+The panel is the Copilot's, rendered inside SMP's page, and every request it
+makes carries the SMP session — so it can only see what that signed-in person
+can already see. It reads plans and past reviews, and writes a DRAFT. A draft
+becomes a plan only when a person submits it through SMP's own cycle, which is
+where §42's authorisation and change log already are.
+
+**Two consequences, so they are not surprises later.** The panel exists only in
+the hosted platform: the single-file handover has no server to talk to, so
+there is no Copilot there and it simply does not appear. And **the read scope is
+a security question, not an AI one** — "the Copilot can search previous plans"
+means a model provider sees a client's strategy. It belongs with §43's open
+items, not after them.
+
+### 16.13 The assignment memory — Forefront's own, not a tenant's
+
+*(Islam, 2026-08-21. Captured on arrival, per rule A8. He has previous work on
+this to share, which comes in before anything is designed.)*
+
+**The idea.** A conversational bot that asks Forefront's consultants about the
+assignments they worked on — what was achieved, what was learned, what went
+wrong — and turns those answers into a **standardised corporate memory**. The
+purpose is not the record: it is that the next assignment starts from the last
+one, and that Forefront's position is argued from what it has actually done.
+
+**The one structural thing already clear**, and it is the reason this is
+recorded here rather than in a tenant's backlog: **this lives ABOVE the
+tenants.** A client's tenant holds that client's strategy and nothing else
+(§21, §36). Forefront's memory of an assignment is Forefront's, spans clients,
+and must never be reachable from inside a tenant. It is a different product on
+the same shelf, exactly as the Copilot is (§16.14).
+
+**Not designed.** Waiting on the previous efforts Islam is bringing, so the
+standard it produces is built on what has already been tried rather than
+invented beside it.
 
 ### 16.12 Later
 
@@ -4319,3 +4450,779 @@ in" — the one thing it must never be mistaken for.
   **49 grants** — seven roles by seven areas.
 - Live against that database through the real gate at `/raya-trade`: 49 cells,
   and changing one moved the navigation on the next paint.
+
+---
+
+## 38 · A design language, and palettes under it — v3.11
+
+Islam sent back `mock-sfstyle.html` — the Strategy-Formulation option drawn on
+SMP's own screens — and asked for *"a theme adjustment for the overall design …
+after choosing the theme we can identify the colors and shades of the palette
+colors used so we can amend upon the company branding."* On branding he was
+specific: *"when we do the multitenant we have the ability to adjust the
+branding of the platform based on the company who is using the platform."*
+
+### 38.1 The measurement that shaped the answer
+
+Colour in SMP was already tokenised — that is what made dark mode possible in
+§25. The type scale and the shape were not: **287 literal font-sizes and 50
+literal radii** across about 1,040 rules. Which decided the scope, because the
+reference's character is not the indigo. It is the 14px body with no serif, the
+`font-black uppercase tracking-widest` micro-labels, hairline cards that state
+themselves by border colour, and a LIGHT table header where SMP had a navy band
+and a zebra stripe. A palette swap would have produced SMP in different colours
+and nothing more.
+
+### 38.2 Two layers, and the line between them is the point
+
+**LAYER 1 — the LANGUAGE.** Type scale, shape, weight. One set, never themed,
+never per tenant.
+
+**LAYER 2 — the PALETTE.** Colours and nothing else. Four blocks: two palettes
+× light and dark.
+
+Islam chose one language with several palettes over two languages side by side,
+and the reason is maintenance: two languages means every page built from here is
+drawn twice and tested twice, and they drift the first time one is fixed and the
+other is not.
+
+The line is drawn exactly there because of §36. **A tenant's branding will
+supply a PALETTE, never a language** — a client can be given their colours
+without being given a different product. Nothing was scaffolded for it; the
+seam is simply in the right place.
+
+### 38.3 Nothing was renamed, because the names were never about colour
+
+A thousand rules read the colour tokens. Renaming them would have meant editing
+every one of those rules to change none of their meaning. Instead three slots
+started carrying a JOB rather than a colour:
+
+| token | was | is now, in slate |
+|---|---|---|
+| `--panel` | navy | slate-900 — the dark bar |
+| `--gold`  | gold | indigo-600 — **the accent** |
+| `--stone` | navy | slate-700 — neutral-strong |
+
+Which is why nothing had to move: **"gold" was never really gold, it was
+whatever the accent happened to be.** The rename would have been a rename of
+the comment, not of the code.
+
+### 38.4 A colour that works as a FILL usually fails as TYPE
+
+The first contrast sweep across all four combinations returned 15 failures, and
+every one was the same mistake: one token doing both jobs. `--good` at #059669
+is a fine dot and a fine bar, and 3.77:1 as a figure. White on the house gold is
+**2.4:1**.
+
+So the palette gained a second rank — `--good-tx`, `--attn-tx`, `--warn-tx`,
+`--bad-tx`, and `--on-accent` for text sitting on the accent fill. The bare
+token stays the fill; the -tx pair is the same meaning one or two steps darker,
+for words. **Getting this wrong is not a wrong shade, it is a word nobody can
+read.**
+
+Two more for the same reason: the dark bar took `--panel-quiet` and
+`--panel-hover` rather than borrowing `--ink-3` and `--surface-2`. Those are
+PAGE colours, and the nav bar is not the page — `--ink-3` on it was a dark grey
+on near-black at about 2.5:1, and `--surface-2` as a hover painted a near-white
+block onto a dark bar. **A surface with its own background needs its own ink.**
+
+### 38.5 The dark variant had to be designed, not copied
+
+Strategy-Formulation has no dark palette anywhere, so slate-dark is SMP's own:
+a #0B1120 ground, #131C2E surfaces, indigo-400 accents, and the four scoring
+colours lifted to their 300/400 shades so they still separate on a dark ground.
+Islam chose this over dropping dark, and it was the right call — dark already
+worked and taking it away would have been a visible regression.
+
+### 38.6 An !important is a decision that has to be revisited when the decision changes
+
+The navy table header was enforced with `!important` in `arrange.css`, because
+several stylesheets set a background on `th` and one of them had to win. Changing
+`_shared.css` therefore did nothing at all — the headers stayed navy through the
+whole first pass and only the screenshots showed it. The rule is now the light
+header, still `!important`, still for the same reason. **A rule written to win
+an argument keeps winning it after the argument has changed.**
+
+### 38.7 The typeface, and why four rather than one
+
+Islam: *"Do we have an option for the fonts used as well?"* — then, when I asked
+him to choose one: *"I don't understand why you want to choose from them. Why
+not to have four."*
+
+He was right, and the answer to why I had asked was simply that he had picked
+"embed one family" earlier — I was following an instruction, not defending a
+position. Worth recording because the reasoning that came out of it is the
+useful part.
+
+**The constraint that shapes every font decision here** is A5: the built file
+has to open from a memory stick and look like itself. So a linked webfont is
+out — it breaks the offline handover, and it puts a request to a third party on
+every load of a file holding a client's strategy. A face either travels inside
+the file or it does not exist.
+
+**The cost turned out to be an order of magnitude smaller than I first quoted.**
+I estimated 60–200 KB per family. Latin subsets of VARIABLE faces are 24–48 KB,
+because one file covers every weight and the non-latin ranges are dropped. Four
+faces are 148 KB, and the built file went from 792 KB to 994 KB. All four are
+SIL OFL 1.1, which permits embedding — most foundry fonts do not, and that is
+the constraint that actually narrows the field.
+
+**The real cost of four was never bytes. It was verification.** Every face has
+different metrics, so a column that fits in one may wrap in another. One face is
+6 width checks; five faces is 30. That is the honest argument for settling on
+fewer, and it is the reason this axis is temporary.
+
+**The shape question underneath it.** Islam had already said the font should
+live WITH the palette. If that is true then the font is not a separate choice at
+all — it is part of what "Forefront" and "Slate" ARE, the same way the navy is,
+and four fonts would mean four palettes rather than a font menu. Two shapes
+follow:
+
+- **A** — the font rides with the palette. One switch. A client's branding
+  later arrives as one package: their colours and their face together, which is
+  how a brand actually works.
+- **B** — the font is its own axis. Three switches, any combination, 30 checks.
+
+Islam: *"Good approach B first."* Which is the right sequencing: **B is how you
+DECIDE, A is how you SHIP.** Judging a typeface from a specimen sheet is
+guessing; judging it on your own screen with your own numbers in it is not. Once
+each palette has a face, the axis collapses into the palette and the faces
+nobody picked leave the file.
+
+**Absence is the system stack.** There is no `[data-font="system"]` block,
+because there is nothing for it to say — `apply()` REMOVES the attribute, and
+`--sans` falls back to `--sys-sans`. The same reasoning §25.2 used for the
+theme before Auto was retired.
+
+Two small things: every face names the system stack after it, so a face that
+fails to decode degrades to the system font rather than to a default serif; and
+the control renders its own name IN the face it names, so the press is not the
+only way to find out what it looks like.
+
+The MONO stack stays a system stack. It carries person keys and unit codes — a
+dozen short strings — and a second embedded family for those would be 40 KB for
+nothing.
+
+### 38.8 Verified
+
+- **Zero contrast failures across all four combinations** — slate and forefront,
+  light and dark. Light mode had carried 61 known failures since §25; those are
+  gone with the palette rather than fixed one at a time.
+- 31 viewers × every page, zero console errors; byte-identical rebuild.
+- Width sweep 1920→900 on the densest page (a unit's Plan, rail plus two wide
+  tables): no horizontal page scroll at any width.
+- All four palette/theme pairs load from storage, paint the right attributes and
+  survive a reload.
+- **Five faces × six widths on the densest page** (a unit's Plan: the rail plus
+  the measures and tactics tables) — no horizontal page scroll in any of the 30.
+- Each embedded face actually becomes the body font rather than silently
+  falling back; "System" removes the attribute; the choice survives a reload.
+- The built file is 994 KB with all four faces inside it, up from 792 KB.
+
+
+---
+
+## 39 · Branding — the tenant's own colours
+
+Islam: *"where is the branding adjustment section?"* — and there wasn't one.
+§38 built the palette LAYER and stopped there, on the reading that branding was
+the multi-tenant thing. The seam was right; the missing part was a place to
+type a colour, and he was right to look for it.
+
+### 39.1 Branding is tenant data. A theme is not.
+
+This is the whole design, and it is the inverse of §25.2. A theme must NEVER go
+in the state graph, because it autosaves and one person choosing dark would
+turn the platform dark for the entire company. Branding is the opposite case
+for exactly the same reason: a client's colours have to be the same for
+everyone in that tenant, so they belong in the graph and nowhere else.
+
+So the precedence is three lines:
+
+    a person's own choice   (localStorage)      wins
+    the tenant's branding   (the state graph)   otherwise
+    the shipped palette                         otherwise
+
+Which is why `chosenPalette()` returns **null** rather than a default when
+nobody has pressed anything: only an actual choice may outrank the tenant's
+brand, and "whatever was first in the list" is not a choice. Getting that
+backwards would have meant a tenant's branding never applied to anybody,
+because everybody already had a default.
+
+Islam chose brand-as-default-with-personal-override. Light and dark stay
+personal regardless — that is about the room somebody is sitting in, not about
+the brand.
+
+### 39.2 A brand is two colours, not seven
+
+Asking for an accent, a darker accent for text, an ink to sit on the accent, a
+glow, a bar, a quiet ink for the bar and a hover is asking somebody to do the
+work the platform should do. The page takes **the accent and the dark bar** and
+derives the other five.
+
+That is also the only way §38.4 can be *guaranteed* rather than remembered. A
+brand colour that is unreadable as text is **darkened until it is readable**,
+by walking it toward black (or toward white on a dark ground) until it clears
+4.5:1 — and the page says so: *"darkened to #896E34"*. The house gold makes the
+point on its own: as a fill it gets ink `#0C111A` for **7.89:1** where white
+would have given 2.4:1, and as a word it becomes `#896E34` for 4.83:1.
+
+The bar's quiet ink is derived the same way — the bar mixed 55% toward its own
+ink — so it is legible ON the bar whatever colour the bar is, which is the
+§38.4 mistake made impossible instead of merely fixed.
+
+### 39.3 Reported, never silently corrected
+
+Every derived pair is contrast-checked and shown, with the ratio and a verdict,
+every time a colour changes. Somebody typing their own brand colour is entitled
+to know it needed darkening and by how much. A half-typed hex is refused rather
+than stored — storing it would blank the colour and look like the platform had
+lost it.
+
+### 39.4 No schema change
+
+`GROUP.branding` rides in the org row's `extra` jsonb, exactly as `phone` and
+`active` do for people (§35.7). Anything on the group that is not an org column
+and not a tabled key lands there already.
+
+### 39.5 Verified
+
+- Two colours derive seven; **every derived pair clears 4.5:1** for the house
+  navy and gold, including the two that fail if taken naively.
+- It paints: the accent reaches `--gold` and the nav bar takes the brand colour
+  live, on the same repaint.
+- **A personal choice still outranks it**, and with no personal choice the
+  tenant's brand decides — both directions checked.
+- Clearing the brand removes the inline properties rather than leaving them
+  behind, so the shipped palette comes back.
+- Round trip against Postgres: branding survives, lands in `org.extra`, and
+  `write(read())` is still a fixed point with it set.
+- 31 viewers × every page, zero console errors.
+
+
+---
+
+## 40 · The retheme's second pass — what a one-page sweep missed
+
+Islam, with a screenshot of the rail: *"it's working but some areas had the
+dark blue navigation color that was turned to transparent now. we need to check
+them … check the rest."*
+
+### 40.1 The claim that was too big
+
+§38 reported **zero contrast failures across all four combinations**, and that
+was true of what it measured — the group's front page. Swept across **19 pages**
+instead of one, the same check returned **316**. The measurement was honest;
+the sentence around it was not, and "zero failures" without naming the surface
+it covered is the kind of claim that stops anyone looking again.
+
+The sweep now walks every destination — five group tabs, a unit's Performance
+and Strategy, eight Setup pages and four Manage pages — in both palettes and
+both themes.
+
+### 40.2 What Islam actually spotted, and the rule behind it
+
+`.rail .rhead` was navy; the retheme made it the card's own surface, which left
+it reading as nothing at all. **A header is a label for what sits under it, and
+it needs a ground of its own to be one — whether or not that ground is dark.**
+It takes the same quiet header the tables now use.
+
+Auditing the rest turned up the worse half of the same mistake: `thead th` and
+`.phead` went light while `.grouphead`, `.gcard .card-head` and `.capline`
+stayed navy, so **the product was carrying both header treatments at once** —
+exactly what the rule those files already stated exists to prevent. A retheme
+that converts some members of a family and not the others is worse than one
+that converts none, because the survivors read as mistakes rather than as a
+style.
+
+### 40.3 Three inks on grounds they were never chosen for
+
+All of the remaining 316 were one shape of error, and it is §38.4 again:
+
+- **`--ink-3` cleared 4.5:1 on white and failed at 4.34 on `--surface-2`** —
+  which is where most of it actually is, in card heads, table heads and section
+  grounds. **A token checked against the most generous background it ever meets
+  is a token checked against the one case that was never in doubt.** Both quiet
+  inks are set against the quietest ground they sit on now.
+- **`--none` was 2.56:1** as text and is used as text in a dozen places.
+- **`--panel` used as INK on the accent fill** (the open nav fold), and
+  **`--gold` used as ink on the panel** (the Temple's pillar labels, at 2.84:1).
+  A colour chosen to work as a fill on the page is not a colour that works as a
+  word on the bar; that is what `--on-accent` and `--panel-accent` are for, and
+  three rules had been reaching past them.
+
+One was wrong in meaning as well as in contrast: the access matrix's *edit*
+state sat on `--attn-bg`, the WARNING tint. "May edit" is not a warning. It is
+on the accent tint now.
+
+### 40.4 Verified
+
+- **316 → 0** across 19 pages × 2 palettes × 2 themes.
+- Only three surfaces still carry the dark panel colour, and all three are
+  meant to: the prototype banner, the navigation bar, and the Temple — which is
+  a drawing, not a component.
+- 31 viewers × every page, zero console errors; byte-identical rebuild.
+
+
+---
+
+## 41 · The accent budget
+
+Islam, comparing the old rail with the new one: *"this view made better sense …
+the grey shade on the selected direction is more subtle rather than what you
+made … it's a strategy platform, needs to be subtly coloured."*
+
+### 41.1 It was not one rule, it was five
+
+The retheme gave a solid accent fill to five things at once, and three of them
+had been navy or subtle:
+
+| | was | became |
+|---|---|---|
+| the rail's selected pillar | grey ground, accent edge | solid accent |
+| the navigation's selected unit | accent underline | solid accent pill |
+| the current quarter pip | navy | solid accent |
+| import step numbers | navy | solid accent |
+| the capability band | navy | solid accent |
+
+Which is why it read loud without any one of them being obviously wrong. **The
+budget is the thing to watch, not the rule.** A single solid fill is a mark; a
+product with nine of them has a colour scheme instead of an accent.
+
+The reason it happened is worth keeping too: the reference marks its current
+place with a filled pill and a pulsing dot, and I carried that through
+consistently — the rail matching the nav so "which pillar am I on" reads the
+same way "which unit am I on" does. **The consistency was real; the volume was
+wrong**, and consistency at the wrong volume is still wrong.
+
+### 41.2 What was chosen, from a comparison rather than from a description
+
+Four rail treatments, three navigation treatments and two pip treatments drawn
+in both palettes, on the real components, before anything was implemented.
+Islam took **B, C, A**:
+
+- **Rail: a quiet ground with an accent edge.** The edge says which row without
+  taking the row's own colours away — the score in particular keeps its scoring
+  colour instead of being swallowed by the fill, which on a page about scores
+  is the whole point.
+- **Navigation: the underline, as it was.** The 3px line is a transparent
+  border reserved on every button, so selecting one cannot move the row by
+  three pixels. The pill's radius went with its fill: a rounded pill carrying a
+  straight underline reads as neither.
+- **Pips: solid, unchanged.** A 20px pip is a mark, not a slab. Keeping this
+  one solid is what makes the other two read as deliberate rather than as a
+  product with no accent at all.
+
+The accent now does four jobs across the product instead of nine.
+
+**The rail and the navigation no longer match each other**, which was
+deliberate before and is given up on purpose. That was the price of the quieter
+register and it is worth paying.
+
+### 41.3 What went with it
+
+The pulsing dot, and with it `@keyframes sf-pulse` and its reduced-motion
+guard — nothing else referenced them (§24: delete an element and delete its CSS
+with it).
+
+### 41.4 The last item on the budget: the open fold
+
+The rail, the navigation and the pips were the five; the **open navigation
+fold** was the sixth and was not touched, because it was gold before the
+retheme rather than because of it. With the navigation back to an underline
+that became the visible fault: the opened MENU was louder than the page you
+were ON, and the accent was being spent twice within two inches of itself.
+
+Drawn again rather than described — five treatments, the same moment in each
+(`mockups/2026-08-21_fold-accent_PENDING.html`): A the solid pill as shipped,
+B the closed shape kept with the accent on the caret alone, C an accent edge
+instead of a fill, D accent words with no fill, E the rail's answer borrowed
+literally. **Chosen: D.**
+
+The recommendation had been C, and the note against D was recorded before the
+choice and stands: the open state loses the border the closed state has, which
+is the wrong way round if you read the border as "this is a control". Islam
+took D anyway, and the reading that makes it right is a different one — an
+open fold is not a button any more, it is a **heading over the list it just
+revealed**, and a heading does not need a box. What the choice buys is that
+the underlined page is now unambiguously the loudest thing on the bar, which
+was the whole point of the budget.
+
+One rule fell out of implementing it. **`.open` beats `:hover` on source order
+alone** — both are `0,3,0` — so replacing the open fill without adding an open
+hover would have left the fold silent under the mouse. The `.open:hover` rule
+is there for that reason, not for decoration.
+
+### 41.6 The palette switch is removed, and the default was wrong
+
+*(Islam, 2026-08-21: "I don't need to have slate, the branding covers this from
+inside.")*
+
+Which colours the product wears is the TENANT's decision, set once on Setup ›
+Branding — not a per-screen preference that leaves two people in the same
+organisation looking at different products. The switch is gone. Light and dark
+stay each viewer's own, because those are about the room they are sitting in.
+
+Removing it exposed a defect the switch had been hiding: **`PALETTES[0]` was
+`slate`, and the bare `:root` block held slate's values** — so a fresh
+deployment opened in a palette that is not the house one. Nobody noticed,
+because everybody pressed the button. **What paints when nothing has decided
+must be what the product actually is**, so Forefront is `PALETTES[0]` and the
+bare `:root` now.
+
+Three smaller consequences. The stored `smp.palette` key is no longer read AND
+is cleared on load — a value left in a browser from before would otherwise pin
+that person to a palette with no control left to change it back. The dead
+helpers went with the control (§24). And the contrast sweep now selects a
+palette the way branding does, `THEME.setBrand({palette})`, rather than through
+a key nothing reads any more — otherwise it would have measured Forefront
+twice and called it four combinations.
+
+Slate stays in the stylesheet as the second palette the two-layer system proves
+itself against, and as what a tenant's branding will plug into (§36).
+
+### 41.7 The closed fold: a soft ghost
+
+Islam, on the closed state: *"they look poor."* He was right, and the reason is
+typographic rather than chromatic: the labels were **11px uppercase
+letterspaced in a bordered capsule**, sitting beside 13.5px sentence-case tabs.
+A different species. Four treatments were drawn
+(`mockups/2026-08-21_closed-fold_PENDING.html`); **D was chosen** — a quiet
+fill, no border, the row's own sentence case.
+
+Why not B, which was the recommendation and dropped the container entirely: a
+fold is **a group of things rather than a page**, and the container is what
+says so. D keeps that and drops the shouting.
+
+### 41.8 The folds become one control
+
+The soft ghost (§41.7) was chosen from four treatments and never reached
+Islam's screen — `main` was four versions behind — so when he looked at the
+deployed bar he was looking at the capsule it replaced. Six were drawn again,
+closed AND open, and **4 was chosen: one shared container.**
+
+Both folds now sit in a single segmented box divided by a hairline. Three
+things it buys. The bar carries **one box instead of two**, on a row that has
+no other box. The shared container **says outright that Units and Functions
+are the same kind of thing**, which two separate capsules only implied. And
+the two folds **stop moving**: they used to be separated by whichever list was
+open, so the control you had just pressed changed position every time you
+pressed it, and Functions sat somewhere different depending on Units. The
+opened list now follows both of them.
+
+Open is **the segment lit, not the word coloured**. §41.4's accent words had
+nowhere to sit inside a filled container — a coloured word on a filled ground
+reads as the disabled segment rather than the open one — and lighting the
+segment is what a segmented control already means. The accent budget is
+untouched: this spends a lighter wash, not the accent.
+
+One implementation note worth keeping: the divider between the segments is an
+**inset shadow, not a border**, because a border would add a pixel to the
+segment's width and shift the one beside it.
+
+### 41.9 The phantom in every mockup
+
+Islam: *"why is the sample you show showing a unit while closed, we already
+removed this long ago."*
+
+He was right. `.foldhere` — the "· Mobile" beside the closed Units fold — was
+removed from the markup in an earlier version (the reversal is recorded in
+`unitTabs()`'s own comment) and **its CSS was left behind**. Every fold mockup
+in this round was drawn by reading that stylesheet, so every option put in
+front of him contained an element the product does not have.
+
+The rule §24 already states — delete an element and delete its CSS with it —
+exists precisely so that leftover CSS cannot later be mistaken for the product.
+This is what happens when it is not followed. The rule is now deleted.
+
+**And the lesson underneath it: a mockup drawn from the STYLESHEET is drawn
+from what the product could look like, not from what it does.** Draw from the
+rendered page.
+
+### 41.5 Verified
+
+- Contrast: **0 failures** across 4 combinations × 20 pages and states. The
+  sweep gained a state rather than a page: **an open fold is not reachable by
+  navigating to it**, so it was never being measured — `scan("group/units-fold-open")`
+  runs while it is open. A treatment nothing measures is a treatment nothing
+  checks.
+- 31 viewers × every page, zero console errors; byte-identical rebuild.
+
+---
+
+## 42 · The server decides who may change what
+
+*(Spec 006. The first item of the security work Islam asked for, and the only
+one that was exploitable by a real user rather than a hypothetical one.)*
+
+### 42.1 What was wrong
+
+`POST /api/state` checked that you were signed in and nothing else. It then
+truncated all thirty tables and wrote back whatever arrived — including
+`people`, `unit_roles` and `access_grants`.
+
+So the lowest-privilege person in the tenant could post a state making
+themselves the SMO, and on their next request they were: issuing passwords,
+resetting anyone's, reading and changing everything. No flaw was needed. The
+browser already builds and sends that object; one field had to be edited on
+its way out.
+
+**Everything §37 built decided what a screen OFFERED. Nothing decided what the
+server ACCEPTED.** The forty-nine cells were a suggestion.
+
+### 42.2 The two lines that carry the design
+
+**The world is the STORED state, never the incoming one.** Roles, the access
+map, unit ownership and the company flags are all read from what the database
+already holds. Authorise against the incoming state and a save can grant
+itself the role that authorises it, in the same request. It is one line in
+`authorize()` — `const w = R.worldOf(stored)` — and it is the whole security
+property.
+
+**An unrecognised change is the SMO's.** Every classifier ends in a
+fall-through that lands on `unknown`. A field the platform gains in a later
+version is guarded on the day it is added rather than the day somebody
+remembers to guard it. It fails CLOSED, and the cost of failing closed is a
+refusal the SMO can always make instead — never a silent hole. That bucket
+caught a real defect within an hour (§42.5).
+
+### 42.3 One copy of the rules, run on both sides
+
+The browser already answered "may this person edit this?" to decide what to
+draw. The server needed the same answer to decide what to accept. Two copies
+would drift, and the drift is silent in the worst way: **a screen that offers
+an edit the server then refuses.**
+
+So `lib/rules.js` holds the roles, the areas, the shipped access defaults and
+every pure function that reads them — `personRoles`, `roleOwns`,
+`companyAllows`, `areaFor`, `grantIn`, `namedOn`, `onlyVia`. `build.py` inlines
+it into the single file; `api/state.js` requires it; `scripts/extract-state.js`
+runs it before the sources so the seed is generated from the same list.
+`config-data.js` keeps every name it had and aliases them, so the forty call
+sites did not move.
+
+This is §33's pattern — one fact, two editing surfaces, cannot disagree —
+applied to authorisation. It was not optional: the moment the contributor
+default moved to `view`, the two copies already disagreed.
+
+### 42.4 The diff IS the change log
+
+The comparison that authorises the save is the comparison that gets written
+down, so the log costs nothing extra. `change_log` (migration 010) sits
+outside the state graph beside `credentials` and `sessions` — **a log a save
+can erase is not a log** — and carries, for each figure that actually moved,
+its row, its name, its field, and its before and after.
+
+    mobhead | unitReporting | mobile | reported figures
+             {"id":"mobile-P1-M1","name":"Data duplicate rate",
+              "field":"actual","from":"1.4%","to":"51%"}
+
+Whole-area changes (the register, the matrix, the cycle) carry no values — a
+diff of the people array is not a sentence anybody reads — so for those the
+WHAT is the record. The itemised list is capped at 200 rows: a plan import
+moves thousands at once, and a log entry nobody can read is not a record.
+
+### 42.5 What the browser found that seventy-seven tests did not
+
+`branding()` created `GROUP.branding = {palette:null, font:null, accent:null,
+bar:null}` the first time anything asked, while an untouched tenant's database
+held no branding at all. The two could never become equal again, so **every
+save carried a group change nobody had made** — and once the server started
+checking, every non-SMO save was refused for ever, with a message naming
+nothing useful.
+
+Sixty-seven unit tests and ten end-to-end API tests passed while this was
+true, because every one of them built its payload from the seed rather than
+from a running browser. It took signing in as a unit head and typing a number.
+
+**A reader that mutates what it reads will eventually be caught by whoever
+compares before and after.** The fix follows the rule `weight` already
+established: `sync.js` drops an all-null branding on the way out — what is not
+the tenant's own is not sent. And the unrecognised-change refusal now NAMES
+the fields that moved, because a refusal nobody can diagnose is a bug report
+addressed to nobody.
+
+### 42.6 A refused save says so, where the save is
+
+Before this, a failed save logged a warning to a console nobody has open and
+retried for ever. With authorisation that becomes the worst failure the
+feature could have: a change made, refused, and still on screen as though it
+had landed. The banner carries the server's own sentence, never a paraphrase,
+and the refused payload is remembered so the identical body is not posted
+again — remembered separately from `lastSaved`, which would claim it had
+landed. This is §32's rule from the Labels page, one surface further in.
+
+### 42.7 Islam's three answers
+
+- **A locked cycle refuses reporting**, from everyone but the SMO. Both the
+  screen and the server check it, or the page invites a figure the server will
+  turn away.
+- **Contributors view; if allowed, their own lines only.** The default moves
+  to `view` (migration 011, only where the tenant still holds the old default —
+  *a migration that overwrites a setting somebody made is a migration lying
+  about being a default*). "Their lines only" is a rule with teeth, so a stored
+  `edit` still reaches nobody else's rows. Submitting, and the unit's note on
+  the cycle, speak for the whole unit, so a contributor does neither.
+- **A tactic's quarters are plan.** If a unit can move its own ticks, a tactic
+  due in Q2 that did not happen is dragged to Q4 and the unit is no longer
+  late. The record of what was promised stops being a record.
+
+`canReport()` also stopped being a hard-coded `head or custodian or SMO` and
+now asks the matrix — **a control that changes nothing is worse than no
+control**, and the contributor row could not do anything even when the SMO set
+it to edit.
+
+### 42.8 Verified
+
+- `scripts/test-authorize.js`: **67 checks, 0 failures.** Escalation, reach,
+  the locked cycle, the contributor rule, a retired person — and the half that
+  matters more, every role doing its own legitimate work unrefused.
+- Throwaway Postgres 16 and the real API end to end: **10 checks, 0 failures.**
+- The platform driven in a browser as a unit head and as the SMO: 12 reportable
+  fields offered, a legitimate report saved silently, a plan change refused
+  with the banner shown, no console errors.
+- Round trip, clean slate, fixed point: PASS. QA 31 viewers, zero console
+  errors. Byte-identical rebuild.
+- Cost: **~240ms** per save on a local Postgres with the ten-unit example.
+
+### 42.9 What this did NOT close
+
+The rest of the security floor, in the order proposed: the `1234` SMO
+(migration 003) still exists; `must_change` is still not enforced on
+`/api/state`, so a temporary password buys a full session; there is still no
+rate limit or lockout on sign-in; there are still no security headers; raw
+database errors still reach the browser; expired sessions are never pruned and
+a password change does not end the others.
+
+---
+
+## 43 · The security floor
+
+*(Spec 007. The five items §42.9 left open, plus session hygiene. §42 closed
+the hole a real user could walk through; these are the ones an attacker walks
+through.)*
+
+### 43.1 The `1234` SMO is retired, not removed
+
+**§19.4 is reversed.** Islam, 2026-08-20: *"don't ask me to do new passwords
+now on the app, just let me access with SMO and 1234."* That was right for a
+prototype nobody's data was in and is wrong for a product a client's strategy
+is in. The convenience it bought is one screen, once.
+
+The bootstrap still creates `smo` / `1234` on an empty database — a deployment
+with no way in is not a deployment — but it now carries `must_change`, so the
+first sign-in leads straight to the change screen.
+
+For a tenant already running, one step checks whether the stored hash still
+verifies against `1234` and sets `must_change` only if it does. **It could not
+be a `.sql` file**: migration 003 wrote the hash with its own salt, so the
+question cannot be asked in SQL. It runs once, recorded in the same
+`_sql_migrations` registry, and it **sets a flag rather than clearing a
+password** — this must not be able to lock anybody out of their own
+deployment, and somebody who already chose a real password is not nagged.
+
+### 43.2 A temporary password bought the whole tenant
+
+The gate had always sent people with a temporary password to the change
+screen. The server did not care whether they went, so an issued password
+opened a thirty-day session and every figure in the tenant.
+
+`/api/state` refuses both directions while `must_change` is set. **Identity is
+checked before authorisation**: somebody who has not finished signing in is
+not somebody whose roles are worth consulting.
+
+### 43.3 Nothing slowed a guess
+
+Two thresholds in a rolling fifteen-minute window, because they answer two
+different attacks: **8 per person key** stops a password list against one
+person; **25 per address** stops a list of PEOPLE instead — person keys are
+short and guessable, so without the second the username half of each guess is
+free. Only failures are recorded; a successful sign-in clears that key's.
+
+Two rules came out of building it. **The limit is checked BEFORE the password
+is verified**, or it is a timing oracle: a wrong password costs a scrypt hash
+and a locked-out one costs nothing, and the difference is measurable. And the
+message never says which threshold was hit or whether the key exists — **a
+rate limiter that confirms usernames has given away what it was protecting.**
+
+**The trade-off is real and was observed, not theorised:** hammering `smo`
+locked the SMO out for the window, mid-test. A threshold per key means anybody
+who knows a key can push that account over it. That is exactly why the window
+is short and self-clearing rather than a lock somebody lifts by hand — a
+permanent lockout turns "I know your username" into "I can keep you out".
+
+### 43.4 Headers, and the limit of the policy
+
+A CSP plus `X-Frame-Options: DENY`, `nosniff`, `no-referrer`, HSTS, a
+`Permissions-Policy` turning off camera / microphone / geolocation / payment /
+USB, `Cross-Origin-Opener-Policy` and DNS prefetch off — on every path.
+
+`scripts/dev-server.js` **reads the list out of `vercel.json`** rather than
+repeating it: the local server exists to test what ships, and a second copy of
+a header list is a second copy that goes stale. It drops HSTS alone, because
+sending it from `http://localhost` pins the browser to https for localhost and
+breaks every other local server on the machine.
+
+**The honest limit.** `'unsafe-inline'` stays, because the single-file design
+is nothing but inline script and inline `style=` attributes. What the policy
+still buys is real — no external script, no external connection, no framing,
+no plugins, no `<base>` — so an injection has nowhere to send anything. What
+it does not buy is protection from an injection that runs. The upgrade is a
+hash-based `script-src`, which is possible (there is not one inline event
+handler in the product) and needs `build.py` to emit the hashes and the gate to
+carry its own. Recorded rather than done, because **a stale hash is a page
+that does not load.**
+
+### 43.5 Two smaller ones
+
+A database error names tables, columns and sometimes values. None of that
+belongs in a browser: it is a free map of the schema to anyone probing and
+means nothing to the person who hit it. One sentence out, the real error to
+the function's log.
+
+And sessions: expired rows are deleted on every sign-in — one DELETE on a path
+already writing, since there is no scheduler here — and choosing a new
+password ends **every other session that person holds**, because the old
+password may be exactly why they are choosing. Their own survives: being
+signed out of the tab you just used to choose a password is not security, it
+is a bug that looks like one.
+
+### 43.6 Verified
+
+- 11 checks on the door and the limiter against the real API: `1234` signs in
+  and buys nothing; the change is accepted and the state then opens; a weak
+  replacement is refused; guessing is cut off from the ninth attempt; a
+  CORRECT password is refused while the window holds.
+- 4 on sessions, and a stale row gone on the next sign-in.
+- §42's 12 authorisation checks re-run through the temporary-password flow.
+- The platform driven in a browser under the CSP: **no violations**, worker
+  registers, manifest loads, fonts render, reporting saves, a plan change
+  refused with the banner.
+- Fresh database: clean slate, round trip, fixed point PASS — and the
+  bootstrap SMO arrives with `must_change` set.
+- QA 31 viewers, zero console errors; byte-identical rebuild.
+
+### 43.8 An explicit reset, asked for and once
+
+Islam, 2026-08-21: *"Please reset my admin password to 1234 for now until
+later adjustment."* Asked for outright, so done — and written where it can be
+seen rather than done quietly, because four digits on a public URL is not a
+password and the whole of §43 exists because of that.
+
+Two things make it safe enough to write down. It runs **AFTER**
+`retireTheSimplePassword`, or the retirement would set `must_change` back in
+the same request — order is the whole of the correctness. And it runs **ONCE**,
+recorded in the migration registry: a reset that ran on every deployment would
+put the password back to 1234 every time a real one was chosen, which is a
+permanent backdoor and the exact thing §43.1 removed.
+
+Changing the password from Setup › People from then on is what it is for, and
+this step will not fight it. Delete the function and its registry row to end
+it.
+
+### 43.7 What is still not done
+
+Hash-based CSP (§43.4). Tenant isolation (§36). At-rest key custody, backups
+and retention. **Who at Forefront can read production** — a people-and-process
+control, not a code one. An external penetration test before go-live. The
+Copilot's read scope.

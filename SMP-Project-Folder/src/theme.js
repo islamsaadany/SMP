@@ -1,4 +1,4 @@
-/* THEME — Auto, Light, Dark.
+/* THEME — light or dark, and which PALETTE (§38).
 
    The dark palette has been in _shared.css since the beginning; what was
    missing was a way to choose it. The product followed the laptop silently
@@ -27,6 +27,40 @@ var THEME = (function () {
   var KEY = "smp.theme";
   var ORDER = ["light", "dark"];
 
+  /* ── The PALETTE, added in 3.11 (§38) ────────────────────────────
+     Two axes now, and they are deliberately separate things. LIGHT/DARK is
+     about the room you are sitting in. PALETTE is about whose colours the
+     product wears. They multiply rather than combining into one list of four,
+     because "dark" means the same thing whichever palette is on, and a single
+     four-position switch would make you hunt for the pair you wanted.
+
+     Both are properties of the SCREEN and neither goes near the state graph
+     (§25.2) — a palette in the graph would autosave, and one person choosing
+     slate would repaint the platform for the whole tenant. When multi-tenant
+     lands (§36) a tenant's own branding arrives as a palette DEFAULT, which a
+     person may still override for their own screen. */
+  /* FOREFRONT FIRST — it is the shipped default, and until v3.12 it was not:
+     PALETTES[0] was "slate", so a fresh deployment opened in a palette that is
+     not the house one. Nobody noticed while the switch was in the top bar,
+     because everybody pressed it. A default nobody has to correct is the only
+     honest kind. */
+  var PKEY = "smp.palette";
+  var PALETTES = ["forefront", "slate"];
+  var PNAMES = { forefront: "Forefront", slate: "Slate" };
+
+  /* ── The FONT axis (§38.8) ───────────────────────────────────────
+     Independent of the palette for now, deliberately: four faces are embedded
+     so they can be judged IN the product rather than from a specimen sheet.
+     Once it is settled which face belongs to which palette this collapses into
+     the palette and the unpicked faces leave the file.
+
+     "system" first, because it is what the platform shipped with and a
+     comparison needs its own starting point in it. */
+  var FKEY = "smp.font";
+  var FONTS = ["system", "inter", "source", "manrope", "plex"];
+  var FNAMES = { system: "System", inter: "Inter", source: "Source Sans",
+                 manrope: "Manrope", plex: "IBM Plex" };
+
   /* Where the switch starts when nobody has chosen: whatever the device says.
      matchMedia is absent in very old engines and returns a stub in some test
      runners, hence the guard - light is the safe fall-through because it is
@@ -51,7 +85,56 @@ var THEME = (function () {
     try { localStorage.setItem(KEY, v); } catch (e) {}
   }
 
+  /* ── The tenant's branding sits UNDER the personal switches (§39) ──
+     Precedence, and it is the whole model in three lines:
+
+         a person's own choice   (localStorage)      wins
+         the tenant's branding   (the state graph)   otherwise
+         the shipped palette                         otherwise
+
+     Which is why `chosen` is null rather than a default when nobody has
+     pressed anything: only an actual choice may outrank the tenant's brand,
+     and "the value that happened to be first in the list" is not a choice.
+
+     BRAND is handed in after the data loads, because theme.js runs in the head
+     before any of it exists. Until then the shipped palette paints, which is
+     the honest thing to show while the tenant's own colours are still on the
+     wire. */
+  var BRAND = null;
+
+  /* THE TENANT DECIDES, NOT THE VIEWER (Islam, 2026-08-21: "I don't need to
+     have slate, the branding covers this from inside"). The per-screen switch
+     is gone, so the stored key is no longer consulted — a value left in a
+     browser from before would otherwise pin that person to a palette with no
+     control left to change it back. Branding sets the palette for everyone;
+     light and dark stay each viewer's own, because those are about the room
+     they are sitting in. */
+  function readPalette() {
+    return (BRAND && BRAND.palette) || PALETTES[0];
+  }
+  /* A palette left in a browser from before the switch was removed would
+     otherwise pin that person to it for ever, with no control left to change
+     it back. Cleared once, on the way past. */
+  function forgetPalette() {
+    try { localStorage.removeItem(PKEY); } catch (e) {}
+  }
+
+  function chosenFont() {
+    try {
+      var v = localStorage.getItem(FKEY);
+      return FONTS.indexOf(v) === -1 ? null : v;
+    } catch (e) { return null; }
+  }
+  function readFont() {
+    return chosenFont() || (BRAND && BRAND.font) || FONTS[0];
+  }
+  function writeFont(v) {
+    try { localStorage.setItem(FKEY, v); } catch (e) {}
+  }
+
   var mode = read();
+  var palette = readPalette();
+  var font = readFont();
 
   function apply() {
     /* Always an explicit attribute now, even when the value came from the
@@ -61,7 +144,33 @@ var THEME = (function () {
        agree. The media block stays in the stylesheet for the gate, which has
        no switch of its own and no script beyond reading storage. */
     document.documentElement.setAttribute("data-theme", mode);
+    /* Always stated, never left to a bare :root fallback. The stylesheet does
+       list the slate values on bare :root as well, so a page whose script
+       failed still paints something coherent rather than nothing — but the
+       attribute is what the four blocks are actually keyed on. */
+    document.documentElement.setAttribute("data-palette", palette);
+    forgetPalette();
+    /* REMOVED rather than set for the system stack — absence is what hands the
+       decision back to --sys-sans, the same reasoning §25.2 used for the theme
+       before Auto was retired. There is no [data-font="system"] block to write
+       because there is nothing for it to say. */
+    if (font === "system") document.documentElement.removeAttribute("data-font");
+    else document.documentElement.setAttribute("data-font", font);
+
+    /* The tenant's own colours, written as inline custom properties on the
+       root so they outrank the stylesheet's palette blocks without any of them
+       having to know a tenant exists. Cleared first, or a colour removed on
+       the Branding page would keep painting until the next full reload. */
+    var root = document.documentElement;
+    (BRAND_APPLIED || []).forEach(function (k) { root.style.removeProperty(k); });
+    BRAND_APPLIED = [];
+    var t = (BRAND && BRAND.tokens) || {};
+    Object.keys(t).forEach(function (k) {
+      root.style.setProperty(k, t[k]);
+      BRAND_APPLIED.push(k);
+    });
   }
+  var BRAND_APPLIED = [];
 
   /* Sun and moon, drawn in the same 20px box as the rest of the chrome's
      marks. The mark shows the state you are IN, and the title says what the
@@ -94,18 +203,57 @@ var THEME = (function () {
     if (btn) paintBtn(btn);
   }
 
+
+  /* The control renders its own name IN the face it names, so the press is not
+     the only way to find out what it looks like. */
+  function paintFont(btn) {
+    btn.textContent = FNAMES[font];
+    btn.style.fontFamily = "var(--sans)";
+    var next = FONTS[(FONTS.indexOf(font) + 1) % FONTS.length];
+    btn.title = "Typeface: " + FNAMES[font] + " — click for " + FNAMES[next];
+    btn.setAttribute("aria-label", btn.title);
+  }
+  function setFont(v, btn) {
+    font = v;
+    writeFont(font);
+    apply();
+    if (btn) paintFont(btn);
+  }
+
   return {
     apply: apply,
+    /* Called by the shell once the data exists, and again after the Branding
+       page changes anything. Re-reads the two axes because a tenant default
+       only takes effect where the person has not chosen for themselves. */
+    setBrand: function (b) {
+      BRAND = b || null;
+      palette = readPalette();
+      font = readFont();
+      apply();
+      var fb = document.getElementById("fontbtn");
+      if (fb && !fb.hidden) paintFont(fb);
+    },
     mode: function () { return mode; },
+    palette: function () { return palette; },
+    font: function () { return font; },
     /* Called once, after the chrome exists. */
     wire: function () {
       var btn = document.getElementById("themebtn");
-      if (!btn) return;
-      btn.hidden = false;
-      paintBtn(btn);
-      btn.addEventListener("click", function () {
-        set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
-      });
+      if (btn) {
+        btn.hidden = false;
+        paintBtn(btn);
+        btn.addEventListener("click", function () {
+          set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
+        });
+      }
+      var fb = document.getElementById("fontbtn");
+      if (fb) {
+        fb.hidden = false;
+        paintFont(fb);
+        fb.addEventListener("click", function () {
+          setFont(FONTS[(FONTS.indexOf(font) + 1) % FONTS.length], fb);
+        });
+      }
     }
   };
 })();

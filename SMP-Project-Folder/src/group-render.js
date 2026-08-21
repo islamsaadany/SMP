@@ -39,7 +39,7 @@ function pctBig(v){ return v == null || isNaN(v) ? '<span class="nodata">&mdash;
 function varCell(a, p){
   if (a == null || p == null) return '<span class="pill none">&mdash;</span>';
   var d = a - p;
-  var c = d >= 0 ? "var(--good)" : d <= -8 ? "var(--bad)" : "var(--warn)";
+  var c = d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)";
   return '<span style="color:' + c + '">' + (d >= 0 ? "+" : "−") + Math.abs(d) + '</span>';
 }
 
@@ -148,7 +148,9 @@ function drillCard(title, val, opts){
    (1/3, figures). Execution is a RATIO TO PLAN, so one number replaces two the
    reader would otherwise have to subtract. Colour appears exactly twice: the
    dial, and the variance. */
-function varColour(d){ return d >= 0 ? "var(--good)" : d <= -8 ? "var(--bad)" : "var(--warn)"; }
+/* TEXT, so the text-weight tokens (§38): the bare --good is the fill and
+   the dot, and at 3.77:1 it was not readable as a figure. */
+function varColour(d){ return d >= 0 ? "var(--good-tx)" : d <= -8 ? "var(--bad-tx)" : "var(--warn-tx)"; }
 
 function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ctxGrip){
   var pid = modalFor(ctx + " \u2014 objectives", "Where the objectives figure comes from", perfDrill);
@@ -462,7 +464,7 @@ function capsTable(){
         (headName && headName !== fn.name ? " &middot; " + esc(headName) : "") + '</span>' : '') + '</td>' +
       '<td class="num">' + c.projects.length + '</td>' +
       '<td class="cc"><span class="mono">' +
-        '<b style="color:var(--good)">' + ce.done + '</b> / ' +
+        '<b style="color:var(--good-tx)">' + ce.done + '</b> / ' +
         '<b style="color:var(--attn)">' + ce.wip + '</b> / ' +
         '<span style="color:var(--none)">' + ce.todo + '</span></span></td>' +
       '<td class="num final" style="color:var(--' + band(perf) + ')">' + pct(perf) + '</td></tr>';
@@ -1503,6 +1505,10 @@ function renderFocusBoard(){
    a target cannot be moved from the screen where it is being reported against. */
 function renderReport(u){
   var may = canReport(u.ukey);
+  /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
+     contributor limited to their own lines does neither — the server refuses
+     both, so the screen does not offer them (spec 006 §7.2). */
+  var mayAll = may && !SMPRules.onlyVia(world(), viewer(), "unit", u.ukey, "contrib");
   var c = reportedCount(u);
   var subd = !!REVIEW.submitted[u.ukey];
   var miss = missingNotes(u);
@@ -1525,7 +1531,17 @@ function renderReport(u){
     var unit = isT ? "%" : splitTarget(x.obj.target).unit;
     var cur = x.obj.actual, has = cur != null && cur !== "";
     var shown = !has ? "" : (isT ? String(cur) : splitTarget(cur).value || String(cur));
-    if (!may) return '<span class="mono">' + (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>';
+    /* Per ROW, not per page. A contributor is limited to the lines they are
+       named on (spec 006 §7.2); a figure with a SOURCE is entered by that
+       source and by nobody in the unit (§16.7). Both are refused by the
+       server, so neither is offered here. */
+    if (!canEnterFigure(u.ukey, x)) {
+      var src = srcOf(x);
+      return '<span class="mono' + (src ? " sourced" : "") + '">' +
+        (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>' +
+        (src ? ' <span class="srcby" title="Entered by ' + esc(srcTeamName(src)) +
+               '">' + esc(srcTeamName(src)) + '</span>' : '');
+    }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
       '" placeholder="\u2014" aria-label="Report ' + esc(x.obj.name) + '">' +
@@ -1533,7 +1549,7 @@ function renderReport(u){
   };
   var noteCell = function(x){
     var want = needsNote(x);
-    return may
+    return canEnterNote(u.ukey, x)
       ? '<input class="fld notefld' + (want ? " needed" : "") + '" data-note="' + x.id + '" value="' +
         esc(x.obj.note || "") + '" placeholder="' +
         (want ? "Why, and what is being done" : "Note, if there is one") + '">'
@@ -1670,7 +1686,7 @@ function renderReport(u){
       '<div class="kpi"><b>' + c.done + '</b><span>of ' + c.total + ' reported</span></div>' +
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (may
+      (mayAll
         ? (subd
             ? '<span class="badge b-done">Submitted</span>' +
               '<button class="linkbu" data-unsubmit="' + u.ukey + '">Reopen my report</button>'
@@ -1680,14 +1696,29 @@ function renderReport(u){
 
   var summary =
     '<h4 class="mini">The owner\'s note on this cycle</h4>' +
-    '<div class="card" style="padding:14px 16px">' + (may
+    '<div class="card" style="padding:14px 16px">' + (mayAll
       ? '<textarea class="fld" data-unote="' + u.ukey + '" rows="3" style="width:100%;max-width:none" ' +
         'placeholder="What the numbers do not say \u2014 what happened, what is being done, what to expect next.">' +
         esc(REVIEW.note[u.ukey] || "") + '</textarea>'
       : '<span class="why" style="margin:0">' + (REVIEW.note[u.ukey] ? esc(REVIEW.note[u.ukey]) : "None.") + '</span>') +
     '</div>';
 
-  return (miss.length && may
+  /* A blocked Submit with no explanation is hostile. If the unit is waiting on
+     somebody else's figures, the page names them and who owes them — the person
+     is accountable for the completeness, so they need a route to act on it
+     (§16.7, settled). */
+  var waiting = outstandingSources(u);
+  var waitingNote = waiting.length && may
+    ? '<div class="note attn-note"><b>' + waiting.length + ' figure' +
+      (waiting.length > 1 ? 's are' : ' is') + ' entered by another team, and not in yet.</b> ' +
+      waiting.map(function(x){
+        return esc(x.obj.name) + " (" + esc(srcTeamName(srcOf(x))) + ")";
+      }).join(" &middot; ") +
+      '. Your report is not complete until they arrive \u2014 ask them, the SMO cannot ' +
+      'be the only one chasing.</div>'
+    : '';
+
+  return waitingNote + (miss.length && may
       ? '<div class="note bad-note"><b>' + miss.length + ' figure' + (miss.length > 1 ? 's need' : ' needs') +
         ' a note.</b> Anything at risk or off track carries an explanation before it can be submitted \u2014 ' +
         'a red number with nothing beside it is where a review meeting stalls.</div>'
@@ -2051,7 +2082,10 @@ function projReportBody(p, may){
 }
 
 function capReportBody(c){
-  var may = REVIEW.state === "open" && grant("k_report") === "edit";
+  /* Same two gates as a unit's reporting: the cycle has to be open AND
+     unlocked, or the server refuses the figures the page is inviting. */
+  var may = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
+            grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +

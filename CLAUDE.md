@@ -101,6 +101,10 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Be proactive about issues** — flag concerns early.
 - **Explain reasoning** — give the rationale behind suggestions.
 - **Ask clarifying questions** — better to ask than assume.
+- **Security risks are reported in four parts, in order** (CLAUDE-RULES A14):
+  the issue in one sentence, **how it hurts us**, the solution in one sentence,
+  and **what the solution costs — including what else in the system it touches**.
+  One risk at a time, worst first. No finding tables, no option menus.
 
 ---
 
@@ -150,11 +154,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **generated from the platform sources** by `node scripts/extract-state.js`. Served over
   http(s) the platform hydrates from GET /api/state and autosaves on change; opened from
   file:// it runs on baked data.
-- **Identity (since v2.1, §19):** the gate is a real login (person key + password,
-  scrypt-hashed, httpOnly session); `/api/state` requires a session; a signed-in person
-  sees their own view; the SMO issues temporary passwords from Levels & access (forced
-  change on first sign-in; sign-in: `SMO` / `1234`, no forced change — §19.4). Enforcement is at the
-  door — per-action authorization and the change log are Phase 2 (§19.2).
+- **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
+  (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
+  a session AND a password that is no longer temporary; a signed-in person sees
+  their own view; the SMO issues temporary passwords from People. **§19.4 is
+  reversed:** `SMO` / `1234` still opens an empty deployment but forces a change
+  at once. Sign-ins are rate-limited (8 per key, 25 per address, 15 minutes);
+  a password change ends that person's other sessions. Security headers are in
+  `vercel.json` and read from there by `scripts/dev-server.js` — never typed twice.
 - **Two datasets (since v2.2, §21):** the database holds the **client's own** tenant;
   the full Raya Trade worked example is baked into the platform file and reachable
   only through the **Demo data** button, which labels it and refuses to save it.
@@ -172,6 +179,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   explicitly its own; two per-company flags decide whether its CEO sees the other
   companies and the group. Stored (`companies` table, `units.company`), survives the
   clean slate, and `006-companies.sql` adds it to a tenant already deployed.
+- **Authorisation (since v3.12, §42):** `/api/state` authorises every save.
+  `lib/rules.js` is the SHARED rules module — roles, areas, access defaults and
+  every pure "may this person…" function; `build.py` inlines it into the
+  platform, `api/state.js` requires it, `scripts/extract-state.js` runs it
+  before the sources. **Never write a second copy of a rule.** `lib/authorize.js`
+  classifies the diff between the stored and incoming graphs and refuses what
+  the person's roles disallow — always resolved against the **stored** world.
+  An unclassified change is the SMO's, by design. `change_log` (migration 010)
+  is written from the same diff and lives outside the state graph.
+  Run `node scripts/test-authorize.js` after touching either file, and
+  `node scripts/test-door.js <smo-password>` against a running dev-server
+  after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
+  SMO on purpose — `DELETE FROM login_attempts;` clears it).
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
@@ -256,7 +276,207 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.10: the matrix stops being a matrix of pages
+*Last Updated: 2026-08-21 — **v3.12, MERGED**: the folds become ONE CONTROL
+(§41.8, treatment 4) — a single segmented box divided by a hairline instead of
+two capsules. One box on a row that has no other box; the container **says
+outright that Units and Functions are the same kind of thing**; and the two
+folds STOP MOVING, because they used to be separated by whichever list was open
+so the control you had just pressed changed position every time. Open is **the
+segment lit, not the word coloured** — §41.4's accent words had nowhere to sit
+inside a filled container, and lighting the segment is what a segmented control
+already means. The divider is an INSET SHADOW, not a border, or it would widen
+the segment and shift the one beside it. §41.9: **every fold mockup this round
+contained an element the product does not have** — `.foldhere` ("· Mobile"
+beside the closed fold) was removed from the markup long ago and its CSS was
+left behind, and I drew from the stylesheet. §24 exists precisely so leftover
+CSS cannot be mistaken for the product; **a mockup drawn from the STYLESHEET is
+drawn from what the product could look like, not from what it does.** Also
+§43.8: an explicit once-only reset of the SMO password to 1234, asked for
+outright — it runs AFTER the retirement (or that would undo it in the same
+request) and ONCE (or it would put 1234 back every time a real password was
+chosen, which is the backdoor §43.1 removed).*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): ONE DECISION, THEN TICKS
+(§16.7a). Islam on the first Source-of-figures screen: *"that's a huge setup to
+do and not practical … he just needs the measure and target so he can tick if
+he owns this or not."* Right, and the number says why — **116 figures across ten
+units**, each asking for a team AND a person before the feature did anything.
+The data also said what to key on: only ONE measure name repeats across units,
+so "set it once by name" saves nothing, but **27 of the 116 are money**, spread
+across all ten — **what separates a team's number from the unit's is what it is
+measured in, not its name**. So WHO is chosen once at the top and every row is a
+single mark, the same shape as Focus measures (A13); the units are BUTTONS with
+their counts on them rather than a dropdown, so where the work is left is
+visible without opening anything; and a row shows the measure and its target
+and nothing else — direction and compile rule are the plan's business, not the
+custodian's. Three states per row, not two: unclaimed, mine, or **another
+team's**, the third shown as that team's name rather than a tick that could be
+overwritten unnoticed. Also §41.7: the CLOSED navigation fold is a soft ghost
+(treatment D) — the fault was typographic, an 11px uppercase capsule beside
+13.5px sentence-case tabs; D keeps a container, because **a fold is a group of
+things rather than a page and the container is what says so**, and drops the
+border and the shouting.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): THE PALETTE SWITCH IS GONE
+(§41.6). Islam: *"I don't need to have slate, the branding covers this from
+inside."* Which colours the product wears is the TENANT's decision (Setup ›
+Branding), not a per-screen preference that leaves two people in the same
+organisation looking at different products; light and dark stay each viewer's
+own. Removing it exposed what it had been hiding: **`PALETTES[0]` was `slate`
+and the bare `:root` held slate's values**, so a fresh deployment opened in a
+palette that is not the house one — invisible while everybody pressed the
+button. **What paints when nothing has decided must be what the product
+actually is.** The stored key is no longer read AND is cleared on load, or a
+stale value would pin somebody to a palette with no control left to change it
+back; the dead helpers went with the control (§24); and the contrast sweep
+selects a palette via `THEME.setBrand({palette})` now, or it would measure
+Forefront twice and call it four combinations.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): FINANCE ENTERS THE NUMBERS
+FINANCE OWNS (§16.7, built). A key objective or a key measure may carry
+`src = { team, by }` — the team that is master of the number and the person who
+enters it. **The team is STORED, not read off the person**: §33's instinct fails
+here, because the person may sit with the SMO rather than in the function whose
+number it is (Islam's "Finance SMO custodian"), and the attribution must name
+the number's HOME rather than the reporter's desk. **It is a rule, not a matrix
+cell** — a source's reach is entirely what it is named on, crossing units
+without owning them. Two consequences in the authoriser: the FIGURE
+(`actual`/`progress`) and the NOTE had to be split, because the number is the
+source's and the explanation is always the unit's; and **who is master of a
+figure is SETUP** — classified separately so a refusal says "Setup is the SMO's"
+rather than "a plan is corrected by the SMO", both true but only one sending
+somebody to the right screen. A sourced figure **still counts toward the unit's
+total**, so a unit cannot submit around a missing Finance number — the unit
+chases too, and the page names what is outstanding and who owes it. THE LESSON:
+**a control that cannot be completed is broken** — deleting `src` whenever one
+end was empty made it impossible to set (team dropped for want of a person,
+person dropped because the team had just gone); a half-set row is kept, shown as
+"Needs both", and does nothing. Only visible by driving the real page. Two
+screens: Setup › Source of figures, and Manage › Figures I report (hidden
+outright for anybody named on nothing). Not sourced yet: capability projects.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): THE SECURITY FLOOR (§43,
+spec 007), on top of §42. **§19.4 is REVERSED**: the `1234` SMO is RETIRED, not
+removed — the bootstrap still creates it (a deployment with no way in is not a
+deployment) but with `must_change`, and a one-off JS step sets the flag on an
+existing tenant *only if the stored hash still verifies against 1234*. It could
+not be a `.sql` file, because migration 003 salted that hash; it **sets a flag
+rather than clearing a password**, so it can never lock anybody out of their own
+deployment. A **temporary password now buys nothing** — `/api/state` refuses
+both directions while `must_change` is set, and **identity is checked before
+authorisation**. **Guessing is slowed**: `login_attempts` (migration 012), 8 per
+key and 25 per address in a rolling 15 minutes, failures only, cleared on
+success, pruned on every sign-in (no scheduler here). Two rules: **check the
+limit BEFORE verifying the password** or it is a timing oracle, and **never say
+which threshold was hit or whether the key exists** — a rate limiter that
+confirms usernames has given away what it was protecting. The DoS trade-off is
+real and was observed, not theorised (hammering `smo` locked the SMO out
+mid-test): that is why the window is short and self-clearing rather than a lock
+somebody lifts. **Security headers** in `vercel.json` for every path, and
+`scripts/dev-server.js` READS THAT LIST rather than repeating it (dropping only
+HSTS, which from localhost would pin every other local server to https). The
+honest limit: `'unsafe-inline'` stays because the single file is nothing but
+inline script and `style=`; the policy still blocks every external script,
+connection, frame and plugin, so an injection has nowhere to send anything —
+the hash-based `script-src` upgrade is possible (no inline handlers anywhere)
+and recorded rather than done, because **a stale hash is a page that does not
+load**. Also: raw DB errors no longer reach the browser (a free schema map to
+anyone probing), expired sessions are pruned, and a password change ends every
+OTHER session that person holds — but never their own, because being signed out
+of the tab you just used to choose a password is a bug that looks like
+security. Still open, and these need decisions not code: hash CSP, tenant
+isolation (§36), key custody / backups / retention, **who at Forefront can read
+production**, an external penetration test before go-live, the Copilot's read
+scope.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): THE SERVER DECIDES WHO MAY
+CHANGE WHAT (§42, spec 006). `POST /api/state` checked that you were signed in
+and nothing else, then truncated thirty tables and wrote back whatever
+arrived — register and access matrix included — so the lowest-privilege person
+in the tenant could post a state making themselves the SMO. **Everything §37
+built decided what a screen OFFERED; nothing decided what the server
+ACCEPTED.** Two lines carry the fix. **The world is the STORED state, never the
+incoming one** — authorise against what is being written and a save grants
+itself the role that authorises it, in the same request. And **an unrecognised
+change is the SMO's**: every classifier falls through to `unknown`, so a field
+added later is guarded the day it is added, not the day somebody remembers.
+**The rules are ONE file run on both sides** (`lib/rules.js`, inlined by
+build.py and required by Node) — two copies drift, and the drift is silent: a
+screen that offers an edit the server then refuses. **The diff that authorises
+IS the change log** (`change_log`, outside the state graph beside credentials —
+a log a save can erase is not a log), so "who moved this target" is answerable
+for the first time. Three rules from Islam: a locked cycle refuses reporting;
+contributors view, and if granted edit reach **their own lines only** (a rule
+with teeth, so a stored `edit` still reaches nobody else's rows) and never
+submit, because submitting speaks for the unit; **a tactic's quarters are
+plan** — if a unit moves its own ticks, a tactic due in Q2 that did not happen
+is dragged to Q4 and the record stops being a record. Also: `canReport()`
+stopped being a hard-coded `head or custodian or SMO` and asks the matrix —
+**a control that changes nothing is worse than no control**. And a refused save
+now says so ON THE PAGE (§32's rule, one surface in) rather than warning a
+console nobody has open. THE LESSON: **a reader that mutates what it reads will
+be caught by whoever compares before and after** — `branding()` created a
+four-null object the database never held, so every save carried a phantom group
+change and every non-SMO save would have been refused for ever. 67 unit tests
+and 10 end-to-end API tests passed while that was true, because all 77 built
+their payloads from the seed rather than from a running browser. **Signing in
+and typing one number found it.** Still open, in order: the `1234` SMO,
+`must_change` unenforced on /api/state, no rate limit or lockout, no security
+headers, raw DB errors reaching the browser, sessions never pruned.*
+
+*Earlier: 2026-08-21 — v3.11 (in progress): a design LANGUAGE, and
+palettes under it (§38). Ported from Strategy-Formulation at Islam's direction.
+Two token layers, and the line between them is the point: LAYER 1 is the
+language (type scale, shape, weight) — one set, never themed; LAYER 2 is the
+palette — colours only, four blocks (slate and forefront × light and dark).
+**A tenant's branding will supply a PALETTE, never a language** (§36), so a
+client can be given their colours without being given a different product.
+Nothing was renamed: `--panel`, `--gold` and `--stone` now carry a JOB rather
+than a colour — **"gold" was never really gold, it was whatever the accent
+happened to be**. Three rules with teeth. **A colour that works as a FILL
+usually fails as TYPE** — white on the house gold is 2.4:1 — so every scoring
+colour gained a `-tx` twin for words; that one change took the sweep from 15
+failures to 0 across all four combinations, and cleared light mode's 61
+long-standing ones with it. **A surface with its own background needs its own
+ink**: the dark nav bar took `--panel-quiet`/`--panel-hover` rather than
+borrowing the page's `--ink-3`, which on it was 2.5:1. And **an !important
+keeps winning after the argument has changed** — the navy table header was
+enforced with one, so editing `_shared.css` did nothing and only the
+screenshots showed it. A retheme's SECOND pass matters as much as the first (§40): §38's "zero
+contrast failures" was measured on ONE page and returned **316** when swept
+across nineteen. **A token checked against the most generous background it ever
+meets is checked against the one case that was never in doubt** — `--ink-3`
+cleared on white and failed on `--surface-2`, where most of it actually sits.
+And converting SOME members of a family is worse than converting none: table
+headers went light while `.grouphead` and `.gcard .card-head` stayed navy, so
+the survivors read as mistakes rather than as a style. **A header needs a
+ground of its own to be a header** — whether or not that ground is dark; the
+rail's lost its fill entirely and vanished. 316 → 0. THE ACCENT BUDGET (§41): the retheme gave a solid accent fill to FIVE things
+at once, and **the budget is the thing to watch, not the rule** — one solid
+fill is a mark, nine is a colour scheme. Islam: *"it's a strategy platform,
+needs to be subtly coloured."* Settled from a drawn comparison, not a
+description: the rail takes a quiet ground with an accent EDGE (the score keeps
+its own scoring colour instead of being swallowed), the navigation goes back to
+the underline, the pips stay solid because a 20px pip is a mark not a slab. The
+rail and the nav no longer match, which was deliberate before and is the price
+of the quieter register. **Consistency at the wrong volume is still wrong.** The
+last item on the budget was the OPEN navigation fold (§41.4) — settled from the
+same kind of drawn comparison as D, accent words with no fill: **an open fold is
+a heading over the list it just revealed, and a heading needs no box.** Two
+things came out of building it. **`.open` beats `:hover` on source order alone**
+(both `0,3,0`), so replacing an open fill without adding an open hover leaves the
+control silent under the mouse. And **an open fold is not reachable by navigating
+to it** — the contrast sweep had never measured it, because a sweep that walks
+pages only ever sees states that are pages; it scans the open fold explicitly
+now.
+TYPEFACE (§38.7): four faces embedded as latin subsets
+of variable fonts (148 KB for all four, because a linked webfont would break
+the offline single-file handover). It is its own axis for now — **B is how you
+decide, A is how you ship** — and collapses into the palette once each has a
+face. Absence of `data-font` is the system stack; there is no block for it
+because there is nothing to say.*
+
+*Earlier: 2026-08-21 — v3.10: the matrix stops being a matrix of pages
 (§37). It was 25 pages × 7 roles, three buttons a cell — **525 controls on one
 screen**, answering a question with 175 instances that nobody asks. It is seven
 roles down and seven AREAS across now: Group, own/other business unit,

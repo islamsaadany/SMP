@@ -276,7 +276,22 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.12 (in progress): FINANCE ENTERS THE NUMBERS
+*Last Updated: 2026-08-21 — v3.12 (in progress): THE PALETTE SWITCH IS GONE
+(§41.6). Islam: *"I don't need to have slate, the branding covers this from
+inside."* Which colours the product wears is the TENANT's decision (Setup ›
+Branding), not a per-screen preference that leaves two people in the same
+organisation looking at different products; light and dark stay each viewer's
+own. Removing it exposed what it had been hiding: **`PALETTES[0]` was `slate`
+and the bare `:root` held slate's values**, so a fresh deployment opened in a
+palette that is not the house one — invisible while everybody pressed the
+button. **What paints when nothing has decided must be what the product
+actually is.** The stored key is no longer read AND is cleared on load, or a
+stale value would pin somebody to a palette with no control left to change it
+back; the dead helpers went with the control (§24); and the contrast sweep
+selects a palette via `THEME.setBrand({palette})` now, or it would measure
+Forefront twice and call it four combinations.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): FINANCE ENTERS THE NUMBERS
 FINANCE OWNS (§16.7, built). A key objective or a key measure may carry
 `src = { team, by }` — the team that is master of the number and the person who
 enters it. **The team is STORED, not read off the person**: §33's instinct fails

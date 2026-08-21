@@ -39,14 +39,9 @@ var THEME = (function () {
      slate would repaint the platform for the whole tenant. When multi-tenant
      lands (§36) a tenant's own branding arrives as a palette DEFAULT, which a
      person may still override for their own screen. */
-  /* FOREFRONT FIRST — it is the shipped default, and until v3.12 it was not:
-     PALETTES[0] was "slate", so a fresh deployment opened in a palette that is
-     not the house one. Nobody noticed while the switch was in the top bar,
-     because everybody pressed it. A default nobody has to correct is the only
-     honest kind. */
   var PKEY = "smp.palette";
-  var PALETTES = ["forefront", "slate"];
-  var PNAMES = { forefront: "Forefront", slate: "Slate" };
+  var PALETTES = ["slate", "forefront"];
+  var PNAMES = { slate: "Slate", forefront: "Forefront" };
 
   /* ── The FONT axis (§38.8) ───────────────────────────────────────
      Independent of the palette for now, deliberately: four faces are embedded
@@ -102,21 +97,17 @@ var THEME = (function () {
      wire. */
   var BRAND = null;
 
-  /* THE TENANT DECIDES, NOT THE VIEWER (Islam, 2026-08-21: "I don't need to
-     have slate, the branding covers this from inside"). The per-screen switch
-     is gone, so the stored key is no longer consulted — a value left in a
-     browser from before would otherwise pin that person to a palette with no
-     control left to change it back. Branding sets the palette for everyone;
-     light and dark stay each viewer's own, because those are about the room
-     they are sitting in. */
-  function readPalette() {
-    return (BRAND && BRAND.palette) || PALETTES[0];
+  function chosenPalette() {
+    try {
+      var v = localStorage.getItem(PKEY);
+      return PALETTES.indexOf(v) === -1 ? null : v;
+    } catch (e) { return null; }
   }
-  /* A palette left in a browser from before the switch was removed would
-     otherwise pin that person to it for ever, with no control left to change
-     it back. Cleared once, on the way past. */
-  function forgetPalette() {
-    try { localStorage.removeItem(PKEY); } catch (e) {}
+  function readPalette() {
+    return chosenPalette() || (BRAND && BRAND.palette) || PALETTES[0];
+  }
+  function writePalette(v) {
+    try { localStorage.setItem(PKEY, v); } catch (e) {}
   }
 
   function chosenFont() {
@@ -149,7 +140,6 @@ var THEME = (function () {
        failed still paints something coherent rather than nothing — but the
        attribute is what the four blocks are actually keyed on. */
     document.documentElement.setAttribute("data-palette", palette);
-    forgetPalette();
     /* REMOVED rather than set for the system stack — absence is what hands the
        decision back to --sys-sans, the same reasoning §25.2 used for the theme
        before Auto was retired. There is no [data-font="system"] block to write
@@ -203,6 +193,20 @@ var THEME = (function () {
     if (btn) paintBtn(btn);
   }
 
+  /* The palette control. A word, not a glyph: there is no icon that says
+     "Forefront" and inventing one would be a second thing to learn. */
+  function paintPal(btn) {
+    btn.textContent = PNAMES[palette];
+    var next = PALETTES[(PALETTES.indexOf(palette) + 1) % PALETTES.length];
+    btn.title = "Palette: " + PNAMES[palette] + " — click for " + PNAMES[next];
+    btn.setAttribute("aria-label", btn.title);
+  }
+  function setPalette(v, btn) {
+    palette = v;
+    writePalette(palette);
+    apply();
+    if (btn) paintPal(btn);
+  }
 
   /* The control renders its own name IN the face it names, so the press is not
      the only way to find out what it looks like. */
@@ -230,6 +234,8 @@ var THEME = (function () {
       palette = readPalette();
       font = readFont();
       apply();
+      var pal = document.getElementById("palettebtn");
+      if (pal && !pal.hidden) paintPal(pal);
       var fb = document.getElementById("fontbtn");
       if (fb && !fb.hidden) paintFont(fb);
     },
@@ -244,6 +250,14 @@ var THEME = (function () {
         paintBtn(btn);
         btn.addEventListener("click", function () {
           set(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length], btn);
+        });
+      }
+      var pal = document.getElementById("palettebtn");
+      if (pal) {
+        pal.hidden = false;
+        paintPal(pal);
+        pal.addEventListener("click", function () {
+          setPalette(PALETTES[(PALETTES.indexOf(palette) + 1) % PALETTES.length], pal);
         });
       }
       var fb = document.getElementById("fontbtn");

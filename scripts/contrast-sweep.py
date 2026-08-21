@@ -41,8 +41,13 @@ with sync_playwright() as p:
       for th in ("light","dark"):
         c=b.new_context(viewport={"width":1440,"height":1200}); pg=c.new_page()
         pg.goto(URL); pg.wait_for_timeout(700)
-        pg.evaluate("([p,t])=>{localStorage.setItem('smp.palette',p);localStorage.setItem('smp.theme',t)}",[pal,th])
-        pg.reload(); pg.wait_for_timeout(1000)
+        # The per-screen palette switch went in 3.12 - the TENANT's branding
+        # decides now - so the sweep selects a palette the way branding does
+        # rather than through a localStorage key nothing reads any more.
+        pg.evaluate("(t)=>localStorage.setItem('smp.theme',t)", th)
+        pg.reload(); pg.wait_for_timeout(900)
+        pg.evaluate("(p)=>THEME.setBrand({palette:p})", pal)
+        pg.wait_for_timeout(400)
         tag=f"{pal}/{th}"
         WHERE=['?']
         def scan(w='?'):

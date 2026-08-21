@@ -1,0 +1,138 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>The closed fold — four treatments</title>
+<style>
+:root{
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-hover:#24487A;
+  --gold:#C9A24D; --panel-accent:#E6C65C; --on-accent:#16325C;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+body{margin:0;font-family:var(--sans);background:#F4F6FA;color:#1B2437}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 70px}
+h1{font-size:21px;margin:0 0 4px}
+p.lede{margin:0 0 24px;color:#5A6883;font-size:14px;max-width:74ch;line-height:1.55}
+h2{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:#5A6883;margin:32px 0 6px}
+h2 em{font-style:normal;text-transform:none;letter-spacing:0;color:#1B2437;font-weight:400}
+.note{font-size:13px;color:#5A6883;margin:0 0 10px;line-height:1.55;max-width:82ch}
+.cap{font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#8592AB;margin:14px 0 5px}
+
+/* ── the bar, exactly as it ships ─────────────────────────────── */
+nav.units{background:var(--panel);display:flex;align-items:stretch;padding:0 16px;
+  overflow:hidden;border-radius:6px}
+.units button{appearance:none;border:0;background:none;padding:0 13px;height:47px;
+  font:600 13.5px/1 var(--sans);color:var(--panel-quiet);cursor:pointer;white-space:nowrap;
+  border-bottom:3px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.units button:hover{color:var(--panel-ink)}
+.units button[aria-selected="true"]{color:var(--panel-ink);font-weight:700;
+  border-bottom-color:var(--gold)}
+.units .sep{width:1px;background:var(--panel-ink);opacity:.22;margin:12px 8px;flex:0 0 1px}
+.foldwrap{display:flex;align-items:center}
+.foldhere{color:var(--gold);font-weight:700;text-transform:none;letter-spacing:0;font-size:12.5px}
+.foldhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
+/* the OPEN state, settled as D — unchanged in every row below */
+.units .navfold.open{color:var(--panel-accent);background:none;border-color:transparent;
+  font-weight:700}
+.units .navfold.open .foldtw{opacity:1}
+
+/* ── A · today: a bordered translucent capsule ────────────────── */
+.a .navfold{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+  border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+  text-transform:uppercase;padding:6px 11px;cursor:pointer;display:inline-flex;
+  align-items:center;gap:6px;white-space:nowrap;margin:0 2px;height:auto}
+.a .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
+.a .foldtw{font-size:9px;opacity:.85}
+
+/* ── B · the row's own type, no box at all ────────────────────── */
+.b .navfold{background:none;border:0;border-bottom:3px solid transparent;
+  color:var(--panel-quiet);font:600 13.5px/1 var(--sans);letter-spacing:0;
+  text-transform:none;padding:0 13px;height:47px;cursor:pointer;display:inline-flex;
+  align-items:center;gap:7px;white-space:nowrap}
+.b .navfold:hover{color:var(--panel-ink)}
+.b .foldtw{font-size:10px;opacity:.7}
+.b .navfold:hover .foldtw{opacity:1}
+
+/* ── C · the row's own type, with the caret in a quiet chip ───── */
+.c .navfold{background:none;border:0;border-bottom:3px solid transparent;
+  color:var(--panel-quiet);font:600 13.5px/1 var(--sans);letter-spacing:0;
+  text-transform:none;padding:0 11px;height:47px;cursor:pointer;display:inline-flex;
+  align-items:center;gap:8px;white-space:nowrap}
+.c .navfold:hover{color:var(--panel-ink)}
+.c .foldtw{font-size:9px;width:16px;height:16px;border-radius:50%;
+  background:rgba(255,255,255,.13);display:inline-flex;align-items:center;
+  justify-content:center;opacity:1}
+.c .navfold:hover .foldtw{background:rgba(255,255,255,.26)}
+
+/* ── D · a soft ghost: quiet fill, no border, sentence case ───── */
+.d .navfold{background:rgba(255,255,255,.07);border:0;border-radius:6px;
+  color:#D7E0EE;font:600 13px/1 var(--sans);letter-spacing:0;text-transform:none;
+  padding:8px 12px;margin:0 3px;cursor:pointer;display:inline-flex;align-items:center;
+  gap:7px;white-space:nowrap;height:auto}
+.d .navfold:hover{background:rgba(255,255,255,.16);color:#fff}
+.d .foldtw{font-size:10px;opacity:.7}
+
+.swap{display:flex;gap:10px;align-items:center;margin:0 0 18px}
+.swap button{font:600 12px/1 var(--sans);padding:8px 13px;border-radius:20px;border:1px solid #C9D2E2;
+  background:#fff;cursor:pointer;color:#1B2437}
+.swap button[aria-pressed="true"]{background:#16325C;color:#fff;border-color:#16325C}
+</style></head><body><div class="wrap">
+
+<h1>The closed fold — four treatments</h1>
+<p class="lede">The <b>open</b> state is settled and identical in every row: accent words, no fill.
+Only the <b>closed</b> fold changes. Each row shows it twice — sitting on the Group page with
+Mobile behind the fold, and with the fold open beside the selected unit.</p>
+
+<div class="swap">
+  <button data-p="wide" aria-pressed="true">1180px</button>
+  <button data-p="narrow" aria-pressed="false">1000px — Islam's laptop</button>
+</div>
+
+<h2>A · <em>today — a bordered capsule, uppercase, 11px</em></h2>
+<p class="note">Two boxed controls beside a row of plain tabs. The uppercase letterspaced type is a
+different species from everything around it, which is most of why it reads as bolted on.</p>
+<div class="pair a"></div>
+
+<h2>B · <em>the row's own type, no box at all</em></h2>
+<p class="note">The fold becomes a tab that happens to open a list. Same size, same weight, same
+height, same hover as Group beside it — and the caret is the only thing saying it does something
+different. Quietest, and the most consistent.</p>
+<div class="pair b"></div>
+
+<h2>C · <em>the row's own type, caret in a quiet chip</em></h2>
+<p class="note">B, but the caret is unmistakably a control rather than a punctuation mark. Costs
+one small circle each; buys an affordance B has to rely on convention for.</p>
+<div class="pair c"></div>
+
+<h2>D · <em>a soft ghost — quiet fill, no border, sentence case</em></h2>
+<p class="note">Keeps a container so the fold still reads as a group of things rather than a page,
+but drops the border and the shouting type. A middle answer if B feels too invisible.</p>
+<div class="pair d"></div>
+
+<script>
+function row(open){
+  var fold = function(label, caret, extra){
+    return '<span class="foldwrap"><button class="navfold' + (extra||'') + '">' + label +
+      ' <span class="foldtw">' + caret + '</span>' +
+      (label === 'Units' && !open ? '<span class="foldhere">Mobile</span>' : '') + '</button></span>';
+  };
+  var units = open
+    ? '<button aria-selected="true">Mobile</button><button>Retail Stores</button>' +
+      '<button>B2B Ecomm</button><button>Consumer Electronics</button><button>Online Shop</button>'
+    : '';
+  return '<nav class="units">' +
+    '<button' + (open ? '' : ' aria-selected="true"') + '>Group</button>' +
+    '<span class="sep"></span>' +
+    fold('Units', open ? '▾' : '▸', open ? ' open' : '') + units +
+    fold('Functions', '▸') +
+    '<span class="sep"></span><button>⚙</button></nav>';
+}
+var HTML = '<div class="cap">closed · on the Group page</div>' + row(false) +
+           '<div class="cap">open</div>' + row(true);
+Array.prototype.forEach.call(document.querySelectorAll('.pair'), function(el){ el.innerHTML = HTML; });
+Array.prototype.forEach.call(document.querySelectorAll('.swap button'), function(b){
+  b.onclick = function(){
+    Array.prototype.forEach.call(document.querySelectorAll('.swap button'), function(x){
+      x.setAttribute('aria-pressed', String(x === b)); });
+    document.querySelector('.wrap').style.maxWidth = b.dataset.p === 'narrow' ? '1000px' : '1120px';
+  };
+});
+</script>
+</div></body></html>

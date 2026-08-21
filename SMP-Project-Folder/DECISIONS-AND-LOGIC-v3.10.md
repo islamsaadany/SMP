@@ -4825,6 +4825,34 @@ alone** — both are `0,3,0` — so replacing the open fill without adding an op
 hover would have left the fold silent under the mouse. The `.open:hover` rule
 is there for that reason, not for decoration.
 
+### 41.6 The palette switch is removed, and the default was wrong
+
+*(Islam, 2026-08-21: "I don't need to have slate, the branding covers this from
+inside.")*
+
+Which colours the product wears is the TENANT's decision, set once on Setup ›
+Branding — not a per-screen preference that leaves two people in the same
+organisation looking at different products. The switch is gone. Light and dark
+stay each viewer's own, because those are about the room they are sitting in.
+
+Removing it exposed a defect the switch had been hiding: **`PALETTES[0]` was
+`slate`, and the bare `:root` block held slate's values** — so a fresh
+deployment opened in a palette that is not the house one. Nobody noticed,
+because everybody pressed the button. **What paints when nothing has decided
+must be what the product actually is**, so Forefront is `PALETTES[0]` and the
+bare `:root` now.
+
+Three smaller consequences. The stored `smp.palette` key is no longer read AND
+is cleared on load — a value left in a browser from before would otherwise pin
+that person to a palette with no control left to change it back. The dead
+helpers went with the control (§24). And the contrast sweep now selects a
+palette the way branding does, `THEME.setBrand({palette})`, rather than through
+a key nothing reads any more — otherwise it would have measured Forefront
+twice and called it four combinations.
+
+Slate stays in the stylesheet as the second palette the two-layer system proves
+itself against, and as what a tenant's branding will plug into (§36).
+
 ### 41.5 Verified
 
 - Contrast: **0 failures** across 4 combinations × 20 pages and states. The

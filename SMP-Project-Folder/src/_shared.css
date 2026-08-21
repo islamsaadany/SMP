@@ -111,8 +111,10 @@
      gate keeps its own media block — it has no switch and no script beyond
      reading storage. */
 
-  /* SLATE — the default. Strategy-Formulation's own palette. */
-  :root, :root[data-palette="slate"], :root[data-palette="slate"][data-theme="light"] {
+  /* SLATE. Ported with the design language in 3.11 and kept as the second
+     palette the layer proves itself against — but it is NO LONGER the bare
+     :root default: see FOREFRONT below. */
+  :root[data-palette="slate"], :root[data-palette="slate"][data-theme="light"] {
     --good-tx:#047857; --attn-tx:#B45309; --warn-tx:#C2410C; --bad-tx:#B91C1C;
     --on-accent:#FFFFFF; --panel-accent:#A5B4FC;
     --panel-quiet:#94A3B8; --panel-hover:#1E293B;
@@ -155,6 +157,12 @@
   /* FOREFRONT — the house navy and gold, in the same language. This is what
      "several palettes" buys: the colours Islam has been looking at for ten
      versions, on the new type and the new shapes. */
+  /* THE BARE :root IS FOREFRONT, since 3.12. It was slate, which meant a
+     deployment whose script had not run yet painted in a palette that is not
+     the house one — invisible while a switch in the top bar let everybody
+     correct it, and a defect the moment that switch was removed. What paints
+     when nothing has decided must be what the product actually is. */
+  :root,
   :root[data-palette="forefront"], :root[data-palette="forefront"][data-theme="light"] {
     --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
     --on-accent:#16325C; --panel-accent:#E6C65C;

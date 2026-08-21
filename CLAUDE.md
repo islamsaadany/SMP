@@ -180,9 +180,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
   carries the same list so it can be tested locally. The worker caches the shell
   and **never `/api/*`**.
+- **Clean URL (since v3.9, §35.6):** the platform is served at **`/raya-trade`**,
+  not at its versioned filename — a Vercel rewrite maps the tenant's name onto
+  the file. Three files carry that mapping and must stay in step: `vercel.json`,
+  `scripts/dev-server.js` and `sw.js` (which caches the **tenant path**, since a
+  worker caches by request URL). From `file://` there is no server to rewrite,
+  so the gate uses the real relative path there.
+- **Multi-tenant (§36):** not built, and deliberately not scaffolded. When it
+  comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
+  a tenant column — person keys are short and global (`smo`, `ceo`), so a column
+  forces composite keys through `credentials` and `sessions`. Read §36 first.
 - **On each version bump:** update the gate's link in `index.html`, bump `SHELL`
-  and the platform filename in `sw.js`, regenerate `db/seed-state.json`, and
-  re-run the round-trip test.
+  **and** the platform filename in `sw.js`, `vercel.json`'s rewrite destination
+  and `scripts/dev-server.js`'s `PLATFORM_FILE`, regenerate `db/seed-state.json`,
+  and re-run the round-trip test.
 
 ### Current Directory Layout
 ```
@@ -245,7 +256,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.9 (in progress): the door gets a wall (§34).
+*Last Updated: 2026-08-21 — v3.9: the register (§35), and the URL stops
+naming the repository (§35.6). The register works because there is nothing to
+synchronise: §33 put a responsibility role on the THING, so the People page
+writes `UNIT_ROLES.mobile.head` — the same field the unit page writes, through
+the same function. **A disagreement is not possible when only one copy exists.**
+The role `<select>` is a search now, because a select could offer only people
+already attached to the unit (so a new unit could never get its first head) and
+could not offer somebody who does not exist (the normal case). **Typing does not
+repaint** — the filter hides rows in place, because a repaint would replace the
+input being typed into, the same family of fault as §30.1. **People are retired,
+never deleted**, retiring revokes their roles, and the refusal is on the SERVER:
+a retired person is turned away with the correct password. **Absent is not
+"none"** — a person the server has not met yet has no password state, so the
+column shows a dash, and every save drops the cache so the next paint asks
+again. Bulk temporary passwords: one shared password, and **the server picks who
+gets it**, so a stale screen can only issue to fewer people, never more.*
+
+*Earlier: 2026-08-21 — v3.9: the door gets a wall (§34).
 The sign-in page was one 400px card asked to carry the whole product, so every
 line of brand had to be squeezed above the password box. Strategy-Formulation's
 strong concept is **not in its form — it is in the split**: a navy wall arguing

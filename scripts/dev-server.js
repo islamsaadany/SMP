@@ -12,6 +12,10 @@ const authHandler = require("../api/auth.js");
 
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
+/* Mirrors vercel.json's rewrite: one tenant today, its own name in the URL,
+   and the versioned filename behind it (§35.6). */
+const TENANT = "raya-trade";
+const PLATFORM_FILE = "SMP-Project-Folder/strategy-management-platform-v3.9.html";
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
                 ".css": "text/css", ".json": "application/json", ".ico": "image/x-icon",
                 /* The PWA's three: a manifest served as octet-stream is ignored,
@@ -30,6 +34,11 @@ http.createServer(function (req, res) {
   let p = path.normalize(path.join(ROOT, decodeURIComponent(url.pathname)));
   if (!p.startsWith(ROOT)) { res.statusCode = 403; return res.end(); }
   if (url.pathname === "/" || url.pathname === "") p = path.join(ROOT, "index.html");
+  /* The same rewrite vercel.json performs, so what is tested here is what
+     ships. Without it the gate's /raya-trade link 404s locally and the
+     pretty URL is only ever exercised in production — which is the one
+     place a broken link costs something. Keep the two in step. */
+  if (url.pathname === "/" + TENANT) p = path.join(ROOT, PLATFORM_FILE);
   fs.readFile(p, function (err, data) {
     if (err) { res.statusCode = 404; return res.end("not found"); }
     res.setHeader("Content-Type", TYPES[path.extname(p)] || "application/octet-stream");

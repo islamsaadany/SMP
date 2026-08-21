@@ -1692,7 +1692,7 @@ do not; they are the plan. Key Objectives sit awkwardly between the two and will
 need a decision: carried forward by default and edited, or written fresh each
 time.
 
-### 16.11 Later
+### 16.12 Later
 
 Review mode should accommodate **images**: a screenshot of a platform or an
 outcome, or an uploaded picture slide placed at a chosen point in the deck.
@@ -3931,3 +3931,224 @@ composed control, never the one element inside it that happens to have the id.**
   straight past a gradient to the white body beneath and scores white-on-navy at
   1.05. **A contrast check that cannot see gradients is a contrast check that
   passes everything.**)
+
+---
+
+## 35 · The register — v3.9
+
+§16.11, built. Islam: *"people can be added in integration with the business
+unit or supporting functional pages as well through the assigning field which
+should be a search field with a list that appears below with relevant names but
+with an Add new button that creates only the name and the Role."* And later,
+about the register and the unit page: *"these three tables should interact
+together."*
+
+### 35.1 One fact, two editing surfaces
+
+They interact because there is nothing to synchronise. §33 already settled where
+a role lives: a SEAT (super user, group CEO, company CEO) is a property of the
+person; RESPONSIBILITY FOR A THING (unit owner, custodian, function head) is a
+property of the thing. So the register does not keep its own copy of who runs
+Mobile — it writes `UNIT_ROLES.mobile.head`, which is the same field the
+Business units page writes, through the same function.
+
+`grantPersonRole(person, role, where)` is that function, and both screens call
+it. There is no reconciliation step because there is nothing to reconcile: a
+disagreement is not possible when only one copy exists.
+
+A responsibility role is singular by nature — one head per unit — so granting it
+takes it from whoever held it. That is not a hazard to guard against; it is what
+"this is now their unit" means.
+
+### 35.2 The picker, and why the <select> had to go
+
+The unit page's role control was a `<select>` over `PEOPLE.filter(p => p.unit === k)`,
+which had two faults that only show up in use:
+
+- It could offer **only people already attached to this unit**, so the first
+  person on a new unit could never be chosen — there was nobody attached yet.
+- It could not offer somebody who **does not exist**, which is the normal case
+  when a unit is being set up from a plan that arrived yesterday.
+
+The replacement is a search over an **ordered, not filtered** list: this unit's
+people first under their own heading, then everybody else. A picker that hides
+the rest cannot move a person between units, and people move between units.
+Typing a name nobody has offers **+ Add "…"**, which creates the person and
+gives them the role in one act — Islam's "creates only the name and the Role" —
+and they appear in the register immediately for the rest of their details.
+
+One picker serves Business units and Supporting functions, addressed at a unit
+key or at `"fn:<key>"`, which is the same encoding `personRoles()` already
+reports. Neither page knows about the other.
+
+**Typing does not repaint.** The filter hides rows in place. A repaint would
+replace the very input being typed into, taking its focus and its caret with
+it — the same family of fault as §30.1, where a change handler rewrote the DOM
+under a button mid-click. **A search box is an interaction that lasts several
+keystrokes, and nothing may rebuild it while it is running.**
+
+### 35.3 People are retired, never deleted
+
+The decision §16.11 left open. Units are retired rather than deleted because a
+closed cycle names them (§30.3); a person carries reported history the same way.
+Snapshots attribute figures to whoever entered them, so deleting the row would
+turn a closed cycle into one nobody reported.
+
+Retiring **revokes every role they hold** rather than leaving them pointed at
+while unable to act. The unit then reads "unassigned", which is the true state
+of a unit whose head has left — where a retired person still named as head is a
+unit that looks staffed and is not.
+
+And it closes the door on the **server**, not only in the client: the login
+query and every session read now require the person to be active. Retirement is
+what happens when somebody leaves the company, so it has to refuse the correct
+password, not merely stop offering them roles. Verified with the right password
+against a retired account.
+
+### 35.4 Passwords: one shared temporary, and who decides the set
+
+Islam chose **one shared temporary password** over one generated per person. It
+is single-use by construction — `must_change` forces a change on first sign-in —
+and a list of per-person passwords has to be carried somewhere, which in
+practice is less safe than the password was.
+
+**The server decides who is in the set.** `issueTemporary` sends a password and
+nothing else; the insert selects the people who have no credentials row at all.
+A client that sends a list can send a longer one, so it does not send one — the
+worst a stale screen can do is issue to a shorter list than it showed. Nobody's
+existing password is ever overwritten; resetting one person is the per-row
+action, deliberately separate.
+
+### 35.5 A person the server has not met yet has no password state
+
+Password state is **not in the state graph and never will be** — credentials
+live in their own table (§19) — so the register asks for it separately, and only
+the SMO may ask.
+
+The bug this exposed: a person created in the register does not exist to the
+server until the autosave lands, so they were absent from the cached states and
+the "N cannot sign in yet" offer never appeared for them. **Absent is not
+"none"**: not knowing whether someone has a password is a different state from
+knowing they have none, and the column shows a dash for the first (§30.2, the
+same distinction that made new page keys invisible on old tenants).
+
+The fix is to drop the cached states on every successful save, so the next paint
+asks again — the first moment the answer can be right. A save that clears them
+also asks the screen to repaint, but only when that column is actually on
+screen: a repaint nobody can see can only cost.
+
+### 35.6 The URL stops naming the repository
+
+Islam: *"The project url is always named something strange:
+…/SMP-Project-Folder/strategy-management-platform-v3.8.html what is that?"*
+
+Fair. The versioned filename is deliberate — **the version IS the cache bust** —
+but it has no business being read by a person, and neither has the name of a
+folder in the repository. A Vercel rewrite maps the tenant's own name onto the
+file, so the address reads `<domain>/raya-trade`.
+
+Opened from a memory stick there is no server to rewrite anything, so the gate
+still uses the real relative path there. **The pretty URL is a property of being
+hosted**, and claiming it offline would be a broken link.
+
+Three files carry the mapping and must stay in step: `vercel.json` (the rewrite),
+`scripts/dev-server.js` (the same rewrite, so what is tested locally is what
+ships), and `sw.js` — which caches `/raya-trade` and **not** the versioned
+filename, because a service worker caches by REQUEST URL and the gate asks for
+the tenant path. Caching the file behind it would fill the cache with something
+nobody requests and leave the platform unavailable offline.
+
+### 35.7 Also in this version
+
+- The **People section left Roles & access.** A matrix page is where you set
+  what a role may reach; a staff list is not a matrix, and carrying both on one
+  screen is most of why that page reads as exhausting. Its redesign is next.
+- **cfgHead draws no Clear button without a clear scope.** Companies passed none
+  and got one anyway — and because it shares the "units" edit key, opening that
+  menu read `labels[0]` off an argument nobody had passed and threw. A control
+  that cannot work should not be drawn.
+- `phone` and `active` ride in the `people` table's **`extra` jsonb** rather
+  than becoming columns. Neither has relational meaning, and adding a column to
+  a table that already exists needs a pre-phase migration (§33.5) for nothing
+  gained. Round trip verified, and the server reads `active` out of the jsonb in
+  the login guard.
+- **A unit and a function may share a name** — Care and IT are both, here — and
+  one person is often custodian of each. Unqualified, the row read "Strategy
+  custodian · Care" twice and looked like a duplicate rather than two real roles
+  over two different things. The kind is part of the answer, so it is part of
+  the label.
+- §16.11 was **numbered twice**; the later one is 16.12 now.
+
+### 35.8 Verified
+
+- 31 viewers × every page, zero console errors; byte-identical rebuild.
+- Register driven end to end from the built file: minting a key (and deduping it
+  to `needspassword2` on a second identical name), giving a role, the same fact
+  appearing on Business units, the picker's filter **not stealing focus**,
+  Add-new creating and assigning in one act, and retirement revoking the role.
+- Against a throwaway Postgres: clean slate PASS, round trip PASS, fixed point
+  PASS, archived plan PASS; `phone` and `active` survive `extra`; bulk issues
+  only to those with none and is a no-op the second time; **a retired person is
+  refused with the correct password.**
+- Live in a browser against that database: states load, the pills render, the
+  bulk offer appears only when somebody needs one, and issuing updates the page.
+- Both URLs: signing in hosted lands on `/raya-trade`; opened from disk the gate
+  still uses the relative versioned path.
+
+---
+
+## 36 · Multi-tenant — what to do when the time comes
+
+Islam: *"the platform should handle multi tenants … that's a future thing I will
+build but I just want to make sure that the platform is prepared."*
+
+Nothing speculative was built. What follows is the assessment, so that when it
+is built it is not a redesign.
+
+### 36.1 What is already tenant-shaped
+
+- **The org name is data.** `GROUP.org` is what the chrome and the deck read;
+  "the platform is named after Raya Trade" already works with no code change.
+- **The state graph is one tenant's whole document.** `readState`/`writeState`
+  move the entire graph in one go. That shape does not change.
+- **The tenant is already in the URL** (§35.6). `/raya-trade` exists today and
+  is the seam.
+- **The demo dataset is already separate from the tenant's data** (§21) — the
+  distinction between "this client's content" and "an example" is settled.
+
+### 36.2 The recommendation: one Postgres SCHEMA per tenant
+
+Two ways exist. A `tenant` column on every table means touching every query,
+every insert, every migration, and every uniqueness constraint — and getting one
+wrong shows one client another client's plan. **One schema per tenant** means
+`SET search_path` at the top of the connection and nothing else changes:
+`db/schema.sql`, every migration, `readState` and `writeState` all stand
+unaltered, and cross-tenant leakage is prevented by Postgres rather than by
+remembering a WHERE clause.
+
+The cost is a schema per client to create and migrate — which `ensureReady`
+already does, once per schema instead of once.
+
+### 36.3 The one trap to avoid
+
+**Person keys are short and global.** `smo`, `ceo`, `own_mob` — every tenant will
+want `smo`. `credentials` and `sessions` are keyed on `person_key`, so under a
+tenant COLUMN those keys need a composite key and every join needs updating.
+Under a schema per tenant they are simply different tables and the collision
+cannot occur. This is the strongest argument for the schema route, and the thing
+that would be expensive to discover late.
+
+### 36.4 The shape of the change
+
+1. Resolve the tenant from the URL path (the slug is already there).
+2. `SET search_path TO <tenant>` on each connection, from a whitelist of known
+   tenants — never from the URL directly, or the path becomes a way to name a
+   schema.
+3. Sign-in gains a tenant: a person belongs to one, and the gate either asks
+   which client after sign-in (Islam's description) or infers it from the path.
+4. `ensureReady` runs per schema, exactly as it does now per database.
+
+Steps 1 and 2 are small. Step 3 is the real work, and it is a decision about
+identity rather than about plumbing: whether the SMO is one person with access
+to many clients, or one account per client. **That question is not answered
+here**, and it should be answered before anything is built.

@@ -1,6 +1,7 @@
 /* /api/auth — sign in, sign out, who am I, change my password, and (SMO
-   only) issue or reset anyone's. One endpoint, action-shaped, because the
-   five operations share every line of plumbing.
+   only) read who has a password, issue or reset one, and issue temporary
+   passwords in bulk. One endpoint, action-shaped, because the operations
+   share every line of plumbing.
 
    Usernames are person keys — the same keys the platform uses everywhere
    (§4: stable ids are the contract). The SMO sees each person's key beside
@@ -69,11 +70,15 @@ module.exports = async function handler(req, res) {
     if (action === "login") {
       const key = String(body.user || "").trim().toLowerCase();
       const cred = (await client.query(
-        "SELECT c.password_hash, c.must_change, p.name, p.role FROM credentials c " +
-        "JOIN people p ON p.key = c.person_key WHERE c.person_key = $1", [key])).rows[0];
+        "SELECT c.password_hash, c.must_change, p.name, p.role, " +
+        "       COALESCE(p.extra->>'active', 'true') <> 'false' AS active " +
+        "FROM credentials c JOIN people p ON p.key = c.person_key WHERE c.person_key = $1", [key])).rows[0];
       /* One message for a wrong name and a wrong password — a login screen
-         should not confirm which usernames exist. */
-      if (!cred || !auth.verifyPassword(body.password, cred.password_hash)) {
+         should not confirm which usernames exist. A RETIRED person gets the
+         same one: they are refused here, on the server, and not only by a
+         client that stops offering them roles. Retirement is what happens when
+         somebody leaves, so it has to close the door, not just the menu. */
+      if (!cred || !cred.active || !auth.verifyPassword(body.password, cred.password_hash)) {
         return send(res, 401, { ok: false, error: "Wrong sign-in. Check both fields, or ask the SMO to reset your password." });
       }
       const token = await auth.createSession(client, key);
@@ -120,6 +125,54 @@ module.exports = async function handler(req, res) {
         [key, auth.hashPassword(body.password)]);
       await client.query("DELETE FROM sessions WHERE person_key = $1", [key]);
       return send(res, 200, { ok: true });
+    }
+
+    /* Who has a password, and is it still the temporary one. The People page
+       cannot show a "no password yet" column without this, and it cannot be
+       derived from the state graph: credentials live in their own table and
+       deliberately never enter the graph (§19). Keys and states only — no
+       hash, no timestamp, nothing that helps anyone guess. */
+    if (action === "passwordStates") {
+      const person = await auth.getSession(client, req);
+      if (!person || person.role !== "super") {
+        return send(res, 403, { ok: false, error: "Passwords are the SMO's." });
+      }
+      const rows = (await client.query(
+        "SELECT p.key, c.must_change FROM people p LEFT JOIN credentials c ON c.person_key = p.key")).rows;
+      const states = {};
+      rows.forEach(function (r) {
+        states[r.key] = r.must_change == null ? "none" : (r.must_change ? "temporary" : "set");
+      });
+      return send(res, 200, { ok: true, states: states });
+    }
+
+    /* Bulk issue: one temporary password, set for everyone who has NONE.
+       Islam chose one shared password over one generated each — it is
+       single-use by construction (must_change forces a change on first
+       sign-in), and a list of per-person passwords has to be carried
+       somewhere, which in practice is less safe than the password was.
+
+       THE SERVER DECIDES WHO IS IN THE SET, not the client. The client knows
+       who has no password only because passwordStates told it, and a client
+       that sends a list can send a longer one — this way the worst a bad
+       request can do is nothing, because anyone with a password is excluded
+       by the query itself. Nobody's existing password is ever overwritten
+       here; resetting one person is the per-row action, deliberately. */
+    if (action === "issueTemporary") {
+      const person = await auth.getSession(client, req);
+      if (!person || person.role !== "super") {
+        return send(res, 403, { ok: false, error: "Issuing passwords is the SMO's." });
+      }
+      const why = auth.passwordPolicy(body.password);
+      if (why) return send(res, 400, { ok: false, error: "The password needs " + why + "." });
+      const hash = auth.hashPassword(body.password);
+      const done = await client.query(
+        "INSERT INTO credentials (person_key, password_hash, must_change) " +
+        "SELECT p.key, $1, true FROM people p " +
+        "WHERE NOT EXISTS (SELECT 1 FROM credentials c WHERE c.person_key = p.key) " +
+        "RETURNING person_key",
+        [hash]);
+      return send(res, 200, { ok: true, issued: done.rows.map(function (r) { return r.person_key; }) });
     }
 
     return send(res, 400, { ok: false, error: "unknown action" });

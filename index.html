@@ -715,8 +715,27 @@
     if (which === "change") document.getElementById("newpw").focus();
   }
 
-  /* Version lives in the filename, never in the app - update on each bump. */
-  var PLATFORM = "SMP-Project-Folder/strategy-management-platform-v3.8.html";
+  /* WHERE THE PLATFORM IS, and what the address bar says it is.
+
+     The versioned filename is deliberate — the version IS the cache bust — but
+     it has no business being read by a person: Islam saw
+     /SMP-Project-Folder/strategy-management-platform-v3.9.html and asked,
+     fairly, what the rest of it was for. Served, a Vercel rewrite maps the
+     tenant's own name onto that file, so the address reads
+     <domain>/raya-trade and the repo's shape and the version number stay
+     where they belong, which is out of sight.
+
+     Opened from a memory stick there is no server to rewrite anything, so the
+     real relative path stands. The pretty URL is a property of being hosted,
+     and claiming it offline would just be a broken link.
+
+     When the platform becomes multi-tenant (§36) this is the seam: the slug is
+     already the tenant's, and it is already in the URL. */
+  var TENANT = "raya-trade";
+  var HOSTED = location.protocol === "http:" || location.protocol === "https:";
+  var PLATFORM = HOSTED
+    ? "/" + TENANT
+    : "SMP-Project-Folder/strategy-management-platform-v3.9.html";
   function openPlatform() { location.replace(PLATFORM); }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }

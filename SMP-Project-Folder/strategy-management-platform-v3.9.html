@@ -811,6 +811,56 @@
   .rmbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .addrow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:14px; }
   .addrow .why { margin:0; }
+  /* ── The register (§35) ──────────────────────────────────────────
+     A role is two facts — which role, and what it is attached to — so the
+     chip carries both. Never a bare role name: "Custodian" alone is the half
+     of the answer that does not tell you whose plan they can touch. */
+  .rolechip { display:inline-flex; align-items:baseline; gap:6px; margin:0 6px 6px 0;
+              padding:4px 6px 4px 10px; border:1px solid var(--line); border-radius:99px;
+              background:var(--surface-2); }
+  .rolechip b { font-size:12px; }
+  .rolechip .why { font-size:11px; }
+  .xbtn { font:inherit; font-size:14px; line-height:1; color:var(--none); background:none;
+          border:none; cursor:pointer; padding:0 4px; border-radius:99px; }
+  .xbtn:hover { color:var(--bad); background:var(--bad-bg); }
+  .xbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .roleadd { display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .roleadd select.fld { max-width:170px; }
+  /* The add-a-person row is a table row, not the flex .addrow above it — a
+     display:flex on a <tr> collapses the cells it was meant to lay out. */
+  .newrow td { background:var(--surface-2); }
+  .newrow input.fld { width:100%; max-width:320px; }
+  /* A retired person reads as past tense without being unreadable: the row is
+     dimmed, never greyed to the point where the name cannot be checked. */
+  tr.retired td { opacity:.62; }
+
+  /* ── The assignment picker (§35) ─────────────────────────────────
+     Closed it is a button that reads as the current answer; open it is a
+     search box over a scrolling list. The list is capped and scrolls rather
+     than growing the row, because a tenant with two hundred people would
+     otherwise push the rest of the table off the screen. */
+  .pickbtn { font:inherit; font-size:13px; font-weight:600; color:var(--ink);
+             background:var(--surface); border:1px solid var(--line); border-radius:8px;
+             padding:6px 10px; cursor:pointer; text-align:left; width:100%; }
+  .pickbtn:hover { border-color:var(--gold); }
+  .pickbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .pickbtn.empty { color:var(--none); font-weight:500; font-style:italic; }
+  .picker { border:1px solid var(--gold); border-radius:10px; background:var(--surface);
+            padding:8px; text-align:left; min-width:210px; }
+  .picker input.fld { width:100%; margin-bottom:6px; }
+  .picklist { max-height:190px; overflow-y:auto; margin-bottom:6px; }
+  .pickhead { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+              color:var(--none); padding:6px 4px 3px; }
+  .pickrow { display:block; width:100%; text-align:left; font:inherit; background:none;
+             border:none; border-radius:6px; padding:5px 8px; cursor:pointer; }
+  .pickrow b { display:block; font-size:13px; font-weight:600; }
+  .pickrow .why { display:block; font-size:11px; }
+  .pickrow:hover { background:var(--surface-2); }
+  .pickrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .pickempty { font-size:12px; color:var(--none); padding:8px 4px; }
+  .pickfoot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+              border-top:1px solid var(--line); padding-top:6px; }
+
   b.overload { color:var(--bad); }
   .note.bad-note { border-left-color:var(--bad); background:var(--bad-bg); }
 
@@ -3218,6 +3268,10 @@ function roleName(k){
    added to the registry but not yet given a job. */
 function personRoles(p){
   if (!p) return [];
+  /* A retired person holds nothing. Retiring already revokes their roles,
+     so this is the second lock rather than the first — but access is the
+     one place where being wrong twice is worth the two lines. */
+  if (!personActive(p)) return [];
   var out = [];
   var seat = p.role || (p.level === "smo" ? "super"
                       : p.level === "ceo" ? (p.company ? "cceo" : "gceo") : null);
@@ -3268,6 +3322,10 @@ var PAGES = [
   { key:"c_access",scope:"setup", label:"Roles & access", note:"This matrix" },
   { key:"c_bands", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
   { key:"c_units", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
+  /* The register. Everyone the platform knows, their role, and — where a
+     database is behind it — whether they have a password yet. SMO only, at
+     Islam's direction: creating a person creates an identity. */
+  { key:"c_people",scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
   { key:"c_import",scope:"manage", label:"Import",          note:"Plan and progress templates" },
 
   { key:"c_fns",   scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
@@ -3297,7 +3355,18 @@ var KO_VIEW = "chips";
 
 /* Configuration screens open read-only. Editing is entered deliberately, which
    is what makes a change to a weight or a threshold an act rather than a slip. */
-var EDITING = { weights:false, factors:false, bands:false, units:false };
+var EDITING = { weights:false, factors:false, bands:false, units:false, people:false, fns:false };
+
+/* Transient register state. None of this is the tenant's data — it is which
+   control happens to be open — so none of it is saved (§25.2: a property of
+   the screen never belongs in the state graph).
+     ADDROLE      whose "+ role" control is open, by person key
+     ADDROLE_KIND which role that control currently shows
+     NEWPERSON    what has been typed into the add-a-person row
+     PICKING      which assignment picker is open, "<unit>|<role>"
+     PICKQ        what has been typed into it */
+var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
+var PICKING = null, PICKQ = "";
 
 /* none | view | edit — three states, because the CEO can see the weighting
    table but does not manage it, and that is not expressible in two. */
@@ -3317,17 +3386,20 @@ var ACCESS = {
            u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", u_report:"edit",
            k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
            c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_fns:"edit",
+           c_people:"edit",
            c_caps:"edit", c_import:"edit", c_cycle:"edit", c_focus:"edit", c_kb:"view" },
   /* Sees everything, manages the scheme rather than the plans. */
   gceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view", g_focus:"edit",
            u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"view",
            c_caps:"view", c_import:"none", c_cycle:"view", c_focus:"edit", c_kb:"view" },
   /* The same reading, bounded to their company by reaches(). */
   cceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"view",
            u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Accountable for the unit: authors its words, reports its figures. The plan
@@ -3336,6 +3408,7 @@ var ACCESS = {
   owner: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Carries the strategy work beside the head, so the same reach — this is the
@@ -3343,11 +3416,13 @@ var ACCESS = {
   custodian: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
            k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   fnhead:{ g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"none", u_found:"none", u_anal:"none", u_plan:"none", u_report:"none",
            k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
   /* Named on a measure or a tactic. Reports their own work and reads the plan
@@ -3355,6 +3430,7 @@ var ACCESS = {
   contrib:{ g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
            u_perf:"view", u_found:"view", u_anal:"none", u_plan:"view", u_report:"edit",
            k_perf:"view", k_found:"view", k_proj:"view", k_report:"edit",
+           c_people:"none",
            c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
            c_caps:"none", c_import:"none", c_cycle:"none", c_focus:"none", c_kb:"view" }
 };
@@ -3426,6 +3502,156 @@ var UNIT_ROLES = {
 function personName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+
+/* ── The register (§16.11, §35) ──────────────────────────────────────
+   People are RETIRED, never deleted. A person carries reported history the
+   same way a unit does (§30.3): snapshots attribute figures to whoever
+   entered them, and removing the row would rewrite a closed cycle into one
+   nobody reported. Retired means cannot sign in, cannot hold a role, still
+   named wherever they already are.
+
+   `active` and `phone` are not columns — they ride in the people table's
+   `extra` jsonb and come back through it. Deliberate: neither has any
+   relational meaning, and adding a real column to a table that already exists
+   needs a pre-phase migration (§33.5) for nothing gained. */
+function personActive(p){ return !!p && p.active !== false; }
+function personBy(key){
+  return PEOPLE.filter(function(x){ return x.key === key; })[0] || null;
+}
+
+/* A person arrives with a name and a role; the key is minted here, the same
+   way a plan's codes are minted on arrival rather than typed (§22). Letters
+   and digits from the name, then a numeric suffix if that is taken — never a
+   silent collision, because the key IS the username. */
+function mintPersonKey(name){
+  var base = String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14);
+  if (!base) base = "person";
+  if (!personBy(base)) return base;
+  var n = 2;
+  while (personBy(base + n)) n++;
+  return base + n;
+}
+
+/* Create and return the key. `where` follows the same encoding personRoles()
+   reports: "group", "co:<company>", "fn:<function>", or a unit key. */
+function addPerson(o){
+  var key = mintPersonKey(o.name);
+  var p = { key: key, name: String(o.name || "").trim(), title: o.title || "" };
+  if (o.phone) p.phone = o.phone;
+  PEOPLE.push(p);
+  if (o.role) grantPersonRole(key, o.role, o.where);
+  return key;
+}
+
+/* ── One fact, two editing surfaces ─────────────────────────────────
+   A SEAT role (super, group CEO, company CEO) is a property of the PERSON and
+   is stored on them. RESPONSIBILITY FOR A THING (unit owner, custodian,
+   function head) is a property of the THING, so granting it writes the
+   thing's pointer — which is the same pointer the Business units page edits.
+   That is why the register and the unit page cannot disagree: there is only
+   one place the answer lives, and both screens write it (§33, §35).
+
+   A responsibility role is singular by nature — one head per unit — so
+   granting it to someone takes it from whoever held it. That is not a side
+   effect to guard against; it is what "this is now their unit" means. */
+function unitRolesFor(k){
+  if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
+  return UNIT_ROLES[k];
+}
+function grantPersonRole(personKey, roleKey, where){
+  var p = personBy(personKey);
+  if (!p) return;
+  var at = where || "group";
+  if (roleKey === "super" || roleKey === "gceo") {
+    p.role = roleKey; delete p.company; if (!p.unit) p.unit = "group";
+  } else if (roleKey === "cceo") {
+    p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
+  } else if (roleKey === "owner") {
+    unitRolesFor(at).head = personKey; p.unit = at;
+  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
+    FUNCTIONS[at.slice(3)].custodian = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "custodian") {
+    unitRolesFor(at).custodian = personKey; p.unit = at;
+  } else if (roleKey === "fnhead") {
+    FUNCTIONS[at.slice(3)].head = personKey; p.fn = at.slice(3);
+  } else if (roleKey === "contrib") {
+    p.unit = at;
+  }
+}
+function revokePersonRole(personKey, roleKey, where){
+  var p = personBy(personKey);
+  var at = where || "group";
+  if (roleKey === "super" || roleKey === "gceo" || roleKey === "cceo") {
+    if (p) { delete p.role; delete p.company; }
+  } else if (roleKey === "owner") {
+    if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
+  } else if (roleKey === "custodian" && at.indexOf("fn:") === 0) {
+    var f = FUNCTIONS[at.slice(3)];
+    if (f && f.custodian === personKey) f.custodian = null;
+  } else if (roleKey === "custodian") {
+    if (UNIT_ROLES[at] && UNIT_ROLES[at].custodian === personKey) UNIT_ROLES[at].custodian = null;
+  } else if (roleKey === "fnhead") {
+    var g = FUNCTIONS[at.slice(3)];
+    if (g && g.head === personKey) g.head = null;
+  }
+  /* contrib is p.unit, which is also how a person is FOUND — clearing it would
+     hide them from every unit dropdown, so it stands until they are given
+     somewhere else to be. */
+}
+
+/* Retiring REVOKES every role the person holds, rather than leaving them
+   pointed at while unable to act. The unit then reads "unassigned", which is
+   the true state of a unit whose head has left — and it is visible, where a
+   retired person still named as head is a unit that looks staffed and is not.
+   Reported history is untouched: it lives in snapshots, not in these
+   pointers. */
+function retirePerson(key){
+  var p = personBy(key);
+  if (!p) return;
+  personRoles(p).forEach(function(r){ revokePersonRole(key, r.role, r.at); });
+  p.active = false;
+}
+function restorePerson(key){
+  var p = personBy(key);
+  if (p) delete p.active;
+}
+
+/* Where a role can be attached, for the second half of the picker. A role
+   whose scope is the group has exactly one answer, and the control says so
+   rather than offering a list of one. */
+function roleWheres(roleKey){
+  if (roleKey === "super" || roleKey === "gceo") return [{ v:"group", label:"the group" }];
+  if (roleKey === "cceo") {
+    return COMPANY_KEYS.map(function(c){ return { v:"co:" + c, label: COMPANIES[c].name }; });
+  }
+  if (roleKey === "fnhead") {
+    return FUNCTION_KEYS.map(function(f){ return { v:"fn:" + f, label: FUNCTIONS[f].name }; });
+  }
+  var units = UNIT_KEYS.map(function(k){ return { v:k, label: UNITS[k].name }; });
+  if (roleKey === "custodian") {
+    return units.concat(FUNCTION_KEYS.map(function(f){
+      return { v:"fn:" + f, label: FUNCTIONS[f].name + " (function)" };
+    }));
+  }
+  return units;
+}
+
+/* The order a picker offers people in: the ones already attached to this unit
+   or function first, then everyone else, retired people never. "Relevant
+   names first" was Islam's word for it — the list still holds everyone,
+   because a person moving between units is normal and a picker that hides
+   them makes the move impossible. */
+function peopleFor(where){
+  var here = [], rest = [];
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var mine = String(where || "").indexOf("fn:") === 0
+      ? p.fn === String(where).slice(3)
+      : p.unit === where;
+    (mine ? here : rest).push(p);
+  });
+  return { here: here, rest: rest };
 }
 
 /* The owner reaches the same pages as the head, for the same unit. */
@@ -9850,43 +10076,6 @@ function renderAccess(){
   }).join("");
 
 
-  /* Credentials exist only where the platform is served with a database
-     behind it (\u00a719). The SMO issues a temporary password per person \u2014
-     usernames are the person keys shown here \u2014 and the person is forced to
-     choose their own on first sign-in. Offline, none of this renders and the
-     page is exactly the prototype's. */
-  var credentialed = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
-  /* The roles a person holds, with what each is attached to. Several is normal
-     and the row shows all of them, because "which of these gave her access to
-     Mobile" is the question this table exists to answer. The official title
-     sits underneath as information: it is never consulted for access (§33). */
-  function atLabel(at){
-    if (!at || at === "group") return "group";
-    if (String(at).indexOf("fn:") === 0) {
-      var f = FUNCTIONS[String(at).slice(3)];
-      return f ? f.name : String(at).slice(3);
-    }
-    if (String(at).indexOf("co:") === 0) {
-      var c = COMPANIES[String(at).slice(3)];
-      return c ? c.name : String(at).slice(3);
-    }
-    return UNITS[at] ? UNITS[at].name : at;
-  }
-  var peopleRows = PEOPLE.map(function(p){
-    var rs = personRoles(p);
-    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title || "") +
-      (credentialed ? ' &middot; <span class="mono">key ' + esc(p.key) + '</span>' : '') + '</span></td>' +
-      '<td>' + (rs.length
-        ? rs.map(function(r){
-            return '<span class="pill kind">' + esc(roleName(r.role)) + '</span>' +
-              '<span class="why" style="margin:0 0 0 6px;display:inline">' + esc(atLabel(r.at)) + '</span>';
-          }).join('<br>')
-        : '<span class="pill none">No role</span>') + '</td>' +
-      '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button>' +
-      (credentialed ? ' <button class="linkbu" data-setpw="' + p.key + '">Set password</button>' : '') +
-      '</td></tr>';
-  }).join("");
-
   return section("", "The visibility matrix",
       "Pre-filled with a working default. Change any cell and the navigation above re-renders immediately for whoever is currently being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
@@ -9901,13 +10090,12 @@ function renderAccess(){
       '<div class="cfg"><table><thead><tr><th style="width:22%">Role</th><th class="cc" style="width:8%">People</th><th>What it is</th></tr></thead><tbody>' +
       roleRows + '</tbody></table></div>') +
 
-    section("", "People",
-      "Role plus what it is attached to. Two people holding the same role reach the same page types but different units &mdash; which is why the matrix alone cannot express access.",
-      '<div class="cfg"><table><thead><tr><th style="width:32%">Person</th>' +
-      '<th style="width:40%">Roles in the platform<span class="why">Not their job title \u2014 the title never decides access</span></th>' +
-      '<th>Simulate</th></tr></thead><tbody>' +
-      peopleRows + '</tbody></table></div>' +
-      '<div class="note"><b>Two unit owners hold the same row of this matrix.</b> It grants both the same page types; what each role is attached to is what sends one to Mobile and the other to Retail. Someone holding several roles gets the most generous answer of them &mdash; but only ever within the reach each role carries.</div>');
+    /* The People list that used to close this page is a page of its own now
+       (§35). A matrix is where you set what a role may reach; a staff list is
+       not a matrix, and carrying both on one screen is most of why this one
+       reads as exhausting. */
+    section("", null, null,
+      '<div class="note"><b>Two unit owners hold the same row of this matrix.</b> It grants both the same page types; what each role is attached to is what sends one to Mobile and the other to Retail. Someone holding several roles gets the most generous answer of them &mdash; but only ever within the reach each role carries. Who holds which role is on <b>People</b>.</div>');
 }
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */
@@ -10057,6 +10245,13 @@ function cfgHead(title, chips, editKey, mayEdit, clearScope, labels){
               '" title="' + (editing ? "Done" : "Edit") + '" aria-label="' +
               (editing ? "Done editing" : "Edit this page") + '">' +
               (editing ? ICO_DONE : ICO_EDIT) + '</button>' +
+            /* No clear scope, no clear button. Companies and People have
+               nothing to clear — a page's rows are retired one at a time — and
+               Companies was rendering the control anyway: it shares the
+               "units" edit key, so opening the menu there read labels[0] off
+               an argument nobody had passed and threw. A control that cannot
+               work should not be drawn. */
+            (!clearScope ? '' :
             '<button class="ico' + (open ? " on" : "") + '" data-clearmenu="' + editKey +
               '" title="Clear" aria-label="Clear plans or progress" aria-expanded="' + open + '">' +
               ICO_CLEAR + '</button>' +
@@ -10082,9 +10277,67 @@ function cfgHead(title, chips, editKey, mayEdit, clearScope, labels){
                   '<button data-clear="' + clearScope + '||nums">' + labels[0] + '</button>' +
                   '<button data-clear="' + clearScope + '||plan">' + labels[1] + '</button>' +
                 '</div>'
-              : '') +
+              : '')) +
           '</span>'
         : '') +
+    '</div></div>';
+}
+
+/* ── Assigning a person to a thing (§35) ────────────────────────────
+   Islam: "a search field with a list that appears below with relevant names
+   but with an Add new button that creates only the name and the Role."
+
+   It replaces a plain <select>, which had two faults. It could only offer
+   people already attached to this unit — so the first person on a new unit
+   could never be chosen, because nobody was attached yet. And it could not
+   offer somebody who does not exist, which is the normal case when a unit is
+   being set up from a plan that arrived yesterday.
+
+   The list is ORDERED, not filtered: this unit's people first under their own
+   heading, then everybody else. A picker that hides the rest cannot move a
+   person between units, and people move between units.
+
+   `where` is the same encoding personRoles() reports — a unit key, or
+   "fn:<function>" — so one picker serves Business units and Supporting
+   functions without either knowing about the other. */
+function assignPicker(where, roleKey, current, editable){
+  var id = where + "|" + roleKey;
+  if (!editable) {
+    var n = personName(current);
+    return n ? esc(n) : '<span class="why" style="margin:0">unassigned</span>';
+  }
+  if (PICKING !== id) {
+    var held = personName(current);
+    return '<button class="pickbtn' + (held ? '' : ' empty') + '" data-pick-open="' + esc(id) + '">' +
+      (held ? esc(held) : 'unassigned') + '</button>';
+  }
+  var pool = peopleFor(where);
+  var row = function(p){
+    return '<button class="pickrow" data-name="' + esc(p.name.toLowerCase()) + '" ' +
+      'data-pick-set="' + esc(id + '|' + p.key) + '">' +
+      '<b>' + esc(p.name) + '</b>' +
+      (p.title ? '<span class="why" style="margin:0">' + esc(p.title) + '</span>' : '') +
+      '</button>';
+  };
+  var group = function(label, list){
+    return list.length
+      ? '<div class="pickhead">' + label + '</div>' + list.map(row).join("")
+      : '';
+  };
+  return '<div class="picker">' +
+    '<input class="fld" id="pickQ" placeholder="Search people…" autocomplete="off" ' +
+      'aria-label="Search people">' +
+    '<div class="picklist">' +
+      group(String(where).indexOf("fn:") === 0 ? "In this function" : "In this unit", pool.here) +
+      group("Everyone else", pool.rest) +
+      '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
+    '</div>' +
+    '<div class="pickfoot">' +
+      '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
+      '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
+      (current ? '<button class="linkbu" data-pick-clear="' + esc(id + '|' + current) +
+                 '">Unassign</button>' : '') +
+      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
     '</div></div>';
 }
 
@@ -10096,20 +10349,10 @@ function renderUnits(){
     var u = UNITS[k];
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
-    var pick = function(role, sel){
-      /* Only people attached to this unit can hold either role — the dropdown
-         cannot offer someone from another unit. */
-      var opts = PEOPLE.filter(function(p){ return p.unit === k; });
-      if (!editable) {
-        var n = personName(sel);
-        return n ? esc(n) : '<span class="why" style="margin:0">unassigned</span>';
-      }
-      return '<select class="fld" data-urole="' + k + '|' + role + '">' +
-        '<option value="">unassigned</option>' +
-        opts.map(function(p){
-          return '<option value="' + p.key + '"' + (p.key === sel ? " selected" : "") + '>' + esc(p.name) + '</option>';
-        }).join("") + '</select>';
-    };
+    /* Was a <select> limited to people already attached to this unit, which
+       meant a new unit could never be given its first head. It is the shared
+       picker now — search, the unit's own people first, and Add new (§35). */
+    var pick = function(role, sel){ return assignPicker(k, role === "head" ? "owner" : "custodian", sel, editable); };
     return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
@@ -10222,6 +10465,177 @@ var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
    different questions on one screen: which units exist, and who is allowed to
    see whom. They are edited at different times by different reasoning, and the
    units table is long enough to push the company rules off the top. */
+/* ── The register (§35) ─────────────────────────────────────────────
+   Everyone the platform knows, in one table. It replaces the People section
+   that used to sit at the bottom of Roles & access — a matrix page is where
+   you set what a role may reach, not where you keep a staff list, and putting
+   both on one screen is most of why that page reads as exhausting.
+
+   SMO only, at Islam's direction: adding a person creates an identity, and an
+   identity is the SMO's to create. The whole page is gated on c_people, which
+   only `super` holds.
+
+   PASSWORD STATE IS NOT IN THE STATE GRAPH and never will be — credentials
+   live in their own table (§19). The column is filled by a separate ask
+   (SYNC.passwordStates) and simply absent when the platform is opened from a
+   file, where there are no credentials to have a state. */
+var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
+
+function renderPeople(){
+  var mayEdit = grant("c_people") === "edit";
+  var editable = mayEdit && EDITING.people;
+  var live = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
+  var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
+  var noPw = live && PWSTATES
+    ? PEOPLE.filter(function(p){ return personActive(p) && PWSTATES[p.key] === "none"; }).length
+    : 0;
+
+  /* A unit and a supporting function may share a name — Care and IT are both,
+     in this tenant — and one person is often custodian of each. Unqualified,
+     the row then reads "Strategy custodian · Care" twice and looks like a
+     duplicate rather than two real roles over two different things. The kind
+     is part of the answer, so it is part of the label. */
+  function whereLabel(at){
+    if (!at || at === "group") return "the group";
+    if (String(at).indexOf("fn:") === 0) {
+      var f = FUNCTIONS[String(at).slice(3)];
+      return (f ? f.name : String(at).slice(3)) + " (function)";
+    }
+    if (String(at).indexOf("co:") === 0) {
+      var c = COMPANIES[String(at).slice(3)];
+      return c ? c.name : String(at).slice(3);
+    }
+    return UNITS[at] ? UNITS[at].name : at;
+  }
+
+  /* The role cell. Read-only it is a list of what they hold and where; in edit
+     it gains an X per role and one add control. Two selects rather than one
+     long list of every role-times-place, because "where" depends on which
+     role was chosen and a combined list would offer Company CEO of Mobile. */
+  function roleCell(p){
+    var rs = personRoles(p);
+    var held = rs.length
+      ? rs.map(function(r){
+          return '<span class="rolechip"><b>' + esc(roleName(r.role)) + '</b>' +
+            '<span class="why" style="margin:0">' + esc(whereLabel(r.at)) + '</span>' +
+            (editable
+              ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
+                '" title="Remove this role" aria-label="Remove this role">&times;</button>'
+              : '') + '</span>';
+        }).join("")
+      : '<span class="pill none">No role</span>';
+    if (!editable) return held;
+    var addRole = ADDROLE === p.key;
+    return held +
+      (addRole
+        ? '<span class="roleadd">' +
+            '<select class="fld" data-prole-pick="' + p.key + '">' +
+              ROLES.map(function(r){
+                return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
+                  '>' + esc(r.name) + '</option>';
+              }).join("") + '</select>' +
+            '<select class="fld" data-prole-where="' + p.key + '">' +
+              roleWheres(ADDROLE_KIND).map(function(w){
+                return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
+              }).join("") + '</select>' +
+            '<button class="linkbu" data-prole-add="' + p.key + '">Give</button>' +
+            '<button class="linkbu" data-prole-cancel="1">Cancel</button>' +
+          '</span>'
+        : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
+  }
+
+  function pwCell(p){
+    if (!live) return '';
+    if (!personActive(p)) {
+      return '<td class="cc"><span class="why" style="margin:0">cannot sign in</span></td>';
+    }
+    var st = PWSTATES ? PWSTATES[p.key] : null;
+    var pill = st === "set"       ? '<span class="pill good">Set</span>'
+             : st === "temporary" ? '<span class="pill warn">Temporary</span>'
+             : st === "none"      ? '<span class="pill none">None yet</span>'
+             : '<span class="why" style="margin:0">&mdash;</span>';
+    return '<td class="cc">' + pill +
+      '<button class="linkbu" data-setpw="' + p.key + '">' +
+      (st === "none" || !st ? "Set" : "Reset") + '</button></td>';
+  }
+
+  var rows = PEOPLE.map(function(p, i){
+    return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
+      '<td class="idx">' + (i + 1) + '</td>' +
+      '<td>' + (editable
+        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
+        : '<b>' + esc(p.name) + '</b>') +
+        '<span class="why mono">' + esc(p.key) + '</span></td>' +
+      /* The job title is information and nothing else. It sits in the register
+         because "who is Mennah" is a fair question; it is never read when
+         deciding what anyone may see (§33). */
+      '<td>' + (editable
+        ? '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
+          '" placeholder="Job title">'
+        : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
+                   : '<span class="why" style="margin:0">not given</span>')) + '</td>' +
+      '<td>' + (editable
+        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
+          '" placeholder="Contact number">'
+        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' +
+      '<td>' + roleCell(p) + '</td>' +
+      pwCell(p) +
+      '<td class="cc">' + (editable
+        ? '<button class="rmbtn' + (personActive(p) ? '' : ' on') + '" data-pact="' + p.key + '">' +
+            (personActive(p) ? "Retire" : "Restore") + '</button>'
+        : '<span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
+            (personActive(p) ? "Active" : "Retired") + '</span>' +
+          /* Moved here with the rest of the register. Seeing the platform as
+             somebody else is how a grant is checked, and it belongs beside the
+             person rather than under a matrix. */
+          (personActive(p)
+            ? '<button class="linkbu" data-as="' + p.key + '">View as</button>' : '')) +
+      '</td></tr>';
+  }).join("");
+
+  var cols = live ? 7 : 6;
+  var addRow = editable
+    ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
+        '<input class="fld" id="newPersonName" placeholder="Full name" ' +
+          'value="' + esc(NEWPERSON) + '">' +
+      '</td><td class="cc"><button class="linkbu" data-padd="1">Add</button></td></tr>'
+    : '';
+
+  return cfgHead("People",
+      ['<span class="pill kind">SMO</span>',
+       plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
+        retired ? [retired + ' retired'] : []).concat(
+        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []),
+      "people", mayEdit, null) +
+
+    section("", "The register",
+      "Everyone the platform knows. A role is given here or on the unit's own page — " +
+      "it is the same fact either way, so the two can never disagree.",
+      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+        '<th class="idx" style="width:38px">#</th>' +
+        '<th style="width:20%">Person<span class="why">Their key is their username</span></th>' +
+        '<th style="width:16%">Job title<span class="why">Never decides access</span></th>' +
+        '<th style="width:12%">Contact</th>' +
+        '<th>Roles, and what each is attached to</th>' +
+        (live ? '<th class="cc" style="width:13%">Password</th>' : '') +
+        '<th class="cc" style="width:10%">Standing</th>' +
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
+      (live && noPw
+        ? '<div class="note"><b>' + plural(noPw, "person").replace("persons", "people") +
+          ' cannot sign in yet.</b> Issue one temporary password to all of them at once — ' +
+          'each is asked to choose their own the first time they use it, so the same ' +
+          'password never works twice for the same person. Nobody who already has a ' +
+          'password is touched.' +
+          '<div style="margin-top:10px"><button class="linkbu" data-pwbulk="1">' +
+          'Issue temporary passwords</button></div></div>'
+        : '') +
+      '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
+      'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
+      'reported. Retiring takes away every role they hold and closes the door — they ' +
+      'cannot sign in — while everything already attributed to them stays true.</div>');
+}
+
 function renderCompanies(){
   var editable = grant("c_units") === "edit" && EDITING.units;
   return cfgHead("Companies",
@@ -10847,17 +11261,12 @@ function renderCycle(){
    not behave differently. */
 function renderFunctions(){
   var editable = grant("c_fns") === "edit" && EDITING.fns;
+  /* The same picker the Business units page uses, addressed at "fn:<key>"
+     rather than a unit key — search, this function's own people first, and Add
+     new (§35). It replaces a <select> that listed every person in the tenant
+     in one flat list, retired ones included. */
   var pick = function(role, current, fk){
-    if (!editable) {
-      var n = personName(current);
-      return n ? esc(n) : '<span class="why" style="margin:0">unassigned</span>';
-    }
-    return '<select class="fld" data-fnrole="' + fk + '|' + role + '">' +
-      '<option value="">unassigned</option>' +
-      PEOPLE.map(function(p){
-        return '<option value="' + p.key + '"' + (p.key === current ? " selected" : "") + '>' +
-          esc(p.name) + '</option>';
-      }).join("") + '</select>';
+    return assignPicker("fn:" + fk, role === "head" ? "fnhead" : "custodian", current, editable);
   };
 
   var rows = FUNCTION_KEYS.map(function(fk, i){
@@ -11551,6 +11960,10 @@ var SYNC = (function () {
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
   var saving = false;
+  /* Kept from boot() so a save can ask the screen to repaint itself. The
+     only thing that needs it is the register's password column, which
+     cannot be right until the save that created the person has landed. */
+  var repaint = null;
 
   /* Two datasets, one product.
 
@@ -11629,7 +12042,23 @@ var SYNC = (function () {
       body: '{"state":' + now + "}"
     }).then(function (r) {
       saving = false;
-      if (r.ok) lastSaved = now;
+      if (r.ok) {
+        lastSaved = now;
+        /* A person created in the register does not exist to the SERVER until
+           this save lands — and credentials are keyed on people, so until then
+           they can be given no password and the password column has nothing
+           true to say about them. Dropping the cached states makes the next
+           paint ask again, which is the first moment the answer can be right.
+           Guarded on the symbol existing so sync.js stays independent of which
+           pages happen to be built into the file. */
+        if (typeof PWSTATES !== "undefined" && PWSTATES !== null) {
+          PWSTATES = null;
+          /* Only when that column is actually on screen. A repaint nobody can
+             see is a repaint that can only cost — and this one fires after
+             every save. */
+          if (repaint && document.querySelector('[data-edit="people"]')) repaint();
+        }
+      }
       else console.warn("SMP: save failed (HTTP " + r.status + ") — will retry on the next change");
     }).catch(function (e) {
       saving = false;
@@ -11712,22 +12141,42 @@ var SYNC = (function () {
     }
   }
 
+  /* One shape for every /api/auth call this object makes: post JSON, hand
+     back (error, body). Three callers with the same six lines is where a typo
+     lives in exactly one of them. */
+  function authPost(body, done) {
+    fetch("/api/auth", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
+      .catch(function (e) { done(String(e.message || e), null); });
+  }
+
   return {
     isLive: function () { return live; },
     isDemo: function () { return mode === "demo"; },
     person: function () { return person; },
-    /* The SMO issues or resets a password from Levels & access. The server
-       checks the policy and the issuer; the password is temporary and forces
-       a change on first sign-in. */
+    /* The three password operations, all SMO-only and all checked again on
+       the server — this object is the convenience, never the enforcement. */
     setPassword: function (key, pw, done) {
-      fetch("/api/auth", { method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "setPassword", person: key, password: pw })
-      }).then(function (r) { return r.json(); })
-        .then(function (j) { done(j.ok ? null : (j.error || "failed")); })
-        .catch(function (e) { done(String(e.message || e)); });
+      authPost({ action: "setPassword", person: key, password: pw },
+        function (err) { done(err); });
+    },
+    /* One temporary password for everyone who has none. The server picks the
+       set, so this sends a password and nothing else. */
+    issueTemporary: function (pw, done) {
+      authPost({ action: "issueTemporary", password: pw },
+        function (err, j) { done(err, err ? null : (j.issued || [])); });
+    },
+    /* "none" / "temporary" / "set" per person key. Credentials never enter the
+       state graph, so the People page has to ask for this separately. */
+    passwordStates: function (done) {
+      authPost({ action: "passwordStates" },
+        function (err, j) { done(err, err ? null : (j.states || {})); });
     },
     boot: function (paint) {
+      repaint = paint;
       paint();
       if (!enabled) return;
       /* Taken before hydration, while the globals still hold the baked-in
@@ -11837,6 +12286,11 @@ var SYNC = (function () {
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
+      /* The register (§35). It sits after the things people are attached TO,
+         because that is the order the SMO works in: the units exist, then the
+         people who hold them. It used to be a section at the bottom of Roles &
+         access, which is a matrix page — a staff list is not a matrix. */
+      { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
       { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
     /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
@@ -12415,13 +12869,6 @@ var SYNC = (function () {
         paint();
       });
     });
-    document.querySelectorAll("[data-fnrole]").forEach(function(el){
-      el.addEventListener("change", function(){
-        var p = el.dataset.fnrole.split("|");
-        FUNCTIONS[p[0]][p[1]] = el.value || null;
-        paint();
-      });
-    });
     document.querySelectorAll("[data-clearmenu]").forEach(function(b){
       b.addEventListener("click", function(ev){
         ev.stopPropagation();
@@ -12553,13 +13000,8 @@ var SYNC = (function () {
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
     });
-    document.querySelectorAll("select[data-urole]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var p = sel.dataset.urole.split("|");
-        UNIT_ROLES[p[0]][p[1]] = sel.value || null;
-        paint();
-      });
-    });
+    /* Both role <select>s are gone — Business units and Supporting functions
+       share one picker now, wired in wirePicker() below (§35). */
     var au = document.getElementById("addunit");
     if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
     /* Choosing from the menu closes it and raises the confirmation, so the
@@ -12710,11 +13152,231 @@ var SYNC = (function () {
           "\nThey will be asked to choose their own on first sign-in.");
         if (!pw) return;
         SYNC.setPassword(key, pw, function(err){
-          alert(err ? "Not set: " + err
-                    : "Set. " + key + " signs in with it once, then chooses their own.");
+          if (err) return alert("Not set: " + err);
+          /* The register shows a password COLUMN now, so a reset that does not
+             repaint it leaves the screen claiming the old state. Ask again
+             rather than assuming — the server is what knows. */
+          if (PWSTATES) PWSTATES[key] = "temporary";
+          paint();
+          alert("Set. " + key + " signs in with it once, then chooses their own.");
         });
       });
     });
+
+    /* ── The register (§35) ─────────────────────────────────────────
+       Three text fields, a standing toggle, an add row, the role controls and
+       the bulk issue. Everything writes the same data the Business units page
+       writes — there is no second copy to keep in step. */
+    function fieldWire(attr, apply){
+      document.querySelectorAll("[data-" + attr + "]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var p = personBy(inp.dataset[attr]);
+          if (p) apply(p, inp.value.trim());
+          paint();
+        });
+      });
+    }
+    fieldWire("pname",  function(p, v){ if (v) p.name = v; });
+    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
+    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
+
+    document.querySelectorAll("[data-pact]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.pact;
+        var p = personBy(key);
+        if (!p) return;
+        if (personActive(p)) {
+          var held = personRoles(p).length;
+          if (held && !confirm(p.name + " holds " + plural(held, "role") +
+              ". Retiring takes " + (held === 1 ? "it" : "them") +
+              " away and closes their sign-in. Everything already reported in their name stays.\n\nRetire " +
+              p.name + "?")) return;
+          retirePerson(key);
+        } else {
+          restorePerson(key);
+        }
+        paint();
+      });
+    });
+
+    /* The typed name is held in a global rather than read off the input at
+       submit time, because the repaint that follows any other change would
+       otherwise throw it away mid-typing. */
+    var newName = document.getElementById("newPersonName");
+    if (newName) {
+      newName.addEventListener("input", function(){ NEWPERSON = newName.value; });
+      newName.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(); }
+      });
+    }
+    function addTypedPerson(){
+      var name = (NEWPERSON || "").trim();
+      if (!name) return;
+      addPerson({ name: name });
+      NEWPERSON = "";
+      paint();
+    }
+    document.querySelectorAll("[data-padd]").forEach(function(b){
+      b.addEventListener("click", addTypedPerson);
+    });
+
+    document.querySelectorAll("[data-prole-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = "owner"; paint();
+      });
+    });
+    document.querySelectorAll("[data-prole-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ ADDROLE = null; paint(); });
+    });
+    /* Choosing the role repaints, because the SECOND select's options depend
+       on the first: a company CEO is attached to a company, a function head to
+       a function. One list of every role-times-place would offer Company CEO
+       of Mobile. */
+    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
+      sel.addEventListener("change", function(){ ADDROLE_KIND = sel.value; paint(); });
+    });
+    document.querySelectorAll("[data-prole-add]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.proleAdd;
+        var where = document.querySelector('[data-prole-where="' + key + '"]');
+        grantPersonRole(key, ADDROLE_KIND, where ? where.value : "group");
+        ADDROLE = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-prole-off]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.proleOff.split("|");
+        revokePersonRole(p[0], p[1], p[2]);
+        paint();
+      });
+    });
+
+    /* One temporary password for everyone who has none. The SERVER picks the
+       set — this sends a password and nothing else — so the worst a stale
+       screen can do is issue to a shorter list than it showed. */
+    document.querySelectorAll("[data-pwbulk]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var pw = prompt("One temporary password, for everyone who has none." +
+          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
+          "\nEach of them is asked to choose their own the first time they use it.");
+        if (!pw) return;
+        SYNC.issueTemporary(pw, function(err, issued){
+          if (err) return alert("Not issued: " + err);
+          issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
+          paint();
+          alert(issued.length
+            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") +
+              ": " + issued.join(", ") + "."
+            : "Nobody needed one \u2014 everybody already has a password.");
+        });
+      });
+    });
+
+    /* Asked ONCE, the first time the register is on screen with a database
+       behind it. Credentials are not in the state graph and never will be
+       (§19), so this is a separate question — and it is a question about other
+       people's accounts, so the server answers it only for the SMO.
+
+       PWSTATES starts null meaning "not asked" and is set to {} before the
+       request goes out, which is what stops every repaint asking again. Empty
+       renders as a dash, not as "none": not knowing is not the same as knowing
+       there is no password (§30.2, the same distinction). */
+    wirePicker();
+
+    if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
+        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
+      PWSTATES = {};
+      SYNC.passwordStates(function(err, st){
+        if (err) return;
+        PWSTATES = st;
+        paint();
+      });
+    }
+  }
+
+  /* ── The assignment picker (§35) ────────────────────────────────
+     Open one, search it, choose a name or add a new one. Used by Business
+     units and by Supporting functions, which is why it addresses everything
+     through grantPersonRole() rather than writing UNIT_ROLES or FUNCTIONS
+     itself — the register writes through the same door, so the two screens
+     cannot drift apart.
+
+     TYPING DOES NOT REPAINT. The filter hides rows in place instead, because
+     a repaint would replace the very input being typed into, taking its focus
+     and its caret with it — the same family of fault as §30.1, where a change
+     handler rewrote the DOM under a button mid-click. A search box is an
+     interaction that lasts several keystrokes; nothing may rebuild it while
+     it is running. */
+  function wirePicker(){
+    document.querySelectorAll("[data-pick-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PICKING = b.dataset.pickOpen; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-pick-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ PICKING = null; PICKQ = ""; paint(); });
+    });
+    document.querySelectorAll("[data-pick-set]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pickSet.split("|");
+        grantPersonRole(p[2], p[1], p[0]);
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-pick-clear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pickClear.split("|");
+        revokePersonRole(p[2], p[1], p[0]);
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+    /* Add new: the typed name becomes a person AND takes the role in one act,
+       which is the whole point — "create only the name and the Role", in
+       Islam's words. They appear in the register immediately, for the rest of
+       their details. */
+    document.querySelectorAll("[data-pick-new]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var name = (PICKQ || "").trim();
+        if (!name) return;
+        var p = b.dataset.pickNew.split("|");
+        addPerson({ name: name, role: p[1], where: p[0] });
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+
+    var q = document.getElementById("pickQ");
+    if (!q) return;
+    q.addEventListener("input", function(){
+      PICKQ = q.value;
+      var needle = PICKQ.trim().toLowerCase();
+      var any = false;
+      document.querySelectorAll(".pickrow").forEach(function(r){
+        var hit = !needle || r.dataset.name.indexOf(needle) > -1;
+        r.hidden = !hit;
+        if (hit) any = true;
+      });
+      /* A heading with nothing under it is a heading that lies about what the
+         list contains. */
+      document.querySelectorAll(".pickhead").forEach(function(h){
+        var n = h.nextElementSibling, shown = false;
+        while (n && n.classList.contains("pickrow")) {
+          if (!n.hidden) shown = true;
+          n = n.nextElementSibling;
+        }
+        h.hidden = !shown;
+      });
+      var empty = document.querySelector(".pickempty");
+      if (empty) empty.hidden = any;
+      var add = document.querySelector("[data-pick-new]");
+      if (add) {
+        add.hidden = !needle;
+        add.textContent = '+ Add \u201c' + PICKQ.trim() + '\u201d';
+      }
+      var hint = document.querySelector(".pickhint");
+      if (hint) hint.hidden = !!needle;
+    });
+    q.focus();
   }
 
   /* Arrangement. One button turns handles on everywhere the viewer is

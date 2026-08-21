@@ -20,7 +20,12 @@ const SHELL = "smp-shell-v3.9";
 const ASSETS = [
   "/",
   "/index.html",
-  "/SMP-Project-Folder/strategy-management-platform-v3.8.html",
+  /* The tenant path, not the file behind it: a service worker caches by
+     REQUEST URL, and the gate asks for /raya-trade. Caching the versioned
+     filename instead would fill the cache with something nobody requests
+     and leave the platform unavailable offline. Both still resolve to the
+     same file on the server (vercel.json rewrites). */
+  "/raya-trade",
   "/manifest.webmanifest",
   "/favicon.svg",
   "/favicon.png",

@@ -3577,3 +3577,52 @@ pages.
   height across a full scroll sweep both ways. PWA suite green. Round trip,
   fixed point and archived-plan round trip PASS. Rebuild byte-identical; the
   seed gains exactly one key per level, which is the point.
+
+---
+
+## 31 · The plan becomes correctable, for the SMO — v3.6
+
+Islam, on §30.6's raised question: *"the plan page should have a pen for the
+SMO."* Answered, and built.
+
+### 31.1 What this does and does not change
+
+**§22 stands.** A plan is still *authored by upload*: the template still carries
+no codes because the platform mints them on arrival, an upload still replaces a
+whole unit's plan, and replacing still archives the outgoing one rather than
+deleting it.
+
+What this adds is the **correction afterwards** — a target typed wrong, an owner
+who moved, a measure named badly — without making the SMO rebuild and re-upload
+an entire unit to fix a word. Authoring and correcting are different acts and
+the platform now has both.
+
+Editable: the pillar name and its end-state line, each measure's
+name, target and three-year target, and each tactic's name and owner. Not
+editable: the code (minted, §22), the direction and compile rule (they change
+what a figure MEANS, and a plan whose meaning drifts under a reported actual is
+worse than one that is wrong in a name), and the quarters grid.
+
+### 31.2 SMO only, and not merely by access key
+
+`mayEditPlan()` requires the viewer's level to be `smo` **and** `u_plan` to
+grant edit. The key alone is not enough: `u_plan` at edit is held by unit heads
+too, and *a plan being correctable by the person measured against it* is a
+different decision from *a plan being correctable by its custodian*. One is
+housekeeping; the other is moving the goalposts.
+
+This is the first thing to revisit when per-action authorisation and the
+per-figure change log land (§19.2). Until then the narrower rule is the safe
+one, and it is written as a named function rather than an inline condition so
+there is exactly one place to change.
+
+### 31.3 Verified
+
+- The pen appears on the plan's title box, hidden at rest and visible on hover.
+- One click opens 24 fields; typing and one more click writes the change into
+  the graph and leaves edit mode — the §30.1 fix holding on a new page.
+- **A CEO-level viewer gets no pen and no editable fields** on a plan they can
+  otherwise read.
+- Three themes × 31 viewers, zero console errors; chrome one height across a
+  full scroll sweep; PWA green; round trip, fixed point and archived-plan round
+  trip PASS; seed and rebuild byte-identical.

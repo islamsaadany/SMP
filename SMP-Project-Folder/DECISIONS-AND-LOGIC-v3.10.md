@@ -1600,6 +1600,34 @@ worse than no entry.
 **Scope, stated:** unit key objectives and unit key measures. Capability
 projects — deliverables, outcomes and milestones — are not sourced yet.
 
+#### RESHAPED the same day: one decision, then ticks
+
+Islam, on seeing it: *"that's a huge setup to do and not practical … he just
+needs the measure and target so he can tick if he owns this or not."* He was
+right, and the number says why: **116 figures across ten units**, each asking
+for a team AND a person before the feature did anything for anybody.
+
+What the data also said, measured rather than assumed: only ONE measure name
+repeats across units, so "set it once by name" would have saved nothing —
+but **27 of the 116 are money** (B EGP, M EGP, EGP), spread across all ten
+units. The thing that separates a team's number from the unit's is not its
+name; it is what it is measured in. Which means the work is one selection and
+a run of ticks, not 116 decisions.
+
+So: **WHO is chosen once at the top**, and every row below is a single mark —
+the same shape as Focus measures, which asks the same kind of question (A13).
+The units are **buttons in a row rather than a dropdown**, with their counts on
+them, so where the work is left is visible without opening anything. And the
+row shows the measure and its target and nothing else: the direction, the
+compile rule and the pillar are the plan's business, not the custodian's.
+
+Three states per row, not two: unclaimed, mine, or **another team's** — the
+third shown as that team's name rather than a tick that could be overwritten
+without noticing. Switching the team at the top is how you release it.
+
+This also retires the half-set problem that the first build had: a mark is
+only offered once both ends are set, and it writes both at once.
+
 ### 16.8 A help box — self-service for the questions the SMO gets asked
 
 **The idea.** A small chat box in the platform answering the questions people
@@ -4852,6 +4880,19 @@ twice and called it four combinations.
 
 Slate stays in the stylesheet as the second palette the two-layer system proves
 itself against, and as what a tenant's branding will plug into (§36).
+
+### 41.7 The closed fold: a soft ghost
+
+Islam, on the closed state: *"they look poor."* He was right, and the reason is
+typographic rather than chromatic: the labels were **11px uppercase
+letterspaced in a bordered capsule**, sitting beside 13.5px sentence-case tabs.
+A different species. Four treatments were drawn
+(`mockups/2026-08-21_closed-fold_PENDING.html`); **D was chosen** — a quiet
+fill, no border, the row's own sentence case.
+
+Why not B, which was the recommendation and dropped the container entirely: a
+fold is **a group of things rather than a page**, and the container is what
+says so. D keeps that and drops the shouting.
 
 ### 41.5 Verified
 

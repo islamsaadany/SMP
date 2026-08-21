@@ -1129,96 +1129,74 @@ function renderSourceSetup(){
   var u = UNITS[SRCSET.unit] || UNITS[activeKeys()[0]];
   if (!u) return '<div class="note">No business units yet.</div>';
 
-  /* ONE decision at the top, then ticks. The first build asked for a team and
-     a person on EVERY row, which meant 116 pairs of dropdowns across ten
-     units before the feature did anything for anybody. Islam: "that's a huge
-     setup to do and not practical ... he just needs the measure and target so
-     he can tick if he owns this or not."
-
-     So the WHO is chosen once, and each row is a single mark — the same shape
-     as Focus measures, which asks the same kind of question (§A13: follow what
-     the platform already does). */
-  var team = SRCSET.team, by = SRCSET.by;
-  var ready = !!(team && by);
-
-  var teamPick = '<select class="fld" id="srcset-team"' + (editable ? '' : ' disabled') + '>' +
-    '<option value="">Choose a team\u2026</option>' + FUNCTION_KEYS.map(function(k){
-      return '<option value="' + esc(k) + '"' + (k === team ? " selected" : "") + '>' +
-        esc(FUNCTIONS[k].name) + '</option>';
-    }).join("") + '</select>';
-  var byPick = '<select class="fld" id="srcset-by"' + (editable ? '' : ' disabled') + '>' +
-    '<option value="">Choose a person\u2026</option>' + PEOPLE.filter(personActive).map(function(p){
-      return '<option value="' + esc(p.key) + '"' + (p.key === by ? " selected" : "") + '>' +
+  /* Anyone the platform knows can be named. NOT only people attached to the
+     function: Islam's Finance SMO custodian sits with the office rather than
+     in Finance, and a picker that could not offer them would make the feature
+     unusable for the one person it was described for. */
+  var peopleOptions = function(sel){
+    return '<option value="">\u2014</option>' + PEOPLE.filter(personActive).map(function(p){
+      return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
         esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
-    }).join("") + '</select>';
-
-  /* Units as buttons rather than a dropdown (Islam): ten of them fit on one
-     line, and a list you can see is a list you can move through. The count is
-     on the button, so where the work is left is visible without opening
-     anything. */
-  var unitBtns = '<div class="unitpick">' + activeKeys().map(function(k){
-      var n = SMPRules.sourceRows(world()).filter(function(r){ return r.unit === k; }).length;
-      return '<button class="upick' + (k === u.ukey ? " on" : "") + '" data-srcunit="' + esc(k) + '">' +
-        esc(UNITS[k].navName || UNITS[k].name) +
-        (n ? ' <span class="upick-n">' + n + '</span>' : '') + '</button>';
-    }).join("") + '</div>';
-
-  /* A row is one of three things: unclaimed, mine, or somebody else's. The
-     third is shown as the team's name rather than a tick you could overwrite
-     without noticing. */
-  var row = function(m){
-    var src = m.src && m.src.by ? m.src : null;
-    var mine = !!(src && ready && src.team === team && src.by === by);
-    var theirs = src && !mine;
-    return '<div class="pick ' + (mine ? "on" : "off") + '">' +
-      (editable && ready && !theirs
-        ? '<button class="fmark-btn' + (mine ? ' on' : '') + '" data-srcpick="' + esc(m.id) + '" ' +
-          'aria-pressed="' + mine + '" aria-label="' + (mine ? "Release " : "Claim ") + esc(m.name) + '"></button>'
-        : '<span class="fmark-btn' + (mine ? ' on' : '') + '" style="cursor:default"></span>') +
-      '<span>' + esc(m.name) + '</span>' +
-      '<span class="num why" style="margin:0">' +
-        (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
-      '<span class="why" style="margin:0;min-width:120px;text-align:right">' +
-        (theirs
-          ? esc(srcTeamName(src))
-          : (mine ? "marked" : (editable && ready ? "click to mark" : ""))) + '</span>' +
-    '</div>';
+    }).join("");
+  };
+  var teamOptions = function(sel){
+    return '<option value="">\u2014</option>' + FUNCTION_KEYS.map(function(k){
+      return '<option value="' + esc(k) + '"' + (k === sel ? " selected" : "") + '>' +
+        esc(FUNCTIONS[k].name) + '</option>';
+    }).join("");
   };
 
-  var blocks =
-    '<div class="grouphead">' + L("keyobj","bu") + '</div>' +
-    (u.keyObjectives.length
-      ? u.keyObjectives.map(row).join("")
-      : '<div class="fstrip-empty">None set for this unit.</div>') +
+  var row = function(m){
+    var src = m.src && m.src.by ? m.src : null;
+    var half = !src && m.src && (m.src.team || m.src.by);
+    return '<tr' + (src ? ' class="has-src"' : (half ? ' class="wantnote"' : '')) + '>' +
+      '<td>' + esc(m.name) + '</td>' +
+      '<td class="cc mono">' + (m.target ? esc(m.target) : '<span class="missing">\u2014</span>') + '</td>' +
+      '<td>' + (editable
+        ? '<select class="fld" data-srcteam="' + esc(m.id) + '">' +
+          teamOptions((src || m.src || {}).team) + '</select>'
+        : (src ? esc(srcTeamName(src)) : '<span class="why" style="margin:0">The unit</span>')) + '</td>' +
+      '<td>' + (editable
+        ? '<select class="fld" data-srcby="' + esc(m.id) + '">' +
+          peopleOptions((src || m.src || {}).by) + '</select>'
+        : (src ? esc((personBy(src.by) || {}).name || src.by) : "")) +
+        (half ? ' <span class="why" style="margin:0">Needs both</span>' : '') + '</td>' +
+    '</tr>';
+  };
+
+  var body =
+    '<tr class="grouprow"><td colspan="4"><b>' + esc(L("keyobj","bu")) + '</b></td></tr>' +
+    (u.keyObjectives.length ? u.keyObjectives.map(row).join("")
+      : '<tr><td colspan="4" class="why">None set for this unit.</td></tr>') +
     u.items.map(function(p, pi){
-      return '<div class="grouphead">' + pillarCode(u, pi) + ' ' + esc(p.name) + '</div>' +
-        (p.measures.length
-          ? p.measures.map(row).join("")
-          : '<div class="fstrip-empty">No key measures.</div>');
+      return '<tr class="grouprow"><td colspan="4"><b>' + pillarCode(u, pi) + " " + esc(p.name) +
+             '</b></td></tr>' +
+        (p.measures.length ? p.measures.map(row).join("")
+          : '<tr><td colspan="4" class="why">No key measures.</td></tr>');
     }).join("");
 
-  var all = SMPRules.sourceRows(world());
-  var forThis = ready ? all.filter(function(r){
-      return r.src.team === team && r.src.by === by; }).length : 0;
+  var unitPick = '<select class="fld" id="srcset-unit">' + activeKeys().map(function(k){
+      var n = SMPRules.sourceRows(world()).filter(function(r){ return r.unit === k; }).length;
+      return '<option value="' + k + '"' + (k === u.ukey ? " selected" : "") + '>' +
+        esc(UNITS[k].name) + (n ? "  \u2014 " + n + " sourced" : "") + '</option>';
+    }).join("") + '</select>';
+
+  var total = SMPRules.sourceRows(world()).length;
 
   return '<div class="kv"><span class="pill kind">SMO</span>' +
-      '<span class="pill kind">' + all.length + ' figure' + (all.length === 1 ? "" : "s") +
-      ' sourced across the group</span>' +
-      (ready ? '<span class="pill good">' + forThis + ' marked for ' + esc(FUNCTIONS[team].name) +
-               '</span>' : '') + '</div>' +
+      '<span class="pill kind">' + total + ' figure' + (total === 1 ? "" : "s") +
+      ' sourced across the group</span></div>' +
     section("", "Source of figures", null,
-      '<div class="imp-row" style="margin:0 0 12px">' +
-        '<span class="cfg-lab">Marking for</span>' + teamPick + byPick + '</div>' +
-      (ready ? '' : '<div class="note">Choose the team and the person first. ' +
-        'Every mark below is stored against them, so one pass through the units ' +
-        'sets everything that team owns.</div>') +
-      unitBtns +
-      '<div class="cfg" style="padding:0">' + blocks + '</div>' +
-      '<div class="note"><b>A marked figure is entered once, by the person named above.</b> ' +
+      '<div class="imp-row" style="margin:0 0 16px">' + unitPick + '</div>' +
+      '<table class="cfg"><thead><tr>' +
+        '<th style="width:44%">Figure</th><th class="cc" style="width:14%">Target</th>' +
+        '<th style="width:21%">Team</th><th style="width:21%">Entered by</th>' +
+      '</tr></thead><tbody>' + body + '</tbody></table>' +
+      '<div class="note"><b>A sourced figure is entered once, by the team that owns the number.</b> ' +
         'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
-        'note</b> \u2014 the number is theirs, the performance is the unit\u2019s, and the ' +
-        'explanation belongs to whoever owns the performance. A row already marked for another ' +
-        'team shows that team\u2019s name; switch to them above to release it.</div>');
+        'note</b> \u2014 the number is Finance\u2019s, the performance is the unit\u2019s, and the ' +
+        'explanation belongs to whoever owns the performance. Leave a row empty and the unit ' +
+        'enters it itself.</div>');
 }
 
 /* The other half of §16.7: a source team is a reporting party like any other,

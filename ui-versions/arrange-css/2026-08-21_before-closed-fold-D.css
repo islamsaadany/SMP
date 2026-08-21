@@ -653,17 +653,12 @@
   /* Scoped inside .units, or `.units button {background:none}` wins on
      specificity and the fold renders with no fill at all \u2014 and its opacity is
      reset, since a control must not inherit the dimming meant for plain tabs. */
-  /* CLOSED: a soft ghost (§41.7, treatment D). It was an 11px uppercase
-     letterspaced label in a bordered capsule — a different typographic species
-     from the 13.5px sentence-case tabs beside it, which is most of why it read
-     as bolted on. It keeps a container, because a fold is a group of things
-     rather than a page and the container is what says so; what it drops is the
-     border and the shouting. */
-  .units .navfold{background:rgba(255,255,255,.07);border:0;opacity:1;
-    border-radius:6px;color:#D7E0EE;font:600 13px/1 var(--sans);letter-spacing:0;
-    text-transform:none;padding:8px 12px;cursor:pointer;display:inline-flex;
-    align-items:center;gap:7px;white-space:nowrap;margin:0 3px}
-  .units .navfold:hover{color:#fff;background:rgba(255,255,255,.16)}
+  .units .navfold{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.34);
+    opacity:1;
+    border-radius:20px;color:#E4EBF5;font:700 11px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;padding:6px 11px;cursor:pointer;display:inline-flex;
+    align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
+  .units .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
   /* The accent budget (§41): open is accent WORDS, not an accent fill. A solid
      pill here was louder than the underlined page it sat beside, and spent the
      accent twice within two inches. The fill and the border both go, so the
@@ -676,8 +671,7 @@
   .units .navfold.open:hover{color:var(--panel-accent);background:rgba(255,255,255,.10);
     border-color:transparent}
   .units .navfold.open .foldtw{opacity:1}
-  .navfold .foldtw{font-size:10px;opacity:.7}
-  .units .navfold:hover .foldtw{opacity:1}
+  .navfold .foldtw{font-size:9px;opacity:.85}
   /* The closed fold carries the location, or browsing one side while sitting on
      the other leaves the navigation saying nothing about where you are. */
   .foldhere{color:var(--gold);font-weight:700;text-transform:none;letter-spacing:0;
@@ -705,7 +699,7 @@
      spacing tightens. Everyone else keeps today's roomier row. */
   .units-in.folded{max-width:none;padding-left:16px;padding-right:16px}
   .units-in.folded button[data-u]{padding-left:9px;padding-right:9px;font-size:13.5px}
-  .units-in.folded .navfold{padding:7px 10px;font-size:12.5px;margin:0 2px}
+  .units-in.folded .navfold{padding:5px 9px;font-size:10.5px;margin:0}
   .units-in.folded .sep{margin:0 3px}
 
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);

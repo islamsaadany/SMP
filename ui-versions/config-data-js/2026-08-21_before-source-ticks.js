@@ -120,10 +120,9 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
      NEWPERSON    what has been typed into the add-a-person row
      PICKING      which assignment picker is open, "<unit>|<role>"
      PICKQ        what has been typed into it */
-/* The source-of-figures page: which unit is open, and WHO the marks are being
-   made for. All three are properties of the screen, never of the state graph
-   (§25.2) — the marks themselves live on the measures. */
-var SRCSET = { unit: null, team: null, by: null };
+/* Which unit the source-of-figures page is showing. A property of the screen,
+   never of the state graph (§25.2). */
+var SRCSET = { unit: null };
 
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 var PICKING = null, PICKQ = "";

@@ -56,10 +56,16 @@ Nothing proceeds past this line without an answer.
 Your Finance custodian, built. §16.7 in the decisions document had already
 designed this; your description matched it, so nothing was reinvented.
 
-**Setup › Source of figures.** One unit at a time, every key objective and key
-measure listed, and against each you say which **team** is master of the number
-and which **person** enters it. Leave a row empty and the unit enters it itself,
-as now.
+**Setup › Source of figures.** You choose the **team and the person once**, at
+the top. Then the units are buttons in a row — with a count on each, so you can
+see where the work is left — and every figure is a single tick: *is this theirs
+or not.* Measure and target, nothing else. A figure already marked for another
+team shows that team's name instead of a tick, so you cannot overwrite it
+without noticing.
+
+The first version asked for two dropdowns on every row, one unit at a time —
+116 of them. You were right that it was impractical; this is one choice and a
+run of ticks.
 
 **Manage › Figures I report.** The custodian's own screen: every figure they are
 master of, across every unit, in one place. Finance enters revenue once per unit

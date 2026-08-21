@@ -926,27 +926,32 @@
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
       b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
     });
-    /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
-       top; each row is then a single mark. The half-set problem the first
-       build had cannot arise: a mark is only offered once both ends are set,
-       and it writes both at once. */
-    document.querySelectorAll("[data-srcunit]").forEach(function(b){
-      b.addEventListener("click", function(){ SRCSET.unit = b.dataset.srcunit; paint(); });
+    /* Source of figures (§16.7). The two selects write one field, so both
+       handlers read the other's current value rather than assuming it —
+       picking a person before a team must not silently drop the team. */
+    var srcUnit = document.getElementById("srcset-unit");
+    if (srcUnit) srcUnit.addEventListener("change", function(){ SRCSET.unit = srcUnit.value; paint(); });
+    var setSrc = function(id, field, value){
+      var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], id);
+      if (!hit) return;
+      var src = hit.src || {};
+      src[field] = value || null;
+      /* A HALF-SET row is kept, not thrown away. Deleting the field whenever
+         one end was empty made the control impossible to complete: choosing a
+         team dropped it again because no person was set yet, and choosing a
+         person dropped it because the team had just been dropped. Setting BOTH
+         ends is what makes a source real — isSourced() asks for `by` — so a
+         half-set row is stored, shown as unfinished, and does nothing.
+         Clearing both is what removes it. */
+      if (!src.team && !src.by) delete hit.src;
+      else hit.src = { team: src.team || null, by: src.by || null };
+      paint();
+    };
+    document.querySelectorAll("[data-srcteam]").forEach(function(el){
+      el.addEventListener("change", function(){ setSrc(el.dataset.srcteam, "team", el.value); });
     });
-    var st = document.getElementById("srcset-team");
-    if (st) st.addEventListener("change", function(){ SRCSET.team = st.value || null; paint(); });
-    var sb = document.getElementById("srcset-by");
-    if (sb) sb.addEventListener("change", function(){ SRCSET.by = sb.value || null; paint(); });
-    document.querySelectorAll("[data-srcpick]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!SRCSET.team || !SRCSET.by) return;
-        var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], b.dataset.srcpick);
-        if (!hit) return;
-        var mine = hit.src && hit.src.team === SRCSET.team && hit.src.by === SRCSET.by;
-        if (mine) delete hit.src;
-        else hit.src = { team: SRCSET.team, by: SRCSET.by };
-        paint();
-      });
+    document.querySelectorAll("[data-srcby]").forEach(function(el){
+      el.addEventListener("change", function(){ setSrc(el.dataset.srcby, "by", el.value); });
     });
 
     document.querySelectorAll("[data-focus]").forEach(function(b){

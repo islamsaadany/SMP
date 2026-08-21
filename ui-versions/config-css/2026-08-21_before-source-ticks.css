@@ -151,20 +151,6 @@
      Quieter than a typed one, and ATTRIBUTED — a greyed number with nothing
      beside it reads as broken; the same number with the team's name beside it
      reads as somebody else's. */
-  /* Units as buttons rather than a dropdown (§16.7a). Ten of them fit on one
-     line at 1000px, and a list you can see is a list you can move through. */
-  .unitpick { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 14px; }
-  .upick { font:600 12.5px/1 var(--sans); color:var(--ink-2); background:var(--surface);
-           border:1px solid var(--line); border-radius:var(--r); padding:7px 11px;
-           cursor:pointer; display:inline-flex; align-items:center; gap:7px; }
-  .upick:hover { border-color:var(--gold); color:var(--ink); }
-  .upick.on { background:var(--surface-2); border-color:var(--gold); color:var(--ink);
-              font-weight:700; box-shadow:inset 3px 0 0 var(--gold); padding-left:12px; }
-  .upick:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .upick-n { font-family:var(--mono); font-size:11px; color:var(--ink-3);
-             background:var(--surface-2); border-radius:20px; padding:2px 6px; }
-  .upick.on .upick-n { background:var(--surface); color:var(--ink-2); }
-
   .mono.sourced { color:var(--ink-3); }
   .srcby { font:700 9px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase;
            color:var(--ink-3); background:var(--surface-2); border:1px solid var(--line);

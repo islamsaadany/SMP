@@ -276,7 +276,28 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.12 (in progress): THE PALETTE SWITCH IS GONE
+*Last Updated: 2026-08-21 — v3.12 (in progress): ONE DECISION, THEN TICKS
+(§16.7a). Islam on the first Source-of-figures screen: *"that's a huge setup to
+do and not practical … he just needs the measure and target so he can tick if
+he owns this or not."* Right, and the number says why — **116 figures across ten
+units**, each asking for a team AND a person before the feature did anything.
+The data also said what to key on: only ONE measure name repeats across units,
+so "set it once by name" saves nothing, but **27 of the 116 are money**, spread
+across all ten — **what separates a team's number from the unit's is what it is
+measured in, not its name**. So WHO is chosen once at the top and every row is a
+single mark, the same shape as Focus measures (A13); the units are BUTTONS with
+their counts on them rather than a dropdown, so where the work is left is
+visible without opening anything; and a row shows the measure and its target
+and nothing else — direction and compile rule are the plan's business, not the
+custodian's. Three states per row, not two: unclaimed, mine, or **another
+team's**, the third shown as that team's name rather than a tick that could be
+overwritten unnoticed. Also §41.7: the CLOSED navigation fold is a soft ghost
+(treatment D) — the fault was typographic, an 11px uppercase capsule beside
+13.5px sentence-case tabs; D keeps a container, because **a fold is a group of
+things rather than a page and the container is what says so**, and drops the
+border and the shouting.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): THE PALETTE SWITCH IS GONE
 (§41.6). Islam: *"I don't need to have slate, the branding covers this from
 inside."* Which colours the product wears is the TENANT's decision (Setup ›
 Branding), not a per-screen preference that leaves two people in the same

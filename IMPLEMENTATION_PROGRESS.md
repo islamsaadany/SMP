@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.9 · **Last updated:** 2026-08-21
+**Latest version:** v3.10 · **Last updated:** 2026-08-21
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,36 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.9 — the sign-in page, and the register *(current)*
+### v3.10 — roles and access, at the size you can read *(current)*
+
+The page you called exhausting was 25 pages × 7 roles, three buttons a cell —
+**525 controls on one screen**. It is **seven roles down and seven kinds of page
+across**: Group, own business unit, other business units, own supporting
+function, other supporting functions, Reporting cycle, Setup. Forty-nine cells,
+one screen, none / view / edit, and edit includes view.
+
+Two changes to your six columns, both forced by what the current settings
+actually said. **Setup and Management could not be one column** — every role
+sees the Reporting cycle and only you touch Labels and Bands. And the
+**Knowledge base left the table**: it was `view` for all seven roles, and a
+column where every cell holds the same answer is a question with no second
+answer.
+
+**"Own" is not a setting**, exactly as you said. It is read from what each role
+is attached to. That also let the table say something it never could before:
+*a unit owner may view other units.* Tested live — granting it took Mobile's
+head from 2 destinations to 11 on the next repaint.
+
+**Three things became rules instead of cells**: the knowledge base is readable
+by everyone; a plan is corrected by the SMO alone, however much access the
+unit's people hold; and focus measures are marked by the group CEO and you.
+
+One thing this costs, recorded rather than hidden: a **Contributor** with edit
+on their own unit can now also edit that unit's Foundation and SWOT, where
+before the SWOT was hidden from them. Reversible by setting Contributor to
+*view*, at the cost of their reporting.
+
+### v3.9 — the sign-in page, and the register
 
 **The sign-in page** (§34). One 400px card was carrying the whole product, so
 every line of brand had to be squeezed above the password box. It is a split
@@ -666,8 +695,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.9.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.9.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.10.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

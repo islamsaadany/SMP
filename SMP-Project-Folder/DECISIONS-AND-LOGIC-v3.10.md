@@ -4152,3 +4152,170 @@ Steps 1 and 2 are small. Step 3 is the real work, and it is a decision about
 identity rather than about plumbing: whether the SMO is one person with access
 to many clients, or one account per client. **That question is not answered
 here**, and it should be answered before anything is built.
+
+---
+
+## 37 · The matrix stops being a matrix of pages — v3.10
+
+Islam, on the old page: *"too much. we just need the roles on the left and the
+types of pages they might see/edit on the horizontal access and in the table we
+have the option to set viewer or editor (Editor includes viewer anyway) or
+none."*
+
+And on what the columns are: *"the Group is a page, Own business unit, Other
+business units, setup and management pages, own supporting function, other
+supporting functions. what else?"*
+
+### 37.1 What was wrong with it
+
+The page was 25 pages × 7 roles, and each cell was three buttons: **525
+controls on one screen**, above a roles table and a staff list. It answered
+"what may a Company CEO do with the Weighting page" — a question with 175
+instances, none of which anyone asks. What people ask is "what can a unit head
+do", which is one column, or "who can open Setup", which is one row.
+
+An intermediate design was drawn and rejected before this one: pick a role,
+then set five collapsible page groups. It halved well on paper — 15 controls at
+rest — but building the mockup killed it. **With the real defaults, four groups
+in five are "mixed" for most roles**, so a page that opened mixed groups to
+avoid hiding a difference opened itself straight back into the 25-row list it
+was meant to replace. The mockup cost an hour and saved building the wrong
+thing; that is what mockups are for.
+
+### 37.2 Seven areas, and why seven and not six
+
+Islam's six, with two changes, both forced by what the shipped defaults
+actually said rather than by preference:
+
+- **Setup and Management could not be one column.** Every role held *view* on
+  the Reporting cycle — a unit head has to see the cycle is open — while only
+  the SMO touched Labels, Bands, Units, People. Merged, a unit owner either
+  loses sight of the cycle or gains the setup pages. They are two columns.
+- **The Knowledge base left the table entirely.** It was `view` for all seven
+  roles without exception. **A column whose every cell holds the same answer is
+  a question with no second answer.** It is a rule now: readable by everyone,
+  always.
+
+Nothing else was missing. All 25 pages land in the seven, and **Companies needs
+no column** — a company has no page at all; it is visibility, not strategy
+(§23).
+
+### 37.3 Own is not a setting
+
+Islam: *"own is always about what they have a role in … a business unit head
+and custodian of Mobile owns Mobile. A CEO of Retail owns all the units below
+him. I see this as a logic thing not a settings thing."*
+
+Which is exactly right, and it is the same principle §33 established from the
+other end: the attachment already lives on the thing. `roleOwns()` reads it.
+There is no control for it anywhere, and there cannot be one to get wrong.
+
+It differs from the old `roleReaches()` in one deliberate way, and the
+difference is the whole point: **reaching and owning stopped being the same
+word.** A Company CEO whose company may see the others *reaches* those units,
+but does not own them — so "own" answers the first column and the matrix
+answers the second. Under the old model those were one boolean, which is why
+"a unit owner may view other units" was not expressible at all. It is now.
+
+Someone holding several roles gets the most generous answer, with **each role
+resolving its own OWN**: the head of the IT unit who also heads the IT function
+gets the owner's answer for the IT unit and the function head's for IT the
+function, from the same two roles, without either being consulted about the
+wrong thing.
+
+### 37.4 Three things became rules
+
+Each was a cell. Each is a sentence now, and each is true whatever the table
+says:
+
+- **The Knowledge base is readable by everyone.** An explanation nobody can
+  open is not an explanation.
+- **A plan is corrected by the SMO alone** (§22, §31). A unit owner holding
+  edit on their own unit still cannot rewrite the plan they are measured
+  against — that is the point of the rule, and it must not depend on a grant.
+- **Focus measures are marked by the group CEO and the SMO.** What carries
+  reward is the office's decision, not a page permission. This one was the
+  giveaway that the old model was wrong: the group CEO's row read `view` on
+  every group page except `g_focus`, which was `edit`, purely so that one
+  button would work.
+
+The company's two flags (§23) also survive and sit **on top**: they can only
+ever narrow. A company set to keep to itself does, whatever the matrix says —
+because the matrix is about a role and those flags are about one company, and
+the more restrictive of two true statements is the one to obey.
+
+### 37.5 Reach is derived now, not decided beside the table
+
+`unitsReachable()` used to ask `reaches()`, which had its own opinion. Now a
+unit is reachable when the area answering for it is not "none" — which is what
+makes "Other business units: view" mean anything: the unit appears in the
+navigation, at view. Verified live: granting it took Mobile's head from **2
+destinations to 11**, on a repaint, against a real database.
+
+### 37.6 What the collapse costs
+
+Honest ledger. Five unit pages now share one answer, so distinctions inside a
+group are gone. Three mattered and all three became rules (§37.4). One remains:
+a **Contributor** holding edit on their own unit can now also edit that unit's
+Foundation and SWOT, where before they had `none` on the SWOT. It is small — a
+contributor is somebody named on a measure inside that unit — and it is
+reversible by setting Contributor to *view*, at the cost of their reporting.
+Recorded rather than hidden.
+
+### 37.7 Two buttons a cell, not three
+
+Islam: *"No need for the none box that's the default no need to grow the
+matrix."*
+
+Right, and the reason is worth writing down: **none is not a third thing you
+choose, it is the absence of the other two.** Giving it a button of its own made
+the cell 50% wider for a state that needs no control at all — on a table that
+was rebuilt to stop being too wide.
+
+Each button is a toggle now. Pressing the lit one turns it off and the cell
+falls back to none. The state a press produces is worked out at render, so the
+click handler still says only "set this cell to this" and never has to know
+what it is replacing.
+
+A cell with neither lit sits on a dashed tray. **Nothing lit IS the answer**,
+and a blank cell in a permissions table would read as "nobody has filled this
+in" — the one thing it must never be mistaken for.
+
+49 cells, 86 buttons.
+
+### 37.8 Two layout faults the first build had
+
+- **The role column was 19% and the role's description a full sentence**, so
+  every one of seven rows wrapped to eight lines and the 49-cell table was
+  taller than the 175-cell one it replaced. The description is on hover; the
+  cell is two lines.
+- **The header notes ran straight across their neighbours.** `_shared.css` sets
+  `thead th { white-space: nowrap }` — right for a one-word header, wrong for a
+  column that explains what it covers. And `table-layout: fixed` takes every
+  width from the **first row, which is the header**, so `.cfg th:first-child`
+  was still claiming 15% for a column the `td` rule set to 19%. **A width set
+  on the body cells of a fixed-layout table is a width that does nothing.**
+
+### 37.9 Verified
+
+- 31 viewers × every page, zero console errors; byte-identical rebuild; no
+  horizontal scroll at 1560, 1000 or below.
+- The cell toggles through every path: lit edit → none, none → view, view →
+  edit, edit → view, lit view → none, and back. No none button survives
+  anywhere, and 86 buttons stand where 147 did.
+- The model, per role: a unit head edits their own unit and reaches no other;
+  a company CEO owns their company's three units and is held off the rest by
+  `seeOthers`; the group CEO sees all ten at view and no Setup; a function head
+  edits their own function only; someone holding two roles gets each answer
+  from the right one.
+- The three rules hold independently of the table: a unit head cannot edit
+  their plan or mark focus; the group CEO can mark focus but not edit a plan;
+  the SMO can do both.
+- **Upgrade from a real v3.9 tenant**, built by running v3.9's own code from
+  `origin/main`: 175 page-keyed grants → 0, migration 009 recorded, the graph
+  still round-trips, a second run is a no-op, and an area row written after the
+  upgrade survives later runs.
+- Fresh deploy: clean slate, round trip, fixed point and archive all PASS, with
+  **49 grants** — seven roles by seven areas.
+- Live against that database through the real gate at `/raya-trade`: 49 cells,
+  and changing one moved the navigation on the next paint.

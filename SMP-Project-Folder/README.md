@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.9.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.10.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.9.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.10.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -97,6 +97,7 @@ of it was rejected — which is the point of keeping it.
 | `mock-groupreport.html` | Group reporting before capabilities were understood |
 | `preview-report.html` | The reporting page before it was built |
 | `concept-reporting.html` | An early reporting concept |
+| `2026-08-21_access-role-then-groups_REJECTED.html` | Roles &amp; access as **pick a role, then five collapsible page groups**. Killed by its own mockup: with the real defaults four groups in five are &ldquo;mixed&rdquo;, so a page that opened mixed groups to avoid hiding a difference unfolded straight back into the 25-row list it was meant to replace. Superseded by the 7&times;7 area table (&sect;37). |
 
 ---
 

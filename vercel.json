@@ -31,7 +31,7 @@
   "rewrites": [
     {
       "source": "/raya-trade",
-      "destination": "/SMP-Project-Folder/strategy-management-platform-v3.9.html"
+      "destination": "/SMP-Project-Folder/strategy-management-platform-v3.10.html"
     }
   ]
 }

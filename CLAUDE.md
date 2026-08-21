@@ -256,7 +256,29 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.9: the register (§35), and the URL stops
+*Last Updated: 2026-08-21 — v3.10: the matrix stops being a matrix of pages
+(§37). It was 25 pages × 7 roles, three buttons a cell — **525 controls on one
+screen**, answering a question with 175 instances that nobody asks. It is seven
+roles down and seven AREAS across now: Group, own/other business unit,
+own/other supporting function, Reporting cycle, Setup. 49 cells. **Own is not a
+setting** — it is read from what each role is attached to, which is §33 from the
+other end, and it made "reaching" and "owning" stop being the same word: a
+company CEO who may see the other companies REACHES those units without owning
+them, so the own column and the other column can now say different things. Three
+cells became **rules**: the knowledge base is readable by everyone, a plan is
+corrected by the SMO alone, and focus measures are marked by the CEO — each true
+whatever the table says. **A column whose every cell holds the same answer is a
+question with no second answer** — and **none is not a third thing you choose,
+it is the absence of the other two**, so the cell is two toggles rather than
+three buttons and nothing lit is itself the answer. Two layout lessons: a full sentence in a 19%
+column makes a 49-cell table taller than the 175-cell one it replaced, and
+**a width set on the body cells of a `table-layout:fixed` table does nothing** —
+fixed layout takes every width from the header row. Also: the intermediate
+design (pick a role, five collapsible groups) was killed BY ITS MOCKUP — with
+real data four groups in five are "mixed", so it unfolded back into the list it
+was meant to replace.*
+
+*Earlier: 2026-08-21 — v3.9: the register (§35), and the URL stops
 naming the repository (§35.6). The register works because there is nothing to
 synchronise: §33 put a responsibility role on the THING, so the People page
 writes `UNIT_ROLES.mobile.head` — the same field the unit page writes, through

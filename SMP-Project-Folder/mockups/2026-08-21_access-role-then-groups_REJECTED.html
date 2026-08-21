@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMP — Roles &amp; access, proposed</title>
+<style>
+  /* The platform's own tokens, copied from _shared.css so this reads as SMP
+     rather than as a drawing of SMP. */
+  :root {
+    --stone:#16325C; --stone-soft:#24487A; --gold:#C9A24D; --gold-deep:#A8842F;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --zebra:#F7F9FC; --on-fill:#FFFFFF;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+      --panel:#24487A; --panel-ink:#EAF0FA; --zebra:#22272F; --on-fill:#14161A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --stone:#7FA3D8; --stone-soft:#5C82BC; --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --panel:#24487A; --panel-ink:#EAF0FA; --zebra:#22272F; --on-fill:#14161A;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
+         font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1180px; margin:0 auto; padding:28px 24px 80px; }
+
+  .mockbar { background:var(--panel); color:var(--panel-ink); font-size:12px; padding:8px 24px;
+             letter-spacing:.02em; display:flex; gap:16px; align-items:center; justify-content:space-between; }
+  .mockbar b { color:var(--gold); }
+  .mockbar button { font:inherit; font-size:11px; background:none; border:1px solid rgba(255,255,255,.35);
+                    color:inherit; border-radius:99px; padding:3px 12px; cursor:pointer; }
+
+  .phead2 { display:flex; align-items:center; justify-content:space-between; gap:16px;
+            padding-bottom:14px; border-bottom:1px solid var(--line); margin-bottom:22px; }
+  .secttl { font-family:var(--serif); font-size:26px; font-weight:600; }
+  .chip { font-size:11.5px; font-weight:600; color:var(--ink-2); background:var(--surface);
+          border:1px solid var(--line); border-radius:99px; padding:4px 12px; margin-left:8px; }
+
+  h2.sec { font-family:var(--serif); font-size:19px; font-weight:600; margin:0 0 4px; }
+  .sec-note { color:var(--ink-3); font-size:13.5px; margin:0 0 16px; max-width:640px; }
+  .section { margin-bottom:34px; }
+
+  /* ── The role chooser ─────────────────────────────────────────── */
+  .roles { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:26px; }
+  .rolebtn { text-align:left; font:inherit; background:var(--surface); border:1px solid var(--line);
+             border-radius:12px; padding:11px 15px; cursor:pointer; min-width:186px;
+             transition:border-color .15s ease, box-shadow .15s ease, background .15s ease; }
+  .rolebtn:hover { border-color:var(--gold); }
+  .rolebtn b { display:block; font-size:13.5px; font-weight:700; }
+  .rolebtn span { display:block; font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+  .rolebtn.on { background:var(--panel); border-color:var(--panel); box-shadow:0 6px 18px rgba(22,50,92,.22); }
+  .rolebtn.on b { color:var(--panel-ink); }
+  .rolebtn.on span { color:var(--gold); }
+
+  /* ── The answer for the chosen role ───────────────────────────── */
+  .scopeline { display:flex; align-items:baseline; gap:10px; margin-bottom:14px; }
+  .scopeline b { font-size:15px; }
+  .scopeline span { font-size:13px; color:var(--ink-3); }
+
+  .grp { border:1px solid var(--line); border-radius:12px; background:var(--surface);
+         margin-bottom:10px; overflow:hidden; }
+  .grphead { display:flex; align-items:center; gap:14px; padding:13px 16px; cursor:pointer;
+             background:var(--surface); }
+  .grphead:hover { background:var(--surface-2); }
+  .grphead .caret { width:14px; color:var(--none); font-size:11px; transition:transform .15s ease; flex:none; }
+  .grp.open .caret { transform:rotate(90deg); }
+  .grphead .gname { flex:1 1 auto; }
+  .grphead .gname b { display:block; font-size:14.5px; font-weight:700; }
+  .grphead .gname span { display:block; font-size:11.5px; color:var(--ink-3); }
+
+  .pages { border-top:1px solid var(--line-soft); display:none; }
+  .grp.open .pages { display:block; }
+  .prow { display:flex; align-items:center; gap:14px; padding:10px 16px 10px 44px;
+          border-bottom:1px solid var(--line-soft); }
+  .prow:last-child { border-bottom:none; }
+  .prow:nth-child(odd) { background:var(--zebra); }
+  .prow .pname { flex:1 1 auto; }
+  .prow .pname b { display:block; font-size:13.5px; font-weight:600; }
+  .prow .pname span { display:block; font-size:11.5px; color:var(--ink-3); }
+
+  /* The same three-state control the platform already uses. */
+  .stset { display:inline-flex; gap:3px; flex:none; }
+  .stbtn { font:inherit; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+           background:var(--surface); border:1px solid var(--line); color:var(--ink-3);
+           border-radius:7px; padding:5px 11px; cursor:pointer; min-width:52px; }
+  .stbtn:hover { border-color:var(--gold); color:var(--ink); }
+  .stbtn.on.none { background:var(--none); border-color:var(--none); color:var(--on-fill); }
+  .stbtn.on.view { background:var(--stone); border-color:var(--stone); color:var(--on-fill); }
+  .stbtn.on.edit { background:var(--gold-deep); border-color:var(--gold-deep); color:var(--on-fill); }
+  .mixed { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+           color:var(--warn); background:var(--warn-bg); border:1px solid var(--warn);
+           border-radius:99px; padding:3px 10px; margin-right:10px; flex:none; }
+
+  .note { border-left:3px solid var(--gold); background:var(--surface); padding:12px 16px;
+          font-size:13px; color:var(--ink-2); border-radius:0 10px 10px 0; margin-top:18px; }
+  .legend { display:flex; gap:18px; flex-wrap:wrap; font-size:12px; color:var(--ink-3); margin-top:14px; }
+  .legend i { font-style:normal; font-weight:700; font-size:10.5px; letter-spacing:.06em;
+              text-transform:uppercase; border-radius:6px; padding:2px 8px; color:var(--on-fill); }
+  .legend i.n { background:var(--none); } .legend i.v { background:var(--stone); } .legend i.e { background:var(--gold-deep); }
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  <span><b>MOCKUP</b> &nbsp;Roles &amp; access, proposed shape &mdash; not wired to anything</span>
+  <button id="themeToggle" type="button">Dark / light</button>
+</div>
+
+<div class="wrap">
+
+  <div class="phead2">
+    <h1 class="secttl">Roles &amp; access</h1>
+    <div><span class="chip">SMO</span><span class="chip">7 roles</span><span class="chip">25 pages</span></div>
+  </div>
+
+  <div class="section">
+    <h2 class="sec">Who are you setting access for?</h2>
+    <p class="sec-note">Pick a role. What it may reach is below, and it applies to
+      everyone holding that role &mdash; bounded by whatever each one is attached to.</p>
+    <div class="roles" id="roles"></div>
+  </div>
+
+  <div class="section">
+    <div class="scopeline">
+      <b id="whoTitle">Business unit owner</b>
+      <span id="whoScope">10 people &middot; bounded to their own unit</span>
+    </div>
+    <div id="groups"></div>
+    <div class="legend">
+      <span><i class="n">none</i> hidden entirely</span>
+      <span><i class="v">view</i> reads, cannot change</span>
+      <span><i class="e">edit</i> reads and changes</span>
+      <span><span class="mixed" style="margin:0">3 edit &middot; 2 view</span> the pages inside disagree, and how</span>
+    </div>
+    <div class="note"><b>Setting a group sets every page in it.</b> Open a group only when
+      one page needs to differ from the rest. Where they already differ, the row says how
+      &mdash; <b>3 edit &middot; 2 view</b> &mdash; so a split is named without having to be
+      unfolded.</div>
+  </div>
+
+</div>
+
+<script>
+var ROLES = [
+  { key:"super",     name:"Super user",              scope:"group-wide",             n:1  },
+  { key:"gceo",      name:"Group CEO",               scope:"group-wide",             n:1  },
+  { key:"cceo",      name:"Company CEO",             scope:"their company",          n:2  },
+  { key:"owner",     name:"Business unit owner",     scope:"their own unit",         n:10 },
+  { key:"custodian", name:"Strategy custodian",      scope:"their unit or function", n:11 },
+  { key:"fnhead",    name:"Supporting function head",scope:"their function",         n:6  },
+  { key:"contrib",   name:"Contributor",             scope:"their unit",             n:2  }
+];
+
+var GROUPS = [
+  { name:"Group pages", note:"The whole organisation's picture", pages:[
+    ["g_perf","Performance","Group headline, business units, themes, capabilities"],
+    ["g_found","Foundation","Purpose, aspiration, core values, who we are"],
+    ["g_temple","Temple","The strategy on one page. No performance figures"],
+    ["g_weight","Weighting","How much each business unit counts"],
+    ["g_focus","Focus","Every unit's focus measures"]]},
+  { name:"Business unit pages", note:"One unit's own plan and reporting", pages:[
+    ["u_perf","Performance","The unit's headline and its pillars"],
+    ["u_found","Foundation","The unit's own words and Key Objectives"],
+    ["u_plan","Strategy","The plan as agreed, with no reported figure on it"],
+    ["u_anal","Analysis","The unit's SWOT"],
+    ["u_report","My reporting","Enter this cycle's figures"]]},
+  { name:"Supporting function pages", note:"Capabilities and the projects behind them", pages:[
+    ["k_perf","Performance","What this function's capabilities read"],
+    ["k_found","Capability foundation","What each capability is, and its key objectives"],
+    ["k_proj","Projects","The plan behind each project"],
+    ["k_report","Reporting","Enter this cycle's figures"]]},
+  { name:"Manage", note:"What the SMO does every cycle", pages:[
+    ["c_cycle","Reporting cycle","Open, chase and close"],
+    ["c_import","Import","Plan and progress templates"],
+    ["c_focus","Focus measures","Choose what carries reward this cycle"],
+    ["c_kb","Knowledge base","How the platform works, in one place"]]},
+  { name:"Setup", note:"What exists — decided once, revisited rarely", pages:[
+    ["c_labels","Labels","Internal names and tenant display labels"],
+    ["c_access","Roles & access","This page"],
+    ["c_bands","Scoring bands","The one scale every score reads on"],
+    ["c_units","Business units","Names, codes and which units are active"],
+    ["c_fns","Supporting functions","Who carries the capabilities"],
+    ["c_people","People","Everyone the platform knows, and what they hold"],
+    ["c_caps","Capabilities","What exists, and which function owns each"]]}
+];
+
+/* The shipped defaults, so the mockup shows real answers rather than invented ones. */
+var A = {
+  super:{g_perf:"edit",g_found:"edit",g_temple:"edit",g_weight:"edit",g_focus:"edit",
+    u_perf:"edit",u_found:"edit",u_anal:"edit",u_plan:"edit",u_report:"edit",
+    k_perf:"edit",k_found:"edit",k_proj:"edit",k_report:"edit",
+    c_labels:"edit",c_access:"edit",c_bands:"edit",c_units:"edit",c_fns:"edit",c_people:"edit",
+    c_caps:"edit",c_import:"edit",c_cycle:"edit",c_focus:"edit",c_kb:"view"},
+  gceo:{g_perf:"view",g_found:"view",g_temple:"view",g_weight:"view",g_focus:"edit",
+    u_perf:"view",u_found:"view",u_anal:"view",u_plan:"view",u_report:"none",
+    k_perf:"view",k_found:"view",k_proj:"view",k_report:"none",
+    c_labels:"none",c_access:"none",c_bands:"none",c_units:"none",c_fns:"view",c_people:"none",
+    c_caps:"view",c_import:"none",c_cycle:"view",c_focus:"edit",c_kb:"view"},
+  cceo:{g_perf:"view",g_found:"view",g_temple:"view",g_weight:"none",g_focus:"view",
+    u_perf:"view",u_found:"view",u_anal:"view",u_plan:"view",u_report:"none",
+    k_perf:"view",k_found:"view",k_proj:"view",k_report:"none",
+    c_labels:"none",c_access:"none",c_bands:"none",c_units:"none",c_fns:"none",c_people:"none",
+    c_caps:"none",c_import:"none",c_cycle:"view",c_focus:"none",c_kb:"view"},
+  owner:{g_perf:"view",g_found:"view",g_temple:"view",g_weight:"none",g_focus:"none",
+    u_perf:"edit",u_found:"edit",u_anal:"edit",u_plan:"view",u_report:"edit",
+    k_perf:"view",k_found:"view",k_proj:"view",k_report:"none",
+    c_labels:"none",c_access:"none",c_bands:"none",c_units:"none",c_fns:"none",c_people:"none",
+    c_caps:"none",c_import:"none",c_cycle:"view",c_focus:"none",c_kb:"view"},
+  custodian:{g_perf:"view",g_found:"view",g_temple:"view",g_weight:"none",g_focus:"none",
+    u_perf:"edit",u_found:"edit",u_anal:"edit",u_plan:"view",u_report:"edit",
+    k_perf:"edit",k_found:"edit",k_proj:"edit",k_report:"edit",
+    c_labels:"none",c_access:"none",c_bands:"none",c_units:"none",c_fns:"none",c_people:"none",
+    c_caps:"none",c_import:"none",c_cycle:"view",c_focus:"none",c_kb:"view"},
+  fnhead:{g_perf:"view",g_found:"view",g_temple:"view",g_weight:"none",g_focus:"none",
+    u_perf:"none",u_found:"none",u_anal:"none",u_plan:"none",u_report:"none",
+    k_perf:"edit",k_found:"edit",k_proj:"edit",k_report:"edit",
+    c_labels:"none",c_access:"none",c_bands:"none",c_units:"none",c_fns:"none",c_people:"none",
+    c_caps:"none",c_import:"none",c_cycle:"view",c_focus:"none",c_kb:"view"},
+  contrib:{g_perf:"none",g_found:"view",g_temple:"view",g_weight:"none",g_focus:"none",
+    u_perf:"view",u_found:"view",u_anal:"none",u_plan:"view",u_report:"edit",
+    k_perf:"view",k_found:"view",k_proj:"view",k_report:"edit",
+    c_labels:"none",c_access:"none",c_bands:"none",c_units:"none",c_fns:"none",c_people:"none",
+    c_caps:"none",c_import:"none",c_cycle:"none",c_focus:"none",c_kb:"view"}
+};
+
+var PICKED = "owner";
+var OPEN = {};          /* which groups the reader has opened by hand */
+
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+function roleOf(k){ return ROLES.filter(function(r){ return r.key===k; })[0]; }
+
+/* A group's state is the state its pages agree on, or "mixed". */
+function groupState(g){
+  var seen = {};
+  g.pages.forEach(function(p){ seen[A[PICKED][p[0]]] = 1; });
+  var ks = Object.keys(seen);
+  return ks.length === 1 ? ks[0] : "mixed";
+}
+/* What the disagreement actually IS, on one line. Building this exposed the
+   flaw in auto-opening every mixed group: with the real defaults, four groups
+   in five are mixed for most roles, so the page opened itself back into the
+   25-row list it was meant to replace. A row that NAMES the split is not
+   hiding it — "3 view · 2 none" says more than an expanded list of five rows,
+   in one line instead of five. */
+function mixSummary(g){
+  var count = {};
+  g.pages.forEach(function(p){ var v = A[PICKED][p[0]]; count[v] = (count[v]||0) + 1; });
+  return ["edit","view","none"].filter(function(k){ return count[k]; })
+    .map(function(k){ return count[k] + " " + k; }).join(" &middot; ");
+}
+
+function stset(current, attr){
+  return '<span class="stset">' + ["none","view","edit"].map(function(o){
+    return '<button type="button" class="stbtn' + (o===current ? " on "+o : "") + '" ' +
+      attr + '="' + o + '">' + o + '</button>';
+  }).join("") + '</span>';
+}
+
+function paintRoles(){
+  document.getElementById("roles").innerHTML = ROLES.map(function(r){
+    return '<button type="button" class="rolebtn' + (r.key===PICKED ? " on" : "") +
+      '" data-role="' + r.key + '"><b>' + esc(r.name) + '</b><span>' +
+      r.n + (r.n===1 ? " person" : " people") + ' &middot; ' + esc(r.scope) + '</span></button>';
+  }).join("");
+}
+
+function paintGroups(){
+  var r = roleOf(PICKED);
+  document.getElementById("whoTitle").textContent = r.name;
+  document.getElementById("whoScope").innerHTML =
+    r.n + (r.n===1 ? " person" : " people") + " &middot; bounded to " + esc(r.scope);
+
+  document.getElementById("groups").innerHTML = GROUPS.map(function(g, gi){
+    var st = groupState(g);
+    var open = !!OPEN[gi];
+    return '<div class="grp' + (open ? " open" : "") + '">' +
+      '<div class="grphead" data-grp="' + gi + '">' +
+        '<span class="caret">&#9654;</span>' +
+        '<span class="gname"><b>' + esc(g.name) + '</b><span>' +
+          g.pages.length + ' pages &middot; ' + esc(g.note) + '</span></span>' +
+        (st === "mixed" ? '<span class="mixed">' + mixSummary(g) + '</span>' : '') +
+        stset(st === "mixed" ? null : st, "data-gset-" + gi) +
+      '</div>' +
+      '<div class="pages">' + g.pages.map(function(p){
+        return '<div class="prow"><span class="pname"><b>' + esc(p[1]) +
+          '</b><span>' + esc(p[2]) + '</span></span>' +
+          stset(A[PICKED][p[0]], "data-pset-" + p[0]) + '</div>';
+      }).join("") + '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function paint(){ paintRoles(); paintGroups(); wire(); }
+
+function wire(){
+  document.querySelectorAll("[data-role]").forEach(function(b){
+    b.addEventListener("click", function(){ PICKED = b.dataset.role; OPEN = {}; paint(); });
+  });
+  document.querySelectorAll(".grphead").forEach(function(h){
+    h.addEventListener("click", function(e){
+      if (e.target.closest(".stbtn")) return;      /* the control is not the row */
+      var i = h.dataset.grp; OPEN[i] = !OPEN[i]; paint();
+    });
+  });
+  GROUPS.forEach(function(g, gi){
+    document.querySelectorAll("[data-gset-" + gi + "]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var v = b.getAttribute("data-gset-" + gi);
+        g.pages.forEach(function(p){ A[PICKED][p[0]] = v; });
+        paint();
+      });
+    });
+    g.pages.forEach(function(p){
+      document.querySelectorAll("[data-pset-" + p[0] + "]").forEach(function(b){
+        b.addEventListener("click", function(){
+          A[PICKED][p[0]] = b.getAttribute("data-pset-" + p[0]);
+          OPEN[gi] = true;
+          paint();
+        });
+      });
+    });
+  });
+}
+
+document.getElementById("themeToggle").addEventListener("click", function(){
+  var d = document.documentElement.getAttribute("data-theme") === "dark";
+  document.documentElement.setAttribute("data-theme", d ? "light" : "dark");
+});
+
+paint();
+</script>
+</body>
+</html>

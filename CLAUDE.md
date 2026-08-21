@@ -276,21 +276,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.12 (in progress): THE ROLE IS A **FIGURE
-CUSTODIAN**, NOT A FINANCE ONE (§16.7). Islam: *"we might have different figures
-custodians. It's Finance for now but we need to think of the future."* Naming it
-"Finance custodian" would be wrong the first time Treasury owns a number — the
-mechanism is not Finance's, Finance is only its first customer. **The TEAM does
-the naming in context**: a unit sees its figure attributed to *Finance*, because
-what a unit needs to know is whose number it is. Two things follow from there
-being several, and both are built: the reporting cycle gains a **Figure
-custodians board** (one row per team AND person — two people in one team may
-each be master of different numbers), because with several custodians the
-difference is between seeing who is late and opening pages to find out; and the
-unit's waiting note **names the person, not just the team** — "ask Finance" is
-not an instruction anybody can act on once there are three.*
-
-*Earlier: 2026-08-21 — v3.12 (in progress): ONE DECISION, THEN TICKS
+*Last Updated: 2026-08-21 — v3.12 (in progress): ONE DECISION, THEN TICKS
 (§16.7a). Islam on the first Source-of-figures screen: *"that's a huge setup to
 do and not practical … he just needs the measure and target so he can tick if
 he owns this or not."* Right, and the number says why — **116 figures across ten

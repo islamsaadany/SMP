@@ -1208,13 +1208,13 @@ function renderSourceSetup(){
                '</span>' : '') + '</div>' +
     section("", "Source of figures", null,
       '<div class="imp-row" style="margin:0 0 12px">' +
-        '<span class="cfg-lab">Figure custodian</span>' + teamPick + byPick + '</div>' +
+        '<span class="cfg-lab">Marking for</span>' + teamPick + byPick + '</div>' +
       (ready ? '' : '<div class="note">Choose the team and the person first. ' +
         'Every mark below is stored against them, so one pass through the units ' +
         'sets everything that team owns.</div>') +
       unitBtns +
       '<div class="cfg" style="padding:0">' + blocks + '</div>' +
-      '<div class="note"><b>A marked figure is entered once, by the custodian named above.</b> ' +
+      '<div class="note"><b>A marked figure is entered once, by the person named above.</b> ' +
         'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
         'note</b> \u2014 the number is theirs, the performance is the unit\u2019s, and the ' +
         'explanation belongs to whoever owns the performance. A row already marked for another ' +
@@ -1270,7 +1270,7 @@ function renderMySources(){
       }).join("") + '</tbody></table>');
   }).join("");
 
-  return '<div class="kv"><span class="pill kind">Figure custodian</span>' +
+  return '<div class="kv">' +
       '<span class="pill kind">' + done + ' of ' + rows.length + ' entered</span>' +
       '<span class="pill ' + (open ? "good" : "none") + '">' +
         (open ? esc(REVIEW.name) + " \u00b7 due " + esc(REVIEW.due) : "No cycle is open") + '</span></div>' +
@@ -1596,40 +1596,8 @@ function renderCycle(){
       '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
     '</div></div>';
 
-  /* FIGURE CUSTODIANS (§16.7). A team that is master of a number is a reporting
-     party like any other, so it gets its own rows here — and it has to, because
-     there will be several of them: Finance is the first, not the only one. With
-     one board per team the SMO would be opening pages to find out who is late. */
-  var parties = SMPRules.sourceParties(world()).map(function(pt){
-    var done = pt.rows.filter(function(r){
-      return r.row.actual != null && r.row.actual !== ""; }).length;
-    var pct = Math.round(done / pt.rows.length * 100);
-    var units = {}; pt.rows.forEach(function(r){ units[r.unit] = 1; });
-    var nU = Object.keys(units).length;
-    var st = done === pt.rows.length ? { k:"done", l:"Complete" }
-           : done ? { k:"part", l:"In progress" } : { k:"late", l:"Not started" };
-    return '<tr><td><b>' + esc(FUNCTIONS[pt.team] ? FUNCTIONS[pt.team].name : pt.team) + '</b></td>' +
-      '<td class="why" style="margin:0">' + esc(personName(pt.by) || pt.by) + '</td>' +
-      '<td><div class="repcell"><span class="repbar' + (pct < 100 ? " part" : "") + '">' +
-        '<i style="width:' + pct + '%"></i></span>' +
-        '<span class="mono why" style="margin:0">' + done + '/' + pt.rows.length + '</span></div></td>' +
-      '<td class="num">' + nU + '</td>' +
-      '<td class="cc"><span class="badge b-' + st.k + '">' + st.l + '</span></td></tr>';
-  }).join("");
-
   return '<div class="kv"><span class="pill kind">SMO</span>' +
       '<span class="pill kind">' + esc(REVIEW.cadence) + '</span></div>' + head +
-    (parties
-      ? section("", "Figure custodians", null,
-          '<div class="cfg"><table><thead><tr><th style="width:22%">Team</th>' +
-            '<th style="width:26%">Custodian</th><th style="width:26%">Progress</th>' +
-            '<th class="cc">Units</th><th class="cc">State</th></tr></thead>' +
-            '<tbody>' + parties + '</tbody></table></div>' +
-          '<div class="note">These figures are entered once by the team that owns the number, ' +
-            'and they count toward the units that use them \u2014 so a unit chasing its own ' +
-            'completeness is chasing these too. Assigned on <b>Setup &rsaquo; Source of ' +
-            'figures</b>.</div>')
-      : '') +
     section("", "Who has reported", null,
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +

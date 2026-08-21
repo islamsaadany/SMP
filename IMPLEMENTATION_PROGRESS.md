@@ -67,21 +67,6 @@ The first version asked for two dropdowns on every row, one unit at a time —
 116 of them. You were right that it was impractical; this is one choice and a
 run of ticks.
 
-**The role is called a *figure custodian*, not a Finance custodian.** Finance is
-the first one, not the only one — the moment Treasury owns a number, "Finance
-custodian" would be the wrong words on the screen. The *team* does the naming
-where it matters: a unit sees its figure attributed to **Finance**, because
-what a unit needs to know is whose number it is.
-
-Two things follow from there being several, and both are in:
-
-- **The reporting cycle now shows a Figure custodians board** — one row per team
-  and person, with their progress, how many units they touch, and whether they
-  are done. Without it you would be opening pages to find out who is late.
-- **When a unit is waiting, the note names the person**, not just the team.
-  "Ask Finance" is not an instruction anybody can act on once there are three
-  custodians; "ask Hossam" is.
-
 **Manage › Figures I report.** The custodian's own screen: every figure they are
 master of, across every unit, in one place. Finance enters revenue once per unit
 without visiting ten pages. Nobody else sees this page — it is hidden outright

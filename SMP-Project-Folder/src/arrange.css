@@ -678,11 +678,6 @@
   .units .navfold.open .foldtw{opacity:1}
   .navfold .foldtw{font-size:10px;opacity:.7}
   .units .navfold:hover .foldtw{opacity:1}
-  /* The closed fold carries the location, or browsing one side while sitting on
-     the other leaves the navigation saying nothing about where you are. */
-  .foldhere{color:var(--gold);font-weight:700;text-transform:none;letter-spacing:0;
-    font-size:12.5px}
-  .foldhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
 
   .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface-2);
     color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;

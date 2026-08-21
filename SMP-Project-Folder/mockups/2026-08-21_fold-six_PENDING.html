@@ -29,8 +29,6 @@ nav.units{background:var(--panel);display:flex;align-items:stretch;padding:0 16p
   border-bottom-color:var(--gold)}
 .units .sep{width:1px;background:var(--panel-ink);opacity:.22;margin:12px 8px;flex:0 0 1px}
 .foldwrap{display:flex;align-items:center}
-.foldhere{color:var(--gold);font-weight:700;font-size:12.5px}
-.foldhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
 .navfold{cursor:pointer;display:inline-flex;align-items:center;white-space:nowrap}
 .foldn{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.55)}
 
@@ -41,7 +39,6 @@ nav.units{background:var(--panel);display:flex;align-items:stretch;padding:0 16p
 .t1 .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
 .t1 .foldtw{font-size:9px;opacity:.85}
 .t1 .navfold.open{background:var(--gold);border-color:var(--gold);color:#16325C}
-.t1 .navfold.open .foldhere{color:#16325C}
 
 /* ── 2 · soft ghost (the D already built) ─────────────────────── */
 .t2 .navfold{background:rgba(255,255,255,.07);border:0;border-radius:6px;color:#D7E0EE;
@@ -93,7 +90,7 @@ nav.units{background:var(--panel);display:flex;align-items:stretch;padding:0 16p
 </style></head><body><div class="wrap">
 
 <h1>The navigation fold — six treatments</h1>
-<p class="lede">Each shown twice: <b>closed</b> on the Group page with Mobile behind the fold, and
+<p class="lede">Each shown twice: <b>closed</b> on the Group page, and
 <b>open</b> beside the selected unit. Everything else on the bar is exactly as it ships — the tabs,
 the selected underline, the separators. Only the two folds change.</p>
 
@@ -133,7 +130,7 @@ function bar(open, opts){
     return '<button class="navfold' + (isOpen ? ' open' : '') + '">' + label +
       (opts.count ? ' <span class="foldn">' + n + '</span>' : '') +
       ' <span class="foldtw">' + (isOpen ? '▾' : '▸') + '</span>' +
-      (label === 'Units' && !isOpen ? '<span class="foldhere">Mobile</span>' : '') + '</button>';
+      '</button>';
   };
   var u = open
     ? '<button aria-selected="true">Mobile</button><button>Retail Stores</button>' +

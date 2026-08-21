@@ -274,7 +274,16 @@ ink**: the dark nav bar took `--panel-quiet`/`--panel-hover` rather than
 borrowing the page's `--ink-3`, which on it was 2.5:1. And **an !important
 keeps winning after the argument has changed** — the navy table header was
 enforced with one, so editing `_shared.css` did nothing and only the
-screenshots showed it. TYPEFACE (§38.7): four faces embedded as latin subsets
+screenshots showed it. A retheme's SECOND pass matters as much as the first (§40): §38's "zero
+contrast failures" was measured on ONE page and returned **316** when swept
+across nineteen. **A token checked against the most generous background it ever
+meets is checked against the one case that was never in doubt** — `--ink-3`
+cleared on white and failed on `--surface-2`, where most of it actually sits.
+And converting SOME members of a family is worse than converting none: table
+headers went light while `.grouphead` and `.gcard .card-head` stayed navy, so
+the survivors read as mistakes rather than as a style. **A header needs a
+ground of its own to be a header** — whether or not that ground is dark; the
+rail's lost its fill entirely and vanished. 316 → 0. TYPEFACE (§38.7): four faces embedded as latin subsets
 of variable fonts (148 KB for all four, because a linked webfont would break
 the offline single-file handover). It is its own axis for now — **B is how you
 decide, A is how you ship** — and collapses into the palette once each has a

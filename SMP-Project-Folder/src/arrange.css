@@ -354,8 +354,11 @@
   .imp-step { display:grid; grid-template-columns:34px 1fr; gap:16px;
               padding:20px 0; border-bottom:1px solid var(--line-soft); }
   .imp-step:last-child { border-bottom:0; }
-  .imp-n { width:28px; height:28px; border-radius:50%; background:var(--panel);
-           color:var(--panel-ink); font-family:var(--mono); font-size:13px;
+  /* A numbered step is a mark, and marks take the accent in this language. */
+  .imp-n { width:28px; height:28px; border-radius:50%; background:var(--gold);
+           /* --on-accent, NOT --panel-ink: the ink that can be read on the
+              accent is not the ink that can be read on the bar (§38.4). */
+           color:var(--on-accent); font-family:var(--mono); font-size:13px;
            display:flex; align-items:center; justify-content:center; }
   .imp-b h4 { margin:0 0 4px; font-family:var(--serif); font-size:18px; }
   .imp-b .sub { margin:0; max-width:74ch; }
@@ -381,8 +384,10 @@
           background:none; font-weight:400; }
   .qs i.on { background:var(--attn-bg); border:1px solid var(--stone-soft);
              color:var(--stone); font-weight:700; }
-  .qs i.on.past { background:var(--panel); border-color:var(--panel);
-                  color:var(--panel-ink); font-weight:700; }
+  /* A quarter already passed is the accent at a tint, not the navigation bar's
+     colour — the bar's colour belongs to the bar. */
+  .qs i.on.past { background:var(--over-bg); border-color:var(--over-line);
+                  color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
@@ -440,7 +445,7 @@
                border:1px solid var(--line); border-radius:var(--r);
                background:var(--surface); padding:12px 16px; margin:0 0 18px; }
   .masterbar .cfg-lab { flex:1; }
-  .editbtn.danger { color:var(--bad); border-color:var(--bad); }
+  .editbtn.danger { color:var(--bad-tx); border-color:var(--bad); }
   .editbtn.danger:hover { background:var(--bad-bg); }
   .confirm.row { flex-direction:row; align-items:center; flex-wrap:wrap; gap:10px; }
   .confirm.row .why { max-width:46ch; }
@@ -484,7 +489,7 @@
     text-transform:uppercase;padding:5px 9px;border-radius:20px;white-space:nowrap}
   .b-over{background:var(--over-bg);color:var(--gold-deep);border:1px solid var(--over-line)}
   .b-met{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
-  .b-short{background:var(--bad-bg);color:var(--bad)}
+  .b-short{background:var(--bad-bg);color:var(--bad-tx)}
   .b-none{background:var(--surface-2);color:var(--none)}
   .board tbody tr.alt td{background:var(--surface-2)}
   .board tbody tr.unitstart td{border-top:1px solid var(--line)}
@@ -586,7 +591,12 @@
     border-bottom:1px solid var(--line)}
   .phead span, .phead > *{color:var(--ink-2)}
   .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
-  .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important; border-bottom:0}
+  /* A grid header that behaves like a table header, so it looks like one. It
+     stayed navy through the retheme while the tables went light, which left
+     the product carrying BOTH treatments — the exact thing the rule above
+     exists to prevent. */
+  .grouphead{background:var(--surface-2) !important; color:var(--ink-2) !important;
+    border-bottom:1px solid var(--line)}
   /* Arrange mode still has to be visible against the dark band. */
   .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
 
@@ -617,7 +627,7 @@
   .oblband{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:13px 18px;
     background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r) var(--r) 0 0;
     margin:22px 0 0}
-  .oblband.cap{background:var(--panel);color:#fff;border-color:var(--panel)}
+  .oblband.cap{background:var(--gold);color:var(--on-accent);border-color:var(--gold)}
   .obl-lab{font-size:10px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-3)}
   .oblband.cap .obl-lab{color:var(--gold)}
   .obl-nm{font-size:16px;font-weight:600}
@@ -649,10 +659,12 @@
     text-transform:uppercase;padding:6px 11px;cursor:pointer;display:inline-flex;
     align-items:center;gap:6px;white-space:nowrap;margin:0 2px}
   .units .navfold:hover{color:#fff;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.65)}
-  .units .navfold.open{color:var(--panel);background:var(--gold);border-color:var(--gold);
+  /* --on-accent, not --panel. The bar's own colour as ink on the accent fill
+     is 2.84:1 — a colour picked for one ground used on another (§38.4). */
+  .units .navfold.open{color:var(--on-accent);background:var(--gold);border-color:var(--gold);
     font-weight:700;opacity:1}
   .units .navfold.open .foldtw{opacity:1}
-  .units .navfold.open .foldhere{color:var(--panel)}
+  .units .navfold.open .foldhere{color:var(--on-accent)}
   .navfold .foldtw{font-size:9px;opacity:.85}
   /* The closed fold carries the location, or browsing one side while sitting on
      the other leaves the navigation saying nothing about where you are. */
@@ -660,13 +672,14 @@
     font-size:12.5px}
   .foldhere::before{content:"\00b7";margin-right:5px;color:rgba(255,255,255,.35)}
 
-  .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);
-    color:#fff;padding:11px 16px;border-radius:var(--r) var(--r) 0 0}
+  .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface-2);
+    color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;
+    border-bottom:1px solid var(--line)}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
-    color:var(--panel);background:var(--gold);border-radius:20px;padding:4px 8px}
+    color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
   .capnm{font-size:15.5px;font-weight:600}
   .capmeta{font-size:12.5px;color:#AFC0D8}
-  .captally{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:#fff;
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
     background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px}
   .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
     border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
@@ -684,11 +697,12 @@
   .units-in.folded .sep{margin:0 3px}
 
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
-    color:#fff;padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px}
+    color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
+    border-bottom:1px solid var(--line)}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
     color:var(--panel);background:var(--gold);border-radius:20px;padding:4px 8px}
   .capnm{font-size:15.5px;font-weight:600}
-  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:#fff;
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3);
     background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
   .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
     border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
@@ -722,7 +736,7 @@
   .units .navmenu-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
   /* `here` is where you ARE, `open` is the menu showing. They are different
      states and both can be true, so they do not share a style. */
-  .units .navmenu-btn.here{color:var(--panel);background:var(--gold);border-color:var(--gold)}
+  .units .navmenu-btn.here{color:var(--on-accent);background:var(--gold);border-color:var(--gold)}
   .navmenu.open .navmenu-btn{color:#fff;background:rgba(255,255,255,.22);
     border-color:rgba(255,255,255,.7)}
   .navmenu.open .navmenu-btn.here{color:var(--panel);background:var(--gold)}

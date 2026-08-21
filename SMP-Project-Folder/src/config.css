@@ -50,7 +50,10 @@
         font-weight:700; padding:3px 9px; border-radius:99px; font-style:normal; }
   .st-none { color:var(--none); border:1px dashed var(--none); }
   .st-view { color:var(--stone); background:var(--surface-2); border:1px solid var(--line); }
-  .st-edit { color:var(--gold-deep); background:var(--attn-bg); border:1px solid var(--gold); }
+  /* The ACCENT tint, not the warning tint. "May edit" is not a warning, and
+     gold-deep on the amber ground was 4.34:1 as well as saying the wrong
+     thing. */
+  .st-edit { color:var(--gold-deep); background:var(--over-bg); border:1px solid var(--over-line); }
   .stset { display:inline-flex; gap:2px; }
   /* A cell with neither button lit IS the answer — "no access" — not an
      unanswered cell. The pair sits on a dashed tray so it reads as a state

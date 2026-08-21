@@ -4567,3 +4567,67 @@ and not a tabled key lands there already.
 - Round trip against Postgres: branding survives, lands in `org.extra`, and
   `write(read())` is still a fixed point with it set.
 - 31 viewers × every page, zero console errors.
+
+
+---
+
+## 40 · The retheme's second pass — what a one-page sweep missed
+
+Islam, with a screenshot of the rail: *"it's working but some areas had the
+dark blue navigation color that was turned to transparent now. we need to check
+them … check the rest."*
+
+### 40.1 The claim that was too big
+
+§38 reported **zero contrast failures across all four combinations**, and that
+was true of what it measured — the group's front page. Swept across **19 pages**
+instead of one, the same check returned **316**. The measurement was honest;
+the sentence around it was not, and "zero failures" without naming the surface
+it covered is the kind of claim that stops anyone looking again.
+
+The sweep now walks every destination — five group tabs, a unit's Performance
+and Strategy, eight Setup pages and four Manage pages — in both palettes and
+both themes.
+
+### 40.2 What Islam actually spotted, and the rule behind it
+
+`.rail .rhead` was navy; the retheme made it the card's own surface, which left
+it reading as nothing at all. **A header is a label for what sits under it, and
+it needs a ground of its own to be one — whether or not that ground is dark.**
+It takes the same quiet header the tables now use.
+
+Auditing the rest turned up the worse half of the same mistake: `thead th` and
+`.phead` went light while `.grouphead`, `.gcard .card-head` and `.capline`
+stayed navy, so **the product was carrying both header treatments at once** —
+exactly what the rule those files already stated exists to prevent. A retheme
+that converts some members of a family and not the others is worse than one
+that converts none, because the survivors read as mistakes rather than as a
+style.
+
+### 40.3 Three inks on grounds they were never chosen for
+
+All of the remaining 316 were one shape of error, and it is §38.4 again:
+
+- **`--ink-3` cleared 4.5:1 on white and failed at 4.34 on `--surface-2`** —
+  which is where most of it actually is, in card heads, table heads and section
+  grounds. **A token checked against the most generous background it ever meets
+  is a token checked against the one case that was never in doubt.** Both quiet
+  inks are set against the quietest ground they sit on now.
+- **`--none` was 2.56:1** as text and is used as text in a dozen places.
+- **`--panel` used as INK on the accent fill** (the open nav fold), and
+  **`--gold` used as ink on the panel** (the Temple's pillar labels, at 2.84:1).
+  A colour chosen to work as a fill on the page is not a colour that works as a
+  word on the bar; that is what `--on-accent` and `--panel-accent` are for, and
+  three rules had been reaching past them.
+
+One was wrong in meaning as well as in contrast: the access matrix's *edit*
+state sat on `--attn-bg`, the WARNING tint. "May edit" is not a warning. It is
+on the accent tint now.
+
+### 40.4 Verified
+
+- **316 → 0** across 19 pages × 2 palettes × 2 themes.
+- Only three surfaces still carry the dark panel colour, and all three are
+  meant to: the prototype banner, the navigation bar, and the Temple — which is
+  a drawing, not a component.
+- 31 viewers × every page, zero console errors; byte-identical rebuild.

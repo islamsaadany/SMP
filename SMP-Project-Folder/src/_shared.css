@@ -93,6 +93,13 @@
      Two more for the dark bar and the accent fill, for the same reason: white
      on the house gold is 2.4:1, so text on the accent gets --on-accent rather
      than the page's --on-fill.
+
+     And the quiet inks are set against the QUIETEST GROUND THEY SIT ON, not
+     the whitest. --ink-3 cleared 4.5:1 on white and failed at 4.34 on
+     --surface-2 — which is where most of it actually is, in card heads, table
+     heads and section grounds. A token checked against the most generous
+     background it ever meets is a token checked against the one case that was
+     never in doubt.
      Four blocks, each complete. They are NOT written as a base plus overrides:
      a partial block inherits whatever the previous one happened to set, and
      that is exactly how v3.0's zebra stripe survived into dark. Every block
@@ -115,8 +122,8 @@
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
     --line:#E2E8F0; --line-soft:#F1F5F9;
-    --ink:#0F172A; --ink-2:#334155; --ink-3:#64748B;
-    --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#94A3B8;
+    --ink:#0F172A; --ink-2:#334155; --ink-3:#5E6E85;
+    --good:#059669; --attn:#D97706; --warn:#EA580C; --bad:#DC2626; --none:#636E7E;
     --good-bg:#ECFDF5; --attn-bg:#FFFBEB; --warn-bg:#FFF7ED; --bad-bg:#FEF2F2;
     --panel:#0F172A; --panel-ink:#FFFFFF;
     /* NO ZEBRA in this language — rows separate on hover instead, and the
@@ -160,8 +167,8 @@
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
     --line:#D6DCE5; --line-soft:#E6EAF0;
-    --ink:#171B22; --ink-2:#414A58; --ink-3:#6B7583;
-    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#8A9099;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
     --zebra:var(--surface); --zebra-focus:#FDFAF1;
@@ -273,7 +280,10 @@
   .pillar { background:var(--panel); color:var(--panel-ink); padding:20px 14px; text-align:center;
             min-height:104px; display:flex; flex-direction:column; justify-content:center; gap:6px; border-radius:var(--r); }
   .pillar b { font-family:var(--serif); font-size:16px; }
-  .pillar span { font-size:11px; letter-spacing:.12em; color:var(--gold); font-weight:700; }
+  /* --panel-accent, not --gold: the accent as a WORD on the dark panel. The
+     accent itself is chosen to work as a fill on the page, and on the panel it
+     is 2.84:1 — the same pairing .banner strong already had to solve. */
+  .pillar span { font-size:11px; letter-spacing:.12em; color:var(--panel-accent); font-weight:700; }
   .pillar em { font-size:12px; font-style:normal; opacity:.8; }
   .stylobate { margin-top:16px; padding:16px 18px 18px; border:1px solid var(--line);
                border-top:3px solid var(--gold); background:var(--surface); }

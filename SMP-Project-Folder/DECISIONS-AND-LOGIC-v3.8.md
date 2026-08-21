@@ -3838,3 +3838,96 @@ that offers the relevant people first with **+ Add new** beside it, creating a
 person with their name and that role, who appears in the registry immediately
 for the rest of their details. Plus per-row password reset and bulk temporary
 passwords (§16.11).
+
+---
+
+## 34 · The door gets a wall — v3.9 (in progress)
+
+Islam: *"The smp login page is poor in design can you use front end skill and
+create a more neat one. Look at the strategy formulation project repo which has
+an amazing design with strong concept and get back to me."*
+
+### 34.1 What the reference actually does
+
+The reference is `Strategy-Formulation`'s `app/(auth)/layout.tsx` — and the
+strong concept Islam saw is **not in the form**. It is in the split.
+
+43% of the screen is a navy wall that argues the product's case: the mark, one
+hero sentence with its idea half in a gradient, four value tiles, a quoted line
+pinned to the bottom behind a rule, and three huge faint rings bleeding off the
+edges. The other 57% is a pale dotted field with the form floating on it. The
+form itself is ordinary; what makes it feel considered is that **the brand does
+its talking somewhere other than on top of the password box**.
+
+Our gate had been asking one 400px card to carry the whole product — an
+eyebrow, a name, a tagline and a form, stacked in a box on flat navy. Every
+line of brand it wanted to say had to be squeezed above the fields, which is
+why it read as thin.
+
+### 34.2 What was taken, and what was deliberately not
+
+**Taken**: the split; the glass card (`rgba(...,0.82)` over `blur(20px)`, 20px
+radius, three stacked shadows instead of one); icon-inset fields with a 3px
+focus ring rather than a border swap; the dot grid; one `rise` keyframe replayed
+with staggered delays so the page assembles rather than appears; the compact
+brand bar below the breakpoint.
+
+**Not taken**, and on purpose:
+
+- **Their `AUTH_001…AUTH_999` error codes with resend/report actions.** That is
+  built for a product with self-service registration and a support desk. SMP has
+  three failure modes and one SMO who issues passwords by hand; a code would be
+  theatre, and a "report this issue" button with nothing behind it is a lie.
+- **Their blue.** They are navy-and-blue; SMP is navy-and-gold (§0). Gold takes
+  every accent the reference gives blue — the focus ring, the hero gradient, the
+  quote's rule. Borrowing the blue would have made this a copy rather than a
+  sibling.
+- **Their light-only palette.** Their sign-in has no dark mode; ours does
+  (§25), so the wall, the dotted field, the glass and the ring are all tokens in
+  the same three blocks as everything else.
+
+### 34.3 The wall may only claim what SMP does
+
+Four tiles, and each one had to be a thing the product actually does: scores
+derived and never typed (§5.1), reporting cycles snapshotted and never
+overwritten, the view resolved per role (§33), and installable/offline (§26).
+The front door is the one page seen by someone who has not signed in yet — it
+is the last place invented capability belongs. Same rule as §21's "never put
+invented content in the database", one surface further out.
+
+### 34.4 Height is a constraint a width query cannot see
+
+The wall's content needs about 600px of height. On a 1024×560 window the quote
+fell below the fold and the whole page grew a scrollbar to reach a decorative
+line — while every `max-width` query in the file reported the layout fine,
+because **width was never the constraint**. A `@media (max-height: 700px)`
+block compacts the wall instead. §27.1 said verify at every width; this extends
+it: **sweep the other axis too, or the layout is verified in one dimension and
+guessed in the other.**
+
+### 34.5 Whoever hides a field hides its furniture
+
+`enterServerMode()` used to unhide the person-key `<input>`. With the input now
+living inside a `.field` wrapper that also holds its icon, unhiding the input
+alone would have left a person icon floating on the card in legacy mode. The
+wrapper is what carries `hidden` now — **the unit of showing and hiding is the
+composed control, never the one element inside it that happens to have the id.**
+
+### 34.6 Verified
+
+- Width sweep 1920→360 in **both** themes: no horizontal scroll at any width,
+  card never clipped, wall present at ≥981 and gone below, bar the inverse.
+- Height sweep 1080→520 at desktop widths: nothing clipped, nothing below the
+  fold, no page scroll down to 560. At 1440×520 the page scrolls 8px — recorded,
+  not fixed; nothing is hidden and that window is smaller than any real one.
+- Behaviour unchanged: legacy mode shows the fixed access name, server mode
+  swaps in the person-key field **with its icon** and re-points the label, a
+  wrong password shows the error and clears the field, the change-password card
+  takes focus and rejects a mismatch, the reveal toggles all three password
+  fields. Zero console errors.
+- **Contrast: every text run on the gate meets WCAG AA in both themes** — scored
+  against the worst stop of each gradient surface, not against a flat colour.
+  (The checker had to be fixed first: reading only `backgroundColor` walks
+  straight past a gradient to the white body beneath and scores white-on-navy at
+  1.05. **A contrast check that cannot see gradients is a contrast check that
+  passes everything.**)

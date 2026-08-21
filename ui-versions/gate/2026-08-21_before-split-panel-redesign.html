@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Relative, not root-relative: the gate is opened from disk as well as
+     served, and a leading slash would find nothing on a file:// path. -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<!-- Installable. The gate is the start_url, so this is the page a person
+     installs from and the page the installed app opens on. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- The window chrome around an installed app follows the theme too, or the
+     title bar stays navy-on-white while the page underneath went dark. Two
+     tags, because theme-color takes a media query but not a class. -->
+<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
+<title>SMP — Access</title>
+<script>
+  /* The gate has no theme control of its own — one card and a password field
+     is not the place to be offered a preference. It READS the choice made
+     inside the platform (same browser, same key, so the same choice) and
+     otherwise follows the device. Signing in never changes the colours under
+     you.
+
+     In the head and inline, before the stylesheet is even parsed, so the card
+     never paints light and flips. Absence of the attribute is what hands the
+     decision back to prefers-color-scheme, so "auto" removes rather than sets.
+     Storage throws rather than returning null in a private window, hence the
+     catch: a browser that cannot remember still follows the device. */
+  try {
+    var t = localStorage.getItem("smp.theme");
+    if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  } catch (e) {}
+</script>
+<script>
+  /* Registered from the gate ONLY, and deliberately not from the platform.
+     The worker's scope is the whole origin, so one registration covers both,
+     and reaching the platform at all means having signed in here first - so
+     by the time anyone opens it the worker is already installed and has
+     precached it. A second registration in the built file would be the same
+     five lines kept in step by hand for no gain.
+
+     Guarded on protocol as well as support: opened from a memory stick the
+     platform is a file:// page, where there is no worker to register and the
+     attempt throws. */
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").catch(function () {});
+    });
+  }
+</script>
+<style>
+  /* Light is the definition; dark redefines the same names and nothing else.
+     Every colour on this page is one of these — a hardcoded #fff or #d8dee8
+     left in a rule is a light value that survives into dark, which is exactly
+     how a "dark mode" ends up with one white box in it.
+
+     The values track the platform's own dark palette (_shared.css) so signing
+     in is not a change of scheme, and the three blocks below are the same
+     three the platform uses: bare :root, the device preference, and the
+     explicit choice. Change one, change all three. */
+  :root {
+    color-scheme: light;
+    --navy: #0f2544;
+    --navy-light: #1b3a63;
+    --gold: #c9a227;
+    --gold-light: #e6c65c;
+    --bg: #f4f6f9;
+    --danger: #b3261e;
+    --card: #ffffff;
+    --field: #ffffff;
+    --line: #d8dee8;
+    --ink: #171b22;
+    --muted: #45536a;
+    --label: #0f2544;
+    --on-navy: #ffffff;
+    --on-navy-soft: #c8d3e2;
+    --on-gold: #0f2544;
+    --ghost-ink: #0f2544;
+    --ghost-line: #0f2544;
+    --shadow: rgba(15, 37, 68, 0.15);
+    --ground: #0f2544;
+    --danger-bg: #fdecea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --navy: #24487a;
+      --navy-light: #2e5794;
+      --gold: #d9b665;
+      --gold-light: #e6c65c;
+      --bg: #14161a;
+      --danger: #d97066;
+      --card: #1c2027;
+      --field: #242932;
+      --line: #333a45;
+      --ink: #e9ecf1;
+      --muted: #b4bcc8;
+      --label: #c3cedc;
+      --on-navy: #eaf0fa;
+      --on-navy-soft: #b9c8de;
+      --on-gold: #14161a;
+      --ghost-ink: #9fbbe4;
+      --ghost-line: #3c5d8c;
+      --shadow: rgba(0, 0, 0, 0.45);
+      --ground: #0b0e13;
+      --danger-bg: #33201e;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --navy: #24487a;
+    --navy-light: #2e5794;
+    --gold: #d9b665;
+    --gold-light: #e6c65c;
+    --bg: #14161a;
+    --danger: #d97066;
+    --card: #1c2027;
+    --field: #242932;
+    --line: #333a45;
+    --ink: #e9ecf1;
+    --muted: #b4bcc8;
+    --label: #c3cedc;
+    --on-navy: #eaf0fa;
+    --on-navy-soft: #b9c8de;
+    --on-gold: #14161a;
+    --ghost-ink: #9fbbe4;
+    --ghost-line: #3c5d8c;
+    --shadow: rgba(0, 0, 0, 0.45);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    /* Navy ground, not pale grey. A sign-in page is a front door, and a door
+       set into a wall reads as deliberate where a form floating on grey reads
+       as unfinished. Taken from HR_ERP's sign-in. */
+    background: var(--ground);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  /* Nothing until the session check answers - see show() below. Opacity rather
+     than display so the card does not jump the layout when it arrives. */
+  .card { opacity: 0; transition: opacity .16s ease; }
+  body.ready .card { opacity: 1; }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 18px 50px var(--shadow);
+    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--navy);
+    color: var(--on-navy);
+    padding: 34px 34px 28px;
+    text-align: center;
+  }
+  /* A gold eyebrow above the name, so the mark is not the only thing carrying
+     the brand at a glance. */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+  }
+  .card-header h1 {
+    margin-top: 8px;
+    font-size: 30px;
+    letter-spacing: 3px;
+  }
+  .card-header h1 span { color: var(--gold-light); }
+  .card-header p {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--on-navy-soft);
+  }
+  .card-body { padding: 30px 34px 34px; }
+  .foot {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--label);
+    margin-bottom: 6px;
+  }
+  .access-name {
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--label);
+    margin-bottom: 18px;
+  }
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+    /* Both stated, or the field keeps the user agent's white-on-black and
+       the one box on the page that takes typing is the one that ignores the
+       theme. */
+    background: var(--field);
+    color: var(--ink);
+  }
+  input[type="password"]:focus, input[type="text"]:focus { border-color: var(--gold); }
+  button {
+    width: 100%;
+    background: var(--navy);
+    color: var(--on-navy);
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: var(--navy-light); }
+  .error {
+    color: var(--danger);
+    background: var(--danger-bg);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .hint {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin: -8px 0 14px;
+  }
+  /* Starting page after access */
+  #home, #change { display: none; }
+  #home { text-align: center; }
+  #home .card-body p { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+  .open-btn {
+    display: block;
+    background: var(--navy);
+    color: var(--on-navy);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 10px;
+  }
+  .open-btn:hover { background: var(--navy-light); }
+  .logout {
+    background: transparent;
+    color: var(--ghost-ink);
+    border: 1px solid var(--ghost-line);
+  }
+  .logout:hover { background: var(--bg); }
+  .badge {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--on-gold);
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Sign in -->
+  <div class="card" id="login">
+    <div class="card-header">
+      <span class="eyebrow">Strategy Management Platform</span>
+      <h1>S<span>M</span>P</h1>
+      <p>Sign in to continue</p>
+    </div>
+    <div class="card-body">
+      <form id="loginForm">
+        <label id="accessLabel" for="password">Access</label>
+        <!-- Served with a database behind it, sign-in is a real account (a
+             person key issued by the SMO). Without one — the local file, or
+             static hosting — the original AdminSMO gate stands. -->
+        <input type="text" id="user" autocomplete="username" autocapitalize="none" hidden>
+        <div class="access-name" id="fixedAccess">AdminSMO</div>
+        <label for="password">Password</label>
+        <input type="password" id="password" autocomplete="current-password" autofocus>
+        <div class="error" id="error">Incorrect password. Please try again.</div>
+        <button type="submit">Sign In</button>
+      </form>
+      <!-- Stated because it is a promise the product keeps: the session cookie
+           is 30 days (lib/auth.js SESSION_DAYS), so signing in once on a
+           device holds for a month. -->
+      <p class="foot">You will stay signed in on this device for 30 days.</p>
+    </div>
+  </div>
+
+  <!-- First sign-in: the issued password is temporary -->
+  <div class="card" id="change">
+    <div class="card-header">
+      <span class="eyebrow">Strategy Management Platform</span>
+      <h1>S<span>M</span>P</h1>
+      <p>Choose your own password</p>
+    </div>
+    <div class="card-body">
+      <form id="changeForm">
+        <label for="newpw">New password</label>
+        <input type="password" id="newpw" autocomplete="new-password">
+        <p class="hint">At least 8 characters, with an uppercase letter, a number and a special character.</p>
+        <label for="newpw2">Repeat it</label>
+        <input type="password" id="newpw2" autocomplete="new-password">
+        <div class="error" id="changeError"></div>
+        <button type="submit">Set password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- The "Starting page" card - a badge, a welcome line and a button that
+       went to the platform - was removed in 3.7. Signing in IS the request to
+       open the platform; a page whose only purpose is to offer a button to the
+       thing you just asked for is a door behind a door. Sign out lives in the
+       platform's own top bar, which is where you are when you want it. -->
+
+<script>
+  /* Two modes, decided once at load.
+
+     SERVER — the page is served next to /api/auth with a database behind it:
+     sign-in is a real account checked on the server, an issued password must
+     be changed on first use, and the session is an httpOnly cookie.
+
+     LEGACY — the local file, or hosting with no database: the original
+     client-side AdminSMO gate, which was always a latch rather than a lock
+     and remains labelled as such in the decisions document (§19). */
+  var LEGACY = { user: "AdminSMO", password: "4123" };
+  var MODE = "legacy";
+  var PERSON = null;
+
+  var loginCard = document.getElementById("login");
+  var changeCard = document.getElementById("change");
+  var errorEl = document.getElementById("error");
+  var changeErrorEl = document.getElementById("changeError");
+  var userEl = document.getElementById("user");
+  var passwordEl = document.getElementById("password");
+
+  /* NOTHING IS SHOWN UNTIL THE ANSWER IS KNOWN.
+
+     The gate used to paint the sign-in card immediately, then reveal the user
+     field when /api/auth answered, then - if a session was already valid -
+     swap the whole card for a starting page. Three states in about a second,
+     which is what Islam saw as "it opens on user and password, lags, then
+     shifts to another window".
+
+     There is one honest thing to show before the answer arrives, and it is
+     nothing. The card is hidden until the session check resolves; if a session
+     is live the platform is opened and the gate is never seen at all. */
+  function show(which) {
+    loginCard.style.display = which === "login" ? "block" : "none";
+    changeCard.style.display = which === "change" ? "block" : "none";
+    document.body.classList.add("ready");
+    if (which === "login") passwordEl.focus();
+    if (which === "change") document.getElementById("newpw").focus();
+  }
+
+  /* Version lives in the filename, never in the app - update on each bump. */
+  var PLATFORM = "SMP-Project-Folder/strategy-management-platform-v3.8.html";
+  function openPlatform() { location.replace(PLATFORM); }
+  function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
+  function clearFail(el) { el.style.display = "none"; }
+
+  function api(body) {
+    return fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
+
+  function enterServerMode() {
+    MODE = "server";
+    userEl.hidden = false;
+    document.getElementById("fixedAccess").style.display = "none";
+    document.getElementById("accessLabel").setAttribute("for", "user");
+  }
+  function signedIn(person) {
+    PERSON = person;
+    /* A temporary password is the one thing that stands between signing in and
+       being in: it has to be replaced before the session is any use. Anything
+       else goes straight through. */
+    if (person && person.mustChange) show("change");
+    else openPlatform();
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearFail(errorEl);
+    if (MODE === "server") {
+      api({ action: "login", user: userEl.value.trim(), password: passwordEl.value })
+        .then(function (j) {
+          passwordEl.value = "";
+          if (j.ok) signedIn(j.person);
+          else fail(errorEl, j.error || "Sign-in failed.");
+        })
+        .catch(function () { fail(errorEl, "Could not reach the server."); });
+      return;
+    }
+    if (passwordEl.value === LEGACY.password) {
+      sessionStorage.setItem("smp_access", LEGACY.user);
+      passwordEl.value = "";
+      signedIn({ name: LEGACY.user, mustChange: false });
+    } else {
+      fail(errorEl, "Incorrect password. Please try again.");
+      passwordEl.value = "";
+      passwordEl.focus();
+    }
+  });
+
+  document.getElementById("changeForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearFail(changeErrorEl);
+    var a = document.getElementById("newpw").value;
+    var b = document.getElementById("newpw2").value;
+    if (a !== b) return fail(changeErrorEl, "The two entries differ.");
+    api({ action: "change", password: a }).then(function (j) {
+      if (j.ok) {
+        document.getElementById("newpw").value = "";
+        document.getElementById("newpw2").value = "";
+        PERSON.mustChange = false;
+        /* The password is theirs now - straight in, same as any other
+           successful sign-in. */
+        openPlatform();
+      } else fail(changeErrorEl, j.error || "Could not set the password.");
+    }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
+  });
+
+  /* Sign out lived on the starting page, which no longer exists. It is in the
+     platform's own top bar, which posts to /api/auth and returns here - and
+     here, with no session, is the sign-in card. */
+
+  /* Decide the mode. file:// can never reach an API; over http(s) the answer
+     comes from /api/auth itself — a 503 means hosting with no database, and
+     the legacy gate stands. */
+  function legacyStart() {
+    if (sessionStorage.getItem("smp_access") === LEGACY.user) signedIn({ name: LEGACY.user, mustChange: false });
+    else show("login");
+  }
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    fetch("/api/auth", { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 503) throw new Error("no db");
+        return r.json();
+      })
+      .then(function (j) {
+        enterServerMode();
+        if (j.ok && j.person) signedIn(j.person);
+        else show("login");
+      })
+      .catch(legacyStart);
+  } else {
+    legacyStart();
+  }
+</script>
+</body>
+</html>

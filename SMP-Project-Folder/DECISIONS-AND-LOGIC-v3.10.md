@@ -4631,3 +4631,72 @@ on the accent tint now.
   meant to: the prototype banner, the navigation bar, and the Temple — which is
   a drawing, not a component.
 - 31 viewers × every page, zero console errors; byte-identical rebuild.
+
+
+---
+
+## 41 · The accent budget
+
+Islam, comparing the old rail with the new one: *"this view made better sense …
+the grey shade on the selected direction is more subtle rather than what you
+made … it's a strategy platform, needs to be subtly coloured."*
+
+### 41.1 It was not one rule, it was five
+
+The retheme gave a solid accent fill to five things at once, and three of them
+had been navy or subtle:
+
+| | was | became |
+|---|---|---|
+| the rail's selected pillar | grey ground, accent edge | solid accent |
+| the navigation's selected unit | accent underline | solid accent pill |
+| the current quarter pip | navy | solid accent |
+| import step numbers | navy | solid accent |
+| the capability band | navy | solid accent |
+
+Which is why it read loud without any one of them being obviously wrong. **The
+budget is the thing to watch, not the rule.** A single solid fill is a mark; a
+product with nine of them has a colour scheme instead of an accent.
+
+The reason it happened is worth keeping too: the reference marks its current
+place with a filled pill and a pulsing dot, and I carried that through
+consistently — the rail matching the nav so "which pillar am I on" reads the
+same way "which unit am I on" does. **The consistency was real; the volume was
+wrong**, and consistency at the wrong volume is still wrong.
+
+### 41.2 What was chosen, from a comparison rather than from a description
+
+Four rail treatments, three navigation treatments and two pip treatments drawn
+in both palettes, on the real components, before anything was implemented.
+Islam took **B, C, A**:
+
+- **Rail: a quiet ground with an accent edge.** The edge says which row without
+  taking the row's own colours away — the score in particular keeps its scoring
+  colour instead of being swallowed by the fill, which on a page about scores
+  is the whole point.
+- **Navigation: the underline, as it was.** The 3px line is a transparent
+  border reserved on every button, so selecting one cannot move the row by
+  three pixels. The pill's radius went with its fill: a rounded pill carrying a
+  straight underline reads as neither.
+- **Pips: solid, unchanged.** A 20px pip is a mark, not a slab. Keeping this
+  one solid is what makes the other two read as deliberate rather than as a
+  product with no accent at all.
+
+The accent now does four jobs across the product instead of nine.
+
+**The rail and the navigation no longer match each other**, which was
+deliberate before and is given up on purpose. That was the price of the quieter
+register and it is worth paying.
+
+### 41.3 What went with it
+
+The pulsing dot, and with it `@keyframes sf-pulse` and its reduced-motion
+guard — nothing else referenced them (§24: delete an element and delete its CSS
+with it).
+
+### 41.4 Verified
+
+- Contrast: still **0 failures** across 19 pages × 2 palettes × 2 themes. B
+  changes which inks sit on which grounds, so this had to be re-run rather
+  than assumed.
+- 31 viewers × every page, zero console errors; byte-identical rebuild.

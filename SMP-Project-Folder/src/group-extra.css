@@ -516,7 +516,6 @@
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
   .rail button.ritem { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
-                       border-radius:var(--r);
     width:100%; text-align:left; font:inherit; color:inherit; background:none;
     padding:11px 14px 11px 11px; border:0; border-bottom:1px solid var(--line-soft);
     border-left:3px solid transparent; cursor:pointer; }
@@ -526,13 +525,14 @@
   .rail .ritem .rsub { grid-column:1/-1; font-size:11px; color:var(--ink-3); margin-top:2px; }
   .rail .ritem .rnum { font-variant-numeric:tabular-nums; font-weight:700;
     font-size:13px; color:var(--ink-3); }
-  /* The selected row is the ACCENT PILL the primary nav uses, so "which pillar
-     am I on" reads the same way "which unit am I on" does one row up. The gold
-     left-edge went with the rest of the old language. */
-  .rail button.ritem.on { background:var(--gold); border-left-color:transparent; color:var(--on-accent); }
+  /* A QUIET GROUND AND AN ACCENT EDGE (§41). The retheme made this a solid
+     accent fill to match the nav's pill; both are back to marking rather than
+     repainting. The edge says which row without taking the row's own colours
+     away — the score in particular keeps its scoring colour instead of being
+     swallowed by the fill, which on a page about scores is the point. */
+  .rail button.ritem.on { background:var(--surface-2); border-left-color:var(--gold); }
   .rail .ritem.on b { font-weight:700; }
-  .rail .ritem.on .rnum,
-  .rail .ritem.on .rsub { color:var(--on-accent); opacity:.86; }
+  .rail .ritem.on .rnum { color:var(--ink); }
   .rail .rfoot { padding:9px 14px; border-top:1px solid var(--line); background:var(--surface-2);
     font-size:11.5px; color:var(--ink-3); }
   .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);

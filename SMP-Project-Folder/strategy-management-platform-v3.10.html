@@ -229,36 +229,36 @@
 
   nav.units { background:var(--panel); }
   .units-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
-  /* Was opacity .62, which put grey type on navy and made the row hard to read
-     \u2014 a navigation button has to be legible first and quiet second. */
-  /* A PILL ROW, not an underlined tab row. The reference's sidebar marks its
-     place with a filled accent pill and a slowly pulsing dot; laid out as a
-     row, that is this. The underline went with the serif. */
-  .units-in { padding:0 24px; align-items:center; gap:4px; height:46px; }
+  /* AN UNDERLINED TAB ROW, not a pill row (§41).
+
+     The retheme made this a filled accent pill with a pulsing dot, following
+     the reference, and made the rail match it. Islam, looking at both: *"it's
+     a strategy platform, needs to be subtly coloured."* He is right, and the
+     count is the argument — five places gained a solid accent fill at once, so
+     it was not any one of them being wrong, it was the budget.
+
+     An underline marks the place without repainting it, and it leaves the
+     accent doing four jobs across the product instead of nine.
+
+     The 3px line is a border reserved on EVERY button, transparent until it is
+     needed, so selecting one cannot move the row by three pixels. An inset
+     shadow would have avoided that too, but a rounded pill with a straight
+     underline reads as neither, so the radius goes with the fill. */
+  .units-in { padding:0 24px; align-items:stretch; gap:2px; height:46px; }
   /* Its own two tokens, not --ink-3 and --surface-2. Those are PAGE colours,
      and the nav bar is not the page: --ink-3 on the dark bar is a dark grey on
      near-black at about 2.5:1, and --surface-2 as a hover paints a near-white
      block onto it. A surface with its own background needs its own ink. */
-  .units button { font:inherit; font-size:var(--fs-small); font-weight:500; padding:7px 11px;
-                  border:0; border-radius:var(--r); background:none; color:var(--panel-quiet);
-                  cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:7px;
-                  transition:background .15s, color .15s; }
-  .units button:hover { background:var(--panel-hover); color:var(--panel-ink); }
-  .units button[aria-selected="true"] { background:var(--gold); color:var(--on-accent); font-weight:600;
-                  box-shadow:var(--shadow-accent); }
-  /* The dot is a second carrier, never the only one — the pill already says
-     it. It marks the row you are on when the page is scanned rather than
-     read. */
-  .units button[aria-selected="true"]::after { content:""; width:6px; height:6px; border-radius:var(--r-pill);
-                  background:var(--on-accent); animation:sf-pulse 2s cubic-bezier(.4,0,.6,1) infinite; }
-  .units button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .units button { font:inherit; font-size:var(--fs-small); font-weight:500; padding:0 13px;
+                  border:0; border-bottom:3px solid transparent; background:none;
+                  color:var(--panel-quiet); cursor:pointer; white-space:nowrap;
+                  display:inline-flex; align-items:center; gap:7px;
+                  transition:color .15s, border-color .15s; }
+  .units button:hover { color:var(--panel-ink); }
+  .units button[aria-selected="true"] { color:var(--panel-ink); font-weight:700;
+                  border-bottom-color:var(--gold); }
+  .units button:focus-visible { outline:2px solid var(--gold); outline-offset:-4px; }
   .units .sep { width:1px; background:var(--panel-ink); opacity:.22; margin:12px 8px; flex:0 0 1px; }
-  @keyframes sf-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  /* Anyone who has asked for less motion gets none. The pill still says where
-     you are; the dot simply stops moving. */
-  @media (prefers-reduced-motion: reduce) {
-    .units button[aria-selected="true"]::after { animation:none; }
-  }
 
   nav.tabs { border-bottom:1px solid var(--line); background:var(--surface); }
   .tabs-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
@@ -922,7 +922,6 @@
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
   .rail button.ritem { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
-                       border-radius:var(--r);
     width:100%; text-align:left; font:inherit; color:inherit; background:none;
     padding:11px 14px 11px 11px; border:0; border-bottom:1px solid var(--line-soft);
     border-left:3px solid transparent; cursor:pointer; }
@@ -932,13 +931,14 @@
   .rail .ritem .rsub { grid-column:1/-1; font-size:11px; color:var(--ink-3); margin-top:2px; }
   .rail .ritem .rnum { font-variant-numeric:tabular-nums; font-weight:700;
     font-size:13px; color:var(--ink-3); }
-  /* The selected row is the ACCENT PILL the primary nav uses, so "which pillar
-     am I on" reads the same way "which unit am I on" does one row up. The gold
-     left-edge went with the rest of the old language. */
-  .rail button.ritem.on { background:var(--gold); border-left-color:transparent; color:var(--on-accent); }
+  /* A QUIET GROUND AND AN ACCENT EDGE (§41). The retheme made this a solid
+     accent fill to match the nav's pill; both are back to marking rather than
+     repainting. The edge says which row without taking the row's own colours
+     away — the score in particular keeps its scoring colour instead of being
+     swallowed by the fill, which on a page about scores is the point. */
+  .rail button.ritem.on { background:var(--surface-2); border-left-color:var(--gold); }
   .rail .ritem.on b { font-weight:700; }
-  .rail .ritem.on .rnum,
-  .rail .ritem.on .rsub { color:var(--on-accent); opacity:.86; }
+  .rail .ritem.on .rnum { color:var(--ink); }
   .rail .rfoot { padding:9px 14px; border-top:1px solid var(--line); background:var(--surface-2);
     font-size:11.5px; color:var(--ink-3); }
   .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);

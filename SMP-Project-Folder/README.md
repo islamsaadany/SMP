@@ -70,6 +70,8 @@ of it was rejected — which is the point of keeping it.
 | `mock-setuphead.html` | One header for both configuration tables |
 | `mock-icons2.html` | Edit and clear icons, compared at real size |
 | `mock-capcard.html` | The capability card, and the Cards/Table toggle. **Built in 1.9** |
+| `2026-08-21_design-language-strategy-formulation_SETTLED.html` | The Strategy-Formulation language on SMP's own screens. **Built in 3.11** (&sect;38) |
+| `2026-08-21_accent-budget_SETTLED.html` | Four rail treatments, three navigation, two pips, in both palettes. Settled **B / C / A** (&sect;41) |
 
 ### Settled — build status noted
 

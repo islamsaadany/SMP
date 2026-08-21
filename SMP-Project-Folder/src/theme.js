@@ -43,6 +43,19 @@ var THEME = (function () {
   var PALETTES = ["slate", "forefront"];
   var PNAMES = { slate: "Slate", forefront: "Forefront" };
 
+  /* ── The FONT axis (§38.8) ───────────────────────────────────────
+     Independent of the palette for now, deliberately: four faces are embedded
+     so they can be judged IN the product rather than from a specimen sheet.
+     Once it is settled which face belongs to which palette this collapses into
+     the palette and the unpicked faces leave the file.
+
+     "system" first, because it is what the platform shipped with and a
+     comparison needs its own starting point in it. */
+  var FKEY = "smp.font";
+  var FONTS = ["system", "inter", "source", "manrope", "plex"];
+  var FNAMES = { system: "System", inter: "Inter", source: "Source Sans",
+                 manrope: "Manrope", plex: "IBM Plex" };
+
   /* Where the switch starts when nobody has chosen: whatever the device says.
      matchMedia is absent in very old engines and returns a stub in some test
      runners, hence the guard - light is the safe fall-through because it is
@@ -77,8 +90,19 @@ var THEME = (function () {
     try { localStorage.setItem(PKEY, v); } catch (e) {}
   }
 
+  function readFont() {
+    try {
+      var v = localStorage.getItem(FKEY);
+      return FONTS.indexOf(v) === -1 ? FONTS[0] : v;
+    } catch (e) { return FONTS[0]; }
+  }
+  function writeFont(v) {
+    try { localStorage.setItem(FKEY, v); } catch (e) {}
+  }
+
   var mode = read();
   var palette = readPalette();
+  var font = readFont();
 
   function apply() {
     /* Always an explicit attribute now, even when the value came from the
@@ -93,6 +117,12 @@ var THEME = (function () {
        failed still paints something coherent rather than nothing — but the
        attribute is what the four blocks are actually keyed on. */
     document.documentElement.setAttribute("data-palette", palette);
+    /* REMOVED rather than set for the system stack — absence is what hands the
+       decision back to --sys-sans, the same reasoning §25.2 used for the theme
+       before Auto was retired. There is no [data-font="system"] block to write
+       because there is nothing for it to say. */
+    if (font === "system") document.documentElement.removeAttribute("data-font");
+    else document.documentElement.setAttribute("data-font", font);
   }
 
   /* Sun and moon, drawn in the same 20px box as the rest of the chrome's
@@ -141,10 +171,27 @@ var THEME = (function () {
     if (btn) paintPal(btn);
   }
 
+  /* The control renders its own name IN the face it names, so the press is not
+     the only way to find out what it looks like. */
+  function paintFont(btn) {
+    btn.textContent = FNAMES[font];
+    btn.style.fontFamily = "var(--sans)";
+    var next = FONTS[(FONTS.indexOf(font) + 1) % FONTS.length];
+    btn.title = "Typeface: " + FNAMES[font] + " — click for " + FNAMES[next];
+    btn.setAttribute("aria-label", btn.title);
+  }
+  function setFont(v, btn) {
+    font = v;
+    writeFont(font);
+    apply();
+    if (btn) paintFont(btn);
+  }
+
   return {
     apply: apply,
     mode: function () { return mode; },
     palette: function () { return palette; },
+    font: function () { return font; },
     /* Called once, after the chrome exists. */
     wire: function () {
       var btn = document.getElementById("themebtn");
@@ -161,6 +208,14 @@ var THEME = (function () {
         paintPal(pal);
         pal.addEventListener("click", function () {
           setPalette(PALETTES[(PALETTES.indexOf(palette) + 1) % PALETTES.length], pal);
+        });
+      }
+      var fb = document.getElementById("fontbtn");
+      if (fb) {
+        fb.hidden = false;
+        paintFont(fb);
+        fb.addEventListener("click", function () {
+          setFont(FONTS[(FONTS.indexOf(font) + 1) % FONTS.length], fb);
         });
       }
     }

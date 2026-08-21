@@ -256,7 +256,32 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.10: the matrix stops being a matrix of pages
+*Last Updated: 2026-08-21 — v3.11 (in progress): a design LANGUAGE, and
+palettes under it (§38). Ported from Strategy-Formulation at Islam's direction.
+Two token layers, and the line between them is the point: LAYER 1 is the
+language (type scale, shape, weight) — one set, never themed; LAYER 2 is the
+palette — colours only, four blocks (slate and forefront × light and dark).
+**A tenant's branding will supply a PALETTE, never a language** (§36), so a
+client can be given their colours without being given a different product.
+Nothing was renamed: `--panel`, `--gold` and `--stone` now carry a JOB rather
+than a colour — **"gold" was never really gold, it was whatever the accent
+happened to be**. Three rules with teeth. **A colour that works as a FILL
+usually fails as TYPE** — white on the house gold is 2.4:1 — so every scoring
+colour gained a `-tx` twin for words; that one change took the sweep from 15
+failures to 0 across all four combinations, and cleared light mode's 61
+long-standing ones with it. **A surface with its own background needs its own
+ink**: the dark nav bar took `--panel-quiet`/`--panel-hover` rather than
+borrowing the page's `--ink-3`, which on it was 2.5:1. And **an !important
+keeps winning after the argument has changed** — the navy table header was
+enforced with one, so editing `_shared.css` did nothing and only the
+screenshots showed it. TYPEFACE (§38.7): four faces embedded as latin subsets
+of variable fonts (148 KB for all four, because a linked webfont would break
+the offline single-file handover). It is its own axis for now — **B is how you
+decide, A is how you ship** — and collapses into the palette once each has a
+face. Absence of `data-font` is the system stack; there is no block for it
+because there is nothing to say.*
+
+*Earlier: 2026-08-21 — v3.10: the matrix stops being a matrix of pages
 (§37). It was 25 pages × 7 roles, three buttons a cell — **525 controls on one
 screen**, answering a question with 175 instances that nobody asks. It is seven
 roles down and seven AREAS across now: Group, own/other business unit,

@@ -4412,7 +4412,67 @@ whole first pass and only the screenshots showed it. The rule is now the light
 header, still `!important`, still for the same reason. **A rule written to win
 an argument keeps winning it after the argument has changed.**
 
-### 38.7 Verified
+### 38.7 The typeface, and why four rather than one
+
+Islam: *"Do we have an option for the fonts used as well?"* — then, when I asked
+him to choose one: *"I don't understand why you want to choose from them. Why
+not to have four."*
+
+He was right, and the answer to why I had asked was simply that he had picked
+"embed one family" earlier — I was following an instruction, not defending a
+position. Worth recording because the reasoning that came out of it is the
+useful part.
+
+**The constraint that shapes every font decision here** is A5: the built file
+has to open from a memory stick and look like itself. So a linked webfont is
+out — it breaks the offline handover, and it puts a request to a third party on
+every load of a file holding a client's strategy. A face either travels inside
+the file or it does not exist.
+
+**The cost turned out to be an order of magnitude smaller than I first quoted.**
+I estimated 60–200 KB per family. Latin subsets of VARIABLE faces are 24–48 KB,
+because one file covers every weight and the non-latin ranges are dropped. Four
+faces are 148 KB, and the built file went from 792 KB to 994 KB. All four are
+SIL OFL 1.1, which permits embedding — most foundry fonts do not, and that is
+the constraint that actually narrows the field.
+
+**The real cost of four was never bytes. It was verification.** Every face has
+different metrics, so a column that fits in one may wrap in another. One face is
+6 width checks; five faces is 30. That is the honest argument for settling on
+fewer, and it is the reason this axis is temporary.
+
+**The shape question underneath it.** Islam had already said the font should
+live WITH the palette. If that is true then the font is not a separate choice at
+all — it is part of what "Forefront" and "Slate" ARE, the same way the navy is,
+and four fonts would mean four palettes rather than a font menu. Two shapes
+follow:
+
+- **A** — the font rides with the palette. One switch. A client's branding
+  later arrives as one package: their colours and their face together, which is
+  how a brand actually works.
+- **B** — the font is its own axis. Three switches, any combination, 30 checks.
+
+Islam: *"Good approach B first."* Which is the right sequencing: **B is how you
+DECIDE, A is how you SHIP.** Judging a typeface from a specimen sheet is
+guessing; judging it on your own screen with your own numbers in it is not. Once
+each palette has a face, the axis collapses into the palette and the faces
+nobody picked leave the file.
+
+**Absence is the system stack.** There is no `[data-font="system"]` block,
+because there is nothing for it to say — `apply()` REMOVES the attribute, and
+`--sans` falls back to `--sys-sans`. The same reasoning §25.2 used for the
+theme before Auto was retired.
+
+Two small things: every face names the system stack after it, so a face that
+fails to decode degrades to the system font rather than to a default serif; and
+the control renders its own name IN the face it names, so the press is not the
+only way to find out what it looks like.
+
+The MONO stack stays a system stack. It carries person keys and unit codes — a
+dozen short strings — and a second embedded family for those would be 40 KB for
+nothing.
+
+### 38.8 Verified
 
 - **Zero contrast failures across all four combinations** — slate and forefront,
   light and dark. Light mode had carried 61 known failures since §25; those are
@@ -4422,3 +4482,8 @@ an argument keeps winning it after the argument has changed.**
   tables): no horizontal page scroll at any width.
 - All four palette/theme pairs load from storage, paint the right attributes and
   survive a reload.
+- **Five faces × six widths on the densest page** (a unit's Plan: the rail plus
+  the measures and tactics tables) — no horizontal page scroll in any of the 30.
+- Each embedded face actually becomes the body font rather than silently
+  falling back; "System" removes the attribute; the choice survives a reload.
+- The built file is 994 KB with all four faces inside it, up from 792 KB.

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.10 · **Last updated:** 2026-08-21
+**Latest version:** v3.11 (in progress) · **Last updated:** 2026-08-21
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,37 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.10 — roles and access, at the size you can read *(current)*
+### v3.11 — a new look, and colours and fonts you can swap *(in progress)*
+
+The Strategy-Formulation design language, ported onto SMP's own screens: 14px
+body, no serif, black-weight uppercase micro-labels, hairline cards that state
+themselves by border colour, and a light table header where SMP had a navy band
+and a zebra stripe.
+
+**Two layers.** The *language* — type, shape, weight — is one set and never
+changes. The *palette* is colours only: **Slate** and **Forefront**, each in
+light and dark. When multi-tenant lands, a client's branding will arrive as a
+palette, never a language — so they get their colours without getting a
+different product.
+
+**Typeface is a third switch, for now.** Four faces are embedded in the file:
+Inter, Source Sans 3, Manrope, IBM Plex Sans. Try them on your own screens with
+your own numbers, then tell me which face belongs to which palette — at that
+point the switch folds into the palette and the ones you did not pick come out
+of the file. Embedded rather than linked because the file has to open from a
+memory stick and still look like itself.
+
+**Zero contrast failures across all four colour combinations.** Light mode had
+been carrying 61 known failures since v3.0; the new palette clears them rather
+than fixing them one at a time.
+
+The file is 994 KB with all four typefaces inside, up from 792 KB.
+
+**Not merged, and not finished:** some deeper reporting and config surfaces
+still carry old shapes. The login page is untouched — it has its own design you
+approved.
+
+### v3.10 — roles and access, at the size you can read
 
 The page you called exhausting was 25 pages × 7 roles, three buttons a cell —
 **525 controls on one screen**. It is **seven roles down and seven kinds of page

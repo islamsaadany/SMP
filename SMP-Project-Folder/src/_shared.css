@@ -31,7 +31,14 @@
        Ported from Strategy-Formulation, which is Tailwind's defaults used
        directly: no webfont, a small type scale, and shape carried by radius
        rather than by shadow. */
-    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    /* The fallback stack, and what every embedded face falls back TO. Never
+       read directly by a rule — rules read --sans, which is set on the font
+       axis below. */
+    --sys-sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    --sans:var(--sys-sans);
+    /* The mono stack stays a system stack. It carries person keys and unit
+       codes — a dozen short strings — and a second embedded family to style
+       those would be 40 KB for nothing. */
     --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
     /* THERE IS NO DISPLAY SERIF. The reference product has none anywhere, and
        it is most of what tells the two languages apart at a glance. The token
@@ -59,6 +66,22 @@
     --shadow-md:0 4px 6px -1px rgb(15 23 42/.10), 0 2px 4px -2px rgb(15 23 42/.10);
     --shadow-accent:0 4px 6px -1px var(--accent-glow);
   }
+
+  /* ── THE FONT AXIS (§38.8) ───────────────────────────────────────
+     Its own axis for now, independent of the palette, so the four faces can be
+     compared IN the real product rather than from a specimen sheet. Islam:
+     *"B first"* — try them all, then settle which face belongs to which
+     palette and collapse the axis into it, at which point the faces nobody
+     picked come out of the file.
+
+     Each face names the system stack after it, so a face that fails to decode
+     degrades to the system font rather than to a default serif. Absence of the
+     attribute is the system stack, which is why there is no [data-font="system"]
+     block: nothing to set. */
+  :root[data-font="inter"]   { --sans:'Inter',var(--sys-sans); }
+  :root[data-font="source"]  { --sans:'Source Sans 3',var(--sys-sans); }
+  :root[data-font="manrope"] { --sans:'Manrope',var(--sys-sans); }
+  :root[data-font="plex"]    { --sans:'IBM Plex Sans',var(--sys-sans); }
 
   /* ── LAYER 2 · THE PALETTES ──────────────────────────────────────
      A colour that is legible as a FILL is usually not legible as TYPE. Every

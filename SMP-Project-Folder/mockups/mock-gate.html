@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMP — the door (mockup, v3.8 proposal)</title>
+<!--
+  MOCKUP ONLY — index.html is untouched.
+
+  The concept is SMP's own mark. favicon.svg is the Strategy Temple: pediment,
+  architrave, three pillars, stylobate. A temple's front is a PORTICO, so the
+  sign-in page is drawn as one, at page scale:
+
+     pediment    -> the hero line on the navy wall
+     architrave  -> the gold hairline under it, and the gold cap on the card
+     pillars     -> the three things SMP does, each on its own gold pillar
+     stylobate   -> the footer rule the whole wall stands on
+
+  Borrowed from Strategy Formulation's sign-in (its structure, not its
+  colours): the split door — a brand wall carrying the argument, a form panel
+  carrying the work; a dot ground behind the card; leading icons in the fields;
+  a show/hide eye; a lifting gradient button; and one staggered entrance.
+  Its blues are replaced throughout by SMP navy/gold.
+
+  The preview bar at the bottom right is mockup chrome and ships with nothing.
+-->
+<style>
+/* ---------------------------------------------------------------- palette
+   Same three blocks as the gate and the platform: bare :root is the light
+   definition, the device preference redefines it, the explicit choice
+   redefines it again. Every value below is a token — a literal colour left in
+   a rule is a light assumption that survives into dark. */
+:root {
+  color-scheme: light;
+  --navy:#16325C; --navy-deep:#0b1e3c; --navy-soft:#24487A;
+  --gold:#C9A24D; --gold-light:#E6C65C; --gold-deep:#A8842F;
+  --panel:#F4F6F9; --panel-2:#E9EEF5; --dot:#C3CEDC;
+  --card:#FFFFFF; --field:#FFFFFF; --line:#DCE3EC; --line-strong:#C7D1DF;
+  --ink:#12161D; --muted:#55617A; --label:#16325C;
+  --on-navy:#FFFFFF; --on-navy-soft:#B9CBE4; --on-navy-dim:#8AA4C8;
+  --danger:#B3261E; --danger-bg:#FDECEA; --danger-line:#F3C9C4;
+  --shadow-1:rgba(15,37,68,.06); --shadow-2:rgba(15,37,68,.10); --shadow-3:rgba(15,37,68,.07);
+  --ring:rgba(201,162,77,.22);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --navy:#172c4e; --navy-deep:#0a1526; --navy-soft:#24487A;
+    --gold:#D9B665; --gold-light:#E6C65C; --gold-deep:#C9A24D;
+    --panel:#14161A; --panel-2:#0F1115; --dot:#2A313C;
+    --card:#1C2027; --field:#242932; --line:#333A45; --line-strong:#3E4653;
+    --ink:#E9ECF1; --muted:#AEB7C4; --label:#C3CEDC;
+    --on-navy:#EAF0FA; --on-navy-soft:#B9C8DE; --on-navy-dim:#8FA6C4;
+    --danger:#D97066; --danger-bg:#33201E; --danger-line:#5A3330;
+    --shadow-1:rgba(0,0,0,.30); --shadow-2:rgba(0,0,0,.45); --shadow-3:rgba(0,0,0,.35);
+    --ring:rgba(217,182,101,.24);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --navy:#172c4e; --navy-deep:#0a1526; --navy-soft:#24487A;
+  --gold:#D9B665; --gold-light:#E6C65C; --gold-deep:#C9A24D;
+  --panel:#14161A; --panel-2:#0F1115; --dot:#2A313C;
+  --card:#1C2027; --field:#242932; --line:#333A45; --line-strong:#3E4653;
+  --ink:#E9ECF1; --muted:#AEB7C4; --label:#C3CEDC;
+  --on-navy:#EAF0FA; --on-navy-soft:#B9C8DE; --on-navy-dim:#8FA6C4;
+  --danger:#D97066; --danger-bg:#33201E; --danger-line:#5A3330;
+  --shadow-1:rgba(0,0,0,.30); --shadow-2:rgba(0,0,0,.45); --shadow-3:rgba(0,0,0,.35);
+  --ring:rgba(217,182,101,.24);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:"Segoe UI",Arial,sans-serif;   /* the platform's stack, unchanged */
+  background:var(--panel); color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+}
+/* A serif for the wordmark and the two headlines only; the rest of the page
+   stays on the platform's own stack, so signing in is not a change of voice.
+   Deliberately NOT a webfont: the gate is opened from a memory stick as well
+   as served, a font that cannot load is a console error qa.py will fail on,
+   and the service worker would have one more origin to think about. This
+   stack resolves on every machine SMP runs on and costs one request fewer. */
+.serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-weight:400}
+
+/* --------------------------------------------------------------- the door */
+.door{min-height:100dvh;display:grid;grid-template-columns:minmax(0,46%) 1fr}
+
+/* ------------------------------------------------------------- brand wall */
+.wall{
+  position:relative;overflow:hidden;color:var(--on-navy);
+  padding:44px 48px 36px;display:flex;flex-direction:column;
+  background:
+    radial-gradient(120% 90% at 12% 0%, rgba(201,162,77,.16) 0%, rgba(201,162,77,0) 55%),
+    linear-gradient(158deg, var(--navy-deep) 0%, var(--navy) 46%, var(--navy-soft) 100%);
+}
+/* Grain, so a large navy field has a surface instead of looking like a fill. */
+.wall::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* The mark itself, enormous and mostly off the corner: present, never read. */
+.wall .ghost{
+  position:absolute;right:-14%;bottom:-16%;width:78%;opacity:.055;
+  pointer-events:none;transform:rotate(-4deg);
+}
+.wall > *{position:relative;z-index:1}
+
+.lockup{display:flex;align-items:center;gap:14px;margin-bottom:52px}
+.lockup .mark{width:46px;height:46px;border-radius:12px;flex:0 0 auto;
+  box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.lockup h1{font-size:27px;letter-spacing:.34em;line-height:1;margin-bottom:7px}
+.lockup h1 b{color:var(--gold-light);font-weight:inherit}
+.lockup p{
+  font-size:9.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--on-navy-dim);
+}
+
+/* Pediment. */
+.hero{max-width:15.5em}
+.hero h2{font-size:44px;line-height:1.1;letter-spacing:-.005em}
+.hero h2 em{font-style:italic;color:var(--gold-light)}
+.hero p{
+  margin-top:16px;font-size:14px;line-height:1.65;color:var(--on-navy-soft);
+  max-width:23em;
+}
+
+/* Architrave — the band the pillars carry. Its top margin is `auto`, which is
+   what splits the wall into two deliberate clusters: the mark and the claim at
+   the top, the three pillars standing on the step at the bottom, and one large
+   quiet space between them rather than four medium ones. */
+.architrave{
+  margin:auto 0 26px;height:2px;transform-origin:left;
+  background:linear-gradient(90deg,var(--gold) 0%,var(--gold-deep) 46%,rgba(201,162,77,0) 100%);
+}
+
+/* Three pillars, because there are three on the mark and three things the
+   platform does. The rule at the left of each row IS the pillar. */
+.pillars{list-style:none;display:flex;flex-direction:column;gap:19px}
+.pillars li{display:flex;gap:16px;align-items:flex-start}
+.pillars li .shaft{
+  flex:0 0 3px;width:3px;align-self:stretch;border-radius:2px;
+  background:linear-gradient(180deg,var(--gold) 0%,rgba(201,162,77,.28) 100%);
+}
+.pillars b{display:block;font-size:13.5px;font-weight:600;letter-spacing:.005em}
+.pillars span{display:block;margin-top:3px;font-size:12.5px;line-height:1.55;color:var(--on-navy-dim)}
+
+/* Stylobate — the step the whole thing stands on. */
+.stylobate{
+  margin-top:30px;padding-top:24px;border-top:1px solid rgba(255,255,255,.10);
+  font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--on-navy-dim);
+}
+
+/* ------------------------------------------------------------- form panel */
+.panel{
+  position:relative;display:flex;align-items:center;justify-content:center;padding:40px 32px;
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel-2) 100%);
+}
+.panel::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(circle,var(--dot) .9px,transparent .9px);
+  background-size:22px 22px;
+  -webkit-mask-image:radial-gradient(80% 70% at 50% 45%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(80% 70% at 50% 45%,#000 30%,transparent 100%);
+}
+.stack{position:relative;width:100%;max-width:404px}
+
+.card{
+  position:relative;background:var(--card);border:1px solid var(--line);
+  border-radius:18px;padding:38px 34px 32px;overflow:hidden;
+  box-shadow:0 1px 2px var(--shadow-1),0 10px 26px var(--shadow-2),0 26px 60px var(--shadow-3);
+}
+/* The card's own architrave: gold across the top, brand without a navy block
+   swallowing a third of the card. */
+.card::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,var(--gold-deep),var(--gold),var(--gold-light));
+}
+.card h2{font-size:30px;line-height:1.15;color:var(--ink)}
+.card .sub{margin-top:7px;font-size:13.5px;color:var(--muted)}
+.card .head{margin-bottom:26px}
+
+label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.field{position:relative;margin-bottom:17px}
+.field svg.lead{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:17px;height:17px;color:var(--muted);opacity:.75;pointer-events:none;
+}
+input[type="text"],input[type="password"]{
+  width:100%;background:var(--field);color:var(--ink);
+  border:1.5px solid var(--line-strong);border-radius:11px;
+  padding:13px 14px 13px 43px;font-size:14.5px;font-family:inherit;outline:none;
+  transition:border-color .14s ease,box-shadow .14s ease;
+}
+input::placeholder{color:var(--muted);opacity:.6}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--ring)}
+.eye{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;color:var(--muted);
+  padding:7px;border-radius:8px;display:flex;line-height:0;width:auto;
+}
+.eye:hover{color:var(--ink);background:transparent}
+/* Legacy mode keeps a stated account rather than a field — same box, no caret. */
+.fixed{
+  background:var(--field);border:1.5px dashed var(--line-strong);border-radius:11px;
+  padding:13px 14px 13px 43px;font-size:14.5px;font-weight:600;color:var(--label);
+}
+.hint{font-size:12px;color:var(--muted);margin:-8px 0 15px;line-height:1.5}
+
+button.go{
+  width:100%;border:none;border-radius:12px;padding:14px;cursor:pointer;
+  font-family:inherit;font-size:14.5px;font-weight:600;letter-spacing:.02em;
+  color:var(--on-navy);
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-deep) 100%);
+  box-shadow:0 4px 14px rgba(15,37,68,.26);
+  transition:transform .14s ease,box-shadow .14s ease,filter .14s ease;
+}
+button.go:hover{transform:translateY(-1px);filter:brightness(1.12);box-shadow:0 8px 22px rgba(15,37,68,.30)}
+button.go:active{transform:translateY(0)}
+button.go:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+.error{
+  display:none;color:var(--danger);background:var(--danger-bg);
+  border:1px solid var(--danger-line);border-radius:10px;
+  padding:11px 13px;font-size:13px;margin-bottom:16px;line-height:1.45;
+}
+.error.on{display:block}
+
+.foot{
+  margin-top:22px;padding-top:18px;border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:12px;color:var(--muted);text-align:center;
+}
+.foot svg{width:14px;height:14px;flex:0 0 auto;opacity:.8}
+.copy{margin-top:20px;text-align:center;font-size:11px;letter-spacing:.06em;color:var(--muted);opacity:.75}
+
+/* ------------------------------------------------------------- entrance
+   One orchestrated arrival, not six little ones. The wall builds bottom-up
+   the way the mark does; the card rises last. */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes spread{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+body.ready .lockup{animation:rise .55s cubic-bezier(.22,.7,.3,1) both}
+body.ready .hero{animation:rise .55s cubic-bezier(.22,.7,.3,1) .08s both}
+body.ready .architrave{animation:spread .5s cubic-bezier(.22,.7,.3,1) .18s both}
+body.ready .pillars li:nth-child(1){animation:rise .5s cubic-bezier(.22,.7,.3,1) .24s both}
+body.ready .pillars li:nth-child(2){animation:rise .5s cubic-bezier(.22,.7,.3,1) .31s both}
+body.ready .pillars li:nth-child(3){animation:rise .5s cubic-bezier(.22,.7,.3,1) .38s both}
+body.ready .stylobate{animation:rise .5s cubic-bezier(.22,.7,.3,1) .44s both}
+body.ready .stack{animation:rise .5s cubic-bezier(.22,.7,.3,1) .12s both}
+/* Nothing paints until the session check answers (§32). A live session opens
+   the platform and the door is never seen — including the wall, which would
+   otherwise flash for the one person who never needed to see it. */
+body:not(.ready) .door{visibility:hidden}
+@media (prefers-reduced-motion:reduce){
+  body.ready *{animation:none !important}
+}
+
+/* ---------------------------------------------------------------- narrow
+   Below the split, the wall becomes a band: the lockup and the hero line,
+   nothing else. The three pillars are an argument, and an argument is not
+   what a phone is for. */
+@media (max-width:940px){
+  .door{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .wall{padding:30px 26px 26px}
+  .lockup{margin-bottom:22px}
+  .hero h2{font-size:29px;max-width:none}
+  .hero p{display:none}
+  .architrave,.pillars,.stylobate,.wall .ghost{display:none}
+  .lockup p{letter-spacing:.16em}
+  .panel{padding:34px 20px 40px}
+  .card{padding:30px 24px 26px}
+}
+@media (max-width:400px){ .card h2{font-size:26px} }
+
+/* ------------------------------------------------------- mockup chrome only */
+.preview{
+  position:fixed;right:14px;bottom:14px;z-index:99;display:flex;gap:6px;
+  background:var(--card);border:1px solid var(--line);border-radius:999px;
+  padding:6px;box-shadow:0 6px 20px var(--shadow-2);font-size:11.5px;
+}
+.preview button{
+  font-family:inherit;font-size:11.5px;border:none;background:transparent;color:var(--muted);
+  padding:6px 11px;border-radius:999px;cursor:pointer;width:auto;
+}
+.preview button[aria-pressed="true"]{background:var(--navy);color:var(--on-navy)}
+</style>
+</head>
+<body>
+
+<div class="door">
+
+  <!-- ============================== brand wall ============================== -->
+  <aside class="wall">
+    <svg class="ghost" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 5.2 27.4 12H4.6z" fill="#fff"/>
+      <rect x="5.2" y="13.2" width="21.6" height="2.4" fill="#fff"/>
+      <rect x="7.2" y="17" width="3.2" height="7.4" fill="#fff"/>
+      <rect x="14.4" y="17" width="3.2" height="7.4" fill="#fff"/>
+      <rect x="21.6" y="17" width="3.2" height="7.4" fill="#fff"/>
+      <rect x="4.4" y="25.6" width="23.2" height="2.8" rx=".6" fill="#fff"/>
+    </svg>
+
+    <div class="lockup">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="6" fill="#16325C"/>
+        <path d="M16 5.2 27.4 12H4.6z" fill="#C9A24D"/>
+        <rect x="5.2" y="13.2" width="21.6" height="2.4" fill="#C9A24D"/>
+        <rect x="7.2" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+        <rect x="14.4" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+        <rect x="21.6" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+        <rect x="4.4" y="25.6" width="23.2" height="2.8" rx=".6" fill="#C9A24D"/>
+      </svg>
+      <div>
+        <h1 class="serif">S<b>M</b>P</h1>
+        <p>Strategy Management Platform</p>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h2 class="serif">The plan, <em>and what became of it.</em></h2>
+      <p>Group and unit plans in one place, scores read off them, and a reporting
+         cycle that keeps its own record.</p>
+    </div>
+
+    <div class="architrave"></div>
+
+    <ul class="pillars">
+      <li><i class="shaft"></i><div>
+        <b>Group, companies, units</b>
+        <span>One plan each, and one place they all live.</span>
+      </div></li>
+      <li><i class="shaft"></i><div>
+        <b>Scores that derive</b>
+        <span>Read off measures and tactics — never typed in.</span>
+      </div></li>
+      <li><i class="shaft"></i><div>
+        <b>Cycles keep the record</b>
+        <span>Each reporting cycle snapshots its own numbers.</span>
+      </div></li>
+    </ul>
+
+    <p class="stylobate">A Forefront Consulting product</p>
+  </aside>
+
+  <!-- ============================== form panel ============================== -->
+  <main class="panel">
+    <div class="stack">
+
+      <!-- ---------- sign in ---------- -->
+      <section class="card" id="login">
+        <div class="head">
+          <h2 class="serif">Welcome back</h2>
+          <p class="sub">Sign in to open the platform.</p>
+        </div>
+
+        <div class="error" id="error">That password was not recognised. Please try again.</div>
+
+        <form id="loginForm" autocomplete="on">
+          <label for="user" id="accessLabel">Access</label>
+
+          <!-- server mode: a person key issued by the SMO -->
+          <div class="field" id="userField">
+            <svg class="lead" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            <input type="text" id="user" placeholder="Your access name" autocomplete="username" autocapitalize="none" spellcheck="false">
+          </div>
+
+          <!-- legacy mode: the account is stated, not typed -->
+          <div class="field" id="fixedField" style="display:none">
+            <svg class="lead" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            <div class="fixed">AdminSMO</div>
+          </div>
+
+          <label for="password">Password</label>
+          <div class="field">
+            <svg class="lead" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <input type="password" id="password" placeholder="Your password" autocomplete="current-password">
+            <button type="button" class="eye" id="eye" aria-label="Show password" title="Show password">
+              <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12C3.8 7.9 7.5 5 12 5s8.2 2.9 9.5 7c-1.3 4.1-5 7-9.5 7s-8.2-2.9-9.5-7z"/></svg>
+            </button>
+          </div>
+
+          <button type="submit" class="go">Sign in</button>
+        </form>
+
+        <p class="foot">
+          <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/></svg>
+          You will stay signed in on this device for 30 days.
+        </p>
+      </section>
+
+      <!-- ---------- first sign-in: the issued password is temporary ---------- -->
+      <section class="card" id="change" style="display:none">
+        <div class="head">
+          <h2 class="serif">Choose your own password</h2>
+          <p class="sub">The one you were issued was temporary.</p>
+        </div>
+
+        <div class="error" id="changeError">The two entries differ.</div>
+
+        <form id="changeForm">
+          <label for="newpw">New password</label>
+          <div class="field">
+            <svg class="lead" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <input type="password" id="newpw" placeholder="At least 8 characters" autocomplete="new-password">
+          </div>
+          <p class="hint">At least 8 characters, with an uppercase letter, a number and a special character.</p>
+
+          <label for="newpw2">Repeat it</label>
+          <div class="field">
+            <svg class="lead" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <input type="password" id="newpw2" placeholder="The same one again" autocomplete="new-password">
+          </div>
+
+          <button type="submit" class="go">Set password and continue</button>
+        </form>
+      </section>
+
+      <p class="copy">© 2026 Forefront Consulting</p>
+    </div>
+  </main>
+</div>
+
+<!-- ===================== mockup chrome — ships with nothing ===================== -->
+<div class="preview" role="group" aria-label="Preview controls">
+  <button id="pTheme">Dark</button>
+  <button id="pCard" aria-pressed="false">Change password</button>
+  <button id="pMode" aria-pressed="false">Legacy</button>
+  <button id="pErr" aria-pressed="false">Error</button>
+</div>
+
+<script>
+  /* Mockup behaviour only. The real gate keeps its own logic (§32: nothing is
+     shown until the session check answers) — this file just makes the states
+     visible so they can be judged. */
+  document.body.classList.add("ready");
+
+  var eye = document.getElementById("eye"), pw = document.getElementById("password");
+  eye.addEventListener("click", function () {
+    var showing = pw.type === "text";
+    pw.type = showing ? "password" : "text";
+    eye.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    eye.setAttribute("title", showing ? "Show password" : "Hide password");
+  });
+
+  function toggle(btn, on) { btn.setAttribute("aria-pressed", on ? "true" : "false"); }
+
+  document.getElementById("pTheme").addEventListener("click", function () {
+    var dark = document.documentElement.getAttribute("data-theme") === "dark";
+    document.documentElement.setAttribute("data-theme", dark ? "light" : "dark");
+    this.textContent = dark ? "Dark" : "Light";
+  });
+  document.getElementById("pCard").addEventListener("click", function () {
+    var on = this.getAttribute("aria-pressed") !== "true";
+    document.getElementById("login").style.display = on ? "none" : "";
+    document.getElementById("change").style.display = on ? "" : "none";
+    toggle(this, on);
+  });
+  document.getElementById("pMode").addEventListener("click", function () {
+    var on = this.getAttribute("aria-pressed") !== "true";
+    document.getElementById("userField").style.display = on ? "none" : "";
+    document.getElementById("fixedField").style.display = on ? "" : "none";
+    document.getElementById("accessLabel").setAttribute("for", on ? "password" : "user");
+    toggle(this, on);
+  });
+  document.getElementById("pErr").addEventListener("click", function () {
+    var on = this.getAttribute("aria-pressed") !== "true";
+    document.getElementById("error").classList.toggle("on", on);
+    document.getElementById("changeError").classList.toggle("on", on);
+    toggle(this, on);
+  });
+</script>
+</body>
+</html>

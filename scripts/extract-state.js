@@ -23,7 +23,6 @@ const state = {
   functions: ctx.FUNCTIONS,
   people: ctx.PEOPLE,
   unitRoles: ctx.UNIT_ROLES,
-  levels: ctx.LEVELS,
   access: ctx.ACCESS,
   labels: ctx.LABELS.entries,
   bands: ctx.BANDS.bands,

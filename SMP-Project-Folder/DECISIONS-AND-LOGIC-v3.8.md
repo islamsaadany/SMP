@@ -3712,3 +3712,129 @@ is. The "all clear" note went; the alarm stayed.
   suite green (its sign-in assertion updated — it was asserting on the Starting
   page this version deletes); round trip, fixed point and archived-plan round
   trip PASS; seed and rebuild byte-identical.
+
+---
+
+## 33 · Roles replace levels — v3.8
+
+Islam: *"N minus one and N-2 … was a start that we used to talk about the
+accessibility that is not really relevant at this moment … the titles should
+not be relevant in the platform accessibility, the activity and visibility
+should be role based."*
+
+### 33.1 The giveaway was already in the code
+
+`LEVELS` carried a `titles` field:
+
+> `{ key:"n1", name:"N-1", titles:"Business Unit Head · Group CFO · Group COO" }`
+
+An abstraction invented before anyone knew what the platform needed, with real
+job titles stapled on to explain what it meant. If a level has to list the
+titles that live at it, the titles were the thing all along.
+
+So: **the role is the thing.** A person's official title — Senior Director,
+Senior Manager — stays in the registry as information *about them* and is never
+consulted for access. Two people with the same title can hold different roles,
+which is correct and was not previously expressible.
+
+### 33.2 Seven roles, and where each one lives
+
+Super user · Group CEO · Company CEO · Business unit owner · Strategy
+custodian · Supporting function head · Contributor.
+
+**Where a role lives depends on what kind of role it is, and this is the whole
+design:**
+
+- A role that names a **seat in the organisation** — super user, group CEO,
+  company CEO — is a property of the **person**. Nothing else points at it.
+- A role that names **responsibility for a thing** — unit owner, custodian,
+  function head — is a property of the **thing**. Mobile already had a head
+  field and a custodian field; those pointers *are* the role, read from the
+  other end.
+
+That is what makes Islam's "and vice versa" work without two tables fighting.
+Setting Mobile's owner on the unit page and setting it in the registry are the
+**same write**, so they cannot disagree — there is one fact with two editing
+surfaces, not two facts to keep in step.
+
+It also gives **multiple roles for free**, which he asked for: a person can be
+group CEO *and* own Care, because those are two records in two different places
+rather than one field fighting itself. `personRoles(p)` assembles the list;
+nothing is stored twice.
+
+### 33.3 The most generous answer, within each role's reach
+
+A person holding several roles gets the **most generous** grant across them.
+Anything else surprises: a group CEO who also owns Care would lose the ability
+to edit Care's foundation because their CEO row says view, and nobody could
+work out why. Least privilege is right for a role a person was *given*; it is
+wrong *across* roles the same person legitimately holds.
+
+**Scope is not relaxed this way.** `reaches()` still resolves per role, so edit
+inherited from owning Care never reaches Mobile.
+
+### 33.4 The matrix was rebuilt, not mapped
+
+At Islam's direction. The rows mean something different now, so a grant carried
+across would be an old answer to a new question. Every role starts from a
+shipped default, and §30.2's rule does the rest: an absent key means "not
+answered yet", so a migrated tenant with an empty map reads entirely through
+the defaults until someone changes a cell.
+
+Which exposed a bug of my own making: `stateCell` read `ACCESS[role][page]`
+directly, so on a migrated tenant — where the map is legitimately empty — the
+whole page threw on `undefined[pageKey]`. It reads through `grantFor()` now, and
+writing a cell is the moment that role gets a row of its own. **Only testing
+against a migrated database found this**; every fresh-deploy test passed.
+
+### 33.5 Two kinds of migration want opposite orders
+
+The serious one. `ensureReady` seeds and *then* migrates, deliberately: §21's
+clean slate must run after the seed or it clears nothing. But **008 reshapes
+columns the seed writes into**, and `schema.sql` cannot help — every statement
+in it is `CREATE TABLE IF NOT EXISTS`, which never adds a column to a table that
+already exists.
+
+So on the deployed tenant the seed would have tried to write `people.role`
+against a table that still had `level`, and failed *before* the migration that
+would have renamed it ever ran. **It would have broken the live database, and
+no fresh-deploy test could have caught it** — the fresh path builds the new
+shape from schema.sql and never notices.
+
+Migrations now declare their phase in their first line — `-- @phase: pre` —
+and run in two passes: **schema migrations before the seed, data migrations
+after**. No marker means post, which is what every migration before 008 wants.
+The answer travels with the file rather than in a list that drifts.
+
+### 33.6 Verified
+
+- **The upgrade path, against a faithful v3.7 tenant built by the v3.7 code
+  itself** — checked out from `main`, its own `ensureReady` run to create it,
+  then the new code let loose on it: `people.role` present and `level` gone,
+  `access_grants` rekeyed to `role_key` and emptied, the `levels` table dropped,
+  `smo → super`, and the state reading back clean. This is what Islam's
+  database will do.
+- **Fresh deploy**: clean slate, round trip, fixed point and archived-plan round
+  trip all PASS.
+- **Every person resolves to at least one role**, including the Group CFO, who
+  had no seat and no pointer and now resolves as a contributor at the group —
+  reaching the group pages and no unit, which the old model could not say
+  (there "unit: group" meant all ten).
+- **Spot checks**: Mobile's head is `owner@mobile`, edits its foundation, cannot
+  reach Retail Stores, cannot edit the plan; its custodian resolves as
+  `custodian@mobile`; the company CEO reaches its own company's units; Finance's
+  head is `fnhead@fn:finance` and reaches no business unit but edits its own
+  pages.
+- **The matrix renders on a migrated tenant** with an empty map, showing the
+  shipped defaults, and changing a cell creates that role's row.
+- **No "Level", no N-1/N-2/N-3 anywhere on the page.**
+- Three themes × 31 viewers, zero console errors; scroll sweep one height; PWA
+  suite green; seed and rebuild byte-identical.
+
+### 33.7 Still to come — v3.9
+
+The registry page itself, and the assignment field Islam described: a search
+that offers the relevant people first with **+ Add new** beside it, creating a
+person with their name and that role, who appears in the registry immediately
+for the rest of their details. Plus per-row password reset and bulk temporary
+passwords (§16.11).

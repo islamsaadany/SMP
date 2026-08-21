@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.7 · **Last updated:** 2026-08-20
+**Latest version:** v3.8 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,38 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.7 — one door *(current)*
+### v3.8 — roles replace levels *(current)*
+N-1 / N-2 / N-3 are gone. **The role is the thing**, and job titles never decide
+access — they are information about a person. Seven roles: Super user, Group
+CEO, Company CEO, Business unit owner, Strategy custodian, Supporting function
+head, Contributor.
+
+The design that makes your "and vice versa" work: a role naming a **seat**
+(super user, CEO) lives on the person; a role naming **responsibility for a
+thing** (unit owner, custodian, function head) lives on the thing — Mobile
+already had a head field, and that pointer *is* the role read from the other
+end. So setting it on the unit page and setting it in the registry are the same
+write and cannot disagree. Several roles at once come free: group CEO *and*
+owner of Care are two records in two places.
+
+Someone holding several roles gets the **most generous** grant across them —
+but only ever within the reach each role carries.
+
+The matrix was **rebuilt, not mapped**, as you asked, and now shows seven role
+columns across every page.
+
+**Two things this caught that would have hit production.** The access matrix
+crashed on a migrated tenant, because its map is legitimately empty and the
+page read it directly. And more seriously: `schema.sql` can never add a column
+to an existing table, so the seed would have written `people.role` before the
+migration renaming `level` ever ran — breaking your live database, invisible to
+every fresh-deploy test. Migrations now declare `-- @phase: pre` and run in two
+passes: schema before the seed, data after.
+
+Verified against a **faithful v3.7 tenant built by the v3.7 code itself**, then
+upgraded.
+
+### v3.7 — one door
 **The gate was three states, not two.** It painted the sign-in card
 immediately in its old shape, then reshaped it when `/api/auth` answered, then —
 if your session was already valid — swapped the whole thing for a Starting page
@@ -592,8 +623,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.7.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.7.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.8.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.8.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

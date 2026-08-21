@@ -1,5 +1,5 @@
 /* ── CONFIGURATION SCREENS ───────────────────────────────────────────────
-   Labels · Levels & access · and the factor editor that extends Weighting.
+   Labels · Roles & access · and the factor editor that extends Weighting.
    ─────────────────────────────────────────────────────────────────────── */
 
 function L(key, scope){
@@ -53,15 +53,20 @@ function renderLabels(){
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
 }
 
-/* ── Levels & access ────────────────────────────────────────────────── */
-function stateCell(levelKey, pageKey, editable){
-  var v = ACCESS[levelKey][pageKey];
+/* ── Roles & access ─────────────────────────────────────────────────── */
+function stateCell(roleKey, pageKey, editable){
+  /* grantFor(), never ACCESS[role][page]. A tenant migrated from the level
+     matrix has an EMPTY access map by design — the rows were rebuilt rather
+     than carried across (§33) — so the direct read was undefined[pageKey] and
+     the whole page threw. The cell shows what the platform would actually
+     answer, which is the shipped default until someone changes it. */
+  var v = grantFor(roleKey, pageKey);
   if (!editable) {
     return '<td class="ac"><span class="st st-' + v + '">' + v + '</span></td>';
   }
   var opts = ["none","view","edit"].map(function(o){
     return '<button type="button" class="stbtn' + (o === v ? " on " + o : "") + '" data-ac="' +
-      levelKey + '|' + pageKey + '|' + o + '" aria-label="' + o + '">' +
+      roleKey + '|' + pageKey + '|' + o + '" aria-label="' + o + '">' +
       (o === "none" ? "&minus;" : o === "view" ? "&#128065;" : "&#9998;") + '</button>';
   }).join("");
   return '<td class="ac"><span class="stset">' + opts + '</span></td>';
@@ -69,53 +74,78 @@ function stateCell(levelKey, pageKey, editable){
 
 function renderAccess(){
   var editable = grant("c_access") === "edit";
-  var levels = [SMO_ROLE].concat(LEVELS);
 
+  /* Every page the matrix controls, grouped the way a reader thinks about
+     them rather than by key prefix. Every page is listed: a matrix that shows
+     some of the pages is a matrix you cannot trust to answer "who can see
+     this". */
   var groups = [
-    { name:"Group pages",    keys:["g_perf","g_found","g_temple","g_weight"] },
-    { name:"Business unit pages", keys:["u_perf","u_found","u_anal"] },
-    { name:"Configuration",  keys:["c_labels","c_access"] }
+    { name:"Group pages",           keys:["g_perf","g_found","g_temple","g_weight","g_focus"] },
+    { name:"Business unit pages",   keys:["u_perf","u_found","u_anal","u_plan","u_report"] },
+    { name:"Supporting function pages", keys:["k_perf","k_found","k_proj","k_report"] },
+    { name:"Manage",                keys:["c_cycle","c_import","c_focus","c_kb"] },
+    { name:"Setup",                 keys:["c_labels","c_access","c_bands","c_units","c_fns","c_caps"] }
   ];
 
-  var head = '<tr><th style="width:24%">Page</th>' + levels.map(function(l){
-    return '<th class="ac"><div class="factor-h"><b>' + esc(l.name) + '</b><span>' +
-      esc(l.titles || "Super user") + '</span></div></th>';
+  var head = '<tr><th style="width:22%">Page</th>' + ROLES.map(function(r){
+    return '<th class="ac"><div class="factor-h"><b>' + esc(r.name) + '</b><span>' +
+      esc(r.scope === "group" ? "group-wide"
+        : r.scope === "company" ? "their company"
+        : r.scope === "fn" ? "their function"
+        : r.scope === "unitfn" ? "their unit or function"
+        : "their unit") + '</span></div></th>';
   }).join("") + '</tr>';
 
   var body = groups.map(function(g){
-    return '<tr class="grouprow"><td colspan="' + (levels.length + 1) + '">' + esc(g.name) + '</td></tr>' +
+    return '<tr class="grouprow"><td colspan="' + (ROLES.length + 1) + '">' + esc(g.name) + '</td></tr>' +
       g.keys.map(function(pk){
         var p = PAGES.filter(function(x){ return x.key === pk; })[0];
+        if (!p) return '';
         return '<tr><td><b>' + esc(p.label) + '</b><span class="why">' + esc(p.note) + '</span></td>' +
-          levels.map(function(l){ return stateCell(l.key, pk, editable); }).join("") + '</tr>';
+          ROLES.map(function(r){ return stateCell(r.key, pk, editable); }).join("") + '</tr>';
       }).join("");
   }).join("");
 
-  var levelRows = LEVELS.map(function(l){
-    return '<tr><td><b>' + esc(l.name) + '</b></td><td>' +
-      (editable ? '<input class="lvl" data-lvl="' + l.key + '" value="' + esc(l.titles) + '" aria-label="Titles at ' + esc(l.name) + '" />'
-                : '<span class="mono">' + esc(l.titles) + '</span>') +
-      '</td><td><span class="why" style="margin:0">' + esc(l.note) + '</span></td></tr>';
+  var roleRows = ROLES.map(function(r){
+    var n = PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+    return '<tr><td><b>' + esc(r.name) + '</b></td>' +
+      '<td class="cc"><span class="mono">' + n + '</span></td>' +
+      '<td><span class="why" style="margin:0">' + esc(r.note) + '</span></td></tr>';
   }).join("");
+
 
   /* Credentials exist only where the platform is served with a database
      behind it (\u00a719). The SMO issues a temporary password per person \u2014
      usernames are the person keys shown here \u2014 and the person is forced to
      choose their own on first sign-in. Offline, none of this renders and the
      page is exactly the prototype's. */
-  var credentialed = typeof SYNC !== "undefined" && SYNC.isLive() && viewer().level === "smo";
+  var credentialed = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
+  /* The roles a person holds, with what each is attached to. Several is normal
+     and the row shows all of them, because "which of these gave her access to
+     Mobile" is the question this table exists to answer. The official title
+     sits underneath as information: it is never consulted for access (§33). */
+  function atLabel(at){
+    if (!at || at === "group") return "group";
+    if (String(at).indexOf("fn:") === 0) {
+      var f = FUNCTIONS[String(at).slice(3)];
+      return f ? f.name : String(at).slice(3);
+    }
+    if (String(at).indexOf("co:") === 0) {
+      var c = COMPANIES[String(at).slice(3)];
+      return c ? c.name : String(at).slice(3);
+    }
+    return UNITS[at] ? UNITS[at].name : at;
+  }
   var peopleRows = PEOPLE.map(function(p){
-    var lv = p.level === "smo" ? SMO_ROLE : LEVELS.filter(function(x){ return x.key === p.level; })[0];
-    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title) +
+    var rs = personRoles(p);
+    return '<tr><td><b>' + esc(p.name) + '</b><span class="why">' + esc(p.title || "") +
       (credentialed ? ' &middot; <span class="mono">key ' + esc(p.key) + '</span>' : '') + '</span></td>' +
-      '<td><span class="pill kind">' + esc(lv.name) + '</span></td>' +
-      '<td><span class="pill ' + (p.unit === "group" ? "theme" : "kind") + '">' +
-        /* A person may belong to a supporting function rather than a business
-           unit \u2014 Finance and HR are not units and never will be. */
-        (p.unit === "group" ? "Group &mdash; all units"
-         : p.unit && UNITS[p.unit] ? esc(UNITS[p.unit].name)
-         : p.fn && FUNCTIONS[p.fn] ? esc(FUNCTIONS[p.fn].name) + " &mdash; function"
-         : "\u2014") + '</span></td>' +
+      '<td>' + (rs.length
+        ? rs.map(function(r){
+            return '<span class="pill kind">' + esc(roleName(r.role)) + '</span>' +
+              '<span class="why" style="margin:0 0 0 6px;display:inline">' + esc(atLabel(r.at)) + '</span>';
+          }).join('<br>')
+        : '<span class="pill none">No role</span>') + '</td>' +
       '<td><button class="linkbu" data-as="' + p.key + '">View as this person &rarr;</button>' +
       (credentialed ? ' <button class="linkbu" data-setpw="' + p.key + '">Set password</button>' : '') +
       '</td></tr>';
@@ -128,19 +158,20 @@ function renderAccess(){
         '<span><i class="st st-none">none</i> no access, page hidden</span>' +
         '<span><i class="st st-view">view</i> reads, cannot change</span>' +
         '<span><i class="st st-edit">edit</i> reads and changes</span></div>' +
-      '<div class="note"><b>The CEO views weighting but does not manage it.</b> That single row is why a cell needs three states rather than two &mdash; visible and editable are different grants, and collapsing them would either lock the CEO out or hand them the model.</div>') +
+      '') +
 
-    section("", "Levels and titles",
-      "Levels travel between clients; titles do not. Each tenant maps its own titles onto the ladder.",
-      '<div class="cfg"><table><thead><tr><th style="width:12%">Level</th><th style="width:40%">Titles at this level</th><th>What sits here</th></tr></thead><tbody>' +
-      levelRows + '</tbody></table></div>' +
-      '<div class="note"><b>The SMO is not a level.</b> An SMO manager might sit at N-2 and still need edit rights no N-1 has, so it is held as a super user beside the ladder rather than a rung on it.</div>') +
+    section("", "The roles",
+      "A role says what someone does in the platform, never what their job title is. Where a role is attached \u2014 a unit, a function, a company \u2014 is what bounds it.",
+      '<div class="cfg"><table><thead><tr><th style="width:22%">Role</th><th class="cc" style="width:8%">People</th><th>What it is</th></tr></thead><tbody>' +
+      roleRows + '</tbody></table></div>') +
 
     section("", "People",
-      "Level plus unit attachment. Two people at N-1 reach the same page types but different units &mdash; which is why the matrix alone cannot express access.",
-      '<div class="cfg"><table><thead><tr><th style="width:34%">Person</th><th>Level</th><th>Attached to</th><th>Simulate</th></tr></thead><tbody>' +
+      "Role plus what it is attached to. Two people holding the same role reach the same page types but different units &mdash; which is why the matrix alone cannot express access.",
+      '<div class="cfg"><table><thead><tr><th style="width:32%">Person</th>' +
+      '<th style="width:40%">Roles in the platform<span class="why">Not their job title \u2014 the title never decides access</span></th>' +
+      '<th>Simulate</th></tr></thead><tbody>' +
       peopleRows + '</tbody></table></div>' +
-      '<div class="note"><b>Ashraf and Hossam are both N-1.</b> The matrix grants both the same page types; their unit attachment is what sends one to Mobile and the other to Retail. A person attached to the group reaches every unit.</div>');
+      '<div class="note"><b>Two unit owners hold the same row of this matrix.</b> It grants both the same page types; what each role is attached to is what sends one to Mobile and the other to Retail. Someone holding several roles gets the most generous answer of them &mdash; but only ever within the reach each role carries.</div>');
 }
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */

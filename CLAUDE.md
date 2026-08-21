@@ -245,7 +245,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.7: one door (§32). The gate was
+*Last Updated: 2026-08-20 — v3.8: roles replace levels (§33).
+N-1/N-2/N-3 were org depth, and the giveaway was in the code: each level carried
+a `titles` string stapling real job titles onto the abstraction. **The role is
+the thing; a job title never decides access.** Seven roles. **Where a role lives
+depends on what kind it is** — a SEAT (super user, CEO) is a property of the
+person; RESPONSIBILITY FOR A THING (unit owner, custodian, function head) is a
+property of the thing, so a unit's head pointer IS the role read from the other
+end. One fact, two editing surfaces, cannot disagree — and several roles at once
+come free. Access is the **most generous** grant across a person's roles, with
+scope still resolved per role. **Two kinds of migration want opposite orders
+around the seed**: `schema.sql` is all CREATE TABLE IF NOT EXISTS and can never
+add a column to an existing table, so a schema migration must run BEFORE the
+seed while a data migration (§21's clean slate) must run after. Migrations
+declare `-- @phase: pre` in their first line; no marker means post. Without this
+the seed would have written `people.role` on a tenant that still had `level` and
+broken the live database — invisible to every fresh-deploy test (§33.5).*
+
+*Earlier: 2026-08-20 — v3.7: one door (§32). The gate was
 **three** states every time — the sign-in card painted immediately in its legacy
 shape, reshaped when `/api/auth` answered, then swapped for a Starting page
 offering a button to the platform. **Before the answer is known there is exactly

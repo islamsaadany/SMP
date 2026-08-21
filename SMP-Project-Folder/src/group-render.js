@@ -2153,7 +2153,7 @@ function unitRailFor(u, sel){
    correctable by its custodian. When per-action authorisation and the change
    log arrive (§19.2) this is the first thing to revisit. */
 function mayEditPlan(){
-  return viewer().level === "smo" && grant("u_plan") === "edit";
+  return hasRole("super") && grant("u_plan") === "edit";
 }
 function unitPlanBody(it){
   var ed = EDIT_PAGE.plan && mayEditPlan();

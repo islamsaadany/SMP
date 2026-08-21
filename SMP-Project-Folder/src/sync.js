@@ -44,7 +44,7 @@ var SYNC = (function () {
       group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
       functionKeys: FUNCTION_KEYS, functions: FUNCTIONS,
       companyKeys: COMPANY_KEYS, companies: COMPANIES,
-      people: PEOPLE, unitRoles: UNIT_ROLES, levels: LEVELS, access: ACCESS,
+      people: PEOPLE, unitRoles: UNIT_ROLES, access: ACCESS,
       labels: LABELS.entries, bands: BANDS.bands, koWeights: KO_WEIGHTS,
       cycle: CYCLE, review: REVIEW, history: HISTORY, priorCycle: PRIOR_CYCLE,
       archives: ARCHIVES
@@ -72,7 +72,6 @@ var SYNC = (function () {
     window.COMPANIES = state.companies || {};
     window.PEOPLE = state.people;
     window.UNIT_ROLES = state.unitRoles;
-    window.LEVELS = state.levels;
     window.ACCESS = state.access;
     LABELS.entries = state.labels;
     BANDS.bands = state.bands;

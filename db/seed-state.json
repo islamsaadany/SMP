@@ -5034,168 +5034,146 @@
   {
    "key": "smo",
    "name": "Strategy Management Office",
-   "level": "smo",
+   "role": "super",
    "unit": "group",
    "title": "SMO"
   },
   {
    "key": "ceo",
    "name": "Group CEO",
-   "level": "ceo",
+   "role": "gceo",
    "unit": "group",
    "title": "Chief Executive"
   },
   {
    "key": "mobhead",
    "name": "Ashraf Laithy",
-   "level": "n1",
    "unit": "mobile",
    "title": "Head of Mobile"
   },
   {
    "key": "loghead",
    "name": "Hazem Roushdy",
-   "level": "n1",
    "unit": "logistics",
    "title": "Head of Logistics"
   },
   {
    "key": "rethead",
    "name": "Hossam Farid",
-   "level": "n1",
    "unit": "retailstores",
    "title": "Head of Retail Stores"
   },
   {
    "key": "cfo",
    "name": "Group CFO",
-   "level": "n1",
    "unit": "group",
    "title": "Chief Financial Officer"
   },
   {
    "key": "b2bhead",
    "name": "Nour Selim",
-   "level": "n1",
    "unit": "b2becomm",
    "title": "Head of B2B Ecomm"
   },
   {
    "key": "cehead",
    "name": "Tarek Nassar",
-   "level": "n1",
    "unit": "consumerelectronics",
    "title": "Head of Consumer Electronics"
   },
   {
    "key": "oshead",
    "name": "Sherif Adel",
-   "level": "n1",
    "unit": "onlineshop",
    "title": "Head of Online Shop"
   },
   {
    "key": "cohead",
    "name": "Amr Bakr",
-   "level": "n1",
    "unit": "corporate",
    "title": "Head of Corporate"
   },
   {
    "key": "cahead",
    "name": "Mostafa Deif",
-   "level": "n1",
    "unit": "care",
    "title": "Head of Care"
   },
   {
    "key": "ithead",
    "name": "Yasser Kamal",
-   "level": "n1",
    "unit": "it",
    "title": "Head of IT"
   },
   {
    "key": "nghead",
    "name": "Chidi Okafor",
-   "level": "n1",
    "unit": "nigeria",
    "title": "Head of Nigeria"
   },
   {
    "key": "own_mob",
    "name": "Mennah Farouk",
-   "level": "n1",
    "unit": "mobile",
    "title": "Strategy custodian, Mobile"
   },
   {
    "key": "own_ret",
    "name": "Dalia Sabry",
-   "level": "n1",
    "unit": "retailstores",
    "title": "Strategy custodian, Retail Stores"
   },
   {
    "key": "own_b2b",
    "name": "Kareem Hafez",
-   "level": "n1",
    "unit": "b2becomm",
    "title": "Strategy custodian, B2B Ecomm"
   },
   {
    "key": "own_ce",
    "name": "Heba Salem",
-   "level": "n1",
    "unit": "consumerelectronics",
    "title": "Strategy custodian, Consumer Electronics"
   },
   {
    "key": "own_os",
    "name": "Nadia Fouad",
-   "level": "n1",
    "unit": "onlineshop",
    "title": "Strategy custodian, Online Shop"
   },
   {
    "key": "own_co",
    "name": "Laila Zaki",
-   "level": "n1",
    "unit": "corporate",
    "title": "Strategy custodian, Corporate"
   },
   {
    "key": "own_ca",
    "name": "Rania Fahmy",
-   "level": "n1",
    "unit": "care",
    "title": "Strategy custodian, Care"
   },
   {
    "key": "own_it",
    "name": "Dina Shawky",
-   "level": "n1",
    "unit": "it",
    "title": "Strategy custodian, IT"
   },
   {
    "key": "own_lg",
    "name": "Mai Sobhy",
-   "level": "n1",
    "unit": "logistics",
    "title": "Strategy custodian, Logistics"
   },
   {
    "key": "own_ng",
    "name": "Amaka Eze",
-   "level": "n1",
    "unit": "nigeria",
    "title": "Strategy custodian, Nigeria"
   },
   {
    "key": "fn_fin",
    "name": "Hossam Abuelenien",
-   "level": "n1",
    "unit": null,
    "fn": "finance",
    "title": "Head of Finance"
@@ -5203,7 +5181,6 @@
   {
    "key": "fn_hr",
    "name": "Noran Adel",
-   "level": "n1",
    "unit": null,
    "fn": "hr",
    "title": "Head of HR"
@@ -5211,7 +5188,6 @@
   {
    "key": "fn_tre",
    "name": "Fayad Sobhy",
-   "level": "n1",
    "unit": null,
    "fn": "treasury",
    "title": "Head of Treasury"
@@ -5219,7 +5195,6 @@
   {
    "key": "fn_mkt",
    "name": "Yara Kamal",
-   "level": "n1",
    "unit": null,
    "fn": "marketing",
    "title": "Head of Marketing"
@@ -5227,7 +5202,6 @@
   {
    "key": "fn_mkt2",
    "name": "Tarek Nour",
-   "level": "n1",
    "unit": null,
    "fn": "marketing",
    "title": "Strategy custodian, Marketing"
@@ -5235,14 +5209,13 @@
   {
    "key": "dir",
    "name": "Ramy Behairy",
-   "level": "n2",
    "unit": "mobile",
    "title": "Director, Digital Operations"
   },
   {
    "key": "co_dist",
    "name": "Company CEO, Distribution",
-   "level": "n1",
+   "role": "cceo",
    "unit": null,
    "company": "distribution",
    "title": "CEO, Distribution"
@@ -5250,7 +5223,7 @@
   {
    "key": "co_b2c",
    "name": "Company CEO, B2C",
-   "level": "n1",
+   "role": "cceo",
    "unit": null,
    "company": "b2c",
    "title": "CEO, B2C"
@@ -5298,162 +5271,188 @@
    "custodian": "own_ng"
   }
  },
- "levels": [
-  {
-   "key": "ceo",
-   "name": "CEO",
-   "titles": "Group Chief Executive",
-   "note": "One person. Sees everything, manages nothing outside their own unit."
-  },
-  {
-   "key": "n1",
-   "name": "N-1",
-   "titles": "Business Unit Head · Group CFO · Group COO",
-   "note": "Runs a business unit, or a group function with no unit of its own."
-  },
-  {
-   "key": "n2",
-   "name": "N-2",
-   "titles": "Director · Pillar owner",
-   "note": "Owns pillars within a unit. Most tactic owners sit here."
-  },
-  {
-   "key": "n3",
-   "name": "N-3",
-   "titles": "Manager · Tactic owner",
-   "note": "Delivers tactics. Reports progress, reads little else."
-  }
- ],
  "access": {
-  "smo": {
+  "super": {
    "g_perf": "edit",
    "g_found": "edit",
    "g_temple": "edit",
    "g_weight": "edit",
+   "g_focus": "edit",
    "u_perf": "edit",
    "u_found": "edit",
    "u_anal": "edit",
    "u_plan": "edit",
+   "u_report": "edit",
+   "k_perf": "edit",
+   "k_found": "edit",
+   "k_proj": "edit",
+   "k_report": "edit",
    "c_labels": "edit",
    "c_access": "edit",
    "c_bands": "edit",
    "c_units": "edit",
-   "c_import": "edit",
-   "g_focus": "edit",
-   "c_focus": "edit",
-   "c_cycle": "edit",
-   "c_kb": "view",
    "c_fns": "edit",
    "c_caps": "edit",
-   "k_perf": "edit",
-   "k_found": "edit",
-   "k_proj": "edit",
-   "k_report": "edit",
-   "u_report": "edit"
+   "c_import": "edit",
+   "c_cycle": "edit",
+   "c_focus": "edit",
+   "c_kb": "view"
   },
-  "ceo": {
+  "gceo": {
    "g_perf": "view",
    "g_found": "view",
    "g_temple": "view",
    "g_weight": "view",
+   "g_focus": "edit",
    "u_perf": "view",
    "u_found": "view",
    "u_anal": "view",
    "u_plan": "view",
+   "u_report": "none",
+   "k_perf": "view",
+   "k_found": "view",
+   "k_proj": "view",
+   "k_report": "none",
    "c_labels": "none",
    "c_access": "none",
    "c_bands": "none",
    "c_units": "none",
-   "c_import": "none",
-   "g_focus": "edit",
-   "c_focus": "edit",
-   "c_cycle": "view",
-   "c_kb": "view",
    "c_fns": "view",
    "c_caps": "view",
-   "k_perf": "view",
-   "k_found": "view",
-   "k_proj": "view",
-   "k_report": "view",
-   "u_report": "none"
+   "c_import": "none",
+   "c_cycle": "view",
+   "c_focus": "edit",
+   "c_kb": "view"
   },
-  "n1": {
+  "cceo": {
    "g_perf": "view",
    "g_found": "view",
    "g_temple": "view",
    "g_weight": "none",
-   "u_perf": "edit",
-   "u_found": "edit",
-   "u_anal": "edit",
-   "u_plan": "edit",
-   "c_labels": "none",
-   "c_access": "none",
-   "c_bands": "none",
-   "c_units": "none",
-   "c_import": "none",
-   "g_focus": "none",
-   "c_focus": "none",
-   "c_cycle": "none",
-   "c_kb": "view",
-   "c_fns": "none",
-   "c_caps": "none",
-   "k_perf": "edit",
-   "k_found": "edit",
-   "k_proj": "edit",
-   "k_report": "edit",
-   "u_report": "edit"
-  },
-  "n2": {
-   "g_perf": "none",
-   "g_found": "view",
-   "g_temple": "view",
-   "g_weight": "none",
+   "g_focus": "view",
    "u_perf": "view",
    "u_found": "view",
    "u_anal": "view",
    "u_plan": "view",
+   "u_report": "none",
+   "k_perf": "view",
+   "k_found": "view",
+   "k_proj": "view",
+   "k_report": "none",
    "c_labels": "none",
    "c_access": "none",
    "c_bands": "none",
    "c_units": "none",
-   "c_import": "none",
-   "g_focus": "none",
-   "c_focus": "none",
-   "c_cycle": "none",
-   "c_kb": "view",
    "c_fns": "none",
    "c_caps": "none",
+   "c_import": "none",
+   "c_cycle": "view",
+   "c_focus": "none",
+   "c_kb": "view"
+  },
+  "owner": {
+   "g_perf": "view",
+   "g_found": "view",
+   "g_temple": "view",
+   "g_weight": "none",
+   "g_focus": "none",
+   "u_perf": "edit",
+   "u_found": "edit",
+   "u_anal": "edit",
+   "u_plan": "view",
+   "u_report": "edit",
+   "k_perf": "view",
+   "k_found": "view",
+   "k_proj": "view",
+   "k_report": "none",
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "c_import": "none",
+   "c_cycle": "view",
+   "c_focus": "none",
+   "c_kb": "view"
+  },
+  "custodian": {
+   "g_perf": "view",
+   "g_found": "view",
+   "g_temple": "view",
+   "g_weight": "none",
+   "g_focus": "none",
+   "u_perf": "edit",
+   "u_found": "edit",
+   "u_anal": "edit",
+   "u_plan": "view",
+   "u_report": "edit",
    "k_perf": "edit",
    "k_found": "edit",
    "k_proj": "edit",
    "k_report": "edit",
-   "u_report": "none"
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "c_import": "none",
+   "c_cycle": "view",
+   "c_focus": "none",
+   "c_kb": "view"
   },
-  "n3": {
-   "g_perf": "none",
-   "g_found": "none",
+  "fnhead": {
+   "g_perf": "view",
+   "g_found": "view",
    "g_temple": "view",
    "g_weight": "none",
-   "u_perf": "view",
+   "g_focus": "none",
+   "u_perf": "none",
    "u_found": "none",
    "u_anal": "none",
    "u_plan": "none",
-   "c_labels": "none",
-   "c_access": "none",
-   "c_bands": "none",
-   "c_units": "none",
-   "c_import": "none",
-   "g_focus": "none",
-   "c_focus": "none",
-   "c_cycle": "none",
-   "c_kb": "view",
-   "c_fns": "none",
-   "c_caps": "none",
+   "u_report": "none",
    "k_perf": "edit",
    "k_found": "edit",
    "k_proj": "edit",
    "k_report": "edit",
-   "u_report": "none"
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "c_import": "none",
+   "c_cycle": "view",
+   "c_focus": "none",
+   "c_kb": "view"
+  },
+  "contrib": {
+   "g_perf": "none",
+   "g_found": "view",
+   "g_temple": "view",
+   "g_weight": "none",
+   "g_focus": "none",
+   "u_perf": "view",
+   "u_found": "view",
+   "u_anal": "none",
+   "u_plan": "view",
+   "u_report": "edit",
+   "k_perf": "view",
+   "k_found": "view",
+   "k_proj": "view",
+   "k_report": "edit",
+   "c_labels": "none",
+   "c_access": "none",
+   "c_bands": "none",
+   "c_units": "none",
+   "c_fns": "none",
+   "c_caps": "none",
+   "c_import": "none",
+   "c_cycle": "none",
+   "c_focus": "none",
+   "c_kb": "view"
   }
  },
  "labels": [

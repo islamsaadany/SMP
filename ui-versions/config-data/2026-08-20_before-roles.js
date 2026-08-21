@@ -41,96 +41,18 @@ var LABELS = {
    The SMO sits outside the ladder entirely — it is a super user, not a rank.
    ──────────────────────────────────────────────────────────────────────── */
 
-/* ── ROLES, which replaced LEVELS in 3.8 ────────────────────────────
-   N-1 / N-2 / N-3 were org DEPTH, invented before anyone knew what the
-   platform would need, and the giveaway was already in the code: each level
-   carried a `titles` string — "N-1 · Business Unit Head · Group CFO · Group
-   COO" — stapling real job titles onto an abstraction to explain what it meant.
-
-   Islam: "the titles should not be relevant in the platform accessibility, the
-   activity and visibility should be role based." So the role IS the thing. A
-   person's official title (Senior Director, Senior Manager) stays in the
-   registry as information ABOUT them and is never consulted for access. Two
-   people with the same title can hold different roles, which is correct.
-
-   WHERE A ROLE LIVES depends on what kind of role it is, and this is the whole
-   design:
-
-     A role that names a SEAT in the organisation — super user, group CEO,
-     company CEO — is a property of the PERSON. Nothing else points at it.
-
-     A role that names RESPONSIBILITY FOR A THING — business unit owner,
-     strategy custodian, supporting function head — is a property of the THING.
-     Mobile already has a head field and a custodian field; those pointers ARE
-     the role, read from the other end.
-
-   So there is one fact, editable from either side, and it cannot disagree with
-   itself: setting Mobile's owner on the unit page and setting it in the
-   registry are the same write. It also gives multiple roles for free — one
-   person can be group CEO and own Care, because those are two records in two
-   different places rather than one field fighting itself. */
-var ROLES = [
-  { key:"super", name:"Super user", scope:"group",
-    note:"The SMO. Sees and edits everything, including configuration." },
-  { key:"gceo",  name:"Group CEO",  scope:"group",
-    note:"Sees the whole group. Manages nothing outside their own unit." },
-  { key:"cceo",  name:"Company CEO", scope:"company",
-    note:"Sees their company's units. Whether they also see the group and the other companies is set per company." },
-  { key:"owner", name:"Business unit owner", scope:"unit",
-    note:"Accountable for one unit's strategy. Named on the unit itself." },
-  { key:"custodian", name:"Strategy custodian", scope:"unitfn",
-    note:"Carries the strategy work for a unit or a supporting function, alongside its head." },
-  { key:"fnhead", name:"Supporting function head", scope:"fn",
-    note:"Runs a supporting function and the capabilities it owns." },
-  { key:"contrib", name:"Contributor", scope:"unit",
-    note:"Named on a measure or a tactic. Reports against their own work and reads their unit." }
+var LEVELS = [
+  { key:"ceo",  name:"CEO",  titles:"Group Chief Executive",
+    note:"One person. Sees everything, manages nothing outside their own unit." },
+  { key:"n1",   name:"N-1",  titles:"Business Unit Head · Group CFO · Group COO",
+    note:"Runs a business unit, or a group function with no unit of its own." },
+  { key:"n2",   name:"N-2",  titles:"Director · Pillar owner",
+    note:"Owns pillars within a unit. Most tactic owners sit here." },
+  { key:"n3",   name:"N-3",  titles:"Manager · Tactic owner",
+    note:"Delivers tactics. Reports progress, reads little else." }
 ];
-var ROLE_KEYS = ROLES.map(function(r){ return r.key; });
-function roleName(k){
-  var r = ROLES.filter(function(x){ return x.key === k; })[0];
-  return r ? r.name : k;
-}
 
-/* Every role a person holds, with what each is attached to. Derived, never
-   stored: the seat roles come from the person, the responsibility roles from
-   whatever points at them. A person who holds nothing gets an empty list and
-   therefore no access, which is the honest answer for someone who has been
-   added to the registry but not yet given a job. */
-function personRoles(p){
-  if (!p) return [];
-  var out = [];
-  var seat = p.role || (p.level === "smo" ? "super"
-                      : p.level === "ceo" ? (p.company ? "cceo" : "gceo") : null);
-  if (seat) out.push({ role: seat, at: p.company ? "co:" + p.company : (p.at || "group") });
-
-  /* A unit's head and custodian live in UNIT_ROLES, beside the unit rather than
-     on it — the pointer is the role, read from the other end. */
-  UNIT_KEYS.forEach(function(k){
-    var r = UNIT_ROLES[k] || {};
-    if (r.head === p.key)      out.push({ role:"owner",     at:k });
-    if (r.custodian === p.key) out.push({ role:"custodian", at:k });
-  });
-  FUNCTION_KEYS.forEach(function(k){
-    if (FUNCTIONS[k].head === p.key)      out.push({ role:"fnhead",    at:"fn:" + k });
-    if (FUNCTIONS[k].custodian === p.key) out.push({ role:"custodian", at:"fn:" + k });
-  });
-
-  /* Named on nothing: a contributor, wherever they are attached — including
-     the group, which is where a Group CFO or COO sits. Attachment is scope and
-     scope alone: contrib@group reaches the GROUP pages and no unit, because
-     roleReaches() matches the attachment exactly. The old model could not say
-     this — "unit: group" there meant all ten units — which is why a group
-     function head had to be given a level that overshot. */
-  if (!out.length && p.unit) out.push({ role:"contrib", at:p.unit });
-  return out;
-}
-function personRoleKeys(p){
-  return personRoles(p).map(function(r){ return r.role; });
-}
-/* Does the person currently being viewed as hold this role at all? The
-   question almost every "can they" check actually wants, and the one place
-   that knows a person holds several. */
-function hasRole(k){ return personRoleKeys(viewer()).indexOf(k) > -1; }
+var SMO_ROLE = { key:"smo", name:"SMO", note:"Super user. Sees and edits everything, including configuration. Not a level." };
 
 /* The eleven pages, grouped by the seven page TYPES the matrix actually
    controls. A page type resolves against the person's unit attachment, so
@@ -145,7 +67,7 @@ var PAGES = [
   { key:"u_plan",  scope:"unit",  label:"Strategy",    note:"The plan as agreed, with no reported figure on it" },
   { key:"u_anal",  scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
   { key:"c_labels",scope:"setup", label:"Labels",      note:"Internal names and tenant display labels" },
-  { key:"c_access",scope:"setup", label:"Roles & access", note:"This matrix" },
+  { key:"c_access",scope:"setup", label:"Levels & access", note:"This matrix" },
   { key:"c_bands", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
   { key:"c_units", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
   { key:"c_import",scope:"manage", label:"Import",          note:"Plan and progress templates" },
@@ -181,101 +103,57 @@ var EDITING = { weights:false, factors:false, bands:false, units:false };
 
 /* none | view | edit — three states, because the CEO can see the weighting
    table but does not manage it, and that is not expressible in two. */
-/* ── ACCESS, by ROLE ────────────────────────────────────────────────
-   Rebuilt from scratch in 3.8 rather than mapped across from the level
-   matrix, at Islam's direction: the rows mean something different now, so a
-   grant carried over would be an old answer to a new question.
-
-   Three states, never more (§19): none, view, edit. Two would not be enough —
-   a unit owner reads the weighting table but does not manage it.
-
-   Scope is NOT expressed here. "owner: u_plan edit" means their OWN unit's
-   plan; which unit that is comes from what the role is attached to, resolved
-   by reaches(). A page is never rendered as a trimmed version of itself. */
 var ACCESS = {
-  super: { g_perf:"edit", g_found:"edit", g_temple:"edit", g_weight:"edit", g_focus:"edit",
-           u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", u_report:"edit",
-           k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
-           c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_fns:"edit",
-           c_caps:"edit", c_import:"edit", c_cycle:"edit", c_focus:"edit", c_kb:"view" },
-  /* Sees everything, manages the scheme rather than the plans. */
-  gceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view", g_focus:"edit",
-           u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
-           k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
-           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"view",
-           c_caps:"view", c_import:"none", c_cycle:"view", c_focus:"edit", c_kb:"view" },
-  /* The same reading, bounded to their company by reaches(). */
-  cceo:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"view",
-           u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", u_report:"none",
-           k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
-           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
-           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
-  /* Accountable for the unit: authors its words, reports its figures. The plan
-     itself is read-only — it arrives by upload and only the SMO corrects it
-     (§22, §31). */
-  owner: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
-           u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
-           k_perf:"view", k_found:"view", k_proj:"view", k_report:"none",
-           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
-           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
-  /* Carries the strategy work beside the head, so the same reach — this is the
-     person who actually fills the foundation in and chases the reporting. */
-  custodian: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
-           u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"view", u_report:"edit",
-           k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
-           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
-           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
-  fnhead:{ g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
-           u_perf:"none", u_found:"none", u_anal:"none", u_plan:"none", u_report:"none",
-           k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit",
-           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
-           c_caps:"none", c_import:"none", c_cycle:"view", c_focus:"none", c_kb:"view" },
-  /* Named on a measure or a tactic. Reports their own work and reads the plan
-     they are being measured against — nothing else. */
-  contrib:{ g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none", g_focus:"none",
-           u_perf:"view", u_found:"view", u_anal:"none", u_plan:"view", u_report:"edit",
-           k_perf:"view", k_found:"view", k_proj:"view", k_report:"edit",
-           c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_fns:"none",
-           c_caps:"none", c_import:"none", c_cycle:"none", c_focus:"none", c_kb:"view" }
+  smo: { g_perf:"edit", g_found:"edit", g_temple:"edit", g_weight:"edit",
+         u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", c_labels:"edit", c_access:"edit", c_bands:"edit", c_units:"edit", c_import:"edit", g_focus:"edit", c_focus:"edit", c_cycle:"edit", c_kb:"view", c_fns:"edit", c_caps:"edit", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"edit" },
+  ceo: { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"view",
+         u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"edit", c_focus:"edit", c_cycle:"view", c_kb:"view", c_fns:"view", c_caps:"view", k_perf:"view", k_found:"view", k_proj:"view", k_report:"view", u_report:"none" },
+  n1:  { g_perf:"view", g_found:"view", g_temple:"view", g_weight:"none",
+         u_perf:"edit", u_found:"edit", u_anal:"edit", u_plan:"edit", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_kb:"view", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"edit" },
+  n2:  { g_perf:"none", g_found:"view", g_temple:"view", g_weight:"none",
+         u_perf:"view", u_found:"view", u_anal:"view", u_plan:"view", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_kb:"view", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"none" },
+  n3:  { g_perf:"none", g_found:"none", g_temple:"view", g_weight:"none",
+         u_perf:"view", u_found:"none", u_anal:"none", u_plan:"none", c_labels:"none", c_access:"none", c_bands:"none", c_units:"none", c_import:"none", g_focus:"none", c_focus:"none", c_cycle:"none", c_kb:"view", c_fns:"none", c_caps:"none", k_perf:"edit", k_found:"edit", k_proj:"edit", k_report:"edit", u_report:"none" }
 };
 
 /* Who is signed in. Changing this re-renders the whole shell against the
    matrix above, so the grid can be judged by using it rather than reading it. */
 var PEOPLE = [
-  { key:"smo",     name:"Strategy Management Office", role:"super", unit:"group",  title:"SMO" },
-  { key:"ceo",     name:"Group CEO",                  role:"gceo",  unit:"group",  title:"Chief Executive" },
-  { key:"mobhead", name:"Ashraf Laithy",              unit:"mobile", title:"Head of Mobile" },
-  { key:"loghead", name:"Hazem Roushdy",              unit:"logistics", title:"Head of Logistics" },
-  { key:"rethead", name:"Hossam Farid",               unit:"retailstores", title:"Head of Retail Stores" },
-  { key:"cfo",     name:"Group CFO",                  unit:"group",  title:"Chief Financial Officer" },
-  { key:"b2bhead", name:"Nour Selim",      unit:"b2becomm",            title:"Head of B2B Ecomm" },
-  { key:"cehead",  name:"Tarek Nassar",    unit:"consumerelectronics", title:"Head of Consumer Electronics" },
-  { key:"oshead",  name:"Sherif Adel",     unit:"onlineshop",          title:"Head of Online Shop" },
-  { key:"cohead",  name:"Amr Bakr",        unit:"corporate",           title:"Head of Corporate" },
-  { key:"cahead",  name:"Mostafa Deif",    unit:"care",                title:"Head of Care" },
-  { key:"ithead",  name:"Yasser Kamal",    unit:"it",                  title:"Head of IT" },
-  { key:"nghead",  name:"Chidi Okafor",    unit:"nigeria",             title:"Head of Nigeria" },
-  { key:"own_mob", name:"Mennah Farouk",   unit:"mobile",              title:"Strategy custodian, Mobile" },
-  { key:"own_ret", name:"Dalia Sabry",     unit:"retailstores",        title:"Strategy custodian, Retail Stores" },
-  { key:"own_b2b", name:"Kareem Hafez",    unit:"b2becomm",            title:"Strategy custodian, B2B Ecomm" },
-  { key:"own_ce",  name:"Heba Salem",      unit:"consumerelectronics", title:"Strategy custodian, Consumer Electronics" },
-  { key:"own_os",  name:"Nadia Fouad",     unit:"onlineshop",          title:"Strategy custodian, Online Shop" },
-  { key:"own_co",  name:"Laila Zaki",      unit:"corporate",           title:"Strategy custodian, Corporate" },
-  { key:"own_ca",  name:"Rania Fahmy",     unit:"care",                title:"Strategy custodian, Care" },
-  { key:"own_it",  name:"Dina Shawky",     unit:"it",                  title:"Strategy custodian, IT" },
-  { key:"own_lg",  name:"Mai Sobhy",       unit:"logistics",           title:"Strategy custodian, Logistics" },
-  { key:"own_ng",  name:"Amaka Eze",       unit:"nigeria",             title:"Strategy custodian, Nigeria" },
-  { key:"fn_fin",  name:"Hossam Abuelenien", unit:null, fn:"finance",   title:"Head of Finance" },
-  { key:"fn_hr",   name:"Noran Adel",        unit:null, fn:"hr",        title:"Head of HR" },
-  { key:"fn_tre",  name:"Fayad Sobhy",       unit:null, fn:"treasury",  title:"Head of Treasury" },
-  { key:"fn_mkt",  name:"Yara Kamal",        unit:null, fn:"marketing", title:"Head of Marketing" },
-  { key:"fn_mkt2", name:"Tarek Nour",        unit:null, fn:"marketing", title:"Strategy custodian, Marketing" },
-  { key:"dir",     name:"Ramy Behairy",               unit:"mobile", title:"Director, Digital Operations" },
+  { key:"smo",     name:"Strategy Management Office", level:"smo", unit:"group",  title:"SMO" },
+  { key:"ceo",     name:"Group CEO",                  level:"ceo", unit:"group",  title:"Chief Executive" },
+  { key:"mobhead", name:"Ashraf Laithy",              level:"n1",  unit:"mobile", title:"Head of Mobile" },
+  { key:"loghead", name:"Hazem Roushdy",              level:"n1",  unit:"logistics", title:"Head of Logistics" },
+  { key:"rethead", name:"Hossam Farid",               level:"n1",  unit:"retailstores", title:"Head of Retail Stores" },
+  { key:"cfo",     name:"Group CFO",                  level:"n1",  unit:"group",  title:"Chief Financial Officer" },
+  { key:"b2bhead", name:"Nour Selim",      level:"n1", unit:"b2becomm",            title:"Head of B2B Ecomm" },
+  { key:"cehead",  name:"Tarek Nassar",    level:"n1", unit:"consumerelectronics", title:"Head of Consumer Electronics" },
+  { key:"oshead",  name:"Sherif Adel",     level:"n1", unit:"onlineshop",          title:"Head of Online Shop" },
+  { key:"cohead",  name:"Amr Bakr",        level:"n1", unit:"corporate",           title:"Head of Corporate" },
+  { key:"cahead",  name:"Mostafa Deif",    level:"n1", unit:"care",                title:"Head of Care" },
+  { key:"ithead",  name:"Yasser Kamal",    level:"n1", unit:"it",                  title:"Head of IT" },
+  { key:"nghead",  name:"Chidi Okafor",    level:"n1", unit:"nigeria",             title:"Head of Nigeria" },
+  { key:"own_mob", name:"Mennah Farouk",   level:"n1", unit:"mobile",              title:"Strategy custodian, Mobile" },
+  { key:"own_ret", name:"Dalia Sabry",     level:"n1", unit:"retailstores",        title:"Strategy custodian, Retail Stores" },
+  { key:"own_b2b", name:"Kareem Hafez",    level:"n1", unit:"b2becomm",            title:"Strategy custodian, B2B Ecomm" },
+  { key:"own_ce",  name:"Heba Salem",      level:"n1", unit:"consumerelectronics", title:"Strategy custodian, Consumer Electronics" },
+  { key:"own_os",  name:"Nadia Fouad",     level:"n1", unit:"onlineshop",          title:"Strategy custodian, Online Shop" },
+  { key:"own_co",  name:"Laila Zaki",      level:"n1", unit:"corporate",           title:"Strategy custodian, Corporate" },
+  { key:"own_ca",  name:"Rania Fahmy",     level:"n1", unit:"care",                title:"Strategy custodian, Care" },
+  { key:"own_it",  name:"Dina Shawky",     level:"n1", unit:"it",                  title:"Strategy custodian, IT" },
+  { key:"own_lg",  name:"Mai Sobhy",       level:"n1", unit:"logistics",           title:"Strategy custodian, Logistics" },
+  { key:"own_ng",  name:"Amaka Eze",       level:"n1", unit:"nigeria",             title:"Strategy custodian, Nigeria" },
+  { key:"fn_fin",  name:"Hossam Abuelenien", level:"n1", unit:null, fn:"finance",   title:"Head of Finance" },
+  { key:"fn_hr",   name:"Noran Adel",        level:"n1", unit:null, fn:"hr",        title:"Head of HR" },
+  { key:"fn_tre",  name:"Fayad Sobhy",       level:"n1", unit:null, fn:"treasury",  title:"Head of Treasury" },
+  { key:"fn_mkt",  name:"Yara Kamal",        level:"n1", unit:null, fn:"marketing", title:"Head of Marketing" },
+  { key:"fn_mkt2", name:"Tarek Nour",        level:"n1", unit:null, fn:"marketing", title:"Strategy custodian, Marketing" },
+  { key:"dir",     name:"Ramy Behairy",               level:"n2",  unit:"mobile", title:"Director, Digital Operations" },
   /* Company CEOs. Attached to a COMPANY rather than a unit — a new kind of
-     attachment: the Company CEO role, bounded to their company (§15.13, §33). */
-  { key:"co_dist", name:"Company CEO, Distribution", role:"cceo", unit:null, company:"distribution",
+     attachment, not a new level: they hold the same pages an N-1 does, on a
+     different set of units (§15.13). */
+  { key:"co_dist", name:"Company CEO, Distribution", level:"n1", unit:null, company:"distribution",
     title:"CEO, Distribution" },
-  { key:"co_b2c",  name:"Company CEO, B2C",          role:"cceo", unit:null, company:"b2c",
+  { key:"co_b2c",  name:"Company CEO, B2C",          level:"n1", unit:null, company:"b2c",
     title:"CEO, B2C" }
 ];
 
@@ -353,7 +231,7 @@ function toggleFocus(id){
 }
 function canMarkFocus(){
   var v = viewer();
-  return !CYCLE.locked && (hasRole("super") || hasRole("gceo"));
+  return !CYCLE.locked && (v.level === "smo" || v.level === "ceo");
 }
 
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
@@ -505,7 +383,12 @@ function capById(id){
 }
 /* Who reaches a capability: the SMO and CEO see all of them; a function's own
    people see theirs. A unit head has no business in a capability at all. */
-
+function reachesCap(capId){
+  var v = viewer(), c = capById(capId);
+  if (!c) return false;
+  if (v.level === "smo" || v.level === "ceo") return true;
+  return functionPeople(c.fn).indexOf(v.key) > -1;
+}
 /* ── What a capability reads ──────────────────────────────────────────
    Three numbers, never folded into one, and one of them is optional.
 
@@ -674,12 +557,10 @@ function functionPeople(key){
    "CE" to people who have never heard it. */
 function navName(x){ return (x && x.navName) ? x.navName : (x ? x.name : ""); }
 
-/* A function is reached by anyone who sees everything, or by whoever is named
-   on it — its head, its custodian, or a person carrying its work. */
 function reachesFn(key){
-  var rs = personRoleKeys(viewer());
-  if (rs.indexOf("super") > -1 || rs.indexOf("gceo") > -1) return true;
-  return functionPeople(key).indexOf(viewer().key) > -1;
+  var v = viewer();
+  if (v.level === "smo" || v.level === "ceo") return true;
+  return functionPeople(key).indexOf(v.key) > -1;
 }
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){
@@ -786,7 +667,7 @@ function deltaFor(key){
    correction still goes through one accountable hand rather than a unit
    quietly moving its own target while reporting against it. */
 function planEditable(){
-  return REVIEW.state !== "open" || hasRole("super");
+  return REVIEW.state !== "open" || viewer().level === "smo";
 }
 
 /* Reporting reaches the unit's owner and its head; the owner is the primary
@@ -795,7 +676,7 @@ function planEditable(){
 function canReport(unitKey){
   var v = viewer();
   if (REVIEW.state !== "open") return false;
-  if (hasRole("super")) return true;
+  if (v.level === "smo") return true;
   var r = UNIT_ROLES[unitKey];
   return !!r && (r.head === v.key || r.custodian === v.key);
 }
@@ -899,62 +780,35 @@ function viewer(){
    Absent means "not answered yet", not "denied": denial is a stored "none",
    and that still wins. */
 var ACCESS_DEFAULTS = JSON.parse(JSON.stringify(ACCESS));
-var STATE_RANK = { none:0, view:1, edit:2 };
-
-/* A person holds several roles, so the answer is the MOST GENEROUS of them.
-   Anything else would be surprising: a group CEO who also owns Care would lose
-   the ability to edit Care's foundation because their CEO row says view, and
-   nobody would be able to work out why. Least-privilege is the right instinct
-   for a role a person was GIVEN; it is the wrong instinct across roles the same
-   person legitimately holds at once.
-
-   Scope is separate and is NOT relaxed this way: reaches() still decides which
-   unit, so "edit" from owning Care never reaches Mobile. */
-function grantFor(roleKey, pageKey){
-  var row = ACCESS[roleKey];
-  if (row && Object.prototype.hasOwnProperty.call(row, pageKey)) return row[pageKey] || "none";
-  /* An absent key means "not answered yet", not "denied" — the map is stored
-     per tenant and only holds the keys that existed when it was written, so a
-     page added in a later version has no row (§30.2). */
-  return (ACCESS_DEFAULTS[roleKey] || {})[pageKey] || "none";
-}
 function grant(pageKey){
-  var keys = personRoleKeys(viewer()), best = "none";
-  for (var i = 0; i < keys.length; i++) {
-    var g = grantFor(keys[i], pageKey);
-    if (STATE_RANK[g] > STATE_RANK[best]) best = g;
-  }
-  return best;
+  var v = viewer();
+  var mine = ACCESS[v.level] || {};
+  if (Object.prototype.hasOwnProperty.call(mine, pageKey)) return mine[pageKey] || "none";
+  return (ACCESS_DEFAULTS[v.level] || {})[pageKey] || "none";
 }
-
 /* A person attached to the group reaches every unit; a person attached to a
    unit reaches only their own. This is the whole of scope — no page ever
    renders a trimmed version of itself. */
-/* Which units a person reaches, from every role they hold. A role is attached
-   to something — the group, a company, a unit, a function — and that
-   attachment is the whole of scope. No page ever renders a trimmed version of
-   itself (§19). */
-function roleReaches(r, unitKey){
-  if (r.role === "super" || r.role === "gceo") return true;
-  if (r.role === "cceo") {
-    var ck = String(r.at || "").replace(/^co:/, ""), co = COMPANIES[ck] || {};
+function reaches(unitKey){
+  var v = viewer();
+  if (unitKey === "setup") return true;
+  /* A company CEO is attached to a company rather than a unit. Whether they
+     reach the group figure, and whether they see the other companies at all,
+     are per-company settings — a client may want one company measured against
+     the whole and another not (§15.13). */
+  if (v.company) {
+    var co = COMPANIES[v.company] || {};
     if (unitKey === "group") return co.seeGroup !== false;
-    if (unitsOfCompany(ck).indexOf(unitKey) > -1) return true;
+    if (unitsOfCompany(v.company).indexOf(unitKey) > -1) return true;
     return !!co.seeOthers;
   }
-  /* Attached to a supporting function rather than a unit: reaches no unit
-     pages. Attaching them to "group" would hand them all ten, because that is
-     what group attachment means here. */
-  if (String(r.at || "").indexOf("fn:") === 0) return false;
-  return r.at === unitKey;
+  if (unitKey === "group") return true;
+  /* Someone attached to a supporting function rather than a business unit
+     reaches no unit pages. Attaching them to "group" would hand them all ten,
+     because that is what group attachment means here. */
+  if (!v.unit) return false;
+  return v.unit === "group" || v.unit === unitKey;
 }
-function reaches(unitKey){
-  if (unitKey === "setup") return true;
-  var rs = personRoles(viewer());
-  for (var i = 0; i < rs.length; i++) if (roleReaches(rs[i], unitKey)) return true;
-  return false;
-}
-
 
 /* ── Key Objective weights ────────────────────────────────────────────────
    Optional. Unweighted means equal weight, which is the one default nobody

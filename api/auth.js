@@ -69,7 +69,7 @@ module.exports = async function handler(req, res) {
     if (action === "login") {
       const key = String(body.user || "").trim().toLowerCase();
       const cred = (await client.query(
-        "SELECT c.password_hash, c.must_change, p.name, p.level FROM credentials c " +
+        "SELECT c.password_hash, c.must_change, p.name, p.role FROM credentials c " +
         "JOIN people p ON p.key = c.person_key WHERE c.person_key = $1", [key])).rows[0];
       /* One message for a wrong name and a wrong password — a login screen
          should not confirm which usernames exist. */
@@ -78,7 +78,7 @@ module.exports = async function handler(req, res) {
       }
       const token = await auth.createSession(client, key);
       res.setHeader("Set-Cookie", auth.cookieHeader(req, token));
-      return send(res, 200, { ok: true, person: { key: key, name: cred.name, level: cred.level, mustChange: cred.must_change } });
+      return send(res, 200, { ok: true, person: { key: key, name: cred.name, role: cred.role, mustChange: cred.must_change } });
     }
 
     if (action === "logout") {
@@ -100,7 +100,10 @@ module.exports = async function handler(req, res) {
 
     if (action === "setPassword") {
       const person = await auth.getSession(client, req);
-      if (!person || person.level !== "smo") {
+      /* The server's own check, not the client's. The SEAT role is stored on
+         the person, so this stays a single column comparison — 'super' is what
+         'smo' was called before roles (§33). */
+      if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "Issuing passwords is the SMO's." });
       }
       const key = String(body.person || "").trim();

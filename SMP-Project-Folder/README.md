@@ -85,6 +85,14 @@ of it was rejected — which is the point of keeping it.
 | `mock-capability.html` | The capability pages and their Setup screens |
 | `mock-capline.html` | The one-line capability band, and projects expanded |
 
+### Pending a decision
+
+| File | What it asks |
+|---|---|
+| `mock-hrerp-style.html` | **SMP in HR_ERP's design language.** A working slice — group performance, a unit's performance, its plan, its reporting screen and one setup table — carrying the real Raya Trade data and the real scoring formulas, painted in HR_ERP's warm paper palette, Fraunces/Hanken type, 12px cards and soft elevation. Navigation, page structure and every figure are unchanged; only the paint moved. **It re-opens the clause in §20 that carries SMP's CSS over verbatim** — see *Waiting on Islam* in `IMPLEMENTATION_PROGRESS.md`. |
+
+---
+
 ### Rejected — kept so the ground is not retrod
 
 | File | Why it was rejected |

@@ -19,6 +19,7 @@ Nothing proceeds past this line without an answer.
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
+| **D8** | **Does SMP take HR_ERP's design language, or keep its own?** | §20 carries SMP's CSS over **verbatim**, precisely so the look cannot drift during the rebuild. Adopting HR_ERP's language is the opposite instruction, and it has to be given before R2 paints the first screen — after that it is a repaint of everything already ported. | §20, and `SMP-Project-Folder/mockups/mock-hrerp-style.html` |
 
 **Answered:**
 
@@ -46,6 +47,56 @@ Nothing proceeds past this line without an answer.
 - **D2 · Phase 2 as it stood** — superseded by the stack move. Its content
   (per-action writes, server-side rule enforcement, the change log) does not go
   away; it becomes part of the rebuild rather than a patch on the old stack.
+
+---
+
+## In flight
+
+### The HR_ERP design language, drawn on SMP's own screens
+`SMP-Project-Folder/mockups/mock-hrerp-style.html` — one self-contained file,
+opens in a browser, no network. Five screens: **group performance** (overall and
+the business-unit cards, with the Cards/Table toggle), **a unit's performance**
+(the two headline cards, the focus strip, the pillar rail, measures and tactics),
+**its plan**, **its reporting screen** with the entry fields, and **one setup
+table** (Business units). The viewer switcher carries the SMO, the group CEO and
+a unit head, and the nav narrows for each as the access matrix says it should.
+
+**What is unchanged:** navigation, page structure, section order, what each
+screen says, and every figure. The scoring functions are copied out of
+`src/config-data.js` rather than restated, and thirteen figures were checked
+against the shipped v3.5 build — group 75 / 67 / 102, Mobile 60 / 107, pillar
+MB01 58 / 83, 41 of 41 reported, 10 figures needing a note. All match.
+
+**What changed — the whole of the proposal:** the warm paper palette
+(`#f5f3ee` / `#fefdfb`) in place of the cool grey ground; Fraunces and Hanken
+Grotesk in place of Georgia and system sans, both embedded so the file still
+works offline; 12px cards with a soft shadow and a hover lift in place of 2px
+flat boxes; a gold uppercase eyebrow above a serif title on every page; and
+HR_ERP's own tab treatment. The four scoring bands keep their meaning and their
+thresholds — only their tints warm up to sit on paper.
+
+**Two things worth knowing before deciding:**
+
+- **HR_ERP has no dark palette.** Its `globals.css` defines light only, so
+  taking the language wholesale means either dropping SMP's dark theme (§25) or
+  authoring a dark counterpart HR_ERP does not have. The sample is light-only.
+- **A card became clickable where a link used to be.** HR_ERP's dashboard tile
+  is a link end to end, so a unit card here opens on any part of it rather than
+  on its name. It is the one interaction the language changes, and it enlarges
+  the target rather than removing one.
+
+**Verified:** every screen walked as all three viewers with no console errors;
+a width sweep 1920 → 600px with no horizontal page scroll at any width; the
+typefaces confirmed loading with the browser set offline and zero network
+requests.
+
+**Found while building, not fixed here** — `groupExec()` and `groupPlan()` carry
+a unit's weight in the denominator even when that unit has nothing to score,
+while `groupUnitsObjectives()` skips it. Nigeria has no plan, so its 5% dilutes
+the group's execution figure but not its objectives figure. Reproduced verbatim
+in the sample rather than corrected, because the sample changes the design and
+not the arithmetic. **This is a question for Islam: should a unit with no plan
+count against the group's execution?**
 
 ---
 

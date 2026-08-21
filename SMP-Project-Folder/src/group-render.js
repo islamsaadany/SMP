@@ -1711,8 +1711,13 @@ function renderReport(u){
   var waitingNote = waiting.length && may
     ? '<div class="note attn-note"><b>' + waiting.length + ' figure' +
       (waiting.length > 1 ? 's are' : ' is') + ' entered by another team, and not in yet.</b> ' +
+      /* Names the PERSON as well as the team. With several custodians "ask
+         Finance" is not an instruction anybody can act on; "ask Hossam" is. */
       waiting.map(function(x){
-        return esc(x.obj.name) + " (" + esc(srcTeamName(srcOf(x))) + ")";
+        var src = srcOf(x);
+        var who = personName(src.by);
+        return esc(x.obj.name) + " (" + esc(srcTeamName(src)) +
+               (who ? " \u2014 " + esc(who) : "") + ")";
       }).join(" &middot; ") +
       '. Your report is not complete until they arrive \u2014 ask them, the SMO cannot ' +
       'be the only one chasing.</div>'

@@ -1628,6 +1628,32 @@ without noticing. Switching the team at the top is how you release it.
 This also retires the half-set problem that the first build had: a mark is
 only offered once both ends are set, and it writes both at once.
 
+#### The role has a name, and it is not "Finance"
+
+Islam: *"we might have different figures custodians. It's Finance for now but
+we need to think of the future."*
+
+So the person is a **FIGURE CUSTODIAN**, on both screens. Naming the role
+"Finance custodian" would have been wrong the first time Treasury owned a
+number — the mechanism is not Finance's, Finance is only its first customer.
+The TEAM does the naming in context: the unit's page attributes a figure to
+*Finance*, not to a generic custodian, because what a unit needs to know is
+whose number it is.
+
+Two things follow from there being several, and both were built with it:
+
+**The reporting cycle gains a Figure custodians board.** §16.7 had already
+settled that a source team is a reporting party like any other and needs its
+own row on the SMO's completeness board — with one custodian that was a
+convenience, with several it is the difference between seeing who is late and
+opening pages to find out. One row per team AND person, because two people in
+the same team may each be master of different numbers.
+
+**The unit's waiting note names the person, not just the team.** With one
+custodian "ask Finance" was an instruction; with several it is not one anybody
+can act on. It reads *"Distribution revenue (Finance — Hossam Abuelenien)"*
+now.
+
 ### 16.8 A help box — self-service for the questions the SMO gets asked
 
 **The idea.** A small chat box in the platform answering the questions people

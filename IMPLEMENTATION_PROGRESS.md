@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.5 · **Last updated:** 2026-08-20
+**Latest version:** v3.6 · **Last updated:** 2026-08-20
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -51,7 +51,24 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.5 — the knowledge base, and the two-click save *(current)*
+### v3.6 — the plan is correctable, for the SMO *(current)*
+The pen you asked for is on the Plan page, **for the SMO only**. §22 still
+stands: a plan is authored by upload, the template still carries no codes, and
+replacing one still archives it. What this adds is the correction afterwards —
+a target typed wrong, an owner who moved — without re-uploading a whole unit to
+fix a word.
+
+Editable: the pillar name and end-state, each measure's name, target and
+three-year target, each tactic's name and owner. Not editable: the code (minted
+on arrival), and the direction and compile rule — those change what a figure
+*means*, and a plan whose meaning drifts under a reported actual is worse than
+one that is wrong in a name.
+
+SMO only and not merely by access key: `u_plan` at edit is held by unit heads
+too, and a plan being correctable by the person measured against it is a
+different decision from one correctable by its custodian.
+
+### v3.5 — the knowledge base, and the two-click save
 **The two-click save.** Fields commit on `change`, which fires on *blur* — so
 pressing Done blurred the field, which saved, which repainted, which destroyed
 the button you were pressing. Your value was saved on click one; what needed the
@@ -553,8 +570,8 @@ taking it wholesale would have deleted four shipped features and everything from
 |---|---|
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
-| `SMP-Project-Folder/strategy-management-platform-v3.5.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.5.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/strategy-management-platform-v3.6.html` | The built platform (must rebuild byte-identical from `src/`) |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.6.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

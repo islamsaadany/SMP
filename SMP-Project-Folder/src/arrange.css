@@ -254,6 +254,10 @@
   .penbtn.on { background:var(--gold); border-color:var(--gold); color:var(--panel); }
   /* The card head has to leave room for it, or a long label runs underneath. */
   .hoverpen .cardhead { padding-right:34px; }
+  /* The plan's title row is a flex header, not a card head; the pen sits in the
+     same corner and the row leaves it room. */
+  .ptitle.hoverpen { padding-right:34px; }
+  .ptitle.hoverpen .penbtn { top:0; right:0; }
 
   /* HALF THE HEIGHT. 47px -> 26px, and it is the CONTENT that had to shrink:
      the padding was 8px a side and the controls 31px, so squeezing the padding

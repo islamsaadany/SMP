@@ -2139,23 +2139,53 @@ function unitRailFor(u, sel){
   return '<div class="rail"><div class="rhead">' + L("pillar","bu") +
     ' <span>' + list.length + '</span></div>' + rows + '</div>';
 }
+/* THE PLAN IS EDITABLE, FOR THE SMO ONLY.
+
+   A plan is authored by upload (§22) and that has not changed: the template,
+   the minting of codes and the archive-on-replace are all still how a plan
+   ARRIVES. What this adds is the correction afterwards - a target typed wrong,
+   an owner who moved - without making the SMO re-upload a whole unit to fix a
+   word.
+
+   SMO only, deliberately, and not merely by access key. c_units-style "edit"
+   on u_plan is held by unit heads too, and a plan being correctable by the
+   person measured against it is a different decision from a plan being
+   correctable by its custodian. When per-action authorisation and the change
+   log arrive (§19.2) this is the first thing to revisit. */
+function mayEditPlan(){
+  return viewer().level === "smo" && grant("u_plan") === "edit";
+}
 function unitPlanBody(it){
+  var ed = EDIT_PAGE.plan && mayEditPlan();
+  var cell = function(v, setter, cls){
+    return ed ? inputOr("plan", v == null ? "" : v, cls || "", setter)
+              : (v ? esc(v) : '<span class="missing">Missing</span>');
+  };
   var mRows = it.measures.map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
-      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>' +
-      '<td class="num">' + (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>' +
+      '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
+      '<td class="num">' + (ed ? inputOr("plan", m.target3y || "", "mono", function(v){ m.target3y = v; })
+                               : (m.target3y ? esc(m.target3y) : "&mdash;")) + '</td>' +
       '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(t.name) + '</td>' +
-      '<td>' + esc(t.owner) + '</td><td>' + qs(t) + '</td></tr>';
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", t.owner || "", "", function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
+      '<td>' + qs(t) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
-  return '<div class="ptitle"><div><h3>' + esc(it.code) + '&nbsp; ' + esc(it.name) + '</h3>' +
+  return '<div class="ptitle hoverpen"><div><h3>' + esc(it.code) + '&nbsp; ' +
+      (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
-      kindPill(it) + '</div>' +
-    (it.sub ? '<p class="sub" style="margin:10px 0 0">' + esc(it.sub) + '</p>' : '') +
+      kindPill(it) +
+      (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>' +
+    (it.sub || ed
+      ? '<p class="sub" style="margin:10px 0 0">' +
+        (ed ? inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) : esc(it.sub)) + '</p>'
+      : '') +
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */

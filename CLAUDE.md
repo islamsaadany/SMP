@@ -245,7 +245,18 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-20 — v3.5: the knowledge base, and two
+*Last Updated: 2026-08-20 — v3.6: the Plan page gains a pen,
+**for the SMO only** (§31). §22 is unchanged — a plan is still authored by
+upload, codes are still minted on arrival, replacing still archives — this adds
+correcting a plan afterwards without re-uploading a unit to fix a word. The gate
+is `mayEditPlan()`, level `smo` AND `u_plan` edit: **the key alone is not
+enough**, because `u_plan` at edit is held by unit heads too and a plan
+correctable by the person measured against it is a different decision from one
+correctable by its custodian. Revisit when §19.2's per-action authorisation and
+change log land. The code, the direction and the compile rule stay read-only —
+they change what a figure MEANS.*
+
+*Earlier: 2026-08-20 — v3.5: the knowledge base, and two
 rules with teeth. **A handler that rewrites the DOM must not run in the middle
 of an interaction with that DOM** — field `change` fires on blur, so pressing
 Done saved the field, repainted, and destroyed the button mid-click; a repaint

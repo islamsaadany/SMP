@@ -139,15 +139,10 @@ var SYNC = (function () {
          this feature could have. So the body is remembered as refused, the
          sentence the server sent is shown, and the next DIFFERENT change is
          tried normally. */
-      /* Signed out, or signed in on a password that still has to be changed:
-         the door, not a banner. */
-      if (r.status === 401) { location.replace("/"); return; }
       if (r.status === 403) {
         refusedBody = now;
-        return r.json().then(function (j) {
-          if (j && j.mustChange) { location.replace("/"); return; }
-          showRefusal(j && j.refusals);
-        }, function () { showRefusal(null); });
+        return r.json().then(function (j) { showRefusal(j && j.refusals); },
+                             function () { showRefusal(null); });
       }
       if (r.ok) {
         showRefusal(null);
@@ -292,10 +287,8 @@ var SYNC = (function () {
       DEMO = clone(graph());
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
-          /* Deployed and not signed in: the gate is the way in. A TEMPORARY
-             password now gets the same answer — the server refuses the state
-             until a real one is chosen, and the gate is where that happens. */
-          if (r.status === 401 || r.status === 403) { location.replace("/"); throw new Error("sign in"); }
+          /* Deployed and not signed in: the gate is the way in. */
+          if (r.status === 401) { location.replace("/"); throw new Error("sign in"); }
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
         })

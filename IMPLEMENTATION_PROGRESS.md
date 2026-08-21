@@ -51,6 +51,45 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.12 — the security floor *(in progress)*
+
+Everything in the list I gave you, built.
+
+**The `1234` password is retired, not deleted.** You can still sign in with it
+— a deployment with no way in is not a deployment — but it now takes you
+straight to "choose your own password", once. If you have already changed it,
+nothing happens: the check asks whether the stored password is still the
+shipped one, and only nags if it is. **It cannot lock you out.**
+
+**A temporary password now buys nothing.** Before, someone you issued a
+password to could ignore the change screen and still open the whole tenant for
+thirty days. The server refuses until they have chosen their own.
+
+**Guessing is slowed down.** Eight wrong attempts on one person, or twenty-five
+from one address, in fifteen minutes, and it stops answering. It clears itself
+— no lock for anyone to lift. One thing to know: anyone who knows a username
+can push that account over the limit on purpose. That is the price of having a
+limit at all, and a short self-clearing window is the cheaper half of the
+trade.
+
+**Security headers, on every page.** The platform can no longer be put in a
+frame on someone else's site, cannot load anything from anywhere else, and
+cannot send anything anywhere else. One honest limit: the single-file design
+means the strictest form of this is not available yet — recorded, with what it
+would cost.
+
+**Database errors stop reaching the browser.** They named tables and columns —
+a free map for anyone probing. One plain sentence now; the real error goes to
+our log.
+
+**Sessions.** Expired ones are cleaned up. And changing your password now signs
+out every other device you were signed in on — which is the point of changing
+it.
+
+**Still open, and these need decisions rather than code:** who at Forefront can
+read the production database, backups and what happens to a client's data when
+an engagement ends, and an outside penetration test before go-live.
+
 ### v3.12 — the server decides who may change what *(in progress)*
 
 **The hole.** Saving used to check that you were signed in and nothing else,

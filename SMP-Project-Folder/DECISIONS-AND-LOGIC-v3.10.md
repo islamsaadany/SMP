@@ -4876,3 +4876,118 @@ The rest of the security floor, in the order proposed: the `1234` SMO
 rate limit or lockout on sign-in; there are still no security headers; raw
 database errors still reach the browser; expired sessions are never pruned and
 a password change does not end the others.
+
+---
+
+## 43 · The security floor
+
+*(Spec 007. The five items §42.9 left open, plus session hygiene. §42 closed
+the hole a real user could walk through; these are the ones an attacker walks
+through.)*
+
+### 43.1 The `1234` SMO is retired, not removed
+
+**§19.4 is reversed.** Islam, 2026-08-20: *"don't ask me to do new passwords
+now on the app, just let me access with SMO and 1234."* That was right for a
+prototype nobody's data was in and is wrong for a product a client's strategy
+is in. The convenience it bought is one screen, once.
+
+The bootstrap still creates `smo` / `1234` on an empty database — a deployment
+with no way in is not a deployment — but it now carries `must_change`, so the
+first sign-in leads straight to the change screen.
+
+For a tenant already running, one step checks whether the stored hash still
+verifies against `1234` and sets `must_change` only if it does. **It could not
+be a `.sql` file**: migration 003 wrote the hash with its own salt, so the
+question cannot be asked in SQL. It runs once, recorded in the same
+`_sql_migrations` registry, and it **sets a flag rather than clearing a
+password** — this must not be able to lock anybody out of their own
+deployment, and somebody who already chose a real password is not nagged.
+
+### 43.2 A temporary password bought the whole tenant
+
+The gate had always sent people with a temporary password to the change
+screen. The server did not care whether they went, so an issued password
+opened a thirty-day session and every figure in the tenant.
+
+`/api/state` refuses both directions while `must_change` is set. **Identity is
+checked before authorisation**: somebody who has not finished signing in is
+not somebody whose roles are worth consulting.
+
+### 43.3 Nothing slowed a guess
+
+Two thresholds in a rolling fifteen-minute window, because they answer two
+different attacks: **8 per person key** stops a password list against one
+person; **25 per address** stops a list of PEOPLE instead — person keys are
+short and guessable, so without the second the username half of each guess is
+free. Only failures are recorded; a successful sign-in clears that key's.
+
+Two rules came out of building it. **The limit is checked BEFORE the password
+is verified**, or it is a timing oracle: a wrong password costs a scrypt hash
+and a locked-out one costs nothing, and the difference is measurable. And the
+message never says which threshold was hit or whether the key exists — **a
+rate limiter that confirms usernames has given away what it was protecting.**
+
+**The trade-off is real and was observed, not theorised:** hammering `smo`
+locked the SMO out for the window, mid-test. A threshold per key means anybody
+who knows a key can push that account over it. That is exactly why the window
+is short and self-clearing rather than a lock somebody lifts by hand — a
+permanent lockout turns "I know your username" into "I can keep you out".
+
+### 43.4 Headers, and the limit of the policy
+
+A CSP plus `X-Frame-Options: DENY`, `nosniff`, `no-referrer`, HSTS, a
+`Permissions-Policy` turning off camera / microphone / geolocation / payment /
+USB, `Cross-Origin-Opener-Policy` and DNS prefetch off — on every path.
+
+`scripts/dev-server.js` **reads the list out of `vercel.json`** rather than
+repeating it: the local server exists to test what ships, and a second copy of
+a header list is a second copy that goes stale. It drops HSTS alone, because
+sending it from `http://localhost` pins the browser to https for localhost and
+breaks every other local server on the machine.
+
+**The honest limit.** `'unsafe-inline'` stays, because the single-file design
+is nothing but inline script and inline `style=` attributes. What the policy
+still buys is real — no external script, no external connection, no framing,
+no plugins, no `<base>` — so an injection has nowhere to send anything. What
+it does not buy is protection from an injection that runs. The upgrade is a
+hash-based `script-src`, which is possible (there is not one inline event
+handler in the product) and needs `build.py` to emit the hashes and the gate to
+carry its own. Recorded rather than done, because **a stale hash is a page
+that does not load.**
+
+### 43.5 Two smaller ones
+
+A database error names tables, columns and sometimes values. None of that
+belongs in a browser: it is a free map of the schema to anyone probing and
+means nothing to the person who hit it. One sentence out, the real error to
+the function's log.
+
+And sessions: expired rows are deleted on every sign-in — one DELETE on a path
+already writing, since there is no scheduler here — and choosing a new
+password ends **every other session that person holds**, because the old
+password may be exactly why they are choosing. Their own survives: being
+signed out of the tab you just used to choose a password is not security, it
+is a bug that looks like one.
+
+### 43.6 Verified
+
+- 11 checks on the door and the limiter against the real API: `1234` signs in
+  and buys nothing; the change is accepted and the state then opens; a weak
+  replacement is refused; guessing is cut off from the ninth attempt; a
+  CORRECT password is refused while the window holds.
+- 4 on sessions, and a stale row gone on the next sign-in.
+- §42's 12 authorisation checks re-run through the temporary-password flow.
+- The platform driven in a browser under the CSP: **no violations**, worker
+  registers, manifest loads, fonts render, reporting saves, a plan change
+  refused with the banner.
+- Fresh database: clean slate, round trip, fixed point PASS — and the
+  bootstrap SMO arrives with `must_change` set.
+- QA 31 viewers, zero console errors; byte-identical rebuild.
+
+### 43.7 What is still not done
+
+Hash-based CSP (§43.4). Tenant isolation (§36). At-rest key custody, backups
+and retention. **Who at Forefront can read production** — a people-and-process
+control, not a code one. An external penetration test before go-live. The
+Copilot's read scope.

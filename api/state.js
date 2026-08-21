@@ -51,6 +51,15 @@ function readBody(req) {
   });
 }
 
+/* A database error names tables, columns and sometimes values — a free map of
+   the schema to anyone probing, and meaningless to the person who hit it. The
+   real one goes to the function's log. */
+function safeError(e) {
+  if (e && e.code === "NO_DB") return String(e.message);
+  console.error("api/state:", e && (e.stack || e.message || e));
+  return "Something went wrong saving. Nothing was changed — try again, and tell the SMO if it keeps happening.";
+}
+
 function send(res, code, obj) {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -94,6 +103,15 @@ module.exports = async function handler(req, res) {
        recorded as such. */
     const person = await auth.getSession(client, req);
     if (!person) return send(res, 401, { ok: false, auth: true, error: "sign in required" });
+    /* A TEMPORARY password is not a password yet. The gate has always sent
+       people to the change screen, but the SERVER did not care whether they
+       went — so an issued password bought a full thirty-day session and the
+       whole tenant's data with it. It is refused here, where it matters, and
+       the flag tells the platform to send them back to the door. */
+    if (person.mustChange) {
+      return send(res, 403, { ok: false, auth: true, mustChange: true,
+                              error: "Choose your own password before going on." });
+    }
 
     if (req.method === "GET") {
       const state = await readState(client);
@@ -137,7 +155,7 @@ module.exports = async function handler(req, res) {
     res.setHeader("Allow", "GET, POST");
     return send(res, 405, { ok: false, error: "method not allowed" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: String(e.message || e) });
+    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: safeError(e) });
   } finally {
     if (client) client.release();
   }

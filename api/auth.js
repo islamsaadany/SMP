@@ -47,6 +47,16 @@ function readBody(req) {
   });
 }
 
+/* A database error names tables, columns and sometimes values. None of that
+   belongs in a browser: it is a free map of the schema to anyone probing, and
+   it means nothing to the person who hit it. The real error goes to the
+   function's own log, where it is visible to us and to nobody else. */
+function safeError(e) {
+  if (e && e.code === "NO_DB") return String(e.message);
+  console.error("api/auth:", e && (e.stack || e.message || e));
+  return "Something went wrong. Try again, and tell the SMO if it keeps happening.";
+}
+
 function send(res, code, obj) {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -69,6 +79,16 @@ module.exports = async function handler(req, res) {
 
     if (action === "login") {
       const key = String(body.user || "").trim().toLowerCase();
+      const ip = auth.clientIp(req);
+      /* One DELETE on a path that is already writing — there is no scheduler
+         in a serverless deployment, and expired sessions and stale attempts
+         were accumulating for ever. */
+      await auth.pruneExpired(client);
+      /* Checked BEFORE the password is verified, or the limiter is a timing
+         oracle: a wrong password would take a scrypt hash's worth of time and
+         a locked-out one would not. */
+      const slow = await auth.tooManyAttempts(client, key, ip);
+      if (slow) return send(res, 429, { ok: false, error: slow });
       const cred = (await client.query(
         "SELECT c.password_hash, c.must_change, p.name, p.role, " +
         "       COALESCE(p.extra->>'active', 'true') <> 'false' AS active " +
@@ -79,8 +99,12 @@ module.exports = async function handler(req, res) {
          client that stops offering them roles. Retirement is what happens when
          somebody leaves, so it has to close the door, not just the menu. */
       if (!cred || !cred.active || !auth.verifyPassword(body.password, cred.password_hash)) {
+        await auth.recordFailure(client, key, ip);
         return send(res, 401, { ok: false, error: "Wrong sign-in. Check both fields, or ask the SMO to reset your password." });
       }
+      /* Getting in clears this key's failures: the threshold is there to slow
+         a guess, and a guess that succeeded is not what it is counting. */
+      await auth.clearFailures(client, key);
       const token = await auth.createSession(client, key);
       res.setHeader("Set-Cookie", auth.cookieHeader(req, token));
       return send(res, 200, { ok: true, person: { key: key, name: cred.name, role: cred.role, mustChange: cred.must_change } });
@@ -100,6 +124,12 @@ module.exports = async function handler(req, res) {
       await client.query(
         "UPDATE credentials SET password_hash = $1, must_change = false, updated_at = now() WHERE person_key = $2",
         [auth.hashPassword(body.password), person.key]);
+      /* The old password may be exactly why they are changing it, so every
+         other session it opened ends here. Their own stays: being signed out
+         of the tab you just used to choose a password is not security, it is
+         a bug that looks like one. */
+      await auth.destroyOtherSessions(client, req, person.key);
+      await auth.clearFailures(client, person.key);
       return send(res, 200, { ok: true });
     }
 
@@ -177,7 +207,7 @@ module.exports = async function handler(req, res) {
 
     return send(res, 400, { ok: false, error: "unknown action" });
   } catch (e) {
-    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: String(e.message || e) });
+    return send(res, e.code === "NO_DB" ? 503 : 500, { ok: false, error: safeError(e) });
   } finally {
     if (client) client.release();
   }

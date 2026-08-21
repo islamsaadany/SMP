@@ -26,7 +26,17 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
                 ".webmanifest": "application/manifest+json; charset=utf-8",
                 ".png": "image/png", ".svg": "image/svg+xml" };
 
+/* The same security headers vercel.json sets, read FROM vercel.json rather
+   than typed again — the local server exists to test what ships, and a second
+   copy of a header list is a second copy that goes stale. HSTS is left to
+   production: sending it from http://localhost would pin the browser to https
+   for localhost, which breaks every other local server on the machine. */
+const VERCEL = JSON.parse(fs.readFileSync(path.join(ROOT, "vercel.json"), "utf8"));
+const SECURITY = ((VERCEL.headers || []).filter(function (h) { return h.source === "/(.*)"; })[0] || {})
+  .headers.filter(function (h) { return h.key !== "Strict-Transport-Security"; });
+
 http.createServer(function (req, res) {
+  SECURITY.forEach(function (h) { res.setHeader(h.key, h.value); });
   const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/api/state") return stateHandler(req, res);
   if (url.pathname === "/api/auth") return authHandler(req, res);

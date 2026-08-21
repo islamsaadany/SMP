@@ -154,11 +154,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   **generated from the platform sources** by `node scripts/extract-state.js`. Served over
   http(s) the platform hydrates from GET /api/state and autosaves on change; opened from
   file:// it runs on baked data.
-- **Identity (since v2.1, §19):** the gate is a real login (person key + password,
-  scrypt-hashed, httpOnly session); `/api/state` requires a session; a signed-in person
-  sees their own view; the SMO issues temporary passwords from Levels & access (forced
-  change on first sign-in; sign-in: `SMO` / `1234`, no forced change — §19.4). Enforcement is at the
-  door — per-action authorization and the change log are Phase 2 (§19.2).
+- **Identity (since v2.1, §19; hardened v3.12, §43):** the gate is a real login
+  (person key + password, scrypt-hashed, httpOnly session); `/api/state` requires
+  a session AND a password that is no longer temporary; a signed-in person sees
+  their own view; the SMO issues temporary passwords from People. **§19.4 is
+  reversed:** `SMO` / `1234` still opens an empty deployment but forces a change
+  at once. Sign-ins are rate-limited (8 per key, 25 per address, 15 minutes);
+  a password change ends that person's other sessions. Security headers are in
+  `vercel.json` and read from there by `scripts/dev-server.js` — never typed twice.
 - **Two datasets (since v2.2, §21):** the database holds the **client's own** tenant;
   the full Raya Trade worked example is baked into the platform file and reachable
   only through the **Demo data** button, which labels it and refuses to save it.
@@ -185,7 +188,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the person's roles disallow — always resolved against the **stored** world.
   An unclassified change is the SMO's, by design. `change_log` (migration 010)
   is written from the same diff and lives outside the state graph.
-  Run `node scripts/test-authorize.js` after touching either file.
+  Run `node scripts/test-authorize.js` after touching either file, and
+  `node scripts/test-door.js <smo-password>` against a running dev-server
+  after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
+  SMO on purpose — `DELETE FROM login_attempts;` clears it).
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
@@ -270,7 +276,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — v3.12 (in progress): THE SERVER DECIDES WHO MAY
+*Last Updated: 2026-08-21 — v3.12 (in progress): THE SECURITY FLOOR (§43,
+spec 007), on top of §42. **§19.4 is REVERSED**: the `1234` SMO is RETIRED, not
+removed — the bootstrap still creates it (a deployment with no way in is not a
+deployment) but with `must_change`, and a one-off JS step sets the flag on an
+existing tenant *only if the stored hash still verifies against 1234*. It could
+not be a `.sql` file, because migration 003 salted that hash; it **sets a flag
+rather than clearing a password**, so it can never lock anybody out of their own
+deployment. A **temporary password now buys nothing** — `/api/state` refuses
+both directions while `must_change` is set, and **identity is checked before
+authorisation**. **Guessing is slowed**: `login_attempts` (migration 012), 8 per
+key and 25 per address in a rolling 15 minutes, failures only, cleared on
+success, pruned on every sign-in (no scheduler here). Two rules: **check the
+limit BEFORE verifying the password** or it is a timing oracle, and **never say
+which threshold was hit or whether the key exists** — a rate limiter that
+confirms usernames has given away what it was protecting. The DoS trade-off is
+real and was observed, not theorised (hammering `smo` locked the SMO out
+mid-test): that is why the window is short and self-clearing rather than a lock
+somebody lifts. **Security headers** in `vercel.json` for every path, and
+`scripts/dev-server.js` READS THAT LIST rather than repeating it (dropping only
+HSTS, which from localhost would pin every other local server to https). The
+honest limit: `'unsafe-inline'` stays because the single file is nothing but
+inline script and `style=`; the policy still blocks every external script,
+connection, frame and plugin, so an injection has nowhere to send anything —
+the hash-based `script-src` upgrade is possible (no inline handlers anywhere)
+and recorded rather than done, because **a stale hash is a page that does not
+load**. Also: raw DB errors no longer reach the browser (a free schema map to
+anyone probing), expired sessions are pruned, and a password change ends every
+OTHER session that person holds — but never their own, because being signed out
+of the tab you just used to choose a password is a bug that looks like
+security. Still open, and these need decisions not code: hash CSP, tenant
+isolation (§36), key custody / backups / retention, **who at Forefront can read
+production**, an external penetration test before go-live, the Copilot's read
+scope.*
+
+*Earlier: 2026-08-21 — v3.12 (in progress): THE SERVER DECIDES WHO MAY
 CHANGE WHAT (§42, spec 006). `POST /api/state` checked that you were signed in
 and nothing else, then truncated thirty tables and wrote back whatever
 arrived — register and access matrix included — so the lowest-privilege person

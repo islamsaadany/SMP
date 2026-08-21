@@ -101,6 +101,10 @@ A drift between specs and code is a documentation bug — report it before silen
 - **Be proactive about issues** — flag concerns early.
 - **Explain reasoning** — give the rationale behind suggestions.
 - **Ask clarifying questions** — better to ask than assume.
+- **Security risks are reported in four parts, in order** (CLAUDE-RULES A14):
+  the issue in one sentence, **how it hurts us**, the solution in one sentence,
+  and **what the solution costs — including what else in the system it touches**.
+  One risk at a time, worst first. No finding tables, no option menus.
 
 ---
 

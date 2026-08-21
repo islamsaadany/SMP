@@ -136,6 +136,25 @@ as a different product the moment it sits beside the real page.
 This is B5 turned into a step: B5 says the screens should match, A13 says the
 matching is done by reading the existing screen first, not by remembering it.
 
+### A14 · Report a security risk in four parts, in that order
+
+Islam set this after a security write-up that was accurate and unreadable.
+Every risk — one at a time, no tables of findings — is reported as:
+
+1. **The issue**, in one sentence, no jargon.
+2. **How it hurts us** — the actual harm to Forefront or to the client, not the
+   technical mechanism.
+3. **The solution**, in one sentence.
+4. **What the solution costs** — how long, and **what else in the system it
+   touches**. If it slows something, changes a screen, or makes another piece of
+   work harder, that is part of the answer, not a footnote.
+
+No option lists, no severity tables, no "further reading". If there are several
+risks, they come one at a time in this shape, worst first (A5: one thing at a
+time). The recommendation is a sentence, not a menu — B6 still applies, so the
+trade-off is named, but it is named in the fourth part rather than as a set of
+alternatives to choose between.
+
 ---
 
 ## B · Practices Claude adopted — confirm or drop

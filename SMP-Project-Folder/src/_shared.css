@@ -220,6 +220,13 @@
   .banner.refused { background:var(--bad-bg); color:var(--bad-tx); display:block;
                     border-bottom:2px solid var(--bad); }
   .banner.refused strong { color:inherit; }
+  /* The way out of a refusal (§48.3). Underlined rather than filled: it is a
+     destructive recovery, so it should read as a deliberate choice and not as
+     the obvious next button to press. */
+  .refused-undo { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:0; padding:0; margin:0; cursor:pointer;
+                  text-decoration:underline; text-underline-offset:2px; }
+  .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 

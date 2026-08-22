@@ -1122,7 +1122,8 @@ function renderGroupFoundation(){
         '<p class="statement">' + fieldOr("foundation", GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
-          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found") +
+          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
+          true) +
       '</div>' +
     '</div>' +
 
@@ -1383,13 +1384,24 @@ function koEdit(list){
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
    End in Mind as the same thing under two labels; the client's own deck carries
    both, saying different things. */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey){
+/* `isGroup` decides whether the HORIZON IS EDITABLE HERE. The card is shared by
+   the group's Foundation and every unit's, and it was rendering the group's
+   horizon field on both — so a unit owner's own-unit pen offered a control that
+   writes GROUP.horizon. The server refuses it ("The group's own strategy cannot
+   be changed here"), which means one keystroke on a page they are entitled to
+   edit left that person unable to save anything until the change was undone.
+
+   The horizon is still SHOWN on a unit, as a pill: it is the horizon the unit's
+   objectives are measured against and reading it there is the point. Only the
+   input is the group's (§48.1). */
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup){
   var editing = EDIT_PAGE[page];
   return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
     penBtn(page, acKey) +
-      (editing ? '<label class="horizon-f">Horizon ' +
-                 inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
-               : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
+      (editing && isGroup
+        ? '<label class="horizon-f">Horizon ' +
+          inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
+        : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
     '<p class="statement">' + fieldOr(page, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears

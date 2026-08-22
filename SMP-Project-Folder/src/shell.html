@@ -226,7 +226,14 @@
       /* FIRST, because it is the page you open before the others — and now
          also because the gear lands on whichever def is `primary`. */
       { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",                        render:renderImport },
+      /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
+         `view` for every role, so gating the row on "not none" put Import in
+         the rail of a contributor, a unit owner, a custodian and a company
+         CEO. They could apply a file, watch the receipt say it worked, and
+         then have the server refuse the save. There is nothing to READ on this
+         page, so restriction is by removing it (§37) rather than trimming it. */
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",
+        when: function(){ return grant("c_import") === "edit"; },        render:renderImport },
       { k:"archives", ac:"c_import", grp:"cycle", label:"Archived plans",                 render:renderArchives },
       { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
@@ -2105,6 +2112,7 @@
 
     var f = document.getElementById("imp-file");
     if (f) f.addEventListener("change", function(){
+      if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
@@ -2186,6 +2194,14 @@
 
     var ap = document.querySelector("[data-apply]");
     if (ap) ap.addEventListener("click", function(){
+      /* THE LAST GATE, and the one that actually protects the data: applying a
+         plan archives and replaces a whole unit's plan in memory before any
+         save is attempted. Checked here rather than trusted from the page that
+         drew the button (§48.2). */
+      if (grant("c_import") !== "edit") {
+        alert("Importing is the SMO's. Nothing has been applied.");
+        return;
+      }
       var what, arch;
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;

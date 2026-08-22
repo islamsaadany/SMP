@@ -108,6 +108,19 @@ var SYNC = (function () {
      showing a change the database never took. */
   var refusedBody = null;
 
+  /* A REFUSAL NEEDS A WAY OUT (§48.3).
+
+     The retry rule was already right and is unchanged: an identical body is
+     never re-sent, and the next DIFFERENT change is tried normally. What was
+     missing is the case where the refused change is still ON SCREEN — an
+     import that was applied, a field that was typed — because then every
+     later body still contains it, every later save is refused too, and the
+     banner is a dead end. Clearing the remembered body would NOT have fixed
+     that; it would have re-sent the same refusal in a loop.
+
+     So the banner carries the only honest recovery: throw away what has not
+     been saved and take the server's copy again. It is destructive to local
+     work, so it says so and asks first. */
   function showRefusal(list) {
     var el = document.getElementById("refused");
     if (!el) return;
@@ -116,8 +129,17 @@ var SYNC = (function () {
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
-        : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>");
+        : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>") +
+      '<span><button type="button" class="refused-undo" id="refused-undo">' +
+      "Discard the change and reload</button></span>";
     el.hidden = false;
+    var u = document.getElementById("refused-undo");
+    if (u) u.addEventListener("click", function () {
+      if (!confirm("Discard everything changed since the last successful save, " +
+                   "and load the stored version again?\n\nAnything you have typed " +
+                   "that was not saved will be lost.")) return;
+      location.reload();
+    });
   }
 
   function save() {

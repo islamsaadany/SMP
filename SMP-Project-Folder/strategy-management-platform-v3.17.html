@@ -234,6 +234,13 @@
   .banner.refused { background:var(--bad-bg); color:var(--bad-tx); display:block;
                     border-bottom:2px solid var(--bad); }
   .banner.refused strong { color:inherit; }
+  /* The way out of a refusal (§48.3). Underlined rather than filled: it is a
+     destructive recovery, so it should read as a deliberate choice and not as
+     the obvious next button to press. */
+  .refused-undo { font:inherit; font-weight:700; color:inherit; background:none;
+                  border:0; padding:0; margin:0; cursor:pointer;
+                  text-decoration:underline; text-underline-offset:2px; }
+  .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
@@ -10500,7 +10507,8 @@ function renderGroupFoundation(){
         '<p class="statement">' + fieldOr("foundation", GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
-          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found") +
+          function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
+          true) +
       '</div>' +
     '</div>' +
 
@@ -10761,13 +10769,24 @@ function koEdit(list){
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
    End in Mind as the same thing under two labels; the client's own deck carries
    both, saying different things. */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey){
+/* `isGroup` decides whether the HORIZON IS EDITABLE HERE. The card is shared by
+   the group's Foundation and every unit's, and it was rendering the group's
+   horizon field on both — so a unit owner's own-unit pen offered a control that
+   writes GROUP.horizon. The server refuses it ("The group's own strategy cannot
+   be changed here"), which means one keystroke on a page they are entitled to
+   edit left that person unable to save anything until the change was undone.
+
+   The horizon is still SHOWN on a unit, as a pill: it is the horizon the unit's
+   objectives are measured against and reading it there is the point. Only the
+   input is the group's (§48.1). */
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup){
   var editing = EDIT_PAGE[page];
   return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
     penBtn(page, acKey) +
-      (editing ? '<label class="horizon-f">Horizon ' +
-                 inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
-               : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
+      (editing && isGroup
+        ? '<label class="horizon-f">Horizon ' +
+          inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
+        : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
     '<p class="statement">' + fieldOr(page, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears
@@ -13715,6 +13734,17 @@ function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
 function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
 
 function renderImport(){
+  /* The second of three gates, and it is not belt-and-braces for its own sake:
+     the rail's `when` decides whether the ROW is drawn, this decides whether
+     the PAGE renders, and the two handlers decide whether the file is applied.
+     A destination can be reached with a stale `currentSub` after a role
+     changes under the viewer, so the page checks for itself. */
+  if (grant("c_import") !== "edit") {
+    return '<div class="note"><b>Importing is the SMO\u2019s.</b> A plan arrives by ' +
+      'upload and is authored by it \u2014 codes are minted, the outgoing plan is ' +
+      'archived \u2014 so it is not something a unit does for itself. Ask the SMO, or ' +
+      'report figures on your unit\u2019s own <b>Report</b> page.</div>';
+  }
   var isCap = impIsCap();
   var u = isCap ? impCap() : UNITS[IMP.unit];
   var isPlan = IMP.kind === "plan";
@@ -15162,6 +15192,19 @@ var SYNC = (function () {
      showing a change the database never took. */
   var refusedBody = null;
 
+  /* A REFUSAL NEEDS A WAY OUT (§48.3).
+
+     The retry rule was already right and is unchanged: an identical body is
+     never re-sent, and the next DIFFERENT change is tried normally. What was
+     missing is the case where the refused change is still ON SCREEN — an
+     import that was applied, a field that was typed — because then every
+     later body still contains it, every later save is refused too, and the
+     banner is a dead end. Clearing the remembered body would NOT have fixed
+     that; it would have re-sent the same refusal in a loop.
+
+     So the banner carries the only honest recovery: throw away what has not
+     been saved and take the server's copy again. It is destructive to local
+     work, so it says so and asks first. */
   function showRefusal(list) {
     var el = document.getElementById("refused");
     if (!el) return;
@@ -15170,8 +15213,17 @@ var SYNC = (function () {
       (list.length === 1 ? "" : "The server refused this change:") + "</span>" +
       (list.length === 1
         ? "<span>" + esc(list[0]) + "</span>"
-        : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>");
+        : "<ul>" + list.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>") +
+      '<span><button type="button" class="refused-undo" id="refused-undo">' +
+      "Discard the change and reload</button></span>";
     el.hidden = false;
+    var u = document.getElementById("refused-undo");
+    if (u) u.addEventListener("click", function () {
+      if (!confirm("Discard everything changed since the last successful save, " +
+                   "and load the stored version again?\n\nAnything you have typed " +
+                   "that was not saved will be lost.")) return;
+      location.reload();
+    });
   }
 
   function save() {
@@ -15520,7 +15572,14 @@ var SYNC = (function () {
       /* FIRST, because it is the page you open before the others — and now
          also because the gear lands on whichever def is `primary`. */
       { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",                        render:renderImport },
+      /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
+         `view` for every role, so gating the row on "not none" put Import in
+         the rail of a contributor, a unit owner, a custodian and a company
+         CEO. They could apply a file, watch the receipt say it worked, and
+         then have the server refuse the save. There is nothing to READ on this
+         page, so restriction is by removing it (§37) rather than trimming it. */
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",
+        when: function(){ return grant("c_import") === "edit"; },        render:renderImport },
       { k:"archives", ac:"c_import", grp:"cycle", label:"Archived plans",                 render:renderArchives },
       { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
@@ -17399,6 +17458,7 @@ var SYNC = (function () {
 
     var f = document.getElementById("imp-file");
     if (f) f.addEventListener("change", function(){
+      if (grant("c_import") !== "edit") return;
       var file = f.files && f.files[0]; if (!file) return;
       if (/\.xlsx$/i.test(file.name)) {
         var rx = new FileReader();
@@ -17480,6 +17540,14 @@ var SYNC = (function () {
 
     var ap = document.querySelector("[data-apply]");
     if (ap) ap.addEventListener("click", function(){
+      /* THE LAST GATE, and the one that actually protects the data: applying a
+         plan archives and replaces a whole unit's plan in memory before any
+         save is attempted. Checked here rather than trusted from the page that
+         drew the button (§48.2). */
+      if (grant("c_import") !== "edit") {
+        alert("Importing is the SMO's. Nothing has been applied.");
+        return;
+      }
       var what, arch;
       if (IMP.kind === "plan") {
         var sm = IMP.summary, inc = sm.incoming;

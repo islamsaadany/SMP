@@ -1892,6 +1892,17 @@ function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
 function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
 
 function renderImport(){
+  /* The second of three gates, and it is not belt-and-braces for its own sake:
+     the rail's `when` decides whether the ROW is drawn, this decides whether
+     the PAGE renders, and the two handlers decide whether the file is applied.
+     A destination can be reached with a stale `currentSub` after a role
+     changes under the viewer, so the page checks for itself. */
+  if (grant("c_import") !== "edit") {
+    return '<div class="note"><b>Importing is the SMO\u2019s.</b> A plan arrives by ' +
+      'upload and is authored by it \u2014 codes are minted, the outgoing plan is ' +
+      'archived \u2014 so it is not something a unit does for itself. Ask the SMO, or ' +
+      'report figures on your unit\u2019s own <b>Report</b> page.</div>';
+  }
   var isCap = impIsCap();
   var u = isCap ? impCap() : UNITS[IMP.unit];
   var isPlan = IMP.kind === "plan";

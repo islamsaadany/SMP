@@ -322,18 +322,12 @@ var ICO_CLEAR = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
 
 var CLEARMENU = null;
 
-/* `extra` is a slot for page-level ACTIONS in the header's right cluster,
-   before the edit pen. HR_ERP puts its bulk controls exactly here — a row of
-   worded dropdown buttons beside the title — and Islam asked for the password
-   actions to match, so the slot exists rather than each page inventing a place
-   to put its own (§47.2). */
-function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
+function cfgHead(title, chips, editKey, mayEdit, clearScope, labels){
   var editing = EDITING[editKey];
   var open = CLEARMENU === editKey;
   return '<div class="phead2"><h2 class="secttl">' + title + '</h2>' +
     '<div class="hright">' +
       chips.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
-      (extra || "") +
       (mayEdit
         ? '<span class="iconwrap">' +
             '<button class="ico' + (editing ? " on" : "") + '" data-edit="' + editKey +
@@ -674,49 +668,6 @@ function renderBranding(){
    file, where there are no credentials to have a state. */
 var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
 
-/* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
-   Islam: "add a columns filter to mark what to show of the columns and make
-   the contact unchecked by default."
-
-   THIS IS A PROPERTY OF THE SCREEN, NEVER OF THE STATE GRAPH — §25's rule for
-   the theme, and the same reason: autosaving it would decide for everyone in
-   the tenant which columns THEY see. localStorage, per browser, like the
-   theme and unlike anything the platform reports on.
-
-   `Person` is not in the list. A register with the names hidden is not a
-   register, and HR_ERP reaches the same answer by marking `name` non-hideable
-   rather than by trusting nobody to untick it. */
-var PCOLS_KEY = "smp.people.columns";
-var PEOPLE_COLS = [
-  { k:"title",    label:"Job title" },
-  { k:"belongs",  label:"Belongs to" },
-  { k:"contact",  label:"Contact",  off:true },
-  { k:"roles",    label:"Roles" },
-  { k:"standing", label:"Standing" },
-  { k:"password", label:"Password", live:true }
-];
-var PCOLS = null;      /* {key:bool}, loaded once */
-
-function peopleCols(){
-  if (PCOLS) return PCOLS;
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(PCOLS_KEY) || "null"); } catch (e) { saved = null; }
-  PCOLS = {};
-  /* MERGED, not replaced. A column added later is not in a map written before
-     it existed, and reading a missing key as `false` would hide every new
-     column from everybody who had ever opened the chooser — §30.2's lesson
-     about the access map, one surface further out. */
-  PEOPLE_COLS.forEach(function(c){
-    PCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
-  });
-  return PCOLS;
-}
-function setPeopleCol(k, on){
-  peopleCols()[k] = on;
-  try { localStorage.setItem(PCOLS_KEY, JSON.stringify(PCOLS)); } catch (e) {}
-}
-function showCol(k){ return peopleCols()[k] !== false; }
-
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   var editable = mayEdit && EDITING.people;
@@ -773,16 +724,8 @@ function renderPeople(){
   function roleCell(p){
     var rs = personRoles(p);
     var home = belongsKey(p);
-    /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people
-       hold one; a handful hold three, and sizing all 31 rows for the handful is
-       what made this the widest column on the page. The overflow is a CONTROL,
-       not a hover: a hover cannot be reached on a touch screen and cannot be
-       read aloud, and this is the only place the second role appears. */
-    var openRoles = PROLES === p.key;
-    var shownRoles = (rs.length > 1 && !openRoles) ? rs.slice(0, 1) : rs;
-    var hiddenRoles = rs.length - shownRoles.length;
     var held = rs.length
-      ? shownRoles.map(function(r){
+      ? rs.map(function(r){
           /* THE CHIP NAMES THE PLACE ONLY WHEN IT IS NOT THE PERSON'S OWN.
              Islam, on Hossam's row: "we don't need finance again. it's
              Function Head" — right, and the rule generalises rather than
@@ -806,15 +749,7 @@ function renderPeople(){
               ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
                 '" title="Remove this role" aria-label="Remove this role">&times;</button>'
               : '') + '</span>';
-        }).join("") +
-        (hiddenRoles
-          ? '<button class="rolemore" data-proles="' + p.key + '" title="Show ' +
-            hiddenRoles + ' more" aria-label="Show ' + hiddenRoles + ' more role' +
-            (hiddenRoles === 1 ? "" : "s") + ' for ' + esc(p.name) + '">&hellip;</button>'
-          : (openRoles && rs.length > 1
-              ? '<button class="rolemore on" data-proles="" title="Show fewer" ' +
-                'aria-label="Show fewer roles">&lsaquo;</button>'
-              : ''))
+        }).join("")
       : '<span class="pill none">No role</span>';
     if (!editable) return held;
     var addRole = ADDROLE === p.key;
@@ -870,25 +805,10 @@ function renderPeople(){
   function kebab(p){
     var open = PMENU === p.key;
     var st = PWSTATES ? PWSTATES[p.key] : null;
-    /* THE ORDER IS WRITTEN DOWN, not produced by splicing into an index. The
-       first version inserted "Edit details" at position 1, which is second
-       only while "Reset password" is present — from a file there are no
-       credentials, so it silently became second-after-"View as". A list whose
-       order depends on which items happened to qualify is a list that reorders
-       itself for some viewers.
-
-       EDIT DETAILS was in the approved mockup and did not make the first
-       build; Islam caught it. It turns the page's edit mode on and puts the
-       cursor in THIS person's name rather than inventing a per-person modal:
-       the page already has one edit mode, and a second way to edit the same
-       row is a second place for the two to disagree. */
     var acts = [];
     if (live && personActive(p)) {
       acts.push('<button data-setpw="' + p.key + '">' +
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
-    }
-    if (mayEdit) {
-      acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
     }
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
@@ -928,34 +848,30 @@ function renderPeople(){
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
-      (showCol("title") ? '<td>' + (editable
+      '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
-                   : '<span class="why" style="margin:0">not given</span>')) + '</td>' : '') +
-      (showCol("belongs") ? '<td>' + (home
+                   : '<span class="why" style="margin:0">not given</span>')) + '</td>' +
+      '<td>' + (home
         ? '<span class="uchip">' + esc(home) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      (showCol("contact") ? '<td>' + (editable
+        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' +
+      '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
           '" placeholder="Contact number">'
         : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
-      (showCol("roles")
-        ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' +
+      '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' +
       /* Standing before Password, at Islam's direction — whether somebody can
          sign in at all is the question you ask before what their password is
          doing. */
-      (showCol("standing")
-        ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
-          (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
-      (showCol("password") ? pwCell(p) : '') +
+      '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
+        (personActive(p) ? "Active" : "Retired") + '</span></td>' +
+      pwCell(p) +
       kebab(p) + '</tr>';
   }).join("");
 
-  var cols = 3 + PEOPLE_COLS.filter(function(c){
-    return showCol(c.k) && (!c.live || live);
-  }).length;
+  var cols = live ? 8 : 7;
   var addRow = editable
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
         '<input class="fld" id="newPersonName" placeholder="Full name" ' +
@@ -980,78 +896,29 @@ function renderPeople(){
      resetting everybody and the SMO would otherwise have locked themselves out
      of their own deployment, with no second SMO to ask. */
   var activeCount = PEOPLE.filter(personActive).length;
-
-  /* ── THE TWO HEADER MENUS (§47.2) ──────────────────────────────────
-     Islam: "the options of password reset needs to be in the top right page —
-     check the password reset design in the people erp repo."
-
-     HR_ERP's registry puts its bulk controls exactly there: worded dropdown
-     buttons in the header's right cluster, each menu item a TITLE plus a line
-     of description, the destructive one below a divider and drawn in red. Same
-     shape here, because it is the same job and Islam already reads that one.
-
-     One rule carried over verbatim, and it is load-bearing in both codebases:
-     THE ACTION FIRES BEFORE THE MENU CLOSES. HR_ERP's `runAndClose` has a
-     comment about a shipped-but-dead bulk password action, and SMP's own
-     CLAUDE.md records the same fault from the React side — closing the menu
-     from the button's own handler unmounts the control before the click
-     finishes. The handlers in shell.html dispatch first and clear PMENUHEAD
-     after. */
-  var colMenu =
-    '<span class="hmenu' + (PCOLMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-colmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + PCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
-      (PCOLMENU
-        ? '<div class="hmenu-panel cols">' +
-            '<div class="hmenu-h"><span>Show columns</span>' +
-              '<span><button class="linkbu" data-colall="1">All</button> &middot; ' +
-              '<button class="linkbu" data-colnone="1">None</button></span></div>' +
-            PEOPLE_COLS.filter(function(c){ return !c.live || live; }).map(function(c){
-              return '<label class="colrow"><input type="checkbox" data-col="' + c.k + '"' +
-                (showCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
-            }).join("") +
-            '<div class="hmenu-note">Person is always shown &mdash; a register ' +
-            'with the names hidden is not a register.</div>' +
-          '</div>'
-        : '') +
-    '</span>';
-
-  var pwMenu = !live ? "" :
-    '<span class="hmenu' + (PWMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-pwmenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + PWMENU + '">Passwords <span class="hcar">&#9662;</span></button>' +
-      (PWMENU
-        ? '<div class="hmenu-panel">' +
-            '<button class="hmenu-item" data-pwbulk="none"' + (noPw ? "" : " disabled") + '>' +
-              '<span class="t">Issue to those with no password</span>' +
-              '<span class="d">' + (noPw
-                ? plural(noPw, "person").replace("persons", "people") + ' cannot sign in yet.'
-                : 'Everybody active already has one.') + '</span></button>' +
-            '<div class="hmenu-sep"></div>' +
-            '<button class="hmenu-item danger" data-pwbulk="all">' +
-              '<span class="t">Reset everyone&rsquo;s password</span>' +
-              '<span class="d">All ' + Math.max(0, activeCount - 1) + ' others get a temporary ' +
-              'one and are signed out. Never you.</span></button>' +
-          '</div>'
-        : '') +
-    '</span>';
-
-  /* The explanation stays; the CONTROLS moved to the header. A note that
-     carries buttons is a second place to press them. */
   var bulk = !live ? "" :
-    '<div class="note"><b>Passwords are issued from <i>Passwords</i>, above.</b> ' +
+    '<div class="note"><b>Passwords, for everybody at once.</b> ' +
       'Each person is asked to choose their own the first time they use the one you ' +
-      'issue, so the same password never works twice for the same person. Resetting ' +
-      'everyone ends their open sessions &mdash; and never touches your own password, ' +
-      'because being signed out of the screen you are working in is not a safety ' +
-      'feature.</div>';
+      'issue, so the same password never works twice for the same person.' +
+      '<div class="bulkrow">' +
+        '<button class="editbtn" data-pwbulk="none"' + (noPw ? "" : " disabled") + '>' +
+          'Issue to those with no password' +
+          '<span class="bulkn">' + noPw + '</span></button>' +
+        '<button class="rmbtn" data-pwbulk="all">' +
+          'Reset everyone&rsquo;s password' +
+          '<span class="bulkn">' + Math.max(0, activeCount - 1) + '</span></button>' +
+      '</div>' +
+      '<div class="why" style="margin:8px 0 0">Resetting everyone ends their open ' +
+      'sessions and asks each of them to choose again. It never touches your own ' +
+      'password &mdash; being signed out of the screen you are working in is not ' +
+      'a safety feature.</div></div>';
 
   return cfgHead("People",
       ['<span class="pill kind">SMO</span>',
        plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
         retired ? [retired + ' retired'] : []).concat(
         noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []),
-      "people", mayEdit, null, null, colMenu + pwMenu) +
+      "people", mayEdit, null) +
 
     section("", "The register",
       "Everyone the platform knows. A role is given here or on the unit's own page — " +
@@ -1064,15 +931,12 @@ function renderPeople(){
       '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
         '<th class="idx">#</th>' +
         '<th>Person</th>' +
-        /* "Never decides access" is gone at Islam's direction. It was a note
-           about the MODEL sitting on a column header, and the knowledge base
-           is where the model is explained (§30) — `c_access` says it there. */
-        (showCol("title")    ? '<th>Job title</th>'  : '') +
-        (showCol("belongs")  ? '<th>Belongs to</th>' : '') +
-        (showCol("contact")  ? '<th>Contact</th>'    : '') +
-        (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
-        (showCol("standing") ? '<th class="cc">Standing</th>' : '') +
-        (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
+        '<th>Job title<span class="why">Never decides access</span></th>' +
+        '<th>Belongs to</th>' +
+        '<th>Contact</th>' +
+        '<th class="roles">Roles</th>' +
+        '<th class="cc">Standing</th>' +
+        (live ? '<th class="cc">Password</th>' : '') +
         '<th class="cc"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
       bulk +

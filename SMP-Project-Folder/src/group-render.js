@@ -1627,13 +1627,19 @@ function renderReport(u){
           }).join(""))
       : "";
 
-    return '<div class="ptitle"><div><h3><span class="pcode">' + pillarCode(u, pi) + '</span> ' +
-        esc(p.name) + '</h3>' +
-        '<div class="pmeta">' + esc(p.kind) + ' &middot; ' + ms.length + ' measures &middot; ' +
+    /* THE SAME BAND THE PLAN AND PERFORMANCE PANES WEAR (§46.3). This page was
+       left behind when they changed: a 19px heading over a meta line, which is
+       the shape those two shed. The counts and the tally are real information
+       and move to the band's right end rather than onto a second line.
+
+       `p.kind` goes with it. SHOW_KIND has been false since 3.4 and every
+       other surface honours it; this one printed "Direction" straight from the
+       data and was the last place in the product still saying it. */
+    return pillarBand(pillarCode(u, pi), p.name,
+        '<span class="pband-n">' + ms.length + ' measures &middot; ' +
         askedT.length + ' tactics asked' +
         (ts.length - askedT.length ? ' &middot; ' + (ts.length - askedT.length) + ' outside this cycle' : '') +
-        '</div></div>' +
-        tally(done, total) + '</div>' +
+        '</span>' + tally(done, total)) +
       mTable + tTable;
   };
 
@@ -2239,9 +2245,10 @@ function unitRailFor(u, sel){
    No border, deliberately — a bordered box inside a bordered pane reads as a
    control, and this is a label. Theme and owner stay gone: the rail card
    carries the owner, and the theme is a Strategy question. */
-function pillarBand(code, name){
+function pillarBand(code, name, right){
   return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
-    '<span class="pband-name">' + esc(name) + '</span></div>';
+    '<span class="pband-name">' + esc(name) + '</span>' +
+    (right ? '<span class="pband-r">' + right + '</span>' : '') + '</div>';
 }
 function unitPlanBody(it, u, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
@@ -2281,9 +2288,20 @@ function unitPlanBody(it, u, railed){
     : pillarBand(code, it.name) +
       (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
   return head +
-    (it.sub || ed
+    /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
+       the title of the direction in the mobile, generally standardize the view
+       there is no notes under the pillars"). Mobile's first pillar carried
+       "End-state: unified market intelligence engine" and the other nine units
+       carried nothing, so the line was not a feature of the page — it was one
+       unit's plan having a field the rest left empty, and a layout that shifts
+       depending on which pillar you picked.
+
+       IT IS STILL EDITABLE while the plan is being corrected, because the
+       field is real data that arrived with the upload and a page that cannot
+       show it also cannot fix it. Read-only, it is gone. */
+    (ed
       ? '<p class="sub" style="margin:10px 0 0">' +
-        (ed ? inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) : esc(it.sub)) + '</p>'
+        inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) + '</p>'
       : '') +
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -

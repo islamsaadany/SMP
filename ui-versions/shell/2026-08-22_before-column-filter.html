@@ -371,44 +371,7 @@
     { k:"look", label:"How it looks",     note:"What it wears" }
   ];
 
-  /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
-     Islam: "the side panel needs to be collapsable and it needs to be sticky."
-
-     Sticky it already was — `.rail` has carried `position:sticky` since 1.7
-     and the setup rail inherits it; measured, it pins under the chrome and
-     holds. What it could not do is get out of the way, and the register is
-     nine columns wide in the 880px the rail leaves.
-
-     COLLAPSED IS A HANDLE, NOT AN ICON RAIL. HR_ERP collapses its sidebar to
-     64px of icons, and that works there because its destinations are Employees,
-     Directory, Time off — things with pictures. Ours are Labels, Scoring bands,
-     Figure sets, and the mockup drew that failing. What makes a handle enough
-     here is that THE PANE ALREADY NAMES THE PAGE: every Setup page opens with
-     its own title, so collapsing the rail costs navigation, not orientation,
-     and one click brings it back.
-
-     The mechanics are HR_ERP's, because they are the house pattern: a grid
-     column swap on the container, the toggle inside the panel's own head
-     rather than in the page, and the preference in localStorage per browser —
-     it is a property of the screen, never of the tenant (§25). */
-  var RAIL_KEY = "smp.setup.rail";
-  var RAIL_OPEN = true;
-  try { RAIL_OPEN = localStorage.getItem(RAIL_KEY) !== "0"; } catch (e) {}
-  function setRailOpen(v){
-    RAIL_OPEN = v;
-    try { localStorage.setItem(RAIL_KEY, v ? "1" : "0"); } catch (e) {}
-  }
-  var ICO_CHEV =
-    '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 4l-6 6 6 6" fill="none" ' +
-    'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
   function setupRail(defs, activeKey){
-    if (!RAIL_OPEN) {
-      return '<div class="rail setuprail shut">' +
-        '<button type="button" class="railtog" data-railtog="1" ' +
-          'title="Show the Setup list" aria-label="Show the Setup list" ' +
-          'aria-expanded="false">' + ICO_CHEV + '</button></div>';
-    }
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
@@ -419,9 +382,7 @@
         }).join("");
     }).join("");
     return '<div class="rail setuprail"><div class="rhead">Setup' +
-      '<button type="button" class="railtog" data-railtog="0" ' +
-        'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + rows + '</div>';
+      '<span>' + defs.length + '</span></div>' + rows + '</div>';
   }
 
   function menuGroups(){
@@ -774,8 +735,7 @@
        is navigation, and navigation that leads somewhere refused is worse than
        navigation that is short. */
     document.getElementById("panel").innerHTML = railed
-      ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
-        setupRail(defs, currentSub) +
+      ? '<div class="split setupsplit">' + setupRail(defs, currentSub) +
         '<div class="pane setuppane">' + secrowHTML + body + '</div></div>'
       : body;
 
@@ -817,29 +777,6 @@
      element before it is in the document gives zeroes — and flipped above the
      button when there is no room below, because a menu that opens off the
      bottom of the window is a menu whose last item cannot be reached. */
-  /* PICKING A NEW PILLAR PUTS YOU AT THE TOP OF IT (Islam, 2026-08-22).
-     The rail is sticky, so it is still under the cursor after you have scrolled
-     a long way down the tactics table — you pick the next pillar and land
-     halfway down a table you have not read. `scrollTo(0,0)` is wrong here: it
-     would throw away the rail's pinned position and put the page header back
-     on screen, when what is wanted is the TOP OF THE PANE with the rail still
-     pinned beside it.
-
-     So it scrolls to the split's own offset less the chrome and the rail gap —
-     the same two numbers the rail's sticky offset is built from, read from the
-     same custom properties, so the pane's top lands exactly where the rail's
-     does. And only ever UPWARDS: if you are already above that point, a
-     scroll down to reach it would be the page moving for no reason. */
-  function toPaneTop(){
-    var split = document.querySelector("#panel .split");
-    if (!split) return;
-    var cs = getComputedStyle(document.documentElement);
-    var chrome = parseFloat(cs.getPropertyValue("--chrome-h")) || 0;
-    var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
-    var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
-    if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
-  }
-
   function positionRowMenu(){
     var m = document.querySelector(".kmenu");
     if (!m) return;
@@ -862,9 +799,6 @@
     /* The Setup rail (§46.1). It replaces a tab row, so it does what the tab
        row did — including dropping every edit mode on the way out, or you land
        on Branding still editing People. */
-    document.querySelectorAll("[data-railtog]").forEach(function(b){
-      b.addEventListener("click", function(){ setRailOpen(b.dataset.railtog === "1"); paint(); });
-    });
     document.querySelectorAll("[data-setupgo]").forEach(function(b){
       b.addEventListener("click", function(){
         if (currentSub !== b.dataset.setupgo) {
@@ -1034,7 +968,6 @@
         var p = b.dataset.urail.split("|");
         RAIL["unit:" + p[0]] = p[1];
         paint();
-        toPaneTop();
       });
     });
     document.querySelectorAll("[data-rail]").forEach(function(b){
@@ -1603,56 +1536,6 @@
     /* One temporary password for everyone who has none. The SERVER picks the
        set — this sends a password and nothing else — so the worst a stale
        screen can do is issue to a shorter list than it showed. */
-    /* Unfolding a person's extra roles (§47.1). Not a hover: a hover cannot be
-       reached on a touch screen, and this is the only place the second role
-       appears on the page. */
-    document.querySelectorAll("[data-proles]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        PROLES = b.dataset.proles || null;
-        paint();
-      });
-    });
-    /* The two header menus (§47.2). Opening one closes the other. */
-    document.querySelectorAll("[data-colmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-pwmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; paint();
-      });
-    });
-    /* A tick repaints the table but MUST NOT close the menu — you come here to
-       set several columns, and a chooser that shuts after each one is a chooser
-       you reopen six times. */
-    document.querySelectorAll("[data-col]").forEach(function(b){
-      b.addEventListener("change", function(e){
-        e.stopPropagation(); setPeopleCol(b.dataset.col, b.checked); paint();
-      });
-    });
-    document.querySelectorAll("[data-colall],[data-colnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-colall");
-        PEOPLE_COLS.forEach(function(c){ setPeopleCol(c.k, on); });
-        paint();
-      });
-    });
-    /* Edit the whole page, cursor in this person's name. The focus is applied
-       AFTER the repaint that creates the input — focusing a node the paint is
-       about to replace focuses nothing. */
-    document.querySelectorAll("[data-pedit]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var key = b.dataset.pedit;
-        EDITING.people = true; PMENU = null;
-        paint();
-        var f = document.querySelector('[data-pname="' + key + '"]');
-        if (f) { f.focus(); f.select(); }
-      });
-    });
     /* The row's action menu (§46.4). Opening one closes any other, because
        PMENU is a single key rather than a flag per row. */
     document.querySelectorAll("[data-pmenu]").forEach(function(b){
@@ -1669,22 +1552,11 @@
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
         var all = b.dataset.pwbulk === "all";
-        /* Menu state cleared HERE, before the dialogs, never from the button's
-           own teardown — closing the menu first unmounts the control the click
-           is still inside. Same fault HR_ERP records against its bulk password
-           action, and the one CLAUDE.md records from the React side. */
-        PWMENU = false;
-        /* EVERY exit repaints, including the cancelled ones. The first version
-           set the state here and repainted only on success, so pressing Cancel
-           left the menu on screen with PWMENU already false — a panel the next
-           unrelated repaint would make vanish. State and screen diverge in
-           exactly the paths nobody tests. */
-        var done = function(){ paint(); };
         if (all && !confirm(
               "Reset the password of everyone in the register except you?\n\n" +
               "Their open sessions end at once, and each of them has to choose a new " +
               "password with the one you are about to type. Your own password is not " +
-              "touched.")) return done();
+              "touched.")) return;
         var pw = prompt(all
           ? "One temporary password, for everyone except you." +
             "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
@@ -1692,9 +1564,9 @@
           : "One temporary password, for everyone who has none." +
             "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
             "\nEach of them is asked to choose their own the first time they use it.");
-        if (!pw) return done();
+        if (!pw) return;
         SYNC.issueTemporary(pw, all ? "all" : "none", function(err, issued){
-          if (err) { done(); return alert("Not issued: " + err); }
+          if (err) return alert("Not issued: " + err);
           issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
           PMENU = null;
           paint();
@@ -2211,20 +2083,11 @@
         !(e.target.closest && e.target.closest(".kmenu, [data-pmenu]"))) {
       PMENU = null; paint();
     }
-    /* The header menus close the same way, and on a click anywhere that is not
-       inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU) &&
-        !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; paint();
-    }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU)) {
-      PCOLMENU = false; PWMENU = false; paint();
-    }
   });
 
   /* The switcher lists the people the platform actually has. It was filled

@@ -600,3 +600,9 @@
   .rail button.ritem { position:relative; }
   .rail.arranging button.ritem { grid-template-columns:auto 1fr auto; }
   .rail.arranging .grip { align-self:center; }
+  /* The band's right end: the counts, then whatever pill the page carries.
+     `margin-left:auto` rather than a grid, so a band with nothing on the right
+     is unchanged and needs no second rule. */
+  .pband-r { margin-left:auto; display:inline-flex; align-items:center; gap:10px;
+             flex:none; }
+  .pband-n { font-size:11.5px; color:var(--ink-3); }

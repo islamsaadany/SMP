@@ -86,7 +86,7 @@ var SEARCHSEL = (function(){
   }
 
   function setLabel(sel, btn){
-    btn.firstChild.textContent = textOf(sel) || "—";
+    btn.querySelector(".sslabel").textContent = textOf(sel) || "—";
     btn.title = textOf(sel) || "";
   }
 
@@ -187,7 +187,16 @@ var SEARCHSEL = (function(){
     btn.className = "ssbtn" + (sel.className.indexOf("selbox") > -1 ? " selbox" : "");
     btn.setAttribute("aria-haspopup", "listbox");
     btn.setAttribute("aria-expanded", "false");
-    btn.appendChild(document.createTextNode(""));
+    /* AN ELEMENT, NOT A TEXT NODE. The label was appended bare, so the rule
+       meant to truncate it — `.ssbtn > :first-child` — matched the CARET,
+       because :first-child selects the first ELEMENT child and a text node is
+       not one. The label therefore had no `white-space:nowrap` and the button
+       WRAPPED. Invisible until a name got long enough: "Mohamed Essam — Head
+       of the Strategy Management Office" in the 150px viewer switcher is what
+       finally showed it. */
+    var lab = document.createElement("span");
+    lab.className = "sslabel";
+    btn.appendChild(lab);
     var car = document.createElement("span");
     car.className = "sscar";
     car.setAttribute("aria-hidden", "true");

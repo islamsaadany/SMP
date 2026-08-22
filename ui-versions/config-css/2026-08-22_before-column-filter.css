@@ -355,14 +355,7 @@
            cursor:pointer; text-align:left; display:inline-flex; align-items:center;
            justify-content:space-between; gap:8px; max-width:100%; min-width:0;
            line-height:1.35; }
-  /* The LABEL, by name. `> :first-child` was pointing at the caret (see
-     searchsel.js) — a selector that matched something, just not the thing it
-     was written for, which is why nothing looked broken until a long name
-     arrived. The button itself is nowrap too: belt and braces on a control
-     that sits in a fixed-width chrome row. */
-  .ssbtn { white-space:nowrap; }
-  .ssbtn .sslabel { overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-                    display:block; min-width:0; }
+  .ssbtn > :first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .ssbtn:hover { border-color:var(--gold); }
   .ssbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .ssbtn[aria-expanded="true"] { border-color:var(--gold); box-shadow:0 0 0 2px var(--over-bg); }
@@ -580,74 +573,3 @@
      sized by what is in it. */
   .cfg table.unitcfg.peoplecfg th:first-child, .cfg table.unitcfg.peoplecfg td:first-child,
   .cfg table.unitcfg.peoplecfg th:last-child,  .cfg table.unitcfg.peoplecfg td:last-child { width:1%; }
-
-  /* ══ THE SETUP RAIL COLLAPSES (§47.3) ═════════════════════════════
-     A grid column swap on the container, HR_ERP's mechanic. Collapsed is a
-     36px handle, not an icon strip — see the note in shell.html. */
-  .setupsplit.shut { grid-template-columns:36px 1fr; }
-  .setuprail .rhead { align-items:center; }
-  .railtog { width:22px; height:22px; padding:0; border:0; border-radius:4px;
-             background:none; color:var(--panel-quiet); cursor:pointer;
-             display:inline-flex; align-items:center; justify-content:center; }
-  .railtog svg { width:14px; height:14px; display:block; }
-  .railtog:hover { background:var(--panel-hover); color:var(--panel-ink); }
-  .railtog:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .setuprail.shut { padding:0; overflow:visible; }
-  .setuprail.shut .railtog { width:34px; height:38px; border-radius:var(--r);
-                             color:var(--ink-3); background:var(--surface); }
-  .setuprail.shut .railtog svg { transform:rotate(180deg); }
-  .setuprail.shut .railtog:hover { background:var(--surface-2); color:var(--gold-deep); }
-
-  /* ══ HEADER MENUS — Columns and Passwords (§47.2) ═════════════════
-     HR_ERP's registry shape: worded dropdown buttons in the header's right
-     cluster, each item a title over a line of description, the destructive one
-     under a divider and in red. */
-  .hmenu { position:relative; display:inline-flex; }
-  .hmenu-btn { font:600 12.5px/1 var(--sans); color:var(--ink-2);
-               background:var(--surface); border:1px solid var(--line);
-               border-radius:var(--r); padding:7px 10px; cursor:pointer;
-               display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
-  .hmenu-btn:hover { border-color:var(--gold); color:var(--ink); }
-  .hmenu-btn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .hmenu.open .hmenu-btn { border-color:var(--gold); background:var(--over-bg);
-                           color:var(--gold-deep); }
-  .hcar { font-size:9px; color:var(--ink-3); }
-  .hmenu.open .hcar { color:var(--gold-deep); }
-  .hmenu-panel { position:absolute; right:0; top:calc(100% + 5px); z-index:50;
-                 width:290px; background:var(--surface); border:1px solid var(--line);
-                 border-radius:var(--r); box-shadow:0 12px 30px rgba(0,0,0,.16);
-                 padding:6px; text-align:left; }
-  .hmenu-panel.cols { width:236px; }
-  .hmenu-h { display:flex; justify-content:space-between; align-items:baseline;
-             gap:10px; padding:5px 8px 7px; font:700 10px/1 var(--sans);
-             letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); }
-  .hmenu-h .linkbu { font-size:11px; letter-spacing:0; text-transform:none; }
-  .hmenu-item { display:block; width:100%; text-align:left; background:none;
-                border:0; border-radius:var(--r-sm); padding:8px 9px; cursor:pointer; }
-  .hmenu-item:hover { background:var(--surface-2); }
-  .hmenu-item:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
-  .hmenu-item[disabled] { opacity:.45; cursor:not-allowed; }
-  .hmenu-item[disabled]:hover { background:none; }
-  .hmenu-item .t { display:block; font:600 13px/1.35 var(--sans); color:var(--ink); }
-  .hmenu-item .d { display:block; font-size:11.5px; line-height:1.4; color:var(--ink-3);
-                   margin-top:2px; }
-  .hmenu-item.danger .t { color:var(--bad); }
-  .hmenu-item.danger:hover { background:var(--bad-bg); }
-  .hmenu-sep { height:1px; background:var(--line-soft); margin:5px 0; }
-  .hmenu-note { font-size:11px; line-height:1.45; color:var(--ink-3);
-                padding:8px 9px 4px; border-top:1px solid var(--line-soft); margin-top:5px; }
-  .colrow { display:flex; align-items:center; gap:9px; padding:6px 9px;
-            border-radius:var(--r-sm); cursor:pointer; font-size:13px; color:var(--ink-2); }
-  .colrow:hover { background:var(--surface-2); color:var(--ink); }
-  .colrow input { width:15px; height:15px; accent-color:var(--gold-deep); flex:none;
-                  margin:0; }
-
-  /* The "…" that unfolds a person's other roles. A control, not a hover. */
-  .rolemore { font:700 12px/1 var(--sans); color:var(--gold-deep);
-              background:var(--over-bg); border:1px solid var(--over-line);
-              border-radius:var(--r-pill); padding:2px 8px; cursor:pointer;
-              vertical-align:1px; }
-  .rolemore:hover { background:var(--gold); color:var(--on-accent);
-                    border-color:var(--gold); }
-  .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .rolemore.on { padding:2px 7px; }

@@ -150,11 +150,6 @@ var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
 var PMENU = null;
-/* Which person's extra roles are unfolded, and which header menu is open.
-   Single keys for the same reason PMENU is: two open at once is a state that
-   has to be closed twice. */
-var PROLES = null;
-var PCOLMENU = false, PWMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────

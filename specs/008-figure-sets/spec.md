@@ -33,9 +33,10 @@ that is enough.
 
 ## 2 · What exists, and where it is stored
 
-**A set** — a name, **a team**, and **ONE owner** (Islam, 2026-08-21):
+**A set** — a name, **a team**, **ONE owner**, and **who picks its figures**
+(Islam, 2026-08-21):
 
-    Financial Figures  ·  team Finance  ·  owner Hossam
+    Financial Figures  ·  team Finance  ·  owner Hossam  ·  picked by the owner
 
 The team is on the SET, not read off the person. Islam's reason for showing a
 department at all decides this: the BU head needs to know **who to talk to**
@@ -72,11 +73,41 @@ instead of two people sharing an undivided pile.
 
 ---
 
+## 2b · Who picks the figures — a SECURITY setting, not a convenience
+
+Islam: *"some numbers are confidential for some people and they shouldn't see
+all the group numbers, but for Finance everything is not confidential because
+they see everything, so they are a special case."*
+
+**A set owner who ticks from the full list has, by definition, read every
+number in the group.** That is the whole mechanism of A below. For Finance it
+costs nothing — they see the figures anyway. For anybody else it means somebody
+whose entire job was entering three numbers can read the lot.
+
+So each set carries a switch:
+
+- **The SMO marks** — DEFAULT. The owner never sees the full list. They open
+  their set and find only what they have been given.
+- **The owner picks** — self-service. They browse every figure in the group and
+  tick. For a team like Finance, from whom nothing is confidential.
+
+**Safe by default, opened deliberately.** The exception is the one you switch
+on, not the one you remember to switch off.
+
+**It is enforced on the SERVER, not by hiding the page.** A set set to "SMO
+marks" has its claims refused when they come from its owner. A switch that only
+hides a control is decoration, and §42 exists because of exactly that.
+
+**And there is no half-view to design.** "The owner picks" IS the grant of
+sight over the whole group's figures — so where it is off, the picking page
+does not exist for that owner at all.
+
 ## 3 · The two ways a figure gets an owner
 
-**A · The set owner ticks.** They open their set and see every figure in the
-group, unit by unit, and tick what belongs to it. This is the page that already
-exists; it moves from the SMO to the set's owner.
+**A · Somebody ticks from the full list** — the SMO by default, or the set's
+owner where §2b's switch allows it. Every figure in the group, unit by unit,
+ticked into the set. This is the page that already exists; who may open it is
+now a property of the set.
 
 **B · The unit's strategy custodian names people, figure by figure.** *"The
 custodian doesn't get a ticking page — he gets all his directions and targets
@@ -178,14 +209,16 @@ claim was refused. Recorded as a reversal with its reasoning, not overwritten.
   other measures, not its plan, not its score. They sign in during the cycle
   and find one page listing every figure they owe, wherever those figures live.
 
-**Nothing is left assumed.** The two-owner question is gone: a set has one
-owner, and two people needing to split the work is two sets.
+**Nothing is left assumed.** The two-owner question is gone (a set has one
+owner; two people splitting the work is two sets), and who may pick a set's
+figures is now a stored setting rather than a convention.
 
 ---
 
 ## 10 · Build order
 
-1. **Sets**, and the set owner's ticking page (A).
+1. **Sets** — the Setup page (name, team, owner, who picks), and the ticking
+   page (A) with §2b's switch decided on the server.
 2. **Claims** — refusal, request, the SMO's list.
 3. **The unit custodian's dropdown** (B), hidden.
 

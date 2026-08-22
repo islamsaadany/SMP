@@ -33,7 +33,7 @@ that is enough.
 
 ## 2 · What exists, and where it is stored
 
-**A set** — a name, **a team**, and **up to two owners** ("2 max for now"):
+**A set** — a name, **a team**, and **ONE owner** (Islam, 2026-08-21):
 
     Financial Figures  ·  team Finance  ·  owner Hossam
 
@@ -49,16 +49,26 @@ the person.
 It also survives the owner changing: hand *Financial Figures* to somebody else
 and the unit still reads *Set by Finance*. Two sets may share a team.
 
-**An assignment, on the figure itself** — the person responsible for entering
-it, and the set it came from if it came from one:
+**An assignment, on the figure itself:**
 
-    measure.src = { set: "<set id>", by: "<person key>" }   ← claimed in a set
-    measure.src = {                  by: "<person key>" }   ← named by the unit
+    measure.src = { set: "<set id>" }      ← claimed into a set
+    measure.src = { by:  "<person key>" }  ← named by a unit custodian
 
 Membership lives on the FIGURE rather than as a list inside the set. That is
 what makes "one figure, one set" an invariant that cannot be violated rather
 than a rule that has to be checked — and it is why a conflict can be detected
 at the moment of the tick instead of found later.
+
+**A set-claimed figure stores only the SET.** Who enters it is the set's owner,
+read from the set — not copied onto every figure it holds. One owner per set is
+what allows this, and it is worth having: handing *Financial Figures* to
+somebody else becomes ONE edit rather than twenty-seven, and no figure can be
+left pointing at the person who used to hold the set. Same pattern as a unit's
+head pointer (§33): a role is read from the thing, never stored twice.
+
+If two people genuinely need to split the work, that is **two sets** — which is
+the more honest arrangement anyway, because each one's scope is then visible
+instead of two people sharing an undivided pile.
 
 ---
 
@@ -168,10 +178,8 @@ claim was refused. Recorded as a reversal with its reasoning, not overwritten.
   other measures, not its plan, not its score. They sign in during the cycle
   and find one page listing every figure they owe, wherever those figures live.
 
-**STILL ASSUMED, stated rather than asked:**
-
-- **Two owners on one set:** either of them may tick and enter. If one is meant
-  to be the owner and the other a stand-in, say so and it changes.
+**Nothing is left assumed.** The two-owner question is gone: a set has one
+owner, and two people needing to split the work is two sets.
 
 ---
 

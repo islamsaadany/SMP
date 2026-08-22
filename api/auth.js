@@ -196,13 +196,44 @@ module.exports = async function handler(req, res) {
       const why = auth.passwordPolicy(body.password);
       if (why) return send(res, 400, { ok: false, error: "The password needs " + why + "." });
       const hash = auth.hashPassword(body.password);
+      /* TWO SCOPES, AND THE SECOND ONE IS NOT THE FIRST ONE WITH A WIDER WHERE.
+         'none' (the default, and what this endpoint always did) reaches only
+         people who have never had a password: it can lock nobody out, because
+         nobody it touches could sign in anyway.
+
+         'all' is a RESET — it overwrites a password somebody is using — so it
+         carries two things the first does not. Their other sessions END, or a
+         reset leaves the person it was aimed at still signed in, which is not a
+         reset. And it EXCLUDES THE PERSON ASKING: §43 already learned that
+         being signed out of the tab you are working in is a bug that looks
+         like security, and here it is worse — mistype the shared password
+         while resetting everybody and the SMO has locked themselves out of
+         their own deployment with no second SMO to ask.
+
+         Retired people are excluded from both. §35 turns them away at the door
+         with the correct password, so issuing them one is issuing a password
+         that cannot be used. */
+      const all = body.scope === "all";
       const done = await client.query(
-        "INSERT INTO credentials (person_key, password_hash, must_change) " +
-        "SELECT p.key, $1, true FROM people p " +
-        "WHERE NOT EXISTS (SELECT 1 FROM credentials c WHERE c.person_key = p.key) " +
-        "RETURNING person_key",
-        [hash]);
-      return send(res, 200, { ok: true, issued: done.rows.map(function (r) { return r.person_key; }) });
+        all
+          ? "INSERT INTO credentials (person_key, password_hash, must_change) " +
+            "SELECT p.key, $1, true FROM people p " +
+            "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $2 " +
+            "ON CONFLICT (person_key) DO UPDATE " +
+            "  SET password_hash = EXCLUDED.password_hash, must_change = true, " +
+            "      updated_at = now() " +
+            "RETURNING person_key"
+          : "INSERT INTO credentials (person_key, password_hash, must_change) " +
+            "SELECT p.key, $1, true FROM people p " +
+            "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $2 " +
+            "  AND NOT EXISTS (SELECT 1 FROM credentials c WHERE c.person_key = p.key) " +
+            "RETURNING person_key",
+        [hash, person.key]);
+      const issued = done.rows.map(function (r) { return r.person_key; });
+      if (all && issued.length) {
+        await client.query("DELETE FROM sessions WHERE person_key = ANY($1)", [issued]);
+      }
+      return send(res, 200, { ok: true, issued: issued });
     }
 
     return send(res, 400, { ok: false, error: "unknown action" });

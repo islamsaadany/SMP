@@ -2157,22 +2157,10 @@ function unitRailFor(u, sel){
      drawing; the distinction is on the item itself and splitting the rail on it
      bought nothing at this size. Kept in the backlog rather than the code. */
   var list = u.items;
-  var rows = list.map(function(it, i){
-    /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
-       are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
-       plan arrived with — "01" for Mobile, because its pillars predate the
-       minting rule — while every other surface in the platform derives
-       `codePrefix + position` and shows "MB01". Putting the code back on the
-       Plan page made the two visible side by side: one tab of a unit called a
-       pillar 01 and the next called it MB01.
-
-       So the DISPLAY moves to pillarCode() and the data attribute does NOT:
-       `data-urail` is the rail's selection key and unitRailPick() matches on
-       `it.code`. Change that and the rail stops being able to find the pillar
-       it just selected. */
+  var rows = list.map(function(it){
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '">' +
-        '<b>' + pillarCode(u, i) + '&nbsp; ' + esc(it.name) + '</b>' +
+        '<b>' + esc(it.code) + '&nbsp; ' + esc(it.name) + '</b>' +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
@@ -2224,29 +2212,9 @@ function unitRailFor(u, sel){
    Which leaves the pen. It used to appear on hover of the heading, and a
    heading that is gone cannot be hovered, so in the read case it becomes a
    small action of its own — still the SMO's alone (§31). */
-/* THE PILLAR NAME COMES BACK, AS THE RAIL'S OWN MARK (§46.3, treatment B3).
-   Islam, having seen it removed: "we will need the title of the pillar here
-   you were right. we need to bring it back but with a better condensed design
-   … would be better if the line is highlighted maybe grey."
-
-   The rail says which pillar is SELECTED, but by the time you have scrolled to
-   the tactics table the rail is off-screen and nothing on the page says what
-   you are reading. So it returns — at 33px rather than 57, and wearing
-   something it did not have to invent: `--surface-2` with a 3px gold left
-   edge is, to the pixel, what `.rail .ritem.on` already puts on the row you
-   picked. THE TWO HALVES OF THE SCREEN SAY "THIS ONE" THE SAME WAY.
-
-   No border, deliberately — a bordered box inside a bordered pane reads as a
-   control, and this is a label. Theme and owner stay gone: the rail card
-   carries the owner, and the theme is a Strategy question. */
-function pillarBand(code, name){
-  return '<div class="pband"><span class="pband-code">' + esc(code) + '</span>' +
-    '<span class="pband-name">' + esc(name) + '</span></div>';
-}
-function unitPlanBody(it, u, railed){
+function unitPlanBody(it, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
   var showHead = !railed || ed;
-  var code = pillarCode(u, u.items.indexOf(it));
   var cell = function(v, setter, cls){
     return ed ? inputOr("plan", v == null ? "" : v, cls || "", setter)
               : (v ? esc(v) : '<span class="missing">Missing</span>');
@@ -2273,13 +2241,12 @@ function unitPlanBody(it, u, railed){
   }).join("");
   var meta = pillarMeta(it);
   var head = showHead
-    ? '<div class="ptitle hoverpen"><div><h3>' + code + '&nbsp; ' +
+    ? '<div class="ptitle hoverpen"><div><h3>' + esc(it.code) + '&nbsp; ' +
         (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name) +
-      (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
+    : (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
   return head +
     (it.sub || ed
       ? '<p class="sub" style="margin:10px 0 0">' +
@@ -2307,8 +2274,8 @@ function renderUnitPlan(u){
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
   return (u.items.length >= 2
-      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
-      : '<div class="pane">' + unitPlanBody(sel, u, false) + '</div>');
+      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, true) + '</div></div>'
+      : '<div class="pane">' + unitPlanBody(sel, false) + '</div>');
 }
 
 
@@ -2391,12 +2358,7 @@ function unitPerfPane(it, u, railed){
   var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
-  /* The same band as the Plan page, for the same reason and by the same
-     argument: scrolled down to the tactics table, the rail is gone. It is the
-     scorePair below that made the OLD header redundant — a 19px name, a meta
-     line and a score pill above two scores stated again at the size they
-     deserve — not the fact of naming the pillar at all. */
-  return (railed ? pillarBand(pillarCode(u, u.items.indexOf(it)), it.name) :
+  return (railed ? '' :
     '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
       '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +

@@ -5736,3 +5736,226 @@ file:
 **0 failing runs across 4 combinations × 25 pages and states**.
 `test-authorize.js` passes 114. `test-roundtrip.js` passes clean slate, round
 trip, fixed point and archived plan.
+
+---
+
+## 46 · Setup becomes a place, and four things drawn before they were built — v3.16
+
+Islam, working through v3.15 screen by screen a second time. Four of the five
+items were settled from a **mockup** rather than from a description
+(`mockups/2026-08-22_five-questions_PENDING.html`), which is the part of the
+method worth keeping: two of the options in it were killed by being drawn, and
+one of them was mine.
+
+### 46.1 Ten setup tabs become a grouped rail
+
+*"let's think of some sort of grouping for the settup tabs. and an easier view
+for it. maybe a collapsable rail on the left for easier navigation think with
+me."*
+
+Three moves, in order, and the first one halves the problem before any design
+happens. **The gear menu was doing two unrelated jobs**: six of its entries are
+things you DO inside a cycle — open it, chase it, import a plan, mark focus
+measures — and ten are things you SET ONCE and revisit rarely. They shared a
+list because they arrived one at a time, not because they belong together.
+
+**A rail is not a new component.** It is `.rail` inside `.split`, which is what
+a unit's pillars have sat in since 1.7. That is most of the argument: Setup
+stops looking like a settings screen bolted onto the side of the product and
+starts looking like the rest of it. A row of tabs would have been a new thing
+to design and would have run out of room at ten.
+
+**The groups are the QUESTION YOU CAME TO ANSWER**, not which table the page
+edits — group by table and you get the same flat row with headings over it.
+*Who* (People, Roles & access) · *What we run* (Business units, Companies,
+Supporting functions, Capabilities) · *How it's measured* (Figure sets, Scoring
+bands, Labels) · *How it looks* (Branding). Four groups, two to four each,
+every page in exactly one.
+
+**The icon strip was killed by its own mockup**, and it was my suggestion to
+draw it. Ten setup pages need ten icons, and a label, a scoring band and a
+figure set are three abstractions with no picture anybody guesses right. It was
+drawn collapsed specifically so it could be seen failing. **A collapse that
+hides the only thing identifying the page is a control you have to learn.**
+
+Consequences that had to follow, or the change would have been half made:
+**the tab row is emptied AND hidden** for Setup (an empty `<nav>` still spends
+its border), and **the gear menu offers Setup as ONE entry** rather than ten.
+Listing the pages in the menu and in the rail is stating the navigation twice —
+the fault the chrome shed in 2.9.
+
+### 46.2 Configuring a set and filling one are two halves of one page
+
+Two Setup pages became one with two sections, using the section row Strategy
+already has. The trick is in the gating and it is worth stating plainly:
+**the parent entry is gated on `c_source`, not on `c_sets`.** `c_source` is
+`area:"always"`, so the entry is reachable and the SECTIONS decide what is
+inside it — the SMO gets both, a set owner who is not the SMO gets only *Fill*,
+and anybody else gets no entry at all. Gate the parent on `c_sets` and the set
+owner loses the page they exist for.
+
+A Setup page's sections render **inside its own pane**, not in the chrome's
+third row: that row spans the window, and the pane starts 236px in beside the
+rail, so a row of section tabs up there would be pointing at a page it does not
+sit above.
+
+### 46.3 The pillar name comes back wearing the rail's own mark
+
+*"we will need the title of the pillar here you were right. we need to bring it
+back but with a better condensed design … would be better if the line is
+highlighted maybe grey."*
+
+He was right and so was the original instinct: the rail says which pillar is
+SELECTED, but by the time you have scrolled to the tactics table the rail is
+off-screen and nothing on the page says what you are reading.
+
+Three greys were drawn and they are not one idea wearing different borders.
+**B1 bleeds to the pane's edge** and becomes a pane header — which puts a grey
+band 40px above the navy table head on a page whose job is a table. **B2 is an
+inset bordered strip** — a box inside a box, and the platform only draws those
+for things you can press. **B3 took the rail's own mark**: `--surface-2` with a
+3px gold left edge, to the pixel what `.ritem.on` already wears. Islam chose B3.
+**The two halves of the screen say "this one" in one language rather than two**,
+and nothing was invented.
+
+Two things fell out of building it:
+
+**A colour that clears on white is not thereby cleared.** `--gold-deep` on
+`--surface-2` measures **4.45:1** — under by five hundredths. §38.5 for the
+fourth time: a surface with its own ground needs its own ink. The code takes
+`--stone`, which is also the better answer on §41's accent budget: the gold edge
+is the mark, and a gold code beside it would be a second one.
+
+**The code shown is DERIVED; the code stored is an IDENTIFIER.** Putting the
+code back on the Plan page put the two side by side for the first time, and
+they disagreed — the Plan rail printed `it.code` ("01", what Mobile's plan
+arrived with) while every other surface derives `codePrefix + position` and
+prints "MB01". One tab of a unit called a pillar 01 and the next called it
+MB01. The DISPLAY moved to `pillarCode()`; the data attribute did not, because
+`data-urail` is the rail's selection key and `unitRailPick()` matches on
+`it.code`.
+
+### 46.4 The register: columns that fit, and one menu at the end of the row
+
+*"the first column of the name needs to wrap around the name length … the roles
+can be cut to fit a certain column size and appear more on hovering … for
+password it should show the status only and we have a vertical 3 dots at the end
+of row on the right with the actions like reset password."*
+
+**"Wrap around the name length" means the column fits the name, not that the
+name is broken to fit the column** — and reading it the other way first is what
+produced 59px rows. `.cfg table` is `table-layout:fixed` with percentage
+widths, right for a settings table of equal cells and wrong for a register,
+where the answer is as long as the person's name happens to be. Auto layout,
+content-sized columns, one line each: **79px → 39px, and every row the same
+height.**
+
+Getting there cost three specificity lessons in one file, which is worth
+recording as one rule: **a class alone rarely wins against `.cfg table`.**
+`.peoplecfg` (0,1,0) lost to `.cfg table` (0,1,1); `.cfg table.peoplecfg`
+(0,2,1) then TIED with `.cfg table.unitcfg` in `arrange.css`, which
+`build.py` concatenates later — and an equal specificity loses on source
+order. The register carries both classes, so the override names both.
+
+**`width:99%; max-width:0` is a FIXED-layout trick.** Under auto layout
+`max-width:0` is not a hint, it is a cap, and the roles column collapsed to
+17px. A cell in an auto table cannot be told "take the remainder and truncate";
+a block inside it can, so the clip moved into a `.rolebox`.
+
+**The kebab fixes more than the height it saves.** Every per-person action used
+to need a column: that is how Password came to be 150px wide to hold one word
+and one link, and how *View as* ended up duplicating the switcher in the top
+bar. A menu is where the next one goes too.
+
+And the menu is **`position:fixed`**, for the same reason the searchable
+dropdown's popup is (§45.5). The first attempt turned the container's overflow
+OFF so the menu would not be clipped — which also turned off the container's
+SCROLLING, and the actions column landed at x=1780 on a 1500px screen with no
+way to reach it. **Fixed positioning is the only kind that escapes an overflow
+ancestor.**
+
+**The chip names the place only when it is not the person's own.** Islam, on
+Hossam's row: *"we don't need finance again. it's Function Head"* — and then,
+unprompted, the better answer: *"we can add the unit/function they belong to and
+the strategy custodian is more of a role right?"* Right, and it resolves what
+was otherwise a real loss: dropping the attachment everywhere drops the half
+that decides access, because *Strategy custodian* says nothing about whose plan
+they may change. With **Belongs to** as its own column the ordinary case is
+already said, so the chip repeats it only when the role reaches somewhere the
+person does not sit. The full *role · where* is always on the hover.
+
+It was written as a comparison of two LABELS first, and every group-level role
+read as "elsewhere" because one function said "The group" and the other said
+"the group". **Two renderings of one fact will always find a way to disagree;
+compare the fact.** It compares attachment keys now.
+
+Also: the register's first row was literally named *Strategy Management
+Office*. It is a seat, not a person, and a register whose first row is an office
+teaches everyone reading it that these rows are job boxes. Renamed; the KEY is
+untouched, because it is the username and the clean slate keeps the row by it.
+
+### 46.5 Filling a set is a flat searchable table
+
+*"make the tables searchable not categorized by direction like this … we can
+have the table for all units as a default so we have the unit as a column that
+can be filtered by … accordingly the units names at the top are not usable."*
+
+**THE TWO JOBS WANT OPPOSITE SHAPES.** Reading a unit's plan is done in plan
+order, one unit at a time, which is why the plan pages group by pillar. Filling
+a set is the other job entirely: you are hunting for the eleven revenue lines
+among a hundred and sixteen figures, and pillar order actively HIDES them from
+each other. Flat and filtered puts every "revenue" in the group on one screen,
+which is what a set crossing ten units is for.
+
+**Measure and Target are separate columns**, deliberately: they were one visual
+blob, and a search over the blob matches `4B EGP` when you type a name. **Key
+objectives join through an `In` column** reading either a pillar code or the
+words *Key objective*. **The `#` column numbers what is SHOWN**, so "11 of 116"
+is a countable claim rather than a rendered one.
+
+**Typing never repaints** (§35) — the search hides rows in place, renumbering
+and retallying as it goes; the dropdowns do repaint, because they change which
+rows exist. And **the row carries its own unit now**: the tick used to read the
+unit from page state, which was safe only while the page showed one unit at a
+time.
+
+### 46.6 Two collective password actions, and why they are not one
+
+*"we need the collective action list of password reset for all or for people
+without set passwords."*
+
+Two, and the second is not the first with a wider `WHERE`. **The first can lock
+nobody out** — it reaches only people who have never had a password, so the
+worst it can do is hand a way in to somebody who had none. **The second is a
+reset**: it overwrites passwords people are using, so it ends their sessions
+(a reset that leaves the target signed in is not a reset) and it is confirmed
+before it is typed.
+
+**It excludes the person asking, on the server.** §43 learned once that being
+signed out of the tab you are working in is a bug that looks like security;
+here it is worse — mistype the shared password while resetting everybody and
+the SMO has locked themselves out of their own deployment with no second SMO to
+ask. Retired people are excluded from both, because §35 turns them away at the
+door with the correct password.
+
+**The server picks the set, both times.** The screen sends a password and a
+scope, never a list of keys, so a stale screen can only ever issue to fewer
+people than it thinks.
+
+### 46.7 The bug the sweep found, and the one the sweep hid
+
+**An empty array is truthy.** `if (secs)` walked straight into `secs[0].k` for
+any viewer whose every section was refused — which, once Figure sets was gated
+on an `area:"always"` key, meant the group CEO crashed the page by opening
+Setup. The real fault was upstream: paint() filtered out defs with nothing to
+render, found the list empty, and **fell back to the unfiltered list**, putting
+back exactly the defs it had just ruled out. Nothing to render is a real
+answer, and the page now says so in words. The reachability test is ONE
+function used by both the menu and paint(), because the two asked the same
+question differently and disagreed for exactly one viewer.
+
+**And the sweep itself had to move.** It clicked ten `[data-md="setup"]` menu
+entries that no longer exist — 30 seconds of Playwright timeout each, forty
+dead clicks, and it never finished. It walks the rail now, and opens each Setup
+page's sections explicitly: §41.5 again, **a state that cannot be reached by
+navigating is a state nothing measures.**

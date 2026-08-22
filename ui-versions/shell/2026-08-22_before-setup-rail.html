@@ -59,7 +59,7 @@
   <div class="units-in" role="tablist" id="units"></div>
 </nav>
 
-<nav class="tabs" id="tabrow">
+<nav class="tabs">
   <div class="tabs-in" role="tablist" id="subtabs"></div>
 </nav>
 
@@ -166,52 +166,32 @@
                     render:renderUnitNaming }];
         } }
     ],
-    /* Setup is what EXISTS: decided once, revisited rarely.
-
-       GROUPED, AND BY THE QUESTION YOU CAME TO ANSWER (Islam, 2026-08-22,
-       §46). Ten pages in one flat row is a row you read end to end every
-       time; grouping them by which TABLE they edit would have produced the
-       same row with headings on it. `grp` is the group's key and SETUP_GROUPS
-       below is the order — one list, so a page cannot be in two groups and
-       cannot be in none. */
+    /* Setup is what EXISTS: decided once, revisited rarely. */
     setup: [
-      /* The register (§35). First now, because "who" is the first question
-         anybody opens Setup to answer. It used to be a section at the bottom
-         of Roles & access, which is a matrix page — a staff list is not a
-         matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access",        render:renderAccess },
-
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units",        render:renderUnits },
+      { k:"labels", ac:"c_labels", label:"Labels",          primary:true, render:renderLabels },
+      { k:"access", ac:"c_access", label:"Roles & access",                render:renderAccess },
+      { k:"bands",  ac:"c_bands",  label:"Scoring bands",                 render:function(){ return renderBands() + renderBandsExtra(); } },
+      { k:"units",  ac:"c_units",  label:"Business units",                render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Supporting functions",  render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities",          render:renderCaps },
-
-      /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
-         FILLING one were two Setup pages; they are one page with two sections
-         now, because they are two halves of the same subject and the second
-         one's tab told you nothing about the first.
-
-         THE PARENT IS GATED ON c_source, NOT c_sets, and that is the whole
-         trick: c_source is `area:"always"`, so the entry is reachable, and the
-         SECTIONS then decide what is inside it. The SMO gets both; a set owner
-         who is not the SMO gets only Fill; anybody else gets no entry at all,
-         because paint() drops a def whose every section is refused. Gate the
-         parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", sections: function(){
-          return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
-                  { k:"fill", ac:"c_source", label:"Fill a figure set",
-                    when: canPickSets,                                 render:renderSourceSetup }];
-        } },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Labels",               render:renderLabels },
-
+      { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
+      /* Spec 008. Sets sit beside the functions because a set belongs to one.
+         Filling a set is a different job done by a different person, so it is
+         a page of its own — offered only to somebody who has a set to fill. */
+      { k:"sets",   ac:"c_sets",   label:"Figure sets",                   render:renderSetsSetup },
+      { k:"source", ac:"c_source", label:"Fill a figure set",
+        when: canPickSets,                                                render:renderSourceSetup },
+      /* The register (§35). It sits after the things people are attached TO,
+         because that is the order the SMO works in: the units exist, then the
+         people who hold them. It used to be a section at the bottom of Roles &
+         access, which is a matrix page — a staff list is not a matrix. */
+      { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding }
+      { k:"brand",  ac:"c_brand",  label:"Branding",                      render:renderBranding },
+      { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
     ],
     /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
        loading plans, marking what carries reward \u2014 activities, not structure.
@@ -245,24 +225,6 @@
     return defs.filter(function(d){
       if (d.when && !d.when()) return false;
       return grantAt(d.ac, target || TARGET) !== "none";
-    });
-  }
-
-  /* REACHABLE, not merely allowed. A tab with SECTIONS shows nothing of its
-     own — its sections are the pages — so a tab whose every section is refused
-     is a tab that opens onto nothing.
-
-     This has to be ONE function because two places ask the question: the menu,
-     deciding whether to offer Setup at all, and paint(), deciding which tabs
-     exist. They disagreed for exactly one viewer and it cost a crash. Figure
-     sets is gated on `c_source`, which is `area:"always"` — every viewer is
-     allowed the ENTRY, and only its sections decide whether there is anything
-     inside. For the group CEO both sections are refused, so paint() filtered
-     the def out, found `defs` empty, fell back to the unfiltered list, put the
-     same def back, and read `secs[0].k` off an empty array. */
-  function reachable(defs, target, arg){
-    return allowed(defs, target).filter(function(d){
-      return !d.sections || allowed(d.sections(arg), target).length;
     });
   }
 
@@ -346,59 +308,14 @@
      always opened, with its own tab row underneath. The groups stay named
      because "Reporting cycle" and "Scoring bands" are different kinds of
      thing \u2014 what the SMO does each cycle, and what was decided once. */
-  /* ══ SETUP IS A PAGE WITH A RAIL, NOT A ROW OF TEN TABS (§46.1) ═════
-     Islam: "let's think of some sort of grouping for the settup tabs. and an
-     easier view for it. maybe a collapsable rail on the left."
-
-     Grouped by THE QUESTION YOU CAME TO ANSWER rather than by which table the
-     page edits — group by table and you get the same flat row with headings
-     over it. Four groups, two to four pages each, every page in exactly one.
-
-     The rail is not a new component: it is `.rail` inside `.split`, which is
-     what a unit's pillars have sat in since 1.7. That is most of why this is
-     worth doing — Setup stops looking like a settings screen bolted onto the
-     side of the product and starts looking like the rest of it.
-
-     NO ICON STRIP. Ten setup pages need ten icons, and a label, a scoring band
-     and a figure set are three abstractions with no picture anybody guesses
-     right; the mockup drew it collapsing so it could be seen failing. If a
-     page ever genuinely needs the 236px back, the page asks for it — Roles &
-     access is the only candidate. */
-  var SETUP_GROUPS = [
-    { k:"who",  label:"Who",              note:"Who exists, and what may they touch" },
-    { k:"run",  label:"What we run",      note:"The things being planned" },
-    { k:"meas", label:"How it's measured", note:"What the numbers mean" },
-    { k:"look", label:"How it looks",     note:"What it wears" }
-  ];
-
-  function setupRail(defs, activeKey){
-    var rows = SETUP_GROUPS.map(function(g){
-      var items = defs.filter(function(d){ return d.grp === g.k; });
-      if (!items.length) return "";       /* a group with nothing in it is not a heading */
-      return '<div class="rgroup" title="' + esc(g.note) + '">' + esc(g.label) + '</div>' +
-        items.map(function(d){
-          return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
-            '" data-setupgo="' + d.k + '">' + esc(d.label) + '</button>';
-        }).join("");
-    }).join("");
-    return '<div class="rail setuprail"><div class="rhead">Setup' +
-      '<span>' + defs.length + '</span></div>' + rows + '</div>';
-  }
-
   function menuGroups(){
     var gs = [];
     /* Neither depends on the unit you happen to be looking at — Setup and the
        cycle belong to nobody's unit — but they are asked explicitly so they
        cannot start depending on it by accident. */
-    var m = allowed(SUBS.manage, "group"), st = reachable(SUBS.setup, "group", null);
+    var m = allowed(SUBS.manage, "group"), st = allowed(SUBS.setup, "group");
     if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
-    /* SETUP IS ONE ENTRY NOW, NOT TEN (§46.1). Its pages are the rail's job;
-       listing them here as well would state the same navigation twice — the
-       fault the chrome shed in 2.9, and the reason the tab row above the
-       Setup pane is emptied too. The entry opens the first page the viewer
-       actually holds, so it never lands on something refused. */
-    if (st.length) gs.push({ dest:"setup", label:"Configure", single:true,
-                             items:[{ k:st[0].k, label:"Setup" }] });
+    if (st.length) gs.push({ dest:"setup",  label:"Setup",  items:st });
     return gs;
   }
 
@@ -530,13 +447,9 @@
     var body = gs.map(function(g){
       return '<div class="navmenu-grp">' + esc(g.label) + '</div>' +
         g.items.map(function(d){
-          /* A single-entry group is lit by its DESTINATION, not by which page
-             inside it happens to be open — the entry means "Setup", and Setup
-             is where you are whichever of its ten pages the rail has chosen. */
-          var on = g.single ? current === g.dest
-                            : (current === g.dest && currentSub === d.k);
           return '<button type="button" data-md="' + g.dest + '" data-ms="' + d.k + '"' +
-            (on ? ' class="on"' : '') + '>' + esc(d.label) + '</button>';
+            (current === g.dest && currentSub === d.k ? ' class="on"' : '') +
+            '>' + esc(d.label) + '</button>';
         }).join("");
     }).join("");
     return '<span class="sep pinsep"></span>' +
@@ -662,7 +575,7 @@
       document.getElementById("subtabs").innerHTML = "";
       document.getElementById("panel").innerHTML =
         '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> The roles this person holds reach nothing. ' +
-        'That is the table working as configured, not an error &mdash; open <b>Setup &rarr; Roles &amp; access</b> as the SMO to change it.</div>';
+        'That is the table working as configured, not an error &mdash; open <b>Manage &rarr; Roles &amp; access</b> as the SMO to change it.</div>';
       return;
     }
 
@@ -674,78 +587,37 @@
     /* Submission is per unit; a function's capabilities are not submitted
        individually, so the whole function counts as one. */
     CURRENT_REPORT_KEY = isFn(current) ? current : (UNITS[current] ? UNITS[current].ukey : null);
-    var defs = reachable(defsFor(current), TARGET, arg);
-    /* NO FALLBACK ONTO THE UNFILTERED LIST. It used to re-add every allowed def
-       when the reachable set came out empty, which put back exactly the defs
-       that had just been ruled out for having nothing to render. Nothing to
-       render is a real answer, and the branch above already says it in words. */
-    if (!defs.length) {
-      document.getElementById("panel").innerHTML =
-        '<div class="note">There is nothing here for you to open. ' +
-        'That is the table working as configured, not an error &mdash; open ' +
-        '<b>Setup &rarr; Roles &amp; access</b> as the SMO to change it.</div>';
-      document.getElementById("subtabs").innerHTML = "";
-      document.getElementById("tabrow").hidden = true;
-      document.getElementById("secrow").hidden = true;
-      return;
-    }
+    var defs = allowed(defsFor(current)).filter(function(d){
+      return !d.sections || allowed(d.sections(arg)).length;
+    });
+    if (!defs.length) defs = allowed(defsFor(current));
     if (!defs.some(function(d){ return d.k === currentSub; })) currentSub = defs[0].k;
 
-    /* SETUP HAS NO TAB ROW. Its ten pages are the rail's job now (§46.1), and
-       leaving the row rendered as well would state the same navigation twice —
-       the fault the chrome shed in 2.9. The row is emptied AND hidden: an
-       empty <nav> still spends its border and its padding. */
-    var railed = current === "setup";
-    document.getElementById("tabrow").hidden = railed;
-    document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
+    document.getElementById("subtabs").innerHTML = defs.map(function(d){
       return '<button role="tab" data-s="' + d.k + '"' + (d.primary ? ' class="primary"' : '') +
         ' aria-selected="' + (d.k === currentSub) + '">' + d.label + '</button>';
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
-    var secs = def.sections ? allowed(def.sections(arg), TARGET) : null;
-    var secrowHTML = "";
-    /* `secs.length`, not `secs`. An empty array is truthy, so a def whose every
-       section was refused walked straight into `secs[0].k`. */
-    if (secs && secs.length) {
+    var secs = def.sections ? allowed(def.sections(arg)) : null;
+    if (secs) {
       if (!secs.some(function(s){ return s.k === CURSEC[def.k]; })) CURSEC[def.k] = secs[0].k;
-      /* A SETUP page's sections belong INSIDE its pane, not in the chrome's
-         third row. The third row spans the window; the pane starts 236px in,
-         beside the rail — a row of section tabs floating over the rail would
-         be pointing at a page it does not sit above. Figure sets is the first
-         Setup page to have sections at all (§46.2). */
-      if (railed && secs.length > 1) {
-        secrowHTML = '<div class="secrow">' + secs.map(function(x){
-          return '<button type="button" role="tab" data-sub2="' + x.k + '"' +
-            (x.cls ? ' class="' + x.cls + '"' : '') +
-            ' aria-selected="' + (x.k === CURSEC[def.k]) + '">' + x.label + '</button>';
-        }).join("") + '</div>';
-      }
       def = secs.filter(function(s){ return s.k === CURSEC[def.k]; })[0];
     }
 
     /* The per-page Info button left the header in 2.9. The explanations in
        PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
        inside the pages themselves. */
-    var body = (current === "group" || current === "setup" || current === "manage")
-      ? def.render()
-      : isFn(current) ? def.render(current) : def.render(UNITS[current]);
-    /* The rail and the page it chose, side by side. `defs` rather than
-       SUBS.setup, so a page the viewer may not open is not offered — the rail
-       is navigation, and navigation that leads somewhere refused is worse than
-       navigation that is short. */
-    document.getElementById("panel").innerHTML = railed
-      ? '<div class="split setupsplit">' + setupRail(defs, currentSub) +
-        '<div class="pane setuppane">' + secrowHTML + body + '</div></div>'
-      : body;
+    document.getElementById("panel").innerHTML =
+      (current === "group" || current === "setup" || current === "manage") ? def.render()
+        : isFn(current) ? def.render(current)
+        : def.render(UNITS[current]);
 
     /* Group Performance is four sections; they become a third nav row rather
        than one long scroll. The row exists only where there are sections. */
     var secrow = document.getElementById("secrow");
     var onSecPage = current === "group" && currentSub === "performance" && GROUP_SECTIONS.length;
-    /* `!railed`: a Setup page's sections were drawn into its own pane above, so
-       drawing them here as well would be the same two buttons in two places. */
-    if (!railed && secs && secs.length > 1) {
+    if (secs && secs.length > 1) {
       /* The same third row the group's Performance sections already use. One
          row that means "sections of the tab above", wherever it appears. */
       secrow.hidden = false;
@@ -767,26 +639,8 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    positionRowMenu();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
-  }
-
-  /* A row's action menu is position:fixed, so somebody has to put it where its
-     button is. It is placed AFTER the paint that created it — measuring an
-     element before it is in the document gives zeroes — and flipped above the
-     button when there is no room below, because a menu that opens off the
-     bottom of the window is a menu whose last item cannot be reached. */
-  function positionRowMenu(){
-    var m = document.querySelector(".kmenu");
-    if (!m) return;
-    var btn = m.parentNode.querySelector("[data-pmenu]");
-    if (!btn) return;
-    var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
-    var below = window.innerHeight - r.bottom - 8;
-    var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
-    m.style.top  = Math.max(8, top) + "px";
-    m.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + "px";
   }
 
   function wire(){
@@ -795,20 +649,6 @@
     });
     document.querySelectorAll("[data-sub2]").forEach(function(b){
       b.addEventListener("click", function(){ CURSEC[currentSub] = b.dataset.sub2; paint(); window.scrollTo(0,0); });
-    });
-    /* The Setup rail (§46.1). It replaces a tab row, so it does what the tab
-       row did — including dropping every edit mode on the way out, or you land
-       on Branding still editing People. */
-    document.querySelectorAll("[data-setupgo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (currentSub !== b.dataset.setupgo) {
-          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
-          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
-          CLEARING = null;
-        }
-        currentSub = b.dataset.setupgo;
-        paint(); window.scrollTo(0,0);
-      });
     });
     document.querySelectorAll("[data-modal]").forEach(function(b){
       b.addEventListener("click", function(e){ e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal); });
@@ -1122,54 +962,17 @@
        The set is chosen once at the top; each row below is a single mark, and
        it writes the set id and nothing else — who ENTERS the figure is read
        from the set, never copied onto the row. */
+    document.querySelectorAll("[data-srcunit]").forEach(function(b){
+      b.addEventListener("click", function(){ SRCSET.unit = b.dataset.srcunit; paint(); });
+    });
     var ss = document.getElementById("srcset-set");
     if (ss) ss.addEventListener("change", function(){ SRCSET.set = ss.value || null; paint(); });
-    /* The three dropdown filters DO repaint — they change which rows exist,
-       and therefore the numbering and the tally. The SEARCH does not (below). */
-    [["srcf-unit","unit"],["srcf-in","inw"],["srcf-status","status"]].forEach(function(pair){
-      var el = document.getElementById(pair[0]);
-      if (el) el.addEventListener("change", function(){ SRCSET[pair[1]] = el.value; paint(); });
-    });
-    /* THE SEARCH FILTERS ROWS IN PLACE AND NEVER REPAINTS (§35). A repaint
-       would replace the input being typed into — the same family of fault as
-       §30.1. It renumbers and retallies as it goes, so "11 of 116" stays a
-       true claim about what is on the screen rather than about what was
-       rendered. */
-    var q = document.getElementById("srcq");
-    if (q) {
-      var srcFilter = function(){
-        var needle = q.value.trim().toLowerCase();
-        SRCSET.q = q.value;
-        var body = document.getElementById("srcrows");
-        if (!body) return;
-        var all = body.querySelectorAll("tr"), n = 0;
-        all.forEach(function(tr){
-          var hit = !needle || (tr.dataset.q || "").indexOf(needle) > -1;
-          tr.hidden = !hit;
-          if (hit) { n++; tr.querySelector(".sn").textContent = n; }
-        });
-        var tally = document.getElementById("srctally");
-        if (tally) {
-          tally.textContent = (n === all.length ? String(all.length) : n + " of " + all.length) +
-            (all.length === 1 ? " figure" : " figures");
-        }
-        var empty = document.querySelector(".srcempty");
-        if (empty) empty.hidden = n > 0;
-      };
-      q.addEventListener("input", srcFilter);
-      srcFilter();          /* numbers the rows on first paint too */
-    }
     document.querySelectorAll("[data-srcpick]").forEach(function(b){
       b.addEventListener("click", function(){
         var mineSets = myPickableSets();
         var st = setById(SRCSET.set) || mineSets[0];
         if (!st) return;
-        /* THE ROW CARRIES ITS OWN UNIT NOW. It used to be read from SRCSET.unit
-           because the page showed one unit at a time; with every unit in one
-           table that would claim the wrong unit's figure whenever two share a
-           measure id. */
-        var parts = b.dataset.srcpick.split("|");
-        var hit = SMPRules.rowById(world(), parts[1], parts[0]);
+        var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], b.dataset.srcpick);
         if (!hit) return;
         /* Somebody else's is not offered a control at all, so this only ever
            sees an unclaimed figure or one of its own. */
@@ -1184,11 +987,10 @@
     document.querySelectorAll("[data-claimask]").forEach(function(b){
       b.addEventListener("click", function(){
         var st = setById(SRCSET.set) || myPickableSets()[0];
+        var unit = SRCSET.unit || activeKeys()[0];
         if (!st) return;
-        /* The unit comes off the ROW, for the same reason the tick does. */
-        var parts = b.dataset.claimask.split("|");
-        if (myOpenClaim(parts[0], st.id)) return;
-        claimsList().push({ id: mintClaimId(), unit: parts[1], figure: parts[0],
+        if (myOpenClaim(b.dataset.claimask, st.id)) return;
+        claimsList().push({ id: mintClaimId(), unit: unit, figure: b.dataset.claimask,
                             set: st.id, by: viewer().key, state: "open" });
         paint();
       });
@@ -1536,44 +1338,20 @@
     /* One temporary password for everyone who has none. The SERVER picks the
        set — this sends a password and nothing else — so the worst a stale
        screen can do is issue to a shorter list than it showed. */
-    /* The row's action menu (§46.4). Opening one closes any other, because
-       PMENU is a single key rather than a flag per row. */
-    document.querySelectorAll("[data-pmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        PMENU = PMENU === b.dataset.pmenu ? null : b.dataset.pmenu;
-        paint();
-      });
-    });
-    /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
-       REACH. "none" can lock nobody out — it only reaches people who could not
-       sign in anyway. "all" overwrites live passwords and ends sessions, so it
-       is confirmed first, in words that name the number of people it hits. */
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
-        var all = b.dataset.pwbulk === "all";
-        if (all && !confirm(
-              "Reset the password of everyone in the register except you?\n\n" +
-              "Their open sessions end at once, and each of them has to choose a new " +
-              "password with the one you are about to type. Your own password is not " +
-              "touched.")) return;
-        var pw = prompt(all
-          ? "One temporary password, for everyone except you." +
-            "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-            "\nEach of them is asked to choose their own the first time they use it."
-          : "One temporary password, for everyone who has none." +
-            "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-            "\nEach of them is asked to choose their own the first time they use it.");
+        var pw = prompt("One temporary password, for everyone who has none." +
+          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
+          "\nEach of them is asked to choose their own the first time they use it.");
         if (!pw) return;
-        SYNC.issueTemporary(pw, all ? "all" : "none", function(err, issued){
+        SYNC.issueTemporary(pw, function(err, issued){
           if (err) return alert("Not issued: " + err);
           issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
-          PMENU = null;
           paint();
           alert(issued.length
-            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") + "."
-            : (all ? "Nobody to issue to \u2014 you are the only active person."
-                   : "Nobody needed one \u2014 everybody already has a password."));
+            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") +
+              ": " + issued.join(", ") + "."
+            : "Nobody needed one \u2014 everybody already has a password.");
         });
       });
     });
@@ -2073,21 +1851,11 @@
 
   /* A menu that stays open after you have looked away is a menu you have to
      dismiss. Bound once, at boot, rather than on every repaint. */
-  document.addEventListener("click", function(e){
+  document.addEventListener("click", function(){
     if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
-    /* A row's action menu closes the same way — but only on a click OUTSIDE
-       it, or choosing an item would close the menu before the item's own
-       handler ran. That is §30.1 from the other side: this listener rewrites
-       the DOM, so it must not fire in the middle of an interaction with it. */
-    if (typeof PMENU !== "undefined" && PMENU !== null &&
-        !(e.target.closest && e.target.closest(".kmenu, [data-pmenu]"))) {
-      PMENU = null; paint();
-    }
   });
   document.addEventListener("keydown", function(e){
-    if (e.key !== "Escape") return;
-    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
-    if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
+    if (e.key === "Escape" && MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
   });
 
   /* The switcher lists the people the platform actually has. It was filled

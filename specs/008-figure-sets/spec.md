@@ -372,3 +372,30 @@ tick you press and the state it produces sat at opposite ends of it.
 **Its dropdowns are searchable** — as is every `<select>` in the platform past
 five options (§45.5, `src/searchsel.js`). The owner list is twenty-nine people
 and was the reason the request was made.
+
+---
+
+## 12 · What v3.16 changed about this feature
+
+**Configuring a set and filling one are two sections of ONE page** (§46.2).
+They were two Setup entries, and the second one's tab told you nothing about
+the first.
+
+**The parent entry is gated on `c_source`, not on `c_sets`**, and the trick
+matters: `c_source` is `area:"always"`, so the entry is reachable and the
+sections decide what is inside it. The SMO gets both; a set owner who is not
+the SMO gets only *Fill*; anybody else gets no entry at all, because a def
+whose every section is refused is not offered. **Gate the parent on `c_sets`
+and the set owner loses the page they exist for.**
+
+**Fill a figure set is one flat searchable table across every unit** (§46.5),
+replacing the unit-at-a-time list grouped by pillar. The two jobs want opposite
+shapes: plan order is right for reading a plan and actively hides the eleven
+revenue lines from each other when filling a set. Unit is a filtered column
+rather than ten buttons; Measure and Target are separate columns so a search
+cannot match `4B EGP`; key objectives join through an `In` column; `#` numbers
+what is *shown*; the header is sticky. Typing filters rows in place and never
+repaints (§35), while the dropdowns do, because they change which rows exist.
+
+**The tick and the request carry their own unit.** They used to read it from
+page state, which was safe only while the page showed one unit at a time.

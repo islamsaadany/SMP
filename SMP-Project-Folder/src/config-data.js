@@ -136,11 +136,20 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
 /* The source-of-figures page: which unit is open, and WHO the marks are being
    made for. All three are properties of the screen, never of the state graph
    (§25.2) — the marks themselves live on the measures. */
-var SRCSET = { unit: null, set: null };
+/* The fill page's state (§46.5). `unit`, `inw` and `status` are FILTERS now
+   rather than a chosen unit — every unit is in the table by default, which is
+   the point of a set that crosses them. `q` is the search box; it is stored so
+   a repaint (claiming a figure) does not lose what was typed, but typing
+   itself never repaints — see renderSourceSetup. */
+var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
+/* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
+   per row: two menus open at once is a state nobody wants and one that has to
+   be closed twice. */
+var PMENU = null;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
@@ -192,7 +201,14 @@ var ACCESS = JSON.parse(JSON.stringify(SMPRules.ACCESS_DEFAULTS));
 /* Who is signed in. Changing this re-renders the whole shell against the
    matrix above, so the grid can be judged by using it rather than reading it. */
 var PEOPLE = [
-  { key:"smo",     name:"Strategy Management Office", role:"super", unit:"group",  title:"SMO" },
+  /* A PERSON, NOT AN OFFICE (Islam, 2026-08-22: "there is no one named Strategy
+     Management Office"). It read as a department because it was written before
+     the register existed, when `smo` was a level rather than somebody's seat.
+     A register whose first row is an office teaches everyone reading it that
+     these rows are job boxes; they are people, and one of them holds the SMO
+     seat. The KEY is untouched — it is the username, the clean slate keeps the
+     row by it, and every seed and session in existence points at it. */
+  { key:"smo",     name:"Mohamed Essam", role:"super", unit:"group",  title:"Head of the Strategy Management Office" },
   { key:"ceo",     name:"Group CEO",                  role:"gceo",  unit:"group",  title:"Chief Executive" },
   { key:"mobhead", name:"Ashraf Laithy",              unit:"mobile", title:"Head of Mobile" },
   { key:"loghead", name:"Hazem Roushdy",              unit:"logistics", title:"Head of Logistics" },

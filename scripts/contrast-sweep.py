@@ -92,13 +92,33 @@ with sync_playwright() as p:
                     "    u.keyObjectives[0].actual = null; }"
                     "  paint(); }")
         pg.wait_for_timeout(300)
-        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand","sets","source"]),
-                         ("manage",["cycle","import","focusset","kb","myfig"])]:
-            for sub in subs:
-                pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
-                try:
-                    pg.click(f'#units [data-md="{grp}"][data-ms="{sub}"]'); pg.wait_for_timeout(420); scan(grp+"/"+sub)
-                except Exception: pass
+        for sub in ["cycle","import","focusset","kb","myfig"]:
+            pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
+            try:
+                pg.click(f'#units [data-md="manage"][data-ms="{sub}"]'); pg.wait_for_timeout(420)
+                scan("manage/"+sub)
+            except Exception: pass
+        # SETUP IS ONE MENU ENTRY AND A RAIL (46.1). It used to be ten entries
+        # in the menu, and clicking for them after they moved cost 30 seconds
+        # of Playwright timeout each - 40 dead clicks, twenty minutes, and the
+        # sweep never finished. The rail is walked instead, which is also the
+        # only way its own groups and its selected row get measured at all.
+        pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
+        try:
+            pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(500)
+        except Exception: pass
+        for key in pg.eval_on_selector_all(".setuprail [data-setupgo]",
+                                           "els=>els.map(e=>e.dataset.setupgo)"):
+            try:
+                pg.click(f'.setuprail [data-setupgo="{key}"]'); pg.wait_for_timeout(420)
+                scan("setup/"+key)
+                # A Setup page with SECTIONS keeps them inside its own pane, and
+                # a section nobody clicks is a page nothing measures (41.5).
+                for k2 in pg.eval_on_selector_all(".setuppane .secrow [data-sub2]",
+                                                  "els=>els.map(e=>e.dataset.sub2)"):
+                    pg.click(f'.setuppane .secrow [data-sub2="{k2}"]'); pg.wait_for_timeout(420)
+                    scan("setup/"+key+"/"+k2)
+            except Exception: pass
         c.close()
     b.close()
 print(f"{sum(bad.values())} failing runs across 4 combinations x 25 pages and states\n")

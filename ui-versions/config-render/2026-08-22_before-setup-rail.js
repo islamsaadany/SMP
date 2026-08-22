@@ -699,52 +699,12 @@ function renderPeople(){
      it gains an X per role and one add control. Two selects rather than one
      long list of every role-times-place, because "where" depends on which
      role was chosen and a combined list would offer Company CEO of Mobile. */
-  /* WHERE THE PERSON SITS, which is not the same question as what a role
-     reaches (§46.4). Islam: "we can add the unit/function they belong to".
-     It is already on the person — `unit` / `fn`, §33's seat fields — and
-     giving it a column of its own is what lets the role chips stop repeating
-     it. A person attached to nothing is not "the group": the group is a real
-     attachment somebody can hold, so an unattached person gets a dash. */
-  /* The KEY the person is attached to, in the same vocabulary `r.at` uses —
-     which is what makes "is this role somewhere else?" a comparison of facts
-     rather than of two display strings. It was written as a label comparison
-     first and every group-level role read as "elsewhere", because belongsLabel
-     said "The group" and whereLabel said "the group". Two renderings of one
-     fact will always find a way to disagree; compare the fact. */
-  function belongsKey(p){
-    if (p.fn) return "fn:" + p.fn;
-    if (p.unit) return p.unit;
-    return null;
-  }
-  function belongsLabel(p){
-    var k = belongsKey(p);
-    return k ? whereLabel(k) : null;
-  }
-
   function roleCell(p){
     var rs = personRoles(p);
-    var home = belongsKey(p);
     var held = rs.length
       ? rs.map(function(r){
-          /* THE CHIP NAMES THE PLACE ONLY WHEN IT IS NOT THE PERSON'S OWN.
-             Islam, on Hossam's row: "we don't need finance again. it's
-             Function Head" — right, and the rule generalises rather than
-             stopping at that row. His own principle is "do not repeat what
-             the row already says", and now that Belongs to is a column, the
-             attachment IS said already for the ordinary case.
-
-             But dropping it everywhere drops the half that decides access:
-             "Strategy custodian" says nothing about WHOSE plan they may
-             change, and one person can hold that role over a unit they do not
-             sit in. So the place survives exactly where it would otherwise be
-             lost — when the role reaches somewhere other than home. The full
-             "role · where" is always on the hover, so nothing is hidden, only
-             unrepeated. */
-          var at = whereLabel(r.at);
-          var elsewhere = !home || r.at !== home;
-          return '<span class="rolechip" title="' + esc(roleName(r.role)) + ' \u00b7 ' + esc(at) + '">' +
-            '<b>' + esc(roleName(r.role)) + '</b>' +
-            (elsewhere ? '<span class="rolewhere">' + esc(at) + '</span>' : '') +
+          return '<span class="rolechip"><b>' + esc(roleName(r.role)) + '</b>' +
+            '<span class="why" style="margin:0">' + esc(whereLabel(r.at)) + '</span>' +
             (editable
               ? '<button class="xbtn" data-prole-off="' + p.key + '|' + r.role + '|' + r.at +
                 '" title="Remove this role" aria-label="Remove this role">&times;</button>'
@@ -771,80 +731,28 @@ function renderPeople(){
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* STATUS ONLY, AND SQUEEZED (Islam, 2026-08-22). The action left this cell
-     for the row's kebab; what is left is one word in one pill, so the column
-     is 76px instead of 150. "Temporary" becomes "Temp" for the same reason —
-     three states that have to be told apart at a glance, not read. */
   function pwCell(p){
     if (!live) return '';
     if (!personActive(p)) {
-      return '<td class="cc"><span class="why" style="margin:0">&mdash;</span></td>';
+      return '<td class="cc"><span class="why" style="margin:0">cannot sign in</span></td>';
     }
     var st = PWSTATES ? PWSTATES[p.key] : null;
-    /* Absent is not "none" (§35): a person the server has not been asked about
-       yet has no state, and a dash says so rather than claiming they have no
-       password. */
     var pill = st === "set"       ? '<span class="pill good">Set</span>'
-             : st === "temporary" ? '<span class="pill warn">Temp</span>'
-             : st === "none"      ? '<span class="pill none">None</span>'
+             : st === "temporary" ? '<span class="pill warn">Temporary</span>'
+             : st === "none"      ? '<span class="pill none">None yet</span>'
              : '<span class="why" style="margin:0">&mdash;</span>';
-    return '<td class="cc">' + pill + '</td>';
+    return '<td class="cc">' + pill +
+      '<button class="linkbu" data-setpw="' + p.key + '">' +
+      (st === "none" || !st ? "Set" : "Reset") + '</button></td>';
   }
 
-  /* ── THE ROW'S ACTIONS, IN ONE MENU AT THE END OF THE ROW ──────────
-     Islam: "we have a vertical 3 dots at the end of row on the right with the
-     actions like reset password."
-
-     It fixes more than the height it saves. Every per-person action used to
-     need a column of its own — that is how Password came to be 150px wide to
-     hold one word and one link, and how View as ended up duplicating the
-     switcher in the top bar. A menu is where the NEXT one goes too.
-
-     Open state is a single key, not a flag per row: two menus open at once is
-     a state nobody wants and one that has to be closed twice. */
-  function kebab(p){
-    var open = PMENU === p.key;
-    var st = PWSTATES ? PWSTATES[p.key] : null;
-    var acts = [];
-    if (live && personActive(p)) {
-      acts.push('<button data-setpw="' + p.key + '">' +
-        (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
-    }
-    if (personActive(p)) {
-      acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
-    }
-    if (mayEdit) {
-      acts.push('<hr>');
-      acts.push('<button class="danger" data-pact="' + p.key + '">' +
-        (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
-    }
-    if (!acts.length) return '<td class="cc"></td>';
-    return '<td class="cc kebcell">' +
-      '<button class="kebab' + (open ? " open" : "") + '" data-pmenu="' + p.key + '" ' +
-      'aria-haspopup="true" aria-expanded="' + open + '" ' +
-      'title="Actions" aria-label="Actions for ' + esc(p.name) + '">' +
-      '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
-      '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
-      '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
-      (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') + '</td>';
-  }
-
-  /* THREE COLUMNS THAT WRAP, ONE THAT CLIPS, AND THE ACTIONS AT THE END
-     (Islam, 2026-08-22). Name, job title and contact are given room and allowed
-     to wrap — they are what you scan the register FOR. Roles clip to their
-     column, because a person with three of them was making a 90px row for
-     information the hover can carry.
-
-     The key is gone from under the name. It is the username, it is generated
-     from the name, and it was costing 31 rows a line each to say what the
-     sign-in page already knows. It is still on the row's hover. */
   var rows = PEOPLE.map(function(p, i){
-    var home = belongsLabel(p);
     return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
-      '<td title="' + esc(p.key) + '">' + (editable
+      '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc(p.name) + '</b>') + '</td>' +
+        : '<b>' + esc(p.name) + '</b>') +
+        '<span class="why mono pkey">' + esc(p.key) + '</span></td>' +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
@@ -853,65 +761,33 @@ function renderPeople(){
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
                    : '<span class="why" style="margin:0">not given</span>')) + '</td>' +
-      '<td>' + (home
-        ? '<span class="uchip">' + esc(home) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
           '" placeholder="Contact number">'
         : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
                    : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' +
-      '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' +
-      /* Standing before Password, at Islam's direction — whether somebody can
-         sign in at all is the question you ask before what their password is
-         doing. */
-      '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
-        (personActive(p) ? "Active" : "Retired") + '</span></td>' +
+      '<td>' + roleCell(p) + '</td>' +
       pwCell(p) +
-      kebab(p) + '</tr>';
+      '<td class="cc">' + (editable
+        ? '<button class="rmbtn' + (personActive(p) ? '' : ' on') + '" data-pact="' + p.key + '">' +
+            (personActive(p) ? "Retire" : "Restore") + '</button>'
+        : '<span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
+            (personActive(p) ? "Active" : "Retired") + '</span>' +
+          /* Moved here with the rest of the register. Seeing the platform as
+             somebody else is how a grant is checked, and it belongs beside the
+             person rather than under a matrix. */
+          (personActive(p)
+            ? '<button class="linkbu" data-as="' + p.key + '">View as</button>' : '')) +
+      '</td></tr>';
   }).join("");
 
-  var cols = live ? 8 : 7;
+  var cols = live ? 7 : 6;
   var addRow = editable
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
         '<input class="fld" id="newPersonName" placeholder="Full name" ' +
           'value="' + esc(NEWPERSON) + '">' +
       '</td><td class="cc"><button class="linkbu" data-padd="1">Add</button></td></tr>'
     : '';
-
-  /* ── THE COLLECTIVE ACTIONS (Islam, 2026-08-22) ────────────────────
-     "we need the collective action list of password reset for all or for
-     people without set passwords."
-
-     Two, and they are not one control with a wider reach. THE FIRST CAN LOCK
-     NOBODY OUT — it only touches people who have never had a password, so the
-     worst it does is hand a way in to somebody who had none. THE SECOND IS A
-     RESET: it overwrites passwords people are using and ends their sessions,
-     so it is drawn as the destructive thing it is and asks twice.
-
-     THE SERVER PICKS THE SET, both times. The screen sends a password and a
-     scope, never a list of keys — a stale screen can then only ever issue to
-     fewer people than it thinks, never more (§35). And "everyone" excludes the
-     person pressing it, on the server: mistype the shared password while
-     resetting everybody and the SMO would otherwise have locked themselves out
-     of their own deployment, with no second SMO to ask. */
-  var activeCount = PEOPLE.filter(personActive).length;
-  var bulk = !live ? "" :
-    '<div class="note"><b>Passwords, for everybody at once.</b> ' +
-      'Each person is asked to choose their own the first time they use the one you ' +
-      'issue, so the same password never works twice for the same person.' +
-      '<div class="bulkrow">' +
-        '<button class="editbtn" data-pwbulk="none"' + (noPw ? "" : " disabled") + '>' +
-          'Issue to those with no password' +
-          '<span class="bulkn">' + noPw + '</span></button>' +
-        '<button class="rmbtn" data-pwbulk="all">' +
-          'Reset everyone&rsquo;s password' +
-          '<span class="bulkn">' + Math.max(0, activeCount - 1) + '</span></button>' +
-      '</div>' +
-      '<div class="why" style="margin:8px 0 0">Resetting everyone ends their open ' +
-      'sessions and asks each of them to choose again. It never touches your own ' +
-      'password &mdash; being signed out of the screen you are working in is not ' +
-      'a safety feature.</div></div>';
 
   return cfgHead("People",
       ['<span class="pill kind">SMO</span>',
@@ -923,23 +799,24 @@ function renderPeople(){
     section("", "The register",
       "Everyone the platform knows. A role is given here or on the unit's own page — " +
       "it is the same fact either way, so the two can never disagree.",
-      /* NO COLUMN WIDTHS, and no table-layout:fixed (see .peoplecfg in
-         config.css). Islam: "the first column of the name needs to wrap
-         around the name length" — the column fits the name, rather than the
-         name being broken to fit the column. Only ROLES is given a width, and
-         it is given the leftovers. */
-      '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
-        '<th class="idx">#</th>' +
-        '<th>Person</th>' +
-        '<th>Job title<span class="why">Never decides access</span></th>' +
-        '<th>Belongs to</th>' +
-        '<th>Contact</th>' +
-        '<th class="roles">Roles</th>' +
-        '<th class="cc">Standing</th>' +
-        (live ? '<th class="cc">Password</th>' : '') +
-        '<th class="cc"></th>' +
+      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+        '<th class="idx" style="width:38px">#</th>' +
+        '<th style="width:20%">Person<span class="why">Their key is their username</span></th>' +
+        '<th style="width:16%">Job title<span class="why">Never decides access</span></th>' +
+        '<th style="width:12%">Contact</th>' +
+        '<th>Roles, and what each is attached to</th>' +
+        (live ? '<th class="cc" style="width:13%">Password</th>' : '') +
+        '<th class="cc" style="width:10%">Standing</th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
-      bulk +
+      (live && noPw
+        ? '<div class="note"><b>' + plural(noPw, "person").replace("persons", "people") +
+          ' cannot sign in yet.</b> Issue one temporary password to all of them at once — ' +
+          'each is asked to choose their own the first time they use it, so the same ' +
+          'password never works twice for the same person. Nobody who already has a ' +
+          'password is touched.' +
+          '<div style="margin-top:10px"><button class="linkbu" data-pwbulk="1">' +
+          'Issue temporary passwords</button></div></div>'
+        : '') +
       '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
       'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
       'reported. Retiring takes away every role they hold and closes the door — they ' +
@@ -1391,51 +1268,17 @@ function renderSetsSetup(){
       'is lost.</div>';
 }
 
-/* ── Fill a figure set: ONE FLAT SEARCHABLE TABLE (§46.5) ─────────────
-   Islam: "make the tables searchable not categorized by direction like this…
-   we can have the table for all units as a default so we have the unit as a
-   column that can be filtered by… accordingly the units names at the top are
-   not usable and let's get the page neat so the table is pushed up and
-   accordingly we have a sticky header."
+/* ── The picking page ────────────────────────────────────────────────
+   One set at a time, one unit at a time, one tick per figure. WHO is chosen at
+   the top — the set — and every row below is a single mark, the same shape as
+   Focus measures (A13). A row shows the measure and its target and nothing
+   else: direction, compile rule and pillar are the plan's business, not the
+   person filling the set.
 
-   THE TWO JOBS WANT OPPOSITE SHAPES. Reading a unit's plan is done in plan
-   order, one unit at a time, which is why the plan pages group by pillar.
-   Filling a set is the other job entirely: you are hunting for the eleven
-   revenue lines among a hundred and sixteen figures, and pillar order actively
-   HIDES them from each other. Flat and filtered puts every "revenue" in the
-   group on one screen — which is what a set crossing ten units is for.
-
-   Seven columns, each earning its place:
-     #        numbers WHAT IS SHOWN, so "11 of 116" is a countable claim
-     Unit     a filter, not ten buttons — every unit is in by default
-     In       how key objectives join the same table: a pillar code, or the
-              words "Key objective". Without it a row cannot say where it sits.
-     Measure  }  SEPARATE COLUMNS, deliberately. They were one visual blob, and
-     Target   }  search over the blob matches "4B EGP" when you type a name.
-     Dir.     the direction of travel
-     Status   the tick, or the holding set's name and a request
-
-   TYPING NEVER REPAINTS (§35). The filter runs over rows already in the DOM;
-   a repaint would replace the input being typed into. The dropdowns DO
-   repaint, because changing them changes the numbering and the tally. */
-function srcFigures(){
-  var out = [];
-  activeKeys().forEach(function(k){
-    var u = UNITS[k];
-    (u.keyObjectives || []).forEach(function(m){
-      out.push({ unit:k, unitName:u.navName || u.name, inw:"ko", inLabel:"Key objective", row:m });
-    });
-    (u.items || []).forEach(function(pl, pi){
-      var code = pillarCode(u, pi);
-      (pl.measures || []).forEach(function(m){
-        out.push({ unit:k, unitName:u.navName || u.name, inw:code, inLabel:code,
-                   inFull:code + " " + pl.name, row:m });
-      });
-    });
-  });
-  return out;
-}
-
+   Reachable only for a set you may pick into: for the SMO that is all of them,
+   for anybody else only their own and only where the switch allows. "The owner
+   picks" IS the grant of sight over the whole group's figures, so where it is
+   off this page does not exist rather than showing a trimmed version. */
 function renderSourceSetup(){
   var mine = myPickableSets();
   if (!mine.length) {
@@ -1444,131 +1287,86 @@ function renderSourceSetup(){
   }
   var st = setById(SRCSET.set) || mine[0];
   if (!SMPRules.mayPickInto(world(), viewer(), st)) st = mine[0];
-  SRCSET.set = st.id;
+  var u = UNITS[SRCSET.unit] || UNITS[activeKeys()[0]];
+  if (!u) return '<div class="note">No business units yet.</div>';
 
-  var figs = srcFigures();
-  if (!figs.length) return '<div class="note">No business unit has a plan yet.</div>';
+  var setPick = mine.length === 1
+    ? '<span class="cfg-lab"><b>' + esc(st.name) + '</b></span>'
+    : '<select class="fld" id="srcset-set">' + mine.map(function(x){
+        return '<option value="' + esc(x.id) + '"' + (x.id === st.id ? " selected" : "") + '>' +
+          esc(x.name) + '</option>';
+      }).join("") + '</select>';
 
-  /* The dropdown filters, applied here; the SEARCH is applied in the browser
-     without a repaint. So the tally has to be counted the same way search
-     counts it — see srcTally() in the shell. */
-  var shown = figs.filter(function(f){
-    if (SRCSET.unit && f.unit !== SRCSET.unit) return false;
-    if (SRCSET.inw === "ko" && f.inw !== "ko") return false;
-    if (SRCSET.inw === "pillar" && f.inw === "ko") return false;
-    var held = SMPRules.isSourced(f.row) ? f.row.src : null;
+  var unitBtns = '<div class="unitpick">' + activeKeys().map(function(k){
+      var n = SMPRules.rowsOfSet(world(), st.id).filter(function(r){ return r.unit === k; }).length;
+      return '<button class="upick' + (k === u.ukey ? " on" : "") + '" data-srcunit="' + esc(k) + '">' +
+        esc(UNITS[k].navName || UNITS[k].name) +
+        (n ? ' <span class="upick-n">' + n + '</span>' : '') + '</button>';
+    }).join("") + '</div>';
+
+  /* Three states per row, not two: unclaimed, in this set, or in ANOTHER —
+     the third shown as that set's name rather than a tick that could be
+     overwritten without noticing. */
+  var row = function(m){
+    var held = SMPRules.isSourced(m) ? m.src : null;
     var mineRow = !!(held && held.set === st.id);
-    if (SRCSET.status === "mine"  && !mineRow) return false;
-    if (SRCSET.status === "free"  && held) return false;
-    if (SRCSET.status === "other" && !(held && !mineRow)) return false;
-    return true;
-  });
+    var theirs = held && !mineRow;
+    var otherName = theirs && held.set
+      ? ((setById(held.set) || {}).name || "another set")
+      : (theirs ? (personName(held.by) || held.by) : "");
+    /* A refusal with no route forward is a dead end, and the platform is the
+       only thing that knows the claim was turned away. So a figure another set
+       holds carries a REQUEST rather than nothing (§5). */
+    var asked = theirs ? myOpenClaim(m.id, st.id) : null;
+    return '<div class="pick ' + (mineRow ? "on" : "off") + '">' +
+      (!theirs
+        ? '<button class="fmark-btn' + (mineRow ? ' on' : '') + '" data-srcpick="' + esc(m.id) + '" ' +
+          'aria-pressed="' + mineRow + '" aria-label="' + (mineRow ? "Release " : "Claim ") +
+          esc(m.name) + '"></button>'
+        : '<span class="fmark-btn" style="cursor:default"></span>') +
+      '<span>' + esc(m.name) + '</span>' +
+      '<span class="num why" style="margin:0">' +
+        (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
+      '<span class="why" style="margin:0;text-align:right">' +
+        (theirs
+          ? esc(otherName) +
+            (asked
+              ? ' <span class="pill attn">Asked</span>'
+              : ' <button class="linkbu" data-claimask="' + esc(m.id) + '">Request the claim</button>')
+          : (mineRow ? "in this set" : "click to claim")) + '</span>' +
+    '</div>';
+  };
+
+  var blocks =
+    '<div class="grouphead">' + L("keyobj","bu") + '</div>' +
+    (u.keyObjectives.length
+      ? u.keyObjectives.map(row).join("")
+      : '<div class="fstrip-empty">None set for this unit.</div>') +
+    u.items.map(function(p, pi){
+      return '<div class="grouphead">' + pillarCode(u, pi) + ' ' + esc(p.name) + '</div>' +
+        (p.measures.length
+          ? p.measures.map(row).join("")
+          : '<div class="fstrip-empty">No key measures.</div>');
+    }).join("");
 
   var inSet = SMPRules.rowsOfSet(world(), st.id).length;
   var team = FUNCTIONS[st.team] ? FUNCTIONS[st.team].name : st.team;
 
-  var setPick = mine.length === 1
-    ? '<span class="fbtn set"><span class="fbl">Filling</span> <b>' + esc(st.name) + '</b></span>'
-    : '<span class="fbtn set"><span class="fbl">Filling</span>' +
-      '<select class="fld bare" id="srcset-set" aria-label="Which set to fill">' +
-      mine.map(function(x){
-        return '<option value="' + esc(x.id) + '"' + (x.id === st.id ? " selected" : "") + '>' +
-          esc(x.name) + '</option>';
-      }).join("") + '</select></span>';
-
-  var sel = function(id, label, opts, cur){
-    return '<span class="fbtn"><span class="fbl">' + label + '</span>' +
-      '<select class="fld bare" id="' + id + '" aria-label="Filter by ' + label.toLowerCase() + '">' +
-      opts.map(function(o){
-        return '<option value="' + esc(o.v) + '"' + (o.v === cur ? " selected" : "") + '>' +
-          esc(o.t) + '</option>';
-      }).join("") + '</select></span>';
-  };
-
-  var unitOpts = [{ v:"", t:"All units" }].concat(activeKeys().map(function(k){
-    return { v:k, t:UNITS[k].navName || UNITS[k].name };
-  }));
-  var inOpts = [{ v:"", t:"Everything" }, { v:"ko", t:"Key objectives" },
-                { v:"pillar", t:"Pillar measures" }];
-  var stOpts = [{ v:"", t:"Any" }, { v:"free", t:"Unclaimed" },
-                { v:"mine", t:"In this set" }, { v:"other", t:"Another set" }];
-
-  /* Three states per row, not two: unclaimed, in this set, or in ANOTHER —
-     the third shown as that set's name rather than a tick that could be
-     overwritten without noticing. A refusal with no route forward is a dead
-     end, so it carries a request (§44.5). */
-  var TICK = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6" ' +
-    'aria-hidden="true"><path d="M4 10.5l4 4 8-9" stroke-linecap="round" ' +
-    'stroke-linejoin="round"/></svg>';
-
-  var rows = shown.map(function(f){
-    var m = f.row;
-    var held = SMPRules.isSourced(m) ? m.src : null;
-    var mineRow = !!(held && held.set === st.id);
-    var theirs = held && !mineRow;
-    var otherName = theirs
-      ? (held.set ? ((setById(held.set) || {}).name || "another set")
-                  : (personName(held.by) || held.by))
-      : "";
-    var asked = theirs ? myOpenClaim(m.id, st.id) : null;
-    var t = splitTarget(m.target);
-    var status = theirs
-      ? '<span class="held">' + esc(otherName) + '</span>' +
-        (asked ? ' <span class="pill attn">Asked</span>'
-               : ' <button class="linkbu" data-claimask="' + esc(m.id) + '|' + esc(f.unit) +
-                 '">Request</button>')
-      : '<button class="fmark-btn' + (mineRow ? ' on' : '') + '" data-srcpick="' +
-        esc(m.id) + '|' + esc(f.unit) + '" aria-pressed="' + mineRow + '" ' +
-        'aria-label="' + (mineRow ? "Release " : "Claim ") + esc(m.name) + '">' +
-        (mineRow ? TICK : '') + '</button>' +
-        '<span class="held">' + (mineRow ? "in this set" : "click to claim") + '</span>';
-    return '<tr class="' + (mineRow ? "mine" : theirs ? "theirs" : "") + '" ' +
-        'data-q="' + esc((m.name + " " + f.unitName).toLowerCase()) + '">' +
-      '<td class="idx sn"></td>' +
-      '<td><span class="uchip">' + esc(f.unitName) + '</span></td>' +
-      '<td><span class="inchip' + (f.inw === "ko" ? " ko" : "") + '"' +
-        (f.inFull ? ' title="' + esc(f.inFull) + '"' : '') + '>' + esc(f.inLabel) + '</span></td>' +
-      '<td class="mname">' + esc(m.name) + '</td>' +
-      '<td class="cc">' + esc(m.dir || "—") + '</td>' +
-      '<td class="num">' + (m.target ? esc(t.value || m.target) : '<span class="missing">—</span>') +
-        (t.unit ? ' <span class="tu">' + esc(t.unit) + '</span>' : '') + '</td>' +
-      '<td class="stcell">' + status + '</td></tr>';
-  }).join("");
-
   return '<div class="kv">' +
       '<span class="pill kind">' + esc(team || "No team") + '</span>' +
-      '<span class="pill kind">owner ' + esc(personName(st.owner) || "—") + '</span>' +
+      '<span class="pill kind">owner ' + esc(personName(st.owner) || "\u2014") + '</span>' +
       '<span class="pill good">' + inSet + ' figure' + (inSet === 1 ? "" : "s") + ' in this set</span>' +
       '</div>' +
-    '<div class="srctools">' + setPick +
-      '<span class="srchbox">' +
-        '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" ' +
-          'aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4" ' +
-          'stroke-linecap="round"/></svg>' +
-        '<input id="srcq" type="text" placeholder="Search measures and units…" ' +
-          'autocomplete="off" aria-label="Search measures and units" value="' +
-          esc(SRCSET.q) + '"></span>' +
-      sel("srcf-unit", "Unit", unitOpts, SRCSET.unit) +
-      sel("srcf-in", "In", inOpts, SRCSET.inw) +
-      sel("srcf-status", "Status", stOpts, SRCSET.status) +
-      '<span class="srctally" id="srctally"></span>' +
-    '</div>' +
-    '<div class="cfg srctable"><table><thead><tr>' +
-      '<th class="idx" style="width:40px">#</th>' +
-      '<th style="width:128px">Unit</th>' +
-      '<th style="width:108px">In</th>' +
-      '<th>Measure</th>' +
-      '<th class="cc" style="width:52px">Dir.</th>' +
-      '<th class="cc" style="width:104px">Target</th>' +
-      '<th style="width:194px">Status</th>' +
-    '</tr></thead><tbody id="srcrows">' + rows + '</tbody></table>' +
-    '<div class="srcempty" hidden>No figure matches. Clear the search, or widen a filter.</div>' +
-    '</div>' +
-    '<div class="note"><b>A figure in a set is entered once, by the set’s owner.</b> ' +
-      'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
-      'note</b> — the number is the set’s, the performance is the unit’s, and the ' +
-      'explanation belongs to whoever owns the performance. A figure another set already ' +
-      'holds shows that set’s name; only the SMO can move it.</div>';
+    section("", "Fill a figure set", null,
+      '<div class="imp-row" style="margin:0 0 12px">' +
+        '<span class="cfg-lab">Filling</span>' + setPick + '</div>' +
+      unitBtns +
+      '<div class="cfg srcpick" style="padding:0">' + blocks + '</div>' +
+      '<div class="note"><b>A figure in a set is entered once, by the set\u2019s owner.</b> ' +
+        'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
+        'note</b> \u2014 the number is the set\u2019s, the performance is the unit\u2019s, and the ' +
+        'explanation belongs to whoever owns the performance. A figure another set already ' +
+        'holds shows that set\u2019s name; only the SMO can move it.</div>');
 }
 
 /* The other half of §16.7: a source team is a reporting party like any other,

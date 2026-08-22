@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.15.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.16.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.15.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.16.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -96,12 +96,7 @@ of it was rejected — which is the point of keeping it.
 | `mock-twotab.html` | Two tabs for a unit — Performance and Strategy — with reporting folded into Performance. **Built in 1.8** |
 | `mock-capability.html` | The capability pages and their Setup screens |
 | `mock-capline.html` | The one-line capability band, and projects expanded |
-
-### Pending — drawn, waiting on an answer
-
-| File | What it asks |
-|---|---|
-| `2026-08-22_five-questions_PENDING.html` | Four design questions from Islam's v3.15 walkthrough, drawn at real scale in the product's own tokens. **The pillar title** back on the Plan pane, condensed three ways (eyebrow / one quiet line / compact bar). **Setup navigation** — the gear menu split into Manage (things you do in a cycle) and Setup (a page with a grouped rail), grouped by the question you came to answer rather than by which table they edit; the icon-strip collapse is drawn to show it failing. **Fill a figure set** as one flat searchable table across every unit, with Measure and Target as separate columns and key objectives folded in by an *In* column. **The People row** at 36px, View as removed, and Reset as a button rather than a text link. |
+| `2026-08-22_five-questions_SETTLED.html` | Four questions from the v3.15 walkthrough, drawn at real scale in the product's own tokens and settled from the drawing. **Pillar title** &mdash; three greys; B3 chosen, which wears the rail's own grey-plus-gold-edge rather than inventing a fourth banded thing. **Setup navigation** &mdash; the grouped rail, and the icon-strip collapse drawn *collapsed* so it could be seen failing. **Fill a figure set** as one flat searchable table. **The People row.** Built in v3.16 (&sect;46). |
 
 ### Rejected — kept so the ground is not retrod
 

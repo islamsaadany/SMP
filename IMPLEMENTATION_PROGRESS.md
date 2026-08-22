@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.15 · **Last updated:** 2026-08-22
+**Latest version:** v3.16 · **Last updated:** 2026-08-22
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -51,6 +51,33 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.16 — Setup becomes a place, and four things drawn before they were built
+
+Four of the five items were settled from a **mockup** rather than a
+description. Two options in it were killed by being drawn, one of them mine
+(§46).
+
+| What | Outcome |
+|---|---|
+| **Setup rail** | Ten flat tabs become a rail grouped by *the question you came to answer* — Who · What we run · How it's measured · How it looks. `.rail` is the unit pages' own component, so nothing new was invented. The gear menu now offers Setup as **one** entry: listing the pages in the menu *and* the rail states the navigation twice. The icon-strip collapse was **killed by its own mockup** — ten setup pages need ten icons, and a label, a scoring band and a figure set have no picture anyone guesses right. |
+| **Figure sets** | Configuring and filling become two sections of one page. Gated on `c_source` (`area:"always"`), so the SECTIONS decide: the SMO gets both, a set owner gets only *Fill*, anyone else gets no entry. |
+| **Pillar title** | Back on Plan and Performance as **treatment B3** — `--surface-2` with a 3px gold left edge, to the pixel what `.ritem.on` wears. 57px → 33px. Exposed that the Plan page printed `01` where every other surface printed `MB01`: **the code shown is derived, the code stored is an identifier.** |
+| **Fill a figure set** | One flat searchable table across all ten units. Measure and Target are separate columns so search can't match `4B EGP`; key objectives join through an `In` column; `#` numbers what is *shown*. Typing never repaints. |
+| **People** | 79px → **39px, every row the same height.** Content-sized columns, a *Belongs to* column, roles clipped with the full text on hover, Password squeezed to None/Set/Temp, and a kebab at the end of the row holding Reset password, View as and Retire. |
+| **Collective passwords** | Two actions, not one with a wider reach. *Issue to those with none* can lock nobody out; *Reset everyone* overwrites live passwords, ends those sessions, is confirmed first, and **excludes the person asking** — on the server. |
+
+**Verified by driving it.** `qa.py` walks 31 viewers with no console errors;
+contrast sweep **0 failures across 4 combinations × 25 pages and states**;
+`test-authorize.js` 114 passed; `test-roundtrip.js` passes clean slate, round
+trip, fixed point and archived plan. Both collective actions were run against a
+live Postgres and checked at the row level — the SMO's hash and `must_change`
+untouched, everyone else's replaced and their sessions gone.
+
+**One crash found and fixed on the way:** an empty array is truthy, so a viewer
+whose every section was refused walked into `secs[0].k`. The real fault was
+upstream — paint() fell back to the *unfiltered* def list when the reachable one
+came out empty, putting back exactly what it had ruled out.
 
 ### v3.15 — eight refinements, and what the measuring found
 
@@ -942,7 +969,7 @@ taking it wholesale would have deleted four shipped features and everything from
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
 | `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.15.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.16.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

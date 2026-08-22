@@ -278,17 +278,10 @@ var SYNC = (function () {
       authPost({ action: "setPassword", person: key, password: pw },
         function (err) { done(err); });
     },
-    /* One temporary password for a SET OF PEOPLE THE SERVER PICKS — which is
-       the whole point: a stale screen can only ever issue to fewer people than
-       it thinks, never more (§35). The client sends a password and a scope,
-       never a list.
-
-       scope "none" (default) — everyone who has never had a password.
-       scope "all"  — every active person except you, an actual reset: it
-                      overwrites live passwords and ends those sessions. */
-    issueTemporary: function (pw, scope, done) {
-      if (typeof scope === "function") { done = scope; scope = "none"; }
-      authPost({ action: "issueTemporary", password: pw, scope: scope || "none" },
+    /* One temporary password for everyone who has none. The server picks the
+       set, so this sends a password and nothing else. */
+    issueTemporary: function (pw, done) {
+      authPost({ action: "issueTemporary", password: pw },
         function (err, j) { done(err, err ? null : (j.issued || [])); });
     },
     /* "none" / "temporary" / "set" per person key. Credentials never enter the

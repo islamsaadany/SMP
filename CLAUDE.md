@@ -220,6 +220,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
   a tenant column — person keys are short and global (`smo`, `ceo`), so a column
   forces composite keys through `credentials` and `sessions`. Read §36 first.
+- **Setup is a PAGE with a rail (since v3.16, §46.1):** the gear menu offers
+  **Manage** (the six things you do in a cycle) and **Setup** as ONE entry; the
+  ten setup pages are the rail's job. `SETUP_GROUPS` in `shell.html` is the
+  order and `grp` on each def is its group — one list, so a page cannot be in
+  two groups or none. **Figure sets is one page with two sections** and is
+  gated on `c_source` (`area:"always"`), never on `c_sets`, or a set owner who
+  is not the SMO loses the page they exist for. A Setup page's sections render
+  INSIDE its pane, not in the chrome's third row. `reachable()` is the ONE
+  function that answers "is there anything behind this tab" — the menu and
+  `paint()` must never ask it differently.
 - **Searchable dropdowns (since v3.15, §45.5):** `src/searchsel.js` enhances
   **every** `<select>` in the platform once its list passes five options —
   `SEARCHSEL.wire()` runs at the end of `paint()`, after `wire()`. The native
@@ -295,7 +305,37 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-22 — **v3.15**: EIGHT REFINEMENTS, AND WHAT THE
+*Last Updated: 2026-08-22 — **v3.16**: SETUP BECOMES A PLACE (§46). Four of
+five items settled from a MOCKUP rather than a description, and two of its
+options were killed by being drawn — one of them mine. **THE GEAR MENU WAS
+DOING TWO UNRELATED JOBS**: six entries are things you DO in a cycle, ten are
+things you SET ONCE, and splitting them halved the problem before any design
+happened. The rail is not a new component — it is what a unit's pillars have
+sat in since 1.7 — and the groups are **the question you came to answer**, not
+which table the page edits. **AN ICON STRIP NEEDS ICONS ANYBODY GUESSES
+RIGHT**: a label, a scoring band and a figure set are three abstractions with
+no picture, so the collapse was drawn collapsed in order to be seen failing.
+**THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER** — putting the
+pillar name back put the two side by side and the Plan tab said "01" where
+every other surface said "MB01". **A COLOUR THAT CLEARS ON WHITE IS NOT
+THEREBY CLEARED**: `--gold-deep` on `--surface-2` is 4.45:1, §38.5 for the
+fourth time. **"WRAP AROUND THE NAME LENGTH" MEANS THE COLUMN FITS THE NAME**,
+not that the name is broken to fit the column — reading it the other way first
+produced 59px rows; auto layout and content-sized columns gave 39px, every row
+the same. Three specificity traps in one file collapse to one rule: **a class
+alone rarely beats `.cfg table`**, and an equal specificity loses on
+build.py's concatenation order. **`width:99%; max-width:0` IS A FIXED-LAYOUT
+TRICK** — under auto layout `max-width:0` is a cap, so the clip moves into a
+block inside the cell. **AN EMPTY ARRAY IS TRUTHY**: `if (secs)` crashed the
+group CEO's Setup page, and the real fault was paint() falling back to the
+UNFILTERED def list when the reachable one came out empty. **A RESET IS NOT
+"ISSUE" WITH A WIDER WHERE** — it ends sessions, is confirmed first, and
+excludes the person asking, on the server. And **compare the fact, not two
+renderings of it**: a role chip comparing display labels read every
+group-level role as "elsewhere" because one function said "The group" and the
+other "the group".*
+
+*Earlier: 2026-08-22 — **v3.15**: EIGHT REFINEMENTS, AND WHAT THE
 MEASURING FOUND (§45). Islam went through the built product screen by screen.
 None of the eight is a feature; half were a symptom with a cause. **A
 comparison against a field nobody sets fails silently and in the SAFE

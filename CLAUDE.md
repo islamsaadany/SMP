@@ -192,6 +192,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **Figure sets (since v3.14, §44; spec 008):** a number can belong to a NAMED
+  SET (`group.sets`) rather than to the unit that reports it. `row.src` is
+  `{set}` or `{by}` — membership on the FIGURE, so one figure/one set is an
+  invariant. Who may pick a set's figures is a **stored security setting** that
+  defaults to the SMO and is enforced in `lib/authorize.js`, never by hiding a
+  page. A refused claim raises a request (`group.claims`) the SMO answers on
+  the cycle page. The unit custodian's per-figure naming (**Strategy › Who
+  enters**) is behind `group.naming`, off by default, read on BOTH sides —
+  turning it off must never delete a naming. Nothing needs a migration: these
+  live in `org.extra`.
 - **DB verification loop:** start a throwaway Postgres 16, then
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
@@ -276,7 +286,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — **v3.13**: THE HEADERS GO BACK TO THE TENANT'S
+*Last Updated: 2026-08-22 — **v3.14**: FIGURE SETS (§44, spec 008). Many
+numbers are not the business unit's — revenue exists in Finance before a unit
+is asked for it. **The thing that owns numbers is a NAMED SET**, not a person
+and not a department: "figure custodian 1, 2, 3" says nothing and *Financial
+Figures* says everything, which is why **the owner needs no role of its own**.
+**The team is on the SET, not read off the person** — §33's instinct fails
+here, because the Finance SMO custodian sits with the office rather than in
+Finance, and what the BU head is reading is *who do I talk to*. **ONE owner per
+set**; two people splitting the work is TWO sets, which is more honest and is
+what lets a figure store only the set — handing one over is ONE edit rather
+than twenty-seven. **Membership lives on the FIGURE** (`row.src`), so *one
+figure, one set* is an invariant rather than a rule somebody checks.
+**WHO PICKS A SET'S FIGURES IS A SECURITY SETTING**: ticking from the full list
+IS reading every number in the group, so it DEFAULTS TO THE SMO and is opened
+deliberately — enforced on the server, because a switch that only hides a
+control is decoration (§42, learned once already). **FIRST CLAIM WINS**, with
+no precedence between a set's tick and a unit custodian's naming: a rule that
+ranked them would need explaining every time it applied. A refusal names the
+holder and offers **Request the claim** — this REVERSES §16.7's "no challenge
+workflow", because once two people can claim, a refusal with no route forward
+is a dead end. **The SMO answers the request**, not the holder, who has an
+interest in the answer. Step 3 is BUILT AND HIDDEN behind a tenant switch:
+**Strategy › Who enters** is a UNIT page and not a Setup one, because a
+strategy custodian holds no Setup at all — a Setup page would be unreachable by
+the only person it is for. **Turning the switch off keeps every naming**; a
+switch that destroys data is not a switch. Naming somebody gives them THAT
+FIGURE AND NOTHING ELSE. Two lessons, both old ones re-earned: **the client and
+the server must build the world the same way** (the browser's `world()` carried
+`sets` but not `claims`, so the page answered from a world with no requests in
+it — the drift `lib/rules.js` exists to prevent, twice in one afternoon; both
+sides call `SMPRules.worldOf()` now), and **a state that cannot be reached by
+navigating is a state nothing measures** — the sweep had to switch naming on
+and open the picker explicitly, and runs 25 pages and states.*
+
+*Earlier: 2026-08-21 — **v3.13**: THE HEADERS GO BACK TO THE TENANT'S
 COLOUR (§41.10). Islam: *"it's not a navy/gold thing. It follows the brand
 colours set in the platform."* That is the decision and it is a product
 argument, not taste: **`--panel` is what Setup › Branding sets for the

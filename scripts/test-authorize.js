@@ -197,65 +197,302 @@ console.log("\n6 · a contributor");
   check("with the shipped default a contributor reports nothing", !v3.ok, v3.refusals.join(" / "));
 })();
 
-/* ── 6b · The source of a figure (§16.7) ────────────────────────── */
-console.log("\n6b · a sourced figure");
+/* ── 6b · Figure sets (spec 008) ────────────────────────────────── */
+console.log("\n6b · figure sets");
 (function () {
-  /* Give the head of Finance the first measure in the unit under test. */
   const base = clone(SEED);
   const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
-  if (!fin) { console.log("  (no finance person in the seed — skipped)"); return; }
-  const m = base.units[UNIT].items[0].measures[0];
-  m.src = { team: "finance", by: fin.key };
-  const other = base.units[UNIT].items[0].measures[1];
-  console.log("  " + m.name + " is now reported by " + fin.name + " (finance)");
+  const tre = base.people.filter(function (p) { return p.fn === "treasury"; })[0];
+  if (!fin || !tre) { console.log("  (no finance/treasury people in the seed — skipped)"); return; }
 
-  const move = function (state, id, to) {
+  /* Two sets: one the SMO fills, one its owner fills. */
+  base.group.sets = [
+    { id: "fin", name: "Financial Figures", team: "finance",  owner: fin.key, pick: "owner" },
+    { id: "tre", name: "Treasury Figures",  team: "treasury", owner: tre.key, pick: "smo" }
+  ];
+  const m  = base.units[UNIT].items[0].measures[0];
+  const m2 = base.units[UNIT].items[0].measures[1];
+  const free = base.units[UNIT].items[0].measures[2];
+  m.src = { set: "fin" };
+  console.log("  " + m.name + " is in Financial Figures (owner " + fin.name + ")");
+
+  const setActual = function (state, id, to) {
     state.units[UNIT].items[0].measures.forEach(function (x) { if (x.id === id) x.actual = to; });
   };
-  const note = function (state, id, txt) {
+  const setNote = function (state, id, txt) {
     state.units[UNIT].items[0].measures.forEach(function (x) { if (x.id === id) x.note = txt; });
+  };
+  const setSrc = function (state, id, src) {
+    state.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === id) { if (src) x.src = src; else delete x.src; } });
   };
   const verdict = function (who, mutate) {
     const inc = clone(base); mutate(inc);
     return A.authorize(base, inc, personOf(base, who));
   };
 
-  let v = verdict(headKey, function (s) { move(s, m.id, "77%"); });
-  check("the unit head cannot enter a sourced figure", !v.ok, v.refusals.join(" / "));
+  /* — entering the figure — */
+  let v = verdict(headKey, function (s) { setActual(s, m.id, "77%"); });
+  check("the unit head cannot enter a figure held by a set", !v.ok, v.refusals.join(" / "));
   console.log("        " + v.refusals.join(" / "));
 
-  v = verdict(fin.key, function (s) { move(s, m.id, "77%"); });
-  check("the named source can", v.ok, v.refusals.join(" / "));
+  v = verdict(fin.key, function (s) { setActual(s, m.id, "77%"); });
+  check("the set's owner can", v.ok, v.refusals.join(" / "));
 
-  v = verdict(fin.key, function (s) { move(s, other.id, "77%"); });
-  check("but not a figure they are not named on", !v.ok, v.refusals.join(" / "));
+  v = verdict(tre.key, function (s) { setActual(s, m.id, "77%"); });
+  check("another set's owner cannot", !v.ok, v.refusals.join(" / "));
 
-  v = verdict(headKey, function (s) { note(s, m.id, "Why it landed there."); });
-  check("the UNIT still writes the note on a sourced figure", v.ok, v.refusals.join(" / "));
+  v = verdict(headKey, function (s) { setNote(s, m.id, "Why it landed there."); });
+  check("the UNIT still writes the note on a set-held figure", v.ok, v.refusals.join(" / "));
 
-  v = verdict(fin.key, function (s) { note(s, m.id, "Finance's opinion."); });
-  check("and the source does not", !v.ok, v.refusals.join(" / "));
+  v = verdict(fin.key, function (s) { setNote(s, m.id, "Finance's opinion."); });
+  check("and the set's owner does not", !v.ok, v.refusals.join(" / "));
 
-  v = verdict(headKey, function (s) { move(s, other.id, "12%"); });
-  check("the unit still reports its own unsourced figures", v.ok, v.refusals.join(" / "));
+  v = verdict(headKey, function (s) { setActual(s, m2.id, "12%"); });
+  check("the unit still reports its own unclaimed figures", v.ok, v.refusals.join(" / "));
 
-  v = verdict("smo", function (s) { move(s, m.id, "77%"); });
-  check("the SMO can correct anything", v.ok, v.refusals.join(" / "));
+  /* — claiming — */
+  v = verdict(fin.key, function (s) { setSrc(s, free.id, { set: "fin" }); });
+  check("an owner whose set is theirs to fill may claim into it", v.ok, v.refusals.join(" / "));
 
-  /* Naming yourself as the source, in the same save that uses it. */
-  const inc = clone(base);
-  inc.units[UNIT].items[0].measures.forEach(function (x) {
-    if (x.id === other.id) { x.src = { team: "finance", by: headKey }; x.actual = "99%"; }
+  v = verdict(tre.key, function (s) { setSrc(s, free.id, { set: "tre" }); });
+  check("an owner whose set is the SMO's to fill may NOT", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { setSrc(s, free.id, { set: "tre" }); });
+  check("nobody may claim into somebody else's set", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { setSrc(s, m.id, { set: "tre" }); });
+  check("a figure another set already holds is refused, by name", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { setSrc(s, m.id, null); });
+  check("an owner may release what their own set holds", v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { setSrc(s, m.id, null); });
+  check("but not what somebody else's holds", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(headKey, function (s) { setSrc(s, free.id, { set: "fin" }); });
+  check("a unit head cannot claim figures into a set at all", !v.ok, v.refusals.join(" / "));
+
+  v = verdict("smo", function (s) { setSrc(s, m.id, { set: "tre" }); });
+  check("the SMO can move a figure between sets", v.ok, v.refusals.join(" / "));
+
+  /* — the sets themselves — */
+  v = verdict(fin.key, function (s) {
+    s.group.sets = s.group.sets.map(function (x) {
+      return x.id === "tre" ? Object.assign({}, x, { owner: fin.key }) : x; });
   });
-  v = A.authorize(base, inc, personOf(base, headKey));
-  check("nobody can name themselves the source and use it in one save", !v.ok,
-        v.refusals.join(" / "));
+  check("an owner cannot make themselves the owner of another set", !v.ok, v.refusals.join(" / "));
 
-  /* And a locked cycle stops the source too. */
+  v = verdict(fin.key, function (s) {
+    s.group.sets = s.group.sets.map(function (x) {
+      return x.id === "tre" ? Object.assign({}, x, { pick: "owner" }) : x; });
+  });
+  check("nor open another set's picking to its owner", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) {
+    s.group.sets = s.group.sets.map(function (x) {
+      return x.id === "fin" ? Object.assign({}, x, { name: "Everything, actually" }) : x; });
+  });
+  check("nor rename their OWN set — a set is Setup", !v.ok, v.refusals.join(" / "));
+
+  v = verdict("smo", function (s) { s.group.sets.push(
+    { id: "mkt", name: "Market Figures", team: "marketing", owner: "smo", pick: "smo" }); });
+  check("the SMO creates sets", v.ok, v.refusals.join(" / "));
+
+  /* — a locked cycle stops the set owner too — */
   const locked = clone(base); locked.cycle.locked = true;
-  const li = clone(locked); move(li, m.id, "88%");
+  const li = clone(locked); setActual(li, m.id, "88%");
   v = A.authorize(locked, li, personOf(locked, fin.key));
-  check("a locked cycle stops the source as well", !v.ok, v.refusals.join(" / "));
+  check("a locked cycle stops the set's owner as well", !v.ok, v.refusals.join(" / "));
+
+  /* — handing the set over is ONE edit — */
+  const handed = clone(base);
+  handed.group.sets = handed.group.sets.map(function (x) {
+    return x.id === "fin" ? Object.assign({}, x, { owner: tre.key }) : x; });
+  const inc2 = clone(handed); setActual(inc2, m.id, "31%");
+  v = A.authorize(handed, inc2, personOf(handed, tre.key));
+  check("handing a set over moves every figure with it, in one edit", v.ok, v.refusals.join(" / "));
+  const inc3 = clone(handed); setActual(inc3, m.id, "31%");
+  v = A.authorize(handed, inc3, personOf(handed, fin.key));
+  check("and the previous owner stops being able to enter them", !v.ok, v.refusals.join(" / "));
+})();
+
+/* ── 6c · Claim requests (spec 008 §5) ──────────────────────────── */
+console.log("\n6c · claim requests");
+(function () {
+  const base = clone(SEED);
+  const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
+  const tre = base.people.filter(function (p) { return p.fn === "treasury"; })[0];
+  if (!fin || !tre) { console.log("  (skipped)"); return; }
+  base.group.sets = [
+    { id: "fin", name: "Financial Figures", team: "finance",  owner: fin.key, pick: "owner" },
+    { id: "tre", name: "Treasury Figures",  team: "treasury", owner: tre.key, pick: "owner" }
+  ];
+  const m    = base.units[UNIT].items[0].measures[0];
+  const free = base.units[UNIT].items[0].measures[1];
+  m.src = { set: "fin" };
+  base.group.claims = [];
+
+  const ask = function (state, over) {
+    state.group.claims = (state.group.claims || []).concat([Object.assign(
+      { id: "c1", unit: UNIT, figure: m.id, set: "tre", by: tre.key, state: "open" }, over || {})]);
+  };
+  const verdict = function (who, mutate) {
+    const inc = clone(base); mutate(inc);
+    return A.authorize(base, inc, personOf(base, who));
+  };
+
+  let v = verdict(tre.key, function (s) { ask(s); });
+  check("a set owner may ask for a figure another set holds", v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { by: fin.key }); });
+  check("but not in somebody else's name", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { set: "fin" }); });
+  check("nor on behalf of a set they do not fill", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { state: "granted" }); });
+  check("nor already answered — the SMO answers it", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { figure: free.id }); });
+  check("nor for a figure nobody holds", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(headKey, function (s) { ask(s, { by: headKey }); });
+  check("a unit head cannot ask at all — they fill no set", !v.ok, v.refusals.join(" / "));
+
+  /* Asking twice is not asking louder. */
+  const asked = clone(base); ask(asked);
+  const twice = clone(asked);
+  twice.group.claims = twice.group.claims.concat([
+    { id: "c2", unit: UNIT, figure: m.id, set: "tre", by: tre.key, state: "open" }]);
+  v = A.authorize(asked, twice, personOf(asked, tre.key));
+  check("a second open request for the same figure is refused", !v.ok, v.refusals.join(" / "));
+
+  /* Answering is the SMO's. */
+  const answered = clone(asked);
+  answered.group.claims = answered.group.claims.map(function (c) {
+    return Object.assign({}, c, { state: "granted" }); });
+  v = A.authorize(asked, answered, personOf(asked, tre.key));
+  check("the asker cannot answer their own request", !v.ok, v.refusals.join(" / "));
+  v = A.authorize(asked, answered, personOf(asked, fin.key));
+  check("nor can the holder", !v.ok, v.refusals.join(" / "));
+  v = A.authorize(asked, answered, personOf(asked, "smo"));
+  check("the SMO can", v.ok, v.refusals.join(" / "));
+
+  /* Granting moves the figure, and that is the SMO's to do anyway. */
+  const moved = clone(answered);
+  moved.units[UNIT].items[0].measures.forEach(function (x) {
+    if (x.id === m.id) x.src = { set: "tre" }; });
+  v = A.authorize(asked, moved, personOf(asked, "smo"));
+  check("and moves the figure in the same save", v.ok, v.refusals.join(" / "));
+  v = A.authorize(asked, moved, personOf(asked, tre.key));
+  check("which the asker still cannot do for themselves", !v.ok, v.refusals.join(" / "));
+
+  /* Withdrawing somebody else's request is not asking. */
+  const gone = clone(asked); gone.group.claims = [];
+  v = A.authorize(asked, gone, personOf(asked, tre.key));
+  check("removing a request is the SMO's", !v.ok, v.refusals.join(" / "));
+})();
+
+/* ── 6d · Naming a person against ONE figure (spec 008 §3B) ─────── */
+console.log("\n6d · naming a person on a figure");
+(function () {
+  const base = clone(SEED);
+  const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
+  const somebody = base.people.filter(function (p) {
+    return p.key !== custKey && p.key !== headKey && p.key !== "smo";
+  })[0];
+  if (!fin || !somebody) { console.log("  (skipped)"); return; }
+  base.group.sets = [
+    { id: "fin", name: "Financial Figures", team: "finance", owner: fin.key, pick: "owner" }
+  ];
+  const held = base.units[UNIT].items[0].measures[0];
+  const free = base.units[UNIT].items[0].measures[1];
+  held.src = { set: "fin" };
+
+  const name = function (state, id, who) {
+    state.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === id) x.src = { by: who };
+    });
+  };
+  const from = function (state, who, mutate) {
+    const inc = clone(state); mutate(inc);
+    return A.authorize(state, inc, personOf(state, who));
+  };
+
+  /* OFF is the shipped answer, and the SERVER is where it is enforced. */
+  let v = from(base, custKey, function (s) { name(s, free.id, somebody.key); });
+  check("naming is refused while the tenant has it switched off", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  const on = clone(base); on.group.naming = true;
+
+  v = from(on, custKey, function (s) { name(s, free.id, somebody.key); });
+  check("the unit's custodian may name somebody once it is on", v.ok, v.refusals.join(" / "));
+
+  v = from(on, headKey, function (s) { name(s, free.id, somebody.key); });
+  check("so may the unit's head", v.ok, v.refusals.join(" / "));
+
+  /* ANYONE THE PLATFORM KNOWS (spec 008 §9) — but only somebody it knows. */
+  v = from(on, custKey, function (s) { name(s, free.id, "nobody-at-all"); });
+  check("naming somebody who is not on the register is refused", !v.ok, v.refusals.join(" / "));
+
+  const retiredOn = clone(on);
+  retiredOn.people.forEach(function (p) { if (p.key === somebody.key) p.active = false; });
+  v = from(retiredOn, custKey, function (s) { name(s, free.id, somebody.key); });
+  check("nor is naming somebody who has been retired", !v.ok, v.refusals.join(" / "));
+
+  /* FIRST CLAIM WINS, in both directions (spec 008 §4). */
+  v = from(on, custKey, function (s) { name(s, held.id, somebody.key); });
+  check("a figure a SET holds cannot be named from the unit", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  const named = clone(on); name(named, free.id, somebody.key);
+  v = from(named, fin.key, function (s) {
+    s.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === free.id) x.src = { set: "fin" }; });
+  });
+  check("and a figure the unit NAMED cannot be claimed into a set", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  /* Releasing is the same act read backwards. */
+  v = from(named, custKey, function (s) {
+    s.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === free.id) delete x.src; });
+  });
+  check("the unit may release what it named", v.ok, v.refusals.join(" / "));
+
+  v = from(named, fin.key, function (s) {
+    s.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === free.id) delete x.src; });
+  });
+  check("a set owner may not release it for them", !v.ok, v.refusals.join(" / "));
+
+  /* Nobody in ANOTHER unit, and nobody who only reports their own lines. */
+  const other = clone(on);
+  v = from(other, custKey, function (s) {
+    s.units[OTHER].items[0].measures[0].src = { by: somebody.key };
+  });
+  check("a custodian cannot name against another unit's figures", !v.ok, v.refusals.join(" / "));
+
+  const contribOn = clone(on);
+  contribOn.access = Object.assign({}, contribOn.access,
+    { contrib: Object.assign({}, (contribOn.access || {}).contrib, { a_unit_own: "edit" }) });
+  const contribKey = "smp_test_contrib";
+  contribOn.people = contribOn.people.concat([
+    { key: contribKey, name: "A Contributor", unit: UNIT }]);
+  v = from(contribOn, contribKey, function (s) { name(s, free.id, somebody.key); });
+  check("a contributor with edit stored still cannot decide who enters a figure",
+        !v.ok, v.refusals.join(" / "));
+
+  /* The switch itself is Setup. */
+  v = from(base, custKey, function (s) { s.group.naming = true; });
+  check("a custodian cannot switch naming on", !v.ok, v.refusals.join(" / "));
+  v = from(base, "smo", function (s) { s.group.naming = true; });
+  check("the SMO can", v.ok, v.refusals.join(" / "));
 })();
 
 /* ── 7 · A retired person can do nothing ───────────────────────── */

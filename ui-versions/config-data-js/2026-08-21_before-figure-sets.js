@@ -77,22 +77,10 @@ function roleName(k){
    whatever points at them. A person who holds nothing gets an empty list and
    therefore no access, which is the honest answer for someone who has been
    added to the registry but not yet given a job. */
-/* The world the shared rules answer from — built by the SAME function the
-   server uses, from a state-shaped object rather than field by field.
-
-   That is not tidiness. Building it field by field means every rule that
-   starts reading a new part of the state needs this list updating too, and
-   nothing says so: the client then answers "who may fill this" from a world
-   with no sets in it while the server answers from one that has them. It
-   happened here twice in one afternoon — once for `sets`, once for `claims` —
-   which is twice more than the shared rules file was supposed to allow.
-   ONE BUILDER, so there is nowhere for the two to differ. */
 function world(){
-  return SMPRules.worldOf({
-    unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
-    functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
-    companies:COMPANIES, access:ACCESS, group:GROUP
-  });
+  return SMPRules.W({ unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
+                      functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
+                      companies:COMPANIES, access:ACCESS });
 }
 function personRoles(p){ return SMPRules.personRoles(world(), p); }
 function personRoleKeys(p){ return SMPRules.personRoleKeys(world(), p); }
@@ -122,8 +110,7 @@ var KO_VIEW = "chips";
 
 /* Configuration screens open read-only. Editing is entered deliberately, which
    is what makes a change to a weight or a threshold an act rather than a slip. */
-var EDITING = { weights:false, factors:false, bands:false, units:false, people:false, fns:false,
-                sets:false };
+var EDITING = { weights:false, factors:false, bands:false, units:false, people:false, fns:false };
 
 /* Transient register state. None of this is the tenant's data — it is which
    control happens to be open — so none of it is saved (§25.2: a property of
@@ -136,9 +123,7 @@ var EDITING = { weights:false, factors:false, bands:false, units:false, people:f
 /* The source-of-figures page: which unit is open, and WHO the marks are being
    made for. All three are properties of the screen, never of the state graph
    (§25.2) — the marks themselves live on the measures. */
-var SRCSET = { unit: null, set: null };
-/* What has been typed into the "add a set" row. Screen state, never saved. */
-var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
+var SRCSET = { unit: null, team: null, by: null };
 
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 var PICKING = null, PICKQ = "";
@@ -1049,103 +1034,36 @@ function canReportRow(unitKey, x){
    The note is a separate question and always the unit's: the number is the
    source's, the performance is the unit's, and the explanation belongs to
    whoever owns the performance. */
-function srcOf(x){ var o = x && (x.obj || x); return SMPRules.isSourced(o) ? o.src : null; }
-/* What the UNIT reads beside a figure it does not enter. A SET is named by its
-   TEAM — the BU head is reading it to know who to talk to, and "Financial
-   Figures" does not answer that while "Finance" does. A figure a unit
-   custodian named directly has no team, so it names the person, who there IS
-   the answer to "who do I ask". */
-function srcLabel(x){
-  var o = x && (x.obj || x);
-  if (!SMPRules.isSourced(o)) return "";
-  if (o.src.set) {
-    var set = SMPRules.setById(world(), o.src.set);
-    if (!set) return "another set";
-    var f = FUNCTIONS[set.team];
-    return f ? (f.navName || f.name) : (set.team || set.name || "another set");
-  }
-  return personName(o.src.by) || o.src.by;
+function srcOf(x){ var o = x && (x.obj || x); return (o && o.src && o.src.by) ? o.src : null; }
+function srcTeamName(src){
+  if (!src) return "";
+  var f = FUNCTIONS[src.team];
+  return f ? (f.navName || f.name) : (src.team || "another team");
 }
-function figureAssignee(x){
-  var o = x && (x.obj || x);
-  return SMPRules.assigneeOf(world(), o);
-}
-/* May THIS viewer type THIS figure? One function, because a screen that asks
-   it in two places will eventually answer differently from the server. */
+/* May THIS viewer type THIS figure? Three answers in one function, because a
+   screen that asks them separately will eventually answer them differently
+   from the server (§42.3). */
 function canEnterFigure(unitKey, x){
-  var who = figureAssignee(x);
-  if (!who) return canReportRow(unitKey, x);
+  var src = srcOf(x);
+  if (!src) return canReportRow(unitKey, x);
   if (hasRole("super")) return canReport(unitKey);
-  return who === viewer().key && REVIEW.state === "open" && !CYCLE.locked;
+  return src.by === viewer().key && REVIEW.state === "open" &&
+         !(CYCLE.locked && !hasRole("super"));
 }
 /* The note stays with the unit whatever the figure does. */
 function canEnterNote(unitKey, x){
-  var who = figureAssignee(x);
-  if (who && !hasRole("super") && who === viewer().key &&
+  var src = srcOf(x);
+  if (src && !hasRole("super") && src.by === viewer().key &&
       grantAt("u_report", unitKey) !== "edit") return false;
   return canReportRow(unitKey, x);
 }
-/* Every figure this person enters, across every unit — resolved through the
-   sets, never off the row. Their reporting surface is built from it, and so is
-   the answer to "does this person have one at all". */
-function mySourceRows(){ return SMPRules.sourcesFor(world(), viewer()); }
+/* Every figure this person is master of, across every unit. Their reporting
+   surface is built from it, and so is the answer to "does this person have
+   one at all". */
+function mySourceRows(){
+  return SMPRules.sourcesFor(world(), viewer());
+}
 function ownsAnySource(){ return mySourceRows().length > 0; }
-/* The sets this viewer may open a picking page for. Empty for almost everyone,
-   and the page is then not offered — "the owner picks" IS the grant of sight
-   over the whole group's figures, so there is no half-view to draw. */
-function myPickableSets(){ return SMPRules.pickableSets(world(), viewer()); }
-function canPickSets(){ return myPickableSets().length > 0; }
-function setsList(){ return (GROUP.sets = GROUP.sets || []); }
-function setById(id){ return SMPRules.setById(world(), id); }
-/* ── Claim requests (spec 008 §5) ────────────────────────────────── */
-function claimsList(){ return (GROUP.claims = GROUP.claims || []); }
-function openClaimsList(){ return SMPRules.openClaims(world()); }
-function myOpenClaim(figureId, setId){
-  return SMPRules.openClaimFor(world(), figureId, setId);
-}
-/* Ids are minted, not typed — the same rule a plan's codes follow (§22). No
-   clock: a repaint must not mint a different id for the same request, and the
-   platform has no reliable "now" it can put in the graph anyway. */
-function mintClaimId(){
-  var n = 1, ids = {};
-  claimsList().forEach(function(c){ ids[c.id] = 1; });
-  while (ids["cl" + n]) n++;
-  return "cl" + n;
-}
-function claimFigure(c){
-  var row = SMPRules.rowById(world(), c.unit, c.figure);
-  return row ? row.name : c.figure;
-}
-
-/* ── Naming a person against ONE figure (spec 008 §3B) ─────────────
-   The second way a figure gets an owner, and the one that needs no set: a
-   unit's strategy custodian names somebody against a number on their own
-   plan. OFF until the tenant switches it on, and the same switch is read by
-   the server — hiding the page would leave the save unguarded (§42). */
-function namingOn(){ return SMPRules.namingOn(world()); }
-function canName(unitKey){ return SMPRules.mayName(world(), viewer(), unitKey); }
-/* Every figure in one unit, in the order the plan reads: the directions
-   first, then each pillar's measures. One list, because the page is the
-   custodian's own plan with a name against each number, not a search. */
-function figuresOf(u){
-  var out = [];
-  (u.keyObjectives || []).forEach(function(m){
-    out.push({ id:m.id, row:m, group:L("keyobj","bu") });
-  });
-  (u.items || []).forEach(function(p, pi){
-    (p.measures || []).forEach(function(m){
-      out.push({ id:m.id, row:m, group:pillarCode(u, pi) + " " + p.name });
-    });
-  });
-  return out;
-}
-
-function mintSetId(name){
-  var base = String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14) || "set";
-  if (!setById(base)) return base;
-  var n = 2; while (setById(base + n)) n++;
-  return base + n;
-}
 /* What a unit is still waiting on from somebody else. A blocked Submit with
    no explanation is hostile: the page has to say what is outstanding and who
    owes it (§16.7, settled). */

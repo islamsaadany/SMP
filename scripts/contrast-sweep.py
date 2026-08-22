@@ -67,6 +67,17 @@ with sync_playwright() as p:
             pg.locator('#units button[data-u="mobile"]').click(); pg.wait_for_timeout(500); scan("unit/perf")
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.indexOf('Strategy')>-1);if(x)x.click()}")
             pg.wait_for_timeout(500); scan("unit/strategy")
+            # "Who enters" is hidden until the tenant switches naming on (spec
+            # 008 3B), and the PICKER is a state rather than a page - the same
+            # 41.5 lesson the open fold taught. Both are opened explicitly.
+            pg.evaluate("()=>{ GROUP.naming = true; paint(); }")
+            pg.wait_for_timeout(300)
+            pg.evaluate("()=>{var x=[...document.querySelectorAll('#secrow-in button')].find(b=>b.textContent.trim()==='Who enters');if(x)x.click()}")
+            pg.wait_for_timeout(500); scan("unit/who-enters")
+            pg.evaluate("()=>{var x=document.querySelector('[data-name-open]');if(x)x.click()}")
+            pg.wait_for_timeout(400); scan("unit/who-enters-picker")
+            pg.evaluate("()=>{var x=document.querySelector('[data-pick-cancel]');if(x)x.click(); GROUP.naming=false; paint();}")
+            pg.wait_for_timeout(300)
         except Exception: pass
         # "Figures I report" is hidden for anybody named on nothing (16.7), so
         # without this the menu entry does not exist and the sweep walks past
@@ -74,12 +85,14 @@ with sync_playwright() as p:
         # page nothing measures. One figure is sourced to the viewer and left
         # outstanding, so the unit's waiting note gets measured too.
         pg.evaluate("() => { var u = UNITS[UNIT_KEYS[0]];"
+                    "  GROUP.sets = [{ id:'sweep', name:'Swept Figures',"
+                    "                  team: FUNCTION_KEYS[0], owner: viewer().key, pick:'owner' }];"
                     "  if (u.keyObjectives[0]) {"
-                    "    u.keyObjectives[0].src = { team: FUNCTION_KEYS[0], by: viewer().key };"
+                    "    u.keyObjectives[0].src = { set: 'sweep' };"
                     "    u.keyObjectives[0].actual = null; }"
                     "  paint(); }")
         pg.wait_for_timeout(300)
-        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand","source"]),
+        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand","sets","source"]),
                          ("manage",["cycle","import","focusset","kb","myfig"])]:
             for sub in subs:
                 pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
@@ -88,6 +101,6 @@ with sync_playwright() as p:
                 except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 22 pages and states\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 25 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

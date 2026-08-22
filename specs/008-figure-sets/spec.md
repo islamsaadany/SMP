@@ -1,7 +1,9 @@
 # 008 · Figure sets — who is responsible for which numbers
 
-**Status:** proposed. Written from Islam's own account of the concept, for him
-to read before any code.
+**Status:** BUILT (2026-08-22) — all three steps: sets, the picking page,
+the switch, claim requests, and the unit custodian's per-figure dropdown
+(hidden until the tenant turns it on). Written from Islam's own account
+of the concept and checked with him line by line; §6 and §9 carry his answers.
 **Supersedes** the team+person shape built in §16.7 on 2026-08-21 (nothing is
 deployed with it, so nothing migrates).
 **Reverses** §16.7's *"Disagreement is settled off the platform. No challenge
@@ -33,26 +35,81 @@ that is enough.
 
 ## 2 · What exists, and where it is stored
 
-**A set** — a name, and **up to two owners** ("2 max for now").
+**A set** — a name, **a team**, **ONE owner**, and **who picks its figures**
+(Islam, 2026-08-21):
 
-**An assignment, on the figure itself** — the person responsible for entering
-it, and the set it came from if it came from one:
+    Financial Figures  ·  team Finance  ·  owner Hossam  ·  picked by the owner
 
-    measure.src = { set: "<set id>", by: "<person key>" }   ← claimed in a set
-    measure.src = {                  by: "<person key>" }   ← named by the unit
+The team is on the SET, not read off the person. Islam's reason for showing a
+department at all decides this: the BU head needs to know **who to talk to**
+when he is writing the note against a number he did not enter, and when he
+looks at his entry page and finds a figure he cannot type. *"Set by Financial
+Figures"* does not tell him that; *"Set by Finance"* does. And the person's own
+department cannot be trusted to say it — the "Finance SMO custodian" sits with
+the office rather than in Finance, which is the case that broke reading it off
+the person.
+
+It also survives the owner changing: hand *Financial Figures* to somebody else
+and the unit still reads *Set by Finance*. Two sets may share a team.
+
+**An assignment, on the figure itself:**
+
+    measure.src = { set: "<set id>" }      ← claimed into a set
+    measure.src = { by:  "<person key>" }  ← named by a unit custodian
 
 Membership lives on the FIGURE rather than as a list inside the set. That is
 what makes "one figure, one set" an invariant that cannot be violated rather
 than a rule that has to be checked — and it is why a conflict can be detected
 at the moment of the tick instead of found later.
 
+**A set-claimed figure stores only the SET.** Who enters it is the set's owner,
+read from the set — not copied onto every figure it holds. One owner per set is
+what allows this, and it is worth having: handing *Financial Figures* to
+somebody else becomes ONE edit rather than twenty-seven, and no figure can be
+left pointing at the person who used to hold the set. Same pattern as a unit's
+head pointer (§33): a role is read from the thing, never stored twice.
+
+If two people genuinely need to split the work, that is **two sets** — which is
+the more honest arrangement anyway, because each one's scope is then visible
+instead of two people sharing an undivided pile.
+
 ---
+
+## 2b · Who picks the figures — a SECURITY setting, not a convenience
+
+Islam: *"some numbers are confidential for some people and they shouldn't see
+all the group numbers, but for Finance everything is not confidential because
+they see everything, so they are a special case."*
+
+**A set owner who ticks from the full list has, by definition, read every
+number in the group.** That is the whole mechanism of A below. For Finance it
+costs nothing — they see the figures anyway. For anybody else it means somebody
+whose entire job was entering three numbers can read the lot.
+
+So each set carries a switch:
+
+- **The SMO marks** — DEFAULT. The owner never sees the full list. They open
+  their set and find only what they have been given.
+- **The owner picks** — self-service. They browse every figure in the group and
+  tick. For a team like Finance, from whom nothing is confidential.
+
+**Safe by default, opened deliberately.** The exception is the one you switch
+on, not the one you remember to switch off.
+
+**It is enforced on the SERVER, not by hiding the page.** A set set to "SMO
+marks" has its claims refused when they come from its owner. A switch that only
+hides a control is decoration, and §42 exists because of exactly that.
+
+**And there is no half-view to design.** "The owner picks" IS the grant of
+sight over the whole group's figures — so where it is off, the picking page
+does not exist for that owner at all.
 
 ## 3 · The two ways a figure gets an owner
 
-**A · The set owner ticks.** They open their set and see every figure in the
-group, unit by unit, and tick what belongs to it. This is the page that already
-exists; it moves from the SMO to the set's owner.
+**A · Somebody ticks from the full list** — the SMO by default, or the set's
+owner where §2b's switch allows it. Every figure in the group, unit by unit,
+ticked into the set. This is the page that already exists; who may open it is
+now a property of the set.
 
 **B · The unit's strategy custodian names people, figure by figure.** *"The
 custodian doesn't get a ticking page — he gets all his directions and targets
@@ -92,17 +149,22 @@ it leaves it and closes the request.
 
 ## 6 · What the unit sees
 
-**"Set by Finance"** — the FUNCTION of the person assigned to that figure, read
-off the person, not off the set. Islam: *"it reads of the assigned person on
-that measure either from the sets or from the custodian setup."*
+**"Set by Finance"** — the SET's team. Always, with no fallback and nothing
+depending on where the assigned person happens to sit.
 
 The figure is shown, not typed, and the unit does not enter it.
 
-**One stated assumption, for correction rather than a question:** a person with
-no supporting function — the "Finance SMO custodian" who sits with the office —
-would render as *Set by —*. Where the person has no function, the page will
-show the **set's name** instead (*Set by Financial Figures*), and where there is
-neither, the person's own name. It never shows a blank.
+Two places this is what the BU head is actually reading, and both are why the
+department appears at all rather than the set's name:
+
+- **the note.** He writes the explanation for a number he did not enter, so he
+  has to know whose it is.
+- **his entry page.** He finds a figure he cannot type, and needs to know who
+  to chase rather than that something is broken.
+
+A figure named by a unit custodian rather than claimed into a set has no team,
+and reads as the person: *Entered by Nadia*. That is right — it is the unit's
+own arrangement, and the person IS the answer to "who do I ask".
 
 ---
 
@@ -141,20 +203,24 @@ claim was refused. Recorded as a reversal with its reasoning, not overwritten.
 
 ## 9 · What needs deciding when the build reaches it
 
-- **Two owners on one set:** may either of them tick and enter, or is one the
-  owner and the other a stand-in? The spec assumes either.
-- **Whom may a unit custodian name** — anyone the platform knows, or only
-  people attached to their unit? The spec assumes anyone, matching the set
-  owner's picker.
-- **Does naming somebody give them sight of that unit's other figures?** No —
-  they see the figure they were named on and nothing else. Stated so it is a
-  decision rather than a side effect.
+**ANSWERED 2026-08-21:**
+
+- **A unit custodian may name anyone the platform knows** — not only people
+  attached to their unit. Same reach as the set owner's picker.
+- **Naming somebody gives them that FIGURE and nothing else.** Not the unit's
+  other measures, not its plan, not its score. They sign in during the cycle
+  and find one page listing every figure they owe, wherever those figures live.
+
+**Nothing is left assumed.** The two-owner question is gone (a set has one
+owner; two people splitting the work is two sets), and who may pick a set's
+figures is now a stored setting rather than a convention.
 
 ---
 
 ## 10 · Build order
 
-1. **Sets**, and the set owner's ticking page (A).
+1. **Sets** — the Setup page (name, team, owner, who picks), and the ticking
+   page (A) with §2b's switch decided on the server.
 2. **Claims** — refusal, request, the SMO's list.
 3. **The unit custodian's dropdown** (B), hidden.
 
@@ -163,12 +229,114 @@ before the first has been watched working.
 
 ---
 
+## 10b · What step 1 actually shipped
+
+**Setup › Figure sets** — name, team, owner, who picks, and a count. The SMO's
+page. **Removing a set releases its figures** back to the units rather than
+orphaning them: a figure pointing at a set that no longer exists has nobody to
+enter it and no way to say so.
+
+**Setup › Fill a figure set** — the picking page. Choose the set, then the
+units are buttons with their counts on them, and every figure is one tick.
+Three states per row: unclaimed, in this set, or in another — the third named,
+and not offered a control at all.
+
+**Manage › Figures I report** — every figure the viewer enters, across every
+unit, resolved through the sets. Hidden for anybody who enters none.
+
+**The unit's page** — a figure it does not enter is greyed and attributed
+**Set by Finance**, the note stays the unit's, and the outstanding list names
+the team AND the person.
+
+**Claim requests (step 2).** A figure another set holds carries **Request the
+claim** rather than nothing — a refusal with no route forward is a dead end,
+and the platform is the only thing that knows the claim was turned away. The
+request records the figure, the asking set and who asked, and **the SMO
+answers it** on the Reporting cycle page: *Move it* puts the figure in the
+asking set and closes the request in one act; *Leave it* closes it without
+moving anything. Asking twice is refused — asking twice is not asking louder.
+Removing a set takes its outstanding requests with it, because a request to
+move a figure into a set that no longer exists is a question with no answer.
+
+## 10c · What step 3 shipped
+
+**Strategy › Who enters**, one section inside each unit's Strategy tab — the
+unit's own plan in the order it reads, with a searchable name against each
+figure. A SETUP page would have been unreachable by the only person it is for:
+a strategy custodian holds no Setup at all.
+
+**It is off until the tenant switches it on**, on Setup › Figure sets and
+behind the Edit button — one line about the same subject, which is who is
+master of which numbers. **The server reads the same flag**, so a naming posted
+while it is off is refused; hiding the page would have left the save unguarded,
+which is §2b's lesson and §42's.
+
+**Turning it OFF leaves every naming in place.** A switch that destroys data is
+not a switch, and turning it back on must find the page as it was left. The
+namings simply stop being reachable, which is what hidden means.
+
+**First claim wins, in both directions.** A figure a set holds is shown with
+its team and no control at all; a figure the unit named cannot be claimed into
+a set, and a set owner cannot release it either. Both refusals name the holder
+and point at the SMO, so neither is a dead end.
+
+**One search implementation, not two.** The picker reuses the register's
+(§35) — same `#pickQ`, same `.pickrow` filter, same "ordered, not filtered"
+rule so a person can be named from outside the unit. Only opening, choosing and
+clearing are its own, because those are a different act.
+
 ## 11 · How it will be verified
 
-- The server refuses a figure claimed by somebody else — the same way it
-  refuses everything else, from the STORED state (§42).
-- Every role driven in a real browser, not only in tests: the fault that the
-  first version of this shipped with was invisible to 77 passing tests and
-  obvious on the page (§42.5).
-- Round trip, clean slate, fixed point; contrast across every page and state;
-  QA's 31 viewers; byte-identical rebuild.
+**Step 3, done:**
+
+- `scripts/test-authorize.js` — **114 checks, 0 failures**, 13 of them new: the
+  switch refused on the server while it is off, the custodian and the head
+  allowed once it is on, a person who is not on the register refused, a retired
+  one refused, **first claim wins in both directions**, releasing allowed to the
+  unit and refused to the set owner, another unit's figures refused, a
+  contributor with `edit` stored still refused, and the switch itself Setup.
+- Driven against a **running dev server and a real Postgres**, because that is
+  what caught §42.5: signed in as the unit's custodian, named somebody, and
+  **the server accepted the save and holds `{"by":"rethead"}`**. Then forged a
+  naming against ANOTHER unit — no control offers it — and the server refused
+  it, said so on the page (*"Not saved. You cannot decide who enters 'Logistics
+  revenue' (logistics)."*), and wrote nothing.
+- The switch and a `{ by }` assignment survive the database round trip;
+  `assigneeOf` resolves through it and `Figures I report` picks the row up.
+- Contrast 0 failures across 4 combinations × **25** pages and states — the
+  page AND its open picker, because a state that cannot be reached by
+  navigating is a state nothing measures (§41.5).
+- QA's 31 viewers, zero console errors; byte-identical rebuild.
+
+**Step 1, done:**
+
+- `scripts/test-authorize.js` — **101 checks, 0 failures**, 33 of them new: who
+  may enter a set-held figure, who may claim into which set, the switch, one
+  figure one set, releasing your own but not somebody else's, a set is Setup
+  even to its own owner, a locked cycle, and — the one that proves the shape —
+  **handing a set over moves every figure with it in one edit, and the previous
+  owner stops being able to enter them.**
+- Driven in a real browser, because the first version of this shipped a fault
+  invisible to 77 passing tests and obvious on the page (§42.5): the Fill page
+  is not offered before a set exists; the SMO creates one and fills it across
+  two units; **the owner sees Fill and Figures I report but not Figure sets**;
+  switching the set to *the SMO fills it* **takes the Fill page away from the
+  owner**; the unit reads *FINANCE* beside the figure.
+- Sets and `src` survive the database round trip, and `assigneeOf` resolves
+  through the set on the way back. Clean slate, round trip and fixed point PASS
+  on a fresh database.
+- Contrast 0 failures across 4 combinations × 23 pages and states.
+- QA's 31 viewers, zero console errors; byte-identical rebuild.
+
+**Two faults the browser found and no test could have:**
+
+- **The request button rendered off the right edge of the page.** Its column
+  needed 215px in a grid track fixed at 90; a row whose content does not fit
+  its track does not wrap, it overflows. Found because a click could not land
+  on it, not because anything looked wrong.
+- **The client's `world()` was built field by field**, so it carried `sets` but
+  not `claims` — the browser answered "has this been asked for?" from a world
+  with no requests in it while the server answered from one that had them.
+  That is the drift `lib/rules.js` exists to prevent, and it happened TWICE in
+  one afternoon. Both sides now build the world with the same `worldOf()`, from
+  a state-shaped object, so there is nowhere left for them to differ.

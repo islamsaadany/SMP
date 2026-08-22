@@ -153,16 +153,9 @@
           return secs;
         } },
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
-          /* Spec 008 §3B. A SECTION of Strategy, not a Setup page: a
-             custodian holds no Setup at all, so a Setup page would be
-             unreachable by the only person it is for. `when` hides it outright
-             until the tenant switches naming on \u2014 a tab that opens a page
-             nobody may use is worse than no tab. */
           return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
                   { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
-                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
-                  { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
-                    render:renderUnitNaming }];
+                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan }];
         } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely. */
@@ -176,12 +169,9 @@
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
-      /* Spec 008. Sets sit beside the functions because a set belongs to one.
-         Filling a set is a different job done by a different person, so it is
-         a page of its own — offered only to somebody who has a set to fill. */
-      { k:"sets",   ac:"c_sets",   label:"Figure sets",                   render:renderSetsSetup },
-      { k:"source", ac:"c_source", label:"Fill a figure set",
-        when: canPickSets,                                                render:renderSourceSetup },
+      /* §16.7. It sits beside the functions because the thing it assigns IS a
+         function — which team is master of a number. */
+      { k:"source", ac:"c_source", label:"Source of figures",             render:renderSourceSetup },
       /* The register (§35). It sits after the things people are attached TO,
          because that is the order the SMO works in: the units exist, then the
          people who hold them. It used to be a section at the bottom of Roles &
@@ -952,127 +942,24 @@
        top; each row is then a single mark. The half-set problem the first
        build had cannot arise: a mark is only offered once both ends are set,
        and it writes both at once. */
-    /* ── Figure sets (spec 008) ─────────────────────────────────────
-       The set is chosen once at the top; each row below is a single mark, and
-       it writes the set id and nothing else — who ENTERS the figure is read
-       from the set, never copied onto the row. */
     document.querySelectorAll("[data-srcunit]").forEach(function(b){
       b.addEventListener("click", function(){ SRCSET.unit = b.dataset.srcunit; paint(); });
     });
-    var ss = document.getElementById("srcset-set");
-    if (ss) ss.addEventListener("change", function(){ SRCSET.set = ss.value || null; paint(); });
+    var st = document.getElementById("srcset-team");
+    if (st) st.addEventListener("change", function(){ SRCSET.team = st.value || null; paint(); });
+    var sb = document.getElementById("srcset-by");
+    if (sb) sb.addEventListener("change", function(){ SRCSET.by = sb.value || null; paint(); });
     document.querySelectorAll("[data-srcpick]").forEach(function(b){
       b.addEventListener("click", function(){
-        var mineSets = myPickableSets();
-        var st = setById(SRCSET.set) || mineSets[0];
-        if (!st) return;
+        if (!SRCSET.team || !SRCSET.by) return;
         var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], b.dataset.srcpick);
         if (!hit) return;
-        /* Somebody else's is not offered a control at all, so this only ever
-           sees an unclaimed figure or one of its own. */
-        if (hit.src && hit.src.set === st.id) delete hit.src;
-        else hit.src = { set: st.id };
+        var mine = hit.src && hit.src.team === SRCSET.team && hit.src.by === SRCSET.by;
+        if (mine) delete hit.src;
+        else hit.src = { team: SRCSET.team, by: SRCSET.by };
         paint();
       });
     });
-
-    /* Asking for a figure another set holds. It writes an OPEN request and
-       nothing else — moving the figure is the SMO's answer, not the asking. */
-    document.querySelectorAll("[data-claimask]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var st = setById(SRCSET.set) || myPickableSets()[0];
-        var unit = SRCSET.unit || activeKeys()[0];
-        if (!st) return;
-        if (myOpenClaim(b.dataset.claimask, st.id)) return;
-        claimsList().push({ id: mintClaimId(), unit: unit, figure: b.dataset.claimask,
-                            set: st.id, by: viewer().key, state: "open" });
-        paint();
-      });
-    });
-    /* Answering one. Moving the figure and closing the request are ONE act, or
-       a granted request could sit open beside a figure that had already
-       moved. */
-    var answerClaim = function(id, grant){
-      var c = claimsList().filter(function(x){ return x.id === id; })[0];
-      if (!c) return;
-      if (grant) {
-        var hit = SMPRules.rowById(world(), c.unit, c.figure);
-        if (hit) hit.src = { set: c.set };
-      }
-      c.state = grant ? "granted" : "declined";
-      paint();
-    };
-    document.querySelectorAll("[data-claimyes]").forEach(function(b){
-      b.addEventListener("click", function(){ answerClaim(b.dataset.claimyes, true); });
-    });
-    document.querySelectorAll("[data-claimno]").forEach(function(b){
-      b.addEventListener("click", function(){ answerClaim(b.dataset.claimno, false); });
-    });
-
-    /* The sets themselves. */
-    var setField = function(attr, apply){
-      document.querySelectorAll("[" + attr + "]").forEach(function(el){
-        el.addEventListener("change", function(){
-          var st = setById(el.getAttribute(attr));
-          if (!st) return;
-          apply(st, el.value);
-          paint();
-        });
-      });
-    };
-    setField("data-setname",  function(st, v){ st.name = v; });
-    setField("data-setteam",  function(st, v){ st.team = v || null; });
-    setField("data-setowner", function(st, v){ st.owner = v || null; });
-    setField("data-setpick",  function(st, v){ st.pick = v === "owner" ? "owner" : "smo"; });
-    document.querySelectorAll("[data-setdel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = b.dataset.setdel;
-        /* REMOVING A SET RELEASES ITS FIGURES rather than orphaning them. A
-           figure pointing at a set that no longer exists has nobody to enter
-           it and no way to say so — it would simply stop being reportable. */
-        UNIT_KEYS.forEach(function(k){
-          var u = UNITS[k] || {};
-          var clear = function(m){ if (m.src && m.src.set === id) delete m.src; };
-          (u.keyObjectives || []).forEach(clear);
-          (u.items || []).forEach(function(p){ (p.measures || []).forEach(clear); });
-        });
-        GROUP.sets = setsList().filter(function(x){ return x.id !== id; });
-        /* And its outstanding requests go with it: a request to move a figure
-           into a set that no longer exists is a question with no answer. */
-        GROUP.claims = claimsList().filter(function(x){ return x.set !== id; });
-        paint();
-      });
-    });
-    /* The switch that turns the second way of assigning on (spec 008 §3B).
-       Turning it OFF leaves every naming in place rather than clearing them:
-       a switch that destroys data is not a switch, and turning it back on must
-       find the page as it was left. The namings simply stop being reachable,
-       which is what "hidden" means. */
-    document.querySelectorAll("[data-naming]").forEach(function(b){
-      b.addEventListener("click", function(){
-        GROUP.naming = b.dataset.naming === "1";
-        paint();
-      });
-    });
-
-    var nsName = document.getElementById("newset-name");
-    if (nsName) {
-      ["name","team","owner","pick"].forEach(function(f){
-        var el = document.getElementById("newset-" + f);
-        if (el) el.addEventListener("change", function(){ NEWSET[f] = el.value; });
-      });
-      nsName.addEventListener("input", function(){ NEWSET.name = nsName.value; });
-      var add = document.getElementById("newset-add");
-      if (add) add.addEventListener("click", function(){
-        var name = (NEWSET.name || "").trim();
-        if (!name) { nsName.focus(); return; }
-        setsList().push({ id: mintSetId(name), name: name,
-                          team: NEWSET.team || null, owner: NEWSET.owner || null,
-                          pick: NEWSET.pick === "owner" ? "owner" : "smo" });
-        NEWSET = { name:"", team:"", owner:"", pick:"smo" };
-        paint();
-      });
-    }
 
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
@@ -1452,33 +1339,6 @@
         if (!name) return;
         var p = b.dataset.pickNew.split("|");
         addPerson({ name: name, role: p[1], where: p[0] });
-        PICKING = null; PICKQ = ""; paint();
-      });
-    });
-
-    /* The naming picker (spec 008 §3B). Its own open/set/clear, and the SAME
-       search below \u2014 one filter implementation, because two would drift the
-       way two copies of a rule drift. It writes { by } and nothing else: a
-       figure a set holds is not offered a control at all, so this only ever
-       sees a free figure or one this unit named itself. */
-    document.querySelectorAll("[data-name-open]").forEach(function(b){
-      b.addEventListener("click", function(){
-        PICKING = b.dataset.nameOpen; PICKQ = ""; paint();
-      });
-    });
-    document.querySelectorAll("[data-name-set]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.nameSet.split("|");        /* src|<unit>|<figure>|<person> */
-        var hit = SMPRules.rowById(world(), p[1], p[2]);
-        if (hit && !(hit.src && hit.src.set)) hit.src = { by: p[3] };
-        PICKING = null; PICKQ = ""; paint();
-      });
-    });
-    document.querySelectorAll("[data-name-clear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.nameClear.split("|");
-        var hit = SMPRules.rowById(world(), p[1], p[2]);
-        if (hit && hit.src && !hit.src.set) delete hit.src;
         PICKING = null; PICKQ = ""; paint();
       });
     });

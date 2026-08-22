@@ -74,12 +74,14 @@ with sync_playwright() as p:
         # page nothing measures. One figure is sourced to the viewer and left
         # outstanding, so the unit's waiting note gets measured too.
         pg.evaluate("() => { var u = UNITS[UNIT_KEYS[0]];"
+                    "  GROUP.sets = [{ id:'sweep', name:'Swept Figures',"
+                    "                  team: FUNCTION_KEYS[0], owner: viewer().key, pick:'owner' }];"
                     "  if (u.keyObjectives[0]) {"
-                    "    u.keyObjectives[0].src = { team: FUNCTION_KEYS[0], by: viewer().key };"
+                    "    u.keyObjectives[0].src = { set: 'sweep' };"
                     "    u.keyObjectives[0].actual = null; }"
                     "  paint(); }")
         pg.wait_for_timeout(300)
-        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand","source"]),
+        for grp,subs in [("setup",["labels","access","bands","units","fns","caps","people","brand","sets","source"]),
                          ("manage",["cycle","import","focusset","kb","myfig"])]:
             for sub in subs:
                 pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
@@ -88,6 +90,6 @@ with sync_playwright() as p:
                 except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 22 pages and states\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 23 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

@@ -1,6 +1,7 @@
 # 008 · Figure sets — who is responsible for which numbers
 
-**Status:** AGREED 2026-08-21, not yet built. Written from Islam's own account
+**Status:** step 1 BUILT (2026-08-21) — sets, the picking page and the
+switch. Steps 2 (claim requests) and 3 (the unit custodian's dropdown) are not. Written from Islam's own account
 of the concept and checked with him line by line; §6 and §9 carry his answers.
 **Supersedes** the team+person shape built in §16.7 on 2026-08-21 (nothing is
 deployed with it, so nothing migrates).
@@ -227,12 +228,47 @@ before the first has been watched working.
 
 ---
 
+## 10b · What step 1 actually shipped
+
+**Setup › Figure sets** — name, team, owner, who picks, and a count. The SMO's
+page. **Removing a set releases its figures** back to the units rather than
+orphaning them: a figure pointing at a set that no longer exists has nobody to
+enter it and no way to say so.
+
+**Setup › Fill a figure set** — the picking page. Choose the set, then the
+units are buttons with their counts on them, and every figure is one tick.
+Three states per row: unclaimed, in this set, or in another — the third named,
+and not offered a control at all.
+
+**Manage › Figures I report** — every figure the viewer enters, across every
+unit, resolved through the sets. Hidden for anybody who enters none.
+
+**The unit's page** — a figure it does not enter is greyed and attributed
+**Set by Finance**, the note stays the unit's, and the outstanding list names
+the team AND the person.
+
+Not built, and stated rather than implied: **claim requests**. Claiming a
+figure another set holds is refused with the holder named; the *Request the
+claim* button and the SMO's list are step 2.
+
 ## 11 · How it will be verified
 
-- The server refuses a figure claimed by somebody else — the same way it
-  refuses everything else, from the STORED state (§42).
-- Every role driven in a real browser, not only in tests: the fault that the
-  first version of this shipped with was invisible to 77 passing tests and
-  obvious on the page (§42.5).
-- Round trip, clean slate, fixed point; contrast across every page and state;
-  QA's 31 viewers; byte-identical rebuild.
+**Step 1, done:**
+
+- `scripts/test-authorize.js` — **88 checks, 0 failures**, 20 of them new: who
+  may enter a set-held figure, who may claim into which set, the switch, one
+  figure one set, releasing your own but not somebody else's, a set is Setup
+  even to its own owner, a locked cycle, and — the one that proves the shape —
+  **handing a set over moves every figure with it in one edit, and the previous
+  owner stops being able to enter them.**
+- Driven in a real browser, because the first version of this shipped a fault
+  invisible to 77 passing tests and obvious on the page (§42.5): the Fill page
+  is not offered before a set exists; the SMO creates one and fills it across
+  two units; **the owner sees Fill and Figures I report but not Figure sets**;
+  switching the set to *the SMO fills it* **takes the Fill page away from the
+  owner**; the unit reads *FINANCE* beside the figure.
+- Sets and `src` survive the database round trip, and `assigneeOf` resolves
+  through the set on the way back. Clean slate, round trip and fixed point PASS
+  on a fresh database.
+- Contrast 0 failures across 4 combinations × 23 pages and states.
+- QA's 31 viewers, zero console errors; byte-identical rebuild.

@@ -1536,10 +1536,11 @@ function renderReport(u){
        source and by nobody in the unit (§16.7). Both are refused by the
        server, so neither is offered here. */
     if (!canEnterFigure(u.ukey, x)) {
-      var src = srcOf(x), lab = src ? srcLabel(x) : "";
+      var src = srcOf(x);
       return '<span class="mono' + (src ? " sourced" : "") + '">' +
         (has ? esc(cur) + (isT ? "%" : "") : "\u2014") + '</span>' +
-        (src ? ' <span class="srcby" title="Set by ' + esc(lab) + '">' + esc(lab) + '</span>' : '');
+        (src ? ' <span class="srcby" title="Entered by ' + esc(srcTeamName(src)) +
+               '">' + esc(srcTeamName(src)) + '</span>' : '');
     }
     return '<span class="entry' + (has ? " filled" : "") + '">' +
       '<input class="field" data-rep="' + x.id + '" data-unit="' + esc(unit) + '" value="' + esc(shown) +
@@ -1710,13 +1711,8 @@ function renderReport(u){
   var waitingNote = waiting.length && may
     ? '<div class="note attn-note"><b>' + waiting.length + ' figure' +
       (waiting.length > 1 ? 's are' : ' is') + ' entered by another team, and not in yet.</b> ' +
-      /* Names the PERSON as well as the set's team: "ask Finance" is not an
-         instruction anybody can act on once there are several sets; "ask
-         Hossam" is. */
       waiting.map(function(x){
-        var who = personName(figureAssignee(x));
-        return esc(x.obj.name) + " (" + esc(srcLabel(x)) +
-               (who ? " \u2014 " + esc(who) : "") + ")";
+        return esc(x.obj.name) + " (" + esc(srcTeamName(srcOf(x))) + ")";
       }).join(" &middot; ") +
       '. Your report is not complete until they arrive \u2014 ask them, the SMO cannot ' +
       'be the only one chasing.</div>'

@@ -169,12 +169,9 @@
          and it was being pushed off the top of a ten-row table. */
       { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
       { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
-      /* Spec 008. Sets sit beside the functions because a set belongs to one.
-         Filling a set is a different job done by a different person, so it is
-         a page of its own — offered only to somebody who has a set to fill. */
-      { k:"sets",   ac:"c_sets",   label:"Figure sets",                   render:renderSetsSetup },
-      { k:"source", ac:"c_source", label:"Fill a figure set",
-        when: canPickSets,                                                render:renderSourceSetup },
+      /* §16.7. It sits beside the functions because the thing it assigns IS a
+         function — which team is master of a number. */
+      { k:"source", ac:"c_source", label:"Source of figures",             render:renderSourceSetup },
       /* The register (§35). It sits after the things people are attached TO,
          because that is the order the SMO works in: the units exist, then the
          people who hold them. It used to be a section at the bottom of Roles &
@@ -945,79 +942,24 @@
        top; each row is then a single mark. The half-set problem the first
        build had cannot arise: a mark is only offered once both ends are set,
        and it writes both at once. */
-    /* ── Figure sets (spec 008) ─────────────────────────────────────
-       The set is chosen once at the top; each row below is a single mark, and
-       it writes the set id and nothing else — who ENTERS the figure is read
-       from the set, never copied onto the row. */
     document.querySelectorAll("[data-srcunit]").forEach(function(b){
       b.addEventListener("click", function(){ SRCSET.unit = b.dataset.srcunit; paint(); });
     });
-    var ss = document.getElementById("srcset-set");
-    if (ss) ss.addEventListener("change", function(){ SRCSET.set = ss.value || null; paint(); });
+    var st = document.getElementById("srcset-team");
+    if (st) st.addEventListener("change", function(){ SRCSET.team = st.value || null; paint(); });
+    var sb = document.getElementById("srcset-by");
+    if (sb) sb.addEventListener("change", function(){ SRCSET.by = sb.value || null; paint(); });
     document.querySelectorAll("[data-srcpick]").forEach(function(b){
       b.addEventListener("click", function(){
-        var mineSets = myPickableSets();
-        var st = setById(SRCSET.set) || mineSets[0];
-        if (!st) return;
+        if (!SRCSET.team || !SRCSET.by) return;
         var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], b.dataset.srcpick);
         if (!hit) return;
-        /* Somebody else's is not offered a control at all, so this only ever
-           sees an unclaimed figure or one of its own. */
-        if (hit.src && hit.src.set === st.id) delete hit.src;
-        else hit.src = { set: st.id };
+        var mine = hit.src && hit.src.team === SRCSET.team && hit.src.by === SRCSET.by;
+        if (mine) delete hit.src;
+        else hit.src = { team: SRCSET.team, by: SRCSET.by };
         paint();
       });
     });
-
-    /* The sets themselves. */
-    var setField = function(attr, apply){
-      document.querySelectorAll("[" + attr + "]").forEach(function(el){
-        el.addEventListener("change", function(){
-          var st = setById(el.getAttribute(attr));
-          if (!st) return;
-          apply(st, el.value);
-          paint();
-        });
-      });
-    };
-    setField("data-setname",  function(st, v){ st.name = v; });
-    setField("data-setteam",  function(st, v){ st.team = v || null; });
-    setField("data-setowner", function(st, v){ st.owner = v || null; });
-    setField("data-setpick",  function(st, v){ st.pick = v === "owner" ? "owner" : "smo"; });
-    document.querySelectorAll("[data-setdel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = b.dataset.setdel;
-        /* REMOVING A SET RELEASES ITS FIGURES rather than orphaning them. A
-           figure pointing at a set that no longer exists has nobody to enter
-           it and no way to say so — it would simply stop being reportable. */
-        UNIT_KEYS.forEach(function(k){
-          var u = UNITS[k] || {};
-          var clear = function(m){ if (m.src && m.src.set === id) delete m.src; };
-          (u.keyObjectives || []).forEach(clear);
-          (u.items || []).forEach(function(p){ (p.measures || []).forEach(clear); });
-        });
-        GROUP.sets = setsList().filter(function(x){ return x.id !== id; });
-        paint();
-      });
-    });
-    var nsName = document.getElementById("newset-name");
-    if (nsName) {
-      ["name","team","owner","pick"].forEach(function(f){
-        var el = document.getElementById("newset-" + f);
-        if (el) el.addEventListener("change", function(){ NEWSET[f] = el.value; });
-      });
-      nsName.addEventListener("input", function(){ NEWSET.name = nsName.value; });
-      var add = document.getElementById("newset-add");
-      if (add) add.addEventListener("click", function(){
-        var name = (NEWSET.name || "").trim();
-        if (!name) { nsName.focus(); return; }
-        setsList().push({ id: mintSetId(name), name: name,
-                          team: NEWSET.team || null, owner: NEWSET.owner || null,
-                          pick: NEWSET.pick === "owner" ? "owner" : "smo" });
-        NEWSET = { name:"", team:"", owner:"", pick:"smo" };
-        paint();
-      });
-    }
 
     document.querySelectorAll("[data-focus]").forEach(function(b){
       b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });

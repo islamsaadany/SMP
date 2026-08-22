@@ -197,65 +197,126 @@ console.log("\n6 · a contributor");
   check("with the shipped default a contributor reports nothing", !v3.ok, v3.refusals.join(" / "));
 })();
 
-/* ── 6b · The source of a figure (§16.7) ────────────────────────── */
-console.log("\n6b · a sourced figure");
+/* ── 6b · Figure sets (spec 008) ────────────────────────────────── */
+console.log("\n6b · figure sets");
 (function () {
-  /* Give the head of Finance the first measure in the unit under test. */
   const base = clone(SEED);
   const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
-  if (!fin) { console.log("  (no finance person in the seed — skipped)"); return; }
-  const m = base.units[UNIT].items[0].measures[0];
-  m.src = { team: "finance", by: fin.key };
-  const other = base.units[UNIT].items[0].measures[1];
-  console.log("  " + m.name + " is now reported by " + fin.name + " (finance)");
+  const tre = base.people.filter(function (p) { return p.fn === "treasury"; })[0];
+  if (!fin || !tre) { console.log("  (no finance/treasury people in the seed — skipped)"); return; }
 
-  const move = function (state, id, to) {
+  /* Two sets: one the SMO fills, one its owner fills. */
+  base.group.sets = [
+    { id: "fin", name: "Financial Figures", team: "finance",  owner: fin.key, pick: "owner" },
+    { id: "tre", name: "Treasury Figures",  team: "treasury", owner: tre.key, pick: "smo" }
+  ];
+  const m  = base.units[UNIT].items[0].measures[0];
+  const m2 = base.units[UNIT].items[0].measures[1];
+  const free = base.units[UNIT].items[0].measures[2];
+  m.src = { set: "fin" };
+  console.log("  " + m.name + " is in Financial Figures (owner " + fin.name + ")");
+
+  const setActual = function (state, id, to) {
     state.units[UNIT].items[0].measures.forEach(function (x) { if (x.id === id) x.actual = to; });
   };
-  const note = function (state, id, txt) {
+  const setNote = function (state, id, txt) {
     state.units[UNIT].items[0].measures.forEach(function (x) { if (x.id === id) x.note = txt; });
+  };
+  const setSrc = function (state, id, src) {
+    state.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === id) { if (src) x.src = src; else delete x.src; } });
   };
   const verdict = function (who, mutate) {
     const inc = clone(base); mutate(inc);
     return A.authorize(base, inc, personOf(base, who));
   };
 
-  let v = verdict(headKey, function (s) { move(s, m.id, "77%"); });
-  check("the unit head cannot enter a sourced figure", !v.ok, v.refusals.join(" / "));
+  /* — entering the figure — */
+  let v = verdict(headKey, function (s) { setActual(s, m.id, "77%"); });
+  check("the unit head cannot enter a figure held by a set", !v.ok, v.refusals.join(" / "));
   console.log("        " + v.refusals.join(" / "));
 
-  v = verdict(fin.key, function (s) { move(s, m.id, "77%"); });
-  check("the named source can", v.ok, v.refusals.join(" / "));
+  v = verdict(fin.key, function (s) { setActual(s, m.id, "77%"); });
+  check("the set's owner can", v.ok, v.refusals.join(" / "));
 
-  v = verdict(fin.key, function (s) { move(s, other.id, "77%"); });
-  check("but not a figure they are not named on", !v.ok, v.refusals.join(" / "));
+  v = verdict(tre.key, function (s) { setActual(s, m.id, "77%"); });
+  check("another set's owner cannot", !v.ok, v.refusals.join(" / "));
 
-  v = verdict(headKey, function (s) { note(s, m.id, "Why it landed there."); });
-  check("the UNIT still writes the note on a sourced figure", v.ok, v.refusals.join(" / "));
+  v = verdict(headKey, function (s) { setNote(s, m.id, "Why it landed there."); });
+  check("the UNIT still writes the note on a set-held figure", v.ok, v.refusals.join(" / "));
 
-  v = verdict(fin.key, function (s) { note(s, m.id, "Finance's opinion."); });
-  check("and the source does not", !v.ok, v.refusals.join(" / "));
+  v = verdict(fin.key, function (s) { setNote(s, m.id, "Finance's opinion."); });
+  check("and the set's owner does not", !v.ok, v.refusals.join(" / "));
 
-  v = verdict(headKey, function (s) { move(s, other.id, "12%"); });
-  check("the unit still reports its own unsourced figures", v.ok, v.refusals.join(" / "));
+  v = verdict(headKey, function (s) { setActual(s, m2.id, "12%"); });
+  check("the unit still reports its own unclaimed figures", v.ok, v.refusals.join(" / "));
 
-  v = verdict("smo", function (s) { move(s, m.id, "77%"); });
-  check("the SMO can correct anything", v.ok, v.refusals.join(" / "));
+  /* — claiming — */
+  v = verdict(fin.key, function (s) { setSrc(s, free.id, { set: "fin" }); });
+  check("an owner whose set is theirs to fill may claim into it", v.ok, v.refusals.join(" / "));
 
-  /* Naming yourself as the source, in the same save that uses it. */
-  const inc = clone(base);
-  inc.units[UNIT].items[0].measures.forEach(function (x) {
-    if (x.id === other.id) { x.src = { team: "finance", by: headKey }; x.actual = "99%"; }
+  v = verdict(tre.key, function (s) { setSrc(s, free.id, { set: "tre" }); });
+  check("an owner whose set is the SMO's to fill may NOT", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { setSrc(s, free.id, { set: "tre" }); });
+  check("nobody may claim into somebody else's set", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { setSrc(s, m.id, { set: "tre" }); });
+  check("a figure another set already holds is refused, by name", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) { setSrc(s, m.id, null); });
+  check("an owner may release what their own set holds", v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { setSrc(s, m.id, null); });
+  check("but not what somebody else's holds", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(headKey, function (s) { setSrc(s, free.id, { set: "fin" }); });
+  check("a unit head cannot claim figures into a set at all", !v.ok, v.refusals.join(" / "));
+
+  v = verdict("smo", function (s) { setSrc(s, m.id, { set: "tre" }); });
+  check("the SMO can move a figure between sets", v.ok, v.refusals.join(" / "));
+
+  /* — the sets themselves — */
+  v = verdict(fin.key, function (s) {
+    s.group.sets = s.group.sets.map(function (x) {
+      return x.id === "tre" ? Object.assign({}, x, { owner: fin.key }) : x; });
   });
-  v = A.authorize(base, inc, personOf(base, headKey));
-  check("nobody can name themselves the source and use it in one save", !v.ok,
-        v.refusals.join(" / "));
+  check("an owner cannot make themselves the owner of another set", !v.ok, v.refusals.join(" / "));
 
-  /* And a locked cycle stops the source too. */
+  v = verdict(fin.key, function (s) {
+    s.group.sets = s.group.sets.map(function (x) {
+      return x.id === "tre" ? Object.assign({}, x, { pick: "owner" }) : x; });
+  });
+  check("nor open another set's picking to its owner", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(fin.key, function (s) {
+    s.group.sets = s.group.sets.map(function (x) {
+      return x.id === "fin" ? Object.assign({}, x, { name: "Everything, actually" }) : x; });
+  });
+  check("nor rename their OWN set — a set is Setup", !v.ok, v.refusals.join(" / "));
+
+  v = verdict("smo", function (s) { s.group.sets.push(
+    { id: "mkt", name: "Market Figures", team: "marketing", owner: "smo", pick: "smo" }); });
+  check("the SMO creates sets", v.ok, v.refusals.join(" / "));
+
+  /* — a locked cycle stops the set owner too — */
   const locked = clone(base); locked.cycle.locked = true;
-  const li = clone(locked); move(li, m.id, "88%");
+  const li = clone(locked); setActual(li, m.id, "88%");
   v = A.authorize(locked, li, personOf(locked, fin.key));
-  check("a locked cycle stops the source as well", !v.ok, v.refusals.join(" / "));
+  check("a locked cycle stops the set's owner as well", !v.ok, v.refusals.join(" / "));
+
+  /* — handing the set over is ONE edit — */
+  const handed = clone(base);
+  handed.group.sets = handed.group.sets.map(function (x) {
+    return x.id === "fin" ? Object.assign({}, x, { owner: tre.key }) : x; });
+  const inc2 = clone(handed); setActual(inc2, m.id, "31%");
+  v = A.authorize(handed, inc2, personOf(handed, tre.key));
+  check("handing a set over moves every figure with it, in one edit", v.ok, v.refusals.join(" / "));
+  const inc3 = clone(handed); setActual(inc3, m.id, "31%");
+  v = A.authorize(handed, inc3, personOf(handed, fin.key));
+  check("and the previous owner stops being able to enter them", !v.ok, v.refusals.join(" / "));
 })();
 
 /* ── 7 · A retired person can do nothing ───────────────────────── */

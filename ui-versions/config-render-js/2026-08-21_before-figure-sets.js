@@ -1124,162 +1124,64 @@ function renderFocusSetup(){
    The pool is large (every key objective and every key measure in every unit),
    so it is filtered by unit, exactly as Focus measures is — one unit at a
    time is how the question is actually asked. */
-/* ── Setup › Figure sets (spec 008) ──────────────────────────────────
-   A set is named, belongs to a TEAM, has ONE owner, and says WHO MAY PICK its
-   figures. Four fields and a count, which is the whole page — the picking
-   happens elsewhere, because it is a different job done by a different person.
-
-   WHO PICKS DEFAULTS TO THE SMO, and that is a security setting rather than a
-   convenience: ticking from the full list IS reading every number in the
-   group. For a team like Finance that costs nothing; for anybody else it hands
-   the whole group's figures to somebody whose job was entering three of them.
-   The exception is the one you switch on, not the one you remember to switch
-   off — and the server enforces it, or the switch is decoration (§42). */
-function renderSetsSetup(){
-  var mayEdit = grant("c_sets") === "edit";
-  var editing = mayEdit && EDITING.sets;
-  var sets = setsList();
-
-  var teamOptions = function(sel, attr){
-    return '<select class="fld" ' + attr + '><option value="">\u2014</option>' +
-      FUNCTION_KEYS.map(function(k){
-        return '<option value="' + esc(k) + '"' + (k === sel ? " selected" : "") + '>' +
-          esc(FUNCTIONS[k].name) + '</option>';
-      }).join("") + '</select>';
-  };
-  var ownerOptions = function(sel, attr){
-    return '<select class="fld" ' + attr + '><option value="">\u2014</option>' +
-      PEOPLE.filter(personActive).map(function(p){
-        return '<option value="' + esc(p.key) + '"' + (p.key === sel ? " selected" : "") + '>' +
-          esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
-      }).join("") + '</select>';
-  };
-  var pickOptions = function(sel, attr){
-    return '<select class="fld" ' + attr + '>' +
-      '<option value="smo"' + (sel !== "owner" ? " selected" : "") + '>The SMO fills it</option>' +
-      '<option value="owner"' + (sel === "owner" ? " selected" : "") + '>Its owner picks</option>' +
-      '</select>';
-  };
-
-  var rows = sets.map(function(st, i){
-    var n = SMPRules.rowsOfSet(world(), st.id).length;
-    return '<tr>' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + (editing
-        ? '<input class="fld" value="' + esc(st.name) + '" data-setname="' + esc(st.id) + '">'
-        : '<b>' + esc(st.name) + '</b>') +
-        '<span class="why mono">id ' + esc(st.id) + '</span></td>' +
-      '<td>' + (editing
-        ? teamOptions(st.team, 'data-setteam="' + esc(st.id) + '"')
-        : (FUNCTIONS[st.team] ? esc(FUNCTIONS[st.team].name)
-                              : '<span class="why" style="margin:0">No team</span>')) + '</td>' +
-      '<td>' + (editing
-        ? ownerOptions(st.owner, 'data-setowner="' + esc(st.id) + '"')
-        : (personName(st.owner)
-            ? esc(personName(st.owner))
-            : '<span class="missing">Nobody yet</span>')) + '</td>' +
-      '<td>' + (editing
-        ? pickOptions(st.pick, 'data-setpick="' + esc(st.id) + '"')
-        : (st.pick === "owner"
-            ? '<span class="pill attn">Its owner picks</span>'
-            : '<span class="pill kind">The SMO fills it</span>')) + '</td>' +
-      '<td class="num">' + n + '</td>' +
-      '<td class="cc">' + (editing
-        ? '<button class="linkbu" data-setdel="' + esc(st.id) + '">Remove</button>'
-        : '') + '</td></tr>';
-  }).join("");
-
-  var addRow = editing
-    ? '<tr class="newrow"><td class="idx">+</td>' +
-      '<td><input class="fld" id="newset-name" value="' + esc(NEWSET.name) +
-        '" placeholder="Financial Figures"></td>' +
-      '<td>' + teamOptions(NEWSET.team, 'id="newset-team"') + '</td>' +
-      '<td>' + ownerOptions(NEWSET.owner, 'id="newset-owner"') + '</td>' +
-      '<td>' + pickOptions(NEWSET.pick, 'id="newset-pick"') + '</td>' +
-      '<td class="num">\u2014</td>' +
-      '<td class="cc"><button class="editbtn" id="newset-add">Add</button></td></tr>'
-    : '';
-
-  var claimed = SMPRules.sourceRows(world()).length;
-
-  return cfgHead("Figure sets",
-      [sets.length + (sets.length === 1 ? " set" : " sets"),
-       claimed + " figure" + (claimed === 1 ? "" : "s") + " claimed"],
-      "sets", mayEdit, null, null) +
-    '<div class="cfg"><table><thead><tr>' +
-      '<th style="width:34px">#</th><th style="width:26%">Set</th>' +
-      '<th style="width:16%">Team</th><th style="width:22%">Owner</th>' +
-      '<th style="width:20%">Who picks its figures</th>' +
-      '<th class="cc" style="width:9%">Figures</th><th class="cc" style="width:9%"></th>' +
-    '</tr></thead><tbody>' + (rows || (editing ? "" :
-      '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
-      'belongs to Finance stops being typed by ten business units.</td></tr>')) +
-      addRow + '</tbody></table></div>' +
-    '<div class="note"><b>Who picks is a security setting, not a convenience.</b> ' +
-      'Ticking from the full list means reading every number in the group \u2014 which ' +
-      'costs nothing for a team that sees them all anyway, and hands the lot to somebody ' +
-      'whose job was three of them otherwise. It defaults to <b>you</b>, and you open it ' +
-      'deliberately. <b>Removing a set releases its figures</b> back to the units; nothing ' +
-      'is lost.</div>';
-}
-
-/* ── The picking page ────────────────────────────────────────────────
-   One set at a time, one unit at a time, one tick per figure. WHO is chosen at
-   the top — the set — and every row below is a single mark, the same shape as
-   Focus measures (A13). A row shows the measure and its target and nothing
-   else: direction, compile rule and pillar are the plan's business, not the
-   person filling the set.
-
-   Reachable only for a set you may pick into: for the SMO that is all of them,
-   for anybody else only their own and only where the switch allows. "The owner
-   picks" IS the grant of sight over the whole group's figures, so where it is
-   off this page does not exist rather than showing a trimmed version. */
 function renderSourceSetup(){
-  var mine = myPickableSets();
-  if (!mine.length) {
-    return '<div class="note">No figure set is yours to fill. Sets are created on ' +
-      '<b>Setup &rsaquo; Figure sets</b>.</div>';
-  }
-  var st = setById(SRCSET.set) || mine[0];
-  if (!SMPRules.mayPickInto(world(), viewer(), st)) st = mine[0];
+  var editable = grant("c_source") === "edit";
   var u = UNITS[SRCSET.unit] || UNITS[activeKeys()[0]];
   if (!u) return '<div class="note">No business units yet.</div>';
 
-  var setPick = mine.length === 1
-    ? '<span class="cfg-lab"><b>' + esc(st.name) + '</b></span>'
-    : '<select class="fld" id="srcset-set">' + mine.map(function(x){
-        return '<option value="' + esc(x.id) + '"' + (x.id === st.id ? " selected" : "") + '>' +
-          esc(x.name) + '</option>';
-      }).join("") + '</select>';
+  /* ONE decision at the top, then ticks. The first build asked for a team and
+     a person on EVERY row, which meant 116 pairs of dropdowns across ten
+     units before the feature did anything for anybody. Islam: "that's a huge
+     setup to do and not practical ... he just needs the measure and target so
+     he can tick if he owns this or not."
 
+     So the WHO is chosen once, and each row is a single mark — the same shape
+     as Focus measures, which asks the same kind of question (§A13: follow what
+     the platform already does). */
+  var team = SRCSET.team, by = SRCSET.by;
+  var ready = !!(team && by);
+
+  var teamPick = '<select class="fld" id="srcset-team"' + (editable ? '' : ' disabled') + '>' +
+    '<option value="">Choose a team\u2026</option>' + FUNCTION_KEYS.map(function(k){
+      return '<option value="' + esc(k) + '"' + (k === team ? " selected" : "") + '>' +
+        esc(FUNCTIONS[k].name) + '</option>';
+    }).join("") + '</select>';
+  var byPick = '<select class="fld" id="srcset-by"' + (editable ? '' : ' disabled') + '>' +
+    '<option value="">Choose a person\u2026</option>' + PEOPLE.filter(personActive).map(function(p){
+      return '<option value="' + esc(p.key) + '"' + (p.key === by ? " selected" : "") + '>' +
+        esc(p.name) + (p.title ? " \u2014 " + esc(p.title) : "") + '</option>';
+    }).join("") + '</select>';
+
+  /* Units as buttons rather than a dropdown (Islam): ten of them fit on one
+     line, and a list you can see is a list you can move through. The count is
+     on the button, so where the work is left is visible without opening
+     anything. */
   var unitBtns = '<div class="unitpick">' + activeKeys().map(function(k){
-      var n = SMPRules.rowsOfSet(world(), st.id).filter(function(r){ return r.unit === k; }).length;
+      var n = SMPRules.sourceRows(world()).filter(function(r){ return r.unit === k; }).length;
       return '<button class="upick' + (k === u.ukey ? " on" : "") + '" data-srcunit="' + esc(k) + '">' +
         esc(UNITS[k].navName || UNITS[k].name) +
         (n ? ' <span class="upick-n">' + n + '</span>' : '') + '</button>';
     }).join("") + '</div>';
 
-  /* Three states per row, not two: unclaimed, in this set, or in ANOTHER —
-     the third shown as that set's name rather than a tick that could be
-     overwritten without noticing. */
+  /* A row is one of three things: unclaimed, mine, or somebody else's. The
+     third is shown as the team's name rather than a tick you could overwrite
+     without noticing. */
   var row = function(m){
-    var held = SMPRules.isSourced(m) ? m.src : null;
-    var mineRow = !!(held && held.set === st.id);
-    var theirs = held && !mineRow;
-    var otherName = theirs && held.set
-      ? ((setById(held.set) || {}).name || "another set")
-      : (theirs ? (personName(held.by) || held.by) : "");
-    return '<div class="pick ' + (mineRow ? "on" : "off") + '">' +
-      (!theirs
-        ? '<button class="fmark-btn' + (mineRow ? ' on' : '') + '" data-srcpick="' + esc(m.id) + '" ' +
-          'aria-pressed="' + mineRow + '" aria-label="' + (mineRow ? "Release " : "Claim ") +
-          esc(m.name) + '"></button>'
-        : '<span class="fmark-btn" style="cursor:default"></span>') +
+    var src = m.src && m.src.by ? m.src : null;
+    var mine = !!(src && ready && src.team === team && src.by === by);
+    var theirs = src && !mine;
+    return '<div class="pick ' + (mine ? "on" : "off") + '">' +
+      (editable && ready && !theirs
+        ? '<button class="fmark-btn' + (mine ? ' on' : '') + '" data-srcpick="' + esc(m.id) + '" ' +
+          'aria-pressed="' + mine + '" aria-label="' + (mine ? "Release " : "Claim ") + esc(m.name) + '"></button>'
+        : '<span class="fmark-btn' + (mine ? ' on' : '') + '" style="cursor:default"></span>') +
       '<span>' + esc(m.name) + '</span>' +
       '<span class="num why" style="margin:0">' +
         (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
-      '<span class="why" style="margin:0;min-width:130px;text-align:right">' +
-        (theirs ? esc(otherName) : (mineRow ? "in this set" : "click to claim")) + '</span>' +
+      '<span class="why" style="margin:0;min-width:120px;text-align:right">' +
+        (theirs
+          ? esc(srcTeamName(src))
+          : (mine ? "marked" : (editable && ready ? "click to mark" : ""))) + '</span>' +
     '</div>';
   };
 
@@ -1295,24 +1197,28 @@ function renderSourceSetup(){
           : '<div class="fstrip-empty">No key measures.</div>');
     }).join("");
 
-  var inSet = SMPRules.rowsOfSet(world(), st.id).length;
-  var team = FUNCTIONS[st.team] ? FUNCTIONS[st.team].name : st.team;
+  var all = SMPRules.sourceRows(world());
+  var forThis = ready ? all.filter(function(r){
+      return r.src.team === team && r.src.by === by; }).length : 0;
 
-  return '<div class="kv">' +
-      '<span class="pill kind">' + esc(team || "No team") + '</span>' +
-      '<span class="pill kind">owner ' + esc(personName(st.owner) || "\u2014") + '</span>' +
-      '<span class="pill good">' + inSet + ' figure' + (inSet === 1 ? "" : "s") + ' in this set</span>' +
-      '</div>' +
-    section("", "Fill a figure set", null,
+  return '<div class="kv"><span class="pill kind">SMO</span>' +
+      '<span class="pill kind">' + all.length + ' figure' + (all.length === 1 ? "" : "s") +
+      ' sourced across the group</span>' +
+      (ready ? '<span class="pill good">' + forThis + ' marked for ' + esc(FUNCTIONS[team].name) +
+               '</span>' : '') + '</div>' +
+    section("", "Source of figures", null,
       '<div class="imp-row" style="margin:0 0 12px">' +
-        '<span class="cfg-lab">Filling</span>' + setPick + '</div>' +
+        '<span class="cfg-lab">Marking for</span>' + teamPick + byPick + '</div>' +
+      (ready ? '' : '<div class="note">Choose the team and the person first. ' +
+        'Every mark below is stored against them, so one pass through the units ' +
+        'sets everything that team owns.</div>') +
       unitBtns +
       '<div class="cfg" style="padding:0">' + blocks + '</div>' +
-      '<div class="note"><b>A figure in a set is entered once, by the set\u2019s owner.</b> ' +
+      '<div class="note"><b>A marked figure is entered once, by the person named above.</b> ' +
         'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
-        'note</b> \u2014 the number is the set\u2019s, the performance is the unit\u2019s, and the ' +
-        'explanation belongs to whoever owns the performance. A figure another set already ' +
-        'holds shows that set\u2019s name; only the SMO can move it.</div>');
+        'note</b> \u2014 the number is theirs, the performance is the unit\u2019s, and the ' +
+        'explanation belongs to whoever owns the performance. A row already marked for another ' +
+        'team shows that team\u2019s name; switch to them above to release it.</div>');
 }
 
 /* The other half of §16.7: a source team is a reporting party like any other,
@@ -1322,9 +1228,8 @@ function renderSourceSetup(){
 function renderMySources(){
   var rows = mySourceRows();
   if (!rows.length) {
-    return '<div class="note">No figure is yours to enter. Figures are grouped into ' +
-      '<b>sets</b>, and a set\u2019s owner enters everything in it \u2014 the SMO creates ' +
-      'them on <b>Setup &rsaquo; Figure sets</b>.</div>';
+    return '<div class="note">You are not named as the source of any figure. ' +
+      'The SMO assigns these on <b>Setup &rsaquo; Source of figures</b>.</div>';
   }
   var open = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super"));
   var byUnit = {};

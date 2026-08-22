@@ -97,6 +97,12 @@ of it was rejected — which is the point of keeping it.
 | `mock-capability.html` | The capability pages and their Setup screens |
 | `mock-capline.html` | The one-line capability band, and projects expanded |
 
+### Pending — drawn, waiting on an answer
+
+| File | What it asks |
+|---|---|
+| `2026-08-22_five-questions_PENDING.html` | Four design questions from Islam's v3.15 walkthrough, drawn at real scale in the product's own tokens. **The pillar title** back on the Plan pane, condensed three ways (eyebrow / one quiet line / compact bar). **Setup navigation** — the gear menu split into Manage (things you do in a cycle) and Setup (a page with a grouped rail), grouped by the question you came to answer rather than by which table they edit; the icon-strip collapse is drawn to show it failing. **Fill a figure set** as one flat searchable table across every unit, with Measure and Target as separate columns and key objectives folded in by an *In* column. **The People row** at 36px, View as removed, and Reset as a button rather than a text link. |
+
 ### Rejected — kept so the ground is not retrod
 
 | File | Why it was rejected |

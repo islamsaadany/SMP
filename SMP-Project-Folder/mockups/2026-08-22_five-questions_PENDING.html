@@ -1,0 +1,760 @@
+<title>Five Questions, Drawn</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ══ TWO LAYERS, AND THE LINE BETWEEN THEM IS THE POINT ═══════════════
+   INSIDE a frame is the PRODUCT, drawn in SMP's own tokens (v3.15's light
+   palette, verbatim from _shared.css) so an option is judged where it will
+   live rather than on a moodboard. OUTSIDE the frame is the REVIEW LAYER —
+   cool slate, mono labels, no gold anywhere. If it is gold and navy it is a
+   proposal; if it is slate and mono it is me talking. */
+:root{
+  /* — the review layer — */
+  --r-bg:#EEF1F5; --r-card:#FFFFFF; --r-line:#D3DAE4; --r-line-2:#E3E8EF;
+  --r-ink:#111826; --r-ink-2:#48546A; --r-ink-3:#6E7A8F;
+  --r-mark:#2F5AA8; --r-mark-bg:#E7EDF8;
+  --r-yes:#1F6248; --r-yes-bg:#E2F0EA; --r-no:#A03F31; --r-no-bg:#F8E7E3;
+
+  /* — SMP's own light palette (forefront), copied not approximated — */
+  --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8; --panel-accent:#E6C65C;
+  --gold:#C9A24D; --gold-deep:#8A6B22; --on-accent:#16325C;
+  --stone:#16325C; --stone-soft:#24487A;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --attn:#B8860B; --bad:#B04434; --none:#676C73;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --over-bg:#F7EFD6; --over-line:#E4D3A4;
+  --r:8px; --r-sm:6px; --r-pill:999px;
+
+  --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --r-bg:#0C1119; --r-card:#141C28; --r-line:#2A3648; --r-line-2:#1F2937;
+    --r-ink:#E9EEF6; --r-ink-2:#B4C0D2; --r-ink-3:#8794A8;
+    --r-mark:#8FB2E8; --r-mark-bg:#182742;
+    --r-yes:#7DCBAA; --r-yes-bg:#123227; --r-no:#E9A296; --r-no-bg:#33201C;
+  }
+}
+:root[data-theme="dark"]{
+  --r-bg:#0C1119; --r-card:#141C28; --r-line:#2A3648; --r-line-2:#1F2937;
+  --r-ink:#E9EEF6; --r-ink-2:#B4C0D2; --r-ink-3:#8794A8;
+  --r-mark:#8FB2E8; --r-mark-bg:#182742;
+  --r-yes:#7DCBAA; --r-yes-bg:#123227; --r-no:#E9A296; --r-no-bg:#33201C;
+}
+/* The PRODUCT tokens never change with the review layer's theme. A mockup that
+   restyles the thing being mocked is showing you something else. */
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--r-bg);color:var(--r-ink);font-family:var(--sans);
+     font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--r-mark);outline-offset:2px;border-radius:4px}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 96px}
+
+/* ── masthead ─────────────────────────────────────────────────── */
+.mast{padding:56px 0 34px;border-bottom:2px solid var(--r-ink)}
+.kicker{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.18em;
+        text-transform:uppercase;color:var(--r-mark);margin:0 0 14px}
+.mast h1{font-size:clamp(30px,4.6vw,46px);line-height:1.06;letter-spacing:-.026em;
+         font-weight:800;margin:0;text-wrap:balance;max-width:15ch}
+.mast p{margin:16px 0 0;max-width:62ch;color:var(--r-ink-2);font-size:16px}
+.mast .legend{display:flex;flex-wrap:wrap;gap:10px 22px;margin:26px 0 0;
+              font-family:var(--mono);font-size:11px;color:var(--r-ink-3);letter-spacing:.04em}
+.mast .legend b{color:var(--r-ink-2);font-weight:600}
+
+/* ── a question ───────────────────────────────────────────────── */
+.q{padding:52px 0 0;border-top:1px solid var(--r-line);margin-top:52px}
+.q:first-of-type{border-top:0;margin-top:0}
+.qn{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--r-mark);background:var(--r-mark-bg);
+    display:inline-block;padding:4px 9px;border-radius:4px;margin:0 0 14px}
+.q h2{font-size:27px;line-height:1.18;letter-spacing:-.018em;font-weight:700;
+      margin:0 0 12px;text-wrap:balance;max-width:24ch}
+.said{margin:0 0 20px;padding:0 0 0 16px;border-left:3px solid var(--r-line);
+      color:var(--r-ink-2);font-style:italic;max-width:64ch}
+.lede{margin:0 0 26px;max-width:66ch;color:var(--r-ink-2)}
+.lede strong{color:var(--r-ink);font-weight:650}
+
+/* ── the frame: product inside, label outside ─────────────────── */
+.opts{display:flex;flex-direction:column;gap:26px}
+.opt{background:var(--r-card);border:1px solid var(--r-line);border-radius:12px;
+     overflow:hidden}
+.opt-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;
+       padding:13px 18px;border-bottom:1px solid var(--r-line-2)}
+.opt-tag{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.13em;
+         text-transform:uppercase;color:var(--r-card);background:var(--r-ink);
+         padding:3px 8px;border-radius:4px;flex:none}
+.opt.rec .opt-tag{background:var(--r-yes)}
+.opt.old .opt-tag{background:var(--r-no)}
+.opt-t{font-weight:650;font-size:15px}
+.opt-m{font-family:var(--mono);font-size:11px;color:var(--r-ink-3);margin-left:auto;
+       letter-spacing:.03em;flex:none}
+.stage{background:var(--ground);padding:22px;overflow-x:auto}
+.opt-f{padding:13px 18px;border-top:1px solid var(--r-line-2);font-size:13.5px;
+       color:var(--r-ink-2)}
+.opt-f b{color:var(--r-ink);font-weight:650}
+.opt-f .cost{color:var(--r-no);font-weight:600}
+.opt-f .win{color:var(--r-yes);font-weight:600}
+
+/* ══ SMP PRODUCT STYLES — inside .stage only ══════════════════════ */
+.stage *{box-sizing:border-box}
+.stage .pane{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+             padding:16px 18px 20px;min-width:660px}
+.stage h4.mini{font:700 11px/1.3 var(--sans);letter-spacing:.13em;text-transform:uppercase;
+               color:var(--ink-3);margin:0 0 9px}
+.stage h4.mini em{font-style:italic;font-weight:600;text-transform:none;letter-spacing:0;
+                  font-size:12px}
+.stage table{width:100%;border-collapse:collapse;font-size:13px}
+.stage thead th{background:var(--panel);color:var(--panel-ink);font-weight:700;
+                font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+                text-align:left;padding:9px 10px;white-space:nowrap}
+.stage thead th:first-child{border-radius:var(--r-sm) 0 0 0}
+.stage thead th:last-child{border-radius:0 var(--r-sm) 0 0}
+.stage tbody td{padding:8px 10px;border-bottom:1px solid var(--line-soft);color:var(--ink-2)}
+.stage tbody tr:last-child td{border-bottom:0}
+.stage td.idx{color:var(--ink-3);font-family:var(--mono);font-size:11.5px;width:38px}
+.stage td.cc{text-align:center}
+.stage td.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stage .why{display:block;font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.stage .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+/* the old header, for comparison */
+.stage .ptitle-old{display:flex;justify-content:space-between;align-items:flex-start;
+                   gap:14px;padding-bottom:12px;border-bottom:1px solid var(--line-soft);
+                   margin-bottom:16px}
+.stage .ptitle-old h3{font:400 19px/1.25 var(--sans);margin:0;color:var(--ink)}
+.stage .pmeta{color:var(--ink-3);font-size:12.5px;margin-top:3px}
+
+/* option A — folded into the eyebrow */
+.stage .eyebrow-title{margin:0 0 9px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.stage .eyebrow-title .code{font:700 11px/1.3 var(--mono);letter-spacing:.08em;
+                            color:var(--gold-deep)}
+.stage .eyebrow-title .nm{font:700 11px/1.3 var(--sans);letter-spacing:.13em;
+                          text-transform:uppercase;color:var(--ink)}
+.stage .eyebrow-title .sep{color:var(--line);font-weight:400}
+.stage .eyebrow-title .rest{font:600 12px/1.3 var(--sans);font-style:italic;color:var(--ink-3)}
+
+/* option B — one quiet line */
+.stage .ptitle-b{display:flex;align-items:baseline;gap:9px;margin:0 0 14px}
+.stage .ptitle-b .code{font:600 12px/1 var(--mono);color:var(--gold-deep);
+                       background:var(--over-bg);border:1px solid var(--over-line);
+                       border-radius:4px;padding:3px 6px;letter-spacing:.03em}
+.stage .ptitle-b .nm{font:650 15.5px/1.3 var(--sans);color:var(--ink);letter-spacing:-.008em}
+
+/* option C — compact bar */
+.stage .ptitle-c{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+                 padding:0 0 9px;border-bottom:1px solid var(--line-soft);margin:0 0 14px}
+.stage .ptitle-c .code{font:600 11.5px/1 var(--mono);color:var(--on-accent);
+                       background:var(--gold);border-radius:4px;padding:4px 7px;
+                       letter-spacing:.03em}
+.stage .ptitle-c .nm{font:650 15px/1.3 var(--sans);color:var(--ink)}
+.stage .ptitle-c .meta{margin-left:auto;display:flex;gap:8px;align-items:center;
+                       font-size:11px;color:var(--ink-3)}
+.stage .ptitle-c .meta .chip{font:600 10px/1 var(--sans);letter-spacing:.09em;
+                             text-transform:uppercase;color:var(--ink-3);
+                             background:var(--surface-2);border:1px solid var(--line);
+                             border-radius:var(--r-pill);padding:4px 8px}
+
+/* rail + split, the product's own */
+.stage .split{display:grid;grid-template-columns:236px 1fr;gap:16px;align-items:start;
+              min-width:900px}
+.stage .rail{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+             overflow:hidden}
+.stage .rhead{background:var(--panel);color:var(--panel-ink);font:700 10.5px/1 var(--sans);
+              letter-spacing:.13em;text-transform:uppercase;padding:10px 13px;
+              display:flex;justify-content:space-between}
+.stage .rgroup{font:700 9.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+               color:var(--ink-3);background:var(--surface-2);padding:8px 13px;
+               border-bottom:1px solid var(--line-soft);border-top:1px solid var(--line-soft)}
+.stage .ritem{display:block;width:100%;text-align:left;background:none;border:0;
+              border-bottom:1px solid var(--line-soft);padding:8px 13px;cursor:pointer;
+              font:500 13px/1.35 var(--sans);color:var(--ink-2)}
+.stage .ritem.on{background:var(--surface-2);color:var(--ink);font-weight:650;
+                 box-shadow:inset 3px 0 0 var(--gold)}
+.stage .railcollapse{display:flex;align-items:center;justify-content:space-between;
+                     padding:8px 13px;border-top:1px solid var(--line-soft);
+                     font-size:11.5px;color:var(--ink-3);background:var(--surface-2)}
+.stage .railstrip{width:46px;border:1px solid var(--line);border-radius:var(--r);
+                  background:var(--surface);overflow:hidden}
+.stage .railstrip .rhead{padding:10px 0;justify-content:center}
+.stage .stripitem{display:flex;align-items:center;justify-content:center;width:100%;
+                  height:38px;border:0;border-bottom:1px solid var(--line-soft);
+                  background:none;cursor:pointer;color:var(--ink-3)}
+.stage .stripitem.on{background:var(--surface-2);color:var(--gold-deep);
+                     box-shadow:inset 3px 0 0 var(--gold)}
+.stage .stripitem svg{width:16px;height:16px}
+.stage .split.collapsed{grid-template-columns:46px 1fr}
+
+/* sub-tab row, the product's own [data-sub2] */
+.stage .secrow{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 16px;
+               padding:0 0 0 2px}
+.stage .secrow button{background:none;border:0;border-bottom:2px solid transparent;
+                      font:600 13.5px/1 var(--sans);color:var(--ink-3);padding:9px 12px;
+                      cursor:pointer;margin-bottom:-1px}
+.stage .secrow button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold);
+                                            font-weight:700}
+.stage .secrow .tally{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);
+                      background:var(--surface-2);border-radius:var(--r-pill);
+                      padding:2px 6px;margin-left:6px}
+
+/* the fill toolbar */
+.stage .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
+.stage .srch{position:relative;flex:1 1 240px;min-width:200px}
+.stage .srch input{width:100%;font:inherit;font-size:13px;padding:7px 10px 7px 30px;
+                   border:1px solid var(--line);border-radius:var(--r);
+                   background:var(--surface);color:var(--ink)}
+.stage .srch svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+                 width:14px;height:14px;color:var(--ink-3)}
+.stage .fbtn{font:600 12.5px/1 var(--sans);color:var(--ink-2);background:var(--surface);
+             border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;
+             cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.stage .fbtn .v{color:var(--ink);font-weight:700}
+.stage .fbtn .car{color:var(--ink-3);font-size:9px}
+.stage .fbtn.set{border-color:var(--gold);background:var(--over-bg);color:var(--gold-deep)}
+.stage .tally-r{margin-left:auto;font:600 11.5px/1 var(--mono);color:var(--ink-3);
+                white-space:nowrap}
+.stage .tbox{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);
+             max-height:none;overflow:hidden}
+.stage .tbox table{font-size:12.5px}
+.stage .tbox thead th{position:sticky;top:0;z-index:2}
+.stage .tbox thead th:first-child,.stage .tbox thead th:last-child{border-radius:0}
+.stage .uchip{font:600 11px/1 var(--sans);color:var(--ink-2);background:var(--surface-2);
+              border:1px solid var(--line);border-radius:var(--r-pill);padding:3px 8px;
+              white-space:nowrap}
+.stage .inchip{font:600 10px/1 var(--mono);color:var(--ink-3);letter-spacing:.04em;
+               white-space:nowrap}
+.stage .inchip.ko{color:var(--gold-deep);font-weight:700}
+.stage .tick{width:19px;height:19px;border:1.5px solid var(--line);border-radius:4px;
+             background:var(--surface);cursor:pointer;display:inline-flex;
+             align-items:center;justify-content:center;padding:0;vertical-align:-4px}
+.stage .tick.on{background:var(--gold);border-color:var(--gold);color:var(--on-accent)}
+.stage .tick svg{width:12px;height:12px}
+.stage .held{font:600 11px/1 var(--sans);color:var(--ink-3)}
+.stage .link{font:600 11.5px/1 var(--sans);color:var(--stone);background:none;border:0;
+             padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.stage tr.mine td{background:var(--over-bg)}
+.stage tr.theirs td{color:var(--ink-3)}
+
+/* pills + the people row */
+.stage .pill{display:inline-flex;align-items:center;font:600 10px/1 var(--sans);
+             letter-spacing:.09em;text-transform:uppercase;border-radius:var(--r-pill);
+             padding:4px 8px}
+.stage .pill.good{color:var(--good);background:var(--good-bg)}
+.stage .pill.warn{color:var(--attn);background:var(--attn-bg)}
+.stage .pill.none{color:var(--none);border:1px dashed var(--none)}
+.stage .rolechip{display:inline-flex;align-items:baseline;gap:5px;margin:0 4px 0 0;
+                 padding:1px 7px;border:1px solid var(--line);border-radius:var(--r-pill);
+                 background:var(--surface-2);max-width:100%;line-height:1.5}
+.stage .rolechip b{font-size:11px;color:var(--ink-2);white-space:nowrap}
+.stage .rolechip span{font-size:10px;color:var(--ink-3);white-space:nowrap;
+                      overflow:hidden;text-overflow:ellipsis;max-width:11ch}
+.stage .actbtn{font:600 11px/1 var(--sans);color:var(--stone);background:var(--surface);
+               border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 9px;
+               cursor:pointer;white-space:nowrap}
+.stage .actbtn:hover{border-color:var(--gold);color:var(--gold-deep)}
+.stage .actbtn.warn{color:var(--gold-deep);border-color:var(--over-line);
+                    background:var(--over-bg)}
+.stage td.pwcell{white-space:nowrap}
+.stage td.pwcell .pill{margin-right:7px}
+
+/* ── the thinking block ───────────────────────────────────────── */
+.think{background:var(--r-card);border:1px solid var(--r-line);border-radius:12px;
+       padding:22px 24px;margin:0 0 26px}
+.think h3{margin:0 0 12px;font-size:15px;font-weight:700;letter-spacing:-.008em}
+.think p{margin:0 0 12px;color:var(--r-ink-2);font-size:14.5px;max-width:70ch}
+.think p:last-child{margin-bottom:0}
+.think strong{color:var(--r-ink);font-weight:650}
+.groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;
+        margin:18px 0 4px}
+.grp{border:1px solid var(--r-line-2);border-radius:8px;padding:13px 15px}
+.grp h4{margin:0 0 3px;font-family:var(--mono);font-size:10.5px;font-weight:600;
+        letter-spacing:.13em;text-transform:uppercase;color:var(--r-mark)}
+.grp .qq{margin:0 0 9px;font-size:12px;color:var(--r-ink-3);font-style:italic}
+.grp ul{margin:0;padding:0;list-style:none;font-size:13px;color:var(--r-ink-2)}
+.grp li{padding:2px 0}
+
+/* ── the ask ──────────────────────────────────────────────────── */
+.ask{margin-top:52px;padding-top:34px;border-top:2px solid var(--r-ink)}
+.ask h2{font-size:22px;font-weight:700;margin:0 0 16px;letter-spacing:-.014em}
+.ask ol{margin:0;padding-left:22px;max-width:74ch}
+.ask li{margin:0 0 12px;color:var(--r-ink-2)}
+.ask li strong{color:var(--r-ink);font-weight:650}
+
+@media (max-width:720px){
+  .wrap{padding:0 16px 64px}
+  .mast{padding:38px 0 26px}
+  .opt-m{margin-left:0;width:100%}
+}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker">SMP · design review · 2026-08-22 · pending</p>
+  <h1>Five questions, drawn</h1>
+  <p>Five things Islam raised after v3.15. Three of them need a choice made before
+     anything is built, so they are drawn here at real scale in the product's own
+     colours. Nothing below is in the platform yet.</p>
+  <div class="legend">
+    <span><b>Inside a frame</b> — the product, SMP's real tokens</span>
+    <span><b>Outside it</b> — me, in slate and mono</span>
+    <span><b>Green tag</b> — my recommendation</span>
+  </div>
+</header>
+
+<!-- ══ 1 ═══════════════════════════════════════════════════════════ -->
+<section class="q">
+  <p class="qn">Question 1 · Plan page</p>
+  <h2>The pillar needs its name back, at a third of the height</h2>
+  <p class="said">“we will need the title of the pillar here you were right. we need to
+     bring it back but with a better condensed design.”</p>
+  <p class="lede">You were right and so was the original instinct — the rail tells you
+     which pillar is <em>selected</em>, but once you have scrolled to the tactics table
+     the rail is off-screen and nothing on the page says what you are reading.
+     <strong>The old header was 57px</strong> for a 19px serif line and a meta line under
+     it. Three ways to say the same thing for less.</p>
+
+  <div class="opts">
+
+    <div class="opt old">
+      <div class="opt-h"><span class="opt-tag">Before</span>
+        <span class="opt-t">What v3.14 had</span>
+        <span class="opt-m">57px · removed in v3.15</span></div>
+      <div class="stage"><div class="pane">
+        <div class="ptitle-old"><div>
+          <h3>MB03&nbsp; Portfolio &amp; Value Chain Expansion</h3>
+          <div class="pmeta">theme DIV · Fayad</div>
+        </div></div>
+        <h4 class="mini">Key measures <em>— as planned: this year's target, and how it compiles</em></h4>
+        <table><thead><tr><th style="width:38px">#</th><th>Measure</th>
+          <th style="width:70px">Dir.</th><th style="width:90px">Target</th>
+          <th style="width:100px">Compiled</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td>Data duplicate rate</td>
+            <td class="cc">≤</td><td class="num">1%</td><td class="cc">Latest</td></tr>
+          </tbody></table>
+      </div></div>
+      <div class="opt-f">A 19px line, a meta line, 12px of padding and a rule.
+        <span class="cost">Everything it says, the rail card says too.</span></div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-h"><span class="opt-tag">Option A</span>
+        <span class="opt-t">Folded into the eyebrow</span>
+        <span class="opt-m">+0px · costs nothing</span></div>
+      <div class="stage"><div class="pane">
+        <div class="eyebrow-title">
+          <span class="code">MB03</span>
+          <span class="nm">Portfolio &amp; Value Chain Expansion</span>
+          <span class="sep">/</span>
+          <span class="rest">key measures — as planned</span>
+        </div>
+        <table><thead><tr><th style="width:38px">#</th><th>Measure</th>
+          <th style="width:70px">Dir.</th><th style="width:90px">Target</th>
+          <th style="width:100px">Compiled</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td>Data duplicate rate</td>
+            <td class="cc">≤</td><td class="num">1%</td><td class="cc">Latest</td></tr>
+            <tr><td class="idx">2</td><td>OR orders processed end-to-end digitally</td>
+            <td class="cc">≥</td><td class="num">90%</td><td class="cc">Latest</td></tr>
+          </tbody></table>
+      </div></div>
+      <div class="opt-f">The pillar becomes the label the table already had.
+        <span class="win">Zero added height</span> — but the name is set at 11px uppercase,
+        which is a label's size, not a title's, and it repeats above the tactics table.</div>
+    </div>
+
+    <div class="opt rec">
+      <div class="opt-h"><span class="opt-tag">Option B · recommended</span>
+        <span class="opt-t">One quiet line</span>
+        <span class="opt-m">22px · 61% shorter</span></div>
+      <div class="stage"><div class="pane">
+        <div class="ptitle-b">
+          <span class="code">MB03</span>
+          <span class="nm">Portfolio &amp; Value Chain Expansion</span>
+        </div>
+        <h4 class="mini">Key measures <em>— as planned: this year's target, and how it compiles</em></h4>
+        <table><thead><tr><th style="width:38px">#</th><th>Measure</th>
+          <th style="width:70px">Dir.</th><th style="width:90px">Target</th>
+          <th style="width:100px">Compiled</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td>Data duplicate rate</td>
+            <td class="cc">≤</td><td class="num">1%</td><td class="cc">Latest</td></tr>
+            <tr><td class="idx">2</td><td>OR orders processed end-to-end digitally</td>
+            <td class="cc">≥</td><td class="num">90%</td><td class="cc">Latest</td></tr>
+          </tbody></table>
+      </div></div>
+      <div class="opt-f">Code as a small gold chip, name at 15.5px, no rule and no meta line.
+        <span class="win">It still reads as a title</span> and it appears once, at the top of
+        the pane, above both tables. <strong>Theme and owner go</strong> — the rail card
+        carries the owner and the theme is a Strategy question, not a Plan one.</div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-h"><span class="opt-tag">Option C</span>
+        <span class="opt-t">Compact bar, meta kept</span>
+        <span class="opt-m">30px · 47% shorter</span></div>
+      <div class="stage"><div class="pane">
+        <div class="ptitle-c">
+          <span class="code">MB03</span>
+          <span class="nm">Portfolio &amp; Value Chain Expansion</span>
+          <span class="meta"><span class="chip">theme DIV</span><span class="chip">Fayad</span></span>
+        </div>
+        <h4 class="mini">Key measures <em>— as planned: this year's target, and how it compiles</em></h4>
+        <table><thead><tr><th style="width:38px">#</th><th>Measure</th>
+          <th style="width:70px">Dir.</th><th style="width:90px">Target</th>
+          <th style="width:100px">Compiled</th></tr></thead>
+          <tbody><tr><td class="idx">1</td><td>Data duplicate rate</td>
+            <td class="cc">≤</td><td class="num">1%</td><td class="cc">Latest</td></tr>
+            <tr><td class="idx">2</td><td>OR orders processed end-to-end digitally</td>
+            <td class="cc">≥</td><td class="num">90%</td><td class="cc">Latest</td></tr>
+          </tbody></table>
+      </div></div>
+      <div class="opt-f">Everything the old header said, on one row: theme and owner become
+        chips on the right. <span class="cost">Two more things to read</span> before the
+        first number — take this only if the theme genuinely gets used on the Plan page.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ 2 ═══════════════════════════════════════════════════════════ -->
+<section class="q">
+  <p class="qn">Question 2 · Navigation</p>
+  <h2>Sixteen destinations behind one gear</h2>
+  <p class="said">“let's think of some sort of grouping for the settup tabs. and an easier
+     view for it. maybe a collapsable rail on the left for easier navigation think with me.”</p>
+
+  <div class="think">
+    <h3>Thinking with you, in three steps</h3>
+    <p><strong>First: the menu is doing two unrelated jobs.</strong> Six of its entries are
+      things you <em>do</em> during a cycle — open it, chase it, import a plan, mark focus
+      measures. Ten are things you <em>set once and revisit rarely</em>. They sit in one
+      alphabet-free list because they arrived one at a time, not because they belong together.
+      Splitting them is free and it halves the problem before any design happens.</p>
+    <p><strong>Second: a rail is not a new component.</strong> The platform already has one —
+      it is what a unit's pillars sit in, `.rail` inside `.split`, 236px beside the pane.
+      Using it for Setup means Setup starts looking like the rest of the product rather
+      than like a settings screen bolted on. That argues strongly for the rail over, say,
+      a row of tabs, which would be a new thing to design and would run out of room at ten.</p>
+    <p><strong>Third: what the groups actually are.</strong> Not by which table they edit —
+      by <em>the question you came to answer</em>. That gives four groups of two to four,
+      and every page lands in exactly one:</p>
+    <div class="groups">
+      <div class="grp"><h4>Who</h4><p class="qq">Who exists, and what may they touch?</p>
+        <ul><li>People</li><li>Roles &amp; access</li></ul></div>
+      <div class="grp"><h4>What we run</h4><p class="qq">What are the things being planned?</p>
+        <ul><li>Business units</li><li>Companies</li><li>Supporting functions</li>
+            <li>Capabilities</li></ul></div>
+      <div class="grp"><h4>How it's measured</h4><p class="qq">What do the numbers mean?</p>
+        <ul><li>Figure sets</li><li>Scoring bands</li><li>Labels</li></ul></div>
+      <div class="grp"><h4>How it looks</h4><p class="qq">What does it wear?</p>
+        <ul><li>Branding</li></ul></div>
+    </div>
+    <p style="margin-top:16px"><strong>The one I'd push back on:</strong> collapsing to an
+      icon strip. Ten setup pages need ten icons, and “Labels” versus “Scoring bands”
+      versus “Figure sets” have no icons anybody guesses right. A collapse that hides the
+      only thing that identified the page is a control you have to learn. If the rail must
+      collapse — and there is a real reason, the access matrix wants 940px — I'd collapse
+      it <em>entirely</em>, to a 46px strip with one “open” handle, and let the group
+      letters be the only marks. Shown as Option B so you can see it lose.</p>
+  </div>
+
+  <div class="opts">
+    <div class="opt rec">
+      <div class="opt-h"><span class="opt-tag">Option A · recommended</span>
+        <span class="opt-t">Grouped rail, always open</span>
+        <span class="opt-m">236px · the product's own rail</span></div>
+      <div class="stage"><div class="split">
+        <div class="rail">
+          <div class="rhead"><span>Setup</span><span>10</span></div>
+          <div class="rgroup">Who</div>
+          <button class="ritem">People</button>
+          <button class="ritem">Roles &amp; access</button>
+          <div class="rgroup">What we run</div>
+          <button class="ritem">Business units</button>
+          <button class="ritem">Companies</button>
+          <button class="ritem">Supporting functions</button>
+          <button class="ritem">Capabilities</button>
+          <div class="rgroup">How it's measured</div>
+          <button class="ritem on">Figure sets</button>
+          <button class="ritem">Scoring bands</button>
+          <button class="ritem">Labels</button>
+          <div class="rgroup">How it looks</div>
+          <button class="ritem">Branding</button>
+          <div class="railcollapse"><span>Collapse the rail</span><span>‹‹</span></div>
+        </div>
+        <div class="pane">
+          <div class="secrow">
+            <button aria-selected="true">Sets configuration <span class="tally">1</span></button>
+            <button aria-selected="false">Fill a figure set <span class="tally">26/116</span></button>
+          </div>
+          <h4 class="mini">The sets</h4>
+          <table><thead><tr><th style="width:38px">#</th><th>Set</th><th style="width:110px">Team</th>
+            <th style="width:150px">Owner</th><th style="width:130px">Who picks</th>
+            <th style="width:80px">Figures</th></tr></thead>
+            <tbody><tr><td class="idx">1</td>
+              <td><b>Financial Figures</b><span class="why mono">id financialfigures</span></td>
+              <td>Finance</td><td>Hossam Abuelenien</td>
+              <td><span class="pill warn">Its owner picks</span></td>
+              <td class="num">26</td></tr></tbody></table>
+        </div>
+      </div></div>
+      <div class="opt-f">The rail groups by the question you came to answer, and the page
+        beside it carries its own sub-tabs. <span class="win">Nothing new is invented</span> —
+        both the rail and the sub-tab row already exist in the product (a unit's pillars, and
+        Strategy's Foundation / SWOT / Plan).</div>
+    </div>
+
+    <div class="opt">
+      <div class="opt-h"><span class="opt-tag">Option B</span>
+        <span class="opt-t">Collapsed to a strip</span>
+        <span class="opt-m">46px · +190px of table</span></div>
+      <div class="stage"><div class="split collapsed">
+        <div class="railstrip">
+          <div class="rhead">››</div>
+          <button class="stripitem" title="People"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg></button>
+          <button class="stripitem" title="Roles &amp; access"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="9" width="12" height="8" rx="1.5"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg></button>
+          <button class="stripitem" title="Business units"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="7" width="6" height="10"/><rect x="11" y="4" width="6" height="13"/></svg></button>
+          <button class="stripitem" title="Companies"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17h14M5 17V5h10v12M8 8h1M11 8h1M8 11h1M11 11h1"/></svg></button>
+          <button class="stripitem" title="Supporting functions"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="2.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.5 1.5M13.5 13.5L15 15M15 5l-1.5 1.5M6.5 13.5L5 15"/></svg></button>
+          <button class="stripitem" title="Capabilities"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3l2 4.5 5 .6-3.6 3.4.9 4.9L10 14l-4.3 2.4.9-4.9L3 8.1l5-.6z"/></svg></button>
+          <button class="stripitem on" title="Figure sets"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="14" height="12" rx="1.5"/><path d="M3 8h14M8 8v8"/></svg></button>
+          <button class="stripitem" title="Scoring bands"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 15l4-5 3 3 4-6 3 4"/></svg></button>
+          <button class="stripitem" title="Labels"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 8V4h4l9 9-4 4z"/><circle cx="6" cy="7" r="1"/></svg></button>
+          <button class="stripitem" title="Branding"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 3a7 7 0 0 1 0 14"/></svg></button>
+        </div>
+        <div class="pane">
+          <div class="secrow">
+            <button aria-selected="true">Sets configuration <span class="tally">1</span></button>
+            <button aria-selected="false">Fill a figure set <span class="tally">26/116</span></button>
+          </div>
+          <h4 class="mini">The sets</h4>
+          <table><thead><tr><th style="width:38px">#</th><th>Set</th><th style="width:110px">Team</th>
+            <th style="width:150px">Owner</th><th style="width:130px">Who picks</th>
+            <th style="width:80px">Figures</th></tr></thead>
+            <tbody><tr><td class="idx">1</td>
+              <td><b>Financial Figures</b><span class="why mono">id financialfigures</span></td>
+              <td>Finance</td><td>Hossam Abuelenien</td>
+              <td><span class="pill warn">Its owner picks</span></td>
+              <td class="num">26</td></tr></tbody></table>
+        </div>
+      </div></div>
+      <div class="opt-f">Hover any icon to see it fail: <span class="cost">a label, a scoring
+        band and a figure set are three abstractions with no picture</span>. It buys 190px,
+        which only the access matrix actually wants. I'd rather Roles &amp; access be the one
+        page that collapses the rail for you, on arrival.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 3 ═══════════════════════════════════════════════════════════ -->
+<section class="q">
+  <p class="qn">Question 3 · Fill a figure set</p>
+  <h2>One searchable table, every unit in it</h2>
+  <p class="said">“make the tables searchable not categorized by direction like this… the 1st
+     column become a numbering column… we can have the table for all units as a default so we
+     have the unit as a column that can be filtered by… accordingly the units names at the top
+     are not usable… so the table is pushed up and accordingly we have a sticky header.”</p>
+  <p class="lede">Agreed, and the reason is that <strong>the two jobs want opposite
+     shapes</strong>. Grouping by pillar is right when you are reading one unit's plan in
+     plan order. Filling a set is the other job entirely — you are hunting for the eleven
+     revenue lines in a hundred and sixteen figures, and pillar order actively hides them
+     from each other. A flat searchable table puts every “revenue” in the group on one
+     screen.</p>
+
+  <div class="opts">
+    <div class="opt rec">
+      <div class="opt-h"><span class="opt-tag">Proposed</span>
+        <span class="opt-t">Flat, filtered, sticky-headed</span>
+        <span class="opt-m">116 rows · all units</span></div>
+      <div class="stage"><div class="pane" style="min-width:900px">
+        <div class="secrow">
+          <button aria-selected="false">Sets configuration <span class="tally">1</span></button>
+          <button aria-selected="true">Fill a figure set <span class="tally">26/116</span></button>
+        </div>
+        <div class="toolbar">
+          <span class="fbtn set">Filling <span class="v">Financial Figures</span> <span class="car">▾</span></span>
+          <div class="srch">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="9" r="5.5"/><path d="M13 13l4 4"/></svg>
+            <input value="revenue" aria-label="Search measures">
+          </div>
+          <span class="fbtn">Unit <span class="v">All</span> <span class="car">▾</span></span>
+          <span class="fbtn">In <span class="v">All</span> <span class="car">▾</span></span>
+          <span class="fbtn">Status <span class="v">All</span> <span class="car">▾</span></span>
+          <span class="tally-r">11 of 116 shown · 26 claimed</span>
+        </div>
+        <div class="tbox">
+          <table>
+            <thead><tr>
+              <th style="width:36px">#</th>
+              <th style="width:130px">Unit</th>
+              <th style="width:110px">In</th>
+              <th>Measure</th>
+              <th style="width:52px">Dir.</th>
+              <th style="width:96px">Target</th>
+              <th style="width:190px">Status</th>
+            </tr></thead>
+            <tbody>
+              <tr class="mine"><td class="idx">1</td><td><span class="uchip">Mobile</span></td>
+                <td><span class="inchip ko">Key objective</span></td>
+                <td>Distribution revenue</td><td class="cc">≥</td><td class="num">6.2B EGP</td>
+                <td><button class="tick on"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M4 10.5l4 4 8-9"/></svg></button>
+                    <span class="held" style="margin-left:7px">in this set</span></td></tr>
+              <tr class="mine"><td class="idx">2</td><td><span class="uchip">Mobile</span></td>
+                <td><span class="inchip">MB01</span></td>
+                <td>Non-Samsung revenue</td><td class="cc">≥</td><td class="num">4B EGP</td>
+                <td><button class="tick on"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M4 10.5l4 4 8-9"/></svg></button>
+                    <span class="held" style="margin-left:7px">in this set</span></td></tr>
+              <tr><td class="idx">3</td><td><span class="uchip">Mobile</span></td>
+                <td><span class="inchip">MB01</span></td>
+                <td>Accessory revenue</td><td class="cc">≥</td><td class="num">300M EGP</td>
+                <td><button class="tick"></button>
+                    <span class="held" style="margin-left:7px">click to claim</span></td></tr>
+              <tr><td class="idx">4</td><td><span class="uchip">Retail Stores</span></td>
+                <td><span class="inchip ko">Key objective</span></td>
+                <td>Retail revenue</td><td class="cc">≥</td><td class="num">4.5B EGP</td>
+                <td><button class="tick"></button>
+                    <span class="held" style="margin-left:7px">click to claim</span></td></tr>
+              <tr class="theirs"><td class="idx">5</td><td><span class="uchip">B2B Ecomm</span></td>
+                <td><span class="inchip">BE02</span></td>
+                <td>Platform revenue share</td><td class="cc">≥</td><td class="num">180M EGP</td>
+                <td><span class="held">Customer Figures</span>
+                    <button class="link" style="margin-left:8px">Request</button></td></tr>
+              <tr><td class="idx">6</td><td><span class="uchip">Online Shop</span></td>
+                <td><span class="inchip ko">Key objective</span></td>
+                <td>Online revenue</td><td class="cc">≥</td><td class="num">1.8B EGP</td>
+                <td><button class="tick"></button>
+                    <span class="held" style="margin-left:7px">click to claim</span></td></tr>
+              <tr class="mine"><td class="idx">7</td><td><span class="uchip">Corporate</span></td>
+                <td><span class="inchip ko">Key objective</span></td>
+                <td>Contracted recurring revenue</td><td class="cc">≥</td><td class="num">150M EGP</td>
+                <td><button class="tick on"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M4 10.5l4 4 8-9"/></svg></button>
+                    <span class="held" style="margin-left:7px">in this set</span></td></tr>
+              <tr><td class="idx">8</td><td><span class="uchip">Care</span></td>
+                <td><span class="inchip">CA02</span></td>
+                <td>Third-party service revenue</td><td class="cc">≥</td><td class="num">180M EGP</td>
+                <td><button class="tick"></button>
+                    <span class="held" style="margin-left:7px">click to claim</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div></div>
+      <div class="opt-f">
+        <b>Seven columns, and each earns its place.</b>
+        <b>#</b> numbers what is <em>currently shown</em>, so “11 of 116” is countable.
+        <b>Unit</b> is a column you filter, not ten buttons you press —
+        <span class="win">every unit is in by default</span>, which is the whole point of a
+        set that crosses them.
+        <b>In</b> is how key objectives join the same table: a pillar code, or the words
+        <em>Key objective</em>. <b>Measure</b> and <b>Target</b> are separate columns so
+        search hits the measure name and never the number — typing <span class="mono">revenue</span>
+        cannot match <span class="mono">4B EGP</span>.
+        <b>Status</b> is the tick, or another set's name with a request beside it.
+        The header is sticky and the unit buttons are gone, so the table starts 120px higher.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 4 ═══════════════════════════════════════════════════════════ -->
+<section class="q">
+  <p class="qn">Question 4 · People</p>
+  <h2>Still too tall, and the reset was hiding in plain sight</h2>
+  <p class="said">“the people table is still large with no need, remove view as from this
+     table and still I can't find the reset passwords actions in this page.”</p>
+  <p class="lede"><strong>The reset action is there</strong> — I signed into a live instance
+     to be sure. The Password column renders, and the button says <em>Reset</em>. The reason
+     you cannot find it is that it is a bare text link at 12px in the sixth of seven columns,
+     with no border and no fill: it reads as part of the sentence rather than as a thing you
+     press. <strong>It is a findability bug, not a missing feature.</strong> Below: an
+     obvious button, View as removed, and the last of the height taken out.</p>
+
+  <div class="opts">
+    <div class="opt old">
+      <div class="opt-h"><span class="opt-tag">Now</span>
+        <span class="opt-t">v3.15 as shipped</span>
+        <span class="opt-m">41–79px per row</span></div>
+      <div class="stage"><div class="pane" style="min-width:940px">
+        <table><thead><tr><th style="width:36px">#</th><th style="width:190px">Person</th>
+          <th style="width:150px">Job title</th><th style="width:110px">Contact</th>
+          <th>Roles</th><th style="width:150px">Password</th><th style="width:130px">Standing</th>
+        </tr></thead><tbody>
+          <tr><td class="idx">1</td>
+            <td><b>Strategy Management Office</b><span class="why mono" style="display:inline;margin-left:8px">smo</span></td>
+            <td>SMO</td><td><span class="why" style="display:inline">—</span></td>
+            <td><span class="rolechip"><b>Super user</b><span>the group</span></span>
+                <span class="rolechip"><b>Supporting function head</b><span>Strategy Management Office (function)</span></span></td>
+            <td class="cc"><span class="pill good">Set</span>
+                <button class="link" style="margin-left:8px">Reset</button></td>
+            <td class="cc"><span class="pill good">Active</span>
+                <button class="link" style="margin-left:8px">View as</button></td></tr>
+        </tbody></table>
+      </div></div>
+      <div class="opt-f">Two links that look like text, a chip that wraps to two lines when its
+        attachment is long, and a name that wraps at 190px.
+        <span class="cost">79px on the live tenant.</span></div>
+    </div>
+
+    <div class="opt rec">
+      <div class="opt-h"><span class="opt-tag">Proposed</span>
+        <span class="opt-t">One line per person</span>
+        <span class="opt-m">36px · a normal table row</span></div>
+      <div class="stage"><div class="pane" style="min-width:940px">
+        <table><thead><tr><th style="width:36px">#</th><th style="width:210px">Person</th>
+          <th style="width:150px">Job title</th><th style="width:110px">Contact</th>
+          <th>Roles</th><th style="width:170px">Password</th><th style="width:96px">Standing</th>
+        </tr></thead><tbody>
+          <tr><td class="idx">1</td>
+            <td><b>Strategy Management Office</b><span class="why mono" style="display:inline;margin-left:8px">smo</span></td>
+            <td>SMO</td><td><span class="why" style="display:inline">—</span></td>
+            <td style="white-space:nowrap"><span class="rolechip"><b>Super user</b><span title="the group">the group</span></span><span class="rolechip"><b>Function head</b><span title="Strategy Management Office (function)">SMO (function)</span></span></td>
+            <td class="pwcell"><span class="pill good">Set</span>
+                <button class="actbtn warn">Reset password</button></td>
+            <td class="cc"><span class="pill good">Active</span></td></tr>
+          <tr><td class="idx">2</td>
+            <td><b>Hossam Abuelenien</b><span class="why mono" style="display:inline;margin-left:8px">fn_fin</span></td>
+            <td>Head of Finance</td><td><span class="mono" style="font-size:12px">010 2244 8890</span></td>
+            <td style="white-space:nowrap"><span class="rolechip"><b>Function head</b><span title="Finance">Finance</span></span></td>
+            <td class="pwcell"><span class="pill warn">Temporary</span>
+                <button class="actbtn warn">Reset password</button></td>
+            <td class="cc"><span class="pill good">Active</span></td></tr>
+          <tr><td class="idx">3</td>
+            <td><b>Yara Kamal</b><span class="why mono" style="display:inline;margin-left:8px">fn_mkt</span></td>
+            <td>Head of Marketing</td><td><span class="why" style="display:inline">—</span></td>
+            <td style="white-space:nowrap"><span class="rolechip"><b>Function head</b><span title="Marketing">Marketing</span></span></td>
+            <td class="pwcell"><span class="pill none">None yet</span>
+                <button class="actbtn">Set password</button></td>
+            <td class="cc"><span class="pill good">Active</span></td></tr>
+        </tbody></table>
+      </div></div>
+      <div class="opt-f">
+        <b>Reset is a button</b>, gold-bordered, and it says what it does rather than being one
+        word. <b>View as is gone</b> — <span class="win">the switcher in the top bar already
+        does it</span>, for every person, which makes the per-row copy pure duplication.
+        <b>Role chips never wrap</b>: the attachment truncates with the full name on hover,
+        and “Supporting function head” shortens to “Function head”, which is what the Roles
+        &amp; access table already calls it. <b>The name and key share a line.</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ the ask ══════════════════════════════════════════════════════ -->
+<section class="ask">
+  <h2>What I need from you</h2>
+  <ol>
+    <li><strong>Pillar title — A, B or C?</strong> I'd take B. Say if you want theme and owner
+        kept, in which case it is C.</li>
+    <li><strong>Setup rail — is the grouping right?</strong> Four groups, named by the question
+        you came to answer. Say if a page is in the wrong one, or if you want the collapse
+        built at all. And confirm the split: does <em>Manage</em> stay a menu while
+        <em>Setup</em> becomes a page with this rail?</li>
+    <li><strong>The fill table — anything missing from the seven columns?</strong> In
+        particular: should <em>Compile</em> be there (I left it out — it is the plan's
+        business, not the filler's), and should the search also match the unit name, or is
+        the Unit filter enough?</li>
+    <li><strong>People — anything else on the row?</strong> Contact is the one column I would
+        question next; it is empty for almost everybody.</li>
+  </ol>
+</section>
+
+</div>

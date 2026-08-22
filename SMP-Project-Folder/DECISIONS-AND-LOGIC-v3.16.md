@@ -5959,3 +5959,122 @@ entries that no longer exist — 30 seconds of Playwright timeout each, forty
 dead clicks, and it never finished. It walks the rail now, and opens each Setup
 page's sections explicitly: §41.5 again, **a state that cannot be reached by
 navigating is a state nothing measures.**
+
+---
+
+## 47 · The register's controls, and a rail that gets out of the way — v3.17
+
+Islam pointed at the HR ERP for the password reset and the filters: *"check the
+password reset design in the people erp repo and check the page search and
+filters and let's see what is a good practice we had there to match."* So this
+section is partly a port, and the parts worth recording are where the two
+products agree for the same reason.
+
+### 47.1 Which columns the register shows
+
+*"add a columns filter to mark what to show of the columns and make the contact
+unchecked by default."*
+
+HR_ERP's employees grid has exactly this — a `Columns ▾` popover, last in the
+filter row, with `All · None` and one tick per column, and `name` marked
+non-hideable. The same three decisions land here for the same reasons.
+
+**It is a property of the SCREEN, never of the state graph.** §25 settled this
+for the theme: autosaving it would decide for everyone in the tenant what THEY
+see. localStorage, per browser. (HR_ERP goes one better and also saves to the
+account so it follows a person between devices; SMP has nowhere to put that
+yet, and localStorage is the honest half.)
+
+**The saved map is MERGED with the defaults, never substituted.** A column
+added later is not in a map written before it existed, and reading a missing
+key as `false` would hide every new column from everybody who had ever opened
+the chooser. That is §30.2 — an absent key means "not answered yet", not
+"denied" — one surface further out.
+
+**Person is not in the list.** A register with the names hidden is not a
+register. HR_ERP reaches the same answer by marking `name` non-hideable rather
+than by trusting nobody to untick it.
+
+Also gone, at Islam's direction: *"Never decides access"* under the Job title
+header. It is a note about the MODEL sitting on a column header, and §30 put
+the model in the knowledge base.
+
+And the roles column now shows **one chip, then a "…"**. Most people hold one
+role; five hold more, and sizing all thirty-one rows for those five made this
+the widest column on the page. **The overflow is a CONTROL, not a hover** — a
+hover cannot be reached on a touch screen, cannot be read aloud, and this is
+the only place the second role appears.
+
+### 47.2 The actions go to the top right
+
+HR_ERP's registry header is an action cluster — `CSV ▾` · `Passwords ▾` ·
+`+ New employee` — beside the title, with each menu item a **title over a line
+of description** and the destructive one under a divider in red. SMP's
+`cfgHead` gained an `extra` slot so that shape is available to any Setup page
+rather than each one inventing a place for its own controls.
+
+**THE ACTION FIRES BEFORE THE MENU CLOSES.** HR_ERP's `runAndClose` carries a
+comment about a shipped-but-dead bulk password action; SMP's own CLAUDE.md
+records the same fault from the React side ("never close a menu from a submit
+button's onClick — the form unmounts before the browser dispatches submit").
+Two codebases, two frameworks, one bug. It is written down in both.
+
+**Every exit repaints, including the cancelled ones.** The first version set
+`PWMENU = false` at the top of the handler and repainted only on success — so
+pressing Cancel left the panel on screen with the state already saying it was
+closed, and the next unrelated repaint would make it vanish. **State and screen
+diverge in exactly the paths nobody tests.**
+
+### 47.3 The rail collapses; it was already sticky
+
+*"the side panel needs to be collapsable and it needs to be sticky."*
+
+Sticky it already was — `.rail` has carried `position:sticky` since 1.7 and the
+setup rail inherits it; measured, it pins under the chrome and holds. What it
+could not do is get out of the way, and the register is nine columns wide in
+the 880px the rail leaves.
+
+**COLLAPSED IS A HANDLE, NOT AN ICON RAIL**, and this is where the port stops.
+HR_ERP collapses its sidebar to 64px of icons and that works there, because its
+destinations are Employees, Directory, Time off — things with pictures. Ours
+are Labels, Scoring bands, Figure sets, and §46.1 already drew that failing.
+What makes a 36px handle enough is that **the pane already names the page**:
+every Setup page opens with its own title, so collapsing costs navigation
+rather than orientation, and one click brings it back. The mechanics are
+HR_ERP's, because they are the house pattern — a grid column swap on the
+container, the toggle inside the panel's own head rather than in the page, and
+the preference in localStorage.
+
+### 47.4 Four things the pages themselves needed
+
+**The Report page gets the same pillar band** as Plan and Performance. It was
+left behind when those two changed in §46.3 — a 19px heading over a meta line,
+the shape they shed. Its counts and its tally move to the band's right end. And
+`p.kind` goes with it: `SHOW_KIND` has been false since 3.4, every other
+surface honours it, and this was the last place in the product still printing
+"Direction".
+
+**No note under a pillar.** Mobile's first pillar carried *"End-state: unified
+market intelligence engine"* and the other nine units carried nothing — so the
+line was not a feature of the page, it was **one unit's plan having a field the
+rest left empty**, and a layout that shifted depending on which pillar you
+picked. It stays editable while a plan is being corrected, because a page that
+cannot show a field also cannot fix it.
+
+**Picking a new pillar puts you at the top of it.** The rail is sticky, so it
+is still under the cursor after a long scroll down the tactics table — you pick
+the next pillar and land halfway down a table you have not read. `scrollTo(0,0)`
+is the wrong fix: it throws away the rail's pinned position and puts the page
+header back on screen. It scrolls to the SPLIT's own offset less the chrome and
+the rail gap — **the same two numbers the rail's sticky offset is built from**,
+read from the same custom properties, so the pane's top lands exactly where the
+rail's does. And only ever upwards.
+
+**A bug a long name exposed.** The searchable dropdown's label was appended as
+a bare TEXT NODE, so `.ssbtn > :first-child` — the rule written to truncate
+it — matched the CARET, because `:first-child` selects the first ELEMENT child
+and a text node is not one. The label therefore had no `white-space:nowrap` and
+the button WRAPPED. **A selector that matches something, just not the thing it
+was written for, fails silently in both directions**: nothing looked broken
+until the SMO's name went from "Strategy Management Office" to "Mohamed Essam —
+Head of the Strategy Management Office" inside a 150px control.

@@ -220,6 +220,18 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
   a tenant column — person keys are short and global (`smo`, `ceo`), so a column
   forces composite keys through `credentials` and `sessions`. Read §36 first.
+- **Screen preferences live in `localStorage`, never in the state graph**
+  (§25, §47.1): the theme, the People page's visible columns
+  (`smp.people.columns`), the Setup rail's collapsed state (`smp.setup.rail`).
+  A saved map is always **merged** with the current defaults, never
+  substituted — a key added later is absent from a map written before it
+  existed, and reading absent as `false` hides every new thing from everyone
+  who ever touched the control (§30.2).
+- **A menu's action fires BEFORE the menu closes** (§47.2). Closing it from the
+  button's own handler unmounts the control the click is still inside — the
+  same fault the React note below records, and the same one HR_ERP records
+  against its bulk password action. And **every exit repaints, including the
+  cancelled ones**, or the state says closed while the panel is still on screen.
 - **Setup is a PAGE with a rail (since v3.16, §46.1):** the gear menu offers
   **Manage** (the six things you do in a cycle) and **Setup** as ONE entry; the
   ten setup pages are the rail's job. `SETUP_GROUPS` in `shell.html` is the

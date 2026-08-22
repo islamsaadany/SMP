@@ -249,12 +249,7 @@
   .cfg tfoot td { background:var(--surface-2); font-weight:700; }
   .factor-h { display:flex; flex-direction:column; gap:2px; }
   .factor-h b { font-size:13px; }
-  /* .factor-h only ever appears INSIDE a table header (two call sites: the
-     access matrix and Weighting), and that header wears the tenant's bar
-     colour — so its second line takes the panel's quiet ink, not the page's.
-     --ink-3 here was 2.4:1 (§38.5). */
-  .factor-h span { font-size:11px; color:var(--panel-quiet); font-weight:400;
-                   text-transform:none; letter-spacing:0; }
+  .factor-h span { font-size:11px; color:var(--ink-3); font-weight:400; text-transform:none; letter-spacing:0; }
   .qual { display:inline-flex; gap:3px; }
   .qual i { width:15px; height:15px; border-radius:2px; border:1px solid var(--line);
             display:inline-block; font-style:normal; }
@@ -340,19 +335,19 @@
 
   /* ── v6 card: Objectives 2/3 with the dial, Execution 1/3 as figures ── */
   .two { display:grid; grid-template-columns:2fr 1fr; }
-  /* The tenant's bar colour, same as every other header (3.13). */
-  .gcard .card-head { background:var(--panel); color:var(--panel-ink);
+  /* Was navy. Same treatment as every other header now — the rule the old
+     comment stated and the retheme half-kept: no screen may have two different
+     ideas of what a header looks like. */
+  .gcard .card-head { background:var(--surface-2); color:var(--ink-2);
                       padding:13px 16px 12px; border-bottom:0; text-align:center; width:100%; }
-  /* Its ink follows its ground, and the ground is the panel again. */
-  .gcard .card-head .gname { font-size:16px; font-weight:700; color:var(--panel-ink); }
-  .gcard .card-head .gname button.linkbu { color:var(--panel-ink);
-                      text-decoration-color:rgba(255,255,255,.45); font-size:16px; }
-  .gcard .card-head .gname button.linkbu:hover { color:var(--panel-accent); }
-  /* --panel-accent, not --gold: the accent as a WORD on the dark panel is
-     2.8:1 (§38.4). */
-  .gcard .card-head .gsub { font-size:11.5px; color:var(--panel-quiet); }
-  .gcard .card-head .pill.theme { background:rgba(255,255,255,.12);
-                      color:var(--panel-accent); border-color:var(--panel-accent); }
+  /* Its ink follows its ground. These were --panel-ink — white — which was
+     right while the head was navy and invisible the moment it was not. */
+  .gcard .card-head .gname { font-size:16px; font-weight:700; color:var(--ink); }
+  .gcard .card-head .gname button.linkbu { color:var(--ink);
+                      text-decoration-color:var(--line); font-size:16px; }
+  .gcard .card-head .gname button.linkbu:hover { color:var(--gold-deep); }
+  .gcard .card-head .gsub { font-size:11.5px; color:var(--ink-3); }
+  .gcard .card-head .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
 
   .box-obj, .box-exec { display:flex; flex-direction:column; align-items:center; padding-top:16px; }
   .box-obj { gap:11px; padding-bottom:20px; padding-left:14px; padding-right:14px; }
@@ -508,15 +503,15 @@
      named once, read in both places. */
   .split { margin-top:0; }
 
-  /* THE SAME HEADER THE TABLES USE — the tenant's bar colour (3.13). A header
-     is a label for what sits under it and needs a ground of its own to be one;
-     that ground is `--panel`, which Setup › Branding sets, so the rail's header
-     wears the tenant's brand exactly as the navigation does. */
-  .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
+  /* THE SAME QUIET HEADER THE TABLES USE. It was navy; I made it the card's own
+     surface, which left it reading as nothing at all — Islam spotted it in the
+     rail. A header is a label for what sits under it, and it needs a ground of
+     its own to be one, whether or not that ground is dark. */
+  .rail .rhead { background:var(--surface-2); color:var(--ink-2); font-weight:700;
+                 letter-spacing:.09em; border-bottom:1px solid var(--line); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
-    display:flex; justify-content:space-between; gap:8px; border-bottom:0; }
-  /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
-  .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
+    display:flex; justify-content:space-between; gap:8px; }
+  .rail .rhead span { color:var(--none); font-weight:600; }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }

@@ -276,7 +276,26 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-21 — **v3.12, MERGED**: the folds become ONE CONTROL
+*Last Updated: 2026-08-21 — **v3.13**: THE HEADERS GO BACK TO THE TENANT'S
+COLOUR (§41.10). Islam: *"it's not a navy/gold thing. It follows the brand
+colours set in the platform."* That is the decision and it is a product
+argument, not taste: **`--panel` is what Setup › Branding sets for the
+navigation bar**, so a header on it WEARS THE TENANT'S BRAND and a header on
+`--surface-2` wears nothing — the light header was the reference product's
+answer to a question SMP answers differently, because SMP is branded per tenant
+and the reference was not. **All five go back together** (`thead th`, `.phead`,
+`.rail .rhead`, `.grouphead`, `.gcard .card-head`) — §40's lesson applied
+rather than re-learned. The AUDIT is the method worth keeping: every selector
+carrying `background:var(--panel)` before the retheme was DIFFED against the
+current stylesheets rather than listed from memory; eight had lost it, five
+were headers, three had gone to the accent and belong to §41's budget. And
+restoring the ground took the sweep from 0 to 36 — every failure a second line
+inside a header, written in the page's quiet ink, 2.4:1 on this one. **§38.5
+for the third time: a surface with its own ground needs its own ink.**
+`.factor-h span` was the stubborn one at `0,1,1`, where the header's own rule
+could not reach it. Back to 0.*
+
+*Earlier: 2026-08-21 — **v3.12, MERGED**: the folds become ONE CONTROL
 (§41.8, treatment 4) — a single segmented box divided by a hairline instead of
 two capsules. One box on a row that has no other box; the container **says
 outright that Units and Functions are the same kind of thing**; and the two

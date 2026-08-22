@@ -4939,6 +4939,44 @@ This is what happens when it is not followed. The rule is now deleted.
 from what the product could look like, not from what it does.** Draw from the
 rendered page.
 
+### 41.10 The headers go back to the tenant's colour
+
+Islam, on the rail's PILLARS header and the table headers: *"what happened to
+the coloring... they were following the navigation branding color."* And then,
+on being offered navy: **"it's not a navy/gold thing. It follows the brand
+colours set in the platform."**
+
+That sentence is the decision, and it is a product argument rather than a taste
+one. `--panel` is the colour **Setup › Branding sets for the navigation bar**.
+A header on `--panel` WEARS THE TENANT'S BRAND; a header on `--surface-2`
+wears nothing. The light header was the reference product's answer to a
+question SMP answers differently, because SMP is branded per tenant and the
+reference was not — porting it was porting an answer along with the language.
+
+**All five go back together**, which is §40's lesson applied rather than
+re-learned: `thead th` (every table in the product), `.phead`, `.rail .rhead`,
+`.grouphead`, `.gcard .card-head`. Converting SOME members of a family is
+worse than converting none — the survivors read as mistakes rather than as a
+style — and it is what left the presentation deck's headers navy while every
+screen behind them went light.
+
+**The audit that found them** is worth keeping as a method: rather than
+listing from memory, every selector carrying `background:var(--panel)` in the
+pre-retheme stylesheets was diffed against the current ones. Eight had lost it;
+five were headers and go back, and three (`.imp-n`, `.oblband.cap`,
+`.qs i.on`) had gone to the ACCENT rather than to light and belong to §41's
+budget, not here.
+
+**And the ink had to follow the ground, again.** Restoring the ground took the
+sweep from 0 to 36 failures, every one of them a second line inside a header —
+"Performance, Foundation, Temple…", "Their key is their username" — written in
+the page's quiet ink, which is quiet on a pale ground and **2.4:1** on this
+one. §38.5 for the third time: **a surface with its own ground needs its own
+ink.** `.factor-h span` was the stubborn one, at `0,1,1` where the header's own
+rule could not reach it; it takes `--panel-quiet` directly now, which is
+correct rather than clever because `.factor-h` only ever appears inside a
+header. Back to 0.
+
 ### 41.5 Verified
 
 - Contrast: **0 failures** across 4 combinations × 20 pages and states. The

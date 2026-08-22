@@ -673,7 +673,12 @@
   .cfg tfoot td { background:var(--surface-2); font-weight:700; }
   .factor-h { display:flex; flex-direction:column; gap:2px; }
   .factor-h b { font-size:13px; }
-  .factor-h span { font-size:11px; color:var(--ink-3); font-weight:400; text-transform:none; letter-spacing:0; }
+  /* .factor-h only ever appears INSIDE a table header (two call sites: the
+     access matrix and Weighting), and that header wears the tenant's bar
+     colour — so its second line takes the panel's quiet ink, not the page's.
+     --ink-3 here was 2.4:1 (§38.5). */
+  .factor-h span { font-size:11px; color:var(--panel-quiet); font-weight:400;
+                   text-transform:none; letter-spacing:0; }
   .qual { display:inline-flex; gap:3px; }
   .qual i { width:15px; height:15px; border-radius:2px; border:1px solid var(--line);
             display:inline-block; font-style:normal; }
@@ -759,19 +764,19 @@
 
   /* ── v6 card: Objectives 2/3 with the dial, Execution 1/3 as figures ── */
   .two { display:grid; grid-template-columns:2fr 1fr; }
-  /* Was navy. Same treatment as every other header now — the rule the old
-     comment stated and the retheme half-kept: no screen may have two different
-     ideas of what a header looks like. */
-  .gcard .card-head { background:var(--surface-2); color:var(--ink-2);
+  /* The tenant's bar colour, same as every other header (3.13). */
+  .gcard .card-head { background:var(--panel); color:var(--panel-ink);
                       padding:13px 16px 12px; border-bottom:0; text-align:center; width:100%; }
-  /* Its ink follows its ground. These were --panel-ink — white — which was
-     right while the head was navy and invisible the moment it was not. */
-  .gcard .card-head .gname { font-size:16px; font-weight:700; color:var(--ink); }
-  .gcard .card-head .gname button.linkbu { color:var(--ink);
-                      text-decoration-color:var(--line); font-size:16px; }
-  .gcard .card-head .gname button.linkbu:hover { color:var(--gold-deep); }
-  .gcard .card-head .gsub { font-size:11.5px; color:var(--ink-3); }
-  .gcard .card-head .pill.theme { background:var(--over-bg); color:var(--gold-deep); }
+  /* Its ink follows its ground, and the ground is the panel again. */
+  .gcard .card-head .gname { font-size:16px; font-weight:700; color:var(--panel-ink); }
+  .gcard .card-head .gname button.linkbu { color:var(--panel-ink);
+                      text-decoration-color:rgba(255,255,255,.45); font-size:16px; }
+  .gcard .card-head .gname button.linkbu:hover { color:var(--panel-accent); }
+  /* --panel-accent, not --gold: the accent as a WORD on the dark panel is
+     2.8:1 (§38.4). */
+  .gcard .card-head .gsub { font-size:11.5px; color:var(--panel-quiet); }
+  .gcard .card-head .pill.theme { background:rgba(255,255,255,.12);
+                      color:var(--panel-accent); border-color:var(--panel-accent); }
 
   .box-obj, .box-exec { display:flex; flex-direction:column; align-items:center; padding-top:16px; }
   .box-obj { gap:11px; padding-bottom:20px; padding-left:14px; padding-right:14px; }
@@ -927,15 +932,15 @@
      named once, read in both places. */
   .split { margin-top:0; }
 
-  /* THE SAME QUIET HEADER THE TABLES USE. It was navy; I made it the card's own
-     surface, which left it reading as nothing at all — Islam spotted it in the
-     rail. A header is a label for what sits under it, and it needs a ground of
-     its own to be one, whether or not that ground is dark. */
-  .rail .rhead { background:var(--surface-2); color:var(--ink-2); font-weight:700;
-                 letter-spacing:.09em; border-bottom:1px solid var(--line); font-size:10.5px;
+  /* THE SAME HEADER THE TABLES USE — the tenant's bar colour (3.13). A header
+     is a label for what sits under it and needs a ground of its own to be one;
+     that ground is `--panel`, which Setup › Branding sets, so the rail's header
+     wears the tenant's brand exactly as the navigation does. */
+  .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
-    display:flex; justify-content:space-between; gap:8px; }
-  .rail .rhead span { color:var(--none); font-weight:600; }
+    display:flex; justify-content:space-between; gap:8px; border-bottom:0; }
+  /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
+  .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
     padding:6px 14px; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase;
     color:var(--ink-3); font-weight:700; }
@@ -1839,33 +1844,45 @@
   .phead.rphead .num{text-align:right}
   .phead.rphead .cc{text-align:center}
 
-  /* ── Table headers, LIGHT since 3.11 ──────────────────────────────
-     They were a navy band with white type, and that band was one of the two
-     things (with the serif) that made SMP read as a different product from the
-     reference. The new language puts a QUIET header over the rows — the same
-     surface, one step down, in uppercase bold — and lets the rounded clipped
-     box do the containing that the dark band used to do.
+  /* ── Table headers: THE TENANT'S BAR COLOUR ───────────────────────
+     They went light in 3.11 with the rest of the ported design language, and
+     back in 3.13 at Islam's direction: *"all five, and it's not a navy/gold
+     thing — it follows the brand colours set in the platform."*
 
-     The rule that matters is still the one this replaces: EVERY table and
-     every grid header that behaves like one is styled here, so no screen ends
-     up with two different ideas of what a header looks like. The !important
-     stays for the same reason it was written — several stylesheets set a
-     background on th, and this is the one that must win. */
+     That is the argument, and it is a product argument rather than a taste
+     one: `--panel` is the colour Setup › Branding sets for the navigation bar,
+     so a header on `--panel` WEARS THE TENANT'S BRAND. A header on
+     `--surface-2` wears nothing. The light header was the reference product's
+     answer to a question SMP answers differently, because SMP is branded per
+     tenant and the reference was not.
+
+     The rule underneath is unchanged and is the one that matters: EVERY table
+     and every grid header that behaves like one is styled here, so no screen
+     ends up with two different ideas of what a header looks like — §40's
+     lesson, that converting SOME members of a family is worse than converting
+     none. The !important stays for the same reason it was written: several
+     stylesheets set a background on th, and this is the one that must win. */
   thead th, table thead th, .cfg table thead th, .scroll table thead th{
-    background:var(--surface-2) !important; color:var(--ink-2) !important;
-    border-bottom:1px solid var(--line) !important}
-  thead th .tip{color:var(--ink-3);border-color:var(--line)}
-  thead th .tip:hover{color:var(--ink);border-color:var(--ink-3)}
-  .phead, .plist .phead{background:var(--surface-2) !important; color:var(--ink-2) !important;
-    border-bottom:1px solid var(--line)}
-  .phead span, .phead > *{color:var(--ink-2)}
-  .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
-  /* A grid header that behaves like a table header, so it looks like one. It
-     stayed navy through the retheme while the tables went light, which left
-     the product carrying BOTH treatments — the exact thing the rule above
-     exists to prevent. */
-  .grouphead{background:var(--surface-2) !important; color:var(--ink-2) !important;
-    border-bottom:1px solid var(--line)}
+    background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0 !important}
+  /* A surface with its own ground needs its own ink (§38.5): --ink-3 on the
+     panel is 2.5:1. These are the panel's own quiet inks. */
+  thead th .tip{color:var(--panel-quiet);border-color:rgba(255,255,255,.45)}
+  thead th .tip:hover{color:var(--panel-ink);border-color:var(--panel-ink)}
+  .phead, .plist .phead{background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0}
+  .phead span, .phead > *{color:var(--panel-ink)}
+  .phead .tip{color:var(--panel-quiet);border-color:rgba(255,255,255,.45)}
+  /* A grid header that behaves like a table header, so it looks like one. */
+  .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important;
+    border-bottom:0}
+  /* THE NOTE INSIDE A HEADER. Several headers carry a second line explaining
+     the column — "Performance, Foundation, Temple…", "Their key is their
+     username" — written in the page's quiet ink, which is quiet against a PALE
+     ground and 2.4:1 against this one. §38.5 again, and the sweep caught all 36
+     of them: a surface with its own ground needs its own ink. */
+  thead th .why, thead th small, thead th span:not([class]),
+  .phead .why, .grouphead .why, .grouphead span{color:var(--panel-quiet)}
   /* Arrange mode still has to be visible against the dark band. */
   .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
 

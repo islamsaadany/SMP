@@ -1,7 +1,7 @@
 # 008 · Figure sets — who is responsible for which numbers
 
-**Status:** proposed. Written from Islam's own account of the concept, for him
-to read before any code.
+**Status:** AGREED 2026-08-21, not yet built. Written from Islam's own account
+of the concept and checked with him line by line; §6 and §9 carry his answers.
 **Supersedes** the team+person shape built in §16.7 on 2026-08-21 (nothing is
 deployed with it, so nothing migrates).
 **Reverses** §16.7's *"Disagreement is settled off the platform. No challenge
@@ -33,7 +33,21 @@ that is enough.
 
 ## 2 · What exists, and where it is stored
 
-**A set** — a name, and **up to two owners** ("2 max for now").
+**A set** — a name, **a team**, and **up to two owners** ("2 max for now"):
+
+    Financial Figures  ·  team Finance  ·  owner Hossam
+
+The team is on the SET, not read off the person. Islam's reason for showing a
+department at all decides this: the BU head needs to know **who to talk to**
+when he is writing the note against a number he did not enter, and when he
+looks at his entry page and finds a figure he cannot type. *"Set by Financial
+Figures"* does not tell him that; *"Set by Finance"* does. And the person's own
+department cannot be trusted to say it — the "Finance SMO custodian" sits with
+the office rather than in Finance, which is the case that broke reading it off
+the person.
+
+It also survives the owner changing: hand *Financial Figures* to somebody else
+and the unit still reads *Set by Finance*. Two sets may share a team.
 
 **An assignment, on the figure itself** — the person responsible for entering
 it, and the set it came from if it came from one:
@@ -92,17 +106,22 @@ it leaves it and closes the request.
 
 ## 6 · What the unit sees
 
-**"Set by Finance"** — the FUNCTION of the person assigned to that figure, read
-off the person, not off the set. Islam: *"it reads of the assigned person on
-that measure either from the sets or from the custodian setup."*
+**"Set by Finance"** — the SET's team. Always, with no fallback and nothing
+depending on where the assigned person happens to sit.
 
 The figure is shown, not typed, and the unit does not enter it.
 
-**One stated assumption, for correction rather than a question:** a person with
-no supporting function — the "Finance SMO custodian" who sits with the office —
-would render as *Set by —*. Where the person has no function, the page will
-show the **set's name** instead (*Set by Financial Figures*), and where there is
-neither, the person's own name. It never shows a blank.
+Two places this is what the BU head is actually reading, and both are why the
+department appears at all rather than the set's name:
+
+- **the note.** He writes the explanation for a number he did not enter, so he
+  has to know whose it is.
+- **his entry page.** He finds a figure he cannot type, and needs to know who
+  to chase rather than that something is broken.
+
+A figure named by a unit custodian rather than claimed into a set has no team,
+and reads as the person: *Entered by Nadia*. That is right — it is the unit's
+own arrangement, and the person IS the answer to "who do I ask".
 
 ---
 
@@ -141,14 +160,18 @@ claim was refused. Recorded as a reversal with its reasoning, not overwritten.
 
 ## 9 · What needs deciding when the build reaches it
 
-- **Two owners on one set:** may either of them tick and enter, or is one the
-  owner and the other a stand-in? The spec assumes either.
-- **Whom may a unit custodian name** — anyone the platform knows, or only
-  people attached to their unit? The spec assumes anyone, matching the set
-  owner's picker.
-- **Does naming somebody give them sight of that unit's other figures?** No —
-  they see the figure they were named on and nothing else. Stated so it is a
-  decision rather than a side effect.
+**ANSWERED 2026-08-21:**
+
+- **A unit custodian may name anyone the platform knows** — not only people
+  attached to their unit. Same reach as the set owner's picker.
+- **Naming somebody gives them that FIGURE and nothing else.** Not the unit's
+  other measures, not its plan, not its score. They sign in during the cycle
+  and find one page listing every figure they owe, wherever those figures live.
+
+**STILL ASSUMED, stated rather than asked:**
+
+- **Two owners on one set:** either of them may tick and enter. If one is meant
+  to be the owner and the other a stand-in, say so and it changes.
 
 ---
 

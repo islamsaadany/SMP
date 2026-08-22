@@ -319,6 +319,84 @@ console.log("\n6b · figure sets");
   check("and the previous owner stops being able to enter them", !v.ok, v.refusals.join(" / "));
 })();
 
+/* ── 6c · Claim requests (spec 008 §5) ──────────────────────────── */
+console.log("\n6c · claim requests");
+(function () {
+  const base = clone(SEED);
+  const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
+  const tre = base.people.filter(function (p) { return p.fn === "treasury"; })[0];
+  if (!fin || !tre) { console.log("  (skipped)"); return; }
+  base.group.sets = [
+    { id: "fin", name: "Financial Figures", team: "finance",  owner: fin.key, pick: "owner" },
+    { id: "tre", name: "Treasury Figures",  team: "treasury", owner: tre.key, pick: "owner" }
+  ];
+  const m    = base.units[UNIT].items[0].measures[0];
+  const free = base.units[UNIT].items[0].measures[1];
+  m.src = { set: "fin" };
+  base.group.claims = [];
+
+  const ask = function (state, over) {
+    state.group.claims = (state.group.claims || []).concat([Object.assign(
+      { id: "c1", unit: UNIT, figure: m.id, set: "tre", by: tre.key, state: "open" }, over || {})]);
+  };
+  const verdict = function (who, mutate) {
+    const inc = clone(base); mutate(inc);
+    return A.authorize(base, inc, personOf(base, who));
+  };
+
+  let v = verdict(tre.key, function (s) { ask(s); });
+  check("a set owner may ask for a figure another set holds", v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { by: fin.key }); });
+  check("but not in somebody else's name", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { set: "fin" }); });
+  check("nor on behalf of a set they do not fill", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { state: "granted" }); });
+  check("nor already answered — the SMO answers it", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  v = verdict(tre.key, function (s) { ask(s, { figure: free.id }); });
+  check("nor for a figure nobody holds", !v.ok, v.refusals.join(" / "));
+
+  v = verdict(headKey, function (s) { ask(s, { by: headKey }); });
+  check("a unit head cannot ask at all — they fill no set", !v.ok, v.refusals.join(" / "));
+
+  /* Asking twice is not asking louder. */
+  const asked = clone(base); ask(asked);
+  const twice = clone(asked);
+  twice.group.claims = twice.group.claims.concat([
+    { id: "c2", unit: UNIT, figure: m.id, set: "tre", by: tre.key, state: "open" }]);
+  v = A.authorize(asked, twice, personOf(asked, tre.key));
+  check("a second open request for the same figure is refused", !v.ok, v.refusals.join(" / "));
+
+  /* Answering is the SMO's. */
+  const answered = clone(asked);
+  answered.group.claims = answered.group.claims.map(function (c) {
+    return Object.assign({}, c, { state: "granted" }); });
+  v = A.authorize(asked, answered, personOf(asked, tre.key));
+  check("the asker cannot answer their own request", !v.ok, v.refusals.join(" / "));
+  v = A.authorize(asked, answered, personOf(asked, fin.key));
+  check("nor can the holder", !v.ok, v.refusals.join(" / "));
+  v = A.authorize(asked, answered, personOf(asked, "smo"));
+  check("the SMO can", v.ok, v.refusals.join(" / "));
+
+  /* Granting moves the figure, and that is the SMO's to do anyway. */
+  const moved = clone(answered);
+  moved.units[UNIT].items[0].measures.forEach(function (x) {
+    if (x.id === m.id) x.src = { set: "tre" }; });
+  v = A.authorize(asked, moved, personOf(asked, "smo"));
+  check("and moves the figure in the same save", v.ok, v.refusals.join(" / "));
+  v = A.authorize(asked, moved, personOf(asked, tre.key));
+  check("which the asker still cannot do for themselves", !v.ok, v.refusals.join(" / "));
+
+  /* Withdrawing somebody else's request is not asking. */
+  const gone = clone(asked); gone.group.claims = [];
+  v = A.authorize(asked, gone, personOf(asked, tre.key));
+  check("removing a request is the SMO's", !v.ok, v.refusals.join(" / "));
+})();
+
 /* ── 7 · A retired person can do nothing ───────────────────────── */
 console.log("\n7 · a retired person");
 (function () {

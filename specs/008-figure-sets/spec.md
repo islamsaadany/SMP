@@ -1,7 +1,7 @@
 # 008 · Figure sets — who is responsible for which numbers
 
-**Status:** step 1 BUILT (2026-08-21) — sets, the picking page and the
-switch. Steps 2 (claim requests) and 3 (the unit custodian's dropdown) are not. Written from Islam's own account
+**Status:** steps 1 and 2 BUILT (2026-08-21) — sets, the picking page, the
+switch, and claim requests. Step 3 (the unit custodian's dropdown) is not. Written from Islam's own account
 of the concept and checked with him line by line; §6 and §9 carry his answers.
 **Supersedes** the team+person shape built in §16.7 on 2026-08-21 (nothing is
 deployed with it, so nothing migrates).
@@ -247,15 +247,23 @@ unit, resolved through the sets. Hidden for anybody who enters none.
 **Set by Finance**, the note stays the unit's, and the outstanding list names
 the team AND the person.
 
-Not built, and stated rather than implied: **claim requests**. Claiming a
-figure another set holds is refused with the holder named; the *Request the
-claim* button and the SMO's list are step 2.
+**Claim requests (step 2).** A figure another set holds carries **Request the
+claim** rather than nothing — a refusal with no route forward is a dead end,
+and the platform is the only thing that knows the claim was turned away. The
+request records the figure, the asking set and who asked, and **the SMO
+answers it** on the Reporting cycle page: *Move it* puts the figure in the
+asking set and closes the request in one act; *Leave it* closes it without
+moving anything. Asking twice is refused — asking twice is not asking louder.
+Removing a set takes its outstanding requests with it, because a request to
+move a figure into a set that no longer exists is a question with no answer.
+
+Not built: **step 3**, the unit custodian's per-figure dropdown.
 
 ## 11 · How it will be verified
 
 **Step 1, done:**
 
-- `scripts/test-authorize.js` — **88 checks, 0 failures**, 20 of them new: who
+- `scripts/test-authorize.js` — **101 checks, 0 failures**, 33 of them new: who
   may enter a set-held figure, who may claim into which set, the switch, one
   figure one set, releasing your own but not somebody else's, a set is Setup
   even to its own owner, a locked cycle, and — the one that proves the shape —
@@ -272,3 +280,16 @@ claim* button and the SMO's list are step 2.
   on a fresh database.
 - Contrast 0 failures across 4 combinations × 23 pages and states.
 - QA's 31 viewers, zero console errors; byte-identical rebuild.
+
+**Two faults the browser found and no test could have:**
+
+- **The request button rendered off the right edge of the page.** Its column
+  needed 215px in a grid track fixed at 90; a row whose content does not fit
+  its track does not wrap, it overflows. Found because a click could not land
+  on it, not because anything looked wrong.
+- **The client's `world()` was built field by field**, so it carried `sets` but
+  not `claims` — the browser answered "has this been asked for?" from a world
+  with no requests in it while the server answered from one that had them.
+  That is the drift `lib/rules.js` exists to prevent, and it happened TWICE in
+  one afternoon. Both sides now build the world with the same `worldOf()`, from
+  a state-shaped object, so there is nowhere left for them to differ.

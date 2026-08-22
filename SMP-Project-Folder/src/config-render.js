@@ -1269,6 +1269,10 @@ function renderSourceSetup(){
     var otherName = theirs && held.set
       ? ((setById(held.set) || {}).name || "another set")
       : (theirs ? (personName(held.by) || held.by) : "");
+    /* A refusal with no route forward is a dead end, and the platform is the
+       only thing that knows the claim was turned away. So a figure another set
+       holds carries a REQUEST rather than nothing (§5). */
+    var asked = theirs ? myOpenClaim(m.id, st.id) : null;
     return '<div class="pick ' + (mineRow ? "on" : "off") + '">' +
       (!theirs
         ? '<button class="fmark-btn' + (mineRow ? ' on' : '') + '" data-srcpick="' + esc(m.id) + '" ' +
@@ -1278,8 +1282,13 @@ function renderSourceSetup(){
       '<span>' + esc(m.name) + '</span>' +
       '<span class="num why" style="margin:0">' +
         (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
-      '<span class="why" style="margin:0;min-width:130px;text-align:right">' +
-        (theirs ? esc(otherName) : (mineRow ? "in this set" : "click to claim")) + '</span>' +
+      '<span class="why" style="margin:0;text-align:right">' +
+        (theirs
+          ? esc(otherName) +
+            (asked
+              ? ' <span class="pill attn">Asked</span>'
+              : ' <button class="linkbu" data-claimask="' + esc(m.id) + '">Request the claim</button>')
+          : (mineRow ? "in this set" : "click to claim")) + '</span>' +
     '</div>';
   };
 
@@ -1307,7 +1316,7 @@ function renderSourceSetup(){
       '<div class="imp-row" style="margin:0 0 12px">' +
         '<span class="cfg-lab">Filling</span>' + setPick + '</div>' +
       unitBtns +
-      '<div class="cfg" style="padding:0">' + blocks + '</div>' +
+      '<div class="cfg srcpick" style="padding:0">' + blocks + '</div>' +
       '<div class="note"><b>A figure in a set is entered once, by the set\u2019s owner.</b> ' +
         'The unit still sees it, still needs it before it can submit, and <b>still writes the ' +
         'note</b> \u2014 the number is the set\u2019s, the performance is the unit\u2019s, and the ' +
@@ -1691,8 +1700,42 @@ function renderCycle(){
       '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
     '</div></div>';
 
+  /* CLAIM REQUESTS (spec 008 §5). The SMO answers them, not the holder — the
+     holder has an interest in the answer, and the SMO is the only person who
+     sees both sides. They live here because this is the page the SMO already
+     opens to see who owes what. */
+  var claims = openClaimsList();
+  var claimRows = claims.map(function(c){
+    var row = SMPRules.rowById(world(), c.unit, c.figure);
+    var holder = row ? srcLabel(row) : "\u2014";
+    var want = setById(c.set);
+    return '<tr><td><b>' + esc(claimFigure(c)) + '</b>' +
+        '<span class="why">' + esc((UNITS[c.unit] || {}).name || c.unit) + '</span></td>' +
+      '<td>' + esc(holder) + '</td>' +
+      '<td>' + esc((want && want.name) || c.set) + '</td>' +
+      '<td class="why" style="margin:0">' + esc(personName(c.by) || c.by) + '</td>' +
+      '<td class="cc">' + (can
+        ? '<button class="editbtn" data-claimyes="' + esc(c.id) + '">Move it</button> ' +
+          '<button class="linkbu" data-claimno="' + esc(c.id) + '">Leave it</button>'
+        : '') + '</td></tr>';
+  }).join("");
+
   return '<div class="kv"><span class="pill kind">SMO</span>' +
-      '<span class="pill kind">' + esc(REVIEW.cadence) + '</span></div>' + head +
+      '<span class="pill kind">' + esc(REVIEW.cadence) + '</span>' +
+      (claims.length ? '<span class="pill attn">' + claims.length + ' claim request' +
+        (claims.length === 1 ? "" : "s") + '</span>' : '') + '</div>' + head +
+    (claims.length
+      ? section("", "Claim requests", null,
+          '<div class="cfg"><table><thead><tr><th style="width:34%">Figure</th>' +
+            '<th style="width:16%">Held by</th><th style="width:20%">Wanted by</th>' +
+            '<th style="width:18%">Asked by</th><th class="cc" style="width:12%"></th>' +
+          '</tr></thead><tbody>' + claimRows + '</tbody></table></div>' +
+          '<div class="note"><b>One figure belongs to one set</b>, so somebody has asked for ' +
+            'one that is already held. <b>Move it</b> puts the figure in the asking set; ' +
+            '<b>leave it</b> closes the request without moving anything. Either way the ' +
+            'conversation about whether it is the right number stays between the two ' +
+            'teams \u2014 this only decides who enters it.</div>')
+      : '') +
     section("", "Who has reported", null,
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +

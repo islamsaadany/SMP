@@ -77,15 +77,22 @@ function roleName(k){
    whatever points at them. A person who holds nothing gets an empty list and
    therefore no access, which is the honest answer for someone who has been
    added to the registry but not yet given a job. */
-/* The world the shared rules answer from. It has to carry everything a rule
-   reads — the sets included, or the client answers "who may fill this" from a
-   world that has no sets in it while the server answers from one that does.
-   The drift lib/rules.js exists to prevent starts here. */
+/* The world the shared rules answer from — built by the SAME function the
+   server uses, from a state-shaped object rather than field by field.
+
+   That is not tidiness. Building it field by field means every rule that
+   starts reading a new part of the state needs this list updating too, and
+   nothing says so: the client then answers "who may fill this" from a world
+   with no sets in it while the server answers from one that has them. It
+   happened here twice in one afternoon — once for `sets`, once for `claims` —
+   which is twice more than the shared rules file was supposed to allow.
+   ONE BUILDER, so there is nowhere for the two to differ. */
 function world(){
-  return SMPRules.W({ unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
-                      functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
-                      companies:COMPANIES, access:ACCESS,
-                      sets:(GROUP && GROUP.sets) || [] });
+  return SMPRules.worldOf({
+    unitKeys:UNIT_KEYS, units:UNITS, unitRoles:UNIT_ROLES,
+    functionKeys:FUNCTION_KEYS, functions:FUNCTIONS,
+    companies:COMPANIES, access:ACCESS, group:GROUP
+  });
 }
 function personRoles(p){ return SMPRules.personRoles(world(), p); }
 function personRoleKeys(p){ return SMPRules.personRoleKeys(world(), p); }
@@ -1090,6 +1097,26 @@ function myPickableSets(){ return SMPRules.pickableSets(world(), viewer()); }
 function canPickSets(){ return myPickableSets().length > 0; }
 function setsList(){ return (GROUP.sets = GROUP.sets || []); }
 function setById(id){ return SMPRules.setById(world(), id); }
+/* ── Claim requests (spec 008 §5) ────────────────────────────────── */
+function claimsList(){ return (GROUP.claims = GROUP.claims || []); }
+function openClaimsList(){ return SMPRules.openClaims(world()); }
+function myOpenClaim(figureId, setId){
+  return SMPRules.openClaimFor(world(), figureId, setId);
+}
+/* Ids are minted, not typed — the same rule a plan's codes follow (§22). No
+   clock: a repaint must not mint a different id for the same request, and the
+   platform has no reliable "now" it can put in the graph anyway. */
+function mintClaimId(){
+  var n = 1, ids = {};
+  claimsList().forEach(function(c){ ids[c.id] = 1; });
+  while (ids["cl" + n]) n++;
+  return "cl" + n;
+}
+function claimFigure(c){
+  var row = SMPRules.rowById(world(), c.unit, c.figure);
+  return row ? row.name : c.figure;
+}
+
 function mintSetId(name){
   var base = String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14) || "set";
   if (!setById(base)) return base;

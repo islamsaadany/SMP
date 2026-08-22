@@ -969,6 +969,39 @@
       });
     });
 
+    /* Asking for a figure another set holds. It writes an OPEN request and
+       nothing else — moving the figure is the SMO's answer, not the asking. */
+    document.querySelectorAll("[data-claimask]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var st = setById(SRCSET.set) || myPickableSets()[0];
+        var unit = SRCSET.unit || activeKeys()[0];
+        if (!st) return;
+        if (myOpenClaim(b.dataset.claimask, st.id)) return;
+        claimsList().push({ id: mintClaimId(), unit: unit, figure: b.dataset.claimask,
+                            set: st.id, by: viewer().key, state: "open" });
+        paint();
+      });
+    });
+    /* Answering one. Moving the figure and closing the request are ONE act, or
+       a granted request could sit open beside a figure that had already
+       moved. */
+    var answerClaim = function(id, grant){
+      var c = claimsList().filter(function(x){ return x.id === id; })[0];
+      if (!c) return;
+      if (grant) {
+        var hit = SMPRules.rowById(world(), c.unit, c.figure);
+        if (hit) hit.src = { set: c.set };
+      }
+      c.state = grant ? "granted" : "declined";
+      paint();
+    };
+    document.querySelectorAll("[data-claimyes]").forEach(function(b){
+      b.addEventListener("click", function(){ answerClaim(b.dataset.claimyes, true); });
+    });
+    document.querySelectorAll("[data-claimno]").forEach(function(b){
+      b.addEventListener("click", function(){ answerClaim(b.dataset.claimno, false); });
+    });
+
     /* The sets themselves. */
     var setField = function(attr, apply){
       document.querySelectorAll("[" + attr + "]").forEach(function(el){
@@ -997,6 +1030,9 @@
           (u.items || []).forEach(function(p){ (p.measures || []).forEach(clear); });
         });
         GROUP.sets = setsList().filter(function(x){ return x.id !== id; });
+        /* And its outstanding requests go with it: a request to move a figure
+           into a set that no longer exists is a question with no answer. */
+        GROUP.claims = claimsList().filter(function(x){ return x.set !== id; });
         paint();
       });
     });

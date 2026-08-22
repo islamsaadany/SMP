@@ -1371,7 +1371,8 @@ function renderFocusSetup(){
     }).join("");
 
   var n = unitFocus(u).length;
-  var unitPick = '<select class="fld" id="fset-unit">' + activeKeys().map(function(k){
+  var unitPick = '<select class="fld" id="fset-unit" aria-label="Which unit to mark">' +
+    activeKeys().map(function(k){
       var c = unitFocus(UNITS[k]).length;
       return '<option value="' + k + '"' + (k === FSET.unit ? " selected" : "") + '>' +
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
@@ -1971,7 +1972,8 @@ function renderImport(){
       '<p class="sub">' + (isPlan
         ? "The file says which unit it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and no other unit is touched."
         : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
-      '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv">' +
+      '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv" ' +
+        'aria-label="Choose a template file to upload">' +
         (isPlan ? "" : '<button class="linkbu" data-paste="1">or paste the file</button>') +
         (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
       '</div>' +
@@ -2006,7 +2008,22 @@ function renderImport(){
       '</div>'
     : '';
 
+  /* A FILE THAT FAILS TO READ HAS TO SAY SO (§48.8). `impFail()` writes the
+     reason into IMP.check and clears IMP.summary and IMP.diff — but checkBlock
+     was only ever concatenated INSIDE step3, and step3 is only built when
+     there is a summary or a diff to review. So the one case where the message
+     matters most, the file that could not be read at all, was the one case
+     where it had nowhere to render: upload the wrong template and the page did
+     not move. The sentence existed the whole time.
+
+     §32's rule, which this codebase states outright: a blocked save must say
+     why, where the save is. An unreadable upload is the same thing one step
+     earlier. */
   var step3 = receipt;
+  if (!step3 && chk && chk.problems.length) {
+    step3 = '<div class="imp-step"><div class="imp-n">!</div><div class="imp-b">' +
+      '<h4>This file could not be read</h4>' + checkBlock + '</div></div>';
+  }
 
   /* A plan upload is not a diff any more (§22). What is shown is the exchange:
      what the file holds, what it displaces, and what of that was reported —
@@ -2393,7 +2410,11 @@ function renderCaps(){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td><b>' + esc(c.name) + '</b></td>' +
       '<td>' + (editable
-        ? '<select class="fld" data-capfn="' + i + '">' +
+        /* NAMED. Eight of these on one page announced as eight identical
+           unnamed combo boxes, and the searchable button in front of each
+           inherits the name from here (§48.5). */
+        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
+          esc(c.name) + '">' +
             '<option value="">\u2014 unassigned \u2014</option>' +
             FUNCTION_KEYS.map(function(k){
               return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +

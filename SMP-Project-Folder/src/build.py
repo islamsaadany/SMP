@@ -49,7 +49,12 @@ for family, path in FACES:
         "font-display:swap;src:url(data:font/woff2;base64,%s) format('woff2')}" % (family, b64))
 css = "\n".join(faces_css) + "\n" + css
 
-out = ("<!doctype html>\n<meta charset='utf-8'>\n"
+# THE <html> TAG IS WRITTEN OUT, for `lang` (§48.5). The file relied on the
+# parser inserting an implicit one, which works for rendering and gives a screen
+# reader no language to pronounce the page in — every one of the 22 page states
+# failed on it. theme.js stamps data-theme and data-palette on the same element
+# at runtime, so declaring it here changes nothing about how those work.
+out = ("<!doctype html>\n<html lang='en'>\n<meta charset='utf-8'>\n"
        "<meta name='viewport' content='width=device-width,initial-scale=1'>\n"
        + ICON + "\n"
        # Root-absolute, and harmless when it 404s on file:// — the platform has

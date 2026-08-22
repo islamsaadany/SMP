@@ -8,6 +8,11 @@
      what; without this the failure mode is silent - a change is made, the
      server refuses it, and the platform goes on showing it as though it had
      landed. Hidden until there is something to say. -->
+<!-- The first thing in the tab order, visible only when focused (§48.5). With
+     the navigation running to twenty entries, a keyboard user reached the page
+     by tabbing past all of it, every time. -->
+<a class="skip" href="#panel">Skip to the page</a>
+
 <div class="banner refused" id="refused" hidden></div>
 
 <div class="chrome">
@@ -90,13 +95,13 @@
   </div>
 </div>
 
-<div class="wrap"><div class="view" id="panel"></div>
+<main class="wrap" id="mainwrap"><div class="view" id="panel"></div>
 
 <!-- No footer. It carried one sentence - the product's name, a spec number
      and a shape - none of which anyone was reading and all of which the chrome
      already says. Its last real content (the invented-data notice) moved to
      the demo banner in 2.2, where it is true; what was left was a signature. -->
-</div>
+</main>
 
 <script src="RULES"></script>
 <script src="DATA"></script>
@@ -854,6 +859,7 @@
        just attached is disturbed. */
     SEARCHSEL.wire();
     positionRowMenu();
+    focusOpenMenu();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -884,6 +890,42 @@
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
     var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
+  }
+
+  /* ══ A MENU TAKES FOCUS, AND GIVES IT BACK (§48.4) ════════════════
+     The row menu and the two header menus opened without moving focus, so
+     their items could only be reached by tabbing the whole document — and
+     closing one dropped focus to <body>. Both are the same omission and both
+     are fixed by the pattern searchsel.js already uses for its popup.
+
+     Called from the same place as positionRowMenu(), which is AFTER the paint
+     that created the menu: focusing a node the paint is about to replace
+     focuses nothing. */
+  var MENURETURN = null;
+  function focusOpenMenu(){
+    var m = document.querySelector(".kmenu, .hmenu-panel");
+    if (!m) {
+      /* Closed. Put focus back on whatever opened it, if that control is still
+         on the page — a repaint may have replaced it, so it is looked up by
+         its data attribute rather than held as a node. */
+      if (MENURETURN) {
+        var back = document.querySelector(MENURETURN);
+        MENURETURN = null;
+        if (back && document.activeElement === document.body) back.focus();
+      }
+      return;
+    }
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu]");
+    if (btn) {
+      MENURETURN = btn.dataset.pmenu ? '[data-pmenu="' + btn.dataset.pmenu + '"]'
+                : btn.hasAttribute("data-colmenu") ? "[data-colmenu]" : "[data-pwmenu]";
+    }
+    /* Only when the menu has just appeared under the keyboard — a mouse user
+       who clicked it does not want the first item stealing their pointer. */
+    if (document.activeElement === document.body || document.activeElement === btn) {
+      var first = m.querySelector("button:not([disabled]), input");
+      if (first) first.focus();
+    }
   }
 
   function positionRowMenu(){
@@ -1626,6 +1668,13 @@
         } else {
           restorePerson(key);
         }
+        /* THE MENU CLOSES WHEN ITS ACTION FIRES (§48.7). It was left open, so
+           after retiring somebody the panel stayed on screen now reading
+           "Restore this person" — and the next press of the kebab read as a
+           toggle-shut, which looks like a broken control. Cleared AFTER the
+           action, never before: closing it first would unmount the button the
+           click is still inside (§47.2). */
+        PMENU = null;
         paint();
       });
     });
@@ -1726,6 +1775,11 @@
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */
+    /* Same for the other two actions in that menu. `data-setpw` is wired
+       elsewhere and already clears it; `data-as` is the viewer switch. */
+    document.querySelectorAll(".kmenu [data-as]").forEach(function(b){
+      b.addEventListener("click", function(){ PMENU = null; });
+    });
     document.querySelectorAll("[data-pedit]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
@@ -2278,15 +2332,46 @@
   wireDeck();
 
   var overlay = document.getElementById("overlay");
+  /* ══ THE MODAL IS ACTUALLY MODAL NOW (§48.4) ══════════════════════
+     Three faults, one shape: the dialog announced itself as `aria-modal` and
+     then behaved like a panel. One Tab left it and landed in the page behind,
+     which was neither `inert` nor `aria-hidden`; Escape closed it but dropped
+     focus to <body> rather than back to the control that opened it; and while
+     CLOSED it stayed in the tab order and in the accessibility tree, so every
+     screen in the product carried a stray "Close" button and a permanently
+     announced empty dialog.
+
+     That last one is §3.2's own lesson arriving in a different tree: opacity:0
+     hides a box, it does not remove it. `inert` on the page behind is what the
+     platform already needed and what the deck needs too.
+
+     The pattern is not invented here — searchsel.js already does exactly this
+     for its popup: open, move focus in; close, put focus back where it was. */
+  var modalReturn = null;
+  var wrapEl = document.querySelector(".wrap");
   function openModal(id){
     var m = MODALS[id]; if (!m) return;
+    modalReturn = document.activeElement;
     document.getElementById("modal-t").innerHTML = m.title;
     document.getElementById("modal-s").innerHTML = m.sub || "";
     document.getElementById("modal-b").innerHTML = m.body;
     overlay.classList.add("on");
+    overlay.removeAttribute("aria-hidden");
+    if (wrapEl) { wrapEl.inert = true; wrapEl.setAttribute("aria-hidden", "true"); }
     document.getElementById("modal-x").focus();
   }
-  function closeModal(){ overlay.classList.remove("on"); }
+  function closeModal(){
+    if (!overlay.classList.contains("on")) return;
+    overlay.classList.remove("on");
+    overlay.setAttribute("aria-hidden", "true");
+    if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
+    /* Back to the control that opened it — the one thing a keyboard user
+       cannot do for themselves, because the thing they pressed is behind a
+       dialog they have just dismissed. */
+    if (modalReturn && document.contains(modalReturn)) modalReturn.focus();
+    modalReturn = null;
+  }
+  overlay.setAttribute("aria-hidden", "true");   /* closed at boot */
   document.getElementById("modal-x").addEventListener("click", closeModal);
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });

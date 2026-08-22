@@ -22,11 +22,27 @@ var ARRANGE = false;
 
 function arranging(scope, unitKey){ return ARRANGE && canArrange(scope, unitKey); }
 
+/* ROLES, NOT LEVELS — THE THIRD INSTANCE OF THE SAME FAULT (§48.6).
+   This read `v.level === "smo"` and `v.level === "n1"`. `level` was deleted in
+   §33 when roles replaced it, so BOTH branches were false for all thirty-one
+   people and the whole reordering feature — 177 lines of pointer drag-and-drop
+   — has been unreachable ever since. Nothing threw, because a comparison
+   against a field nobody sets fails in the SAFE direction: it locks down
+   rather than opening up, so every sweep stayed green.
+
+   That is now three: sync.js hid the viewer switcher from the SMO (§45.3),
+   this hid reordering from everyone, and both were found by using the product
+   rather than by testing it. THE RULE: after renaming a field, grep for the
+   OLD name across every source, including the ones the change was not about.
+
+   Who may reorder, restated in roles: the SMO anywhere; and within one unit,
+   whoever may edit that unit's plan — its owner or its custodian — which is
+   the same question `mayEditPlan`-style gates already ask elsewhere. Asked
+   through grantAt() so the access matrix stays the single answer. */
 function canArrange(scope, unitKey){
-  var v = viewer();
-  if (v.level === "smo") return true;
+  if (hasRole("super")) return true;
   if (scope === "group") return false;          /* units, capabilities, themes */
-  return v.level === "n1" && (v.unit === "group" || v.unit === unitKey);
+  return !!unitKey && grantAt("u_plan", unitKey) === "edit";
 }
 
 function handle(label){

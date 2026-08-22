@@ -1507,13 +1507,23 @@ function renderFocusBoard(){
             '<th class="cc">Source</th><th class="cc">Target</th><th class="cc">Actual</th>' +
             '<th class="cc">Progress</th><th class="cc">Standing</th>' +
           '</tr></thead><tbody>' + body + '</tbody></table></div>'
-        : '<div class="note">Nothing marked in this cycle. Marks are made on each unit\'s own ' +
-          'Performance page \u2014 press <b>Mark focus</b> there, then click the diamond beside any ' +
-          'objective or key measure.</div>') +
+        /* IT SENT PEOPLE TO A CONTROL THAT DOES NOT EXIST (§48.7). Both notes
+           said marking happens on a unit's own Performance page, by pressing
+           "Mark focus" — there is no such button anywhere, for any viewer.
+           Marking moved to Setup a long time ago, and focusStrip()'s own
+           comment thirty lines up says so: "Nothing is marked from here.
+           Marking is a configuration act and lives in Setup." The page and the
+           comment beside it disagreed, and the page was wrong.
+
+           A note that names a route is worth more than one that describes a
+           feeling, which is why these two survived this morning's prose cut —
+           but only if the route is real. */
+        : '<div class="note">Nothing marked in this cycle. Marks are made on ' +
+          '<b>Setup &rsaquo; Focus measures</b>.</div>') +
       (unmarked.length
         ? '<div class="note"><b>' + unmarked.length + ' unit' + (unmarked.length > 1 ? 's have' : ' has') +
-          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") + '. Marked on each unit\'s ' +
-          'own page.</div>'
+          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") +
+          '. Marked on <b>Setup &rsaquo; Focus measures</b>.</div>'
         : ''));
 }
 

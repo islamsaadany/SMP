@@ -1,4 +1,5 @@
 <!doctype html>
+<html lang='en'>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1'>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2232%22%20height=%2232%22%20viewBox=%220%200%2032%2032%22%3E%20%3Crect%20width=%2232%22%20height=%2232%22%20rx=%226%22%20fill=%22%2316325C%22/%3E%20%3Cpath%20d=%22M16%205.2%2027.4%2012H4.6z%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%225.2%22%20y=%2213.2%22%20width=%2221.6%22%20height=%222.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%227.2%22%20y=%2217%22%20width=%223.2%22%20height=%227.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%2214.4%22%20y=%2217%22%20width=%223.2%22%20height=%227.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%2221.6%22%20y=%2217%22%20width=%223.2%22%20height=%227.4%22%20fill=%22%23C9A24D%22/%3E%20%3Crect%20x=%224.4%22%20y=%2225.6%22%20width=%2223.2%22%20height=%222.8%22%20rx=%220.6%22%20fill=%22%23C9A24D%22/%3E%20%3C/svg%3E">
@@ -134,7 +135,7 @@
     --panel-quiet:#94A3B8; --panel-hover:#1E293B;
     color-scheme: light;
     --stone:#334155; --stone-soft:#475569;
-    --gold:#4F46E5; --gold-deep:#4338CA;
+    --gold:#4F46E5; --gold-deep:#4338CA; --focus:#4338CA;
     --accent-glow:rgb(99 102 241/.20);
     --ground:#F8FAFC; --surface:#FFFFFF; --surface-2:#F1F5F9;
     --line:#E2E8F0; --line-soft:#F1F5F9;
@@ -155,7 +156,7 @@
     --panel-quiet:#8B97A9; --panel-hover:#16203A;
     color-scheme: dark;
     --stone:#94A3B8; --stone-soft:#CBD5E1;
-    --gold:#818CF8; --gold-deep:#A5B4FC;
+    --gold:#818CF8; --gold-deep:#A5B4FC; --focus:#A5B4FC;
     --accent-glow:rgb(129 140 248/.22);
     --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
     --line:#2B3852; --line-soft:#212C42;
@@ -185,7 +186,7 @@
     --stone:#16325C; --stone-soft:#24487A;
     /* gold-deep is TEXT weight — it labels things on a pale ground — so it is
        darker than the fill it names. At #A8842F it read 3.5:1. */
-    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
     --accent-glow:rgb(201 162 77/.28);
     --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
     --line:#D6DCE5; --line-soft:#E6EAF0;
@@ -203,7 +204,7 @@
     --panel-quiet:#9AA6B8; --panel-hover:#1A2030;
     color-scheme: dark;
     --stone:#7FA3D8; --stone-soft:#5C82BC;
-    --gold:#D9B665; --gold-deep:#C9A24D;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
     --accent-glow:rgb(217 182 101/.24);
     --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
     --line:#333A45; --line-soft:#2A303A;
@@ -219,7 +220,18 @@
   * { box-sizing:border-box; }
   body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
          font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
-  :focus-visible { outline:2px solid var(--gold); outline-offset:2px; border-radius:var(--r-sm); }
+  /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring
+     needs 3:1 (WCAG 1.4.11) — it cleared on the navy nav bar at 5.32 and in
+     dark mode at 6.81+, and failed on every light surface, which is most of
+     the product. §38.5 once more: a surface with its own ground needs its own
+     ink, and a RING is ink. Defined per palette beside the accent. */
+  :focus-visible { outline:2px solid var(--focus); outline-offset:2px; border-radius:var(--r-sm); }
+  /* The skip link (§48.5): first in the tab order, off-screen until focused. */
+  .skip { position:absolute; left:-9999px; top:0; z-index:200;
+          background:var(--panel); color:var(--panel-ink); padding:10px 16px;
+          font:600 13px/1 var(--sans); border-radius:0 0 var(--r) 0;
+          text-decoration:none; }
+  .skip:focus { left:0; }
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
   .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
 
@@ -722,7 +734,13 @@
   .overlay { position:fixed; inset:0; background:rgba(10,14,20,.55); z-index:100;
              display:flex; align-items:center; justify-content:center; padding:28px;
              opacity:0; pointer-events:none; transition:opacity .15s; }
-  .overlay.on { opacity:1; pointer-events:auto; }
+  .overlay.on { opacity:1; pointer-events:auto; visibility:visible; }
+  /* CLOSED MEANS GONE, from the tab order and the accessibility tree as well as
+     from the screen (§48.4). `opacity:0` left a "Close" button tabbable on
+     every page and a permanently announced empty dialog. `visibility:hidden`
+     removes both and still transitions, which `display:none` would not. */
+  .overlay { visibility:hidden; transition:opacity .12s ease, visibility 0s linear .12s; }
+  .overlay.on { transition:opacity .12s ease, visibility 0s; }
   .modal { background:var(--surface); border:1px solid var(--line); border-radius:3px;
            width:min(940px,100%); max-height:88vh; display:flex; flex-direction:column;
            box-shadow:0 24px 60px rgba(0,0,0,.28); }
@@ -2958,6 +2976,11 @@ THEME.apply();
      what; without this the failure mode is silent - a change is made, the
      server refuses it, and the platform goes on showing it as though it had
      landed. Hidden until there is something to say. -->
+<!-- The first thing in the tab order, visible only when focused (§48.5). With
+     the navigation running to twenty entries, a keyboard user reached the page
+     by tabbing past all of it, every time. -->
+<a class="skip" href="#panel">Skip to the page</a>
+
 <div class="banner refused" id="refused" hidden></div>
 
 <div class="chrome">
@@ -3040,13 +3063,13 @@ THEME.apply();
   </div>
 </div>
 
-<div class="wrap"><div class="view" id="panel"></div>
+<main class="wrap" id="mainwrap"><div class="view" id="panel"></div>
 
 <!-- No footer. It carried one sentence - the product's name, a spec number
      and a shape - none of which anyone was reading and all of which the chrome
      already says. Its last real content (the invented-data notice) moved to
      the demo banner in 2.2, where it is true; what was left was a signature. -->
-</div>
+</main>
 
 <script>
 /* THE RULES — who holds which role, and who may change what.
@@ -6633,11 +6656,27 @@ var ARRANGE = false;
 
 function arranging(scope, unitKey){ return ARRANGE && canArrange(scope, unitKey); }
 
+/* ROLES, NOT LEVELS — THE THIRD INSTANCE OF THE SAME FAULT (§48.6).
+   This read `v.level === "smo"` and `v.level === "n1"`. `level` was deleted in
+   §33 when roles replaced it, so BOTH branches were false for all thirty-one
+   people and the whole reordering feature — 177 lines of pointer drag-and-drop
+   — has been unreachable ever since. Nothing threw, because a comparison
+   against a field nobody sets fails in the SAFE direction: it locks down
+   rather than opening up, so every sweep stayed green.
+
+   That is now three: sync.js hid the viewer switcher from the SMO (§45.3),
+   this hid reordering from everyone, and both were found by using the product
+   rather than by testing it. THE RULE: after renaming a field, grep for the
+   OLD name across every source, including the ones the change was not about.
+
+   Who may reorder, restated in roles: the SMO anywhere; and within one unit,
+   whoever may edit that unit's plan — its owner or its custodian — which is
+   the same question `mayEditPlan`-style gates already ask elsewhere. Asked
+   through grantAt() so the access matrix stays the single answer. */
 function canArrange(scope, unitKey){
-  var v = viewer();
-  if (v.level === "smo") return true;
+  if (hasRole("super")) return true;
   if (scope === "group") return false;          /* units, capabilities, themes */
-  return v.level === "n1" && (v.unit === "group" || v.unit === unitKey);
+  return !!unitKey && grantAt("u_plan", unitKey) === "edit";
 }
 
 function handle(label){
@@ -10892,13 +10931,23 @@ function renderFocusBoard(){
             '<th class="cc">Source</th><th class="cc">Target</th><th class="cc">Actual</th>' +
             '<th class="cc">Progress</th><th class="cc">Standing</th>' +
           '</tr></thead><tbody>' + body + '</tbody></table></div>'
-        : '<div class="note">Nothing marked in this cycle. Marks are made on each unit\'s own ' +
-          'Performance page \u2014 press <b>Mark focus</b> there, then click the diamond beside any ' +
-          'objective or key measure.</div>') +
+        /* IT SENT PEOPLE TO A CONTROL THAT DOES NOT EXIST (§48.7). Both notes
+           said marking happens on a unit's own Performance page, by pressing
+           "Mark focus" — there is no such button anywhere, for any viewer.
+           Marking moved to Setup a long time ago, and focusStrip()'s own
+           comment thirty lines up says so: "Nothing is marked from here.
+           Marking is a configuration act and lives in Setup." The page and the
+           comment beside it disagreed, and the page was wrong.
+
+           A note that names a route is worth more than one that describes a
+           feeling, which is why these two survived this morning's prose cut —
+           but only if the route is real. */
+        : '<div class="note">Nothing marked in this cycle. Marks are made on ' +
+          '<b>Setup &rsaquo; Focus measures</b>.</div>') +
       (unmarked.length
         ? '<div class="note"><b>' + unmarked.length + ' unit' + (unmarked.length > 1 ? 's have' : ' has') +
-          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") + '. Marked on each unit\'s ' +
-          'own page.</div>'
+          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") +
+          '. Marked on <b>Setup &rsaquo; Focus measures</b>.</div>'
         : ''));
 }
 
@@ -13213,7 +13262,8 @@ function renderFocusSetup(){
     }).join("");
 
   var n = unitFocus(u).length;
-  var unitPick = '<select class="fld" id="fset-unit">' + activeKeys().map(function(k){
+  var unitPick = '<select class="fld" id="fset-unit" aria-label="Which unit to mark">' +
+    activeKeys().map(function(k){
       var c = unitFocus(UNITS[k]).length;
       return '<option value="' + k + '"' + (k === FSET.unit ? " selected" : "") + '>' +
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
@@ -13813,7 +13863,8 @@ function renderImport(){
       '<p class="sub">' + (isPlan
         ? "The file says which unit it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and no other unit is touched."
         : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
-      '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv">' +
+      '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv" ' +
+        'aria-label="Choose a template file to upload">' +
         (isPlan ? "" : '<button class="linkbu" data-paste="1">or paste the file</button>') +
         (IMP.read ? '<span class="pill quiet">Read &middot; ' + esc(IMP.read) + '</span>' : '') +
       '</div>' +
@@ -13848,7 +13899,22 @@ function renderImport(){
       '</div>'
     : '';
 
+  /* A FILE THAT FAILS TO READ HAS TO SAY SO (§48.8). `impFail()` writes the
+     reason into IMP.check and clears IMP.summary and IMP.diff — but checkBlock
+     was only ever concatenated INSIDE step3, and step3 is only built when
+     there is a summary or a diff to review. So the one case where the message
+     matters most, the file that could not be read at all, was the one case
+     where it had nowhere to render: upload the wrong template and the page did
+     not move. The sentence existed the whole time.
+
+     §32's rule, which this codebase states outright: a blocked save must say
+     why, where the save is. An unreadable upload is the same thing one step
+     earlier. */
   var step3 = receipt;
+  if (!step3 && chk && chk.problems.length) {
+    step3 = '<div class="imp-step"><div class="imp-n">!</div><div class="imp-b">' +
+      '<h4>This file could not be read</h4>' + checkBlock + '</div></div>';
+  }
 
   /* A plan upload is not a diff any more (§22). What is shown is the exchange:
      what the file holds, what it displaces, and what of that was reported —
@@ -14235,7 +14301,11 @@ function renderCaps(){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td><b>' + esc(c.name) + '</b></td>' +
       '<td>' + (editable
-        ? '<select class="fld" data-capfn="' + i + '">' +
+        /* NAMED. Eight of these on one page announced as eight identical
+           unnamed combo boxes, and the searchable button in front of each
+           inherits the name from here (§48.5). */
+        ? '<select class="fld" data-capfn="' + i + '" aria-label="Which function carries ' +
+          esc(c.name) + '">' +
             '<option value="">\u2014 unassigned \u2014</option>' +
             FUNCTION_KEYS.map(function(k){
               return '<option value="' + k + '"' + (k === c.fn ? " selected" : "") + '>' +
@@ -16200,6 +16270,7 @@ var SYNC = (function () {
        just attached is disturbed. */
     SEARCHSEL.wire();
     positionRowMenu();
+    focusOpenMenu();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -16230,6 +16301,42 @@ var SYNC = (function () {
     var gap = parseFloat(cs.getPropertyValue("--rail-gap")) || 0;
     var want = split.getBoundingClientRect().top + window.scrollY - chrome - gap;
     if (window.scrollY > want) window.scrollTo({ top: Math.max(0, want) });
+  }
+
+  /* ══ A MENU TAKES FOCUS, AND GIVES IT BACK (§48.4) ════════════════
+     The row menu and the two header menus opened without moving focus, so
+     their items could only be reached by tabbing the whole document — and
+     closing one dropped focus to <body>. Both are the same omission and both
+     are fixed by the pattern searchsel.js already uses for its popup.
+
+     Called from the same place as positionRowMenu(), which is AFTER the paint
+     that created the menu: focusing a node the paint is about to replace
+     focuses nothing. */
+  var MENURETURN = null;
+  function focusOpenMenu(){
+    var m = document.querySelector(".kmenu, .hmenu-panel");
+    if (!m) {
+      /* Closed. Put focus back on whatever opened it, if that control is still
+         on the page — a repaint may have replaced it, so it is looked up by
+         its data attribute rather than held as a node. */
+      if (MENURETURN) {
+        var back = document.querySelector(MENURETURN);
+        MENURETURN = null;
+        if (back && document.activeElement === document.body) back.focus();
+      }
+      return;
+    }
+    var btn = m.parentNode.querySelector("[data-pmenu],[data-colmenu],[data-pwmenu]");
+    if (btn) {
+      MENURETURN = btn.dataset.pmenu ? '[data-pmenu="' + btn.dataset.pmenu + '"]'
+                : btn.hasAttribute("data-colmenu") ? "[data-colmenu]" : "[data-pwmenu]";
+    }
+    /* Only when the menu has just appeared under the keyboard — a mouse user
+       who clicked it does not want the first item stealing their pointer. */
+    if (document.activeElement === document.body || document.activeElement === btn) {
+      var first = m.querySelector("button:not([disabled]), input");
+      if (first) first.focus();
+    }
   }
 
   function positionRowMenu(){
@@ -16972,6 +17079,13 @@ var SYNC = (function () {
         } else {
           restorePerson(key);
         }
+        /* THE MENU CLOSES WHEN ITS ACTION FIRES (§48.7). It was left open, so
+           after retiring somebody the panel stayed on screen now reading
+           "Restore this person" — and the next press of the kebab read as a
+           toggle-shut, which looks like a broken control. Cleared AFTER the
+           action, never before: closing it first would unmount the button the
+           click is still inside (§47.2). */
+        PMENU = null;
         paint();
       });
     });
@@ -17072,6 +17186,11 @@ var SYNC = (function () {
     /* Edit the whole page, cursor in this person's name. The focus is applied
        AFTER the repaint that creates the input — focusing a node the paint is
        about to replace focuses nothing. */
+    /* Same for the other two actions in that menu. `data-setpw` is wired
+       elsewhere and already clears it; `data-as` is the viewer switch. */
+    document.querySelectorAll(".kmenu [data-as]").forEach(function(b){
+      b.addEventListener("click", function(){ PMENU = null; });
+    });
     document.querySelectorAll("[data-pedit]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
@@ -17624,15 +17743,46 @@ var SYNC = (function () {
   wireDeck();
 
   var overlay = document.getElementById("overlay");
+  /* ══ THE MODAL IS ACTUALLY MODAL NOW (§48.4) ══════════════════════
+     Three faults, one shape: the dialog announced itself as `aria-modal` and
+     then behaved like a panel. One Tab left it and landed in the page behind,
+     which was neither `inert` nor `aria-hidden`; Escape closed it but dropped
+     focus to <body> rather than back to the control that opened it; and while
+     CLOSED it stayed in the tab order and in the accessibility tree, so every
+     screen in the product carried a stray "Close" button and a permanently
+     announced empty dialog.
+
+     That last one is §3.2's own lesson arriving in a different tree: opacity:0
+     hides a box, it does not remove it. `inert` on the page behind is what the
+     platform already needed and what the deck needs too.
+
+     The pattern is not invented here — searchsel.js already does exactly this
+     for its popup: open, move focus in; close, put focus back where it was. */
+  var modalReturn = null;
+  var wrapEl = document.querySelector(".wrap");
   function openModal(id){
     var m = MODALS[id]; if (!m) return;
+    modalReturn = document.activeElement;
     document.getElementById("modal-t").innerHTML = m.title;
     document.getElementById("modal-s").innerHTML = m.sub || "";
     document.getElementById("modal-b").innerHTML = m.body;
     overlay.classList.add("on");
+    overlay.removeAttribute("aria-hidden");
+    if (wrapEl) { wrapEl.inert = true; wrapEl.setAttribute("aria-hidden", "true"); }
     document.getElementById("modal-x").focus();
   }
-  function closeModal(){ overlay.classList.remove("on"); }
+  function closeModal(){
+    if (!overlay.classList.contains("on")) return;
+    overlay.classList.remove("on");
+    overlay.setAttribute("aria-hidden", "true");
+    if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }
+    /* Back to the control that opened it — the one thing a keyboard user
+       cannot do for themselves, because the thing they pressed is behind a
+       dialog they have just dismissed. */
+    if (modalReturn && document.contains(modalReturn)) modalReturn.focus();
+    modalReturn = null;
+  }
+  overlay.setAttribute("aria-hidden", "true");   /* closed at boot */
   document.getElementById("modal-x").addEventListener("click", closeModal);
   overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });

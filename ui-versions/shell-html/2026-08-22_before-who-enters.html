@@ -1,0 +1,1940 @@
+<div class="banner" id="banner">
+  <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
+  <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
+</div>
+
+<!-- A REFUSED SAVE HAS TO SAY SO, WHERE THE SAVE IS (spec 006 §4, and the
+     rule §32 set for the Labels page). The server now decides who may change
+     what; without this the failure mode is silent - a change is made, the
+     server refuses it, and the platform goes on showing it as though it had
+     landed. Hidden until there is something to say. -->
+<div class="banner refused" id="refused" hidden></div>
+
+<div class="chrome">
+<!-- Three things on the first line and nothing else: who the product is, who
+     you are looking as, and the two buttons that leave. The org name, the unit
+     name and the "Group, N units" tag all left in 2.9 - the row below already
+     says where you are, and repeating it cost the whole first line. -->
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Strategy Management Platform</h1>
+      <!-- Whose strategy this is. The product name alone never said it, and a
+           consulting product shown to a client should. Set in paint() from
+           GROUP.org, so it follows the demo switch: the worked example says
+           Raya Trade, the client's own tenant says the client. textContent,
+           never innerHTML - the org name is typed in Labels. -->
+      <span class="orgname" id="orgname"></span>
+    </div>
+    <div class="viewer">
+      <label for="asWho">Viewing as</label>
+      <select id="asWho"></select>
+      <span class="viewer-note" id="viewerNote"></span>
+    </div>
+    <!-- Far right, together: Demo data, then Sign out (appended by SYNC).
+         Switches the whole product between the client's own data and the
+         full worked example, for explaining how it works. Appears only
+         where there is a live dataset to tell the example apart from. -->
+    <div class="topacts" id="topacts">
+      <!-- Light and Dark. First of the three because it changes how the
+           product LOOKS; the two beside it change what it shows or end the
+           session. Hidden until THEME.wire() draws its mark. -->
+      <button class="infobtn themebtn" id="themebtn" type="button" hidden></button>
+      <!-- The palette switch was here until 3.12. It is gone at Islam's
+           direction: "I don't need to have slate, the branding covers this
+           from inside." Which colours the product wears is the TENANT's
+           decision, set once on Setup › Branding, not a per-screen preference
+           that leaves two people looking at different products. Light and dark
+           stay each viewer's own — those are about the room they sit in. -->
+      <!-- The typeface, while the four are being compared (§38.8). It renders
+           its own name in the face it names, so you can see one without
+           pressing it. It goes when the choice is settled. -->
+      <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
+      <button class="infobtn" id="demobtn" hidden>Demo data</button>
+    </div>
+  </div>
+</header>
+
+<nav class="units">
+  <div class="units-in" role="tablist" id="units"></div>
+</nav>
+
+<nav class="tabs">
+  <div class="tabs-in" role="tablist" id="subtabs"></div>
+</nav>
+
+<nav class="tabs sectionrow" id="secrow" hidden>
+  <div class="tabs-in" role="tablist" id="secrow-in"></div>
+</nav>
+</div>
+
+<div id="deckroot" class="deckroot" tabindex="-1">
+  <div class="deckstage"><div class="deck"></div></div>
+  <div class="deckbar">
+    <span class="dtitle"></span>
+    <div class="ddots"></div>
+    <span class="dcount"><span class="dcount-c">1</span> / <span class="dcount-t">0</span></span>
+    <button data-dprev title="Previous">&#8592;</button>
+    <button data-dnext title="Next">&#8594;</button>
+    <button data-dfit class="txt" title="Fit to window instead of 16:9">Fit</button>
+    <button data-dfs class="txt" title="Fullscreen">Fullscreen</button>
+    <button data-dexit class="txt" title="Exit (Esc)">Exit</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
+  <div class="modal">
+    <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
+      <button class="modal-x" id="modal-x" aria-label="Close">&times;</button></div>
+    <div class="modal-b" id="modal-b"></div>
+  </div>
+</div>
+
+<div class="wrap"><div class="view" id="panel"></div>
+
+<!-- No footer. It carried one sentence - the product's name, a spec number
+     and a shape - none of which anyone was reading and all of which the chrome
+     already says. Its last real content (the invented-data notice) moved to
+     the demo banner in 2.2, where it is true; what was left was a signature. -->
+</div>
+
+<script src="RULES"></script>
+<script src="DATA"></script>
+<script src="CONFIGDATA"></script>
+<script src="ARRANGE"></script>
+<script src="PAGEINFO"></script>
+<script src="TEMPLATES"></script>
+<script src="XLSX"></script>
+<script src="RENDER"></script>
+<script src="CONFIGRENDER"></script>
+<script src="PRESENT"></script>
+<script src="SYNC"></script>
+<script>
+/* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
+   a stacked list for Manage. They were replaced in 2.9 by one worded button
+   with a menu: the same ten destinations, but named rather than guessed at. */
+
+  /* Page definitions carry the access key the matrix is keyed on, so a page
+     is never rendered without a grant having been checked first. */
+  var SUBS = {
+    /* A supporting function is the destination; the capabilities it carries are
+       named inside its pages. */
+    /* Two tabs, not five. The top row asks one question \u2014 how is it going, or
+       what did we agree \u2014 and everything else is a section inside one of the
+       two. Reporting is not a page you visit: it is what a cycle asks of you
+       for two weeks a quarter, so it appears inside Performance and leaves
+       again. See \u00a715.10. */
+    fn: [
+      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, sections: function(k){
+          var secs = [{ k:"perf", ac:"k_perf", label:"Performance", render:renderFnPerformance }];
+          var r = reportSectionState();
+          if (r) secs.push({ k:"report", ac:"k_report", label:"Report" + r.badge,
+                             cls:r.cls, render:renderFnReport });
+          return secs;
+        } },
+      { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
+          return [{ k:"found", ac:"k_found", label:"Foundation", render:renderFnFoundation },
+                  { k:"proj",  ac:"k_proj",  label:"Projects",   render:renderFnProjects }];
+        } }
+    ],
+    group: [
+      { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
+      { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
+      { k:"focus",       ac:"g_focus",  label:"Focus",                     render:renderFocusBoard },
+      { k:"temple",      ac:"g_temple", label:"Temple",                    render:renderTemple },
+      { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
+    ],
+    unit: [
+      { k:"performance", ac:"u_perf", label:"Performance", primary:true, sections: function(u){
+          var secs = [{ k:"perf", ac:"u_perf", label:"Performance", render:renderUnitPerformance }];
+          var r = reportSectionState();
+          if (r) secs.push({ k:"report", ac:"u_report", label:"Report" + r.badge,
+                             cls:r.cls, render:renderReport });
+          return secs;
+        } },
+      { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
+          return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
+                  { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
+                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan }];
+        } }
+    ],
+    /* Setup is what EXISTS: decided once, revisited rarely. */
+    setup: [
+      { k:"labels", ac:"c_labels", label:"Labels",          primary:true, render:renderLabels },
+      { k:"access", ac:"c_access", label:"Roles & access",                render:renderAccess },
+      { k:"bands",  ac:"c_bands",  label:"Scoring bands",                 render:function(){ return renderBands() + renderBandsExtra(); } },
+      { k:"units",  ac:"c_units",  label:"Business units",                render:renderUnits },
+      /* Its own tab since 3.5. It shares c_units - the same person manages
+         both - but it answers a different question from "which units exist",
+         and it was being pushed off the top of a ten-row table. */
+      { k:"companies", ac:"c_units", label:"Companies",                    render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    label:"Supporting functions",          render:renderFunctions },
+      /* Spec 008. Sets sit beside the functions because a set belongs to one.
+         Filling a set is a different job done by a different person, so it is
+         a page of its own — offered only to somebody who has a set to fill. */
+      { k:"sets",   ac:"c_sets",   label:"Figure sets",                   render:renderSetsSetup },
+      { k:"source", ac:"c_source", label:"Fill a figure set",
+        when: canPickSets,                                                render:renderSourceSetup },
+      /* The register (§35). It sits after the things people are attached TO,
+         because that is the order the SMO works in: the units exist, then the
+         people who hold them. It used to be a section at the bottom of Roles &
+         access, which is a matrix page — a staff list is not a matrix. */
+      { k:"people", ac:"c_people", label:"People",                        render:renderPeople },
+      /* Last in Setup: it changes how everything else LOOKS, which is a thing
+         you do once the things themselves exist (§39). */
+      { k:"brand",  ac:"c_brand",  label:"Branding",                      render:renderBranding },
+      { k:"caps",   ac:"c_caps",   label:"Capabilities",                  render:renderCaps }
+    ],
+    /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
+       loading plans, marking what carries reward \u2014 activities, not structure.
+       They sat in Setup only because that was the only place that existed. */
+    manage: [
+      /* First in the list: it is the page you open before the others. */
+      { k:"kb",       ac:"c_kb",     label:"Knowledge base",                render:renderKB },
+      { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
+      { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
+      { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
+      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup },
+      /* Only for somebody who has actually been named on a figure. Its reach
+         is not a setting (§16.7), so `when` hides it outright rather than the
+         matrix answering "none" — a menu entry that opens an empty page is
+         worse than no entry. */
+      { k:"myfig",    ac:"c_myfig",  label:"Figures I report",
+        when: ownsAnySource,                                render:renderMySources }
+    ]
+  };
+
+  var current = "group", currentSub = "performance";
+  /* Which section of a container tab is open, per tab. Kept per tab rather than
+     globally so moving between Performance and Strategy does not reset both. */
+  var CURSEC = {};
+
+  /* Which of a destination's tabs the viewer holds. The TARGET matters now:
+     the same five unit tabs answer differently for a unit somebody owns and
+     one they do not (§37), so asking without saying which unit would give the
+     currently-open unit's answer for every unit in the navigation. */
+  function allowed(defs, target){
+    return defs.filter(function(d){
+      if (d.when && !d.when()) return false;
+      return grantAt(d.ac, target || TARGET) !== "none";
+    });
+  }
+
+  /* A unit tab appears only if the viewer reaches that unit AND holds at least
+     one of its pages. Restriction is by removing the page, never by trimming
+     what a page shows. */
+  /* Which fold is open. Expanding is BROWSING, not going: opening Functions
+     while sitting on Mobile does not move the page, so the closed fold has to
+     carry the location or the navigation stops saying where you are. */
+  /* Both folds start closed. The row arrives at its shortest, and a person who
+     never opens one is never shown eighteen entries. */
+  var NAVFOLD = null;
+
+  function myUnits(){
+    return activeKeys().filter(function(k){ return allowed(SUBS.unit, k).length; });
+  }
+  function myFns(){
+    return FUNCTION_KEYS.filter(function(k){
+      return FUNCTIONS[k].active !== false && capsOfFunction(k).length &&
+             allowed(SUBS.fn, "fn:" + k).length;
+    });
+  }
+  /* The folds appear only for someone who reaches more than one unit AND more
+     than one capability — today the SMO and the CEO. Everyone else sees the row
+     exactly as it has always been, and never meets the concept. */
+  function foldsNeeded(){ return myUnits().length > 1 && myFns().length > 1; }
+
+  function unitTabs(){
+    var out = [];
+    if (allowed(SUBS.group, "group").length) out.push({ k:"group", label:"Group" });
+    var us = myUnits(), cs = myFns(), fold = foldsNeeded();
+
+    if (fold) {
+      /* The row does NOT group by company (§15.13). It was built that way and
+         taken out in the same version: the SMO and the group CEO see
+         everything and already have this fold, so companies added a second
+         layer of folding to a row that was working; and a company CEO sees
+         only their own three or four units, so there is nothing to group. The
+         grouping solved a problem neither viewer had. The company level
+         survives where it does work — deciding who reaches what.
+
+         REVERSAL of the 1.2 rule: a closed fold no longer announces where you
+         are. It remembers silently — reopening puts you back, and the page
+         below already says it. Repeating it made the row noisier the more
+         folds there were. Worth revisiting if the row ever feels lost, since
+         with the company folds gone there are only two folds again. */
+      /* THE TWO FOLDS TRAVEL TOGETHER, in one container (§41.8, treatment 4).
+         They used to be separated by whichever list was open, so the control
+         you had just pressed moved every time you pressed it and the second
+         fold ended up in a different place depending on the first. As one
+         segmented box they stay put, the bar carries one box instead of two,
+         and the shared container says outright that Units and Functions are
+         the same kind of thing. The opened list follows BOTH of them. */
+      out.push({ folds: [
+        { fold:"units", label:"Units",     open:NAVFOLD === "units" },
+        { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
+      ] });
+      if (NAVFOLD === "units")
+        us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
+      else if (NAVFOLD === "caps")
+        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+    } else {
+      us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
+      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+    }
+    /* Manage and Setup used to be two glyph buttons here. They are now one
+       worded button with a menu, rendered separately (paintMenu) so it can sit
+       anchored right and open downward without the row's layout owning it.
+       Anchored right rather than trailing the row: it is the same destination
+       wherever you are, and a control that moves as the list beside it grows
+       is a control you have to look for. */
+    return out;
+  }
+
+  /* MENU_OPEN is chrome state, not a destination \u2014 it never survives a paint
+     of the page below, only of the row itself. */
+  var MENU_OPEN = false;
+
+  /* One list, two labelled groups. Merging the two buttons was about the way
+     IN, not about the pages: every entry still opens exactly the page it
+     always opened, with its own tab row underneath. The groups stay named
+     because "Reporting cycle" and "Scoring bands" are different kinds of
+     thing \u2014 what the SMO does each cycle, and what was decided once. */
+  function menuGroups(){
+    var gs = [];
+    /* Neither depends on the unit you happen to be looking at — Setup and the
+       cycle belong to nobody's unit — but they are asked explicitly so they
+       cannot start depending on it by accident. */
+    var m = allowed(SUBS.manage, "group"), st = allowed(SUBS.setup, "group");
+    if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
+    if (st.length) gs.push({ dest:"setup",  label:"Setup",  items:st });
+    return gs;
+  }
+
+  /* Where a destination opens. Everything keeps its own first page except a
+     business unit, which opens on Strategy and, inside it, on Plan. Both are
+     checked against what the viewer holds rather than assumed. */
+  function entrySub(k){
+    var d = allowed(defsFor(k));
+    if (!d.length) return null;
+    if (k !== "group" && k !== "manage" && k !== "setup" && !isFn(k)) {
+      var strat = d.filter(function(x){ return x.k === "strategy"; })[0];
+      if (strat) {
+        var secs = allowed(strat.sections(UNITS[k]));
+        if (secs.some(function(x){ return x.k === "plan"; })) CURSEC.strategy = "plan";
+        if (secs.length) return "strategy";
+      }
+    }
+    return d[0].k;
+  }
+
+  function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function defsFor(k){
+    return k === "group" ? SUBS.group
+         : k === "manage" ? SUBS.manage
+         : k === "setup" ? SUBS.setup
+         : isFn(k) ? SUBS.fn
+         : SUBS.unit;
+  }
+
+  function paintUnits(){
+    var tabs = unitTabs();
+    document.getElementById("units").classList.toggle("folded", foldsNeeded());
+    /* A destination folded out of sight is still where you are. Resetting
+       `current` because it is not in the visible list would make expanding a
+       fold navigate \u2014 which is exactly what a fold must not do. Only reset when
+       the destination is genuinely unreachable for this viewer. */
+    var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }));
+    if (allowed(SUBS.group, "group").length) everything.push("group");
+    if (allowed(SUBS.setup, "group").length) everything.push("setup");
+    if (allowed(SUBS.manage, "group").length) everything.push("manage");
+    if (everything.indexOf(current) === -1) {
+      var dests = tabs.filter(function(t){ return t.k; });
+      current = dests.length ? dests[0].k : null;
+    }
+    document.getElementById("units").innerHTML = tabs.map(function(t, i){
+      if (t.folds) {
+        return '<span class="sep"></span><span class="foldgroup">' +
+          t.folds.map(function(f){
+            return '<button class="navfold' + (f.open ? " open" : "") +
+              '" data-fold="' + f.fold + '" aria-expanded="' + f.open + '">' + f.label +
+              '<span class="foldtw">' + (f.open ? "\u25be" : "\u25b8") + '</span></button>';
+          }).join("") + '</span>';
+      }
+      return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
+        '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
+        '>' + t.label + '</button>';
+    }).join("") + menuHTML();
+    /* Only destinations. A fold button lives in the same row but goes nowhere \u2014
+       binding it here set current to undefined and reset the page to Group, which
+       made expanding a fold navigate. */
+    /* WIRED HERE, NOT IN wire(). paintUnits() replaces this row's innerHTML, so
+       every handler inside it dies on each call and has to be re-attached by
+       the same function that destroyed them. The fold used to be wired in
+       wire(), which only runs on a full paint() - and three paths call
+       paintUnits() ALONE: opening the Manage menu, closing it with Escape, and
+       closing it by clicking anywhere else. After any of those the Units and
+       Functions folds were dead until something else forced a full repaint,
+       which is why they "worked after a few tries".
+
+       The rule was already written on the fold's own handler in 2.x - rewriting
+       the row destroys its handlers - and then the menu was added and broke it
+       from the other side. So: whoever rewrites the DOM re-wires it, and there
+       is only one place that does. */
+    document.querySelectorAll("#units [data-fold]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Browsing, not going: `current` is untouched, so the page and its tabs
+           stay exactly as they are. Toggle, not switch: pressing the open one
+           closes it and returns the row to its shortest state. */
+        NAVFOLD = (NAVFOLD === b.dataset.fold) ? null : b.dataset.fold;
+        MENU_OPEN = false;
+        paintUnits();
+      });
+    });
+    document.querySelectorAll("#units button[data-u]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Edit is a decision about the thing being edited, not a lamp that
+           stays on while you walk around. Leaving edit modes on across a unit
+           switch landed you editing a different unit's foundation without
+           ever pressing Edit on it. Arrange mode drops for the same reason. */
+        if (current !== b.dataset.u) {
+          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
+          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
+          if (typeof ARRANGE !== "undefined") ARRANGE = false;
+          CLEARING = null;
+        }
+        current = b.dataset.u;
+        /* A business unit opens on its PLAN, not on Performance. What the unit
+           agreed is the thing people come to read and the thing they come to
+           change; the score is a consequence of it and is one click away.
+           Falls back to the first page the viewer actually holds, so someone
+           without u_plan is not sent to a tab that is not there. */
+        currentSub = entrySub(current);
+        MENU_OPEN = false;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+    wireMenu();
+  }
+
+  /* A gear. It replaced the word "Manage" in 3.3 - at 11px uppercase in a
+     pill, the word was the widest thing in the navigation row and it named a
+     menu rather than a place. The mark is the same 20px box the theme control
+     uses. */
+  var ICON_MANAGE =
+    '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
+    '<circle cx="10" cy="10" r="2.9" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
+    '<path d="M10 1.9l1.2 2.05a6.2 6.2 0 0 1 1.63.68l2.3-.55 1.4 2.42-1.6 1.72a6.2 6.2 0 0 1 0 1.56' +
+    'l1.6 1.72-1.4 2.42-2.3-.55a6.2 6.2 0 0 1-1.63.68L10 18.1l-1.2-2.05a6.2 6.2 0 0 1-1.63-.68' +
+    'l-2.3.55-1.4-2.42 1.6-1.72a6.2 6.2 0 0 1 0-1.56L3.47 8.5l1.4-2.42 2.3.55a6.2 6.2 0 0 1 1.63-.68z" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+
+  /* The menu lives inside the row so it sits on the same baseline as the tabs,
+     but its panel is absolutely positioned, so a long list never widens the
+     row or pushes the units along. */
+  function menuHTML(){
+    var gs = menuGroups();
+    if (!gs.length) return "";
+    var on = current === "manage" || current === "setup";
+    var body = gs.map(function(g){
+      return '<div class="navmenu-grp">' + esc(g.label) + '</div>' +
+        g.items.map(function(d){
+          return '<button type="button" data-md="' + g.dest + '" data-ms="' + d.k + '"' +
+            (current === g.dest && currentSub === d.k ? ' class="on"' : '') +
+            '>' + esc(d.label) + '</button>';
+        }).join("");
+    }).join("");
+    return '<span class="sep pinsep"></span>' +
+      '<div class="navmenu' + (MENU_OPEN ? " open" : "") + '">' +
+      '<button type="button" class="navmenu-btn navmenu-ico' + (on ? " here" : "") + '" id="navmenu-btn" ' +
+      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '" ' +
+      /* The word is gone from the face of the button, so it has to be carried
+         somewhere a pointer and a screen reader can both reach it. Never let a
+         glyph be the only thing that says what a control does. */
+      'title="Manage" aria-label="Manage">' + ICON_MANAGE +
+      '<span class="navmenu-tw" aria-hidden="true">\u25be</span></button>' +
+      '<div class="navmenu-panel"' + (MENU_OPEN ? "" : " hidden") + '>' + body + '</div></div>';
+  }
+
+  function wireMenu(){
+    var btn = document.getElementById("navmenu-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function(e){
+      e.stopPropagation();
+      MENU_OPEN = !MENU_OPEN;
+      paintUnits();
+    });
+    document.querySelectorAll("#units [data-md]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        /* Same rule as a unit tab: going somewhere else drops every edit mode,
+           or you land editing a page you never pressed Edit on. */
+        if (current !== b.dataset.md) {
+          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
+          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
+          if (typeof ARRANGE !== "undefined") ARRANGE = false;
+          CLEARING = null;
+        }
+        current = b.dataset.md;
+        currentSub = b.dataset.ms;
+        MENU_OPEN = false;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+  }
+
+  /* THE TWO-CLICK SAVE.
+
+     Every editable field in Setup commits on `change` and then repaints. But
+     `change` on a text input fires on BLUR, and the blur is caused by pressing
+     something else - usually the Done button in the same table. So the order
+     was: mousedown on Done, input blurs, change fires, paint() rewrites the
+     panel and destroys the very button being pressed, and the click lands on
+     nothing. The value was saved; leaving edit mode took a second press. That
+     is the "two clicks to save".
+
+     Fixed once, here, rather than in twenty handlers: a repaint requested
+     while the mouse is down is held until the click it belongs to has landed.
+     mouseup and click are dispatched in the same task, and timers run after
+     it, so a setTimeout scheduled on mouseup is reliably after the click.
+
+     Deliberately not solved by committing on `input` instead: that works for
+     the button, but a field committing on every keystroke also has to not
+     repaint on every keystroke, and then nothing derived updates until
+     something else happens to paint. This keeps the repaint, and only moves
+     it a few milliseconds. */
+  var CLICKING = false, PAINT_HELD = false, holdTimer = null;
+  function releasePaint(){
+    CLICKING = false;
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    if (PAINT_HELD) { PAINT_HELD = false; paint(); }
+  }
+  document.addEventListener("mousedown", function(){
+    CLICKING = true;
+    /* A mousedown whose mouseup lands outside the window never releases, and a
+       stuck flag means the page silently stops repainting. Nothing is worth
+       that, so it always releases on its own. */
+    if (holdTimer) clearTimeout(holdTimer);
+    holdTimer = setTimeout(releasePaint, 500);
+  }, true);
+  document.addEventListener("mouseup", function(){ setTimeout(releasePaint, 0); }, true);
+
+  /* The tenant's branding, handed to THEME. One function, called on boot and
+     after every change on the Branding page, so the applied colours and the
+     page's own preview cannot drift apart (§39). */
+  function applyBrand(){
+    var b = branding();
+    THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
+  }
+
+  function paint(){
+    if (CLICKING) { PAINT_HELD = true; return; }
+    /* WHAT THIS PAINT IS ABOUT, set before anything renders. Every grant() with
+       no target of its own answers for this — the unit, the function or the
+       group currently on screen — because "own business unit" and "other
+       business units" are different answers to the same page (§37), and a
+       render has exactly one subject. Anything asking about a DIFFERENT thing
+       (the navigation, listing every unit) passes its own target to grantAt().
+       "setup" is deliberately mapped to the group: the Setup pages belong to
+       nobody's unit, and their area does not depend on the target at all. */
+    TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
+    /* Field setters are registered during render, so the list is emptied first
+       or stale closures accumulate on every repaint. */
+    FIELDS.length = 0;
+    fillViewers();
+    paintUnits();
+    /* Repainted rather than set once: the demo switch swaps the whole graph,
+       and Labels can rename the tenant while you are looking at it. The
+       separator lives with the name so an unnamed tenant shows nothing at all
+       rather than a stranded middot. */
+    document.getElementById("orgname").textContent =
+      GROUP.org ? "\u00b7 " + GROUP.org : "";
+    var v = viewer();
+    /* Guarded even though every person currently has a unit: reading
+       UNITS[null].name throws inside paint, which aborts the repaint and
+       leaves the previous screen showing \u2014 a crash that looks like a routing
+       bug. */
+    var where = v.unit === "group" ? "all units"
+              : (v.unit && UNITS[v.unit] ? UNITS[v.unit].name : "\u2014");
+    document.getElementById("viewerNote").innerHTML =
+      /* The roles they hold, not a level. Several is normal — group CEO who
+         also owns Care reads "Group CEO · Business unit owner". */
+      (personRoles(v).map(function(r){ return roleName(r.role); })
+        .filter(function(x, i, a){ return a.indexOf(x) === i; }).join(" &middot; ") || "No role") +
+      " &middot; " + where;
+
+    if (!current) {
+      document.getElementById("subtabs").innerHTML = "";
+      document.getElementById("panel").innerHTML =
+        '<div class="note bad-note" style="margin-top:30px"><b>No pages granted.</b> The roles this person holds reach nothing. ' +
+        'That is the table working as configured, not an error &mdash; open <b>Manage &rarr; Roles &amp; access</b> as the SMO to change it.</div>';
+      return;
+    }
+
+    /* A tab with SECTIONS is a container: the tab itself renders nothing and
+       the third row carries its pages. A tab without them renders directly, as
+       every group and setup tab still does. */
+    var arg = (current === "group" || current === "setup" || current === "manage") ? null
+            : isFn(current) ? current : UNITS[current];
+    /* Submission is per unit; a function's capabilities are not submitted
+       individually, so the whole function counts as one. */
+    CURRENT_REPORT_KEY = isFn(current) ? current : (UNITS[current] ? UNITS[current].ukey : null);
+    var defs = allowed(defsFor(current)).filter(function(d){
+      return !d.sections || allowed(d.sections(arg)).length;
+    });
+    if (!defs.length) defs = allowed(defsFor(current));
+    if (!defs.some(function(d){ return d.k === currentSub; })) currentSub = defs[0].k;
+
+    document.getElementById("subtabs").innerHTML = defs.map(function(d){
+      return '<button role="tab" data-s="' + d.k + '"' + (d.primary ? ' class="primary"' : '') +
+        ' aria-selected="' + (d.k === currentSub) + '">' + d.label + '</button>';
+    }).join("");
+
+    var def = defs.filter(function(d){ return d.k === currentSub; })[0];
+    var secs = def.sections ? allowed(def.sections(arg)) : null;
+    if (secs) {
+      if (!secs.some(function(s){ return s.k === CURSEC[def.k]; })) CURSEC[def.k] = secs[0].k;
+      def = secs.filter(function(s){ return s.k === CURSEC[def.k]; })[0];
+    }
+
+    /* The per-page Info button left the header in 2.9. The explanations in
+       PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
+       inside the pages themselves. */
+    document.getElementById("panel").innerHTML =
+      (current === "group" || current === "setup" || current === "manage") ? def.render()
+        : isFn(current) ? def.render(current)
+        : def.render(UNITS[current]);
+
+    /* Group Performance is four sections; they become a third nav row rather
+       than one long scroll. The row exists only where there are sections. */
+    var secrow = document.getElementById("secrow");
+    var onSecPage = current === "group" && currentSub === "performance" && GROUP_SECTIONS.length;
+    if (secs && secs.length > 1) {
+      /* The same third row the group's Performance sections already use. One
+         row that means "sections of the tab above", wherever it appears. */
+      secrow.hidden = false;
+      document.getElementById("secrow-in").innerHTML = secs.map(function(s){
+        return '<button role="tab" data-sub2="' + s.k + '"' + (s.cls ? ' class="' + s.cls + '"' : '') +
+          ' aria-selected="' + (s.k === def.k) + '">' + s.label + '</button>';
+      }).join("");
+    } else {
+      secrow.hidden = !onSecPage;
+      if (onSecPage) {
+        document.getElementById("secrow-in").innerHTML = GROUP_SECTIONS.map(function(t, i){
+          return '<button role="tab" data-sec="' + i + '" aria-selected="' + (i === GSEC) + '">' + t + '</button>';
+        }).join("");
+      }
+    }
+    wire();
+    /* Every mutation repaints, so this is where a change becomes a save. */
+    SYNC.afterPaint();
+  }
+
+  function wire(){
+    document.querySelectorAll("#subtabs button").forEach(function(b){
+      b.addEventListener("click", function(){ currentSub = b.dataset.s; paint(); window.scrollTo(0,0); });
+    });
+    document.querySelectorAll("[data-sub2]").forEach(function(b){
+      b.addEventListener("click", function(){ CURSEC[currentSub] = b.dataset.sub2; paint(); window.scrollTo(0,0); });
+    });
+    document.querySelectorAll("[data-modal]").forEach(function(b){
+      b.addEventListener("click", function(e){ e.stopPropagation(); e.preventDefault(); openModal(b.dataset.modal); });
+    });
+    document.querySelectorAll("[data-go]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation(); e.preventDefault();
+        if (!reaches(b.dataset.go)) return;
+        current = b.dataset.go; currentSub = "performance"; paint(); window.scrollTo(0,0);
+      });
+    });
+
+    /* Impact is the one factor a person sets; editing it recomputes the
+       composite immediately so the model is visible rather than asserted. */
+    document.querySelectorAll("[data-imp]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.weighting.units[+b.dataset.imp].imp = +b.dataset.val;
+        currentSub = "weighting"; paint();
+        var d = document.querySelector("details.cfgwrap"); if (d) d.open = true;
+      });
+    });
+
+    /* Factor weights: edited live, and the total is checked rather than
+       silently normalised — 40/30/20/20 must fail loudly, not quietly
+       produce an answer nobody asked for. */
+    document.querySelectorAll("input.fwt").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var n = parseInt(inp.value, 10);
+        if (!isNaN(n)) GROUP.weighting.factors[+inp.dataset.f].weight = Math.max(0, Math.min(100, n));
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rmf]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.weighting.factors.splice(+b.dataset.rmf, 1); paint();
+      });
+    });
+    var add = document.getElementById("addf");
+    if (add) add.addEventListener("click", function(){
+      GROUP.weighting.factors.push({ key:"f" + Date.now(), name:"New factor",
+        kind:"judgement", basis:"describe the basis", weight:0 });
+      GROUP.weighting.units.forEach(function(u){ u["f" + Date.now()] = 1; });
+      paint();
+    });
+
+    /* Key Objective weights */
+    document.querySelectorAll("[data-kotog]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.kotog;
+        if (KO_WEIGHTS[k]) { KO_WEIGHTS[k] = null; }
+        else {
+          var n = UNITS[k].keyObjectives.length, base = Math.floor(100 / n), arr = [];
+          for (var i = 0; i < n; i++) arr.push(base);
+          arr[0] += 100 - base * n;
+          KO_WEIGHTS[k] = arr;
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("input.kow").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var p = inp.dataset.ko.split("|"), n = parseInt(inp.value, 10);
+        if (!isNaN(n) && KO_WEIGHTS[p[0]]) KO_WEIGHTS[p[0]][+p[1]] = Math.max(0, Math.min(100, n));
+        paint();
+      });
+    });
+
+    /* Labels */
+    document.querySelectorAll("input.lbl").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        LABELS.entries[+inp.dataset.lbl][inp.dataset.scope] = inp.value || "—";
+        paint();
+      });
+    });
+    /* The "titles at this level" field went with LEVELS in 3.8. A title is
+       information about a person, not a rung anyone is standing on. */
+
+    /* Access matrix — changing a cell re-renders the navigation immediately,
+       so the grid is judged by using it rather than by reading it. */
+    document.querySelectorAll("[data-ac]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.ac.split("|");
+        /* The row may not exist yet: a migrated tenant starts with an empty
+           map and every answer coming from the shipped default. Writing a cell
+           is the moment that role gets a row of its own. */
+        (ACCESS[p[0]] = ACCESS[p[0]] || {})[p[1]] = p[2];
+        paint();
+      });
+    });
+    wirePillars();
+    wireArrange();
+    document.querySelectorAll("input[data-uname]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        /* Name is display only — the key is untouched, so nothing downstream
+           has to be found and updated. */
+        UNITS[inp.dataset.uname].name = inp.value || UNITS[inp.dataset.uname].name;
+        var row = GROUP.weighting.units.filter(function(r){ return r.key === inp.dataset.uname; })[0];
+        if (row) row.unit = UNITS[inp.dataset.uname].name;
+        paint();
+      });
+    });
+    document.querySelectorAll("input[data-upx]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
+        paint();
+      });
+    });
+    wireImport();
+    var lc = document.querySelector("[data-lockcycle]");
+    if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
+    var pb = document.querySelector("[data-present]");
+    if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
+    var pf = document.querySelector("[data-present-fn]");
+    if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
+    /* A capability's reporting writes back. Before the project model these
+       inputs rendered and were bound to nothing at all, so a figure could be
+       typed and lost on the next repaint. */
+    document.querySelectorAll("[data-crep]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.crep);
+        if (!hit) return;
+        var v = el.value.trim();
+        if (v === "") { hit.obj.actual = null; }
+        else if (hit.kind === "deliverable") { hit.obj.actual = Number(v); }
+        else {
+          var unit = el.dataset.unit || "";
+          hit.obj.actual = unit && !/\s/.test(v) ? v + " " + unit : v;
+          hit.obj.actual = hit.obj.actual.trim();
+        }
+        /* Progress is not recomputed here. It is not recomputed on a unit's
+           reporting page either \u2014 a reported actual carries its score in from
+           the cycle rather than being scored on the spot \u2014 and the two pages
+           must behave the same way. */
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-cnote]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.cnote);
+        if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
+      });
+    });
+    document.querySelectorAll("[data-cpick]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.cpick);
+        if (!hit) return;
+        if (hit.kind === "milestone") hit.obj.status = el.value || null;
+        else hit.obj.actual = el.value || null;
+        paint();
+      });
+    });
+    /* The rail. Which project is open belongs to the capability, so it keeps
+       its place across Performance, Projects and Reporting — visible the
+       whole time, which is why it is allowed to persist. */
+    document.querySelectorAll("[data-urail]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.urail.split("|");
+        RAIL["unit:" + p[0]] = p[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rail]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var c = capOfProjectId(b.dataset.rail);
+        if (c) { RAIL[railKeyFor(c)] = b.dataset.rail; paint(); }
+      });
+    });
+    document.querySelectorAll("[data-unav]").forEach(function(el){
+      el.addEventListener("change", function(){
+        UNITS[el.dataset.unav].navName = el.value.trim() || null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-clearmenu]").forEach(function(b){
+      b.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        CLEARMENU = (CLEARMENU === b.dataset.clearmenu) ? null : b.dataset.clearmenu;
+        CLEARING = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-fname]").forEach(function(el){
+      el.addEventListener("change", function(){
+        FUNCTIONS[el.dataset.fname].name = el.value.trim() || FUNCTIONS[el.dataset.fname].name;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-fnav]").forEach(function(el){
+      el.addEventListener("change", function(){
+        FUNCTIONS[el.dataset.fnav].navName = el.value.trim() || null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-fpx]").forEach(function(el){
+      el.addEventListener("change", function(){
+        FUNCTIONS[el.dataset.fpx].codePrefix = el.value.trim().toUpperCase();
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-fnretire]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var f = FUNCTIONS[b.dataset.fnretire];
+        f.active = f.active === false;
+        paint();
+      });
+    });
+    var addFn = document.getElementById("addfn");
+    if (addFn) addFn.addEventListener("click", function(){
+      var name = prompt("Name of the supporting function");
+      if (!name || !name.trim()) return;
+      var key = name.trim().toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || ("fn" + FUNCTION_KEYS.length);
+      if (FUNCTIONS[key]) { alert("A function with that key already exists."); return; }
+      FUNCTIONS[key] = { name:name.trim(), navName:null,
+        codePrefix:name.trim().slice(0, 3).toUpperCase(), head:null, custodian:null, active:true };
+      FUNCTION_KEYS.push(key);
+      paint();
+    });
+    document.querySelectorAll("[data-capfn]").forEach(function(el){
+      el.addEventListener("change", function(){
+        GROUP.capabilities[+el.dataset.capfn].fn = el.value || null;
+        paint();
+      });
+    });
+    var fu = document.getElementById("fset-unit");
+    if (fu) fu.addEventListener("change", function(){ FSET.unit = fu.value; paint(); });
+    var cc = document.querySelector("[data-closecycle]");
+    if (cc) cc.addEventListener("click", function(){
+      var gaps = 0;
+      activeKeys().forEach(function(k){ var c = reportedCount(UNITS[k]); gaps += c.total - c.done; });
+      if (!confirm("Close " + REVIEW.name + "?" +
+          (gaps ? "\n\n" + gaps + " items are unreported and will close as unreported." : "") +
+          "\n\nThe figures become a record and the plan reopens to unit owners.")) return;
+      /* The snapshot. Everything a later cycle needs in order to say what a
+         score was last time. */
+      var snap = { name:REVIEW.name, group:groupUnitsObjectives(), units:{} };
+      activeKeys().forEach(function(k){ snap.units[k] = unitObjectives(UNITS[k]); });
+      HISTORY.push(snap);
+      REVIEW.state = "closed";
+      paint();
+    });
+    var oc = document.querySelector("[data-opencycle]");
+    if (oc) oc.addEventListener("click", function(){
+      var n = HISTORY.length + 1;
+      REVIEW = { name:"Cycle " + n, from:REVIEW.to, to:"", due:"", endsQuarter:4,
+                 state:"open", note:{}, submitted:{}, cadence:REVIEW.cadence };
+      paint();
+    });
+    document.querySelectorAll("[data-rep]").forEach(function(el){
+      el.addEventListener("change", function(){
+        /* `current` is the open destination, which is the unit on its own
+           reporting page and is NOT a unit on "Figures I report" — that page
+           carries rows from several units at once, so each field names its
+           own. One handler, because two would drift (§42.3). */
+        var hit = findById(UNITS[el.dataset.repu || current], el.dataset.rep);
+        if (!hit) return;
+        var v = el.value.trim();
+        /* The field holds the bare number; the unit lives in the suffix beside
+           it. Rejoin them before storing, or every screen downstream reads a
+           revenue of "2.7" where it expects "2.7B EGP". */
+        var unit = el.dataset.unit || "";
+        if (hit.kind !== "TACTIC" && v !== "" && unit)
+          v = joinTarget(hit.obj.actual || hit.obj.target, v, unit);
+        if (hit.kind === "TACTIC") {
+          var n = parseInt(v.replace("%",""), 10);
+          hit.obj.actual = v === "" ? null : Math.max(0, Math.min(100, isNaN(n) ? 0 : n));
+          if (hit.obj.actual != null) {
+            if (hit.obj.actual >= 100) hit.obj.status = "Done";
+            else if (hit.obj.actual > 0 && hit.obj.status !== "Blocked") hit.obj.status = "WIP";
+          } else hit.obj.status = "Not started";
+        } else {
+          hit.obj.actual = v;
+          /* Progress is what the actual implies against the target, worked out
+             here rather than typed, so a figure and its meaning cannot differ. */
+          var t = parseFloat(String(hit.obj.target).replace(/[^0-9.]/g, ""));
+          var a = parseFloat(String(v).replace(/[^0-9.]/g, ""));
+          if (v === "" || isNaN(a) || isNaN(t) || !t) hit.obj.progress = null;
+          else hit.obj.progress = Math.max(0, Math.min(150,
+            Math.round((hit.obj.dir === "\u2264" ? t / a : a / t) * 100)));
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-note]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = findById(UNITS[current], el.dataset.note);
+        if (hit) { hit.obj.note = el.value; paint(); }
+      });
+    });
+    document.querySelectorAll("[data-unote]").forEach(function(el){
+      el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
+    });
+    document.querySelectorAll("[data-submit]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var u = UNITS[b.dataset.submit], miss = missingNotes(u);
+        if (miss.length) {
+          alert(miss.length + " figure" + (miss.length > 1 ? "s are" : " is") +
+            " at risk or off track with no note. Add a line to each before submitting.");
+          return;
+        }
+        REVIEW.submitted[b.dataset.submit] = true; paint();
+      });
+    });
+    document.querySelectorAll("[data-unsubmit]").forEach(function(b){
+      b.addEventListener("click", function(){ delete REVIEW.submitted[b.dataset.unsubmit]; paint(); });
+    });
+    /* Source of figures (§16.7, reshaped in §16.7a). WHO is chosen once at the
+       top; each row is then a single mark. The half-set problem the first
+       build had cannot arise: a mark is only offered once both ends are set,
+       and it writes both at once. */
+    /* ── Figure sets (spec 008) ─────────────────────────────────────
+       The set is chosen once at the top; each row below is a single mark, and
+       it writes the set id and nothing else — who ENTERS the figure is read
+       from the set, never copied onto the row. */
+    document.querySelectorAll("[data-srcunit]").forEach(function(b){
+      b.addEventListener("click", function(){ SRCSET.unit = b.dataset.srcunit; paint(); });
+    });
+    var ss = document.getElementById("srcset-set");
+    if (ss) ss.addEventListener("change", function(){ SRCSET.set = ss.value || null; paint(); });
+    document.querySelectorAll("[data-srcpick]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var mineSets = myPickableSets();
+        var st = setById(SRCSET.set) || mineSets[0];
+        if (!st) return;
+        var hit = SMPRules.rowById(world(), SRCSET.unit || activeKeys()[0], b.dataset.srcpick);
+        if (!hit) return;
+        /* Somebody else's is not offered a control at all, so this only ever
+           sees an unclaimed figure or one of its own. */
+        if (hit.src && hit.src.set === st.id) delete hit.src;
+        else hit.src = { set: st.id };
+        paint();
+      });
+    });
+
+    /* Asking for a figure another set holds. It writes an OPEN request and
+       nothing else — moving the figure is the SMO's answer, not the asking. */
+    document.querySelectorAll("[data-claimask]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var st = setById(SRCSET.set) || myPickableSets()[0];
+        var unit = SRCSET.unit || activeKeys()[0];
+        if (!st) return;
+        if (myOpenClaim(b.dataset.claimask, st.id)) return;
+        claimsList().push({ id: mintClaimId(), unit: unit, figure: b.dataset.claimask,
+                            set: st.id, by: viewer().key, state: "open" });
+        paint();
+      });
+    });
+    /* Answering one. Moving the figure and closing the request are ONE act, or
+       a granted request could sit open beside a figure that had already
+       moved. */
+    var answerClaim = function(id, grant){
+      var c = claimsList().filter(function(x){ return x.id === id; })[0];
+      if (!c) return;
+      if (grant) {
+        var hit = SMPRules.rowById(world(), c.unit, c.figure);
+        if (hit) hit.src = { set: c.set };
+      }
+      c.state = grant ? "granted" : "declined";
+      paint();
+    };
+    document.querySelectorAll("[data-claimyes]").forEach(function(b){
+      b.addEventListener("click", function(){ answerClaim(b.dataset.claimyes, true); });
+    });
+    document.querySelectorAll("[data-claimno]").forEach(function(b){
+      b.addEventListener("click", function(){ answerClaim(b.dataset.claimno, false); });
+    });
+
+    /* The sets themselves. */
+    var setField = function(attr, apply){
+      document.querySelectorAll("[" + attr + "]").forEach(function(el){
+        el.addEventListener("change", function(){
+          var st = setById(el.getAttribute(attr));
+          if (!st) return;
+          apply(st, el.value);
+          paint();
+        });
+      });
+    };
+    setField("data-setname",  function(st, v){ st.name = v; });
+    setField("data-setteam",  function(st, v){ st.team = v || null; });
+    setField("data-setowner", function(st, v){ st.owner = v || null; });
+    setField("data-setpick",  function(st, v){ st.pick = v === "owner" ? "owner" : "smo"; });
+    document.querySelectorAll("[data-setdel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = b.dataset.setdel;
+        /* REMOVING A SET RELEASES ITS FIGURES rather than orphaning them. A
+           figure pointing at a set that no longer exists has nobody to enter
+           it and no way to say so — it would simply stop being reportable. */
+        UNIT_KEYS.forEach(function(k){
+          var u = UNITS[k] || {};
+          var clear = function(m){ if (m.src && m.src.set === id) delete m.src; };
+          (u.keyObjectives || []).forEach(clear);
+          (u.items || []).forEach(function(p){ (p.measures || []).forEach(clear); });
+        });
+        GROUP.sets = setsList().filter(function(x){ return x.id !== id; });
+        /* And its outstanding requests go with it: a request to move a figure
+           into a set that no longer exists is a question with no answer. */
+        GROUP.claims = claimsList().filter(function(x){ return x.set !== id; });
+        paint();
+      });
+    });
+    var nsName = document.getElementById("newset-name");
+    if (nsName) {
+      ["name","team","owner","pick"].forEach(function(f){
+        var el = document.getElementById("newset-" + f);
+        if (el) el.addEventListener("change", function(){ NEWSET[f] = el.value; });
+      });
+      nsName.addEventListener("input", function(){ NEWSET.name = nsName.value; });
+      var add = document.getElementById("newset-add");
+      if (add) add.addEventListener("click", function(){
+        var name = (NEWSET.name || "").trim();
+        if (!name) { nsName.focus(); return; }
+        setsList().push({ id: mintSetId(name), name: name,
+                          team: NEWSET.team || null, owner: NEWSET.owner || null,
+                          pick: NEWSET.pick === "owner" ? "owner" : "smo" });
+        NEWSET = { name:"", team:"", owner:"", pick:"smo" };
+        paint();
+      });
+    }
+
+    document.querySelectorAll("[data-focus]").forEach(function(b){
+      b.addEventListener("click", function(){ toggleFocus(b.dataset.focus); paint(); });
+    });
+    /* Both role <select>s are gone — Business units and Supporting functions
+       share one picker now, wired in wirePicker() below (§35). */
+    var au = document.getElementById("addunit");
+    if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
+    /* Choosing from the menu closes it and raises the confirmation, so the
+       destructive act is still two deliberate presses. */
+    document.querySelectorAll("[data-clear]").forEach(function(b){
+      b.addEventListener("click", function(){ CLEARING = b.dataset.clear; CLEARMENU = null; paint(); });
+    });
+    document.querySelectorAll("[data-clearno]").forEach(function(b){
+      b.addEventListener("click", function(){ CLEARING = null; CLEARMENU = null; paint(); });
+    });
+    document.querySelectorAll("[data-clearyes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* One handler for all three levels \u2014 a unit, a function, or everything
+           \u2014 so clearing behaves identically wherever it is reached from. */
+        var p = b.dataset.clearyes.split("|");
+        if (p[0] === "all") { if (p[1] === "plan") clearAllPlans(); else clearAllNumbers(); }
+        else if (p[0] === "fnall") {
+          FUNCTION_KEYS.forEach(function(k){ clearFunction(k, p[2] === "plan" ? "plan" : "nums"); });
+        }
+        else if (p[0] === "fn") { clearFunction(p[1], p[2] === "plan" ? "plan" : "nums"); }
+        else if (p[1] === "plan") clearUnitPlan(UNITS[p[0]]);
+        else clearUnitNumbers(UNITS[p[0]]);
+        CLEARING = null; paint();
+      });
+    });
+    document.querySelectorAll("[data-uact]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var u = UNITS[b.dataset.uact];
+        u.active = !u.active;
+        /* Retirement changes what the composite is over, so the weights are
+           re-derived immediately rather than on the next weighting repaint \u2014
+           the group figure reads them before that repaint happens. */
+        syncWeights();
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-kov]").forEach(function(b){
+      b.addEventListener("click", function(){ KO_VIEW = b.dataset.kov; paint(); });
+    });
+    document.querySelectorAll("[data-tadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.tadd;
+        if (k === "ko")    GROUP.keyObjectives.push({ id:"group-KO" + (GROUP.keyObjectives.length + 1),
+                             name:"New objective", group:null, dir:"\u2265", target3y:"", target:"",
+                             compile:"Latest", actual:"", progress:null });
+        if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
+        if (k === "cap")   GROUP.capabilities.push({ name:"New capability", def:"",
+                             measures:[], tactics:[] });
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-trm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.trm.split("|"), i = +p[1];
+        /* Removal asks once when the row carries anything \u2014 a reported
+           objective or a capability with work under it is history, and units
+           get a confirm for far less. A row added a moment ago and still
+           empty goes without ceremony. */
+        var what = null;
+        if (p[0] === "ko") {
+          var m = GROUP.keyObjectives[i];
+          if (m && (m.actual || m.target)) what = 'the objective "' + m.name + '"' +
+            (m.actual ? " and its reported " + m.actual : "");
+        }
+        if (p[0] === "cap") {
+          var cp = GROUP.capabilities[i];
+          if (cp && (cp.measures.length || cp.tactics.length))
+            what = '"' + cp.name + '" with ' + cp.measures.length + " measures and " +
+                   cp.tactics.length + " tactics under it";
+        }
+        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
+        if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
+        if (p[0] === "theme") GROUP.themes.splice(i, 1);
+        if (p[0] === "cap")   GROUP.capabilities.splice(i, 1);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-fld]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var fn = FIELDS[+el.dataset.fld];
+        if (fn) { fn(el.value); paint(); }
+      });
+    });
+    document.querySelectorAll("[data-page]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.page; EDIT_PAGE[k] = !EDIT_PAGE[k]; paint();
+      });
+    });
+    document.querySelectorAll("[data-sec]").forEach(function(b){
+      b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
+    });
+    /* Cards or a table, per section (§16.6). A view preference — it changes
+       how a section is laid out, never what anything is or in what order it
+       is stored. */
+    document.querySelectorAll("[data-gview]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.gview.split("|");
+        GVIEW[p[0]] = p[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-edit]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.edit; EDITING[k] = !EDITING[k]; paint();
+      });
+    });
+    document.querySelectorAll("input.blabel").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        BANDS.bands[+inp.dataset.b].label = inp.value || "Unnamed"; paint();
+      });
+    });
+    document.querySelectorAll("input.bfloor").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var n = parseInt(inp.value, 10);
+        if (!isNaN(n)) BANDS.bands[+inp.dataset.b].floor = Math.max(0, Math.min(100, n));
+        paint();
+      });
+    });
+    /* A unit's company, and a company's two visibility flags. Both are
+       configuration: they change who reaches what, never a figure. */
+    document.querySelectorAll("[data-ucomp]").forEach(function(el){
+      el.addEventListener("change", function(){
+        UNITS[el.dataset.ucomp].company = el.value || null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-coflag]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var p = el.dataset.coflag.split("|");
+        COMPANIES[p[0]][p[1]] = el.value === "yes";
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-as]").forEach(function(b){
+      b.addEventListener("click", function(){
+        VIEWER = b.dataset.as;
+        document.getElementById("asWho").value = VIEWER;
+        current = null; currentSub = null; paint(); window.scrollTo(0,0);
+      });
+    });
+    /* The SMO issues a temporary password; the server checks the policy and
+       forces a change on first sign-in. */
+    document.querySelectorAll("[data-setpw]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.setpw;
+        var pw = prompt("Temporary password for " + key +
+          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
+          "\nThey will be asked to choose their own on first sign-in.");
+        if (!pw) return;
+        SYNC.setPassword(key, pw, function(err){
+          if (err) return alert("Not set: " + err);
+          /* The register shows a password COLUMN now, so a reset that does not
+             repaint it leaves the screen claiming the old state. Ask again
+             rather than assuming — the server is what knows. */
+          if (PWSTATES) PWSTATES[key] = "temporary";
+          paint();
+          alert("Set. " + key + " signs in with it once, then chooses their own.");
+        });
+      });
+    });
+
+    /* ── The register (§35) ─────────────────────────────────────────
+       Three text fields, a standing toggle, an add row, the role controls and
+       the bulk issue. Everything writes the same data the Business units page
+       writes — there is no second copy to keep in step. */
+    function fieldWire(attr, apply){
+      document.querySelectorAll("[data-" + attr + "]").forEach(function(inp){
+        inp.addEventListener("change", function(){
+          var p = personBy(inp.dataset[attr]);
+          if (p) apply(p, inp.value.trim());
+          paint();
+        });
+      });
+    }
+    fieldWire("pname",  function(p, v){ if (v) p.name = v; });
+    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
+    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
+
+    document.querySelectorAll("[data-pact]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.pact;
+        var p = personBy(key);
+        if (!p) return;
+        if (personActive(p)) {
+          var held = personRoles(p).length;
+          if (held && !confirm(p.name + " holds " + plural(held, "role") +
+              ". Retiring takes " + (held === 1 ? "it" : "them") +
+              " away and closes their sign-in. Everything already reported in their name stays.\n\nRetire " +
+              p.name + "?")) return;
+          retirePerson(key);
+        } else {
+          restorePerson(key);
+        }
+        paint();
+      });
+    });
+
+    /* The typed name is held in a global rather than read off the input at
+       submit time, because the repaint that follows any other change would
+       otherwise throw it away mid-typing. */
+    var newName = document.getElementById("newPersonName");
+    if (newName) {
+      newName.addEventListener("input", function(){ NEWPERSON = newName.value; });
+      newName.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(); }
+      });
+    }
+    function addTypedPerson(){
+      var name = (NEWPERSON || "").trim();
+      if (!name) return;
+      addPerson({ name: name });
+      NEWPERSON = "";
+      paint();
+    }
+    document.querySelectorAll("[data-padd]").forEach(function(b){
+      b.addEventListener("click", addTypedPerson);
+    });
+
+    document.querySelectorAll("[data-prole-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = "owner"; paint();
+      });
+    });
+    document.querySelectorAll("[data-prole-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ ADDROLE = null; paint(); });
+    });
+    /* Choosing the role repaints, because the SECOND select's options depend
+       on the first: a company CEO is attached to a company, a function head to
+       a function. One list of every role-times-place would offer Company CEO
+       of Mobile. */
+    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
+      sel.addEventListener("change", function(){ ADDROLE_KIND = sel.value; paint(); });
+    });
+    document.querySelectorAll("[data-prole-add]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.proleAdd;
+        var where = document.querySelector('[data-prole-where="' + key + '"]');
+        grantPersonRole(key, ADDROLE_KIND, where ? where.value : "group");
+        ADDROLE = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-prole-off]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.proleOff.split("|");
+        revokePersonRole(p[0], p[1], p[2]);
+        paint();
+      });
+    });
+
+    /* One temporary password for everyone who has none. The SERVER picks the
+       set — this sends a password and nothing else — so the worst a stale
+       screen can do is issue to a shorter list than it showed. */
+    document.querySelectorAll("[data-pwbulk]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var pw = prompt("One temporary password, for everyone who has none." +
+          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
+          "\nEach of them is asked to choose their own the first time they use it.");
+        if (!pw) return;
+        SYNC.issueTemporary(pw, function(err, issued){
+          if (err) return alert("Not issued: " + err);
+          issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
+          paint();
+          alert(issued.length
+            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") +
+              ": " + issued.join(", ") + "."
+            : "Nobody needed one \u2014 everybody already has a password.");
+        });
+      });
+    });
+
+    /* Asked ONCE, the first time the register is on screen with a database
+       behind it. Credentials are not in the state graph and never will be
+       (§19), so this is a separate question — and it is a question about other
+       people's accounts, so the server answers it only for the SMO.
+
+       PWSTATES starts null meaning "not asked" and is set to {} before the
+       request goes out, which is what stops every repaint asking again. Empty
+       renders as a dash, not as "none": not knowing is not the same as knowing
+       there is no password (§30.2, the same distinction). */
+    /* ── Branding (§39) ─────────────────────────────────────────────
+       The colour input fires `input` continuously while the picker is dragged,
+       so it repaints on `change` — once, when the picker closes — and the hex
+       field on `change` too. A repaint per frame of a drag would rebuild the
+       control being dragged, which is §30.1 again. */
+    document.querySelectorAll("[data-brand]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        branding()[inp.dataset.brand] = inp.value.toUpperCase();
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandhex]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var v = inp.value.trim();
+        /* An unreadable value is refused rather than stored: a half-typed hex
+           would blank the colour and look like the platform had lost it. */
+        if (v && !hexRgb(v)) { inp.value = branding()[inp.dataset.brandhex] || ""; return; }
+        branding()[inp.dataset.brandhex] = v ? rgbHex(hexRgb(v)) : null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        branding()[b.dataset.brandclear] = null;
+        applyBrand(); paint();
+      });
+    });
+    document.querySelectorAll("[data-brandreset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.branding = {};
+        applyBrand(); paint();
+      });
+    });
+
+    wirePicker();
+
+    if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
+        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
+      PWSTATES = {};
+      SYNC.passwordStates(function(err, st){
+        if (err) return;
+        PWSTATES = st;
+        paint();
+      });
+    }
+  }
+
+  /* ── The assignment picker (§35) ────────────────────────────────
+     Open one, search it, choose a name or add a new one. Used by Business
+     units and by Supporting functions, which is why it addresses everything
+     through grantPersonRole() rather than writing UNIT_ROLES or FUNCTIONS
+     itself — the register writes through the same door, so the two screens
+     cannot drift apart.
+
+     TYPING DOES NOT REPAINT. The filter hides rows in place instead, because
+     a repaint would replace the very input being typed into, taking its focus
+     and its caret with it — the same family of fault as §30.1, where a change
+     handler rewrote the DOM under a button mid-click. A search box is an
+     interaction that lasts several keystrokes; nothing may rebuild it while
+     it is running. */
+  function wirePicker(){
+    document.querySelectorAll("[data-pick-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PICKING = b.dataset.pickOpen; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-pick-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ PICKING = null; PICKQ = ""; paint(); });
+    });
+    document.querySelectorAll("[data-pick-set]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pickSet.split("|");
+        grantPersonRole(p[2], p[1], p[0]);
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-pick-clear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pickClear.split("|");
+        revokePersonRole(p[2], p[1], p[0]);
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+    /* Add new: the typed name becomes a person AND takes the role in one act,
+       which is the whole point — "create only the name and the Role", in
+       Islam's words. They appear in the register immediately, for the rest of
+       their details. */
+    document.querySelectorAll("[data-pick-new]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var name = (PICKQ || "").trim();
+        if (!name) return;
+        var p = b.dataset.pickNew.split("|");
+        addPerson({ name: name, role: p[1], where: p[0] });
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+
+    var q = document.getElementById("pickQ");
+    if (!q) return;
+    q.addEventListener("input", function(){
+      PICKQ = q.value;
+      var needle = PICKQ.trim().toLowerCase();
+      var any = false;
+      document.querySelectorAll(".pickrow").forEach(function(r){
+        var hit = !needle || r.dataset.name.indexOf(needle) > -1;
+        r.hidden = !hit;
+        if (hit) any = true;
+      });
+      /* A heading with nothing under it is a heading that lies about what the
+         list contains. */
+      document.querySelectorAll(".pickhead").forEach(function(h){
+        var n = h.nextElementSibling, shown = false;
+        while (n && n.classList.contains("pickrow")) {
+          if (!n.hidden) shown = true;
+          n = n.nextElementSibling;
+        }
+        h.hidden = !shown;
+      });
+      var empty = document.querySelector(".pickempty");
+      if (empty) empty.hidden = any;
+      var add = document.querySelector("[data-pick-new]");
+      if (add) {
+        add.hidden = !needle;
+        add.textContent = '+ Add \u201c' + PICKQ.trim() + '\u201d';
+      }
+      var hint = document.querySelector(".pickhint");
+      if (hint) hint.hidden = !!needle;
+    });
+    q.focus();
+  }
+
+  /* Arrangement. One button turns handles on everywhere the viewer is
+     permitted; committing a drop re-renders and restores whatever was open. */
+  function wireArrange(){
+    document.querySelectorAll("[data-arrange]").forEach(function(b){
+      b.addEventListener("click", function(){ ARRANGE = !ARRANGE; paint(); });
+    });
+    document.querySelectorAll(".sortable").forEach(function(c){
+      var kind = c.dataset.kind;
+      var isTable = kind === "measures" || kind === "tactics";
+      var sel = isTable ? "tr" : (kind === "pillars" ? ".prow-wrap" : ".gwrap");
+      makeSortable(c, sel, function(order){
+        var open = [];
+        document.querySelectorAll('.prow[aria-expanded="true"]').forEach(function(r){ open.push(+r.dataset.p); });
+
+        if (kind === "pillars") applyOrder(UNITS[current].items, order);
+        else if (kind === "units") applyOrder(UNIT_KEYS, order);
+        else if (kind === "caps") applyOrder(GROUP.capabilities, order);
+        else if (kind === "themes") applyOrder(GROUP.themes, order); else {
+          var body = c.closest(".pbody");
+          var pi = +body.previousElementSibling.dataset.p;
+          var it = UNITS[current].items[pi];
+          applyOrder(kind === "measures" ? it.measures : it.tactics, order);
+        }
+
+        paint();
+        open.forEach(function(i){
+          var r = document.querySelector('.prow[data-p="' + i + '"]');
+          if (r) { r.setAttribute("aria-expanded","true"); r.nextElementSibling.hidden = false; }
+        });
+      });
+    });
+  }
+
+  /* Import. Downloading is attempted as a file and always offered as text,
+     because a sandboxed frame may refuse the download and leaving the SMO with
+     nothing would be worse than a copy box. */
+  function csvFor(){
+    if (impIsCap()) {
+      var c = impCap();
+      return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
+    }
+    var u = UNITS[IMP.unit];
+    return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
+  }
+  function fileName(){
+    var name = impIsCap() ? impCap().name : UNITS[IMP.unit].name;
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
+      "-" + IMP.kind + "-template.csv";
+  }
+  /* A plan file is READ into a summary, not diffed: it authors the plan, so
+     what matters is what it holds and what that displaces (§22). Reporting is
+     still a difference against what is recorded. */
+  function readPlanRows(rows, label){
+    IMP.read = label;
+    if (impIsCap()) {
+      var c = impCap();
+      IMP.check = validateCapPlan(c, rows);
+      IMP.summary = capReplaceSummary(c, rows);
+    } else {
+      var u = UNITS[IMP.unit];
+      IMP.check = validatePlan(u, rows);
+      IMP.summary = planReplaceSummary(u, rows);
+    }
+    IMP.diff = null;
+    paint();
+  }
+  function impFail(msg){
+    IMP.check = { problems:[{ at:"the whole file", msg:msg }], notices:[] };
+    IMP.summary = null; IMP.diff = null; IMP.read = "";
+    paint();
+  }
+
+  function loadCSV(text){
+    IMP.done = null;
+    IMP.text = text;
+    /* A plan arrives as a workbook, because a workbook has a Read me sheet and
+       a plan file has to say which unit it is for. A flat CSV cannot say it,
+       and guessing would write one unit's plan into another \u2014 the worst
+       accident this flow can have. Reporting still takes a CSV: it is per unit
+       and the unit is chosen on screen. */
+    if (IMP.kind === "plan") {
+      impFail("a plan has to arrive as the .xlsx template \u2014 its Read me sheet is what says " +
+              "which unit the plan is for. Download the plan template above and fill that.");
+      return;
+    }
+    var rows = parseCSV(text);
+    if (impIsCap()) {
+      var c = impCap();
+      var cShape = checkCapFileShape(c, rows, "progress");
+      IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+      IMP.diff = diffCapProgress(c, rows);
+      IMP.summary = null;
+      paint();
+      return;
+    }
+    var u = UNITS[IMP.unit];
+    var shape = checkFileShape(u, rows, "progress");
+    IMP.check = shape.length ? { problems: shape, notices: [] } : null;
+    IMP.diff = diffProgress(u, rows);
+    IMP.summary = null;
+    paint();
+  }
+
+  function wireImport(){
+    var us = document.getElementById("imp-unit");
+    if (us) us.addEventListener("change", function(){ IMP.unit = us.value; IMP.diff = null; paint(); });
+
+    document.querySelectorAll("[data-impkind]").forEach(function(b){
+      b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
+    });
+
+    function sendXlsx(sheets, name){
+      var bytes = buildXlsx(sheets);
+      var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
+    /* The plan template is the same file whichever unit it is for, so it is
+       built against an empty shape rather than a chosen unit's content. */
+    var dlx = document.querySelector("[data-dlx]");
+    if (dlx) dlx.addEventListener("click", function(){
+      if (IMP.kind === "plan") {
+        sendXlsx(planWorkbook(blankUnitShape()), "SMP - plan template.xlsx");
+        return;
+      }
+      var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(UNITS[IMP.unit]);
+      sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
+    });
+    var dlxc = document.querySelector("[data-dlxcap]");
+    if (dlxc) dlxc.addEventListener("click", function(){
+      sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - capability template.xlsx");
+    });
+
+    var dl = document.querySelector("[data-dl]");
+    if (dl) dl.addEventListener("click", function(){
+      var blob = new Blob([csvFor()], { type:"text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = fileName();
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    });
+
+    var show = document.querySelector("[data-showcsv]");
+    if (show) show.addEventListener("click", function(){
+      document.getElementById("modal-t").textContent = fileName();
+      document.getElementById("modal-s").textContent = "Select all and copy, if the download is blocked";
+      document.getElementById("modal-b").innerHTML =
+        '<textarea class="csvbox" readonly>' + csvFor().replace(/</g, "&lt;") + '</textarea>';
+      overlay.classList.add("on");
+    });
+
+    var f = document.getElementById("imp-file");
+    if (f) f.addEventListener("change", function(){
+      var file = f.files && f.files[0]; if (!file) return;
+      if (/\.xlsx$/i.test(file.name)) {
+        var rx = new FileReader();
+        rx.onload = function(){
+          readXlsx(rx.result).then(function(sheets){
+            /* The template is generic, so the file itself says whose plan it
+               is: one cell on the Read me sheet. Nothing else in the workbook
+               names a unit, and with the codes gone nothing else could. */
+            if (IMP.kind === "plan") {
+              var picked = readmePick(sheets);
+              if (!picked) {
+                impFail(impIsCap()
+                  ? "no capability chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is."
+                  : "no business unit chosen. Open the Read me sheet and pick one from the dropdown in B2 \u2014 the platform cannot tell whose plan this is.");
+                return;
+              }
+              var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
+              var cp = GROUP.capabilities.filter(function(x){ return x.name === picked; })[0];
+              if (!uk && !cp) {
+                impFail('no business unit or capability called "' + picked +
+                  '". Open the Read me sheet and choose one from the dropdown in B2.');
+                return;
+              }
+              IMP.unit = uk ? uk : "cap:" + cp.id;
+              if (cp) {
+                var cRows = capPlanFromWorkbook(cp, sheets);
+                readPlanRows(cRows, cp.name + " \u00b7 " + cRows.length + " rows");
+              } else {
+                var pRows = planFromWorkbook(UNITS[uk], sheets);
+                readPlanRows(pRows, UNITS[uk].name + " \u00b7 " + pRows.length + " rows");
+              }
+              return;
+            }
+            if (impIsCap()) {
+              var c = impCap();
+              var cpRows = capProgressFromWorkbook(c, sheets);
+              var cShape = checkCapFileShape(c, cpRows, "progress");
+              IMP.check = cShape.length ? { problems: cShape, notices: [] } : null;
+              IMP.diff = diffCapProgress(c, cpRows);
+              IMP.summary = null;
+              paint();
+              return;
+            }
+            var u = UNITS[IMP.unit];
+            var rows = progressFromWorkbook(u, sheets);
+            var shape = checkFileShape(u, rows, "progress");
+            IMP.check = shape.length ? { problems: shape, notices: [] } : null;
+            IMP.diff = diffProgress(u, rows);
+            IMP.summary = null;
+            paint();
+          }).catch(function(e){
+            IMP.check = { problems:[{ at:file.name, msg:"could not be read as a workbook \u2014 " + e.message }], notices:[] };
+            IMP.diff = null; IMP.summary = null; IMP.read = "";
+            paint();
+          });
+        };
+        rx.readAsArrayBuffer(file);
+        return;
+      }
+      var rd = new FileReader();
+      rd.onload = function(){ loadCSV(String(rd.result)); };
+      rd.readAsText(file);
+    });
+
+    var paste = document.querySelector("[data-paste]");
+    if (paste) paste.addEventListener("click", function(){
+      document.getElementById("modal-t").textContent = "Paste the filled file";
+      document.getElementById("modal-s").textContent = "";
+      document.getElementById("modal-b").innerHTML =
+        '<textarea class="csvbox" id="pastebox" placeholder="Paste the CSV here"></textarea>' +
+        '<div class="imp-row" style="margin-top:12px"><button class="editbtn" id="pasteok">Read it</button></div>';
+      overlay.classList.add("on");
+      document.getElementById("pasteok").addEventListener("click", function(){
+        var t = document.getElementById("pastebox").value;
+        overlay.classList.remove("on");
+        if (t.trim()) loadCSV(t);
+      });
+    });
+
+    var ap = document.querySelector("[data-apply]");
+    if (ap) ap.addEventListener("click", function(){
+      var what, arch;
+      if (IMP.kind === "plan") {
+        var sm = IMP.summary, inc = sm.incoming;
+        if (impIsCap()) {
+          var cc = impCap();
+          arch = applyCapPlanReplace(cc, sm.rows);
+          what = plural(inc.projects, "project") + ", " +
+                 plural(inc.objectives, "objective") + " written.";
+          IMP.done = { unit:cc.name, key:cc.id, fn:cc.fn, what:what, archived:arch };
+        } else {
+          var uu = UNITS[IMP.unit];
+          arch = applyPlanReplace(uu, sm.rows);
+          /* The tenant's own word for a pillar, which the label registry holds
+             in the plural because that is how it is used in headings. */
+          what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
+                 plural(inc.measures, "measure") + ", " +
+                 plural(inc.tactics, "tactic") + " written.";
+          IMP.done = { unit:uu.name, key:uu.ukey, what:what, archived:arch };
+        }
+      } else {
+        var ch = IMP.diff.rows.filter(function(r){ return r.status === "changed"; }).length;
+        what = ch + " figure" + (ch === 1 ? "" : "s") + " updated.";
+        if (impIsCap()) {
+          var c = impCap();
+          applyCapProgress(c, IMP.diff);
+          IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
+        } else {
+          var u = UNITS[IMP.unit];
+          applyProgress(u, IMP.diff);
+          IMP.done = { unit:u.name, key:u.ukey, what:what };
+        }
+      }
+      IMP.diff = null; IMP.summary = null; IMP.text = ""; IMP.check = null; IMP.read = "";
+      paint();
+    });
+
+    /* Archived plans: restore one, or forget it for good. Forgetting asks,
+       because it is the only act in the import flow that actually destroys
+       something. */
+    document.querySelectorAll("[data-restore]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (restoreArchive(b.dataset.restore)) paint();
+      });
+    });
+    document.querySelectorAll("[data-forget]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var a = ARCHIVES.filter(function(x){ return x.id === b.dataset.forget; })[0];
+        if (!a) return;
+        if (!confirm("Delete " + a.name + "'s archive of " + a.at +
+                     " for good? This is the one thing here that cannot be undone.")) return;
+        forgetArchive(a.id);
+        paint();
+      });
+    });
+    /* The receipt's way back for a capability: its function's pages. */
+    document.querySelectorAll("[data-gofn]").forEach(function(b){
+      b.addEventListener("click", function(){
+        IMP.done = null;
+        current = b.dataset.gofn; currentSub = null;
+        paint(); window.scrollTo(0,0);
+      });
+    });
+    document.querySelectorAll("[data-gounit]").forEach(function(b){
+      b.addEventListener("click", function(){
+        IMP.done = null;
+        var target = document.querySelector('#units button[data-u="' + b.dataset.gounit + '"]');
+        if (target) target.click();
+      });
+    });
+    var cx = document.querySelector("[data-cancel]");
+    if (cx) cx.addEventListener("click", function(){ IMP.diff = null; paint(); });
+  }
+
+  wireDeck();
+
+  var overlay = document.getElementById("overlay");
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
+    overlay.classList.add("on");
+    document.getElementById("modal-x").focus();
+  }
+  function closeModal(){ overlay.classList.remove("on"); }
+  document.getElementById("modal-x").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
+
+  /* A menu that stays open after you have looked away is a menu you have to
+     dismiss. Bound once, at boot, rather than on every repaint. */
+  document.addEventListener("click", function(){
+    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
+  });
+
+  /* The switcher lists the people the platform actually has. It was filled
+     once, at load, from the baked-in example \u2014 so on the deployed product it
+     went on offering all 29 of them after hydration had replaced them with the
+     tenant's own, and picking someone who had gone threw on the next repaint.
+     It is refilled whenever the list itself changes, which is cheap because
+     the signature says when nothing has. */
+  var sel = document.getElementById("asWho");
+  var viewerSig = null;
+  function fillViewers(){
+    var sig = PEOPLE.map(function(p){ return p.key; }).join(",");
+    if (sig !== viewerSig) {
+      viewerSig = sig;
+      sel.innerHTML = PEOPLE.map(function(p){
+        return '<option value="' + p.key + '">' + p.name + " \u2014 " + p.title + '</option>';
+      }).join("");
+    }
+    viewer();               /* corrects VIEWER if the person selected has gone */
+    sel.value = VIEWER;
+  }
+  fillViewers();
+  sel.addEventListener("change", function(){
+    VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
+  });
+
+  /* The three nav rows sit in one sticky container, so nothing has to be
+     measured and no offset has to be kept in sync. The header still condenses,
+     but on hysteresis — condense at 70, expand at 20 — because a single
+     threshold oscillates: shrinking the header pulls content up, which can
+     drop the page back under the threshold and re-expand it. */
+  /* The sticky pillar header pins beneath the chrome, so it needs the chrome's
+     height. That height changes for three separate reasons — the header
+     condenses, the window resizes, and the tab row is repopulated on every
+     paint — so it is observed rather than measured at chosen moments. This is
+     what the old code got wrong: it measured on every scroll frame, mid
+     transition, and fed the result straight back into the layout. */
+  var chromeEl = document.querySelector(".chrome");
+  new ResizeObserver(function(){
+    document.documentElement.style.setProperty("--chrome-h", chromeEl.offsetHeight + "px");
+  }).observe(chromeEl);
+
+  /* NO CONDENSE-ON-SCROLL. The chrome is one height, always.
+
+     This was the last thing in the product that changed size while you
+     scrolled, and it is what Islam had been reporting as the scroll-up glitch
+     for four versions. Two separate causes had already been found and fixed
+     underneath it (a chrome with no background in 2.7, a rail capped against
+     its own measured height in 2.8) and the symptom kept coming back, because
+     the mechanism was still there.
+
+     What it actually did, measured: at scroll position 25 the chrome settled
+     at 190px if you had arrived scrolling DOWN, and 168px if you had arrived
+     scrolling UP - and stayed there. Not a transition mid-flight; the settled
+     state genuinely depended on the direction you came from. That is the
+     hysteresis (condense past 70, expand below 20) working exactly as
+     designed - it is what stopped the header chattering at the threshold - but
+     the consequence is that scrolling back up holds the header condensed and
+     then drops 22px of chrome into the page in one step, moving everything
+     below it. That step, plus the .18s ease it animated with, is the "hazy and
+     damaged" of the original report.
+
+     It bought 22px. The header is 47px now (§27) - it was 108px when the
+     condense was written, and reclaiming a fifth of a tall header was worth
+     something. Reclaiming 22px from a 47px one is not worth a chrome whose
+     height depends on which way you were scrolling.
+
+     The ResizeObserver that publishes --chrome-h stays. The rail's sticky
+     offset still reads it; it simply reports a constant now, which is the
+     easiest possible thing for it to be right about. */
+
+
+  /* Pillar rows: accordion, plus pulling the opened row under the chrome so a
+     collapsing row above cannot move the page out from under the cursor. */
+  function wirePillars(){
+    /* The control shows what pressing it will do, and follows the rows: opening
+       the last panel by hand flips it to fold. */
+    function syncFold(){
+      var rows = document.querySelectorAll(".prow");
+      var btn = document.querySelector("[data-allrows]");
+      if (!btn || !rows.length) return;
+      var allOpen = document.querySelectorAll('.prow[aria-expanded="true"]').length === rows.length;
+      btn.innerHTML = allOpen ? ICON_FOLD : ICON_UNFOLD;
+      btn.title = allOpen ? "Collapse all" : "Expand all";
+    }
+    syncFold();
+    var foldBtn = document.querySelector("[data-allrows]");
+    if (foldBtn) foldBtn.addEventListener("click", function(){
+      var rows = document.querySelectorAll(".prow");
+      var allOpen = document.querySelectorAll('.prow[aria-expanded="true"]').length === rows.length;
+      rows.forEach(function(r){
+        r.setAttribute("aria-expanded", String(!allOpen));
+        r.nextElementSibling.hidden = allOpen;
+      });
+      syncFold();
+    });
+
+    document.querySelectorAll(".prow").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* Panels open and close independently. Nothing else closes.
+
+           This is the third attempt and the only one that works, so the reasoning
+           is worth keeping. First the opened row was scrolled to the top, which
+           threw the page ~350px on every click. Then the row was anchored so it
+           could not move \u2014 and it did not, to the pixel \u2014 but holding it still
+           while a panel ABOVE it collapsed meant scrolling the window 785px, so
+           everything else on screen changed and it read as a worse jump than
+           before. The row was the wrong thing to hold.
+
+           An accordion was chosen to stop the list becoming unreadable when
+           several pillars are open. That is a smaller cost than a page that
+           lurches on every click. Opening a panel now only ever adds height
+           BELOW the row, and closing one only removes height below it, so
+           nothing above the click ever moves and no correction is needed. */
+        var open = b.getAttribute("aria-expanded") === "true";
+        b.setAttribute("aria-expanded", String(!open));
+        b.nextElementSibling.hidden = open;
+        syncFold();
+      });
+    });
+  }
+
+  /* Paint immediately from the baked data, then hydrate from the database
+     where one is reachable and repaint. On file:// this is just paint(). */
+  /* The colours are already applied - THEME.apply() ran in the head. This
+     only hangs the control on the chrome, which has to exist first. */
+  THEME.wire();
+  /* Before the first paint, so the tenant's own colours are on screen from the
+     start rather than arriving a frame later. SYNC.boot repaints after
+     hydration and applyBrand runs again there, because the branding that
+     matters is the one in the DATABASE, not the one baked into the file. */
+  applyBrand();
+  SYNC.boot(function(){ applyBrand(); paint(); });
+</script>

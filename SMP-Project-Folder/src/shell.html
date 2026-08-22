@@ -108,6 +108,7 @@
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
 <script src="PRESENT"></script>
+<script src="SEARCHSEL"></script>
 <script src="SYNC"></script>
 <script>
 /* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
@@ -633,6 +634,11 @@
       }
     }
     wire();
+    /* LAST, and after wire(). Every <select> the paint just produced gets a
+       searchable button in front of it once its list passes five options
+       (searchsel.js) — the native control stays where it is, so nothing wire()
+       just attached is disturbed. */
+    SEARCHSEL.wire();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }

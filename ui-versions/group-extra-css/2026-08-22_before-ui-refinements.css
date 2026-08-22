@@ -541,17 +541,7 @@
   .rail .rfoot { padding:9px 14px; border-top:1px solid var(--line); background:var(--surface-2);
     font-size:11.5px; color:var(--ink-3); }
   .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
-    padding:16px 18px 20px; position:relative; }
-  /* WHERE THE HEADING WENT, THE PEN STILL HAS TO LIVE (2026-08-22). With the
-     rail carrying the name, the plan pane opens straight onto the tables and
-     there is no .ptitle left to hover. The pen keeps the same language — it
-     appears when you are over the thing it edits — but the hover target is now
-     the PANE. Zero height, so it costs the tables no room; it sits in the
-     padding rather than pushing anything down. */
-  .pane .paneact { position:absolute; top:12px; right:12px; height:0; z-index:3; }
-  .pane .paneact .penbtn { top:0; right:0; }
-  .pane:hover .paneact .penbtn,
-  .pane:focus-within .paneact .penbtn { visibility:visible; opacity:1; }
+    padding:16px 18px 20px; }
   .pane .ptitle { display:flex; justify-content:space-between; align-items:flex-start; gap:14px;
     flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--line-soft); }
   .pane .ptitle h3 { font:400 19px/1.25 var(--serif); margin:0; }

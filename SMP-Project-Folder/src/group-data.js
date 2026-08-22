@@ -10,6 +10,30 @@ var GROUP = {
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
   horizon: "2029",
+  /* ── The worked example has a figure set (spec 008) ────────────────
+     Added 2026-08-22, at Islam's request: the demo shipped with no sets at
+     all, so none of the Finance-entry behaviour could be SEEN — the chip on a
+     sourced number, the chase note above a unit's report, and the "Figures I
+     report" page all render nothing where there is nothing to render, and a
+     feature that renders nothing looks like a feature that was not built.
+
+     ONE set, and it claims the money. That is the argument the feature is for:
+     revenue and margin exist in Finance before a unit is asked for them, and
+     what separates a team's number from the unit's is WHAT IT IS MEASURED IN,
+     not what it is called (§16.7a). Every figure whose target is in EGP is in
+     it — 44 of them, across every unit — which is why membership lives on the
+     figure rather than being listed here.
+
+     `pick: "owner"` deliberately, and it is the security setting (§44): the
+     demo is where you show somebody that ticking from the full list is
+     reading every number in the group, and you cannot show that with a set
+     only the SMO can open. This is the EXAMPLE dataset; the client's own
+     tenant starts with no sets and defaults to the SMO. */
+  sets: [
+    { id: "financialfigures", name: "Financial Figures", team: "finance",
+      owner: "fn_fin", pick: "owner" }
+  ],
+  claims: [],
   /* The review point. H1 means Q1 and Q2 have passed. */
   asOfQuarter: 2,
   aspiration: "To be the most trusted & diversified provider for mobile, consumer electronics, IT products & logistics services in Egypt & Nigeria, delivering innovative offerings and unmatched service excellence that enrich lives, empower businesses, and drive regional growth.",
@@ -508,7 +532,7 @@ var UNITS = {
     aspiration: "To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.",
     endInMind: "To be positioned as one of the recognized regional distributors for consumer electronics",
     keyObjectives: [
-      { name: "Distribution revenue", dir: "≥", target3y: "9.0B EGP", target: "6.2B EGP", compile: "Sum", actual: "2.7B", progress: 44 },
+      { src: { set: "financialfigures" }, name: "Distribution revenue", dir: "≥", target3y: "9.0B EGP", target: "6.2B EGP", compile: "Sum", actual: "2.7B", progress: 44 },
       { name: "Mobile market share",  dir: "≥", target3y: "38%", target: "32%",      compile: "Latest", actual: "28%", progress: 88 },
       { name: "Active merchant reach",dir: "≥", target3y: "6,500", target: "4,500",    compile: "Latest", actual: "3,180", progress: 71 },
       { name: "App coverage rate",    dir: "≥", target3y: "75%", target: "50%",      compile: "Latest", actual: "22%", progress: 44, note: "Rollout gated on the merchant app release. Recovery plan agreed with Ramy for Q3." }
@@ -552,12 +576,12 @@ var UNITS = {
       { code: "03", name: "Portfolio & Value Chain Expansion", sub: "",
         kind: "Direction", theme: "DIV", owner: "Karim", outcomes: 52, exec: 40, planned: 43,
         measures: [
-          { name: "Non-Samsung revenue",      dir: "≥", target: "4B EGP",   compile: "Sum", actual: "1.6B", progress: 40 },
+          { src: { set: "financialfigures" }, name: "Non-Samsung revenue",      dir: "≥", target: "4B EGP",   compile: "Sum", actual: "1.6B", progress: 40 },
           { name: "Samsung market share",     dir: "≥", target: "30%",      compile: "Latest", actual: "31%", progress: 103 },
           { name: "Vivo market share",        dir: "≥", target: "60%",      compile: "Latest", actual: "48%", progress: 80 },
-          { name: "Accessory revenue",        dir: "≥", target: "300M EGP", compile: "Sum", actual: "96M", progress: 32 },
+          { src: { set: "financialfigures" }, name: "Accessory revenue",        dir: "≥", target: "300M EGP", compile: "Sum", actual: "96M", progress: 32 },
           { name: "Active Sary merchants",    dir: "≥", target: "800",      compile: "Latest", actual: "310", progress: 39 },
-          { name: "Sary revenue",             dir: "≥", target: "150M EGP", compile: "Sum", actual: "42M", progress: 28 },
+          { src: { set: "financialfigures" }, name: "Sary revenue",             dir: "≥", target: "150M EGP", compile: "Sum", actual: "42M", progress: 28 },
           { name: "Local production devices", dir: "≥", target: "1M",       compile: "Sum", actual: "520K", progress: 52 },
           { name: "Sary app downloads",       dir: "≥", target: "40K",      compile: "Latest", actual: "18.4K", progress: 46 }
         ],
@@ -602,7 +626,7 @@ var UNITS = {
     aspiration: "To be the most preferred consumer electronics retailer in Egypt — the destination customers choose first, online and on the high street.",
     endInMind: "",
     keyObjectives: [
-      { name: "Retail revenue",     dir: "≥", target3y: "6.8B EGP", target: "4.5B EGP", compile: "Sum", actual: "3.8B", progress: 84 },
+      { src: { set: "financialfigures" }, name: "Retail revenue",     dir: "≥", target3y: "6.8B EGP", target: "4.5B EGP", compile: "Sum", actual: "3.8B", progress: 84 },
       { name: "Stores operating",   dir: "≥", target3y: "120", target: "88",       compile: "Latest", actual: "91", progress: 103 },
       { name: "E-store share of revenue", dir: "≥", target3y: "38%", target: "25%", compile: "Latest", actual: "21%", progress: 84 },
       { name: "Net promoter score", dir: "≥", target3y: "65", target: "55",       compile: "Latest", actual: "45", progress: 82 }
@@ -629,7 +653,7 @@ var UNITS = {
       { code: "R02", name: "Omnichannel Experience", sub: "",
         kind: "Direction", theme: "VC", owner: "Dalia", outcomes: 71, exec: 64, planned: 70,
         measures: [
-          { name: "E-store revenue",        dir: "≥", target: "1.1B EGP", compile: "Sum", actual: "0.62B", progress: 56 },
+          { src: { set: "financialfigures" }, name: "E-store revenue",        dir: "≥", target: "1.1B EGP", compile: "Sum", actual: "0.62B", progress: 56 },
           { name: "Click-and-collect share",dir: "≥", target: "30%",      compile: "Latest", actual: "33%", progress: 110 },
           { name: "Unified stock accuracy", dir: "≥", target: "95%",      compile: "Latest", actual: "67%", progress: 71 }
         ],
@@ -665,7 +689,7 @@ var UNITS = {
     aspiration: "To be the default ordering platform for Egypt's independent electronics retail — the first app a merchant opens each morning.",
     endInMind: "",
     keyObjectives: [
-      { name: "Platform GMV",         dir: "≥", target3y: "9.5B EGP", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
+      { src: { set: "financialfigures" }, name: "Platform GMV",         dir: "≥", target3y: "9.5B EGP", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
       { name: "Monthly active merchants", dir: "≥", target3y: "14,000", target: "2,200", compile: "Latest", actual: "980", progress: 45 },
       { name: "Repeat order rate",    dir: "≥", target3y: "72%", target: "65%",      compile: "Latest", actual: "31%", progress: 48 },
       { name: "Credit default rate",  dir: "≤", target3y: "1.5%", target: "2%",       compile: "Latest", actual: "3.1%", progress: 65 }
@@ -691,7 +715,7 @@ var UNITS = {
       { code: "M02", name: "Merchant Financing", sub: "",
         kind: "Direction", theme: "DIV", owner: "Hala", outcomes: 44, exec: 42, planned: 33,
         measures: [
-          { name: "Credit book",         dir: "≥", target: "180M EGP", compile: "Latest", actual: "74M", progress: 41 },
+          { src: { set: "financialfigures" }, name: "Credit book",         dir: "≥", target: "180M EGP", compile: "Latest", actual: "74M", progress: 41 },
           { name: "Merchants with credit", dir: "≥", target: "600",    compile: "Latest", actual: "285", progress: 48 }
         ],
         tactics: [
@@ -723,7 +747,7 @@ var UNITS = {
     aspiration: "To be the first destination Egyptians open when they shop electronics online — fastest to deliver, widest assortment, and the easiest returns in the market.",
     endInMind: "",
     keyObjectives: [
-      { name: "Online revenue", dir: "≥", target3y: "2.6B EGP", target: "1.8B EGP", compile: "Sum", actual: "1.1B", progress: 61 },
+      { src: { set: "financialfigures" }, name: "Online revenue", dir: "≥", target3y: "2.6B EGP", target: "1.8B EGP", compile: "Sum", actual: "1.1B", progress: 61 },
       { name: "Site conversion rate", dir: "≥", target3y: "3.2%", target: "2.4%", compile: "Latest", actual: "1.8%", progress: 75 },
       { name: "Repeat purchase rate", dir: "≥", target3y: "40%", target: "28%", compile: "Latest", actual: "19%", progress: 68 },
       { name: "Assortment breadth (live SKUs)", dir: "≥", target3y: "24,000", target: "14,000", compile: "Latest", actual: "9,400", progress: 67 },
@@ -773,7 +797,7 @@ var UNITS = {
     aspiration: "To be the distributor every major appliance and electronics brand chooses first for Egypt, with the deepest retail coverage in the category.",
     endInMind: "",
     keyObjectives: [
-      { name: "CE distribution revenue", dir: "≥", target3y: "7.8B EGP", target: "5.4B EGP", compile: "Sum", actual: "2.4B", progress: 44 },
+      { src: { set: "financialfigures" }, name: "CE distribution revenue", dir: "≥", target3y: "7.8B EGP", target: "5.4B EGP", compile: "Sum", actual: "2.4B", progress: 44 },
       { name: "CE market share", dir: "≥", target3y: "24%", target: "18%", compile: "Latest", actual: "14%", progress: 78 },
       { name: "Active dealer accounts", dir: "≥", target3y: "2,600", target: "1,900", compile: "Latest", actual: "1,410", progress: 74 },
       { name: "Gross margin", dir: "≥", target3y: "9.5%", target: "8.2%", compile: "Latest", actual: "7.1%", progress: 87 },
@@ -790,7 +814,7 @@ var UNITS = {
         measures: [
           { name: "Principal agreements signed", dir: "≥", target: "4", compile: "Sum", actual: "2", progress: 50 },
           { name: "Revenue from top-2 brands", dir: "≤", target: "55%", compile: "Latest", actual: "64%", progress: 86 },
-          { name: "New category revenue", dir: "≥", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
+          { src: { set: "financialfigures" }, name: "New category revenue", dir: "≥", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
         ],
         tactics: [
           { name: "Negotiate two additional principal lines", owner: "Tarek Nassar", q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 },
@@ -823,8 +847,8 @@ var UNITS = {
     aspiration: "To be the single technology supply partner for Egypt's largest enterprises and government programmes, selling solutions rather than boxes.",
     endInMind: "",
     keyObjectives: [
-      { name: "Corporate revenue", dir: "≥", target3y: "1.4B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.42B", progress: 47 },
-      { name: "Contracted recurring revenue", dir: "≥", target3y: "260M EGP", target: "150M EGP", compile: "Sum", actual: "61M", progress: 41 },
+      { src: { set: "financialfigures" }, name: "Corporate revenue", dir: "≥", target3y: "1.4B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.42B", progress: 47 },
+      { src: { set: "financialfigures" }, name: "Contracted recurring revenue", dir: "≥", target3y: "260M EGP", target: "150M EGP", compile: "Sum", actual: "61M", progress: 41 },
       { name: "Tender win rate", dir: "≥", target3y: "35%", target: "26%", compile: "Latest", actual: "19%", progress: 73 },
       { name: "Named enterprise accounts", dir: "≥", target3y: "140", target: "95", compile: "Latest", actual: "72", progress: 76 },
     ],
@@ -840,7 +864,7 @@ var UNITS = {
         measures: [
           { name: "Certified pre-sales engineers", dir: "≥", target: "18", compile: "Latest", actual: "11", progress: 61 },
           { name: "Solution-led deal share", dir: "≥", target: "45%", compile: "Latest", actual: "29%", progress: 64 },
-          { name: "Average deal size", dir: "≥", target: "3.2M EGP", compile: "Latest", actual: "2.1M", progress: 66 },
+          { src: { set: "financialfigures" }, name: "Average deal size", dir: "≥", target: "3.2M EGP", compile: "Latest", actual: "2.1M", progress: 66 },
         ],
         tactics: [
           { name: "Pre-sales academy and certification", owner: "Amr Bakr", q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 55 },
@@ -852,7 +876,7 @@ var UNITS = {
         measures: [
           { name: "Active public contracts", dir: "≥", target: "24", compile: "Latest", actual: "16", progress: 67 },
           { name: "Tender win rate", dir: "≥", target: "26%", compile: "Latest", actual: "19%", progress: 73 },
-          { name: "Public revenue", dir: "≥", target: "420M EGP", compile: "Sum", actual: "178M", progress: 42 },
+          { src: { set: "financialfigures" }, name: "Public revenue", dir: "≥", target: "420M EGP", compile: "Sum", actual: "178M", progress: 42 },
         ],
         tactics: [
           { name: "Framework agreement registrations", owner: "Laila Zaki", q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 70 },
@@ -873,7 +897,7 @@ var UNITS = {
     aspiration: "To be the after-sales operation brands trust with their reputation — the reason a customer buys the second device from us.",
     endInMind: "",
     keyObjectives: [
-      { name: "Service revenue", dir: "≥", target3y: "1.3B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.44B", progress: 49 },
+      { src: { set: "financialfigures" }, name: "Service revenue", dir: "≥", target3y: "1.3B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.44B", progress: 49 },
       { name: "First-time fix rate", dir: "≥", target3y: "92%", target: "86%", compile: "Latest", actual: "89%", progress: 103 },
       { name: "Average turnaround time", dir: "≤", target3y: "3 d", target: "4 d", compile: "Latest", actual: "6 d", progress: 67 },
       { name: "Extended plan attach rate", dir: "≥", target3y: "22%", target: "15%", compile: "Latest", actual: "9%", progress: 60 },
@@ -901,8 +925,8 @@ var UNITS = {
         kind: "Direction", theme: "DIV", owner: "Rania Fahmy",
         measures: [
           { name: "Extended plan attach rate", dir: "≥", target: "15%", compile: "Latest", actual: "9%", progress: 60 },
-          { name: "Third-party service revenue", dir: "≥", target: "180M EGP", compile: "Sum", actual: "62M", progress: 34 },
-          { name: "Out-of-warranty revenue", dir: "≥", target: "240M EGP", compile: "Sum", actual: "112M", progress: 47 },
+          { src: { set: "financialfigures" }, name: "Third-party service revenue", dir: "≥", target: "180M EGP", compile: "Sum", actual: "62M", progress: 34 },
+          { src: { set: "financialfigures" }, name: "Out-of-warranty revenue", dir: "≥", target: "240M EGP", compile: "Sum", actual: "112M", progress: 47 },
         ],
         tactics: [
           { name: "Extended plan sales at point of sale", owner: "Rania Fahmy", q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 48 },
@@ -923,7 +947,7 @@ var UNITS = {
     aspiration: "To be the leading distributor of IT products and infrastructure in Egypt, with services attached to every major hardware line we carry.",
     endInMind: "",
     keyObjectives: [
-      { name: "IT distribution revenue", dir: "≥", target3y: "3.4B EGP", target: "2.2B EGP", compile: "Sum", actual: "0.98B", progress: 45 },
+      { src: { set: "financialfigures" }, name: "IT distribution revenue", dir: "≥", target3y: "3.4B EGP", target: "2.2B EGP", compile: "Sum", actual: "0.98B", progress: 45 },
       { name: "Services attach rate", dir: "≥", target3y: "28%", target: "18%", compile: "Latest", actual: "11%", progress: 61 },
       { name: "Active reseller accounts", dir: "≥", target3y: "900", target: "640", compile: "Latest", actual: "471", progress: 74 },
       { name: "Inventory turns", dir: "≥", target3y: "7.0", target: "5.5", compile: "Latest", actual: "4.2", progress: 76 },
@@ -939,7 +963,7 @@ var UNITS = {
         kind: "Direction", theme: "OT", owner: "Yasser Kamal",
         measures: [
           { name: "Active resellers", dir: "≥", target: "640", compile: "Latest", actual: "471", progress: 74 },
-          { name: "Revenue per reseller", dir: "≥", target: "3.4M EGP", compile: "Latest", actual: "2.1M", progress: 62 },
+          { src: { set: "financialfigures" }, name: "Revenue per reseller", dir: "≥", target: "3.4M EGP", compile: "Latest", actual: "2.1M", progress: 62 },
           { name: "Reseller portal adoption", dir: "≥", target: "70%", compile: "Latest", actual: "44%", progress: 63 },
         ],
         tactics: [
@@ -950,7 +974,7 @@ var UNITS = {
       { code: "IT02", name: "Infrastructure Services", sub: "",
         kind: "Direction", theme: "VC", owner: "Dina Shawky",
         measures: [
-          { name: "Services revenue", dir: "≥", target: "400M EGP", compile: "Sum", actual: "178M", progress: 45 },
+          { src: { set: "financialfigures" }, name: "Services revenue", dir: "≥", target: "400M EGP", compile: "Sum", actual: "178M", progress: 45 },
           { name: "Services attach rate", dir: "≥", target: "18%", compile: "Latest", actual: "11%", progress: 61 },
           { name: "Certified engineers", dir: "≥", target: "24", compile: "Latest", actual: "15", progress: 63 },
         ],
@@ -973,10 +997,10 @@ var UNITS = {
     aspiration: "To be a profitable third-party logistics business in its own right, not merely the group's internal delivery arm.",
     endInMind: "",
     keyObjectives: [
-      { name: "Logistics revenue", dir: "≥", target3y: "2.4B EGP", target: "1.6B EGP", compile: "Sum", actual: "0.71B", progress: 44 },
+      { src: { set: "financialfigures" }, name: "Logistics revenue", dir: "≥", target3y: "2.4B EGP", target: "1.6B EGP", compile: "Sum", actual: "0.71B", progress: 44 },
       { name: "External client revenue share", dir: "≥", target3y: "45%", target: "30%", compile: "Latest", actual: "18%", progress: 60 },
       { name: "On-time delivery rate", dir: "≥", target3y: "96%", target: "92%", compile: "Latest", actual: "94%", progress: 102 },
-      { name: "Cost per parcel", dir: "≤", target3y: "28 EGP", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
+      { src: { set: "financialfigures" }, name: "Cost per parcel", dir: "≤", target3y: "28 EGP", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
     ],
     swot: {
       s: ["National hub-and-spoke coverage", "Captive group volume as a base load"],
@@ -989,7 +1013,7 @@ var UNITS = {
         kind: "Capability", theme: "OT", owner: "Hazem Roushdy",
         measures: [
           { name: "On-time delivery", dir: "≥", target: "92%", compile: "Latest", actual: "94%", progress: 102 },
-          { name: "Cost per parcel", dir: "≤", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
+          { src: { set: "financialfigures" }, name: "Cost per parcel", dir: "≤", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
           { name: "Hub utilisation", dir: "≥", target: "82%", compile: "Latest", actual: "68%", progress: 83 },
         ],
         tactics: [
@@ -1000,7 +1024,7 @@ var UNITS = {
       { code: "LG02", name: "Third-Party Client Growth", sub: "",
         kind: "Direction", theme: "DIV", owner: "Mai Sobhy",
         measures: [
-          { name: "External client revenue", dir: "≥", target: "480M EGP", compile: "Sum", actual: "192M", progress: 40 },
+          { src: { set: "financialfigures" }, name: "External client revenue", dir: "≥", target: "480M EGP", compile: "Sum", actual: "192M", progress: 40 },
           { name: "Named 3PL clients", dir: "≥", target: "40", compile: "Latest", actual: "23", progress: 58 },
           { name: "Client retention", dir: "≥", target: "85%", compile: "Latest", actual: "74%", progress: 87 },
         ],
@@ -1023,7 +1047,7 @@ var UNITS = {
     aspiration: "To have proven the group's distribution model outside Egypt, with Nigeria standing on its own commercially and ready to be repeated elsewhere.",
     endInMind: "",
     keyObjectives: [
-      { name: "Nigeria revenue", dir: "≥", target3y: "2.2B EGP", target: "1.1B EGP", compile: "Sum", actual: "0.38B", progress: 35 },
+      { src: { set: "financialfigures" }, name: "Nigeria revenue", dir: "≥", target3y: "2.2B EGP", target: "1.1B EGP", compile: "Sum", actual: "0.38B", progress: 35 },
       { name: "Local dealer accounts", dir: "≥", target3y: "420", target: "240", compile: "Latest", actual: "138", progress: 58 },
       { name: "Contribution margin", dir: "≥", target3y: "6.0%", target: "4.2%", compile: "Latest", actual: "2.6%", progress: 62 },
       { name: "Working capital cycle", dir: "≤", target3y: "55 d", target: "70 d", compile: "Latest", actual: "91 d", progress: 77 },

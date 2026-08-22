@@ -2,6 +2,16 @@
  "group": {
   "org": "Raya Trade",
   "horizon": "2029",
+  "sets": [
+   {
+    "id": "financialfigures",
+    "name": "Financial Figures",
+    "team": "finance",
+    "owner": "fn_fin",
+    "pick": "owner"
+   }
+  ],
+  "claims": [],
   "asOfQuarter": 2,
   "aspiration": "To be the most trusted & diversified provider for mobile, consumer electronics, IT products & logistics services in Egypt & Nigeria, delivering innovative offerings and unmatched service excellence that enrich lives, empower businesses, and drive regional growth.",
   "endInMind": "",
@@ -2026,6 +2036,9 @@
    "endInMind": "To be positioned as one of the recognized regional distributors for consumer electronics",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Distribution revenue",
      "dir": "≥",
      "target3y": "9.0B EGP",
@@ -2321,6 +2334,9 @@
      "planned": 43,
      "measures": [
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Non-Samsung revenue",
        "dir": "≥",
        "target": "4B EGP",
@@ -2348,6 +2364,9 @@
        "id": "mobile-P3-M3"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Accessory revenue",
        "dir": "≥",
        "target": "300M EGP",
@@ -2366,6 +2385,9 @@
        "id": "mobile-P3-M5"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Sary revenue",
        "dir": "≥",
        "target": "150M EGP",
@@ -2636,6 +2658,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Retail revenue",
      "dir": "≥",
      "target3y": "6.8B EGP",
@@ -2788,6 +2813,9 @@
      "planned": 70,
      "measures": [
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "E-store revenue",
        "dir": "≥",
        "target": "1.1B EGP",
@@ -2959,6 +2987,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Platform GMV",
      "dir": "≥",
      "target3y": "9.5B EGP",
@@ -3100,6 +3131,9 @@
      "planned": 33,
      "measures": [
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Credit book",
        "dir": "≥",
        "target": "180M EGP",
@@ -3246,6 +3280,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Online revenue",
      "dir": "≥",
      "target3y": "2.6B EGP",
@@ -3497,6 +3534,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "CE distribution revenue",
      "dir": "≥",
      "target3y": "7.8B EGP",
@@ -3583,6 +3623,9 @@
        "id": "consumerelectronics-P1-M2"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "New category revenue",
        "dir": "≥",
        "target": "900M EGP",
@@ -3748,6 +3791,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Corporate revenue",
      "dir": "≥",
      "target3y": "1.4B EGP",
@@ -3758,6 +3804,9 @@
      "id": "corporate-KO1"
     },
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Contracted recurring revenue",
      "dir": "≥",
      "target3y": "260M EGP",
@@ -3834,6 +3883,9 @@
        "id": "corporate-P1-M2"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Average deal size",
        "dir": "≥",
        "target": "3.2M EGP",
@@ -3907,6 +3959,9 @@
        "id": "corporate-P2-M2"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Public revenue",
        "dir": "≥",
        "target": "420M EGP",
@@ -3999,6 +4054,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Service revenue",
      "dir": "≥",
      "target3y": "1.3B EGP",
@@ -4149,6 +4207,9 @@
        "id": "care-P2-M1"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Third-party service revenue",
        "dir": "≥",
        "target": "180M EGP",
@@ -4158,6 +4219,9 @@
        "id": "care-P2-M2"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Out-of-warranty revenue",
        "dir": "≥",
        "target": "240M EGP",
@@ -4250,6 +4314,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "IT distribution revenue",
      "dir": "≥",
      "target3y": "3.4B EGP",
@@ -4327,6 +4394,9 @@
        "id": "it-P1-M1"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Revenue per reseller",
        "dir": "≥",
        "target": "3.4M EGP",
@@ -4391,6 +4461,9 @@
      "owner": "Dina Shawky",
      "measures": [
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Services revenue",
        "dir": "≥",
        "target": "400M EGP",
@@ -4501,6 +4574,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Logistics revenue",
      "dir": "≥",
      "target3y": "2.4B EGP",
@@ -4531,6 +4607,9 @@
      "id": "logistics-KO3"
     },
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Cost per parcel",
      "dir": "≤",
      "target3y": "28 EGP",
@@ -4578,6 +4657,9 @@
        "id": "logistics-P1-M1"
       },
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "Cost per parcel",
        "dir": "≤",
        "target": "33 EGP",
@@ -4642,6 +4724,9 @@
      "owner": "Mai Sobhy",
      "measures": [
       {
+       "src": {
+        "set": "financialfigures"
+       },
        "name": "External client revenue",
        "dir": "≥",
        "target": "480M EGP",
@@ -4752,6 +4837,9 @@
    "endInMind": "",
    "keyObjectives": [
     {
+     "src": {
+      "set": "financialfigures"
+     },
      "name": "Nigeria revenue",
      "dir": "≥",
      "target3y": "2.2B EGP",

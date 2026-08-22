@@ -2192,29 +2192,8 @@ function unitRailFor(u, sel){
    log arrive (§19.2) this is the first thing to revisit. */
 /* mayEditPlan() moved to config-data.js in 3.10, beside the other two rules
    that are rules rather than settings. One definition, not two. */
-/* THE PANE NO LONGER REPEATS THE RAIL (Islam, 2026-08-22: "do we need this
-   part since the information is already on the card on the rail?").
-
-   He is right, and the rail card is the proof: it already carries the code,
-   the name, the counts and the owner, and it sits four inches to the left of a
-   heading saying the same three things. So where there IS a rail the pane
-   opens straight onto the plan.
-
-   Two exceptions, both of them the same rule — a pane with nothing naming it
-   is only acceptable while something else names it:
-
-   1. A unit with ONE pillar has no rail (see renderUnitPlan), so the heading
-      is the only thing on the page that says which pillar this is. It stays.
-   2. EDITING needs it back whatever the rail says: the pillar's NAME is typed
-      in that heading and its theme and owner are read from the line under it.
-      Take the block away in edit mode and the name becomes uneditable.
-
-   Which leaves the pen. It used to appear on hover of the heading, and a
-   heading that is gone cannot be hovered, so in the read case it becomes a
-   small action of its own — still the SMO's alone (§31). */
-function unitPlanBody(it, railed){
+function unitPlanBody(it){
   var ed = EDIT_PAGE.plan && mayEditPlan();
-  var showHead = !railed || ed;
   var cell = function(v, setter, cls){
     return ed ? inputOr("plan", v == null ? "" : v, cls || "", setter)
               : (v ? esc(v) : '<span class="missing">Missing</span>');
@@ -2224,13 +2203,8 @@ function unitPlanBody(it, railed){
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
-      /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
-         measures are for 1 year only". A pillar's key measures carry one
-         target and it is this year's; the three-year horizon belongs to the
-         unit's KEY OBJECTIVES, which are a different table on a different page
-         and keep theirs. `target3y` is still stored and still travels through
-         import, export and the archive — this removes a column, not a field,
-         so nothing a plan already carries is lost. */
+      '<td class="num">' + (ed ? inputOr("plan", m.target3y || "", "mono", function(v){ m.target3y = v; })
+                               : (m.target3y ? esc(m.target3y) : "&mdash;")) + '</td>' +
       '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
@@ -2240,14 +2214,11 @@ function unitPlanBody(it, railed){
       '<td>' + qs(t) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
-  var head = showHead
-    ? '<div class="ptitle hoverpen"><div><h3>' + esc(it.code) + '&nbsp; ' +
-        (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
-        (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
-        kindPill(it) +
-        (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
-  return head +
+  return '<div class="ptitle hoverpen"><div><h3>' + esc(it.code) + '&nbsp; ' +
+      (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
+      (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
+      kindPill(it) +
+      (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>' +
     (it.sub || ed
       ? '<p class="sub" style="margin:10px 0 0">' +
         (ed ? inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) : esc(it.sub)) + '</p>'
@@ -2255,8 +2226,8 @@ function unitPlanBody(it, railed){
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
-    '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","Compiled"], mRows) +
+    '<h4 class="mini">Key measures <em>\u2014 as planned: target, horizon, how it compiles</em></h4>' +
+    miniTable(["#","Measure","Dir.","Target","3-year","Compiled"], mRows) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Quarters"], tRows);
 }
@@ -2274,8 +2245,8 @@ function renderUnitPlan(u){
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
   return (u.items.length >= 2
-      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, true) + '</div></div>'
-      : '<div class="pane">' + unitPlanBody(sel, false) + '</div>');
+      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel) + '</div></div>'
+      : '<div class="pane">' + unitPlanBody(sel) + '</div>');
 }
 
 
@@ -2346,22 +2317,16 @@ function unitPerfRail(u){
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
   return u.items.length >= 2
-    ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
-    : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
+    ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u) + '</div></div>'
+    : '<div class="pane">' + unitPerfPane(sel, u) + '</div>';
 }
-/* Same removal as the plan pane, and here the duplication was worse: the rail
-   row states the name, the score AND the execution figure, and scorePair
-   below states both scores again at the size they deserve. The heading was the
-   third telling. Nothing on this page is edited in it, so unlike the plan
-   there is no edit case to keep it for — only the no-rail one. */
-function unitPerfPane(it, u, railed){
+function unitPerfPane(it, u){
   var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
-  return (railed ? '' :
-    '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
+  return '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
-      '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
+      '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>' +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
               it.measures.length, scored.length,
               scored.length ? Math.max.apply(null, scored) : null,

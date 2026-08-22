@@ -340,3 +340,35 @@ clearing are its own, because those are a different act.
   That is the drift `lib/rules.js` exists to prevent, and it happened TWICE in
   one afternoon. Both sides now build the world with the same `worldOf()`, from
   a state-shaped object, so there is nowhere left for them to differ.
+
+---
+
+## 11 · What v3.15 changed about this feature
+
+**The worked example now has a figure set.** It shipped without one, so every
+surface above rendered empty and the feature looked unbuilt (§45.4). The demo
+carries *Financial Figures* — Finance, owned by the Head of Finance, `pick:
+"owner"` — claiming **every figure whose target is in EGP, 26 of them across
+all ten units**. The client's own tenant is unchanged: no sets, and who-picks
+still defaults to the SMO.
+
+`pick: "owner"` in the example is deliberate. The demo is where somebody is
+shown that ticking from the full list means reading every number in the group,
+and that cannot be shown with a set only the SMO can open.
+
+**And the thing that had to be fixed to allow it.** Sets live in `org.extra`,
+which makes them **the one part of this feature the clean slate could not
+reach**. Migration 004 does `DELETE FROM pillars`, which takes every `row.src`
+with the measures that carried it — and left the set itself standing, holding
+nothing and owned by a person the same migration had just deleted. §21 says
+invented content never enters the client's database; this was the first time a
+feature stored something where that rule's enforcement was not looking. 004 now
+clears `sets`, `claims` and `naming`.
+
+**The fill page is 760px wide, not screen wide** (§45.7). A row is a tick, a
+measure name, a target and one short state; stretched across a monitor, the
+tick you press and the state it produces sat at opposite ends of it.
+
+**Its dropdowns are searchable** — as is every `<select>` in the platform past
+five options (§45.5, `src/searchsel.js`). The owner list is twenty-nine people
+and was the reason the request was made.

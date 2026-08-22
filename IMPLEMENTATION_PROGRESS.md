@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.14 · **Last updated:** 2026-08-22
-**Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
+**Latest version:** v3.15 · **Last updated:** 2026-08-22
+**Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
+reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
 ---
@@ -50,6 +51,34 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.15 — eight refinements, and what the measuring found
+
+Islam went through the built product screen by screen. Eight items, none of
+them a feature; half of them a symptom with a cause worth recording (§45).
+
+| # | Asked for | What it turned out to be |
+|---|---|---|
+| 1 | Drop the 3-year column from a plan's key measures | Done on the **Plan page only**. Key objectives keep theirs on Foundation, the Temple and the deck — a different table, and Islam was told which. `target3y` is still stored: a column went, not a field. |
+| 2 | The pane repeats the rail card | Removed on Plan and Performance. Kept where a unit has ONE pillar (no rail to name it) and in edit mode (the name is typed in that heading). The pen moved, because **a hover control needs something to hover**. |
+| 3 | Keep the "view as" dropdown; put the Finance-entry thing in the demo data | The dropdown was a **live bug**: `sync.js` read `person.level`, a field §33 deleted, so the switcher was hidden from everybody including the SMO. And the demo shipped with no figure sets, so §44 rendered nothing anywhere. |
+| 4 | Dropdowns beyond 5 items searchable | One component, every `<select>` in the platform. The native select **stays and is hidden in place** — nothing wire() attaches is disturbed. |
+| 5 | What does this toggle do? | Answered, no change: it is §44's tenant switch for *Strategy › Who enters*. |
+| 6 | The access table's design | Header notes to hover; the eye was a **colour emoji** that could neither take the button's colour nor fit inside it — both icons are SVG now; rows tightened; the two essays moved to the knowledge base. |
+| 7 | The fill-a-figure-set list is screen wide | Capped at 760px. The tick and the state it produces were at opposite ends of the monitor. |
+| 8 | People rows are very high; where is password reset? | The chips explained the **worst** row and none of the ordinary ones. Measuring every cell found three things paid on all 31 rows: 61px → 41px. Password reset was never missing — credentials are not in the state graph, so the column is absent from a file-opened build. |
+
+**Verified by driving it, not by reasoning.** `qa.py` walks 31 viewers with no
+console errors; the contrast sweep reports **0 failures across 4 combinations ×
+25 pages and states**; `test-authorize.js` passes 114; `test-roundtrip.js`
+passes clean slate, round trip, fixed point and archived plan against a fresh
+Postgres 16 — where `org.extra` now holds no `sets`, because the demo's figure
+set was the first thing §44 stored where §21's clean slate was not looking.
+
+**Multi-tenant:** restated by Islam and recorded as §36.5. Still nothing built
+and nothing scaffolded, deliberately. His restatement settles half of §36.4's
+open question — *enter first, then choose the client* means one account
+reaching many tenants, not an account per tenant.
 
 ### v3.14 — figure sets: who is responsible for which numbers
 
@@ -913,7 +942,7 @@ taking it wholesale would have deleted four shipped features and everything from
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
 | `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.14.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.15.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

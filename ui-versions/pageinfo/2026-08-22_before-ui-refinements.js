@@ -203,48 +203,20 @@ var PAGE_INFO = {
     ]
   },
 
-  /* Rewritten 2026-08-22. Two of these entries came OFF the Roles & access page
-     itself, which had grown twelve lines of essay under a 49-cell table — a
-     setup page is where you change a thing, not where it is explained (§30).
-     The other two were still written in LEVELS, which §33 retired a version
-     ago: "a person is a level plus a unit" is no longer true of anything. */
   c_access: {
-    title: "Roles and access",
+    title: "Levels and access",
     body: [
-      ["&ldquo;Own&rdquo; is whatever they hold a role in",
-       "The head and the custodian of Mobile own Mobile. A company CEO owns every unit in their " +
-       "company. The SMO and the group CEO own all of it. <b>Nobody types that in anywhere</b> " +
-       "&mdash; it is read from who is attached to what on <b>Business units</b>, <b>Supporting " +
-       "functions</b> and <b>People</b>, which is why those pages and the access table cannot " +
-       "disagree. Two things a company decides for itself apply on top and can only ever narrow " +
-       "it: whether its CEO sees <b>the group</b>, and whether they see <b>the other " +
-       "companies</b>. Both are on the Companies page."],
-      ["Three things are rules, not settings, so they are not in the table",
-       "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody " +
-       "can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much " +
-       "access the unit&rsquo;s own people hold, because a plan you are measured against is not " +
-       "yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked " +
-       "by the group CEO and the SMO. Each of these used to be a cell in the matrix."],
       ["Page level only",
-       "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
-       "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
-       "can reason about. The one exception is a rule with teeth rather than a setting: a " +
-       "contributor granted edit reaches <b>their own lines only</b>."],
-      ["Two states, not three",
-       "View and edit, and edit includes view. <b>None is not a third thing you choose</b>, it is " +
-       "the absence of the other two &mdash; which is why a cell is two toggles and nothing lit is " +
-       "itself the answer. The group CEO views the weighting table without managing it; collapsing " +
-       "the two grants would either lock them out or hand them the model."],
-      ["Several roles at once, and the most generous wins",
-       "A person may be a function head and a strategy custodian and a contributor. Access is the " +
-       "<b>widest</b> grant across everything they hold, while <b>scope stays per role</b>: being " +
-       "custodian of Mobile does not carry into the unit they contribute to. The SMO is not a rung " +
-       "on a ladder &mdash; it is a super user beside it."],
-      ["The screen decides what to offer; the server decides what to accept",
-       "Every grant here is enforced again on save (&sect;42). A control the table hides is also a " +
-       "change the server refuses, and an unrecognised change is the SMO&rsquo;s by default &mdash; " +
-       "so a field added later is guarded the day it is added. Who changed what is recorded outside " +
-       "the state graph, where a save cannot erase it."]
+       "If a level can open a page, it sees everything on it. Restriction happens by removing the page, never " +
+       "by trimming its contents &mdash; per-element permissions make a system nobody can reason about."],
+      ["Three states, not two",
+       "The CEO views the weighting table but does not manage it. Visible and editable are different grants; " +
+       "collapsing them would either lock the CEO out or hand them the model."],
+      ["A person is a level plus a unit",
+       "The level decides which pages, the attachment decides whose. Two people at N-1 reach the same page " +
+       "types but different units."],
+      ["The SMO is not a level",
+       "It is a super user beside the ladder. An SMO manager might sit at N-2 and still need rights no N-1 has."]
     ]
   },
 

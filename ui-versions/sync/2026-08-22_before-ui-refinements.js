@@ -189,14 +189,7 @@ var SYNC = (function () {
       window.VIEWER = person.key;
       sel.value = person.key;
     }
-    /* THE SEAT ROLE, NOT A LEVEL. This read `person.level !== "smo"` — a name
-       that stopped existing when roles replaced levels (§33). The server has
-       returned `role` ("super") ever since, so `undefined !== "smo"` was true
-       for EVERYBODY and the switcher was hidden from the one person it is for:
-       the SMO saw "Signed in as …" and lost the simulation entirely. A
-       comparison against a field nobody sets fails silently and in the safe
-       direction, which is why it survived a version. */
-    if (person.role !== "super") {
+    if (person.level !== "smo") {
       sel.hidden = true;
       var label = box.querySelector("label");
       if (label) label.textContent = "Signed in as";

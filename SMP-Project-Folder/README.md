@@ -1,4 +1,4 @@
-# SMP Project Folder — v3.8
+# SMP Project Folder — v3.15
 
 Everything needed to pick this project up cold. Read in this order.
 
@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.14.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.15.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.14.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.15.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -44,6 +44,13 @@ exactly as every version before it.
   reports crashes. Run it after every change.
 - `sync.js` is the persistence module — hydrate from the database, save on
   change, silently local on file://.
+- `searchsel.js` (v3.15) makes **every** `<select>` past five options
+  searchable. It hides the native select **in place** rather than replacing it,
+  so every existing handler keeps working — read the header comment before
+  touching it.
+- `new-units.js` is **not built into anything.** It is a leftover from when
+  four of the units were being drafted; they really live in `group-data.js`.
+  Do not edit it expecting the platform to change (§45.9).
 
 The database layer itself lives at the **repo root** (`db/`, `api/`, `lib/`,
 `scripts/`): schema, seed generated from these sources

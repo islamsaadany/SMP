@@ -20,6 +20,7 @@
 --   · every capability's definition, key objectives and projects
 --   · the reporting cycle, its focus marks and its closed history
 --   · the invented people, and the role assignments pointing at them
+--   · the example's figure set (added to the seed 2026-08-22)
 --
 -- Nothing is lost: the full example is still in db/seed-state.json and baked
 -- into the platform file, which is what the Demo button shows. Runs once and
@@ -47,6 +48,24 @@ DELETE FROM group_key_objectives;
 UPDATE org SET aspiration = '', end_in_mind = '', mission = '',
                extra = (extra - 'portfolio' - 'themeView' - 'themePillars'
                               - 'keyObjectivesScore') || '{"values":[]}'::jsonb;
+
+-- ── Figure sets (§44) ───────────────────────────────────────────────────
+-- Sets live in org.extra rather than in a table of their own, so they are the
+-- one part of §44 the deletes above cannot reach: `DELETE FROM pillars`
+-- clears every `row.src` with the measures that carried it, and would leave a
+-- set holding nothing and OWNED BY A PERSON THIS MIGRATION HAS JUST DELETED.
+--
+-- The worked example gained "Financial Figures" on 2026-08-22 so the
+-- Finance-entry behaviour could be seen in demo at all — a feature that
+-- renders nothing looks like a feature that was not built. It is invented, and
+-- §21 is unambiguous about where invented content may live. `claims` and
+-- `naming` go with it: both are answers about sets nobody has made yet.
+--
+-- Safe to add to a migration already recorded as applied, because the only
+-- route into org.extra is the SEED, the seed only runs against an EMPTY
+-- database, and this file runs immediately after it. A tenant with real work
+-- in it is never seeded and therefore never reaches this line twice.
+UPDATE org SET extra = extra - 'sets' - 'claims' - 'naming';
 
 -- ── Capability content (the names and their owning function stay) ───────
 DELETE FROM projects;                -- cascades deliverables, outcomes, milestones

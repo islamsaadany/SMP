@@ -15,7 +15,7 @@ const PORT = parseInt(process.argv[2], 10) || 3999;
 /* Mirrors vercel.json's rewrite: one tenant today, its own name in the URL,
    and the versioned filename behind it (§35.6). */
 const TENANT = "raya-trade";
-const PLATFORM_FILE = "SMP-Project-Folder/strategy-management-platform-v3.14.html";
+const PLATFORM_FILE = "SMP-Project-Folder/strategy-management-platform-v3.15.html";
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript",
                 ".css": "text/css", ".json": "application/json", ".ico": "image/x-icon",
                 /* The PWA's three: a manifest served as octet-stream is ignored,

@@ -4284,6 +4284,30 @@ identity rather than about plumbing: whether the SMO is one person with access
 to many clients, or one account per client. **That question is not answered
 here**, and it should be answered before anything is built.
 
+### 36.5 Restated, unchanged — 2026-08-22
+
+Islam, a version later and in the same words: *"the platform should handle
+multi tenants for now where the SMO can enter the platform first and then
+choose the client so for now he can choose raya trade and chose another so the
+platform is named after raya trade. that's a future thing I will build but I
+just want to make sure that the platform is prepared."*
+
+Recorded because it **confirms the shape twice**, and because the sentence
+answers half of §36.4's open question by itself: *the SMO enters first and then
+chooses the client* means ONE ACCOUNT REACHING MANY TENANTS, not an account per
+tenant. That settles which way the identity decision goes and leaves only its
+mechanics — whether the schema is chosen after sign-in or carried in the path,
+and what a session token is scoped to.
+
+**Still nothing built, and still nothing scaffolded.** A tenant switcher with
+one tenant behind it is a control that cannot be tested, and §36.2's whole
+argument is that the cost of doing this late is small precisely because
+`readState`/`writeState` move a whole tenant in one go. Nothing about this
+version's work moves the platform away from that: figure sets went into
+`org.extra` rather than into a table with a tenant column, and the searchable
+picker is chrome. The one thing to re-read first is §36.3 — person keys are
+short and global, and that is the trap that would be expensive to find late.
+
 ---
 
 ## 37 · The matrix stops being a matrix of pages — v3.10
@@ -5458,3 +5482,257 @@ have been measured. The sweep runs 25 pages and states now.
 
 Unit key objectives and unit key measures. **Capability projects — deliverables,
 outcomes and milestones — are not assignable**, and were not in §16.7 either.
+
+---
+
+## 45 · Eight refinements, and what the measuring found — v3.15
+
+Islam, 2026-08-22, working through the built product screen by screen. Eight
+items, none of them a feature. What makes them worth a section is that half of
+them turned out to be **a symptom of something with a cause**, and the causes
+are the part worth keeping.
+
+### 45.1 A key measure is a one-year number
+
+*"in the direction plans the key measures are for 1 year only so remove the 3
+years column."*
+
+Done, **on the Plan page and nowhere else** — which is a distinction the page
+names badly. A pillar's KEY MEASURES carry one target and it is this year's; a
+unit's KEY OBJECTIVES carry two, this year's and the horizon, and they are a
+different table on a different page. Three other places still show a
+three-year column and all three are key objectives: the unit's Foundation, the
+group's Temple, and slide 2 of the deck (where it reads *"By 2029"* once the
+group has set its horizon). They were left, deliberately, and Islam was told
+which they were.
+
+`target3y` is **still stored** and still travels through import, export and the
+archive. A column was removed, not a field: nothing a plan already carries is
+lost, and an uploaded template that fills it is not rejected.
+
+### 45.2 The pane stops repeating the rail
+
+*"do we need this part since the information is already on the card on the
+rail? and same question for the performance as well."*
+
+No, and the rail card is the proof: it already carries the code, the name, the
+counts and the owner, four inches to the left of a heading saying the same
+three things. On Performance it was worse — the rail states the name, the score
+AND the execution figure, and `scorePair` below states both scores again at the
+size they deserve, so the heading was the third telling.
+
+**Two exceptions, and they are the same rule: a pane with nothing naming it is
+only acceptable while something else names it.**
+
+1. A unit with ONE pillar has no rail. The heading stays there — removing it
+   would leave a plan with nothing on the page saying which plan it is.
+2. **Editing needs it back whatever the rail says.** The pillar's name is typed
+   in that heading. Take the block away in edit mode and the name becomes
+   uneditable — a removal that quietly deletes a capability is not a removal.
+
+Which left the pen, and a small lesson with it: **a control that appears on
+hover needs something to hover.** The pen lived on `.ptitle.hoverpen`, and
+`.ptitle` is what went. It moves to the pane's own corner and the PANE becomes
+the hover target — same language, different anchor.
+
+### 45.3 The viewer switcher had been hidden from the only person it is for
+
+*"for the demo view please leave for me the drop down at the top of the page
+for view as to test things."* — followed, when asked what he actually saw, by
+*"no it's now signed as and the name of the person."*
+
+That is a bug, and it had been live since §33. `sync.js` decided who keeps the
+switcher with:
+
+```js
+if (person.level !== "smo") { sel.hidden = true; ... }
+```
+
+`level` stopped existing when roles replaced levels. The server has returned
+`role: "super"` ever since, so `undefined !== "smo"` was **true for
+everybody** — the SMO saw "Signed in as …" and lost the simulation entirely,
+on the deployed product only, which is why no file-opened test ever showed it.
+
+**A comparison against a field nobody sets fails silently and in the safe
+direction**, which is exactly why it survived a version: it locks down rather
+than opens up, so nothing broke, nothing threw, and the sweep stayed green. A
+rename that leaves a dead read behind is not caught by tests that assert what
+is allowed; it is caught by somebody using the product.
+
+### 45.4 A feature that renders nothing looks like a feature that was not built
+
+*"please update the data with the note of Financy entry thing. where does this
+note appear?"*
+
+It appeared nowhere, because the demo dataset shipped with **no figure sets at
+all** — and every surface §44 built renders nothing where there is nothing to
+render. The worked example now carries ONE set, *Financial Figures* on Finance,
+owned by the Head of Finance, and it claims **every figure whose target is in
+EGP — 26 of them, across all ten units**. That is the argument the feature is
+for, and it is the one §16.7a already found in the data: what separates a
+team's number from the unit's is **what it is measured in**, not what it is
+called.
+
+`pick: "owner"` deliberately. The demo is where you show somebody that ticking
+from the full list is reading every number in the group, and you cannot show
+that with a set only the SMO can open. The client's own tenant still starts
+with none and still defaults to the SMO.
+
+Which exposed the thing worth recording. **`sets` live in `org.extra`, so they
+are the one part of §44 the clean slate could not reach.** Migration 004 does
+`DELETE FROM pillars`, which takes every `row.src` with the measures that
+carried it — but it left the set itself standing, holding nothing and **owned
+by a person the same migration had just deleted**. §21 says invented content
+never enters the database, and this is the first time a feature has stored
+something where §21's enforcement was not looking. 004 now clears `sets`,
+`claims` and `naming`, and that is safe to add to a migration already recorded
+as applied because **the only route into `org.extra` is the seed, the seed only
+runs against an empty database, and 004 runs immediately after it**.
+
+Answering the question he actually asked: the note appears in three places, all
+on the reporting side — a chip naming the team beside a figure the unit may not
+type, a highlighted note above the unit's report naming each outstanding figure
+and who owes it, and the set owner's own *Figures I report* page.
+
+### 45.5 A searchable dropdown, and why the native `<select>` stays
+
+*"make all the drop downs beyond 5 items searchable, this might apply to any
+selection list in the platform."*
+
+It does, so it is not a control the Figure sets page owns: it is an
+enhancement applied to every `<select>` in the platform once its list passes
+five options. Below six, nothing changes at all — which is what lets it be
+applied to everything without an inventory of what deserves it. Direction (2),
+compile rule (3) and who-picks (2) are answered by looking; twenty-nine people
+are not.
+
+**The native `<select>` is not replaced, not moved, and not reparented — it is
+hidden in place and a button is inserted in front of it.** Every existing
+handler keeps working untouched: `data-setowner`, `data-prole-where`,
+`[data-coflag]`, every `addEventListener("change")` `wire()` attaches, every
+`sel.value` read. Choosing a name sets the select and fires a real `change`, so
+the handler that saves it never learns there was a search box. **Rewiring the
+controls that feed the access matrix in order to add a search box is not a
+trade worth making.**
+
+Three rules it had to obey, all of them already paid for elsewhere:
+
+- **Typing never repaints** (§35). The filter hides rows in place.
+- **The DOM is cleaned up before the change fires** (§30.1). Selecting an
+  option repaints the whole panel, so the popup is closed and unhooked FIRST
+  and nothing touches the DOM after.
+- **Whoever hides a field hides its furniture** (§34). `sync.js` hides the
+  viewer switcher by setting `hidden` on the select; the button follows it.
+
+And one that is new: **the popup is `position:fixed`, and that is not a
+preference.** `.cfg` is `overflow-x:auto`, which computes overflow-y to auto as
+well, so an absolutely positioned popup inside a settings table is clipped by
+its own table. Fixed positioning is the only kind that escapes an overflow
+ancestor without having to know there was one.
+
+### 45.6 The access table, and a colour emoji that could not be coloured
+
+*"the design is poor, please remove all the descriptions from the headers and
+just make it appear on hovering and make the icons of view and edit in place
+and make the eye icon colorless like the pen."*
+
+The eye was `&#128065;` — U+1F441, which every platform renders as a **colour
+emoji**. Two faults follow from that one fact and both were on screen. A colour
+emoji **ignores its element's `color`**, so a lit cell painted the glyph in the
+emoji's own browns on a navy ground instead of inverting; and at emoji metrics
+it **overhangs a 26×24 button**, which is why it appeared to sit below its box
+rather than in it. The pen (`&#9998;`, U+270E) is a text glyph and behaved —
+which is exactly why the pair looked mismatched. Two inline SVGs settle both:
+they take `currentColor`, and the rule sizes them rather than a font nobody
+chose.
+
+The header notes are lists — *"Open, chase and close · Import · Archived plans
+· Focus measures"* — and seven of them stacked under seven labels made the HEAD
+of a 49-cell table taller than its body. They go to hover, which is the answer
+the role column already reached in §37. With them gone the row padding could
+come down too: the setup default is nine pixels top and bottom, written for
+cells holding a sentence, and every cell here holds one 26px control.
+
+The two essays under the table went to the knowledge base — *"Own is not a
+setting"* and *"Three things are rules"*. **A setup page is where you change a
+thing, not where it is explained** (§30). Reading them again to move them found
+that `c_access`'s knowledge-base entry was **still written in levels**, which
+§33 retired a version ago: *"a person is a level plus a unit"* was no longer
+true of anything. Rewritten.
+
+### 45.7 A list is as wide as its content
+
+*"for the fill figure set table, make the table narrow fitting the content not
+screen wide."*
+
+A row on the fill page is a tick, a measure name, a target and one short
+state — about 700px of content stretched across 1400, so **the tick you press
+and the state it produces sat at opposite ends of the monitor**. Capped at
+760px. The cap is on the LIST only: the pills, the "Filling" selector and the
+unit buttons above it are page-wide furniture.
+
+### 45.8 The diagnosis was half right, and measuring said so
+
+*"for the people table rows are very high let's see how to make it a normal
+table height and I can't find the passwrod reset functions."*
+
+The role chips were the obvious culprit and they were **not the cause of the
+typical row**. Compacting them took the tallest rows from 89px to 69px and left
+the median at 61 — which is the number that matters, because there are 31 rows
+and only three of them hold three roles.
+
+Measuring cell by cell found three small things, all paid on **all** 31 rows:
+
+1. 18px of the setup table's own padding. The register is a LIST — you scan it
+   for a name — which is a different reading act from the settings tables that
+   padding was written for.
+2. A Person cell spending two lines on a name and a key. `loghead` is seven
+   characters and it cost every row 17px to put it on a line of its own.
+3. A Standing cell whose pill and "View as" link **wrapped** inside a 10%
+   column.
+
+61px → 41px, and 89 → 63. The lesson is the method rather than the numbers:
+**the obvious cause explained the worst row and none of the ordinary ones**,
+and only measuring every cell of an ordinary row said so.
+
+The password reset was not missing. **Credentials are not in the state graph
+and never will be** (§19), so the Password column is filled by a separate ask
+and simply absent when the platform is opened from a file — which is where he
+was looking. Nothing to fix; worth stating plainly, because "the column is not
+there" and "the feature is not built" look identical from the outside.
+
+### 45.9 A scratch file that looked like data
+
+Claiming the money figures touched `src/new-units.js` as well — until the
+claims did not show up and the count came back 26 rather than 44.
+**`new-units.js` is not in `build.py`.** The four units it describes really
+live in `group-data.js:737`; the file is a leftover from when they were being
+drafted, and it has not been built into anything since it was committed.
+Reverted rather than kept in step, because §24's rule reads the same from this
+side: **a file that is not built is not the product, and editing it as though
+it were is how a source of truth acquires a second copy.**
+
+### 45.10 What was verified, and how
+
+Not by reasoning. Every item was driven in headless Chromium against the built
+file:
+
+- Plan and Performance panes: `.ptitle` count 0 where a rail exists, the pen
+  present, the measure headers read `# · Measure · Dir. · Target · Compiled`.
+- The access table: no `.factor-h`, no emoji left in the grid, and every SVG
+  measured **inside** its button's rectangle rather than assumed to be.
+- The searchable picker: opened, filtered to one row on "yara", clicked, and
+  `GROUP.sets[0].owner` read back as `fn_mkt` — the proof that the native
+  select really did receive the change.
+- The demo set: Nigeria's report shows *"1 figure is entered by another team"*
+  naming Finance and Hossam; Mobile's shows the chip and no note, because all
+  four of its claimed figures are in.
+- People rows: measured before and after, in the same page, by injecting the
+  old rule.
+- A fresh Postgres 16, seeded and clean-slated: `org.extra` holds no `sets`,
+  no `claims`, no `naming`, and no unit row carries a `src`.
+
+`qa.py` walks 31 viewers with no console errors. The contrast sweep reports
+**0 failing runs across 4 combinations × 25 pages and states**.
+`test-authorize.js` passes 114. `test-roundtrip.js` passes clean slate, round
+trip, fixed point and archived plan.

@@ -965,7 +965,17 @@
   .rail .rfoot { padding:9px 14px; border-top:1px solid var(--line); background:var(--surface-2);
     font-size:11.5px; color:var(--ink-3); }
   .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
-    padding:16px 18px 20px; }
+    padding:16px 18px 20px; position:relative; }
+  /* WHERE THE HEADING WENT, THE PEN STILL HAS TO LIVE (2026-08-22). With the
+     rail carrying the name, the plan pane opens straight onto the tables and
+     there is no .ptitle left to hover. The pen keeps the same language — it
+     appears when you are over the thing it edits — but the hover target is now
+     the PANE. Zero height, so it costs the tables no room; it sits in the
+     padding rather than pushing anything down. */
+  .pane .paneact { position:absolute; top:12px; right:12px; height:0; z-index:3; }
+  .pane .paneact .penbtn { top:0; right:0; }
+  .pane:hover .paneact .penbtn,
+  .pane:focus-within .paneact .penbtn { visibility:visible; opacity:1; }
   .pane .ptitle { display:flex; justify-content:space-between; align-items:flex-start; gap:14px;
     flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--line-soft); }
   .pane .ptitle h3 { font:400 19px/1.25 var(--serif); margin:0; }
@@ -1033,8 +1043,17 @@
   .acgrid thead th { white-space:normal; overflow-wrap:anywhere; }
   .acgrid td.rolecell b { display:block; font-size:13px; line-height:1.3; }
   .acgrid td.rolecell .why { margin-top:2px; }
-  .acgrid .factor-h b { font-size:11px; line-height:1.25; }
-  .acgrid .factor-h span { font-size:9.5px; line-height:1.3; display:block; margin-top:3px; }
+  /* .factor-h is gone from this table with the header notes it laid out, and
+     its two rules go with it (§24: delete an element and delete its CSS). The
+     class still belongs to the WEIGHTING factor editor, which is why the rules
+     removed here were the `.acgrid`-scoped ones and not the base ones. */
+  /* SHORTER ROWS (2026-08-22). Nine pixels top and bottom is the setup-table
+     default, written for cells holding a sentence; every cell here holds one
+     26px control, so the padding was most of the row. Seven roles × 7px saved
+     twice over is what lets the table fit without scrolling now the header
+     notes have gone to hover. */
+  .acgrid th, .acgrid td { padding-top:5px; padding-bottom:5px; }
+  .acgrid thead th { padding-top:9px; padding-bottom:9px; }
   /* Below the width where seven columns of controls fit, the table scrolls
      inside its own box rather than pushing the page sideways — a horizontal
      page scroll breaks every position:sticky above it (§27.2). */
@@ -1056,9 +1075,16 @@
      unanswered cell. The pair sits on a dashed tray so it reads as a state
      somebody chose rather than a control nobody has reached yet. */
   .stset.off { border:1px dashed var(--none); border-radius:4px; padding:1px; }
+  /* A BOX WITH A GLYPH CENTRED IN IT, not a box with a font in it. The pair
+     used to be text — one text glyph and one colour emoji — so the box was
+     sized in ems and the emoji hung out of the bottom of it. inline-flex
+     centres whatever is inside, and the SVGs are sized here (§ICON_EYE). */
   .stbtn { width:26px; height:24px; border:1px solid var(--line); background:var(--surface);
            color:var(--ink-3); cursor:pointer; font-size:11px; padding:0; border-radius:2px;
-           font-family:var(--sans); line-height:1; }
+           font-family:var(--sans); line-height:1;
+           display:inline-flex; align-items:center; justify-content:center; }
+  .stbtn svg { width:14px; height:14px; display:block; }
+  .st svg { width:12px; height:12px; display:inline-block; vertical-align:-2px; }
   .stbtn:first-child { border-radius:2px 0 0 2px; }
   .stbtn:last-child { border-radius:0 2px 2px 0; }
   .stbtn:hover { background:var(--surface-2); }
@@ -1081,11 +1107,39 @@
      A role is two facts — which role, and what it is attached to — so the
      chip carries both. Never a bare role name: "Custodian" alone is the half
      of the answer that does not tell you whose plan they can touch. */
-  .rolechip { display:inline-flex; align-items:baseline; gap:6px; margin:0 6px 6px 0;
-              padding:4px 6px 4px 10px; border:1px solid var(--line); border-radius:99px;
-              background:var(--surface-2); }
-  .rolechip b { font-size:12px; }
-  .rolechip .why { font-size:11px; }
+  /* ROW HEIGHT (Islam, 2026-08-22: "for the people table rows are very high").
+     A person holding three roles was a 90px row, and the chip was carrying the
+     weight three ways at once: 8px of its own vertical padding, a 6px bottom
+     margin per wrapped line, and — the one that was invisible — the INHERITED
+     `.cfg td .why { margin-top:4px }`. Inside a baseline flex a margin-top on
+     an item does not indent it, it grows the line, so every chip was 4px
+     taller than it looked and nothing in this block said so. A chip is still
+     the same two facts on the same one line; it just stops paying for them
+     three times. */
+  /* AND THE REST OF THE ROW WITH IT. Compacting the chip took the tallest
+     rows from 89px to 69px and left the TYPICAL one at 61 — because the chip
+     was never what set the floor. Measured, cell by cell, on a row holding one
+     role: 18px of the setup table's own padding, a Person cell spending two
+     lines on a name and a key, and a Standing cell whose pill and "View as"
+     link wrapped onto two lines inside a 10% column. Three small things, all
+     paid on all 31 rows. The register is a LIST — you scan it for a name —
+     which is a different reading act from the settings tables this padding was
+     written for, so it is the one table here that asks for less. */
+  .unitcfg td, .unitcfg th { padding-top:6px; padding-bottom:6px; }
+  /* The key beside the name rather than under it. It is the username and it is
+     four characters; a line of its own for `loghead` cost every row 17px. */
+  .unitcfg td .pkey { display:inline; margin:0 0 0 8px; }
+  /* The pill and the link on ONE line. They are two answers to the same
+     question — is this person active, and may I look through their eyes — and
+     the column is wide enough for both once it is allowed not to wrap. */
+  .unitcfg td.cc { white-space:nowrap; }
+  .unitcfg td.cc .linkbu { margin-left:8px; }
+
+  .rolechip { display:inline-flex; align-items:baseline; gap:5px; margin:0 5px 3px 0;
+              padding:1px 6px 1px 9px; border:1px solid var(--line); border-radius:99px;
+              background:var(--surface-2); line-height:1.55; }
+  .rolechip b { font-size:11.5px; }
+  .rolechip .why { font-size:10.5px; margin-top:0; }
   .xbtn { font:inherit; font-size:14px; line-height:1; color:var(--none); background:none;
           border:none; cursor:pointer; padding:0 4px; border-radius:99px; }
   .xbtn:hover { color:var(--bad); background:var(--bad-bg); }
@@ -1169,6 +1223,14 @@
      overflows. */
   .cfg.srcpick .pick { grid-template-columns:26px 1fr auto 215px; }
   .cfg.srcpick .pick .linkbu { font-size:11.5px; }
+  /* AS WIDE AS ITS CONTENT, NOT AS WIDE AS THE SCREEN (Islam, 2026-08-22:
+     "make the table narrow fitting the content not screen wide"). A row here
+     is a tick, a measure name, a target and one short state — four things that
+     total about 700px and were being stretched across 1400, so the tick you
+     press and the state it produces sat at opposite ends of the monitor. The
+     cap is on the LIST only: the pills, the "Filling" selector and the unit
+     buttons above it are page-wide furniture and stay where they are. */
+  .cfg.srcpick { max-width:760px; }
 
   /* The naming page (spec 008 §3B) has no tick, and its last column carries a
      picker that OPENS INTO the row — 210px is the picker's own min-width, so
@@ -1286,6 +1348,45 @@
                    color:var(--ink-3); background:var(--surface); }
   .qual.static i.on { background:var(--stone-soft); border-color:var(--stone-soft); color:var(--on-fill); }
   .cfg .val { display:inline-block; padding:4px 0; font-size:13px; }
+
+  /* ══ The searchable dropdown (searchsel.js) ═════════════════════════
+     The button stands where the <select> stood, so it inherits nothing it
+     should not and matches the field beside it. The popup is position:fixed —
+     see the note in searchsel.js: `.cfg` is an overflow container and would
+     clip an absolutely positioned one. */
+  .ss-native { position:absolute !important; width:1px; height:1px; padding:0;
+               margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;
+               border:0; opacity:0; pointer-events:none; }
+  .ssbtn { font:inherit; font-size:13px; color:var(--ink); background:var(--surface);
+           border:1px solid var(--line); border-radius:var(--r); padding:6px 9px;
+           cursor:pointer; text-align:left; display:inline-flex; align-items:center;
+           justify-content:space-between; gap:8px; max-width:100%; min-width:0;
+           line-height:1.35; }
+  .ssbtn > :first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ssbtn:hover { border-color:var(--gold); }
+  .ssbtn:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .ssbtn[aria-expanded="true"] { border-color:var(--gold); box-shadow:0 0 0 2px var(--over-bg); }
+  .sscar { color:var(--ink-3); font-size:10px; flex:none; }
+  /* Inside a settings table the field fills its column, the same as the
+     select it replaced (`.cfg .fld { width:100% }`). */
+  .cfg .ssbtn { width:100%; }
+  .sspop { position:fixed; z-index:120; max-width:min(380px, calc(100vw - 16px));
+           background:var(--surface); border:1px solid var(--gold); border-radius:10px;
+           box-shadow:0 12px 30px rgba(0,0,0,.18); padding:8px; }
+  .sspop .sssearch { width:100%; margin:0 0 6px; }
+  .sslist { max-height:230px; overflow-y:auto; }
+  .ssrow { display:block; width:100%; text-align:left; font:inherit; font-size:13px;
+           color:var(--ink); background:none; border:0; border-radius:6px;
+           padding:6px 8px; cursor:pointer; }
+  .ssrow:hover { background:var(--surface-2); }
+  .ssrow.on { background:var(--over-bg); color:var(--gold-deep); font-weight:600; }
+  .ssrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .ssempty { font-size:12px; color:var(--none); padding:8px 4px; }
+  /* The viewer switcher keeps the cap its select had, and for the same reason:
+     "Strategy Management Office — all units" would otherwise set the width of
+     the chrome's first line and wrap the two buttons beside it onto a second.
+     The name truncates; the popup shows it in full. */
+  .viewer .ssbtn { max-width:150px; font-size:11px; padding:1px 5px; line-height:1.4; }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -3158,6 +3259,30 @@ var GROUP = {
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
   horizon: "2029",
+  /* ── The worked example has a figure set (spec 008) ────────────────
+     Added 2026-08-22, at Islam's request: the demo shipped with no sets at
+     all, so none of the Finance-entry behaviour could be SEEN — the chip on a
+     sourced number, the chase note above a unit's report, and the "Figures I
+     report" page all render nothing where there is nothing to render, and a
+     feature that renders nothing looks like a feature that was not built.
+
+     ONE set, and it claims the money. That is the argument the feature is for:
+     revenue and margin exist in Finance before a unit is asked for them, and
+     what separates a team's number from the unit's is WHAT IT IS MEASURED IN,
+     not what it is called (§16.7a). Every figure whose target is in EGP is in
+     it — 44 of them, across every unit — which is why membership lives on the
+     figure rather than being listed here.
+
+     `pick: "owner"` deliberately, and it is the security setting (§44): the
+     demo is where you show somebody that ticking from the full list is
+     reading every number in the group, and you cannot show that with a set
+     only the SMO can open. This is the EXAMPLE dataset; the client's own
+     tenant starts with no sets and defaults to the SMO. */
+  sets: [
+    { id: "financialfigures", name: "Financial Figures", team: "finance",
+      owner: "fn_fin", pick: "owner" }
+  ],
+  claims: [],
   /* The review point. H1 means Q1 and Q2 have passed. */
   asOfQuarter: 2,
   aspiration: "To be the most trusted & diversified provider for mobile, consumer electronics, IT products & logistics services in Egypt & Nigeria, delivering innovative offerings and unmatched service excellence that enrich lives, empower businesses, and drive regional growth.",
@@ -3656,7 +3781,7 @@ var UNITS = {
     aspiration: "To be the biggest and most diversified distributor in local market through the most developed and advanced tech systems — positioned as one of the recognized regional distributors for consumer electronics.",
     endInMind: "To be positioned as one of the recognized regional distributors for consumer electronics",
     keyObjectives: [
-      { name: "Distribution revenue", dir: "≥", target3y: "9.0B EGP", target: "6.2B EGP", compile: "Sum", actual: "2.7B", progress: 44 },
+      { src: { set: "financialfigures" }, name: "Distribution revenue", dir: "≥", target3y: "9.0B EGP", target: "6.2B EGP", compile: "Sum", actual: "2.7B", progress: 44 },
       { name: "Mobile market share",  dir: "≥", target3y: "38%", target: "32%",      compile: "Latest", actual: "28%", progress: 88 },
       { name: "Active merchant reach",dir: "≥", target3y: "6,500", target: "4,500",    compile: "Latest", actual: "3,180", progress: 71 },
       { name: "App coverage rate",    dir: "≥", target3y: "75%", target: "50%",      compile: "Latest", actual: "22%", progress: 44, note: "Rollout gated on the merchant app release. Recovery plan agreed with Ramy for Q3." }
@@ -3700,12 +3825,12 @@ var UNITS = {
       { code: "03", name: "Portfolio & Value Chain Expansion", sub: "",
         kind: "Direction", theme: "DIV", owner: "Karim", outcomes: 52, exec: 40, planned: 43,
         measures: [
-          { name: "Non-Samsung revenue",      dir: "≥", target: "4B EGP",   compile: "Sum", actual: "1.6B", progress: 40 },
+          { src: { set: "financialfigures" }, name: "Non-Samsung revenue",      dir: "≥", target: "4B EGP",   compile: "Sum", actual: "1.6B", progress: 40 },
           { name: "Samsung market share",     dir: "≥", target: "30%",      compile: "Latest", actual: "31%", progress: 103 },
           { name: "Vivo market share",        dir: "≥", target: "60%",      compile: "Latest", actual: "48%", progress: 80 },
-          { name: "Accessory revenue",        dir: "≥", target: "300M EGP", compile: "Sum", actual: "96M", progress: 32 },
+          { src: { set: "financialfigures" }, name: "Accessory revenue",        dir: "≥", target: "300M EGP", compile: "Sum", actual: "96M", progress: 32 },
           { name: "Active Sary merchants",    dir: "≥", target: "800",      compile: "Latest", actual: "310", progress: 39 },
-          { name: "Sary revenue",             dir: "≥", target: "150M EGP", compile: "Sum", actual: "42M", progress: 28 },
+          { src: { set: "financialfigures" }, name: "Sary revenue",             dir: "≥", target: "150M EGP", compile: "Sum", actual: "42M", progress: 28 },
           { name: "Local production devices", dir: "≥", target: "1M",       compile: "Sum", actual: "520K", progress: 52 },
           { name: "Sary app downloads",       dir: "≥", target: "40K",      compile: "Latest", actual: "18.4K", progress: 46 }
         ],
@@ -3750,7 +3875,7 @@ var UNITS = {
     aspiration: "To be the most preferred consumer electronics retailer in Egypt — the destination customers choose first, online and on the high street.",
     endInMind: "",
     keyObjectives: [
-      { name: "Retail revenue",     dir: "≥", target3y: "6.8B EGP", target: "4.5B EGP", compile: "Sum", actual: "3.8B", progress: 84 },
+      { src: { set: "financialfigures" }, name: "Retail revenue",     dir: "≥", target3y: "6.8B EGP", target: "4.5B EGP", compile: "Sum", actual: "3.8B", progress: 84 },
       { name: "Stores operating",   dir: "≥", target3y: "120", target: "88",       compile: "Latest", actual: "91", progress: 103 },
       { name: "E-store share of revenue", dir: "≥", target3y: "38%", target: "25%", compile: "Latest", actual: "21%", progress: 84 },
       { name: "Net promoter score", dir: "≥", target3y: "65", target: "55",       compile: "Latest", actual: "45", progress: 82 }
@@ -3777,7 +3902,7 @@ var UNITS = {
       { code: "R02", name: "Omnichannel Experience", sub: "",
         kind: "Direction", theme: "VC", owner: "Dalia", outcomes: 71, exec: 64, planned: 70,
         measures: [
-          { name: "E-store revenue",        dir: "≥", target: "1.1B EGP", compile: "Sum", actual: "0.62B", progress: 56 },
+          { src: { set: "financialfigures" }, name: "E-store revenue",        dir: "≥", target: "1.1B EGP", compile: "Sum", actual: "0.62B", progress: 56 },
           { name: "Click-and-collect share",dir: "≥", target: "30%",      compile: "Latest", actual: "33%", progress: 110 },
           { name: "Unified stock accuracy", dir: "≥", target: "95%",      compile: "Latest", actual: "67%", progress: 71 }
         ],
@@ -3813,7 +3938,7 @@ var UNITS = {
     aspiration: "To be the default ordering platform for Egypt's independent electronics retail — the first app a merchant opens each morning.",
     endInMind: "",
     keyObjectives: [
-      { name: "Platform GMV",         dir: "≥", target3y: "9.5B EGP", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
+      { src: { set: "financialfigures" }, name: "Platform GMV",         dir: "≥", target3y: "9.5B EGP", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
       { name: "Monthly active merchants", dir: "≥", target3y: "14,000", target: "2,200", compile: "Latest", actual: "980", progress: 45 },
       { name: "Repeat order rate",    dir: "≥", target3y: "72%", target: "65%",      compile: "Latest", actual: "31%", progress: 48 },
       { name: "Credit default rate",  dir: "≤", target3y: "1.5%", target: "2%",       compile: "Latest", actual: "3.1%", progress: 65 }
@@ -3839,7 +3964,7 @@ var UNITS = {
       { code: "M02", name: "Merchant Financing", sub: "",
         kind: "Direction", theme: "DIV", owner: "Hala", outcomes: 44, exec: 42, planned: 33,
         measures: [
-          { name: "Credit book",         dir: "≥", target: "180M EGP", compile: "Latest", actual: "74M", progress: 41 },
+          { src: { set: "financialfigures" }, name: "Credit book",         dir: "≥", target: "180M EGP", compile: "Latest", actual: "74M", progress: 41 },
           { name: "Merchants with credit", dir: "≥", target: "600",    compile: "Latest", actual: "285", progress: 48 }
         ],
         tactics: [
@@ -3871,7 +3996,7 @@ var UNITS = {
     aspiration: "To be the first destination Egyptians open when they shop electronics online — fastest to deliver, widest assortment, and the easiest returns in the market.",
     endInMind: "",
     keyObjectives: [
-      { name: "Online revenue", dir: "≥", target3y: "2.6B EGP", target: "1.8B EGP", compile: "Sum", actual: "1.1B", progress: 61 },
+      { src: { set: "financialfigures" }, name: "Online revenue", dir: "≥", target3y: "2.6B EGP", target: "1.8B EGP", compile: "Sum", actual: "1.1B", progress: 61 },
       { name: "Site conversion rate", dir: "≥", target3y: "3.2%", target: "2.4%", compile: "Latest", actual: "1.8%", progress: 75 },
       { name: "Repeat purchase rate", dir: "≥", target3y: "40%", target: "28%", compile: "Latest", actual: "19%", progress: 68 },
       { name: "Assortment breadth (live SKUs)", dir: "≥", target3y: "24,000", target: "14,000", compile: "Latest", actual: "9,400", progress: 67 },
@@ -3921,7 +4046,7 @@ var UNITS = {
     aspiration: "To be the distributor every major appliance and electronics brand chooses first for Egypt, with the deepest retail coverage in the category.",
     endInMind: "",
     keyObjectives: [
-      { name: "CE distribution revenue", dir: "≥", target3y: "7.8B EGP", target: "5.4B EGP", compile: "Sum", actual: "2.4B", progress: 44 },
+      { src: { set: "financialfigures" }, name: "CE distribution revenue", dir: "≥", target3y: "7.8B EGP", target: "5.4B EGP", compile: "Sum", actual: "2.4B", progress: 44 },
       { name: "CE market share", dir: "≥", target3y: "24%", target: "18%", compile: "Latest", actual: "14%", progress: 78 },
       { name: "Active dealer accounts", dir: "≥", target3y: "2,600", target: "1,900", compile: "Latest", actual: "1,410", progress: 74 },
       { name: "Gross margin", dir: "≥", target3y: "9.5%", target: "8.2%", compile: "Latest", actual: "7.1%", progress: 87 },
@@ -3938,7 +4063,7 @@ var UNITS = {
         measures: [
           { name: "Principal agreements signed", dir: "≥", target: "4", compile: "Sum", actual: "2", progress: 50 },
           { name: "Revenue from top-2 brands", dir: "≤", target: "55%", compile: "Latest", actual: "64%", progress: 86 },
-          { name: "New category revenue", dir: "≥", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
+          { src: { set: "financialfigures" }, name: "New category revenue", dir: "≥", target: "900M EGP", compile: "Sum", actual: "310M", progress: 34 },
         ],
         tactics: [
           { name: "Negotiate two additional principal lines", owner: "Tarek Nassar", q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 },
@@ -3971,8 +4096,8 @@ var UNITS = {
     aspiration: "To be the single technology supply partner for Egypt's largest enterprises and government programmes, selling solutions rather than boxes.",
     endInMind: "",
     keyObjectives: [
-      { name: "Corporate revenue", dir: "≥", target3y: "1.4B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.42B", progress: 47 },
-      { name: "Contracted recurring revenue", dir: "≥", target3y: "260M EGP", target: "150M EGP", compile: "Sum", actual: "61M", progress: 41 },
+      { src: { set: "financialfigures" }, name: "Corporate revenue", dir: "≥", target3y: "1.4B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.42B", progress: 47 },
+      { src: { set: "financialfigures" }, name: "Contracted recurring revenue", dir: "≥", target3y: "260M EGP", target: "150M EGP", compile: "Sum", actual: "61M", progress: 41 },
       { name: "Tender win rate", dir: "≥", target3y: "35%", target: "26%", compile: "Latest", actual: "19%", progress: 73 },
       { name: "Named enterprise accounts", dir: "≥", target3y: "140", target: "95", compile: "Latest", actual: "72", progress: 76 },
     ],
@@ -3988,7 +4113,7 @@ var UNITS = {
         measures: [
           { name: "Certified pre-sales engineers", dir: "≥", target: "18", compile: "Latest", actual: "11", progress: 61 },
           { name: "Solution-led deal share", dir: "≥", target: "45%", compile: "Latest", actual: "29%", progress: 64 },
-          { name: "Average deal size", dir: "≥", target: "3.2M EGP", compile: "Latest", actual: "2.1M", progress: 66 },
+          { src: { set: "financialfigures" }, name: "Average deal size", dir: "≥", target: "3.2M EGP", compile: "Latest", actual: "2.1M", progress: 66 },
         ],
         tactics: [
           { name: "Pre-sales academy and certification", owner: "Amr Bakr", q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 55 },
@@ -4000,7 +4125,7 @@ var UNITS = {
         measures: [
           { name: "Active public contracts", dir: "≥", target: "24", compile: "Latest", actual: "16", progress: 67 },
           { name: "Tender win rate", dir: "≥", target: "26%", compile: "Latest", actual: "19%", progress: 73 },
-          { name: "Public revenue", dir: "≥", target: "420M EGP", compile: "Sum", actual: "178M", progress: 42 },
+          { src: { set: "financialfigures" }, name: "Public revenue", dir: "≥", target: "420M EGP", compile: "Sum", actual: "178M", progress: 42 },
         ],
         tactics: [
           { name: "Framework agreement registrations", owner: "Laila Zaki", q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 70 },
@@ -4021,7 +4146,7 @@ var UNITS = {
     aspiration: "To be the after-sales operation brands trust with their reputation — the reason a customer buys the second device from us.",
     endInMind: "",
     keyObjectives: [
-      { name: "Service revenue", dir: "≥", target3y: "1.3B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.44B", progress: 49 },
+      { src: { set: "financialfigures" }, name: "Service revenue", dir: "≥", target3y: "1.3B EGP", target: "0.9B EGP", compile: "Sum", actual: "0.44B", progress: 49 },
       { name: "First-time fix rate", dir: "≥", target3y: "92%", target: "86%", compile: "Latest", actual: "89%", progress: 103 },
       { name: "Average turnaround time", dir: "≤", target3y: "3 d", target: "4 d", compile: "Latest", actual: "6 d", progress: 67 },
       { name: "Extended plan attach rate", dir: "≥", target3y: "22%", target: "15%", compile: "Latest", actual: "9%", progress: 60 },
@@ -4049,8 +4174,8 @@ var UNITS = {
         kind: "Direction", theme: "DIV", owner: "Rania Fahmy",
         measures: [
           { name: "Extended plan attach rate", dir: "≥", target: "15%", compile: "Latest", actual: "9%", progress: 60 },
-          { name: "Third-party service revenue", dir: "≥", target: "180M EGP", compile: "Sum", actual: "62M", progress: 34 },
-          { name: "Out-of-warranty revenue", dir: "≥", target: "240M EGP", compile: "Sum", actual: "112M", progress: 47 },
+          { src: { set: "financialfigures" }, name: "Third-party service revenue", dir: "≥", target: "180M EGP", compile: "Sum", actual: "62M", progress: 34 },
+          { src: { set: "financialfigures" }, name: "Out-of-warranty revenue", dir: "≥", target: "240M EGP", compile: "Sum", actual: "112M", progress: 47 },
         ],
         tactics: [
           { name: "Extended plan sales at point of sale", owner: "Rania Fahmy", q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 48 },
@@ -4071,7 +4196,7 @@ var UNITS = {
     aspiration: "To be the leading distributor of IT products and infrastructure in Egypt, with services attached to every major hardware line we carry.",
     endInMind: "",
     keyObjectives: [
-      { name: "IT distribution revenue", dir: "≥", target3y: "3.4B EGP", target: "2.2B EGP", compile: "Sum", actual: "0.98B", progress: 45 },
+      { src: { set: "financialfigures" }, name: "IT distribution revenue", dir: "≥", target3y: "3.4B EGP", target: "2.2B EGP", compile: "Sum", actual: "0.98B", progress: 45 },
       { name: "Services attach rate", dir: "≥", target3y: "28%", target: "18%", compile: "Latest", actual: "11%", progress: 61 },
       { name: "Active reseller accounts", dir: "≥", target3y: "900", target: "640", compile: "Latest", actual: "471", progress: 74 },
       { name: "Inventory turns", dir: "≥", target3y: "7.0", target: "5.5", compile: "Latest", actual: "4.2", progress: 76 },
@@ -4087,7 +4212,7 @@ var UNITS = {
         kind: "Direction", theme: "OT", owner: "Yasser Kamal",
         measures: [
           { name: "Active resellers", dir: "≥", target: "640", compile: "Latest", actual: "471", progress: 74 },
-          { name: "Revenue per reseller", dir: "≥", target: "3.4M EGP", compile: "Latest", actual: "2.1M", progress: 62 },
+          { src: { set: "financialfigures" }, name: "Revenue per reseller", dir: "≥", target: "3.4M EGP", compile: "Latest", actual: "2.1M", progress: 62 },
           { name: "Reseller portal adoption", dir: "≥", target: "70%", compile: "Latest", actual: "44%", progress: 63 },
         ],
         tactics: [
@@ -4098,7 +4223,7 @@ var UNITS = {
       { code: "IT02", name: "Infrastructure Services", sub: "",
         kind: "Direction", theme: "VC", owner: "Dina Shawky",
         measures: [
-          { name: "Services revenue", dir: "≥", target: "400M EGP", compile: "Sum", actual: "178M", progress: 45 },
+          { src: { set: "financialfigures" }, name: "Services revenue", dir: "≥", target: "400M EGP", compile: "Sum", actual: "178M", progress: 45 },
           { name: "Services attach rate", dir: "≥", target: "18%", compile: "Latest", actual: "11%", progress: 61 },
           { name: "Certified engineers", dir: "≥", target: "24", compile: "Latest", actual: "15", progress: 63 },
         ],
@@ -4121,10 +4246,10 @@ var UNITS = {
     aspiration: "To be a profitable third-party logistics business in its own right, not merely the group's internal delivery arm.",
     endInMind: "",
     keyObjectives: [
-      { name: "Logistics revenue", dir: "≥", target3y: "2.4B EGP", target: "1.6B EGP", compile: "Sum", actual: "0.71B", progress: 44 },
+      { src: { set: "financialfigures" }, name: "Logistics revenue", dir: "≥", target3y: "2.4B EGP", target: "1.6B EGP", compile: "Sum", actual: "0.71B", progress: 44 },
       { name: "External client revenue share", dir: "≥", target3y: "45%", target: "30%", compile: "Latest", actual: "18%", progress: 60 },
       { name: "On-time delivery rate", dir: "≥", target3y: "96%", target: "92%", compile: "Latest", actual: "94%", progress: 102 },
-      { name: "Cost per parcel", dir: "≤", target3y: "28 EGP", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
+      { src: { set: "financialfigures" }, name: "Cost per parcel", dir: "≤", target3y: "28 EGP", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
     ],
     swot: {
       s: ["National hub-and-spoke coverage", "Captive group volume as a base load"],
@@ -4137,7 +4262,7 @@ var UNITS = {
         kind: "Capability", theme: "OT", owner: "Hazem Roushdy",
         measures: [
           { name: "On-time delivery", dir: "≥", target: "92%", compile: "Latest", actual: "94%", progress: 102 },
-          { name: "Cost per parcel", dir: "≤", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
+          { src: { set: "financialfigures" }, name: "Cost per parcel", dir: "≤", target: "33 EGP", compile: "Latest", actual: "39 EGP", progress: 85 },
           { name: "Hub utilisation", dir: "≥", target: "82%", compile: "Latest", actual: "68%", progress: 83 },
         ],
         tactics: [
@@ -4148,7 +4273,7 @@ var UNITS = {
       { code: "LG02", name: "Third-Party Client Growth", sub: "",
         kind: "Direction", theme: "DIV", owner: "Mai Sobhy",
         measures: [
-          { name: "External client revenue", dir: "≥", target: "480M EGP", compile: "Sum", actual: "192M", progress: 40 },
+          { src: { set: "financialfigures" }, name: "External client revenue", dir: "≥", target: "480M EGP", compile: "Sum", actual: "192M", progress: 40 },
           { name: "Named 3PL clients", dir: "≥", target: "40", compile: "Latest", actual: "23", progress: 58 },
           { name: "Client retention", dir: "≥", target: "85%", compile: "Latest", actual: "74%", progress: 87 },
         ],
@@ -4171,7 +4296,7 @@ var UNITS = {
     aspiration: "To have proven the group's distribution model outside Egypt, with Nigeria standing on its own commercially and ready to be repeated elsewhere.",
     endInMind: "",
     keyObjectives: [
-      { name: "Nigeria revenue", dir: "≥", target3y: "2.2B EGP", target: "1.1B EGP", compile: "Sum", actual: "0.38B", progress: 35 },
+      { src: { set: "financialfigures" }, name: "Nigeria revenue", dir: "≥", target3y: "2.2B EGP", target: "1.1B EGP", compile: "Sum", actual: "0.38B", progress: 35 },
       { name: "Local dealer accounts", dir: "≥", target3y: "420", target: "240", compile: "Latest", actual: "138", progress: 58 },
       { name: "Contribution margin", dir: "≥", target3y: "6.0%", target: "4.2%", compile: "Latest", actual: "2.6%", progress: 62 },
       { name: "Working capital cycle", dir: "≤", target3y: "55 d", target: "70 d", compile: "Latest", actual: "91 d", progress: 77 },
@@ -6474,20 +6599,48 @@ var PAGE_INFO = {
     ]
   },
 
+  /* Rewritten 2026-08-22. Two of these entries came OFF the Roles & access page
+     itself, which had grown twelve lines of essay under a 49-cell table — a
+     setup page is where you change a thing, not where it is explained (§30).
+     The other two were still written in LEVELS, which §33 retired a version
+     ago: "a person is a level plus a unit" is no longer true of anything. */
   c_access: {
-    title: "Levels and access",
+    title: "Roles and access",
     body: [
+      ["&ldquo;Own&rdquo; is whatever they hold a role in",
+       "The head and the custodian of Mobile own Mobile. A company CEO owns every unit in their " +
+       "company. The SMO and the group CEO own all of it. <b>Nobody types that in anywhere</b> " +
+       "&mdash; it is read from who is attached to what on <b>Business units</b>, <b>Supporting " +
+       "functions</b> and <b>People</b>, which is why those pages and the access table cannot " +
+       "disagree. Two things a company decides for itself apply on top and can only ever narrow " +
+       "it: whether its CEO sees <b>the group</b>, and whether they see <b>the other " +
+       "companies</b>. Both are on the Companies page."],
+      ["Three things are rules, not settings, so they are not in the table",
+       "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody " +
+       "can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much " +
+       "access the unit&rsquo;s own people hold, because a plan you are measured against is not " +
+       "yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked " +
+       "by the group CEO and the SMO. Each of these used to be a cell in the matrix."],
       ["Page level only",
-       "If a level can open a page, it sees everything on it. Restriction happens by removing the page, never " +
-       "by trimming its contents &mdash; per-element permissions make a system nobody can reason about."],
-      ["Three states, not two",
-       "The CEO views the weighting table but does not manage it. Visible and editable are different grants; " +
-       "collapsing them would either lock the CEO out or hand them the model."],
-      ["A person is a level plus a unit",
-       "The level decides which pages, the attachment decides whose. Two people at N-1 reach the same page " +
-       "types but different units."],
-      ["The SMO is not a level",
-       "It is a super user beside the ladder. An SMO manager might sit at N-2 and still need rights no N-1 has."]
+       "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
+       "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
+       "can reason about. The one exception is a rule with teeth rather than a setting: a " +
+       "contributor granted edit reaches <b>their own lines only</b>."],
+      ["Two states, not three",
+       "View and edit, and edit includes view. <b>None is not a third thing you choose</b>, it is " +
+       "the absence of the other two &mdash; which is why a cell is two toggles and nothing lit is " +
+       "itself the answer. The group CEO views the weighting table without managing it; collapsing " +
+       "the two grants would either lock them out or hand them the model."],
+      ["Several roles at once, and the most generous wins",
+       "A person may be a function head and a strategy custodian and a contributor. Access is the " +
+       "<b>widest</b> grant across everything they hold, while <b>scope stays per role</b>: being " +
+       "custodian of Mobile does not carry into the unit they contribute to. The SMO is not a rung " +
+       "on a ladder &mdash; it is a super user beside it."],
+      ["The screen decides what to offer; the server decides what to accept",
+       "Every grant here is enforced again on save (&sect;42). A control the table hides is also a " +
+       "change the server refuses, and an unrecognised change is the SMO&rsquo;s by default &mdash; " +
+       "so a field added later is guarded the day it is added. Who changed what is recorded outside " +
+       "the state graph, where a save cannot erase it."]
     ]
   },
 
@@ -11083,8 +11236,29 @@ function unitRailFor(u, sel){
    log arrive (§19.2) this is the first thing to revisit. */
 /* mayEditPlan() moved to config-data.js in 3.10, beside the other two rules
    that are rules rather than settings. One definition, not two. */
-function unitPlanBody(it){
+/* THE PANE NO LONGER REPEATS THE RAIL (Islam, 2026-08-22: "do we need this
+   part since the information is already on the card on the rail?").
+
+   He is right, and the rail card is the proof: it already carries the code,
+   the name, the counts and the owner, and it sits four inches to the left of a
+   heading saying the same three things. So where there IS a rail the pane
+   opens straight onto the plan.
+
+   Two exceptions, both of them the same rule — a pane with nothing naming it
+   is only acceptable while something else names it:
+
+   1. A unit with ONE pillar has no rail (see renderUnitPlan), so the heading
+      is the only thing on the page that says which pillar this is. It stays.
+   2. EDITING needs it back whatever the rail says: the pillar's NAME is typed
+      in that heading and its theme and owner are read from the line under it.
+      Take the block away in edit mode and the name becomes uneditable.
+
+   Which leaves the pen. It used to appear on hover of the heading, and a
+   heading that is gone cannot be hovered, so in the read case it becomes a
+   small action of its own — still the SMO's alone (§31). */
+function unitPlanBody(it, railed){
   var ed = EDIT_PAGE.plan && mayEditPlan();
+  var showHead = !railed || ed;
   var cell = function(v, setter, cls){
     return ed ? inputOr("plan", v == null ? "" : v, cls || "", setter)
               : (v ? esc(v) : '<span class="missing">Missing</span>');
@@ -11094,8 +11268,13 @@ function unitPlanBody(it){
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
-      '<td class="num">' + (ed ? inputOr("plan", m.target3y || "", "mono", function(v){ m.target3y = v; })
-                               : (m.target3y ? esc(m.target3y) : "&mdash;")) + '</td>' +
+      /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
+         measures are for 1 year only". A pillar's key measures carry one
+         target and it is this year's; the three-year horizon belongs to the
+         unit's KEY OBJECTIVES, which are a different table on a different page
+         and keep theirs. `target3y` is still stored and still travels through
+         import, export and the archive — this removes a column, not a field,
+         so nothing a plan already carries is lost. */
       '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
@@ -11105,11 +11284,14 @@ function unitPlanBody(it){
       '<td>' + qs(t) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
-  return '<div class="ptitle hoverpen"><div><h3>' + esc(it.code) + '&nbsp; ' +
-      (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
-      (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
-      kindPill(it) +
-      (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>' +
+  var head = showHead
+    ? '<div class="ptitle hoverpen"><div><h3>' + esc(it.code) + '&nbsp; ' +
+        (ed ? inputOr("plan", it.name, "", function(v){ it.name = v; }) : esc(it.name)) + '</h3>' +
+        (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
+        kindPill(it) +
+        (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
+    : (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
+  return head +
     (it.sub || ed
       ? '<p class="sub" style="margin:10px 0 0">' +
         (ed ? inputOr("plan", it.sub || "", "", function(v){ it.sub = v; }) : esc(it.sub)) + '</p>'
@@ -11117,8 +11299,8 @@ function unitPlanBody(it){
     /* The "Plan only" notice went in 3.4. The tab you are on says Plan, the
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
-    '<h4 class="mini">Key measures <em>\u2014 as planned: target, horizon, how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","3-year","Compiled"], mRows) +
+    '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
+    miniTable(["#","Measure","Dir.","Target","Compiled"], mRows) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, and in which quarters</em></h4>' +
     miniTable(["#","Tactic","Owner","Quarters"], tRows);
 }
@@ -11136,8 +11318,8 @@ function renderUnitPlan(u){
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
   return (u.items.length >= 2
-      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel) + '</div></div>'
-      : '<div class="pane">' + unitPlanBody(sel) + '</div>');
+      ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, true) + '</div></div>'
+      : '<div class="pane">' + unitPlanBody(sel, false) + '</div>');
 }
 
 
@@ -11208,16 +11390,22 @@ function unitPerfRail(u){
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
   return u.items.length >= 2
-    ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u) + '</div></div>'
-    : '<div class="pane">' + unitPerfPane(sel, u) + '</div>';
+    ? '<div class="split">' + rail + '<div class="pane">' + unitPerfPane(sel, u, true) + '</div></div>'
+    : '<div class="pane">' + unitPerfPane(sel, u, false) + '</div>';
 }
-function unitPerfPane(it, u){
+/* Same removal as the plan pane, and here the duplication was worse: the rail
+   row states the name, the score AND the execution figure, and scorePair
+   below states both scores again at the size they deserve. The heading was the
+   third telling. Nothing on this page is edited in it, so unlike the plan
+   there is no edit case to keep it for — only the no-rail one. */
+function unitPerfPane(it, u, railed){
   var scored = scorableMeasures(it).map(function(m){ return m.progress; });
   var uk = u && u.ukey;
   var meta = pillarMeta(it);
-  return '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
+  return (railed ? '' :
+    '<div class="ptitle"><div><h3>' + esc(it.name) + '</h3>' +
       (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
-      '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>' +
+      '<span class="pill ' + band(pillarPerf(it)) + '">' + pct(pillarPerf(it)) + '</span></div>') +
     scorePair(pillarPerf(it), pillarExec(it), pillarPlan(it),
               it.measures.length, scored.length,
               scored.length ? Math.max.apply(null, scored) : null,
@@ -11289,6 +11477,29 @@ function renderLabels(){
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
 }
 
+/* MONOCHROME, AND INSIDE THE BOX (Islam, 2026-08-22: "make the icons of view
+   and edit in place and make the eye icon colorless like the pen").
+
+   The eye was `&#128065;` — U+1F441, which every platform renders as a COLOUR
+   EMOJI. Two faults follow from that one fact and both were on screen. A
+   colour emoji ignores its element's `color`, so a lit cell painted the glyph
+   in the emoji's own browns on a navy ground instead of inverting; and at
+   emoji metrics it overhangs a 26×24 button, which is why it appeared to sit
+   BELOW its box rather than in it. The pen (`&#9998;`, U+270E) is a text glyph
+   and behaved — which is exactly why the pair looked mismatched.
+
+   Two inline SVGs settle both at once: they take `currentColor`, so the lit
+   state inverts like every other control here, and the RULE sizes them rather
+   than a font nobody chose. Used by the buttons AND by the legend, so the
+   legend cannot drift from the thing it explains. */
+var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M1.7 10S4.8 5 10 5s8.3 5 8.3 5-3.1 5-8.3 5-8.3-5-8.3-5z" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
+  '<circle cx="10" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
+  '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+
 /* ── Roles & access ─────────────────────────────────────────────────── */
 function stateCell(roleKey, areaKey, editable, disabled){
   /* grantFor(), never ACCESS[role][area]. A tenant carried across from an
@@ -11320,7 +11531,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
       roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
       (on ? "Turn off — leaves no access" : o === "view" ? "May read" : "May read and change") +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
-      (o === "view" ? "&#128065;" : "&#9998;") + '</button>';
+      (o === "view" ? ICON_EYE : ICON_PEN) + '</button>';
   }).join("");
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
@@ -11356,9 +11567,15 @@ function renderAccess(){
     return null;
   }
 
+  /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
+     (Islam, 2026-08-22: "remove all the descriptions from the headers and just
+     make it appear on hovering"). The notes are lists — "Open, chase and
+     close · Import · Archived plans · Focus measures" — and seven of them
+     stacked under seven labels made the HEAD of a 49-cell table taller than
+     its body. The same answer the role column already reached in §37: the
+     sentence is on hover, and the column keeps its name. */
   var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
-    return '<th class="ac"><div class="factor-h"><b>' + esc(a.label) + '</b><span>' +
-      esc(a.note) + '</span></div></th>';
+    return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
   }).join("") + '</tr>';
 
   var body = ROLES.map(function(r){
@@ -11381,30 +11598,18 @@ function renderAccess(){
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-view">&#128065;</i> may read</span>' +
-        '<span><i class="st st-edit">&#9998;</i> may read and change</span>' +
+        '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
+        '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>') +
-
-    section("", "Own is not a setting",
-      null,
-      '<div class="note"><b>&ldquo;Own&rdquo; is whatever they hold a role in.</b> ' +
-      'The head and the custodian of Mobile own Mobile. A company CEO owns every unit ' +
-      'in their company. The SMO and the group CEO own all of it. Nobody types that in ' +
-      'anywhere &mdash; it is read from who is attached to what on ' +
-      '<b>Business units</b>, <b>Supporting functions</b> and <b>People</b>, which is why ' +
-      'those pages and this one cannot disagree.' +
-      '<div style="margin-top:10px">Two things a company decides for itself still apply on top, ' +
-      'and can only ever narrow this table: whether its CEO sees <b>the group</b>, and whether ' +
-      'they see <b>the other companies</b>. Both are on the Companies page.</div></div>' +
-      '<div class="note"><b>Three things are rules, not settings, so they are not in the table.</b> ' +
-      'The <b>Knowledge base</b> is readable by everyone, always &mdash; an explanation nobody ' +
-      'can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much ' +
-      'access the unit&rsquo;s own people hold, because a plan you are measured against is not ' +
-      'yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked ' +
-      'by the group CEO and the SMO. Each of these used to be a cell here.</div>');
+      '</div>');
 }
+/* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
+   "the design is poor"). "Own is not a setting" and "Three things are rules"
+   ran to twelve lines under a table of 49 cells, and neither is something you
+   read while setting a grant — they are what the page MEANS, which is what the
+   knowledge base is for (§30). Both are now `c_access` in pageinfo.js, whole
+   and reachable by everyone, and this page ends where the table does. */
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */
 /* The previous cycle's split, carried so a factor change can be read against
@@ -11971,7 +12176,7 @@ function renderPeople(){
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(p.name) + '</b>') +
-        '<span class="why mono">' + esc(p.key) + '</span></td>' +
+        '<span class="why mono pkey">' + esc(p.key) + '</span></td>' +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
@@ -13813,6 +14018,230 @@ function wireDeck(){
 
 </script>
 <script>
+/* ══ A DROPDOWN YOU CAN TYPE INTO ═════════════════════════════════════
+   Islam, 2026-08-22: "for the figures setting make all the drop downs beyond
+   5 items searchable, this might apply to any selection list in the platform."
+
+   It does, so this is not a control the Figure sets page owns. It is an
+   ENHANCEMENT applied to every <select> in the platform once its list passes
+   five options, and it is written the way it is for one reason above all:
+
+   THE NATIVE <select> STAYS. It is not replaced, not moved, and not
+   reparented — it is hidden in place, and a button is inserted in front of it.
+   Everything that already exists keeps working untouched: `data-setowner`,
+   `data-prole-where`, `[data-coflag]`, every `addEventListener("change")` that
+   wire() attaches, and every `sel.value` read. Choosing a name from the list
+   sets the select and fires a real `change` on it, so the handler that saves
+   it never learns there was a search box. A component that replaced the
+   selects would have needed all of that rewired, and rewiring a control that
+   feeds the authorisation matrix to add a search box is not a trade worth
+   making.
+
+   FIVE IS THE THRESHOLD, NOT A GUESS. Direction (2), compile rule (3), who
+   picks a set's figures (2) are all answered by looking; a list of twenty-nine
+   people is not, and that is the one the SMO uses most. Below six options
+   nothing changes at all, which is why this can be applied to everything
+   without an inventory of what deserves it.
+
+   THREE RULES IT HAD TO OBEY, all of them already paid for elsewhere:
+
+   1. TYPING NEVER REPAINTS (§35). The filter hides rows in place. A repaint
+      would replace the input being typed into, which is the same family of
+      fault as §30.1.
+   2. THE DOM IS CLEANED UP BEFORE THE CHANGE FIRES (§30.1). Selecting an
+      option repaints the whole panel, so the popup is closed and unhooked
+      FIRST and nothing touches the DOM afterwards.
+   3. WHOEVER HIDES A FIELD HIDES ITS FURNITURE (§34). `sync.js` hides the
+      viewer switcher for anyone who is not the SMO by setting `hidden` on the
+      select itself; the button follows it, or a non-SMO would get a live
+      control in front of a hidden field.
+
+   The popup is position:fixed and closes on scroll. Not a preference: `.cfg`
+   is `overflow-x:auto`, which computes overflow-y to auto as well, so an
+   absolutely positioned popup inside a settings table is CLIPPED by its own
+   table. Fixed positioning is the only kind that escapes an overflow ancestor
+   without knowing there was one. */
+var SEARCHSEL = (function(){
+  var MIN = 6;             /* "beyond 5 items" */
+  var open = null;
+
+  function textOf(sel){
+    var o = sel.options[sel.selectedIndex];
+    return o ? o.text : "";
+  }
+
+  function close(){
+    if (!open) return;
+    var o = open;
+    open = null;
+    document.removeEventListener("mousedown", o.onDoc, true);
+    document.removeEventListener("keydown", o.onKey, true);
+    window.removeEventListener("scroll", o.onGone, true);
+    window.removeEventListener("resize", o.onGone, true);
+    if (o.pop.parentNode) o.pop.parentNode.removeChild(o.pop);
+    o.btn.setAttribute("aria-expanded", "false");
+  }
+
+  /* The popup is measured against the button and flipped above it when there
+     is no room below — a list that opens off the bottom of the window is a
+     list you cannot reach the end of. */
+  function place(btn, pop){
+    var r = btn.getBoundingClientRect();
+    var h = pop.offsetHeight, w = pop.offsetWidth;
+    var below = window.innerHeight - r.bottom - 8;
+    var top = (below >= h || r.top < h + 8) ? r.bottom + 4 : r.top - h - 4;
+    var left = Math.min(r.left, Math.max(8, window.innerWidth - w - 8));
+    pop.style.top = Math.max(8, top) + "px";
+    pop.style.left = left + "px";
+  }
+
+  function choose(sel, btn, value){
+    /* Cleanup FIRST. `change` repaints the panel, which destroys everything
+       below — including the popup this click is still inside (§30.1). */
+    close();
+    if (sel.value === value) return;
+    sel.value = value;
+    setLabel(sel, btn);
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function setLabel(sel, btn){
+    btn.firstChild.textContent = textOf(sel) || "—";
+    btn.title = textOf(sel) || "";
+  }
+
+  function openFor(sel, btn){
+    close();
+    var pop = document.createElement("div");
+    pop.className = "sspop";
+    pop.setAttribute("role", "listbox");
+
+    var q = document.createElement("input");
+    q.type = "text";
+    q.className = "fld sssearch";
+    q.placeholder = "Search…";
+    q.autocomplete = "off";
+    q.setAttribute("aria-label", "Search this list");
+
+    var list = document.createElement("div");
+    list.className = "sslist";
+    var none = document.createElement("div");
+    none.className = "ssempty";
+    none.textContent = "Nothing matches.";
+    none.hidden = true;
+
+    var rows = [];
+    Array.prototype.forEach.call(sel.options, function(op){
+      var r = document.createElement("button");
+      r.type = "button";
+      r.className = "ssrow" + (op.value === sel.value ? " on" : "");
+      r.textContent = op.text || "—";
+      r.setAttribute("role", "option");
+      r.setAttribute("aria-selected", op.value === sel.value);
+      r._q = (op.text || "").toLowerCase();
+      r.addEventListener("click", function(){ choose(sel, btn, op.value); });
+      rows.push(r);
+      list.appendChild(r);
+    });
+
+    /* Hides rows in place. Never re-renders the list, never touches the input
+       being typed into (§35). */
+    q.addEventListener("input", function(){
+      var s = q.value.trim().toLowerCase(), n = 0;
+      rows.forEach(function(r){
+        var hit = !s || r._q.indexOf(s) > -1;
+        r.hidden = !hit;
+        if (hit) n++;
+      });
+      none.hidden = n > 0;
+    });
+
+    pop.appendChild(q);
+    pop.appendChild(list);
+    pop.appendChild(none);
+    document.body.appendChild(pop);
+    pop.style.minWidth = Math.max(200, btn.offsetWidth) + "px";
+    place(btn, pop);
+    btn.setAttribute("aria-expanded", "true");
+
+    var onDoc = function(e){ if (!pop.contains(e.target) && e.target !== btn) close(); };
+    var onKey = function(e){
+      if (e.key === "Escape") { close(); btn.focus(); return; }
+      if (e.key !== "Enter") return;
+      /* Enter takes the first row still showing — the whole point of typing
+         three letters is not having to reach for the mouse afterwards. */
+      var first = rows.filter(function(r){ return !r.hidden; })[0];
+      if (first && document.activeElement === q) { e.preventDefault(); first.click(); }
+    };
+    /* Fixed to the viewport, so a scroll would leave it hanging beside
+       nothing. Closing is honest; following the button is not worth a
+       scroll-frame listener on a page with sticky chrome (§28.3). */
+    var onGone = function(){ close(); };
+
+    document.addEventListener("mousedown", onDoc, true);
+    document.addEventListener("keydown", onKey, true);
+    window.addEventListener("scroll", onGone, true);
+    window.addEventListener("resize", onGone, true);
+
+    open = { native: sel, btn: btn, pop: pop, onDoc: onDoc, onKey: onKey, onGone: onGone };
+    q.focus();
+  }
+
+  function enhance(sel){
+    if (sel.multiple || sel.disabled) return;
+    if (sel.dataset.nosearch === "1") return;
+    if (sel.options.length < MIN) return;
+    if (sel.dataset.ss === "1") {           /* already wrapped this paint */
+      var prev = sel.previousSibling;
+      if (prev && prev.classList && prev.classList.contains("ssbtn")) {
+        setLabel(sel, prev);
+        prev.hidden = sel.hidden;
+      }
+      return;
+    }
+    sel.dataset.ss = "1";
+    sel.classList.add("ss-native");
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "ssbtn" + (sel.className.indexOf("selbox") > -1 ? " selbox" : "");
+    btn.setAttribute("aria-haspopup", "listbox");
+    btn.setAttribute("aria-expanded", "false");
+    btn.appendChild(document.createTextNode(""));
+    var car = document.createElement("span");
+    car.className = "sscar";
+    car.setAttribute("aria-hidden", "true");
+    car.textContent = "▾";
+    btn.appendChild(car);
+    setLabel(sel, btn);
+    /* Inserted as a SIBLING, never as a parent. sync.js reaches for the
+       viewer select by id and inserts a name beside it — reparenting the
+       select would break that from a file this component has never heard of. */
+    sel.parentNode.insertBefore(btn, sel);
+    btn.hidden = sel.hidden;
+
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      if (open && open.native === sel) close(); else openFor(sel, btn);
+    });
+    /* The label still points at the select, and something else may set the
+       value (the viewer switcher does, from sync.js). Both are answered here
+       rather than by asking every caller to know about this file. */
+    sel.addEventListener("focus", function(){ btn.focus(); });
+    sel.addEventListener("change", function(){ setLabel(sel, btn); });
+  }
+
+  return {
+    wire: function(){
+      close();
+      document.querySelectorAll("select").forEach(enhance);
+    },
+    close: close
+  };
+})();
+
+</script>
+<script>
 /* ── Persistence ──────────────────────────────────────────────────────────
    Served over http(s), the platform loads its state from /api/state and
    writes every change back, so edits survive reloads and every viewer shares
@@ -14004,7 +14433,14 @@ var SYNC = (function () {
       window.VIEWER = person.key;
       sel.value = person.key;
     }
-    if (person.level !== "smo") {
+    /* THE SEAT ROLE, NOT A LEVEL. This read `person.level !== "smo"` — a name
+       that stopped existing when roles replaced levels (§33). The server has
+       returned `role` ("super") ever since, so `undefined !== "smo"` was true
+       for EVERYBODY and the switcher was hidden from the one person it is for:
+       the SMO saw "Signed in as …" and lost the simulation entirely. A
+       comparison against a field nobody sets fails silently and in the safe
+       direction, which is why it survived a version. */
+    if (person.role !== "super") {
       sel.hidden = true;
       var label = box.querySelector("label");
       if (label) label.textContent = "Signed in as";
@@ -14675,6 +15111,11 @@ var SYNC = (function () {
       }
     }
     wire();
+    /* LAST, and after wire(). Every <select> the paint just produced gets a
+       searchable button in front of it once its list passes five options
+       (searchsel.js) — the native control stays where it is, so nothing wire()
+       just attached is disturbed. */
+    SEARCHSEL.wire();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }

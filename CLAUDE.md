@@ -220,6 +220,15 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
   a tenant column — person keys are short and global (`smo`, `ceo`), so a column
   forces composite keys through `credentials` and `sessions`. Read §36 first.
+- **Searchable dropdowns (since v3.15, §45.5):** `src/searchsel.js` enhances
+  **every** `<select>` in the platform once its list passes five options —
+  `SEARCHSEL.wire()` runs at the end of `paint()`, after `wire()`. The native
+  select is **hidden in place, never replaced or reparented**, so every existing
+  `change` handler and `sel.value` read keeps working; choosing fires a real
+  `change` on it. Three rules it obeys and you must too: typing never repaints
+  (§35), the popup is unhooked BEFORE the change fires (§30.1), and the button
+  follows the select's `hidden` (§34). The popup is `position:fixed` because
+  `.cfg` is an overflow container and would clip an absolute one.
 - **On each version bump:** update the gate's link in `index.html`, bump `SHELL`
   **and** the platform filename in `sw.js`, `vercel.json`'s rewrite destination
   and `scripts/dev-server.js`'s `PLATFORM_FILE`, regenerate `db/seed-state.json`,
@@ -286,7 +295,39 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-22 — **v3.14**: FIGURE SETS (§44, spec 008). Many
+*Last Updated: 2026-08-22 — **v3.15**: EIGHT REFINEMENTS, AND WHAT THE
+MEASURING FOUND (§45). Islam went through the built product screen by screen.
+None of the eight is a feature; half were a symptom with a cause. **A
+comparison against a field nobody sets fails silently and in the SAFE
+direction** — `sync.js` still read `person.level`, deleted by §33 a version ago,
+so `undefined !== "smo"` was true for everybody and the viewer switcher was
+hidden from the one person it exists for. It locks down rather than opens up,
+so nothing threw and every sweep stayed green; only using the product found it.
+**A feature that renders nothing looks like a feature that was not built** — the
+demo shipped with no figure sets, so every surface §44 built showed empty; it
+now carries *Financial Figures* claiming all 26 EGP-denominated figures. And
+that exposed the real one: **`sets` live in `org.extra`, the first thing §44
+stored where §21's clean slate was not looking** — migration 004 deleted every
+`row.src` with the pillars that carried them and left the set standing, owned by
+a person it had just deleted. **THE OBVIOUS CAUSE EXPLAINS THE WORST CASE AND
+NONE OF THE ORDINARY ONES**: the People page's role chips took the tallest row
+from 89px to 69 and left the median at 61, and only measuring every cell of an
+ordinary row found the three things paid on all 31 (61 → 41). **A COLOUR EMOJI
+CANNOT BE COLOURED** — `&#128065;` ignores its element's `color` and overhangs a
+26×24 button, which is why the lit eye painted brown on navy and sat below its
+box while the pen (a text glyph) behaved; both are SVG taking `currentColor`
+now. **A control that appears on hover needs something to hover** — removing the
+pane heading took the pen's anchor with it, so the pane became the target.
+**A file that is not built is not the product** — `src/new-units.js` is not in
+`build.py` and its four units really live in `group-data.js:737`; editing it as
+though it were data is how a source of truth acquires a second copy. And the
+searchable dropdown's own rule: **the native `<select>` stays**, hidden in
+place, because rewiring the controls that feed the access matrix to add a search
+box is not a trade worth making. Multi-tenant restated and recorded as §36.5 —
+still nothing built, deliberately; *enter first, then choose the client* settles
+half of §36.4's open question.*
+
+*Earlier: 2026-08-22 — **v3.14**: FIGURE SETS (§44, spec 008). Many
 numbers are not the business unit's — revenue exists in Finance before a unit
 is asked for it. **The thing that owns numbers is a NAMED SET**, not a person
 and not a department: "figure custodian 1, 2, 3" says nothing and *Financial

@@ -53,29 +53,6 @@ function renderLabels(){
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' + warn);
 }
 
-/* MONOCHROME, AND INSIDE THE BOX (Islam, 2026-08-22: "make the icons of view
-   and edit in place and make the eye icon colorless like the pen").
-
-   The eye was `&#128065;` — U+1F441, which every platform renders as a COLOUR
-   EMOJI. Two faults follow from that one fact and both were on screen. A
-   colour emoji ignores its element's `color`, so a lit cell painted the glyph
-   in the emoji's own browns on a navy ground instead of inverting; and at
-   emoji metrics it overhangs a 26×24 button, which is why it appeared to sit
-   BELOW its box rather than in it. The pen (`&#9998;`, U+270E) is a text glyph
-   and behaved — which is exactly why the pair looked mismatched.
-
-   Two inline SVGs settle both at once: they take `currentColor`, so the lit
-   state inverts like every other control here, and the RULE sizes them rather
-   than a font nobody chose. Used by the buttons AND by the legend, so the
-   legend cannot drift from the thing it explains. */
-var ICON_EYE = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-  '<path d="M1.7 10S4.8 5 10 5s8.3 5 8.3 5-3.1 5-8.3 5-8.3-5-8.3-5z" fill="none" ' +
-    'stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>' +
-  '<circle cx="10" cy="10" r="2.3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
-var ICON_PEN = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
-  '<path d="M13.4 3.6l3 3L7.9 15.1l-3.9.9.9-3.9z" fill="none" ' +
-    'stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-
 /* ── Roles & access ─────────────────────────────────────────────────── */
 function stateCell(roleKey, areaKey, editable, disabled){
   /* grantFor(), never ACCESS[role][area]. A tenant carried across from an
@@ -107,7 +84,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
       roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
       (on ? "Turn off — leaves no access" : o === "view" ? "May read" : "May read and change") +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
-      (o === "view" ? ICON_EYE : ICON_PEN) + '</button>';
+      (o === "view" ? "&#128065;" : "&#9998;") + '</button>';
   }).join("");
   /* Nothing lit IS the answer, so the cell says so rather than looking
      unanswered — a blank cell in a permissions table reads as "not filled in",
@@ -143,15 +120,9 @@ function renderAccess(){
     return null;
   }
 
-  /* THE HEADER SAYS WHAT THE COLUMN IS; HOVER SAYS WHAT IS IN IT
-     (Islam, 2026-08-22: "remove all the descriptions from the headers and just
-     make it appear on hovering"). The notes are lists — "Open, chase and
-     close · Import · Archived plans · Focus measures" — and seven of them
-     stacked under seven labels made the HEAD of a 49-cell table taller than
-     its body. The same answer the role column already reached in §37: the
-     sentence is on hover, and the column keeps its name. */
   var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
-    return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
+    return '<th class="ac"><div class="factor-h"><b>' + esc(a.label) + '</b><span>' +
+      esc(a.note) + '</span></div></th>';
   }).join("") + '</tr>';
 
   var body = ROLES.map(function(r){
@@ -174,18 +145,30 @@ function renderAccess(){
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
-        '<span><i class="st st-view">' + ICON_EYE + '</i> may read</span>' +
-        '<span><i class="st st-edit">' + ICON_PEN + '</i> may read and change</span>' +
+        '<span><i class="st st-view">&#128065;</i> may read</span>' +
+        '<span><i class="st st-edit">&#9998;</i> may read and change</span>' +
         '<span><i class="st st-none">neither</i> no access, page hidden</span>' +
         '<span><i class="st" style="background:none;color:var(--none);border:1px dashed var(--none)">&mdash;</i> cannot come up for this role</span>' +
-      '</div>');
+      '</div>') +
+
+    section("", "Own is not a setting",
+      null,
+      '<div class="note"><b>&ldquo;Own&rdquo; is whatever they hold a role in.</b> ' +
+      'The head and the custodian of Mobile own Mobile. A company CEO owns every unit ' +
+      'in their company. The SMO and the group CEO own all of it. Nobody types that in ' +
+      'anywhere &mdash; it is read from who is attached to what on ' +
+      '<b>Business units</b>, <b>Supporting functions</b> and <b>People</b>, which is why ' +
+      'those pages and this one cannot disagree.' +
+      '<div style="margin-top:10px">Two things a company decides for itself still apply on top, ' +
+      'and can only ever narrow this table: whether its CEO sees <b>the group</b>, and whether ' +
+      'they see <b>the other companies</b>. Both are on the Companies page.</div></div>' +
+      '<div class="note"><b>Three things are rules, not settings, so they are not in the table.</b> ' +
+      'The <b>Knowledge base</b> is readable by everyone, always &mdash; an explanation nobody ' +
+      'can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much ' +
+      'access the unit&rsquo;s own people hold, because a plan you are measured against is not ' +
+      'yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked ' +
+      'by the group CEO and the SMO. Each of these used to be a cell here.</div>');
 }
-/* THE TWO ESSAYS ARE GONE FROM THE PAGE (Islam, 2026-08-22, on this table:
-   "the design is poor"). "Own is not a setting" and "Three things are rules"
-   ran to twelve lines under a table of 49 cells, and neither is something you
-   read while setting a grant — they are what the page MEANS, which is what the
-   knowledge base is for (§30). Both are now `c_access` in pageinfo.js, whole
-   and reachable by everyone, and this page ends where the table does. */
 
 /* ── The factor editor, appended to the Weighting page ──────────────── */
 /* The previous cycle's split, carried so a factor change can be read against
@@ -752,7 +735,7 @@ function renderPeople(){
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(p.name) + '</b>') +
-        '<span class="why mono pkey">' + esc(p.key) + '</span></td>' +
+        '<span class="why mono">' + esc(p.key) + '</span></td>' +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */

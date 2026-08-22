@@ -10479,8 +10479,17 @@ function renderTemple(){
 }
 
 function renderGroupFoundation(){
-  return
-    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  /* `return` ON ITS OWN LINE RETURNED UNDEFINED. Automatic semicolon insertion
+     ended the statement there and left everything below as dead code, so the
+     group's Foundation page has rendered the literal word "undefined" since
+     v3.5 — and threw no error, which is exactly why a sweep that asserts "no
+     console errors" walked past it every time.
+
+     It broke when `editBar(...) +` was removed for the pen-on-hover change:
+     the operand went and the `+` went with it, leaving the `return` stranded.
+     Cost: a blank page for every viewer, and no edit route to the group's
+     clauses, purpose, aspiration or values for anyone including the SMO. */
+  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       GROUP.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
@@ -14969,6 +14978,19 @@ var SEARCHSEL = (function(){
     }
     sel.dataset.ss = "1";
     sel.classList.add("ss-native");
+    /* OUT OF THE TAB ORDER, AND OUT OF THE ACCESSIBILITY TREE. Hiding the
+       select in place left it TABBABLE — and the focus handler below bounces
+       its focus straight back to the button, so Tab went button → select →
+       button → button … and NOTHING ELSE ON THE PAGE WAS EVER REACHABLE by
+       keyboard. Every page carries at least one of these, so from v3.15 until
+       now the whole product was a keyboard trap on its first control.
+
+       The lesson is the one §34 already records from the other direction:
+       whoever hides a field hides its furniture. Visually hidden is not
+       hidden — `tabindex` and `aria-hidden` are what remove a control from the
+       two trees that are not the visual one. */
+    sel.tabIndex = -1;
+    sel.setAttribute("aria-hidden", "true");
 
     var btn = document.createElement("button");
     btn.type = "button";
@@ -15003,8 +15025,19 @@ var SEARCHSEL = (function(){
     });
     /* The label still points at the select, and something else may set the
        value (the viewer switcher does, from sync.js). Both are answered here
-       rather than by asking every caller to know about this file. */
+       rather than by asking every caller to know about this file.
+
+       The focus bounce stays for the LABEL's sake — clicking "Viewing as"
+       focuses the select it is `for`, and that should land on the button — but
+       it can no longer be reached by Tab, so it cannot loop. */
     sel.addEventListener("focus", function(){ btn.focus(); });
+    /* The visible control inherits the hidden one's name, so a screen reader
+       is told what the control is FOR rather than only what it currently says
+       (§48.2). Without it the viewer switcher announces a person's name with
+       no hint that it switches anything. */
+    var lbl = sel.id && document.querySelector('label[for="' + sel.id + '"]');
+    var name = (lbl && lbl.textContent.trim()) || sel.getAttribute("aria-label");
+    if (name) btn.setAttribute("aria-label", name);
     sel.addEventListener("change", function(){ setLabel(sel, btn); });
   }
 

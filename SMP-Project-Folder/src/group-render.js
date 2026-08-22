@@ -1101,8 +1101,17 @@ function renderTemple(){
 }
 
 function renderGroupFoundation(){
-  return
-    '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
+  /* `return` ON ITS OWN LINE RETURNED UNDEFINED. Automatic semicolon insertion
+     ended the statement there and left everything below as dead code, so the
+     group's Foundation page has rendered the literal word "undefined" since
+     v3.5 — and threw no error, which is exactly why a sweep that asserts "no
+     console errors" walked past it every time.
+
+     It broke when `editBar(...) +` was removed for the pen-on-hover change:
+     the operand went and the `+` went with it, leaving the `return` stranded.
+     Cost: a blank page for every viewer, and no edit route to the group's
+     clauses, purpose, aspiration or values for anyone including the SMO. */
+  return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       GROUP.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +

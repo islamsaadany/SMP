@@ -232,9 +232,12 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   same fault the React note below records, and the same one HR_ERP records
   against its bulk password action. And **every exit repaints, including the
   cancelled ones**, or the state says closed while the panel is still on screen.
-- **Setup is a PAGE with a rail (since v3.16, §46.1):** the gear menu offers
-  **Manage** (the six things you do in a cycle) and **Setup** as ONE entry; the
-  ten setup pages are the rail's job. `SETUP_GROUPS` in `shell.html` is the
+- **Setup is a PAGE with a rail, and it is the ONLY door (since v3.17, §46.1,
+  §47.7):** the gear is not a menu — it navigates straight to the page, which
+  carries all sixteen entries in five groups, *Running the cycle* first. It
+  lands on the def marked `primary`, never merely the first in the array. A
+  group folds, but **never the one holding the current page**. The old Manage
+  menu, `MENU_OPEN` and all its CSS are gone (§24). `SETUP_GROUPS` in `shell.html` is the
   order and `grp` on each def is its group — one list, so a page cannot be in
   two groups or none. **Figure sets is one page with two sections** and is
   gated on `c_source` (`area:"always"`), never on `c_sets`, or a set owner who
@@ -317,7 +320,24 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-22 — **v3.16**: SETUP BECOMES A PLACE (§46). Four of
+*Last Updated: 2026-08-22 — **v3.17**: ONE DOOR, A SWITCH, AND A CYCLE THAT
+ASKS (§47). **THE GEAR STOPS BEING A MENU**: Setup and Manage merge into one
+railed page, and with one destination behind it a menu holding one item is a
+door behind a door (§32, once already at the gate). **A GROUP MAY FOLD BUT
+NEVER THE ONE YOU ARE IN** — a rail that can hide the row it points at lies
+about where you are. **THE THIRD STATE IS WHAT MADE IT A FOLD**: Units |
+Functions looked like one segmented box since §41.8 but could also be BOTH
+CLOSED; dropping that state is what turns it into a switch, and the disclosure
+arrow had to go with it because ▸/▾ promises something that no longer happens.
+**A HARD-CODED GUESS THAT CHANGES A SCORE IS NOT COSMETIC**: opening a cycle
+minted `endsQuarter:4`, which decides which tactics count as due, so it is
+asked for now — with nothing touching REVIEW until Open is pressed, or a
+half-filled form would already have closed the cycle it meant to succeed. And
+**MEASURE THE PROSE, DO NOT GREP IT**: driving all thirteen user-facing pages
+found nine already clean and exactly one line that described the DATABASE on a
+page a group CEO opens.*
+
+*Earlier: 2026-08-22 — **v3.16**: SETUP BECOMES A PLACE (§46). Four of
 five items settled from a MOCKUP rather than a description, and two of its
 options were killed by being drawn — one of them mine. **THE GEAR MENU WAS
 DOING TWO UNRELATED JOBS**: six entries are things you DO in a cycle, ten are

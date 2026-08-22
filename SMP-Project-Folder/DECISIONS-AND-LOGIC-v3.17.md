@@ -6078,3 +6078,128 @@ the button WRAPPED. **A selector that matches something, just not the thing it
 was written for, fails silently in both directions**: nothing looked broken
 until the SMO's name went from "Strategy Management Office" to "Mohamed Essam —
 Head of the Strategy Management Office" inside a 150px control.
+
+### 47.5 Cleaning the user-facing prose
+
+*"we need to clean any unneded notes or explanations from the user interface …
+I'm fine for now for the setup and manage pages but the user facing needs
+cleaning."*
+
+Measured rather than guessed: every one of the thirteen user-facing pages was
+driven and every visible line of prose pulled out, excluding drill-down modals
+(where an explanation is exactly what you opened it for). **Nine of thirteen
+were already clean** — both Foundations, SWOT, Plan, Temple, unit Performance
+and both function pages had nothing.
+
+One line was plainly wrong and is gone outright: Weighting carried *"Factors
+are stored as rows, not as fixed columns, so adding one is data entry rather
+than a schema change."* **That is a sentence about the database, rendering on a
+page a group CEO opens.**
+
+Three others kept their first half and lost their second, because in each case
+the first sentence states a fact or an action and the second is an aphorism:
+the group's variance line lost *"Read as a share of plan, not of the whole
+year"*, the focus board lost *"beside the target and the history that inform
+the decision"*, and the Report's blocked-submit warning lost *"a red number
+with nothing beside it is where a review meeting stalls"*. The warning still
+says why Submit is blocked, which is the part that had to survive.
+
+**The test worth keeping is the one that found them**: drive the pages and read
+what is actually on screen. Grepping the source finds the conditional empty
+states too, and those are not noise — they are the page explaining why it is
+empty.
+
+### 47.6 Units | Functions becomes a switch
+
+*"one button as a switch between both and the one that is selected is
+highlighted … for better usability."*
+
+The control has looked like one segmented box since §41.8, but it behaved as
+two independent folds with a **third state — both closed**. That state is what
+made it a pair of folds rather than a switch, and dropping it is the whole
+change: the row always shows one list, the lit half always says which, and
+pressing the lit side now does nothing rather than emptying the row. **Nobody
+was choosing "neither" on purpose**; they were closing the one they had opened.
+
+Two things followed. **The disclosure arrow had to go** — a ▸/▾ twist promises
+"this opens and closes", and `aria-expanded` says the same to a screen reader;
+both became `aria-pressed` and no arrow. And **a switch cannot rest on a side
+with nothing behind it**: a viewer holding functions but no units is moved to
+the side that has something, or they would face an empty list with no clue that
+the other half was full.
+
+### 47.7 Setup and Manage become one page
+
+*"I guess we can combine both into the new page we made for the setup with the
+grouping of the pages and in the rail we can make the grouping collapsable."*
+
+The split was made in §46.1 and it was right **about the menu**: sixteen flat
+entries doing two jobs. But the rail with groups already solves that, so
+keeping two doors behind one gear became the odd part. Five groups now, and
+**Running the cycle comes first** because it is what anybody opens most.
+
+Three consequences, each of which had to be built or the merge would be half
+done:
+
+**The gear stops being a menu.** With one destination behind it, a menu holding
+one item is a door behind a door — which §32 removed once already at the gate.
+The gear IS the door now, and that removes an interaction rather than adding
+one. `MENU_OPEN`, the panel markup, its group bands and its CSS all went with
+it (§24, and §41.9's reason: a stylesheet left behind is how a later mockup
+draws a control the product does not have).
+
+**It lands on the PRIMARY page, not the first one in the array.** Landing on
+"whatever happens to be first" put the gear on the knowledge base — true of the
+list, wrong for the person pressing it.
+
+**A group folds, but never the one you are in.** A rail that can hide the row
+it is pointing at is a rail that lies about where you are, so the stored
+preference is overridden for the current group.
+
+And the sweeps had to move again. Both `qa.py` and the contrast sweep clicked
+`[data-md="manage"][data-ms=…]` entries that no longer exist; they walk the
+rail now and **unfold every group first**, because a folded group hides its
+rows and a page nothing clicks is a page nothing tests. §41.5, third time.
+
+### 47.8 Opening a cycle asks what it is
+
+*"on opening the cycle it didn't ask me any questions. when a cycle opens I
+believe we should set the name of the cycle and the duration it covers."*
+
+It minted `{ name:"Cycle 3", from:<last cycle's end>, to:"", due:"",
+endsQuarter:4 }` and opened it — a name nobody chose, a period half filled from
+a guess, and a hard-coded end quarter. **That last one is not cosmetic:
+`endsQuarter` decides which tactics count as DUE**, so a wrong guess silently
+changes every unit's execution score. It is asked for now, with the reason
+printed under the field.
+
+An inline panel rather than a modal, because what you are about to replace —
+the cycle above it — should stay on screen while you describe its successor.
+And **nothing touches `REVIEW` until Open is pressed**: a half-filled form would
+otherwise have already closed the cycle it was going to succeed. The name is
+the one field that blocks, because it is what every snapshot, delta and
+archived plan is filed under and nothing can derive it.
+
+The fields listen on `input` rather than `change`: a change event does not fire
+until blur, so pressing Open straight from a field would read the value from
+before the last thing typed.
+
+### 47.9 Two small ones from the same pass
+
+**The Report page kept the old pillar header** when Plan and Performance took
+the band in §46.3 — and it was also the last place in the product still
+printing `p.kind` ("Direction"), which `SHOW_KIND` has hidden since 3.4.
+
+**No note under a pillar.** Mobile's first pillar carried *"End-state: unified
+market intelligence engine"* and the other nine units carried nothing, so the
+line was not a feature of the page — it was one unit's plan having a field the
+rest left empty, and a layout that shifted depending on which pillar you
+picked. Still editable while correcting a plan, because a page that cannot show
+a field also cannot fix it.
+
+**Picking a new pillar puts you at the top of it.** The rail is sticky, so it
+is still under the cursor after a long scroll — you picked the next pillar and
+landed halfway down a table you had not read. `scrollTo(0,0)` is the wrong fix:
+it throws away the rail's pinned position. It scrolls to the SPLIT's offset
+less the chrome and the rail gap, **the same two numbers the rail's own sticky
+offset is built from**, and only ever upwards.

@@ -92,21 +92,21 @@ with sync_playwright() as p:
                     "    u.keyObjectives[0].actual = null; }"
                     "  paint(); }")
         pg.wait_for_timeout(300)
-        for sub in ["cycle","import","focusset","kb","myfig"]:
-            pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
-            try:
-                pg.click(f'#units [data-md="manage"][data-ms="{sub}"]'); pg.wait_for_timeout(420)
-                scan("manage/"+sub)
-            except Exception: pass
-        # SETUP IS ONE MENU ENTRY AND A RAIL (46.1). It used to be ten entries
-        # in the menu, and clicking for them after they moved cost 30 seconds
-        # of Playwright timeout each - 40 dead clicks, twenty minutes, and the
-        # sweep never finished. The rail is walked instead, which is also the
-        # only way its own groups and its selected row get measured at all.
-        pg.click("#navmenu-btn"); pg.wait_for_timeout(180)
+        # SETUP IS ONE DESTINATION AND A RAIL (46.1, merged with Manage in 47.7).
+        # The gear used to open a menu of sixteen; it goes straight to the page
+        # now, and every one of those sixteen is a rail row. Walking the rail is
+        # also the only way its groups and its selected row get measured at all.
         try:
             pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(500)
         except Exception: pass
+        # Every group open, or a folded one hides its rows from the sweep -
+        # 41.5: a state that cannot be reached by navigating is a state nothing
+        # measures.
+        for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
+                                         "els=>els.map(e=>e.dataset.railgrp)"):
+            try:
+                pg.click(f'.setuprail [data-railgrp="{g}"]'); pg.wait_for_timeout(200)
+            except Exception: pass
         for key in pg.eval_on_selector_all(".setuprail [data-setupgo]",
                                            "els=>els.map(e=>e.dataset.setupgo)"):
             try:

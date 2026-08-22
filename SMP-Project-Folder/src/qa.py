@@ -3,11 +3,6 @@ import pathlib
 url="file://"+str(pathlib.Path("strategy-management-platform.html").resolve())
 errs=[]
 
-def open_menu(pg):
-    b=pg.query_selector("#navmenu-btn")
-    if b and b.get_attribute("aria-expanded") != "true":
-        b.click(); pg.wait_for_timeout(80)
-
 def walk_destinations(pg):
     n=len(pg.query_selector_all("#units button[data-u]"))
     for ui in range(n):
@@ -46,17 +41,23 @@ with sync_playwright() as p:
             seen+=walk_destinations(pg)
         # The Manage menu: reopened before each entry, because choosing one
         # closes it. Every entry is a destination the two icons used to hold.
-        if pg.query_selector("#navmenu-btn"):
-            open_menu(pg)
-            keys=pg.eval_on_selector_all("#units .navmenu-panel button",
-                                         "els=>els.map(e=>e.dataset.md+'|'+e.dataset.ms)")
-            for k in keys:
-                d,sub=k.split("|")
-                open_menu(pg)
-                e=pg.query_selector('#units .navmenu-panel button[data-md="%s"][data-ms="%s"]'%(d,sub))
-                if not e: continue
-                e.click(); pg.wait_for_timeout(140)
-                walk_subtabs(pg)
+        # THE GEAR IS A DESTINATION, NOT A MENU (47.7). Setup and Manage merged
+        # into one page whose rail carries all sixteen entries, so the sweep
+        # walks the rail — and unfolds every group first, because a folded one
+        # hides its rows and a page nothing clicks is a page nothing tests.
+        if pg.query_selector('#units [data-md="setup"]'):
+            pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
+            for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
+                                             "els=>els.map(e=>e.dataset.railgrp)"):
+                pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(120)
+            for key in pg.eval_on_selector_all(".setuprail [data-setupgo]",
+                                               "els=>els.map(e=>e.dataset.setupgo)"):
+                el=pg.query_selector('.setuprail [data-setupgo="%s"]'%key)
+                if not el: continue
+                el.click(); pg.wait_for_timeout(160)
+                for k2 in pg.eval_on_selector_all(".setuppane .secrow [data-sub2]",
+                                                  "els=>els.map(e=>e.dataset.sub2)"):
+                    pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
                 seen+=1
         print(v,"ok", seen, "destinations")
     print("ERRORS:", errs if errs else "none")

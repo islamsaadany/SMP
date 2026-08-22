@@ -213,21 +213,29 @@
          you do once the things themselves exist (§39). */
       { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding }
     ],
-    /* Manage is what the SMO DOES, every cycle. Opening a window, chasing it,
-       loading plans, marking what carries reward \u2014 activities, not structure.
-       They sat in Setup only because that was the only place that existed. */
+    /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
+       because a flat menu of sixteen was doing two jobs — and that argument
+       was about the MENU. The rail with groups solves the same problem better,
+       so keeping two doors behind one gear is now the odd part: the gear opens
+       the page, and the rail's first group is the cycle.
+
+       These keep their own array because they are still a group with its own
+       label and its own answer to "may this person reach anything here"; they
+       are concatenated into the setup list by defsFor(). */
     manage: [
-      /* First in the list: it is the page you open before the others. */
-      { k:"kb",       ac:"c_kb",     label:"Knowledge base",                render:renderKB },
-      { k:"cycle",    ac:"c_cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
-      { k:"import",   ac:"c_import", label:"Import",                        render:renderImport },
-      { k:"archives", ac:"c_import", label:"Archived plans",                 render:renderArchives },
-      { k:"focusset", ac:"c_focus",  label:"Focus measures",                render:renderFocusSetup },
+      /* FIRST, because it is the page you open before the others — and now
+         also because the gear lands on whichever def is `primary`. */
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",                        render:renderImport },
+      { k:"archives", ac:"c_import", grp:"cycle", label:"Archived plans",                 render:renderArchives },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig",  label:"Figures I report",
+      /* Last in its group: it explains the rest, so it is not where you start. */
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB },
+      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
         when: ownsAnySource,                                render:renderMySources }
     ]
   };
@@ -272,9 +280,20 @@
   /* Which fold is open. Expanding is BROWSING, not going: opening Functions
      while sitting on Mobile does not move the page, so the closed fold has to
      carry the location or the navigation stops saying where you are. */
-  /* Both folds start closed. The row arrives at its shortest, and a person who
-     never opens one is never shown eighteen entries. */
-  var NAVFOLD = null;
+  /* A TWO-POSITION SWITCH, ONE SIDE ALWAYS ON (§47.6). Islam: "one button as a
+     switch between both and the one that is selected is highlighted."
+
+     The control has looked like one segmented box since §41.8, but it behaved
+     as two independent folds with a THIRD state — both closed — which is what
+     made it a pair of folds rather than a switch. Dropping that state is the
+     whole change: the row always shows one list, the lit half always says
+     which, and pressing the lit one now does nothing rather than emptying the
+     row. Nobody was choosing "neither" on purpose; they were closing the one
+     they had opened.
+
+     It starts on Units, because a business unit is what the platform is mostly
+     about and every viewer who holds any unit holds one here. */
+  var NAVFOLD = "units";
 
   function myUnits(){
     return activeKeys().filter(function(k){ return allowed(SUBS.unit, k).length; });
@@ -316,13 +335,18 @@
          segmented box they stay put, the bar carries one box instead of two,
          and the shared container says outright that Units and Functions are
          the same kind of thing. The opened list follows BOTH of them. */
+      /* A switch cannot rest on a side that has nothing behind it: a viewer who
+         holds functions but no units would otherwise land on an empty Units
+         list with no way to see that Functions has anything. */
+      if (NAVFOLD === "units" && !us.length) NAVFOLD = "caps";
+      if (NAVFOLD === "caps"  && !cs.length) NAVFOLD = "units";
       out.push({ folds: [
         { fold:"units", label:"Units",     open:NAVFOLD === "units" },
         { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
       ] });
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      else if (NAVFOLD === "caps")
+      else
         cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
@@ -337,9 +361,6 @@
     return out;
   }
 
-  /* MENU_OPEN is chrome state, not a destination \u2014 it never survives a paint
-     of the page below, only of the row itself. */
-  var MENU_OPEN = false;
 
   /* One list, two labelled groups. Merging the two buttons was about the way
      IN, not about the pages: every entry still opens exactly the page it
@@ -364,7 +385,13 @@
      right; the mockup drew it collapsing so it could be seen failing. If a
      page ever genuinely needs the 236px back, the page asks for it — Roles &
      access is the only candidate. */
+  /* The setup destination IS manage + setup now. One list, built here rather
+     than written out twice, so a page cannot be in one and missing from the
+     other. */
+  function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
+
   var SETUP_GROUPS = [
+    { k:"cycle", label:"Running the cycle", note:"What you do while a cycle is open" },
     { k:"who",  label:"Who",              note:"Who exists, and what may they touch" },
     { k:"run",  label:"What we run",      note:"The things being planned" },
     { k:"meas", label:"How it's measured", note:"What the numbers mean" },
@@ -402,6 +429,18 @@
     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12 4l-6 6 6 6" fill="none" ' +
     'stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
+  /* WHICH GROUPS ARE FOLDED. Five groups and sixteen pages is a long rail, so
+     they collapse — but the group holding the page you are ON is always open,
+     whatever the stored preference says. A rail that can hide the thing it is
+     pointing at is a rail that lies about where you are. */
+  var RAILSHUT = {};
+  try { RAILSHUT = JSON.parse(localStorage.getItem("smp.setup.groups") || "{}") || {}; }
+  catch (e) { RAILSHUT = {}; }
+  function toggleRailGroup(k){
+    RAILSHUT[k] = !RAILSHUT[k];
+    try { localStorage.setItem("smp.setup.groups", JSON.stringify(RAILSHUT)); } catch (e) {}
+  }
+
   function setupRail(defs, activeKey){
     if (!RAIL_OPEN) {
       return '<div class="rail setuprail shut">' +
@@ -412,11 +451,17 @@
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
-      return '<div class="rgroup" title="' + esc(g.note) + '">' + esc(g.label) + '</div>' +
-        items.map(function(d){
+      var here = items.some(function(d){ return d.k === activeKey; });
+      var shut = !!RAILSHUT[g.k] && !here;
+      return '<button type="button" class="rgroup' + (shut ? " shut" : "") +
+          '" data-railgrp="' + g.k + '" title="' + esc(g.note) + '" ' +
+          'aria-expanded="' + (!shut) + '">' +
+          '<span class="rgtw" aria-hidden="true">' + (shut ? "\u25b8" : "\u25be") + '</span>' +
+          esc(g.label) + '<span class="rgn">' + items.length + '</span></button>' +
+        (shut ? '' : items.map(function(d){
           return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
             '" data-setupgo="' + d.k + '">' + esc(d.label) + '</button>';
-        }).join("");
+        }).join(""));
     }).join("");
     return '<div class="rail setuprail"><div class="rhead">Setup' +
       '<button type="button" class="railtog" data-railtog="0" ' +
@@ -429,15 +474,19 @@
     /* Neither depends on the unit you happen to be looking at — Setup and the
        cycle belong to nobody's unit — but they are asked explicitly so they
        cannot start depending on it by accident. */
-    var m = allowed(SUBS.manage, "group"), st = reachable(SUBS.setup, "group", null);
-    if (m.length)  gs.push({ dest:"manage", label:"Manage", items:m });
-    /* SETUP IS ONE ENTRY NOW, NOT TEN (§46.1). Its pages are the rail's job;
-       listing them here as well would state the same navigation twice — the
-       fault the chrome shed in 2.9, and the reason the tab row above the
-       Setup pane is emptied too. The entry opens the first page the viewer
-       actually holds, so it never lands on something refused. */
-    if (st.length) gs.push({ dest:"setup", label:"Configure", single:true,
-                             items:[{ k:st[0].k, label:"Setup" }] });
+    /* NOTHING LEFT TO GROUP. Manage and Setup are one destination now (§47.7),
+       so the gear has exactly one thing to offer — and a menu holding one item
+       is a door behind a door, which §32 removed once already at the gate. The
+       gear IS the door now; this function only answers whether there is
+       anything behind it, and which page to land on. */
+    var st = reachable(setupDefs(), "group", null);
+    /* THE PRIMARY PAGE, falling back to the first the viewer holds. Landing on
+       "whatever happens to be first in the array" put the gear on the knowledge
+       base — true of the list, wrong for the person pressing it, who is far
+       more often coming to open or chase a cycle. */
+    var land = st.filter(function(d){ return d.primary; })[0] || st[0];
+    if (st.length) gs.push({ dest:"setup", label:"Setup", single:true,
+                             items:[{ k:land.k, label:"Setup" }] });
     return gs;
   }
 
@@ -461,8 +510,10 @@
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
   function defsFor(k){
     return k === "group" ? SUBS.group
-         : k === "manage" ? SUBS.manage
-         : k === "setup" ? SUBS.setup
+         /* Both keys resolve to the SAME merged list (§47.7). "manage" survives
+            only so a stored or in-flight `current` from before the merge lands
+            somewhere real rather than on the unit branch. */
+         : k === "manage" || k === "setup" ? setupDefs()
          : isFn(k) ? SUBS.fn
          : SUBS.unit;
   }
@@ -484,11 +535,16 @@
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
       if (t.folds) {
-        return '<span class="sep"></span><span class="foldgroup">' +
+        /* NO DISCLOSURE ARROW. A ▸/▾ twist promises "this opens and closes",
+           which is what these were and are not any more — a switch has two
+           sides and the lit one IS the state (§47.6). `aria-pressed` rather
+           than `aria-expanded` for the same reason: nothing expands. */
+        return '<span class="sep"></span><span class="foldgroup" role="group" ' +
+          'aria-label="Show units or supporting functions">' +
           t.folds.map(function(f){
             return '<button class="navfold' + (f.open ? " open" : "") +
-              '" data-fold="' + f.fold + '" aria-expanded="' + f.open + '">' + f.label +
-              '<span class="foldtw">' + (f.open ? "\u25be" : "\u25b8") + '</span></button>';
+              '" data-fold="' + f.fold + '" aria-pressed="' + f.open + '">' +
+              f.label + '</button>';
           }).join("") + '</span>';
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
@@ -514,10 +570,9 @@
     document.querySelectorAll("#units [data-fold]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Browsing, not going: `current` is untouched, so the page and its tabs
-           stay exactly as they are. Toggle, not switch: pressing the open one
-           closes it and returns the row to its shortest state. */
-        NAVFOLD = (NAVFOLD === b.dataset.fold) ? null : b.dataset.fold;
-        MENU_OPEN = false;
+           stay exactly as they are. A SWITCH, not a toggle — pressing the lit
+           side leaves it lit (§47.6). */
+        NAVFOLD = b.dataset.fold;
         paintUnits();
       });
     });
@@ -540,7 +595,6 @@
            Falls back to the first page the viewer actually holds, so someone
            without u_plan is not sent to a tab that is not there. */
         currentSub = entrySub(current);
-        MENU_OPEN = false;
         paint(); window.scrollTo(0,0);
       });
     });
@@ -566,38 +620,24 @@
     var gs = menuGroups();
     if (!gs.length) return "";
     var on = current === "manage" || current === "setup";
-    var body = gs.map(function(g){
-      return '<div class="navmenu-grp">' + esc(g.label) + '</div>' +
-        g.items.map(function(d){
-          /* A single-entry group is lit by its DESTINATION, not by which page
-             inside it happens to be open — the entry means "Setup", and Setup
-             is where you are whichever of its ten pages the rail has chosen. */
-          var on = g.single ? current === g.dest
-                            : (current === g.dest && currentSub === d.k);
-          return '<button type="button" data-md="' + g.dest + '" data-ms="' + d.k + '"' +
-            (on ? ' class="on"' : '') + '>' + esc(d.label) + '</button>';
-        }).join("");
-    }).join("");
+    /* ONE CLICK, NOT TWO. With a single destination behind it the gear stops
+       being a menu button and becomes a link — press it and you are on the
+       page, with the rail carrying everything the menu used to list. */
+    var only = gs[0].items[0];
     return '<span class="sep pinsep"></span>' +
-      '<div class="navmenu' + (MENU_OPEN ? " open" : "") + '">' +
-      '<button type="button" class="navmenu-btn navmenu-ico' + (on ? " here" : "") + '" id="navmenu-btn" ' +
-      'aria-haspopup="true" aria-expanded="' + MENU_OPEN + '" ' +
-      /* The word is gone from the face of the button, so it has to be carried
-         somewhere a pointer and a screen reader can both reach it. Never let a
-         glyph be the only thing that says what a control does. */
-      'title="Manage" aria-label="Manage">' + ICON_MANAGE +
-      '<span class="navmenu-tw" aria-hidden="true">\u25be</span></button>' +
-      '<div class="navmenu-panel"' + (MENU_OPEN ? "" : " hidden") + '>' + body + '</div></div>';
+      '<button type="button" class="navmenu-btn navmenu-ico navmenu-solo' +
+        (on ? " here" : "") + '" data-md="setup" data-ms="' + only.k + '" ' +
+        'title="Setup" aria-label="Setup">' + ICON_MANAGE + '</button>';
   }
 
+  /* The menu panel that used to live here is gone with the two-door split
+     (§47.7, §24: delete an element and delete its code with it). MENU_OPEN and
+     the panel markup went with it — a stylesheet or a state flag left behind is
+     how a later drawing shows a control the product does not have (§41.9). */
+
   function wireMenu(){
-    var btn = document.getElementById("navmenu-btn");
-    if (!btn) return;
-    btn.addEventListener("click", function(e){
-      e.stopPropagation();
-      MENU_OPEN = !MENU_OPEN;
-      paintUnits();
-    });
+    /* No toggle any more — the gear IS a [data-md] destination, so it is wired
+       by the same loop as everything else the row can go to. */
     document.querySelectorAll("#units [data-md]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
@@ -611,7 +651,6 @@
         }
         current = b.dataset.md;
         currentSub = b.dataset.ms;
-        MENU_OPEN = false;
         paint(); window.scrollTo(0,0);
       });
     });
@@ -862,6 +901,9 @@
     /* The Setup rail (§46.1). It replaces a tab row, so it does what the tab
        row did — including dropping every edit mode on the way out, or you land
        on Branding still editing People. */
+    document.querySelectorAll("[data-railgrp]").forEach(function(b){
+      b.addEventListener("click", function(){ toggleRailGroup(b.dataset.railgrp); paint(); });
+    });
     document.querySelectorAll("[data-railtog]").forEach(function(b){
       b.addEventListener("click", function(){ setRailOpen(b.dataset.railtog === "1"); paint(); });
     });
@@ -1116,11 +1158,45 @@
       REVIEW.state = "closed";
       paint();
     });
+    /* Opening a cycle now DESCRIBES it first (§47.8). The button fills a draft
+       from what can honestly be guessed — the new period starts where the last
+       one ended — and asks for the rest. Nothing touches REVIEW until Open. */
     var oc = document.querySelector("[data-opencycle]");
     if (oc) oc.addEventListener("click", function(){
-      var n = HISTORY.length + 1;
-      REVIEW = { name:"Cycle " + n, from:REVIEW.to, to:"", due:"", endsQuarter:4,
+      NEWCYCLE = { name:"", from:REVIEW.to || "", to:"", due:"",
+                   endsQuarter:REVIEW.endsQuarter || 4 };
+      paint();
+      var f = document.getElementById("nc-name");
+      if (f) f.focus();
+    });
+    ["nc-name","nc-from","nc-to","nc-due","nc-q"].forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) return;
+      /* `input`, not `change`: the draft has to be current when Open is
+         pressed, and a change event does not fire until blur — pressing Open
+         directly from a field would read the value before the last one typed. */
+      el.addEventListener("input", function(){
+        var k = id === "nc-q" ? "endsQuarter" : id.slice(3);
+        NEWCYCLE[k] = el.value;
+      });
+    });
+    var ncc = document.querySelector("[data-nc-cancel]");
+    if (ncc) ncc.addEventListener("click", function(){ NEWCYCLE = null; paint(); });
+    var ncg = document.querySelector("[data-nc-go]");
+    if (ncg) ncg.addEventListener("click", function(){
+      var d = NEWCYCLE || {};
+      /* A name is the one thing nothing can be derived from, and it is what
+         every snapshot, delta and archived plan will be filed under. */
+      if (!String(d.name || "").trim()) {
+        alert("Give the cycle a name — it is what its figures are filed under " +
+              "once it closes, and what the next cycle compares against.");
+        var f = document.getElementById("nc-name"); if (f) f.focus();
+        return;
+      }
+      REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
+                 due:d.due || "", endsQuarter:Number(d.endsQuarter) || 4,
                  state:"open", note:{}, submitted:{}, cadence:REVIEW.cadence };
+      NEWCYCLE = null;
       paint();
     });
     document.querySelectorAll("[data-rep]").forEach(function(el){
@@ -2202,7 +2278,6 @@
   /* A menu that stays open after you have looked away is a menu you have to
      dismiss. Bound once, at boot, rather than on every repaint. */
   document.addEventListener("click", function(e){
-    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
     /* A row's action menu closes the same way — but only on a click OUTSIDE
        it, or choosing an item would close the menu before the item's own
        handler ran. That is §30.1 from the other side: this listener rewrites
@@ -2220,7 +2295,6 @@
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
-    if (MENU_OPEN) { MENU_OPEN = false; paintUnits(); }
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU)) {
       PCOLMENU = false; PWMENU = false; paint();

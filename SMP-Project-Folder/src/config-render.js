@@ -224,8 +224,12 @@ function renderFactorEditor(){
 
   var totalOK = total === 100;
 
-  return section("", "Weighting factors",
-    "Factors are stored as rows, not as fixed columns, so adding one is data entry rather than a schema change. Each declares its own type, which decides how its values are captured.",
+  /* The note that was here described HOW THE DATA IS STORED — "as rows, not as
+     fixed columns … rather than a schema change". That is a sentence for
+     whoever maintains the platform, and it was rendering on a page a group CEO
+     opens. Cut outright rather than trimmed: none of it was about weighting
+     (§47.5). */
+  return section("", "Weighting factors", null,
 
     '<div class="cfg-bar plain">' +
       '<span class="cfg-lab">' + w.factors.length + ' factors &middot; totalling ' + total + '%</span>' +
@@ -2183,9 +2187,45 @@ function renderCycle(){
       (can
         ? (open
             ? '<button class="editbtn danger" data-closecycle="1">Close the cycle</button>'
-            : '<button class="editbtn" data-opencycle="1">Open a new cycle</button>')
+            : '<button class="editbtn" data-opencycle="1">Open a new cycle&hellip;</button>')
         : '') +
     '</div>' +
+    /* ── OPENING A CYCLE ASKS WHAT IT IS (§47.8) ────────────────────
+       Islam: "on opening the cycle it didn't ask me any questions … we should
+       set the name of the cycle and the duration it covers."
+
+       It used to mint `{ name:"Cycle 3", from:<last cycle's end>, to:"",
+       due:"", endsQuarter:4 }` and open it — a name nobody chose, a period
+       half filled from a guess, and a hard-coded end quarter. That last one is
+       not cosmetic: `endsQuarter` decides which tactics count as DUE, so a
+       wrong guess silently changes every unit's execution score.
+
+       An inline panel rather than a modal, because the fields want the page's
+       own controls and because what you are about to replace — the cycle
+       above — should stay on screen while you describe its successor. */
+    (NEWCYCLE
+      ? '<div class="cfg newcycle"><div class="nc-h">Open a new cycle</div>' +
+        '<div class="nc-grid">' +
+          '<label><span>Name</span><input class="fld" id="nc-name" value="' +
+            esc(NEWCYCLE.name) + '" placeholder="H1 2027"></label>' +
+          '<label><span>Covers from</span><input class="fld" id="nc-from" value="' +
+            esc(NEWCYCLE.from) + '" placeholder="Jan 2027"></label>' +
+          '<label><span>to</span><input class="fld" id="nc-to" value="' +
+            esc(NEWCYCLE.to) + '" placeholder="Jun 2027"></label>' +
+          '<label><span>Reports due</span><input class="fld" id="nc-due" value="' +
+            esc(NEWCYCLE.due) + '" placeholder="15 Jul 2027"></label>' +
+          '<label><span>Ends in quarter</span><select class="fld" id="nc-q">' +
+            [1,2,3,4].map(function(q){
+              return '<option value="' + q + '"' +
+                (Number(NEWCYCLE.endsQuarter) === q ? " selected" : "") + '>Q' + q + '</option>';
+            }).join("") + '</select></label>' +
+        '</div>' +
+        '<div class="nc-why"><b>The quarter decides which tactics are asked for.</b> ' +
+          'A tactic whose span has not started yet is not counted as unreported.</div>' +
+        '<div class="nc-act">' +
+          '<button class="editbtn" data-nc-go="1">Open this cycle</button>' +
+          '<button class="linkbu" data-nc-cancel="1">Cancel</button></div></div>'
+      : '') +
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
       '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +

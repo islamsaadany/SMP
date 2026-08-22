@@ -154,6 +154,11 @@ var PMENU = null;
    Single keys for the same reason PMENU is: two open at once is a state that
    has to be closed twice. */
 var PROLES = null;
+/* The cycle being described, before it is opened (§47.8). Null when the panel
+   is closed. It is NOT the live REVIEW: nothing is replaced until the SMO
+   presses Open, or a half-filled form would already have closed the cycle it
+   was going to succeed. */
+var NEWCYCLE = null;
 var PCOLMENU = false, PWMENU = false;
 var PICKING = null, PICKQ = "";
 

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.16 · **Last updated:** 2026-08-22
+**Latest version:** v3.17 · **Last updated:** 2026-08-22
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -51,6 +51,25 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.17 — one door, a switch, and a cycle that asks
+
+| What | Outcome |
+|---|---|
+| **Setup + Manage merged** | One railed page, five groups, *Running the cycle* first. The gear navigates instead of opening a menu — with one destination behind it, a menu of one is a door behind a door. Groups fold, never the one you are in. |
+| **Units \| Functions** | A two-position switch: one side always lit, the row always showing one list. The third "both closed" state is what had made it a pair of folds; the disclosure arrow went with it. |
+| **Opening a cycle** | Asks for name, period, due date and end quarter. `endsQuarter` was hard-coded to 4 and decides which tactics count as due — a silent guess that moved every unit's execution score. Nothing touches REVIEW until Open. |
+| **Prose cleaning** | All thirteen user-facing pages driven and read. Nine already clean. One line cut outright (Weighting described the database); three trimmed of their aphorism but kept their fact. |
+| **Report page** | Gets the pillar band Plan and Performance took in §46.3, and stops printing "Direction" — the last place `SHOW_KIND` was ignored. |
+| **Pillar note** | Gone. One unit had it, nine did not, so the layout shifted by pillar. Still editable while correcting a plan. |
+| **Pillar switch** | Returns you to the top of the pane, with the rail still pinned — not `scrollTo(0,0)`, which would throw the pin away. |
+
+**Verified:** `qa.py` 31 viewers no console errors; contrast sweep **0 failures
+across 4 combinations × 25 pages and states**; `test-authorize.js` 114 passed;
+`test-roundtrip.js` clean slate, round trip, fixed point and archived plan
+against a fresh Postgres 16. Both sweeps were themselves updated — they clicked
+menu entries that no longer exist, and now walk the rail and unfold every group
+first (§41.5, third time).
 
 ### v3.16 — Setup becomes a place, and four things drawn before they were built
 
@@ -969,7 +988,7 @@ taking it wholesale would have deleted four shipped features and everything from
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
 | `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.16.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.17.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

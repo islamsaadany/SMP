@@ -937,7 +937,7 @@ function renderGroupPerformance(){
           sub: groupRatio() == null
                ? "No tactic anywhere in the group has a plan against it yet, so there is nothing to deliver against."
                : "Delivered <b>" + groupExec() + "%</b> against <b>" + groupPlan() +
-                 "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>. Read as a share of plan, not of the whole year.",
+                 "%</b> planned &mdash; variance <b>" + varCell(groupExec(), groupPlan()) + "</b>.",
           drill: execDrill, modalTitle: "Business units \u2014 execution", modalSub: "Weighted compile of tactic delivery, as a share of plan"
         }) +
       '</div>') });
@@ -1491,8 +1491,8 @@ function renderFocusBoard(){
           'objective or key measure.</div>') +
       (unmarked.length
         ? '<div class="note"><b>' + unmarked.length + ' unit' + (unmarked.length > 1 ? 's have' : ' has') +
-          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") + '. Marking happens on each unit\'s ' +
-          'own page, beside the target and the history that inform the choice.</div>'
+          ' nothing marked.</b> ' + unmarked.map(esc).join(", ") + '. Marked on each unit\'s ' +
+          'own page.</div>'
         : ''));
 }
 
@@ -1730,8 +1730,8 @@ function renderReport(u){
 
   return waitingNote + (miss.length && may
       ? '<div class="note bad-note"><b>' + miss.length + ' figure' + (miss.length > 1 ? 's need' : ' needs') +
-        ' a note.</b> Anything at risk or off track carries an explanation before it can be submitted \u2014 ' +
-        'a red number with nothing beside it is where a review meeting stalls.</div>'
+        ' a note.</b> Anything at risk or off track carries an explanation before it can be ' +
+        'submitted.</div>'
       : '') +
     bar +
     section("", L("keyobj","bu") + " " + tally(doneOf(objs), objs.length), null, objTable) +

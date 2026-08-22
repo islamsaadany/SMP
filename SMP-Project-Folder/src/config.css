@@ -651,3 +651,26 @@
                     border-color:var(--gold); }
   .rolemore:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
   .rolemore.on { padding:2px 7px; }
+  /* The rail's groups fold (§47.7). A button now, not a div — it does
+     something, so it has to be reachable by keyboard and say what it is. */
+  .setuprail .rgroup { display:flex; align-items:center; gap:7px; width:100%;
+                       text-align:left; cursor:pointer; border-left:0; border-right:0; }
+  .setuprail .rgroup:hover { color:var(--ink-2); background:var(--line-soft); }
+  .setuprail .rgroup:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  .setuprail .rgtw { font-size:9px; color:var(--ink-3); flex:none; }
+  .setuprail .rgn { margin-left:auto; font-family:var(--mono); font-size:10px;
+                    color:var(--ink-3); letter-spacing:0; }
+
+  /* ══ OPEN A NEW CYCLE (§47.8) ═════════════════════════════════════ */
+  .newcycle { padding:16px 18px; margin:0 0 16px; }
+  .nc-h { font:700 11px/1 var(--sans); letter-spacing:.13em; text-transform:uppercase;
+          color:var(--ink-3); margin:0 0 12px; }
+  .nc-grid { display:flex; flex-wrap:wrap; gap:12px 14px; align-items:flex-end; }
+  .nc-grid label { display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .nc-grid label span { font:600 10.5px/1 var(--sans); letter-spacing:.09em;
+                        text-transform:uppercase; color:var(--ink-3); }
+  .nc-grid .fld { width:160px; max-width:none; }
+  .nc-grid label:nth-child(5) .fld { width:88px; }
+  .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
+  .nc-why b { color:var(--ink-2); }
+  .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; }

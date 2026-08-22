@@ -1,7 +1,8 @@
 # 008 · Figure sets — who is responsible for which numbers
 
-**Status:** steps 1 and 2 BUILT (2026-08-21) — sets, the picking page, the
-switch, and claim requests. Step 3 (the unit custodian's dropdown) is not. Written from Islam's own account
+**Status:** BUILT (2026-08-22) — all three steps: sets, the picking page,
+the switch, claim requests, and the unit custodian's per-figure dropdown
+(hidden until the tenant turns it on). Written from Islam's own account
 of the concept and checked with him line by line; §6 and §9 carry his answers.
 **Supersedes** the team+person shape built in §16.7 on 2026-08-21 (nothing is
 deployed with it, so nothing migrates).
@@ -257,9 +258,55 @@ moving anything. Asking twice is refused — asking twice is not asking louder.
 Removing a set takes its outstanding requests with it, because a request to
 move a figure into a set that no longer exists is a question with no answer.
 
-Not built: **step 3**, the unit custodian's per-figure dropdown.
+## 10c · What step 3 shipped
+
+**Strategy › Who enters**, one section inside each unit's Strategy tab — the
+unit's own plan in the order it reads, with a searchable name against each
+figure. A SETUP page would have been unreachable by the only person it is for:
+a strategy custodian holds no Setup at all.
+
+**It is off until the tenant switches it on**, on Setup › Figure sets and
+behind the Edit button — one line about the same subject, which is who is
+master of which numbers. **The server reads the same flag**, so a naming posted
+while it is off is refused; hiding the page would have left the save unguarded,
+which is §2b's lesson and §42's.
+
+**Turning it OFF leaves every naming in place.** A switch that destroys data is
+not a switch, and turning it back on must find the page as it was left. The
+namings simply stop being reachable, which is what hidden means.
+
+**First claim wins, in both directions.** A figure a set holds is shown with
+its team and no control at all; a figure the unit named cannot be claimed into
+a set, and a set owner cannot release it either. Both refusals name the holder
+and point at the SMO, so neither is a dead end.
+
+**One search implementation, not two.** The picker reuses the register's
+(§35) — same `#pickQ`, same `.pickrow` filter, same "ordered, not filtered"
+rule so a person can be named from outside the unit. Only opening, choosing and
+clearing are its own, because those are a different act.
 
 ## 11 · How it will be verified
+
+**Step 3, done:**
+
+- `scripts/test-authorize.js` — **114 checks, 0 failures**, 13 of them new: the
+  switch refused on the server while it is off, the custodian and the head
+  allowed once it is on, a person who is not on the register refused, a retired
+  one refused, **first claim wins in both directions**, releasing allowed to the
+  unit and refused to the set owner, another unit's figures refused, a
+  contributor with `edit` stored still refused, and the switch itself Setup.
+- Driven against a **running dev server and a real Postgres**, because that is
+  what caught §42.5: signed in as the unit's custodian, named somebody, and
+  **the server accepted the save and holds `{"by":"rethead"}`**. Then forged a
+  naming against ANOTHER unit — no control offers it — and the server refused
+  it, said so on the page (*"Not saved. You cannot decide who enters 'Logistics
+  revenue' (logistics)."*), and wrote nothing.
+- The switch and a `{ by }` assignment survive the database round trip;
+  `assigneeOf` resolves through it and `Figures I report` picks the row up.
+- Contrast 0 failures across 4 combinations × **25** pages and states — the
+  page AND its open picker, because a state that cannot be reached by
+  navigating is a state nothing measures (§41.5).
+- QA's 31 viewers, zero console errors; byte-identical rebuild.
 
 **Step 1, done:**
 

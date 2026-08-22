@@ -153,9 +153,16 @@
           return secs;
         } },
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
+          /* Spec 008 §3B. A SECTION of Strategy, not a Setup page: a
+             custodian holds no Setup at all, so a Setup page would be
+             unreachable by the only person it is for. `when` hides it outright
+             until the tenant switches naming on \u2014 a tab that opens a page
+             nobody may use is worse than no tab. */
           return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
                   { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
-                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan }];
+                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
+                  { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
+                    render:renderUnitNaming }];
         } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely. */
@@ -1036,6 +1043,18 @@
         paint();
       });
     });
+    /* The switch that turns the second way of assigning on (spec 008 §3B).
+       Turning it OFF leaves every naming in place rather than clearing them:
+       a switch that destroys data is not a switch, and turning it back on must
+       find the page as it was left. The namings simply stop being reachable,
+       which is what "hidden" means. */
+    document.querySelectorAll("[data-naming]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.naming = b.dataset.naming === "1";
+        paint();
+      });
+    });
+
     var nsName = document.getElementById("newset-name");
     if (nsName) {
       ["name","team","owner","pick"].forEach(function(f){
@@ -1433,6 +1452,33 @@
         if (!name) return;
         var p = b.dataset.pickNew.split("|");
         addPerson({ name: name, role: p[1], where: p[0] });
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+
+    /* The naming picker (spec 008 §3B). Its own open/set/clear, and the SAME
+       search below \u2014 one filter implementation, because two would drift the
+       way two copies of a rule drift. It writes { by } and nothing else: a
+       figure a set holds is not offered a control at all, so this only ever
+       sees a free figure or one this unit named itself. */
+    document.querySelectorAll("[data-name-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PICKING = b.dataset.nameOpen; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-name-set]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.nameSet.split("|");        /* src|<unit>|<figure>|<person> */
+        var hit = SMPRules.rowById(world(), p[1], p[2]);
+        if (hit && !(hit.src && hit.src.set)) hit.src = { by: p[3] };
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-name-clear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.nameClear.split("|");
+        var hit = SMPRules.rowById(world(), p[1], p[2]);
+        if (hit && hit.src && !hit.src.set) delete hit.src;
         PICKING = null; PICKQ = ""; paint();
       });
     });

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.13 · **Last updated:** 2026-08-21
+**Latest version:** v3.14 · **Last updated:** 2026-08-22
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -50,6 +50,49 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.14 — figure sets: who is responsible for which numbers
+
+The whole of spec 008, in three steps. **Many numbers are not the business
+unit's number** — revenue and margin exist in Finance before a unit is asked
+for them, and asking ten units to type them means the same figure is entered
+ten times and can be wrong ten times.
+
+**A set is the thing that owns numbers** — a name, a team, one owner, and a
+list of figures drawn from any unit. *Financial Figures · team Finance · owner
+Hossam.* Naming the set is what makes it workable: "figure custodian 1, 2, 3"
+says nothing, and the owner then needs no role of their own. The **team is on
+the set**, so the unit reads *Set by Finance* — which is what the BU head
+actually needs when he is writing the note against a number he did not enter.
+
+**Who may pick a set's figures is a security setting, not a convenience.**
+Ticking from the full list means reading every number in the group. For Finance
+that costs nothing; for anybody else it hands the lot to somebody whose job was
+three of them. So it **defaults to you**, and you open it deliberately — and
+the server enforces it, not the screen.
+
+**One figure, one set — first claim wins.** A figure somebody already holds is
+refused by name, with **Request the claim** beside it rather than nothing. The
+request records the figure, the asking set and who asked; **you answer it** on
+the Reporting cycle page — *Move it* or *Leave it*. Asking twice is refused.
+
+**The second way of assigning is built and switched OFF**, as you asked. Once
+you turn it on (Setup › Figure sets, behind Edit), every unit gains a
+**Strategy › Who enters** page: the unit's own plan in the order it reads, with
+a searchable name against each figure. Naming somebody gives them **that figure
+and nothing else**. Turning the switch back off hides the page and keeps every
+naming.
+
+**Three pages:** Setup › Figure sets, Setup › Fill a figure set (offered only
+to somebody who has a set to fill), Manage › Figures I report (hidden for
+anybody named on nothing).
+
+*Verified:* 114 authorisation checks, 0 failures. Driven against a running
+server and a real Postgres — the custodian's save was accepted and the server
+holds it; a forged naming against another unit was refused, said so on the
+page, and wrote nothing. Round trip, clean slate and fixed point PASS on a
+fresh database. Contrast 0 across 4 combinations × 25 pages and states. QA's 31
+viewers, zero console errors. Byte-identical rebuild.
 
 ### v3.13 — the headers wear your brand again
 
@@ -870,7 +913,7 @@ taking it wholesale would have deleted four shipped features and everything from
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
 | `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.13.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.14.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

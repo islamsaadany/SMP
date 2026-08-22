@@ -1170,6 +1170,13 @@
   .cfg.srcpick .pick { grid-template-columns:26px 1fr auto 215px; }
   .cfg.srcpick .pick .linkbu { font-size:11.5px; }
 
+  /* The naming page (spec 008 §3B) has no tick, and its last column carries a
+     picker that OPENS INTO the row — 210px is the picker's own min-width, so
+     the track is given enough for it rather than letting it overflow the way
+     the request button once did. */
+  .cfg.srcname .pick { grid-template-columns:1fr auto 240px; align-items:start; }
+  .cfg.srcname .pick > span:first-child { padding-top:5px; }
+
   .mono.sourced { color:var(--ink-3); }
   .srcby { font:700 9px/1 var(--sans); letter-spacing:.09em; text-transform:uppercase;
            color:var(--ink-3); background:var(--surface-2); border:1px solid var(--line);
@@ -2759,6 +2766,12 @@ THEME.apply();
        is not a setting: it is whatever that person has been named on, and the
        page is hidden outright when they have been named on nothing. */
     { key:"c_myfig",  area:"always", scope:"manage", label:"Figures I report", note:"Every figure you are master of, across the units" },
+    /* The OTHER way a figure gets an owner (spec 008 §3B): the unit's own
+       custodian names somebody, figure by figure, on their own plan. A UNIT
+       page, not a Setup one — a custodian holds no Setup at all, so a Setup
+       page would be unreachable by the only person it is for. It is hidden
+       until the tenant switches naming on. */
+    { key:"u_src",    area:"unit",   scope:"unit",   label:"Who enters", note:"Name who enters each of this unit's figures" },
     { key:"c_kb",     area:"always", scope:"manage", label:"Knowledge base", note:"How the platform works, in one place" },
     { key:"c_cycle",  area:"a_cycle", scope:"manage", label:"Reporting cycle", note:"Open, chase and close" },
     { key:"u_report", area:"unit", scope:"unit",  label:"My reporting",    note:"Enter this cycle's figures" }
@@ -2774,7 +2787,8 @@ THEME.apply();
       unitKeys: o.unitKeys || [], units: o.units || {},
       unitRoles: o.unitRoles || {}, sets: o.sets || [], claims: o.claims || [],
       functionKeys: o.functionKeys || [], functions: o.functions || {},
-      companies: o.companies || {}, access: o.access || {}
+      companies: o.companies || {}, access: o.access || {},
+      naming: !!o.naming
     };
   }
   /* A world built straight off a state graph — the shape the server holds. */
@@ -2784,7 +2798,8 @@ THEME.apply();
                functionKeys: state.functionKeys, functions: state.functions,
                companies: state.companies, access: state.access,
                sets: (state.group || {}).sets,
-               claims: (state.group || {}).claims });
+               claims: (state.group || {}).claims,
+               naming: (state.group || {}).naming });
   }
 
   function personActive(p) { return !!p && p.active !== false; }
@@ -3022,6 +3037,41 @@ THEME.apply();
     })[0] || null;
   }
 
+  /* ── 5c · Naming a person against ONE figure (spec 008 §3B) ──────
+     The other way a figure gets an owner, and the one that needs no set. A
+     unit's strategy custodian works down their OWN directions and targets and
+     names somebody against a number. Islam: "the custodian doesn't get a
+     ticking page — he gets all his directions and targets and a searchable
+     dropdown in front of each number so he can set who can input them."
+
+         row.src = { by: "<person key>" }
+
+     NAMING SOMEBODY GIVES THEM THAT FIGURE AND NOTHING ELSE (spec 008 §9).
+     Not the unit's other measures, not its plan, not its score: they sign in
+     during the cycle and find one page listing every figure they owe, wherever
+     those figures live. Which is why it is stored as a person and not as a
+     role — there is no role to give.
+
+     IT IS OFF UNTIL THE TENANT SWITCHES IT ON, at Islam's direction: one way
+     of assigning is watched in practice before the second is turned on. The
+     switch is READ HERE, so the server refuses a naming while it is off — a
+     switch that only hides a control is decoration (§42), which is the same
+     lesson §2b's "who picks" already cost us.
+
+     FIRST CLAIM WINS, with no precedence between this and a set (spec 008 §4).
+     A figure a set holds cannot be named from here, and a figure named here
+     cannot be claimed into a set: whoever asked first holds it, and the other
+     side is offered the request rather than a dead end. */
+  function namingOn(w) { return !!(w && w.naming); }
+  function mayName(w, person, unitKey) {
+    if (!namingOn(w) || !person) return false;
+    if (isSMO(w, person)) return true;
+    if (grantIn(w, person, "unit", unitKey) !== "edit") return false;
+    /* A contributor reports their own lines (spec 006 §7.2); deciding who
+       enters the unit's figures speaks for the unit. */
+    return !onlyVia(w, person, "unit", unitKey, "contrib");
+  }
+
   /* Find one row by id, wherever it lives. The authoriser needs the STORED
      row to ask whose figure it is — asking the incoming one would let a save
      name itself as the source in the same request, which is §42.2 again. */
@@ -3089,6 +3139,7 @@ THEME.apply();
     setsOf: setsOf, setById: setById, mayPickInto: mayPickInto,
     pickableSets: pickableSets, assigneeOf: assigneeOf, sourceLabel: sourceLabel,
     claimsOf: claimsOf, openClaims: openClaims, openClaimFor: openClaimFor,
+    namingOn: namingOn, mayName: mayName,
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
   };
 });
@@ -5278,6 +5329,29 @@ function mintClaimId(){
 function claimFigure(c){
   var row = SMPRules.rowById(world(), c.unit, c.figure);
   return row ? row.name : c.figure;
+}
+
+/* ── Naming a person against ONE figure (spec 008 §3B) ─────────────
+   The second way a figure gets an owner, and the one that needs no set: a
+   unit's strategy custodian names somebody against a number on their own
+   plan. OFF until the tenant switches it on, and the same switch is read by
+   the server — hiding the page would leave the save unguarded (§42). */
+function namingOn(){ return SMPRules.namingOn(world()); }
+function canName(unitKey){ return SMPRules.mayName(world(), viewer(), unitKey); }
+/* Every figure in one unit, in the order the plan reads: the directions
+   first, then each pillar's measures. One list, because the page is the
+   custodian's own plan with a name against each number, not a search. */
+function figuresOf(u){
+  var out = [];
+  (u.keyObjectives || []).forEach(function(m){
+    out.push({ id:m.id, row:m, group:L("keyobj","bu") });
+  });
+  (u.items || []).forEach(function(p, pi){
+    (p.measures || []).forEach(function(m){
+      out.push({ id:m.id, row:m, group:pillarCode(u, pi) + " " + p.name });
+    });
+  });
+  return out;
 }
 
 function mintSetId(name){
@@ -12297,6 +12371,33 @@ function renderFocusSetup(){
    the whole group's figures to somebody whose job was entering three of them.
    The exception is the one you switch on, not the one you remember to switch
    off — and the server enforces it, or the switch is decoration (§42). */
+/* THE SECOND WAY OF ASSIGNING, AND ITS SWITCH (spec 008 §3B, §10).
+   A unit's own custodian naming people against their own figures is built and
+   OFF, at Islam's direction: one way of assigning is watched in practice
+   before the second is turned on.
+
+   It sits behind the Edit button on this page rather than on a page of its
+   own, because it is one line about the same subject — who is master of which
+   numbers — and a switch with a page to itself invites being flipped for the
+   sake of it. THE SERVER READS THE SAME FLAG: a switch that only hides a
+   control is decoration, which is what §42 cost us once already. */
+function namingSwitch(mayEdit, editing){
+  if (!mayEdit) return "";
+  var on = namingOn();
+  return '<div class="imp-row" style="margin:16px 0 0">' +
+    '<span class="cfg-lab">Unit custodians may name who enters a figure</span>' +
+    (editing
+      ? '<span class="minisw">' +
+          '<button data-naming="0" aria-pressed="' + (!on) + '">Off</button>' +
+          '<button data-naming="1" aria-pressed="' + on + '">On</button></span>'
+      : (on ? '<span class="pill attn">On</span>' : '<span class="pill none">Off</span>')) +
+    '<span class="why" style="margin:0">' +
+      (on
+        ? 'Every unit gains a <b>Strategy › Who enters</b> page. A figure a set already holds cannot be named there.'
+        : 'Figures are assigned on <b>Fill a figure set</b> only.') +
+    '</span></div>';
+}
+
 function renderSetsSetup(){
   var mayEdit = grant("c_sets") === "edit";
   var editing = mayEdit && EDITING.sets;
@@ -12377,6 +12478,7 @@ function renderSetsSetup(){
       '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
       'belongs to Finance stops being typed by ten business units.</td></tr>')) +
       addRow + '</tbody></table></div>' +
+    namingSwitch(mayEdit, editing) +
     '<div class="note"><b>Who picks is a security setting, not a convenience.</b> ' +
       'Ticking from the full list means reading every number in the group \u2014 which ' +
       'costs nothing for a team that sees them all anyway, and hands the lot to somebody ' +
@@ -12546,6 +12648,117 @@ function renderMySources(){
     '<div class="note"><b>You enter the figure; the unit writes the note.</b> ' +
       'The number is yours, the performance is theirs, and a unit cannot complete its ' +
       'report until these are in \u2014 which is why they will ask.</div>';
+}
+
+/* ── Who enters this unit's figures (spec 008 §3B) ────────────────────
+   The SECOND way a figure gets an owner, and the one that needs no set.
+   Islam: "the custodian doesn't get a ticking page — he gets all his
+   directions and targets and a searchable dropdown in front of each number so
+   he can set who can input them."
+
+   So it is not a list to hunt through: it IS the unit's plan, in the order the
+   plan reads, with a name against each number. The ticking page (A) exists
+   because a set owner is looking ACROSS ten units for the few figures that are
+   theirs; a custodian is looking DOWN one unit at all of them, and the two
+   jobs want opposite shapes.
+
+   FIRST CLAIM WINS (§4). A figure a set already holds is shown with that set's
+   team and no control at all — not because the custodian ranks lower, but
+   because whoever asked first holds it and moving one is the SMO's answer to a
+   request. The same is true from the other side: a set owner ticking the fill
+   page finds a named figure already taken.
+
+   HIDDEN UNTIL THE TENANT SWITCHES IT ON, on Setup › Figure sets. */
+function namePicker(unitKey, m, editable){
+  var id = "src|" + unitKey + "|" + m.id;
+  var current = (m.src && !m.src.set) ? m.src.by : null;
+  var shown = current ? (personName(current) || current) : "";
+  if (!editable) {
+    return shown ? esc(shown)
+                 : '<span class="why" style="margin:0">the unit enters it</span>';
+  }
+  if (PICKING !== id) {
+    return '<button class="pickbtn' + (shown ? '' : ' empty') + '" data-name-open="' + esc(id) + '">' +
+      (shown ? esc(shown) : 'the unit enters it') + '</button>';
+  }
+  /* Ordered, not filtered — the same rule the register's picker follows (§35).
+     A custodian MAY NAME ANYONE THE PLATFORM KNOWS (spec 008 §9), because the
+     person who knows a number often does not sit in the unit that reports it;
+     this unit's own people simply come first. */
+  var pool = peopleFor(unitKey);
+  var prow = function(p){
+    return '<button class="pickrow" data-name="' + esc(p.name.toLowerCase()) + '" ' +
+      'data-name-set="' + esc(id + '|' + p.key) + '">' +
+      '<b>' + esc(p.name) + '</b>' +
+      (p.title ? '<span class="why" style="margin:0">' + esc(p.title) + '</span>' : '') +
+      '</button>';
+  };
+  var group = function(label, list){
+    return list.length ? '<div class="pickhead">' + label + '</div>' + list.map(prow).join("") : '';
+  };
+  return '<div class="picker">' +
+    '<input class="fld" id="pickQ" placeholder="Search people…" autocomplete="off" ' +
+      'aria-label="Search people">' +
+    '<div class="picklist">' +
+      group("In this unit", pool.here) +
+      group("Everyone else", pool.rest) +
+      '<div class="pickempty" hidden>No name matches.</div>' +
+    '</div>' +
+    '<div class="pickfoot">' +
+      (current ? '<button class="linkbu" data-name-clear="' + esc(id) + '">The unit enters it</button>' : '') +
+      '<button class="linkbu" data-pick-cancel="1">Cancel</button>' +
+    '</div></div>';
+}
+
+function renderUnitNaming(u){
+  var editable = canName(u.ukey);
+  var figs = figuresOf(u);
+  if (!figs.length) {
+    return '<div class="note">This unit has no directions or key measures yet. A plan ' +
+      'arrives by upload (§22), and this page follows it.</div>';
+  }
+
+  var named = 0, inSet = 0;
+  figs.forEach(function(f){
+    if (!f.row.src) return;
+    if (f.row.src.set) inSet++; else if (f.row.src.by) named++;
+  });
+
+  var last = null;
+  var rows = figs.map(function(f){
+    var m = f.row, head = "";
+    if (f.group !== last) { last = f.group; head = '<div class="grouphead">' + esc(f.group) + '</div>'; }
+    /* A figure a SET holds is shown, attributed and left alone. The team is
+       what the page shows rather than the set's name, for the same reason the
+       unit's own pages do: the custodian is reading it to know who to talk to. */
+    var setHeld = m.src && m.src.set ? setById(m.src.set) : null;
+    var who = setHeld
+      ? '<span class="srcby">' + esc(srcLabel(m) || "another set") + '</span>' +
+        '<span class="why" style="margin:0 0 0 6px">only the SMO can move it</span>'
+      : namePicker(u.ukey, m, editable);
+    return head +
+      '<div class="pick ' + (m.src ? "on" : "off") + '">' +
+        '<span>' + esc(m.name) + '</span>' +
+        '<span class="num why" style="margin:0">' +
+          (m.target ? esc(m.target) : '<span class="missing">No target</span>') + '</span>' +
+        '<span style="text-align:right">' + who + '</span>' +
+      '</div>';
+  }).join("");
+
+  return '<div class="kv">' +
+      '<span class="pill ' + (named ? "good" : "none") + '">' + named + ' named here</span>' +
+      '<span class="pill kind">' + inSet + ' in a figure set</span>' +
+      '<span class="pill kind">' + (figs.length - named - inSet) + ' entered by the unit</span>' +
+      '</div>' +
+    section("", "Who enters each figure", null,
+      '<div class="cfg srcname" style="padding:0">' + rows + '</div>' +
+      '<div class="note"><b>Naming somebody gives them that figure and nothing else.</b> ' +
+        'Not this unit’s other measures, not its plan, not its score — they sign in ' +
+        'during the cycle and find one page listing every figure they owe. ' +
+        '<b>The note stays yours</b>, and the figure still counts toward this unit’s ' +
+        'report, so it cannot be submitted until the number is in. A figure a ' +
+        '<b>figure set</b> already holds is shown with its team and cannot be named from ' +
+        'here: whoever claimed it first holds it, and only the SMO moves one.</div>');
 }
 
 /* The scope is a business unit OR a capability (§16.4): capability projects
@@ -13982,9 +14195,16 @@ var SYNC = (function () {
           return secs;
         } },
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
+          /* Spec 008 §3B. A SECTION of Strategy, not a Setup page: a
+             custodian holds no Setup at all, so a Setup page would be
+             unreachable by the only person it is for. `when` hides it outright
+             until the tenant switches naming on \u2014 a tab that opens a page
+             nobody may use is worse than no tab. */
           return [{ k:"found", ac:"u_found", label:"Foundation", render:renderUnitFoundation },
                   { k:"swot",  ac:"u_anal",  label:"SWOT",       render:renderUnitAnalysis },
-                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan }];
+                  { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
+                  { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
+                    render:renderUnitNaming }];
         } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely. */
@@ -14865,6 +15085,18 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* The switch that turns the second way of assigning on (spec 008 §3B).
+       Turning it OFF leaves every naming in place rather than clearing them:
+       a switch that destroys data is not a switch, and turning it back on must
+       find the page as it was left. The namings simply stop being reachable,
+       which is what "hidden" means. */
+    document.querySelectorAll("[data-naming]").forEach(function(b){
+      b.addEventListener("click", function(){
+        GROUP.naming = b.dataset.naming === "1";
+        paint();
+      });
+    });
+
     var nsName = document.getElementById("newset-name");
     if (nsName) {
       ["name","team","owner","pick"].forEach(function(f){
@@ -15262,6 +15494,33 @@ var SYNC = (function () {
         if (!name) return;
         var p = b.dataset.pickNew.split("|");
         addPerson({ name: name, role: p[1], where: p[0] });
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+
+    /* The naming picker (spec 008 §3B). Its own open/set/clear, and the SAME
+       search below \u2014 one filter implementation, because two would drift the
+       way two copies of a rule drift. It writes { by } and nothing else: a
+       figure a set holds is not offered a control at all, so this only ever
+       sees a free figure or one this unit named itself. */
+    document.querySelectorAll("[data-name-open]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PICKING = b.dataset.nameOpen; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-name-set]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.nameSet.split("|");        /* src|<unit>|<figure>|<person> */
+        var hit = SMPRules.rowById(world(), p[1], p[2]);
+        if (hit && !(hit.src && hit.src.set)) hit.src = { by: p[3] };
+        PICKING = null; PICKQ = ""; paint();
+      });
+    });
+    document.querySelectorAll("[data-name-clear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.nameClear.split("|");
+        var hit = SMPRules.rowById(world(), p[1], p[2]);
+        if (hit && hit.src && !hit.src.set) delete hit.src;
         PICKING = null; PICKQ = ""; paint();
       });
     });

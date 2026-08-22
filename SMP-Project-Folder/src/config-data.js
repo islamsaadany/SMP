@@ -1117,6 +1117,29 @@ function claimFigure(c){
   return row ? row.name : c.figure;
 }
 
+/* ── Naming a person against ONE figure (spec 008 §3B) ─────────────
+   The second way a figure gets an owner, and the one that needs no set: a
+   unit's strategy custodian names somebody against a number on their own
+   plan. OFF until the tenant switches it on, and the same switch is read by
+   the server — hiding the page would leave the save unguarded (§42). */
+function namingOn(){ return SMPRules.namingOn(world()); }
+function canName(unitKey){ return SMPRules.mayName(world(), viewer(), unitKey); }
+/* Every figure in one unit, in the order the plan reads: the directions
+   first, then each pillar's measures. One list, because the page is the
+   custodian's own plan with a name against each number, not a search. */
+function figuresOf(u){
+  var out = [];
+  (u.keyObjectives || []).forEach(function(m){
+    out.push({ id:m.id, row:m, group:L("keyobj","bu") });
+  });
+  (u.items || []).forEach(function(p, pi){
+    (p.measures || []).forEach(function(m){
+      out.push({ id:m.id, row:m, group:pillarCode(u, pi) + " " + p.name });
+    });
+  });
+  return out;
+}
+
 function mintSetId(name){
   var base = String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 14) || "set";
   if (!setById(base)) return base;

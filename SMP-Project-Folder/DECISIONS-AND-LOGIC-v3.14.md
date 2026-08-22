@@ -5264,3 +5264,197 @@ Hash-based CSP (§43.4). Tenant isolation (§36). At-rest key custody, backups
 and retention. **Who at Forefront can read production** — a people-and-process
 control, not a code one. An external penetration test before go-live. The
 Copilot's read scope.
+
+---
+
+## 44 · Figure sets — who is responsible for which numbers — v3.14
+
+Spec `specs/008-figure-sets/spec.md`. This **supersedes the `{ team, by }` shape
+§16.7 built** on 2026-08-21 (nothing was deployed with it, so nothing migrates)
+and **reverses §16.7's third settled question** — see §44.6.
+
+Islam's own account of the concept, which is where the whole design comes from:
+
+> *"There is someone who can be responsible of a set of numbers. This person
+> can see a full list like we created with all the units in place so he can
+> tick what he is responsible of."*
+
+### 44.1 The unit of ownership is a SET, not a person and not a department
+
+§16.7 attached a number to a *team plus a person*, and the first thing that
+broke was the naming. "Figure custodian 1, 2, 3" says nothing about what
+anybody owns; *Financial Figures* and *Market Figures* say everything.
+
+So the thing that owns numbers is a **named set** — a name, a team, ONE owner,
+and who may pick its figures. **The role then needs no name of its own**: a
+person is the owner of a set, and that is the whole of it. It is also what
+makes several people owning different numbers work without inventing a
+hierarchy of custodians.
+
+**The team is on the SET, not read off the person.** §33's instinct — read a
+role from what it is attached to — fails here, and Islam's reason for showing a
+department at all decides it: the BU head needs to know **who to talk to** when
+he is writing the note against a number he did not enter. *"Set by Financial
+Figures"* does not answer that; *"Set by Finance"* does. And the person's own
+department cannot be trusted to say it, because the Finance SMO custodian sits
+with the office rather than in Finance. It also survives the owner changing:
+hand the set to somebody else and the unit still reads *Set by Finance*.
+
+**ONE owner per set.** Two people splitting the work is TWO SETS, which is the
+more honest arrangement anyway — each one's scope becomes visible instead of
+two people sharing an undivided pile. And it is what lets a figure store only
+the SET: who enters it is read from the set, never copied onto the row. Handing
+a set over is then **one edit rather than twenty-seven**, and no figure can be
+left pointing at whoever used to hold it. Same pattern as a unit's head pointer
+(§33): a role is read from the thing, never stored twice.
+
+**Membership lives on the FIGURE**, not as a list inside the set:
+
+    row.src = { set: "<set id>" }     claimed into a set
+    row.src = { by:  "<person key>" } named directly by a unit custodian
+
+That is what makes *one figure, one set* an invariant that cannot be violated
+rather than a rule somebody has to check — and it is why a conflict is caught
+at the moment of the tick instead of found later.
+
+### 44.2 Who picks a set's figures is a SECURITY setting
+
+Islam: *"some numbers are confidential for some people and they shouldn't see
+all the group numbers, but for Finance everything is not confidential because
+they see everything, so they are a special case."*
+
+**A set owner who ticks from the full list has, by definition, read every
+number in the group.** That is the whole mechanism. For Finance it costs
+nothing. For anybody else it means somebody whose entire job was entering three
+numbers can read the lot.
+
+So each set carries a switch, and **it defaults to the SMO**: the exception is
+the one you switch on, not the one you remember to switch off. It is enforced
+**on the server** — a set marked *the SMO fills it* has its claims refused when
+they arrive from its owner. A switch that only hides a control is decoration,
+which is what §42 already cost us once.
+
+**And there is no half-view to design.** "The owner picks" IS the grant of
+sight over the whole group's figures, so where it is off the picking page does
+not exist for that owner at all.
+
+### 44.3 Two ways a figure gets an owner, and first claim wins
+
+**A · somebody ticks from the full list** — the SMO by default, the set's owner
+where the switch allows. Set at the top, units as buttons with their counts on
+them, one tick per row.
+
+**B · the unit's own strategy custodian names people, figure by figure.**
+*"The custodian doesn't get a ticking page — he gets all his directions and
+targets and a searchable dropdown in front of each number so he can set who can
+input them."* No set is involved.
+
+The two want opposite shapes for a reason worth keeping: **a set owner is
+looking ACROSS ten units for the few figures that are theirs; a custodian is
+looking DOWN one unit at all of them.** A ticking page serves the first and
+fights the second.
+
+**There is no precedence rule between A and B, deliberately.** Whoever claimed
+it first holds it. A rule that ranked them would need explaining every time it
+applied — and it would be arbitrary, because both are legitimate claims made by
+people who are entitled to make them.
+
+Attempting to claim what somebody already holds does not fail silently: the
+person is told **who holds it** and is offered **Request the claim**.
+
+### 44.4 Claim requests
+
+A request records the figure, the asking set and who asked. **The SMO answers
+it** — not the current holder, for two reasons: the holder has an interest in
+the answer, and the SMO is the only person who can see both sides. *Move it*
+puts the figure in the asking set and closes the request in one act, because a
+granted request sitting open beside a figure that had already moved is two
+records of one decision. *Leave it* closes it without moving anything.
+
+**Asking twice is refused** — asking twice is not asking louder. **Removing a
+set takes its outstanding requests with it**, because a request to move a
+figure into a set that no longer exists is a question with no answer. And
+**removing a set releases its figures** back to the units rather than orphaning
+them: a figure pointing at a set that is gone has nobody to enter it and no way
+to say so.
+
+### 44.5 B is built and HIDDEN, behind a tenant switch
+
+At Islam's direction — *"keep the option hidden somewhere in the setup maybe
+until later"* — so one way of assigning is watched in practice before the second
+is turned on.
+
+**Strategy › Who enters**, one section inside each unit's Strategy tab. It is a
+UNIT page and not a Setup one for a reason that only shows up when you check:
+**a strategy custodian holds no Setup at all**, so a Setup page would have been
+unreachable by the only person it is for.
+
+The switch lives on Setup › Figure sets, behind the Edit button — one line
+about the same subject, which is who is master of which numbers. **The server
+reads the same flag**, so a naming posted while it is off is refused; hiding
+the page would have left the save unguarded.
+
+**Turning it OFF leaves every naming in place.** A switch that destroys data is
+not a switch, and turning it back on has to find the page as it was left. The
+namings simply stop being reachable — which is what *hidden* means.
+
+**Naming somebody gives them that FIGURE and nothing else** — not the unit's
+other measures, not its plan, not its score. They sign in during the cycle and
+find one page listing every figure they owe, wherever those figures live. Which
+is also why it stores a person rather than a role: there is no role to give.
+
+**A custodian may name anyone the platform knows**, not only people attached to
+their unit — the person who knows a number often does not sit in the unit that
+reports it. The picker reuses the register's (§35): same search, same *ordered,
+not filtered* rule, one filter implementation rather than two that would drift.
+
+### 44.6 What this reverses, and what still stands
+
+§16.7 settled: *"Disagreement is settled off the platform. No challenge
+workflow, no arbitration screen."*
+
+That still holds for **whether a number is right** — the conversation about a
+disputed figure belongs between the two teams. What has changed is **whether
+somebody may claim it**, and there the old decision assumed the SMO was the
+only person assigning. Once two people can claim, **a refusal with no route
+forward is a dead end**, and the platform is the only thing that knows the
+claim was turned away. Recorded as a reversal with its reasoning, never
+overwritten.
+
+Everything else in §16.7 stands unchanged and is worth restating, because it is
+what makes the feature safe: **the unit writes the note, always** (the number is
+the set's, the performance is the unit's); **an assigned figure still counts
+toward the unit's total**, so a unit cannot submit around a missing number and
+the chasing is distributed to the people who want it; and **the unit's
+custodian submits the whole thing**, having possibly entered none of it.
+
+### 44.7 What the build taught
+
+**A reader that mutates what it reads will be caught by whoever compares before
+and after.** Not new here — it is §42.5 — but it is why every step of this was
+driven in a real browser against a real server rather than trusted to tests.
+Step 3's acceptance test is exactly that: sign in as the unit's custodian, name
+somebody, and confirm **the server accepted the save**.
+
+**The client and the server must build the world the same way.** The browser's
+`world()` was assembled field by field, so it carried `sets` but not `claims` —
+the page answered "has this been asked for?" from a world with no requests in
+it while the server answered from one that had them. That is the drift
+`lib/rules.js` exists to prevent, and it happened TWICE in one afternoon. Both
+sides call `SMPRules.worldOf()` from a state-shaped object now, so there is
+nowhere left for them to differ.
+
+**A row whose content does not fit its track does not wrap — it overflows.**
+The request button needed 215px in a `.pick` grid track fixed at 90, and
+rendered off the right edge of the page. No test saw it; one click that could
+not land did.
+
+**A state that cannot be reached by navigating is a state nothing measures.**
+§41.5 again: the contrast sweep walks pages, so the Who enters page had to be
+switched on explicitly and its picker opened explicitly, or neither would ever
+have been measured. The sweep runs 25 pages and states now.
+
+### 44.8 Scope, stated
+
+Unit key objectives and unit key measures. **Capability projects — deliverables,
+outcomes and milestones — are not assignable**, and were not in §16.7 either.

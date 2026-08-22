@@ -397,6 +397,104 @@ console.log("\n6c · claim requests");
   check("removing a request is the SMO's", !v.ok, v.refusals.join(" / "));
 })();
 
+/* ── 6d · Naming a person against ONE figure (spec 008 §3B) ─────── */
+console.log("\n6d · naming a person on a figure");
+(function () {
+  const base = clone(SEED);
+  const fin = base.people.filter(function (p) { return p.fn === "finance"; })[0];
+  const somebody = base.people.filter(function (p) {
+    return p.key !== custKey && p.key !== headKey && p.key !== "smo";
+  })[0];
+  if (!fin || !somebody) { console.log("  (skipped)"); return; }
+  base.group.sets = [
+    { id: "fin", name: "Financial Figures", team: "finance", owner: fin.key, pick: "owner" }
+  ];
+  const held = base.units[UNIT].items[0].measures[0];
+  const free = base.units[UNIT].items[0].measures[1];
+  held.src = { set: "fin" };
+
+  const name = function (state, id, who) {
+    state.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === id) x.src = { by: who };
+    });
+  };
+  const from = function (state, who, mutate) {
+    const inc = clone(state); mutate(inc);
+    return A.authorize(state, inc, personOf(state, who));
+  };
+
+  /* OFF is the shipped answer, and the SERVER is where it is enforced. */
+  let v = from(base, custKey, function (s) { name(s, free.id, somebody.key); });
+  check("naming is refused while the tenant has it switched off", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  const on = clone(base); on.group.naming = true;
+
+  v = from(on, custKey, function (s) { name(s, free.id, somebody.key); });
+  check("the unit's custodian may name somebody once it is on", v.ok, v.refusals.join(" / "));
+
+  v = from(on, headKey, function (s) { name(s, free.id, somebody.key); });
+  check("so may the unit's head", v.ok, v.refusals.join(" / "));
+
+  /* ANYONE THE PLATFORM KNOWS (spec 008 §9) — but only somebody it knows. */
+  v = from(on, custKey, function (s) { name(s, free.id, "nobody-at-all"); });
+  check("naming somebody who is not on the register is refused", !v.ok, v.refusals.join(" / "));
+
+  const retiredOn = clone(on);
+  retiredOn.people.forEach(function (p) { if (p.key === somebody.key) p.active = false; });
+  v = from(retiredOn, custKey, function (s) { name(s, free.id, somebody.key); });
+  check("nor is naming somebody who has been retired", !v.ok, v.refusals.join(" / "));
+
+  /* FIRST CLAIM WINS, in both directions (spec 008 §4). */
+  v = from(on, custKey, function (s) { name(s, held.id, somebody.key); });
+  check("a figure a SET holds cannot be named from the unit", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  const named = clone(on); name(named, free.id, somebody.key);
+  v = from(named, fin.key, function (s) {
+    s.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === free.id) x.src = { set: "fin" }; });
+  });
+  check("and a figure the unit NAMED cannot be claimed into a set", !v.ok, v.refusals.join(" / "));
+  console.log("        " + v.refusals.join(" / "));
+
+  /* Releasing is the same act read backwards. */
+  v = from(named, custKey, function (s) {
+    s.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === free.id) delete x.src; });
+  });
+  check("the unit may release what it named", v.ok, v.refusals.join(" / "));
+
+  v = from(named, fin.key, function (s) {
+    s.units[UNIT].items[0].measures.forEach(function (x) {
+      if (x.id === free.id) delete x.src; });
+  });
+  check("a set owner may not release it for them", !v.ok, v.refusals.join(" / "));
+
+  /* Nobody in ANOTHER unit, and nobody who only reports their own lines. */
+  const other = clone(on);
+  v = from(other, custKey, function (s) {
+    s.units[OTHER].items[0].measures[0].src = { by: somebody.key };
+  });
+  check("a custodian cannot name against another unit's figures", !v.ok, v.refusals.join(" / "));
+
+  const contribOn = clone(on);
+  contribOn.access = Object.assign({}, contribOn.access,
+    { contrib: Object.assign({}, (contribOn.access || {}).contrib, { a_unit_own: "edit" }) });
+  const contribKey = "smp_test_contrib";
+  contribOn.people = contribOn.people.concat([
+    { key: contribKey, name: "A Contributor", unit: UNIT }]);
+  v = from(contribOn, contribKey, function (s) { name(s, free.id, somebody.key); });
+  check("a contributor with edit stored still cannot decide who enters a figure",
+        !v.ok, v.refusals.join(" / "));
+
+  /* The switch itself is Setup. */
+  v = from(base, custKey, function (s) { s.group.naming = true; });
+  check("a custodian cannot switch naming on", !v.ok, v.refusals.join(" / "));
+  v = from(base, "smo", function (s) { s.group.naming = true; });
+  check("the SMO can", v.ok, v.refusals.join(" / "));
+})();
+
 /* ── 7 · A retired person can do nothing ───────────────────────── */
 console.log("\n7 · a retired person");
 (function () {

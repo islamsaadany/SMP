@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.12 · **Last updated:** 2026-08-21
+**Latest version:** v3.13 · **Last updated:** 2026-08-21
 **Sign in as:** `SMO` / `1234` — no password change asked for (§19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
 
@@ -50,6 +50,25 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.13 — the headers wear your brand again
+
+You spotted the rail's **PILLARS** header and the table headers had gone grey.
+That was deliberate in v3.11 — the design language I ported uses a light table
+header — and you were right that it was wrong for us: **`--panel` is the colour
+Setup › Branding sets for the navigation bar**, so a header on it wears the
+tenant's brand. A grey header wears nothing.
+
+**All five went back together:** every table header, the pillar-list header,
+the rail's header, the grouping rows in Setup, and the unit and capability card
+headers. Half of them would have been worse than none — the ones left behind
+read as mistakes rather than as a style, which is exactly what had happened to
+the presentation deck.
+
+Rather than list them from memory I diffed every rule that used the bar colour
+before the retheme against every rule that uses it now. Eight had lost it: five
+were headers and are restored; three had gone to the accent instead, which is a
+different decision and stays.
 
 ### v3.12 — Finance enters the numbers Finance owns
 
@@ -851,7 +870,7 @@ taking it wholesale would have deleted four shipped features and everything from
 | `index.html` | The gate — real login when served with a database, legacy AdminSMO latch offline |
 | `SMP-Project-Folder/src/` | The platform's sources; `build.py` assembles the single file, `qa.py` walks every page as every viewer |
 | `SMP-Project-Folder/strategy-management-platform-v3.10.html` | The built platform (must rebuild byte-identical from `src/`) |
-| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.12.md` | Every decision with its reasoning — the contract |
+| `SMP-Project-Folder/DECISIONS-AND-LOGIC-v3.13.md` | Every decision with its reasoning — the contract |
 | `db/` | `schema.sql`, `migrations/`, `seed-state.json` (generated) |
 | `lib/`, `api/` | State reader/writer and auth; the two endpoints |
 | `scripts/` | `extract-state.js` (regenerate the seed), `test-roundtrip.js`, `dev-server.js` |

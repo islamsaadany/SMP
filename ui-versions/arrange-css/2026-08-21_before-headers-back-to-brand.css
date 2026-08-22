@@ -570,45 +570,33 @@
   .phead.rphead .num{text-align:right}
   .phead.rphead .cc{text-align:center}
 
-  /* ── Table headers: THE TENANT'S BAR COLOUR ───────────────────────
-     They went light in 3.11 with the rest of the ported design language, and
-     back in 3.13 at Islam's direction: *"all five, and it's not a navy/gold
-     thing — it follows the brand colours set in the platform."*
+  /* ── Table headers, LIGHT since 3.11 ──────────────────────────────
+     They were a navy band with white type, and that band was one of the two
+     things (with the serif) that made SMP read as a different product from the
+     reference. The new language puts a QUIET header over the rows — the same
+     surface, one step down, in uppercase bold — and lets the rounded clipped
+     box do the containing that the dark band used to do.
 
-     That is the argument, and it is a product argument rather than a taste
-     one: `--panel` is the colour Setup › Branding sets for the navigation bar,
-     so a header on `--panel` WEARS THE TENANT'S BRAND. A header on
-     `--surface-2` wears nothing. The light header was the reference product's
-     answer to a question SMP answers differently, because SMP is branded per
-     tenant and the reference was not.
-
-     The rule underneath is unchanged and is the one that matters: EVERY table
-     and every grid header that behaves like one is styled here, so no screen
-     ends up with two different ideas of what a header looks like — §40's
-     lesson, that converting SOME members of a family is worse than converting
-     none. The !important stays for the same reason it was written: several
-     stylesheets set a background on th, and this is the one that must win. */
+     The rule that matters is still the one this replaces: EVERY table and
+     every grid header that behaves like one is styled here, so no screen ends
+     up with two different ideas of what a header looks like. The !important
+     stays for the same reason it was written — several stylesheets set a
+     background on th, and this is the one that must win. */
   thead th, table thead th, .cfg table thead th, .scroll table thead th{
-    background:var(--panel) !important; color:var(--panel-ink) !important;
-    border-bottom:0 !important}
-  /* A surface with its own ground needs its own ink (§38.5): --ink-3 on the
-     panel is 2.5:1. These are the panel's own quiet inks. */
-  thead th .tip{color:var(--panel-quiet);border-color:rgba(255,255,255,.45)}
-  thead th .tip:hover{color:var(--panel-ink);border-color:var(--panel-ink)}
-  .phead, .plist .phead{background:var(--panel) !important; color:var(--panel-ink) !important;
-    border-bottom:0}
-  .phead span, .phead > *{color:var(--panel-ink)}
-  .phead .tip{color:var(--panel-quiet);border-color:rgba(255,255,255,.45)}
-  /* A grid header that behaves like a table header, so it looks like one. */
-  .grouphead{background:var(--panel) !important; color:var(--panel-ink) !important;
-    border-bottom:0}
-  /* THE NOTE INSIDE A HEADER. Several headers carry a second line explaining
-     the column — "Performance, Foundation, Temple…", "Their key is their
-     username" — written in the page's quiet ink, which is quiet against a PALE
-     ground and 2.4:1 against this one. §38.5 again, and the sweep caught all 36
-     of them: a surface with its own ground needs its own ink. */
-  thead th .why, thead th small, thead th span:not([class]),
-  .phead .why, .grouphead .why, .grouphead span{color:var(--panel-quiet)}
+    background:var(--surface-2) !important; color:var(--ink-2) !important;
+    border-bottom:1px solid var(--line) !important}
+  thead th .tip{color:var(--ink-3);border-color:var(--line)}
+  thead th .tip:hover{color:var(--ink);border-color:var(--ink-3)}
+  .phead, .plist .phead{background:var(--surface-2) !important; color:var(--ink-2) !important;
+    border-bottom:1px solid var(--line)}
+  .phead span, .phead > *{color:var(--ink-2)}
+  .phead .tip{color:rgba(255,255,255,.72);border-color:rgba(255,255,255,.45)}
+  /* A grid header that behaves like a table header, so it looks like one. It
+     stayed navy through the retheme while the tables went light, which left
+     the product carrying BOTH treatments — the exact thing the rule above
+     exists to prevent. */
+  .grouphead{background:var(--surface-2) !important; color:var(--ink-2) !important;
+    border-bottom:1px solid var(--line)}
   /* Arrange mode still has to be visible against the dark band. */
   .plist.arranging .phead{background:var(--gold-deep);color:var(--on-fill)}
 

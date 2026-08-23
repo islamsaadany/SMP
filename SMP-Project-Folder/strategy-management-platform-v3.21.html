@@ -2296,6 +2296,34 @@
   .imp-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
   .imp-row select.fld { width:auto; min-width:190px; max-width:none; }
   .imp-row input[type=file] { font:inherit; font-size:13px; }
+
+  /* ONE BUTTON WITH TWO ENTRIES (§61). A <details>, so the open state is the
+     browser's and closing it from inside its own click cannot unmount the
+     button the click is still in (§47.2). The popup is absolute inside a
+     relative wrapper; .imp-row is not an overflow container, so unlike the
+     searchable select (§45.5) it does not need to be fixed. */
+  details.dlmenu { position:relative; flex:0 0 auto; }
+  details.dlmenu > summary { list-style:none; display:inline-flex; align-items:center;
+                             gap:7px; white-space:nowrap; }
+  details.dlmenu > summary::-webkit-details-marker { display:none; }
+  details.dlmenu > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+  .dlcar { font-size:10px; line-height:1; transform:translateY(1px); }
+  details.dlmenu[open] > summary .dlcar { transform:translateY(1px) rotate(180deg); }
+  details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
+                           min-width:290px; background:var(--surface);
+                           border:1px solid var(--line); border-radius:var(--r);
+                           box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
+  details.dlmenu > .menu button { display:block; width:100%; text-align:left; font:inherit;
+                                  font-size:13.5px; color:var(--ink); background:none;
+                                  border:0; padding:9px 14px; cursor:pointer; }
+  details.dlmenu > .menu button:hover { background:var(--surface-2); }
+  details.dlmenu > .menu button:focus-visible { outline:2px solid var(--gold);
+                                                outline-offset:-2px; }
+  /* The line under each entry says which subjects keep that plan, because
+     "pillars" and "projects" are the platform's words and the person choosing
+     is holding a file for a named unit. */
+  .dlsub { display:block; font-size:11.5px; color:var(--ink-2); margin-top:2px;
+           text-transform:none; letter-spacing:0; font-weight:400; }
   .imp-tally { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px; }
   .csvbox { width:100%; height:340px; font-family:var(--mono); font-size:12px;
             line-height:1.5; padding:12px; border:1px solid var(--line);
@@ -7037,10 +7065,31 @@ function fnHasWork(k){
   if (!f) return false;
   return fnPlansInPillars(f) ? fnItems(f).length > 0 : capsOfFunction(k).length > 0;
 }
+/* AN EMPTY FUNCTION IS INVISIBLE TO A READER AND REACHABLE BY WHOEVER FILLS
+   IT (§61). fnHasWork() alone was the whole gate, which is right for somebody
+   coming to READ — an empty page is a dead end — and exactly wrong for the
+   people who have to put something there: a function with no plan yet could
+   not be opened, so the only way to reach it was to give it a plan first.
+
+   Worst on a fresh tenant, where migration 004 removes every capability: EVERY
+   function serving the group was missing from the navigation until somebody
+   uploaded something, and there was nowhere to upload it from.
+
+   The test is EDIT, not view — the same grant that decides whether the plan
+   and the foundation can be authored at all, asked of the target the tab would
+   open. */
+function fnCanFill(k){
+  return grantAt("k_found", "fn:" + k) === "edit" ||
+         grantAt("k_proj",  "fn:" + k) === "edit";
+}
+/* IS THIS FUNCTION IN THE NAVIGATION AT ALL. Asked once, because §59 has
+   already been paid for asking the same question in two places. */
+function fnShows(k){
+  var f = FUNCTIONS[k];
+  return !!f && f.active !== false && (fnHasWork(k) || fnCanFill(k));
+}
 function fnsReachable(){
-  return FUNCTION_KEYS.filter(function(k){
-    return FUNCTIONS[k].active !== false && reachesFn(k) && fnHasWork(k);
-  });
+  return FUNCTION_KEYS.filter(function(k){ return fnShows(k) && reachesFn(k); });
 }
 /* A function is retired, never deleted \u2014 it carries reported history, exactly
    as a unit does. */
@@ -7737,6 +7786,48 @@ function fnAsUnit(fk){
            clauses:Array.isArray(f.clauses) ? f.clauses : FN_NO_ROWS,
            swot:f.swot || FN_NO_SWOT, active:f.active !== false };
 }
+/* WRITING TO A FUNCTION THAT PLANS IN PILLARS (§61). fnAsUnit() is a READING
+   view: it hands out the function's own arrays where they exist and a shared
+   frozen empty where they do not, because a reader must never create the field
+   it was looking for (§50.6). An import WRITES, so it asks for the containers
+   first — here, in the writing half, which is the only place that mints them.
+
+   And the view is a fresh object every call, while clearUnitPlan() ASSIGNS
+   `u.items`, `u.keyObjectives` and `u.swot` rather than emptying them in
+   place. Assign into a view and the plan is written to an object that is
+   thrown away one line later — the import would report the rows it wrote and
+   the function would still be empty. fnWriteBack() is the other half of the
+   pair, and neither is any use without it. */
+function fnWritable(fk){
+  var f = FUNCTIONS[fk];
+  if (!f || !fnPlansInPillars(f)) return null;
+  if (!Array.isArray(f.items)) f.items = [];
+  if (!Array.isArray(f.clauses)) f.clauses = [];
+  if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
+  if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
+  return fnAsUnit(fk);
+}
+function fnWriteBack(fk, u){
+  var f = FUNCTIONS[fk];
+  if (!f || !u) return;
+  f.items = u.items;
+  f.keyObjectives = u.keyObjectives;
+  f.clauses = u.clauses;
+  f.swot = u.swot;
+  f.aspiration = u.aspiration || "";
+  f.endInMind = u.endInMind || "";
+}
+/* unitLike() for somebody about to write. Same two answers, same one place. */
+function unitLikeWritable(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
+  return fnWritable(t.slice(3));
+}
+function fnKeyOfTarget(target){
+  var t = String(target || "");
+  return t.indexOf("fn:") === 0 ? t.slice(3) : null;
+}
+
 /* Whether a target — a unit key or "fn:<key>" — is drawn by the unit pages. */
 function plansInPillars(target){
   var t = String(target || "");
@@ -10710,8 +10801,30 @@ function readmeCell(sheets, label){
 /* Whose plan this is. Both templates label it differently — a unit's says
    "Business unit" and a capability's says "Capability" — so both are asked
    for, and the one that answers is the answer. */
+/* WRITES THE NEW LABEL, READS EITHER (§58, §61). The pillars Read me sheet used
+   to be labelled "Business unit" and now says "Business unit or function",
+   because the dropdown offers both. A label is a CONTRACT with every file
+   already downloaded and sitting in somebody's Downloads folder, so the old one
+   still reads — and renaming it without this is the §51.11 fault exactly: the
+   reader stops finding the cell, the upload reports "no business unit called
+   ''", and nothing says why. */
+var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
 function readmePick(sheets){
-  return readmeCell(sheets, "Business unit") || readmeCell(sheets, "Capability");
+  for (var i = 0; i < READ_PICK_LABELS.length; i++) {
+    var v = readmeCell(sheets, READ_PICK_LABELS[i]);
+    if (v) return v;
+  }
+  return "";
+}
+
+/* Everything a pillars plan may be written for, in the order the dropdown
+   offers it. Named once because the Import page shows the same count. */
+function planSubjectNames(){
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
+           .map(function(k){ return UNITS[k].name; })
+    .concat(FUNCTION_KEYS.filter(function(k){
+      return FUNCTIONS[k].active !== false && fnPlansInPillars(FUNCTIONS[k]);
+    }).map(function(k){ return FUNCTIONS[k].name; }));
 }
 
 function planWorkbook(u){
@@ -10719,9 +10832,18 @@ function planWorkbook(u){
   var units = unitSuggestions();
   var picked = u ? u.name : "";
 
-  var readmeSheet = readme("plan", "Business unit",
-    UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
-             .map(function(k){ return UNITS[k].name; }));
+  /* UNITS AND THE FUNCTIONS THAT PLAN LIKE THEM (§61). A function whose
+     format is pillars carries the same plan a unit does — the same pillars,
+     measures and tactics, read by the same pages — so it can arrive in the
+     same file, and the only thing that had ever stopped it was this list.
+
+     Retired ones are left out on both sides, and the label stays "Business
+     unit": it is the cell the reader looks for, and renaming it would refuse
+     every file downloaded before today (§58.2, the same contract). */
+  /* "or function" is not decoration: the dropdown now offers both, and a label
+     reading "Business unit" beside a function's name would read as a mistake
+     in the file rather than as the feature (§61). */
+  var readmeSheet = readme("plan", "Business unit or function", planSubjectNames());
   readmeSheet.rows[1][1] = picked;
 
   return [
@@ -13527,6 +13649,22 @@ function projPerformanceBody(p, fk){
     miniTable(["#","Milestone","Finish","Progress"], mRows);
 }
 
+/* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
+   rendered NOTHING AT ALL on all three of its pages — `[].map().join("")` is
+   the empty string, and an empty string is a blank page rather than an empty
+   state (§61, §45.2). It was unreachable before §61 and is not now, so the
+   page has to say what would fill it.
+
+   Named once, because it is the same sentence three times and the third copy
+   is the one that gets left behind (§59). */
+function fnNothingBehind(fk){
+  var f = FUNCTIONS[fk];
+  return '<div class="note">' + esc(f ? f.name : "This function") +
+    ' improves no capability yet, so there is nothing here to plan or report. ' +
+    'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
+    'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.</div>';
+}
+
 function renderFnPerformance(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
@@ -13537,6 +13675,7 @@ function renderFnPerformance(fnKey){
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
+  if (!caps.length) return fnNothingBehind(fk);
   return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
       '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
     caps.map(function(c){
@@ -13618,6 +13757,7 @@ function projPlanBody(p, fk){
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
+  if (!caps.length) return fnNothingBehind(fk);
   return caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
@@ -13748,6 +13888,7 @@ function capReportBody(c){
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
+  if (!caps.length) return fnNothingBehind(fk);
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -13946,8 +14087,13 @@ function unitPlanBody(it, u, railed){
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);
-  if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
-    ' yet, so there is no plan to show.</div>';
+  /* AN EMPTY PAGE HAS TO SAY WHAT WOULD FILL IT (§61). This said "This unit"
+     on a supporting function's own page — and only ever appeared there,
+     because before §61 a function with no plan was missing from the navigation
+     and there was no way to reach the sentence. */
+  if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
+    L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
+    'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table
@@ -14691,6 +14837,36 @@ var FSET = { unit:"mobile" };
    second silently won. One declaration now. ── */
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
             read:"", check:null, done:null };
+
+/* WHICH OF THE TWO PLANS A SUBJECT KEEPS (§61). A business unit and a function
+   that plans in pillars take the PILLARS workbook; a capability and the
+   functions that improve it take the PROJECTS one. Two files, so the download
+   is one button with two entries rather than a button and a link beside it
+   calling itself "Capability template" — the second was unfindable, and it was
+   the only place the word for the other half appeared.
+
+   READ OFF THE SUBJECT, never stored beside it. A second field would be a
+   second copy of the same fact and the two would drift — the progress list
+   would offer capabilities while the format said pillars, and the select would
+   show nothing selected. The subject already says which plan it keeps, so
+   changing the format IS changing the subject. */
+function impFmtOf(target){
+  return String(target || "").indexOf("cap:") === 0 ? "projects" : "pillars";
+}
+/* The subjects a progress file can be downloaded for, in the chosen format. */
+function impSubjects(fmt){
+  if (fmt === "projects") {
+    return GROUP.capabilities.map(function(c){
+      return { v:"cap:" + c.id, label:c.name };
+    });
+  }
+  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
+    .map(function(k){ return { v:k, label:UNITS[k].name }; })
+    .concat(FUNCTION_KEYS.filter(function(k){
+      var f = FUNCTIONS[k];
+      return f.active !== false && fnPlansInPillars(f);
+    }).map(function(k){ return { v:"fn:" + k, label:FUNCTIONS[k].name }; }));
+}
 
 /* The register's own file, on the People page (§54.3). Its own state rather
    than a second `kind` on IMP: the import page authors a PLAN for one unit,
@@ -16372,6 +16548,13 @@ function renderUnitNaming(u){
    review — with their own sheets, because the thing being planned is a
    project with deliverables, outcomes and milestones. */
 function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
+/* THE IMPORT'S SUBJECT, RESOLVED ONCE (§61). It was a unit key and eight
+   places read `UNITS[IMP.unit]` directly; since a function that plans in
+   pillars can be planned by file it may also be "fn:<key>", and eight direct
+   reads is eight chances to get it wrong — §59.4's fault, which cost a crash
+   the first time a target was resolved that way. unitLike() already answers
+   this for the whole platform, so this is only where the import asks it. */
+function impUnit(){ return unitLike(IMP.unit); }
 function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
 
 function renderImport(){
@@ -16387,18 +16570,33 @@ function renderImport(){
       'report figures on your unit\u2019s own <b>Report</b> page.</div>';
   }
   var isCap = impIsCap();
-  var u = isCap ? impCap() : UNITS[IMP.unit];
+  var u = isCap ? impCap() : impUnit();
   var isPlan = IMP.kind === "plan";
   var d = IMP.diff;
 
+  /* Narrowed to the chosen format, not units-and-capabilities in one list
+     (§61) — the list is the subjects that keep THAT plan, so choosing the
+     format above it is what makes the two agree. */
   var unitPick = '<select class="fld" id="imp-unit">' +
-    '<optgroup label="Business units">' + UNIT_KEYS.map(function(k){
-      return '<option value="' + k + '"' + (k === IMP.unit ? " selected" : "") + '>' + esc(UNITS[k].name) + '</option>';
-    }).join("") + '</optgroup>' +
-    '<optgroup label="Capabilities">' + GROUP.capabilities.map(function(c){
-      return '<option value="cap:' + c.id + '"' + ("cap:" + c.id === IMP.unit ? " selected" : "") + '>' +
-        esc(c.name) + '</option>';
-    }).join("") + '</optgroup></select>';
+    impSubjects(impFmtOf(IMP.unit)).map(function(o){
+      return '<option value="' + esc(o.v) + '"' + (o.v === IMP.unit ? " selected" : "") + '>' +
+        esc(o.label) + '</option>';
+    }).join("") + '</select>';
+
+  /* ONE BUTTON, TWO ENTRIES. `<details>` rather than a button and a flag:
+     a menu's action fires before the menu closes (§47.2), and a `<details>`
+     that is closed from inside its own click has not unmounted the button the
+     click is still in — it hides it. Keyboard and screen reader come free. */
+  function dlMenu(label, act){
+    return '<details class="dlmenu"><summary class="editbtn">' + label +
+      '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
+      '<div class="menu" role="menu">' +
+        '<button role="menuitem" data-' + act + '="pillars">Pillars template' +
+          '<span class="dlsub">Business units and the functions that plan in pillars</span></button>' +
+        '<button role="menuitem" data-' + act + '="projects">Projects template' +
+          '<span class="dlsub">Capabilities and the functions that improve them</span></button>' +
+      '</div></details>';
+  }
 
   var kindPick = '<span class="minisw">' +
     '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
@@ -16431,20 +16629,20 @@ function renderImport(){
     '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
       '<h4>Download the template</h4>' +
       '<p class="sub">' + (isPlan
-        ? "The same file whichever unit you are planning. Choose the unit on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
+        ? "Two formats: <b>pillars</b> for a business unit or a function that plans like one, <b>projects</b> for a capability. Each is the same file whoever it is for &mdash; choose the subject on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
         : "One row per reportable item, with its target and what is currently recorded. Only the New value column is typed.") +
       '</p>' +
-      '<div class="imp-row">' + (isPlan ? "" : unitPick) + kindPick +
-        '<button class="editbtn" data-dlx="1">' +
-          (isPlan ? "Download the plan template" : "Download Excel") + '</button>' +
+      '<div class="imp-row">' + kindPick +
         (isPlan
-          ? '<button class="linkbu" data-dlxcap="1">Capability template</button>'
-          : '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
+          ? dlMenu("Download plan template", "dlplan")
+          : dlMenu("Download progress template", "dlprog") + unitPick +
+            '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
             '<button class="linkbu" data-showcsv="1">View the CSV</button>') +
       '</div>' +
       '<p class="sub" style="margin-top:8px">' + (isPlan
-        ? UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; }).length +
-          " business units and " + GROUP.themes.length + " themes are in its dropdowns"
+        ? planSubjectNames().length + " business units and functions, " +
+          GROUP.capabilities.length + " capabilities and " +
+          GROUP.themes.length + " themes are in its dropdowns"
         : counts) + '</p>' +
     '</div></div>';
 
@@ -16452,7 +16650,7 @@ function renderImport(){
     '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
       '<h4>Upload the filled file</h4>' +
       '<p class="sub">' + (isPlan
-        ? "The file says which unit it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and no other unit is touched."
+        ? "The file says which unit, function or capability it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and nothing else is touched."
         : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
       '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv" ' +
         'aria-label="Choose a template file to upload">' +
@@ -19253,10 +19451,9 @@ var SYNC = (function () {
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
-      /* fnHasWork(), not `capsOfFunction(k).length` — the same question
-         fnsReachable() asks, asked once (§59). */
-      return FUNCTIONS[k].active !== false && fnHasWork(k) &&
-             allowed(SUBS.fn, "fn:" + k).length;
+      /* fnShows(), not `capsOfFunction(k).length` and not fnHasWork() either
+         — the same question fnsReachable() asks, asked once (§59, §61). */
+      return fnShows(k) && allowed(SUBS.fn, "fn:" + k).length;
     });
   }
   /* The folds appear only for someone who reaches more than one unit AND more
@@ -21424,11 +21621,11 @@ var SYNC = (function () {
       var c = impCap();
       return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
     }
-    var u = UNITS[IMP.unit];
+    var u = impUnit();
     return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
   }
   function fileName(){
-    var name = impIsCap() ? impCap().name : UNITS[IMP.unit].name;
+    var name = impIsCap() ? impCap().name : impUnit().name;
     return name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
       "-" + IMP.kind + "-template.csv";
   }
@@ -21442,7 +21639,7 @@ var SYNC = (function () {
       IMP.check = validateCapPlan(c, rows);
       IMP.summary = capReplaceSummary(c, rows);
     } else {
-      var u = UNITS[IMP.unit];
+      var u = impUnit();
       IMP.check = validatePlan(u, rows);
       IMP.summary = planReplaceSummary(u, rows);
     }
@@ -21478,7 +21675,7 @@ var SYNC = (function () {
       paint();
       return;
     }
-    var u = UNITS[IMP.unit];
+    var u = impUnit();
     var shape = checkFileShape(u, rows, "progress");
     IMP.check = shape.length ? { problems: shape, notices: [] } : null;
     IMP.diff = diffProgress(u, rows);
@@ -21489,6 +21686,14 @@ var SYNC = (function () {
   /* Lifted out of wireImport() 2026-08-23 (§54.3): the People page sends a
      workbook too, and two copies of "build it, wrap it in a blob, click a
      link, revoke the URL" is the second one that gets the revoke wrong. */
+  /* §47.2: the action fires BEFORE the menu closes. A `<details>` closed from
+     inside its own click has not unmounted the button the click is still in —
+     it hides it — so this is safe where removing the node would not be. */
+  function closeDlMenu(el){
+    var d = el.closest("details.dlmenu");
+    if (d) d.open = false;
+  }
+
   function sendXlsx(sheets, name){
     var bytes = buildXlsx(sheets);
     var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -21507,20 +21712,42 @@ var SYNC = (function () {
       b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
     });
 
-    /* The plan template is the same file whichever unit it is for, so it is
-       built against an empty shape rather than a chosen unit's content. */
-    var dlx = document.querySelector("[data-dlx]");
-    if (dlx) dlx.addEventListener("click", function(){
-      if (IMP.kind === "plan") {
-        sendXlsx(planWorkbook(blankUnitShape()), "SMP - plan template.xlsx");
-        return;
-      }
-      var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(UNITS[IMP.unit]);
-      sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
+    /* THE PLAN TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
+       an empty shape rather than a chosen subject's content, with the subject
+       named on the Read me sheet. Two files, one menu. */
+    document.querySelectorAll("[data-dlplan]").forEach(function(b){
+      b.addEventListener("click", function(){
+        closeDlMenu(this);
+        if (this.dataset.dlplan === "projects")
+          sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - projects plan template.xlsx");
+        else
+          sendXlsx(planWorkbook(blankUnitShape()), "SMP - pillars plan template.xlsx");
+      });
     });
-    var dlxc = document.querySelector("[data-dlxcap]");
-    if (dlxc) dlxc.addEventListener("click", function(){
-      sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - capability template.xlsx");
+
+    /* A PROGRESS FILE IS NOT GENERIC — it is one subject's current rows, so
+       the subject travels with the format. Choosing a format the selected
+       subject does not keep moves the selection to the first that does AND
+       repaints, so the select shows exactly what was downloaded rather than
+       leaving a file arriving from a list that says something else. */
+    document.querySelectorAll("[data-dlprog]").forEach(function(b){
+      b.addEventListener("click", function(){
+        closeDlMenu(this);
+        var want = this.dataset.dlprog;
+        if (impFmtOf(IMP.unit) !== want) {
+          var first = impSubjects(want)[0];
+          if (!first) {
+            alert(want === "projects"
+              ? "There are no capabilities yet, so there is no projects file to download."
+              : "There are no business units yet, so there is no pillars file to download.");
+            return;
+          }
+          IMP.unit = first.v; IMP.diff = null; IMP.summary = null; IMP.read = "";
+        }
+        var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(impUnit());
+        sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
+        paint();
+      });
     });
 
     var dl = document.querySelector("[data-dl]");
@@ -21558,6 +21785,14 @@ var SYNC = (function () {
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
+              /* A FUNCTION THAT PLANS IN PILLARS IS A PLAN SUBJECT (§61). Its
+                 plan lives on the function, so the pillars template offers it
+                 on the Read me sheet beside the units — and the upload has to
+                 be able to resolve the name it just offered. */
+              var fk = uk ? null : FUNCTION_KEYS.filter(function(k){
+                var f = FUNCTIONS[k];
+                return f.active !== false && fnPlansInPillars(f) && f.name === picked;
+              })[0];
               /* ONE NAMING IN THE FILE (§51.19). Islam: "I don't think we
                  should have the capability file with 2 namings capability and
                  function. we can just upload with the capability and we
@@ -21580,7 +21815,7 @@ var SYNC = (function () {
                  now caught at the one moment somebody can still act on it. */
               var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
               var cp = caps[0];
-              if (!uk && caps.length > 1) {
+              if (!uk && !fk && caps.length > 1) {
                 impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
                   caps.map(function(x){
                     var f = FUNCTIONS[x.fn];
@@ -21588,18 +21823,20 @@ var SYNC = (function () {
                   }).join(" and ") + '. Rename one on Setup \u2192 Capabilities, then upload again.');
                 return;
               }
-              if (!uk && !cp) {
-                impFail('no business unit or capability called "' + esc(picked) +
+              if (!uk && !fk && !cp) {
+                impFail('no business unit, supporting function or capability called "' +
+                  esc(picked) +
                   '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
-              IMP.unit = uk ? uk : "cap:" + cp.id;
-              if (cp) {
+              IMP.unit = uk ? uk : fk ? "fn:" + fk : "cap:" + cp.id;
+              if (!uk && !fk && cp) {
                 var cRows = capPlanFromWorkbook(cp, sheets);
                 readPlanRows(cRows, cp.name + " \u00b7 " + cRows.length + " rows");
               } else {
-                var pRows = planFromWorkbook(UNITS[uk], sheets);
-                readPlanRows(pRows, UNITS[uk].name + " \u00b7 " + pRows.length + " rows");
+                var pu = impUnit();
+                var pRows = planFromWorkbook(pu, sheets);
+                readPlanRows(pRows, pu.name + " \u00b7 " + pRows.length + " rows");
               }
               return;
             }
@@ -21613,7 +21850,7 @@ var SYNC = (function () {
               paint();
               return;
             }
-            var u = UNITS[IMP.unit];
+            var u = impUnit();
             var rows = progressFromWorkbook(u, sheets);
             var shape = checkFileShape(u, rows, "progress");
             IMP.check = shape.length ? { problems: shape, notices: [] } : null;
@@ -21666,8 +21903,12 @@ var SYNC = (function () {
                  plural(inc.objectives, "objective") + " written.";
           IMP.done = { unit:cc.name, key:cc.id, fn:cc.fn, what:what, archived:arch };
         } else {
-          var uu = UNITS[IMP.unit];
+          /* WRITABLE, not the reading view — a plan applied to fnAsUnit()'s
+             throwaway object is reported as written and is not (§61). */
+          var uu = unitLikeWritable(IMP.unit);
           arch = applyPlanReplace(uu, sm.rows);
+          var wfk = fnKeyOfTarget(IMP.unit);
+          if (wfk) fnWriteBack(wfk, uu);
           /* The tenant's own word for a pillar, which the label registry holds
              in the plural because that is how it is used in headings. */
           what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
@@ -21683,7 +21924,7 @@ var SYNC = (function () {
           applyCapProgress(c, IMP.diff);
           IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
         } else {
-          var u = UNITS[IMP.unit];
+          var u = impUnit();
           applyProgress(u, IMP.diff);
           IMP.done = { unit:u.name, key:u.ukey, what:what };
         }

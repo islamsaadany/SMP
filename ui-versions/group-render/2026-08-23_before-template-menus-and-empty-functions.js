@@ -2117,22 +2117,6 @@ function projPerformanceBody(p, fk){
     miniTable(["#","Milestone","Finish","Progress"], mRows);
 }
 
-/* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
-   rendered NOTHING AT ALL on all three of its pages — `[].map().join("")` is
-   the empty string, and an empty string is a blank page rather than an empty
-   state (§61, §45.2). It was unreachable before §61 and is not now, so the
-   page has to say what would fill it.
-
-   Named once, because it is the same sentence three times and the third copy
-   is the one that gets left behind (§59). */
-function fnNothingBehind(fk){
-  var f = FUNCTIONS[fk];
-  return '<div class="note">' + esc(f ? f.name : "This function") +
-    ' improves no capability yet, so there is nothing here to plan or report. ' +
-    'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
-    'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.</div>';
-}
-
 function renderFnPerformance(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
@@ -2143,7 +2127,6 @@ function renderFnPerformance(fnKey){
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
-  if (!caps.length) return fnNothingBehind(fk);
   return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
       '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
     caps.map(function(c){
@@ -2225,7 +2208,6 @@ function projPlanBody(p, fk){
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
-  if (!caps.length) return fnNothingBehind(fk);
   return caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
@@ -2356,7 +2338,6 @@ function capReportBody(c){
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
-  if (!caps.length) return fnNothingBehind(fk);
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -2555,13 +2536,8 @@ function unitPlanBody(it, u, railed){
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);
-  /* AN EMPTY PAGE HAS TO SAY WHAT WOULD FILL IT (§61). This said "This unit"
-     on a supporting function's own page — and only ever appeared there,
-     because before §61 a function with no plan was missing from the navigation
-     and there was no way to reach the sentence. */
-  if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
-    L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
-    'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.</div>';
+  if (!sel) return '<div class="note">This unit has no ' + L("pillar","bu").toLowerCase() +
+    ' yet, so there is no plan to show.</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table

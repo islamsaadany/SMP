@@ -341,9 +341,10 @@
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
-      /* fnShows(), not `capsOfFunction(k).length` and not fnHasWork() either
-         — the same question fnsReachable() asks, asked once (§59, §61). */
-      return fnShows(k) && allowed(SUBS.fn, "fn:" + k).length;
+      /* fnHasWork(), not `capsOfFunction(k).length` — the same question
+         fnsReachable() asks, asked once (§59). */
+      return FUNCTIONS[k].active !== false && fnHasWork(k) &&
+             allowed(SUBS.fn, "fn:" + k).length;
     });
   }
   /* The folds appear only for someone who reaches more than one unit AND more
@@ -2511,11 +2512,11 @@
       var c = impCap();
       return IMP.kind === "plan" ? capPlanTemplate(c) : capProgressTemplate(c);
     }
-    var u = impUnit();
+    var u = UNITS[IMP.unit];
     return IMP.kind === "plan" ? planTemplate(u) : progressTemplate(u);
   }
   function fileName(){
-    var name = impIsCap() ? impCap().name : impUnit().name;
+    var name = impIsCap() ? impCap().name : UNITS[IMP.unit].name;
     return name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
       "-" + IMP.kind + "-template.csv";
   }
@@ -2529,7 +2530,7 @@
       IMP.check = validateCapPlan(c, rows);
       IMP.summary = capReplaceSummary(c, rows);
     } else {
-      var u = impUnit();
+      var u = UNITS[IMP.unit];
       IMP.check = validatePlan(u, rows);
       IMP.summary = planReplaceSummary(u, rows);
     }
@@ -2565,7 +2566,7 @@
       paint();
       return;
     }
-    var u = impUnit();
+    var u = UNITS[IMP.unit];
     var shape = checkFileShape(u, rows, "progress");
     IMP.check = shape.length ? { problems: shape, notices: [] } : null;
     IMP.diff = diffProgress(u, rows);
@@ -2576,14 +2577,6 @@
   /* Lifted out of wireImport() 2026-08-23 (§54.3): the People page sends a
      workbook too, and two copies of "build it, wrap it in a blob, click a
      link, revoke the URL" is the second one that gets the revoke wrong. */
-  /* §47.2: the action fires BEFORE the menu closes. A `<details>` closed from
-     inside its own click has not unmounted the button the click is still in —
-     it hides it — so this is safe where removing the node would not be. */
-  function closeDlMenu(el){
-    var d = el.closest("details.dlmenu");
-    if (d) d.open = false;
-  }
-
   function sendXlsx(sheets, name){
     var bytes = buildXlsx(sheets);
     var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
@@ -2602,42 +2595,20 @@
       b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
     });
 
-    /* THE PLAN TEMPLATE IS GENERIC, IN BOTH FORMATS (§22, §61): built against
-       an empty shape rather than a chosen subject's content, with the subject
-       named on the Read me sheet. Two files, one menu. */
-    document.querySelectorAll("[data-dlplan]").forEach(function(b){
-      b.addEventListener("click", function(){
-        closeDlMenu(this);
-        if (this.dataset.dlplan === "projects")
-          sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - projects plan template.xlsx");
-        else
-          sendXlsx(planWorkbook(blankUnitShape()), "SMP - pillars plan template.xlsx");
-      });
+    /* The plan template is the same file whichever unit it is for, so it is
+       built against an empty shape rather than a chosen unit's content. */
+    var dlx = document.querySelector("[data-dlx]");
+    if (dlx) dlx.addEventListener("click", function(){
+      if (IMP.kind === "plan") {
+        sendXlsx(planWorkbook(blankUnitShape()), "SMP - plan template.xlsx");
+        return;
+      }
+      var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(UNITS[IMP.unit]);
+      sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
     });
-
-    /* A PROGRESS FILE IS NOT GENERIC — it is one subject's current rows, so
-       the subject travels with the format. Choosing a format the selected
-       subject does not keep moves the selection to the first that does AND
-       repaints, so the select shows exactly what was downloaded rather than
-       leaving a file arriving from a list that says something else. */
-    document.querySelectorAll("[data-dlprog]").forEach(function(b){
-      b.addEventListener("click", function(){
-        closeDlMenu(this);
-        var want = this.dataset.dlprog;
-        if (impFmtOf(IMP.unit) !== want) {
-          var first = impSubjects(want)[0];
-          if (!first) {
-            alert(want === "projects"
-              ? "There are no capabilities yet, so there is no projects file to download."
-              : "There are no business units yet, so there is no pillars file to download.");
-            return;
-          }
-          IMP.unit = first.v; IMP.diff = null; IMP.summary = null; IMP.read = "";
-        }
-        var sheets = impIsCap() ? capProgressWorkbook(impCap()) : progressWorkbook(impUnit());
-        sendXlsx(sheets, fileName().replace(/\.csv$/, ".xlsx"));
-        paint();
-      });
+    var dlxc = document.querySelector("[data-dlxcap]");
+    if (dlxc) dlxc.addEventListener("click", function(){
+      sendXlsx(capPlanWorkbook(blankCapShape()), "SMP - capability template.xlsx");
     });
 
     var dl = document.querySelector("[data-dl]");
@@ -2675,14 +2646,6 @@
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              /* A FUNCTION THAT PLANS IN PILLARS IS A PLAN SUBJECT (§61). Its
-                 plan lives on the function, so the pillars template offers it
-                 on the Read me sheet beside the units — and the upload has to
-                 be able to resolve the name it just offered. */
-              var fk = uk ? null : FUNCTION_KEYS.filter(function(k){
-                var f = FUNCTIONS[k];
-                return f.active !== false && fnPlansInPillars(f) && f.name === picked;
-              })[0];
               /* ONE NAMING IN THE FILE (§51.19). Islam: "I don't think we
                  should have the capability file with 2 namings capability and
                  function. we can just upload with the capability and we
@@ -2705,7 +2668,7 @@
                  now caught at the one moment somebody can still act on it. */
               var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
               var cp = caps[0];
-              if (!uk && !fk && caps.length > 1) {
+              if (!uk && caps.length > 1) {
                 impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
                   caps.map(function(x){
                     var f = FUNCTIONS[x.fn];
@@ -2713,20 +2676,18 @@
                   }).join(" and ") + '. Rename one on Setup \u2192 Capabilities, then upload again.');
                 return;
               }
-              if (!uk && !fk && !cp) {
-                impFail('no business unit, supporting function or capability called "' +
-                  esc(picked) +
+              if (!uk && !cp) {
+                impFail('no business unit or capability called "' + esc(picked) +
                   '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
-              IMP.unit = uk ? uk : fk ? "fn:" + fk : "cap:" + cp.id;
-              if (!uk && !fk && cp) {
+              IMP.unit = uk ? uk : "cap:" + cp.id;
+              if (cp) {
                 var cRows = capPlanFromWorkbook(cp, sheets);
                 readPlanRows(cRows, cp.name + " \u00b7 " + cRows.length + " rows");
               } else {
-                var pu = impUnit();
-                var pRows = planFromWorkbook(pu, sheets);
-                readPlanRows(pRows, pu.name + " \u00b7 " + pRows.length + " rows");
+                var pRows = planFromWorkbook(UNITS[uk], sheets);
+                readPlanRows(pRows, UNITS[uk].name + " \u00b7 " + pRows.length + " rows");
               }
               return;
             }
@@ -2740,7 +2701,7 @@
               paint();
               return;
             }
-            var u = impUnit();
+            var u = UNITS[IMP.unit];
             var rows = progressFromWorkbook(u, sheets);
             var shape = checkFileShape(u, rows, "progress");
             IMP.check = shape.length ? { problems: shape, notices: [] } : null;
@@ -2793,12 +2754,8 @@
                  plural(inc.objectives, "objective") + " written.";
           IMP.done = { unit:cc.name, key:cc.id, fn:cc.fn, what:what, archived:arch };
         } else {
-          /* WRITABLE, not the reading view — a plan applied to fnAsUnit()'s
-             throwaway object is reported as written and is not (§61). */
-          var uu = unitLikeWritable(IMP.unit);
+          var uu = UNITS[IMP.unit];
           arch = applyPlanReplace(uu, sm.rows);
-          var wfk = fnKeyOfTarget(IMP.unit);
-          if (wfk) fnWriteBack(wfk, uu);
           /* The tenant's own word for a pillar, which the label registry holds
              in the plural because that is how it is used in headings. */
           what = plural(inc.pillars, L("pillar", "bu").toLowerCase().replace(/s$/, "")) + ", " +
@@ -2814,7 +2771,7 @@
           applyCapProgress(c, IMP.diff);
           IMP.done = { unit:c.name, key:c.id, fn:c.fn, what:what };
         } else {
-          var u = impUnit();
+          var u = UNITS[IMP.unit];
           applyProgress(u, IMP.diff);
           IMP.done = { unit:u.name, key:u.ukey, what:what };
         }

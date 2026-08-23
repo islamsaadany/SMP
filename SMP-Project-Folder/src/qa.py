@@ -120,6 +120,60 @@ with sync_playwright() as p:
     print("template round trip: unit=%r | cap=%r | neither names a function"
           % (rt["unit"], rt["cap"]))
 
+    # ── AN EMPTY FUNCTION IS REACHABLE, AND SAYS SO (61) ──────────────
+    # Islam, 2026-08-23: three of his functions were missing from the
+    # navigation entirely. fnHasWork() was the whole gate, which is right for
+    # somebody coming to READ and exactly wrong for the people who have to put
+    # something there — a function with no plan could not be opened, so the
+    # only way to reach it was to give it a plan first. On a fresh tenant,
+    # where migration 004 removes every capability, that hid EVERY function.
+    #
+    # Asserted as three facts rather than one: it is in the navigation, its
+    # page is not blank, and a plan applied to it reaches the FUNCTION. The
+    # third is the one that would fail silently — fnAsUnit() hands out a fresh
+    # object every call, so a plan written into it is reported as written and
+    # is not there afterwards.
+    # As the SMO — the sweep above leaves the switcher on whoever it ended on,
+    # and "can this person fill it" is the whole of the new gate.
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    fn61 = pg.evaluate("""() => {
+      FUNCTIONS.qapill = { name:"QA Pillars Fn", navName:null, codePrefix:"QAP",
+                           head:null, custodian:null, active:true, format:"pillars" };
+      FUNCTIONS.qaproj = { name:"QA Projects Fn", navName:null, codePrefix:"QAJ",
+                           head:null, custodian:null, active:true };
+      FUNCTION_KEYS.push("qapill", "qaproj");
+      const nav = { pill: fnShows("qapill"), proj: fnShows("qaproj") };
+      const blank = { pill: renderFnProjects("fn:qapill").trim().length,
+                      proj: renderFnProjects("fn:qaproj").trim().length,
+                      projPerf: renderFnPerformance("fn:qaproj").trim().length };
+      const u = unitLikeWritable("fn:qapill");
+      applyPlanReplace(u, [
+        { type:"PILLAR", id:"P1", name:"QA pillar", kind:"Direction" },
+        { type:"MEASURE", id:"M1", parent_id:"P1", name:"QA measure",
+          direction:"\u2265", value:"1", unit:"", compile:"Latest" }
+      ]);
+      fnWriteBack("qapill", u);
+      const wrote = { items:(FUNCTIONS.qapill.items || []).length,
+                      measures:((FUNCTIONS.qapill.items || [])[0] || {measures:[]}).measures.length,
+                      hasWork: fnHasWork("qapill") };
+      FUNCTION_KEYS.splice(FUNCTION_KEYS.indexOf("qapill"), 1);
+      FUNCTION_KEYS.splice(FUNCTION_KEYS.indexOf("qaproj"), 1);
+      delete FUNCTIONS.qapill; delete FUNCTIONS.qaproj;
+      return { nav:nav, blank:blank, wrote:wrote };
+    }""")
+    if not (fn61["nav"]["pill"] and fn61["nav"]["proj"]):
+        errs.append("EMPTY FUNCTION: not in the navigation for the SMO (%r)" % fn61["nav"])
+    for k, n in fn61["blank"].items():
+        if n < 40:
+            errs.append("EMPTY FUNCTION: %s renders %d characters \u2014 a blank page, "
+                        "not an empty state" % (k, n))
+    if fn61["wrote"]["items"] != 1 or fn61["wrote"]["measures"] != 1 or not fn61["wrote"]["hasWork"]:
+        errs.append("EMPTY FUNCTION: a plan applied to a pillars function did not "
+                    "reach the function (%r)" % fn61["wrote"])
+    print("empty function: reachable, says what would fill it, and a plan "
+          "written to it sticks (%d pillars, %d measures)"
+          % (fn61["wrote"]["items"], fn61["wrote"]["measures"]))
+
     # ── A UNIT AND A FUNCTION MUST MATCH (53.5) ───────────────────────
     # The rule Islam set on 2026-08-23: any change to how something works or
     # how it looks is tested on BOTH sides of the navigation switch, because a

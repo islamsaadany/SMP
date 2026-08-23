@@ -611,36 +611,6 @@ var FSET = { unit:"mobile" };
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
             read:"", check:null, done:null };
 
-/* WHICH OF THE TWO PLANS A SUBJECT KEEPS (§61). A business unit and a function
-   that plans in pillars take the PILLARS workbook; a capability and the
-   functions that improve it take the PROJECTS one. Two files, so the download
-   is one button with two entries rather than a button and a link beside it
-   calling itself "Capability template" — the second was unfindable, and it was
-   the only place the word for the other half appeared.
-
-   READ OFF THE SUBJECT, never stored beside it. A second field would be a
-   second copy of the same fact and the two would drift — the progress list
-   would offer capabilities while the format said pillars, and the select would
-   show nothing selected. The subject already says which plan it keeps, so
-   changing the format IS changing the subject. */
-function impFmtOf(target){
-  return String(target || "").indexOf("cap:") === 0 ? "projects" : "pillars";
-}
-/* The subjects a progress file can be downloaded for, in the chosen format. */
-function impSubjects(fmt){
-  if (fmt === "projects") {
-    return GROUP.capabilities.map(function(c){
-      return { v:"cap:" + c.id, label:c.name };
-    });
-  }
-  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
-    .map(function(k){ return { v:k, label:UNITS[k].name }; })
-    .concat(FUNCTION_KEYS.filter(function(k){
-      var f = FUNCTIONS[k];
-      return f.active !== false && fnPlansInPillars(f);
-    }).map(function(k){ return { v:"fn:" + k, label:FUNCTIONS[k].name }; }));
-}
-
 /* The register's own file, on the People page (§54.3). Its own state rather
    than a second `kind` on IMP: the import page authors a PLAN for one unit,
    this amends the register for everybody, and the two share no step but the
@@ -2321,13 +2291,6 @@ function renderUnitNaming(u){
    review — with their own sheets, because the thing being planned is a
    project with deliverables, outcomes and milestones. */
 function impIsCap(){ return String(IMP.unit).indexOf("cap:") === 0; }
-/* THE IMPORT'S SUBJECT, RESOLVED ONCE (§61). It was a unit key and eight
-   places read `UNITS[IMP.unit]` directly; since a function that plans in
-   pillars can be planned by file it may also be "fn:<key>", and eight direct
-   reads is eight chances to get it wrong — §59.4's fault, which cost a crash
-   the first time a target was resolved that way. unitLike() already answers
-   this for the whole platform, so this is only where the import asks it. */
-function impUnit(){ return unitLike(IMP.unit); }
 function impCap(){ return capById(String(IMP.unit).replace(/^cap:/, "")); }
 
 function renderImport(){
@@ -2343,33 +2306,18 @@ function renderImport(){
       'report figures on your unit\u2019s own <b>Report</b> page.</div>';
   }
   var isCap = impIsCap();
-  var u = isCap ? impCap() : impUnit();
+  var u = isCap ? impCap() : UNITS[IMP.unit];
   var isPlan = IMP.kind === "plan";
   var d = IMP.diff;
 
-  /* Narrowed to the chosen format, not units-and-capabilities in one list
-     (§61) — the list is the subjects that keep THAT plan, so choosing the
-     format above it is what makes the two agree. */
   var unitPick = '<select class="fld" id="imp-unit">' +
-    impSubjects(impFmtOf(IMP.unit)).map(function(o){
-      return '<option value="' + esc(o.v) + '"' + (o.v === IMP.unit ? " selected" : "") + '>' +
-        esc(o.label) + '</option>';
-    }).join("") + '</select>';
-
-  /* ONE BUTTON, TWO ENTRIES. `<details>` rather than a button and a flag:
-     a menu's action fires before the menu closes (§47.2), and a `<details>`
-     that is closed from inside its own click has not unmounted the button the
-     click is still in — it hides it. Keyboard and screen reader come free. */
-  function dlMenu(label, act){
-    return '<details class="dlmenu"><summary class="editbtn">' + label +
-      '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-      '<div class="menu" role="menu">' +
-        '<button role="menuitem" data-' + act + '="pillars">Pillars template' +
-          '<span class="dlsub">Business units and the functions that plan in pillars</span></button>' +
-        '<button role="menuitem" data-' + act + '="projects">Projects template' +
-          '<span class="dlsub">Capabilities and the functions that improve them</span></button>' +
-      '</div></details>';
-  }
+    '<optgroup label="Business units">' + UNIT_KEYS.map(function(k){
+      return '<option value="' + k + '"' + (k === IMP.unit ? " selected" : "") + '>' + esc(UNITS[k].name) + '</option>';
+    }).join("") + '</optgroup>' +
+    '<optgroup label="Capabilities">' + GROUP.capabilities.map(function(c){
+      return '<option value="cap:' + c.id + '"' + ("cap:" + c.id === IMP.unit ? " selected" : "") + '>' +
+        esc(c.name) + '</option>';
+    }).join("") + '</optgroup></select>';
 
   var kindPick = '<span class="minisw">' +
     '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
@@ -2402,20 +2350,20 @@ function renderImport(){
     '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
       '<h4>Download the template</h4>' +
       '<p class="sub">' + (isPlan
-        ? "Two formats: <b>pillars</b> for a business unit or a function that plans like one, <b>projects</b> for a capability. Each is the same file whoever it is for &mdash; choose the subject on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
+        ? "The same file whichever unit you are planning. Choose the unit on its Read me sheet, fill it in Excel, and the platform assigns every code itself."
         : "One row per reportable item, with its target and what is currently recorded. Only the New value column is typed.") +
       '</p>' +
-      '<div class="imp-row">' + kindPick +
+      '<div class="imp-row">' + (isPlan ? "" : unitPick) + kindPick +
+        '<button class="editbtn" data-dlx="1">' +
+          (isPlan ? "Download the plan template" : "Download Excel") + '</button>' +
         (isPlan
-          ? dlMenu("Download plan template", "dlplan")
-          : dlMenu("Download progress template", "dlprog") + unitPick +
-            '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
+          ? '<button class="linkbu" data-dlxcap="1">Capability template</button>'
+          : '<button class="linkbu" data-dl="1">or the raw CSV</button>' +
             '<button class="linkbu" data-showcsv="1">View the CSV</button>') +
       '</div>' +
       '<p class="sub" style="margin-top:8px">' + (isPlan
-        ? planSubjectNames().length + " business units and functions, " +
-          GROUP.capabilities.length + " capabilities and " +
-          GROUP.themes.length + " themes are in its dropdowns"
+        ? UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; }).length +
+          " business units and " + GROUP.themes.length + " themes are in its dropdowns"
         : counts) + '</p>' +
     '</div></div>';
 
@@ -2423,7 +2371,7 @@ function renderImport(){
     '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
       '<h4>Upload the filled file</h4>' +
       '<p class="sub">' + (isPlan
-        ? "The file says which unit, function or capability it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and nothing else is touched."
+        ? "The file says which unit it is for, so there is nothing to select here. An upload <b>authors</b> that plan \u2014 the outgoing one is archived, not destroyed \u2014 and no other unit is touched."
         : "Fill the new_value column only where a figure changed. Blank rows are ignored.") + '</p>' +
       '<div class="imp-row"><input type="file" id="imp-file" accept=".xlsx,.csv" ' +
         'aria-label="Choose a template file to upload">' +

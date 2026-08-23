@@ -368,34 +368,6 @@
   .imp-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
   .imp-row select.fld { width:auto; min-width:190px; max-width:none; }
   .imp-row input[type=file] { font:inherit; font-size:13px; }
-
-  /* ONE BUTTON WITH TWO ENTRIES (§61). A <details>, so the open state is the
-     browser's and closing it from inside its own click cannot unmount the
-     button the click is still in (§47.2). The popup is absolute inside a
-     relative wrapper; .imp-row is not an overflow container, so unlike the
-     searchable select (§45.5) it does not need to be fixed. */
-  details.dlmenu { position:relative; flex:0 0 auto; }
-  details.dlmenu > summary { list-style:none; display:inline-flex; align-items:center;
-                             gap:7px; white-space:nowrap; }
-  details.dlmenu > summary::-webkit-details-marker { display:none; }
-  details.dlmenu > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
-  .dlcar { font-size:10px; line-height:1; transform:translateY(1px); }
-  details.dlmenu[open] > summary .dlcar { transform:translateY(1px) rotate(180deg); }
-  details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
-                           min-width:290px; background:var(--surface);
-                           border:1px solid var(--line); border-radius:var(--r);
-                           box-shadow:0 8px 24px rgba(0,0,0,.16); padding:4px 0; }
-  details.dlmenu > .menu button { display:block; width:100%; text-align:left; font:inherit;
-                                  font-size:13.5px; color:var(--ink); background:none;
-                                  border:0; padding:9px 14px; cursor:pointer; }
-  details.dlmenu > .menu button:hover { background:var(--surface-2); }
-  details.dlmenu > .menu button:focus-visible { outline:2px solid var(--gold);
-                                                outline-offset:-2px; }
-  /* The line under each entry says which subjects keep that plan, because
-     "pillars" and "projects" are the platform's words and the person choosing
-     is holding a file for a named unit. */
-  .dlsub { display:block; font-size:11.5px; color:var(--ink-2); margin-top:2px;
-           text-transform:none; letter-spacing:0; font-weight:400; }
   .imp-tally { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 14px; }
   .csvbox { width:100%; height:340px; font-family:var(--mono); font-size:12px;
             line-height:1.5; padding:12px; border:1px solid var(--line);

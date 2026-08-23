@@ -7981,3 +7981,120 @@ plan template's Read-me lists business units, and a function is not among them.
 That is the next piece, and it is its own decision — §22 says an upload
 AUTHORS a plan, which for a function means deciding what happens to the
 capabilities it is not using.
+
+## 60 · The sliders mark, the rail's code, and the page stops moving (v3.21)
+
+**60.1 The gear is two sliders.** Islam did not like the gear. Six marks were
+drawn at the size the control is actually worn — a 20px mark inside a 34px
+button, which is the only size it is ever seen at — and he chose the sliders.
+The gear's teeth were the whole problem: at 20px an outlined cog loses them to
+anti-aliasing and reads as a smudge. Two sliders hold their shape at any size,
+and they are the truer picture of what is behind the button: sixteen things you
+SET, not machinery.
+
+**60.2 The code is not part of the name.** Islam: *"the code looks like the same
+name with the pillar name, that needs distinction in colour and alignment."* It
+did, for a plain reason — the code sat INSIDE the same bold element as the name,
+same colour, same weight, same line, so `FIN01` read as the title's first word.
+It takes `.pband-code`'s treatment now (mono, letter-spaced, `--stone`, its own
+line), so the rail and the pane beside it say a code the SAME way rather than
+two ways (§53).
+
+`--gold-deep` on `--surface-2` for the selected row's code was **§38.5 for the
+seventh time** — the sweep went 53 → 61 and back to 53 on `--ink-2`. This file
+records that trap by number and it was walked into anyway.
+
+**60.3 A toggle that removes the sub-details.** In the rail's header, remembered
+in `localStorage` (`smp.rail.terse`) like every other screen preference (§25,
+§47.1) — never in the state graph, because one person tidying their rail must
+not tidy everybody's. `railHead()`, `railName()` and `railSub()` are the one
+place all four rails ask, or the fourth is the one that keeps its sub-line.
+
+**60.4 The page stopped moving.** `html { scrollbar-gutter: stable }`. A unit
+whose page is short enough to need no scrollbar and one that needs one are
+different widths, so switching between them shifted the whole layout — which is
+what Islam saw on IT and Corporate and on the functions. Recorded honestly:
+headless Chromium draws overlay scrollbars and cannot reproduce the jump, so
+this was reasoned from the mechanism and the measurement of the two page
+heights, not seen failing and then seen fixed.
+
+## 61 · An empty function is still a function (v3.21)
+
+**61.1 Three functions were missing from the navigation.** Islam: *"why can't I
+see the merchandising, consumer finance, and marketing in the functions
+navigation bar? they are still functions the whole point is that they are
+planned in a different format."*
+
+`fnHasWork()` was the whole gate — a function appeared when it had capabilities,
+or, if it plans in pillars, when it had pillars. That is right for somebody
+coming to READ, because an empty page is a dead end, and it is exactly wrong for
+the people who have to put something there: **a function with no plan could not
+be opened, so the only way to reach it was to give it a plan first.**
+
+Worst on a fresh tenant. Migration 004 removes every capability, so on a clean
+slate EVERY function serving the group was missing from the navigation until
+somebody uploaded something — and there was nowhere to upload it from.
+
+**The test is EDIT, not view.** `fnCanFill(k)` asks the same grant that decides
+whether the plan and the foundation can be authored at all, at the target the
+tab would open; `fnShows(k)` is `active && (fnHasWork || fnCanFill)`, and it is
+asked ONCE, by both `fnsReachable()` and the shell's `myFns()` — §59 has already
+been paid for asking this question in two places with two different answers.
+
+**61.2 An empty page has to say what would fill it.** Both empty states existed
+only in theory before, because neither page could be reached. The pillars one
+said *"This unit has no pillars yet"* on a supporting function. The projects one
+said nothing at all: `[].map().join("")` is the empty string, and an empty
+string is a blank page rather than an empty state (§45.2). `fnNothingBehind()`
+is one sentence used by all three of a function's pages, because the third copy
+is the one that gets left behind.
+
+**61.3 A reading view is not a writable one.** `fnAsUnit()` builds a fresh object
+every call and hands out a shared frozen empty where the function has no array,
+because a reader must never create the field it was looking for (§50.6). An
+import WRITES — and `clearUnitPlan()` ASSIGNS `u.items`, `u.keyObjectives` and
+`u.swot` rather than emptying them in place, so a plan applied to the view is
+written to an object thrown away one line later.
+
+**This is the silent kind.** The import reports the pillars, measures and
+tactics it wrote, the archive is taken, nothing throws — and the function is
+still empty when you open it. `fnWritable()` mints the containers (in the
+WRITING half, deliberately, which is the only place that mints them) and
+`fnWriteBack()` copies the assigned fields back; `unitLikeWritable()` is
+`unitLike()` for somebody about to write. `qa.py` asserts it by writing a plan
+and then asking the FUNCTION, and the assertion was proved against the fault:
+through the reading view the check reports `viewItems: 1, fnItems: 0`.
+
+**61.4 One button, two entries.** Islam: *"Make this part into download Plan
+Template and a drop down opens with 2 selections Pillars Template or Projects
+Template and same for the Progress."* What was there was a button and, beside
+it, a link calling itself *Capability template* — unfindable, and the only place
+in the flow where the word for the other half of the product appeared.
+
+It is a `<details>`, not a button and a flag: a menu's action fires BEFORE the
+menu closes (§47.2), and a `<details>` closed from inside its own click has not
+unmounted the button the click is still in — it hides it. Keyboard and screen
+reader come free.
+
+**61.5 A plan template is generic; a progress template is not.** Both plan files
+are built against an empty shape with the subject named on the Read me sheet
+(§22), so both menu entries are just downloads. A progress workbook is one
+subject's current rows, so the subject travels with the format: choosing a
+format the selected subject does not keep moves the selection to the first that
+does AND repaints, so the select shows exactly what was downloaded.
+
+**The format is READ OFF THE SUBJECT, never stored beside it.** A second field
+would be a second copy of the same fact and the two would drift — the list
+offering capabilities while the format said pillars, and the select showing
+nothing selected. The subject already says which plan it keeps, so changing the
+format IS changing the subject.
+
+**61.6 The pillars template now offers the functions that plan in pillars.**
+`planSubjectNames()` is units plus pillars-format functions, named once because
+the Import page prints the same count. The Read me label becomes *"Business unit
+or function"* — and **the reader takes either.** Renaming it without that is
+§51.11 exactly: `readmePick()` stops finding the cell, the upload reports *no
+business unit called ''*, and nothing says why. The round trip caught it inside
+one run. §58 had already settled the principle for the people workbook: **write
+the new label, read either — somebody is holding a file downloaded before the
+rename.**

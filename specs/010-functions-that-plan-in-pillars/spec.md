@@ -155,3 +155,29 @@ the SMO's (§31, §42's `unitPlan`).
 - **The horizon** (§16.16) is group-wide and any plan upload moves it. A
   function planning in pillars carries key objectives with horizons too, which
   makes that sharper — but it is its own piece of work.
+
+---
+
+## Addendum — §61 (2026-08-23)
+
+Three things the original spec left unfinished, found by using the product.
+
+**A function is in the navigation before it has a plan.** The gate was
+"is there anything behind this function". That is right for a reader and wrong
+for whoever has to fill it: a pillars function with no plan could not be
+opened, so the only way to reach it was to give it a plan first — and on a
+clean-slate tenant, where every capability is removed, no function appeared at
+all. A function now shows when it is active AND (it has work OR the viewer may
+edit its plan or foundation). Its empty pages say what would fill them.
+
+**A pillars function can receive a plan by upload.** The plan template's Read me
+sheet lists business units *and* the functions whose format is pillars; the
+label reads "Business unit or function" and the reader accepts the old label
+too. The upload resolves that name to `fn:<key>` and applies through the same
+`applyPlanReplace()` a unit uses — against a WRITABLE view, because
+`fnAsUnit()` is a reading view whose assigned fields are thrown away.
+
+**The download is one button with two entries** — *Pillars template* and
+*Projects template* — on both the plan and the progress step. On progress the
+subject list is narrowed to the subjects that keep the chosen format, and the
+format is read off the selected subject rather than stored beside it.

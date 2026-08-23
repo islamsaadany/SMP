@@ -222,6 +222,25 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **An empty function is still a function (§61):** `fnHasWork()` was the whole
+  navigation gate, which is right for somebody coming to READ and wrong for the
+  people who have to fill it — **a function with no plan could not be opened, so
+  the only way to reach it was to give it a plan first**, and on a fresh tenant
+  (migration 004 removes every capability) that hid EVERY function. `fnShows()`
+  is `active && (fnHasWork || fnCanFill)` and the fill test is **edit**, asked
+  ONCE by both `fnsReachable()` and the shell's `myFns()`. `fnNothingBehind()`
+  is the one empty state all three of a function's pages use. **A READING VIEW
+  IS NOT A WRITABLE ONE**: `fnAsUnit()` returns a fresh object and frozen
+  empties, and `clearUnitPlan()` ASSIGNS `items`/`keyObjectives`/`swot`, so an
+  import applied to the view reports what it wrote and writes nothing —
+  `fnWritable()` / `fnWriteBack()` / `unitLikeWritable()` are the writing half,
+  and `qa.py` proves it by asking the FUNCTION afterwards. **The download is one
+  button with two entries** (`<details>`, so closing it from inside its own
+  click hides rather than unmounts — §47.2): a plan template is generic in both
+  formats, a progress template is one subject's rows, and **the format is read
+  off the subject rather than stored beside it**, or the two drift. The pillars
+  Read me now says *"Business unit or function"* and **the reader takes either**
+  (§58's rule: write the new label, read either).
 - **A function that plans in pillars (spec 010, made usable in §59):** its
   plan and figures live on the FUNCTION, so `collectFunction()` classifies them
   through **`collectUnit()` against the `fn:<key>` target** — never a second

@@ -1692,31 +1692,10 @@ function fnHasWork(k){
   if (!f) return false;
   return fnPlansInPillars(f) ? fnItems(f).length > 0 : capsOfFunction(k).length > 0;
 }
-/* AN EMPTY FUNCTION IS INVISIBLE TO A READER AND REACHABLE BY WHOEVER FILLS
-   IT (§61). fnHasWork() alone was the whole gate, which is right for somebody
-   coming to READ — an empty page is a dead end — and exactly wrong for the
-   people who have to put something there: a function with no plan yet could
-   not be opened, so the only way to reach it was to give it a plan first.
-
-   Worst on a fresh tenant, where migration 004 removes every capability: EVERY
-   function serving the group was missing from the navigation until somebody
-   uploaded something, and there was nowhere to upload it from.
-
-   The test is EDIT, not view — the same grant that decides whether the plan
-   and the foundation can be authored at all, asked of the target the tab would
-   open. */
-function fnCanFill(k){
-  return grantAt("k_found", "fn:" + k) === "edit" ||
-         grantAt("k_proj",  "fn:" + k) === "edit";
-}
-/* IS THIS FUNCTION IN THE NAVIGATION AT ALL. Asked once, because §59 has
-   already been paid for asking the same question in two places. */
-function fnShows(k){
-  var f = FUNCTIONS[k];
-  return !!f && f.active !== false && (fnHasWork(k) || fnCanFill(k));
-}
 function fnsReachable(){
-  return FUNCTION_KEYS.filter(function(k){ return fnShows(k) && reachesFn(k); });
+  return FUNCTION_KEYS.filter(function(k){
+    return FUNCTIONS[k].active !== false && reachesFn(k) && fnHasWork(k);
+  });
 }
 /* A function is retired, never deleted \u2014 it carries reported history, exactly
    as a unit does. */
@@ -2413,48 +2392,6 @@ function fnAsUnit(fk){
            clauses:Array.isArray(f.clauses) ? f.clauses : FN_NO_ROWS,
            swot:f.swot || FN_NO_SWOT, active:f.active !== false };
 }
-/* WRITING TO A FUNCTION THAT PLANS IN PILLARS (§61). fnAsUnit() is a READING
-   view: it hands out the function's own arrays where they exist and a shared
-   frozen empty where they do not, because a reader must never create the field
-   it was looking for (§50.6). An import WRITES, so it asks for the containers
-   first — here, in the writing half, which is the only place that mints them.
-
-   And the view is a fresh object every call, while clearUnitPlan() ASSIGNS
-   `u.items`, `u.keyObjectives` and `u.swot` rather than emptying them in
-   place. Assign into a view and the plan is written to an object that is
-   thrown away one line later — the import would report the rows it wrote and
-   the function would still be empty. fnWriteBack() is the other half of the
-   pair, and neither is any use without it. */
-function fnWritable(fk){
-  var f = FUNCTIONS[fk];
-  if (!f || !fnPlansInPillars(f)) return null;
-  if (!Array.isArray(f.items)) f.items = [];
-  if (!Array.isArray(f.clauses)) f.clauses = [];
-  if (!Array.isArray(f.keyObjectives)) f.keyObjectives = [];
-  if (!f.swot || f.swot === FN_NO_SWOT) f.swot = { s:[], w:[], o:[], t:[] };
-  return fnAsUnit(fk);
-}
-function fnWriteBack(fk, u){
-  var f = FUNCTIONS[fk];
-  if (!f || !u) return;
-  f.items = u.items;
-  f.keyObjectives = u.keyObjectives;
-  f.clauses = u.clauses;
-  f.swot = u.swot;
-  f.aspiration = u.aspiration || "";
-  f.endInMind = u.endInMind || "";
-}
-/* unitLike() for somebody about to write. Same two answers, same one place. */
-function unitLikeWritable(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
-  return fnWritable(t.slice(3));
-}
-function fnKeyOfTarget(target){
-  var t = String(target || "");
-  return t.indexOf("fn:") === 0 ? t.slice(3) : null;
-}
-
 /* Whether a target — a unit key or "fn:<key>" — is drawn by the unit pages. */
 function plansInPillars(target){
   var t = String(target || "");

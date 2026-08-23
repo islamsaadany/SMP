@@ -352,30 +352,8 @@ function readmeCell(sheets, label){
 /* Whose plan this is. Both templates label it differently — a unit's says
    "Business unit" and a capability's says "Capability" — so both are asked
    for, and the one that answers is the answer. */
-/* WRITES THE NEW LABEL, READS EITHER (§58, §61). The pillars Read me sheet used
-   to be labelled "Business unit" and now says "Business unit or function",
-   because the dropdown offers both. A label is a CONTRACT with every file
-   already downloaded and sitting in somebody's Downloads folder, so the old one
-   still reads — and renaming it without this is the §51.11 fault exactly: the
-   reader stops finding the cell, the upload reports "no business unit called
-   ''", and nothing says why. */
-var READ_PICK_LABELS = ["Business unit or function", "Business unit", "Capability"];
 function readmePick(sheets){
-  for (var i = 0; i < READ_PICK_LABELS.length; i++) {
-    var v = readmeCell(sheets, READ_PICK_LABELS[i]);
-    if (v) return v;
-  }
-  return "";
-}
-
-/* Everything a pillars plan may be written for, in the order the dropdown
-   offers it. Named once because the Import page shows the same count. */
-function planSubjectNames(){
-  return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
-           .map(function(k){ return UNITS[k].name; })
-    .concat(FUNCTION_KEYS.filter(function(k){
-      return FUNCTIONS[k].active !== false && fnPlansInPillars(FUNCTIONS[k]);
-    }).map(function(k){ return FUNCTIONS[k].name; }));
+  return readmeCell(sheets, "Business unit") || readmeCell(sheets, "Capability");
 }
 
 function planWorkbook(u){
@@ -383,18 +361,9 @@ function planWorkbook(u){
   var units = unitSuggestions();
   var picked = u ? u.name : "";
 
-  /* UNITS AND THE FUNCTIONS THAT PLAN LIKE THEM (§61). A function whose
-     format is pillars carries the same plan a unit does — the same pillars,
-     measures and tactics, read by the same pages — so it can arrive in the
-     same file, and the only thing that had ever stopped it was this list.
-
-     Retired ones are left out on both sides, and the label stays "Business
-     unit": it is the cell the reader looks for, and renaming it would refuse
-     every file downloaded before today (§58.2, the same contract). */
-  /* "or function" is not decoration: the dropdown now offers both, and a label
-     reading "Business unit" beside a function's name would read as a mistake
-     in the file rather than as the feature (§61). */
-  var readmeSheet = readme("plan", "Business unit or function", planSubjectNames());
+  var readmeSheet = readme("plan", "Business unit",
+    UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; })
+             .map(function(k){ return UNITS[k].name; }));
   readmeSheet.rows[1][1] = picked;
 
   return [

@@ -17889,12 +17889,32 @@ var SYNC = (function () {
        (the navigation, listing every unit) passes its own target to grantAt().
        "setup" is deliberately mapped to the group: the Setup pages belong to
        nobody's unit, and their area does not depend on the target at all. */
-    TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
     fillViewers();
     paintUnits();
+    /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
+       It used to be set BEFORE paintUnits(), and paintUnits is the thing that
+       corrects `current` when this viewer cannot reach where the last one was
+       standing. So on the first paint after the reach changed, TARGET still
+       named the OLD destination while `current` had already moved — and every
+       tab was then judged against the wrong subject.
+
+       What it cost: setting the business unit owner's GROUP area to "none"
+       made a unit head lose EVERYTHING. Their own unit's pages were granted —
+       `u_perf` measured "edit" the whole time — but they were being asked
+       against the group, where the answer had just become none, so every tab
+       was filtered out and the page said there was nothing to open. The one
+       change the access table is most likely to be asked for took the product
+       away from the person it was configured for. A function head lost
+       everything the same way; a custodian did not, only because `current`
+       happened to be their own unit already and never needed correcting —
+       which is why it looked intermittent rather than total.
+
+       paintUnits() reads no grant of its own (every call inside it passes an
+       explicit target, by the note above), so nothing needs the old value. */
+    TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     /* Repainted rather than set once: the demo switch swaps the whole graph,
        and Labels can rename the tenant while you are looking at it. The
        separator lives with the name so an unnamed tenant shows nothing at all

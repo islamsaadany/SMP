@@ -158,12 +158,8 @@
           return secs;
         } },
       { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
-          /* PLAN, not Projects, when the function plans in pillars — the tab
-             has to say what is behind it (spec 010). */
           return [{ k:"found", ac:"k_found", label:"Foundation", render:renderFnFoundation },
-                  { k:"proj",  ac:"k_proj",
-                    label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
-                    render:renderFnProjects }];
+                  { k:"proj",  ac:"k_proj",  label:"Projects",   render:renderFnProjects }];
         } }
     ],
     group: [
@@ -208,12 +204,6 @@
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
       { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
-      /* The client's own names for parts of the business, and what each one
-         opens here (§54.1). In *Who* rather than *What we run*, and sharing
-         c_people rather than taking a key of its own: it is not another thing
-         being planned, it is the vocabulary the register's own data arrives
-         in, and Companies already shares c_units on exactly this argument. */
-      { k:"mainbu", ac:"c_people", grp:"who", label:"BU list",               render:renderMainbus },
       { k:"access", ac:"c_access", grp:"who", label:"Roles & access",        render:renderAccess },
 
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units",        render:renderUnits },
@@ -543,28 +533,18 @@
     return gs;
   }
 
-  /* Where a destination opens. The group and Setup keep their own first page;
-     a BUSINESS UNIT opens on Strategy and, inside it, on Plan, and a
-     SUPPORTING FUNCTION opens on Strategy and, inside it, on Projects — the
-     same page under the name that function's plan goes by. Both are checked
-     against what the viewer holds rather than assumed.
-
-     ONE FUNCTION, TWO KINDS OF DESTINATION (§53.1). It used to say "not a
-     function" and send every function to Performance, which is exactly the
-     kind of divergence the cross-testing rule now forbids: what the unit got
-     in §28, the function did not. The tab and section keys are the only
-     difference, so they are two variables rather than two branches. */
+  /* Where a destination opens. Everything keeps its own first page except a
+     business unit, which opens on Strategy and, inside it, on Plan. Both are
+     checked against what the viewer holds rather than assumed. */
   function entrySub(k){
     var d = allowed(defsFor(k));
     if (!d.length) return null;
-    if (k !== "group" && k !== "manage" && k !== "setup") {
-      var fn = isFn(k);
-      var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
-      var strat = d.filter(function(x){ return x.k === tab; })[0];
+    if (k !== "group" && k !== "manage" && k !== "setup" && !isFn(k)) {
+      var strat = d.filter(function(x){ return x.k === "strategy"; })[0];
       if (strat) {
-        var secs = allowed(strat.sections(fn ? k : UNITS[k]));
-        if (secs.some(function(x){ return x.k === want; })) CURSEC[tab] = want;
-        if (secs.length) return tab;
+        var secs = allowed(strat.sections(UNITS[k]));
+        if (secs.some(function(x){ return x.k === "plan"; })) CURSEC.strategy = "plan";
+        if (secs.length) return "strategy";
       }
     }
     return d[0].k;
@@ -666,12 +646,11 @@
           CLEARING = null;
         }
         current = b.dataset.u;
-        /* A business unit opens on its PLAN and a supporting function on its
-           PROJECTS, not on Performance. What was agreed is the thing people
-           come to read and the thing they come to change; the score is a
-           consequence of it and is one click away. Falls back to the first
-           page the viewer actually holds, so someone without u_plan is not
-           sent to a tab that is not there. */
+        /* A business unit opens on its PLAN, not on Performance. What the unit
+           agreed is the thing people come to read and the thing they come to
+           change; the score is a consequence of it and is one click away.
+           Falls back to the first page the viewer actually holds, so someone
+           without u_plan is not sent to a tab that is not there. */
         currentSub = entrySub(current);
         paint(); window.scrollTo(0,0);
       });
@@ -788,29 +767,12 @@
        (the navigation, listing every unit) passes its own target to grantAt().
        "setup" is deliberately mapped to the group: the Setup pages belong to
        nobody's unit, and their area does not depend on the target at all. */
+    TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
     fillViewers();
     paintUnits();
-    /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
-       It used to be set BEFORE paintUnits(), and paintUnits is the thing that
-       corrects `current` when this viewer cannot reach where the last one was
-       standing. So on the first paint after the reach changed, TARGET still
-       named the OLD destination while `current` had already moved — and every
-       tab was then judged against the wrong subject.
-
-       What it cost: setting the business unit owner's GROUP area to "none"
-       made a unit head lose EVERYTHING. Their own unit's pages were granted —
-       `u_perf` measured "edit" the whole time — but they were being asked
-       against the group, where the answer had just become none, so every tab
-       was filtered out and the page said there was nothing to open. The one
-       change the table is most likely to be asked for took the product away
-       from the person it was configured for.
-
-       paintUnits() reads no grant of its own (every call inside it passes an
-       explicit target, by the note above), so nothing needs the old value. */
-    TARGET = (!current || current === "setup" || current === "manage") ? "group" : current;
     /* Repainted rather than set once: the demo switch swaps the whole graph,
        and Labels can rename the tenant while you are looking at it. The
        separator lives with the name so an unnamed tenant shows nothing at all
@@ -1153,36 +1115,6 @@
     document.querySelectorAll("input[data-upx]").forEach(function(inp){
       inp.addEventListener("change", function(){
         UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
-        paint();
-      });
-    });
-    /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
-       save that will not happen has to say so where the save is (§42). */
-    document.querySelectorAll("input[data-ulogo]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        var k = inp.dataset.ulogo, f = inp.files && inp.files[0];
-        inp.value = "";                       /* or the same file cannot be picked twice */
-        if (!f) return;
-        LOGO_NOTE = "";
-        logoIntake(f).then(function(uri){
-          UNITS[k].logo = uri;
-          LOGO_NOTE = "";
-          /* No save call: sync.js polls the serialised state every 5s and
-             writes when it differs. Calling one would be a second way to
-             save, and the wrong one. */
-          paint();
-        }, function(err){
-          LOGO_NOTE = UNITS[k].name + ": " + err.message;
-          paint();
-        });
-      });
-    });
-    document.querySelectorAll("[data-ulogoclear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* DELETE the key rather than blanking it, so a unit with no mark is
-           the same shape it was before anybody uploaded one (§52). */
-        delete UNITS[b.dataset.ulogoclear].logo;
-        LOGO_NOTE = "";
         paint();
       });
     });
@@ -1817,131 +1749,6 @@
     });
     var ac = document.getElementById("addcompany");
     if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
-
-    /* ── The BU list (§54.1) ────────────────────────────────────────
-       A name, where it points, and a Remove that is refused while anybody
-       carries it. The NAME is the key here — unlike a unit or a company,
-       which carry a key under the label so a rename detaches nothing — so
-       renaming moves the people with it, inside renameMainbu(). */
-    document.querySelectorAll("[data-mbat]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        setMainbuAt(sel.dataset.mbat, sel.value || null);
-        paint();
-      });
-    });
-    document.querySelectorAll("input[data-mbname]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        var was = inp.dataset.mbname, now = inp.value.trim();
-        if (now && now !== was && !renameMainbu(was, now)) {
-          /* Refused rather than silently merged: two departments becoming one
-             is a decision, and it is not one a typo gets to make. */
-          alert('There is already a BU called "' + now + '". Two names cannot be merged by ' +
-                'renaming one into the other \u2014 move the people first.');
-        }
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-mbdel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        removeMainbu(b.dataset.mbdel);
-        paint();
-      });
-    });
-    var newBu = document.getElementById("newMainbu");
-    if (newBu) {
-      newBu.addEventListener("input", function(){ NEWMAINBU = newBu.value; });
-      newBu.addEventListener("keydown", function(e){
-        if (e.key === "Enter") { e.preventDefault(); addTypedMainbu(); }
-      });
-    }
-    function addTypedMainbu(){
-      var n = (NEWMAINBU || "").trim();
-      if (!n) return;
-      addMainbu(n);
-      NEWMAINBU = "";
-      paint();
-    }
-    document.querySelectorAll("[data-mbadd]").forEach(function(b){
-      b.addEventListener("click", addTypedMainbu);
-    });
-
-    /* ── The register's own file (§54.3) ────────────────────────────
-       Download, upload, review, apply. The gate is checked HERE as well as on
-       the section that draws the controls, for the reason renderImport()
-       states: a destination can be reached with a stale page after a role
-       changed under the viewer, and the handler is the last thing between a
-       file and the register. */
-    var dlp = document.querySelector("[data-dlppl]");
-    if (dlp) dlp.addEventListener("click", function(){
-      sendXlsx(peopleWorkbook(), "SMP - people.xlsx");
-    });
-
-    var pf = document.getElementById("ppl-file");
-    if (pf) pf.addEventListener("change", function(){
-      if (grant("c_people") !== "edit") return;
-      var file = pf.files && pf.files[0];
-      if (!file) return;
-      var rx = new FileReader();
-      rx.onload = function(){
-        readXlsx(rx.result).then(function(sheets){
-          if (!sheets["People"]) {
-            /* §48.8's rule: a file that cannot be read has to SAY so, where
-               the upload is. A plan workbook dropped here is the likely
-               mistake, and naming the sheet it is missing is what tells
-               somebody which of the two files they picked up. */
-            PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
-                          roles:0, retired:0, restored:0,
-                          problems:[{ at:file.name, msg:"has no sheet called People. This is " +
-                            "the people workbook's own sheet \u2014 download the template above " +
-                            "and fill that." }] };
-            PPLF.read = ""; PPLF.done = null;
-            paint();
-            return;
-          }
-          var rows = peopleFromWorkbook(sheets);
-          PPLF.plan = planPeopleFile(rows);
-          PPLF.read = file.name + " \u00b7 " + plural(rows.length, "row");
-          PPLF.done = null;
-          paint();
-        }).catch(function(e){
-          PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
-                        roles:0, retired:0, restored:0,
-                        problems:[{ at:file.name,
-                          msg:"could not be read as a workbook \u2014 " + e.message }] };
-          PPLF.read = ""; PPLF.done = null;
-          paint();
-        });
-      };
-      rx.readAsArrayBuffer(file);
-    });
-
-    document.querySelectorAll("[data-pplapply]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (grant("c_people") !== "edit") return;
-        var plan = PPLF.plan;
-        if (!plan || plan.problems.length) return;
-        applyPeopleFile(plan);
-        /* The receipt is written from what the plan SAID, before the state
-           moved under it — counted after the fact it would be counting the
-           register rather than the file. */
-        var parts = [];
-        if (plan.added)    parts.push(plural(plan.added, "person").replace("persons", "people") + " added");
-        if (plan.updated)  parts.push(plan.updated + " updated");
-        if (plan.roles)    parts.push(plural(plan.roles, "role") + " given");
-        if (plan.retired)  parts.push(plan.retired + " retired");
-        if (plan.restored) parts.push(plan.restored + " restored");
-        if (plan.newBus.length) parts.push(plural(plan.newBus.length, "BU name") + " added to the BU list");
-        PPLF.done = parts.length ? parts.join(", ") + "." : "Nothing to change \u2014 the file matched the register.";
-        PPLF.plan = null; PPLF.read = "";
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-pplcancel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        PPLF.plan = null; PPLF.read = ""; PPLF.done = null;
-        paint();
-      });
-    });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
         VIEWER = b.dataset.as;
@@ -1986,12 +1793,6 @@
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
-    /* The two the employee file brings (§54.2). Cleared when emptied rather
-       than kept as "", so absent and blank stay one word — the codebase reads
-       every optional field with == null and a stored empty string would come
-       back through the round trip as a field the data never had. */
-    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; });
-    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; });
 
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -2475,19 +2276,6 @@
     paint();
   }
 
-  /* Lifted out of wireImport() 2026-08-23 (§54.3): the People page sends a
-     workbook too, and two copies of "build it, wrap it in a blob, click a
-     link, revoke the URL" is the second one that gets the revoke wrong. */
-  function sendXlsx(sheets, name){
-    var bytes = buildXlsx(sheets);
-    var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-  }
-
   function wireImport(){
     var us = document.getElementById("imp-unit");
     if (us) us.addEventListener("change", function(){ IMP.unit = us.value; IMP.diff = null; paint(); });
@@ -2496,6 +2284,15 @@
       b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
     });
 
+    function sendXlsx(sheets, name){
+      var bytes = buildXlsx(sheets);
+      var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
     /* The plan template is the same file whichever unit it is for, so it is
        built against an empty shape rather than a chosen unit's content. */
     var dlx = document.querySelector("[data-dlx]");
@@ -2547,39 +2344,37 @@
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              /* ONE NAMING IN THE FILE (§51.19). Islam: "I don't think we
-                 should have the capability file with 2 namings capability and
-                 function. we can just upload with the capability and we
-                 connect the function on the platform … to avoid the confusion
-                 between the 2 templates."
+              /* THE FUNCTION CELL IS A CAPABILITY'S QUESTION, AND ONLY A
+                 CAPABILITY'S (§51.14). Asked of every plan, it broke uploading
+                 a UNIT's plan outright: a unit's Read me carries no such row,
+                 so the read came back with whatever prose sat at that position
+                 and the upload was refused for naming a function that does not
+                 exist. A unit is resolved first, and a workbook that names one
+                 is never asked about functions at all.
 
-                 §51.2 put a Supporting function row in the workbook so two
-                 functions with a similarly named capability could be told
-                 apart. It solved that and made a worse problem: the file then
-                 carried TWO names that had to AGREE, and a workbook whose
-                 halves disagreed was refused — "no capability called Customer
-                 Centric under Customer Experience" — for a link the PLATFORM
-                 owns and can see. Which function carries a capability is a
-                 Setup decision, made on the Capabilities page (§51.11).
-
-                 THE AMBIGUITY IS ANSWERED HERE INSTEAD, and better: two
-                 capabilities sharing a name are refused BY NAME, naming both
-                 functions, rather than resolved by whichever came first in the
-                 array. That was the silent wrong-plan §51.2 feared, and it is
-                 now caught at the one moment somebody can still act on it. */
-              var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
-              var cp = caps[0];
-              if (!uk && caps.length > 1) {
-                impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
-                  caps.map(function(x){
-                    var f = FUNCTIONS[x.fn];
-                    return f ? esc(f.name) : "no function";
-                  }).join(" and ") + '. Rename one on Setup \u2192 Capabilities, then upload again.');
+                 WITHIN the function when one IS named: two functions may each
+                 carry a capability with the same name, and before §51.2 the
+                 first match in the array won, silently, into the wrong
+                 function's plan. A blank cell still resolves across the tenant,
+                 so a workbook saved before that change still opens. */
+              var wantFn = uk ? "" : readmePickFn(sheets);
+              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
+                return FUNCTIONS[k].name === wantFn; })[0];
+              if (wantFn && !fnKeyWanted) {
+                impFail('no supporting function called "' + wantFn +
+                  '". Open the Read me sheet and choose one from the dropdown beside ' +
+                  '"Supporting function".');
                 return;
               }
+              var capPool = GROUP.capabilities.filter(function(x){
+                return !fnKeyWanted || x.fn === fnKeyWanted; });
+              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail('no business unit or capability called "' + esc(picked) +
-                  '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail(fnKeyWanted
+                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
+                    '. Open the Read me sheet and check B2 and B3 against each other.'
+                  : 'no business unit or capability called "' + picked +
+                    '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;

@@ -1,0 +1,102 @@
+diff --git a/SMP-Project-Folder/src/present.css b/SMP-Project-Folder/src/present.css
+index a961629..49212ec 100644
+--- a/SMP-Project-Folder/src/present.css
++++ b/SMP-Project-Folder/src/present.css
+@@ -360,3 +360,29 @@
+   .picfoot { display:flex; align-items:center; gap:12px; }
+   .picsub { font-size:var(--fs-small); color:var(--ink-3); }
+   .picover { margin:10px 0 0; }
++
++  /* ── The tenant's unit lockup on the deck (MOCKUP, §52.8) ──────────
++     Two tones and a rule, so three tokens. The platform always writes an
++     explicit data-theme (§27), so dark is one selector rather than the
++     gate's three blocks.
++
++     On a dark slide the whole lockup goes white, which is how the client
++     supplies their reversed mark - not the two-tone dimmed, which would
++     be a third version of a mark they only draw two ways. */
++  .deckroot { --umark:#001780; --uflag:#225FAC; --urule:#111111; }
++  :root[data-theme="dark"] .deckroot { --umark:#FFFFFF; --uflag:#FFFFFF; --urule:#FFFFFF; }
++  .umarkdefs { position:absolute; width:0; height:0; overflow:hidden; }
++
++  /* The cover wears it at reading size, in place of the group's name. */
++  .dcovermark { display:block; width:340px; height:68.3px; margin:0 0 26px; }
++
++  /* THE FOOTER IS OUT OF FLOW. A footer in the flex column would shorten
++     every slide's content box, which changes how many rows a table fits
++     and therefore how many continuation slides deckFitPass() mints - so
++     the space is RESERVED as padding on the slide and the mark is placed
++     in it, rather than the mark pushing the content up. */
++  .dslide.hasmark { padding-bottom:104px; }
++  .dfoot { position:absolute; left:62px; right:62px; bottom:36px;
++           display:flex; align-items:center; padding-top:20px;
++           border-top:1px solid var(--line-soft); }
++  .dfootmark { display:block; width:150px; height:30.1px; opacity:.75; }
+diff --git a/SMP-Project-Folder/src/present.js b/SMP-Project-Folder/src/present.js
+index 18743fb..e558c01 100644
+--- a/SMP-Project-Folder/src/present.js
++++ b/SMP-Project-Folder/src/present.js
+@@ -54,7 +54,9 @@ function deckSlides(u){
+ 
+   /* 1 — the cover carries the unit and the cycle, and nothing else. */
+   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
+-    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
++    (UMARK_OF[u.ukey]
++        ? unitMark(u.ukey, "dcovermark")
++        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
+     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
+ 
+@@ -515,10 +517,52 @@ function insertPictureSlides(deck, target, blank){
+   });
+ }
+ 
++/* ── The tenant's unit lockups (MOCKUP, §52.8) ────────────────────────
++   Drawn to be looked at before it is built. Three things are deliberately
++   NOT solved here: where an uploaded mark is stored, how build.py inlines
++   it, and who is allowed to set one.
++
++   The symbol is defined ONCE per deck and referenced by every slide. A
++   <use> clones into a shadow tree that a document selector cannot reach
++   (§52.3), so the paint is declared inline on the groups inside the
++   symbol and these tokens still theme it.
++
++   Distribution covers Mobile, IT and Consumer Electronics - exactly the
++   three units whose company is `distribution`, so the mark belongs to the
++   COMPANY and its units inherit it. Nothing else is mapped, because
++   nothing else is confirmed. */
++var UMARK_DEFS = "<svg class=\"umarkdefs\" aria-hidden=\"true\" focusable=\"false\"><defs>\n  <path id=\"distribution_2_124\" d=\"M.083999637 0V.7299957H.31300355C.3590037 .7299957 .39900209 .7211609 .43299867 .7034912 .46699525 .6858317 .49349467 .66100057 .51249697 .6289978 .5314992 .59699508 .54100039 .55933126 .54100039 .51600649 .54100039 .46733094 .52849838 .42516075 .50349429 .38949586 .47850038 .35383097 .44466654 .32866416 .4019928 .31399537L.5509949 0H.42799378L.29499818 .30000306H.19200135V0H.083999637M.19200135 .39500428H.31300355C.34900413 .39500428 .3776703 .405838 .39900209 .4275055 .42033387 .44917298 .43099977 .478007 .43099977 .51400759 .43099977 .55134078 .42033387 .5806732 .39900209 .602005 .3776703 .6233368 .34900413 .6340027 .31300355 .6340027H.19200135V.39500428Z\"/>\n  <path id=\"distribution_2_128\" d=\"M.30299378-.009994507C.2536672-.009994507 .21133423-.0018310547 .17599488 .01449585 .1406657 .030832926 .113332118 .0541687 .09399414 .084503177 .07466634 .11483765 .06500244 .15100098 .06500244 .19299317H.17199707C.17199707 .15966797 .18366497 .13350423 .20700073 .11450195 .2303365 .09549967 .2626699 .085998538 .30400086 .085998538 .34266664 .085998538 .372996 .095331829 .394989 .11399841 .4169922 .132665 .42799378 .15833028 .42799378 .19099427 .42799378 .21832784 .42049156 .24199422 .40548707 .2619934 .39049278 .28200279 .3689982 .29566957 .34100343 .30299378L.24899292 .33000184C.19566854 .34533183 .15450542 .37149558 .12550354 .40849305 .09650167 .4455007 .08200073 .4896698 .08200073 .54100039 .08200073 .5809987 .09099833 .6159973 .10899353 .6459961 .1269989 .6759949 .15266419 .69932559 .18598938 .71598818 .21932476 .73266097 .2586619 .7409973 .30400086 .7409973 .3706716 .7409973 .4241689 .722997 .4644928 .68699648 .50482687 .6509959 .5253296 .6026662 .526001 .54200747H.41799928C.41799928 .57400009 .40783183 .5991618 .38749696 .6174927 .36716209 .63583377 .33866374 .6450043 .30200196 .6450043 .2666626 .6450043 .23899333 .63650009 .21899414 .6194916 .19899495 .6024933 .18899536 .5786641 .18899536 .54800418 .18899536 .5206706 .19649251 .49700419 .21148682 .477005 .22649129 .45700584 .24799602 .44300334 .27600099 .43499757L.3690033 .40699769C.42233787 .3923289 .46333824 .3663279 .4920044 .32899476 .5206706 .2916616 .53500369 .2469991 .53500369 .19500733 .53500369 .15433757 .52533468 .118499759 .5059967 .0874939 .4866689 .05649821 .45967103 .03250122 .42500306 .01550293 .39033509-.0014953613 .3496653-.009994507 .30299378-.009994507Z\"/>\n  <path id=\"distribution_2_136\" d=\"M.2460022 0V.6309967H.050994874V.7310028H.548996V.6309967H.3540039V0H.2460022Z\"/>\n  <path id=\"distribution_2_141\" d=\"M.30000306-.009994507C.2300059-.009994507 .17600505 .009170532 .13800049 .04750061 .09999593 .08583069 .08099365 .1379954 .08099365 .20399475V.7299957H.18899536V.20399475C.18899536 .16733296 .19816081 .13833618 .2164917 .117004398 .23483277 .09567261 .2626699 .085006717 .30000306 .085006717 .33666484 .085006717 .364329 .09567261 .3829956 .117004398 .4016622 .13833618 .41099549 .16733296 .41099549 .20399475V.7299957H.5189972V.20399475C.5189972 .1379954 .4999949 .08583069 .46199037 .04750061 .42399598 .009170532 .3700002-.009994507 .30000306-.009994507Z\"/>\n  <path id=\"distribution_2_26\" d=\"M.085006717 0V.7299957H.30000306C.369339 .7299957 .42367045 .71332809 .46299745 .6799927 .5023346 .6466675 .5220032 .6006724 .5220032 .54200747 .5220032 .50867208 .5148366 .47983805 .50050356 .45550538 .48617045 .4311727 .46633403 .41233827 .44099427 .39900209 .41566468 .3856659 .3860016 .3793335 .352005 .38000489V.38900758C.38866679 .3896688 .4209951 .38283286 .44898988 .36849977 .47699485 .35416667 .49899803 .33299766 .5149994 .30499269 .5310008 .2769979 .53900149 .2436676 .53900149 .20500183 .53900149 .16367086 .52983096 .12750244 .51148989 .09649658 .49315898 .06550089 .467158 .041666669 .43348695 .024993897 .39982606 .008331299 .3599955 0 .31399537 0H.085006717M.19000244 .09300232H.30499269C.3436686 .09300232 .37433879 .10333252 .39700318 .12399292 .41966758 .1446635 .43099977 .17333476 .43099977 .21000672 .43099977 .24733989 .41966758 .27733866 .39700318 .30000306 .37433879 .32266746 .3436686 .33399964 .30499269 .33399964H.19000244V.09300232M.19000244 .42399598H.29899598C.33499656 .42399598 .36332704 .43365989 .38398744 .45298768 .404658 .47232566 .4149933 .4983317 .4149933 .53100588 .4149933 .56366989 .40482585 .58949789 .38449098 .60849 .36416627 .62749227 .33600364 .6369934 .30000306 .6369934H.19000244V.42399598Z\"/>\n  <path id=\"distribution_2_33\" d=\"M.08299255 0V.7299957H.28700257C.33499656 .7299957 .3766581 .72083029 .4119873 .7024994 .44732667 .6841685 .4748281 .6583354 .49449159 .625 .5141652 .5916646 .5240021 .5523326 .5240021 .5070038V.22399903C.5240021 .17933147 .5141652 .13999431 .49449159 .10598755 .4748281 .07199097 .44732667 .04582723 .4119873 .027496338 .3766581 .009165446 .33499656 0 .28700257 0H.08299255M.19099427 .0980072H.28700257C.32700096 .0980072 .35850016 .10917155 .38150025 .13150025 .40450035 .15382894 .41600038 .18466187 .41600038 .22399903V.5070038C.41600038 .54566958 .40450035 .5761668 .38150025 .5984955 .35850016 .62083438 .32700096 .6320038 .28700257 .6320038H.19099427V.0980072Z\"/>\n  <path id=\"distribution_2_66\" d=\"M.0980072 0V.09599304H.24499512V.6340027H.0980072V.7299957H.5019989V.6340027H.35499574V.09599304H.5019989V0H.0980072Z\"/>\n  <path id=\"distribution_2_89\" d=\"M.08099365 0V.7299957H.21699524L.42999269 .1230011C.42866007 .1423289 .4269918 .1653239 .4249878 .19198609 .422994 .21865845 .42149864 .24632772 .4205017 .2749939 .4195048 .30366007 .41900636 .32966105 .41900636 .35299684V.7299957H.5189972V0H.3829956L.17100525 .6069946C.17233785 .58966067 .1738332 .56799319 .17549134 .5419922 .17715962 .5160014 .17849224 .4890035 .17948914 .46099855 .18049622 .43300376 .18099976 .40700279 .18099976 .3829956V0H.08099365Z\"/>\n  <path id=\"distribution_2_95\" d=\"M.30000306-.009994507C.2546641-.009994507 .2154948-.0014953613 .18249512 .01550293 .14949544 .03250122 .12416077 .05716451 .10649109 .0894928 .08883158 .12183126 .08000183 .15966797 .08000183 .20300293V.5269928C.08000183 .57099917 .08883158 .6089986 .10649109 .6409912 .12416077 .67299398 .14949544 .6974945 .18249512 .7144928 .2154948 .7315013 .2546641 .7400055 .30000306 .7400055 .34533183 .7400055 .38449607 .7315013 .41749574 .7144928 .4504954 .6974945 .47583009 .67299398 .49349977 .6409912 .51116946 .6089986 .5200043 .57133486 .5200043 .5279999V.20300293C.5200043 .15966797 .51116946 .12183126 .49349977 .0894928 .47583009 .05716451 .4504954 .03250122 .41749574 .01550293 .38449607-.0014953613 .34533183-.009994507 .30000306-.009994507M.30000306 .085998538C.33666484 .085998538 .36449687 .09616598 .38349916 .116500858 .40250144 .13683574 .41200257 .16566976 .41200257 .20300293V.5269928C.41200257 .5649974 .40250144 .5939992 .38349916 .6139984 .36449687 .6339976 .33666484 .6439972 .30000306 .6439972 .26400248 .6439972 .2363332 .6339976 .21699524 .6139984 .19766744 .5939992 .18800354 .5649974 .18800354 .5269928V.20300293C.18800354 .16566976 .19766744 .13683574 .21699524 .116500858 .2363332 .09616598 .26400248 .085998538 .30000306 .085998538Z\"/>\n</defs><symbol id=\"umark-distribution\" viewBox=\"0 0 152.47 30.63\"><g style=\"fill:var(--umark)\"><use data-text=\"D\" xlink:href=\"#distribution_2_33\" transform=\"matrix(10,0,0,-10,69.571018,25.980927)\"/><use data-text=\"I\" xlink:href=\"#distribution_2_66\" transform=\"matrix(10,0,0,-10,76.47101,25.980927)\"/><use data-text=\"S\" xlink:href=\"#distribution_2_128\" transform=\"matrix(10,0,0,-10,83.371,25.980927)\"/><use data-text=\"T\" xlink:href=\"#distribution_2_136\" transform=\"matrix(10,0,0,-10,90.270999,25.980927)\"/><use data-text=\"R\" xlink:href=\"#distribution_2_124\" transform=\"matrix(10,0,0,-10,97.17099,25.980927)\"/><use data-text=\"I\" xlink:href=\"#distribution_2_66\" transform=\"matrix(10,0,0,-10,104.070987,25.980927)\"/><use data-text=\"B\" xlink:href=\"#distribution_2_26\" transform=\"matrix(10,0,0,-10,110.97098,25.980927)\"/><use data-text=\"U\" xlink:href=\"#distribution_2_141\" transform=\"matrix(10,0,0,-10,117.87097,25.980927)\"/><use data-text=\"T\" xlink:href=\"#distribution_2_136\" transform=\"matrix(10,0,0,-10,124.770969,25.980927)\"/><use data-text=\"I\" xlink:href=\"#distribution_2_66\" transform=\"matrix(10,0,0,-10,131.67096,25.980927)\"/><use data-text=\"O\" xlink:href=\"#distribution_2_95\" transform=\"matrix(10,0,0,-10,138.57096,25.980927)\"/><use data-text=\"N\" xlink:href=\"#distribution_2_89\" transform=\"matrix(10,0,0,-10,145.47095,25.980927)\"/><path transform=\"matrix(1,0,0,-1,41.213014,14.546326)\" d=\"M0 0-3.112-6.263-6.224 0\"/><path transform=\"matrix(1,0,0,-1,10.069,21.437928)\" d=\"M0 0H-3.547V3.004H0C2.65 3.004 2.681 0 0 0M25.346-4.566 20.352 6.832H14.337L8.413-6.321C8.413-3.913 7.529-1.325 5.522-1.325 9.973 .023 8.679 6.832 2.913 6.832H-9.069V-8.191H-3.458V-3.395C1.143-3.395 2.299-2.533 2.299-7.083 2.299-8.021 2.684-8.191 3.456-8.191H13.296L17.527 1.9 21.026-8.191 22.527-8.18 21.462-5.027C21.462-5.027 24.951-5.017 25.167-5.009 25.427-4.926 25.39-4.682 25.346-4.566\"/><path transform=\"matrix(1,0,0,-1,37.824098,29.628632)\" d=\"M0 0 .242 .01C.808 .01 1.171 .792 1.475 1.387 1.728 1.87 1.926 2.264 1.948 2.308L7.857 15.023H13.33L19.892 0H14.34L10.644 10.09 6.558 0H.304\"/></g><g style=\"fill:var(--uflag)\"><path transform=\"matrix(1,0,0,-1,40.5007,8.128113)\" d=\"M0 0 3.096 6.231 6.192 0\"/><path transform=\"matrix(1,0,0,-1,50.259309,1)\" d=\"M0 0-3.096-6.231-6.192 0\"/><path transform=\"matrix(1,0,0,-1,57.67929,1)\" d=\"M0 0-3.096-6.231-6.192 0\"/><path transform=\"matrix(1,0,0,-1,47.684694,8.128113)\" d=\"M0 0 3.096 6.231 6.192 0\"/></g><g style=\"fill:none;stroke:var(--urule)\"><path transform=\"matrix(1,0,0,-1,63.906496,-6.8806765)\" stroke-width=\".424\" stroke-linecap=\"butt\" stroke-miterlimit=\"10\" stroke-linejoin=\"miter\" d=\"M0 0V-36.573\"/></g></symbol></svg>";
++var UMARK_OF = { mobile:"distribution", it:"distribution", consumerelectronics:"distribution" };
++function unitMark(ukey, cls){
++  var m = UMARK_OF[ukey];
++  return m ? '<svg class="' + cls + '"><use href="#umark-' + m + '"/></svg>' : "";
++}
++/* Every slide carries the mark in its footer, and the cover carries it
++   large instead of the group's name. Appended in ONE place rather than at
++   twenty push() calls - and AFTER the picture slides are inserted, so a
++   custodian's own slide is footed too, and BEFORE deckFitPass(), so a
++   slide it splits carries the footer into every continuation. */
++function deckFootMarks(deck, ukey){
++  if (!UMARK_OF[ukey]) return;
++  deck.insertAdjacentHTML("afterbegin", UMARK_DEFS);
++  [].forEach.call(deck.querySelectorAll(".dslide"), function(s){
++    s.classList.add("hasmark");
++    /* Skipped on the slide that already wears the mark LARGE, and only
++       there. Written against `.d-cover` first, which silently took the
++       footer off five more: the SWOT and pillar dividers carry that class
++       too, and so does Thank you. Asking whether the mark is already on
++       the slide cannot make that mistake. */
++    if (s.querySelector(".dcovermark")) return;
++    s.insertAdjacentHTML("beforeend",
++      '<div class="dfoot">' + unitMark(ukey, "dfootmark") + '</div>');
++  });
++}
++
+ function openDeckWith(titleHtml, slides, target){
+   var root = document.getElementById("deckroot");
+   root.querySelector(".deck").innerHTML = slides;
+   if (target) insertPictureSlides(root.querySelector(".deck"), target);
++  if (target && target.indexOf("fn:") !== 0) deckFootMarks(root.querySelector(".deck"), target);
+   root.querySelector(".dtitle").innerHTML = titleHtml;
+   root.classList.add("on");
+   document.body.classList.add("presenting");

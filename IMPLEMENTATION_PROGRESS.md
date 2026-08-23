@@ -134,6 +134,15 @@ not, and Job title or Contact can be switched off to recover it.
 
 **Waiting on Islam:** what each of the ten names points at (see D8 above).
 
+### v3.20 — the client's mark, on the door and on the deck
+
+- The Raya Trade lockup on the sign-in gate, both cards (§52)
+- A unit's own mark: uploaded on Setup › Business units, **PNG only** because an
+  uploaded SVG is executable content; large on its review deck's cover and small
+  in the footer of every other slide (§52.9)
+- The group and unit lockups extracted as vector from the client's brand manual,
+  and the client's material filed under `clients/raya-trade/`
+
 ### v3.19 — the capability half catches up, and slides get a place
 
 Islam went through the built product and sent notes as he found things. Almost

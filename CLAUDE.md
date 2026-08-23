@@ -526,6 +526,44 @@ the scrub in migration 004, verified by deploying to an empty database and
 asking the row rather than by reading the SQL. Recorded rather than hidden: the
 register was already 1061px in a 920px box and Main BU makes it 1127px.*
 
+*Earlier: 2026-08-23 &mdash; **v3.20: the client's mark, on the door and
+on the deck** (§52). **PNG ONLY, AND IT IS A SECURITY DECISION**: an uploaded
+SVG is executable content in a page already running `'unsafe-inline'` (§43.6),
+so one file could read every session in the tenant — put to Islam as a trade
+with its cost stated, and he chose PNG. **A UNIT'S MARK NEEDS NO MIGRATION**:
+`units` carries an `extra` JSONB and `lib/state-io.js` files every unrecognised
+key there and reads it back, so `logo` round-trips untouched — proved in a
+throwaway Postgres, 17,978 characters per unit, still there **after the clean
+slate**, which is right because migration 004 removes `perf` BY NAME and a real
+client's lockup is not invented content (§21). **A LOGO IS A UNIT SETTING**, so
+it joins `UNIT_CONFIG` in `lib/authorize.js` rather than falling through to
+unknown — the same permission either way, but the REFUSAL then names Setup and
+sends the person somewhere (§16.7). **THE GROUND IS THE WHOLE POINT**:
+`picIntake` paints white before encoding (right for a slide picture, fatal for a
+mark), so the shared half became `imgToCanvas(file, maxEdge, ground)` with the
+ground stated by its caller — and since a PNG cannot be recoloured, the mark
+sits on a light plate on a dark slide, the same answer the sign-in wall already
+gives Forefront's own mark. **A FOOTER IN THE FLEX COLUMN QUIETLY LENGTHENS THE
+DECK** — it shortens every content box, which changes how many rows a table fits
+and therefore how many continuation slides `deckFitPass()` mints; out of flow
+with its space reserved, measured across five units at 27/22/19/19/19 slides
+before and exactly the same after. And **a slide that wears the mark LARGE does
+not wear it small as well** — written first against `.d-cover` it silently took
+the footer off five more, because the SWOT divider, the four pillar dividers and
+Thank you all carry that class. **§52.10: ALL TEN UNITS NOW CARRY A MARK** —
+eight distinct, because DISTRIBUTION is the COMPANY's and its three units wear
+it, and **B2B Ecomm wears MAZAYA**, which was not a guess but the worked example
+`navName()` has carried since 3.4. Two SILENT failures on the way, both found
+only by looking at the output: **a font subset MAPS far more than it DRAWS**
+(the manual's JetBrains Mono has a cmap entry for every ASCII character and an
+outline for 36, no digits, so `B2B` came out `B B` and nothing complained), and
+**`set_content()` serves from `about:blank`, where Chromium refuses a `file://`
+subresource** — so ten lockups rendered as broken-image icons, 2.5KB each and
+all within 200 bytes of one another, and would have been baked into the seed.
+Both now fail loudly: the generator refuses a character it cannot draw, and the
+renderer COUNTS THE INK and refuses anything under 5%. **A pipeline that
+substitutes silently produces a plausible artefact.***
+
 *Earlier: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
 A one-line ask that was decisions all the way down. **THE TENANT'S MARK GOES ON
 THE CARD, NOT ON THE WALL** — the person at that door works for the client, so

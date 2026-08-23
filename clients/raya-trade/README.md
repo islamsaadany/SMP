@@ -58,6 +58,39 @@ The seven subsidiary lockups, extracted the same way from
 | `logo-nigeria.svg` | RAYA \| NIGERIA |
 | `logo-digital.svg` | RAYA \| DIGITAL |
 
+Five of them are **drawn**, not supplied — Raya's seven cover their
+subsidiaries, and SMP has business units Raya does not name:
+
+| File | Reads | Source |
+|---|---|---|
+| `logo-corporate.svg` | RAYA \| CORPORATE | drawn |
+| `logo-online-shop.svg` | RAYA \| ONLINE SHOP | drawn, two lines |
+| `logo-b2b-ecomm.svg` | RAYA \| B2B ECOMM | drawn, two lines — spare |
+| `logo-mazaya.svg` | RAYA \| MAZAYA | drawn |
+| `logo-ezee.svg` | RAYA \| EZEE | drawn — spare, no unit yet |
+
+`scripts/make-unit-lockup.py` draws them, and **nothing about them is
+invented**: the RAYA wordmark, its flag and the rule are the client's own
+vector artwork lifted from a supplied lockup, the name is set in the manual's
+own headline face, and every measurement is taken off supplied artwork —
+the rule at x 62.91, the name at x 68.575 in JetBrains Mono Regular at 10pt
+with the advance stretched from 6.0 to 6.9, a single-line name 4.35 above the
+wordmark's foot and a two-line one straddling it, exactly as SMART CARE does.
+
+**The generator is checked by REDRAWING A SUPPLIED LOCKUP and diffing it
+against the real one** — RETAIL for one line, SMART CARE for two, both at
+**0 differing pixels**. A construction that cannot reproduce RETAIL has no
+business drawing CORPORATE.
+
+The face is the full open-licensed JetBrains Mono (`JetBrainsMono-Regular.ttf`,
+OFL, licence beside it) rather than the manual's embedded copy, and that is a
+correction rather than a convenience: **a subset maps far more than it draws.**
+The manual's copy carries a cmap entry for every ASCII character and an outline
+for only 36 of them, **no digits at all** — so `B2B` came out as `B B` and
+nothing complained. The generator now refuses a character it cannot draw, and
+a space is the only one allowed to draw nothing. The full font was proved to be
+the same drawing by the same 0-pixel diff before being used.
+
 **This is a different lockup from the group's, deliberately.** The group wears
 the *online* mark (`RAYA` + flag + `TRADE`); a unit wears the *with-line* mark
 (`RAYA` + rule + name). Islam settled it: two different things, two different
@@ -72,6 +105,32 @@ by rendering the result rather than reading it.
 `#001780` navy and `#225FAC` blue here, against the group mark's `#282E76` and
 `#3A67B1` — the two lockups are drawn in different blues, which is the artwork
 and not a mistake in the extraction.
+
+## Which unit wears which mark
+
+Settled by Islam, 2026-08-23. `unit-marks.json` holds these as the transparent
+PNGs the platform stores, rendered by `scripts/make-unit-marks.py`.
+
+| Unit | Mark | |
+|---|---|---|
+| Mobile | DISTRIBUTION | the company's, worn by its three units |
+| Consumer Electronics | DISTRIBUTION | |
+| IT | DISTRIBUTION | |
+| Retail Stores | RETAIL | supplied |
+| Care | SMART CARE | supplied |
+| Logistics | LOGISTICS | supplied |
+| Nigeria | NIGERIA | supplied |
+| Corporate | CORPORATE | drawn |
+| Online Shop | ONLINE SHOP | drawn |
+| B2B Ecomm | **MAZAYA** | drawn — it is what the unit trades as |
+
+**B2B Ecomm wears MAZAYA**, which is not a guess: *"a unit may be known
+internally by a brand the formal name does not carry — B2B Ecomm trading as
+Mazaya"* has been the worked example in `navName()` since 3.4.
+
+Three lockups have no home and are kept rather than deleted: **DIGITAL**,
+**ELECTRONICS** and **B2B ECOMM** (superseded by Mazaya), plus **EZEE**, which
+was asked for and has no unit to sit on yet.
 
 ## reference/
 

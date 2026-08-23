@@ -360,31 +360,3 @@
   .picfoot { display:flex; align-items:center; gap:12px; }
   .picsub { font-size:var(--fs-small); color:var(--ink-3); }
   .picover { margin:10px 0 0; }
-
-  /* ── The unit's own mark on the deck (§52.9) ───────────────────────
-     A PNG, so it cannot be recoloured for a dark slide the way an SVG
-     could — Islam chose PNG knowing that, because an uploaded SVG is
-     executable content (§43.6). So on a DARK slide the mark sits on a
-     light plate, which is the same answer the sign-in wall already gives
-     Forefront's own mark: a plate is always readable whatever was
-     uploaded, and cannot be got wrong by the person uploading it.
-
-     On a light slide there is no plate at all — a navy mark on a near
-     white ground needs nothing behind it, and a plate there would be a
-     visible rectangle for no reason. */
-  .dcovermark { display:block; width:340px; height:auto; margin:0 0 26px; }
-  :root[data-theme="dark"] .dcovermark,
-  :root[data-theme="dark"] .dfootmark {
-    background:#fff; padding:10px 14px; border-radius:5px; box-sizing:content-box;
-  }
-
-  /* THE FOOTER IS OUT OF FLOW. A footer in the flex column would shorten
-     every slide's content box, which changes how many rows a table fits
-     and therefore how many continuation slides deckFitPass() mints — a
-     footer that quietly lengthens the deck. The space is RESERVED as
-     padding on the slide and the mark placed into it. */
-  .dslide.hasmark { padding-bottom:104px; }
-  .dfoot { position:absolute; left:62px; right:62px; bottom:36px;
-           display:flex; align-items:center; padding-top:20px;
-           border-top:1px solid var(--line-soft); }
-  .dfootmark { display:block; width:150px; height:auto; opacity:.75; }

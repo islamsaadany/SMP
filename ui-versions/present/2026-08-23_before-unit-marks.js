@@ -54,26 +54,17 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    (unitLogo(u)
-        ? '<img class="dcovermark" src="' + esc(unitLogo(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
-  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
-     deck's other side-by-side view of the two, so it drops the same column the
-     Foundation page does — and the scoring slide further on keeps it, because
-     that is where an actual is read against a target. */
-  var aimNear = SHOW_KO_THIS_YEAR;
   var aimRows = u.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
       '<td class="num big3">' + (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>' +
-      (aimNear
-        ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
-        : '') + '</tr>';
+      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td></tr>';
   }).join("");
   S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
@@ -85,9 +76,9 @@ function deckSlides(u){
     '</div><div class="aimbottom"><span class="dlab">' + L("keyobj","bu") +
       horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">Dir.</th><th class="num">' + horizonColLabel() + '</th>' +
-      (aimNear ? '<th class="num">This year</th>' : '') +
-      '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
+      '<th class="num">Dir.</th><th class="num">' +
+        (horizonSet() ? "By " + esc(GROUP.horizon) : "3-year") + '</th>' +
+      '<th class="num">This year</th></tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
 
   /* 3 — the two readings, at the size they deserve. */
@@ -359,12 +350,12 @@ function deckSlidesFn(fk){
           '<div><span class="dlab">Milestones</span><b class="plain">' + mst.done + ' of ' + mst.total + '</b></div>' +
         '</div></section>');
 
-      /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
-         a deliverable was carrying a second, quieter answer to both. */
       var dRows = p.deliverables.map(function(d, i){
         var v = delivReads(d);
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(d.name) + '</td>' +
+          '<td>' + esc(d.owner || "—") + '</td>' +
+          '<td class="num">' + esc(d.due || "—") + '</td>' +
           '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
             : d.kind === "pct" ? esc(String(d.actual)) + "%"
             : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
@@ -374,7 +365,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
-        '<th class="num">Reported</th><th class="num">Reads</th>' +
+        '<th>Owner</th><th class="num">Due</th><th class="num">Reported</th><th class="num">Reads</th>' +
         '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
 
       var oRows = p.outcomes.map(function(o, i){
@@ -425,13 +416,11 @@ function deckSlidesFn(fk){
     c.projects.forEach(function(p){
       p.deliverables.forEach(function(d){
         var v = delivReads(d);
-        if (v != null && v < 70) {
+        if (delivDue(d) && v != null && v < 70) {
           n++;
           att.push('<tr><td class="idx">' + n + '</td>' +
             '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
-            /* A deliverable has no target and no date of its own: what it is
-               aimed at is being delivered, and when is when the project ends. */
-            '<td class="num">ends ' + esc(p.end || "\u2014") + '</td>' +
+            '<td class="num">' + esc(d.due || "—") + '</td>' +
             '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
             '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
         }
@@ -526,39 +515,10 @@ function insertPictureSlides(deck, target, blank){
   });
 }
 
-/* ── The unit's own mark on the deck (§52.9) ──────────────────────────
-   Large on the cover in place of the group's name, small in the footer of
-   every other slide. A unit with no mark keeps the eyebrow and gets no
-   footer mark, which is what every slide did before — so a missing mark
-   costs nothing and half a set of lockups is still worth having.
-
-   Appended in ONE place rather than at twenty push() calls: AFTER the
-   picture slides are inserted, so a custodian's own slide is footed too,
-   and BEFORE deckFitPass(), so a slide it splits carries the footer into
-   every continuation. */
-function deckFootMarks(deck, u){
-  var src = unitLogo(u);
-  if (!src) return;
-  [].forEach.call(deck.querySelectorAll(".dslide"), function(s){
-    s.classList.add("hasmark");
-    /* Skipped on the slide that already wears the mark LARGE, and only
-       there. Written first against `.d-cover`, which silently took the
-       footer off five more: the SWOT and pillar dividers carry that class
-       too, and so does Thank you. Asking whether the mark is already on
-       the slide cannot make that mistake. */
-    if (s.querySelector(".dcovermark")) return;
-    s.insertAdjacentHTML("beforeend",
-      '<div class="dfoot"><img class="dfootmark" src="' + esc(src) + '" alt=""></div>');
-  });
-}
-
 function openDeckWith(titleHtml, slides, target){
   var root = document.getElementById("deckroot");
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
-  if (target && target.indexOf("fn:") !== 0 && UNITS[target]) {
-    deckFootMarks(root.querySelector(".deck"), UNITS[target]);
-  }
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");

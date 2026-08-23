@@ -2344,18 +2344,26 @@
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              /* WITHIN THE FUNCTION NAMED IN B3, when one is named (§51.2).
-                 Two supporting functions may each carry a capability with the
-                 same name, and before this the first match in the array won —
-                 silently, and into the wrong function's plan. A blank B3 still
-                 resolves across the tenant, so a workbook saved before this
-                 change still opens. */
-              var wantFn = readmePickFn(sheets);
+              /* THE FUNCTION CELL IS A CAPABILITY'S QUESTION, AND ONLY A
+                 CAPABILITY'S (§51.14). Asked of every plan, it broke uploading
+                 a UNIT's plan outright: a unit's Read me carries no such row,
+                 so the read came back with whatever prose sat at that position
+                 and the upload was refused for naming a function that does not
+                 exist. A unit is resolved first, and a workbook that names one
+                 is never asked about functions at all.
+
+                 WITHIN the function when one IS named: two functions may each
+                 carry a capability with the same name, and before §51.2 the
+                 first match in the array won, silently, into the wrong
+                 function's plan. A blank cell still resolves across the tenant,
+                 so a workbook saved before that change still opens. */
+              var wantFn = uk ? "" : readmePickFn(sheets);
               var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
                 return FUNCTIONS[k].name === wantFn; })[0];
               if (wantFn && !fnKeyWanted) {
                 impFail('no supporting function called "' + wantFn +
-                  '". Open the Read me sheet and choose one from the dropdown in B3.');
+                  '". Open the Read me sheet and choose one from the dropdown beside ' +
+                  '"Supporting function".');
                 return;
               }
               var capPool = GROUP.capabilities.filter(function(x){

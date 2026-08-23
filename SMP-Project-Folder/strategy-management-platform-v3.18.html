@@ -2762,10 +2762,20 @@
      than being cropped by it, and the whole point is the crop. */
   .d-pics .pcell { margin:0; min-width:0; min-height:0; display:flex;
                    flex-direction:column; gap:14px; }
+  /* THE FRAME'S GROUND IS THE SLIDE'S GROUND (§51.10). With `contain` the
+     picture no longer fills its box, so whatever is behind it becomes a
+     letterbox band on the slide — and a grey band around a screenshot reads as
+     part of the design. On the slide's own white it simply disappears.
+     `object-fit` is written by picStyle per picture, never here. */
   .d-pics .pframe { flex:1; min-height:0; display:block; overflow:hidden;
-                    border-radius:6px; background:var(--surface-2); }
-  .d-pics .pframe img { width:100%; height:100%; object-fit:cover; display:block; }
+                    border-radius:6px; background:var(--surface); }
+  .d-pics .pframe img { width:100%; height:100%; display:block; }
   .d-pics figcaption { font-size:21px; line-height:1.38; color:var(--ink-2); }
+  /* Islam: "make the headers always bold". The deck's headings are a 400-weight
+     serif by design (§38's type scale) — this is the PICTURE slide's own title
+     only, which sits over evidence rather than over a table and has to hold its
+     own against it. */
+  .dslide.d-pics h2 { font-weight:700; }
   .dslide.tight.d-pics figcaption { font-size:18px; }
 
   /* The empty slide, in the editor only. It says what it is and what will
@@ -2805,9 +2815,14 @@
   .sl-n { font:600 11px/1.6 var(--mono); color:var(--ink-3); text-align:right; }
   .sl-lab { grid-column:2; font-size:var(--fs-small); color:var(--ink-2); line-height:1.35;
             overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  /* --gold-deep on --surface-2 is 4.45:1 — §38.5, and the SIXTH time. The
+     selected row's ground is `--surface-2`, so the accent that reads fine on
+     every other row fails on the one you are looking at. The gold thumbnail
+     border already marks these as yours; the words take an ink that clears on
+     both grounds. */
   .sl-lab em { display:block; font-style:normal; font-size:var(--fs-micro);
                letter-spacing:var(--track); text-transform:uppercase;
-               color:var(--gold-deep); font-weight:700; margin-top:2px; }
+               color:var(--ink-2); font-weight:700; margin-top:2px; }
   /* A REAL SLIDE AT ONE TENTH, not a drawing of one — so a slide that is wrong
      is wrong here too. The holder is `position:relative` because `.dslide` is
      `position:absolute; inset:0` and needs something to be inset within. */
@@ -2885,7 +2900,7 @@
               border-radius:var(--r-sm); background:var(--surface-2);
               border:1px solid var(--line); cursor:grab; touch-action:none; }
   .picframe.dragging { cursor:grabbing; }
-  .picframe img { width:100%; height:100%; object-fit:cover; display:block;
+  .picframe img { width:100%; height:100%; display:block;
                   pointer-events:none; user-select:none; }
   .picslot.empty { justify-content:stretch; }
   /* THE CARD'S OWN GROUND, not the quiet one — §38.5 for the fifth time, and
@@ -2902,11 +2917,23 @@
   .picdrop input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
   .picdrop:focus-within { outline:2px solid var(--gold); outline-offset:1px; }
   .picplus { font-size:22px; line-height:1; color:var(--gold-deep); }
-  .picctl { display:flex; align-items:center; gap:10px; }
-  .piczoom { flex:1; display:flex; align-items:center; gap:7px; min-width:0;
+  .picctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .picctl .minisw { flex:none; }
+  .piczoom { display:flex; align-items:center; gap:7px; min-width:0;
              font-size:var(--fs-micro); letter-spacing:var(--track);
              text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .piczoom input { flex:1; min-width:0; accent-color:var(--gold); }
+  .piczoom b { font-family:var(--mono); font-size:10px; color:var(--ink-2);
+               min-width:34px; text-align:right; letter-spacing:0; }
+
+  /* Up and down. A pair, boxed like the arrangement switch beside it. */
+  .slmove { display:inline-flex; border:1px solid var(--line); border-radius:var(--r-sm);
+            overflow:hidden; }
+  .slmove button { font:inherit; font-size:10px; line-height:1; background:var(--surface);
+                   border:0; color:var(--ink-2); padding:7px 9px; cursor:pointer; }
+  .slmove button + button { border-left:1px solid var(--line); }
+  .slmove button:hover { background:var(--surface-2); color:var(--ink); }
+  .slmove button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .picslot .piccap { width:100%; }
   .picfoot { display:flex; align-items:center; gap:12px; }
   .picsub { font-size:var(--fs-small); color:var(--ink-3); }
@@ -15771,10 +15798,26 @@ function pslideNewId(){
    The crop is `object-position` plus a scale, and it is the SAME two numbers
    the editor writes and the same two the editor previews. One rendering, so
    what was framed is what is shown. */
+/* FIT IS THE DEFAULT, NOT FILL (§51.10, Islam: "allow me to zoom out more as
+   the zoom in is too big", and "pictures need to be wrapped to fit in the space
+   you give to it in the slide").
+
+   Both notes are the same note. The frames were `object-fit:cover`, which fills
+   the box and throws away whatever does not fit — so a portrait infographic in
+   a landscape frame lost both its edges, and the zoom slider could only make
+   that worse because 100% was already the tightest crop available. There was no
+   way to say "show me all of it".
+
+   So a picture FITS its frame whole, and FILL is the deliberate choice for a
+   photograph that should bleed. §16.12 asks for a screenshot of a platform
+   before it asks for anything else, and a screenshot with its edges cut off is
+   not a screenshot of anything. Zoom starts at 50% so a picture can also be
+   made smaller than its box. */
 function picStyle(p){
-  var z = Math.max(1, Math.min(3, +p.z || 1));
-  return "object-position:" + (+p.x || 0) + "% " + (+p.y || 0) + "%;" +
-    (z > 1 ? "transform:scale(" + z + ");" : "");
+  var z = Math.max(0.5, Math.min(3, +p.z || 1));
+  return "object-fit:" + (p.fit === "cover" ? "cover" : "contain") + ";" +
+    "object-position:" + (+p.x == null ? 50 : +p.x) + "% " + (+p.y == null ? 50 : +p.y) + "%;" +
+    (z !== 1 ? "transform:scale(" + z + ");" : "");
 }
 /* `blank` is the EDITOR's flag and nothing else's. A slide with no picture in
    it is not a slide and must never reach a projector (§50.2) — but the moment
@@ -16025,6 +16068,10 @@ function slidesPaneHtml(cur, sl){
             return '<button data-piclay="' + esc(sl.id) + '" data-n="' + n + '" aria-pressed="' +
               (across === n) + '" title="' + n + ' on the slide">' + n + '</button>';
           }).join("") + '</span>' +
+        '<span class="slmove"><button data-slmove="-1" aria-label="Move this slide up" ' +
+          'title="Move up">&#9650;</button>' +
+          '<button data-slmove="1" aria-label="Move this slide down" ' +
+          'title="Move down">&#9660;</button></span>' +
         '<button class="editbtn" data-picdel="' + esc(sl.id) + '">Remove slide</button>' +
       '</div>' +
       '<div class="picslots">' + slots.join("") + '</div>' +
@@ -16042,18 +16089,29 @@ function slidesSlot(sl, p, i){
         esc(sl.id) + '" data-i="' + i + '">' +
       '<span class="picplus" aria-hidden="true">+</span><span>Add a picture</span></label></div>';
   }
-  var z = Math.round((Math.max(1, Math.min(3, +p.z || 1))) * 100);
+  var z = Math.round((Math.max(0.5, Math.min(3, +p.z || 1))) * 100);
+  var fills = p.fit === "cover";
   return '<div class="picslot" data-i="' + i + '">' +
     '<span class="picframe" data-picdrag="' + esc(sl.id) + '" data-i="' + i + '" ' +
       'title="Drag to move the picture inside the frame">' +
       '<img src="' + esc(p.src) + '" alt="" style="' + picStyle(p) + '"></span>' +
     '<div class="picctl">' +
-      '<label class="piczoom"><span>Zoom</span>' +
-        '<input type="range" min="100" max="300" step="1" value="' + z + '" ' +
-        'data-piczoom="' + esc(sl.id) + '" data-i="' + i + '" aria-label="Zoom"></label>' +
+      /* WHOLE or CROPPED, said in two words rather than inferred from a
+         slider position (§51.10). Fit shows all of it; Fill bleeds it to the
+         edges and throws away what does not reach. */
+      '<span class="minisw" role="group" aria-label="How the picture sits">' +
+        '<button data-picfit="' + esc(sl.id) + '" data-i="' + i + '" data-v="contain" ' +
+          'aria-pressed="' + (!fills) + '" title="Show the whole picture">Fit</button>' +
+        '<button data-picfit="' + esc(sl.id) + '" data-i="' + i + '" data-v="cover" ' +
+          'aria-pressed="' + fills + '" title="Fill the frame, cropping the rest">Fill</button>' +
+      '</span>' +
       '<button class="editbtn" data-picdrop="' + esc(sl.id) + '" data-i="' + i +
         '" aria-label="Remove this picture">Remove</button>' +
     '</div>' +
+    '<label class="piczoom"><span>Zoom</span>' +
+      '<input type="range" min="50" max="300" step="1" value="' + z + '" ' +
+      'data-piczoom="' + esc(sl.id) + '" data-i="' + i + '" aria-label="Zoom">' +
+      '<b>' + z + '%</b></label>' +
     '<input class="fld piccap" data-piccap="' + esc(sl.id) + '" data-i="' + i +
       '" value="' + esc(p.cap || "") + '" placeholder="Caption — optional" aria-label="Caption">' +
   '</div>';
@@ -16085,41 +16143,80 @@ function slidesFitStage(){
    can share one anchor, and their order among themselves is list order. So
    the new one is spliced in at the position its VISUAL place implies, not
    appended and hoped for. */
-function slidesAdd(){
-  var box = slidesAssemble();
-  var all = [].slice.call(box.querySelectorAll(".dslide"));
-  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
-  if (at < 0) at = all.length - 1;
+/* ── Putting a slide in a place ──────────────────────────────────────────
+   ONE function, because Add and the up/down arrows are the same act: decide
+   which anchor the slide now belongs to, and where among that anchor's other
+   slides it sits. Written twice they would drift, and the drift would be a
+   slide that moves one way when added and another way when nudged.
 
-  var anchor = "", k = 0;
-  for (var i = at; i >= 0; i--) {
-    if (all[i].dataset.anchor) { anchor = all[i].dataset.anchor; break; }
+   `after` is a position in the ASSEMBLED deck — insert immediately after that
+   slide. The anchor is the nearest anchored slide at or before it (§50.3, read
+   out of the deck as always), and the index inside the stored list is the
+   count of that anchor's slides already sitting at or before the point. */
+function slidesPlace(sl, all, after){
+  var anchor = "";
+  for (var i = after; i >= 0; i--) {
+    if (all[i] && all[i].dataset.anchor) { anchor = all[i].dataset.anchor; break; }
   }
   if (!anchor) {
-    var firstA = box.querySelector("[data-anchor]");
-    anchor = firstA ? firstA.dataset.anchor : "end";
+    for (var f = 0; f < all.length; f++) if (all[f].dataset.anchor) { anchor = all[f].dataset.anchor; break; }
   }
-  /* How many of this anchor's picture slides already sit at or before here. */
+  if (!anchor) anchor = "end";
+
   var list = pslidesFor(SLED.target);
-  for (var j = 0; j <= at; j++) {
+  var was = list.indexOf(sl);
+  if (was > -1) list.splice(was, 1);        /* out first, so the count is honest */
+
+  var k = 0;
+  for (var j = 0; j <= after && j < all.length; j++) {
     var id = all[j].getAttribute("data-ps");
-    if (!id) continue;
-    var s = pslideById(SLED.target, id);
-    if (s && s.at === anchor) k++;
+    if (!id || id === sl.id) continue;
+    var other = pslideById(SLED.target, id);
+    if (other && other.at === anchor) k++;
   }
   var withA = [];
-  list.forEach(function(s, idx){ if (s.at === anchor) withA.push(idx); });
+  list.forEach(function(x, idx){ if (x.at === anchor) withA.push(idx); });
   var pos = k < withA.length ? withA[k]
           : (withA.length ? withA[withA.length - 1] + 1 : list.length);
+  sl.at = anchor;
+  list.splice(pos, 0, sl);
+}
 
+function slidesAdd(){
+  var list = pslidesFor(SLED.target);
   if (list.length >= PIC_MAX_SLIDES) {
     SLED.err = PIC_MAX_SLIDES + " slides is the limit — remove one to add another.";
     slidesPaint();
     return;
   }
-  var made = { id:pslideNewId(), title:"", layout:1, at:anchor, pics:[] };
-  list.splice(pos, 0, made);
+  var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
+  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (after < 0) after = all.length - 1;
+  var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
+  slidesPlace(made, all, after);
   SLED.sel = "ps:" + made.id;
+  slidesMark();
+  slidesPaint();
+}
+
+/* UP AND DOWN (§51.10, Islam). A picture slide steps over its neighbour,
+   whatever kind of slide that is — stepping over a generated one is how a
+   picture gets from the end of the pillars to the end of the SWOT without
+   anybody naming an anchor. Only picture slides move: the generated ones are
+   the deck's own order and are not ours to shuffle. */
+function slidesMove(dir){
+  if (!SLED.sel || SLED.sel.indexOf("ps:") !== 0) return;
+  var sl = pslideById(SLED.target, SLED.sel.slice(3));
+  if (!sl) return;
+  var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) return;
+  /* Down means after the slide below; up means after the one two above, since
+     "after" is measured in the deck as it stands with this slide still in it. */
+  var after = dir > 0 ? at + 1 : at - 2;
+  if (dir > 0 && at >= all.length - 1) return;
+  if (dir < 0 && at <= 0) return;
+  slidesPlace(sl, all, after);
   slidesMark();
   slidesPaint();
 }
@@ -16173,6 +16270,17 @@ function slidesWire(){
   });
   root.querySelectorAll("[data-sladd]").forEach(function(b){
     b.addEventListener("click", slidesAdd);
+  });
+  root.querySelectorAll("[data-slmove]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesMove(+b.dataset.slmove); });
+  });
+  root.querySelectorAll("[data-picfit]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var sl = slideOf(b, "picfit"); if (!sl) return;
+      var p = (sl.pics || [])[+b.dataset.i]; if (!p) return;
+      p.fit = b.dataset.v;
+      slidesMark(); slidesPaint();
+    });
   });
   root.querySelectorAll("[data-picdel]").forEach(function(b){
     b.addEventListener("click", function(){
@@ -16247,6 +16355,8 @@ function slidesWire(){
       p.z = (+r.value) / 100;
       var img = r.closest(".picslot").querySelector("img");
       if (img) img.setAttribute("style", picStyle(p));
+      var readout = r.parentNode.querySelector("b");
+      if (readout) readout.textContent = r.value + "%";
       slidesLive(i).forEach(function(x){ x.setAttribute("style", picStyle(p)); });
       slidesMark();
     });

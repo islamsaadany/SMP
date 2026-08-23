@@ -125,9 +125,15 @@ with sync_playwright() as p:
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()==='Performance');if(x)x.click()}")
             pg.wait_for_timeout(400)
             pg.evaluate("()=>{var x=document.querySelector('[data-picedit]');if(x)x.click()}")
-            pg.wait_for_timeout(500); scan("unit/pictures-editor", "#overlay")
-            pg.evaluate("()=>{var x=document.getElementById('modal-x');if(x)x.click()}")
-            pg.wait_for_timeout(300)
+            # MANAGE SLIDES IS A MODE, NOT A MODAL, since 51.8 — so it is
+            # scanned at its own root and closed by its own Done. Closing it
+            # with the dialog's X did nothing, and the still-open overlay then
+            # swallowed every later click: the FIRST thing this sweep did after
+            # its own loud failure was point at the line that caused it, which
+            # is the whole reason it was made to fail loudly.
+            pg.wait_for_timeout(600); scan("unit/manage-slides", "#slideroot")
+            pg.click("#slideroot [data-slexit]")
+            pg.wait_for_timeout(400)
             pg.evaluate("()=>{var x=document.querySelector('[data-present]');if(x)x.click()}")
             pg.wait_for_timeout(800)
             pg.evaluate('''() => {

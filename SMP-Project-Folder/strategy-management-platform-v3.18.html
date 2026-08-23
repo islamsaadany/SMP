@@ -2419,6 +2419,29 @@
      kind of thing.
      `align-self:center` because the group is shorter than the 47px row and
      must not be stretched to it. */
+  /* ONE CONTROL, and now one ELEMENT (§51.9). The `.foldgroup` rules below
+     dressed two buttons to look like a single segmented box; the box is the
+     button itself now and the two words are spans inside it. Same shape on
+     screen, different thing under the pointer — which is the whole point:
+     pressing it switches, rather than pressing one half of it selecting. */
+  .units .navswitch{display:inline-flex;align-items:center;align-self:center;
+    background:rgba(255,255,255,.08);border:0;border-radius:7px;overflow:hidden;
+    padding:0;margin:0 6px;cursor:pointer;font:inherit}
+  .units .navswitch:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .units .navswitch .nsw{display:block;padding:7px 13px;font-size:13.5px;
+    font-weight:700;color:rgba(255,255,255,.62);letter-spacing:-.005em;
+    transition:background .12s,color .12s}
+  .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+  .units .navswitch .nsw.on{color:#fff;background:rgba(255,255,255,.2)}
+  /* HOVER LIFTS THE CONTROL, NOT THE OTHER HALF. Lighting the unselected word
+     on hover was right while these were two buttons — you were pointing at the
+     side you meant. With one button it made both halves look lit and the state
+     unreadable exactly when somebody was looking at it. */
+  .units .navswitch:hover{background:rgba(255,255,255,.15)}
+  .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
+  .units-in.folded .navswitch{margin:0 3px}
+  .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
+
   .units .foldgroup{display:inline-flex;align-items:center;align-self:center;
     background:rgba(255,255,255,.08);border-radius:7px;margin:0 4px;overflow:hidden}
   .units .foldgroup .navfold{background:none;border:0;opacity:1;border-radius:0;
@@ -2793,14 +2816,28 @@
   .sthumb-in { display:block; position:relative; width:1600px; height:900px;
                transform:scale(.105); transform-origin:0 0; pointer-events:none; }
   .slrow.mine .sthumb { border-color:var(--gold); }
-  .sl-add { padding:8px 6px 4px; }
+  /* Pinned, and above the list rather than below it: it is the first thing
+     you came here to do. */
+  .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
+            padding:6px 6px 10px; margin:-10px -10px 6px; border-bottom:1px solid var(--line);
+            display:flex; flex-direction:column; align-items:stretch; gap:4px; }
   .sl-add .editbtn { width:100%; }
+  .sl-add .picsub { text-align:center; font-size:var(--fs-micro); }
 
   /* The pane: the slide above, its controls below. */
+  /* THE SLIDE TAKES THE ROOM (§51.9, Islam). The stage was capped at 420px
+     and the pane scrolled, so most of the right-hand side was empty below the
+     controls — on the very screen whose whole job is looking at one slide. It
+     fills whatever is left now, and the controls keep their natural height at
+     the bottom. min-height:0 on the stage or a flex child refuses to shrink
+     below its content and the cap comes back by another route. */
   .slidepane { flex:1; min-width:0; display:flex; flex-direction:column;
-               gap:14px; padding:16px; overflow-y:auto; }
-  .sstage { flex:none; height:min(46vh, 420px); position:relative; }
-  .sstage-in { position:absolute; inset:0; width:1600px; height:900px;
+               gap:14px; padding:16px; overflow:hidden; }
+  .sstage { flex:1; min-height:0; position:relative; }
+  .slidepane .slctl { flex:none; max-height:46%; overflow-y:auto; }
+  /* Centred in whatever room there is, rather than pinned to the top-left of
+     a box that is now usually wider than 16:9. */
+  .sstage-in { position:absolute; top:0; left:50%; width:1600px; height:900px;
                transform-origin:0 0; box-shadow:0 6px 24px rgba(0,0,0,.16); }
   .slctl { background:var(--surface); border:1px solid var(--line);
            border-radius:var(--r-lg); padding:14px 15px 16px; }
@@ -15915,8 +15952,17 @@ function slidesPaint(){
     SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
   }
 
+  /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
+     rail, after all twenty-three rows — so the one control the whole mode
+     exists for could only be found by scrolling to the end of a list nobody
+     had a reason to scroll. A control you have to go looking for is a control
+     that is not there. */
   var list = document.getElementById("slidelist");
-  list.innerHTML = all.map(function(el, i){
+  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      '+ Add a slide</button>' +
+      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
+        ? "after the one selected" : "after the slide selected below") + '</span></div>' +
+    all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
         (mine ? " mine" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
@@ -15924,8 +15970,7 @@ function slidesPaint(){
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
       '<span class="sl-lab">' + esc(slidesLabel(el)) +
         (mine ? '<em>your pictures</em>' : '') + '</span></div>';
-  }).join("") +
-    '<div class="sl-add"><button class="editbtn" data-sladd="1">Add a slide</button></div>';
+  }).join("");
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -16022,8 +16067,12 @@ function slidesFitStage(){
   var st = pane && pane.querySelector(".sstage");
   if (!st) return;
   var k = Math.min(st.clientWidth / 1600, st.clientHeight / 900);
+  if (!(k > 0)) k = 0.01;
   var inner = st.querySelector(".sstage-in");
-  if (inner) inner.style.transform = "scale(" + (k > 0 ? k : 0.01) + ")";
+  /* Left is 50% of the box, so pulling back half the SCALED width centres it.
+     Translate before scale, because the two are applied right to left and a
+     translate written after would itself be scaled. */
+  if (inner) inner.style.transform = "translateX(" + (-1600 * k / 2) + "px) scale(" + k + ")";
 }
 
 /* ── Adding one where you are standing ───────────────────────────────────
@@ -17359,13 +17408,27 @@ var SYNC = (function () {
            which is what these were and are not any more — a switch has two
            sides and the lit one IS the state (§47.6). `aria-pressed` rather
            than `aria-expanded` for the same reason: nothing expands. */
-        return '<span class="sep"></span><span class="foldgroup" role="group" ' +
-          'aria-label="Show units or supporting functions">' +
+        /* ONE BUTTON, TWO WORDS (§51.9, Islam: "I want it a switching button
+           where the 2 words stay on 1 button but on clicking the selection
+           switches"). It was two buttons inside a container that LOOKED like
+           one control, which is a different thing: you pressed the side you
+           wanted rather than pressing the control. Now there is one button
+           carrying both words, the lit word is the state, and pressing it
+           anywhere switches to the other — so the thing you press and the
+           thing that changes are the same object.
+
+           A plain button, not `role="switch"`: a switch is on or off and this
+           is neither: it is two named sides. The label says what pressing it
+           will DO, because the visible words already say where you are. */
+        var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
+        var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
+        return '<span class="sep"></span>' +
+          '<button class="navswitch" data-fold="' + other.fold + '"' +
+          ' aria-label="Showing ' + lit.label.toLowerCase() + '. Press to show ' +
+          other.label.toLowerCase() + '.">' +
           t.folds.map(function(f){
-            return '<button class="navfold' + (f.open ? " open" : "") +
-              '" data-fold="' + f.fold + '" aria-pressed="' + f.open + '">' +
-              f.label + '</button>';
-          }).join("") + '</span>';
+            return '<span class="nsw' + (f.open ? " on" : "") + '">' + f.label + '</span>';
+          }).join("") + '</button>';
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +

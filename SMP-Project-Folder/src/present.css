@@ -238,14 +238,28 @@
   .sthumb-in { display:block; position:relative; width:1600px; height:900px;
                transform:scale(.105); transform-origin:0 0; pointer-events:none; }
   .slrow.mine .sthumb { border-color:var(--gold); }
-  .sl-add { padding:8px 6px 4px; }
+  /* Pinned, and above the list rather than below it: it is the first thing
+     you came here to do. */
+  .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
+            padding:6px 6px 10px; margin:-10px -10px 6px; border-bottom:1px solid var(--line);
+            display:flex; flex-direction:column; align-items:stretch; gap:4px; }
   .sl-add .editbtn { width:100%; }
+  .sl-add .picsub { text-align:center; font-size:var(--fs-micro); }
 
   /* The pane: the slide above, its controls below. */
+  /* THE SLIDE TAKES THE ROOM (§51.9, Islam). The stage was capped at 420px
+     and the pane scrolled, so most of the right-hand side was empty below the
+     controls — on the very screen whose whole job is looking at one slide. It
+     fills whatever is left now, and the controls keep their natural height at
+     the bottom. min-height:0 on the stage or a flex child refuses to shrink
+     below its content and the cap comes back by another route. */
   .slidepane { flex:1; min-width:0; display:flex; flex-direction:column;
-               gap:14px; padding:16px; overflow-y:auto; }
-  .sstage { flex:none; height:min(46vh, 420px); position:relative; }
-  .sstage-in { position:absolute; inset:0; width:1600px; height:900px;
+               gap:14px; padding:16px; overflow:hidden; }
+  .sstage { flex:1; min-height:0; position:relative; }
+  .slidepane .slctl { flex:none; max-height:46%; overflow-y:auto; }
+  /* Centred in whatever room there is, rather than pinned to the top-left of
+     a box that is now usually wider than 16:9. */
+  .sstage-in { position:absolute; top:0; left:50%; width:1600px; height:900px;
                transform-origin:0 0; box-shadow:0 6px 24px rgba(0,0,0,.16); }
   .slctl { background:var(--surface); border:1px solid var(--line);
            border-radius:var(--r-lg); padding:14px 15px 16px; }

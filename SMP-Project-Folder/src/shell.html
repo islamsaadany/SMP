@@ -582,13 +582,27 @@
            which is what these were and are not any more — a switch has two
            sides and the lit one IS the state (§47.6). `aria-pressed` rather
            than `aria-expanded` for the same reason: nothing expands. */
-        return '<span class="sep"></span><span class="foldgroup" role="group" ' +
-          'aria-label="Show units or supporting functions">' +
+        /* ONE BUTTON, TWO WORDS (§51.9, Islam: "I want it a switching button
+           where the 2 words stay on 1 button but on clicking the selection
+           switches"). It was two buttons inside a container that LOOKED like
+           one control, which is a different thing: you pressed the side you
+           wanted rather than pressing the control. Now there is one button
+           carrying both words, the lit word is the state, and pressing it
+           anywhere switches to the other — so the thing you press and the
+           thing that changes are the same object.
+
+           A plain button, not `role="switch"`: a switch is on or off and this
+           is neither: it is two named sides. The label says what pressing it
+           will DO, because the visible words already say where you are. */
+        var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
+        var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
+        return '<span class="sep"></span>' +
+          '<button class="navswitch" data-fold="' + other.fold + '"' +
+          ' aria-label="Showing ' + lit.label.toLowerCase() + '. Press to show ' +
+          other.label.toLowerCase() + '.">' +
           t.folds.map(function(f){
-            return '<button class="navfold' + (f.open ? " open" : "") +
-              '" data-fold="' + f.fold + '" aria-pressed="' + f.open + '">' +
-              f.label + '</button>';
-          }).join("") + '</span>';
+            return '<span class="nsw' + (f.open ? " on" : "") + '">' + f.label + '</span>';
+          }).join("") + '</button>';
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +

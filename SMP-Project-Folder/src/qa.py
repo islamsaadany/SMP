@@ -31,13 +31,21 @@ with sync_playwright() as p:
         # nowhere, and — since 2.9 — the Manage menu's entries, which are not
         # visible until it is opened. Each is walked in its own way.
         seen=0
-        # Folds first: a unit inside a closed fold is unreachable until it opens.
-        for fk in pg.eval_on_selector_all("#units .navfold","els=>els.map(e=>e.dataset.fold)"):
-            f=pg.query_selector('#units .navfold[data-fold="%s"]'%fk)
-            if f and f.get_attribute("aria-expanded") != "true":
-                f.click(); pg.wait_for_timeout(120)
-            seen+=walk_destinations(pg)
-        if not pg.query_selector("#units .navfold"):
+        # UNITS | FUNCTIONS IS ONE BUTTON NOW (51.9), so the row shows one list
+        # at a time and the other is reached by PRESSING it rather than by
+        # opening a second fold. This walks the list on show, presses, walks the
+        # other, and presses again so the switch is left as it was found.
+        #
+        # It is updated here rather than left to fail, because it would NOT have
+        # failed: `.navfold` simply stops matching, the loop iterates nothing,
+        # and the sweep reports "ok" having walked half the product. Third time
+        # in one session that a check quietly measured less than it claimed.
+        if pg.query_selector("#units .navswitch"):
+            for _ in range(2):
+                seen+=walk_destinations(pg)
+                sw=pg.query_selector("#units .navswitch")
+                if sw: sw.click(); pg.wait_for_timeout(150)
+        else:
             seen+=walk_destinations(pg)
         # The Manage menu: reopened before each entry, because choosing one
         # closes it. Every entry is a destination the two icons used to hold.

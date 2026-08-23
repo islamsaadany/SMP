@@ -64,11 +64,26 @@ with sync_playwright() as p:
         for tab in ["Performance","Foundation","Focus","Temple","Weighting"]:
             pg.evaluate("(t)=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()===t);if(x)x.click()}",tab)
             pg.wait_for_timeout(400); scan("group/"+tab)
-        pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Units')===0);if(f)f.click()}")
+        # UNITS | FUNCTIONS IS ONE BUTTON (51.9). Both places that used to
+        # reach a list did it by matching the text of a button, and the switch's
+        # own text is now "UnitsFunctions" — so one of them clicked the switch
+        # believing it was opening a fold, and the other matched nothing at all
+        # and skipped the function pages in silence. Asked by what is LIT now,
+        # and it says so rather than assuming.
+        def show(want):
+            for _ in range(3):
+                lit = pg.eval_on_selector_all("#units .navswitch .nsw.on",
+                                              "e=>e.map(x=>x.textContent.trim())")
+                if not lit: return False
+                if lit[0].lower().startswith(want): return True
+                pg.click("#units .navswitch"); pg.wait_for_timeout(200)
+            return False
+
+        show("units")
         pg.wait_for_timeout(250)
-        # The OPEN fold is a state, not a page — it has to be scanned while it is
-        # open or the treatment it carries is never measured (§41).
-        scan("group/units-fold-open")
+        # The switch is a state, not a page, and carries a treatment of its own
+        # (§41) — so it is scanned while it is on screen rather than assumed.
+        scan("group/nav-switch")
         try:
             # A UNIT DOES NOT OPEN ON PERFORMANCE. Since 3.3 it opens on
             # Strategy > Plan, so clicking the unit and calling what appears
@@ -130,7 +145,7 @@ with sync_playwright() as p:
         # page's own light-mode ink at 1.43:1. 41.5 again: a page nothing
         # navigates to is a page nothing measures.
         try:
-            pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Function')===0); if(f)f.click()}")
+            if not show("functions"): raise Exception("the nav switch would not show functions")
             pg.wait_for_timeout(250)
             pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
             for t in ["Performance", "Strategy"]:
@@ -141,7 +156,7 @@ with sync_playwright() as p:
                                                   "els=>els.map(e=>e.textContent.trim())"):
                     pg.evaluate("(k)=>{var x=[...document.querySelectorAll('#secrow-in button')].find(b=>b.textContent.trim()===k); if(x)x.click()}", k2)
                     pg.wait_for_timeout(450); scan("fn/" + t.lower() + "/" + k2.lower())
-            pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Unit')===0); if(f)f.click()}")
+            show("units")
             pg.wait_for_timeout(250)
         except Exception as e: print("   (function sweep skipped: %s)" % e)
 

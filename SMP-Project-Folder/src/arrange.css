@@ -674,6 +674,29 @@
      kind of thing.
      `align-self:center` because the group is shorter than the 47px row and
      must not be stretched to it. */
+  /* ONE CONTROL, and now one ELEMENT (§51.9). The `.foldgroup` rules below
+     dressed two buttons to look like a single segmented box; the box is the
+     button itself now and the two words are spans inside it. Same shape on
+     screen, different thing under the pointer — which is the whole point:
+     pressing it switches, rather than pressing one half of it selecting. */
+  .units .navswitch{display:inline-flex;align-items:center;align-self:center;
+    background:rgba(255,255,255,.08);border:0;border-radius:7px;overflow:hidden;
+    padding:0;margin:0 6px;cursor:pointer;font:inherit}
+  .units .navswitch:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .units .navswitch .nsw{display:block;padding:7px 13px;font-size:13.5px;
+    font-weight:700;color:rgba(255,255,255,.62);letter-spacing:-.005em;
+    transition:background .12s,color .12s}
+  .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+  .units .navswitch .nsw.on{color:#fff;background:rgba(255,255,255,.2)}
+  /* HOVER LIFTS THE CONTROL, NOT THE OTHER HALF. Lighting the unselected word
+     on hover was right while these were two buttons — you were pointing at the
+     side you meant. With one button it made both halves look lit and the state
+     unreadable exactly when somebody was looking at it. */
+  .units .navswitch:hover{background:rgba(255,255,255,.15)}
+  .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
+  .units-in.folded .navswitch{margin:0 3px}
+  .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
+
   .units .foldgroup{display:inline-flex;align-items:center;align-self:center;
     background:rgba(255,255,255,.08);border-radius:7px;margin:0 4px;overflow:hidden}
   .units .foldgroup .navfold{background:none;border:0;opacity:1;border-radius:0;

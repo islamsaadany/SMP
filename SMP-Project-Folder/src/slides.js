@@ -261,8 +261,17 @@ function slidesPaint(){
     SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
   }
 
+  /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
+     rail, after all twenty-three rows — so the one control the whole mode
+     exists for could only be found by scrolling to the end of a list nobody
+     had a reason to scroll. A control you have to go looking for is a control
+     that is not there. */
   var list = document.getElementById("slidelist");
-  list.innerHTML = all.map(function(el, i){
+  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      '+ Add a slide</button>' +
+      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
+        ? "after the one selected" : "after the slide selected below") + '</span></div>' +
+    all.map(function(el, i){
     var mine = !!el.dataset.ps;
     return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
         (mine ? " mine" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
@@ -270,8 +279,7 @@ function slidesPaint(){
       '<span class="sthumb"><span class="sthumb-in"></span></span>' +
       '<span class="sl-lab">' + esc(slidesLabel(el)) +
         (mine ? '<em>your pictures</em>' : '') + '</span></div>';
-  }).join("") +
-    '<div class="sl-add"><button class="editbtn" data-sladd="1">Add a slide</button></div>';
+  }).join("");
 
   /* The clones go in after the innerHTML, or writing the rail would discard
      them. Each thumbnail is the slide itself with `.on` so it lays out. */
@@ -368,8 +376,12 @@ function slidesFitStage(){
   var st = pane && pane.querySelector(".sstage");
   if (!st) return;
   var k = Math.min(st.clientWidth / 1600, st.clientHeight / 900);
+  if (!(k > 0)) k = 0.01;
   var inner = st.querySelector(".sstage-in");
-  if (inner) inner.style.transform = "scale(" + (k > 0 ? k : 0.01) + ")";
+  /* Left is 50% of the box, so pulling back half the SCALED width centres it.
+     Translate before scale, because the two are applied right to left and a
+     translate written after would itself be scaled. */
+  if (inner) inner.style.transform = "translateX(" + (-1600 * k / 2) + "px) scale(" + k + ")";
 }
 
 /* ── Adding one where you are standing ───────────────────────────────────

@@ -1191,13 +1191,8 @@
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     var pb = document.querySelector("[data-present]");
     if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
-    /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
-       that was clicked cannot go stale, and cannot be captured by whatever
-       else happens to be in this scope — see the note on `pfile` below. */
-    var presentFn = document.querySelector("[data-present-fn]");
-    if (presentFn) presentFn.addEventListener("click", function(){
-      openDeckFn(this.dataset.presentFn);
-    });
+    var pf = document.querySelector("[data-present-fn]");
+    if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
     /* Picture slides — beside Present, because it is the deck they go into
        (§50.4). Wired here with the rest of the page's actions, in the function
        that rewrote the DOM they sit in (§29's rule: whoever rewrites the DOM
@@ -1881,22 +1876,10 @@
       sendXlsx(peopleWorkbook(), "SMP - people.xlsx");
     });
 
-    /* `pfile`, NOT `pf` (found 2026-08-23). TWO BRANCHES EACH ADDED A `var pf`
-       TO THIS ONE FUNCTION and git merged both without a word, because they
-       are six hundred lines apart and nothing about the text conflicts. `var`
-       is FUNCTION-scoped, so they were one binding: on every paint where the
-       People page is not on screen this line reassigned it to null, and the
-       deck button's handler — which closed over the same `pf` — threw
-       `null.dataset` and a function's Present did nothing at all.
-
-       Neither branch was wrong and neither test could have caught it: each
-       half worked perfectly in the tree it was written in. A CLEAN MERGE CAN
-       STILL COLLIDE IN A SHARED SCOPE, and the only thing that finds it is
-       driving the merged product. */
-    var pfile = document.getElementById("ppl-file");
-    if (pfile) pfile.addEventListener("change", function(){
+    var pf = document.getElementById("ppl-file");
+    if (pf) pf.addEventListener("change", function(){
       if (grant("c_people") !== "edit") return;
-      var file = this.files && this.files[0];
+      var file = pf.files && pf.files[0];
       if (!file) return;
       var rx = new FileReader();
       rx.onload = function(){
@@ -2110,23 +2093,6 @@
         paint();
       });
     });
-    /* ACCEPTING WHAT SOMEBODY SAID ABOUT THEMSELVES (§56). The declaration
-       granted nothing; this is the SMO moving them, and it is an ordinary edit
-       of the person's BU — attachPersonAt() is the one door the register and
-       the file importer already share (§54), and the save is authorised on the
-       server like every other. Nothing here touches the declaration itself: it
-       stands until the person says something else, and the note stops showing
-       the moment the two agree. */
-    document.querySelectorAll("[data-usesaid]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var key = b.dataset.usesaid;
-        var said = SAIDWHERE && SAIDWHERE[key];
-        var p = personBy(key);
-        if (!p || !said) return;
-        attachPersonAt(p, said);
-        paint();
-      });
-    });
 
     /* One temporary password for everyone who has none. The SERVER picks the
        set — this sends a password and nothing else — so the worst a stale
@@ -2290,17 +2256,6 @@
       SYNC.passwordStates(function(err, st){
         if (err) return;
         PWSTATES = st;
-        paint();
-      });
-    }
-    /* The same shape and the same moment as the password states: asked once
-       per visit to the page, and absent rather than empty from file:// (§56). */
-    if (SAIDWHERE === null && document.querySelector('[data-edit="people"]') &&
-        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
-      SAIDWHERE = {};
-      SYNC.declarations(function(err, said){
-        if (err) return;
-        SAIDWHERE = said;
         paint();
       });
     }

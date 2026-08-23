@@ -400,3 +400,14 @@ CREATE TABLE IF NOT EXISTS plan_archives (
   plan      jsonb,
   figures   jsonb
 );
+
+-- Where people say they work (§56). A DECLARATION, never an attachment: it
+-- grants nothing, and the BU that decides access stays the SMO's on the People
+-- page. Outside the state graph and without a foreign key, because a save
+-- TRUNCATEs the thirty tables CASCADE and would otherwise take this with it —
+-- the same two reasons `credentials` is shaped this way. Added by migration 017.
+CREATE TABLE IF NOT EXISTS bu_declarations (
+  person_key  text PRIMARY KEY,
+  at          text NOT NULL,
+  declared_on timestamptz NOT NULL DEFAULT now()
+);

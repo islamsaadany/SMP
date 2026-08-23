@@ -53,6 +53,25 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.21 — where people say they work, and no attention slide
+
+- **The first sign-in asks where they work** (§56) — every business unit and
+  every supporting function, or "I would rather the SMO set it". It is a
+  DECLARATION and grants nothing: the SMO sees "They said X — Use it" under the
+  BU on the register and accepts it there. Stored outside the state graph and
+  without a foreign key, or a save would erase it.
+- **The "What needs attention" slide is gone** from both decks — a second
+  telling of numbers already shown pillar by pillar, and the one slide that read
+  as a list of failures rather than the unit's own account.
+- **A merge bug found by driving the product** (§56.6): two branches each added
+  a `var pf` to the same function, 600 lines apart with no textual conflict, so
+  a function's Present button threw and did nothing.
+
+Verified: the picker driven end to end against a real Postgres — declared,
+stored, read back on the register, accepted with one press and the person's
+`unit_key` moved; `test-authorize.js` 136 passed; `qa.py` 31 viewers clean;
+both decks open (unit 27 → 24 slides, function 19 → 18).
+
 ### v3.21 — the floor is two roles
 
 - **Employee** joins the seven roles: on the register, attached to a part of the

@@ -222,6 +222,21 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **Where people say they work (since v3.21, §56):** the first sign-in asks,
+  and the answer is a **declaration that grants nothing** — the BU that decides
+  access stays the SMO's, who sees *"They said X — Use it"* under the BU on the
+  register and accepts through `attachPersonAt()`, the same one door. Stored in
+  `bu_declarations`, OUTSIDE the state graph and with **no foreign key**: a save
+  TRUNCATEs the thirty tables CASCADE, so a column on `people` would be erased
+  and an FK would take the whole table with it. The list of choices is built and
+  re-validated on the SERVER, and nothing about the question may block a
+  sign-in — the password is set before it is asked.
+- **A clean merge can still collide in a shared scope (§56.6):** two branches
+  each added a `var pf` to `wire()`, 600 lines apart, no textual conflict — and
+  `var` is function-scoped, so one binding, and a function's Present button
+  threw `null.dataset` on every paint where the People page was absent. Only
+  driving the merged product finds these. Prefer `this` over closing over the
+  element a handler was wired to.
 - **The floor is two roles (since v3.21, §55):** somebody attached to a part of
   the business and holding nothing else is a **Contributor** where a plan names
   them and an **Employee** where it does not — derived by `namedInUnit()`,

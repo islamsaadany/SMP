@@ -7616,3 +7616,83 @@ name, exactly as it already refused Contributor. Retiring stores neither, becaus
 neither is taken away — both are read off `p.unit`, which retiring leaves alone
 (§49.6). And the access matrix grew a row rather than a page: 7 roles became 8,
 49 stored grants became 56.
+
+---
+
+## 56 · Where people say they work (v3.21)
+
+*2026-08-23. Islam: "we are meeting the people tomorrow so maybe on
+registration and password change they can set their BU from the list or their
+supporting function, so we can get precisely who is where rather than
+guessing."*
+
+### 56.1 A declaration is not an attachment
+
+A person choosing their own BU is choosing their own access. An Employee sees
+their own unit's plan and the group (§55.4), so a free pick at first sign-in is
+a screen where anybody awards themselves the reach to read whichever unit's
+numbers they were curious about — and across companies it defeats the
+per-company visibility flags Raya specifically asked for (§23).
+
+So what somebody picks is **recorded and grants nothing**. Their BU on the
+register — the thing that decides what opens — is still the SMO's, changed on
+the People page like any other. Which is also what lets the list be the whole
+organisation rather than a guess at which part of it is theirs: constraining the
+choices would only have mattered if the choice granted something.
+
+### 56.2 It lives outside the state graph, and without a foreign key
+
+`lib/state-io.js` writes a save by TRUNCATE-ing all thirty tables and
+re-inserting, so a column on `people` would be erased by the next thing the SMO
+saved. `bu_declarations` sits where credentials, sessions and the change log
+sit, for the reason §42 gives: a record a save can erase is not a record.
+
+And with **no foreign key to `people`**, which is why `credentials` has none
+either: that TRUNCATE is CASCADE, so a reference would take this table with it
+on every single save. It is the kind of correctness that is invisible until the
+first time somebody presses Save and the evidence is gone.
+
+### 56.3 The list is built on the server
+
+`whereList` reads the units and functions out of the database and
+`declareWhere` validates against the same query. A client that names its own
+options can name one that is not there, and the declaration is stored by key —
+so the choices and the check come from one place rather than two that can
+disagree. The options are built with `createElement`, not with a string: every
+one of those names came out of the database and the gate has no `esc()` to
+borrow.
+
+### 56.4 Nothing about it may stop somebody signing in
+
+The password is already set by the time the declaration is sent, and its answer
+is not waited on for anything. A failure there costs the SMO one row to fill in
+by hand; a failure that blocked the door would cost somebody their first
+sign-in. On a deployment too old to have the endpoint the question simply is not
+asked, rather than asked and broken.
+
+### 56.5 The SMO reads it on the register
+
+Under the BU, never instead of it: *"They said Retail Stores — Use it"*. Silent
+when it agrees with where they already are, because a register that annotated
+every row with a note confirming the row is a register nobody reads. **Use it**
+is an ordinary edit through `attachPersonAt()` — the one door the register and
+the file importer already share (§54) — so it is authorised on the server like
+every other change, and there is no second write path to guard.
+
+### 56.6 A CLEAN MERGE CAN STILL COLLIDE IN A SHARED SCOPE
+
+Found by driving the merged product, not by any test. Two branches each added a
+`var pf` to `wire()` — one for the function's Present button, one for the People
+page's file input — six hundred lines apart, nothing about the text conflicting,
+and git merged both without a word.
+
+`var` is FUNCTION-scoped, so they were **one binding**. On every paint where the
+People page was not on screen, the second line reassigned it to null, and the
+deck button's handler — which closed over the same `pf` — threw `null.dataset`.
+**A function's Present did nothing at all**, and both halves had worked
+perfectly in the tree each was written in.
+
+Fixed by renaming one and by having both handlers read `this` rather than close
+over the element they were wired to. The rule is the finding: the merge report
+is not a substitute for opening the product, because the collisions a merge
+creates are exactly the ones neither side could have tested for.

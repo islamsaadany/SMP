@@ -223,14 +223,41 @@ function deckSlides(u){
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
     'platform, not in a deck that is already wrong.</p></section>');
 
-  /* THERE IS NO "WHAT NEEDS ATTENTION" SLIDE (Islam, 2026-08-23). It gathered
-     every measure and tactic reading under 70 into one closing table — a
-     second telling of numbers the deck has already shown pillar by pillar,
-     and the one slide in the review that reads as a list of failures rather
-     than as the unit's own account of its plan. The notes slide above is
-     where what is being done gets said, in the unit's words. Its anchor
-     ("attention") goes with it; a picture slide that named it lands at the
-     end rather than being dropped (§50.3). */
+  /* 8 — everything at risk or off track, with what is being done about it. */
+  var att = [], n = 0;
+  u.items.forEach(function(p, pi){
+    p.measures.forEach(function(m){
+      if (m.progress != null && m.progress < 70) {
+        n++;
+        att.push('<tr><td class="idx">' + n + '</td>' +
+          '<td class="lead">' + esc(m.name) + '<span class="dsub">' + pillarCode(u, pi) +
+            ' &middot; measure</span></td>' +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) + '</td>' +
+          '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
+          '<td class="dnote' + (m.note ? '' : ' empty') + '">' + (m.note ? esc(m.note) : "&mdash;") + '</td></tr>');
+      }
+    });
+    p.tactics.forEach(function(t){
+      var r = tacticRatio(t);
+      if (tacticDue(t) && r != null && r < 70) {
+        n++;
+        att.push('<tr><td class="idx">' + n + '</td>' +
+          '<td class="lead">' + esc(t.name) + '<span class="dsub">' + pillarCode(u, pi) +
+            ' &middot; tactic &middot; ' + esc(t.owner) + '</span></td>' +
+          '<td class="num">' + tacticPlanned(t) + '%</td><td class="num">' + t.actual + '%</td>' +
+          '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
+          '<td class="dnote' + (t.note ? '' : ' empty') + '">' + (t.note ? esc(t.note) : "&mdash;") + '</td></tr>');
+      }
+    });
+  });
+  if (att.length) {
+    S.push('<section class="dslide" data-split="ATT"' +
+      anch("attention", "After \u201cWhat needs attention\u201d") + '><h2>What needs attention' +
+      '<span class="dwhich">' + att.length + ' at risk or off track</span></h2>' +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
+      '<th class="num">Target / due</th><th class="num">Actual</th><th class="num">Progress</th>' +
+      '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
+  }
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     '><h1 class="cover">Thank you</h1>' +
@@ -391,10 +418,52 @@ function deckSlidesFn(fk){
     });
   });
 
-  /* AND NONE ON A FUNCTION'S DECK EITHER. The same slide, gathering
-     deliverables, outcomes and milestone overruns instead of measures and
-     tactics — and removed for the same reason, on both sides of the switch
-     rather than on one (A15). */
+  /* Everything at risk or off track across the function, with what is being
+     done — the same closing gather a unit's deck makes. */
+  var att = [], n = 0;
+  caps.forEach(function(c){
+    c.projects.forEach(function(p){
+      p.deliverables.forEach(function(d){
+        var v = delivReads(d);
+        if (v != null && v < 70) {
+          n++;
+          att.push('<tr><td class="idx">' + n + '</td>' +
+            '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
+            /* A deliverable has no target and no date of its own: what it is
+               aimed at is being delivered, and when is when the project ends. */
+            '<td class="num">ends ' + esc(p.end || "\u2014") + '</td>' +
+            '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
+            '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
+        }
+      });
+      p.outcomes.forEach(function(o){
+        if (o.progress != null && o.progress < 70) {
+          n++;
+          att.push('<tr><td class="idx">' + n + '</td>' +
+            '<td class="lead">' + esc(o.name) + '<span class="dsub">' + esc(p.name) + ' &middot; outcome</span></td>' +
+            '<td class="num">' + esc(o.target) + '</td>' +
+            '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
+            '<td class="dnote' + (o.note ? '' : ' empty') + '">' + (o.note ? esc(o.note) : "&mdash;") + '</td></tr>');
+        }
+      });
+      projOverruns(p).forEach(function(m){
+        n++;
+        att.push('<tr><td class="idx">' + n + '</td>' +
+          '<td class="lead">' + esc(m.name) + '<span class="dsub">' + esc(p.name) + ' &middot; milestone overrun</span></td>' +
+          '<td class="num">' + esc(m.finish) + '</td>' +
+          '<td class="num">ends ' + esc(p.end) + '</td>' +
+          '<td class="dnote' + (m.note ? '' : ' empty') + '">' + (m.note ? esc(m.note) : "&mdash;") + '</td></tr>');
+      });
+    });
+  });
+  if (att.length) {
+    S.push('<section class="dslide" data-split="FNATT"' +
+      anch("attention", "After \u201cWhat needs attention\u201d") + '><h2>What needs attention' +
+      '<span class="dwhich">' + att.length + ' at risk, off track or overrunning</span></h2>' +
+      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
+      '<th class="num">Target / due</th><th class="num">Reads</th>' +
+      '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
+  }
 
   S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +

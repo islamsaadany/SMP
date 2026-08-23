@@ -181,6 +181,7 @@ var SYNC = (function () {
            paint ask again, which is the first moment the answer can be right.
            Guarded on the symbol existing so sync.js stays independent of which
            pages happen to be built into the file. */
+        if (typeof SAIDWHERE !== "undefined" && SAIDWHERE !== null) SAIDWHERE = null;
         if (typeof PWSTATES !== "undefined" && PWSTATES !== null) {
           PWSTATES = null;
           /* Only when that column is actually on screen. A repaint nobody can
@@ -318,6 +319,14 @@ var SYNC = (function () {
     passwordStates: function (done) {
       authPost({ action: "passwordStates" },
         function (err, j) { done(err, err ? null : (j.states || {})); });
+    },
+    /* What each person said about where they work (§56). Outside the state
+       graph for the same reason credentials are, so the People page asks for
+       it separately — and gets nothing at all from file://, where the register
+       is whatever the demo baked in. */
+    declarations: function (done) {
+      authPost({ action: "declarations" },
+        function (err, j) { done(err, err ? null : (j.said || {})); });
     },
     boot: function (paint) {
       repaint = paint;

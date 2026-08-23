@@ -162,6 +162,66 @@ module.exports = async function handler(req, res) {
        derived from the state graph: credentials live in their own table and
        deliberately never enter the graph (§19). Keys and states only — no
        hash, no timestamp, nothing that helps anyone guess. */
+    /* ── Where people say they work (§56) ──────────────────────────
+       THE LIST IS BUILT ON THE SERVER, not sent up by the client. A client
+       that names its own options can name one that is not there, and the
+       declaration is stored by key — so the choices and the check come from
+       the same query rather than from two that can disagree.
+
+       Readable by anybody signed in, and it holds nothing confidential: the
+       units and supporting functions are the navigation bar. */
+    if (action === "whereList") {
+      const person = await auth.getSession(client, req);
+      if (!person) return send(res, 401, { ok: false, error: "sign in first" });
+      const us = (await client.query(
+        "SELECT key, name FROM units WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows;
+      const fs = (await client.query(
+        "SELECT key, name FROM functions WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows;
+      const mine = (await client.query(
+        "SELECT at, declared_on FROM bu_declarations WHERE person_key = $1", [person.key])).rows[0];
+      return send(res, 200, { ok: true,
+        units: us.map(function (r) { return { at: r.key, name: r.name }; }),
+        functions: fs.map(function (r) { return { at: "fn:" + r.key, name: r.name }; }),
+        mine: mine ? mine.at : null });
+    }
+
+    /* A DECLARATION, AND NOTHING ELSE HAPPENS. It does not touch `people`, so
+       it moves nobody's access: the SMO reads it on the People page and
+       attaches them there, which is an ordinary edit the authoriser already
+       guards. Validated against the same list `whereList` builds, so a crafted
+       request can only store something that exists. */
+    if (action === "declareWhere") {
+      const person = await auth.getSession(client, req);
+      if (!person) return send(res, 401, { ok: false, error: "sign in first" });
+      const at = String(body.at || "").trim();
+      if (!at) {
+        await client.query("DELETE FROM bu_declarations WHERE person_key = $1", [person.key]);
+        return send(res, 200, { ok: true, at: null });
+      }
+      const known = at.indexOf("fn:") === 0
+        ? (await client.query("SELECT 1 FROM functions WHERE key = $1", [at.slice(3)])).rowCount
+        : (await client.query("SELECT 1 FROM units WHERE key = $1", [at])).rowCount;
+      if (!known) return send(res, 400, { ok: false, error: "That is not somewhere in this organisation." });
+      await client.query(
+        "INSERT INTO bu_declarations (person_key, at) VALUES ($1, $2) " +
+        "ON CONFLICT (person_key) DO UPDATE SET at = EXCLUDED.at, declared_on = now()",
+        [person.key, at]);
+      return send(res, 200, { ok: true, at: at });
+    }
+
+    /* What everybody said, for the SMO to act on. The same shape and the same
+       gate as passwordStates, which the People page already reads. */
+    if (action === "declarations") {
+      const person = await auth.getSession(client, req);
+      if (!person || person.role !== "super") {
+        return send(res, 403, { ok: false, error: "The register is the SMO's." });
+      }
+      const rows = (await client.query("SELECT person_key, at FROM bu_declarations")).rows;
+      const said = {};
+      rows.forEach(function (r) { said[r.person_key] = r.at; });
+      return send(res, 200, { ok: true, said: said });
+    }
+
     if (action === "passwordStates") {
       const person = await auth.getSession(client, req);
       if (!person || person.role !== "super") {

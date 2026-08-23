@@ -14590,6 +14590,29 @@ function renderBranding(){
    file, where there are no credentials to have a state. */
 var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
 
+/* ── What somebody said about themselves (§56) ─────────────────────
+   Shown under the BU, never instead of it. A declaration is collected at the
+   first sign-in and grants nothing at all: this is the SMO reading it and
+   deciding, and pressing Use it is an ordinary edit of the person's BU —
+   through attachPersonAt(), the same one door the register and the file
+   importer both use (§54), and authorised on the server like any other.
+
+   Silent when it agrees with where they already are: a register that
+   annotated every row with a note confirming the row would be a register
+   nobody reads. */
+function saidWhereNote(p, editable){
+  if (!SAIDWHERE) return "";
+  var said = SAIDWHERE[p.key];
+  if (!said || said === personAt(p)) return "";
+  return '<span class="why saidwhere">They said ' + esc(roleWhereLabel(said)) +
+    (editable ? ' <button class="linkbu" data-usesaid="' + esc(p.key) + '">Use it</button>' : '') +
+    '</span>';
+}
+/* And for the same reason, what each person said about where they work (§56):
+   a declaration lives outside the state graph, so the register asks for it
+   separately and simply has nothing to show from a file. */
+var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
+
 /* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
    Islam: "add a columns filter to mark what to show of the columns and make
    the contact unchecked by default."
@@ -14893,7 +14916,8 @@ function renderPeople(){
         : (drift
             ? '<span class="why" style="margin:0">&mdash; BU list says ' +
               esc(whereLabel(drift)) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+            : '<span class="why" style="margin:0">&mdash;</span>')) +
+        saidWhereNote(p, editable) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -16915,41 +16939,14 @@ function deckSlides(u){
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
     'platform, not in a deck that is already wrong.</p></section>');
 
-  /* 8 — everything at risk or off track, with what is being done about it. */
-  var att = [], n = 0;
-  u.items.forEach(function(p, pi){
-    p.measures.forEach(function(m){
-      if (m.progress != null && m.progress < 70) {
-        n++;
-        att.push('<tr><td class="idx">' + n + '</td>' +
-          '<td class="lead">' + esc(m.name) + '<span class="dsub">' + pillarCode(u, pi) +
-            ' &middot; measure</span></td>' +
-          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) + '</td>' +
-          '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td>' +
-          '<td class="dnote' + (m.note ? '' : ' empty') + '">' + (m.note ? esc(m.note) : "&mdash;") + '</td></tr>');
-      }
-    });
-    p.tactics.forEach(function(t){
-      var r = tacticRatio(t);
-      if (tacticDue(t) && r != null && r < 70) {
-        n++;
-        att.push('<tr><td class="idx">' + n + '</td>' +
-          '<td class="lead">' + esc(t.name) + '<span class="dsub">' + pillarCode(u, pi) +
-            ' &middot; tactic &middot; ' + esc(t.owner) + '</span></td>' +
-          '<td class="num">' + tacticPlanned(t) + '%</td><td class="num">' + t.actual + '%</td>' +
-          '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td>' +
-          '<td class="dnote' + (t.note ? '' : ' empty') + '">' + (t.note ? esc(t.note) : "&mdash;") + '</td></tr>');
-      }
-    });
-  });
-  if (att.length) {
-    S.push('<section class="dslide" data-split="ATT"' +
-      anch("attention", "After \u201cWhat needs attention\u201d") + '><h2>What needs attention' +
-      '<span class="dwhich">' + att.length + ' at risk or off track</span></h2>' +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
-      '<th class="num">Target / due</th><th class="num">Actual</th><th class="num">Progress</th>' +
-      '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
-  }
+  /* THERE IS NO "WHAT NEEDS ATTENTION" SLIDE (Islam, 2026-08-23). It gathered
+     every measure and tactic reading under 70 into one closing table — a
+     second telling of numbers the deck has already shown pillar by pillar,
+     and the one slide in the review that reads as a list of failures rather
+     than as the unit's own account of its plan. The notes slide above is
+     where what is being done gets said, in the unit's words. Its anchor
+     ("attention") goes with it; a picture slide that named it lands at the
+     end rather than being dropped (§50.3). */
 
   S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
     '><h1 class="cover">Thank you</h1>' +
@@ -17110,52 +17107,10 @@ function deckSlidesFn(fk){
     });
   });
 
-  /* Everything at risk or off track across the function, with what is being
-     done — the same closing gather a unit's deck makes. */
-  var att = [], n = 0;
-  caps.forEach(function(c){
-    c.projects.forEach(function(p){
-      p.deliverables.forEach(function(d){
-        var v = delivReads(d);
-        if (v != null && v < 70) {
-          n++;
-          att.push('<tr><td class="idx">' + n + '</td>' +
-            '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
-            /* A deliverable has no target and no date of its own: what it is
-               aimed at is being delivered, and when is when the project ends. */
-            '<td class="num">ends ' + esc(p.end || "\u2014") + '</td>' +
-            '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
-            '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
-        }
-      });
-      p.outcomes.forEach(function(o){
-        if (o.progress != null && o.progress < 70) {
-          n++;
-          att.push('<tr><td class="idx">' + n + '</td>' +
-            '<td class="lead">' + esc(o.name) + '<span class="dsub">' + esc(p.name) + ' &middot; outcome</span></td>' +
-            '<td class="num">' + esc(o.target) + '</td>' +
-            '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
-            '<td class="dnote' + (o.note ? '' : ' empty') + '">' + (o.note ? esc(o.note) : "&mdash;") + '</td></tr>');
-        }
-      });
-      projOverruns(p).forEach(function(m){
-        n++;
-        att.push('<tr><td class="idx">' + n + '</td>' +
-          '<td class="lead">' + esc(m.name) + '<span class="dsub">' + esc(p.name) + ' &middot; milestone overrun</span></td>' +
-          '<td class="num">' + esc(m.finish) + '</td>' +
-          '<td class="num">ends ' + esc(p.end) + '</td>' +
-          '<td class="dnote' + (m.note ? '' : ' empty') + '">' + (m.note ? esc(m.note) : "&mdash;") + '</td></tr>');
-      });
-    });
-  });
-  if (att.length) {
-    S.push('<section class="dslide" data-split="FNATT"' +
-      anch("attention", "After \u201cWhat needs attention\u201d") + '><h2>What needs attention' +
-      '<span class="dwhich">' + att.length + ' at risk, off track or overrunning</span></h2>' +
-      '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
-      '<th class="num">Target / due</th><th class="num">Reads</th>' +
-      '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
-  }
+  /* AND NONE ON A FUNCTION'S DECK EITHER. The same slide, gathering
+     deliverables, outcomes and milestone overruns instead of measures and
+     tactics — and removed for the same reason, on both sides of the switch
+     rather than on one (A15). */
 
   S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
     '><h2>Notes and achievements</h2>' +
@@ -18558,6 +18513,7 @@ var SYNC = (function () {
            paint ask again, which is the first moment the answer can be right.
            Guarded on the symbol existing so sync.js stays independent of which
            pages happen to be built into the file. */
+        if (typeof SAIDWHERE !== "undefined" && SAIDWHERE !== null) SAIDWHERE = null;
         if (typeof PWSTATES !== "undefined" && PWSTATES !== null) {
           PWSTATES = null;
           /* Only when that column is actually on screen. A repaint nobody can
@@ -18695,6 +18651,14 @@ var SYNC = (function () {
     passwordStates: function (done) {
       authPost({ action: "passwordStates" },
         function (err, j) { done(err, err ? null : (j.states || {})); });
+    },
+    /* What each person said about where they work (§56). Outside the state
+       graph for the same reason credentials are, so the People page asks for
+       it separately — and gets nothing at all from file://, where the register
+       is whatever the demo baked in. */
+    declarations: function (done) {
+      authPost({ action: "declarations" },
+        function (err, j) { done(err, err ? null : (j.said || {})); });
     },
     boot: function (paint) {
       repaint = paint;
@@ -19806,8 +19770,13 @@ var SYNC = (function () {
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
     var pb = document.querySelector("[data-present]");
     if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
-    var pf = document.querySelector("[data-present-fn]");
-    if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
+    /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
+       that was clicked cannot go stale, and cannot be captured by whatever
+       else happens to be in this scope — see the note on `pfile` below. */
+    var presentFn = document.querySelector("[data-present-fn]");
+    if (presentFn) presentFn.addEventListener("click", function(){
+      openDeckFn(this.dataset.presentFn);
+    });
     /* Picture slides — beside Present, because it is the deck they go into
        (§50.4). Wired here with the rest of the page's actions, in the function
        that rewrote the DOM they sit in (§29's rule: whoever rewrites the DOM
@@ -20491,10 +20460,22 @@ var SYNC = (function () {
       sendXlsx(peopleWorkbook(), "SMP - people.xlsx");
     });
 
-    var pf = document.getElementById("ppl-file");
-    if (pf) pf.addEventListener("change", function(){
+    /* `pfile`, NOT `pf` (found 2026-08-23). TWO BRANCHES EACH ADDED A `var pf`
+       TO THIS ONE FUNCTION and git merged both without a word, because they
+       are six hundred lines apart and nothing about the text conflicts. `var`
+       is FUNCTION-scoped, so they were one binding: on every paint where the
+       People page is not on screen this line reassigned it to null, and the
+       deck button's handler — which closed over the same `pf` — threw
+       `null.dataset` and a function's Present did nothing at all.
+
+       Neither branch was wrong and neither test could have caught it: each
+       half worked perfectly in the tree it was written in. A CLEAN MERGE CAN
+       STILL COLLIDE IN A SHARED SCOPE, and the only thing that finds it is
+       driving the merged product. */
+    var pfile = document.getElementById("ppl-file");
+    if (pfile) pfile.addEventListener("change", function(){
       if (grant("c_people") !== "edit") return;
-      var file = pf.files && pf.files[0];
+      var file = this.files && this.files[0];
       if (!file) return;
       var rx = new FileReader();
       rx.onload = function(){
@@ -20708,6 +20689,23 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* ACCEPTING WHAT SOMEBODY SAID ABOUT THEMSELVES (§56). The declaration
+       granted nothing; this is the SMO moving them, and it is an ordinary edit
+       of the person's BU — attachPersonAt() is the one door the register and
+       the file importer already share (§54), and the save is authorised on the
+       server like every other. Nothing here touches the declaration itself: it
+       stands until the person says something else, and the note stops showing
+       the moment the two agree. */
+    document.querySelectorAll("[data-usesaid]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.usesaid;
+        var said = SAIDWHERE && SAIDWHERE[key];
+        var p = personBy(key);
+        if (!p || !said) return;
+        attachPersonAt(p, said);
+        paint();
+      });
+    });
 
     /* One temporary password for everyone who has none. The SERVER picks the
        set — this sends a password and nothing else — so the worst a stale
@@ -20871,6 +20869,17 @@ var SYNC = (function () {
       SYNC.passwordStates(function(err, st){
         if (err) return;
         PWSTATES = st;
+        paint();
+      });
+    }
+    /* The same shape and the same moment as the password states: asked once
+       per visit to the page, and absent rather than empty from file:// (§56). */
+    if (SAIDWHERE === null && document.querySelector('[data-edit="people"]') &&
+        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
+      SAIDWHERE = {};
+      SYNC.declarations(function(err, said){
+        if (err) return;
+        SAIDWHERE = said;
         paint();
       });
     }

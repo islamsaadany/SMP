@@ -401,36 +401,7 @@
     color: var(--ink);
   }
   input[type="password"] { padding-right: 44px; }
-  /* THE SELECT WEARS THE SAME FIELD AS THE INPUTS (§56). It sits in the same
-     `.field`, so it needs the same 44px of room for the icon beside it and the
-     same ground — a bare user-agent select next to two styled boxes reads as a
-     control somebody forgot. `appearance:none` and a drawn caret, because the
-     platform's own selects do the same and a native arrow would be the one
-     piece of chrome on the card. */
-  .field select {
-    width: 100%;
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    padding: 13px 38px 13px 44px;
-    font-size: 14.5px;
-    font-family: inherit;
-    outline: none;
-    background: var(--field);
-    color: var(--ink);
-    appearance: none; -webkit-appearance: none;
-    transition: border-color .15s ease, box-shadow .15s ease;
-  }
-  .field::after {
-    /* Only where a select is: a caret over an input would be a lie. */
-    content: none;
-  }
-  .field:has(select)::after {
-    content: ""; position: absolute; right: 16px; top: 50%; pointer-events: none;
-    width: 8px; height: 8px; margin-top: -6px;
-    border-right: 1.5px solid var(--icon); border-bottom: 1.5px solid var(--icon);
-    transform: rotate(45deg);
-  }
-  input:focus, .field select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--ring); }
+  input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--ring); }
   /* A password you cannot read back is a password you mistype twice. */
   .eye {
     position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
@@ -780,25 +751,6 @@
               </svg>
             </button>
           </div>
-          <!-- WHERE THEY WORK, ASKED ONCE (§56). The first sign-in is the one
-               moment everybody passes through, so it is where the register
-               stops guessing. It is a DECLARATION: it grants nothing, and the
-               BU that decides what they can open stays the SMO's — which is
-               why the list can safely be the whole organisation rather than a
-               guess at which part of it is theirs.
-
-               Optional, and it says so. Somebody who is not sure should not be
-               made to invent an answer to get a password. -->
-          <div id="whereWrap" hidden>
-            <label for="whereSel">Where do you work?</label>
-            <div class="field">
-              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-              </svg>
-              <select id="whereSel"></select>
-            </div>
-            <p class="hint">The SMO confirms it. Leave it blank if you are not sure.</p>
-          </div>
           <div class="error" id="changeError"></div>
           <button type="submit">Set password</button>
         </form>
@@ -853,7 +805,7 @@
     changeCard.style.display = which === "change" ? "block" : "none";
     document.body.classList.add("ready");
     if (which === "login") passwordEl.focus();
-    if (which === "change") { document.getElementById("newpw").focus(); loadWhere(); }
+    if (which === "change") document.getElementById("newpw").focus();
   }
 
   /* WHERE THE PLATFORM IS, and what the address bar says it is.
@@ -944,42 +896,6 @@
     }
   });
 
-  /* THE LIST COMES FROM THE SERVER, and the control is hidden until it does.
-     An empty dropdown that fills a moment later is a control that changes
-     under the hand already on it; and on a deployment old enough not to have
-     the endpoint, there is simply no question rather than a broken one. */
-  function loadWhere() {
-    var wrap = document.getElementById("whereWrap");
-    var sel = document.getElementById("whereSel");
-    api({ action: "whereList" }).then(function (j) {
-      if (!j || !j.ok) return;
-      /* BUILT WITH THE DOM, not with a string. Every one of these names came
-         out of the database, and the gate has no esc() to borrow — an
-         `option` created this way cannot carry markup whatever it is called. */
-      sel.textContent = "";
-      var blank = document.createElement("option");
-      blank.value = "";
-      blank.textContent = "\u2014 I would rather the SMO set it \u2014";
-      sel.appendChild(blank);
-      var add = function (list, label) {
-        if (!list || !list.length) return;
-        var g = document.createElement("optgroup");
-        g.label = label;
-        list.forEach(function (x) {
-          var o = document.createElement("option");
-          o.value = x.at;
-          o.textContent = x.name;
-          if (x.at === j.mine) o.selected = true;
-          g.appendChild(o);
-        });
-        sel.appendChild(g);
-      };
-      add(j.units, "Business units");
-      add(j.functions, "Supporting functions");
-      wrap.hidden = false;
-    }).catch(function () { /* no question rather than a broken one */ });
-  }
-
   document.getElementById("changeForm").addEventListener("submit", function (e) {
     e.preventDefault();
     clearFail(changeErrorEl);
@@ -987,20 +903,14 @@
     var b = document.getElementById("newpw2").value;
     if (a !== b) return fail(changeErrorEl, "The two entries differ.");
     api({ action: "change", password: a }).then(function (j) {
-      if (!j.ok) return fail(changeErrorEl, j.error || "Could not set the password.");
-      document.getElementById("newpw").value = "";
-      document.getElementById("newpw2").value = "";
-      PERSON.mustChange = false;
-      /* THE PASSWORD IS ALREADY SET BY HERE, so nothing about where they work
-         may stop them getting in: the declaration is sent and its answer is
-         not waited on for anything that matters. A failure here costs the SMO
-         one row to fill in by hand; a failure that blocked the door would cost
-         somebody their first sign-in. */
-      var wrap = document.getElementById("whereWrap");
-      var at = wrap && !wrap.hidden ? document.getElementById("whereSel").value : "";
-      var go = function () { openPlatform(); };
-      if (!at) return go();
-      api({ action: "declareWhere", at: at }).then(go).catch(go);
+      if (j.ok) {
+        document.getElementById("newpw").value = "";
+        document.getElementById("newpw2").value = "";
+        PERSON.mustChange = false;
+        /* The password is theirs now - straight in, same as any other
+           successful sign-in. */
+        openPlatform();
+      } else fail(changeErrorEl, j.error || "Could not set the password.");
     }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
   });
 

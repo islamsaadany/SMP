@@ -738,29 +738,6 @@ function renderBranding(){
    file, where there are no credentials to have a state. */
 var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
 
-/* ── What somebody said about themselves (§56) ─────────────────────
-   Shown under the BU, never instead of it. A declaration is collected at the
-   first sign-in and grants nothing at all: this is the SMO reading it and
-   deciding, and pressing Use it is an ordinary edit of the person's BU —
-   through attachPersonAt(), the same one door the register and the file
-   importer both use (§54), and authorised on the server like any other.
-
-   Silent when it agrees with where they already are: a register that
-   annotated every row with a note confirming the row would be a register
-   nobody reads. */
-function saidWhereNote(p, editable){
-  if (!SAIDWHERE) return "";
-  var said = SAIDWHERE[p.key];
-  if (!said || said === personAt(p)) return "";
-  return '<span class="why saidwhere">They said ' + esc(roleWhereLabel(said)) +
-    (editable ? ' <button class="linkbu" data-usesaid="' + esc(p.key) + '">Use it</button>' : '') +
-    '</span>';
-}
-/* And for the same reason, what each person said about where they work (§56):
-   a declaration lives outside the state graph, so the register asks for it
-   separately and simply has nothing to show from a file. */
-var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
-
 /* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
    Islam: "add a columns filter to mark what to show of the columns and make
    the contact unchecked by default."
@@ -1064,8 +1041,7 @@ function renderPeople(){
         : (drift
             ? '<span class="why" style="margin:0">&mdash; BU list says ' +
               esc(whereLabel(drift)) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>')) +
-        saidWhereNote(p, editable) + '</td>' : '') +
+            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */

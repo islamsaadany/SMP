@@ -43,6 +43,36 @@ the record of what was supplied, not the asset to ship.
 They are kept as the record of what was handed over. The SVGs above are what
 the product draws.
 
+## brand/units/
+
+The seven subsidiary lockups, extracted the same way from
+`reference/subsidiary-lockups.pdf`.
+
+| File | Reads |
+|---|---|
+| `logo-distribution.svg` | RAYA \| DISTRIBUTION |
+| `logo-retail.svg` | RAYA \| RETAIL |
+| `logo-electronics.svg` | RAYA \| ELECTRONICS |
+| `logo-smart-care.svg` | RAYA \| SMART CARE |
+| `logo-logistics.svg` | RAYA \| LOGISTICS |
+| `logo-nigeria.svg` | RAYA \| NIGERIA |
+| `logo-digital.svg` | RAYA \| DIGITAL |
+
+**This is a different lockup from the group's, deliberately.** The group wears
+the *online* mark (`RAYA` + flag + `TRADE`); a unit wears the *with-line* mark
+(`RAYA` + rule + name). Islam settled it: two different things, two different
+uses. Do not mix them.
+
+The divider rule is a **stroked black line**, not a filled shape, and it
+reaches above the wordmark — so it is the one part of these files that a
+colour filter drops silently and a redaction set to remove anything it touches
+takes away with the neighbouring rows. Both faults happened; both were caught
+by rendering the result rather than reading it.
+
+`#001780` navy and `#225FAC` blue here, against the group mark's `#282E76` and
+`#3A67B1` — the two lockups are drawn in different blues, which is the artwork
+and not a mistake in the extraction.
+
 ## reference/
 
 | File | What it is |

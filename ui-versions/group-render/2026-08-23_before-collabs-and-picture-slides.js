@@ -247,43 +247,6 @@ function measureHead(unscored){
     '</tr></thead>';
 }
 
-/* ── Owner, and the people supporting them (§50) ─────────────────
-   A tactic has carried COLLABORATORS since the import template was built: the
-   upload writes them, the database stores them, and being named on one is what
-   lets a Contributor report a line that is theirs. What it never had was a
-   COLUMN. They were a small "with A, B" line tucked under the owner's name on
-   the unit's Performance page, and absent from the Plan page and the deck
-   entirely — so on the two surfaces a client actually sees, the people
-   supporting a tactic did not exist.
-
-   ONE PERSON IS ACCOUNTABLE AND SEVERAL SUPPORT THEM. That is two different
-   facts about a tactic, so it is two columns rather than one column carrying a
-   sub-line. Owner stays exactly what it was: one name, never a list.
-
-   ONE FUNCTION, THREE TABLES — Performance, Plan and the deck all ask here, so
-   a tactic cannot say one thing on screen and another in front of the board.
-   Names are TYPED, matched against a person's key or their name (lib/rules.js
-   §5), which is the same weakness `owner` already carries and is recorded
-   there rather than invented again here. */
-function collabNames(t){
-  return (t && Array.isArray(t.collaborators) ? t.collaborators : [])
-    .map(function(x){ return String(x == null ? "" : x).trim(); })
-    .filter(Boolean);
-}
-function collabText(t){ return collabNames(t).join(", "); }
-/* Nobody supporting is a real and ordinary answer, not an omission — so it
-   reads as an em-dash rather than as "Missing" (§15.1: absent, never zero). */
-function collabCell(t){
-  var n = collabNames(t);
-  return n.length ? esc(n.join(", ")) : '<span class="nobody">&mdash;</span>';
-}
-/* Typed back the way it is shown. Commas separate; a stray semicolon or a
-   trailing comma is somebody typing, not an error worth a message. */
-function collabParse(v){
-  return String(v == null ? "" : v).split(/[,;]/)
-    .map(function(x){ return x.trim(); }).filter(Boolean);
-}
-
 /* Tactic, owner and quarters read left; the rest centres. A tactic whose
    quarters have not begun is not behind \u2014 it is not yet due, and scoring it
    would say otherwise. */
@@ -293,6 +256,8 @@ function tacticRows(ts, unitKey){
     var pl = tacticPlanned(t), due = tacticDue(t), r = tacticRatio(t);
     var status = t.status === "Done" ? '<span class="pill good">Done</span>'
                                      : '<span class="pill warn">' + esc(t.status) + '</span>';
+    var who = esc(t.owner) + (t.collaborators && t.collaborators.length
+      ? '<span class="why" style="margin:2px 0 0">with ' + t.collaborators.map(esc).join(", ") + '</span>' : '');
     /* Three distinct states, and they must not look alike: not yet due, due
        but unreported, and reported. */
     var tail = !due
@@ -307,12 +272,11 @@ function tacticRows(ts, unitKey){
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td><td>' + esc(t.name) +
       (t.outcome ? '<span class="why">' + esc(t.outcome) + '</span>' : '') + '</td>' +
-      '<td>' + esc(t.owner) + '</td><td class="collabs">' + collabCell(t) + '</td>' +
-      '<td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
+      '<td>' + who + '</td><td>' + qs(t) + '</td><td class="cc">' + status + '</td>' + tail + '</tr>';
   }).join("");
 }
 function tacticHead(){
-  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Collabs.</th><th>Quarters</th>' +
+  return '<thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th><th>Quarters</th>' +
     '<th class="cc">Status</th><th class="cc">Deliv. / plan</th><th class="cc">Var.</th>' +
     '<th class="cc">Of plan</th></tr></thead>';
 }
@@ -1276,7 +1240,7 @@ function renderUnitPerformance(u){
   var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
 
   return bands('<button class="editbtn" data-present="1" title="Present this unit">Present</button>' +
-      picBtn("unit", u.ukey) + arrangeBtn("unit", u.ukey)) +
+      arrangeBtn("unit", u.ukey)) +
 
     '<div class="scores">' +
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
@@ -1575,7 +1539,7 @@ function renderReport(u){
   /* Submitting is the UNIT's act, and the unit's note speaks for the unit. A
      contributor limited to their own lines does neither — the server refuses
      both, so the screen does not offer them (spec 006 §7.2). */
-  var mayAll = canSpeakFor(u.ukey);
+  var mayAll = may && !SMPRules.onlyVia(world(), viewer(), "unit", u.ukey, "contrib");
   var c = reportedCount(u);
   var subd = !!REVIEW.submitted[u.ukey];
   var miss = missingNotes(u);
@@ -2014,7 +1978,7 @@ function renderFnPerformance(fnKey){
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
   return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
-      '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
+      '" title="Present this function">Present</button></div>' +
     fnHead(fk) + caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
@@ -2343,15 +2307,6 @@ function unitPlanBody(it, u, railed){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) + '</td>' +
       '<td>' + (ed ? inputOr("plan", t.owner || "", "", function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
-      /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
-         could only arrive with the upload, so a name that changed after the
-         plan landed meant re-uploading the unit to fix it. It sits under the
-         SAME pen that corrects the rest of the plan, and behind the same gate
-         (§31): who is named on a tactic decides who may report it, so it is
-         not a field the people being measured hold. */
-      '<td class="collabs">' + (ed
-        ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
-        : collabCell(t)) + '</td>' +
       '<td>' + qs(t) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
@@ -2384,8 +2339,8 @@ function unitPlanBody(it, u, railed){
        three statements of the same thing above a fourth. */
     '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
     miniTable(["#","Measure","Dir.","Target","Compiled"], mRows) +
-    '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
-    miniTable(["#","Tactic","Owner","Collabs.","Quarters"], tRows);
+    '<h4 class="mini">Tactics <em>\u2014 who carries it, and in which quarters</em></h4>' +
+    miniTable(["#","Tactic","Owner","Quarters"], tRows);
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);

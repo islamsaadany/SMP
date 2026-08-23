@@ -2,7 +2,7 @@ import glob, sys, collections
 from playwright.sync_api import sync_playwright
 EXE=sorted(glob.glob("/opt/pw-browsers/chromium-*/chrome-linux/chrome"))[0]
 URL="file:///home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html"
-JS = r"""() => {
+JS = r"""(root) => {
   const lum=c=>{const s=c.map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});
     return 0.2126*s[0]+0.7152*s[1]+0.0722*s[2]};
   const parse=s=>{const m=String(s).match(/rgba?\(([^)]+)\)/);if(!m)return null;
@@ -18,7 +18,13 @@ JS = r"""() => {
     const rb=parse(getComputedStyle(document.body).backgroundColor);
     return[rb&&rb.a>0.6?rb.c:[255,255,255]]};
   const out=[];
-  document.querySelectorAll('body *').forEach(el=>{
+  /* A MODAL AND A DECK SLIDE ARE NOT A PAGE. Both sit on top of the page
+     behind, which is still in the document — so scanning `body *` for them
+     counts that page's failures again under a second and a third name, and a
+     check that reports one defect three times has stopped saying where the
+     defect is. They pass their own root; everything that IS a page passes
+     none and scans the document, exactly as before. */
+  document.querySelectorAll((root||'body')+' *').forEach(el=>{
     if(el.children.length&&![...el.childNodes].some(n=>n.nodeType===3&&n.textContent.trim()))return;
     const t=(el.textContent||'').trim();if(!t)return;
     const r=el.getBoundingClientRect();if(!r.width||!r.height)return;
@@ -50,9 +56,9 @@ with sync_playwright() as p:
         pg.wait_for_timeout(400)
         tag=f"{pal}/{th}"
         WHERE=['?']
-        def scan(w='?'):
+        def scan(w='?', root=None):
             WHERE[0]=w
-            for r in pg.evaluate(JS):
+            for r in pg.evaluate(JS, root):
                 k=f"{tag} :: {WHERE[0]} :: {r['sel'][:26]}"; bad[k]+=1
                 samp.setdefault(k, f"{r['ratio']} < {r['need']}  “{r['text']}”")
         for tab in ["Performance","Foundation","Focus","Temple","Weighting"]:
@@ -64,7 +70,16 @@ with sync_playwright() as p:
         # open or the treatment it carries is never measured (§41).
         scan("group/units-fold-open")
         try:
-            pg.locator('#units button[data-u="mobile"]').click(); pg.wait_for_timeout(500); scan("unit/perf")
+            # A UNIT DOES NOT OPEN ON PERFORMANCE. Since 3.3 it opens on
+            # Strategy > Plan, so clicking the unit and calling what appears
+            # "unit/perf" measured the PLAN page twice and the Performance page
+            # never — for twelve versions, silently and in the safe direction
+            # (45.1's fault in a different tree). It is clicked explicitly now,
+            # and the label says which page it actually scanned.
+            pg.locator('#units button[data-u="mobile"]').click(); pg.wait_for_timeout(500)
+            scan("unit/landing")
+            pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()==='Performance');if(x)x.click()}")
+            pg.wait_for_timeout(600); scan("unit/perf")
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.indexOf('Strategy')>-1);if(x)x.click()}")
             pg.wait_for_timeout(500); scan("unit/strategy")
             # "Who enters" is hidden until the tenant switches naming on (spec
@@ -78,7 +93,36 @@ with sync_playwright() as p:
             pg.wait_for_timeout(400); scan("unit/who-enters-picker")
             pg.evaluate("()=>{var x=document.querySelector('[data-pick-cancel]');if(x)x.click(); GROUP.naming=false; paint();}")
             pg.wait_for_timeout(300)
-        except Exception: pass
+            # PICTURE SLIDES (50). Two states, neither of them a page: the
+            # editor is a modal and the slide only exists inside the deck. The
+            # same 41.5 lesson as the open fold and the naming picker - a state
+            # nothing navigates to is a state nothing measures - so both are
+            # opened on purpose, with a picture already in place so the crop
+            # controls and the caption exist to be measured at all.
+            pg.evaluate('''() => {
+              var u = UNIT_KEYS[0];
+              REVIEW.slides = {}; REVIEW.slides[u] = [{ id:"sweep", layout:2,
+                title:"Site visit \u2014 the new fit-out", at:"cover",
+                pics:[{ src:"data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==",
+                        cap:"Mall of Egypt, opened 12 June", z:1.4, x:40, y:60 }] }];
+              paint(); }''')
+            pg.wait_for_timeout(300)
+            pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()==='Performance');if(x)x.click()}")
+            pg.wait_for_timeout(400)
+            pg.evaluate("()=>{var x=document.querySelector('[data-picedit]');if(x)x.click()}")
+            pg.wait_for_timeout(500); scan("unit/pictures-editor", "#overlay")
+            pg.evaluate("()=>{var x=document.getElementById('modal-x');if(x)x.click()}")
+            pg.wait_for_timeout(300)
+            pg.evaluate("()=>{var x=document.querySelector('[data-present]');if(x)x.click()}")
+            pg.wait_for_timeout(800)
+            pg.evaluate('''() => {
+              var ss=[...document.querySelectorAll('#deckroot .dslide')];
+              var i=ss.findIndex(s=>s.classList.contains('d-pics'));
+              if(i>-1) deckShow(i); }''')
+            pg.wait_for_timeout(400); scan("deck/picture-slide", ".dslide.d-pics")
+            pg.evaluate("()=>{closeDeck(); delete REVIEW.slides; paint();}")
+            pg.wait_for_timeout(300)
+        except Exception as e: print("   (picture sweep skipped: %s)" % e)
         # "Figures I report" is hidden for anybody named on nothing (16.7), so
         # without this the menu entry does not exist and the sweep walks past
         # it - 41.5's lesson: a page that cannot be reached by navigating is a
@@ -121,6 +165,6 @@ with sync_playwright() as p:
             except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 25 pages and states\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 28 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

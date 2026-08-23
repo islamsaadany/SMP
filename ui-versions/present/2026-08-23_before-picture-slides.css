@@ -55,10 +55,6 @@
   .dsub { display:block; color:var(--ink-3); font-size:17px; margin-top:5px; font-weight:400; }
   .dslide .withnote td.dnote { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:30ch; }
   .dslide .withnote td.dnote.empty { color:var(--none); }
-  /* The same relationship the note column has to the figures beside it: a
-     supporting fact, set below the row's own size (§50). */
-  .dslide td.collabs { font-size:18px; color:var(--ink-2); line-height:1.42; max-width:22ch; }
-  .dslide td.collabs .nobody { color:var(--none); }
   .dslide .withnote th:last-child { width:24%; }
   .dirs td.dirname b { font:400 40px/1.2 var(--serif); display:block; }
   .dirs td.dirname .dsub { font-size:19px; margin-top:8px; }
@@ -134,7 +130,6 @@
      run on to another slide. */
   .dslide.tight td, .dslide.tight table.dbig td { padding:12px 18px; font-size:19px; }
   .dslide.tight .withnote td.dnote { font-size:16px; }
-  .dslide.tight td.collabs { font-size:16px; }
   .dslide.tight ol.dswot li { padding:13px 0; font-size:23px; }
   .dslide.tight .dirs td { padding:18px 18px; }
   .dslide.tight .dirs td.dirname b { font-size:31px; }
@@ -160,86 +155,3 @@
   .ddot { width:7px; height:7px; border-radius:50%; background:rgba(255,255,255,.25);
           border:0; padding:0; cursor:pointer; }
   .ddot.on { background:var(--gold); transform:scale(1.35); }
-
-  /* ── PICTURE SLIDES (§50) ─────────────────────────────────────────
-     Two halves of one feature: the SLIDE, which is projected, and the
-     EDITOR, which is a modal in the app. They are together because the crop
-     is the only thing that matters about a picture slide and it has to be the
-     SAME frame in both — a picture framed in the editor and cropped
-     differently on the slide is worse than no cropping at all. */
-  .dslide.d-pics .pgrid { flex:1; min-height:0; display:grid; gap:26px; }
-  /* THE ARRANGEMENT IS ONE SET OF CLASSES, WORN BY BOTH (§50.6). The slide
-     and the editor have to lay the pictures out the same way or the editor is
-     not showing you the slide — so `pg1`..`pg4` are written WITHOUT a parent
-     in front of them. They were `.pgrid.pg2` at first, which the editor's own
-     container (`.picslots`) does not match, and it silently stacked every
-     arrangement in one column: the rule applied to the thing it was named
-     after and to nothing else. */
-  .pg1 { grid-template-columns:1fr; }
-  .pg2 { grid-template-columns:1fr 1fr; }
-  .pg3 { grid-template-columns:1fr 1fr 1fr; }
-  .pg4 { grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; }
-  /* min-height/min-width:0 on both — a grid item's default `auto` minimum is
-     its content, so an image would push the track wider than the slide rather
-     than being cropped by it, and the whole point is the crop. */
-  .d-pics .pcell { margin:0; min-width:0; min-height:0; display:flex;
-                   flex-direction:column; gap:14px; }
-  .d-pics .pframe { flex:1; min-height:0; display:block; overflow:hidden;
-                    border-radius:6px; background:var(--surface-2); }
-  .d-pics .pframe img { width:100%; height:100%; object-fit:cover; display:block; }
-  .d-pics figcaption { font-size:21px; line-height:1.38; color:var(--ink-2); }
-  .dslide.tight.d-pics figcaption { font-size:18px; }
-
-  /* ── The editor ───────────────────────────────────────────────────
-     Inside the modal, so it wears the app's type rather than the deck's. */
-  .picwrap { display:flex; flex-direction:column; gap:18px; }
-  .picnone { margin:0; color:var(--ink-3); font-size:var(--fs-note); }
-  .picerr { margin:0 0 4px; padding:9px 12px; border-radius:var(--r-sm);
-            background:var(--surface-2); border-left:3px solid var(--bad);
-            color:var(--bad-tx); font-size:var(--fs-note); }
-  .piccard { border:1px solid var(--line); border-radius:var(--r-lg);
-             background:var(--surface); padding:14px 15px 16px; }
-  .piccard-h { display:flex; gap:10px; align-items:center; }
-  .piccard-h .picttl { flex:1; min-width:0; }
-  .piccard-cfg { display:flex; gap:18px; flex-wrap:wrap; margin:12px 0 14px; }
-  .picfield { display:flex; flex-direction:column; gap:5px; font-size:var(--fs-small); }
-  .picfield > span { font-size:var(--fs-micro); letter-spacing:var(--track);
-                     text-transform:uppercase; color:var(--ink-3); font-weight:700; }
-  .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
-                     border:1px solid var(--line); border-radius:var(--r-sm);
-                     background:var(--surface); color:var(--ink); max-width:320px; }
-  .picslots { display:grid; gap:12px; }
-  .picslot { display:flex; flex-direction:column; gap:8px; min-width:0; }
-  /* A fixed 16:10 well, so the frame in here has the same shape as the frame
-     on the slide whatever the arrangement — otherwise the crop chosen against
-     a tall editor box arrives on a wide slide showing something else. */
-  .picframe { display:block; position:relative; aspect-ratio:16/10; overflow:hidden;
-              border-radius:var(--r-sm); background:var(--surface-2);
-              border:1px solid var(--line); cursor:grab; touch-action:none; }
-  .picframe.dragging { cursor:grabbing; }
-  .picframe img { width:100%; height:100%; object-fit:cover; display:block;
-                  pointer-events:none; user-select:none; }
-  .picslot.empty { justify-content:stretch; }
-  /* THE CARD'S OWN GROUND, not the quiet one — §38.5 for the fifth time, and
-     this one is written down: `--gold-deep` on `--surface-2` measures 4.45:1
-     and needs 4.5. The plus is the accent because that is what says "press
-     here", so it is the GROUND that moves rather than the mark; the dashed
-     border is what says the slot is empty, and hover moves the border rather
-     than the fill, which would put the failure straight back. */
-  .picdrop { display:flex; flex-direction:column; align-items:center; justify-content:center;
-             gap:6px; aspect-ratio:16/10; border:1px dashed var(--line);
-             border-radius:var(--r-sm); background:var(--surface); cursor:pointer;
-             color:var(--ink-3); font-size:var(--fs-small); text-align:center; }
-  .picdrop:hover { border-color:var(--gold); border-style:solid; color:var(--ink-2); }
-  .picdrop input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
-  .picdrop:focus-within { outline:2px solid var(--gold); outline-offset:1px; }
-  .picplus { font-size:22px; line-height:1; color:var(--gold-deep); }
-  .picctl { display:flex; align-items:center; gap:10px; }
-  .piczoom { flex:1; display:flex; align-items:center; gap:7px; min-width:0;
-             font-size:var(--fs-micro); letter-spacing:var(--track);
-             text-transform:uppercase; color:var(--ink-3); font-weight:700; }
-  .piczoom input { flex:1; min-width:0; accent-color:var(--gold); }
-  .picslot .piccap { width:100%; }
-  .picfoot { display:flex; align-items:center; gap:12px; }
-  .picsub { font-size:var(--fs-small); color:var(--ink-3); }
-  .picover { margin:10px 0 0; }

@@ -390,6 +390,12 @@
   tbody tr:hover > td { background:var(--surface-2); }
   td.num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
   td .why, .why { display:block; font-size:12px; color:var(--ink-3); margin-top:3px; }
+  /* Collabs. — the people supporting a tactic's owner (§50). Quieter than the
+     owner beside it, because ONE name is accountable and the rest support; and
+     it wraps, because three names in a column sized for one is what makes a
+     row twice the height of every other row. */
+  td.collabs { color:var(--ink-2); font-size:var(--fs-small); }
+  .nobody { color:var(--none); }
   .qs { display:flex; gap:3px; }
   .qs i { width:18px; height:18px; border:1px solid var(--line); border-radius:var(--r-sm); font-style:normal;
           font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;

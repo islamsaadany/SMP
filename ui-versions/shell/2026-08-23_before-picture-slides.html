@@ -113,7 +113,6 @@
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
 <script src="PRESENT"></script>
-<script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
 <script src="SYNC"></script>
 <script>
@@ -1081,15 +1080,6 @@
     if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
     var pf = document.querySelector("[data-present-fn]");
     if (pf) pf.addEventListener("click", function(){ openDeckFn(pf.dataset.presentFn); });
-    /* Picture slides — beside Present, because it is the deck they go into
-       (§50.4). Wired here with the rest of the page's actions, in the function
-       that rewrote the DOM they sit in (§29's rule: whoever rewrites the DOM
-       re-wires it). */
-    document.querySelectorAll("[data-picedit]").forEach(function(b){
-      b.addEventListener("click", function(){
-        picEditorOpen(b.dataset.picedit, b.dataset.pickey);
-      });
-    });
     /* A capability's reporting writes back. Before the project model these
        inputs rendered and were bound to nothing at all, so a figure could be
        typed and lost on the next repaint. */
@@ -2234,8 +2224,11 @@
 
     var show = document.querySelector("[data-showcsv]");
     if (show) show.addEventListener("click", function(){
-      openModalHtml(esc(fileName()), "Select all and copy, if the download is blocked",
-        '<textarea class="csvbox" readonly>' + csvFor().replace(/</g, "&lt;") + '</textarea>');
+      document.getElementById("modal-t").textContent = fileName();
+      document.getElementById("modal-s").textContent = "Select all and copy, if the download is blocked";
+      document.getElementById("modal-b").innerHTML =
+        '<textarea class="csvbox" readonly>' + csvFor().replace(/</g, "&lt;") + '</textarea>';
+      overlay.classList.add("on");
     });
 
     var f = document.getElementById("imp-file");
@@ -2307,12 +2300,15 @@
 
     var paste = document.querySelector("[data-paste]");
     if (paste) paste.addEventListener("click", function(){
-      openModalHtml("Paste the filled file", "",
+      document.getElementById("modal-t").textContent = "Paste the filled file";
+      document.getElementById("modal-s").textContent = "";
+      document.getElementById("modal-b").innerHTML =
         '<textarea class="csvbox" id="pastebox" placeholder="Paste the CSV here"></textarea>' +
-        '<div class="imp-row" style="margin-top:12px"><button class="editbtn" id="pasteok">Read it</button></div>');
+        '<div class="imp-row" style="margin-top:12px"><button class="editbtn" id="pasteok">Read it</button></div>';
+      overlay.classList.add("on");
       document.getElementById("pasteok").addEventListener("click", function(){
         var t = document.getElementById("pastebox").value;
-        closeModal();
+        overlay.classList.remove("on");
         if (t.trim()) loadCSV(t);
       });
     });
@@ -2420,30 +2416,19 @@
      for its popup: open, move focus in; close, put focus back where it was. */
   var modalReturn = null;
   var wrapEl = document.querySelector(".wrap");
-  /* ONE WAY IN, for the same reason §48.4 gave: the inert page behind, the
-     remembered focus and the announced dialog are what MAKE it a modal, and a
-     caller that sets `.on` by hand gets a dialog that only looks like one.
-     There were two such callers — the CSV box and the paste box — and they had
-     both been left behind when the dialog was fixed. */
-  function openModalHtml(title, sub, body){
+  function openModal(id){
+    var m = MODALS[id]; if (!m) return;
     modalReturn = document.activeElement;
-    document.getElementById("modal-t").innerHTML = title || "";
-    document.getElementById("modal-s").innerHTML = sub || "";
-    document.getElementById("modal-b").innerHTML = body || "";
+    document.getElementById("modal-t").innerHTML = m.title;
+    document.getElementById("modal-s").innerHTML = m.sub || "";
+    document.getElementById("modal-b").innerHTML = m.body;
     overlay.classList.add("on");
     overlay.removeAttribute("aria-hidden");
     if (wrapEl) { wrapEl.inert = true; wrapEl.setAttribute("aria-hidden", "true"); }
     document.getElementById("modal-x").focus();
   }
-  function openModal(id){
-    var m = MODALS[id]; if (!m) return;
-    openModalHtml(m.title, m.sub || "", m.body);
-  }
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
-    /* Before the focus restore, so the button it hands focus back to is the
-       one carrying the right count. */
-    picEditorClosing();
     overlay.classList.remove("on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }

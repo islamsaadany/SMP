@@ -646,8 +646,8 @@ var UNITS = {
           { name: "Prime-location share",  dir: "≥", target: "60%",  compile: "Latest", actual: "47%", progress: 78 }
         ],
         tactics: [
-          { name: "Site selection model using catchment data", owner: "Hossam", collaborators: ["Dalia", "Nour"], q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP",  actual: 70 },
-          { name: "Standard fit-out programme",                owner: "Dalia",  collaborators: ["Hossam"], q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP",  actual: 65 },
+          { name: "Site selection model using catchment data", owner: "Hossam", q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP",  actual: 70 },
+          { name: "Standard fit-out programme",                owner: "Dalia",  q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP",  actual: 65 },
           { name: "Landlord framework agreements",             owner: "Hossam", q1: 0, q2: 1, q3: 1, q4: 1, status: "WIP",  actual: 55 }
         ] },
       { code: "R02", name: "Omnichannel Experience", sub: "",
@@ -658,9 +658,9 @@ var UNITS = {
           { name: "Unified stock accuracy", dir: "≥", target: "95%",      compile: "Latest", actual: "67%", progress: 71 }
         ],
         tactics: [
-          { name: "Single stock view across store and e-store", owner: "Dalia", collaborators: ["Nour", "Sherif"], q1: 1, q2: 1, q3: 0, q4: 0, status: "WIP",  actual: 60 },
+          { name: "Single stock view across store and e-store", owner: "Dalia", q1: 1, q2: 1, q3: 0, q4: 0, status: "WIP",  actual: 60 },
           { name: "Click-and-collect rollout",                  owner: "Dalia", q1: 1, q2: 1, q3: 1, q4: 0, status: "WIP",  actual: 55 },
-          { name: "Unified loyalty across channels",            owner: "Nour",  collaborators: ["Dalia"], q1: 0, q2: 1, q3: 1, q4: 1, status: "WIP",  actual: 50 }
+          { name: "Unified loyalty across channels",            owner: "Nour",  q1: 0, q2: 1, q3: 1, q4: 1, status: "WIP",  actual: 50 }
         ] },
       { code: "R03", name: "Retail Operations Excellence", sub: "Service, stock and store discipline",
         kind: "Capability", theme: "VC", owner: "Nour", outcomes: null, exec: 71, planned: 55,
@@ -669,7 +669,7 @@ var UNITS = {
           { name: "Shrinkage rate",      dir: "≤", target: "0.4%",compile: "Latest", actual: "0.6%", progress: 67 }
         ],
         tactics: [
-          { name: "Store operating standard and audit cycle", owner: "Nour", collaborators: ["Hossam", "Dalia"], q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 60 },
+          { name: "Store operating standard and audit cycle", owner: "Nour", q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 60 },
           { name: "Replenishment automation",                 owner: "Nour", q1: 0, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 }
         ] }
     ]

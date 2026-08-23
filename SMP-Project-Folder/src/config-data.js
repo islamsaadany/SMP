@@ -1174,6 +1174,29 @@ function canReportRow(unitKey, x){
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
+/* ── Speaking for the whole unit (§50.5) ───────────────────────────
+   Three acts are not about a row: SUBMITTING, the cycle NOTE, and the deck's
+   PICTURE SLIDES. Each speaks for the unit in front of whoever is reading the
+   review, and the server authorises all three under ONE classification
+   (`reportState`, spec 006 §7.2) — so the screen offers them under one
+   function. Two copies of that answer would drift, and the drift is silent in
+   the worst way: a control the server then refuses.
+
+   A CONTRIBUTOR limited to their own lines does none of them. What they may
+   say is about their own rows; a picture slide is the unit's.
+
+   A supporting function has no contributors to exclude — its reporting is the
+   function's, whole — so its half is the two gates its reporting page already
+   applies, asked here rather than restated there. */
+function canSpeakFor(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") === 0) {
+    return REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
+           grantAt("k_report", t) === "edit";
+  }
+  return canReport(t) && !SMPRules.onlyVia(world(), viewer(), "unit", t, "contrib");
+}
+
 /* ── The source of a figure (§16.7) ────────────────────────────────
    A key objective or a measure may carry `src` — the team that is master of
    the number and the person in it who enters it. Where it does, the UNIT sees
@@ -1761,7 +1784,17 @@ function capSnapshotCounts(s){
    is no longer there is dropped on the way back in. */
 function figuresSnapshot(){
   var snap = { units:{}, caps:{}, groupCaps:{}, groupKO:{},
-               note:clone(REVIEW.note || {}), submitted:clone(REVIEW.submitted || {}) };
+               note:clone(REVIEW.note || {}), submitted:clone(REVIEW.submitted || {}),
+               /* THE PICTURES GO INTO THE ARCHIVE WITH THE FIGURES (§50.1).
+                  They belong to this cycle: a picture is evidence for one
+                  review, and one that stayed would present itself as next
+                  cycle's until somebody remembered to take it out. Archived
+                  rather than dropped, because a restore that gives back the
+                  numbers and not the pictures has not restored the review.
+                  Absent, not empty: a cycle nobody put a picture in must
+                  archive nothing rather than an object the database never
+                  held (§42's phantom change). */
+               slides:REVIEW.slides ? clone(REVIEW.slides) : undefined };
   var put = function(m, x, fields){
     if (!x || !x.id) return;
     var o = {};
@@ -1861,6 +1894,8 @@ function applyFiguresSnapshot(s){
   });
   REVIEW.note = clone(s.note || {});
   REVIEW.submitted = clone(s.submitted || {});
+  if (s.slides && Object.keys(s.slides).length) REVIEW.slides = clone(s.slides);
+  else delete REVIEW.slides;
 }
 
 /* A note explains a figure. Cleared together, or the new cycle opens with last
@@ -1885,6 +1920,10 @@ function clearForNewCycle(){
   clearAllNotes();
   REVIEW.note = {};
   REVIEW.submitted = {};
+  /* DELETED, not emptied. An empty object is a change against a database that
+     never held the field, and every save a non-SMO makes would then be refused
+     for the rest of the cycle (§42). */
+  delete REVIEW.slides;
 }
 
 /* "1 pillars" is the kind of thing that makes a product feel unfinished. */

@@ -12,38 +12,6 @@ var DECK = { i:0, slides:[], root:null };
 function dPct(v){ return v == null || isNaN(v) ? "&mdash;" : v + "%"; }
 function dBand(v){ return band(v); }
 
-/* ── WHERE A PICTURE SLIDE CAN GO (§50.3) ─────────────────────────────────
-   An anchor is a NAMED POINT IN THIS DECK, written on the slide it names and
-   carrying its own label. The position picker is built by generating the deck
-   and reading these back — so the list of places a picture can go IS the deck,
-   and the two cannot drift. Adding a slide to the deck later gives it a
-   position in the picker for free, or gives it none, and either is a decision
-   made in one place rather than in two lists that agree until they do not.
-
-   `where` is "after" unless it says otherwise. The Thank-you slide is the one
-   that says otherwise: "the end" means the last thing anybody looks at, and
-   that is not after the thanks. */
-function anch(key, label, where){
-  return ' data-anchor="' + esc(key) + '" data-anchor-label="' + esc(label) + '"' +
-    (where ? ' data-anchor-where="' + esc(where) + '"' : '');
-}
-
-/* The anchors of a deck, in the order they appear in it. Built by rendering
-   the deck into a detached element — nothing is shown, and the answer is
-   therefore the real deck's rather than a description of it. */
-function deckAnchors(kind, key){
-  var box = document.createElement("div");
-  box.innerHTML = kind === "fn" ? deckSlidesFn(key) : deckSlides(UNITS[key]);
-  var seen = {}, out = [];
-  [].forEach.call(box.querySelectorAll("[data-anchor]"), function(el){
-    var a = el.dataset.anchor;
-    if (seen[a]) return;
-    seen[a] = 1;
-    out.push({ a:a, label:el.dataset.anchorLabel || a });
-  });
-  return out;
-}
-
 function deckSlides(u){
   var S = [];
   var ko = unitObjectives(u), ex = unitRatio(u);
@@ -53,7 +21,7 @@ function deckSlides(u){
     (dl.d > 0 ? "\u25b2" : "\u25bc") + " " + Math.abs(dl.d) + '</span>';
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
+  S.push('<section class="dslide d-cover">' +
     '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
@@ -66,8 +34,7 @@ function deckSlides(u){
       '<td class="num big3">' + (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>' +
       '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td></tr>';
   }).join("");
-  S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
-    '><h2>What we are aiming at</h2>' +
+  S.push('<section class="dslide"><h2>What we are aiming at</h2>' +
     '<div class="aimtop"><div><span class="dlab">' + L("aspiration","bu") + '</span>' +
       '<p class="asp2">' + esc(u.aspiration) + '</p></div>' +
       (u.endInMind
@@ -82,8 +49,7 @@ function deckSlides(u){
     '</div></section>');
 
   /* 3 — the two readings, at the size they deserve. */
-  S.push('<section class="dslide d-head"' + anch("stand", "After \u201cWhere the unit stands\u201d") +
-    '><h2>Where the unit stands</h2>' +
+  S.push('<section class="dslide d-head"><h2>Where the unit stands</h2>' +
     '<div class="headgrid">' +
       '<div class="headcell"><span class="dlab">' + L("keyobj","bu") + ' performance</span>' +
         '<b class="' + dBand(ko) + '">' + dPct(ko) + '</b>' +
@@ -105,8 +71,7 @@ function deckSlides(u){
       '<td class="num">' + esc(m.actual) + '</td>' +
       '<td class="num final ' + dBand(m.progress) + '">' + dPct(m.progress) + '</td></tr>';
   }).join("");
-  S.push('<section class="dslide"' + anch("objectives", L("keyobj","bu") + " \u2014 after the table") +
-    '><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
+  S.push('<section class="dslide"><h2>' + L("keyobj","bu") + ' &mdash; where we stand</h2>' +
     '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
     '<th class="num">Dir.</th><th class="num">This year</th><th class="num">Actual</th>' +
     '<th class="num">Progress</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
@@ -121,15 +86,11 @@ function deckSlides(u){
       return '<div class="seccell t-' + x[2] + '"><b>' + (u.swot[x[0]] || []).length + '</b>' +
         '<span>' + x[1] + '</span></div>';
     }).join("") + '</div></section>');
-  sw.forEach(function(x, xi){
+  sw.forEach(function(x){
     var items = (u.swot[x[0]] || []).map(function(t, i){
       return '<li><span class="n">' + (i+1) + '</span><span>' + esc(t) + '</span></li>';
     }).join("");
-    /* The anchor sits on the LAST category, so "after SWOT" means after all
-       four rather than in the middle of them. */
-    S.push('<section class="dslide d-swot t-' + x[2] + '"' +
-      (xi === sw.length - 1 ? anch("swot", "After the SWOT section") : "") +
-      '><h2>' + x[1] + '</h2>' +
+    S.push('<section class="dslide d-swot t-' + x[2] + '"><h2>' + x[1] + '</h2>' +
       '<ol class="dswot">' + items + '</ol></section>');
   });
 
@@ -142,8 +103,7 @@ function deckSlides(u){
       '<td class="num final ' + dBand(pillarPerf(p)) + '">' + dPct(pillarPerf(p)) + '</td>' +
       '<td class="num final ' + dBand(r) + '">' + dPct(r) + '</td></tr>';
   }).join("");
-  S.push('<section class="dslide"' + anch("pillars", "After the " + L("pillar","bu").toLowerCase() + " overview") +
-    '><h2>' + L("pillar","bu") + '</h2>' +
+  S.push('<section class="dslide"><h2>' + L("pillar","bu") + '</h2>' +
     '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Pillar</th>' +
     '<th class="num">Measures</th><th class="num">Execution</th></tr></thead>' +
     '<tbody>' + pRows + '</tbody></table></section>');
@@ -183,32 +143,27 @@ function deckSlides(u){
       if (!tacticDue(t)) {
         return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
-          '<td class="collabs">' + collabCell(t) + '</td>' +
           '<td class="num">' + spanLabel(t) + '</td>' +
           '<td colspan="2" class="cc">Outside this cycle</td>' +
           '<td class="dnote empty">&mdash;</td></tr>';
       }
       return '<tr><td class="idx">' + (i+1) + '</td>' +
         '<td class="lead">' + esc(t.name) + '</td><td>' + esc(t.owner) + '</td>' +
-        '<td class="collabs">' + collabCell(t) + '</td>' +
         '<td class="num">' + spanLabel(t) + '</td>' +
         '<td class="num">' + (t.actual == null ? "&mdash;" : t.actual) + ' / ' + tacticPlanned(t) + '</td>' +
         '<td class="num final ' + dBand(tacticRatio(t)) + '">' + dPct(tacticRatio(t)) + '</td>' +
         (t.note ? '<td class="dnote">' + esc(t.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
         '</tr>';
     }).join("");
-    S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T"' +
-      anch("p" + pillarCode(u, pi), "After " + pillarCode(u, pi) + " \u2014 " + p.name) + '>' +
+    S.push('<section class="dslide" data-split="' + pillarCode(u, pi) + 'T">' +
       deckPillarHead(u, p, pi, "Tactics") +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Tactic</th><th>Owner</th>' +
-      '<th>Collabs.</th>' +
       '<th class="num">Quarters</th><th class="num">Deliv. / due</th><th class="num">Of plan</th>' +
       '<th>Note</th></tr></thead><tbody>' + tRows + '</tbody></table></section>');
   });
 
   /* 7 — the owner's note, editable in the room. */
-  S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
-    '><h2>Notes and achievements</h2>' +
+  S.push('<section class="dslide"><h2>Notes and achievements</h2>' +
     '<div class="dnotebox" contenteditable="true" data-deckunote="' + u.ukey + '">' +
       esc(REVIEW.note[u.ukey] || "") + '</div>' +
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
@@ -242,16 +197,14 @@ function deckSlides(u){
     });
   });
   if (att.length) {
-    S.push('<section class="dslide" data-split="ATT"' +
-      anch("attention", "After \u201cWhat needs attention\u201d") + '><h2>What needs attention' +
+    S.push('<section class="dslide" data-split="ATT"><h2>What needs attention' +
       '<span class="dwhich">' + att.length + ' at risk or off track</span></h2>' +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
       '<th class="num">Target / due</th><th class="num">Actual</th><th class="num">Progress</th>' +
       '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
   }
 
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    '><h1 class="cover">Thank you</h1>' +
+  S.push('<section class="dslide d-cover d-thanks"><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(u.name) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
 
@@ -277,7 +230,7 @@ function deckSlidesFn(fk){
   var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
   var S = [];
 
-  S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
+  S.push('<section class="dslide d-cover">' +
     '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
     '<h1 class="cover">' + esc(f.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Capability review &middot; ' + esc(REVIEW.name) +
@@ -329,8 +282,7 @@ function deckSlidesFn(fk){
         '<td class="num final ' + dBand(projPerf(p)) + '">' + dPct(projPerf(p)) + '</td>' +
         '<td class="num">' + mst.done + ' / ' + mst.total + '</td></tr>';
     }).join("");
-    S.push('<section class="dslide"' + anch("cap" + c.id, "After " + c.name + " \u2014 projects") +
-      '><h2>Projects<span class="dwhich">' + esc(c.name) + '</span></h2>' +
+    S.push('<section class="dslide"><h2>Projects<span class="dwhich">' + esc(c.name) + '</span></h2>' +
       '<table class="zebra dirs"><thead><tr><th class="idx">#</th><th>Project</th>' +
       '<th class="num">Deliverables</th><th class="num">Outcomes</th>' +
       '<th class="num">Performance</th><th class="num">Milestones</th></tr></thead>' +
@@ -446,23 +398,20 @@ function deckSlidesFn(fk){
     });
   });
   if (att.length) {
-    S.push('<section class="dslide" data-split="FNATT"' +
-      anch("attention", "After \u201cWhat needs attention\u201d") + '><h2>What needs attention' +
+    S.push('<section class="dslide" data-split="FNATT"><h2>What needs attention' +
       '<span class="dwhich">' + att.length + ' at risk, off track or overrunning</span></h2>' +
       '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Item</th>' +
       '<th class="num">Target / due</th><th class="num">Reads</th>' +
       '<th>What is being done</th></tr></thead><tbody>' + att.join("") + '</tbody></table></section>');
   }
 
-  S.push('<section class="dslide"' + anch("notes", "After \u201cNotes and achievements\u201d") +
-    '><h2>Notes and achievements</h2>' +
+  S.push('<section class="dslide"><h2>Notes and achievements</h2>' +
     '<div class="dnotebox" contenteditable="true" data-deckunote="fn:' + esc(fk) + '">' +
       esc(REVIEW.note["fn:" + fk] || "") + '</div>' +
     '<p class="dhint">Editable here. A number challenged in the room is corrected in the ' +
     'platform, not in a deck that is already wrong.</p></section>');
 
-  S.push('<section class="dslide d-cover d-thanks"' + anch("end", "Last \u2014 before Thank you", "before") +
-    '><h1 class="cover">Thank you</h1>' +
+  S.push('<section class="dslide d-cover d-thanks"><h1 class="cover">Thank you</h1>' +
     '<div class="coverrule"></div><p class="coversub">' + esc(f.name) +
     ' &middot; ' + esc(REVIEW.name) + '</p></section>');
 
@@ -471,53 +420,9 @@ function deckSlidesFn(fk){
 
 /* ── Opening, moving and closing ──────────────────────────────────────── */
 
-/* The custodian's own slides, put into the deck they were placed in (§50.3).
-
-   BEFORE THE FIT PASS, deliberately: the fit pass CLONES a long table's slide
-   to continue it, so a picture slide inserted afterwards could land between a
-   table and its own continuation — and an anchor read after cloning would
-   match twice.
-
-   AN ANCHOR THAT IS NO LONGER THERE IS NOT A LOST SLIDE. A pillar can be
-   renamed, replaced by an upload or removed between the day a picture was
-   placed and the day the deck is opened; the picture then goes to the end,
-   where it is still in the room, rather than being silently dropped. */
-function insertPictureSlides(deck, target){
-  var list = pslidesOf(target);
-  if (!list.length) return;
-  var host = {}, where = {};
-  [].forEach.call(deck.querySelectorAll("[data-anchor]"), function(el){
-    var a = el.dataset.anchor;
-    if (host[a]) return;
-    host[a] = el;
-    where[a] = el.dataset.anchorWhere === "before" ? "beforebegin" : "afterend";
-  });
-  var tail = deck.querySelector("[data-anchor-where='before']");
-  list.forEach(function(sl){
-    var html = pslideHtml(sl);
-    /* A slide somebody started and put no picture in is not shown — and it
-       must not move the anchor either, or the NEXT slide on that anchor would
-       be placed after whatever happened to follow it. */
-    if (!html) return;
-    var at = host[sl.at];
-    if (!at) { /* the anchor has gone; the slide has not */
-      if (tail) tail.insertAdjacentHTML("beforebegin", html);
-      else deck.insertAdjacentHTML("beforeend", html);
-      return;
-    }
-    at.insertAdjacentHTML(where[sl.at], html);
-    /* Two slides on one anchor keep the order they were written in: the next
-       one hangs off the one just inserted, not off the anchor again. */
-    host[sl.at] = where[sl.at] === "before" || where[sl.at] === "beforebegin"
-      ? at.previousElementSibling : at.nextElementSibling;
-    where[sl.at] = "afterend";
-  });
-}
-
-function openDeckWith(titleHtml, slides, target){
+function openDeckWith(titleHtml, slides){
   var root = document.getElementById("deckroot");
   root.querySelector(".deck").innerHTML = slides;
-  if (target) insertPictureSlides(root.querySelector(".deck"), target);
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -528,11 +433,10 @@ function openDeckWith(titleHtml, slides, target){
   root.focus();
 }
 function openDeck(u){
-  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), deckSlides(u), u.ukey);
+  openDeckWith("<b>" + esc(u.name) + "</b> &middot; " + esc(REVIEW.name), deckSlides(u));
 }
 function openDeckFn(fk){
-  openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name),
-    deckSlidesFn(fk), "fn:" + fk);
+  openDeckWith("<b>" + esc(FUNCTIONS[fk].name) + "</b> &middot; " + esc(REVIEW.name), deckSlidesFn(fk));
 }
 function closeDeck(){
   var root = document.getElementById("deckroot");

@@ -100,6 +100,21 @@ function firstDiff(a, b, at) {
 
   const seed = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "db", "seed-state.json"), "utf8"));
   /* Fidelity is the writer's and the reader's business, not the migration's. */
+  /* PICTURE SLIDES SURVIVE THE ROUND TRIP (§50). They land in the review
+     row's `extra` and are merged back on read, which is why the feature needed
+     no migration — but "needs no migration" is a claim, and this is the proof.
+     Asserted on the SAME graph as everything else, so a picture cannot pass a
+     test of its own while breaking the fixed point. */
+  seed.review = seed.review || {};
+  seed.review.slides = {
+    [seed.unitKeys[0]]: [{ id: "psRT1", title: "Site visit", at: "cover", layout: 2,
+      pics: [{ src: "data:image/png;base64,iVBORw0KGgo=", cap: "The new fit-out",
+               z: 1.4, x: 62.5, y: 30 },
+             { src: "data:image/jpeg;base64,/9j/4AAQ", cap: "", z: 1, x: 50, y: 50 }] }],
+    "fn:_rt_": [{ id: "psRT2", title: "", at: "end", layout: 1,
+      pics: [{ src: "data:image/png;base64,iVBORw0KGgo=", cap: "", z: 1, x: 0, y: 100 }] }]
+  };
+
   await io.writeState(client, seed);
   const back = await io.readState(client);
 

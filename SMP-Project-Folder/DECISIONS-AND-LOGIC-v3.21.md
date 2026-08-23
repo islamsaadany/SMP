@@ -7679,7 +7679,24 @@ is an ordinary edit through `attachPersonAt()` — the one door the register and
 the file importer already share (§54) — so it is authorised on the server like
 every other change, and there is no second write path to guard.
 
-### 56.6 A CLEAN MERGE CAN STILL COLLIDE IN A SHARED SCOPE
+### 56.6 The label names what it asks for, not why we are asking
+
+*Islam, same evening: "change 'where you work' to 'pick your unit/function'."*
+
+**Pick your unit or function.** "Where do you work?" is a question about the
+person; the answer is one of two lists sitting directly under it, and the label
+should say which lists those are. It reads as an instruction now, because that
+is what it is — and it is honest about the shape of the answer, which matters
+when the alternative is somebody scanning a dropdown wondering whether their
+department is supposed to be in it at all.
+
+It also survives the shortening that is coming. Once the BUs are mapped under
+each Main BU and the supporting functions under the Support Function name, the
+list can narrow to what that person's Main BU actually holds — and it is still
+a unit or a function they are picking, just fewer of them. A label naming the
+REASON would have had to be rewritten the day the reason changed.
+
+### 56.7 A CLEAN MERGE CAN STILL COLLIDE IN A SHARED SCOPE
 
 Found by driving the merged product, not by any test. Two branches each added a
 `var pf` to `wire()` — one for the function's Present button, one for the People

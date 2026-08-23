@@ -231,7 +231,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and an FK would take the whole table with it. The list of choices is built and
   re-validated on the SERVER, and nothing about the question may block a
   sign-in — the password is set before it is asked.
-- **A clean merge can still collide in a shared scope (§56.6):** two branches
+- **A clean merge can still collide in a shared scope (§56.7):** two branches
   each added a `var pf` to `wire()`, 600 lines apart, no textual conflict — and
   `var` is function-scoped, so one binding, and a function's Present button
   threw `null.dataset` on every paint where the People page was absent. Only

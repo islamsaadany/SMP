@@ -2258,10 +2258,29 @@
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              var cp = GROUP.capabilities.filter(function(x){ return x.name === picked; })[0];
+              /* WITHIN THE FUNCTION NAMED IN B3, when one is named (§51.2).
+                 Two supporting functions may each carry a capability with the
+                 same name, and before this the first match in the array won —
+                 silently, and into the wrong function's plan. A blank B3 still
+                 resolves across the tenant, so a workbook saved before this
+                 change still opens. */
+              var wantFn = readmePickFn(sheets);
+              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
+                return FUNCTIONS[k].name === wantFn; })[0];
+              if (wantFn && !fnKeyWanted) {
+                impFail('no supporting function called "' + wantFn +
+                  '". Open the Read me sheet and choose one from the dropdown in B3.');
+                return;
+              }
+              var capPool = GROUP.capabilities.filter(function(x){
+                return !fnKeyWanted || x.fn === fnKeyWanted; });
+              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail('no business unit or capability called "' + picked +
-                  '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail(fnKeyWanted
+                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
+                    '. Open the Read me sheet and check B2 and B3 against each other.'
+                  : 'no business unit or capability called "' + picked +
+                    '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;

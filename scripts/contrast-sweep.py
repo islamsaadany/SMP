@@ -123,6 +123,28 @@ with sync_playwright() as p:
             pg.evaluate("()=>{closeDeck(); delete REVIEW.slides; paint();}")
             pg.wait_for_timeout(300)
         except Exception as e: print("   (picture sweep skipped: %s)" % e)
+        # A SUPPORTING FUNCTION IS HALF THE PRODUCT AND WAS NEVER SWEPT (51.5).
+        # The walk covered the group, one unit and Setup; every function page —
+        # Performance, Report, Foundation, Projects — had gone twelve versions
+        # unmeasured, which is how a capability band on a navy ground kept the
+        # page's own light-mode ink at 1.43:1. 41.5 again: a page nothing
+        # navigates to is a page nothing measures.
+        try:
+            pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Function')===0); if(f)f.click()}")
+            pg.wait_for_timeout(250)
+            pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
+            for t in ["Performance", "Strategy"]:
+                pg.evaluate("(t)=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()===t); if(x)x.click()}", t)
+                pg.wait_for_timeout(500); scan("fn/" + t.lower())
+                # ...and every section inside it, for the same reason.
+                for k2 in pg.eval_on_selector_all("#secrow-in button",
+                                                  "els=>els.map(e=>e.textContent.trim())"):
+                    pg.evaluate("(k)=>{var x=[...document.querySelectorAll('#secrow-in button')].find(b=>b.textContent.trim()===k); if(x)x.click()}", k2)
+                    pg.wait_for_timeout(450); scan("fn/" + t.lower() + "/" + k2.lower())
+            pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Unit')===0); if(f)f.click()}")
+            pg.wait_for_timeout(250)
+        except Exception as e: print("   (function sweep skipped: %s)" % e)
+
         # "Figures I report" is hidden for anybody named on nothing (16.7), so
         # without this the menu entry does not exist and the sweep walks past
         # it - 41.5's lesson: a page that cannot be reached by navigating is a
@@ -165,6 +187,6 @@ with sync_playwright() as p:
             except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 28 pages and states\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 34 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

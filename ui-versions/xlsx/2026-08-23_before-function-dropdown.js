@@ -685,21 +685,10 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 
-/* THE WORKBOOK HAS TO SAY WHICH FUNCTION IT IS FOR (§51.2).
-   B2 named the capability and nothing named the function it sits under, so two
-   functions with a similarly named capability could not be told apart, and a
-   file that came back with B2 retyped rather than chosen simply failed with
-   nothing to point at. B3 is now a dropdown of the tenant's supporting
-   functions, and the import resolves the capability WITHIN it.
-
-   Blank B3 still works: an older workbook resolves the capability across the
-   whole tenant exactly as before. A template is a thing people keep on disk
-   for months, and one that stops opening is a template that has broken. */
-function capReadme(kind, capNames, picked, fnNames, pickedFn){
+function capReadme(kind, capNames, picked){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
-       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -713,7 +702,6 @@ function capReadme(kind, capNames, picked, fnNames, pickedFn){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
-       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -726,35 +714,16 @@ function capReadme(kind, capNames, picked, fnNames, pickedFn){
   var sheet = { name:"Read me", widths:[22, 96],
                 rows:lines.map(function(l){ return [l[0], l[1]]; }),
                 validations:[{ range:"B2:B2", list:capNames,
-                               error:"Choose one from the list." },
-                             { range:"B3:B3", list:fnNames || [],
                                error:"Choose one from the list." }] };
   sheet.rows[1][1] = picked || "";
-  sheet.rows[2][1] = pickedFn || "";
   return sheet;
-}
-
-/* The tenant's supporting functions, for the dropdown — retired ones are not
-   offered, for the same reason a retired unit is not offered a plan. */
-function fnSuggestions(){
-  return Object.keys(FUNCTIONS)
-    .filter(function(k){ return FUNCTIONS[k].active !== false; })
-    .map(function(k){ return FUNCTIONS[k].name; });
-}
-/* The function cell, read back. Blank is a legitimate answer (see above), so
-   this returns "" rather than refusing. */
-function readmePickFn(sheets){
-  var rows = sheets["Read me"];
-  if (!rows || !rows[2]) return "";
-  return String(rows[2][1] == null ? "" : rows[2][1]).trim();
 }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
   var units = unitSuggestions();
   return [
-    capReadme("plan", names, c ? c.name : "", fnSuggestions(),
-              c && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
+    capReadme("plan", names, c ? c.name : ""),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
@@ -818,8 +787,7 @@ function capPlanWorkbook(c){
 
 function capProgressWorkbook(c){
   return [
-    capReadme("progress", [c.name], c.name, fnSuggestions(),
-              FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
+    capReadme("progress", [c.name], c.name),
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],

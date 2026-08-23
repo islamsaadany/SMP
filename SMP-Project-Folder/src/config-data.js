@@ -1629,6 +1629,30 @@ function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
 
+/* ── A PROJECT IS THE FUNCTION'S PILLAR, SO IT IS CODED LIKE ONE (§51.3) ──
+   On a unit page the rail holds PILLARS and each shows MB01, RS02. On a
+   function page the rail holds PROJECTS and they showed nothing at all — so
+   the same shelf in the same component was addressable on one page and
+   nameless on the next, and there was no way to say "FIN02" in a meeting.
+
+   Same shape as pillarCode and for the same reasons: the function's own
+   prefix, then the position, DERIVED and never stored (§46.3 — the code shown
+   is derived, the code stored is an identifier). Numbered across the whole
+   function rather than within each capability, because the function is what
+   owns the prefix and a person saying "FIN02" should not have to say which
+   capability first. */
+function fnProjects(fk){
+  return capsOfFunction(fk).reduce(function(acc, c){
+    return acc.concat(c.projects || []);
+  }, []);
+}
+function projCode(fk, p){
+  var f = FUNCTIONS[fk];
+  if (!f || !p) return "";
+  var i = fnProjects(fk).map(function(x){ return x.id; }).indexOf(p.id);
+  return i < 0 ? "" : (f.codePrefix || "") + String(i + 1).padStart(2, "0");
+}
+
 function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
 function dueTactics(p){ return p.tactics.filter(tacticDue); }

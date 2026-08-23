@@ -424,6 +424,10 @@
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
   .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
+  /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
+     not pre-wrap: line breaks survive, accidental double spaces and pasted
+     indentation do not. */
+  .flow { white-space:pre-line; }
   ul.values { display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:0; }
   ul.values li { list-style:none; background:var(--surface-2); border:1px solid var(--line-soft);
                  border-radius:var(--r); padding:6px 11px; font-size:13.5px; }
@@ -2439,18 +2443,12 @@
      and delete its CSS with it, or the next person drawing from the stylesheet
      draws a control the product does not have (§41.9). */
 
-  .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface-2);
-    color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;
-    border-bottom:1px solid var(--line)}
-  .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
-    color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
-  .capnm{font-size:15.5px;font-weight:600}
-  .capmeta{font-size:12.5px;color:#AFC0D8}
-  .captally{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
-    background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px}
-  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
-    border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
-  .capbody h4.mini:first-child{margin-top:0}
+  /* THE FIRST .capline BLOCK IS GONE (§51.5). There were TWO of them in this
+     file — one on `--surface-2`, one on `--panel` — and the second silently
+     won on source order. Editing the first did nothing, which is §29.2's
+     lesson exactly: a duplicated CSS rule does not fail loudly, it quietly
+     ignores you. It also carried `.capmeta`, whose element the product no
+     longer has (§24). */
 
   /* The folded row carries more entries than the flat one ever did, and the
      content column is 1180px. Tightened only when the folds are present, so
@@ -2464,13 +2462,19 @@
   .units-in.folded .foldgroup .navfold{padding:7px 11px;font-size:12.5px}
   .units-in.folded .sep{margin:0 3px}
 
+  /* A SURFACE WITH ITS OWN GROUND NEEDS ITS OWN INK — §38.5, §41.10, and this
+     is the SIXTH header, missed when the other five were converted. The band
+     moved to `--panel` and kept the PAGE's ink, so the capability's own name
+     measured 1.72:1 in slate and 1.43:1 in forefront — the worst reading in the
+     product, on the one word the band exists to say. It takes what
+     `.grouphead` and `.rail .rhead` already take. */
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
-    color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
+    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
     border-bottom:1px solid var(--line)}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
-    color:var(--panel);background:var(--gold);border-radius:20px;padding:4px 8px}
-  .capnm{font-size:15.5px;font-weight:600}
-  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3);
+    color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
+  .capnm{font-size:15.5px;font-weight:600;color:var(--panel-ink)}
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--panel-quiet);
     background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
   .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
     border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
@@ -6400,6 +6404,30 @@ function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
 
+/* ── A PROJECT IS THE FUNCTION'S PILLAR, SO IT IS CODED LIKE ONE (§51.3) ──
+   On a unit page the rail holds PILLARS and each shows MB01, RS02. On a
+   function page the rail holds PROJECTS and they showed nothing at all — so
+   the same shelf in the same component was addressable on one page and
+   nameless on the next, and there was no way to say "FIN02" in a meeting.
+
+   Same shape as pillarCode and for the same reasons: the function's own
+   prefix, then the position, DERIVED and never stored (§46.3 — the code shown
+   is derived, the code stored is an identifier). Numbered across the whole
+   function rather than within each capability, because the function is what
+   owns the prefix and a person saying "FIN02" should not have to say which
+   capability first. */
+function fnProjects(fk){
+  return capsOfFunction(fk).reduce(function(acc, c){
+    return acc.concat(c.projects || []);
+  }, []);
+}
+function projCode(fk, p){
+  var f = FUNCTIONS[fk];
+  if (!f || !p) return "";
+  var i = fnProjects(fk).map(function(x){ return x.id; }).indexOf(p.id);
+  return i < 0 ? "" : (f.codePrefix || "") + String(i + 1).padStart(2, "0");
+}
+
 function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
 function dueTactics(p){ return p.tactics.filter(tacticDue); }
@@ -9606,10 +9634,21 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 
-function capReadme(kind, capNames, picked){
+/* THE WORKBOOK HAS TO SAY WHICH FUNCTION IT IS FOR (§51.2).
+   B2 named the capability and nothing named the function it sits under, so two
+   functions with a similarly named capability could not be told apart, and a
+   file that came back with B2 retyped rather than chosen simply failed with
+   nothing to point at. B3 is now a dropdown of the tenant's supporting
+   functions, and the import resolves the capability WITHIN it.
+
+   Blank B3 still works: an older workbook resolves the capability across the
+   whole tenant exactly as before. A template is a thing people keep on disk
+   for months, and one that stops opening is a template that has broken. */
+function capReadme(kind, capNames, picked, fnNames, pickedFn){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
+       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -9623,6 +9662,7 @@ function capReadme(kind, capNames, picked){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
+       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -9635,16 +9675,35 @@ function capReadme(kind, capNames, picked){
   var sheet = { name:"Read me", widths:[22, 96],
                 rows:lines.map(function(l){ return [l[0], l[1]]; }),
                 validations:[{ range:"B2:B2", list:capNames,
+                               error:"Choose one from the list." },
+                             { range:"B3:B3", list:fnNames || [],
                                error:"Choose one from the list." }] };
   sheet.rows[1][1] = picked || "";
+  sheet.rows[2][1] = pickedFn || "";
   return sheet;
+}
+
+/* The tenant's supporting functions, for the dropdown — retired ones are not
+   offered, for the same reason a retired unit is not offered a plan. */
+function fnSuggestions(){
+  return Object.keys(FUNCTIONS)
+    .filter(function(k){ return FUNCTIONS[k].active !== false; })
+    .map(function(k){ return FUNCTIONS[k].name; });
+}
+/* The function cell, read back. Blank is a legitimate answer (see above), so
+   this returns "" rather than refusing. */
+function readmePickFn(sheets){
+  var rows = sheets["Read me"];
+  if (!rows || !rows[2]) return "";
+  return String(rows[2][1] == null ? "" : rows[2][1]).trim();
 }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
   var units = unitSuggestions();
   return [
-    capReadme("plan", names, c ? c.name : ""),
+    capReadme("plan", names, c ? c.name : "", fnSuggestions(),
+              c && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
@@ -9708,7 +9767,8 @@ function capPlanWorkbook(c){
 
 function capProgressWorkbook(c){
   return [
-    capReadme("progress", [c.name], c.name),
+    capReadme("progress", [c.name], c.name, fnSuggestions(),
+              FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
@@ -11188,8 +11248,20 @@ function penBtn(page, acKey){
    the foundation rendered inputs that were bound to nothing, so every edit
    looked accepted and was silently discarded on the next repaint. */
 var FIELDS = [];
+/* A PARAGRAPH TYPED AS TWO PARAGRAPHS MUST READ AS TWO PARAGRAPHS (§51.1).
+   The editing control is a <textarea>, which keeps every line break the person
+   typed; the READING control was a bare <span>, and HTML collapses newlines to
+   a single space. So a purpose statement written as three sentences with air
+   between them came back as one run-on block the moment the pen was closed —
+   the text was never lost, it was only never shown.
+
+   `flow` carries `white-space:pre-line`: line breaks survive, runs of spaces
+   and stray indentation do not. That is the right pair for prose somebody
+   typed, and it is on fieldOr rather than on each caller so every long-text
+   field in the platform behaves the same way. */
 function fieldOr(page, value, cls, setter){
-  if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
+  if (!EDIT_PAGE[page] || !setter)
+    return '<span class="flow ' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
   return '<textarea class="fld ' + (cls || '') + '" data-fld="' + i + '" rows="2">' + esc(value) + '</textarea>';
 }
@@ -11663,15 +11735,23 @@ function capHead(c){
     '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
 }
 
-function fnHead(fk){
-  var f = FUNCTIONS[fk], caps = capsOfFunction(fk), people = functionPeople(fk);
-  return '<div class="caphdr">' +
-    '<div><div class="capname">' + esc(f.name) + '</div>' +
-      '<div class="why" style="margin:3px 0 0">Supporting function &middot; ' +
-        esc(people.map(personName).join(", ")) +
-        ' &middot; carries ' + caps.length + ' ' + (caps.length === 1 ? "capability" : "capabilities") +
-        ', scored by the group</div></div></div>';
-}
+/* THE FUNCTION'S OWN NAMEPLATE IS GONE (§51.4, Islam).
+
+   It printed the function's name, its people, how many capabilities it carries
+   and "scored by the group" — above a navigation row that already highlights
+   the function you are looking at. That is §24's argument, and the unit pages
+   settled it two versions earlier: a UNIT has no such band on any of its
+   tabs, so a function carrying one made the two halves of the product read as
+   two products.
+
+   It was also lying on a tenant where nobody is attached: with no people the
+   line rendered "Supporting function \u00b7 \u00b7 carries 1 capability" — two
+   middots with nothing between them, which is what a joined empty list looks
+   like. A line that has to be defended by a fallback for the ordinary case is
+   a line nobody needed.
+
+   The capability's own band (`capBand`) stays: a function may carry several,
+   and that band is what says which one a section belongs to. */
 
 function capBand(c){
   var r = capReported(c);
@@ -11698,14 +11778,19 @@ function railPick(c){
    column of wasted width. The pane simply fills it. */
 function railWorthIt(list){ return (list || []).length >= 2; }
 
-function railFor(list, sel, numOf, subOf, groupOf, footNote){
+/* `codeOf` is optional and last, so every existing caller is untouched. The
+   unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
+   project rail beside it showed a bare name, and the two rails are the same
+   component doing the same job (§51.3). */
+function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
   var lastGroup = null;
   var rows = list.map(function(it){
     var g = groupOf ? groupOf(it) : null, head = "";
     if (g && g !== lastGroup) { head = '<div class="rgroup">' + esc(g) + '</div>'; lastGroup = g; }
+    var code = codeOf ? codeOf(it) : "";
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
-        '<b>' + esc(it.name) + '</b>' +
+        '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
         '<span class="rnum">' + (numOf ? numOf(it) : "") + '</span>' +
         (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
       '</button>';
@@ -11797,7 +11882,7 @@ function capKOTable(c){
       }).join(""));
 }
 
-function projPerformanceBody(p){
+function projPerformanceBody(p, fk){
   var dRows = p.deliverables.map(function(d, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
@@ -11822,10 +11907,15 @@ function projPerformanceBody(p){
       '<td class="cc">' + msPill(m) + '</td></tr>';
   }).join("");
   var mst = projMilestones(p);
-  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
-      '<div class="pmeta">' + projMeta(p) + ' &middot; deliverables ' + pct(projDeliverySide(p)) +
-      ', outcomes ' + pct(projOutcomeSide(p)) + '</div></div>' +
-      '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span></div>' +
+  /* THE SAME BAND THE PILLAR PANE WEARS (§51.3). It was an `.ptitle` with a
+     19px <h3> and a meta line — the shape the unit's pane carried until §46.3
+     replaced it with a 33px band, code first, on `--surface-2` with a gold
+     left edge. Two panes doing the same job in the same component wore two
+     different headers; they wear one now, and the project shows the code the
+     rail beside it shows. The `right` slot pillarBand has always had and never
+     used carries the score. */
+  return pillarBand(projCode(fk, p), p.name,
+      '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
     '<h4 class="mini">Deliverables</h4>' +
     miniTable(["#","Deliverable","Reported","Reads"], dRows) +
     '<h4 class="mini">Outcomes</h4>' +
@@ -11841,7 +11931,7 @@ function renderFnPerformance(fnKey){
      platform holds at that moment. */
   return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
       '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
-    fnHead(fk) + caps.map(function(c){
+    caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
@@ -11849,18 +11939,20 @@ function renderFnPerformance(fnKey){
       function(p){ var v = projPerf(p);
         return v == null ? '<span class="rnum">&mdash;</span>'
           : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
-      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones'; },
-      null, 'Figure shown is performance');
+      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones &middot; ' +
+        projMeta(p); },
+      null, 'Figure shown is performance',
+      function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<h4 class="mini">Projects</h4>' +
-      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, fk)) + '</div>';
   }).join("");
 }
 
 /* ── Capability \u2192 Projects ──────────────────────────────────────────
    The plan as it was formed. Nothing here has been reported: no progress, no
    status, no actuals. Those are entered on Reporting and read on Performance. */
-function projPlanBody(p){
+function projPlanBody(p, fk){
   var dRows = p.deliverables.map(function(d, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
       '<td class="cc">' + delivKindPill(d) + '</td>' +
@@ -11879,9 +11971,8 @@ function projPlanBody(p){
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td></tr>';
   }).join("");
-  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
-      '<div class="pmeta">' + projMeta(p) + '</div></div>' +
-      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span></div>' +
+  return pillarBand(projCode(fk, p), p.name,
+      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>') +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
@@ -11897,16 +11988,18 @@ function projPlanBody(p){
 
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return fnHead(fk) + caps.map(function(c){
+  return caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
       'No projects yet.</div></div>';
     var rail = railFor(c.projects, sel,
       function(p){ return p.deliverables.length; },
-      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones'; },
-      null, 'Figure shown is deliverables');
+      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones &middot; ' +
+        projMeta(p); },
+      null, 'Figure shown is deliverables',
+      function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' +
-      splitOrPane(c.projects, sel, rail, projPlanBody(sel)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPlanBody(sel, fk)) + '</div>';
   }).join("");
 }
 
@@ -11938,7 +12031,7 @@ function capPickBox(x, may, opts, val){
     }).join("") + '</select>';
 }
 
-function projReportBody(p, may){
+function projReportBody(p, may, fk){
   var r = projReported(p);
   var dRows = p.deliverables.map(function(d, i){
     if (!delivDue(d)) {
@@ -11972,10 +12065,8 @@ function projReportBody(p, may){
         [["","\u2014"],["todo","Not started"],["wip","In progress"],["done","Completed"]], m.status) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
-  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
-      '<div class="pmeta">' + esc(REVIEW.name) + ' &middot; ' + r.total + ' entries asked, ' +
-      r.done + ' given</div></div>' +
-      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span></div>' +
+  return pillarBand(projCode(fk, p), p.name,
+      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
     '<h4 class="mini">Deliverables</h4>' +
     miniTable(["#","Deliverable","Kind","Reported","Note"], dRows) +
     '<h4 class="mini">Outcomes</h4>' +
@@ -12009,15 +12100,16 @@ function capReportBody(c){
     function(p){ var r = projReported(p);
       return r.total === 0 ? 'Not asked this cycle'
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
-    null, 'Tally is entries given of asked');
+    null, 'Tally is entries given of asked',
+    function(p){ return projCode(c.fn, p); });
   return koBlock + '<h4 class="mini">Projects</h4>' +
-    splitOrPane(c.projects, sel, rail, projReportBody(sel, may));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
 }
 
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (REVIEW.state !== "open") {
-    return fnHead(fk) + '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
   }
   var done = 0, total = 0;
@@ -12028,7 +12120,7 @@ function renderFnReport(fnKey){
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
     '</div>';
-  return fnHead(fk) + bar + caps.map(function(c){
+  return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
 }
@@ -12242,7 +12334,7 @@ function renderUnitPlan(u){
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return fnHead(fk) + editBar("capfoundation", "k_found") + caps.map(function(c){
+  return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
     var koBlock = c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
@@ -18660,10 +18752,29 @@ var SYNC = (function () {
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              var cp = GROUP.capabilities.filter(function(x){ return x.name === picked; })[0];
+              /* WITHIN THE FUNCTION NAMED IN B3, when one is named (§51.2).
+                 Two supporting functions may each carry a capability with the
+                 same name, and before this the first match in the array won —
+                 silently, and into the wrong function's plan. A blank B3 still
+                 resolves across the tenant, so a workbook saved before this
+                 change still opens. */
+              var wantFn = readmePickFn(sheets);
+              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
+                return FUNCTIONS[k].name === wantFn; })[0];
+              if (wantFn && !fnKeyWanted) {
+                impFail('no supporting function called "' + wantFn +
+                  '". Open the Read me sheet and choose one from the dropdown in B3.');
+                return;
+              }
+              var capPool = GROUP.capabilities.filter(function(x){
+                return !fnKeyWanted || x.fn === fnKeyWanted; });
+              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail('no business unit or capability called "' + picked +
-                  '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail(fnKeyWanted
+                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
+                    '. Open the Read me sheet and check B2 and B3 against each other.'
+                  : 'no business unit or capability called "' + picked +
+                    '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;

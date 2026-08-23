@@ -58,6 +58,37 @@ The seven subsidiary lockups, extracted the same way from
 | `logo-nigeria.svg` | RAYA \| NIGERIA |
 | `logo-digital.svg` | RAYA \| DIGITAL |
 
+Three of them are **drawn**, not supplied — Raya's seven cover their
+subsidiaries, and SMP has business units Raya does not name:
+
+| File | Reads | Source |
+|---|---|---|
+| `logo-corporate.svg` | RAYA \| CORPORATE | drawn |
+| `logo-online-shop.svg` | RAYA \| ONLINE SHOP | drawn, two lines |
+| `logo-b2b-ecomm.svg` | RAYA \| B2B ECOMM | drawn, two lines |
+
+`scripts/make-unit-lockup.py` draws them, and **nothing about them is
+invented**: the RAYA wordmark, its flag and the rule are the client's own
+vector artwork lifted from a supplied lockup, the name is set in the manual's
+own headline face, and every measurement is taken off supplied artwork —
+the rule at x 62.91, the name at x 68.575 in JetBrains Mono Regular at 10pt
+with the advance stretched from 6.0 to 6.9, a single-line name 4.35 above the
+wordmark's foot and a two-line one straddling it, exactly as SMART CARE does.
+
+**The generator is checked by REDRAWING A SUPPLIED LOCKUP and diffing it
+against the real one** — RETAIL for one line, SMART CARE for two, both at
+**0 differing pixels**. A construction that cannot reproduce RETAIL has no
+business drawing CORPORATE.
+
+The face is the full open-licensed JetBrains Mono (`JetBrainsMono-Regular.ttf`,
+OFL, licence beside it) rather than the manual's embedded copy, and that is a
+correction rather than a convenience: **a subset maps far more than it draws.**
+The manual's copy carries a cmap entry for every ASCII character and an outline
+for only 36 of them, **no digits at all** — so `B2B` came out as `B B` and
+nothing complained. The generator now refuses a character it cannot draw, and
+a space is the only one allowed to draw nothing. The full font was proved to be
+the same drawing by the same 0-pixel diff before being used.
+
 **This is a different lockup from the group's, deliberately.** The group wears
 the *online* mark (`RAYA` + flag + `TRADE`); a unit wears the *with-line* mark
 (`RAYA` + rule + name). Islam settled it: two different things, two different

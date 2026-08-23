@@ -28,7 +28,9 @@ nobody types an id; the ID column is grey and last.
 2. **Given** People is selected under Plan, **When** Download Excel is pressed,
    **Then** the workbook carries that capability's key objectives (with
    weight), each project's brief row (owner, stakeholders, timeline kind,
-   start, end), and its deliverables (kind: Delivered/not or %), outcomes
+   start, end), and its deliverables (kind: Delivered/not or % — and nothing
+   else: since v3.20 a deliverable carries no due date and no owner, §53.4),
+   outcomes
    (direction, target split into value and unit, measured at) and milestones
    (covers, owner, finish) — each child sheet with a Project dropdown.
 3. **Given** the CSV alternative, **Then** a flat file with types
@@ -94,7 +96,9 @@ upload.
   targets split into value + unit.
 - **FR-003**: Capability plan CSV: flat rows, columns
   `id,type,parent_id,name,description,owner,stakeholders,direction,value,unit,
-  kind,due,measure_at,start,end,finish,covers,weight,compile,timeline,notes`;
+  kind,measure_at,start,end,finish,covers,weight,compile,timeline,notes`
+  (`due` was dropped in v3.20 with the field itself, §53.4; `owner` stays for
+  projects and milestones);
   the workbook reduces to these rows before the shared diff/apply path.
 - **FR-004**: Validation problems block: missing id/type, duplicate id,
   unmatched project, bad direction/kind/status/compile. Notices do not: no

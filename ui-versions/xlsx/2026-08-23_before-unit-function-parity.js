@@ -797,18 +797,15 @@ function capPlanWorkbook(c){
                 p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || ""];
       }) },
 
-    /* THREE COLUMNS. Due and Owner went with the fields (§53.4): a
-       deliverable is delivered when the project ends, and the project's owner
-       is the project's. A column the platform no longer reads is worse than
-       no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 52, 18],
-      head:["Project", "Deliverable", "Kind"],
+    { name:"Deliverables", widths:[34, 44, 16, 12, 20],
+      head:["Project", "Deliverable", "Kind", "Due", "Owner"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not"]);
+          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
+                    d.due || "", d.owner || ""]);
         });
         return acc;
       }, []) },
@@ -852,12 +849,12 @@ function capProgressWorkbook(c){
                 m.actual == null ? "" : String(m.actual), "", m.id];
       }) },
 
-    { name:"Deliverables", widths:[30, 44, 18, 18, 18, 16], lockedCols:[5],
-      head:["Project", "Deliverable", "Kind", "Currently recorded", "New value", "ID"],
+    { name:"Deliverables", widths:[30, 40, 16, 10, 18, 18, 16], lockedCols:[6],
+      head:["Project", "Deliverable", "Kind", "Due", "Currently recorded", "New value", "ID"],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
           acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
-                    d.actual == null ? "" : String(d.actual), "", d.id]);
+                    d.due || "", d.actual == null ? "" : String(d.actual), "", d.id]);
         });
         return acc;
       }, []) },
@@ -925,6 +922,7 @@ function capPlanFromWorkbook(c, sheets){
   }
   child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
     row.kind = delivKindKey(r["Kind"]) || r["Kind"];
+    row.due = r["Due"]; row.owner = r["Owner"];
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];

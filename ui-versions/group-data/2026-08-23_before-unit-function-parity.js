@@ -114,9 +114,9 @@ var GROUP = {
           brief: "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
           stakeholders: ["Operations", "IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Single documented order process", kind: "binary", actual: "yes" },
-            { name: "Unit-by-unit gap assessment", kind: "binary", actual: "yes" },
-            { name: "Process rolled out across the three units", kind: "pct", actual: 55 }
+            { name: "Single documented order process", kind: "binary", due: "Q2", owner: "Ashraf Abdelaty", actual: "yes" },
+            { name: "Unit-by-unit gap assessment", kind: "binary", due: "Q2", owner: "Hala", actual: "yes" },
+            { name: "Process rolled out across the three units", kind: "pct", due: "Q4", owner: "Ashraf Abdelaty", actual: 55 }
           ],
           outcomes: [
             { name: "Order cycle time", dir: "≤", target: "12 d", measureAt: "Q3 2026", actual: "15 d", progress: 80,
@@ -133,8 +133,8 @@ var GROUP = {
           brief: "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
           stakeholders: ["Finance", "Operations"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Cost-to-serve model built and validated", kind: "binary", actual: "yes" },
-            { name: "Monthly review running with all units", kind: "pct", actual: 60 }
+            { name: "Cost-to-serve model built and validated", kind: "binary", due: "Q2", owner: "Fayad Sobhy", actual: "yes" },
+            { name: "Monthly review running with all units", kind: "pct", due: "Q3", owner: "Fayad Sobhy", actual: 60 }
           ],
           outcomes: [
             { name: "Cost-to-serve", dir: "≤", target: "4.2%", measureAt: "Q4 2026", actual: null, progress: null }
@@ -148,8 +148,8 @@ var GROUP = {
           brief: "Cut the rework in distribution by fixing the two failure points that produce most of it.",
           stakeholders: ["Operations"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Failure analysis on twelve months of orders", kind: "binary", actual: "yes" },
-            { name: "Corrective standard operating procedures", kind: "pct", actual: 40 }
+            { name: "Failure analysis on twelve months of orders", kind: "binary", due: "Q2", owner: "Hala", actual: "yes" },
+            { name: "Corrective standard operating procedures", kind: "pct", due: "Q3", owner: "Hala", actual: 40 }
           ],
           outcomes: [
             { name: "First-time-right rate", dir: "≥", target: "95%", measureAt: "Q4 2026", actual: "82%", progress: 86 }
@@ -172,8 +172,8 @@ var GROUP = {
           brief: "Name a successor for every key role in every unit, and know which ones have nobody.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Key-role definition agreed group-wide", kind: "binary", actual: "yes" },
-            { name: "Succession map per unit", kind: "pct", actual: 70 }
+            { name: "Key-role definition agreed group-wide", kind: "binary", due: "Q1", owner: "Noran Adel", actual: "yes" },
+            { name: "Succession map per unit", kind: "pct", due: "Q3", owner: "Noran Adel", actual: 70 }
           ],
           outcomes: [
             { name: "Key-role coverage", dir: "≥", target: "90%", measureAt: "Q3 2026", actual: "62%", progress: 69,
@@ -188,8 +188,8 @@ var GROUP = {
           brief: "Two roles produce most of the voluntary attrition. Find out why, and change it.",
           stakeholders: ["HR"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Exit interview analysis", kind: "binary", actual: "yes" },
-            { name: "Revised package and progression for both roles", kind: "binary", actual: "no",
+            { name: "Exit interview analysis", kind: "binary", due: "Q2", owner: "Noran Adel", actual: "yes" },
+            { name: "Revised package and progression for both roles", kind: "binary", due: "Q3", owner: "Noran Adel", actual: "no",
               note: "Held pending the compensation review." }
           ],
           outcomes: [
@@ -204,8 +204,8 @@ var GROUP = {
           brief: "One training calendar for the group, published ahead of the year and actually delivered.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Annual training calendar published", kind: "binary", actual: "yes" },
-            { name: "Calendar delivered", kind: "pct", actual: 44 }
+            { name: "Annual training calendar published", kind: "binary", due: "Q1", owner: "Hala", actual: "yes" },
+            { name: "Calendar delivered", kind: "pct", due: "Q4", owner: "Hala", actual: 44 }
           ],
           outcomes: [
             { name: "Training hours per head", dir: "≥", target: "24", measureAt: "Q4 2026", actual: "5", progress: 21,
@@ -229,8 +229,8 @@ var GROUP = {
           brief: "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
           stakeholders: ["IT", "Finance", "Unit heads"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Target instance design", kind: "binary", actual: "yes" },
-            { name: "Instances migrated", kind: "pct", actual: 33,
+            { name: "Target instance design", kind: "binary", due: "Q2", owner: "Abdelhamid", actual: "yes" },
+            { name: "Instances migrated", kind: "pct", due: "Q4", owner: "Abdelhamid", actual: 33,
               note: "Two of six migrated. Mobile's cutover moved to Q3 with the principal." }
           ],
           outcomes: [
@@ -247,8 +247,8 @@ var GROUP = {
           brief: "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
           stakeholders: ["IT", "Finance"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Warehouse built and loading nightly", kind: "binary", actual: "no" },
-            { name: "Reporting layer live for sales and finance", kind: "pct", actual: 36 }
+            { name: "Warehouse built and loading nightly", kind: "binary", due: "Q3", owner: "Ramy Behairy", actual: "no" },
+            { name: "Reporting layer live for sales and finance", kind: "pct", due: "Q4", owner: "Ramy Behairy", actual: 36 }
           ],
           outcomes: [
             { name: "Dependency on automated reports", dir: "≥", target: "90%", measureAt: "Q4 2026", actual: "58%", progress: 64,
@@ -263,8 +263,8 @@ var GROUP = {
           brief: "A standing backlog of automation candidates, and a cadence that actually clears it.",
           stakeholders: ["IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Backlog built and prioritised", kind: "binary", actual: "yes" },
-            { name: "Backlog delivered", kind: "pct", actual: 52 }
+            { name: "Backlog built and prioritised", kind: "binary", due: "Q1", owner: "Ramy Behairy", actual: "yes" },
+            { name: "Backlog delivered", kind: "pct", due: "Q4", owner: "Ramy Behairy", actual: 52 }
           ],
           outcomes: [
             { name: "Manual hours removed per month", dir: "≥", target: "300", measureAt: "Q4 2026", actual: "140", progress: 47 }
@@ -284,8 +284,8 @@ var GROUP = {
           brief: "Establish what the market currently believes about us, and agree what we want it to believe instead.",
           stakeholders: ["Marketing"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Market perception study", kind: "binary", actual: "yes" },
-            { name: "Positioning statement agreed by the board", kind: "binary", actual: "no" }
+            { name: "Market perception study", kind: "binary", due: "Q2", owner: "Yara Kamal", actual: "yes" },
+            { name: "Positioning statement agreed by the board", kind: "binary", due: "Q3", owner: "Yara Kamal", actual: "no" }
           ],
           outcomes: [
             { name: "Unaided brand awareness", dir: "≥", target: "45%", measureAt: "Q4 2026", actual: null, progress: null }
@@ -298,8 +298,8 @@ var GROUP = {
           brief: "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
           stakeholders: ["Marketing", "Sales"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Twelve-month communication calendar", kind: "binary", actual: "yes" },
-            { name: "Calendar executed", kind: "pct", actual: 35 }
+            { name: "Twelve-month communication calendar", kind: "binary", due: "Q2", owner: "Tarek Nour", actual: "yes" },
+            { name: "Calendar executed", kind: "pct", due: "Q4", owner: "Tarek Nour", actual: 35 }
           ],
           outcomes: [
             { name: "Trade partner recall", dir: "≥", target: "70%", measureAt: "Q1 2027", actual: null, progress: null }
@@ -321,8 +321,8 @@ var GROUP = {
           brief: "One feedback loop, running continuously, whose output reaches the people who can act on it.",
           stakeholders: ["Care", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Feedback instrument agreed across units", kind: "binary", actual: "yes" },
-            { name: "Loop running in all units", kind: "pct", actual: 50 }
+            { name: "Feedback instrument agreed across units", kind: "binary", due: "Q1", owner: "Mennah Farouk", actual: "yes" },
+            { name: "Loop running in all units", kind: "pct", due: "Q4", owner: "Mennah Farouk", actual: 50 }
           ],
           outcomes: [
             { name: "Net promoter score", dir: "≥", target: "40", measureAt: "Q4 2026", actual: "26", progress: 65 },
@@ -337,8 +337,8 @@ var GROUP = {
           brief: "A single standard for what happens when we get it wrong, and how quickly.",
           stakeholders: ["Care"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Recovery standard published", kind: "binary", actual: "no" },
-            { name: "Care teams trained", kind: "pct", actual: 20 }
+            { name: "Recovery standard published", kind: "binary", due: "Q3", owner: "Dalia Sabry", actual: "no" },
+            { name: "Care teams trained", kind: "pct", due: "Q4", owner: "Dalia Sabry", actual: 20 }
           ],
           outcomes: [
             { name: "Repeat complaints", dir: "≤", target: "8%", measureAt: "Q1 2027", actual: null, progress: null }
@@ -357,8 +357,8 @@ var GROUP = {
           brief: "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
           stakeholders: ["Marketing", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review framework and evidence pack", kind: "binary", actual: "yes" },
-            { name: "Quarterly reviews held", kind: "pct", actual: 50 }
+            { name: "Review framework and evidence pack", kind: "binary", due: "Q2", owner: "Tarek Nour", actual: "yes" },
+            { name: "Quarterly reviews held", kind: "pct", due: "Q4", owner: "Tarek Nour", actual: 50 }
           ],
           outcomes: [
             { name: "Revenue from lines added in the last two years", dir: "≥", target: "25%", measureAt: "Q4 2026", actual: "11%", progress: 44 }
@@ -388,11 +388,11 @@ var GROUP = {
           stakeholders: ["Finance Department", "IT Department"], timeline: "date",
           start: "1 Jan 2026", end: "30 Apr 2026",
           deliverables: [
-            { name: "Oracle-based interest utilisation form", kind: "binary", actual: "yes" },
-            { name: "Tracking interest expense on a daily basis", kind: "binary", actual: "yes" },
-            { name: "Real-time data recalculation for corridor interest and pricing", kind: "binary", actual: "no",
+            { name: "Oracle-based interest utilisation form", kind: "binary", due: "Q1", owner: "IT", actual: "yes" },
+            { name: "Tracking interest expense on a daily basis", kind: "binary", due: "Q1", owner: "Finance", actual: "yes" },
+            { name: "Real-time data recalculation for corridor interest and pricing", kind: "binary", due: "Q2", owner: "IT", actual: "no",
               note: "Pricing corridor logic reopened with Treasury." },
-            { name: "Daily treasury monitoring of debt balances", kind: "pct", actual: 100 }
+            { name: "Daily treasury monitoring of debt balances", kind: "pct", due: "Q2", owner: "Treasury", actual: 100 }
           ],
           outcomes: [
             { name: "Reduction of manual work", dir: "≥", target: "40 h", measureAt: "Q2 2026", actual: "20 h", progress: 50,
@@ -410,9 +410,9 @@ var GROUP = {
           brief: "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
           stakeholders: ["Finance Department", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Facility term sheet agreed with lead bank", kind: "binary", actual: null },
-            { name: "Covenant reporting pack rebuilt", kind: "pct", actual: null },
-            { name: "Legacy facilities closed", kind: "binary", actual: null }
+            { name: "Facility term sheet agreed with lead bank", kind: "binary", due: "Q2", owner: "Treasury", actual: null },
+            { name: "Covenant reporting pack rebuilt", kind: "pct", due: "Q3", owner: "Finance", actual: null },
+            { name: "Legacy facilities closed", kind: "binary", due: "Q4", owner: "Treasury", actual: null }
           ],
           outcomes: [
             { name: "Arrangement and commitment fees", dir: "≤", target: "-18%", measureAt: "Q1 2027", actual: null, progress: null }
@@ -427,8 +427,8 @@ var GROUP = {
           brief: "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
           stakeholders: ["Finance Department"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Working capital baseline per unit", kind: "binary", actual: null },
-            { name: "Unit-level release plans agreed", kind: "pct", actual: null }
+            { name: "Working capital baseline per unit", kind: "binary", due: "Q3", owner: "Finance", actual: null },
+            { name: "Unit-level release plans agreed", kind: "pct", due: "Q4", owner: "Finance", actual: null }
           ],
           outcomes: [
             { name: "Days sales outstanding", dir: "≤", target: "65", measureAt: "Q4 2026", actual: null, progress: null },
@@ -454,8 +454,8 @@ var GROUP = {
           stakeholders: ["Strategy Management Office", "Unit heads"], timeline: "quarter",
           start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review format and evidence pack", kind: "binary", actual: "yes" },
-            { name: "Reviews held with every unit", kind: "pct", actual: 66 }
+            { name: "Review format and evidence pack", kind: "binary", due: "Q1", owner: "Islam Saadany", actual: "yes" },
+            { name: "Reviews held with every unit", kind: "pct", due: "Q4", owner: "Islam Saadany", actual: 66 }
           ],
           outcomes: [
             { name: "Cycles reviewed on time", dir: "≥", target: "4", measureAt: "Q4 2026", actual: "2", progress: 50 }
@@ -469,8 +469,8 @@ var GROUP = {
           brief: "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
           stakeholders: ["Strategy Management Office"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "All units' plans loaded", kind: "pct", actual: 70 },
-            { name: "All units reporting through the platform", kind: "pct", actual: 40 }
+            { name: "All units' plans loaded", kind: "pct", due: "Q3", owner: "Islam Saadany", actual: 70 },
+            { name: "All units reporting through the platform", kind: "pct", due: "Q4", owner: "Islam Saadany", actual: 40 }
           ],
           outcomes: [
             { name: "Plan adherence", dir: "≥", target: "80%", measureAt: "Q4 2026", actual: "51%", progress: 64 }

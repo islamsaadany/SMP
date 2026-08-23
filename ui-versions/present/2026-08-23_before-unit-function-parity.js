@@ -357,12 +357,12 @@ function deckSlidesFn(fk){
           '<div><span class="dlab">Milestones</span><b class="plain">' + mst.done + ' of ' + mst.total + '</b></div>' +
         '</div></section>');
 
-      /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
-         a deliverable was carrying a second, quieter answer to both. */
       var dRows = p.deliverables.map(function(d, i){
         var v = delivReads(d);
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(d.name) + '</td>' +
+          '<td>' + esc(d.owner || "—") + '</td>' +
+          '<td class="num">' + esc(d.due || "—") + '</td>' +
           '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
             : d.kind === "pct" ? esc(String(d.actual)) + "%"
             : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
@@ -372,7 +372,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
-        '<th class="num">Reported</th><th class="num">Reads</th>' +
+        '<th>Owner</th><th class="num">Due</th><th class="num">Reported</th><th class="num">Reads</th>' +
         '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
 
       var oRows = p.outcomes.map(function(o, i){
@@ -423,13 +423,11 @@ function deckSlidesFn(fk){
     c.projects.forEach(function(p){
       p.deliverables.forEach(function(d){
         var v = delivReads(d);
-        if (v != null && v < 70) {
+        if (delivDue(d) && v != null && v < 70) {
           n++;
           att.push('<tr><td class="idx">' + n + '</td>' +
             '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
-            /* A deliverable has no target and no date of its own: what it is
-               aimed at is being delivered, and when is when the project ends. */
-            '<td class="num">ends ' + esc(p.end || "\u2014") + '</td>' +
+            '<td class="num">' + esc(d.due || "—") + '</td>' +
             '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
             '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
         }

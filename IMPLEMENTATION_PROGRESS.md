@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.19 · **Last updated:** 2026-08-23
+**Latest version:** v3.20 · **Last updated:** 2026-08-23
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -51,6 +51,39 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.20 — a unit and a function are the same product
+
+Five items from Islam, and the middle one is the rule the other four are
+evidence for. Full reasoning in §53 of the decisions log.
+
+- **A function opens on its Projects**, as a unit opens on its Plan. §28 decided
+  that for plans; the code said `&& !isFn(k)`, so it reached units only.
+- **A capability is a band, not a card.** Its body was a bordered box with 16px
+  of padding, so the rail and pane inside it sat 34px narrower than the
+  identical rail and pane on a unit's page — and its white ground fought the
+  pinned band's ground filler down both sides.
+- **The function's rails match the unit's**: no bare number, no footer
+  captioning it (§29.6, applied to one rail of two), a small line of counts
+  rather than counts plus both dates plus the timeline kind, and a footer that
+  states the summary. The project's owner moved onto the band.
+- **Deliverables and outcomes are one table with a Type column** — while the
+  score still keeps them apart, half per side. **No due** (a deliverable is
+  delivered when the project ends) and **no owner** (the department is
+  responsible), removed from the panes, the deck, both `.xlsx` sheets, both CSV
+  column lists, the seed and the database (migration 016).
+- **THE RULE: any functional or visual change is tested on both sides of the
+  navigation switch.** Walking both sides is not testing both sides — the sweep
+  had walked every function page each time and reported "ok", because walking
+  proves a page renders and none of these were rendering faults. `qa.py` now
+  measures the two panes and asserts they agree.
+
+Verified: `qa.py` — 31 viewers, no console errors, template round trip, parity
+same-shape, both landings; `test-authorize.js` 125 passed; `test-roundtrip.js`
+clean slate / round trip / fixed point / archived plan all PASS on a fresh
+Postgres 16, plus an upgrade run against a database created at v3.19 with
+`due` and `owner` populated; contrast sweep 53 failing runs across 4
+combinations × 34 pages and states — unchanged, all pre-existing (§16.15).
 
 ### v3.19 — the capability half catches up, and slides get a place
 

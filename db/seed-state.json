@@ -181,24 +181,18 @@
        {
         "name": "Single documented order process",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Ashraf Abdelaty",
         "actual": "yes",
         "id": "cap1-P1-D1"
        },
        {
         "name": "Unit-by-unit gap assessment",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Hala",
         "actual": "yes",
         "id": "cap1-P1-D2"
        },
        {
         "name": "Process rolled out across the three units",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Ashraf Abdelaty",
         "actual": 55,
         "id": "cap1-P1-D3"
        }
@@ -276,16 +270,12 @@
        {
         "name": "Cost-to-serve model built and validated",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Fayad Sobhy",
         "actual": "yes",
         "id": "cap1-P2-D1"
        },
        {
         "name": "Monthly review running with all units",
         "kind": "pct",
-        "due": "Q3",
-        "owner": "Fayad Sobhy",
         "actual": 60,
         "id": "cap1-P2-D2"
        }
@@ -344,16 +334,12 @@
        {
         "name": "Failure analysis on twelve months of orders",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Hala",
         "actual": "yes",
         "id": "cap1-P3-D1"
        },
        {
         "name": "Corrective standard operating procedures",
         "kind": "pct",
-        "due": "Q3",
-        "owner": "Hala",
         "actual": 40,
         "id": "cap1-P3-D2"
        }
@@ -443,16 +429,12 @@
        {
         "name": "Key-role definition agreed group-wide",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "Noran Adel",
         "actual": "yes",
         "id": "cap2-P1-D1"
        },
        {
         "name": "Succession map per unit",
         "kind": "pct",
-        "due": "Q3",
-        "owner": "Noran Adel",
         "actual": 70,
         "id": "cap2-P1-D2"
        }
@@ -512,16 +494,12 @@
        {
         "name": "Exit interview analysis",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Noran Adel",
         "actual": "yes",
         "id": "cap2-P2-D1"
        },
        {
         "name": "Revised package and progression for both roles",
         "kind": "binary",
-        "due": "Q3",
-        "owner": "Noran Adel",
         "actual": "no",
         "note": "Held pending the compensation review.",
         "id": "cap2-P2-D2"
@@ -582,16 +560,12 @@
        {
         "name": "Annual training calendar published",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "Hala",
         "actual": "yes",
         "id": "cap2-P3-D1"
        },
        {
         "name": "Calendar delivered",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Hala",
         "actual": 44,
         "id": "cap2-P3-D2"
        }
@@ -681,16 +655,12 @@
        {
         "name": "Target instance design",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Abdelhamid",
         "actual": "yes",
         "id": "cap3-P1-D1"
        },
        {
         "name": "Instances migrated",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Abdelhamid",
         "actual": 33,
         "note": "Two of six migrated. Mobile's cutover moved to Q3 with the principal.",
         "id": "cap3-P1-D2"
@@ -768,16 +738,12 @@
        {
         "name": "Warehouse built and loading nightly",
         "kind": "binary",
-        "due": "Q3",
-        "owner": "Ramy Behairy",
         "actual": "no",
         "id": "cap3-P2-D1"
        },
        {
         "name": "Reporting layer live for sales and finance",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Ramy Behairy",
         "actual": 36,
         "id": "cap3-P2-D2"
        }
@@ -837,16 +803,12 @@
        {
         "name": "Backlog built and prioritised",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "Ramy Behairy",
         "actual": "yes",
         "id": "cap3-P3-D1"
        },
        {
         "name": "Backlog delivered",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Ramy Behairy",
         "actual": 52,
         "id": "cap3-P3-D2"
        }
@@ -914,16 +876,12 @@
        {
         "name": "Market perception study",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Yara Kamal",
         "actual": "yes",
         "id": "cap4-P1-D1"
        },
        {
         "name": "Positioning statement agreed by the board",
         "kind": "binary",
-        "due": "Q3",
-        "owner": "Yara Kamal",
         "actual": "no",
         "id": "cap4-P1-D2"
        }
@@ -975,16 +933,12 @@
        {
         "name": "Twelve-month communication calendar",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Tarek Nour",
         "actual": "yes",
         "id": "cap4-P2-D1"
        },
        {
         "name": "Calendar executed",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Tarek Nour",
         "actual": 35,
         "id": "cap4-P2-D2"
        }
@@ -1064,16 +1018,12 @@
        {
         "name": "Feedback instrument agreed across units",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "Mennah Farouk",
         "actual": "yes",
         "id": "cap5-P1-D1"
        },
        {
         "name": "Loop running in all units",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Mennah Farouk",
         "actual": 50,
         "id": "cap5-P1-D2"
        }
@@ -1141,16 +1091,12 @@
        {
         "name": "Recovery standard published",
         "kind": "binary",
-        "due": "Q3",
-        "owner": "Dalia Sabry",
         "actual": "no",
         "id": "cap5-P2-D1"
        },
        {
         "name": "Care teams trained",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Dalia Sabry",
         "actual": 20,
         "id": "cap5-P2-D2"
        }
@@ -1211,16 +1157,12 @@
        {
         "name": "Review framework and evidence pack",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Tarek Nour",
         "actual": "yes",
         "id": "cap6-P1-D1"
        },
        {
         "name": "Quarterly reviews held",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Tarek Nour",
         "actual": 50,
         "id": "cap6-P1-D2"
        }
@@ -1312,24 +1254,18 @@
        {
         "name": "Oracle-based interest utilisation form",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "IT",
         "actual": "yes",
         "id": "cap7-P1-D1"
        },
        {
         "name": "Tracking interest expense on a daily basis",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "Finance",
         "actual": "yes",
         "id": "cap7-P1-D2"
        },
        {
         "name": "Real-time data recalculation for corridor interest and pricing",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "IT",
         "actual": "no",
         "note": "Pricing corridor logic reopened with Treasury.",
         "id": "cap7-P1-D3"
@@ -1337,8 +1273,6 @@
        {
         "name": "Daily treasury monitoring of debt balances",
         "kind": "pct",
-        "due": "Q2",
-        "owner": "Treasury",
         "actual": 100,
         "id": "cap7-P1-D4"
        }
@@ -1424,24 +1358,18 @@
        {
         "name": "Facility term sheet agreed with lead bank",
         "kind": "binary",
-        "due": "Q2",
-        "owner": "Treasury",
         "actual": null,
         "id": "cap7-P2-D1"
        },
        {
         "name": "Covenant reporting pack rebuilt",
         "kind": "pct",
-        "due": "Q3",
-        "owner": "Finance",
         "actual": null,
         "id": "cap7-P2-D2"
        },
        {
         "name": "Legacy facilities closed",
         "kind": "binary",
-        "due": "Q4",
-        "owner": "Treasury",
         "actual": null,
         "id": "cap7-P2-D3"
        }
@@ -1508,16 +1436,12 @@
        {
         "name": "Working capital baseline per unit",
         "kind": "binary",
-        "due": "Q3",
-        "owner": "Finance",
         "actual": null,
         "id": "cap7-P3-D1"
        },
        {
         "name": "Unit-level release plans agreed",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Finance",
         "actual": null,
         "id": "cap7-P3-D2"
        }
@@ -1625,16 +1549,12 @@
        {
         "name": "Review format and evidence pack",
         "kind": "binary",
-        "due": "Q1",
-        "owner": "Islam Saadany",
         "actual": "yes",
         "id": "cap8-P1-D1"
        },
        {
         "name": "Reviews held with every unit",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Islam Saadany",
         "actual": 66,
         "id": "cap8-P1-D2"
        }
@@ -1693,16 +1613,12 @@
        {
         "name": "All units' plans loaded",
         "kind": "pct",
-        "due": "Q3",
-        "owner": "Islam Saadany",
         "actual": 70,
         "id": "cap8-P2-D1"
        },
        {
         "name": "All units reporting through the platform",
         "kind": "pct",
-        "due": "Q4",
-        "owner": "Islam Saadany",
         "actual": 40,
         "id": "cap8-P2-D2"
        }
@@ -5584,7 +5500,7 @@
    "a_unit_other": "none",
    "a_fn_own": "view",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "custodian": {
@@ -5593,7 +5509,7 @@
    "a_unit_other": "none",
    "a_fn_own": "edit",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "fnhead": {
@@ -5602,7 +5518,7 @@
    "a_unit_other": "none",
    "a_fn_own": "edit",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "contrib": {
@@ -5611,7 +5527,7 @@
    "a_unit_other": "none",
    "a_fn_own": "view",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   }
  },

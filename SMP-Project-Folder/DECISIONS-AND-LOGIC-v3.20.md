@@ -6994,3 +6994,170 @@ And the one that needs a decision rather than code: **an uploaded SVG is
 executable content**, in a page that already runs with `'unsafe-inline'` (§43.6).
 Either uploads are raster only, or the SVG is sanitised against an allow-list on
 the way in. The seven extracted here are safe because nobody uploaded them.
+
+---
+
+## 53 · A unit and a function are the same product (v3.20)
+
+*2026-08-23. Islam, after using the built v3.19: "when we press on a function in
+the navigation it should open by default on the projects page in the strategy,
+and we need to match the sizing we made in the page for the rail and the project
+name at the top of the right panel and the stickiness. You need to add a rule
+that any change happens in the functionality or visual should be tested across
+the units and the functions as they need to match unless something is
+conflicting. For the deliverables and outcomes they need to be in the same table
+with a tag to show which is which rather than 2 tables, and remove the due
+column — it's not mandatory as it's a full project due, it's delivered when the
+project ends. And there is no owner on the deliverables or outcomes, the
+department is responsible."*
+
+Five items, and the middle one is not a feature at all. It is the rule the other
+four are evidence for.
+
+### 53.1 A function opens on its Projects
+
+§28 decided that a business unit opens on **Strategy › Plan** and not on
+Performance: what was agreed is what people come to read and to change, and the
+score is a consequence of it, one click away. The argument is about plans, not
+about units — but the code that carried it out said, in as many words, *not a
+function*:
+
+```js
+if (k !== "group" && k !== "manage" && k !== "setup" && !isFn(k)) {
+```
+
+So for four versions a supporting function opened on Performance while every
+business unit opened on its plan, and the reason was a clause in a condition
+rather than a decision anybody made.
+
+The tab and the section are the only things that differ — `fnstrat`/`proj` for a
+function, `strategy`/`plan` for a unit — so they are **two variables, not two
+branches**. A second branch is how the two halves drift apart again.
+
+### 53.2 The same rail, because it is the same rail
+
+The function's Projects page and the unit's Plan page render through the *same*
+`railFor`, the same `.split`, the same `.pane` and the same `pillarBand`. What
+had diverged was everything passed into them:
+
+| | Unit's Plan rail | Function's Projects rail |
+|---|---|---|
+| Number on the right | none (§29.6) | the deliverables count |
+| Footer | none (§29.6) | "Figure shown is deliverables" |
+| Small line | two counts and the owner | three counts, both dates and the timeline kind |
+
+§29.6 removed the bare number and the footer that tried to explain it, on the
+argument that **nothing on a plan page has been reported, so there is no figure
+to explain**. That argument is about plan pages. It was applied to the unit's
+and not to the function's, which is the same page under a different name.
+
+Both now carry the same shape. The project's owner moved onto the band rather
+than into the rail's small line: a pillar has two child lists and a project has
+three, so a name in the rail took every row to three lines while the unit's sat
+at two — and the sizing is the thing that had to match.
+
+The Performance rail's footer stops captioning a column and **states the
+summary**, exactly as a unit's does: "63% across 3 projects · execution 42%".
+
+Two small things fell out of it. `railFor` rendered `<span class="rnum"></span>`
+even when there was no number, and an empty span still takes its track in the
+row's grid. And the Performance and Report panes each carried an
+`<h4>Projects</h4>` immediately above a rail whose own head says "PROJECTS 3".
+
+### 53.3 A capability is a band, not a card
+
+The measurable half of "match the sizing". A function's page wrapped everything
+below the capability band in `.capbody` — a bordered white box with 16px of
+horizontal padding — so the rail and the pane **inside** it, which draw their own
+borders, sat 17px in on each side and 34px narrower than the identical rail and
+pane on a unit's page. A card inside a card, and the outer one's padding was
+the difference.
+
+The band stays: a function can carry several capabilities and something has to
+separate them. The box around the rest is gone.
+
+It also fixes a seam nobody had named. `.pane > .pband`'s `::before` paints
+`--ground` over whatever scrolls up into the gap above a pinned band (§51.13).
+While the capbody was white, that painted the page's grey onto a white card and
+left a line down both sides. With no card there is nothing to disagree with.
+
+And **the third duplicated rule in `arrange.css`**: two `.capbody` blocks, 105
+lines apart, the later one winning on source order — §29.2's lesson and §51.5's
+`.capline`, in the same file, for the third time. Editing the first one did
+nothing at all.
+
+### 53.4 Deliverables and outcomes are one table
+
+They are two kinds of evidence that a project achieved what it set out to, which
+is exactly why the **score** still keeps them apart — half from the deliverables
+side, half from the outcomes side, per side and not per row (§9). Reading them
+together and scoring them together are different questions, and only the first
+one had been asked.
+
+One table on all three project panes, with a **Type** column carrying
+`Deliverable` or `Outcome`. A column rather than a pill beside the name: with
+two values and two only, a column is the thing you can run your eye down. The
+row numbers run across the whole table — two rows both called 1 would say it was
+still two tables.
+
+**No due.** A deliverable carried a quarter of its own, and one later than the
+cycle meant *not asked*: a dimmed row the tally left out. Islam: it is delivered
+when the project ends. So the column went — and with nothing left to set,
+`delivDue()` went with it, at all four of its call sites rather than being left
+behind always answering true (§24). An **outcome** keeps its measurement time,
+because that is a real thing somebody chose.
+
+**No owner.** The project has one. A row inside it naming a second person in a
+smaller font invited an argument about which of the two was accountable, and the
+answer Islam gives is neither: the department is.
+
+Removed everywhere the fields could be read or written, not only where they were
+shown — the three panes, the review deck's slide and its attention gather, both
+`.xlsx` sheets that carried them, the CSV column lists in both directions, the
+seed, and the two database columns (migration 016). **A column the platform no
+longer reads is worse than no column**: somebody fills it in and nothing
+happens.
+
+### 53.5 THE RULE: measure both, not walk both
+
+> Any change to how something works or how it looks is tested on **both** sides
+> of the navigation switch. A unit's page and a function's are the same product
+> and must not drift apart unless something genuinely conflicts.
+
+Everything in 53.1–53.3 was a fix applied to one side and not the other, and
+each had been through several green sweeps. The sweeps walk both sides already
+— qa.py has pressed the switch and visited every function page since §51.9 —
+and reported "ok" every time, because **walking a page proves it renders, and
+these were not rendering faults**. The two pages were fine. They were fine
+differently.
+
+So the check MEASURES them and compares: the rail's grid track, the pane's box
+inside the panel, the pane's padding, whether the rail and the band are sticky
+and at what offset, and the band name's size and weight. It asserts the two
+**agree**, never what the number is — so a deliberate change to both stays
+green, and a change to one does not.
+
+Proved against the previous build before being trusted: run on v3.19 it reports
+`paneLeft: unit 212, function 229` and `paneRight: unit 0, function 17`; run on
+this one, nothing. And it names the page it actually scanned and asserts that
+name, because §50.6's sweep spent twelve versions measuring the wrong page under
+the right label.
+
+The landing is asserted the same way, from the navigation rather than from the
+function that decides it: click the destination, read back which tab and section
+are lit.
+
+### 53.6 What was deliberately not changed
+
+The **deck** keeps a slide for deliverables and a slide for outcomes. A slide is
+a full screen with one table on it, and a Type column exists to let the eye sort
+a list it is scrolling — on a slide the heading already sorts it. Only the two
+dead columns came off.
+
+**Milestones keep their owner.** Islam named deliverables and outcomes, and a
+milestone is a piece of the timeline somebody is walking, not a thing the
+project hands over.
+
+The two database columns are **dropped**, not left standing and ignored. What
+was in them survives in `plan_archives` for any plan that carried them, which is
+where a replaced plan has lived since §22.

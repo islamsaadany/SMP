@@ -89,14 +89,22 @@ CREATE TABLE IF NOT EXISTS projects (
   extra        jsonb NOT NULL DEFAULT '{}'
 );
 
+-- A deliverable carries no due date and no owner: the project's end is when it
+-- is delivered, and the project's owner owns it (§53.4). Migration 016 drops
+-- the two columns from a database created before that.
 CREATE TABLE IF NOT EXISTS deliverables (
   id         text PRIMARY KEY,
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   idx        int NOT NULL,
   name       text NOT NULL DEFAULT '',
   kind       text NOT NULL DEFAULT 'binary',
-  due        text,
-  owner      text,
+  -- `actual` IS NOT MAPPED, DELIBERATELY, and this column stays empty: a
+  -- deliverable's actual is "yes"/"no" for a binary one and a NUMBER for a
+  -- percentage one, and a text column returns both as text — which breaks the
+  -- write(read()) fixed point the round-trip test asserts. It rides in `extra`,
+  -- which is jsonb and keeps 77 a 77. An outcome's actual IS a column because
+  -- an outcome's actual is always text ("15 d"). Do not "fix" this by mapping
+  -- it without changing the column's type.
   actual     text,
   note       text,
   extra      jsonb NOT NULL DEFAULT '{}'

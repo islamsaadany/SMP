@@ -120,5 +120,95 @@ with sync_playwright() as p:
     print("template round trip: unit=%r | cap=%r | neither names a function"
           % (rt["unit"], rt["cap"]))
 
+    # ── A UNIT AND A FUNCTION MUST MATCH (53.5) ───────────────────────
+    # The rule Islam set on 2026-08-23: any change to how something works or
+    # how it looks is tested on BOTH sides of the navigation switch, because a
+    # unit's page and a function's are the same product and must not drift
+    # apart unless something genuinely conflicts. They already had: a unit
+    # opened on its Plan and a function on Performance (28, never applied to
+    # functions); the unit's rail lost its bare number and its footer in 29.6
+    # and the function's kept both; and the function's rail and pane sat 34px
+    # narrower, inside a card the unit does not have.
+    #
+    # Walking both sides would not have caught any of that — the sweep visited
+    # every one of those pages and reported "ok". So this MEASURES the two and
+    # compares them: the same rail track, the same pane box, the same band,
+    # pinned at the same offset. It asserts they AGREE, never what the number
+    # is, so a deliberate change to both stays green and a change to one does
+    # not.
+    def pane_shape(pg):
+        return pg.evaluate("""() => {
+          const split = document.querySelector('.split');
+          if (!split) return { err: 'no .split on this page' };
+          const rail = split.querySelector('.rail'), pane = split.querySelector('.pane');
+          const band = pane && pane.querySelector(':scope > .pband');
+          const nm = band && band.querySelector('.pband-name');
+          const panel = document.getElementById('panel');
+          const pb = panel.getBoundingClientRect(), rb = pane.getBoundingClientRect();
+          const cs = getComputedStyle(pane);
+          return {
+            railTrack: getComputedStyle(split).gridTemplateColumns.split(' ')[0],
+            paneLeft: Math.round(rb.left - pb.left), paneRight: Math.round(pb.right - rb.right),
+            panePad: cs.padding,
+            railSticky: getComputedStyle(rail).position + ' ' + getComputedStyle(rail).top,
+            bandSticky: band ? getComputedStyle(band).position + ' ' + getComputedStyle(band).top : 'no band',
+            bandName: nm ? getComputedStyle(nm).fontSize + '/' + getComputedStyle(nm).fontWeight : 'no name',
+          };
+        }""")
+
+    def goto(pg, key, tab, sec):
+        want = "Functions" if key.startswith("fn:") else "Units"
+        for _ in range(3):
+            on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
+            if on and on[0] == want: break
+            pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+        pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(250)
+        pg.evaluate("""(t)=>{const b=[...document.querySelectorAll('#subtabs button')]
+            .find(x=>x.textContent.trim()===t); if(b)b.click()}""", tab)
+        pg.wait_for_timeout(200)
+        pg.evaluate("""(t)=>{const b=[...document.querySelectorAll('#secrow button')]
+            .find(x=>x.textContent.trim()===t); if(b)b.click()}""", sec)
+        pg.wait_for_timeout(300)
+        # THE LABEL MUST SAY WHICH PAGE WAS ACTUALLY SCANNED (50.6). A probe
+        # that clicks and does not check reports the page behind under the
+        # name of the one it meant to open.
+        got = pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
+            b=document.querySelector('#secrow [aria-selected="true"]');
+            return (a?a.textContent.trim():'?') + ' / ' + (b?b.textContent.trim():'?')}""")
+        return got
+
+    pg.select_option("#asWho", people[0]); pg.wait_for_timeout(200)
+    where_u = goto(pg, "mobile", "Strategy", "Plan")
+    unit_shape = pane_shape(pg)
+    where_f = goto(pg, "fn:finance", "Strategy", "Projects")
+    fn_shape = pane_shape(pg)
+    if where_u != "Strategy / Plan":
+        errs.append("PARITY: meant to scan a unit's Plan, landed on %r" % where_u)
+    if where_f != "Strategy / Projects":
+        errs.append("PARITY: meant to scan a function's Projects, landed on %r" % where_f)
+    for k in sorted(set(list(unit_shape) + list(fn_shape))):
+        if unit_shape.get(k) != fn_shape.get(k):
+            errs.append("PARITY %s: unit %r, function %r"
+                        % (k, unit_shape.get(k), fn_shape.get(k)))
+    print("unit/function parity: %s vs %s \u2014 %s"
+          % (where_u, where_f,
+             "same shape" if unit_shape == fn_shape else "DIFFERENT"))
+
+    # A FUNCTION OPENS ON ITS PROJECTS, as a unit opens on its Plan (53.1).
+    for key, want in (("mobile", "Strategy / Plan"), ("fn:finance", "Strategy / Projects")):
+        w = "Functions" if key.startswith("fn:") else "Units"
+        for _ in range(3):
+            on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
+            if on and on[0] == w: break
+            pg.click("#units .navswitch"); pg.wait_for_timeout(150)
+        pg.click('#units button[data-u="group"]'); pg.wait_for_timeout(200)
+        pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(350)
+        got = pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
+            b=document.querySelector('#secrow [aria-selected="true"]');
+            return (a?a.textContent.trim():'?') + ' / ' + (b?b.textContent.trim():'?')}""")
+        if got != want:
+            errs.append("LANDING: %s opens on %r, not %r" % (key, got, want))
+        print("%s opens on %s" % (key, got))
+
     print("ERRORS:", errs if errs else "none")
     b.close()

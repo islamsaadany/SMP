@@ -1028,17 +1028,17 @@ function outcomeDue(o){
   if (oy && cy && oy !== cy) return oy < cy;
   return +q[1] <= +cq[1];
 }
-/* THERE IS NO delivDue(). A deliverable used to carry a quarter of its own,
-   and one later than the cycle meant "not asked": a row the reporting page
-   dimmed and the tally left out. Islam, 2026-08-23: a deliverable belongs to
-   the project, and the project's end is when it is delivered. The column went
-   (§53.4), and with nothing left to set there is nothing left to gate on — so
-   the predicate went too, at all four of its call sites, rather than being
-   left behind always answering true (§24). An OUTCOME still has one, because
-   a measurement time is a real thing somebody chose. */
+function delivDue(d){
+  if (!d.due) return true;
+  var q = String(d.due).match(/Q([1-4])/);
+  var cq = String(REVIEW.name || "").match(/Q([1-4])/);
+  if (!q || !cq) return true;
+  return +q[1] <= +cq[1];
+}
 function projReported(p){
   var n = 0, total = 0;
   (p.deliverables || []).forEach(function(d){
+    if (!delivDue(d)) return;
     total++;
     if (d.actual != null && d.actual !== "") n++;
   });

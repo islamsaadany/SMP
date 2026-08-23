@@ -87,6 +87,20 @@ A drift between specs and code is a documentation bug — report it before silen
   the client for enforcement. (SMP's current access gate is a client-side placeholder and is
   explicitly NOT real security — it must move server-side before SMP holds anything sensitive.)
 
+#### A unit and a function are the same product — test both (2026-08-23, §53.5, A15)
+- **Every functional or visual change is tested on BOTH sides of the navigation
+  switch.** A business unit's page and a supporting function's must not drift
+  apart unless something genuinely conflicts — and where it does, say which and
+  why.
+- **Walking both sides is not testing both sides.** The sweep had walked every
+  function page for four versions and reported "ok" while three fixes sat on the
+  unit's side only. Walking proves a page RENDERS; none of the three were
+  rendering faults. The two pages were fine — they were fine *differently*.
+- So `qa.py` **measures** the unit's Plan pane and the function's Projects pane
+  and asserts they **agree** — the rail's track, the pane's box, its padding,
+  the sticky offsets, the band name — never what the number is, so a deliberate
+  change to both stays green and a change to one does not.
+
 #### Lessons carried over from HR_ERP (apply if SMP uses React/Next.js)
 - **Server pages people MONITOR must keep themselves live** — server-rendered pages never re-render on client-side navigation or while sitting open, so a badge/queue/tracker painted once goes stale. Pattern: a poller (mount + focus + interval) hitting a small API and broadcasting an app event, or a router.refresh-on-focus auto-refresher for whole pages.
 - **Never close a menu/modal from a submit button's `onClick`** — React flushes click updates synchronously, so the `<form>` unmounts before the browser dispatches `submit`; the action silently never runs. Dispatch first, then close: `action={(fd) => { dispatch(fd); setOpen(false); }}`.
@@ -210,6 +224,16 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and JPEG with the smaller kept** — a screenshot is smaller as PNG, a
   photograph seven times smaller as JPEG, and the file's own type predicts
   neither. No migration: it lands in the `review` row's `extra`.
+- **Deliverables and outcomes (one table since v3.20, §53.4):** a project's two
+  kinds of evidence read as ONE table with a **Type** column, on all three
+  project panes — while the SCORE still keeps them apart, half per SIDE
+  (`projPerf`). Reading them together and scoring them together are different
+  questions. A deliverable has **no due and no owner**: it is delivered when the
+  project ends, and the project's owner owns it. `delivDue()` no longer exists —
+  an outcome keeps `measureAt`, because a measurement time is a real thing
+  somebody chose. The fields are gone from the panes, the deck, both `.xlsx`
+  sheets, both CSV column lists, the seed and the database (migration 016) —
+  **a column the platform no longer reads is worse than no column.**
 - **Collaborators on a tactic (since the import template; given a COLUMN in
   v3.18, §50):** `tactics.collaborators` is what `SMPRules.namedOn()` reads to
   decide whether a Contributor may report a line — so **it is the SMO's to
@@ -393,7 +417,43 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
+*Last Updated: 2026-08-23 &mdash; **v3.20: a unit and a function are the same
+product** (§53). Four fixes and one rule, and the rule is what the four are
+evidence for. **A FUNCTION OPENED ON PERFORMANCE BECAUSE OF A CLAUSE, NOT A
+DECISION**: §28's argument &mdash; what was agreed is what people come to read, the
+score is a consequence of it &mdash; is about PLANS, and the code carrying it out
+said `&& !isFn(k)`, so for four versions every unit opened on its plan and every
+function did not. The tab and section keys are the only difference, so they are
+two variables and not a second branch, which is how the halves drifted in the
+first place. **A CAPABILITY IS A BAND, NOT A CARD**: everything below it was
+wrapped in a bordered box with 16px of padding, so the rail and pane INSIDE it
+&mdash; which draw their own borders &mdash; sat 34px narrower than the identical rail
+and pane on a unit's page. A card inside a card, and the outer one's padding was
+the whole of the mismatch; removing it also closed a seam, because `.pband`'s
+`::before` paints the PAGE's ground and was painting it onto white. And the
+**third duplicated rule in `arrange.css`** &mdash; two `.capbody` blocks, the later
+winning on source order, after §29.2 and §51.5's `.capline` in the same file.
+**§29.6 WAS APPLIED TO ONE RAIL OF TWO**: the unit's Plan rail lost its bare
+number and the footer that tried to explain it &mdash; nothing on a plan page has
+been reported, so there is no figure to explain &mdash; and the function's Projects
+rail kept both, plus a small line carrying three counts, both dates and the
+timeline kind over three lines where the unit's sat at two. **DELIVERABLES AND
+OUTCOMES ARE ONE TABLE, TAGGED**, while the score still keeps them apart half
+per side: reading them together and scoring them together are different
+questions and only the first was ever asked. **A DELIVERABLE HAS NO DUE AND NO
+OWNER** &mdash; it is delivered when the project ends and the project's owner owns
+it &mdash; so `delivDue()` went at all four call sites rather than being left
+answering true (§24), and both columns were dropped from the database, because a
+column the platform no longer reads is one somebody fills in for nothing. Then
+the rule itself: **WALKING BOTH SIDES IS NOT TESTING BOTH SIDES.** Every one of
+those three had been through green sweeps that visited the page each time &mdash;
+walking proves a page renders, and none of them were rendering faults. The two
+pages were fine; they were fine DIFFERENTLY. So `qa.py` MEASURES the two and
+asserts they AGREE &mdash; never what the number is, so a deliberate change to both
+stays green &mdash; and it was run against v3.19 before being trusted, where it
+reports `paneLeft: unit 212, function 229`.*
+
+*Earlier: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
 A one-line ask that was decisions all the way down. **THE TENANT'S MARK GOES ON
 THE CARD, NOT ON THE WALL** — the person at that door works for the client, so
 their mark belongs on the thing they touch while Forefront's stays on the wall

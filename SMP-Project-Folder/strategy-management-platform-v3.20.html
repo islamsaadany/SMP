@@ -2445,9 +2445,10 @@
   .obl-nm{font-size:16px;font-weight:600}
   .obl-meta{font-size:12.5px;color:var(--ink-3)}
   .oblband.cap .obl-meta{color:#C3CEE0}
-  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
-    border-radius:0 0 var(--r) var(--r);padding:16px 18px 20px}
-  .capbody h4.mini:first-child{margin-top:0}
+  /* THE SECOND .capbody LIVED HERE. Two rules, same selector, 105 lines
+     apart, and the later one won on source order — the identical fault §51.5
+     found in this file for `.capline` and §29.2 recorded before that. Editing
+     the padding here did nothing at all. One rule now, below. */
   .whoami{font:400 19px/1.2 var(--serif)}
 
   /* A build should be identifiable from a screenshot. */
@@ -2543,16 +2544,29 @@
      product, on the one word the band exists to say. It takes what
      `.grouphead` and `.rail .rhead` already take. */
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
-    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
-    border-bottom:1px solid var(--line)}
+    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r);margin:16px 0 14px;
+    border:1px solid var(--line)}
+  .capline:first-child{margin-top:0}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
     color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
   .capnm{font-size:15.5px;font-weight:600;color:var(--panel-ink)}
   .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--panel-quiet);
     background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
-  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
-    border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
+  /* A CAPABILITY IS A BAND, NOT A CARD (§53.3). Its body used to be a bordered
+     white box, so the rail and the pane inside it — which draw their own
+     borders — sat 16px in on each side and 34px narrower than the identical
+     rail and pane on a unit's page. A card inside a card, and the sizing
+     Islam asked to match was the outer one's padding. The band stays, because
+     a function can carry several capabilities and something has to separate
+     them; the box around the rest is gone, so everything under it lines up
+     with a unit's exactly. */
+  .capbody{padding:0 0 6px}
   .capbody h4.mini:first-child{margin-top:0}
+  /* THE STICKY BAND NEEDS THE PAGE BEHIND IT. `.pane > .pband`'s ::before
+     paints `--ground` over whatever scrolls up into the gap above it; while
+     the capbody was white, it painted the page's grey onto a white card and
+     left a seam down both sides. With no card there is nothing to disagree
+     with. */
   .caphdr{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;padding:16px 18px;
     background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 18px}
   .capname{font:400 21px/1.2 var(--serif)}
@@ -4027,9 +4041,9 @@ var GROUP = {
           brief: "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
           stakeholders: ["Operations", "IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Single documented order process", kind: "binary", due: "Q2", owner: "Ashraf Abdelaty", actual: "yes" },
-            { name: "Unit-by-unit gap assessment", kind: "binary", due: "Q2", owner: "Hala", actual: "yes" },
-            { name: "Process rolled out across the three units", kind: "pct", due: "Q4", owner: "Ashraf Abdelaty", actual: 55 }
+            { name: "Single documented order process", kind: "binary", actual: "yes" },
+            { name: "Unit-by-unit gap assessment", kind: "binary", actual: "yes" },
+            { name: "Process rolled out across the three units", kind: "pct", actual: 55 }
           ],
           outcomes: [
             { name: "Order cycle time", dir: "≤", target: "12 d", measureAt: "Q3 2026", actual: "15 d", progress: 80,
@@ -4046,8 +4060,8 @@ var GROUP = {
           brief: "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
           stakeholders: ["Finance", "Operations"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Cost-to-serve model built and validated", kind: "binary", due: "Q2", owner: "Fayad Sobhy", actual: "yes" },
-            { name: "Monthly review running with all units", kind: "pct", due: "Q3", owner: "Fayad Sobhy", actual: 60 }
+            { name: "Cost-to-serve model built and validated", kind: "binary", actual: "yes" },
+            { name: "Monthly review running with all units", kind: "pct", actual: 60 }
           ],
           outcomes: [
             { name: "Cost-to-serve", dir: "≤", target: "4.2%", measureAt: "Q4 2026", actual: null, progress: null }
@@ -4061,8 +4075,8 @@ var GROUP = {
           brief: "Cut the rework in distribution by fixing the two failure points that produce most of it.",
           stakeholders: ["Operations"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Failure analysis on twelve months of orders", kind: "binary", due: "Q2", owner: "Hala", actual: "yes" },
-            { name: "Corrective standard operating procedures", kind: "pct", due: "Q3", owner: "Hala", actual: 40 }
+            { name: "Failure analysis on twelve months of orders", kind: "binary", actual: "yes" },
+            { name: "Corrective standard operating procedures", kind: "pct", actual: 40 }
           ],
           outcomes: [
             { name: "First-time-right rate", dir: "≥", target: "95%", measureAt: "Q4 2026", actual: "82%", progress: 86 }
@@ -4085,8 +4099,8 @@ var GROUP = {
           brief: "Name a successor for every key role in every unit, and know which ones have nobody.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Key-role definition agreed group-wide", kind: "binary", due: "Q1", owner: "Noran Adel", actual: "yes" },
-            { name: "Succession map per unit", kind: "pct", due: "Q3", owner: "Noran Adel", actual: 70 }
+            { name: "Key-role definition agreed group-wide", kind: "binary", actual: "yes" },
+            { name: "Succession map per unit", kind: "pct", actual: 70 }
           ],
           outcomes: [
             { name: "Key-role coverage", dir: "≥", target: "90%", measureAt: "Q3 2026", actual: "62%", progress: 69,
@@ -4101,8 +4115,8 @@ var GROUP = {
           brief: "Two roles produce most of the voluntary attrition. Find out why, and change it.",
           stakeholders: ["HR"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Exit interview analysis", kind: "binary", due: "Q2", owner: "Noran Adel", actual: "yes" },
-            { name: "Revised package and progression for both roles", kind: "binary", due: "Q3", owner: "Noran Adel", actual: "no",
+            { name: "Exit interview analysis", kind: "binary", actual: "yes" },
+            { name: "Revised package and progression for both roles", kind: "binary", actual: "no",
               note: "Held pending the compensation review." }
           ],
           outcomes: [
@@ -4117,8 +4131,8 @@ var GROUP = {
           brief: "One training calendar for the group, published ahead of the year and actually delivered.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Annual training calendar published", kind: "binary", due: "Q1", owner: "Hala", actual: "yes" },
-            { name: "Calendar delivered", kind: "pct", due: "Q4", owner: "Hala", actual: 44 }
+            { name: "Annual training calendar published", kind: "binary", actual: "yes" },
+            { name: "Calendar delivered", kind: "pct", actual: 44 }
           ],
           outcomes: [
             { name: "Training hours per head", dir: "≥", target: "24", measureAt: "Q4 2026", actual: "5", progress: 21,
@@ -4142,8 +4156,8 @@ var GROUP = {
           brief: "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
           stakeholders: ["IT", "Finance", "Unit heads"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Target instance design", kind: "binary", due: "Q2", owner: "Abdelhamid", actual: "yes" },
-            { name: "Instances migrated", kind: "pct", due: "Q4", owner: "Abdelhamid", actual: 33,
+            { name: "Target instance design", kind: "binary", actual: "yes" },
+            { name: "Instances migrated", kind: "pct", actual: 33,
               note: "Two of six migrated. Mobile's cutover moved to Q3 with the principal." }
           ],
           outcomes: [
@@ -4160,8 +4174,8 @@ var GROUP = {
           brief: "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
           stakeholders: ["IT", "Finance"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Warehouse built and loading nightly", kind: "binary", due: "Q3", owner: "Ramy Behairy", actual: "no" },
-            { name: "Reporting layer live for sales and finance", kind: "pct", due: "Q4", owner: "Ramy Behairy", actual: 36 }
+            { name: "Warehouse built and loading nightly", kind: "binary", actual: "no" },
+            { name: "Reporting layer live for sales and finance", kind: "pct", actual: 36 }
           ],
           outcomes: [
             { name: "Dependency on automated reports", dir: "≥", target: "90%", measureAt: "Q4 2026", actual: "58%", progress: 64,
@@ -4176,8 +4190,8 @@ var GROUP = {
           brief: "A standing backlog of automation candidates, and a cadence that actually clears it.",
           stakeholders: ["IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Backlog built and prioritised", kind: "binary", due: "Q1", owner: "Ramy Behairy", actual: "yes" },
-            { name: "Backlog delivered", kind: "pct", due: "Q4", owner: "Ramy Behairy", actual: 52 }
+            { name: "Backlog built and prioritised", kind: "binary", actual: "yes" },
+            { name: "Backlog delivered", kind: "pct", actual: 52 }
           ],
           outcomes: [
             { name: "Manual hours removed per month", dir: "≥", target: "300", measureAt: "Q4 2026", actual: "140", progress: 47 }
@@ -4197,8 +4211,8 @@ var GROUP = {
           brief: "Establish what the market currently believes about us, and agree what we want it to believe instead.",
           stakeholders: ["Marketing"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Market perception study", kind: "binary", due: "Q2", owner: "Yara Kamal", actual: "yes" },
-            { name: "Positioning statement agreed by the board", kind: "binary", due: "Q3", owner: "Yara Kamal", actual: "no" }
+            { name: "Market perception study", kind: "binary", actual: "yes" },
+            { name: "Positioning statement agreed by the board", kind: "binary", actual: "no" }
           ],
           outcomes: [
             { name: "Unaided brand awareness", dir: "≥", target: "45%", measureAt: "Q4 2026", actual: null, progress: null }
@@ -4211,8 +4225,8 @@ var GROUP = {
           brief: "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
           stakeholders: ["Marketing", "Sales"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Twelve-month communication calendar", kind: "binary", due: "Q2", owner: "Tarek Nour", actual: "yes" },
-            { name: "Calendar executed", kind: "pct", due: "Q4", owner: "Tarek Nour", actual: 35 }
+            { name: "Twelve-month communication calendar", kind: "binary", actual: "yes" },
+            { name: "Calendar executed", kind: "pct", actual: 35 }
           ],
           outcomes: [
             { name: "Trade partner recall", dir: "≥", target: "70%", measureAt: "Q1 2027", actual: null, progress: null }
@@ -4234,8 +4248,8 @@ var GROUP = {
           brief: "One feedback loop, running continuously, whose output reaches the people who can act on it.",
           stakeholders: ["Care", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Feedback instrument agreed across units", kind: "binary", due: "Q1", owner: "Mennah Farouk", actual: "yes" },
-            { name: "Loop running in all units", kind: "pct", due: "Q4", owner: "Mennah Farouk", actual: 50 }
+            { name: "Feedback instrument agreed across units", kind: "binary", actual: "yes" },
+            { name: "Loop running in all units", kind: "pct", actual: 50 }
           ],
           outcomes: [
             { name: "Net promoter score", dir: "≥", target: "40", measureAt: "Q4 2026", actual: "26", progress: 65 },
@@ -4250,8 +4264,8 @@ var GROUP = {
           brief: "A single standard for what happens when we get it wrong, and how quickly.",
           stakeholders: ["Care"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Recovery standard published", kind: "binary", due: "Q3", owner: "Dalia Sabry", actual: "no" },
-            { name: "Care teams trained", kind: "pct", due: "Q4", owner: "Dalia Sabry", actual: 20 }
+            { name: "Recovery standard published", kind: "binary", actual: "no" },
+            { name: "Care teams trained", kind: "pct", actual: 20 }
           ],
           outcomes: [
             { name: "Repeat complaints", dir: "≤", target: "8%", measureAt: "Q1 2027", actual: null, progress: null }
@@ -4270,8 +4284,8 @@ var GROUP = {
           brief: "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
           stakeholders: ["Marketing", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review framework and evidence pack", kind: "binary", due: "Q2", owner: "Tarek Nour", actual: "yes" },
-            { name: "Quarterly reviews held", kind: "pct", due: "Q4", owner: "Tarek Nour", actual: 50 }
+            { name: "Review framework and evidence pack", kind: "binary", actual: "yes" },
+            { name: "Quarterly reviews held", kind: "pct", actual: 50 }
           ],
           outcomes: [
             { name: "Revenue from lines added in the last two years", dir: "≥", target: "25%", measureAt: "Q4 2026", actual: "11%", progress: 44 }
@@ -4301,11 +4315,11 @@ var GROUP = {
           stakeholders: ["Finance Department", "IT Department"], timeline: "date",
           start: "1 Jan 2026", end: "30 Apr 2026",
           deliverables: [
-            { name: "Oracle-based interest utilisation form", kind: "binary", due: "Q1", owner: "IT", actual: "yes" },
-            { name: "Tracking interest expense on a daily basis", kind: "binary", due: "Q1", owner: "Finance", actual: "yes" },
-            { name: "Real-time data recalculation for corridor interest and pricing", kind: "binary", due: "Q2", owner: "IT", actual: "no",
+            { name: "Oracle-based interest utilisation form", kind: "binary", actual: "yes" },
+            { name: "Tracking interest expense on a daily basis", kind: "binary", actual: "yes" },
+            { name: "Real-time data recalculation for corridor interest and pricing", kind: "binary", actual: "no",
               note: "Pricing corridor logic reopened with Treasury." },
-            { name: "Daily treasury monitoring of debt balances", kind: "pct", due: "Q2", owner: "Treasury", actual: 100 }
+            { name: "Daily treasury monitoring of debt balances", kind: "pct", actual: 100 }
           ],
           outcomes: [
             { name: "Reduction of manual work", dir: "≥", target: "40 h", measureAt: "Q2 2026", actual: "20 h", progress: 50,
@@ -4323,9 +4337,9 @@ var GROUP = {
           brief: "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
           stakeholders: ["Finance Department", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Facility term sheet agreed with lead bank", kind: "binary", due: "Q2", owner: "Treasury", actual: null },
-            { name: "Covenant reporting pack rebuilt", kind: "pct", due: "Q3", owner: "Finance", actual: null },
-            { name: "Legacy facilities closed", kind: "binary", due: "Q4", owner: "Treasury", actual: null }
+            { name: "Facility term sheet agreed with lead bank", kind: "binary", actual: null },
+            { name: "Covenant reporting pack rebuilt", kind: "pct", actual: null },
+            { name: "Legacy facilities closed", kind: "binary", actual: null }
           ],
           outcomes: [
             { name: "Arrangement and commitment fees", dir: "≤", target: "-18%", measureAt: "Q1 2027", actual: null, progress: null }
@@ -4340,8 +4354,8 @@ var GROUP = {
           brief: "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
           stakeholders: ["Finance Department"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Working capital baseline per unit", kind: "binary", due: "Q3", owner: "Finance", actual: null },
-            { name: "Unit-level release plans agreed", kind: "pct", due: "Q4", owner: "Finance", actual: null }
+            { name: "Working capital baseline per unit", kind: "binary", actual: null },
+            { name: "Unit-level release plans agreed", kind: "pct", actual: null }
           ],
           outcomes: [
             { name: "Days sales outstanding", dir: "≤", target: "65", measureAt: "Q4 2026", actual: null, progress: null },
@@ -4367,8 +4381,8 @@ var GROUP = {
           stakeholders: ["Strategy Management Office", "Unit heads"], timeline: "quarter",
           start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review format and evidence pack", kind: "binary", due: "Q1", owner: "Islam Saadany", actual: "yes" },
-            { name: "Reviews held with every unit", kind: "pct", due: "Q4", owner: "Islam Saadany", actual: 66 }
+            { name: "Review format and evidence pack", kind: "binary", actual: "yes" },
+            { name: "Reviews held with every unit", kind: "pct", actual: 66 }
           ],
           outcomes: [
             { name: "Cycles reviewed on time", dir: "≥", target: "4", measureAt: "Q4 2026", actual: "2", progress: 50 }
@@ -4382,8 +4396,8 @@ var GROUP = {
           brief: "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
           stakeholders: ["Strategy Management Office"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "All units' plans loaded", kind: "pct", due: "Q3", owner: "Islam Saadany", actual: 70 },
-            { name: "All units reporting through the platform", kind: "pct", due: "Q4", owner: "Islam Saadany", actual: 40 }
+            { name: "All units' plans loaded", kind: "pct", actual: 70 },
+            { name: "All units reporting through the platform", kind: "pct", actual: 40 }
           ],
           outcomes: [
             { name: "Plan adherence", dir: "≥", target: "80%", measureAt: "Q4 2026", actual: "51%", progress: 64 }
@@ -6052,17 +6066,17 @@ function outcomeDue(o){
   if (oy && cy && oy !== cy) return oy < cy;
   return +q[1] <= +cq[1];
 }
-function delivDue(d){
-  if (!d.due) return true;
-  var q = String(d.due).match(/Q([1-4])/);
-  var cq = String(REVIEW.name || "").match(/Q([1-4])/);
-  if (!q || !cq) return true;
-  return +q[1] <= +cq[1];
-}
+/* THERE IS NO delivDue(). A deliverable used to carry a quarter of its own,
+   and one later than the cycle meant "not asked": a row the reporting page
+   dimmed and the tally left out. Islam, 2026-08-23: a deliverable belongs to
+   the project, and the project's end is when it is delivered. The column went
+   (§53.4), and with nothing left to set there is nothing left to gate on — so
+   the predicate went too, at all four of its call sites, rather than being
+   left behind always answering true (§24). An OUTCOME still has one, because
+   a measurement time is a real thing somebody chose. */
 function projReported(p){
   var n = 0, total = 0;
   (p.deliverables || []).forEach(function(d){
-    if (!delivDue(d)) return;
     total++;
     if (d.actual != null && d.actual !== "") n++;
   });
@@ -8980,11 +8994,15 @@ function applyProgress(u, d){
    deliverable, and a status against each milestone. Only new values are read.
    ──────────────────────────────────────────────────────────────────────── */
 
+/* NO `due` COLUMN. A deliverable had one and lost it (§53.4) — the project's
+   end is when it is delivered — so the column goes with the field rather than
+   staying behind for a value nothing writes. `owner` stays: a PROJECT and a
+   MILESTONE both have one. */
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
-                 "direction","value","unit","kind","due","measure_at","start","end",
+                 "direction","value","unit","kind","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
-                    "due","measure_at","finish","current","new_value","notes"];
+                    "measure_at","finish","current","new_value","notes"];
 
 /* Address any row inside ONE capability — the import must never write into a
    neighbour, which is what scoping the finder (rather than reusing the global
@@ -9018,7 +9036,7 @@ function capPlanTemplate(c){
       timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
-        kind:d.kind, due:d.due, owner:d.owner }));
+        kind:d.kind }));
     });
     (p.outcomes || []).forEach(function(o){
       var a = splitTarget(o.target);
@@ -9073,9 +9091,8 @@ function capProgressTemplate(c){
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
         parent_name:p.name, name:d.name,
-        kind:d.kind === "pct" ? "% delivered" : "Delivered / not", due:d.due,
-        current:(d.actual == null ? "" : d.actual), new_value:"",
-        notes:delivDue(d) ? "" : "not yet due — due " + d.due }));
+        kind:d.kind === "pct" ? "% delivered" : "Delivered / not",
+        current:(d.actual == null ? "" : d.actual), new_value:"" }));
     });
     (p.outcomes || []).forEach(function(o){
       rows.push(csvRow(CAPPROG_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id,
@@ -9251,8 +9268,6 @@ function diffCapPlan(c, rows){
     } else if (hit.kind === "DELIVERABLE") {
       cmp("name", hit.obj.name, r.name);
       cmp("kind", hit.obj.kind, delivKindKey(r.kind) || "");
-      cmp("due", hit.obj.due, r.due);
-      cmp("owner", hit.obj.owner, r.owner);
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
@@ -9309,7 +9324,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
       p.deliverables.push({ id:x.id, name:x.name, kind:delivKindKey(x.kind) || "binary",
-        due:x.due || "", owner:x.owner || "", actual:null });
+        actual:null });
       made++;
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
@@ -9346,7 +9361,6 @@ function applyCapPlan(c, d){
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
       if (ch.f === "kind")           o.kind = delivKindKey(ch.now) || o.kind;
-      if (ch.f === "due")            o.due = ch.now;
       if (ch.f === "measured at")    o.measureAt = ch.now;
       if (ch.f === "what it covers") o.covers = ch.now;
       if (ch.f === "finish")         o.finish = ch.now;
@@ -10210,15 +10224,18 @@ function capPlanWorkbook(c){
                 p.timeline === "date" ? "Dates" : "Quarters", p.start || "", p.end || ""];
       }) },
 
-    { name:"Deliverables", widths:[34, 44, 16, 12, 20],
-      head:["Project", "Deliverable", "Kind", "Due", "Owner"],
+    /* THREE COLUMNS. Due and Owner went with the fields (§53.4): a
+       deliverable is delivered when the project ends, and the project's owner
+       is the project's. A column the platform no longer reads is worse than
+       no column — somebody fills it in and nothing happens. */
+    { name:"Deliverables", widths:[34, 52, 18],
+      head:["Project", "Deliverable", "Kind"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
-                    d.due || "", d.owner || ""]);
+          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not"]);
         });
         return acc;
       }, []) },
@@ -10262,12 +10279,12 @@ function capProgressWorkbook(c){
                 m.actual == null ? "" : String(m.actual), "", m.id];
       }) },
 
-    { name:"Deliverables", widths:[30, 40, 16, 10, 18, 18, 16], lockedCols:[6],
-      head:["Project", "Deliverable", "Kind", "Due", "Currently recorded", "New value", "ID"],
+    { name:"Deliverables", widths:[30, 44, 18, 18, 18, 16], lockedCols:[5],
+      head:["Project", "Deliverable", "Kind", "Currently recorded", "New value", "ID"],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
           acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
-                    d.due || "", d.actual == null ? "" : String(d.actual), "", d.id]);
+                    d.actual == null ? "" : String(d.actual), "", d.id]);
         });
         return acc;
       }, []) },
@@ -10335,7 +10352,6 @@ function capPlanFromWorkbook(c, sheets){
   }
   child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
     row.kind = delivKindKey(r["Kind"]) || r["Kind"];
-    row.due = r["Due"]; row.owner = r["Owner"];
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
@@ -12293,7 +12309,11 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
         '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
-        '<span class="rnum">' + (numOf ? numOf(it) : "") + '</span>' +
+        /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
+         the row's grid, so a rail with nothing to show on the right laid its
+         names out as though something were there — the unit's Plan rail, which
+         has never had a number, does not render one at all. */
+      (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
         (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
       '</button>';
   }).join("");
@@ -12306,13 +12326,31 @@ function splitOrPane(list, sel, rail, pane){
     : '<div class="pane">' + pane + '</div>';
 }
 
-function projMeta(p){
-  return (p.timeline === "date" ? esc(p.start) + " &rarr; " + esc(p.end) + " &middot; timeline by date"
-                                : esc(p.start) + " &rarr; " + esc(p.end) + " &middot; timeline by quarter");
-}
+/* THERE IS NO projMeta(). It built "Q1 2026 → Q4 2026 · timeline by quarter"
+   for the rail's small line, and the rail dropped it (§53.2) to match the
+   unit's. The dates are on the project's own cover line, which is where a
+   date belongs; a function left holding a helper nothing calls is how a
+   stylesheet ends up describing a control the product does not have (§24). */
 function delivKindPill(d){
   return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
 }
+/* ── ONE TABLE, TAGGED (§53.4) ─────────────────────────────────────────
+   A deliverable and an outcome were two tables, one after the other, on all
+   three project panes. Islam: they belong in the same table with a tag saying
+   which is which. They are two kinds of evidence that the project achieved
+   what it set out to — which is exactly why the SCORE still keeps them apart,
+   half each per SIDE (projPerf). Reading them together and scoring them
+   together are different questions, and only the first one was asked.
+
+   The tag is a column rather than a pill tucked beside the name: with two
+   values and two only, a column is the thing you can run your eye down. */
+var DX_HEADING = "Deliverables and outcomes";
+function dxTag(kind){
+  return '<span class="pill kind">' + (kind === "o" ? "Outcome" : "Deliverable") + '</span>';
+}
+/* The row number runs across the whole table, not once per kind: it is one
+   table now, and two rows both called 1 would say it was not. */
+function dxIdx(i){ return '<td class="idx">' + (i + 1) + '</td>'; }
 function delivShown(d){
   var v = delivReads(d);
   if (v == null) return '<span class="pill kind">&mdash;</span>';
@@ -12385,20 +12423,24 @@ function capKOTable(c){
 }
 
 function projPerformanceBody(p, fk){
-  var dRows = p.deliverables.map(function(d, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) +
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      '<td class="num">&mdash;</td>' +
       '<td class="cc">' + delivShown(d) + '</td>' +
       '<td class="num final">' + pct(delivReads(d)) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  }).join("") + p.outcomes.map(function(o){
     if (o.progress == null) {
-      return '<tr class="notdue"><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
+      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="cc">' + dxTag("o") + '</td>' +
         '<td class="num">' + esc(o.target) + '</td>' +
         '<td colspan="2" class="cc"><span class="pill kind">Measured at ' + esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) +
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) +
       (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
@@ -12418,10 +12460,8 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">Deliverables</h4>' +
-    miniTable(["#","Deliverable","Reported","Reads"], dRows) +
-    '<h4 class="mini">Outcomes</h4>' +
-    miniTable(["#","Outcome","Target","Reported","Reads"], oRows) +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Reads"], dxRows) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
     miniTable(["#","Milestone","Finish","Progress"], mRows);
 }
@@ -12442,16 +12482,26 @@ function renderFnPerformance(fnKey){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
+    /* And the same rail a unit's Performance page carries: the score on the
+       right, execution and the owner underneath, and a footer that STATES the
+       summary rather than captioning the column ("83% across 4 · execution
+       71%"). "Figure shown is performance" explained a number nobody had
+       asked about. */
+    var ce = capExec(c);
     var rail = railFor(c.projects, sel,
       function(p){ var v = projPerf(p);
-        return v == null ? '<span class="rnum">&mdash;</span>'
+        return v == null ? '&mdash;'
           : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
-      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones &middot; ' +
-        projMeta(p); },
-      null, 'Figure shown is performance',
+      function(p){ var m = projMilestones(p);
+        return 'execution ' + m.done + ' of ' + m.total +
+          (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
+      null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, "project") +
+        ' &middot; execution ' + pct(ce.pct),
       function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
-      '<h4 class="mini">Projects</h4>' +
+      /* NO HEADING OVER THE RAIL. The rail's own head says "Projects 3" two
+         lines below it, and a unit's Performance page puts no heading over
+         its pillars either (§53.2). */
       splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, fk)) + '</div>';
   }).join("");
 }
@@ -12460,14 +12510,21 @@ function renderFnPerformance(fnKey){
    The plan as it was formed. Nothing here has been reported: no progress, no
    status, no actuals. Those are entered on Reporting and read on Performance. */
 function projPlanBody(p, fk){
-  var dRows = p.deliverables.map(function(d, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
+  /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
+     project ends, so a date of its own was a second answer to a question the
+     project had already answered; and the department carries it, not a named
+     person — the project has an owner, and naming somebody per row invited
+     the unit to argue about which of them it was. */
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
       '<td class="cc">' + delivKindPill(d) + '</td>' +
-      '<td class="cc">' + esc(d.due || "\u2014") + '</td>' +
-      '<td class="cc">' + esc(d.owner || "\u2014") + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
+      '<td class="num">&mdash;</td>' +
+      '<td class="cc">&mdash;</td></tr>';
+  }).join("") + p.outcomes.map(function(o){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="cc">' + esc(o.dir) + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="cc">' + esc(o.measureAt || "\u2014") + '</td></tr>';
@@ -12478,16 +12535,20 @@ function projPlanBody(p, fk){
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td></tr>';
   }).join("");
+  /* The owner sits on the band rather than in the rail. A pillar has two
+     child lists and a project has three, so the rail's small line is a count
+     longer here — adding a name to it took every row to three lines while a
+     unit's sat at two, which is the sizing that had to match. */
   return pillarBand(projCode(fk, p), p.name,
+      (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
       '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>') +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
     (p.stakeholders || []).map(function(s){ return '<span class="pill kind">' + esc(s) + '</span> '; }).join("") +
-    '<h4 class="mini">Deliverables <em>\u2014 what the project hands over</em></h4>' +
-    miniTable(["#","Deliverable","Kind","Due","Owner"], dRows) +
-    '<h4 class="mini">Outcomes <em>\u2014 always a measure, always with a measurement time</em></h4>' +
-    miniTable(["#","Outcome","Dir.","Target","Measured at"], oRows) +
+    '<h4 class="mini">' + DX_HEADING +
+      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Measured as","Target","Measured at"], dxRows) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     miniTable(["#","Milestone","What it covers","Owner","Finish"], mRows) +
     overrunNote(p);
@@ -12500,11 +12561,18 @@ function renderFnProjects(fnKey){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
       'No projects yet.</div></div>';
-    var rail = railFor(c.projects, sel,
-      function(p){ return p.deliverables.length; },
-      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones &middot; ' +
-        projMeta(p); },
-      null, 'Figure shown is deliverables',
+    /* THE SAME RAIL A UNIT'S PLAN CARRIES (§53.2). §29.6 took the bare number
+       and the footer explaining it off the unit's Plan rail — nothing on a
+       plan page has been reported, so there is no figure to explain — and left
+       them standing on the function's, which is the same rail on the same kind
+       of page. The sub line loses projMeta with them: the unit's says how many
+       of each thing and who owns it, in one line; this said that AND the start
+       date AND the end date AND which kind of timeline, over three. */
+    var rail = railFor(c.projects, sel, null,
+      function(p){ return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
+        plural(p.outcomes.length, "outcome") + ' &middot; ' +
+        plural(p.milestones.length, "milestone"); },
+      null, null,
       function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' +
       splitOrPane(c.projects, sel, rail, projPlanBody(sel, fk)) + '</div>';
@@ -12541,28 +12609,32 @@ function capPickBox(x, may, opts, val){
 
 function projReportBody(p, may, fk){
   var r = projReported(p);
-  var dRows = p.deliverables.map(function(d, i){
-    if (!delivDue(d)) {
-      return '<tr class="notdue"><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
-        '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 due ' + esc(d.due) + '</span></td></tr>';
-    }
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
-      '<td class="cc">' + delivKindPill(d) + '</td>' +
+  /* EVERY DELIVERABLE IS ASKED. The dimmed "Not asked — due Q4" row went with
+     the due date itself (§53.4); an OUTCOME still has one, because a
+     measurement time is a real thing somebody chose. */
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      /* A deliverable has no target: the box beside it already says whether
+         it is delivered-or-not or a percentage, so the kind pill that used to
+         sit here would only be saying it twice, under a heading that is not
+         its own. */
+      '<td class="num">&mdash;</td>' +
       '<td class="cc">' + (d.kind === "pct"
         ? capEntryBox(d, "%", may, d.name)
         : capPickBox(d, may, [["","\u2014"],["yes","Delivered"],["no","Not yet"]], d.actual)) + '</td>' +
       '<td class="notecol">' + capNoteBox(d, may) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  }).join("") + p.outcomes.map(function(o){
     if (!outcomeDue(o)) {
-      return '<tr class="notdue"><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
-        '<td class="num">' + esc(o.target) + '</td>' +
+      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="cc">' + dxTag("o") + '</td>' +
         '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 measured at ' +
         esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
-      '<td class="cc">' + esc(o.measureAt || "\u2014") + '</td>' +
       '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
@@ -12575,10 +12647,8 @@ function projReportBody(p, may, fk){
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    '<h4 class="mini">Deliverables</h4>' +
-    miniTable(["#","Deliverable","Kind","Reported","Note"], dRows) +
-    '<h4 class="mini">Outcomes</h4>' +
-    miniTable(["#","Outcome","Target","Measured at","Reported","Note"], oRows) +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Note"], dxRows) +
     '<h4 class="mini">Milestones</h4>' +
     miniTable(["#","Milestone","Finish","Progress","Note"], mRows);
 }
@@ -12610,7 +12680,7 @@ function capReportBody(c){
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
-  return koBlock + '<h4 class="mini">Projects</h4>' +
+  return koBlock +
     splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
 }
 
@@ -15807,12 +15877,12 @@ function deckSlidesFn(fk){
           '<div><span class="dlab">Milestones</span><b class="plain">' + mst.done + ' of ' + mst.total + '</b></div>' +
         '</div></section>');
 
+      /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
+         a deliverable was carrying a second, quieter answer to both. */
       var dRows = p.deliverables.map(function(d, i){
         var v = delivReads(d);
         return '<tr><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(d.name) + '</td>' +
-          '<td>' + esc(d.owner || "—") + '</td>' +
-          '<td class="num">' + esc(d.due || "—") + '</td>' +
           '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
             : d.kind === "pct" ? esc(String(d.actual)) + "%"
             : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
@@ -15822,7 +15892,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
-        '<th>Owner</th><th class="num">Due</th><th class="num">Reported</th><th class="num">Reads</th>' +
+        '<th class="num">Reported</th><th class="num">Reads</th>' +
         '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
 
       var oRows = p.outcomes.map(function(o, i){
@@ -15873,11 +15943,13 @@ function deckSlidesFn(fk){
     c.projects.forEach(function(p){
       p.deliverables.forEach(function(d){
         var v = delivReads(d);
-        if (delivDue(d) && v != null && v < 70) {
+        if (v != null && v < 70) {
           n++;
           att.push('<tr><td class="idx">' + n + '</td>' +
             '<td class="lead">' + esc(d.name) + '<span class="dsub">' + esc(p.name) + ' &middot; deliverable</span></td>' +
-            '<td class="num">' + esc(d.due || "—") + '</td>' +
+            /* A deliverable has no target and no date of its own: what it is
+               aimed at is being delivered, and when is when the project ends. */
+            '<td class="num">ends ' + esc(p.end || "\u2014") + '</td>' +
             '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
             '<td class="dnote' + (d.note ? '' : ' empty') + '">' + (d.note ? esc(d.note) : "&mdash;") + '</td></tr>');
         }
@@ -17862,18 +17934,28 @@ var SYNC = (function () {
     return gs;
   }
 
-  /* Where a destination opens. Everything keeps its own first page except a
-     business unit, which opens on Strategy and, inside it, on Plan. Both are
-     checked against what the viewer holds rather than assumed. */
+  /* Where a destination opens. The group and Setup keep their own first page;
+     a BUSINESS UNIT opens on Strategy and, inside it, on Plan, and a
+     SUPPORTING FUNCTION opens on Strategy and, inside it, on Projects — the
+     same page under the name that function's plan goes by. Both are checked
+     against what the viewer holds rather than assumed.
+
+     ONE FUNCTION, TWO KINDS OF DESTINATION (§53.1). It used to say "not a
+     function" and send every function to Performance, which is exactly the
+     kind of divergence the cross-testing rule now forbids: what the unit got
+     in §28, the function did not. The tab and section keys are the only
+     difference, so they are two variables rather than two branches. */
   function entrySub(k){
     var d = allowed(defsFor(k));
     if (!d.length) return null;
-    if (k !== "group" && k !== "manage" && k !== "setup" && !isFn(k)) {
-      var strat = d.filter(function(x){ return x.k === "strategy"; })[0];
+    if (k !== "group" && k !== "manage" && k !== "setup") {
+      var fn = isFn(k);
+      var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
+      var strat = d.filter(function(x){ return x.k === tab; })[0];
       if (strat) {
-        var secs = allowed(strat.sections(UNITS[k]));
-        if (secs.some(function(x){ return x.k === "plan"; })) CURSEC.strategy = "plan";
-        if (secs.length) return "strategy";
+        var secs = allowed(strat.sections(fn ? k : UNITS[k]));
+        if (secs.some(function(x){ return x.k === want; })) CURSEC[tab] = want;
+        if (secs.length) return tab;
       }
     }
     return d[0].k;
@@ -17975,11 +18057,12 @@ var SYNC = (function () {
           CLEARING = null;
         }
         current = b.dataset.u;
-        /* A business unit opens on its PLAN, not on Performance. What the unit
-           agreed is the thing people come to read and the thing they come to
-           change; the score is a consequence of it and is one click away.
-           Falls back to the first page the viewer actually holds, so someone
-           without u_plan is not sent to a tab that is not there. */
+        /* A business unit opens on its PLAN and a supporting function on its
+           PROJECTS, not on Performance. What was agreed is the thing people
+           come to read and the thing they come to change; the score is a
+           consequence of it and is one click away. Falls back to the first
+           page the viewer actually holds, so someone without u_plan is not
+           sent to a tab that is not there. */
         currentSub = entrySub(current);
         paint(); window.scrollTo(0,0);
       });

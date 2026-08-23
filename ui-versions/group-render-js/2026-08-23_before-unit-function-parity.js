@@ -1922,11 +1922,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
         '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
-        /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
-         the row's grid, so a rail with nothing to show on the right laid its
-         names out as though something were there — the unit's Plan rail, which
-         has never had a number, does not render one at all. */
-      (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
+        '<span class="rnum">' + (numOf ? numOf(it) : "") + '</span>' +
         (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
       '</button>';
   }).join("");
@@ -1939,31 +1935,13 @@ function splitOrPane(list, sel, rail, pane){
     : '<div class="pane">' + pane + '</div>';
 }
 
-/* THERE IS NO projMeta(). It built "Q1 2026 → Q4 2026 · timeline by quarter"
-   for the rail's small line, and the rail dropped it (§53.2) to match the
-   unit's. The dates are on the project's own cover line, which is where a
-   date belongs; a function left holding a helper nothing calls is how a
-   stylesheet ends up describing a control the product does not have (§24). */
+function projMeta(p){
+  return (p.timeline === "date" ? esc(p.start) + " &rarr; " + esc(p.end) + " &middot; timeline by date"
+                                : esc(p.start) + " &rarr; " + esc(p.end) + " &middot; timeline by quarter");
+}
 function delivKindPill(d){
   return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
 }
-/* ── ONE TABLE, TAGGED (§53.4) ─────────────────────────────────────────
-   A deliverable and an outcome were two tables, one after the other, on all
-   three project panes. Islam: they belong in the same table with a tag saying
-   which is which. They are two kinds of evidence that the project achieved
-   what it set out to — which is exactly why the SCORE still keeps them apart,
-   half each per SIDE (projPerf). Reading them together and scoring them
-   together are different questions, and only the first one was asked.
-
-   The tag is a column rather than a pill tucked beside the name: with two
-   values and two only, a column is the thing you can run your eye down. */
-var DX_HEADING = "Deliverables and outcomes";
-function dxTag(kind){
-  return '<span class="pill kind">' + (kind === "o" ? "Outcome" : "Deliverable") + '</span>';
-}
-/* The row number runs across the whole table, not once per kind: it is one
-   table now, and two rows both called 1 would say it was not. */
-function dxIdx(i){ return '<td class="idx">' + (i + 1) + '</td>'; }
 function delivShown(d){
   var v = delivReads(d);
   if (v == null) return '<span class="pill kind">&mdash;</span>';
@@ -2036,24 +2014,20 @@ function capKOTable(c){
 }
 
 function projPerformanceBody(p, fk){
-  var n = 0;
-  var dxRows = p.deliverables.map(function(d){
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) +
+  var dRows = p.deliverables.map(function(d, i){
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
-      '<td class="cc">' + dxTag("d") + '</td>' +
-      '<td class="num">&mdash;</td>' +
       '<td class="cc">' + delivShown(d) + '</td>' +
       '<td class="num final">' + pct(delivReads(d)) + '</td></tr>';
-  }).join("") + p.outcomes.map(function(o){
+  }).join("");
+  var oRows = p.outcomes.map(function(o, i){
     if (o.progress == null) {
-      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
-        '<td class="cc">' + dxTag("o") + '</td>' +
+      return '<tr class="notdue"><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
         '<td class="num">' + esc(o.target) + '</td>' +
         '<td colspan="2" class="cc"><span class="pill kind">Measured at ' + esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) +
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) +
       (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
-      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
@@ -2073,8 +2047,10 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Reads"], dxRows) +
+    '<h4 class="mini">Deliverables</h4>' +
+    miniTable(["#","Deliverable","Reported","Reads"], dRows) +
+    '<h4 class="mini">Outcomes</h4>' +
+    miniTable(["#","Outcome","Target","Reported","Reads"], oRows) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
     miniTable(["#","Milestone","Finish","Progress"], mRows);
 }
@@ -2095,26 +2071,16 @@ function renderFnPerformance(fnKey){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
-    /* And the same rail a unit's Performance page carries: the score on the
-       right, execution and the owner underneath, and a footer that STATES the
-       summary rather than captioning the column ("83% across 4 · execution
-       71%"). "Figure shown is performance" explained a number nobody had
-       asked about. */
-    var ce = capExec(c);
     var rail = railFor(c.projects, sel,
       function(p){ var v = projPerf(p);
-        return v == null ? '&mdash;'
+        return v == null ? '<span class="rnum">&mdash;</span>'
           : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
-      function(p){ var m = projMilestones(p);
-        return 'execution ' + m.done + ' of ' + m.total +
-          (p.owner ? ' &middot; ' + esc(p.owner) : ''); },
-      null, pct(capPerf(c)) + ' across ' + plural(c.projects.length, "project") +
-        ' &middot; execution ' + pct(ce.pct),
+      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones &middot; ' +
+        projMeta(p); },
+      null, 'Figure shown is performance',
       function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
-      /* NO HEADING OVER THE RAIL. The rail's own head says "Projects 3" two
-         lines below it, and a unit's Performance page puts no heading over
-         its pillars either (§53.2). */
+      '<h4 class="mini">Projects</h4>' +
       splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, fk)) + '</div>';
   }).join("");
 }
@@ -2123,21 +2089,14 @@ function renderFnPerformance(fnKey){
    The plan as it was formed. Nothing here has been reported: no progress, no
    status, no actuals. Those are entered on Reporting and read on Performance. */
 function projPlanBody(p, fk){
-  /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
-     project ends, so a date of its own was a second answer to a question the
-     project had already answered; and the department carries it, not a named
-     person — the project has an owner, and naming somebody per row invited
-     the unit to argue about which of them it was. */
-  var n = 0;
-  var dxRows = p.deliverables.map(function(d){
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
-      '<td class="cc">' + dxTag("d") + '</td>' +
+  var dRows = p.deliverables.map(function(d, i){
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
       '<td class="cc">' + delivKindPill(d) + '</td>' +
-      '<td class="num">&mdash;</td>' +
-      '<td class="cc">&mdash;</td></tr>';
-  }).join("") + p.outcomes.map(function(o){
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
-      '<td class="cc">' + dxTag("o") + '</td>' +
+      '<td class="cc">' + esc(d.due || "\u2014") + '</td>' +
+      '<td class="cc">' + esc(d.owner || "\u2014") + '</td></tr>';
+  }).join("");
+  var oRows = p.outcomes.map(function(o, i){
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
       '<td class="cc">' + esc(o.dir) + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="cc">' + esc(o.measureAt || "\u2014") + '</td></tr>';
@@ -2148,20 +2107,16 @@ function projPlanBody(p, fk){
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td></tr>';
   }).join("");
-  /* The owner sits on the band rather than in the rail. A pillar has two
-     child lists and a project has three, so the rail's small line is a count
-     longer here — adding a name to it took every row to three lines while a
-     unit's sat at two, which is the sizing that had to match. */
   return pillarBand(projCode(fk, p), p.name,
-      (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
       '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>') +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
     (p.stakeholders || []).map(function(s){ return '<span class="pill kind">' + esc(s) + '</span> '; }).join("") +
-    '<h4 class="mini">' + DX_HEADING +
-      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
-    miniTable(["#","Deliverable or outcome","Type","Measured as","Target","Measured at"], dxRows) +
+    '<h4 class="mini">Deliverables <em>\u2014 what the project hands over</em></h4>' +
+    miniTable(["#","Deliverable","Kind","Due","Owner"], dRows) +
+    '<h4 class="mini">Outcomes <em>\u2014 always a measure, always with a measurement time</em></h4>' +
+    miniTable(["#","Outcome","Dir.","Target","Measured at"], oRows) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     miniTable(["#","Milestone","What it covers","Owner","Finish"], mRows) +
     overrunNote(p);
@@ -2174,18 +2129,11 @@ function renderFnProjects(fnKey){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
       'No projects yet.</div></div>';
-    /* THE SAME RAIL A UNIT'S PLAN CARRIES (§53.2). §29.6 took the bare number
-       and the footer explaining it off the unit's Plan rail — nothing on a
-       plan page has been reported, so there is no figure to explain — and left
-       them standing on the function's, which is the same rail on the same kind
-       of page. The sub line loses projMeta with them: the unit's says how many
-       of each thing and who owns it, in one line; this said that AND the start
-       date AND the end date AND which kind of timeline, over three. */
-    var rail = railFor(c.projects, sel, null,
-      function(p){ return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
-        plural(p.outcomes.length, "outcome") + ' &middot; ' +
-        plural(p.milestones.length, "milestone"); },
-      null, null,
+    var rail = railFor(c.projects, sel,
+      function(p){ return p.deliverables.length; },
+      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones &middot; ' +
+        projMeta(p); },
+      null, 'Figure shown is deliverables',
       function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' +
       splitOrPane(c.projects, sel, rail, projPlanBody(sel, fk)) + '</div>';
@@ -2222,32 +2170,28 @@ function capPickBox(x, may, opts, val){
 
 function projReportBody(p, may, fk){
   var r = projReported(p);
-  /* EVERY DELIVERABLE IS ASKED. The dimmed "Not asked — due Q4" row went with
-     the due date itself (§53.4); an OUTCOME still has one, because a
-     measurement time is a real thing somebody chose. */
-  var n = 0;
-  var dxRows = p.deliverables.map(function(d){
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
-      '<td class="cc">' + dxTag("d") + '</td>' +
-      /* A deliverable has no target: the box beside it already says whether
-         it is delivered-or-not or a percentage, so the kind pill that used to
-         sit here would only be saying it twice, under a heading that is not
-         its own. */
-      '<td class="num">&mdash;</td>' +
+  var dRows = p.deliverables.map(function(d, i){
+    if (!delivDue(d)) {
+      return '<tr class="notdue"><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
+        '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 due ' + esc(d.due) + '</span></td></tr>';
+    }
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
+      '<td class="cc">' + delivKindPill(d) + '</td>' +
       '<td class="cc">' + (d.kind === "pct"
         ? capEntryBox(d, "%", may, d.name)
         : capPickBox(d, may, [["","\u2014"],["yes","Delivered"],["no","Not yet"]], d.actual)) + '</td>' +
       '<td class="notecol">' + capNoteBox(d, may) + '</td></tr>';
-  }).join("") + p.outcomes.map(function(o){
+  }).join("");
+  var oRows = p.outcomes.map(function(o, i){
     if (!outcomeDue(o)) {
-      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
-        '<td class="cc">' + dxTag("o") + '</td>' +
+      return '<tr class="notdue"><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
+        '<td class="num">' + esc(o.target) + '</td>' +
         '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 measured at ' +
         esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
-      '<td class="cc">' + dxTag("o") + '</td>' +
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
+      '<td class="cc">' + esc(o.measureAt || "\u2014") + '</td>' +
       '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
@@ -2260,8 +2204,10 @@ function projReportBody(p, may, fk){
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Note"], dxRows) +
+    '<h4 class="mini">Deliverables</h4>' +
+    miniTable(["#","Deliverable","Kind","Reported","Note"], dRows) +
+    '<h4 class="mini">Outcomes</h4>' +
+    miniTable(["#","Outcome","Target","Measured at","Reported","Note"], oRows) +
     '<h4 class="mini">Milestones</h4>' +
     miniTable(["#","Milestone","Finish","Progress","Note"], mRows);
 }
@@ -2293,7 +2239,7 @@ function capReportBody(c){
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
     null, 'Tally is entries given of asked',
     function(p){ return projCode(c.fn, p); });
-  return koBlock +
+  return koBlock + '<h4 class="mini">Projects</h4>' +
     splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
 }
 

@@ -155,6 +155,26 @@ time). The recommendation is a sentence, not a menu — B6 still applies, so the
 trade-off is named, but it is named in the fourth part rather than as a set of
 alternatives to choose between.
 
+### A15 · A unit and a function are the same product — test both
+
+*Islam, 2026-08-23.* Every change to how something works or how it looks is
+tested on **both** sides of the navigation switch. A business unit's page and a
+supporting function's are the same product; they must not drift apart unless
+something genuinely conflicts, and where they do conflict, say which and why.
+
+This was set after v3.19 shipped three fixes that had each been applied to one
+side only: a unit opened on its plan and a function on Performance (§28, never
+carried across); a unit's rail lost a number and a footer nobody could read
+(§29.6) and a function's kept both; and a function's rail and pane sat 34px
+narrower, inside a card the unit does not have.
+
+**Walking both sides is not testing both sides.** The sweep had visited every
+one of those pages, every time, and reported "ok" — because walking a page
+proves it renders, and none of these were rendering faults. The two pages were
+fine; they were fine *differently*. So the check MEASURES the two and asserts
+they AGREE, never what the number is: a deliberate change to both stays green,
+a change to one does not (`qa.py`, "unit/function parity").
+
 ---
 
 ## B · Practices Claude adopted — confirm or drop

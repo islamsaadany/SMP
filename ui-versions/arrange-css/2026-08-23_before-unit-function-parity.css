@@ -648,10 +648,9 @@
   .obl-nm{font-size:16px;font-weight:600}
   .obl-meta{font-size:12.5px;color:var(--ink-3)}
   .oblband.cap .obl-meta{color:#C3CEE0}
-  /* THE SECOND .capbody LIVED HERE. Two rules, same selector, 105 lines
-     apart, and the later one won on source order — the identical fault §51.5
-     found in this file for `.capline` and §29.2 recorded before that. Editing
-     the padding here did nothing at all. One rule now, below. */
+  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
+    border-radius:0 0 var(--r) var(--r);padding:16px 18px 20px}
+  .capbody h4.mini:first-child{margin-top:0}
   .whoami{font:400 19px/1.2 var(--serif)}
 
   /* A build should be identifiable from a screenshot. */
@@ -747,29 +746,16 @@
      product, on the one word the band exists to say. It takes what
      `.grouphead` and `.rail .rhead` already take. */
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
-    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r);margin:16px 0 14px;
-    border:1px solid var(--line)}
-  .capline:first-child{margin-top:0}
+    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
+    border-bottom:1px solid var(--line)}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
     color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
   .capnm{font-size:15.5px;font-weight:600;color:var(--panel-ink)}
   .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--panel-quiet);
     background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
-  /* A CAPABILITY IS A BAND, NOT A CARD (§53.3). Its body used to be a bordered
-     white box, so the rail and the pane inside it — which draw their own
-     borders — sat 16px in on each side and 34px narrower than the identical
-     rail and pane on a unit's page. A card inside a card, and the sizing
-     Islam asked to match was the outer one's padding. The band stays, because
-     a function can carry several capabilities and something has to separate
-     them; the box around the rest is gone, so everything under it lines up
-     with a unit's exactly. */
-  .capbody{padding:0 0 6px}
+  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
+    border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
   .capbody h4.mini:first-child{margin-top:0}
-  /* THE STICKY BAND NEEDS THE PAGE BEHIND IT. `.pane > .pband`'s ::before
-     paints `--ground` over whatever scrolls up into the gap above it; while
-     the capbody was white, it painted the page's grey onto a white card and
-     left a seam down both sides. With no card there is nothing to disagree
-     with. */
   .caphdr{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;padding:16px 18px;
     background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin:0 0 18px}
   .capname{font:400 21px/1.2 var(--serif)}

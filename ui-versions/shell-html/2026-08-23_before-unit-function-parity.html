@@ -537,28 +537,18 @@
     return gs;
   }
 
-  /* Where a destination opens. The group and Setup keep their own first page;
-     a BUSINESS UNIT opens on Strategy and, inside it, on Plan, and a
-     SUPPORTING FUNCTION opens on Strategy and, inside it, on Projects — the
-     same page under the name that function's plan goes by. Both are checked
-     against what the viewer holds rather than assumed.
-
-     ONE FUNCTION, TWO KINDS OF DESTINATION (§53.1). It used to say "not a
-     function" and send every function to Performance, which is exactly the
-     kind of divergence the cross-testing rule now forbids: what the unit got
-     in §28, the function did not. The tab and section keys are the only
-     difference, so they are two variables rather than two branches. */
+  /* Where a destination opens. Everything keeps its own first page except a
+     business unit, which opens on Strategy and, inside it, on Plan. Both are
+     checked against what the viewer holds rather than assumed. */
   function entrySub(k){
     var d = allowed(defsFor(k));
     if (!d.length) return null;
-    if (k !== "group" && k !== "manage" && k !== "setup") {
-      var fn = isFn(k);
-      var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
-      var strat = d.filter(function(x){ return x.k === tab; })[0];
+    if (k !== "group" && k !== "manage" && k !== "setup" && !isFn(k)) {
+      var strat = d.filter(function(x){ return x.k === "strategy"; })[0];
       if (strat) {
-        var secs = allowed(strat.sections(fn ? k : UNITS[k]));
-        if (secs.some(function(x){ return x.k === want; })) CURSEC[tab] = want;
-        if (secs.length) return tab;
+        var secs = allowed(strat.sections(UNITS[k]));
+        if (secs.some(function(x){ return x.k === "plan"; })) CURSEC.strategy = "plan";
+        if (secs.length) return "strategy";
       }
     }
     return d[0].k;
@@ -660,12 +650,11 @@
           CLEARING = null;
         }
         current = b.dataset.u;
-        /* A business unit opens on its PLAN and a supporting function on its
-           PROJECTS, not on Performance. What was agreed is the thing people
-           come to read and the thing they come to change; the score is a
-           consequence of it and is one click away. Falls back to the first
-           page the viewer actually holds, so someone without u_plan is not
-           sent to a tab that is not there. */
+        /* A business unit opens on its PLAN, not on Performance. What the unit
+           agreed is the thing people come to read and the thing they come to
+           change; the score is a consequence of it and is one click away.
+           Falls back to the first page the viewer actually holds, so someone
+           without u_plan is not sent to a tab that is not there. */
         currentSub = entrySub(current);
         paint(); window.scrollTo(0,0);
       });

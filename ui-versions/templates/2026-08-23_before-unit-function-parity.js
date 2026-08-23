@@ -622,15 +622,11 @@ function applyProgress(u, d){
    deliverable, and a status against each milestone. Only new values are read.
    ──────────────────────────────────────────────────────────────────────── */
 
-/* NO `due` COLUMN. A deliverable had one and lost it (§53.4) — the project's
-   end is when it is delivered — so the column goes with the field rather than
-   staying behind for a value nothing writes. `owner` stays: a PROJECT and a
-   MILESTONE both have one. */
 var CAPP_COLS = ["id","type","parent_id","name","description","owner","stakeholders",
-                 "direction","value","unit","kind","measure_at","start","end",
+                 "direction","value","unit","kind","due","measure_at","start","end",
                  "finish","covers","weight","compile","timeline","notes"];
 var CAPPROG_COLS = ["id","type","parent_id","parent_name","name","kind","target",
-                    "measure_at","finish","current","new_value","notes"];
+                    "due","measure_at","finish","current","new_value","notes"];
 
 /* Address any row inside ONE capability — the import must never write into a
    neighbour, which is what scoping the finder (rather than reusing the global
@@ -664,7 +660,7 @@ function capPlanTemplate(c){
       timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
-        kind:d.kind }));
+        kind:d.kind, due:d.due, owner:d.owner }));
     });
     (p.outcomes || []).forEach(function(o){
       var a = splitTarget(o.target);
@@ -719,8 +715,9 @@ function capProgressTemplate(c){
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
         parent_name:p.name, name:d.name,
-        kind:d.kind === "pct" ? "% delivered" : "Delivered / not",
-        current:(d.actual == null ? "" : d.actual), new_value:"" }));
+        kind:d.kind === "pct" ? "% delivered" : "Delivered / not", due:d.due,
+        current:(d.actual == null ? "" : d.actual), new_value:"",
+        notes:delivDue(d) ? "" : "not yet due — due " + d.due }));
     });
     (p.outcomes || []).forEach(function(o){
       rows.push(csvRow(CAPPROG_COLS, { id:o.id, type:"OUTCOME", parent_id:p.id,
@@ -896,6 +893,8 @@ function diffCapPlan(c, rows){
     } else if (hit.kind === "DELIVERABLE") {
       cmp("name", hit.obj.name, r.name);
       cmp("kind", hit.obj.kind, delivKindKey(r.kind) || "");
+      cmp("due", hit.obj.due, r.due);
+      cmp("owner", hit.obj.owner, r.owner);
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
@@ -952,7 +951,7 @@ function createFromCapPlan(c, d){
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
       p.deliverables.push({ id:x.id, name:x.name, kind:delivKindKey(x.kind) || "binary",
-        actual:null });
+        due:x.due || "", owner:x.owner || "", actual:null });
       made++;
     } else if (x.type === "OUTCOME") {
       var p2 = projectById(x.parent_id); if (!p2) return;
@@ -989,6 +988,7 @@ function applyCapPlan(c, d){
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
       if (ch.f === "kind")           o.kind = delivKindKey(ch.now) || o.kind;
+      if (ch.f === "due")            o.due = ch.now;
       if (ch.f === "measured at")    o.measureAt = ch.now;
       if (ch.f === "what it covers") o.covers = ch.now;
       if (ch.f === "finish")         o.finish = ch.now;

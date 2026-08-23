@@ -7952,7 +7952,28 @@ Driven through the real controls: a new function is switchable, choosing
 Pillars stores `format`, choosing a unit stores `under`, and going back to
 Projects leaves `{}` — both keys gone.
 
-### 59.6 What is still open on spec 010
+### 59.6 Nine columns is the table's limit, and it was already at eight
+
+Drawn as two columns, *Plans in* and *Under* took the table to ten in edit
+mode. **Measured rather than judged:** at 920px "Shown in the nav" wanted 119px
+in a 94px cell, "Strategy custodian" 129 in 119 and "Capabilities" 86 in 68 —
+three headers overlapping their neighbours, and the format select clipped to
+"Proje".
+
+Two changes, both repairs to what the ninth column cost:
+
+**They became ONE column,** because they are one fact — how this function
+plans, of which `under` is the second half and exists only on the pillars side.
+Stacked in one cell, the way the Official BU list's mapping cell does it. The
+word UNDER sits above its select rather than beside it: beside it the select
+had ~90px of a 138px column and clipped "Retail Stores" to "Ret…", and the
+value is the half worth reading.
+
+**Three headers shortened** — *Nav name*, *Caps*, *Custodian*. Each still says
+what its column is; the long forms were describing what the row already shows.
+Zero overlapping headers after, measured the same way.
+
+### 59.7 What is still open on spec 010
 
 **The import template.** A pillars function's plan can be corrected on the page
 and reported on, but it cannot yet ARRIVE by upload the way a unit's does: the

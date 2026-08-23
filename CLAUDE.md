@@ -393,7 +393,44 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 — **v3.19: the capability half catches up, and
+*Last Updated: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
+A one-line ask that was decisions all the way down. **THE TENANT'S MARK GOES ON
+THE CARD, NOT ON THE WALL** — the person at that door works for the client, so
+their mark belongs on the thing they touch while Forefront's stays on the wall
+that explains the product; and the decider is a measurement, not a preference,
+because **below 980px the wall is gone entirely** and a mark placed there
+vanishes on every phone. **THE FILE YOU ARE HANDED IS NOT THE ASSET**: two
+JPEGs arrived with opaque grey grounds — a JPEG has no alpha — so the reversed
+lockup was invisible and either one would have painted a rectangle around
+itself; the mark is extracted from the client's own brand manual instead, with
+the colours read off the vector paths rather than sampled from a picture of
+them, and the manual's `#CDDDF0` **construction grid dropped, because the grid
+is not the mark**. Two faults, neither visible in the source and both found by
+rendering the result. **A `<use>` CLONES INTO A SHADOW TREE**, which a document
+selector cannot reach — so the obvious `.clientmark .mk { fill: … }` styled
+nothing at all; custom properties DO cross that boundary, so the fill is
+declared inline inside the symbol and the tokens still theme it. And **A HEIGHT
+IS NOT A WIDTH** (§35.4, again): the mark cost the card ~70px, which at
+1024×560 grew a scrollbar — and putting the fix in the existing short-window
+block only half worked, because that block carries `min-width: 981px` for the
+**wall**, which does not exist below 980. **THE WALL IS GATED ON WIDTH; THE
+CARD IS NOT** — anything condensing the card needs its own block with no width
+condition, placed last so the shorter answer wins on a screen that is both.
+Swept 22 sizes in both themes; three stacked-layout sizes still scroll and are
+recorded rather than hidden. **TWO LOCKUPS, TWO JOBS**: the arrows mark
+(`RAYA ◄► TRADE`) is the GROUP, the with-line mark (`RAYA │ DISTRIBUTION`) is
+the UNIT — Islam's ruling, and they are drawn in different blues. Extracting
+the seven unit marks lost the rule the file is named after, twice: **the
+divider is a STROKE, not a fill**, so a colour filter drops it silently, and it
+reaches above the wordmark, so removing line art that TOUCHES the redaction
+takes it with the neighbouring rows — remove only what is COVERED. Client
+material lives in **`clients/raya-trade/`** at the root, never inside
+`SMP-Project-Folder/`, which is the product and travels as a zip. Still open:
+the unit lockups on the review deck (cover and footer of every slide, to be
+drawn first), and the security decision that **an uploaded SVG is executable
+content** in a page already running `'unsafe-inline'` (§43.6).*
+
+*Earlier: 2026-08-23 — **v3.19: the capability half catches up, and
 slides get a place** (§51). Almost none of it a feature. **ADDING A CAPABILITY
 TOOK THE PRODUCT DOWN** — the add button had minted the pre-§15 shape for eleven
 versions, so the new row had no id, no function and neither of the lists every
@@ -418,7 +455,6 @@ what was asked for.** And three checks were found lying in one day — a label
 that had never scanned the page it named, a probe that broke when I edited what
 it string-matched, and two sweeps that would have gone green while walking half
 the product.*
-
 *Earlier: 2026-08-23 — **v3.18: a column the data always had, and
 pictures in the review** (§50, spec 009). **COLLABORATORS WERE NEVER MISSING**
 — a tactic has carried them since the import template, the database stores

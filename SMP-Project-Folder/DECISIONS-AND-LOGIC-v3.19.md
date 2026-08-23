@@ -6829,3 +6829,146 @@ stays. The demotion was real; its cause was the restore, not the fallback.
 `roleWhereLabel()` came out of `renderPeople()` in the same pass, because the
 restore dialog needed to name where a role was held and a second copy of that
 function is exactly the drift `lib/rules.js` exists to prevent.
+
+---
+
+## 52 · The client's own mark on the door
+
+*Written as §51 and renumbered on the way to main. **A number can be spent in
+code before it is spent in this log**: the capability-parity and Manage slides
+work reached main referencing §51 through §51.11 in its commits and its source
+comments while this log still ended at §50, so the log said the number was free
+and eleven files said it was taken — and the two merged CLEANLY, because
+nothing textually collided. That is the worst way for a collision to arrive.
+Renumbered mine rather than theirs, because a number already in shipped source
+comments is the harder one to move. **§51 was written up shortly afterwards**,
+in the v3.19 rename of this file, so the gap closed on its own; what is worth
+keeping is that for a few hours the contract and the code disagreed and no tool
+could have told you.*
+
+Islam, looking at the gate: *"in the login page I need to have the client's
+logo somewhere."* Small ask, and every part of it turned out to be a decision.
+
+### 52.1 The mark goes on the CARD, not on the wall
+
+The gate is a split door since §34: a navy wall arguing the product's case, and
+a glass card floating on a pale field. Forefront's temple mark sits top-left of
+the wall. There were four places a client's mark could go and only one survives
+the arguments.
+
+**The person at this door works for the client.** They are signing in to *their*
+strategy, not into a consulting product — so the tenant's mark belongs on the
+thing they touch, and Forefront's belongs on the wall that explains the product.
+Put both on the wall and they compete for one corner.
+
+And the decider, which is a measurement rather than a preference: **below 980px
+the wall is gone entirely** (§34), and the card is the whole page. A mark on the
+wall is a mark that vanishes on every phone. A mark on the card is on every
+screen there is.
+
+It is on **both** cards — signing in, and choosing your own password — because
+they are two doors into the same tenant. One `<symbol>`, referenced twice,
+never written twice.
+
+### 52.2 The file you are handed is not the asset
+
+Two JPEGs arrived over WhatsApp, 633×81, one black and one reversed. Neither is
+usable and the reason is not fussiness: **a JPEG has no alpha**, so the black
+one carries an opaque `#D9D9D9` ground and the reversed one `#F6F6F6` — the
+white lockup on a near-white rectangle, invisible, and either one dropped on the
+card paints a grey box around itself.
+
+What made it recoverable is that the client also sent their **brand identity
+manual**, and page 24 draws the lockup as vector artwork. So the asset is
+extracted from the client's own drawing rather than traced from a screenshot,
+and the colours are read off the paths — `#282E76` and `#3A67B1` — rather than
+sampled from a picture of them.
+
+**The manual draws every lockup over a construction grid**, `#CDDDF0`, and the
+grid is not the mark. Filtering it out is one line; noticing it is the work.
+
+### 52.3 A `<use>` clones into a SHADOW TREE
+
+One definition, two references, and the fill themed by the page's tokens — so
+`.clientmark .mk { fill: var(--client-mark) }`. It styled **nothing**. A `<use>`
+clones its target into a shadow tree that a document selector cannot reach.
+
+**Custom properties DO cross that boundary**, so the fill is declared inline
+inside the symbol and the tokens still decide it. The rule to keep: *a selector
+stops at the shadow boundary; an inherited property does not.*
+
+Caught only by screenshotting the result. It would have shipped as a black
+lockup in dark mode, on a near-black card.
+
+### 52.4 A HEIGHT IS NOT A WIDTH, and the wall and the card are gated differently
+
+The mark cost the card about 70px. At **1024×560** that was enough to push the
+page 20px past the fold and grow a scrollbar — which is *exactly* §35.4, where
+the wall's quote fell below the fold on a short laptop and no width query could
+see it. The file already carries a `@media (max-height: 700px)` block for that.
+
+Putting the condensed values in that block fixed 1024×560 and left 461–980px
+wide and short still broken — because that block is written
+`(max-height: 700px) and (min-width: 981px)`, and the `min-width` is there for
+the **wall**, which only exists above 980.
+
+**THE WALL IS GATED ON WIDTH. THE CARD IS NOT.** Anything that condenses the
+card needs its own block with no width condition — placed last, so that on a
+screen both short and narrow the *shorter* answer wins on source order.
+
+Swept 22 sizes in both themes. Three stacked-layout sizes still scroll by
+24–64px and are recorded rather than hidden: two of the three already did before
+this change, and what falls below the fold is the copyright line, never a
+control.
+
+### 52.5 Two lockups, two jobs — do not mix them
+
+The brand manual carries the mark in several forms, and the temptation is to
+pick the nicest one. Islam settled it flatly: **the arrows lockup
+(`RAYA ◄► TRADE`, the manual's "online" sub-brand) is the GROUP; the with-line
+lockup (`RAYA │ DISTRIBUTION`) is the UNIT.** Two different things, two
+different uses.
+
+So the gate wears the arrows mark, and a unit — wherever a unit's mark ends up —
+wears the line one. They are even drawn in different blues (`#282E76`/`#3A67B1`
+against `#001780`/`#225FAC`), which is the artwork and not drift in the
+extraction.
+
+### 52.6 The divider is a STROKE, and a redaction that removes what it touches removes it
+
+Extracting the seven unit lockups the same way produced seven lockups that still
+looked like lockups — and had **lost the vertical rule** that the file is
+literally named after ("Subsidiaries with line"). Twice, for two different
+reasons.
+
+The rule is drawn as a **stroked** line, not a filled shape, so a filter written
+around fill colours drops it in silence. And it reaches **above** the wordmark,
+so removing line art that *touches* the redaction took it away with the rows
+either side; it has to be removed only when *covered*.
+
+Both faults produce a plausible result. Neither is visible in the source. The
+only thing that found them was rendering the output and looking at it.
+
+### 52.7 Where the client's material lives
+
+`clients/raya-trade/` at the repository root — brand assets and reference,
+deliberately **not** inside `SMP-Project-Folder/`. That folder is the product and
+travels as a zip; a 19 MB brand manual does not belong in the thing you carry.
+A second client is a sibling folder, never a rewrite of this one.
+
+### 52.8 Still open
+
+Unit lockups on the review deck — **the cover and the footer of every slide**,
+settled in principle, to be drawn before it is built.
+
+The mapping is partly answered, and the answer is a shape rather than a list:
+**Distribution covers Mobile, IT and Consumer Electronics** — which is exactly
+the three units whose `company` is `distribution` in the stored tenant, so the
+lockup belongs to the COMPANY and its units inherit it. The Electronics lockup
+is not used. The rest is to be confirmed, so nothing else is assumed and no
+unit is given a mark on a guess.
+
+And the one that needs a decision rather than code: **an uploaded SVG is
+executable content**, in a page that already runs with `'unsafe-inline'` (§43.6).
+Either uploads are raster only, or the SVG is sanitised against an allow-list on
+the way in. The seven extracted here are safe because nobody uploaded them.

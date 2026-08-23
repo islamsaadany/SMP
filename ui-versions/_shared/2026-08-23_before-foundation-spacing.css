@@ -409,10 +409,6 @@
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
   .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
-  /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
-     not pre-wrap: line breaks survive, accidental double spaces and pasted
-     indentation do not. */
-  .flow { white-space:pre-line; }
   ul.values { display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:0; }
   ul.values li { list-style:none; background:var(--surface-2); border:1px solid var(--line-soft);
                  border-radius:var(--r); padding:6px 11px; font-size:13.5px; }

@@ -87,6 +87,24 @@
   </div>
 </div>
 
+<!-- MANAGE SLIDES (§51.8). A MODE, not a dialog — the same argument
+     presentation mode makes: preparing the pictures for a review is looking at
+     the deck, and a deck does not fit in a 940px box. The left rail is the
+     WHOLE deck, generated slides included, so where a picture slide sits is
+     said by where it sits rather than by a dropdown describing it. -->
+<div id="slideroot" class="slideroot" role="dialog" aria-modal="true"
+     aria-labelledby="sl-title" tabindex="-1">
+  <div class="slidebar">
+    <span class="sl-title" id="sl-title"></span>
+    <span class="sl-sub"></span>
+    <button data-slexit class="txt" title="Done (Esc)">Done</button>
+  </div>
+  <div class="slidebody">
+    <div class="slidelist" id="slidelist"></div>
+    <div class="slidepane" id="slidepane"></div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
   <div class="modal">
     <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
@@ -357,13 +375,25 @@
         { fold:"units", label:"Units",     open:NAVFOLD === "units" },
         { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
       ] });
+      /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
+         (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
+         name — so a function's navName was stored, printed in the Setup
+         table, editable there, and read by NOTHING. Setting the Strategy
+         Management Office to "SMO" changed a cell and left the navigation
+         saying "Strategy Management Office".
+
+         Units had gone through navName() since the field existed; functions
+         never did. §45.1's fault in a fourth tree: a field nobody reads fails
+         silently, and it fails looking like the feature was never built. The
+         same one-argument helper answers for both now, so a third kind of
+         thing added later cannot get this wrong on its own. */
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       else
-        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     }
     /* Manage and Setup used to be two glyph buttons here. They are now one
        worded button with a menu, rendered separately (paintMenu) so it can sit
@@ -552,13 +582,27 @@
            which is what these were and are not any more — a switch has two
            sides and the lit one IS the state (§47.6). `aria-pressed` rather
            than `aria-expanded` for the same reason: nothing expands. */
-        return '<span class="sep"></span><span class="foldgroup" role="group" ' +
-          'aria-label="Show units or supporting functions">' +
+        /* ONE BUTTON, TWO WORDS (§51.9, Islam: "I want it a switching button
+           where the 2 words stay on 1 button but on clicking the selection
+           switches"). It was two buttons inside a container that LOOKED like
+           one control, which is a different thing: you pressed the side you
+           wanted rather than pressing the control. Now there is one button
+           carrying both words, the lit word is the state, and pressing it
+           anywhere switches to the other — so the thing you press and the
+           thing that changes are the same object.
+
+           A plain button, not `role="switch"`: a switch is on or off and this
+           is neither: it is two named sides. The label says what pressing it
+           will DO, because the visible words already say where you are. */
+        var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
+        var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
+        return '<span class="sep"></span>' +
+          '<button class="navswitch" data-fold="' + other.fold + '"' +
+          ' aria-label="Showing ' + lit.label.toLowerCase() + '. Press to show ' +
+          other.label.toLowerCase() + '.">' +
           t.folds.map(function(f){
-            return '<button class="navfold' + (f.open ? " open" : "") +
-              '" data-fold="' + f.fold + '" aria-pressed="' + f.open + '">' +
-              f.label + '</button>';
-          }).join("") + '</span>';
+            return '<span class="nsw' + (f.open ? " on" : "") + '">' + f.label + '</span>';
+          }).join("") + '</button>';
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
@@ -1087,7 +1131,7 @@
        re-wires it). */
     document.querySelectorAll("[data-picedit]").forEach(function(b){
       b.addEventListener("click", function(){
-        picEditorOpen(b.dataset.picedit, b.dataset.pickey);
+        slidesOpen(b.dataset.picedit, b.dataset.pickey);
       });
     });
     /* A capability's reporting writes back. Before the project model these
@@ -1510,6 +1554,29 @@
        share one picker now, wired in wirePicker() below (§35). */
     var au = document.getElementById("addunit");
     if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
+    /* Capabilities: add, name, remove — the SMO's, behind the same key the
+       rest of the page is behind (§51.11). */
+    var ac = document.getElementById("addcap");
+    if (ac) ac.addEventListener("click", function(){
+      if (grant("c_caps") !== "edit") return;
+      addCapability(); paint();
+    });
+    document.querySelectorAll("[data-capname]").forEach(function(el){
+      el.addEventListener("change", function(){
+        if (grant("c_caps") !== "edit") return;
+        var c = GROUP.capabilities[+el.dataset.capname];
+        if (c) { c.name = el.value.trim() || c.name; paint(); }
+      });
+    });
+    document.querySelectorAll("[data-caprm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (grant("c_caps") !== "edit") return;
+        var i = +b.dataset.caprm, held = capabilityHolds(GROUP.capabilities[i]);
+        if (held && !confirm("Remove " + held + "? This cannot be undone here.")) return;
+        GROUP.capabilities.splice(i, 1);
+        paint();
+      });
+    });
     /* Choosing from the menu closes it and raises the confirmation, so the
        destructive act is still two deliberate presses. */
     document.querySelectorAll("[data-clear]").forEach(function(b){
@@ -1556,8 +1623,12 @@
                              name:"New objective", group:null, dir:"\u2265", target3y:"", target:"",
                              compile:"Latest", actual:"", progress:null });
         if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
-        if (k === "cap")   GROUP.capabilities.push({ name:"New capability", def:"",
-                             measures:[], tactics:[] });
+        /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
+           `measures` and `tactics` — fields §15 removed — so the row had no
+           id, no function and neither list, and the Capabilities page threw on
+           the next paint. One function mints one now, and both places that add
+           a capability call it. */
+        if (k === "cap")   addCapability();
         paint();
       });
     });
@@ -1574,12 +1645,11 @@
           if (m && (m.actual || m.target)) what = 'the objective "' + m.name + '"' +
             (m.actual ? " and its reported " + m.actual : "");
         }
-        if (p[0] === "cap") {
-          var cp = GROUP.capabilities[i];
-          if (cp && (cp.measures.length || cp.tactics.length))
-            what = '"' + cp.name + '" with ' + cp.measures.length + " measures and " +
-                   cp.tactics.length + " tactics under it";
-        }
+        /* Read from the fields a capability ACTUALLY has. This asked for
+           `measures.length` on an object that has not carried `measures` since
+           §15, so it threw before it could confirm anything and the removal
+           never ran (§51.11). */
+        if (p[0] === "cap") what = capabilityHolds(GROUP.capabilities[i]) || null;
         if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
@@ -1592,6 +1662,22 @@
         var fn = FIELDS[+el.dataset.fld];
         if (fn) { fn(el.value); paint(); }
       });
+      /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
+         end in mind is not editable in terms of space or empty lines").
+         Every long-text field was `rows="2"`, so a purpose written as three
+         paragraphs was typed through a two-line window — Enter worked, and you
+         could not see that it had. Growing is not a repaint: it sets the
+         element's own height and touches nothing else, so it is safe on
+         `input` where a repaint would destroy the field being typed into
+         (§35). Height is cleared first, or the box can only ever grow. */
+      if (el.tagName === "TEXTAREA") {
+        var fit = function(){
+          el.style.height = "auto";
+          el.style.height = (el.scrollHeight + 2) + "px";
+        };
+        el.addEventListener("input", fit);
+        fit();
+      }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -2258,10 +2344,29 @@
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              var cp = GROUP.capabilities.filter(function(x){ return x.name === picked; })[0];
+              /* WITHIN THE FUNCTION NAMED IN B3, when one is named (§51.2).
+                 Two supporting functions may each carry a capability with the
+                 same name, and before this the first match in the array won —
+                 silently, and into the wrong function's plan. A blank B3 still
+                 resolves across the tenant, so a workbook saved before this
+                 change still opens. */
+              var wantFn = readmePickFn(sheets);
+              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
+                return FUNCTIONS[k].name === wantFn; })[0];
+              if (wantFn && !fnKeyWanted) {
+                impFail('no supporting function called "' + wantFn +
+                  '". Open the Read me sheet and choose one from the dropdown in B3.');
+                return;
+              }
+              var capPool = GROUP.capabilities.filter(function(x){
+                return !fnKeyWanted || x.fn === fnKeyWanted; });
+              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail('no business unit or capability called "' + picked +
-                  '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail(fnKeyWanted
+                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
+                    '. Open the Read me sheet and check B2 and B3 against each other.'
+                  : 'no business unit or capability called "' + picked +
+                    '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;
@@ -2401,6 +2506,7 @@
   }
 
   wireDeck();
+  wireSlides();
 
   var overlay = document.getElementById("overlay");
   /* ══ THE MODAL IS ACTUALLY MODAL NOW (§48.4) ══════════════════════
@@ -2441,9 +2547,6 @@
   }
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
-    /* Before the focus restore, so the button it hands focus back to is the
-       one carrying the right count. */
-    picEditorClosing();
     overlay.classList.remove("on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }

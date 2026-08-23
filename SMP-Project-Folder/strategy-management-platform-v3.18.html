@@ -424,6 +424,10 @@
   .clause dt { font-weight:700; color:var(--stone); font-size:13.5px; }
   .clause dd { margin:0; font-family:var(--serif); font-size:15px; }
   .statement { font-family:var(--serif); font-size:16px; line-height:1.5; }
+  /* Prose somebody typed keeps the shape they typed it in (§51.1). pre-LINE,
+     not pre-wrap: line breaks survive, accidental double spaces and pasted
+     indentation do not. */
+  .flow { white-space:pre-line; }
   ul.values { display:flex; flex-wrap:wrap; gap:7px; padding:0; margin:0; }
   ul.values li { list-style:none; background:var(--surface-2); border:1px solid var(--line-soft);
                  border-radius:var(--r); padding:6px 11px; font-size:13.5px; }
@@ -2415,6 +2419,29 @@
      kind of thing.
      `align-self:center` because the group is shorter than the 47px row and
      must not be stretched to it. */
+  /* ONE CONTROL, and now one ELEMENT (§51.9). The `.foldgroup` rules below
+     dressed two buttons to look like a single segmented box; the box is the
+     button itself now and the two words are spans inside it. Same shape on
+     screen, different thing under the pointer — which is the whole point:
+     pressing it switches, rather than pressing one half of it selecting. */
+  .units .navswitch{display:inline-flex;align-items:center;align-self:center;
+    background:rgba(255,255,255,.08);border:0;border-radius:7px;overflow:hidden;
+    padding:0;margin:0 6px;cursor:pointer;font:inherit}
+  .units .navswitch:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .units .navswitch .nsw{display:block;padding:7px 13px;font-size:13.5px;
+    font-weight:700;color:rgba(255,255,255,.62);letter-spacing:-.005em;
+    transition:background .12s,color .12s}
+  .units .navswitch .nsw + .nsw{box-shadow:inset 1px 0 0 rgba(255,255,255,.16)}
+  .units .navswitch .nsw.on{color:#fff;background:rgba(255,255,255,.2)}
+  /* HOVER LIFTS THE CONTROL, NOT THE OTHER HALF. Lighting the unselected word
+     on hover was right while these were two buttons — you were pointing at the
+     side you meant. With one button it made both halves look lit and the state
+     unreadable exactly when somebody was looking at it. */
+  .units .navswitch:hover{background:rgba(255,255,255,.15)}
+  .units .navswitch:hover .nsw:not(.on){color:rgba(255,255,255,.8)}
+  .units-in.folded .navswitch{margin:0 3px}
+  .units-in.folded .navswitch .nsw{padding:7px 11px;font-size:12.5px}
+
   .units .foldgroup{display:inline-flex;align-items:center;align-self:center;
     background:rgba(255,255,255,.08);border-radius:7px;margin:0 4px;overflow:hidden}
   .units .foldgroup .navfold{background:none;border:0;opacity:1;border-radius:0;
@@ -2439,18 +2466,12 @@
      and delete its CSS with it, or the next person drawing from the stylesheet
      draws a control the product does not have (§41.9). */
 
-  .capline{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface-2);
-    color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;
-    border-bottom:1px solid var(--line)}
-  .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
-    color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
-  .capnm{font-size:15.5px;font-weight:600}
-  .capmeta{font-size:12.5px;color:#AFC0D8}
-  .captally{margin-left:auto;font-family:var(--mono);font-size:12.5px;color:var(--ink-3);
-    background:rgba(255,255,255,.12);border-radius:20px;padding:3px 10px}
-  .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
-    border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
-  .capbody h4.mini:first-child{margin-top:0}
+  /* THE FIRST .capline BLOCK IS GONE (§51.5). There were TWO of them in this
+     file — one on `--surface-2`, one on `--panel` — and the second silently
+     won on source order. Editing the first did nothing, which is §29.2's
+     lesson exactly: a duplicated CSS rule does not fail loudly, it quietly
+     ignores you. It also carried `.capmeta`, whose element the product no
+     longer has (§24). */
 
   /* The folded row carries more entries than the flat one ever did, and the
      content column is 1180px. Tightened only when the folds are present, so
@@ -2464,13 +2485,19 @@
   .units-in.folded .foldgroup .navfold{padding:7px 11px;font-size:12.5px}
   .units-in.folded .sep{margin:0 3px}
 
+  /* A SURFACE WITH ITS OWN GROUND NEEDS ITS OWN INK — §38.5, §41.10, and this
+     is the SIXTH header, missed when the other five were converted. The band
+     moved to `--panel` and kept the PAGE's ink, so the capability's own name
+     measured 1.72:1 in slate and 1.43:1 in forefront — the worst reading in the
+     product, on the one word the band exists to say. It takes what
+     `.grouphead` and `.rail .rhead` already take. */
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
-    color:var(--ink-2);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
+    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r) var(--r) 0 0;margin-top:16px;
     border-bottom:1px solid var(--line)}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
-    color:var(--panel);background:var(--gold);border-radius:20px;padding:4px 8px}
-  .capnm{font-size:15.5px;font-weight:600}
-  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3);
+    color:var(--on-accent);background:var(--gold);border-radius:20px;padding:4px 8px}
+  .capnm{font-size:15.5px;font-weight:600;color:var(--panel-ink)}
+  .captally{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--panel-quiet);
     background:rgba(255,255,255,.14);border-radius:20px;padding:3px 10px}
   .capbody{background:var(--surface);border:1px solid var(--line);border-top:0;
     border-radius:0 0 var(--r) var(--r);padding:14px 16px 18px}
@@ -2735,15 +2762,106 @@
      than being cropped by it, and the whole point is the crop. */
   .d-pics .pcell { margin:0; min-width:0; min-height:0; display:flex;
                    flex-direction:column; gap:14px; }
+  /* THE FRAME'S GROUND IS THE SLIDE'S GROUND (§51.10). With `contain` the
+     picture no longer fills its box, so whatever is behind it becomes a
+     letterbox band on the slide — and a grey band around a screenshot reads as
+     part of the design. On the slide's own white it simply disappears.
+     `object-fit` is written by picStyle per picture, never here. */
   .d-pics .pframe { flex:1; min-height:0; display:block; overflow:hidden;
-                    border-radius:6px; background:var(--surface-2); }
-  .d-pics .pframe img { width:100%; height:100%; object-fit:cover; display:block; }
+                    border-radius:6px; background:var(--surface); }
+  .d-pics .pframe img { width:100%; height:100%; display:block; }
   .d-pics figcaption { font-size:21px; line-height:1.38; color:var(--ink-2); }
+  /* Islam: "make the headers always bold". The deck's headings are a 400-weight
+     serif by design (§38's type scale) — this is the PICTURE slide's own title
+     only, which sits over evidence rather than over a table and has to hold its
+     own against it. */
+  .dslide.d-pics h2 { font-weight:700; }
   .dslide.tight.d-pics figcaption { font-size:18px; }
 
-  /* ── The editor ───────────────────────────────────────────────────
-     Inside the modal, so it wears the app's type rather than the deck's. */
-  .picwrap { display:flex; flex-direction:column; gap:18px; }
+  /* The empty slide, in the editor only. It says what it is and what will
+     happen to it, rather than being a blank rectangle somebody has to guess at. */
+  .d-blank .blankslide { flex:1; display:flex; flex-direction:column; align-items:center;
+             justify-content:center; gap:14px; border:2px dashed var(--line);
+             border-radius:10px; color:var(--ink-3); text-align:center; }
+  .d-blank .blankslide span { font-size:38px; font-weight:600; color:var(--ink-2); }
+  .d-blank .blankslide em { font-style:normal; font-size:24px; }
+
+  /* ── MANAGE SLIDES (§51.8) ─────────────────────────────────────────
+     A mode, laid out like the thing it edits: the deck down the left, the
+     slide you are working on filling the right. It borrows the deck's own
+     chrome (`.deckroot`, `.deckbar`) rather than inventing a second full-screen
+     shell — one product. */
+  .slideroot { position:fixed; inset:0; z-index:60; background:var(--surface-2); display:none; }
+  .slideroot.on { display:flex; flex-direction:column; }
+  .slidebar { display:flex; align-items:center; gap:12px; padding:10px 16px;
+              background:var(--panel); color:var(--panel-ink); flex:none; }
+  .sl-title { font-weight:700; font-size:var(--fs-body); }
+  .sl-sub { font-size:var(--fs-small); color:var(--panel-quiet); }
+  .slidebar [data-slexit] { margin-left:auto; font:inherit; font-size:var(--fs-small);
+              letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+              background:none; border:1px solid rgba(255,255,255,.35);
+              color:var(--panel-ink); border-radius:var(--r-pill);
+              padding:6px 16px; cursor:pointer; }
+  .slidebar [data-slexit]:hover { background:rgba(255,255,255,.14); }
+  .slidebody { flex:1; min-height:0; display:flex; }
+
+  /* The rail. Its own scroller, because the deck is long and the pane is not. */
+  .slidelist { width:232px; flex:none; overflow-y:auto; background:var(--surface);
+               border-right:1px solid var(--line); padding:10px; }
+  .slrow { display:grid; grid-template-columns:20px 168px; gap:8px; align-items:start;
+           padding:6px; border-radius:var(--r-sm); cursor:pointer; margin-bottom:4px; }
+  .slrow:hover { background:var(--surface-2); }
+  .slrow.on { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+  .sl-n { font:600 11px/1.6 var(--mono); color:var(--ink-3); text-align:right; }
+  .sl-lab { grid-column:2; font-size:var(--fs-small); color:var(--ink-2); line-height:1.35;
+            overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  /* --gold-deep on --surface-2 is 4.45:1 — §38.5, and the SIXTH time. The
+     selected row's ground is `--surface-2`, so the accent that reads fine on
+     every other row fails on the one you are looking at. The gold thumbnail
+     border already marks these as yours; the words take an ink that clears on
+     both grounds. */
+  .sl-lab em { display:block; font-style:normal; font-size:var(--fs-micro);
+               letter-spacing:var(--track); text-transform:uppercase;
+               color:var(--ink-2); font-weight:700; margin-top:2px; }
+  /* A REAL SLIDE AT ONE TENTH, not a drawing of one — so a slide that is wrong
+     is wrong here too. The holder is `position:relative` because `.dslide` is
+     `position:absolute; inset:0` and needs something to be inset within. */
+  .sthumb { display:block; width:168px; height:94.5px; overflow:hidden;
+            border:1px solid var(--line); border-radius:3px; background:var(--surface); }
+  .sthumb-in { display:block; position:relative; width:1600px; height:900px;
+               transform:scale(.105); transform-origin:0 0; pointer-events:none; }
+  .slrow.mine .sthumb { border-color:var(--gold); }
+  /* Pinned, and above the list rather than below it: it is the first thing
+     you came here to do. */
+  .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
+            padding:6px 6px 10px; margin:-10px -10px 6px; border-bottom:1px solid var(--line);
+            display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+  .sl-add .editbtn { width:100%; }
+  .sl-add .picsub { text-align:center; font-size:var(--fs-micro); }
+
+  /* The pane: the slide above, its controls below. */
+  /* THE SLIDE TAKES THE ROOM (§51.9, Islam). The stage was capped at 420px
+     and the pane scrolled, so most of the right-hand side was empty below the
+     controls — on the very screen whose whole job is looking at one slide. It
+     fills whatever is left now, and the controls keep their natural height at
+     the bottom. min-height:0 on the stage or a flex child refuses to shrink
+     below its content and the cap comes back by another route. */
+  .slidepane { flex:1; min-width:0; display:flex; flex-direction:column;
+               gap:14px; padding:16px; overflow:hidden; }
+  .sstage { flex:1; min-height:0; position:relative; }
+  .slidepane .slctl { flex:none; max-height:46%; overflow-y:auto; }
+  /* Centred in whatever room there is, rather than pinned to the top-left of
+     a box that is now usually wider than 16:9. */
+  .sstage-in { position:absolute; top:0; left:50%; width:1600px; height:900px;
+               transform-origin:0 0; box-shadow:0 6px 24px rgba(0,0,0,.16); }
+  .slctl { background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r-lg); padding:14px 15px 16px; }
+  .slctl-read { color:var(--ink-3); }
+  .slctl-read p { margin:0; }
+  .slctl-h { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .slctl-h .picttl { flex:1; min-width:180px; }
+
+  /* ── The picture controls ─────────────────────────────────────────── */
   .picnone { margin:0; color:var(--ink-3); font-size:var(--fs-note); }
   .picerr { margin:0 0 4px; padding:9px 12px; border-radius:var(--r-sm);
             background:var(--surface-2); border-left:3px solid var(--bad);
@@ -2759,7 +2877,21 @@
   .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
                      border:1px solid var(--line); border-radius:var(--r-sm);
                      background:var(--surface); color:var(--ink); max-width:320px; }
-  .picslots { display:grid; gap:12px; }
+  /* THE EDITOR'S SLOTS WRAP (§51.6). They took the same fixed column counts
+     the slide uses, so four across in a 940px dialog gave 200px frames, and
+     on a laptop the row simply ran out of room. The slide keeps its exact
+     arrangement — it is a fixed 1600x900 stage and there is always room —
+     while the editor fits as many as the dialog can hold and wraps the rest.
+     Written WITHOUT a pg-class in front of it so it beats nothing and is
+     beaten by nothing: it is the only rule that sizes .picslots. */
+  /* THE CONTROLS ARE HANDLES, NOT THE PREVIEW. The slide above is the
+     preview — full size, exactly as it will project — so these frames only
+     have to be big enough to drag inside. auto-FILL with a MAX, not auto-fit
+     with 1fr: two pictures in a 1200px pane were becoming 590px frames, half a
+     screen each, and the thing you were actually framing was pushed off the
+     top. They cap at 230px and sit left. */
+  .picslots { display:grid; gap:12px;
+              grid-template-columns:repeat(auto-fill, minmax(190px, 230px)); }
   .picslot { display:flex; flex-direction:column; gap:8px; min-width:0; }
   /* A fixed 16:10 well, so the frame in here has the same shape as the frame
      on the slide whatever the arrangement — otherwise the crop chosen against
@@ -2768,7 +2900,7 @@
               border-radius:var(--r-sm); background:var(--surface-2);
               border:1px solid var(--line); cursor:grab; touch-action:none; }
   .picframe.dragging { cursor:grabbing; }
-  .picframe img { width:100%; height:100%; object-fit:cover; display:block;
+  .picframe img { width:100%; height:100%; display:block;
                   pointer-events:none; user-select:none; }
   .picslot.empty { justify-content:stretch; }
   /* THE CARD'S OWN GROUND, not the quiet one — §38.5 for the fifth time, and
@@ -2785,11 +2917,23 @@
   .picdrop input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
   .picdrop:focus-within { outline:2px solid var(--gold); outline-offset:1px; }
   .picplus { font-size:22px; line-height:1; color:var(--gold-deep); }
-  .picctl { display:flex; align-items:center; gap:10px; }
-  .piczoom { flex:1; display:flex; align-items:center; gap:7px; min-width:0;
+  .picctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .picctl .minisw { flex:none; }
+  .piczoom { display:flex; align-items:center; gap:7px; min-width:0;
              font-size:var(--fs-micro); letter-spacing:var(--track);
              text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .piczoom input { flex:1; min-width:0; accent-color:var(--gold); }
+  .piczoom b { font-family:var(--mono); font-size:10px; color:var(--ink-2);
+               min-width:34px; text-align:right; letter-spacing:0; }
+
+  /* Up and down. A pair, boxed like the arrangement switch beside it. */
+  .slmove { display:inline-flex; border:1px solid var(--line); border-radius:var(--r-sm);
+            overflow:hidden; }
+  .slmove button { font:inherit; font-size:10px; line-height:1; background:var(--surface);
+                   border:0; color:var(--ink-2); padding:7px 9px; cursor:pointer; }
+  .slmove button + button { border-left:1px solid var(--line); }
+  .slmove button:hover { background:var(--surface-2); color:var(--ink); }
+  .slmove button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .picslot .piccap { width:100%; }
   .picfoot { display:flex; align-items:center; gap:12px; }
   .picsub { font-size:var(--fs-small); color:var(--ink-3); }
@@ -3146,6 +3290,24 @@ THEME.apply();
     <button data-dfit class="txt" title="Fit to window instead of 16:9">Fit</button>
     <button data-dfs class="txt" title="Fullscreen">Fullscreen</button>
     <button data-dexit class="txt" title="Exit (Esc)">Exit</button>
+  </div>
+</div>
+
+<!-- MANAGE SLIDES (§51.8). A MODE, not a dialog — the same argument
+     presentation mode makes: preparing the pictures for a review is looking at
+     the deck, and a deck does not fit in a 940px box. The left rail is the
+     WHOLE deck, generated slides included, so where a picture slide sits is
+     said by where it sits rather than by a dropdown describing it. -->
+<div id="slideroot" class="slideroot" role="dialog" aria-modal="true"
+     aria-labelledby="sl-title" tabindex="-1">
+  <div class="slidebar">
+    <span class="sl-title" id="sl-title"></span>
+    <span class="sl-sub"></span>
+    <button data-slexit class="txt" title="Done (Esc)">Done</button>
+  </div>
+  <div class="slidebody">
+    <div class="slidelist" id="slidelist"></div>
+    <div class="slidepane" id="slidepane"></div>
   </div>
 </div>
 
@@ -6400,6 +6562,30 @@ function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
 
+/* ── A PROJECT IS THE FUNCTION'S PILLAR, SO IT IS CODED LIKE ONE (§51.3) ──
+   On a unit page the rail holds PILLARS and each shows MB01, RS02. On a
+   function page the rail holds PROJECTS and they showed nothing at all — so
+   the same shelf in the same component was addressable on one page and
+   nameless on the next, and there was no way to say "FIN02" in a meeting.
+
+   Same shape as pillarCode and for the same reasons: the function's own
+   prefix, then the position, DERIVED and never stored (§46.3 — the code shown
+   is derived, the code stored is an identifier). Numbered across the whole
+   function rather than within each capability, because the function is what
+   owns the prefix and a person saying "FIN02" should not have to say which
+   capability first. */
+function fnProjects(fk){
+  return capsOfFunction(fk).reduce(function(acc, c){
+    return acc.concat(c.projects || []);
+  }, []);
+}
+function projCode(fk, p){
+  var f = FUNCTIONS[fk];
+  if (!f || !p) return "";
+  var i = fnProjects(fk).map(function(x){ return x.id; }).indexOf(p.id);
+  return i < 0 ? "" : (f.codePrefix || "") + String(i + 1).padStart(2, "0");
+}
+
 function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
 function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
 function dueTactics(p){ return p.tactics.filter(tacticDue); }
@@ -6879,6 +7065,47 @@ GROUP.capabilities.forEach(function(c, ci){
   c.id = "cap" + (ci + 1);
   renumberCapability(c);
 });
+
+/* ── Minting a capability (§51.11) ────────────────────────────────────────
+   THE ONE PLACE A CAPABILITY IS BORN. There was an add button on the Temple
+   page that pushed `{ name, def, measures:[], tactics:[] }` — the shape a
+   capability had BEFORE §15 replaced measures and tactics with key objectives
+   and projects. So the row it made had no id, no function, and neither of the
+   two lists every reader expects, and the Capabilities Setup page threw
+   `Cannot read properties of undefined` and rendered nothing at all. Adding a
+   capability took the product down.
+
+   §24's rule with the sign reversed: when a field is renamed, the code that
+   CREATES it has to be found as well as the code that reads it. A reader that
+   crashes is at least loud; a writer that mints the old shape is silent until
+   somebody opens the page.
+
+   The id must not collide with one already in use, so it is taken from the
+   highest number in play rather than from the length — removing a capability
+   and adding another would otherwise hand the newcomer a dead row's id. */
+function addCapability(fnKey){
+  var n = 0;
+  GROUP.capabilities.forEach(function(c){
+    var m = /^cap(\d+)$/.exec(String(c.id || ""));
+    if (m) n = Math.max(n, +m[1]);
+  });
+  var made = { id:"cap" + (n + 1), name:"New capability", def:"",
+               fn:fnKey || null, keyObjectives:[], projects:[] };
+  GROUP.capabilities.push(made);
+  renumberCapability(made);
+  return made;
+}
+/* What removing one would destroy, in words, or "" when it is an empty row
+   somebody added a moment ago. Read from the fields a capability ACTUALLY has
+   — the old check read `measures` and `tactics` and threw on every real one,
+   so the confirmation never appeared and the removal never happened. */
+function capabilityHolds(c){
+  if (!c) return "";
+  var k = (c.keyObjectives || []).length, p = (c.projects || []).length;
+  if (!k && !p) return "";
+  return '"' + (c.name || "this capability") + '" with ' +
+    plural(k, "key objective") + " and " + plural(p, "project") + " under it";
+}
 
 /* Address any row inside a capability by its id: a key objective, or a
    deliverable, outcome or milestone inside one of its projects. Reporting
@@ -9606,10 +9833,21 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 
-function capReadme(kind, capNames, picked){
+/* THE WORKBOOK HAS TO SAY WHICH FUNCTION IT IS FOR (§51.2).
+   B2 named the capability and nothing named the function it sits under, so two
+   functions with a similarly named capability could not be told apart, and a
+   file that came back with B2 retyped rather than chosen simply failed with
+   nothing to point at. B3 is now a dropdown of the tenant's supporting
+   functions, and the import resolves the capability WITHIN it.
+
+   Blank B3 still works: an older workbook resolves the capability across the
+   whole tenant exactly as before. A template is a thing people keep on disk
+   for months, and one that stops opening is a template that has broken. */
+function capReadme(kind, capNames, picked, fnNames, pickedFn){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
+       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -9623,6 +9861,7 @@ function capReadme(kind, capNames, picked){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
+       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -9635,16 +9874,35 @@ function capReadme(kind, capNames, picked){
   var sheet = { name:"Read me", widths:[22, 96],
                 rows:lines.map(function(l){ return [l[0], l[1]]; }),
                 validations:[{ range:"B2:B2", list:capNames,
+                               error:"Choose one from the list." },
+                             { range:"B3:B3", list:fnNames || [],
                                error:"Choose one from the list." }] };
   sheet.rows[1][1] = picked || "";
+  sheet.rows[2][1] = pickedFn || "";
   return sheet;
+}
+
+/* The tenant's supporting functions, for the dropdown — retired ones are not
+   offered, for the same reason a retired unit is not offered a plan. */
+function fnSuggestions(){
+  return Object.keys(FUNCTIONS)
+    .filter(function(k){ return FUNCTIONS[k].active !== false; })
+    .map(function(k){ return FUNCTIONS[k].name; });
+}
+/* The function cell, read back. Blank is a legitimate answer (see above), so
+   this returns "" rather than refusing. */
+function readmePickFn(sheets){
+  var rows = sheets["Read me"];
+  if (!rows || !rows[2]) return "";
+  return String(rows[2][1] == null ? "" : rows[2][1]).trim();
 }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
   var units = unitSuggestions();
   return [
-    capReadme("plan", names, c ? c.name : ""),
+    capReadme("plan", names, c ? c.name : "", fnSuggestions(),
+              c && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
@@ -9708,7 +9966,8 @@ function capPlanWorkbook(c){
 
 function capProgressWorkbook(c){
   return [
-    capReadme("progress", [c.name], c.name),
+    capReadme("progress", [c.name], c.name, fnSuggestions(),
+              FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
@@ -11188,8 +11447,20 @@ function penBtn(page, acKey){
    the foundation rendered inputs that were bound to nothing, so every edit
    looked accepted and was silently discarded on the next repaint. */
 var FIELDS = [];
+/* A PARAGRAPH TYPED AS TWO PARAGRAPHS MUST READ AS TWO PARAGRAPHS (§51.1).
+   The editing control is a <textarea>, which keeps every line break the person
+   typed; the READING control was a bare <span>, and HTML collapses newlines to
+   a single space. So a purpose statement written as three sentences with air
+   between them came back as one run-on block the moment the pen was closed —
+   the text was never lost, it was only never shown.
+
+   `flow` carries `white-space:pre-line`: line breaks survive, runs of spaces
+   and stray indentation do not. That is the right pair for prose somebody
+   typed, and it is on fieldOr rather than on each caller so every long-text
+   field in the platform behaves the same way. */
 function fieldOr(page, value, cls, setter){
-  if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
+  if (!EDIT_PAGE[page] || !setter)
+    return '<span class="flow ' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
   return '<textarea class="fld ' + (cls || '') + '" data-fld="' + i + '" rows="2">' + esc(value) + '</textarea>';
 }
@@ -11663,15 +11934,23 @@ function capHead(c){
     '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
 }
 
-function fnHead(fk){
-  var f = FUNCTIONS[fk], caps = capsOfFunction(fk), people = functionPeople(fk);
-  return '<div class="caphdr">' +
-    '<div><div class="capname">' + esc(f.name) + '</div>' +
-      '<div class="why" style="margin:3px 0 0">Supporting function &middot; ' +
-        esc(people.map(personName).join(", ")) +
-        ' &middot; carries ' + caps.length + ' ' + (caps.length === 1 ? "capability" : "capabilities") +
-        ', scored by the group</div></div></div>';
-}
+/* THE FUNCTION'S OWN NAMEPLATE IS GONE (§51.4, Islam).
+
+   It printed the function's name, its people, how many capabilities it carries
+   and "scored by the group" — above a navigation row that already highlights
+   the function you are looking at. That is §24's argument, and the unit pages
+   settled it two versions earlier: a UNIT has no such band on any of its
+   tabs, so a function carrying one made the two halves of the product read as
+   two products.
+
+   It was also lying on a tenant where nobody is attached: with no people the
+   line rendered "Supporting function \u00b7 \u00b7 carries 1 capability" — two
+   middots with nothing between them, which is what a joined empty list looks
+   like. A line that has to be defended by a fallback for the ordinary case is
+   a line nobody needed.
+
+   The capability's own band (`capBand`) stays: a function may carry several,
+   and that band is what says which one a section belongs to. */
 
 function capBand(c){
   var r = capReported(c);
@@ -11698,14 +11977,19 @@ function railPick(c){
    column of wasted width. The pane simply fills it. */
 function railWorthIt(list){ return (list || []).length >= 2; }
 
-function railFor(list, sel, numOf, subOf, groupOf, footNote){
+/* `codeOf` is optional and last, so every existing caller is untouched. The
+   unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
+   project rail beside it showed a bare name, and the two rails are the same
+   component doing the same job (§51.3). */
+function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
   var lastGroup = null;
   var rows = list.map(function(it){
     var g = groupOf ? groupOf(it) : null, head = "";
     if (g && g !== lastGroup) { head = '<div class="rgroup">' + esc(g) + '</div>'; lastGroup = g; }
+    var code = codeOf ? codeOf(it) : "";
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
-        '<b>' + esc(it.name) + '</b>' +
+        '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
         '<span class="rnum">' + (numOf ? numOf(it) : "") + '</span>' +
         (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
       '</button>';
@@ -11797,7 +12081,7 @@ function capKOTable(c){
       }).join(""));
 }
 
-function projPerformanceBody(p){
+function projPerformanceBody(p, fk){
   var dRows = p.deliverables.map(function(d, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
@@ -11822,10 +12106,15 @@ function projPerformanceBody(p){
       '<td class="cc">' + msPill(m) + '</td></tr>';
   }).join("");
   var mst = projMilestones(p);
-  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
-      '<div class="pmeta">' + projMeta(p) + ' &middot; deliverables ' + pct(projDeliverySide(p)) +
-      ', outcomes ' + pct(projOutcomeSide(p)) + '</div></div>' +
-      '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span></div>' +
+  /* THE SAME BAND THE PILLAR PANE WEARS (§51.3). It was an `.ptitle` with a
+     19px <h3> and a meta line — the shape the unit's pane carried until §46.3
+     replaced it with a 33px band, code first, on `--surface-2` with a gold
+     left edge. Two panes doing the same job in the same component wore two
+     different headers; they wear one now, and the project shows the code the
+     rail beside it shows. The `right` slot pillarBand has always had and never
+     used carries the score. */
+  return pillarBand(projCode(fk, p), p.name,
+      '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
     '<h4 class="mini">Deliverables</h4>' +
     miniTable(["#","Deliverable","Reported","Reads"], dRows) +
     '<h4 class="mini">Outcomes</h4>' +
@@ -11841,7 +12130,7 @@ function renderFnPerformance(fnKey){
      platform holds at that moment. */
   return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
       '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
-    fnHead(fk) + caps.map(function(c){
+    caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
@@ -11849,18 +12138,20 @@ function renderFnPerformance(fnKey){
       function(p){ var v = projPerf(p);
         return v == null ? '<span class="rnum">&mdash;</span>'
           : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
-      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones'; },
-      null, 'Figure shown is performance');
+      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones &middot; ' +
+        projMeta(p); },
+      null, 'Figure shown is performance',
+      function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<h4 class="mini">Projects</h4>' +
-      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, fk)) + '</div>';
   }).join("");
 }
 
 /* ── Capability \u2192 Projects ──────────────────────────────────────────
    The plan as it was formed. Nothing here has been reported: no progress, no
    status, no actuals. Those are entered on Reporting and read on Performance. */
-function projPlanBody(p){
+function projPlanBody(p, fk){
   var dRows = p.deliverables.map(function(d, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
       '<td class="cc">' + delivKindPill(d) + '</td>' +
@@ -11879,9 +12170,8 @@ function projPlanBody(p){
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td></tr>';
   }).join("");
-  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
-      '<div class="pmeta">' + projMeta(p) + '</div></div>' +
-      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span></div>' +
+  return pillarBand(projCode(fk, p), p.name,
+      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>') +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
@@ -11897,16 +12187,18 @@ function projPlanBody(p){
 
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return fnHead(fk) + caps.map(function(c){
+  return caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
       'No projects yet.</div></div>';
     var rail = railFor(c.projects, sel,
       function(p){ return p.deliverables.length; },
-      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones'; },
-      null, 'Figure shown is deliverables');
+      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones &middot; ' +
+        projMeta(p); },
+      null, 'Figure shown is deliverables',
+      function(p){ return projCode(fk, p); });
     return capBand(c) + '<div class="capbody">' +
-      splitOrPane(c.projects, sel, rail, projPlanBody(sel)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPlanBody(sel, fk)) + '</div>';
   }).join("");
 }
 
@@ -11938,7 +12230,7 @@ function capPickBox(x, may, opts, val){
     }).join("") + '</select>';
 }
 
-function projReportBody(p, may){
+function projReportBody(p, may, fk){
   var r = projReported(p);
   var dRows = p.deliverables.map(function(d, i){
     if (!delivDue(d)) {
@@ -11972,10 +12264,8 @@ function projReportBody(p, may){
         [["","\u2014"],["todo","Not started"],["wip","In progress"],["done","Completed"]], m.status) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
-  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
-      '<div class="pmeta">' + esc(REVIEW.name) + ' &middot; ' + r.total + ' entries asked, ' +
-      r.done + ' given</div></div>' +
-      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span></div>' +
+  return pillarBand(projCode(fk, p), p.name,
+      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
     '<h4 class="mini">Deliverables</h4>' +
     miniTable(["#","Deliverable","Kind","Reported","Note"], dRows) +
     '<h4 class="mini">Outcomes</h4>' +
@@ -12009,15 +12299,16 @@ function capReportBody(c){
     function(p){ var r = projReported(p);
       return r.total === 0 ? 'Not asked this cycle'
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
-    null, 'Tally is entries given of asked');
+    null, 'Tally is entries given of asked',
+    function(p){ return projCode(c.fn, p); });
   return koBlock + '<h4 class="mini">Projects</h4>' +
-    splitOrPane(c.projects, sel, rail, projReportBody(sel, may));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
 }
 
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (REVIEW.state !== "open") {
-    return fnHead(fk) + '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
+    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
   }
   var done = 0, total = 0;
@@ -12028,7 +12319,7 @@ function renderFnReport(fnKey){
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
     '</div>';
-  return fnHead(fk) + bar + caps.map(function(c){
+  return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
 }
@@ -12242,7 +12533,7 @@ function renderUnitPlan(u){
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return fnHead(fk) + editBar("capfoundation", "k_found") + caps.map(function(c){
+  return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
     var koBlock = c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
@@ -14773,7 +15064,14 @@ function renderCaps(){
   var rows = GROUP.capabilities.map(function(c, i){
     var f = functionOf(c.fn);
     return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td><b>' + esc(c.name) + '</b></td>' +
+      /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
+         else, so a capability could be given an owner but never renamed —
+         and a capability added from Temple arrived called "New capability"
+         with no way on this page to say what it actually is. */
+      '<td>' + (editable
+        ? '<input class="fld" value="' + esc(c.name) + '" data-capname="' + i +
+          '" aria-label="Name of capability ' + (i+1) + '">'
+        : '<b>' + esc(c.name) + '</b>') + '</td>' +
       '<td>' + (editable
         /* NAMED. Eight of these on one page announced as eight identical
            unnamed combo boxes, and the searchable button in front of each
@@ -14787,8 +15085,14 @@ function renderCaps(){
             }).join("") + '</select>'
         : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
       '<td class="nowrapcell">' + esc(f ? (personName(f.head) || "\u2014") : "\u2014") + '</td>' +
-      '<td class="num">' + c.keyObjectives.length + '</td>' +
-      '<td class="num">' + c.projects.length + '</td></tr>';
+      /* Defensive on purpose: a capability minted by an older build carries
+         neither list, and a Setup page that throws takes the whole screen with
+         it. The minting is fixed (§51.11); this is so a graph saved before the
+         fix still opens. */
+      '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
+      '<td class="num">' + (c.projects || []).length + '</td>' +
+      '<td class="cc">' + (editable
+        ? '<button class="rmbtn" data-caprm="' + i + '">Remove</button>' : '') + '</td></tr>';
   }).join("");
 
   var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
@@ -14801,8 +15105,14 @@ function renderCaps(){
          shading rather than as a long name. */
       '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:26%">Capability</th>' +
         '<th style="width:20%">Owned by</th><th style="width:24%">Head</th>' +
-        '<th class="cc">Key objectives</th><th class="cc">Projects</th></tr></thead>' +
+        '<th class="cc">Key objectives</th><th class="cc">Projects</th>' +
+        '<th class="cc"></th></tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
+      (editable
+        ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a capability</button>' +
+          '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
+          'carries it, then upload its projects on Import.</span></div>'
+        : '') +
       '<div class="note"><b>One function each.</b> A function may hold several capabilities \u2014 ' +
         'Marketing carries two \u2014 which is why a custodian is named after the function and never ' +
         'after a capability: naming someone after one breaks the moment a second is assigned.</div>' +
@@ -15300,7 +15610,7 @@ function deckSlidesFn(fk){
    renamed, replaced by an upload or removed between the day a picture was
    placed and the day the deck is opened; the picture then goes to the end,
    where it is still in the room, rather than being silently dropped. */
-function insertPictureSlides(deck, target){
+function insertPictureSlides(deck, target, blank){
   var list = pslidesOf(target);
   if (!list.length) return;
   var host = {}, where = {};
@@ -15312,10 +15622,11 @@ function insertPictureSlides(deck, target){
   });
   var tail = deck.querySelector("[data-anchor-where='before']");
   list.forEach(function(sl){
-    var html = pslideHtml(sl);
+    var html = pslideHtml(sl, blank);
     /* A slide somebody started and put no picture in is not shown — and it
        must not move the anchor either, or the NEXT slide on that anchor would
-       be placed after whatever happened to follow it. */
+       be placed after whatever happened to follow it. The editor passes
+       `blank` and does see it (§51.8). */
     if (!html) return;
     var at = host[sl.at];
     if (!at) { /* the anchor has gone; the slide has not */
@@ -15547,15 +15858,42 @@ function pslideNewId(){
    The crop is `object-position` plus a scale, and it is the SAME two numbers
    the editor writes and the same two the editor previews. One rendering, so
    what was framed is what is shown. */
+/* FIT IS THE DEFAULT, NOT FILL (§51.10, Islam: "allow me to zoom out more as
+   the zoom in is too big", and "pictures need to be wrapped to fit in the space
+   you give to it in the slide").
+
+   Both notes are the same note. The frames were `object-fit:cover`, which fills
+   the box and throws away whatever does not fit — so a portrait infographic in
+   a landscape frame lost both its edges, and the zoom slider could only make
+   that worse because 100% was already the tightest crop available. There was no
+   way to say "show me all of it".
+
+   So a picture FITS its frame whole, and FILL is the deliberate choice for a
+   photograph that should bleed. §16.12 asks for a screenshot of a platform
+   before it asks for anything else, and a screenshot with its edges cut off is
+   not a screenshot of anything. Zoom starts at 50% so a picture can also be
+   made smaller than its box. */
 function picStyle(p){
-  var z = Math.max(1, Math.min(3, +p.z || 1));
-  return "object-position:" + (+p.x || 0) + "% " + (+p.y || 0) + "%;" +
-    (z > 1 ? "transform:scale(" + z + ");" : "");
+  var z = Math.max(0.5, Math.min(3, +p.z || 1));
+  return "object-fit:" + (p.fit === "cover" ? "cover" : "contain") + ";" +
+    "object-position:" + (+p.x == null ? 50 : +p.x) + "% " + (+p.y == null ? 50 : +p.y) + "%;" +
+    (z !== 1 ? "transform:scale(" + z + ");" : "");
 }
-function pslideHtml(sl){
+/* `blank` is the EDITOR's flag and nothing else's. A slide with no picture in
+   it is not a slide and must never reach a projector (§50.2) — but the moment
+   after you press Add a slide it is exactly that, and a rail that does not show
+   the thing you just made is a rail that swallowed it. So the deck asks
+   without the flag and the editor asks with it. */
+function pslideHtml(sl, blank){
   var pics = (sl.pics || []).filter(function(p){ return p && p.src; })
                             .slice(0, PIC_PER_SLIDE);
-  if (!pics.length) return "";      /* a slide with no picture is not a slide */
+  if (!pics.length) {
+    if (!blank) return "";
+    return '<section class="dslide d-pics d-blank" data-ps="' + esc(sl.id) + '">' +
+      (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
+      '<div class="blankslide"><span>This slide is empty</span>' +
+      '<em>It will not appear in the review until it has a picture.</em></div></section>';
+  }
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || pics.length));
   var cells = pics.map(function(p){
     return '<figure class="pcell"><span class="pframe">' +
@@ -15563,7 +15901,7 @@ function pslideHtml(sl){
       '" style="' + picStyle(p) + '"></span>' +
       (p.cap ? '<figcaption>' + esc(p.cap) + '</figcaption>' : '') + '</figure>';
   }).join("");
-  return '<section class="dslide d-pics">' +
+  return '<section class="dslide d-pics" data-ps="' + esc(sl.id) + '">' +
     (sl.title ? '<h2>' + esc(sl.title) + '</h2>' : '') +
     '<div class="pgrid pg' + Math.min(across, pics.length) + '">' + cells + '</div></section>';
 }
@@ -15612,226 +15950,491 @@ function picIntake(file){
   });
 }
 
-/* ── The editor ──────────────────────────────────────────────────────────
-   A modal rather than a page. Preparing the pictures for one review is a
-   finished task with an end, it belongs beside the Present button that opens
-   the deck they go into, and it needs no address of its own.
+/* ── MANAGE SLIDES (§51.8) ────────────────────────────────────────────────
+   Islam: "the buttons shouldn't be pictures it should be manage slides which
+   opens the slides list on the left like PowerPoint and on the right are the
+   slides view and the user can add a slide there a blank one and then add
+   pictures there. think of the customer experience to have something
+   functional."
 
-   THE STATE IT EDITS IS THE LIVE ONE. There is no draft and no Save: a change
-   is written as it is made, exactly as every other edit surface in the
-   platform behaves, and the autosave carries it. */
-var PICED = { target:null, kind:null, anchors:[], err:"" };
+   THE LEFT RAIL IS THE WHOLE DECK, not just the picture slides — every
+   generated slide too, in the order they will project. That is what makes the
+   POSITION DROPDOWN DISAPPEAR: where a picture slide goes is said by where it
+   sits, which is how anybody who has used slides expects to say it. §50.3's
+   rule is unchanged underneath — the anchor is still read back out of the deck
+   — but it is now read from where you dropped the slide rather than typed into
+   a list describing the deck in words.
 
-function picEditorOpen(kind, key){
+   It is a MODE rather than a dialog, for the same reason presenting is: this
+   is looking at a deck, and a deck does not fit in a 940px box.
+
+   Nothing about what is STORED changed. Still a title, an anchor, an
+   arrangement and the pictures (§50.2). */
+
+var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+
+/* Every section in the assembled deck gets an identity the rail can hold on
+   to across a repaint: a picture slide by its own id, a generated slide by its
+   running position among the generated ones — which does not move when a
+   picture slide is added above it. */
+function slidesAssemble(){
+  var box = document.createElement("div");
+  box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
+  insertPictureSlides(box, SLED.target, true);
+  var g = 0;
+  [].forEach.call(box.querySelectorAll(".dslide"), function(el){
+    var id = el.getAttribute("data-ps");
+    el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
+  });
+  return box;
+}
+/* A heading carries its own kicker inside it (`.dwhich` — "Key measures",
+   "Tactics", "continued"), so reading the element's textContent ran the two
+   together: "RS03 Retail Operations ExcellenceKey measures". The parts are
+   read separately and joined with a separator, which is what the slide itself
+   shows visually. */
+function slidesLabel(el){
+  var h = el.querySelector("h1, h2");
+  if (!h) return el.classList.contains("d-swot") ? "SWOT" : "Slide";
+  var extra = [];
+  [].forEach.call(h.querySelectorAll("span, em"), function(x){
+    var t = x.textContent.trim();
+    if (t) extra.push(t);
+  });
+  var clone = h.cloneNode(true);
+  [].forEach.call(clone.querySelectorAll("span, em"), function(x){ x.remove(); });
+  var main = clone.textContent.trim();
+  return [main].concat(extra).filter(Boolean).join(" \u00b7 ") || "Slide";
+}
+
+function slidesOpen(kind, key){
   var target = kind === "fn" ? "fn:" + key : key;
   if (!canSpeakFor(target)) return;
-  PICED = { target:target, kind:kind, key:key, err:"",
-            anchors:deckAnchors(kind, key) };
-  openModalHtml("Picture slides",
-    esc(picTargetName(kind, key)) + " &middot; " + esc(REVIEW.name) +
-    " &mdash; they are archived with this cycle when it closes",
-    picEditorBody());
-  picEditorWire();
+  SLED = { target:target, kind:kind, key:key, sel:null, err:"" };
+  var root = document.getElementById("slideroot");
+  root.querySelector(".sl-title").textContent = "Manage slides";
+  root.querySelector(".sl-sub").textContent =
+    picTargetName(kind, key) + " · " + (REVIEW.name || "");
+  root.classList.add("on");
+  document.body.classList.add("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = true; wrap.setAttribute("aria-hidden", "true"); }
+  slidesPaint();
+  root.focus();
 }
 function picTargetName(kind, key){
   return kind === "fn" ? (FUNCTIONS[key] || {}).name || key
                        : (UNITS[key] || {}).name || key;
 }
-
-function picEditorBody(){
-  var list = pslidesOf(PICED.target);
-  var full = list.length >= PIC_MAX_SLIDES;
-  return '<div class="picwrap">' +
-    (PICED.err ? '<p class="picerr" role="alert">' + esc(PICED.err) + '</p>' : '') +
-    (list.length
-      ? list.map(picSlideCard).join("")
-      : '<p class="picnone">No pictures in this deck yet. A slide can hold up to ' +
-        PIC_PER_SLIDE + ' pictures, and sits wherever you put it in the review.</p>') +
-    '<div class="picfoot">' +
-      '<button class="editbtn" data-picadd="1"' + (full ? " disabled" : "") + '>Add a slide</button>' +
-      (full ? '<span class="picsub">' + PIC_MAX_SLIDES + ' slides is the limit — remove one to add another.</span>'
-            : '<span class="picsub">' + list.length + ' of ' + PIC_MAX_SLIDES + '</span>') +
-    '</div></div>';
+function slidesClose(){
+  var root = document.getElementById("slideroot");
+  if (!root.classList.contains("on")) return;
+  root.classList.remove("on");
+  document.body.classList.remove("presenting");
+  var wrap = document.querySelector(".wrap");
+  if (wrap) { wrap.inert = false; wrap.removeAttribute("aria-hidden"); }
+  SLED = { target:null, kind:null, key:null, sel:null, err:"" };
+  paint();
 }
 
-function picSlideCard(sl){
+/* ── Painting ────────────────────────────────────────────────────────────
+   The rail's thumbnails are the REAL slides, scaled. Not a drawing of a slide
+   and not a description of one: the same markup the projector gets, at 1/10,
+   so a slide that is wrong is wrong here too. */
+var SL_THUMB = 0.105;
+
+function slidesPaint(){
+  var box = slidesAssemble();
+  var all = [].slice.call(box.querySelectorAll(".dslide"));
+  if (!all.length) return;
+  /* Keep the selection if it still exists; otherwise take the first picture
+     slide, and failing that the first slide. */
+  var keys = all.map(function(el){ return el.dataset.ed; });
+  if (keys.indexOf(SLED.sel) < 0) {
+    var firstPic = all.filter(function(el){ return el.dataset.ps; })[0];
+    SLED.sel = firstPic ? firstPic.dataset.ed : keys[0];
+  }
+
+  /* ADD A SLIDE SITS AT THE TOP, PINNED (§51.9). It was the last thing in the
+     rail, after all twenty-three rows — so the one control the whole mode
+     exists for could only be found by scrolling to the end of a list nobody
+     had a reason to scroll. A control you have to go looking for is a control
+     that is not there. */
+  var list = document.getElementById("slidelist");
+  list.innerHTML = '<div class="sl-add"><button class="editbtn" data-sladd="1">' +
+      '+ Add a slide</button>' +
+      '<span class="picsub">' + (SLED.sel && SLED.sel.indexOf("ps:") === 0
+        ? "after the one selected" : "after the slide selected below") + '</span></div>' +
+    all.map(function(el, i){
+    var mine = !!el.dataset.ps;
+    return '<div class="slrow' + (el.dataset.ed === SLED.sel ? " on" : "") +
+        (mine ? " mine" : "") + '" data-slgo="' + esc(el.dataset.ed) + '">' +
+      '<span class="sl-n">' + (i + 1) + '</span>' +
+      '<span class="sthumb"><span class="sthumb-in"></span></span>' +
+      '<span class="sl-lab">' + esc(slidesLabel(el)) +
+        (mine ? '<em>your pictures</em>' : '') + '</span></div>';
+  }).join("");
+
+  /* The clones go in after the innerHTML, or writing the rail would discard
+     them. Each thumbnail is the slide itself with `.on` so it lays out. */
+  [].forEach.call(list.querySelectorAll(".sthumb-in"), function(holder, i){
+    var c = all[i].cloneNode(true);
+    c.classList.add("on");
+    holder.appendChild(c);
+  });
+
+  var pane = document.getElementById("slidepane");
+  var cur = all[keys.indexOf(SLED.sel)];
+  var sl = cur && cur.dataset.ps ? pslideById(SLED.target, cur.dataset.ps) : null;
+  pane.innerHTML = slidesPaneHtml(cur, sl);
+  var stage = pane.querySelector(".sstage-in");
+  if (stage && cur) {
+    var c = cur.cloneNode(true);
+    c.classList.add("on");
+    stage.appendChild(c);
+  }
+  slidesFitStage();
+  slidesWire();
+  /* THE RAIL FOLLOWS THE SELECTION. Adding a slide in the middle of a
+     twenty-three slide deck and being shown the bottom of the list is the rail
+     answering a question nobody asked. `nearest` rather than `center`, so a
+     selection already on screen does not jump. */
+  var on = list.querySelector(".slrow.on");
+  if (on && on.scrollIntoView) on.scrollIntoView({ block:"nearest" });
+  SLED.err = "";
+}
+
+function slidesPaneHtml(cur, sl){
+  var head = SLED.err ? '<p class="picerr" role="alert">' + esc(SLED.err) + '</p>' : '';
+  if (!sl) {
+    return head +
+      '<div class="sstage"><div class="sstage-in"></div></div>' +
+      '<div class="slctl slctl-read"><p class="picsub">This slide is built by the ' +
+      'platform from what the unit has reported, and is refreshed every time the ' +
+      'deck opens. <b>Add a slide</b> puts your own pictures after it.</p></div>';
+  }
   var pics = sl.pics || [];
   var across = Math.max(1, Math.min(PIC_PER_SLIDE, +sl.layout || 1));
   var slots = [];
-  for (var i = 0; i < across; i++) slots.push(picSlot(sl, pics[i], i));
-  return '<div class="piccard" data-ps="' + esc(sl.id) + '">' +
-    '<div class="piccard-h">' +
-      '<input class="fld picttl" data-picttl="' + esc(sl.id) + '" value="' + esc(sl.title || "") +
-        '" placeholder="Slide title — optional" aria-label="Slide title">' +
-      '<button class="editbtn" data-picdel="' + esc(sl.id) + '">Remove slide</button>' +
-    '</div>' +
-    '<div class="piccard-cfg">' +
-      '<label class="picfield"><span>Where it goes</span>' +
-        '<select data-picat="' + esc(sl.id) + '">' +
-          PICED.anchors.map(function(a){
-            return '<option value="' + esc(a.a) + '"' + (a.a === sl.at ? " selected" : "") +
-              '>' + esc(a.label) + '</option>';
-          }).join("") + '</select></label>' +
-      '<label class="picfield"><span>Pictures on the slide</span>' +
+  for (var i = 0; i < across; i++) slots.push(slidesSlot(sl, pics[i], i));
+  return head +
+    '<div class="sstage"><div class="sstage-in"></div></div>' +
+    '<div class="slctl">' +
+      '<div class="slctl-h">' +
+        '<input class="fld picttl" data-picttl="' + esc(sl.id) + '" value="' + esc(sl.title || "") +
+          '" placeholder="Slide title — optional" aria-label="Slide title">' +
         '<span class="minisw" role="group" aria-label="Pictures on the slide">' +
           [1,2,3,4].map(function(n){
             return '<button data-piclay="' + esc(sl.id) + '" data-n="' + n + '" aria-pressed="' +
-              (across === n) + '">' + n + '</button>';
-          }).join("") + '</span></label>' +
-    '</div>' +
-    '<div class="picslots pg' + across + '">' + slots.join("") + '</div>' +
-    (pics.length > across
-      ? '<p class="picsub picover">' + (pics.length - across) + ' more ' +
-        (pics.length - across === 1 ? "picture is" : "pictures are") +
-        ' kept but not shown at this arrangement.</p>' : '') +
-  '</div>';
+              (across === n) + '" title="' + n + ' on the slide">' + n + '</button>';
+          }).join("") + '</span>' +
+        '<span class="slmove"><button data-slmove="-1" aria-label="Move this slide up" ' +
+          'title="Move up">&#9650;</button>' +
+          '<button data-slmove="1" aria-label="Move this slide down" ' +
+          'title="Move down">&#9660;</button></span>' +
+        '<button class="editbtn" data-picdel="' + esc(sl.id) + '">Remove slide</button>' +
+      '</div>' +
+      '<div class="picslots">' + slots.join("") + '</div>' +
+      (pics.length > across
+        ? '<p class="picsub picover">' + (pics.length - across) + ' more ' +
+          (pics.length - across === 1 ? "picture is" : "pictures are") +
+          ' kept but not shown at this arrangement.</p>' : '') +
+    '</div>';
 }
 
-function picSlot(sl, p, i){
+function slidesSlot(sl, p, i){
   if (!p || !p.src) {
     return '<div class="picslot empty">' +
       '<label class="picdrop"><input type="file" accept="image/*" data-picfile="' +
         esc(sl.id) + '" data-i="' + i + '">' +
       '<span class="picplus" aria-hidden="true">+</span><span>Add a picture</span></label></div>';
   }
-  var z = Math.round((Math.max(1, Math.min(3, +p.z || 1))) * 100);
+  var z = Math.round((Math.max(0.5, Math.min(3, +p.z || 1))) * 100);
+  var fills = p.fit === "cover";
   return '<div class="picslot" data-i="' + i + '">' +
     '<span class="picframe" data-picdrag="' + esc(sl.id) + '" data-i="' + i + '" ' +
       'title="Drag to move the picture inside the frame">' +
       '<img src="' + esc(p.src) + '" alt="" style="' + picStyle(p) + '"></span>' +
     '<div class="picctl">' +
-      '<label class="piczoom"><span>Zoom</span>' +
-        '<input type="range" min="100" max="300" step="1" value="' + z + '" ' +
-        'data-piczoom="' + esc(sl.id) + '" data-i="' + i + '" aria-label="Zoom"></label>' +
+      /* WHOLE or CROPPED, said in two words rather than inferred from a
+         slider position (§51.10). Fit shows all of it; Fill bleeds it to the
+         edges and throws away what does not reach. */
+      '<span class="minisw" role="group" aria-label="How the picture sits">' +
+        '<button data-picfit="' + esc(sl.id) + '" data-i="' + i + '" data-v="contain" ' +
+          'aria-pressed="' + (!fills) + '" title="Show the whole picture">Fit</button>' +
+        '<button data-picfit="' + esc(sl.id) + '" data-i="' + i + '" data-v="cover" ' +
+          'aria-pressed="' + fills + '" title="Fill the frame, cropping the rest">Fill</button>' +
+      '</span>' +
       '<button class="editbtn" data-picdrop="' + esc(sl.id) + '" data-i="' + i +
         '" aria-label="Remove this picture">Remove</button>' +
     '</div>' +
+    '<label class="piczoom"><span>Zoom</span>' +
+      '<input type="range" min="50" max="300" step="1" value="' + z + '" ' +
+      'data-piczoom="' + esc(sl.id) + '" data-i="' + i + '" aria-label="Zoom">' +
+      '<b>' + z + '%</b></label>' +
     '<input class="fld piccap" data-piccap="' + esc(sl.id) + '" data-i="' + i +
       '" value="' + esc(p.cap || "") + '" placeholder="Caption — optional" aria-label="Caption">' +
   '</div>';
 }
 
-/* Only the editor repaints, and only when its SHAPE changes. Typing a title or
-   a caption changes nothing about the shape, so it never repaints — §35's rule,
-   and the same reason the register filters rows in place: a repaint replaces
-   the field being typed into. */
-function picEditorRepaint(){
-  document.getElementById("modal-b").innerHTML = picEditorBody();
-  PICED.err = "";
-  picEditorWire();
-  SEARCHSEL.wire();
+/* The stage is the deck's own 1600x900, scaled to whatever room the pane has.
+   Same trick deckScale() uses, and for the same reason: what is rehearsed has
+   to be what projects, so the slide is never re-laid-out at another size. */
+function slidesFitStage(){
+  var pane = document.getElementById("slidepane");
+  var st = pane && pane.querySelector(".sstage");
+  if (!st) return;
+  var k = Math.min(st.clientWidth / 1600, st.clientHeight / 900);
+  if (!(k > 0)) k = 0.01;
+  var inner = st.querySelector(".sstage-in");
+  /* Left is 50% of the box, so pulling back half the SCALED width centres it.
+     Translate before scale, because the two are applied right to left and a
+     translate written after would itself be scaled. */
+  if (inner) inner.style.transform = "translateX(" + (-1600 * k / 2) + "px) scale(" + k + ")";
 }
 
-function picEditorWire(){
-  var box = document.getElementById("modal-b");
-  var slideOf = function(el, attr){ return pslideById(PICED.target, el.dataset[attr]); };
-  var mark = function(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); };
+/* ── Adding one where you are standing ───────────────────────────────────
+   THE ANCHOR IS READ OUT OF THE DECK, still (§50.3) — but out of the PLACE
+   rather than out of a dropdown. Walking back from the insertion point to the
+   nearest anchored slide is the same lookup the picker used to render, asked
+   from the other end.
 
-  box.querySelectorAll("[data-picadd]").forEach(function(b){
+   Where it lands in the stored list matters as much: several picture slides
+   can share one anchor, and their order among themselves is list order. So
+   the new one is spliced in at the position its VISUAL place implies, not
+   appended and hoped for. */
+/* ── Putting a slide in a place ──────────────────────────────────────────
+   ONE function, because Add and the up/down arrows are the same act: decide
+   which anchor the slide now belongs to, and where among that anchor's other
+   slides it sits. Written twice they would drift, and the drift would be a
+   slide that moves one way when added and another way when nudged.
+
+   `after` is a position in the ASSEMBLED deck — insert immediately after that
+   slide. The anchor is the nearest anchored slide at or before it (§50.3, read
+   out of the deck as always), and the index inside the stored list is the
+   count of that anchor's slides already sitting at or before the point. */
+function slidesPlace(sl, all, after){
+  var anchor = "";
+  for (var i = after; i >= 0; i--) {
+    if (all[i] && all[i].dataset.anchor) { anchor = all[i].dataset.anchor; break; }
+  }
+  if (!anchor) {
+    for (var f = 0; f < all.length; f++) if (all[f].dataset.anchor) { anchor = all[f].dataset.anchor; break; }
+  }
+  if (!anchor) anchor = "end";
+
+  var list = pslidesFor(SLED.target);
+  var was = list.indexOf(sl);
+  if (was > -1) list.splice(was, 1);        /* out first, so the count is honest */
+
+  var k = 0;
+  for (var j = 0; j <= after && j < all.length; j++) {
+    var id = all[j].getAttribute("data-ps");
+    if (!id || id === sl.id) continue;
+    var other = pslideById(SLED.target, id);
+    if (other && other.at === anchor) k++;
+  }
+  var withA = [];
+  list.forEach(function(x, idx){ if (x.at === anchor) withA.push(idx); });
+  var pos = k < withA.length ? withA[k]
+          : (withA.length ? withA[withA.length - 1] + 1 : list.length);
+  sl.at = anchor;
+  list.splice(pos, 0, sl);
+}
+
+function slidesAdd(){
+  var list = pslidesFor(SLED.target);
+  if (list.length >= PIC_MAX_SLIDES) {
+    SLED.err = PIC_MAX_SLIDES + " slides is the limit — remove one to add another.";
+    slidesPaint();
+    return;
+  }
+  var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
+  var after = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (after < 0) after = all.length - 1;
+  var made = { id:pslideNewId(), title:"", layout:1, at:"", pics:[] };
+  slidesPlace(made, all, after);
+  SLED.sel = "ps:" + made.id;
+  slidesMark();
+  slidesPaint();
+}
+
+/* UP AND DOWN (§51.10, Islam). A picture slide steps over its neighbour,
+   whatever kind of slide that is — stepping over a generated one is how a
+   picture gets from the end of the pillars to the end of the SWOT without
+   anybody naming an anchor. Only picture slides move: the generated ones are
+   the deck's own order and are not ours to shuffle. */
+function slidesMove(dir){
+  if (!SLED.sel || SLED.sel.indexOf("ps:") !== 0) return;
+  var sl = pslideById(SLED.target, SLED.sel.slice(3));
+  if (!sl) return;
+  var all = [].slice.call(slidesAssemble().querySelectorAll(".dslide"));
+  var at = all.map(function(el){ return el.dataset.ed; }).indexOf(SLED.sel);
+  if (at < 0) return;
+  /* Down means after the slide below; up means after the one two above, since
+     "after" is measured in the deck as it stands with this slide still in it. */
+  var after = dir > 0 ? at + 1 : at - 2;
+  if (dir > 0 && at >= all.length - 1) return;
+  if (dir < 0 && at <= 0) return;
+  slidesPlace(sl, all, after);
+  slidesMark();
+  slidesPaint();
+}
+
+function slidesMark(){ if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint(); }
+
+/* Re-draw the SELECTED slide only — the big one and its thumbnail — from the
+   one function the deck itself uses. Not a repaint: the controls being typed
+   into live in `.slctl`, a different subtree, so nothing under the cursor is
+   replaced (§35's rule is about the field, not about the page).
+
+   It exists because patching the rendered slide by hand does not survive a
+   field going from empty to filled: typing the first title had nothing to
+   write into, since a slide with no title has no heading element at all. */
+function slidesRestage(){
+  if (!SLED.sel || SLED.sel.indexOf("ps:") !== 0) return;
+  var sl = pslideById(SLED.target, SLED.sel.slice(3));
+  if (!sl) return;
+  var html = pslideHtml(sl, true);
+  var root = document.getElementById("slideroot");
+  [root.querySelector(".sstage-in"), root.querySelector(".slrow.on .sthumb-in")]
+    .forEach(function(holder){
+      if (!holder) return;
+      holder.innerHTML = html;
+      if (holder.firstElementChild) holder.firstElementChild.classList.add("on");
+    });
+  /* The rail's WORDS as well as its picture. A slide whose thumbnail says
+     "New stores this half" and whose label underneath still says "Slide" is
+     the two halves of one row disagreeing. */
+  var lab = root.querySelector(".slrow.on .sl-lab");
+  var made = root.querySelector(".sstage-in .dslide");
+  if (lab && made) lab.innerHTML = esc(slidesLabel(made)) + '<em>your pictures</em>';
+}
+/* The same picture in both places, so framing it moves the slide AND the
+   thumbnail. Done by patching rather than restaging, because a drag redraws
+   many times a second and rebuilding the markup under the pointer is how a
+   drag gets dropped. */
+function slidesLive(i){
+  var root = document.getElementById("slideroot");
+  return [root.querySelectorAll(".sstage-in img")[i],
+          root.querySelectorAll(".slrow.on .sthumb-in img")[i]]
+    .filter(Boolean);
+}
+
+function slidesWire(){
+  var root = document.getElementById("slideroot");
+  var slideOf = function(el, attr){ return pslideById(SLED.target, el.dataset[attr]); };
+
+  root.querySelectorAll("[data-slgo]").forEach(function(r){
+    r.addEventListener("click", function(){ SLED.sel = r.dataset.slgo; slidesPaint(); });
+  });
+  root.querySelectorAll("[data-sladd]").forEach(function(b){
+    b.addEventListener("click", slidesAdd);
+  });
+  root.querySelectorAll("[data-slmove]").forEach(function(b){
+    b.addEventListener("click", function(){ slidesMove(+b.dataset.slmove); });
+  });
+  root.querySelectorAll("[data-picfit]").forEach(function(b){
     b.addEventListener("click", function(){
-      var list = pslidesFor(PICED.target);
-      if (list.length >= PIC_MAX_SLIDES) return;
-      list.push({ id:pslideNewId(), title:"", layout:1,
-                  at:(PICED.anchors[0] || {}).a || "end", pics:[] });
-      mark(); picEditorRepaint();
+      var sl = slideOf(b, "picfit"); if (!sl) return;
+      var p = (sl.pics || [])[+b.dataset.i]; if (!p) return;
+      p.fit = b.dataset.v;
+      slidesMark(); slidesPaint();
     });
   });
-
-  box.querySelectorAll("[data-picdel]").forEach(function(b){
+  root.querySelectorAll("[data-picdel]").forEach(function(b){
     b.addEventListener("click", function(){
-      var list = pslidesFor(PICED.target), id = b.dataset.picdel;
+      var list = pslidesFor(SLED.target), id = b.dataset.picdel;
       for (var i = 0; i < list.length; i++) if (list[i].id === id) { list.splice(i, 1); break; }
-      pslidesTidy(PICED.target);
-      mark(); picEditorRepaint();
+      pslidesTidy(SLED.target);
+      SLED.sel = null;
+      slidesMark(); slidesPaint();
     });
   });
 
-  /* Typing. Written straight into the model, no repaint. */
-  box.querySelectorAll("[data-picttl]").forEach(function(f){
+  /* Typing never repaints (§35) — the stage above is refreshed by hand from
+     the one field that changes it, so the slide follows the title without the
+     control being replaced under the cursor. */
+  root.querySelectorAll("[data-picttl]").forEach(function(f){
     f.addEventListener("input", function(){
-      var sl = slideOf(f, "picttl"); if (sl) { sl.title = f.value; mark(); }
+      var sl = slideOf(f, "picttl"); if (!sl) return;
+      sl.title = f.value;
+      slidesRestage();
+      slidesMark();
     });
   });
-  box.querySelectorAll("[data-piccap]").forEach(function(f){
+  root.querySelectorAll("[data-piccap]").forEach(function(f){
     f.addEventListener("input", function(){
       var sl = slideOf(f, "piccap"); if (!sl) return;
-      var p = (sl.pics || [])[+f.dataset.i]; if (p) { p.cap = f.value; mark(); }
-    });
-  });
-  box.querySelectorAll("[data-picat]").forEach(function(f){
-    f.addEventListener("change", function(){
-      var sl = slideOf(f, "picat"); if (sl) { sl.at = f.value; mark(); }
+      var p = (sl.pics || [])[+f.dataset.i]; if (!p) return;
+      p.cap = f.value;
+      slidesRestage();
+      slidesMark();
     });
   });
 
-  box.querySelectorAll("[data-piclay]").forEach(function(b){
+  root.querySelectorAll("[data-piclay]").forEach(function(b){
     b.addEventListener("click", function(){
       var sl = slideOf(b, "piclay"); if (!sl) return;
+      /* Pictures are never thrown away when the arrangement narrows: four to
+         one and back must return what was there (§50.6). */
       sl.layout = +b.dataset.n;
-      /* THE PICTURES ARE NOT THROWN AWAY when the arrangement narrows. Going
-         from four to one and back again must return what was there — a control
-         that destroys data on the way past is not a control (§44's switch). */
-      mark(); picEditorRepaint();
+      slidesMark(); slidesPaint();
     });
   });
 
-  box.querySelectorAll("[data-picfile]").forEach(function(f){
+  root.querySelectorAll("[data-picfile]").forEach(function(f){
     f.addEventListener("change", function(){
       var sl = slideOf(f, "picfile"), file = f.files && f.files[0];
       if (!sl || !file) return;
       picIntake(file).then(function(src){
         sl.pics = sl.pics || [];
         sl.pics[+f.dataset.i] = { src:src, cap:"", z:1, x:50, y:50 };
-        /* A slot skipped over leaves a hole in the array; the deck filters
-           them out, and so must the editor's own count. */
         for (var i = 0; i < sl.pics.length; i++) if (!sl.pics[i]) sl.pics[i] = null;
-        mark(); picEditorRepaint();
+        slidesMark(); slidesPaint();
       }).catch(function(e){
-        PICED.err = "That picture could not be added — " + e.message + ".";
-        picEditorRepaintWithError();
+        SLED.err = "That picture could not be added — " + e.message + ".";
+        slidesPaint();
       });
     });
   });
-
-  box.querySelectorAll("[data-picdrop]").forEach(function(b){
+  root.querySelectorAll("[data-picdrop]").forEach(function(b){
     b.addEventListener("click", function(){
       var sl = slideOf(b, "picdrop"); if (!sl) return;
       (sl.pics || []).splice(+b.dataset.i, 1);
-      mark(); picEditorRepaint();
+      slidesMark(); slidesPaint();
     });
   });
 
-  box.querySelectorAll("[data-piczoom]").forEach(function(r){
+  /* Zoom and crop move the CONTROL's picture and the STAGE's picture together,
+     because the stage is the point: you are framing the slide, not a swatch. */
+  root.querySelectorAll("[data-piczoom]").forEach(function(r){
     r.addEventListener("input", function(){
       var sl = slideOf(r, "piczoom"); if (!sl) return;
-      var p = (sl.pics || [])[+r.dataset.i]; if (!p) return;
+      var i = +r.dataset.i, p = (sl.pics || [])[i]; if (!p) return;
       p.z = (+r.value) / 100;
       var img = r.closest(".picslot").querySelector("img");
       if (img) img.setAttribute("style", picStyle(p));
-      mark();
+      var readout = r.parentNode.querySelector("b");
+      if (readout) readout.textContent = r.value + "%";
+      slidesLive(i).forEach(function(x){ x.setAttribute("style", picStyle(p)); });
+      slidesMark();
     });
   });
-
-  /* Drag to choose what shows. The two numbers written here are the two the
-     deck reads, so the frame in this modal and the frame on the slide are the
-     same frame. Pointer events, so it works with a finger as well as a mouse —
-     the platform is installable and gets opened on a tablet. */
-  box.querySelectorAll("[data-picdrag]").forEach(function(fr){
+  root.querySelectorAll("[data-picdrag]").forEach(function(fr){
     fr.addEventListener("pointerdown", function(ev){
       var sl = slideOf(fr, "picdrag"); if (!sl) return;
-      var p = (sl.pics || [])[+fr.dataset.i]; if (!p) return;
+      var i = +fr.dataset.i, p = (sl.pics || [])[i]; if (!p) return;
       var img = fr.querySelector("img"), r = fr.getBoundingClientRect();
       var sx = ev.clientX, sy = ev.clientY, ox = +p.x || 0, oy = +p.y || 0;
       fr.setPointerCapture(ev.pointerId);
       fr.classList.add("dragging");
       ev.preventDefault();
       var move = function(e){
-        /* A drag across the whole frame sweeps the whole picture. Dividing by
-           the frame's own size is what keeps a small frame and a large one
-           feeling the same. */
         p.x = Math.max(0, Math.min(100, ox - (e.clientX - sx) / r.width  * 100));
         p.y = Math.max(0, Math.min(100, oy - (e.clientY - sy) / r.height * 100));
         if (img) img.setAttribute("style", picStyle(p));
+        slidesLive(i).forEach(function(x){ x.setAttribute("style", picStyle(p)); });
       };
       var up = function(e){
         fr.removeEventListener("pointermove", move);
@@ -15839,7 +16442,7 @@ function picEditorWire(){
         fr.removeEventListener("pointercancel", up);
         fr.classList.remove("dragging");
         try { fr.releasePointerCapture(e.pointerId); } catch (x) {}
-        mark();
+        slidesMark();
       };
       fr.addEventListener("pointermove", move);
       fr.addEventListener("pointerup", up);
@@ -15848,29 +16451,17 @@ function picEditorWire(){
   });
 }
 
-/* The error survives the repaint that shows it; every other repaint clears it,
-   which is why the two are separate functions rather than a flag. */
-function picEditorRepaintWithError(){
-  var msg = PICED.err;
-  picEditorRepaint();
-  PICED.err = msg;
-  document.getElementById("modal-b").insertAdjacentHTML("afterbegin",
-    '<p class="picerr" role="alert">' + esc(msg) + '</p>');
-}
-
-/* Closing it refreshes ONLY the count on the button that opened it. A full
-   repaint here would replace the very button the dialog is about to hand focus
-   back to (§48.4's restore, §30.1's family) — and there is nothing else on the
-   page behind that a picture slide changes. */
-function picEditorClosing(){
-  if (!PICED.target) return;
-  PICED = { target:null, kind:null, key:null, anchors:[], err:"" };
-  document.querySelectorAll("[data-picedit]").forEach(function(b){
-    var n = pslidesOf(b.dataset.picedit === "fn" ? "fn:" + b.dataset.pickey : b.dataset.pickey).length;
-    var pill = b.querySelector(".pill");
-    if (n && pill) pill.textContent = n;
-    else if (n) b.insertAdjacentHTML("beforeend", ' <span class="pill kind">' + n + '</span>');
-    else if (pill) pill.remove();
+function wireSlides(){
+  var root = document.getElementById("slideroot");
+  root.querySelector("[data-slexit]").addEventListener("click", slidesClose);
+  addEventListener("resize", function(){ if (root.classList.contains("on")) slidesFitStage(); });
+  addEventListener("keydown", function(ev){
+    if (!root.classList.contains("on")) return;
+    if (ev.target.tagName === "INPUT" || ev.target.isContentEditable) {
+      if (ev.key === "Escape") ev.target.blur();
+      return;
+    }
+    if (ev.key === "Escape") slidesClose();
   });
 }
 
@@ -15881,7 +16472,7 @@ function picBtn(kind, key){
   if (!canSpeakFor(target)) return "";
   var n = pslidesOf(target).length;
   return '<button class="editbtn" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) +
-    '" title="Picture slides for this review">Pictures' +
+    '" title="Add and arrange your own picture slides">Manage slides' +
     (n ? ' <span class="pill kind">' + n + '</span>' : '') + '</button>';
 }
 
@@ -16042,10 +16633,31 @@ var SEARCHSEL = (function(){
       var first = rows.filter(function(r){ return !r.hidden; })[0];
       if (first && document.activeElement === q) { e.preventDefault(); first.click(); }
     };
-    /* Fixed to the viewport, so a scroll would leave it hanging beside
-       nothing. Closing is honest; following the button is not worth a
-       scroll-frame listener on a page with sticky chrome (§28.3). */
-    var onGone = function(){ close(); };
+    /* IT FOLLOWS THE BUTTON NOW, RATHER THAN CLOSING (§51.6, Islam: "the
+       where it goes list needs to be scrollable as on scrolling it closes").
+
+       It used to close on any scroll, and the note here argued that closing
+       was honest because the popup is `position:fixed` and would otherwise
+       hang beside nothing. That reasoning held while every list was short
+       enough to sit inside the viewport. A LIST LONG ENOUGH TO SCROLL BREAKS
+       IT: reaching for the twelfth entry scrolls the popup's own list, that
+       scroll bubbles to the window with capture on, and the control shuts
+       under the pointer. The list you cannot scroll is the list you cannot
+       use.
+
+       So a scroll INSIDE the popup is left alone, and a scroll anywhere else
+       REPOSITIONS rather than closes — the cost §28.3 warned about is one
+       getBoundingClientRect per scroll frame on an element that is already
+       fixed, which measures nothing and changes nobody's height (§28.3's real
+       rule was never size against a measured value; this only moves). It
+       still closes when the button it belongs to has left the screen, because
+       a popup pointing at nothing is worse than a closed one. */
+    var onGone = function(e){
+      if (e && e.target && e.target.nodeType === 1 && pop.contains(e.target)) return;
+      var r = btn.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) { close(); return; }
+      place(btn, pop);
+    };
 
     document.addEventListener("mousedown", onDoc, true);
     document.addEventListener("keydown", onKey, true);
@@ -16759,13 +17371,25 @@ var SYNC = (function () {
         { fold:"units", label:"Units",     open:NAVFOLD === "units" },
         { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
       ] });
+      /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
+         (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
+         name — so a function's navName was stored, printed in the Setup
+         table, editable there, and read by NOTHING. Setting the Strategy
+         Management Office to "SMO" changed a cell and left the navigation
+         saying "Strategy Management Office".
+
+         Units had gone through navName() since the field existed; functions
+         never did. §45.1's fault in a fourth tree: a field nobody reads fails
+         silently, and it fails looking like the feature was never built. The
+         same one-argument helper answers for both now, so a third kind of
+         thing added later cannot get this wrong on its own. */
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       else
-        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     }
     /* Manage and Setup used to be two glyph buttons here. They are now one
        worded button with a menu, rendered separately (paintMenu) so it can sit
@@ -16954,13 +17578,27 @@ var SYNC = (function () {
            which is what these were and are not any more — a switch has two
            sides and the lit one IS the state (§47.6). `aria-pressed` rather
            than `aria-expanded` for the same reason: nothing expands. */
-        return '<span class="sep"></span><span class="foldgroup" role="group" ' +
-          'aria-label="Show units or supporting functions">' +
+        /* ONE BUTTON, TWO WORDS (§51.9, Islam: "I want it a switching button
+           where the 2 words stay on 1 button but on clicking the selection
+           switches"). It was two buttons inside a container that LOOKED like
+           one control, which is a different thing: you pressed the side you
+           wanted rather than pressing the control. Now there is one button
+           carrying both words, the lit word is the state, and pressing it
+           anywhere switches to the other — so the thing you press and the
+           thing that changes are the same object.
+
+           A plain button, not `role="switch"`: a switch is on or off and this
+           is neither: it is two named sides. The label says what pressing it
+           will DO, because the visible words already say where you are. */
+        var lit = t.folds.filter(function(f){ return f.open; })[0] || t.folds[0];
+        var other = t.folds.filter(function(f){ return f !== lit; })[0] || lit;
+        return '<span class="sep"></span>' +
+          '<button class="navswitch" data-fold="' + other.fold + '"' +
+          ' aria-label="Showing ' + lit.label.toLowerCase() + '. Press to show ' +
+          other.label.toLowerCase() + '.">' +
           t.folds.map(function(f){
-            return '<button class="navfold' + (f.open ? " open" : "") +
-              '" data-fold="' + f.fold + '" aria-pressed="' + f.open + '">' +
-              f.label + '</button>';
-          }).join("") + '</span>';
+            return '<span class="nsw' + (f.open ? " on" : "") + '">' + f.label + '</span>';
+          }).join("") + '</button>';
       }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
@@ -17489,7 +18127,7 @@ var SYNC = (function () {
        re-wires it). */
     document.querySelectorAll("[data-picedit]").forEach(function(b){
       b.addEventListener("click", function(){
-        picEditorOpen(b.dataset.picedit, b.dataset.pickey);
+        slidesOpen(b.dataset.picedit, b.dataset.pickey);
       });
     });
     /* A capability's reporting writes back. Before the project model these
@@ -17912,6 +18550,29 @@ var SYNC = (function () {
        share one picker now, wired in wirePicker() below (§35). */
     var au = document.getElementById("addunit");
     if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
+    /* Capabilities: add, name, remove — the SMO's, behind the same key the
+       rest of the page is behind (§51.11). */
+    var ac = document.getElementById("addcap");
+    if (ac) ac.addEventListener("click", function(){
+      if (grant("c_caps") !== "edit") return;
+      addCapability(); paint();
+    });
+    document.querySelectorAll("[data-capname]").forEach(function(el){
+      el.addEventListener("change", function(){
+        if (grant("c_caps") !== "edit") return;
+        var c = GROUP.capabilities[+el.dataset.capname];
+        if (c) { c.name = el.value.trim() || c.name; paint(); }
+      });
+    });
+    document.querySelectorAll("[data-caprm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (grant("c_caps") !== "edit") return;
+        var i = +b.dataset.caprm, held = capabilityHolds(GROUP.capabilities[i]);
+        if (held && !confirm("Remove " + held + "? This cannot be undone here.")) return;
+        GROUP.capabilities.splice(i, 1);
+        paint();
+      });
+    });
     /* Choosing from the menu closes it and raises the confirmation, so the
        destructive act is still two deliberate presses. */
     document.querySelectorAll("[data-clear]").forEach(function(b){
@@ -17958,8 +18619,12 @@ var SYNC = (function () {
                              name:"New objective", group:null, dir:"\u2265", target3y:"", target:"",
                              compile:"Latest", actual:"", progress:null });
         if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
-        if (k === "cap")   GROUP.capabilities.push({ name:"New capability", def:"",
-                             measures:[], tactics:[] });
+        /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
+           `measures` and `tactics` — fields §15 removed — so the row had no
+           id, no function and neither list, and the Capabilities page threw on
+           the next paint. One function mints one now, and both places that add
+           a capability call it. */
+        if (k === "cap")   addCapability();
         paint();
       });
     });
@@ -17976,12 +18641,11 @@ var SYNC = (function () {
           if (m && (m.actual || m.target)) what = 'the objective "' + m.name + '"' +
             (m.actual ? " and its reported " + m.actual : "");
         }
-        if (p[0] === "cap") {
-          var cp = GROUP.capabilities[i];
-          if (cp && (cp.measures.length || cp.tactics.length))
-            what = '"' + cp.name + '" with ' + cp.measures.length + " measures and " +
-                   cp.tactics.length + " tactics under it";
-        }
+        /* Read from the fields a capability ACTUALLY has. This asked for
+           `measures.length` on an object that has not carried `measures` since
+           §15, so it threw before it could confirm anything and the removal
+           never ran (§51.11). */
+        if (p[0] === "cap") what = capabilityHolds(GROUP.capabilities[i]) || null;
         if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
@@ -17994,6 +18658,22 @@ var SYNC = (function () {
         var fn = FIELDS[+el.dataset.fld];
         if (fn) { fn(el.value); paint(); }
       });
+      /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
+         end in mind is not editable in terms of space or empty lines").
+         Every long-text field was `rows="2"`, so a purpose written as three
+         paragraphs was typed through a two-line window — Enter worked, and you
+         could not see that it had. Growing is not a repaint: it sets the
+         element's own height and touches nothing else, so it is safe on
+         `input` where a repaint would destroy the field being typed into
+         (§35). Height is cleared first, or the box can only ever grow. */
+      if (el.tagName === "TEXTAREA") {
+        var fit = function(){
+          el.style.height = "auto";
+          el.style.height = (el.scrollHeight + 2) + "px";
+        };
+        el.addEventListener("input", fit);
+        fit();
+      }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -18660,10 +19340,29 @@ var SYNC = (function () {
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              var cp = GROUP.capabilities.filter(function(x){ return x.name === picked; })[0];
+              /* WITHIN THE FUNCTION NAMED IN B3, when one is named (§51.2).
+                 Two supporting functions may each carry a capability with the
+                 same name, and before this the first match in the array won —
+                 silently, and into the wrong function's plan. A blank B3 still
+                 resolves across the tenant, so a workbook saved before this
+                 change still opens. */
+              var wantFn = readmePickFn(sheets);
+              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
+                return FUNCTIONS[k].name === wantFn; })[0];
+              if (wantFn && !fnKeyWanted) {
+                impFail('no supporting function called "' + wantFn +
+                  '". Open the Read me sheet and choose one from the dropdown in B3.');
+                return;
+              }
+              var capPool = GROUP.capabilities.filter(function(x){
+                return !fnKeyWanted || x.fn === fnKeyWanted; });
+              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail('no business unit or capability called "' + picked +
-                  '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail(fnKeyWanted
+                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
+                    '. Open the Read me sheet and check B2 and B3 against each other.'
+                  : 'no business unit or capability called "' + picked +
+                    '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;
@@ -18803,6 +19502,7 @@ var SYNC = (function () {
   }
 
   wireDeck();
+  wireSlides();
 
   var overlay = document.getElementById("overlay");
   /* ══ THE MODAL IS ACTUALLY MODAL NOW (§48.4) ══════════════════════
@@ -18843,9 +19543,6 @@ var SYNC = (function () {
   }
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
-    /* Before the focus restore, so the button it hands focus back to is the
-       one carrying the right count. */
-    picEditorClosing();
     overlay.classList.remove("on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }

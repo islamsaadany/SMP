@@ -64,11 +64,26 @@ with sync_playwright() as p:
         for tab in ["Performance","Foundation","Focus","Temple","Weighting"]:
             pg.evaluate("(t)=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()===t);if(x)x.click()}",tab)
             pg.wait_for_timeout(400); scan("group/"+tab)
-        pg.evaluate("()=>{var f=[...document.querySelectorAll('#units button')].find(b=>b.textContent.trim().indexOf('Units')===0);if(f)f.click()}")
+        # UNITS | FUNCTIONS IS ONE BUTTON (51.9). Both places that used to
+        # reach a list did it by matching the text of a button, and the switch's
+        # own text is now "UnitsFunctions" — so one of them clicked the switch
+        # believing it was opening a fold, and the other matched nothing at all
+        # and skipped the function pages in silence. Asked by what is LIT now,
+        # and it says so rather than assuming.
+        def show(want):
+            for _ in range(3):
+                lit = pg.eval_on_selector_all("#units .navswitch .nsw.on",
+                                              "e=>e.map(x=>x.textContent.trim())")
+                if not lit: return False
+                if lit[0].lower().startswith(want): return True
+                pg.click("#units .navswitch"); pg.wait_for_timeout(200)
+            return False
+
+        show("units")
         pg.wait_for_timeout(250)
-        # The OPEN fold is a state, not a page — it has to be scanned while it is
-        # open or the treatment it carries is never measured (§41).
-        scan("group/units-fold-open")
+        # The switch is a state, not a page, and carries a treatment of its own
+        # (§41) — so it is scanned while it is on screen rather than assumed.
+        scan("group/nav-switch")
         try:
             # A UNIT DOES NOT OPEN ON PERFORMANCE. Since 3.3 it opens on
             # Strategy > Plan, so clicking the unit and calling what appears
@@ -110,9 +125,15 @@ with sync_playwright() as p:
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()==='Performance');if(x)x.click()}")
             pg.wait_for_timeout(400)
             pg.evaluate("()=>{var x=document.querySelector('[data-picedit]');if(x)x.click()}")
-            pg.wait_for_timeout(500); scan("unit/pictures-editor", "#overlay")
-            pg.evaluate("()=>{var x=document.getElementById('modal-x');if(x)x.click()}")
-            pg.wait_for_timeout(300)
+            # MANAGE SLIDES IS A MODE, NOT A MODAL, since 51.8 — so it is
+            # scanned at its own root and closed by its own Done. Closing it
+            # with the dialog's X did nothing, and the still-open overlay then
+            # swallowed every later click: the FIRST thing this sweep did after
+            # its own loud failure was point at the line that caused it, which
+            # is the whole reason it was made to fail loudly.
+            pg.wait_for_timeout(600); scan("unit/manage-slides", "#slideroot")
+            pg.click("#slideroot [data-slexit]")
+            pg.wait_for_timeout(400)
             pg.evaluate("()=>{var x=document.querySelector('[data-present]');if(x)x.click()}")
             pg.wait_for_timeout(800)
             pg.evaluate('''() => {
@@ -123,6 +144,28 @@ with sync_playwright() as p:
             pg.evaluate("()=>{closeDeck(); delete REVIEW.slides; paint();}")
             pg.wait_for_timeout(300)
         except Exception as e: print("   (picture sweep skipped: %s)" % e)
+        # A SUPPORTING FUNCTION IS HALF THE PRODUCT AND WAS NEVER SWEPT (51.5).
+        # The walk covered the group, one unit and Setup; every function page —
+        # Performance, Report, Foundation, Projects — had gone twelve versions
+        # unmeasured, which is how a capability band on a navy ground kept the
+        # page's own light-mode ink at 1.43:1. 41.5 again: a page nothing
+        # navigates to is a page nothing measures.
+        try:
+            if not show("functions"): raise Exception("the nav switch would not show functions")
+            pg.wait_for_timeout(250)
+            pg.click('#units button[data-u="fn:finance"]'); pg.wait_for_timeout(500)
+            for t in ["Performance", "Strategy"]:
+                pg.evaluate("(t)=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()===t); if(x)x.click()}", t)
+                pg.wait_for_timeout(500); scan("fn/" + t.lower())
+                # ...and every section inside it, for the same reason.
+                for k2 in pg.eval_on_selector_all("#secrow-in button",
+                                                  "els=>els.map(e=>e.textContent.trim())"):
+                    pg.evaluate("(k)=>{var x=[...document.querySelectorAll('#secrow-in button')].find(b=>b.textContent.trim()===k); if(x)x.click()}", k2)
+                    pg.wait_for_timeout(450); scan("fn/" + t.lower() + "/" + k2.lower())
+            show("units")
+            pg.wait_for_timeout(250)
+        except Exception as e: print("   (function sweep skipped: %s)" % e)
+
         # "Figures I report" is hidden for anybody named on nothing (16.7), so
         # without this the menu entry does not exist and the sweep walks past
         # it - 41.5's lesson: a page that cannot be reached by navigating is a
@@ -165,6 +208,6 @@ with sync_playwright() as p:
             except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 28 pages and states\n")
+print(f"{sum(bad.values())} failing runs across 4 combinations x 34 pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

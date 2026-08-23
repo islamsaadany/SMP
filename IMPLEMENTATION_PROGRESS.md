@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.20 · **Last updated:** 2026-08-23
+**Latest version:** v3.21 · **Last updated:** 2026-08-23
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -53,7 +53,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.20 — a unit and a function are the same product
+### v3.21 — a unit and a function are the same product
 
 Five items from Islam, and the middle one is the rule the other four are
 evidence for. Full reasoning in §53 of the decisions log.
@@ -86,7 +86,7 @@ Postgres 16, plus an upgrade run against a database created at v3.19 with
 `due` and `owner` populated; contrast sweep 53 failing runs across 4
 combinations × 34 pages and states — unchanged, all pre-existing (§16.15).
 
-### v3.20 — the BU list, and the register as a file
+### v3.21 — the BU list, and the register as a file
 
 Islam brought one row of Raya's employee data (`Emp.ID 102347 · Mohamed
 Hassanin Ehsan Hassanin · … · BU: Distribution`) and the official list of ten
@@ -134,7 +134,7 @@ not, and Job title or Contact can be switched off to recover it.
 
 **Waiting on Islam:** what each of the ten names points at (see D8 above).
 
-### v3.20 — the client's mark, on the door and on the deck
+### v3.21 — the client's mark, on the door and on the deck
 
 - The Raya Trade lockup on the sign-in gate, both cards (§52)
 - A unit's own mark: uploaded on Setup › Business units, **PNG only** because an

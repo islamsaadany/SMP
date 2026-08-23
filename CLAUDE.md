@@ -222,7 +222,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **The BU list (since v3.20, §54; spec 011):** the client's own names for
+- **The BU list (since v3.21, §54; spec 011):** the client's own names for
   parts of the business (`GROUP.mainbus`, so `org.extra` and no migration),
   each pointing at a unit, a function, a company, the group — or at NOTHING,
   which is a real answer for a department that carries no strategy. **The
@@ -262,7 +262,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and JPEG with the smaller kept** — a screenshot is smaller as PNG, a
   photograph seven times smaller as JPEG, and the file's own type predicts
   neither. No migration: it lands in the `review` row's `extra`.
-- **Deliverables and outcomes (one table since v3.20, §53.4):** a project's two
+- **Deliverables and outcomes (one table since v3.21, §53.4):** a project's two
   kinds of evidence read as ONE table with a **Type** column, on all three
   project panes — while the SCORE still keeps them apart, half per SIDE
   (`projPerf`). Reading them together and scoring them together are different
@@ -455,7 +455,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 &mdash; **v3.20: a unit and a function are the same
+*Last Updated: 2026-08-23 &mdash; **v3.21: a unit and a function are the same
 product** (§53). Four fixes and one rule, and the rule is what the four are
 evidence for. **A FUNCTION OPENED ON PERFORMANCE BECAUSE OF A CLAUSE, NOT A
 DECISION**: §28's argument &mdash; what was agreed is what people come to read, the
@@ -491,7 +491,7 @@ asserts they AGREE &mdash; never what the number is, so a deliberate change to b
 stays green &mdash; and it was run against v3.19 before being trusted, where it
 reports `paneLeft: unit 212, function 229`.*
 
-*Earlier: 2026-08-23 &mdash; **v3.20: the BU list, and the register as a
+*Earlier: 2026-08-23 &mdash; **v3.21: the BU list, and the register as a
 file** (§54, spec 011). A one-row sample and a ten-name list, and **six of the
 ten names the client uses do not exist in the platform at all** — Distribution
 is a COMPANY here, Retail is *Retail Stores*, and IT is the name of both a unit
@@ -526,7 +526,7 @@ the scrub in migration 004, verified by deploying to an empty database and
 asking the row rather than by reading the SQL. Recorded rather than hidden: the
 register was already 1061px in a 920px box and Main BU makes it 1127px.*
 
-*Earlier: 2026-08-23 &mdash; **v3.20: the client's mark, on the door and
+*Earlier: 2026-08-23 &mdash; **v3.21: the client's mark, on the door and
 on the deck** (§52). **PNG ONLY, AND IT IS A SECURITY DECISION**: an uploaded
 SVG is executable content in a page already running `'unsafe-inline'` (§43.6),
 so one file could read every session in the tenant — put to Islam as a trade

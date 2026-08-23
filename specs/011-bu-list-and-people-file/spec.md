@@ -1,6 +1,6 @@
 # 011 · The BU list, and the register as a file
 
-**Version:** v3.20 · **Decisions:** §54 · **Status:** built and verified
+**Version:** v3.21 · **Decisions:** §54 · **Status:** built and verified
 
 Islam brought one row of Raya's employee data, the official list of ten BUs,
 and four asks: map the main BU onto what the platform calls a BU, give the

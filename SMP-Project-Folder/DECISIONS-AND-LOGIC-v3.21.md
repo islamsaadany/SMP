@@ -7092,7 +7092,7 @@ obeys too.**
 
 ---
 
-## 53 · A unit and a function are the same product (v3.20)
+## 53 · A unit and a function are the same product (v3.21)
 
 *2026-08-23. Islam, after using the built v3.19: "when we press on a function in
 the navigation it should open by default on the projects page in the strategy,
@@ -7312,7 +7312,7 @@ to the lowest thing drawn before it in the page must be at least `--pin-clear`.
 Not merely its previous sibling — on the Projects page the band is a step further
 out, and a check that looked only at siblings would have called that page clean.
 
-## 54 · The BU list, and the register as a file — v3.20
+## 54 · The BU list, and the register as a file — v3.21
 
 Islam brought one row of Raya's employee data and one problem:
 

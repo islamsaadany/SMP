@@ -2742,6 +2742,18 @@ function renderCycle(){
 /* ── The two cells §59 adds ────────────────────────────────────────
    Kept beside the table rather than inline, because each carries a REFUSAL and
    a refusal needs room to say why. */
+/* ONE COLUMN, NOT TWO. Drawn as two it took the table to ten columns in edit
+   mode: the headers collided, the select was clipped to "Proje", and every row
+   grew to three lines. And they are ONE FACT — how this function plans — of
+   which `under` is the second half and exists only on the pillars side. So
+   they stack in one cell, the way the Official BU list's mapping cell does.
+   Measured before and after rather than judged: 10 columns to 9, and the
+   widest header stops overlapping its neighbour. */
+function planCell(fk, f, editable){
+  var under = fnPlansInPillars(f) ? planUnderCell(fk, f, editable) : "";
+  return '<div class="plancell">' + planFormatCell(fk, f, editable) +
+    (under ? '<span class="planunder">under ' + under + '</span>' : '') + '</div>';
+}
 function planFormatCell(fk, f, editable){
   var pillars = fnPlansInPillars(f);
   var word = pillars ? L("pillar","bu") : "Projects";
@@ -2774,7 +2786,6 @@ function planUnderCell(fk, f, editable){
   /* Only a pillars function borrows a foundation, so only it has somewhere to
      sit under — offering this to a projects function would be a control that
      changes nothing. */
-  if (!fnPlansInPillars(f)) return '<span class="why" style="margin:0">&mdash;</span>';
   var at = f.under && UNITS[f.under] ? f.under : "";
   if (!editable) {
     return at ? '<span class="uchip">' + esc(UNITS[at].name) + '</span>'
@@ -2822,8 +2833,7 @@ function renderFunctions(){
          SWITCHING IS REFUSED WHILE THE OTHER SIDE HOLDS SOMETHING, and it says
          what is in the way rather than hiding a plan that still exists — the
          same contract as retiring a company that still holds units (§49.3). */
-      '<td class="cc">' + planFormatCell(fk, f, editable) + '</td>' +
-      '<td class="cc">' + planUnderCell(fk, f, editable) + '</td>' +
+      '<td class="cc">' + planCell(fk, f, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + caps.length + '</span></td>' +
       '<td class="cc">' + pick("head", f.head, fk) + '</td>' +
       '<td class="cc">' + pick("custodian", f.custodian, fk) + '</td>' +
@@ -2861,11 +2871,16 @@ function renderFunctions(){
       ["Clear all progress", "Clear all plans"]) +
     section("", "", null,
       '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:16%">Function</th>' +
-        '<th style="width:11%">Shown in the nav</th><th class="cc" style="width:6%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th>' +
-        '<th class="cc" style="width:12%">Under</th>' +
-        '<th class="cc" style="width:7%">Capabilities</th>' +
-        '<th class="cc" style="width:14%">Head</th><th class="cc" style="width:14%">Strategy custodian</th>' +
+        /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
+           at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
+           custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
+           overlapping their neighbours, which adding a ninth column caused.
+           Each still says what its column is; the long forms were describing
+           what the row already shows. */
+        '<th style="width:11%">Nav name</th><th class="cc" style="width:6%">Code</th>' +
+        '<th class="cc" style="width:15%">Plans in</th>' +
+        '<th class="cc" style="width:8%">Caps</th>' +
+        '<th class="cc" style="width:14%">Head</th><th class="cc" style="width:14%">Custodian</th>' +
         '<th class="cc" style="width:9%">Status</th></tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A

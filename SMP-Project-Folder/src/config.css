@@ -489,6 +489,20 @@
      Several chips and the control that adds one more, wrapping rather than
      scrolling: a row holding eight functions is the case this exists for, and
      a cell that scrolled would hide exactly the ones somebody came to check. */
+  /* How a supporting function plans: the format, and under it the unit it
+     sits under where there is one (§59). Stacked, because they are one fact
+     and a second column for the second half took the table to ten. */
+  .plancell { display:flex; flex-direction:column; gap:4px; align-items:stretch; }
+  .plancell .why { margin:0; }
+  /* The word above the control, not beside it. Beside it the select had ~90px
+     of a 138px column and clipped "Retail Stores" to "Ret…" — and the value is
+     the half worth reading. Only a pillars function shows this row at all, so
+     the extra line costs nothing on the other eight. */
+  .planunder { font-size:10.5px; color:var(--ink-3); display:flex;
+               flex-direction:column; gap:2px; align-items:stretch;
+               letter-spacing:.06em; text-transform:uppercase; font-weight:700; }
+  .planunder select { width:100%; text-transform:none; letter-spacing:0;
+                      font-weight:400; }
   .mbcell { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
   .mbcell .uchip { display:inline-flex; align-items:center; gap:5px; }
   .mbcell .mbadd { flex:1 1 auto; min-width:170px; }

@@ -2864,7 +2864,12 @@ function renderFunctions(){
             (f.active === false ? "Retired" : "Active") + '</span>') + '</td></tr>';
   }).join("");
 
-  return cfgHead("Supporting functions",
+  /* "Functions" in the rail and on the page (Islam, 2026-08-23). The page has
+     always been about all of them, and "supporting" was doing no work in a
+     list where nothing else is a function — it only made the rail's longest
+     entry longer. The ROLE keeps its full name: "Supporting function head" is
+     what somebody holds, and that is a different word doing a different job. */
+  return cfgHead("Functions",
       ['<span class="pill kind">SMO</span>', activeFunctionKeys().length + ' active',
        GROUP.capabilities.length + ' capabilities'],
       "fns", grant("c_fns") === "edit", "fnall",

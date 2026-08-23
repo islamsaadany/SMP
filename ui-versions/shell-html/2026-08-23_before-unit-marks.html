@@ -1118,36 +1118,6 @@
         paint();
       });
     });
-    /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
-       save that will not happen has to say so where the save is (§42). */
-    document.querySelectorAll("input[data-ulogo]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        var k = inp.dataset.ulogo, f = inp.files && inp.files[0];
-        inp.value = "";                       /* or the same file cannot be picked twice */
-        if (!f) return;
-        LOGO_NOTE = "";
-        logoIntake(f).then(function(uri){
-          UNITS[k].logo = uri;
-          LOGO_NOTE = "";
-          /* No save call: sync.js polls the serialised state every 5s and
-             writes when it differs. Calling one would be a second way to
-             save, and the wrong one. */
-          paint();
-        }, function(err){
-          LOGO_NOTE = UNITS[k].name + ": " + err.message;
-          paint();
-        });
-      });
-    });
-    document.querySelectorAll("[data-ulogoclear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* DELETE the key rather than blanking it, so a unit with no mark is
-           the same shape it was before anybody uploaded one (§52). */
-        delete UNITS[b.dataset.ulogoclear].logo;
-        LOGO_NOTE = "";
-        paint();
-      });
-    });
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });

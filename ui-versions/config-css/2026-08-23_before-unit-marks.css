@@ -674,10 +674,3 @@
   .nc-why { font-size:12px; color:var(--ink-3); margin:14px 0 0; }
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; }
-
-  /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
-  .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
-              background:#fff; border:1px solid var(--line); }
-  .umarkimg { display:block; max-width:190px; max-height:34px; width:auto; height:auto; }
-  .umarkpick { cursor:pointer; }
-  .logonote { color:var(--bad); margin:10px 0 0; }

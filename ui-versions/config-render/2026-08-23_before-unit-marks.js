@@ -532,54 +532,7 @@ function renderUnits(){
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:9%">Status</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : '')) +
-
-    renderUnitMarks(editable);
-}
-
-/* ── The units' own marks (§52.9) ────────────────────────────────────
-   Its OWN SECTION rather than a twelfth column. The units table already
-   carries eleven, its widths are declared on the header row and sum to
-   the whole, and a mark needs a preview and two controls in one cell —
-   three things a 7% column cannot hold. A section on the same page keeps
-   one question in one place, which is what §46 settled Setup pages are
-   for.
-
-   Shown to everyone who can reach the page and editable only by the SMO,
-   the same gate as the table above: `logo` is in UNIT_CONFIG, so the
-   server classifies a change to it as the unit's settings and refuses it
-   from anybody else. A control that changes nothing is worse than no
-   control (§42), so it is not drawn when it cannot be used. */
-function renderUnitMarks(editable){
-  var rows = UNIT_KEYS.map(function(k, i){
-    var u = UNITS[k], src = unitLogo(u);
-    return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
-      '<td class="idx">' + (i + 1) + '</td>' +
-      '<td><b>' + esc(u.name) + '</b>' +
-        (u.company ? '<span class="why">' + esc(COMPANIES[u.company].name) + '</span>' : '') + '</td>' +
-      '<td>' + (src
-        ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(src) + '" alt="' + esc(u.name) + '"></span>'
-        : '<span class="why" style="margin:0">no mark &mdash; the unit\u2019s name is used</span>') + '</td>' +
-      '<td class="cc">' + (editable
-        ? '<div class="rowacts">' +
-            '<label class="linkbu umarkpick">' + (src ? "Replace" : "Upload") +
-              '<input type="file" accept="image/png" data-ulogo="' + k + '" hidden></label>' +
-            (src ? '<button class="linkbu" data-ulogoclear="' + k + '">Remove</button>' : '') +
-          '</div>'
-        : '<span class="why" style="margin:0">SMO</span>') + '</td></tr>';
-  }).join("");
-
-  return section("", "Unit marks", null,
-    '<p class="why" style="margin:0 0 12px">Shown on the unit\u2019s review deck &mdash; large on the cover, ' +
-      'small in the footer of every other slide. A unit with no mark shows its name, which is what every ' +
-      'slide does today, so a missing one costs nothing. ' +
-      '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints a box ' +
-      'around itself on a dark slide.</p>' +
-    '<div class="cfg"><table><thead><tr>' +
-      '<th class="idx" style="width:38px">#</th><th style="width:26%">Unit</th>' +
-      '<th style="width:44%">Mark</th><th class="cc" style="width:22%"></th>' +
-    '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
+      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
 }
 
 

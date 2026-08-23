@@ -6972,3 +6972,59 @@ And the one that needs a decision rather than code: **an uploaded SVG is
 executable content**, in a page that already runs with `'unsafe-inline'` (§43.6).
 Either uploads are raster only, or the SVG is sanitised against an allow-list on
 the way in. The seven extracted here are safe because nobody uploaded them.
+
+### 52.9 A unit's own mark, and PNG as a security decision
+
+Islam: the units have their own lockups, the SMO uploads them, *"I can upload
+the others to the table later."* Six things came out of building it.
+
+**PNG ONLY, and it is a security decision, not a preference.** An uploaded SVG
+is executable content — it can carry a `<script>`, and this page already runs
+with `'unsafe-inline'` (§43.6), so one uploaded file could read every session in
+the tenant. Put to Islam as a trade with its cost stated — raster does not scale
+as sweetly, and a mark that cannot be recoloured needs answering on a dark
+slide; he chose PNG. The cap is 900px on the long edge, which is what the deck's
+cover mark needs on a 4K projector, and 220KB of data URI, because it is carried
+in every save.
+
+**NO MIGRATION, AND THAT IS THE SCHEMA WORKING AS DESIGNED.** `units` carries an
+`extra` JSONB, and `lib/state-io.js` puts every key it does not recognise there
+and reads it straight back — so `logo` round-trips with no schema change at all.
+Checked in a throwaway Postgres rather than assumed: three units, 17,978
+characters each, still there **after the clean slate** — which is right, because
+migration 004 removes `perf` by name and keeps the rest, and a real client's
+lockup is not invented content (§21).
+
+**A LOGO IS A UNIT SETTING**, so `logo` joins `UNIT_CONFIG` in `lib/authorize.js`
+rather than being left to the unknown fall-through. Both land on the SMO, so it
+changes no permission — it changes the REFUSAL, which now says Setup is the
+SMO's and sends the person to the page that holds it (§16.7).
+
+**ITS OWN SECTION, NOT A TWELFTH COLUMN.** The units table already carries
+eleven columns, its widths are declared on the header row and sum to the whole,
+and a mark needs a preview and two controls in one cell. A section on the same
+page is what §46 settled Setup pages are for.
+
+**THE GROUND IS THE WHOLE POINT, TWICE OVER.** `picIntake` paints white
+underneath before encoding, because a transparent PNG re-encoded as a JPEG comes
+back with a black ground — correct for a slide picture and fatal for a mark,
+which is exactly what made the supplied JPEGs unusable (§52.2). Rather than a
+second copy of decode-and-scale, the shared half became `imgToCanvas(file,
+maxEdge, ground)` and the ground is stated by its caller. And because a PNG
+cannot be recoloured for a dark slide the way an SVG could, the mark sits on a
+light plate there — the same answer the sign-in wall already gives Forefront's
+own mark, and one the person uploading cannot get wrong.
+
+**THE FOOTER IS OUT OF FLOW**, and a footer that quietly lengthens the deck is
+the fault that avoids: in the flex column it would shorten every content box,
+which changes how many rows a table fits and therefore how many continuation
+slides `deckFitPass()` mints. Measured across five units — 27 / 22 / 19 / 19 /
+19 slides before, exactly the same after. And the skip rule is *a slide that
+wears the mark large does not wear it small as well*; written first against
+`.d-cover` it silently took the footer off five more, because the SWOT divider,
+the four pillar dividers and Thank you all carry that class.
+
+**Removing a mark DELETES the key** rather than blanking it, so a unit with no
+mark is the shape it was before anybody uploaded one, and `unitLogo()` never
+creates what it was looking for (§50.6).
+

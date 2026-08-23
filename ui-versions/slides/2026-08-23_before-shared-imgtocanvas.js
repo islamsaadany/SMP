@@ -144,25 +144,6 @@ function picIntake(file){
     if (!file || !/^image\//.test(file.type || "")) {
       reject(new Error("that is not a picture")); return;
     }
-    imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
-      var jpg = cv.toDataURL("image/jpeg", 0.82);
-      var png = cv.toDataURL("image/png");
-      resolve(png.length < jpg.length ? png : jpg);
-    }, reject);
-  });
-}
-
-/* Read a file, scale it to fit `maxEdge`, and hand back the canvas. The ONE
-   copy of decode-and-scale, because two things want it for opposite reasons.
-
-   `ground` is a colour painted before the picture, or null for none, and it
-   is not a detail: a slide picture needs WHITE underneath or a transparent
-   PNG re-encoded as a JPEG comes back with a black ground, while a LOGO needs
-   nothing underneath at all — a ground behind a logo is the very fault that
-   made the supplied JPEGs unusable (§52.2). One helper, and the difference
-   stated by its caller rather than guessed here. */
-function imgToCanvas(file, maxEdge, ground){
-  return new Promise(function(resolve, reject){
     var fr = new FileReader();
     fr.onerror = function(){ reject(new Error("the file could not be read")); };
     fr.onload = function(){
@@ -171,15 +152,19 @@ function imgToCanvas(file, maxEdge, ground){
       img.onload = function(){
         var w = img.naturalWidth, h = img.naturalHeight;
         if (!w || !h) { reject(new Error("that picture has no size")); return; }
-        var k = Math.min(1, maxEdge / Math.max(w, h));
+        var k = Math.min(1, PIC_MAX_EDGE / Math.max(w, h));
         var cw = Math.max(1, Math.round(w * k)), ch = Math.max(1, Math.round(h * k));
         var cv = document.createElement("canvas");
         cv.width = cw; cv.height = ch;
         var cx = cv.getContext("2d");
-        if (ground) { cx.fillStyle = ground; cx.fillRect(0, 0, cw, ch); }
+        /* White underneath, or a transparent PNG re-encoded as a JPEG comes
+           back with a black ground. */
+        cx.fillStyle = "#FFFFFF"; cx.fillRect(0, 0, cw, ch);
         cx.imageSmoothingQuality = "high";
         cx.drawImage(img, 0, 0, cw, ch);
-        resolve(cv);
+        var jpg = cv.toDataURL("image/jpeg", 0.82);
+        var png = cv.toDataURL("image/png");
+        resolve(png.length < jpg.length ? png : jpg);
       };
       img.src = fr.result;
     };

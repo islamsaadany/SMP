@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.19 · **Last updated:** 2026-08-23
+**Latest version:** v3.20 · **Last updated:** 2026-08-23
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -51,6 +51,15 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.20 — the client's mark, on the door and on the deck
+
+- The Raya Trade lockup on the sign-in gate, both cards (§52)
+- A unit's own mark: uploaded on Setup › Business units, **PNG only** because an
+  uploaded SVG is executable content; large on its review deck's cover and small
+  in the footer of every other slide (§52.9)
+- The group and unit lockups extracted as vector from the client's brand manual,
+  and the client's material filed under `clients/raya-trade/`
 
 ### v3.19 — the capability half catches up, and slides get a place
 

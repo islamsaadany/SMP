@@ -54,9 +54,7 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    (unitLogo(u)
-        ? '<img class="dcovermark" src="' + esc(unitLogo(u)) + '" alt="' + esc(u.name) + '">'
-        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
+    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
@@ -517,39 +515,10 @@ function insertPictureSlides(deck, target, blank){
   });
 }
 
-/* ── The unit's own mark on the deck (§52.9) ──────────────────────────
-   Large on the cover in place of the group's name, small in the footer of
-   every other slide. A unit with no mark keeps the eyebrow and gets no
-   footer mark, which is what every slide did before — so a missing mark
-   costs nothing and half a set of lockups is still worth having.
-
-   Appended in ONE place rather than at twenty push() calls: AFTER the
-   picture slides are inserted, so a custodian's own slide is footed too,
-   and BEFORE deckFitPass(), so a slide it splits carries the footer into
-   every continuation. */
-function deckFootMarks(deck, u){
-  var src = unitLogo(u);
-  if (!src) return;
-  [].forEach.call(deck.querySelectorAll(".dslide"), function(s){
-    s.classList.add("hasmark");
-    /* Skipped on the slide that already wears the mark LARGE, and only
-       there. Written first against `.d-cover`, which silently took the
-       footer off five more: the SWOT and pillar dividers carry that class
-       too, and so does Thank you. Asking whether the mark is already on
-       the slide cannot make that mistake. */
-    if (s.querySelector(".dcovermark")) return;
-    s.insertAdjacentHTML("beforeend",
-      '<div class="dfoot"><img class="dfootmark" src="' + esc(src) + '" alt=""></div>');
-  });
-}
-
 function openDeckWith(titleHtml, slides, target){
   var root = document.getElementById("deckroot");
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
-  if (target && target.indexOf("fn:") !== 0 && UNITS[target]) {
-    deckFootMarks(root.querySelector(".deck"), UNITS[target]);
-  }
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");

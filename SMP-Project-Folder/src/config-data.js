@@ -345,6 +345,55 @@ function readableOn(fg, bg, need){
   return target;
 }
 
+/* ── A unit's own mark (§52.9) ───────────────────────────────────────
+   Islam: the client's units have their own lockups, and the SMO uploads
+   them one at a time.
+
+   PNG, and only PNG — Islam's decision after the trade was put to him.
+   AN UPLOADED SVG IS EXECUTABLE CONTENT: it can carry a <script>, and
+   this page already runs with 'unsafe-inline' (§43.6), so one uploaded
+   file could read every session in the tenant. A PNG cannot do that.
+   The price is paid knowingly: raster does not scale as sweetly, which
+   is why the cap is generous enough for a projector.
+
+   Stored as a data URI on the unit. No migration and no schema change:
+   `units` carries an `extra` JSONB and lib/state-io.js puts every key it
+   does not recognise there and reads it straight back.
+
+   READING NEVER CREATES (§50.6, §52). This returns "" for a unit with no
+   mark and never writes the field — an accessor that mints what it was
+   looking for makes every save carry a change the database never held,
+   and every non-SMO save is refused for ever after. */
+/* A refusal has to say so ON THE PAGE, not in a console nobody has open
+   (§42). Screen state, so it is never saved and never leaves this browser. */
+var LOGO_NOTE = "";
+var LOGO_MAX_EDGE = 900;    /* the deck's cover mark on a 4K projector */
+var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
+
+function unitLogo(u){ return (u && u.logo) || ""; }
+
+function logoIntake(file){
+  return new Promise(function(resolve, reject){
+    if (!file || file.type !== "image/png") {
+      reject(new Error("a mark must be a PNG")); return;
+    }
+    imgToCanvas(file, LOGO_MAX_EDGE, null).then(function(cv){
+      /* No ground, so whatever was transparent stays transparent — a mark
+         with a white box behind it is unusable on a dark slide, which is
+         exactly why the supplied JPEGs could not be used. */
+      var png = cv.toDataURL("image/png");
+      if (png.length > LOGO_MAX_BYTES) {
+        reject(new Error("that mark is " + Math.round(png.length / 1024) +
+          "KB after shrinking, and the limit is " +
+          Math.round(LOGO_MAX_BYTES / 1024) + "KB. A flat logo should be well under it — " +
+          "a photograph or a screenshot will not be."));
+        return;
+      }
+      resolve(png);
+    }, reject);
+  });
+}
+
 /* The tenant's branding. `null` anywhere means "use the shipped palette",
    which is why an untouched tenant carries no branding at all rather than a
    copy of the defaults — a stored copy would silently stop tracking the

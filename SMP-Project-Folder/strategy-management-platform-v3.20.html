@@ -1790,6 +1790,13 @@
   .nc-why b { color:var(--ink-2); }
   .nc-act { display:flex; align-items:center; gap:12px; margin:14px 0 0; }
 
+  /* ── A unit's own mark, on the Setup page (§52.9) ─────────────────── */
+  .umarkbox { display:inline-flex; align-items:center; padding:6px 10px; border-radius:4px;
+              background:#fff; border:1px solid var(--line); }
+  .umarkimg { display:block; max-width:190px; max-height:34px; width:auto; height:auto; }
+  .umarkpick { cursor:pointer; }
+  .logonote { color:var(--bad); margin:10px 0 0; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -2985,6 +2992,34 @@
   .picfoot { display:flex; align-items:center; gap:12px; }
   .picsub { font-size:var(--fs-small); color:var(--ink-3); }
   .picover { margin:10px 0 0; }
+
+  /* ── The unit's own mark on the deck (§52.9) ───────────────────────
+     A PNG, so it cannot be recoloured for a dark slide the way an SVG
+     could — Islam chose PNG knowing that, because an uploaded SVG is
+     executable content (§43.6). So on a DARK slide the mark sits on a
+     light plate, which is the same answer the sign-in wall already gives
+     Forefront's own mark: a plate is always readable whatever was
+     uploaded, and cannot be got wrong by the person uploading it.
+
+     On a light slide there is no plate at all — a navy mark on a near
+     white ground needs nothing behind it, and a plate there would be a
+     visible rectangle for no reason. */
+  .dcovermark { display:block; width:340px; height:auto; margin:0 0 26px; }
+  :root[data-theme="dark"] .dcovermark,
+  :root[data-theme="dark"] .dfootmark {
+    background:#fff; padding:10px 14px; border-radius:5px; box-sizing:content-box;
+  }
+
+  /* THE FOOTER IS OUT OF FLOW. A footer in the flex column would shorten
+     every slide's content box, which changes how many rows a table fits
+     and therefore how many continuation slides deckFitPass() mints — a
+     footer that quietly lengthens the deck. The space is RESERVED as
+     padding on the slide and the mark placed into it. */
+  .dslide.hasmark { padding-bottom:104px; }
+  .dfoot { position:absolute; left:62px; right:62px; bottom:36px;
+           display:flex; align-items:center; padding-top:20px;
+           border-top:1px solid var(--line-soft); }
+  .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
 
 </style>
 <script>
@@ -4407,8 +4442,18 @@ var GROUP = {
   ]
 };
 
+/* The Raya Distribution lockup, from the client's own brand manual.
+   Distribution covers Mobile, IT and Consumer Electronics - exactly the
+   three units whose company is `distribution`, so the mark is the
+   COMPANY's and its units carry it. One constant, referenced three
+   times: the same 18KB written out three times is three things to keep
+   in step. Real client artwork, not invented content, which is why it
+   survives the clean slate with the units themselves (§21, §52.9). */
+var RAYA_DISTRIBUTION_MARK = "data:image/png;base64,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RERERESUUQwIiYiIiIiIMooBIRERERERUUYxICQiIiIiIsooBoREREREREQZxYCQiIiIiIgooxgQEhERERERZRQDQiIiIiIiooxiQEhERERERJRRDAiJiIiIiIgyigEhERERERFRRjEgJCIiIiIiyigGhERERERERBnFgJCIiIiIiCijGBASERERERFlFANCIiIiIiKijGJASERERERElFEMCImIiIiIiDKKASEREREREVFGMSAkIiIiIiLKKAaEREREREREGcWAkIiIiIiIKKMYEBIREREREWUUA0IiIiIiIqKMYkBIRERERESUUQwIiYiIiIiIMooBIRERERERUUYxICQiIiIiIsooBoREREREREQZxYCQiIiIiIgoo4IDwinuNEzCnaBKtPz7p/x8BlB/woB+FovcfyMrJl+wIdZZebv8phAHGo+j6J6JKHS4H5DLxxAXGouxauJ0vHrOa2i1ju5j5AEPhU1vjp+BN87rAxERERE1JDggnIDxcrkrqLKRUEgDbfKj0CUn5Opx+f8D8vM+CVD+iLSatOpEudwNcaFkn50691tYPOufaLVe9zcSFD6C+HxOvhFJMIirZS9/ZZ78kodN66w8Hm+gB0RERETUECfwWt0Wj4xPEim1vgQme8jPr8rPp1FwX5DldEx1pyJVTGCgT0HcjB84GVEpwUUcDGYHv44oFF45CraDwUEnALfmQEREREQNcUCtpbClLP8jWddXJKN0Laa5WyMNTGCgsAHi5xjgkkmIQr/7sFw+AvuujiY7qJW85+ciDhQ6UHjObrdVIiIiohRgQBidibIcjTY8K4HhLRIYboJkOx1xpDAZ+de/gKjYzxIukwzhpYhCvudAuZyO+DgNRERERNSQ4IBQrdKgVjpYAsN/Id99EpKovXtvCbzeibhSOrpuo/azhNegz/0PouDoTsSJwvYSpO4CIiIiIqobM4Q2OfoyFNzbkXfXQ5Lk9BmIM4W3SxZ2H0TFXpZwGTxciCh0dH9MLrdF3CjvVBARERFR3VhUxjaFA+RdeCwxXUg7et4tl7sj/qILFOxlCaPLDmp9NuJpX2w4d2MQERERUV3YZTQetkUbnkS7uxPiTntxDQxG212yr+9BVKLPEkaXHZzWs400XOyJOFJyDMsNcCwhERERUZ3YZTQ+2pHTD0sQswfiqt3dSE7Ak1PZUaU6SxhddrDN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";
+
 var UNITS = {
   mobile: {
+    logo: RAYA_DISTRIBUTION_MARK,
     name: "Mobile", codePrefix: "MB", weight: 0, real: true,
     perf: { objectives: 62, pillars: 49, exec: 45 },
     clauses: [
@@ -4675,6 +4720,7 @@ var UNITS = {
         ] },
     ] },
   consumerelectronics: {
+    logo: RAYA_DISTRIBUTION_MARK,
     name: "Consumer Electronics", codePrefix: "CE", weight: 0, real: false,
     clauses: [
       ["We are", "the group's consumer electronics distribution arm"],
@@ -4825,6 +4871,7 @@ var UNITS = {
         ] },
     ] },
   it: {
+    logo: RAYA_DISTRIBUTION_MARK,
     name: "IT", codePrefix: "IT", weight: 0, real: false,
     clauses: [
       ["We are", "the group's IT products and infrastructure distributor"],
@@ -5323,6 +5370,55 @@ function readableOn(fg, bg, need){
     if (contrastOf(c, bg) >= need) return c;
   }
   return target;
+}
+
+/* ── A unit's own mark (§52.9) ───────────────────────────────────────
+   Islam: the client's units have their own lockups, and the SMO uploads
+   them one at a time.
+
+   PNG, and only PNG — Islam's decision after the trade was put to him.
+   AN UPLOADED SVG IS EXECUTABLE CONTENT: it can carry a <script>, and
+   this page already runs with 'unsafe-inline' (§43.6), so one uploaded
+   file could read every session in the tenant. A PNG cannot do that.
+   The price is paid knowingly: raster does not scale as sweetly, which
+   is why the cap is generous enough for a projector.
+
+   Stored as a data URI on the unit. No migration and no schema change:
+   `units` carries an `extra` JSONB and lib/state-io.js puts every key it
+   does not recognise there and reads it straight back.
+
+   READING NEVER CREATES (§50.6, §52). This returns "" for a unit with no
+   mark and never writes the field — an accessor that mints what it was
+   looking for makes every save carry a change the database never held,
+   and every non-SMO save is refused for ever after. */
+/* A refusal has to say so ON THE PAGE, not in a console nobody has open
+   (§42). Screen state, so it is never saved and never leaves this browser. */
+var LOGO_NOTE = "";
+var LOGO_MAX_EDGE = 900;    /* the deck's cover mark on a 4K projector */
+var LOGO_MAX_BYTES = 220000; /* the data URI, carried in every save */
+
+function unitLogo(u){ return (u && u.logo) || ""; }
+
+function logoIntake(file){
+  return new Promise(function(resolve, reject){
+    if (!file || file.type !== "image/png") {
+      reject(new Error("a mark must be a PNG")); return;
+    }
+    imgToCanvas(file, LOGO_MAX_EDGE, null).then(function(cv){
+      /* No ground, so whatever was transparent stays transparent — a mark
+         with a white box behind it is unusable on a dark slide, which is
+         exactly why the supplied JPEGs could not be used. */
+      var png = cv.toDataURL("image/png");
+      if (png.length > LOGO_MAX_BYTES) {
+        reject(new Error("that mark is " + Math.round(png.length / 1024) +
+          "KB after shrinking, and the limit is " +
+          Math.round(LOGO_MAX_BYTES / 1024) + "KB. A flat logo should be well under it — " +
+          "a photograph or a screenshot will not be."));
+        return;
+      }
+      resolve(png);
+    }, reject);
+  });
 }
 
 /* The tenant's branding. `null` anywhere means "use the shipped palette",
@@ -13234,7 +13330,54 @@ function renderUnits(){
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:9%">Status</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : ''));
+      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : '')) +
+
+    renderUnitMarks(editable);
+}
+
+/* ── The units' own marks (§52.9) ────────────────────────────────────
+   Its OWN SECTION rather than a twelfth column. The units table already
+   carries eleven, its widths are declared on the header row and sum to
+   the whole, and a mark needs a preview and two controls in one cell —
+   three things a 7% column cannot hold. A section on the same page keeps
+   one question in one place, which is what §46 settled Setup pages are
+   for.
+
+   Shown to everyone who can reach the page and editable only by the SMO,
+   the same gate as the table above: `logo` is in UNIT_CONFIG, so the
+   server classifies a change to it as the unit's settings and refuses it
+   from anybody else. A control that changes nothing is worse than no
+   control (§42), so it is not drawn when it cannot be used. */
+function renderUnitMarks(editable){
+  var rows = UNIT_KEYS.map(function(k, i){
+    var u = UNITS[k], src = unitLogo(u);
+    return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
+      '<td class="idx">' + (i + 1) + '</td>' +
+      '<td><b>' + esc(u.name) + '</b>' +
+        (u.company ? '<span class="why">' + esc(COMPANIES[u.company].name) + '</span>' : '') + '</td>' +
+      '<td>' + (src
+        ? '<span class="umarkbox"><img class="umarkimg" src="' + esc(src) + '" alt="' + esc(u.name) + '"></span>'
+        : '<span class="why" style="margin:0">no mark &mdash; the unit\u2019s name is used</span>') + '</td>' +
+      '<td class="cc">' + (editable
+        ? '<div class="rowacts">' +
+            '<label class="linkbu umarkpick">' + (src ? "Replace" : "Upload") +
+              '<input type="file" accept="image/png" data-ulogo="' + k + '" hidden></label>' +
+            (src ? '<button class="linkbu" data-ulogoclear="' + k + '">Remove</button>' : '') +
+          '</div>'
+        : '<span class="why" style="margin:0">SMO</span>') + '</td></tr>';
+  }).join("");
+
+  return section("", "Unit marks", null,
+    '<p class="why" style="margin:0 0 12px">Shown on the unit\u2019s review deck &mdash; large on the cover, ' +
+      'small in the footer of every other slide. A unit with no mark shows its name, which is what every ' +
+      'slide does today, so a missing one costs nothing. ' +
+      '<b>PNG only</b>, and keep the background transparent: a mark with white behind it paints a box ' +
+      'around itself on a dark slide.</p>' +
+    '<div class="cfg"><table><thead><tr>' +
+      '<th class="idx" style="width:38px">#</th><th style="width:26%">Unit</th>' +
+      '<th style="width:44%">Mark</th><th class="cc" style="width:22%"></th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
+    (LOGO_NOTE ? '<p class="why logonote">' + esc(LOGO_NOTE) + '</p>' : ''));
 }
 
 
@@ -15255,7 +15398,9 @@ function deckSlides(u){
 
   /* 1 — the cover carries the unit and the cycle, and nothing else. */
   S.push('<section class="dslide d-cover"' + anch("cover", "After the cover") + '>' +
-    '<div class="eyebrow">' + esc(GROUP.org) + '</div>' +
+    (unitLogo(u)
+        ? '<img class="dcovermark" src="' + esc(unitLogo(u)) + '" alt="' + esc(u.name) + '">'
+        : '<div class="eyebrow">' + esc(GROUP.org) + '</div>') +
     '<h1 class="cover">' + esc(u.name) + '</h1><div class="coverrule"></div>' +
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
@@ -15716,10 +15861,39 @@ function insertPictureSlides(deck, target, blank){
   });
 }
 
+/* ── The unit's own mark on the deck (§52.9) ──────────────────────────
+   Large on the cover in place of the group's name, small in the footer of
+   every other slide. A unit with no mark keeps the eyebrow and gets no
+   footer mark, which is what every slide did before — so a missing mark
+   costs nothing and half a set of lockups is still worth having.
+
+   Appended in ONE place rather than at twenty push() calls: AFTER the
+   picture slides are inserted, so a custodian's own slide is footed too,
+   and BEFORE deckFitPass(), so a slide it splits carries the footer into
+   every continuation. */
+function deckFootMarks(deck, u){
+  var src = unitLogo(u);
+  if (!src) return;
+  [].forEach.call(deck.querySelectorAll(".dslide"), function(s){
+    s.classList.add("hasmark");
+    /* Skipped on the slide that already wears the mark LARGE, and only
+       there. Written first against `.d-cover`, which silently took the
+       footer off five more: the SWOT and pillar dividers carry that class
+       too, and so does Thank you. Asking whether the mark is already on
+       the slide cannot make that mistake. */
+    if (s.querySelector(".dcovermark")) return;
+    s.insertAdjacentHTML("beforeend",
+      '<div class="dfoot"><img class="dfootmark" src="' + esc(src) + '" alt=""></div>');
+  });
+}
+
 function openDeckWith(titleHtml, slides, target){
   var root = document.getElementById("deckroot");
   root.querySelector(".deck").innerHTML = slides;
   if (target) insertPictureSlides(root.querySelector(".deck"), target);
+  if (target && target.indexOf("fn:") !== 0 && UNITS[target]) {
+    deckFootMarks(root.querySelector(".deck"), UNITS[target]);
+  }
   root.querySelector(".dtitle").innerHTML = titleHtml;
   root.classList.add("on");
   document.body.classList.add("presenting");
@@ -15995,6 +16169,25 @@ function picIntake(file){
     if (!file || !/^image\//.test(file.type || "")) {
       reject(new Error("that is not a picture")); return;
     }
+    imgToCanvas(file, PIC_MAX_EDGE, "#FFFFFF").then(function(cv){
+      var jpg = cv.toDataURL("image/jpeg", 0.82);
+      var png = cv.toDataURL("image/png");
+      resolve(png.length < jpg.length ? png : jpg);
+    }, reject);
+  });
+}
+
+/* Read a file, scale it to fit `maxEdge`, and hand back the canvas. The ONE
+   copy of decode-and-scale, because two things want it for opposite reasons.
+
+   `ground` is a colour painted before the picture, or null for none, and it
+   is not a detail: a slide picture needs WHITE underneath or a transparent
+   PNG re-encoded as a JPEG comes back with a black ground, while a LOGO needs
+   nothing underneath at all — a ground behind a logo is the very fault that
+   made the supplied JPEGs unusable (§52.2). One helper, and the difference
+   stated by its caller rather than guessed here. */
+function imgToCanvas(file, maxEdge, ground){
+  return new Promise(function(resolve, reject){
     var fr = new FileReader();
     fr.onerror = function(){ reject(new Error("the file could not be read")); };
     fr.onload = function(){
@@ -16003,19 +16196,15 @@ function picIntake(file){
       img.onload = function(){
         var w = img.naturalWidth, h = img.naturalHeight;
         if (!w || !h) { reject(new Error("that picture has no size")); return; }
-        var k = Math.min(1, PIC_MAX_EDGE / Math.max(w, h));
+        var k = Math.min(1, maxEdge / Math.max(w, h));
         var cw = Math.max(1, Math.round(w * k)), ch = Math.max(1, Math.round(h * k));
         var cv = document.createElement("canvas");
         cv.width = cw; cv.height = ch;
         var cx = cv.getContext("2d");
-        /* White underneath, or a transparent PNG re-encoded as a JPEG comes
-           back with a black ground. */
-        cx.fillStyle = "#FFFFFF"; cx.fillRect(0, 0, cw, ch);
+        if (ground) { cx.fillStyle = ground; cx.fillRect(0, 0, cw, ch); }
         cx.imageSmoothingQuality = "high";
         cx.drawImage(img, 0, 0, cw, ch);
-        var jpg = cv.toDataURL("image/jpeg", 0.82);
-        var png = cv.toDataURL("image/png");
-        resolve(png.length < jpg.length ? png : jpg);
+        resolve(cv);
       };
       img.src = fr.result;
     };
@@ -18184,6 +18373,36 @@ var SYNC = (function () {
     document.querySelectorAll("input[data-upx]").forEach(function(inp){
       inp.addEventListener("change", function(){
         UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
+        paint();
+      });
+    });
+    /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
+       save that will not happen has to say so where the save is (§42). */
+    document.querySelectorAll("input[data-ulogo]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var k = inp.dataset.ulogo, f = inp.files && inp.files[0];
+        inp.value = "";                       /* or the same file cannot be picked twice */
+        if (!f) return;
+        LOGO_NOTE = "";
+        logoIntake(f).then(function(uri){
+          UNITS[k].logo = uri;
+          LOGO_NOTE = "";
+          /* No save call: sync.js polls the serialised state every 5s and
+             writes when it differs. Calling one would be a second way to
+             save, and the wrong one. */
+          paint();
+        }, function(err){
+          LOGO_NOTE = UNITS[k].name + ": " + err.message;
+          paint();
+        });
+      });
+    });
+    document.querySelectorAll("[data-ulogoclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* DELETE the key rather than blanking it, so a unit with no mark is
+           the same shape it was before anybody uploaded one (§52). */
+        delete UNITS[b.dataset.ulogoclear].logo;
+        LOGO_NOTE = "";
         paint();
       });
     });

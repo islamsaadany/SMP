@@ -218,6 +218,27 @@
   }
 
   * { box-sizing:border-box; }
+  /* ── THE PAGE MUST NOT MOVE SIDEWAYS BETWEEN UNITS (§60.3) ────────
+     Islam: "when I switch between the units the page somehow shifts a bit
+     left, when I pick IT and Corporate precisely, and in the supporting
+     functions as well."
+
+     Not those units — their HEIGHT. A unit with five pillars is taller than
+     the window and gets a scrollbar; one with four is not and does not, so the
+     content column re-centres by the scrollbar's width every time you cross
+     that line. Measured at 1500x900: Mobile's page is 918px and scrolls,
+     Corporate, IT, Consumer Electronics and Online Shop are 900px and do not
+     — which is the boundary, unit by unit.
+
+     `scrollbar-gutter: stable` reserves the space whether or not the bar is
+     there, so the column stays put. It costs the gutter's width on pages that
+     do not scroll, which is the trade: a constant margin nobody notices
+     against a jump everybody does.
+
+     NOT REPRODUCIBLE HEADLESS — Chromium there uses overlay scrollbars and
+     reports a width of 0, so the check that finds this is the page HEIGHT
+     crossing the viewport, not the shift itself. */
+  html { scrollbar-gutter: stable; }
   body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
          font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
   /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring
@@ -998,7 +1019,18 @@
      wears the tenant's brand exactly as the navigation does. */
   .rail .rhead { background:var(--panel); color:var(--panel-ink); font-size:10.5px;
     letter-spacing:.09em; text-transform:uppercase; font-weight:700; padding:9px 14px;
-    display:flex; justify-content:space-between; gap:8px; border-bottom:0; }
+    display:flex; justify-content:space-between; gap:8px; border-bottom:0;
+    align-items:center; }
+  .rail .rhead .rhl { display:flex; gap:8px; }
+  /* JUST THE NAMES (§60). Drops every row's small line, so a rail of twenty
+     is scannable — a screen preference, kept in localStorage beside the theme
+     (§25), never in the state graph. Lit when it is on, because a control
+     that hides something has to say it is hiding it. */
+  .railterse { border:0; background:none; padding:2px; margin:-2px -2px -2px 0;
+    color:var(--panel-quiet); cursor:pointer; line-height:0; border-radius:4px; }
+  .railterse svg { width:14px; height:14px; display:block; }
+  .railterse:hover { color:var(--panel-ink); }
+  .railterse.on { color:var(--gold); }
   /* The panel's own quiet ink. --none on the panel is 2.6:1 (§38.5). */
   .rail .rhead span { color:var(--panel-quiet); font-weight:600; }
   .rail .rgroup { background:var(--surface-2); border-bottom:1px solid var(--line-soft);
@@ -1011,6 +1043,20 @@
   .rail button.ritem:last-of-type { border-bottom:0; }
   .rail button.ritem:hover { background:var(--surface-2); }
   .rail .ritem b { font-size:13px; font-weight:500; line-height:1.35; }
+  /* THE CODE IS NOT PART OF THE NAME (§60). It sat inside the same bold
+     element, same colour, same weight, on the same line — so "FIN01" read as
+     the title's first word. This is `.pband-code`'s treatment, deliberately:
+     the rail and the pane beside it now say a code the same way (§53). */
+  .rail .ritem .rcode { grid-column:1/-1; display:block;
+    font:600 10.5px/1 var(--mono); color:var(--stone); letter-spacing:.06em;
+    margin-bottom:3px; }
+  /* NO GOLD ON THE SELECTED ROW'S CODE. `--gold-deep` on `--surface-2` is
+     4.45:1 — §38.5, and the seventh time this file has recorded it. The
+     selected row is already marked twice, by the gold left edge and the bold
+     name, so a third mark was spending the accent budget (§41) to fail a
+     contrast check. The code stays quiet in both states; what changes is the
+     row around it. */
+  .rail .ritem.on .rcode { color:var(--ink-2); }
   .rail .ritem .rsub { grid-column:1/-1; font-size:11px; color:var(--ink-3); margin-top:2px; }
   .rail .ritem .rnum { font-variant-numeric:tabular-nums; font-weight:700;
     font-size:13px; color:var(--ink-3); }
@@ -13132,13 +13178,12 @@ function renderReport(u){
               : (t.total - t.done) + ' still to enter';
       return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
           esc(u.ukey) + '|' + esc(p.code) + '">' +
-        '<b>' + pillarCode(u, pi) + '&nbsp; ' + esc(p.name) + '</b>' +
+        railName(pillarCode(u, pi), p.name) +
         '<span class="rnum"><span class="rtally' + (t.total && t.done >= t.total ? " full" : "") + '">' +
           t.done + '/' + t.total + '</span></span>' +
-        '<span class="rsub">' + sub + '</span></button>';
+        railSub(sub) + '</button>';
     }).join("");
-    var rail = '<div class="rail"><div class="rhead">' + L("pillar","bu") +
-      ' <span>' + u.items.length + '</span></div>' + railRows +
+    var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = reportPillarPane(sel, u.items.indexOf(sel));
     pillars = u.items.length >= 2
@@ -13277,6 +13322,45 @@ function railWorthIt(list){ return (list || []).length >= 2; }
    unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
    project rail beside it showed a bare name, and the two rails are the same
    component doing the same job (§51.3). */
+/* ── THE RAIL'S CODE, AND THE SUB-LINE TOGGLE (§60) ────────────────
+   Islam: "the code looks like the same name with the pillar name — that needs
+   distinction in terms of colour and alignment."
+
+   It did, and for a plain reason: the code was INSIDE the same bold element as
+   the name, same colour, same weight, on the same line — so `FIN01` read as
+   the first word of the title. The pane's band beside it had already solved
+   this (`.pband-code`: mono, letter-spaced, `--stone`), so the rail takes the
+   pane's treatment rather than a new one, and the two say the code the same
+   way. That is §53's parity rule, not a fresh choice.
+
+   ONE HELPER FOR FOUR RAILS. The unit's Plan, Performance and Report rails and
+   the capability's Projects rail each built this string themselves — the shape
+   §59.3 was bitten by, where the same question answered in two places meant
+   fixing one of them changed nothing. */
+function railName(code, name){
+  return (code ? '<span class="rcode">' + esc(code) + '</span>' : '') +
+    '<b>' + esc(name) + '</b>';
+}
+/* The header, and the control that drops every row's small line. A SCREEN
+   PREFERENCE, so it lives in localStorage beside the theme and the People
+   page's columns (§25, §47.1) — putting it in the state graph would change
+   the rail for everyone in the tenant. */
+var RAIL_TERSE = (function(){
+  try { return localStorage.getItem("smp.rail.terse") === "1"; } catch(e){ return false; }
+})();
+function railHead(label, n){
+  return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
+    '<button class="railterse' + (RAIL_TERSE ? " on" : "") + '" data-railterse="1" ' +
+    'title="' + (RAIL_TERSE ? "Show the detail under each name" : "Just the names") + '" ' +
+    'aria-pressed="' + (RAIL_TERSE ? "true" : "false") + '">' +
+    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h7" ' +
+    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
+    '</button></div>';
+}
+function railSub(html){
+  return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
+}
+
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
   var lastGroup = null;
   var rows = list.map(function(it){
@@ -13285,16 +13369,16 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
     var code = codeOf ? codeOf(it) : "";
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
-        '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
+        railName(code, it.name) +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
          names out as though something were there — the unit's Plan rail, which
          has never had a number, does not render one at all. */
       (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
-        (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
+        railSub(subOf ? subOf(it) : "") +
       '</button>';
   }).join("");
-  return '<div class="rail"><div class="rhead">Projects <span>' + list.length + '</span></div>' +
+  return '<div class="rail">' + railHead("Projects", list.length) +
     rows + (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
 }
 function splitOrPane(list, sel, rail, pane){
@@ -13719,22 +13803,21 @@ function unitRailFor(u, sel){
        it just selected. */
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '">' +
-        '<b>' + pillarCode(u, i) + '&nbsp; ' + esc(it.name) + '</b>' +
+        railName(pillarCode(u, i), it.name) +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
            which was which. The bare number went with the footer that tried to
            explain it (§29.6). */
-        '<span class="rsub">' + plural(it.measures.length, "measure") +
+        railSub(plural(it.measures.length, "measure") +
           ' &middot; ' + plural(it.tactics.length, "tactic") +
-          (it.owner ? ' &middot; ' + esc(it.owner) : '') + '</span>' +
+          (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
       '</button>';
   }).join("");
   /* No footer. It said "Figure shown is key measures", explaining a number
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
-  return '<div class="rail"><div class="rhead">' + L("pillar","bu") +
-    ' <span>' + list.length + '</span></div>' + rows + '</div>';
+  return '<div class="rail">' + railHead(L("pillar","bu"), list.length) + rows + '</div>';
 }
 /* THE PLAN IS EDITABLE, FOR THE SMO ONLY.
 
@@ -13947,14 +14030,14 @@ function unitPerfRail(u){
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
       esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
-      '<b>' + pillarCode(u, i) + '&nbsp; ' + esc(it.name) + '</b>' +
+      railName(pillarCode(u, i), it.name) +
       '<span class="rnum" style="color:var(--' + band(perf) + ');font-weight:700">' + pct(perf) + '</span>' +
-      '<span class="rsub">' + (SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
-        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '') +
-        '</span></button>';
+      railSub((SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
+        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
+      '</button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    '<div class="rhead">' + L("pillar","bu") + ' <span>' + u.items.length + '</span></div>' +
+    railHead(L("pillar","bu"), u.items.length) +
     '<div class="sortable" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
@@ -19514,13 +19597,19 @@ var SYNC = (function () {
      pill, the word was the widest thing in the navigation row and it named a
      menu rather than a place. The mark is the same 20px box the theme control
      uses. */
+  /* TWO SLIDERS, NOT A GEAR (Islam, 2026-08-23, chosen from six drawn at the
+     size the control is actually worn — a 20px mark in a 34px button, which is
+     the only size it is ever seen at).
+
+     The gear's teeth were the problem: at 20px an outlined cog loses them to
+     anti-aliasing and reads as a smudge. Two sliders hold their shape at that
+     size, and they are the truer picture anyway — the page behind this is
+     sixteen things you SET, not machinery. */
   var ICON_MANAGE =
     '<svg viewBox="0 0 20 20" class="navmenusvg" aria-hidden="true">' +
-    '<circle cx="10" cy="10" r="2.9" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
-    '<path d="M10 1.9l1.2 2.05a6.2 6.2 0 0 1 1.63.68l2.3-.55 1.4 2.42-1.6 1.72a6.2 6.2 0 0 1 0 1.56' +
-    'l1.6 1.72-1.4 2.42-2.3-.55a6.2 6.2 0 0 1-1.63.68L10 18.1l-1.2-2.05a6.2 6.2 0 0 1-1.63-.68' +
-    'l-2.3.55-1.4-2.42 1.6-1.72a6.2 6.2 0 0 1 0-1.56L3.47 8.5l1.4-2.42 2.3.55a6.2 6.2 0 0 1 1.63-.68z" ' +
-    'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+    '<g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none">' +
+    '<path d="M3 6.5h9M15.5 6.5h1.5M3 13.5h4M10.5 13.5h6.5"/>' +
+    '<circle cx="13.6" cy="6.5" r="2.1"/><circle cx="8.6" cy="13.5" r="2.1"/></g></svg>';
 
   /* The menu lives inside the row so it sits on the same baseline as the tabs,
      but its panel is absolutely positioned, so a long list never widens the
@@ -20084,6 +20173,15 @@ var SYNC = (function () {
         RAIL["unit:" + p[0]] = p[1];
         paint();
         toPaneTop();
+      });
+    });
+    /* Just the names, or the names with their detail (§60). A screen
+       preference: written to localStorage and repainted, never saved. */
+    document.querySelectorAll("[data-railterse]").forEach(function(b){
+      b.addEventListener("click", function(){
+        RAIL_TERSE = !RAIL_TERSE;
+        try { localStorage.setItem("smp.rail.terse", RAIL_TERSE ? "1" : "0"); } catch(e){}
+        paint();
       });
     });
     document.querySelectorAll("[data-rail]").forEach(function(b){

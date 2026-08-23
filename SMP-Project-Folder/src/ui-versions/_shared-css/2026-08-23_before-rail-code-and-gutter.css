@@ -203,27 +203,6 @@
   }
 
   * { box-sizing:border-box; }
-  /* ── THE PAGE MUST NOT MOVE SIDEWAYS BETWEEN UNITS (§60.3) ────────
-     Islam: "when I switch between the units the page somehow shifts a bit
-     left, when I pick IT and Corporate precisely, and in the supporting
-     functions as well."
-
-     Not those units — their HEIGHT. A unit with five pillars is taller than
-     the window and gets a scrollbar; one with four is not and does not, so the
-     content column re-centres by the scrollbar's width every time you cross
-     that line. Measured at 1500x900: Mobile's page is 918px and scrolls,
-     Corporate, IT, Consumer Electronics and Online Shop are 900px and do not
-     — which is the boundary, unit by unit.
-
-     `scrollbar-gutter: stable` reserves the space whether or not the bar is
-     there, so the column stays put. It costs the gutter's width on pages that
-     do not scroll, which is the trade: a constant margin nobody notices
-     against a jump everybody does.
-
-     NOT REPRODUCIBLE HEADLESS — Chromium there uses overlay scrollbars and
-     reports a width of 0, so the check that finds this is the page HEIGHT
-     crossing the viewport, not the shift itself. */
-  html { scrollbar-gutter: stable; }
   body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans);
          font-size:var(--fs-body); line-height:1.55; -webkit-font-smoothing:antialiased; }
   /* --focus, not --gold. The accent measures 2.40:1 on white and a focus ring

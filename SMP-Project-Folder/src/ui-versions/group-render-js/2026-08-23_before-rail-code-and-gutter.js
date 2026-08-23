@@ -1768,12 +1768,13 @@ function renderReport(u){
               : (t.total - t.done) + ' still to enter';
       return '<button class="ritem' + (p.code === sel.code ? " on" : "") + '" data-urail="' +
           esc(u.ukey) + '|' + esc(p.code) + '">' +
-        railName(pillarCode(u, pi), p.name) +
+        '<b>' + pillarCode(u, pi) + '&nbsp; ' + esc(p.name) + '</b>' +
         '<span class="rnum"><span class="rtally' + (t.total && t.done >= t.total ? " full" : "") + '">' +
           t.done + '/' + t.total + '</span></span>' +
-        railSub(sub) + '</button>';
+        '<span class="rsub">' + sub + '</span></button>';
     }).join("");
-    var rail = '<div class="rail">' + railHead(L("pillar","bu"), u.items.length) + railRows +
+    var rail = '<div class="rail"><div class="rhead">' + L("pillar","bu") +
+      ' <span>' + u.items.length + '</span></div>' + railRows +
       '<div class="rfoot">Tally is entries given of asked</div></div>';
     var pane = reportPillarPane(sel, u.items.indexOf(sel));
     pillars = u.items.length >= 2
@@ -1912,45 +1913,6 @@ function railWorthIt(list){ return (list || []).length >= 2; }
    unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
    project rail beside it showed a bare name, and the two rails are the same
    component doing the same job (§51.3). */
-/* ── THE RAIL'S CODE, AND THE SUB-LINE TOGGLE (§60) ────────────────
-   Islam: "the code looks like the same name with the pillar name — that needs
-   distinction in terms of colour and alignment."
-
-   It did, and for a plain reason: the code was INSIDE the same bold element as
-   the name, same colour, same weight, on the same line — so `FIN01` read as
-   the first word of the title. The pane's band beside it had already solved
-   this (`.pband-code`: mono, letter-spaced, `--stone`), so the rail takes the
-   pane's treatment rather than a new one, and the two say the code the same
-   way. That is §53's parity rule, not a fresh choice.
-
-   ONE HELPER FOR FOUR RAILS. The unit's Plan, Performance and Report rails and
-   the capability's Projects rail each built this string themselves — the shape
-   §59.3 was bitten by, where the same question answered in two places meant
-   fixing one of them changed nothing. */
-function railName(code, name){
-  return (code ? '<span class="rcode">' + esc(code) + '</span>' : '') +
-    '<b>' + esc(name) + '</b>';
-}
-/* The header, and the control that drops every row's small line. A SCREEN
-   PREFERENCE, so it lives in localStorage beside the theme and the People
-   page's columns (§25, §47.1) — putting it in the state graph would change
-   the rail for everyone in the tenant. */
-var RAIL_TERSE = (function(){
-  try { return localStorage.getItem("smp.rail.terse") === "1"; } catch(e){ return false; }
-})();
-function railHead(label, n){
-  return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
-    '<button class="railterse' + (RAIL_TERSE ? " on" : "") + '" data-railterse="1" ' +
-    'title="' + (RAIL_TERSE ? "Show the detail under each name" : "Just the names") + '" ' +
-    'aria-pressed="' + (RAIL_TERSE ? "true" : "false") + '">' +
-    '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h7" ' +
-    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
-    '</button></div>';
-}
-function railSub(html){
-  return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
-}
-
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
   var lastGroup = null;
   var rows = list.map(function(it){
@@ -1959,16 +1921,16 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
     var code = codeOf ? codeOf(it) : "";
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
-        railName(code, it.name) +
+        '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
          names out as though something were there — the unit's Plan rail, which
          has never had a number, does not render one at all. */
       (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
-        railSub(subOf ? subOf(it) : "") +
+        (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
       '</button>';
   }).join("");
-  return '<div class="rail">' + railHead("Projects", list.length) +
+  return '<div class="rail"><div class="rhead">Projects <span>' + list.length + '</span></div>' +
     rows + (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
 }
 function splitOrPane(list, sel, rail, pane){
@@ -2393,21 +2355,22 @@ function unitRailFor(u, sel){
        it just selected. */
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
         esc(u.ukey) + '|' + esc(it.code) + '">' +
-        railName(pillarCode(u, i), it.name) +
+        '<b>' + pillarCode(u, i) + '&nbsp; ' + esc(it.name) + '</b>' +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
            the right - two numbers, one of them unlabelled, and nothing saying
            which was which. The bare number went with the footer that tried to
            explain it (§29.6). */
-        railSub(plural(it.measures.length, "measure") +
+        '<span class="rsub">' + plural(it.measures.length, "measure") +
           ' &middot; ' + plural(it.tactics.length, "tactic") +
-          (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
+          (it.owner ? ' &middot; ' + esc(it.owner) : '') + '</span>' +
       '</button>';
   }).join("");
   /* No footer. It said "Figure shown is key measures", explaining a number
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
-  return '<div class="rail">' + railHead(L("pillar","bu"), list.length) + rows + '</div>';
+  return '<div class="rail"><div class="rhead">' + L("pillar","bu") +
+    ' <span>' + list.length + '</span></div>' + rows + '</div>';
 }
 /* THE PLAN IS EDITABLE, FOR THE SMO ONLY.
 
@@ -2620,14 +2583,14 @@ function unitPerfRail(u){
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
       esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
       (on ? handle("Reorder " + it.name) : '') +
-      railName(pillarCode(u, i), it.name) +
+      '<b>' + pillarCode(u, i) + '&nbsp; ' + esc(it.name) + '</b>' +
       '<span class="rnum" style="color:var(--' + band(perf) + ');font-weight:700">' + pct(perf) + '</span>' +
-      railSub((SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
-        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '')) +
-      '</button>';
+      '<span class="rsub">' + (SHOW_KIND ? esc(it.kind) + ' &middot; ' : '') +
+        'execution ' + pct(r) + (it.owner ? ' &middot; ' + esc(it.owner) : '') +
+        '</span></button>';
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), u.items.length) +
+    '<div class="rhead">' + L("pillar","bu") + ' <span>' + u.items.length + '</span></div>' +
     '<div class="sortable" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';

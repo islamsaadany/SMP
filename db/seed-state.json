@@ -1,6 +1,48 @@
 {
  "group": {
   "org": "Raya Trade",
+  "mainbus": [
+   {
+    "name": "Distribution",
+    "at": null
+   },
+   {
+    "name": "Finance",
+    "at": null
+   },
+   {
+    "name": "IT",
+    "at": null
+   },
+   {
+    "name": "Logistics",
+    "at": null
+   },
+   {
+    "name": "Maintenance",
+    "at": null
+   },
+   {
+    "name": "Marketing",
+    "at": null
+   },
+   {
+    "name": "Mazaya",
+    "at": null
+   },
+   {
+    "name": "Retail",
+    "at": null
+   },
+   {
+    "name": "Risk",
+    "at": null
+   },
+   {
+    "name": "Support Function",
+    "at": null
+   }
+  ],
   "horizon": "2027",
   "sets": [
    {
@@ -5584,7 +5626,7 @@
    "a_unit_other": "none",
    "a_fn_own": "view",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "custodian": {
@@ -5593,7 +5635,7 @@
    "a_unit_other": "none",
    "a_fn_own": "edit",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "fnhead": {
@@ -5602,7 +5644,7 @@
    "a_unit_other": "none",
    "a_fn_own": "edit",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   },
   "contrib": {
@@ -5611,7 +5653,7 @@
    "a_unit_other": "none",
    "a_fn_own": "view",
    "a_fn_other": "none",
-   "a_cycle": "view",
+   "a_cycle": "none",
    "a_setup": "none"
   }
  },

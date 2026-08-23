@@ -9,6 +9,34 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
+  /* ── THE BU LIST (§53.1, spec 011) ───────────────────────────────
+     Raya's own ten names for parts of the business, exactly as its employee
+     data spells them (Islam, 2026-08-23). NOT invented (B3) — they are the
+     client's official list, which is why they are here rather than made up.
+
+     AND DELIBERATELY UNMAPPED. What each name points at is a decision only
+     Islam can make, and two of the ten make that plain: "Distribution" is a
+     COMPANY here rather than a unit, and "IT" is the name of both a business
+     unit and a supporting function, so the platform cannot guess which one an
+     employee in IT belongs to. A4: build the field, leave it empty, do not
+     seed it with a guess.
+
+     They are the DEMO's, not a tenant's: migration 004 strips `mainbus` from
+     org.extra after the seed, exactly as it strips `sets` — a client deploying
+     SMP must not inherit Raya's departments, which is §21's rule and the fault
+     §45.3 records against the figure sets that survived the clean slate. */
+  mainbus: [
+    { name:"Distribution",     at:null },
+    { name:"Finance",          at:null },
+    { name:"IT",               at:null },
+    { name:"Logistics",        at:null },
+    { name:"Maintenance",      at:null },
+    { name:"Marketing",        at:null },
+    { name:"Mazaya",           at:null },
+    { name:"Retail",           at:null },
+    { name:"Risk",             at:null },
+    { name:"Support Function", at:null }
+  ],
   /* 2027, Islam's own number for this strategy — not a guess (A4). It was
      2029, which was invented when the field was added.
 

@@ -3922,6 +3922,34 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
+  /* ── THE BU LIST (§53.1, spec 011) ───────────────────────────────
+     Raya's own ten names for parts of the business, exactly as its employee
+     data spells them (Islam, 2026-08-23). NOT invented (B3) — they are the
+     client's official list, which is why they are here rather than made up.
+
+     AND DELIBERATELY UNMAPPED. What each name points at is a decision only
+     Islam can make, and two of the ten make that plain: "Distribution" is a
+     COMPANY here rather than a unit, and "IT" is the name of both a business
+     unit and a supporting function, so the platform cannot guess which one an
+     employee in IT belongs to. A4: build the field, leave it empty, do not
+     seed it with a guess.
+
+     They are the DEMO's, not a tenant's: migration 004 strips `mainbus` from
+     org.extra after the seed, exactly as it strips `sets` — a client deploying
+     SMP must not inherit Raya's departments, which is §21's rule and the fault
+     §45.3 records against the figure sets that survived the clean slate. */
+  mainbus: [
+    { name:"Distribution",     at:null },
+    { name:"Finance",          at:null },
+    { name:"IT",               at:null },
+    { name:"Logistics",        at:null },
+    { name:"Maintenance",      at:null },
+    { name:"Marketing",        at:null },
+    { name:"Mazaya",           at:null },
+    { name:"Retail",           at:null },
+    { name:"Risk",             at:null },
+    { name:"Support Function", at:null }
+  ],
   /* 2027, Islam's own number for this strategy — not a guess (A4). It was
      2029, which was invented when the field was added.
 
@@ -5170,6 +5198,11 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
 var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
+/* The same treatment for the BU list's add row, and for the same reason:
+   held in a global rather than read off the input at submit time, because
+   the repaint any other change causes would otherwise throw away what is
+   half typed. */
+var NEWMAINBU = "";
 /* Which row's action menu is open, by person key (§46.4). ONE key, not a flag
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
@@ -5477,9 +5510,32 @@ function addPerson(o){
   var key = mintPersonKey(o.name);
   var p = { key: key, name: String(o.name || "").trim(), title: o.title || "" };
   if (o.phone) p.phone = o.phone;
+  /* Three facts the employee file brings and the typed Add row does not, so
+     all three are optional and none is invented when absent (§53.2). `empId`
+     is the client's own employee number and is what a second upload matches
+     on — it survives a marriage, a transfer and a new mail domain, none of
+     which the name or the address do. `mainbu` is HR's word for their part of
+     the business; where that POINTS is read through the BU list rather than
+     copied onto the person, so re-pointing the list never leaves a stale
+     answer behind on five hundred rows. */
+  if (o.empId) p.empId = String(o.empId).trim();
+  if (o.email) p.email = String(o.email).trim();
+  if (o.mainbu) p.mainbu = String(o.mainbu).trim();
+  if (o.where !== undefined && o.where !== null) attachPersonAt(p, o.where);
   PEOPLE.push(p);
   if (o.role) grantPersonRole(key, o.role, o.where);
   return key;
+}
+
+/* The employee number, matched the way the file will spell it: trimmed, and
+   compared as text because a leading zero is part of an employee number and
+   102347 read as a number is not the same string as 0102347. */
+function personByEmpId(id){
+  var want = String(id == null ? "" : id).trim();
+  if (!want) return null;
+  return PEOPLE.filter(function(p){
+    return String(p.empId == null ? "" : p.empId).trim() === want;
+  })[0] || null;
 }
 
 /* ── One fact, two editing surfaces ─────────────────────────────────
@@ -5640,6 +5696,437 @@ function roleWheres(roleKey){
     }));
   }
   return units;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE BU LIST (§53, spec 011) — the client's own names for its business
+
+   An employee file arrives with a BU column holding the client's official
+   vocabulary: Distribution, Finance, IT, Logistics, Maintenance, Marketing,
+   Mazaya, Retail, Risk, Support Function. The platform holds none of those
+   words. It holds business units, supporting functions and companies, named
+   the way the strategy work named them — "Retail Stores" rather than Retail,
+   "Distribution" as a COMPANY holding three units rather than a unit, and
+   nothing at all for Maintenance, Risk or Mazaya.
+
+   So the register carries TWO answers and they are different questions:
+
+     Main BU   what the organisation calls the person's part of the business.
+               HR's word, straight off the file, never edited by the platform.
+     BU        what that points at HERE — the unit, function or company whose
+               pages they open and whose plan they may touch. This is the
+               attachment access has always been read from; it is what the
+               register called "Belongs to" until Islam renamed it, on the
+               grounds that a strategy platform's word for a part of the
+               business is BU (2026-08-23).
+
+   THE LIST IS THE BRIDGE, AND IT IS STORED ONCE. Ten rows, each pointing at
+   one place or at nothing. A row pointing at nothing is a real answer, not an
+   omission: Risk employs people and carries no strategy, so they belong to
+   Risk and have nothing to open. Naming the person's unit on every one of five
+   hundred rows would be the same fact typed five hundred times, and a typo in
+   any one of them a person quietly in the wrong place.
+
+   THE VOCABULARY IS `r.at`'s — "group", "co:<company>", "fn:<function>", or a
+   unit key — the same strings a role is held at and the same ones
+   roleWhereLabel() names. Reusing it is the whole reason a Main BU can point
+   at a company: the platform already had somewhere to put "attached to
+   Distribution, which is not a unit", because a company CEO is attached that
+   way (§23).
+
+   It lives on GROUP, which means it lands in the org row's `extra` and needs
+   no migration — the same free ride §44's figure sets took. And like every
+   other accessor here it must NEVER CREATE THE FIELD IT WAS LOOKING FOR
+   (§50.6): `branding()` invented a four-null object the database never held
+   and every non-SMO save would have been refused for ever. The reader returns
+   a shared frozen empty; mainbuList() is the writing half; removing the last
+   row deletes the key again.
+   ══════════════════════════════════════════════════════════════════ */
+var NO_MAINBUS = Object.freeze([]);
+function mainbus(){ return GROUP.mainbus || NO_MAINBUS; }
+function mainbuList(){
+  if (!GROUP.mainbus) GROUP.mainbus = [];
+  return GROUP.mainbus;
+}
+/* Matched case- and space-insensitively, because the same name will arrive
+   from HR as "Support Function", "support function" and " Support Function"
+   in the same file, and three rows for one department is not a list anybody
+   can map. The name is STORED as first written — the client's own casing. */
+function mainbuKey(name){ return String(name == null ? "" : name).trim().toLowerCase(); }
+function mainbuBy(name){
+  var want = mainbuKey(name);
+  if (!want) return null;
+  return mainbus().filter(function(b){ return mainbuKey(b.name) === want; })[0] || null;
+}
+function mainbuAt(name){
+  var b = mainbuBy(name);
+  return b && b.at ? b.at : null;
+}
+function mainbuNames(){ return mainbus().map(function(b){ return b.name; }); }
+/* Returns the stored name, so a caller can write back the client's casing
+   rather than whatever the file happened to use. */
+function addMainbu(name){
+  var n = String(name == null ? "" : name).trim();
+  if (!n) return null;
+  var had = mainbuBy(n);
+  if (had) return had.name;
+  mainbuList().push({ name:n, at:null });
+  return n;
+}
+function setMainbuAt(name, at){
+  var b = mainbuBy(name);
+  if (!b) return;
+  if (at) b.at = at; else delete b.at;
+}
+/* A rename carries the people with it. The name IS the key here — unlike a
+   unit or a company, which have a key under the label precisely so a rename
+   cannot detach anything — because it is the client's own word and arrives
+   spelled that way in every file. So the rename has to move `p.mainbu` too,
+   or the register would show people belonging to a name the list no longer
+   holds. Refused if the new name is already taken: merging two departments is
+   a decision, not a typo's side effect. */
+function renameMainbu(oldName, newName){
+  var b = mainbuBy(oldName);
+  var n = String(newName == null ? "" : newName).trim();
+  if (!b || !n) return false;
+  var clash = mainbuBy(n);
+  if (clash && clash !== b) return false;
+  var was = b.name;
+  b.name = n;
+  PEOPLE.forEach(function(p){ if (mainbuKey(p.mainbu) === mainbuKey(was)) p.mainbu = n; });
+  return true;
+}
+function peopleOfMainbu(name){
+  var want = mainbuKey(name);
+  return PEOPLE.filter(function(p){ return mainbuKey(p.mainbu) === want; });
+}
+/* REFUSED while people carry it, naming how many — the same contract as
+   retiring a company that still holds units (§49.3). A list row is not a
+   record of anything, so unlike a person or a unit it is deleted rather than
+   retired; what makes that safe is exactly this refusal. */
+function removeMainbu(name){
+  var b = mainbuBy(name);
+  if (!b || peopleOfMainbu(b.name).length) return false;
+  var list = mainbuList();
+  list.splice(list.indexOf(b), 1);
+  if (!list.length) delete GROUP.mainbus;
+  return true;
+}
+
+/* Where a Main BU may point, grouped the way the picker offers it. Retired
+   companies and inactive units are still offered when something already
+   points at them, for the same reason a role at a retired company is left
+   alone: the pointer is a fact, and hiding it does not unmake it. */
+function mainbuWheres(){
+  return [
+    { label:"The group", opts:[{ v:"group", label:"The group" }] },
+    { label:"Business units", opts:UNIT_KEYS.map(function(k){
+        return { v:k, label:UNITS[k].name }; }) },
+    { label:"Supporting functions", opts:FUNCTION_KEYS.map(function(f){
+        return { v:"fn:" + f, label:FUNCTIONS[f].name }; }) },
+    { label:"Companies", opts:COMPANY_KEYS.map(function(c){
+        return { v:"co:" + c, label:COMPANIES[c].name }; }) }
+  ];
+}
+
+/* ── WHERE A PERSON SITS, AS ONE FACT ─────────────────────────────
+   The register drew this inline and read `p.fn` then `p.unit`, which was
+   right until a Main BU could point at a company: a person attached to
+   Distribution has neither, and the cell read as a dash for somebody who is
+   very much somewhere. It is one function now, in the vocabulary
+   roleWhereLabel() already speaks, so the register and the file importer
+   cannot answer it differently. */
+function personAt(p){
+  if (!p) return null;
+  if (p.fn) return "fn:" + p.fn;
+  if (p.company) return "co:" + p.company;
+  if (p.unit) return p.unit;
+  return null;
+}
+/* THE WRITING HALF IS SEPARATE, and it clears all three before setting one —
+   a person who moves from a function to a unit and keeps `p.fn` is in two
+   places, and personAt() would go on reporting the one they left. Roles are
+   NOT touched: a unit head moved to Finance still heads that unit until
+   somebody says otherwise, and that is a decision for the People page, not a
+   side effect of a spreadsheet column. */
+function attachPersonAt(p, at){
+  if (!p) return;
+  delete p.unit; delete p.fn; delete p.company;
+  if (!at) return;
+  if (at === "group") p.unit = "group";
+  else if (String(at).indexOf("fn:") === 0) p.fn = String(at).slice(3);
+  else if (String(at).indexOf("co:") === 0) p.company = String(at).slice(3);
+  else p.unit = at;
+}
+/* Where the person's Main BU says they should be, which is not always where
+   they are: the list can be re-pointed after a file was loaded, and somebody
+   can be moved by hand afterwards. Neither is wrong, and neither should be
+   silently reconciled — the register marks the disagreement and leaves it to
+   be answered, because a mapping that quietly moved thirty people the next
+   time a row changed would be the worst kind of helpful. */
+function mainbuDrift(p){
+  if (!p || !p.mainbu) return null;
+  var b = mainbuBy(p.mainbu);
+  if (!b || !b.at) return null;
+  return b.at === personAt(p) ? null : b.at;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   THE REGISTER AS A FILE (§53.3, spec 011)
+
+   Islam: "you give me a template download and upload for the data in the
+   people register tab so I can upload an excel with the agreed on format to
+   seed in the users."
+
+   Eight columns, one row per person, and the SAME file both ways: what
+   downloads is the register as it stands, so the template is also the export
+   and a second upload amends rather than duplicates. That is §22's contract
+   for a plan turned round — a plan is AUTHORED by upload because a plan is one
+   whole thing, and a register is not: five hundred people arrive in batches,
+   from an HR system nobody here controls, and a file that replaced the
+   register would retire everybody it forgot to mention.
+
+   SO AN UPLOAD ADDS AND AMENDS, AND NEVER REMOVES. A row not in the file is a
+   person the file says nothing about. Retiring is a thing the file can ASK for
+   — Status: Retired — and it does exactly what the row's own menu does,
+   revoking their roles and closing the door, with the record they are named in
+   left true (§35).
+
+   MATCHED ON EMP ID (Islam, asked). Not the name, which two people share and
+   one person changes; not the email, which changes with a mail domain. A row
+   with no employee number is SKIPPED WITH A NOTICE rather than refused: the
+   thirty-three people already in this tenant have no employee number, and a
+   template that could be downloaded and not uploaded back is the fault §51.14
+   records against the plan file.
+   ══════════════════════════════════════════════════════════════════ */
+var PEOPLE_FILE_COLS = ["Emp ID", "Name", "Job title", "Email", "Mobile",
+                        "Main BU", "Role", "Status"];
+/* Written by the download, ignored by the upload. A person may hold three
+   roles and the Role column holds one, so the rest are shown rather than
+   silently dropped from the file — what the column cannot carry, the sheet
+   still has to say. */
+var PEOPLE_FILE_EXTRA = "Also holds";
+
+function fileTxt(v){ return String(v == null ? "" : v).trim(); }
+
+/* The role a name in the file means. Matched on the role's own label, because
+   that is what the dropdown offers and what somebody reading the sheet sees —
+   "Strategy custodian", never "custodian". */
+function roleKeyByName(name){
+  var want = fileTxt(name).toLowerCase();
+  if (!want) return null;
+  var hit = ROLES.filter(function(r){ return r.name.toLowerCase() === want; })[0];
+  return hit ? hit.key : null;
+}
+/* Contributor is not granted and never has been: it is what personRoles()
+   reads off somebody attached to a unit and holding nothing else (§49.5). A
+   file naming it would be asking for a role that arrives by itself, so the
+   template does not offer it and the reader says so plainly. */
+function roleIsGrantable(key){ return key && key !== "contrib"; }
+
+/* Reads the sheet against the stored world and says what would happen. It
+   changes NOTHING — the review step exists so that an upload is looked at
+   before it lands, exactly as a plan's is, and a reader that mutated on the
+   way past would make the review a report of what had already been done. */
+function planPeopleFile(rows){
+  var plan = { rows:[], problems:[], notices:[], newBus:[],
+               added:0, updated:0, retired:0, restored:0, roles:0 };
+  var seen = {};
+  (rows || []).forEach(function(r, i){
+    /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
+       looking at Excel, where the header is row 1 and the first person is row
+       2 — an off-by-one here sends them to the wrong line, which is worse than
+       no line at all. */
+    var at = "Row " + (i + 2);
+    var id     = fileTxt(r["Emp ID"]);
+    var name   = fileTxt(r["Name"]);
+    var mainbu = fileTxt(r["Main BU"]);
+    var role   = fileTxt(r["Role"]);
+    var status = fileTxt(r["Status"]);
+    var label  = name || id || "this row";
+
+    if (!id) {
+      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number, so there is ' +
+        'nothing to match them on. Left exactly as they are.' });
+      return;
+    }
+    if (seen[id]) {
+      plan.problems.push({ at:at, msg:'employee number ' + id + ' is used twice in this file — ' +
+        'also on ' + seen[id] + '. One row per person.' });
+      return;
+    }
+    seen[id] = at;
+
+    var existing = personByEmpId(id);
+    if (!existing && !name) {
+      plan.problems.push({ at:at, msg:'employee number ' + id + ' is not on the register and the ' +
+        'row has no name, so there is nobody to add.' });
+      return;
+    }
+
+    /* An unknown department is ADDED TO THE BU LIST, unmapped, rather than
+       refused. It is how the ten names arrive in the first place: a fresh
+       tenant has an empty list, and demanding it be typed before the first
+       file can be read is the trap §22 walked into when a locked dropdown
+       meant a first plan could not be authored from the template. What the
+       name POINTS AT is still the SMO's to say, on the BU list page. */
+    var bu = mainbu ? mainbuBy(mainbu) : null;
+    if (mainbu && !bu) {
+      var already = plan.newBus.filter(function(n){
+        return mainbuKey(n) === mainbuKey(mainbu); })[0];
+      if (!already) {
+        plan.newBus.push(mainbu);
+        plan.notices.push({ at:at, msg:'"' + mainbu + '" is not on the BU list yet. It will be ' +
+          'added, pointing at nothing until you map it on Setup → BU list.' });
+      }
+    }
+    /* The stored spelling wins, so "support function" typed in a hurry does
+       not become a second department beside "Support Function". */
+    var buName = bu ? bu.name : mainbu;
+    var where  = bu ? (bu.at || null) : null;
+
+    var roleKey = null;
+    if (role) {
+      roleKey = roleKeyByName(role);
+      /* A ROLE THEY ALREADY HOLD IS NOT AN ASK (§53.4). Found by the round
+         trip and not by reading: the download writes each person's current
+         role, so 31 of the demo's 33 rows came back naming a role the file
+         then could not place — their Main BU is empty, a role is held over
+         their own BU, and the platform refused its own export. A template
+         that cannot be uploaded back is the fault §51.14 records against the
+         plan file, arriving in a second file.
+
+         The rule that fixes it is the one the column already promised: this
+         column GIVES a role, it never takes one away. If they hold it there
+         is nothing to give, so there is nothing to check and no BU needed.
+         What it will not do is MOVE one — a custodian of Mobile whose BU says
+         Retail stays custodian of Mobile, because moving a custodianship is a
+         real act and a spreadsheet column that did it as a side effect would
+         do it to everybody at once. */
+      if (!roleKey) {
+        plan.problems.push({ at:at, msg:'"' + role + '" is not one of the roles. Choose from the ' +
+          'dropdown in the Role column.' });
+        return;
+      }
+      if (!roleIsGrantable(roleKey)) {
+        plan.problems.push({ at:at, msg:'Contributor is not given — it is what somebody attached ' +
+          'to a unit and holding nothing else already is. Leave Role blank.' });
+        return;
+      }
+      var holdsIt = existing &&
+        personRoles(existing).some(function(r){ return r.role === roleKey; });
+      /* Cleared BEFORE anything is asked of it, and the checks below are then
+         skipped rather than run against a role nobody is granting. Written the
+         other way round first — cleared, then checked — it fell into "is this
+         grantable?" holding null and reported every one of those 31 rows as
+         asking for Contributor. */
+      if (holdsIt) roleKey = null;
+
+      /* A ROLE IS ALWAYS HELD OVER SOMETHING, and the file does not say over
+         what: Islam's ruling is that it is always their own BU, which is what
+         keeps the template to one column. So a role needs the Main BU to point
+         somewhere, and it needs to point at somewhere that role can be held —
+         "Business unit owner" of a supporting function is not a thing, and the
+         refusal names what the role does admit rather than just saying no. */
+      if (roleKey && !where) {
+        plan.problems.push({ at:at, msg:'"' + roleName(roleKey) + '" is held over the person’s own ' +
+          'BU, and ' + (buName ? '"' + buName + '" points at nothing yet' : 'this row names no BU') +
+          '. Map it on Setup → BU list, or leave Role blank and give it on the register.' });
+        return;
+      }
+      if (roleKey && !roleWheres(roleKey).some(function(w){ return w.v === where; })) {
+        plan.problems.push({ at:at, msg:'"' + roleName(roleKey) + '" cannot be held over ' +
+          roleWhereLabel(where) + ', which is what "' + buName + '" points at.' });
+        return;
+      }
+    }
+
+    var wantActive = null;
+    if (status) {
+      var st = status.toLowerCase();
+      if (st === "active") wantActive = true;
+      else if (st === "retired") wantActive = false;
+      else {
+        plan.problems.push({ at:at, msg:'"' + status + '" is not a status. It is Active or Retired.' });
+        return;
+      }
+    }
+
+    var row = { at:at, id:id, key:existing ? existing.key : null,
+                name:name || (existing ? existing.name : ""),
+                title:fileTxt(r["Job title"]), email:fileTxt(r["Email"]),
+                phone:fileTxt(r["Mobile"]), mainbu:buName, where:where,
+                role:roleKey, wantActive:wantActive, changes:[] };
+
+    if (!existing) {
+      row.action = "add";
+      plan.added++;
+      if (roleKey) plan.roles++;
+      if (wantActive === false) plan.retired++;
+    } else {
+      row.action = "update";
+      /* WHAT ACTUALLY MOVES, field by field. A review saying "31 people
+         updated" when 31 rows came back unchanged from the download teaches
+         whoever reads it to stop reading it. A blank cell is "nothing to say
+         about this", never "clear it" — the file is an amendment, and an
+         amendment that erased every field it left empty would empty the
+         register on its first round trip. */
+      var was = existing;
+      var cmp = [["name", "name", row.name], ["title", "job title", row.title],
+                 ["email", "email", row.email], ["phone", "mobile", row.phone]];
+      cmp.forEach(function(c){
+        if (c[2] && fileTxt(was[c[0]]) !== c[2]) row.changes.push(c[1]);
+      });
+      if (buName && mainbuKey(was.mainbu) !== mainbuKey(buName)) row.changes.push("BU");
+      if (roleKey) { row.changes.push("role"); plan.roles++; }
+      if (wantActive === true  && !personActive(was)) { row.changes.push("restored"); plan.restored++; }
+      if (wantActive === false &&  personActive(was)) { row.changes.push("retired");  plan.retired++; }
+      if (row.changes.length) plan.updated++; else row.action = "same";
+    }
+    plan.rows.push(row);
+  });
+  return plan;
+}
+
+/* Applies what the plan says, in the one order that works: the department
+   before the person, the person's attachment before their role (a role is
+   held over their BU, so the BU has to be true first), and retiring LAST —
+   retiring revokes roles, so a row that both granted one and retired the
+   person would otherwise keep a role on somebody who cannot sign in. */
+function applyPeopleFile(plan){
+  plan.newBus.forEach(function(n){ addMainbu(n); });
+
+  plan.rows.forEach(function(row){
+    if (row.action === "same") return;
+    var p = row.key ? personBy(row.key) : null;
+    if (!p) {
+      var key = addPerson({ name:row.name, title:row.title, phone:row.phone,
+                            empId:row.id, email:row.email, mainbu:row.mainbu,
+                            where:row.where });
+      p = personBy(key);
+      if (!p) return;
+    } else {
+      if (row.name)  p.name  = row.name;
+      if (row.title) p.title = row.title;
+      if (row.email) p.email = row.email;
+      if (row.phone) p.phone = row.phone;
+      p.empId = row.id;
+      if (row.mainbu) {
+        p.mainbu = row.mainbu;
+        /* Only when the list actually points somewhere. A person whose
+           department maps to nothing keeps whatever attachment they already
+           had — moving them to "nowhere" because Risk has not been mapped yet
+           would take away pages they can open today. */
+        if (row.where) attachPersonAt(p, row.where);
+      }
+    }
+    /* Restoring gives NOTHING back by itself (§49.4): what they get is what
+       this file says, which is the Role column or nothing. The page asks;
+       a file answers by being explicit. */
+    if (row.wantActive === true && !personActive(p)) restorePerson(p.key, false);
+    if (row.role) grantPersonRole(p.key, row.role, row.where);
+    if (row.wantActive === false && personActive(p)) retirePerson(p.key);
+  });
 }
 
 /* The order a picker offers people in: the ones already attached to this unit
@@ -10367,6 +10854,98 @@ function capProgressFromWorkbook(c, sheets){
   return out;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   THE PEOPLE WORKBOOK (§53.3, spec 011)
+
+   Two sheets: how to fill it, and the register. The same file both ways —
+   what downloads is who is on the register right now, so it is the export as
+   well as the template, and a filled copy uploaded back amends rather than
+   duplicating (planPeopleFile/applyPeopleFile in config-data.js).
+
+   THREE DROPDOWNS, AND ONE OF THEM IS DELIBERATELY A SUGGESTION. Role and
+   Status are closed lists — there are seven roles and two statuses, and a
+   typo in either is a person in the wrong place or a person who cannot sign
+   in. Main BU is SOFT, because the list starts empty on a new tenant and a
+   locked column would mean no employee file could ever be read until somebody
+   had typed ten department names by hand. That is exactly the trap the plan
+   template fell into (§22): a fixed list offered nothing, so Excel refused
+   every pillar name typed into the column, so a first plan could not be
+   authored from the template at all. A name the list has not met is added on
+   arrival, pointing at nothing.
+   ══════════════════════════════════════════════════════════════════ */
+var PEOPLE_STATUSES = ["Active", "Retired"];
+
+function peopleReadme(){
+  var lines = [
+    ["People workbook", ""],
+    ["", ""],
+    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People."],
+    ["Matching", "Emp ID is who the row is. A number already on the register updates that person; a new one adds them. A row with no Emp ID is skipped — there is nothing to match it on."],
+    ["Adding somebody", "Fill Emp ID and Name. Everything else is optional."],
+    ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
+    ["Main BU", "Your own name for their part of the business. Where it points — which unit, function or company they actually open — is set once on Setup → BU list. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
+    ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Contributor is not offered: it is what somebody attached to a unit and holding nothing else already is."],
+    ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
+    ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
+    ["", ""],
+    ["When you are done", "Save as .xlsx and upload it on Setup → People."]
+  ];
+  return { name:"Read me", widths:[22, 96],
+           rows:lines.map(function(l){ return [l[0], l[1]]; }) };
+}
+
+function peopleWorkbook(){
+  var names = mainbuNames();
+  /* Contributor is excluded from the dropdown for the same reason the reader
+     refuses it: it is derived, not granted. */
+  var roleNames = ROLES.filter(function(r){ return r.key !== "contrib"; })
+                       .map(function(r){ return r.name; });
+  var vals = [
+    { range:"G2:G2000", list:roleNames,
+      error:"Choose a role from the list, or leave the cell blank." },
+    { range:"H2:H2000", list:PEOPLE_STATUSES,
+      error:"Active or Retired." }
+  ];
+  /* An empty list would write formula1 as a pair of quotes with nothing in
+     them, which Excel reads as a broken validation rather than as no
+     validation. On a tenant whose BU list is still empty the column simply
+     has no dropdown — and that is the case the soft list exists for. */
+  if (names.length) {
+    vals.unshift({ range:"F2:F2000", list:names, soft:true });
+  }
+
+  var rows = PEOPLE.map(function(p){
+    var held = personRoles(p).filter(function(r){ return r.role !== "contrib"; });
+    return [
+      p.empId || "", p.name, p.title || "", p.email || "", p.phone || "",
+      p.mainbu || "",
+      held.length ? roleName(held[0].role) : "",
+      personActive(p) ? "Active" : "Retired",
+      /* Everything after the first, WITH where it is held — the one column
+         cannot carry a second role and must not pretend there is not one. */
+      held.slice(1).map(function(r){
+        return roleName(r.role) + " · " + roleWhereLabel(r.at);
+      }).join("; ")
+    ];
+  });
+
+  return [
+    peopleReadme(),
+    { name:"People", widths:[12, 30, 30, 32, 16, 20, 26, 11, 34],
+      head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
+      lockedCols:[8],
+      validations:vals,
+      rows:rows }
+  ];
+}
+
+/* The sheet is named People and read by its header row, so a column moved or
+   a column added later costs nothing — sheetObjects() keys on the heading, not
+   on the position. */
+function peopleFromWorkbook(sheets){
+  return sheetObjects(sheets["People"] || []);
+}
+
 </script>
 <script>
 /* VOCABULARY, fixed after review:
@@ -13515,6 +14094,13 @@ var FSET = { unit:"mobile" };
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
             read:"", check:null, done:null };
 
+/* The register's own file, on the People page (§53.3). Its own state rather
+   than a second `kind` on IMP: the import page authors a PLAN for one unit,
+   this amends the register for everybody, and the two share no step but the
+   word "upload". `plan` is what planPeopleFile() read and nothing has been
+   written yet — Apply is what writes it. */
+var PPLF = { read:"", plan:null, done:null };
+
 
 /* ── Setup · Companies ──────────────────────────────────────────────
    Its own page since 3.5. It sat above the Business units table, which put two
@@ -13648,12 +14234,24 @@ var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
 var PCOLS_KEY = "smp.people.columns";
+/* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§53.1).
+   `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
+   word for a part of the business is BU, and the column says which one the
+   person opens. `standing` → `status`: it holds Active or Retired, which is a
+   status; standing is what a focus measure has.
+
+   THE KEYS MOVED WITH THE LABELS, which costs anybody who has ever opened the
+   column chooser their saved preference for those two — an absent key falls
+   back to the shipped default (§30.2), and both default to shown, so the worst
+   case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
+  { k:"empid",    label:"Emp. ID", off:true },
   { k:"title",    label:"Job title" },
-  { k:"belongs",  label:"Belongs to" },
+  { k:"mainbu",   label:"Main BU" },
+  { k:"bu",       label:"BU" },
   { k:"contact",  label:"Contact",  off:true },
   { k:"roles",    label:"Roles" },
-  { k:"standing", label:"Standing" },
+  { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
 ];
 var PCOLS = null;      /* {key:bool}, loaded once */
@@ -13709,11 +14307,13 @@ function renderPeople(){
      first and every group-level role read as "elsewhere", because belongsLabel
      said "The group" and whereLabel said "the group". Two renderings of one
      fact will always find a way to disagree; compare the fact. */
-  function belongsKey(p){
-    if (p.fn) return "fn:" + p.fn;
-    if (p.unit) return p.unit;
-    return null;
-  }
+  /* Lifted into config-data.js as personAt() 2026-08-23 (§53.1). It read
+     `p.fn` then `p.unit`, which was complete until a Main BU could point at a
+     COMPANY — a person attached to Distribution has neither, and the cell read
+     as a dash for somebody who is very much somewhere. The file importer has
+     to answer the same question, and two copies of "where does this person
+     sit" would find a way to disagree. */
+  var belongsKey = personAt;
   function belongsLabel(p){
     var k = belongsKey(p);
     return k ? whereLabel(k) : null;
@@ -13783,6 +14383,17 @@ function renderPeople(){
             '<button class="linkbu" data-prole-cancel="1">Cancel</button>' +
           '</span>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
+  }
+
+  /* Read-only, and spelled out rather than leaning on `"" || dash` — an
+     expression whose falsiness carries the meaning is one refactor away from
+     being wrong (CLAUDE.md: explicit over clever). */
+  function contactCell(p){
+    var bits = [];
+    if (p.email) bits.push('<span class="val">' + esc(p.email) + '</span>');
+    if (p.phone) bits.push('<span class="mono">' + esc(p.phone) + '</span>');
+    if (!bits.length) return '<span class="why" style="margin:0">&mdash;</span>';
+    return bits.join("");
   }
 
   /* STATUS ONLY, AND SQUEEZED (Islam, 2026-08-22). The action left this cell
@@ -13869,11 +14480,20 @@ function renderPeople(){
      sign-in page already knows. It is still on the row's hover. */
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
+    var drift = mainbuDrift(p);
     return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td title="' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(p.name) + '</b>') + '</td>' +
+      /* The employee number. Off by default — it is the client's own
+         identifier and matters when a file is being reconciled, not when
+         somebody is looking up who runs Retail. */
+      (showCol("empid") ? '<td>' + (editable
+        ? '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
+          '" placeholder="Emp. ID">'
+        : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
@@ -13882,20 +14502,43 @@ function renderPeople(){
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
                    : '<span class="why" style="margin:0">not given</span>')) + '</td>' : '') +
-      (showCol("belongs") ? '<td>' + (home
-        ? '<span class="uchip">' + esc(home) + '</span>'
+      /* MAIN BU IS THE CLIENT'S WORD, BU IS OURS (§53.1). The first is typed
+         (or arrives in the file) and is never interpreted; the second is read
+         through the BU list and is what decides which pages open.
+
+         WHERE THEY DISAGREE, THE CELL SAYS SO rather than either being
+         quietly corrected. The list can be re-pointed after a file was loaded
+         and a person can be moved by hand afterwards — neither is a fault, and
+         a mapping that silently moved thirty people the next time a row
+         changed would be the worst kind of helpful. */
+      (showCol("mainbu") ? '<td>' + (p.mainbu
+        ? '<span class="val">' + esc(p.mainbu) + '</span>' +
+          (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the BU list</span>')
         : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
+      (showCol("bu") ? '<td>' + (home
+        ? '<span class="uchip">' + esc(home) + '</span>' + (drift
+            ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
+              esc(whereLabel(drift)) + ' on the BU list">BU list says ' +
+              esc(whereLabel(drift)) + '</span>'
+            : '')
+        : (drift
+            ? '<span class="why" style="margin:0">&mdash; BU list says ' +
+              esc(whereLabel(drift)) + '</span>'
+            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      /* Email above the number. Both are how you reach somebody, and giving
+         each a column of its own made an eleven-column register — the pair is
+         one answer to one question. */
       (showCol("contact") ? '<td>' + (editable
-        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
-          '" placeholder="Contact number">'
-        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+        ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
+          '" placeholder="Email"><input class="fld" value="' + esc(p.phone || "") +
+          '" data-pphone="' + p.key + '" placeholder="Mobile">'
+        : contactCell(p)) + '</td>' : '') +
       (showCol("roles")
         ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
       /* Standing before Password, at Islam's direction — whether somebody can
          sign in at all is the question you ask before what their password is
          doing. */
-      (showCol("standing")
+      (showCol("status")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
       (showCol("password") ? pwCell(p) : '') +
@@ -14016,11 +14659,13 @@ function renderPeople(){
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
+        (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
         (showCol("title")    ? '<th>Job title</th>'  : '') +
-        (showCol("belongs")  ? '<th>Belongs to</th>' : '') +
+        (showCol("mainbu")   ? '<th>Main BU</th>'    : '') +
+        (showCol("bu")       ? '<th>BU</th>'         : '') +
         (showCol("contact")  ? '<th>Contact</th>'    : '') +
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
-        (showCol("standing") ? '<th class="cc">Standing</th>' : '') +
+        (showCol("status")   ? '<th class="cc">Status</th>' : '') +
         (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
         '<th class="cc"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
@@ -14028,7 +14673,235 @@ function renderPeople(){
       '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
       'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
       'reported. Retiring takes away every role they hold and closes the door — they ' +
-      'cannot sign in — while everything already attributed to them stays true.</div>');
+      'cannot sign in — while everything already attributed to them stays true.</div>') +
+
+    renderPeopleFile(mayEdit);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   THE REGISTER'S FILE (§53.3, spec 011)
+
+   A section on the People page rather than a page of its own, and not on
+   Import either. Import authors ONE UNIT'S PLAN and is reached from the
+   cycle; this amends the register, and the register is what you are already
+   looking at when you decide five hundred people need to be in it. A13: the
+   three-step shape, the review-before-apply and every class here are the
+   import page's, because it is the same job done to a different table.
+   ══════════════════════════════════════════════════════════════════ */
+function renderPeopleFile(mayEdit){
+  if (!mayEdit) return "";
+  var plan = PPLF.plan;
+
+  var step1 =
+    '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
+      '<h4>Download the register</h4>' +
+      '<p class="sub">The same file both ways: what comes down is who is on the register ' +
+        'now, so it is the export as well as the template. ' +
+        plural(PEOPLE.length, "row") + ', with Role and Status as dropdowns' +
+        (mainbus().length
+          ? ' and your ' + mainbus().length + ' BU names in the Main BU column'
+          : ' — the Main BU column has no list yet, so type the names and they will be ' +
+            'added to the BU list on arrival') + '.</p>' +
+      '<div class="imp-row">' +
+        '<button class="editbtn" data-dlppl="1">Download the people template</button>' +
+      '</div>' +
+    '</div></div>';
+
+  var step2 =
+    '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
+      '<h4>Upload the filled file</h4>' +
+      '<p class="sub">Matched on <b>Emp ID</b>. A number already here updates that person, ' +
+        'a new one adds them, and a person the file does not mention is not touched — ' +
+        '<b>an upload never removes anybody</b>.</p>' +
+      '<div class="imp-row"><input type="file" id="ppl-file" accept=".xlsx" ' +
+        'aria-label="Choose a filled people file to upload">' +
+        (PPLF.read ? '<span class="pill quiet">Read &middot; ' + esc(PPLF.read) + '</span>' : '') +
+      '</div>' +
+    '</div></div>';
+
+  /* THE RECEIPT, and it names the way back to nothing — you are already on the
+     page the change landed on, so it says what moved and stops. */
+  var step3 = PPLF.done
+    ? '<div class="applied"><b>' + esc(PPLF.done) + '</b></div>'
+    : "";
+
+  if (!step3 && plan) {
+    var blocked = plan.problems.length;
+    var checks =
+      plan.problems.map(function(x){
+        return '<div class="chk bad"><span class="pill bad">Problem</span>' +
+          '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
+      }).join("") +
+      plan.notices.map(function(x){
+        return '<div class="chk note-c"><span class="pill attn">Notice</span>' +
+          '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
+      }).join("");
+
+    /* WHAT MOVES, PERSON BY PERSON. A tally alone ("31 updated") is unreadable
+       against a file that came straight back off the download with two cells
+       changed — the whole point of reviewing is seeing which two. Rows that
+       change nothing are counted and not listed, or the table is the file. */
+    var moving = plan.rows.filter(function(r){ return r.action !== "same"; });
+    var same = plan.rows.length - moving.length;
+    var body = moving.length
+      ? '<div class="scroll"><table><thead><tr><th>Row</th><th>Person</th>' +
+          '<th>Main BU</th><th class="cc">What happens</th></tr></thead><tbody>' +
+        moving.map(function(r){
+          return '<tr><td class="mono">' + esc(r.id) + '</td>' +
+            '<td><b>' + esc(r.name) + '</b></td>' +
+            '<td>' + (r.mainbu
+              ? esc(r.mainbu) + (r.where
+                  ? ' <span class="why" style="margin:0">&rarr; ' + esc(roleWhereLabel(r.where)) + '</span>'
+                  : ' <span class="why" style="margin:0">&rarr; not mapped</span>')
+              : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' +
+            '<td class="cc">' + (r.action === "add"
+              ? '<span class="pill good">Added</span>'
+              : '<span class="pill attn">' + esc(r.changes.join(", ")) + '</span>') +
+            '</td></tr>';
+        }).join("") + '</tbody></table></div>'
+      : '<div class="note">Nothing in this file differs from what is recorded.</div>';
+
+    step3 =
+      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
+        '<h4>Review, then apply</h4>' +
+        (checks ? '<div class="imp-checks">' + checks + '</div>' : '') +
+        (blocked
+          ? '<div class="note bad-note"><b>Nothing can be applied while a problem stands.</b> ' +
+            'Data that loads badly is harder to find later than a file that refuses to load.</div>'
+          : '') +
+        '<div class="imp-tally">' +
+          (plan.added   ? '<span class="pill good">' + plan.added + ' added</span>' : '') +
+          (plan.updated ? '<span class="pill attn">' + plan.updated + ' updated</span>' : '') +
+          (plan.roles   ? '<span class="pill kind">' + plan.roles + ' given a role</span>' : '') +
+          (plan.retired ? '<span class="pill bad">' + plan.retired + ' retired</span>' : '') +
+          (plan.restored? '<span class="pill good">' + plan.restored + ' restored</span>' : '') +
+          (plan.newBus.length
+            ? '<span class="pill attn">' + plural(plan.newBus.length, "new BU name") + '</span>' : '') +
+          (same ? '<span class="pill quiet">' + same + ' unchanged</span>' : '') +
+        '</div>' + body +
+        '<div class="imp-row" style="margin-top:14px">' +
+          (blocked
+            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+            : '<button class="editbtn apply" data-pplapply="1">Apply to the register</button>') +
+          '<button class="linkbu" data-pplcancel="1">Discard</button></div>' +
+      '</div></div>';
+  }
+
+  return section("", "Seed the register from a file",
+    "One row per person, matched on their employee number. Adds and amends — it never " +
+    "removes anybody, and a blank cell means \u201cnothing to say about this\u201d rather than " +
+    "\u201cclear it\u201d.",
+    '<div class="imp">' + step1 + step2 + step3 + '</div>');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   SETUP · BU LIST (§53.1, spec 011)
+
+   Ten rows and one dropdown each. It sits in *Who* rather than *What we run*
+   because its only reader is the register: it is not another thing being
+   planned, it is the vocabulary the client's own employee data arrives in.
+   It shares `c_people` for the same reason Companies shares `c_units` — the
+   same person maintains both, and inventing a fourteenth access key for a
+   ten-row table would be a switch nobody ever moves.
+   ══════════════════════════════════════════════════════════════════ */
+function renderMainbus(){
+  var mayEdit = grant("c_people") === "edit";
+  var editable = mayEdit && EDITING.people;
+  var list = mainbus();
+  var mapped = list.filter(function(b){ return !!b.at; }).length;
+  /* Names people carry that the list has never met. It cannot happen through
+     an upload — a new name is added on arrival — but it can through a rename
+     the register was mid-edit for, and a list that does not admit it is a list
+     that quietly loses people. */
+  var strays = [];
+  PEOPLE.forEach(function(p){
+    if (!p.mainbu || mainbuBy(p.mainbu)) return;
+    if (strays.indexOf(p.mainbu) === -1) strays.push(p.mainbu);
+  });
+
+  var wheres = mainbuWheres();
+  function target(b){
+    if (!editable) {
+      return b.at
+        ? '<span class="uchip">' + esc(roleWhereLabel(b.at)) + '</span>'
+        : '<span class="pill none">Not mapped</span>';
+    }
+    return '<select class="fld" data-mbat="' + esc(b.name) + '">' +
+      '<option value=""' + (b.at ? "" : " selected") + '>\u2014 not mapped \u2014</option>' +
+      wheres.map(function(g){
+        return '<optgroup label="' + esc(g.label) + '">' + g.opts.map(function(o){
+          return '<option value="' + esc(o.v) + '"' + (o.v === b.at ? " selected" : "") + '>' +
+            esc(o.label) + '</option>';
+        }).join("") + '</optgroup>';
+      }).join("") + '</select>';
+  }
+
+  var rows = list.map(function(b, i){
+    var n = peopleOfMainbu(b.name).length;
+    return '<tr><td class="idx">' + (i + 1) + '</td>' +
+      '<td>' + (editable
+        ? '<input class="fld" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
+        : '<b>' + esc(b.name) + '</b>') + '</td>' +
+      '<td>' + target(b) + '</td>' +
+      '<td class="cc"><span class="mono">' + n + '</span></td>' +
+      '<td class="cc">' + (editable
+        /* Deleted rather than retired, and that is safe only because it is
+           REFUSED while anybody carries the name — the same contract as
+           retiring a company that still holds units (§49.3). A list row
+           records nothing, so there is no history to protect. */
+        ? (n
+            ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
+            : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')
+        : '') + '</td></tr>';
+  }).join("");
+
+  var addRow = editable
+    ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
+        '<input class="fld" id="newMainbu" placeholder="Business unit name, as your own records spell it" ' +
+        'value="' + esc(NEWMAINBU) + '">' +
+      '</td><td class="cc"><button class="linkbu" data-mbadd="1">Add</button></td></tr>'
+    : '';
+
+  var table = list.length || editable
+    ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+        '<th class="idx" style="width:38px">#</th>' +
+        '<th style="width:30%">Main BU</th>' +
+        '<th style="width:34%">Points at</th>' +
+        '<th class="cc" style="width:14%">People</th>' +
+        '<th class="cc" style="width:18%"></th>' +
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
+    : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
+      'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
+      'nothing, for you to map. Or type them in with Edit.</div>';
+
+  return cfgHead("BU list",
+      ['<span class="pill kind">SMO</span>',
+       plural(list.length, "name"),
+       mapped + ' mapped'].concat(
+        strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
+                         ' on people and not on this list</span>'] : []),
+      "people", mayEdit) +
+
+    section("", "Your names, and what they point at",
+      "The words your own records use for parts of the business, and which unit, supporting " +
+      "function or company each one opens here. Set once — every employee file then reads " +
+      "itself, instead of every row naming a unit five hundred times.",
+      table +
+      (strays.length
+        ? '<div class="note bad-note"><b>' + esc(strays.join(", ")) +
+          '</b> ' + (strays.length === 1 ? 'is on somebody' : 'are on people') +
+          '\u2019s record and not on this list. Add ' + (strays.length === 1 ? 'it' : 'them') +
+          ' above, or correct the spelling on <b>People</b>.</div>'
+        : '') +
+      '<div class="note"><b>Pointing at nothing is an answer.</b> A part of the business can ' +
+      'employ people and carry no strategy here \u2014 they are on the register, they belong to it, ' +
+      'and there is simply nothing for them to open. Mapping it later moves nobody by itself: ' +
+      'the register marks where somebody sits somewhere other than their BU says, and leaves ' +
+      'the answer to you.</div>' +
+      '<div class="note"><b>A name may point at a company.</b> Your records may call something ' +
+      'a BU that is a group of units here \u2014 the platform already knows how to attach somebody ' +
+      'to one, because that is where a company CEO sits.</div>');
 }
 
 function renderCompanies(){
@@ -17533,6 +18406,12 @@ var SYNC = (function () {
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
       { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
+      /* The client's own names for parts of the business, and what each one
+         opens here (§53.1). In *Who* rather than *What we run*, and sharing
+         c_people rather than taking a key of its own: it is not another thing
+         being planned, it is the vocabulary the register's own data arrives
+         in, and Companies already shares c_units on exactly this argument. */
+      { k:"mainbu", ac:"c_people", grp:"who", label:"BU list",               render:renderMainbus },
       { k:"access", ac:"c_access", grp:"who", label:"Roles & access",        render:renderAccess },
 
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units",        render:renderUnits },
@@ -19095,6 +19974,131 @@ var SYNC = (function () {
     });
     var ac = document.getElementById("addcompany");
     if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
+
+    /* ── The BU list (§53.1) ────────────────────────────────────────
+       A name, where it points, and a Remove that is refused while anybody
+       carries it. The NAME is the key here — unlike a unit or a company,
+       which carry a key under the label so a rename detaches nothing — so
+       renaming moves the people with it, inside renameMainbu(). */
+    document.querySelectorAll("[data-mbat]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        setMainbuAt(sel.dataset.mbat, sel.value || null);
+        paint();
+      });
+    });
+    document.querySelectorAll("input[data-mbname]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        var was = inp.dataset.mbname, now = inp.value.trim();
+        if (now && now !== was && !renameMainbu(was, now)) {
+          /* Refused rather than silently merged: two departments becoming one
+             is a decision, and it is not one a typo gets to make. */
+          alert('There is already a BU called "' + now + '". Two names cannot be merged by ' +
+                'renaming one into the other \u2014 move the people first.');
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-mbdel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        removeMainbu(b.dataset.mbdel);
+        paint();
+      });
+    });
+    var newBu = document.getElementById("newMainbu");
+    if (newBu) {
+      newBu.addEventListener("input", function(){ NEWMAINBU = newBu.value; });
+      newBu.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addTypedMainbu(); }
+      });
+    }
+    function addTypedMainbu(){
+      var n = (NEWMAINBU || "").trim();
+      if (!n) return;
+      addMainbu(n);
+      NEWMAINBU = "";
+      paint();
+    }
+    document.querySelectorAll("[data-mbadd]").forEach(function(b){
+      b.addEventListener("click", addTypedMainbu);
+    });
+
+    /* ── The register's own file (§53.3) ────────────────────────────
+       Download, upload, review, apply. The gate is checked HERE as well as on
+       the section that draws the controls, for the reason renderImport()
+       states: a destination can be reached with a stale page after a role
+       changed under the viewer, and the handler is the last thing between a
+       file and the register. */
+    var dlp = document.querySelector("[data-dlppl]");
+    if (dlp) dlp.addEventListener("click", function(){
+      sendXlsx(peopleWorkbook(), "SMP - people.xlsx");
+    });
+
+    var pf = document.getElementById("ppl-file");
+    if (pf) pf.addEventListener("change", function(){
+      if (grant("c_people") !== "edit") return;
+      var file = pf.files && pf.files[0];
+      if (!file) return;
+      var rx = new FileReader();
+      rx.onload = function(){
+        readXlsx(rx.result).then(function(sheets){
+          if (!sheets["People"]) {
+            /* §48.8's rule: a file that cannot be read has to SAY so, where
+               the upload is. A plan workbook dropped here is the likely
+               mistake, and naming the sheet it is missing is what tells
+               somebody which of the two files they picked up. */
+            PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
+                          roles:0, retired:0, restored:0,
+                          problems:[{ at:file.name, msg:"has no sheet called People. This is " +
+                            "the people workbook's own sheet \u2014 download the template above " +
+                            "and fill that." }] };
+            PPLF.read = ""; PPLF.done = null;
+            paint();
+            return;
+          }
+          var rows = peopleFromWorkbook(sheets);
+          PPLF.plan = planPeopleFile(rows);
+          PPLF.read = file.name + " \u00b7 " + plural(rows.length, "row");
+          PPLF.done = null;
+          paint();
+        }).catch(function(e){
+          PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
+                        roles:0, retired:0, restored:0,
+                        problems:[{ at:file.name,
+                          msg:"could not be read as a workbook \u2014 " + e.message }] };
+          PPLF.read = ""; PPLF.done = null;
+          paint();
+        });
+      };
+      rx.readAsArrayBuffer(file);
+    });
+
+    document.querySelectorAll("[data-pplapply]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (grant("c_people") !== "edit") return;
+        var plan = PPLF.plan;
+        if (!plan || plan.problems.length) return;
+        applyPeopleFile(plan);
+        /* The receipt is written from what the plan SAID, before the state
+           moved under it — counted after the fact it would be counting the
+           register rather than the file. */
+        var parts = [];
+        if (plan.added)    parts.push(plural(plan.added, "person").replace("persons", "people") + " added");
+        if (plan.updated)  parts.push(plan.updated + " updated");
+        if (plan.roles)    parts.push(plural(plan.roles, "role") + " given");
+        if (plan.retired)  parts.push(plan.retired + " retired");
+        if (plan.restored) parts.push(plan.restored + " restored");
+        if (plan.newBus.length) parts.push(plural(plan.newBus.length, "BU name") + " added to the BU list");
+        PPLF.done = parts.length ? parts.join(", ") + "." : "Nothing to change \u2014 the file matched the register.";
+        PPLF.plan = null; PPLF.read = "";
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pplcancel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PPLF.plan = null; PPLF.read = ""; PPLF.done = null;
+        paint();
+      });
+    });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
         VIEWER = b.dataset.as;
@@ -19139,6 +20143,12 @@ var SYNC = (function () {
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
+    /* The two the employee file brings (§53.2). Cleared when emptied rather
+       than kept as "", so absent and blank stay one word — the codebase reads
+       every optional field with == null and a stored empty string would come
+       back through the round trip as a field the data never had. */
+    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; });
+    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; });
 
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -19622,6 +20632,19 @@ var SYNC = (function () {
     paint();
   }
 
+  /* Lifted out of wireImport() 2026-08-23 (§53.3): the People page sends a
+     workbook too, and two copies of "build it, wrap it in a blob, click a
+     link, revoke the URL" is the second one that gets the revoke wrong. */
+  function sendXlsx(sheets, name){
+    var bytes = buildXlsx(sheets);
+    var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
   function wireImport(){
     var us = document.getElementById("imp-unit");
     if (us) us.addEventListener("change", function(){ IMP.unit = us.value; IMP.diff = null; paint(); });
@@ -19630,15 +20653,6 @@ var SYNC = (function () {
       b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
     });
 
-    function sendXlsx(sheets, name){
-      var bytes = buildXlsx(sheets);
-      var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = name;
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-    }
     /* The plan template is the same file whichever unit it is for, so it is
        built against an empty shape rather than a chosen unit's content. */
     var dlx = document.querySelector("[data-dlx]");

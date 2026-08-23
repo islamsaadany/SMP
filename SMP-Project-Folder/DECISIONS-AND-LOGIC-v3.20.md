@@ -6994,3 +6994,226 @@ And the one that needs a decision rather than code: **an uploaded SVG is
 executable content**, in a page that already runs with `'unsafe-inline'` (§43.6).
 Either uploads are raster only, or the SVG is sanitised against an allow-list on
 the way in. The seven extracted here are safe because nobody uploaded them.
+
+---
+
+## 53 · The BU list, and the register as a file — v3.20
+
+Islam brought one row of Raya's employee data and one problem:
+
+> Emp.ID 102347 · Mohamed Hassanin Ehsan Hassanin · Senior Manager (Sales) ·
+> mohamed_ehsan@rayacorp.com · 01111111821 · **Distribution**
+>
+> "however in the official company list of the BUs are the following:
+> Distribution, Finance, IT, Logistics, Maintenance, Marketing, Mazaya,
+> Retail, Risk, Support Function … so we can call these the main BUs so we can
+> keep our Units in place as is. we just will need to map the Main BU to the BU
+> in the table … and you give me a template download and upload for the data in
+> the people register tab so I can upload an excel with the agreed on format to
+> seed in the users. and of course add to the template the roles in a drop down
+> to identify their roles and change standing to Status"
+
+Four things, and only the last one is a rename.
+
+### 53.1 The platform holds none of those ten words
+
+Checked against the tenant rather than assumed, and that is the whole finding:
+
+| Official BU | What the platform actually holds |
+|---|---|
+| Distribution | a **company**, not a unit |
+| Finance | supporting **function** |
+| IT | a **unit** *and* a **function** — both exist |
+| Logistics | **unit** |
+| Maintenance | nothing |
+| Marketing | supporting **function** |
+| Mazaya | nothing — a name in the demo's content, not a unit |
+| Retail | a unit, but named **Retail Stores** |
+| Risk | nothing |
+| Support Function | nothing |
+
+Six of the ten do not resolve. So the file cannot be read against the
+platform's own list, and naming a unit on each of five hundred employee rows
+would be one fact typed five hundred times with a typo in some of them putting
+somebody quietly in the wrong place.
+
+**THE LIST IS THE BRIDGE, AND IT IS STORED ONCE.** A Setup page — *BU list* —
+holding the client's own names, each pointing at one place here or at nothing.
+
+**POINTING AT NOTHING IS AN ANSWER, NOT AN OMISSION.** Risk employs people and
+carries no strategy: they are on the register, they belong to Risk, and there
+is simply nothing for them to open. A list that demanded a target for every
+name would force a wrong one.
+
+**THE VOCABULARY IS `r.at`'s** — `"group"`, `"co:<company>"`, `"fn:<function>"`
+or a unit key, the same strings a role is held at and the same ones
+`roleWhereLabel()` names. That reuse is what lets a Main BU point at a
+**company**: the platform already knew how to attach somebody to one, because
+that is where a company CEO sits (§23). Nothing new had to be invented for
+Distribution, which was the case that looked hardest.
+
+**IT SITS IN *WHO*, NOT IN *WHAT WE RUN*, and shares `c_people`.** It is not
+another thing being planned; it is the vocabulary the register's own data
+arrives in, and its only reader is the register. Companies already shares
+`c_units` on exactly this argument (§30) — a fourteenth access key for a
+ten-row table would be a switch nobody ever moves.
+
+**WHAT EACH NAME POINTS AT IS ISLAM'S, AND IS LEFT EMPTY** (A4). Two of the ten
+make that plain: Distribution is a company rather than a unit, and **IT is the
+name of both a business unit and a supporting function**, so the platform
+cannot guess which one an employee in IT belongs to. The demo ships the ten
+names and no mappings.
+
+### 53.2 The register carries two answers, because they are two questions
+
+Renamed at Islam's word: *"belongs to is not good naming"*. A strategy
+platform's word for a part of the business is **BU**.
+
+- **Main BU** — what the organisation calls the person's part of the business.
+  HR's word, straight off the file, never interpreted.
+- **BU** — what that points at here: the unit, function or company whose pages
+  they open. This is the attachment access has always been read from; it was
+  called *Belongs to*.
+
+And *Standing* becomes **Status**, which is what a column holding Active or
+Retired is. Standing is what a focus measure has.
+
+**WHERE THE TWO DISAGREE, THE CELL SAYS SO.** The list can be re-pointed after
+a file was loaded, and a person can be moved by hand afterwards; neither is a
+fault. A mapping that silently moved thirty people the next time a row changed
+would be the worst kind of helpful, so the register marks the disagreement and
+leaves the answer to the SMO.
+
+Three new facts on a person — employee number, email, Main BU — and **none
+needed a migration**: they ride in the `people` row's `extra`, the same free
+ride `active` and `phone` take (§35). The BU list rides in `org.extra`, as
+figure sets do (§44).
+
+### 53.3 The register as a file — and it is the export too
+
+One workbook, two sheets, eight columns: Emp ID · Name · Job title · Email ·
+Mobile · Main BU · Role · Status. It downloads what is on the register right
+now, so the template **is** the export, and a filled copy uploaded back amends
+rather than duplicating.
+
+**AN UPLOAD ADDS AND AMENDS, AND NEVER REMOVES.** This is §22's contract for a
+plan turned round, and deliberately so: a plan is authored by upload because a
+plan is one whole thing, and a register is not. Five hundred people arrive in
+batches from an HR system nobody here controls, so a file that replaced the
+register would retire everybody it forgot to mention. Retiring is something the
+file can *ask* for — Status: Retired — doing exactly what the row's own menu
+does. **A blank cell means "nothing to say about this", never "clear it".**
+
+**MATCHED ON EMP ID** (Islam, asked). Not the name, which two people share and
+one person changes; not the email, which changes with a mail domain. A row with
+no employee number is **skipped with a notice**, not refused — the thirty-three
+people already in this tenant have none, and a template that could be
+downloaded and not uploaded back is §51.14 arriving in a second file.
+
+**AN UNKNOWN DEPARTMENT IS ADDED TO THE LIST, UNMAPPED, RATHER THAN REFUSED.**
+It is how the ten names arrive in the first place. A fresh tenant's list is
+empty, and demanding it be typed before the first file could be read is the
+trap §22 fell into: a locked dropdown offered nothing, so Excel refused every
+pillar name typed into the column, so a first plan could not be authored from
+the template. Role and Status are closed lists; **Main BU is a suggestion**.
+
+**A ROLE IS ALWAYS HELD OVER THE PERSON'S OWN BU** (Islam's ruling), which is
+what keeps the template to one column rather than two. The consequence is
+honest and is stated on the sheet: a role needs the Main BU to point somewhere,
+and it must point somewhere that role can be held — "Business unit owner" of a
+supporting function is not a thing, and the refusal names what the role does
+admit. Contributor is not offered at all: it is not granted, it is what
+somebody attached to a unit and holding nothing else already is (§49.5).
+
+### 53.4 What the round trip caught, immediately
+
+**THE PLATFORM REFUSED ITS OWN EXPORT.** The download writes each person's
+current role, so 31 of the demo's 33 rows came back naming a role the upload
+then could not place — those people have no Main BU, a role is held over their
+own BU, and there was nothing to place it against.
+
+Found by a check, not by reading, and the check is the point: the people file
+is asserted to be a **fixed point** — downloaded and uploaded back unchanged,
+it must move nothing. Without that, the first thing anybody does with the
+feature (download it to see the shape) reports a register full of changes that
+are not changes.
+
+The rule that fixes it is the one the column already promised: **this column
+gives a role, it never takes one away.** If they already hold it there is
+nothing to give, so there is nothing to check and no BU needed. What it will
+not do is **move** one — a custodian of Mobile whose BU says Retail stays
+custodian of Mobile, because moving a custodianship is a real act and a
+spreadsheet column that did it as a side effect would do it to everybody at
+once.
+
+Two smaller ones, both from the same run. Written as *clear the role, then
+check it*, the check fell through holding `null` and reported all 31 rows as
+asking for Contributor — **clear it before anything is asked of it**. And the
+first version of the one-edited-cell check changed the *person* and downloaded
+again, so both sides agreed and it reported zero changes while passing: **the
+edit has to be made to the FILE** (§50.6, measuring the wrong thing passes).
+
+### 53.5 A check that asks whether it can run is a check that passes
+
+Walked into while writing the test for something else, and recorded because
+this file records it twice already. The new authorisation test was written
+`A.classify ? … : null` — and the export is called `collect()`, so it skipped
+in silence and the suite still said "passed". It is unconditional now.
+
+The same rule was applied forward rather than re-learned: the contrast sweep
+**seeds two BU rows and a drifting person** before walking Setup, because an
+empty BU list renders one note and would be reported clean (§45.2); and the
+sweep's page count is **counted rather than typed**, because the literal `34`
+was already stale.
+
+### 53.6 A client must not inherit Raya's departments
+
+The demo carries the ten names so the feature is visible rather than described.
+That put them in `org.extra`, which is **exactly where §45.3's figure set
+survived the clean slate** — so `mainbus` joins `sets`, `claims` and `naming`
+in migration 004's scrub. Editing that file reaches every future deployment and
+no existing one, which is correct: an existing tenant is never re-seeded, so it
+never receives them. Verified by deploying to an empty database and asking the
+`org` row, rather than by reading the SQL.
+
+### 53.7 What was measured
+
+- `test-authorize.js`: **131 passed, 0 failed** — five new, covering that a
+  unit head and a custodian cannot point or re-point a BU row, that the SMO
+  can, and that the change is classified as `setup` rather than falling into
+  the unknown bucket.
+- `qa.py`: every page as all 31 viewers, **no console errors**; the people file
+  round trip **33 rows, fixed point PASS**, one edited cell producing exactly
+  one changed row, and Islam's own sample employee in an unmapped department
+  coming back as *added* with the department offered to the BU list.
+- Contrast sweep: **53 failing runs before, 53 after** — the new pages add
+  none. (The 53 are §16.15's, on the Performance page, recorded and untouched.)
+- `test-roundtrip.js` against a real Postgres 16: clean slate, deep-equal round
+  trip and fixed point all **PASS** with the BU list in the seed.
+- End to end, signed in, against the API: the BU list and a person carrying an
+  employee number, email and Main BU save, persist and read back, and
+  `change_log` names the change *"the BU list"* rather than *unknown*. The real
+  upload path was driven through the file input — the review named the
+  duplicate employee number, skipped the person with none, offered the unknown
+  department, and applied.
+
+### 53.8 What this cost, and what is still open
+
+The register was already wider than its box: **1061px in 920px** at v3.19,
+scrolling in place. Main BU adds 66px, so it is **1127px** now. The box scrolls
+and the page does not, and Job title or Contact can be switched off in the
+Columns menu to recover it — but it is a widening, and it is recorded rather
+than left to be noticed.
+
+Still open, and each needs an answer rather than code:
+
+- **What each of the ten names points at.** Ten dropdowns, five minutes, and
+  nobody but Islam can fill them. IT is the one to think about: a unit and a
+  function share the name.
+- **Email is the obvious future sign-in name.** It is on the register now; the
+  username is still a key minted from the person's name (§35). Changing what
+  people sign in with is its own decision.
+- **The file grants roles and nothing slows it down.** An upload that names
+  *Super user* against a row gives the SMO seat, and it is authorised as Setup
+  like everything else here — correct, and worth knowing before a file arrives
+  from somebody else's laptop.

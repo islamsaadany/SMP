@@ -192,6 +192,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **The BU list (since v3.20, §53; spec 011):** the client's own names for
+  parts of the business (`GROUP.mainbus`, so `org.extra` and no migration),
+  each pointing at a unit, a function, a company, the group — or at NOTHING,
+  which is a real answer for a department that carries no strategy. **The
+  vocabulary is `r.at`'s** — `"group"`, `"co:…"`, `"fn:…"` or a unit key — the
+  same strings a role is held at, which is the whole reason a Main BU can point
+  at a COMPANY without inventing anything. The register carries **Main BU** (the
+  client's word, off the employee file) beside **BU** (what it points at here,
+  and what decides access) — renamed from *Belongs to*, as *Standing* was
+  renamed to *Status*. `personAt()` / `attachPersonAt()` in `config-data.js` are
+  the ONE pair that answer "where does this person sit"; the register and the
+  file importer must never answer it separately. The **people workbook** is the
+  register's export as well as its template, matched on **Emp ID**, and it
+  **adds and amends and never removes** — that is §22's contract turned round,
+  because a plan is one whole thing and a register arrives in batches. An
+  unknown department is ADDED to the list unmapped rather than refused, or a
+  fresh tenant could never read its first file (§22's locked-dropdown trap).
+  **A ROLE THE PERSON ALREADY HOLDS IS NOT AN ASK** — the column gives a role,
+  never takes or moves one; without that rule the platform refused its own
+  export on 31 of 33 rows. The demo ships the ten names and NO mappings (A4),
+  and migration 004 strips `mainbus` from `org.extra` so a client never
+  inherits Raya's departments (§45.3's fault, avoided rather than repeated).
 - **Picture slides (since v3.18, §50; spec 009):** the review deck can carry
   the custodian's own slides of uploaded pictures. **Nothing stores a SLIDE** —
   `REVIEW.slides` (keyed like `REVIEW.note`) holds a title, an anchor, an
@@ -393,7 +415,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
+*Last Updated: 2026-08-23 &mdash; **v3.20: the BU list, and the register as a
+file** (§53, spec 011). A one-row sample and a ten-name list, and **six of the
+ten names the client uses do not exist in the platform at all** — Distribution
+is a COMPANY here, Retail is *Retail Stores*, and IT is the name of both a unit
+and a function. Checking that against the tenant rather than assuming it is
+what turned "map the BU column" into a stored list with a real question in it.
+**POINTING AT NOTHING IS AN ANSWER**: Risk employs people and carries no
+strategy, so they are on the register, they belong to Risk, and there is
+nothing for them to open — a list that demanded a target for every name would
+force a wrong one. **THE VOCABULARY IS THE ONE ROLES ALREADY USE**, which is
+why the hardest-looking case cost nothing: the platform already knew how to
+attach somebody to a company, because that is where a company CEO sits.
+**AN UPLOAD ADDS AND AMENDS AND NEVER REMOVES** — §22's contract turned round,
+deliberately: a plan is authored by upload because a plan is one whole thing,
+and a register that a file replaced would retire everybody the file forgot.
+**THE ROUND TRIP CAUGHT THE PLATFORM REFUSING ITS OWN EXPORT** on 31 of 33
+rows, within a minute of the check existing — the download writes each person's
+current role and the upload could not place it, and the fix is the rule the
+column already promised: **it gives a role, it never takes or moves one.** Two
+smaller ones from the same run, both old lessons: a value cleared AFTER
+something was asked of it reported all 31 rows as asking for Contributor, and
+the first one-edited-cell check edited the PERSON and downloaded again, so both
+sides agreed and it passed while measuring nothing (§50.6). **AND A CHECK THAT
+ASKS WHETHER IT CAN RUN IS A CHECK THAT PASSES**: the new authorisation test was
+written `A.classify ? … : null` and the export is `collect()`, so it skipped in
+silence while the suite said 131 passed. Applied forward rather than
+re-learned — the contrast sweep now SEEDS two BU rows before walking Setup (an
+empty page is reported clean, §45.2) and COUNTS its pages instead of printing a
+literal that was already stale. **A CLIENT MUST NOT INHERIT RAYA'S
+DEPARTMENTS**: the demo carries the ten names, which put them in `org.extra` —
+exactly where §45.3's figure set survived the clean slate — so `mainbus` joins
+the scrub in migration 004, verified by deploying to an empty database and
+asking the row rather than by reading the SQL. Recorded rather than hidden: the
+register was already 1061px in a 920px box and Main BU makes it 1127px.*
+
+*Earlier: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
 A one-line ask that was decisions all the way down. **THE TENANT'S MARK GOES ON
 THE CARD, NOT ON THE WALL** — the person at that door works for the client, so
 their mark belongs on the thing they touch while Forefront's stays on the wall

@@ -208,12 +208,6 @@
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
       { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
-      /* The client's own names for parts of the business, and what each one
-         opens here (§53.1). In *Who* rather than *What we run*, and sharing
-         c_people rather than taking a key of its own: it is not another thing
-         being planned, it is the vocabulary the register's own data arrives
-         in, and Companies already shares c_units on exactly this argument. */
-      { k:"mainbu", ac:"c_people", grp:"who", label:"BU list",               render:renderMainbus },
       { k:"access", ac:"c_access", grp:"who", label:"Roles & access",        render:renderAccess },
 
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units",        render:renderUnits },
@@ -1776,131 +1770,6 @@
     });
     var ac = document.getElementById("addcompany");
     if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
-
-    /* ── The BU list (§53.1) ────────────────────────────────────────
-       A name, where it points, and a Remove that is refused while anybody
-       carries it. The NAME is the key here — unlike a unit or a company,
-       which carry a key under the label so a rename detaches nothing — so
-       renaming moves the people with it, inside renameMainbu(). */
-    document.querySelectorAll("[data-mbat]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        setMainbuAt(sel.dataset.mbat, sel.value || null);
-        paint();
-      });
-    });
-    document.querySelectorAll("input[data-mbname]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        var was = inp.dataset.mbname, now = inp.value.trim();
-        if (now && now !== was && !renameMainbu(was, now)) {
-          /* Refused rather than silently merged: two departments becoming one
-             is a decision, and it is not one a typo gets to make. */
-          alert('There is already a BU called "' + now + '". Two names cannot be merged by ' +
-                'renaming one into the other \u2014 move the people first.');
-        }
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-mbdel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        removeMainbu(b.dataset.mbdel);
-        paint();
-      });
-    });
-    var newBu = document.getElementById("newMainbu");
-    if (newBu) {
-      newBu.addEventListener("input", function(){ NEWMAINBU = newBu.value; });
-      newBu.addEventListener("keydown", function(e){
-        if (e.key === "Enter") { e.preventDefault(); addTypedMainbu(); }
-      });
-    }
-    function addTypedMainbu(){
-      var n = (NEWMAINBU || "").trim();
-      if (!n) return;
-      addMainbu(n);
-      NEWMAINBU = "";
-      paint();
-    }
-    document.querySelectorAll("[data-mbadd]").forEach(function(b){
-      b.addEventListener("click", addTypedMainbu);
-    });
-
-    /* ── The register's own file (§53.3) ────────────────────────────
-       Download, upload, review, apply. The gate is checked HERE as well as on
-       the section that draws the controls, for the reason renderImport()
-       states: a destination can be reached with a stale page after a role
-       changed under the viewer, and the handler is the last thing between a
-       file and the register. */
-    var dlp = document.querySelector("[data-dlppl]");
-    if (dlp) dlp.addEventListener("click", function(){
-      sendXlsx(peopleWorkbook(), "SMP - people.xlsx");
-    });
-
-    var pf = document.getElementById("ppl-file");
-    if (pf) pf.addEventListener("change", function(){
-      if (grant("c_people") !== "edit") return;
-      var file = pf.files && pf.files[0];
-      if (!file) return;
-      var rx = new FileReader();
-      rx.onload = function(){
-        readXlsx(rx.result).then(function(sheets){
-          if (!sheets["People"]) {
-            /* §48.8's rule: a file that cannot be read has to SAY so, where
-               the upload is. A plan workbook dropped here is the likely
-               mistake, and naming the sheet it is missing is what tells
-               somebody which of the two files they picked up. */
-            PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
-                          roles:0, retired:0, restored:0,
-                          problems:[{ at:file.name, msg:"has no sheet called People. This is " +
-                            "the people workbook's own sheet \u2014 download the template above " +
-                            "and fill that." }] };
-            PPLF.read = ""; PPLF.done = null;
-            paint();
-            return;
-          }
-          var rows = peopleFromWorkbook(sheets);
-          PPLF.plan = planPeopleFile(rows);
-          PPLF.read = file.name + " \u00b7 " + plural(rows.length, "row");
-          PPLF.done = null;
-          paint();
-        }).catch(function(e){
-          PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
-                        roles:0, retired:0, restored:0,
-                        problems:[{ at:file.name,
-                          msg:"could not be read as a workbook \u2014 " + e.message }] };
-          PPLF.read = ""; PPLF.done = null;
-          paint();
-        });
-      };
-      rx.readAsArrayBuffer(file);
-    });
-
-    document.querySelectorAll("[data-pplapply]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (grant("c_people") !== "edit") return;
-        var plan = PPLF.plan;
-        if (!plan || plan.problems.length) return;
-        applyPeopleFile(plan);
-        /* The receipt is written from what the plan SAID, before the state
-           moved under it — counted after the fact it would be counting the
-           register rather than the file. */
-        var parts = [];
-        if (plan.added)    parts.push(plural(plan.added, "person").replace("persons", "people") + " added");
-        if (plan.updated)  parts.push(plan.updated + " updated");
-        if (plan.roles)    parts.push(plural(plan.roles, "role") + " given");
-        if (plan.retired)  parts.push(plan.retired + " retired");
-        if (plan.restored) parts.push(plan.restored + " restored");
-        if (plan.newBus.length) parts.push(plural(plan.newBus.length, "BU name") + " added to the BU list");
-        PPLF.done = parts.length ? parts.join(", ") + "." : "Nothing to change \u2014 the file matched the register.";
-        PPLF.plan = null; PPLF.read = "";
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-pplcancel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        PPLF.plan = null; PPLF.read = ""; PPLF.done = null;
-        paint();
-      });
-    });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
         VIEWER = b.dataset.as;
@@ -1945,12 +1814,6 @@
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
-    /* The two the employee file brings (§53.2). Cleared when emptied rather
-       than kept as "", so absent and blank stay one word — the codebase reads
-       every optional field with == null and a stored empty string would come
-       back through the round trip as a field the data never had. */
-    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; });
-    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; });
 
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -2434,19 +2297,6 @@
     paint();
   }
 
-  /* Lifted out of wireImport() 2026-08-23 (§53.3): the People page sends a
-     workbook too, and two copies of "build it, wrap it in a blob, click a
-     link, revoke the URL" is the second one that gets the revoke wrong. */
-  function sendXlsx(sheets, name){
-    var bytes = buildXlsx(sheets);
-    var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-  }
-
   function wireImport(){
     var us = document.getElementById("imp-unit");
     if (us) us.addEventListener("change", function(){ IMP.unit = us.value; IMP.diff = null; paint(); });
@@ -2455,6 +2305,15 @@
       b.addEventListener("click", function(){ IMP.kind = b.dataset.impkind; IMP.diff = null; paint(); });
     });
 
+    function sendXlsx(sheets, name){
+      var bytes = buildXlsx(sheets);
+      var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    }
     /* The plan template is the same file whichever unit it is for, so it is
        built against an empty shape rather than a chosen unit's content. */
     var dlx = document.querySelector("[data-dlx]");

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.19 · **Last updated:** 2026-08-23
+**Latest version:** v3.20 · **Last updated:** 2026-08-23
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -20,6 +20,7 @@ Nothing proceeds past this line without an answer.
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
+| **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §53.1 |
 
 **Answered:**
 
@@ -51,6 +52,54 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.20 — the BU list, and the register as a file
+
+Islam brought one row of Raya's employee data (`Emp.ID 102347 · Mohamed
+Hassanin Ehsan Hassanin · … · BU: Distribution`) and the official list of ten
+BUs, and asked for the mapping, an Excel template for the register, roles as a
+dropdown, and *Standing* renamed to *Status*.
+
+**Checked before building, and six of the ten do not resolve.** Distribution is
+a *company* here, not a unit; Retail is *Retail Stores*; IT is the name of both
+a unit and a function; Maintenance, Mazaya, Risk and Support Function have no
+counterpart at all. So the file cannot be read against the platform's own list.
+
+- **Setup → BU list** (new page, under *Who*, shares `c_people`). The client's
+  ten names, each pointing at a unit, a function, a company, the group — or at
+  nothing, which is a real answer for a department that employs people and
+  carries no strategy. **The ten names ship; the mappings are deliberately
+  empty** (A4) — IT in particular is Islam's call.
+- **The register gains *Main BU* and renames two columns.** *Belongs to* →
+  **BU** and *Standing* → **Status**, both at Islam's word. Where a person sits
+  somewhere other than their Main BU points, the cell says so rather than
+  either being quietly corrected.
+- **Download and upload on the People page.** One workbook, eight columns,
+  matched on **Emp ID**. It downloads the register as it stands, so it is the
+  export as well as the template. **An upload adds and amends and never removes
+  anybody**; a department it has never met is added to the BU list unmapped
+  rather than refused.
+- Employee number, email and Main BU are new facts on a person, and **none
+  needed a migration**.
+
+**What the round trip caught immediately:** the platform refused its own
+export — 31 of 33 downloaded rows named a role the upload could not place.
+Fixed by the rule the column already promised: it gives a role, it never takes
+or moves one (§53.4).
+
+**Verified:** `test-authorize.js` 131 passed / 0 failed (five new, covering
+that nobody below the SMO can point a BU row); `qa.py` clean across all 31
+viewers with a new people-file round trip (33 rows, fixed point PASS); contrast
+53 failing runs before and 53 after; `test-roundtrip.js` PASS against a real
+Postgres 16; and the whole path driven signed-in against the API — the BU list
+and a seeded person save, persist, read back, and appear in `change_log` as
+*"the BU list"* rather than *unknown*.
+
+**Cost, recorded rather than hidden:** the register table was already 1061px
+inside a 920px box; Main BU makes it 1127px. It scrolls in place, the page does
+not, and Job title or Contact can be switched off to recover it.
+
+**Waiting on Islam:** what each of the ten names points at (see D8 above).
 
 ### v3.19 — the capability half catches up, and slides get a place
 

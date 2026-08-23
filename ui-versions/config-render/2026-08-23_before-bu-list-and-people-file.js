@@ -564,13 +564,6 @@ var FSET = { unit:"mobile" };
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
             read:"", check:null, done:null };
 
-/* The register's own file, on the People page (§53.3). Its own state rather
-   than a second `kind` on IMP: the import page authors a PLAN for one unit,
-   this amends the register for everybody, and the two share no step but the
-   word "upload". `plan` is what planPeopleFile() read and nothing has been
-   written yet — Apply is what writes it. */
-var PPLF = { read:"", plan:null, done:null };
-
 
 /* ── Setup · Companies ──────────────────────────────────────────────
    Its own page since 3.5. It sat above the Business units table, which put two
@@ -704,24 +697,12 @@ var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
 var PCOLS_KEY = "smp.people.columns";
-/* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§53.1).
-   `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
-   word for a part of the business is BU, and the column says which one the
-   person opens. `standing` → `status`: it holds Active or Retired, which is a
-   status; standing is what a focus measure has.
-
-   THE KEYS MOVED WITH THE LABELS, which costs anybody who has ever opened the
-   column chooser their saved preference for those two — an absent key falls
-   back to the shipped default (§30.2), and both default to shown, so the worst
-   case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
-  { k:"empid",    label:"Emp. ID", off:true },
   { k:"title",    label:"Job title" },
-  { k:"mainbu",   label:"Main BU" },
-  { k:"bu",       label:"BU" },
+  { k:"belongs",  label:"Belongs to" },
   { k:"contact",  label:"Contact",  off:true },
   { k:"roles",    label:"Roles" },
-  { k:"status",   label:"Status" },
+  { k:"standing", label:"Standing" },
   { k:"password", label:"Password", live:true }
 ];
 var PCOLS = null;      /* {key:bool}, loaded once */
@@ -777,13 +758,11 @@ function renderPeople(){
      first and every group-level role read as "elsewhere", because belongsLabel
      said "The group" and whereLabel said "the group". Two renderings of one
      fact will always find a way to disagree; compare the fact. */
-  /* Lifted into config-data.js as personAt() 2026-08-23 (§53.1). It read
-     `p.fn` then `p.unit`, which was complete until a Main BU could point at a
-     COMPANY — a person attached to Distribution has neither, and the cell read
-     as a dash for somebody who is very much somewhere. The file importer has
-     to answer the same question, and two copies of "where does this person
-     sit" would find a way to disagree. */
-  var belongsKey = personAt;
+  function belongsKey(p){
+    if (p.fn) return "fn:" + p.fn;
+    if (p.unit) return p.unit;
+    return null;
+  }
   function belongsLabel(p){
     var k = belongsKey(p);
     return k ? whereLabel(k) : null;
@@ -853,17 +832,6 @@ function renderPeople(){
             '<button class="linkbu" data-prole-cancel="1">Cancel</button>' +
           '</span>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
-  }
-
-  /* Read-only, and spelled out rather than leaning on `"" || dash` — an
-     expression whose falsiness carries the meaning is one refactor away from
-     being wrong (CLAUDE.md: explicit over clever). */
-  function contactCell(p){
-    var bits = [];
-    if (p.email) bits.push('<span class="val">' + esc(p.email) + '</span>');
-    if (p.phone) bits.push('<span class="mono">' + esc(p.phone) + '</span>');
-    if (!bits.length) return '<span class="why" style="margin:0">&mdash;</span>';
-    return bits.join("");
   }
 
   /* STATUS ONLY, AND SQUEEZED (Islam, 2026-08-22). The action left this cell
@@ -950,20 +918,11 @@ function renderPeople(){
      sign-in page already knows. It is still on the row's hover. */
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
-    var drift = mainbuDrift(p);
     return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td title="' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(p.name) + '</b>') + '</td>' +
-      /* The employee number. Off by default — it is the client's own
-         identifier and matters when a file is being reconciled, not when
-         somebody is looking up who runs Retail. */
-      (showCol("empid") ? '<td>' + (editable
-        ? '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
-          '" placeholder="Emp. ID">'
-        : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
@@ -972,43 +931,20 @@ function renderPeople(){
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
                    : '<span class="why" style="margin:0">not given</span>')) + '</td>' : '') +
-      /* MAIN BU IS THE CLIENT'S WORD, BU IS OURS (§53.1). The first is typed
-         (or arrives in the file) and is never interpreted; the second is read
-         through the BU list and is what decides which pages open.
-
-         WHERE THEY DISAGREE, THE CELL SAYS SO rather than either being
-         quietly corrected. The list can be re-pointed after a file was loaded
-         and a person can be moved by hand afterwards — neither is a fault, and
-         a mapping that silently moved thirty people the next time a row
-         changed would be the worst kind of helpful. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
-        ? '<span class="val">' + esc(p.mainbu) + '</span>' +
-          (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the BU list</span>')
+      (showCol("belongs") ? '<td>' + (home
+        ? '<span class="uchip">' + esc(home) + '</span>'
         : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      (showCol("bu") ? '<td>' + (home
-        ? '<span class="uchip">' + esc(home) + '</span>' + (drift
-            ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
-              esc(whereLabel(drift)) + ' on the BU list">BU list says ' +
-              esc(whereLabel(drift)) + '</span>'
-            : '')
-        : (drift
-            ? '<span class="why" style="margin:0">&mdash; BU list says ' +
-              esc(whereLabel(drift)) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
-      /* Email above the number. Both are how you reach somebody, and giving
-         each a column of its own made an eleven-column register — the pair is
-         one answer to one question. */
       (showCol("contact") ? '<td>' + (editable
-        ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-          '" placeholder="Email"><input class="fld" value="' + esc(p.phone || "") +
-          '" data-pphone="' + p.key + '" placeholder="Mobile">'
-        : contactCell(p)) + '</td>' : '') +
+        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
+          '" placeholder="Contact number">'
+        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
       (showCol("roles")
         ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
       /* Standing before Password, at Islam's direction — whether somebody can
          sign in at all is the question you ask before what their password is
          doing. */
-      (showCol("status")
+      (showCol("standing")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
       (showCol("password") ? pwCell(p) : '') +
@@ -1129,13 +1065,11 @@ function renderPeople(){
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
-        (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
         (showCol("title")    ? '<th>Job title</th>'  : '') +
-        (showCol("mainbu")   ? '<th>Main BU</th>'    : '') +
-        (showCol("bu")       ? '<th>BU</th>'         : '') +
+        (showCol("belongs")  ? '<th>Belongs to</th>' : '') +
         (showCol("contact")  ? '<th>Contact</th>'    : '') +
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
-        (showCol("status")   ? '<th class="cc">Status</th>' : '') +
+        (showCol("standing") ? '<th class="cc">Standing</th>' : '') +
         (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
         '<th class="cc"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
@@ -1143,235 +1077,7 @@ function renderPeople(){
       '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
       'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
       'reported. Retiring takes away every role they hold and closes the door — they ' +
-      'cannot sign in — while everything already attributed to them stays true.</div>') +
-
-    renderPeopleFile(mayEdit);
-}
-
-
-/* ══════════════════════════════════════════════════════════════════
-   THE REGISTER'S FILE (§53.3, spec 011)
-
-   A section on the People page rather than a page of its own, and not on
-   Import either. Import authors ONE UNIT'S PLAN and is reached from the
-   cycle; this amends the register, and the register is what you are already
-   looking at when you decide five hundred people need to be in it. A13: the
-   three-step shape, the review-before-apply and every class here are the
-   import page's, because it is the same job done to a different table.
-   ══════════════════════════════════════════════════════════════════ */
-function renderPeopleFile(mayEdit){
-  if (!mayEdit) return "";
-  var plan = PPLF.plan;
-
-  var step1 =
-    '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
-      '<h4>Download the register</h4>' +
-      '<p class="sub">The same file both ways: what comes down is who is on the register ' +
-        'now, so it is the export as well as the template. ' +
-        plural(PEOPLE.length, "row") + ', with Role and Status as dropdowns' +
-        (mainbus().length
-          ? ' and your ' + mainbus().length + ' BU names in the Main BU column'
-          : ' — the Main BU column has no list yet, so type the names and they will be ' +
-            'added to the BU list on arrival') + '.</p>' +
-      '<div class="imp-row">' +
-        '<button class="editbtn" data-dlppl="1">Download the people template</button>' +
-      '</div>' +
-    '</div></div>';
-
-  var step2 =
-    '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
-      '<h4>Upload the filled file</h4>' +
-      '<p class="sub">Matched on <b>Emp ID</b>. A number already here updates that person, ' +
-        'a new one adds them, and a person the file does not mention is not touched — ' +
-        '<b>an upload never removes anybody</b>.</p>' +
-      '<div class="imp-row"><input type="file" id="ppl-file" accept=".xlsx" ' +
-        'aria-label="Choose a filled people file to upload">' +
-        (PPLF.read ? '<span class="pill quiet">Read &middot; ' + esc(PPLF.read) + '</span>' : '') +
-      '</div>' +
-    '</div></div>';
-
-  /* THE RECEIPT, and it names the way back to nothing — you are already on the
-     page the change landed on, so it says what moved and stops. */
-  var step3 = PPLF.done
-    ? '<div class="applied"><b>' + esc(PPLF.done) + '</b></div>'
-    : "";
-
-  if (!step3 && plan) {
-    var blocked = plan.problems.length;
-    var checks =
-      plan.problems.map(function(x){
-        return '<div class="chk bad"><span class="pill bad">Problem</span>' +
-          '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
-      }).join("") +
-      plan.notices.map(function(x){
-        return '<div class="chk note-c"><span class="pill attn">Notice</span>' +
-          '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
-      }).join("");
-
-    /* WHAT MOVES, PERSON BY PERSON. A tally alone ("31 updated") is unreadable
-       against a file that came straight back off the download with two cells
-       changed — the whole point of reviewing is seeing which two. Rows that
-       change nothing are counted and not listed, or the table is the file. */
-    var moving = plan.rows.filter(function(r){ return r.action !== "same"; });
-    var same = plan.rows.length - moving.length;
-    var body = moving.length
-      ? '<div class="scroll"><table><thead><tr><th>Row</th><th>Person</th>' +
-          '<th>Main BU</th><th class="cc">What happens</th></tr></thead><tbody>' +
-        moving.map(function(r){
-          return '<tr><td class="mono">' + esc(r.id) + '</td>' +
-            '<td><b>' + esc(r.name) + '</b></td>' +
-            '<td>' + (r.mainbu
-              ? esc(r.mainbu) + (r.where
-                  ? ' <span class="why" style="margin:0">&rarr; ' + esc(roleWhereLabel(r.where)) + '</span>'
-                  : ' <span class="why" style="margin:0">&rarr; not mapped</span>')
-              : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' +
-            '<td class="cc">' + (r.action === "add"
-              ? '<span class="pill good">Added</span>'
-              : '<span class="pill attn">' + esc(r.changes.join(", ")) + '</span>') +
-            '</td></tr>';
-        }).join("") + '</tbody></table></div>'
-      : '<div class="note">Nothing in this file differs from what is recorded.</div>';
-
-    step3 =
-      '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
-        '<h4>Review, then apply</h4>' +
-        (checks ? '<div class="imp-checks">' + checks + '</div>' : '') +
-        (blocked
-          ? '<div class="note bad-note"><b>Nothing can be applied while a problem stands.</b> ' +
-            'Data that loads badly is harder to find later than a file that refuses to load.</div>'
-          : '') +
-        '<div class="imp-tally">' +
-          (plan.added   ? '<span class="pill good">' + plan.added + ' added</span>' : '') +
-          (plan.updated ? '<span class="pill attn">' + plan.updated + ' updated</span>' : '') +
-          (plan.roles   ? '<span class="pill kind">' + plan.roles + ' given a role</span>' : '') +
-          (plan.retired ? '<span class="pill bad">' + plan.retired + ' retired</span>' : '') +
-          (plan.restored? '<span class="pill good">' + plan.restored + ' restored</span>' : '') +
-          (plan.newBus.length
-            ? '<span class="pill attn">' + plural(plan.newBus.length, "new BU name") + '</span>' : '') +
-          (same ? '<span class="pill quiet">' + same + ' unchanged</span>' : '') +
-        '</div>' + body +
-        '<div class="imp-row" style="margin-top:14px">' +
-          (blocked
-            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
-            : '<button class="editbtn apply" data-pplapply="1">Apply to the register</button>') +
-          '<button class="linkbu" data-pplcancel="1">Discard</button></div>' +
-      '</div></div>';
-  }
-
-  return section("", "Seed the register from a file",
-    "One row per person, matched on their employee number. Adds and amends — it never " +
-    "removes anybody, and a blank cell means \u201cnothing to say about this\u201d rather than " +
-    "\u201cclear it\u201d.",
-    '<div class="imp">' + step1 + step2 + step3 + '</div>');
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   SETUP · BU LIST (§53.1, spec 011)
-
-   Ten rows and one dropdown each. It sits in *Who* rather than *What we run*
-   because its only reader is the register: it is not another thing being
-   planned, it is the vocabulary the client's own employee data arrives in.
-   It shares `c_people` for the same reason Companies shares `c_units` — the
-   same person maintains both, and inventing a fourteenth access key for a
-   ten-row table would be a switch nobody ever moves.
-   ══════════════════════════════════════════════════════════════════ */
-function renderMainbus(){
-  var mayEdit = grant("c_people") === "edit";
-  var editable = mayEdit && EDITING.people;
-  var list = mainbus();
-  var mapped = list.filter(function(b){ return !!b.at; }).length;
-  /* Names people carry that the list has never met. It cannot happen through
-     an upload — a new name is added on arrival — but it can through a rename
-     the register was mid-edit for, and a list that does not admit it is a list
-     that quietly loses people. */
-  var strays = [];
-  PEOPLE.forEach(function(p){
-    if (!p.mainbu || mainbuBy(p.mainbu)) return;
-    if (strays.indexOf(p.mainbu) === -1) strays.push(p.mainbu);
-  });
-
-  var wheres = mainbuWheres();
-  function target(b){
-    if (!editable) {
-      return b.at
-        ? '<span class="uchip">' + esc(roleWhereLabel(b.at)) + '</span>'
-        : '<span class="pill none">Not mapped</span>';
-    }
-    return '<select class="fld" data-mbat="' + esc(b.name) + '">' +
-      '<option value=""' + (b.at ? "" : " selected") + '>\u2014 not mapped \u2014</option>' +
-      wheres.map(function(g){
-        return '<optgroup label="' + esc(g.label) + '">' + g.opts.map(function(o){
-          return '<option value="' + esc(o.v) + '"' + (o.v === b.at ? " selected" : "") + '>' +
-            esc(o.label) + '</option>';
-        }).join("") + '</optgroup>';
-      }).join("") + '</select>';
-  }
-
-  var rows = list.map(function(b, i){
-    var n = peopleOfMainbu(b.name).length;
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + (editable
-        ? '<input class="fld" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
-        : '<b>' + esc(b.name) + '</b>') + '</td>' +
-      '<td>' + target(b) + '</td>' +
-      '<td class="cc"><span class="mono">' + n + '</span></td>' +
-      '<td class="cc">' + (editable
-        /* Deleted rather than retired, and that is safe only because it is
-           REFUSED while anybody carries the name — the same contract as
-           retiring a company that still holds units (§49.3). A list row
-           records nothing, so there is no history to protect. */
-        ? (n
-            ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
-            : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')
-        : '') + '</td></tr>';
-  }).join("");
-
-  var addRow = editable
-    ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
-        '<input class="fld" id="newMainbu" placeholder="Business unit name, as your own records spell it" ' +
-        'value="' + esc(NEWMAINBU) + '">' +
-      '</td><td class="cc"><button class="linkbu" data-mbadd="1">Add</button></td></tr>'
-    : '';
-
-  var table = list.length || editable
-    ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th>' +
-        '<th style="width:30%">Main BU</th>' +
-        '<th style="width:34%">Points at</th>' +
-        '<th class="cc" style="width:14%">People</th>' +
-        '<th class="cc" style="width:18%"></th>' +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
-    : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
-      'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
-      'nothing, for you to map. Or type them in with Edit.</div>';
-
-  return cfgHead("BU list",
-      ['<span class="pill kind">SMO</span>',
-       plural(list.length, "name"),
-       mapped + ' mapped'].concat(
-        strays.length ? ['<span class="pill warn">' + plural(strays.length, "name") +
-                         ' on people and not on this list</span>'] : []),
-      "people", mayEdit) +
-
-    section("", "Your names, and what they point at",
-      "The words your own records use for parts of the business, and which unit, supporting " +
-      "function or company each one opens here. Set once — every employee file then reads " +
-      "itself, instead of every row naming a unit five hundred times.",
-      table +
-      (strays.length
-        ? '<div class="note bad-note"><b>' + esc(strays.join(", ")) +
-          '</b> ' + (strays.length === 1 ? 'is on somebody' : 'are on people') +
-          '\u2019s record and not on this list. Add ' + (strays.length === 1 ? 'it' : 'them') +
-          ' above, or correct the spelling on <b>People</b>.</div>'
-        : '') +
-      '<div class="note"><b>Pointing at nothing is an answer.</b> A part of the business can ' +
-      'employ people and carry no strategy here \u2014 they are on the register, they belong to it, ' +
-      'and there is simply nothing for them to open. Mapping it later moves nobody by itself: ' +
-      'the register marks where somebody sits somewhere other than their BU says, and leaves ' +
-      'the answer to you.</div>' +
-      '<div class="note"><b>A name may point at a company.</b> Your records may call something ' +
-      'a BU that is a group of units here \u2014 the platform already knows how to attach somebody ' +
-      'to one, because that is where a company CEO sits.</div>');
+      'cannot sign in — while everything already attributed to them stays true.</div>');
 }
 
 function renderCompanies(){

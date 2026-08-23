@@ -1718,120 +1718,8 @@ function fnShows(k){
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){ return fnShows(k) && reachesFn(k); });
 }
-/* RETIRED IS THE DEFAULT; DELETED IS FOR THE ONES THAT NEVER STARTED (§62).
-   The rule above stands and is the reason this is not a plain delete: a
-   function key is written into `c.fn` on a capability, into `p.by` on a
-   pillar, into `p.fn` on a person, into `fn:<key>` in the Official BU list,
-   and into every reporting key REVIEW and history hold. Removing the row
-   leaves each of those pointing at nothing, and nothing would say so.
-
-   So the delete is REFUSED while anything still points at it, and the refusal
-   NAMES what — the same contract as retiring a company that still holds units
-   (§49.3). Islam asked for it because a function created by mistake, or one
-   the client turned out not to run, could only ever be retired: a permanent
-   row in a list of sixteen, and no way to take it back out.
-
-   ANYTHING EVER REPORTED IS A REFUSAL, not a warning. A figure that was
-   submitted is a record, and a record whose subject has been deleted is worse
-   than a tidy list — that case is what Retire is for, and the refusal says so.
-   Its own unsaved plan is NOT a blocker: it is the function's, it goes with
-   it, and the confirmation says what goes. */
-/* Each blocker carries BOTH lengths. The actions cell has room for four words
-   and the refusal has to name what is in the way and where to go and fix it —
-   one string cannot be both, and writing the long one twice is how the two
-   come to disagree. `short` sits in the row, `full` is the tooltip and the
-   sentence the refusal speaks. */
-function fnBlock(short, full){ return { short:short, full:full }; }
-function fnDeleteBlockers(fk){
-  var out = [], f = FUNCTIONS[fk];
-  if (!f) return [fnBlock("unknown", "no such function")];
-  var caps = capsOfFunction(fk);
-  if (caps.length) out.push(fnBlock(
-    plural(caps.length, "capability", "capabilities"),
-    plural(caps.length, "capability", "capabilities") +
-    " improved here (" + caps.map(function(c){ return c.name; }).join(", ") +
-    ") \u2014 reallocate them on Setup \u2192 Capabilities"));
-
-  /* A pillar anywhere in the tenant that reads its score from this function.
-     Over units AND pillars functions, because a function that plans in
-     pillars carries pillars that can name a carrier too (§59). */
-  var carried = [];
-  UNIT_KEYS.forEach(function(k){
-    (UNITS[k].items || []).forEach(function(p){
-      if (p.by === fk) carried.push(UNITS[k].name + " \u00b7 " + (p.code || p.name));
-    });
-  });
-  FUNCTION_KEYS.forEach(function(k){
-    if (k === fk) return;
-    fnItems(FUNCTIONS[k]).forEach(function(p){
-      if (p.by === fk) carried.push(FUNCTIONS[k].name + " \u00b7 " + (p.code || p.name));
-    });
-  });
-  if (carried.length) out.push(fnBlock(
-    plural(carried.length, "pillar") + " scored from here",
-    plural(carried.length, "pillar") + " scored from here (" +
-    carried.join(", ") + ") \u2014 clear the pointer on the plan that names it"));
-
-  var here = PEOPLE.filter(function(p){ return p.fn === fk && personActive(p); })
-                   .map(function(p){ return p.name; });
-  if (here.length) out.push(fnBlock(
-    plural(here.length, "person", "people") + " attached",
-    plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People"));
-
-  var mb = (GROUP.mainbus || []).filter(function(b){
-    return mainbuAts(b).indexOf("fn:" + fk) > -1;
-  }).map(function(b){ return b.name; });
-  if (mb.length) out.push(fnBlock(
-    plural(mb.length, "Official BU") + " pointing here",
-    plural(mb.length, "Official BU") + " pointing here (" +
-    mb.join(", ") + ") \u2014 unmap it on Setup \u2192 Official BU list"));
-
-  if (fnEverReported(fk)) out.push(fnBlock("reported against",
-    "figures have been reported against it \u2014 that is a record, so retire " +
-    "it instead of deleting it"));
-  return out;
-}
-/* Has this function ever been part of a cycle. Submitted, noted, snapshotted
-   or archived — any one of them makes it history. */
-function fnEverReported(fk){
-  var t = "fn:" + fk;
-  if (REVIEW.submitted && REVIEW.submitted[t]) return true;
-  if (REVIEW.note && REVIEW.note[t]) return true;
-  if (REVIEW.slides && REVIEW.slides[t]) return true;
-  if ((ARCHIVES || []).some(function(a){ return a.key === t; })) return true;
-  /* A closed cycle carries a score per subject, and a score whose subject has
-     been deleted is a column in the history with nothing behind it. */
-  if ((HISTORY || []).some(function(h){ return h.units && h.units[t] != null; })) return true;
-  var f = FUNCTIONS[fk];
-  if (f) {
-    var reported = fnItems(f).some(function(p){
-      return (p.measures || []).some(function(m){ return m.actual !== "" && m.actual != null; }) ||
-             (p.tactics  || []).some(function(x){ return x.actual != null; });
-    });
-    if (reported) return true;
-  }
-  return false;
-}
-/* What a delete takes with it, so the confirmation can say it rather than
-   asking somebody to trust a button (§49.2's lesson, from the other end). */
-function fnDeleteTakes(fk){
-  var f = FUNCTIONS[fk], out = [];
-  if (!f) return out;
-  var items = fnItems(f);
-  if (items.length) out.push(plural(items.length, L("pillar", "bu").toLowerCase().replace(/s$/, "")));
-  if (f.head || f.custodian) out.push(plural((f.head ? 1 : 0) + (f.custodian ? 1 : 0), "named role"));
-  return out;
-}
-function deleteFunction(fk){
-  if (!FUNCTIONS[fk] || fnDeleteBlockers(fk).length) return false;
-  var i = FUNCTION_KEYS.indexOf(fk);
-  if (i > -1) FUNCTION_KEYS.splice(i, 1);
-  delete FUNCTIONS[fk];
-  return true;
-}
-/* A function is retired, never deleted \u2014 unless nothing points at it and
-   nothing was ever reported against it, which is fnDeleteBlockers() above. */
+/* A function is retired, never deleted \u2014 it carries reported history, exactly
+   as a unit does. */
 /* Clearing a capability. Its PLAN is the work it intends \u2014 today measures and
    initiatives, tomorrow enhancement projects. Its PROGRESS is what has been
    reported against that work. The definition is the capability's identity, not
@@ -2924,13 +2812,7 @@ function clearForNewCycle(){
 }
 
 /* "1 pillars" is the kind of thing that makes a product feel unfinished. */
-/* An explicit plural where -s is wrong: "1 capability" / "2 capabilities",
-   "1 person" / "2 people". Optional, so every existing call is unchanged —
-   and it is here rather than at the call sites because this file already
-   records "3 pillarss" as the cost of doing it by hand (§59). */
-function plural(n, word, many){
-  return n + " " + (n === 1 ? word : (many || word + "s"));
-}
+function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
 
 /* The horizon is the year a tenant is planning TO, and it is theirs to enter —
    never a default the platform supplies. Until it is entered every page that

@@ -8098,3 +8098,67 @@ business unit called ''*, and nothing says why. The round trip caught it inside
 one run. §58 had already settled the principle for the people workbook: **write
 the new label, read either — somebody is holding a file downloaded before the
 rename.**
+
+## 62 · A function can be deleted, and the refusal is the feature (v3.21)
+
+**62.1 The ask.** Islam: *"give me the option to fully delete functions in the
+functions setup."* A function created by mistake, or one the client turned out
+not to run, could only ever be **Retired** — a permanent row in a list of
+sixteen, with no way to take it back out.
+
+**62.2 Retire is still the default, and this is why.** §33 put responsibility
+roles ON the thing, so a function's head and custodian go with it — but a
+function KEY is written into five other places: `c.fn` on a capability, `p.by`
+on a pillar that scores from it, `p.fn` on a person, `fn:<key>` in the Official
+BU list, and every reporting key `REVIEW` and `HISTORY` hold. Removing the row
+leaves each of those pointing at nothing, and **nothing would say so** —
+exactly the fault §49.3 refused for companies.
+
+So the delete is **refused while anything still points at it, and the refusal
+names what.** Measured against the demo before it was written: all eight
+functions are blocked, and each for a different reason.
+
+**Anything ever reported is a refusal, not a warning.** A figure that was
+submitted is a record, and a record whose subject has been deleted is worse
+than a tidy list. That case is what Retire is for, and the refusal says so in
+those words. A function's own unreported plan is **not** a blocker: it is the
+function's, it goes with it, and the confirmation names what goes.
+
+**62.3 The refusal is where the confirmation would be.** §59 shows a blocked
+control DISABLED with its reason beside it, and that is right for a one-line
+reason in a cell with room. This cell has neither. The reasons are sentences
+that name what is in the way AND where to go and clear it, and the actions
+column is **83px wide with four controls already wrapping in it** — measured,
+not guessed; the §59 treatment put six lines of grey text under every row.
+
+So the button is always live and pressing it always answers. A disabled button
+says "no"; this one says why, and what to do instead. It breaks out of the cell
+(absolute, opening leftward so it cannot leave the table) and is left-aligned,
+because centred prose is for one line and not for a paragraph.
+
+**62.4 Checked at both ends, and the far end was already right.** The blockers
+are asked again on Yes rather than trusted from the render that drew the
+button — a confirmation can sit open while something changes underneath it, and
+the check that matters is the one nearest the write (§48.2). On the server,
+`lib/authorize.js` already classifies a removed function as **setup** three
+ways over, so a non-SMO save carrying a deletion is refused with a sentence
+that names Setup. Nothing needed adding: §42's "an unrecognised change is the
+SMO's" had covered a feature that did not exist yet, which is the whole point
+of that rule.
+
+Proved through a throwaway Postgres as well as in the browser: eight functions
+in, `hr` deleted, `writeState` then `readState` gives back seven and the key is
+absent from `functionKeys`.
+
+**62.5 `--bad` on `--bad-bg` is 4.41.** §38.5's rule — a colour that works as a
+FILL usually fails as TYPE — caught by measuring the new panel in all four
+palette-and-theme combinations. Fixed for **every** confirmation rather than
+only the wide one, because converting some members of a family is worse than
+converting none (§40). Worth recording that the contrast sweep did not find it
+and could not: a confirmation is not a page, and a sweep that walks pages only
+ever sees states that are pages (§41.4, again).
+
+**62.6 `plural()` grew a second form.** `plural(n, "capability")` gave
+"1 capabilitys". The explicit plural is optional, so every existing call is
+unchanged — and it lives in `plural()` rather than at the call sites because
+this file already records "3 pillarss" (§59) as the cost of doing it by hand.

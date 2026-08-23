@@ -2893,50 +2893,6 @@ function renderFunctions(){
         ? '<div class="rowacts">' +
             '<button class="linkbu" data-fnretire="' + fk + '">' +
               (f.active === false ? "Reinstate" : "Retire") + '</button>' +
-            /* DELETE, AND THE REFUSAL IS THE FEATURE (§62).
-               §59 shows a blocked control DISABLED with its reason beside it,
-               and that is right for a one-line reason in a cell with room.
-               This cell has neither: the reasons are sentences that name what
-               is in the way AND where to go and clear it, and the actions
-               column is 83px wide with four things already wrapping in it.
-               Measured before it was written — the alternative put six lines
-               of grey text under every row.
-
-               So the button is always live and the REFUSAL IS WHERE THE
-               CONFIRMATION WOULD BE. Pressing Delete always answers, and the
-               answer arrives at the moment somebody asked the question rather
-               than in a tooltip they have to find. A disabled button says
-               "no"; this one says why, and what to do about it. */
-            (function(){
-              if (CLEARING !== "fndel|" + fk)
-                return '<button class="linkbu" data-fndel="' + fk + '">Delete</button>';
-              var why = fnDeleteBlockers(fk);
-              if (why.length) return '<span class="confirm wide">' +
-                '<b>' + esc(f.name) + ' cannot be deleted</b>' +
-                '<span class="why" style="margin:0">' +
-                  /* Each reason is a sentence in a paragraph of them, so it
-                     starts with a capital. Written where they are JOINED, not
-                     baked into the strings, because the same text is spoken
-                     mid-sentence by the refusal on the server side. */
-                  why.map(function(w){
-                    return esc(w.full.charAt(0).toUpperCase() + w.full.slice(1)) + ".";
-                  }).join(" ") +
-                  ' <b>Retire</b> takes it out of the navigation and keeps all of that.' +
-                '</span>' +
-                '<button class="linkbu" data-clearno="1">Close</button></span>';
-              var takes = fnDeleteTakes(fk);
-              return '<span class="confirm"><b>Delete ' + esc(f.name) + '?</b>' +
-                '<span class="why" style="margin:0">' +
-                  (takes.length
-                    ? "This removes the function and " + takes.join(" and ") +
-                      " with it. Nothing points at it and nothing has been " +
-                      "reported against it, so nothing else changes."
-                    : "Nothing points at it and nothing has been reported " +
-                      "against it. There is no undo \u2014 Retire is the " +
-                      "reversible one.") + '</span>' +
-                '<button class="rmbtn" data-fndelyes="' + fk + '">Yes, delete it</button>' +
-                '<button class="linkbu" data-clearno="1">Cancel</button></span>';
-            })() +
             (CLEARING === "fn|" + fk + "|plan"
               ? '<span class="confirm"><b>Clear the whole plan?</b>' +
                   '<span class="why" style="margin:0">Key objectives and projects across ' +

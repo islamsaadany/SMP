@@ -1341,39 +1341,6 @@
         paint();
       });
     });
-    /* DELETE, IN TWO PRESSES AND CHECKED AT BOTH (§62). The blockers are asked
-       again on Yes rather than trusted from the render that drew the button:
-       the confirmation can sit open while something else changes underneath
-       it, and the check that matters is the one nearest the write (§48.2). */
-    document.querySelectorAll("[data-fndel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; paint();
-      });
-    });
-    document.querySelectorAll("[data-fndelyes]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var fk = this.dataset.fndelyes;
-        if (grant("c_fns") !== "edit") {
-          alert("Functions are the SMO's. Nothing has been deleted.");
-          CLEARING = null; paint(); return;
-        }
-        var why = fnDeleteBlockers(fk);
-        if (why.length) {
-          alert("Not deleted \u2014 " +
-                why.map(function(w){ return w.full; }).join(". ") + ".");
-          CLEARING = null; paint(); return;
-        }
-        deleteFunction(fk);
-        CLEARING = null;
-        /* Deleting happens on Setup, so the deleted function is not what the
-           page is showing — unless a stale `current` still names it, which
-           would paint a tab row for something that no longer exists. Nothing
-           else has to move: fnsReachable() rebuilds from FUNCTION_KEYS on
-           every paint. */
-        if (current === "fn:" + fk) { current = "group"; currentSub = "performance"; }
-        paint();
-      });
-    });
     var addFn = document.getElementById("addfn");
     if (addFn) addFn.addEventListener("click", function(){
       var name = prompt("Name of the supporting function");

@@ -222,6 +222,22 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A function can be DELETED, and the refusal is the feature (§62):** retired
+  is still the default, because a function key is written into `c.fn` on a
+  capability, `p.by` on a pillar, `p.fn` on a person, `fn:<key>` in the
+  Official BU list and every reporting key REVIEW and HISTORY hold — so
+  `fnDeleteBlockers()` refuses while any of those holds it and **names what**,
+  and **anything ever reported is a refusal, not a warning** (that is what
+  Retire is for). The button is always live and **the refusal is where the
+  confirmation would be**: §59's disabled-with-the-reason is right for one
+  line, and the actions column is 83px wide with four controls already
+  wrapping. Blockers are re-asked on Yes, never trusted from the render that
+  drew the button (§48.2). **The server needed nothing**: `lib/authorize.js`
+  already classified a removed function as `setup`, which is §42's "an
+  unrecognised change is the SMO's" covering a feature that did not exist yet.
+  `plural()` now takes an optional plural form ("1 capability" / "2
+  capabilities"), and `--bad` on `--bad-bg` is 4.41 — §38.5 again, fixed for
+  every confirmation because converting some of a family is worse than none.
 - **An empty function is still a function (§61):** `fnHasWork()` was the whole
   navigation gate, which is right for somebody coming to READ and wrong for the
   people who have to fill it — **a function with no plan could not be opened, so

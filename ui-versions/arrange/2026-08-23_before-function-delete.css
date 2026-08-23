@@ -437,26 +437,7 @@
   .rowacts { display:flex; flex-direction:column; gap:6px; align-items:center; }
   .confirm { display:flex; flex-direction:column; gap:5px; align-items:center;
              background:var(--bad-bg); border-radius:var(--r); padding:8px 10px; }
-  /* --bad-tx, not --bad: §38.5's rule, which is that a colour that works as a
-     FILL usually fails as TYPE. --bad on --bad-bg measures 4.41 in slate light
-     — a heading in the scoring red on the scoring red's own ground. Changed
-     for every confirmation rather than only the wide one, because converting
-     SOME members of a family is worse than converting none (§40). */
-  .confirm b { font-size:11.5px; color:var(--bad-tx); }
-  /* A REFUSAL IS LONGER THAN A CONFIRMATION (§62). "Clear the plan?" is four
-     words and fits the 83px actions column; "cannot be deleted, and here is
-     each thing in the way and where to clear it" is three sentences, and in
-     that column it rendered as a 12-line ribbon of centred text. So this one
-     breaks out of the cell — anchored to the row's actions, opening leftward
-     so it cannot leave the table, and left-aligned because centred prose is
-     for one line, not for a paragraph. */
-  .rowacts { position:relative; }
-  .confirm.wide { position:absolute; z-index:30; top:0; right:0; width:330px;
-                  align-items:flex-start; text-align:left; padding:11px 13px;
-                  border:1px solid var(--bad); box-shadow:0 8px 24px rgba(0,0,0,.16); }
-  /* The reason is a paragraph on a tinted ground, so it takes the page's ink
-     rather than the quiet grey that clears on white and not on this. */
-  .confirm.wide .why { text-align:left; color:var(--ink); }
+  .confirm b { font-size:11.5px; color:var(--bad); }
   .big .nodata { color:var(--none); font-family:var(--sans); font-size:19px; font-style:italic; }
 
   /* The code is a reference, not part of the name it sits beside. */

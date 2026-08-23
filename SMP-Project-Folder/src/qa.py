@@ -174,6 +174,66 @@ with sync_playwright() as p:
           "written to it sticks (%d pillars, %d measures)"
           % (fn61["wrote"]["items"], fn61["wrote"]["measures"]))
 
+    # ── DELETE IS REFUSED WHILE ANYTHING POINTS AT IT (62) ────────────
+    # Islam asked to be able to delete a function outright. Retired-never-
+    # deleted stands as the DEFAULT, because a function key is written into a
+    # capability, a pillar, a person, the Official BU list and every reporting
+    # key — so the delete refuses while any of those hold it, and the refusal
+    # names them.
+    #
+    # Asserted from both ends. Every function in the demo is blocked, and it
+    # matters WHICH reason: Merchandising is the one that has been reported
+    # against, which is the refusal Retire exists for. And a spare function
+    # nothing points at deletes, through the button rather than by calling the
+    # model — the check that passes while measuring nothing is the one that
+    # builds its own payload (50.6, 54.5).
+    dele = pg.evaluate("""() => {
+      const blocked = {};
+      FUNCTION_KEYS.forEach(k => blocked[k] = fnDeleteBlockers(k).map(b => b.short));
+      FUNCTIONS.qaspare = { name:"QA Spare", navName:null, codePrefix:"QSP",
+                            head:null, custodian:null, active:true };
+      FUNCTION_KEYS.push("qaspare");
+      return { blocked:blocked, spare:fnDeleteBlockers("qaspare").length,
+               refusedAnyway:deleteFunction(FUNCTION_KEYS[0]) };
+    }""")
+    unblocked = [k for k, v in dele["blocked"].items() if not v]
+    if unblocked:
+        errs.append("DELETE: %s would delete with something still pointing at it"
+                    % ", ".join(unblocked))
+    if dele["spare"]:
+        errs.append("DELETE: a function nothing points at is still refused")
+    if dele["refusedAnyway"]:
+        errs.append("DELETE: deleteFunction() ignored its own blockers")
+    if "reported against" not in dele["blocked"].get("merchandising", []):
+        errs.append("DELETE: a function that has been reported against is not "
+                    "refused on that ground (%r)" % dele["blocked"].get("merchandising"))
+    # Through the page, in edit mode, the way a person does it.
+    pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(200)
+    for g in pg.eval_on_selector_all(".setuprail .rgroup.shut",
+                                     "els=>els.map(e=>e.dataset.railgrp)"):
+        pg.click('.setuprail [data-railgrp="%s"]' % g); pg.wait_for_timeout(100)
+    pg.click('.setuprail [data-setupgo="fns"]'); pg.wait_for_timeout(300)
+    pg.evaluate("() => { EDITING.fns = true; paint(); }"); pg.wait_for_timeout(250)
+    n0 = len(pg.query_selector_all(".cfg tbody tr"))
+    pg.click('[data-fndel="qaspare"]'); pg.wait_for_timeout(200)
+    pg.click('[data-fndelyes="qaspare"]'); pg.wait_for_timeout(300)
+    n1 = len(pg.query_selector_all(".cfg tbody tr"))
+    still = pg.evaluate("() => !!FUNCTIONS.qaspare")
+    if still or n1 != n0 - 1:
+        errs.append("DELETE: the button did not remove the row (%d -> %d, still %r)"
+                    % (n0, n1, still))
+    # And the one that is refused says so where the confirmation would be.
+    pg.click('[data-fndel="merchandising"]'); pg.wait_for_timeout(250)
+    refusal = pg.eval_on_selector(".confirm.wide", "e => e.innerText") \
+        if pg.query_selector(".confirm.wide") else ""
+    if "cannot be deleted" not in refusal or "Retire" not in refusal:
+        errs.append("DELETE: the refusal does not say why, or does not offer "
+                    "Retire (%r)" % refusal[:120])
+    pg.click("[data-clearno]"); pg.wait_for_timeout(150)
+    print("delete: %d of %d functions blocked, a spare one deletes through the "
+          "button, and the refusal names what is in the way"
+          % (len(dele["blocked"]) - len(unblocked), len(dele["blocked"])))
+
     # ── A UNIT AND A FUNCTION MUST MATCH (53.5) ───────────────────────
     # The rule Islam set on 2026-08-23: any change to how something works or
     # how it looks is tested on BOTH sides of the navigation switch, because a

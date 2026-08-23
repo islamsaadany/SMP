@@ -1823,6 +1823,28 @@ the same shelf, exactly as the Copilot is (§16.14).
 standard it produces is built on what has already been tried rather than
 invented beside it.
 
+### 16.16 The horizon belongs to a plan, not to the group
+
+*(Islam, 2026-08-23: "for the By in this strategy it's all 2027 but it needs to
+be set from somewhere in the plans later." Recorded on arrival, per A8.)*
+
+`GROUP.horizon` is ONE value for the whole tenant, and it is what every
+"by &lt;year&gt;" on screen reads from (§23.5). The plan template already
+carries a Horizon row on its Aspiration sheet — and the import writes it
+**straight to the group's value**, so uploading one unit's plan with a
+different year silently moves the year every OTHER unit is read against. A
+blank is safe, because it keeps what is there; a different value is not.
+
+Today that is invisible because every unit's plan carries the same year. It
+stops being invisible the moment two units plan to different horizons, which
+is the situation Islam is describing.
+
+**Not designed.** The open question is whether a horizon belongs to the unit,
+to the plan (so an archived plan keeps the year it was written against), or
+stays the group's with the per-unit value an override. It touches the import,
+the archive and every surface that prints a year, so it is its own piece of
+work rather than a field added quietly.
+
 ### 16.15 The unit's Performance page fails contrast in light mode
 
 *Found 2026-08-23 while building §50, and NOT fixed there — it is a palette

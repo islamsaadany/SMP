@@ -3903,7 +3903,16 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
-  horizon: "2029",
+  /* 2027, Islam's own number for this strategy — not a guess (A4). It was
+     2029, which was invented when the field was added.
+
+     ONE HORIZON, GROUP-WIDE, AND ANY PLAN CAN MOVE IT. The Aspiration sheet
+     carries a Horizon row and the import writes it straight to GROUP.horizon,
+     so uploading one unit's plan with a different year changes the year every
+     other unit's "by <year>" reads from. A blank is safe (it keeps what is
+     there); a different value is not. Islam: it "needs to be set from somewhere
+     in the plans later" — recorded as §16.16. */
+  horizon: "2027",
   /* ── The worked example has a figure set (spec 008) ────────────────
      Added 2026-08-22, at Islam's request: the demo shipped with no sets at
      all, so none of the Finance-entry behaviour could be SEEN — the chip on a

@@ -1362,20 +1362,8 @@ function penBtn(page, acKey){
    the foundation rendered inputs that were bound to nothing, so every edit
    looked accepted and was silently discarded on the next repaint. */
 var FIELDS = [];
-/* A PARAGRAPH TYPED AS TWO PARAGRAPHS MUST READ AS TWO PARAGRAPHS (§51.1).
-   The editing control is a <textarea>, which keeps every line break the person
-   typed; the READING control was a bare <span>, and HTML collapses newlines to
-   a single space. So a purpose statement written as three sentences with air
-   between them came back as one run-on block the moment the pen was closed —
-   the text was never lost, it was only never shown.
-
-   `flow` carries `white-space:pre-line`: line breaks survive, runs of spaces
-   and stray indentation do not. That is the right pair for prose somebody
-   typed, and it is on fieldOr rather than on each caller so every long-text
-   field in the platform behaves the same way. */
 function fieldOr(page, value, cls, setter){
-  if (!EDIT_PAGE[page] || !setter)
-    return '<span class="flow ' + (cls || '') + '">' + esc(value) + '</span>';
+  if (!EDIT_PAGE[page] || !setter) return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
   var i = FIELDS.push(setter) - 1;
   return '<textarea class="fld ' + (cls || '') + '" data-fld="' + i + '" rows="2">' + esc(value) + '</textarea>';
 }
@@ -1849,23 +1837,15 @@ function capHead(c){
     '<div class="capkpi"><div><i>Reported</i><b>' + r.done + ' / ' + r.total + '</b></div></div></div>';
 }
 
-/* THE FUNCTION'S OWN NAMEPLATE IS GONE (§51.4, Islam).
-
-   It printed the function's name, its people, how many capabilities it carries
-   and "scored by the group" — above a navigation row that already highlights
-   the function you are looking at. That is §24's argument, and the unit pages
-   settled it two versions earlier: a UNIT has no such band on any of its
-   tabs, so a function carrying one made the two halves of the product read as
-   two products.
-
-   It was also lying on a tenant where nobody is attached: with no people the
-   line rendered "Supporting function \u00b7 \u00b7 carries 1 capability" — two
-   middots with nothing between them, which is what a joined empty list looks
-   like. A line that has to be defended by a fallback for the ordinary case is
-   a line nobody needed.
-
-   The capability's own band (`capBand`) stays: a function may carry several,
-   and that band is what says which one a section belongs to. */
+function fnHead(fk){
+  var f = FUNCTIONS[fk], caps = capsOfFunction(fk), people = functionPeople(fk);
+  return '<div class="caphdr">' +
+    '<div><div class="capname">' + esc(f.name) + '</div>' +
+      '<div class="why" style="margin:3px 0 0">Supporting function &middot; ' +
+        esc(people.map(personName).join(", ")) +
+        ' &middot; carries ' + caps.length + ' ' + (caps.length === 1 ? "capability" : "capabilities") +
+        ', scored by the group</div></div></div>';
+}
 
 function capBand(c){
   var r = capReported(c);
@@ -1892,19 +1872,14 @@ function railPick(c){
    column of wasted width. The pane simply fills it. */
 function railWorthIt(list){ return (list || []).length >= 2; }
 
-/* `codeOf` is optional and last, so every existing caller is untouched. The
-   unit rail has shown `MB01 Digital & Data-Driven Operations` since §46.3; a
-   project rail beside it showed a bare name, and the two rails are the same
-   component doing the same job (§51.3). */
-function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
+function railFor(list, sel, numOf, subOf, groupOf, footNote){
   var lastGroup = null;
   var rows = list.map(function(it){
     var g = groupOf ? groupOf(it) : null, head = "";
     if (g && g !== lastGroup) { head = '<div class="rgroup">' + esc(g) + '</div>'; lastGroup = g; }
-    var code = codeOf ? codeOf(it) : "";
     return head +
       '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
-        '<b>' + (code ? esc(code) + '&nbsp; ' : '') + esc(it.name) + '</b>' +
+        '<b>' + esc(it.name) + '</b>' +
         '<span class="rnum">' + (numOf ? numOf(it) : "") + '</span>' +
         (subOf ? '<span class="rsub">' + subOf(it) + '</span>' : '') +
       '</button>';
@@ -1996,7 +1971,7 @@ function capKOTable(c){
       }).join(""));
 }
 
-function projPerformanceBody(p, fk){
+function projPerformanceBody(p){
   var dRows = p.deliverables.map(function(d, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
@@ -2021,15 +1996,10 @@ function projPerformanceBody(p, fk){
       '<td class="cc">' + msPill(m) + '</td></tr>';
   }).join("");
   var mst = projMilestones(p);
-  /* THE SAME BAND THE PILLAR PANE WEARS (§51.3). It was an `.ptitle` with a
-     19px <h3> and a meta line — the shape the unit's pane carried until §46.3
-     replaced it with a 33px band, code first, on `--surface-2` with a gold
-     left edge. Two panes doing the same job in the same component wore two
-     different headers; they wear one now, and the project shows the code the
-     rail beside it shows. The `right` slot pillarBand has always had and never
-     used carries the score. */
-  return pillarBand(projCode(fk, p), p.name,
-      '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
+  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
+      '<div class="pmeta">' + projMeta(p) + ' &middot; deliverables ' + pct(projDeliverySide(p)) +
+      ', outcomes ' + pct(projOutcomeSide(p)) + '</div></div>' +
+      '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span></div>' +
     '<h4 class="mini">Deliverables</h4>' +
     miniTable(["#","Deliverable","Reported","Reads"], dRows) +
     '<h4 class="mini">Outcomes</h4>' +
@@ -2045,7 +2015,7 @@ function renderFnPerformance(fnKey){
      platform holds at that moment. */
   return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
       '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
-    caps.map(function(c){
+    fnHead(fk) + caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<div class="note">No projects yet. Nothing to report until there are.</div></div>';
@@ -2053,20 +2023,18 @@ function renderFnPerformance(fnKey){
       function(p){ var v = projPerf(p);
         return v == null ? '<span class="rnum">&mdash;</span>'
           : '<b style="color:var(--' + band(v) + ')">' + v + '%</b>'; },
-      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones &middot; ' +
-        projMeta(p); },
-      null, 'Figure shown is performance',
-      function(p){ return projCode(fk, p); });
+      function(p){ var m = projMilestones(p); return m.done + ' of ' + m.total + ' milestones'; },
+      null, 'Figure shown is performance');
     return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
       '<h4 class="mini">Projects</h4>' +
-      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel, fk)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPerformanceBody(sel)) + '</div>';
   }).join("");
 }
 
 /* ── Capability \u2192 Projects ──────────────────────────────────────────
    The plan as it was formed. Nothing here has been reported: no progress, no
    status, no actuals. Those are entered on Reporting and read on Performance. */
-function projPlanBody(p, fk){
+function projPlanBody(p){
   var dRows = p.deliverables.map(function(d, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(d.name) + '</td>' +
       '<td class="cc">' + delivKindPill(d) + '</td>' +
@@ -2085,8 +2053,9 @@ function projPlanBody(p, fk){
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td></tr>';
   }).join("");
-  return pillarBand(projCode(fk, p), p.name,
-      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>') +
+  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
+      '<div class="pmeta">' + projMeta(p) + '</div></div>' +
+      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span></div>' +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
@@ -2102,18 +2071,16 @@ function projPlanBody(p, fk){
 
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return caps.map(function(c){
+  return fnHead(fk) + caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
       'No projects yet.</div></div>';
     var rail = railFor(c.projects, sel,
       function(p){ return p.deliverables.length; },
-      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones &middot; ' +
-        projMeta(p); },
-      null, 'Figure shown is deliverables',
-      function(p){ return projCode(fk, p); });
+      function(p){ return p.outcomes.length + ' outcomes &middot; ' + p.milestones.length + ' milestones'; },
+      null, 'Figure shown is deliverables');
     return capBand(c) + '<div class="capbody">' +
-      splitOrPane(c.projects, sel, rail, projPlanBody(sel, fk)) + '</div>';
+      splitOrPane(c.projects, sel, rail, projPlanBody(sel)) + '</div>';
   }).join("");
 }
 
@@ -2145,7 +2112,7 @@ function capPickBox(x, may, opts, val){
     }).join("") + '</select>';
 }
 
-function projReportBody(p, may, fk){
+function projReportBody(p, may){
   var r = projReported(p);
   var dRows = p.deliverables.map(function(d, i){
     if (!delivDue(d)) {
@@ -2179,8 +2146,10 @@ function projReportBody(p, may, fk){
         [["","\u2014"],["todo","Not started"],["wip","In progress"],["done","Completed"]], m.status) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
-  return pillarBand(projCode(fk, p), p.name,
-      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
+  return '<div class="ptitle"><div><h3>' + esc(p.name) + '</h3>' +
+      '<div class="pmeta">' + esc(REVIEW.name) + ' &middot; ' + r.total + ' entries asked, ' +
+      r.done + ' given</div></div>' +
+      '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span></div>' +
     '<h4 class="mini">Deliverables</h4>' +
     miniTable(["#","Deliverable","Kind","Reported","Note"], dRows) +
     '<h4 class="mini">Outcomes</h4>' +
@@ -2214,16 +2183,15 @@ function capReportBody(c){
     function(p){ var r = projReported(p);
       return r.total === 0 ? 'Not asked this cycle'
         : (r.done >= r.total ? 'Complete' : (r.total - r.done) + ' still to enter'); },
-    null, 'Tally is entries given of asked',
-    function(p){ return projCode(c.fn, p); });
+    null, 'Tally is entries given of asked');
   return koBlock + '<h4 class="mini">Projects</h4>' +
-    splitOrPane(c.projects, sel, rail, projReportBody(sel, may, c.fn));
+    splitOrPane(c.projects, sel, rail, projReportBody(sel, may));
 }
 
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (REVIEW.state !== "open") {
-    return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
+    return fnHead(fk) + '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
   }
   var done = 0, total = 0;
@@ -2234,7 +2202,7 @@ function renderFnReport(fnKey){
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
     '</div>';
-  return bar + caps.map(function(c){
+  return fnHead(fk) + bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
   }).join("");
 }
@@ -2448,7 +2416,7 @@ function renderUnitPlan(u){
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
-  return editBar("capfoundation", "k_found") + caps.map(function(c){
+  return fnHead(fk) + editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
     var koBlock = c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +

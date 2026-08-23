@@ -184,15 +184,106 @@
      than being cropped by it, and the whole point is the crop. */
   .d-pics .pcell { margin:0; min-width:0; min-height:0; display:flex;
                    flex-direction:column; gap:14px; }
+  /* THE FRAME'S GROUND IS THE SLIDE'S GROUND (§51.10). With `contain` the
+     picture no longer fills its box, so whatever is behind it becomes a
+     letterbox band on the slide — and a grey band around a screenshot reads as
+     part of the design. On the slide's own white it simply disappears.
+     `object-fit` is written by picStyle per picture, never here. */
   .d-pics .pframe { flex:1; min-height:0; display:block; overflow:hidden;
-                    border-radius:6px; background:var(--surface-2); }
-  .d-pics .pframe img { width:100%; height:100%; object-fit:cover; display:block; }
+                    border-radius:6px; background:var(--surface); }
+  .d-pics .pframe img { width:100%; height:100%; display:block; }
   .d-pics figcaption { font-size:21px; line-height:1.38; color:var(--ink-2); }
+  /* Islam: "make the headers always bold". The deck's headings are a 400-weight
+     serif by design (§38's type scale) — this is the PICTURE slide's own title
+     only, which sits over evidence rather than over a table and has to hold its
+     own against it. */
+  .dslide.d-pics h2 { font-weight:700; }
   .dslide.tight.d-pics figcaption { font-size:18px; }
 
-  /* ── The editor ───────────────────────────────────────────────────
-     Inside the modal, so it wears the app's type rather than the deck's. */
-  .picwrap { display:flex; flex-direction:column; gap:18px; }
+  /* The empty slide, in the editor only. It says what it is and what will
+     happen to it, rather than being a blank rectangle somebody has to guess at. */
+  .d-blank .blankslide { flex:1; display:flex; flex-direction:column; align-items:center;
+             justify-content:center; gap:14px; border:2px dashed var(--line);
+             border-radius:10px; color:var(--ink-3); text-align:center; }
+  .d-blank .blankslide span { font-size:38px; font-weight:600; color:var(--ink-2); }
+  .d-blank .blankslide em { font-style:normal; font-size:24px; }
+
+  /* ── MANAGE SLIDES (§51.8) ─────────────────────────────────────────
+     A mode, laid out like the thing it edits: the deck down the left, the
+     slide you are working on filling the right. It borrows the deck's own
+     chrome (`.deckroot`, `.deckbar`) rather than inventing a second full-screen
+     shell — one product. */
+  .slideroot { position:fixed; inset:0; z-index:60; background:var(--surface-2); display:none; }
+  .slideroot.on { display:flex; flex-direction:column; }
+  .slidebar { display:flex; align-items:center; gap:12px; padding:10px 16px;
+              background:var(--panel); color:var(--panel-ink); flex:none; }
+  .sl-title { font-weight:700; font-size:var(--fs-body); }
+  .sl-sub { font-size:var(--fs-small); color:var(--panel-quiet); }
+  .slidebar [data-slexit] { margin-left:auto; font:inherit; font-size:var(--fs-small);
+              letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+              background:none; border:1px solid rgba(255,255,255,.35);
+              color:var(--panel-ink); border-radius:var(--r-pill);
+              padding:6px 16px; cursor:pointer; }
+  .slidebar [data-slexit]:hover { background:rgba(255,255,255,.14); }
+  .slidebody { flex:1; min-height:0; display:flex; }
+
+  /* The rail. Its own scroller, because the deck is long and the pane is not. */
+  .slidelist { width:232px; flex:none; overflow-y:auto; background:var(--surface);
+               border-right:1px solid var(--line); padding:10px; }
+  .slrow { display:grid; grid-template-columns:20px 168px; gap:8px; align-items:start;
+           padding:6px; border-radius:var(--r-sm); cursor:pointer; margin-bottom:4px; }
+  .slrow:hover { background:var(--surface-2); }
+  .slrow.on { background:var(--surface-2); box-shadow:inset 3px 0 0 var(--gold); }
+  .sl-n { font:600 11px/1.6 var(--mono); color:var(--ink-3); text-align:right; }
+  .sl-lab { grid-column:2; font-size:var(--fs-small); color:var(--ink-2); line-height:1.35;
+            overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+  /* --gold-deep on --surface-2 is 4.45:1 — §38.5, and the SIXTH time. The
+     selected row's ground is `--surface-2`, so the accent that reads fine on
+     every other row fails on the one you are looking at. The gold thumbnail
+     border already marks these as yours; the words take an ink that clears on
+     both grounds. */
+  .sl-lab em { display:block; font-style:normal; font-size:var(--fs-micro);
+               letter-spacing:var(--track); text-transform:uppercase;
+               color:var(--ink-2); font-weight:700; margin-top:2px; }
+  /* A REAL SLIDE AT ONE TENTH, not a drawing of one — so a slide that is wrong
+     is wrong here too. The holder is `position:relative` because `.dslide` is
+     `position:absolute; inset:0` and needs something to be inset within. */
+  .sthumb { display:block; width:168px; height:94.5px; overflow:hidden;
+            border:1px solid var(--line); border-radius:3px; background:var(--surface); }
+  .sthumb-in { display:block; position:relative; width:1600px; height:900px;
+               transform:scale(.105); transform-origin:0 0; pointer-events:none; }
+  .slrow.mine .sthumb { border-color:var(--gold); }
+  /* Pinned, and above the list rather than below it: it is the first thing
+     you came here to do. */
+  .sl-add { position:sticky; top:-10px; z-index:2; background:var(--surface);
+            padding:6px 6px 10px; margin:-10px -10px 6px; border-bottom:1px solid var(--line);
+            display:flex; flex-direction:column; align-items:stretch; gap:4px; }
+  .sl-add .editbtn { width:100%; }
+  .sl-add .picsub { text-align:center; font-size:var(--fs-micro); }
+
+  /* The pane: the slide above, its controls below. */
+  /* THE SLIDE TAKES THE ROOM (§51.9, Islam). The stage was capped at 420px
+     and the pane scrolled, so most of the right-hand side was empty below the
+     controls — on the very screen whose whole job is looking at one slide. It
+     fills whatever is left now, and the controls keep their natural height at
+     the bottom. min-height:0 on the stage or a flex child refuses to shrink
+     below its content and the cap comes back by another route. */
+  .slidepane { flex:1; min-width:0; display:flex; flex-direction:column;
+               gap:14px; padding:16px; overflow:hidden; }
+  .sstage { flex:1; min-height:0; position:relative; }
+  .slidepane .slctl { flex:none; max-height:46%; overflow-y:auto; }
+  /* Centred in whatever room there is, rather than pinned to the top-left of
+     a box that is now usually wider than 16:9. */
+  .sstage-in { position:absolute; top:0; left:50%; width:1600px; height:900px;
+               transform-origin:0 0; box-shadow:0 6px 24px rgba(0,0,0,.16); }
+  .slctl { background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r-lg); padding:14px 15px 16px; }
+  .slctl-read { color:var(--ink-3); }
+  .slctl-read p { margin:0; }
+  .slctl-h { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+  .slctl-h .picttl { flex:1; min-width:180px; }
+
+  /* ── The picture controls ─────────────────────────────────────────── */
   .picnone { margin:0; color:var(--ink-3); font-size:var(--fs-note); }
   .picerr { margin:0 0 4px; padding:9px 12px; border-radius:var(--r-sm);
             background:var(--surface-2); border-left:3px solid var(--bad);
@@ -208,7 +299,21 @@
   .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
                      border:1px solid var(--line); border-radius:var(--r-sm);
                      background:var(--surface); color:var(--ink); max-width:320px; }
-  .picslots { display:grid; gap:12px; }
+  /* THE EDITOR'S SLOTS WRAP (§51.6). They took the same fixed column counts
+     the slide uses, so four across in a 940px dialog gave 200px frames, and
+     on a laptop the row simply ran out of room. The slide keeps its exact
+     arrangement — it is a fixed 1600x900 stage and there is always room —
+     while the editor fits as many as the dialog can hold and wraps the rest.
+     Written WITHOUT a pg-class in front of it so it beats nothing and is
+     beaten by nothing: it is the only rule that sizes .picslots. */
+  /* THE CONTROLS ARE HANDLES, NOT THE PREVIEW. The slide above is the
+     preview — full size, exactly as it will project — so these frames only
+     have to be big enough to drag inside. auto-FILL with a MAX, not auto-fit
+     with 1fr: two pictures in a 1200px pane were becoming 590px frames, half a
+     screen each, and the thing you were actually framing was pushed off the
+     top. They cap at 230px and sit left. */
+  .picslots { display:grid; gap:12px;
+              grid-template-columns:repeat(auto-fill, minmax(190px, 230px)); }
   .picslot { display:flex; flex-direction:column; gap:8px; min-width:0; }
   /* A fixed 16:10 well, so the frame in here has the same shape as the frame
      on the slide whatever the arrangement — otherwise the crop chosen against
@@ -217,7 +322,7 @@
               border-radius:var(--r-sm); background:var(--surface-2);
               border:1px solid var(--line); cursor:grab; touch-action:none; }
   .picframe.dragging { cursor:grabbing; }
-  .picframe img { width:100%; height:100%; object-fit:cover; display:block;
+  .picframe img { width:100%; height:100%; display:block;
                   pointer-events:none; user-select:none; }
   .picslot.empty { justify-content:stretch; }
   /* THE CARD'S OWN GROUND, not the quiet one — §38.5 for the fifth time, and
@@ -234,11 +339,23 @@
   .picdrop input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
   .picdrop:focus-within { outline:2px solid var(--gold); outline-offset:1px; }
   .picplus { font-size:22px; line-height:1; color:var(--gold-deep); }
-  .picctl { display:flex; align-items:center; gap:10px; }
-  .piczoom { flex:1; display:flex; align-items:center; gap:7px; min-width:0;
+  .picctl { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .picctl .minisw { flex:none; }
+  .piczoom { display:flex; align-items:center; gap:7px; min-width:0;
              font-size:var(--fs-micro); letter-spacing:var(--track);
              text-transform:uppercase; color:var(--ink-3); font-weight:700; }
   .piczoom input { flex:1; min-width:0; accent-color:var(--gold); }
+  .piczoom b { font-family:var(--mono); font-size:10px; color:var(--ink-2);
+               min-width:34px; text-align:right; letter-spacing:0; }
+
+  /* Up and down. A pair, boxed like the arrangement switch beside it. */
+  .slmove { display:inline-flex; border:1px solid var(--line); border-radius:var(--r-sm);
+            overflow:hidden; }
+  .slmove button { font:inherit; font-size:10px; line-height:1; background:var(--surface);
+                   border:0; color:var(--ink-2); padding:7px 9px; cursor:pointer; }
+  .slmove button + button { border-left:1px solid var(--line); }
+  .slmove button:hover { background:var(--surface-2); color:var(--ink); }
+  .slmove button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
   .picslot .piccap { width:100%; }
   .picfoot { display:flex; align-items:center; gap:12px; }
   .picsub { font-size:var(--fs-small); color:var(--ink-3); }

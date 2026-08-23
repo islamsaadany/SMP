@@ -488,6 +488,10 @@
   }
   @media (max-width: 460px) {
     .card { padding: 30px 22px 26px; border-radius: 16px; }
+    /* Same reason as the short-window block: the mark's ~49px was 2px more
+       than a 320x640 phone had left. Measured at 320, not assumed from 390. */
+    .clientmark { width: 132px; height: 27.5px; margin-bottom: 14px; }
+    .clientmark + hr { margin-bottom: 16px; }
   }
   /* SHORT windows, not narrow ones. Measured: the wall's content needs about
      600px of height, so on a 1024x560 laptop the quote fell below the fold and
@@ -502,6 +506,23 @@
     .props { gap: 8px; }
     .props li { padding: 9px 13px; }
     .quote { padding-top: 14px; font-size: 12.5px; }
+  }
+  /* The mark condenses on a SHORT window at ANY width, which is why it is not
+     in the block above: that one is gated on min-width because the WALL only
+     exists above 980px, but the card carries the mark at every width. Gating
+     the two together left 461-980px wide and short - a small laptop window,
+     a split screen - drawing the mark full size with no room for it.
+
+     Adding the mark cost the card ~70px, and at 1024x560 that was enough to
+     push the page past the fold and grow a scrollbar: the exact fault the
+     block above exists to prevent, and one no width query can see (§35).
+     Last in the file deliberately, so on a screen that is both short and
+     narrow the SHORTER answer wins on source order.
+
+     Measured at every size, not estimated from one that passed. */
+  @media (max-height: 700px) {
+    .clientmark { width: 120px; height: 25px; margin-bottom: 10px; }
+    .clientmark + hr { margin-bottom: 12px; }
   }
   /* An entrance is a courtesy; for anyone who has asked for less motion it is
      an obstacle. Nothing here depends on an animation to become visible. */

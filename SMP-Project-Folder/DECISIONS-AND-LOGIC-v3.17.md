@@ -6203,3 +6203,190 @@ landed halfway down a table you had not read. `scrollTo(0,0)` is the wrong fix:
 it throws away the rail's pinned position. It scrolls to the SPLIT's offset
 less the chrome and the rail gap, **the same two numbers the rail's own sticky
 offset is built from**, and only ever upwards.
+
+---
+
+## 48 · The due diligence — what walking every scenario found
+
+Islam, after the register's controls landed: *"do a due diligence on all the
+user scenarios that they might go through and identify if any scenario is
+bugged or blocked or has an issue, check if there is any inconsistency in the
+flow or gaps and the accessibility."*
+
+Thirty-one viewers were signed in and walked, not reasoned about. The method is
+the finding: **every fault below was invisible to static reading and to twelve
+versions of green sweeps**, because each one failed silently and in the safe
+direction.
+
+### 48.1 A comparison against a field nobody sets, for the third time
+
+`arrange.js` asked `v.level === "smo"` and `v.level === "n1"`. `level` was
+deleted in §33 when roles replaced it, so both branches were false for all
+thirty-one people and **177 lines of pointer drag-and-drop have been dead code
+ever since**. Nothing threw. `sync.js` hid the viewer switcher from the SMO the
+same way (§45.3), and `canReport()` was a hard-coded level test before §42.
+
+**THE RULE, earned three times: after renaming a field, grep the OLD name
+across every source, including the ones the change was not about.** A stale
+comparison locks down rather than opening up — so no error is raised, no sweep
+goes red, and the feature simply is not there.
+
+Restated in roles and asked through `grantAt()`, so the access matrix stays the
+single answer: the SMO anywhere, and within a unit whoever may edit its plan.
+
+### 48.2 Import was the only Setup page with no access check at all
+
+`a_cycle` defaults to `view` for every role and the rail gated on "not none", so
+a contributor, a unit owner, a custodian and a company CEO all carried Import —
+could apply a file, read "Applied to Mobile. 3 figures updated", and then have
+the server refuse the save. **The "SMO only" pill the page printed was
+decoration.**
+
+Gated in three places on purpose, because each protects something different:
+the rail's `when` decides whether the ROW is drawn, `renderImport()` decides
+whether the PAGE renders (a destination can be reached with a stale
+`currentSub` after a role changes under the viewer), and the apply handler
+decides whether the FILE IS APPLIED — which matters most, because applying a
+plan archives and replaces a whole unit's plan in memory before any save is
+attempted.
+
+### 48.3 The modal was not modal, and the menus dropped focus
+
+Four faults of one shape. The modal announced `aria-modal` and behaved like a
+panel: one Tab left it into a page that was neither `inert` nor
+`aria-hidden`; Escape dropped focus to `<body>`; and while CLOSED it stayed
+tabbable and in the accessibility tree, so every screen carried a stray Close
+button and a permanently announced empty dialog — **§3.2's `opacity:0` lesson
+arriving in a different tree**. The row menu and both header menus opened
+without taking focus and closed without giving it back.
+
+Focus is moved AFTER the paint that creates the control, because focusing a
+node the paint is about to replace focuses nothing; and the return target is
+looked up by data attribute rather than held as a node, because a repaint may
+have replaced the button.
+
+### 48.4 The cheap accessibility set — five edits, five real findings
+
+`<html lang>` (the build emitted **no `<html>` tag at all**, so 22 of 22 page
+states failed); a `<main>` landmark and a skip link, first in the tab order and
+visible only on focus, because the navigation runs to twenty entries; names on
+the eight Capabilities selects, the focus-measure unit picker and the file
+input; and **a `--focus` token per palette, because `--gold` measures 2.40:1 on
+white and a focus ring needs 3:1** — it cleared on the navy bar at 5.32 and
+failed on every light surface, which is most of the product.
+
+### 48.5 Three from the journey walk
+
+**The Focus board sent people to a control that does not exist** — "press Mark
+focus on the unit's Performance page". There is no such button for any viewer;
+marking moved to Setup, and `focusStrip()`'s own comment thirty lines up says
+so. The page and the comment beside it disagreed and the page was wrong.
+
+**A file that fails to read now says why.** `impFail()` wrote the reason into
+`IMP.check`, but `checkBlock` only rendered inside `step3`, and `step3` only
+exists when there is a summary or a diff — so the one case where the message
+matters most had nowhere to render. Upload the wrong template and the page did
+not move. **The sentence existed the whole time.**
+
+**A row's action menu closes when its action fires** (§47.2), cleared AFTER the
+action and never before.
+
+---
+
+## 49 · The four the audit could not fix without asking
+
+The last four findings each changed behaviour or destroyed data, so they were
+put to Islam with a proposal and a cost apiece. *"all 4 are good go."*
+
+### 49.1 A new cycle asks again — because it now clears
+
+Opening a cycle replaced the name, the dates and the deadline and **left every
+actual, progress mark, tactic status and note exactly where the last cycle left
+them**. 163 of 184 items read "reported" the second it opened, a unit head could
+press Submit without touching a field, and the page's own copy already claimed
+the new cycle "asks every unit again".
+
+**Clearing alone was not the fix.** `HISTORY` keeps a SCORE per unit and never
+the raw figures, so a clear with nothing behind it destroys the closed cycle's
+numbers. Opening ARCHIVES first — the same act an import performs on a plan it
+replaces, with the same Restore — and the confirmation says how many figures
+and notes are about to go.
+
+**The snapshot is keyed BY ID, never cloned by position.** A plan may be edited
+between the close and the restore, and a positional snapshot would then put last
+cycle's number against a different measure. An id that is no longer there is
+dropped on the way back in.
+
+Two consequences worth recording. **A capability is ONE object** — the group's
+headline pair (`perf`/`exec`) and the function's own reporting hang off the same
+record — so both are taken in one pass rather than two that could disagree.
+And **notes are cleared with the figures they explain**, or the new cycle opens
+with last cycle's explanation sitting under a blank number.
+
+The archive gets **its own column** rather than reusing `plan`: a plan archive
+holds no figures and a figures archive holds no plan, and one column carrying
+either depending on `kind` is a lie the next reader has to discover.
+
+Open remains `a_cycle` edit, which defaults to the SMO alone. A tenant that
+grants it wider will find the SERVER refusing the figure clears (§42) — the
+correct direction, and not something to loosen without a decision.
+
+### 49.2 Clearing a plan is the same act as replacing one
+
+An **import** that replaced a plan archived the outgoing one and offered a
+Restore; **Clear plan** destroyed the identical thing with no archive and no
+undo. Two routes to the same outcome, one of them reversible.
+
+`clearUnitPlan()` and `clearCapability(c, "plan")` archive on the way out now
+and RETURN the archive, so the import path takes one rather than two — it used
+to call `archiveUnitPlan()` itself and then call a clear that (once fixed)
+archived again. The reason is threaded through as a word, so the list says how a
+plan left rather than only that it did: *cleared*, or *replaced by an upload*.
+
+### 49.3 A company gets a life
+
+The Companies page offered two visibility dropdowns per company and nothing
+else: no add, no rename, no retire, and **no `addCompany` anywhere in the
+product**. Every other Setup table has had all three since 1.7.
+
+**Retired, never deleted**, and for the reason a unit is: a company key is
+written into every company CEO's role as `co:<key>` and into `units.company`, so
+a deleted row leaves a pointer at nothing. Retiring is **REFUSED while any unit
+still belongs**, and the cell says how many rather than going quiet about why
+there is no button — quietly orphaning a unit into "its own company" behind the
+SMO's back is the failure this prevents.
+
+A retired company is not offered as a destination in the unit picker, and not
+offered as a seat in the role picker; a unit already in one still shows it,
+marked, because hiding it would silently read as "its own company".
+
+**A correction to the finding as first written.** It claimed a real tenant
+*inherits* Distribution and B2C from the demo. It does — and **deliberately**:
+§21's clean slate keeps the companies for the same reason it keeps the ten
+business units and the supporting functions, and v2.6 recorded both companies as
+real. Migration 004 is unchanged. The gap was the missing controls, and with a
+rename in place they are no longer stuck.
+
+### 49.4 Retiring remembers what it took
+
+Retiring revokes every role (§35, and right). **Restoring gave none of it
+back**, so a Strategy custodian who was retired and brought back returned as a
+Contributor of their unit, and nobody was told.
+
+Retiring stores what it revoked; restoring names it and asks. **A seat somebody
+else has taken up meanwhile is named and NOT offered** — restoring one person
+must never quietly unseat another. `contrib` is not stored, because it is not
+granted: it is read off `p.unit`, which retiring leaves alone, so it comes back
+by itself, and storing it would make the list say a role was returned that was
+never taken.
+
+**A second correction, and the reason to measure first.** The finding also
+proposed deleting `lib/rules.js`'s last line — *a person attached to a unit and
+holding nothing else is a Contributor of it* — as a role nobody granted.
+Measured against the tenant, **two real people resolve through it and nothing
+else**, and it is not an invention: it is the definition of Contributor. It
+stays. The demotion was real; its cause was the restore, not the fallback.
+
+`roleWhereLabel()` came out of `renderPeople()` in the same pass, because the
+restore dialog needed to name where a role was held and a second copy of that
+function is exactly the drift `lib/rules.js` exists to prevent.

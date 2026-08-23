@@ -550,9 +550,8 @@ function capReplaceSummary(c, rows){
 /* Every row is a creation, so the existing builder does the whole job \u2014 it is
    the same code that has always created a new pillar arriving in a file. */
 function applyPlanReplace(u, rows){
-  /* clearUnitPlan archives on the way out (§49.2), so this is ONE archive,
-     not two — the import used to take its own and then take a second. */
-  var archived = clearUnitPlan(u);
+  var archived = archiveUnitPlan(u);
+  clearUnitPlan(u);
   /* The foundation's LABELS are a skeleton the unit keeps when a file does not
      carry one. A file that does carry clauses re-authors both label and text,
      so the old ones are cleared out of the way first. */
@@ -569,7 +568,8 @@ function applyPlanReplace(u, rows){
   return archived;
 }
 function applyCapPlanReplace(c, rows){
-  var archived = clearCapability(c, "plan");
+  var archived = archiveCapPlan(c);
+  clearCapability(c, "plan");
   createFromCapPlan(c, { rows: rows.map(function(r){
     return { status:"new", type:r.type, raw:r };
   }) });

@@ -365,8 +365,7 @@ function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
                       ? "Clear every plan?" : "Clear all reported progress?") + '</b>' +
                     '<span class="why" style="margin:4px 0 0">' +
                       (CLEARING === clearScope + "||plan"
-                        ? "The work itself, everywhere on this page. Names and definitions stand. " +
-                          "Each one is archived first and can be restored."
+                        ? "The work itself, everywhere on this page. Names and definitions stand."
                         : "Actuals and notes, everywhere on this page. Every plan stands.") +
                     '</span></div>' +
                   '<button class="danger" data-clearyes="' + CLEARING + '">Yes, clear</button>' +
@@ -477,13 +476,9 @@ function renderUnits(){
          reads as somebody having forgotten and standing alone is a decision. */
       '<td>' + (editable
         ? '<select class="fld" data-ucomp="' + k + '">' +
-            /* A retired company is nowhere a unit can be MOVED to, but a unit
-               already in one still shows it — hiding it would silently read
-               as "its own company" (§49.3). */
-            COMPANY_KEYS.filter(function(ck){ return companyActive(ck) || u.company === ck; })
-              .map(function(ck){
+            COMPANY_KEYS.map(function(ck){
               return '<option value="' + ck + '"' + (u.company === ck ? " selected" : "") + '>' +
-                esc(COMPANIES[ck].name) + (companyActive(ck) ? '' : ' (retired)') + '</option>';
+                esc(COMPANIES[ck].name) + '</option>';
             }).join("") +
             '<option value=""' + (u.company ? "" : " selected") + '>\u2014 its own company \u2014</option>' +
           '</select>'
@@ -497,8 +492,7 @@ function renderUnits(){
               (u.active ? "Retire" : "Restore") + '</button>' +
             (CLEARING === k + "|plan"
               ? '<span class="confirm"><b>Clear the whole plan?</b>' +
-                  '<span class="why" style="margin:0">Pillars, measures, tactics, objectives, SWOT and the foundation text. ' +
-                    'Kept as an archive dated today and restorable from <b>Archived plans</b>.</span>' +
+                  '<span class="why" style="margin:0">Pillars, measures, tactics, objectives, SWOT and the foundation text.</span>' +
                   '<button class="rmbtn" data-clearyes="' + k + '|plan">Yes, clear the plan</button>' +
                   '<button class="linkbu" data-clearno="1">Cancel</button></span>'
               : CLEARING === k + "|nums"
@@ -736,11 +730,23 @@ function renderPeople(){
     ? PEOPLE.filter(function(p){ return personActive(p) && PWSTATES[p.key] === "none"; }).length
     : 0;
 
-  /* Lifted out of this function 2026-08-23: restoring a person names the
-     places their roles were held, and a second copy of this in the shell is
-     exactly the drift lib/rules.js exists to prevent. It is roleWhereLabel()
-     in config-data.js now, with the reasoning that belongs to it. */
-  var whereLabel = roleWhereLabel;
+  /* A unit and a supporting function may share a name — Care and IT are both,
+     in this tenant — and one person is often custodian of each. Unqualified,
+     the row then reads "Strategy custodian · Care" twice and looks like a
+     duplicate rather than two real roles over two different things. The kind
+     is part of the answer, so it is part of the label. */
+  function whereLabel(at){
+    if (!at || at === "group") return "the group";
+    if (String(at).indexOf("fn:") === 0) {
+      var f = FUNCTIONS[String(at).slice(3)];
+      return (f ? f.name : String(at).slice(3)) + " (function)";
+    }
+    if (String(at).indexOf("co:") === 0) {
+      var c = COMPANIES[String(at).slice(3)];
+      return c ? c.name : String(at).slice(3);
+    }
+    return UNITS[at] ? UNITS[at].name : at;
+  }
 
   /* The role cell. Read-only it is a list of what they hold and where; in edit
      it gains an X per role and one add control. Two selects rather than one
@@ -1082,53 +1088,34 @@ function renderPeople(){
 
 function renderCompanies(){
   var editable = grant("c_units") === "edit" && EDITING.units;
-  var live = activeCompanyKeys().length;
   return cfgHead("Companies",
       ['<span class="pill kind">SMO</span>',
        COMPANY_KEYS.length + ' ' + (COMPANY_KEYS.length === 1 ? 'company' : 'companies'),
-       plural(soloUnits().length, "unit") + ' standing alone'].concat(
-         live < COMPANY_KEYS.length ? [(COMPANY_KEYS.length - live) + ' retired'] : []),
+       plural(soloUnits().length, "unit") + ' standing alone'],
       "units", grant("c_units") === "edit") +
     section("", "Companies", null,
       '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:24%">Company</th>' +
-        '<th class="cc" style="width:8%">Units</th>' +
-        '<th class="cc" style="width:18%">Sees other companies</th>' +
-        '<th class="cc" style="width:18%">Sees the group</th>' +
-        '<th class="cc" style="width:20%">Status</th></tr></thead><tbody>' +
+        '<th class="idx" style="width:38px">#</th><th style="width:22%">Company</th>' +
+        '<th class="cc" style="width:10%">Units</th>' +
+        '<th class="cc" style="width:20%">Sees other companies</th>' +
+        '<th class="cc" style="width:20%">Sees the group</th></tr></thead><tbody>' +
       COMPANY_KEYS.map(function(ck, i){
-        var co = COMPANIES[ck], on = companyActive(ck), blockers = companyRetireBlockers(ck);
-        var flag = function(field, val){
+        var co = COMPANIES[ck], flag = function(field, val){
           if (!editable) return '<span class="pill ' + (val ? "good" : "none") + '">' +
             (val ? "Yes" : "No") + '</span>';
           return '<select class="fld" data-coflag="' + ck + '|' + field + '">' +
             '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
             '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
         };
-        return '<tr' + (on ? '' : ' class="retired"') + '><td class="idx">' + (i+1) + '</td>' +
-          '<td>' + (editable
-            ? '<input class="fld" value="' + esc(co.name) + '" data-coname="' + ck + '">'
-            : '<b>' + esc(co.name) + '</b>') +
-            '<span class="why mono">key ' + ck + '</span></td>' +
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td><b>' + esc(co.name) + '</b><span class="why mono">key ' + ck + '</span></td>' +
           '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
           '<td class="cc">' + flag("seeOthers", co.seeOthers) + '</td>' +
-          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td>' +
-          /* Retiring is REFUSED while units still belong here, and the cell says
-             how many rather than going quiet about why there is no button. */
-          '<td class="cc">' + (editable
-            ? (on && blockers.length
-                ? '<span class="pill none" title="' + esc(blockers.join(", ")) + '">holds ' +
-                    plural(blockers.length, "unit") + '</span>'
-                : '<button class="rmbtn' + (on ? '' : ' on') + '" data-coact="' + ck + '">' +
-                    (on ? "Retire" : "Restore") + '</button>')
-            : '<span class="pill ' + (on ? "good" : "none") + '">' +
-                (on ? "Active" : "Retired") + '</span>') + '</td></tr>';
+          '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td></tr>';
       }).join("") + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
       '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
       'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
       'more. Supporting functions belong to no company: they serve all of them. ' +
-      'A company is <b>retired, never deleted</b>, and only once no unit belongs to it. ' +
       (soloUnits().length
         ? soloUnits().length + ' unit' + (soloUnits().length === 1 ? ' stands' : 's stand') +
           ' alone: ' + soloUnits().map(function(k){ return esc(UNITS[k].name); }).join(", ") + '.'
@@ -2140,38 +2127,25 @@ function renderArchives(){
   var can = grant("c_import") === "edit";
   if (!ARCHIVES.length)
     return section("", "Archived plans",
-      "A plan is archived here whenever an upload replaces one or a clear empties one, and a " +
-      "cycle's figures whenever a new cycle clears them. Nothing has been replaced yet.",
-      '<div class="note">Empty. Upload a plan on <b>Import</b>, clear one on <b>Business units</b>, ' +
-      'or open a new reporting cycle, and what it displaces will appear here with a way to put ' +
-      'it back.</div>');
+      "A plan is archived here whenever an upload replaces one. Nothing has been replaced yet.",
+      '<div class="note">Empty. Upload a plan on <b>Import</b> and the plan it displaces will ' +
+      'appear here, with a way to put it back.</div>');
 
   var rows = ARCHIVES.map(function(a){
     var c = a.counts || {};
-    /* Three kinds now: a unit's plan, a capability's plan, and a CYCLE's
-       figures — taken when a new cycle clears the last one's numbers (§49.1).
-       A figures archive belongs to no one unit, so it is always restorable. */
-    var held = a.kind === "figures"
-      ? [plural(c.reported || 0, "reported figure"), plural(c.notes || 0, "note"),
-         plural(c.units || 0, "submitted unit")].join(" &middot; ")
-      : a.kind === "unit"
+    var held = a.kind === "unit"
       ? [c.pillars + " pillars", c.measures + " measures", c.tactics + " tactics",
          c.objectives + " objectives"].join(" &middot; ")
       : [c.projects + " projects", c.deliverables + " deliverables",
          c.outcomes + " outcomes", c.milestones + " milestones"].join(" &middot; ");
-    var live = a.kind === "figures" ? true : a.kind === "unit" ? UNITS[a.key] : capById(a.key);
+    var live = a.kind === "unit" ? UNITS[a.key] : capById(a.key);
     return '<tr><td><b>' + esc(a.name) + '</b>' +
-        (a.kind === "figures"
-          ? '<span class="why">the cycle\u2019s figures</span>'
-          : live ? ''
-          : '<span class="why">no longer in the platform &mdash; cannot be restored</span>') +
+        (live ? '' : '<span class="why">no longer in the platform &mdash; cannot be restored</span>') +
         '</td>' +
       '<td class="cc">' + esc(a.at) + '</td>' +
       '<td>' + esc(a.by || "\u2014") + '<span class="why">' + esc(a.why || "") + '</span></td>' +
       '<td>' + held +
-        (a.kind === "figures"
-          ? '<span class="why">put back into whatever plan is standing then</span>'
-          : c.reported
+        (c.reported
           ? '<span class="why">' + c.reported + ' reported figure' + (c.reported === 1 ? '' : 's') + ' kept with it</span>'
           : '<span class="why">nothing reported</span>') + '</td>' +
       '<td class="cc">' + (can && live
@@ -2181,9 +2155,8 @@ function renderArchives(){
   }).join("");
 
   return section("", "Archived plans",
-    "Every plan an upload replaced or a clear emptied, and every cycle's figures a new cycle " +
-    "cleared \u2014 newest first. Restoring puts one back and archives whatever is there now: " +
-    "the same act in reverse, with the same warning.",
+    "Every plan an upload replaced, newest first. Restoring puts one back and archives whatever " +
+    "is there now \u2014 the same act in reverse, with the same warning.",
     '<div class="cfg"><table><thead><tr>' +
       '<th style="width:22%">Plan</th><th class="cc" style="width:12%">Archived</th>' +
       '<th style="width:20%">Replaced by</th><th>What it held</th>' +
@@ -2389,7 +2362,7 @@ function renderFunctions(){
                   '<span class="why" style="margin:0">Key objectives and projects across ' +
                     functionCapCount(fk) + ' ' +
                     (functionCapCount(fk) === 1 ? "capability" : "capabilities") +
-                    '. The definitions stand, and each plan is archived first.</span>' +
+                    '. The definitions stand.</span>' +
                   '<button class="rmbtn" data-clearyes="fn|' + fk + '|plan">Yes, clear the plan</button>' +
                   '<button class="linkbu" data-clearno="1">Cancel</button></span>'
               : CLEARING === "fn|" + fk + "|nums"

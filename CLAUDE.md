@@ -320,7 +320,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-22 — **v3.17**: ONE DOOR, A SWITCH, AND A CYCLE THAT
+*Last Updated: 2026-08-23 — **the due diligence, and the four it could not
+fix without asking** (§48, §49). Thirty-one viewers were signed in and WALKED,
+not reasoned about, and the method is the finding: **a comparison against a
+field nobody sets fails silently and in the SAFE direction**, so twelve
+versions of green sweeps never saw that reordering had been dead code for all
+thirty-one people since §33 — the third instance of one fault, and the rule is
+now earned: **after renaming a field, grep the OLD name across every source,
+including the ones the change was not about.** Import was the only Setup page
+with **no access check at all** and printed an "SMO only" pill as decoration.
+The modal announced `aria-modal` and behaved like a panel — and while CLOSED
+stayed tabbable and announced, §3.2's `opacity:0` lesson arriving in a
+different tree. The build emitted **no `<html>` tag at all**. The Focus board
+sent people to a control that does not exist. Then four that changed behaviour
+or data, each put to Islam first. **A NEW CYCLE ASKS AGAIN**: opening one left
+163 of 184 items reading "reported", so a unit could submit without touching a
+field — it archives the figures and then clears them, because HISTORY keeps a
+SCORE and never the raw numbers, and the snapshot is keyed **by id, never by
+position**, or a plan edited in between puts last cycle's number against a
+different measure. **CLEARING A PLAN IS THE SAME ACT AS REPLACING ONE** —
+import archived and offered a Restore; Clear plan destroyed the identical thing
+with no undo. **A COMPANY GETS A LIFE** (add, rename, retire), retired never
+deleted because its key is written into every `co:<key>` role, and retiring is
+REFUSED while units still belong rather than orphaning them quietly.
+**RETIRING REMEMBERS WHAT IT TOOK**: restoring gave nothing back, so a
+custodian returned as a Contributor and nobody was told — and a seat somebody
+else has taken up meanwhile is named and NOT offered. Two findings CORRECTED by
+measuring rather than reasoning: the demo's companies are inherited
+deliberately (§21 keeps them exactly as it keeps the ten units), and
+`lib/rules.js`'s Contributor fallback is load-bearing for two real people — it
+is the definition of Contributor, not an invented role.*
+
+*Earlier: 2026-08-22 — **v3.17**: ONE DOOR, A SWITCH, AND A CYCLE THAT
 ASKS (§47). **THE GEAR STOPS BEING A MENU**: Setup and Manage merge into one
 railed page, and with one destination behind it a menu holding one item is a
 door behind a door (§32, once already at the gate). **A GROUP MAY FOLD BUT

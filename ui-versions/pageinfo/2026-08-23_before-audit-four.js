@@ -280,16 +280,14 @@ var PAGE_INFO = {
       ["Two different clears",
        "<b>Clear numbers</b> removes what was <i>reported</i> \u2014 actuals and progress \u2014 and leaves the plan " +
        "standing. That is the start of a reporting cycle, or the fix after a bad progress upload. " +
-       "<b>Clear plan</b> removes what was <i>committed to</i>, so a fresh file can be loaded \u2014 " + 
-       "archiving it first, exactly as an upload that replaced it would."],
+       "<b>Clear plan</b> removes what was <i>committed to</i>, so a fresh file can be loaded."],
       ["Cleared means unreported, never zero",
        "A cleared measure reads <i>Not scored</i> and a cleared tactic reads <i>Not reported</i>, and both " +
        "are left out of every average. Resetting them to zero would report a unit as failing when nobody " +
        "had yet said anything."],
       ["Clearing a plan is not retiring a unit",
        "<b>Clear plan</b> empties everything a plan template carries \u2014 pillars, measures, tactics, objectives, " +
-       "SWOT and the foundation text \u2014 so a fresh file can be loaded into a clean unit. What it emptied " +
-       "is kept in <b>Archived plans</b> and can be put back. The unit itself " +
+       "SWOT and the foundation text \u2014 so a fresh file can be loaded into a clean unit. The unit itself " +
        "survives: its name, code, roles and weight are configuration, not plan content."],
       ["Retired, never deleted",
        "A unit carries pillars, measures, tactics and reported progress. Retiring it stops it appearing; " +

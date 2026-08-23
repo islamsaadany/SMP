@@ -139,7 +139,10 @@ CREATE TABLE IF NOT EXISTS companies (
   name        text NOT NULL DEFAULT '',
   ceo         text,
   see_others  boolean NOT NULL DEFAULT false,
-  see_group   boolean NOT NULL DEFAULT true
+  see_group   boolean NOT NULL DEFAULT true,
+  -- Retired, never deleted: a company key is written into every company CEO's
+  -- role as `co:<key>` and into units.company (§49.3).
+  active      boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE IF NOT EXISTS units (
@@ -378,5 +381,9 @@ CREATE TABLE IF NOT EXISTS plan_archives (
   by_name   text,
   why       text,
   counts    jsonb,
-  plan      jsonb NOT NULL
+  -- A plan archive holds a plan; a CYCLE's archive holds the figures it
+  -- cleared (§49.1). Each is null on the other kind — one column carrying
+  -- either depending on `kind` is a lie the next reader has to discover.
+  plan      jsonb,
+  figures   jsonb
 );

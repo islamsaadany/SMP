@@ -1242,29 +1242,6 @@
         var f = document.getElementById("nc-name"); if (f) f.focus();
         return;
       }
-      /* ── A NEW CYCLE ASKS AGAIN (§49.1) ──────────────────────────
-         Opening used to replace REVIEW and nothing else, so last period's
-         actuals, progress marks, tactic statuses and notes carried straight
-         over and 163 of 184 items read "reported" the moment it opened — a
-         unit could submit without touching a field, and the page's own copy
-         already claimed every unit was asked again.
-
-         Archived BEFORE cleared, because HISTORY keeps a score per unit and
-         never the raw figures: a clear with nothing behind it would destroy
-         the closed cycle's numbers. Same act an import performs on the plan
-         it replaces, same Restore. */
-      var arch = archiveFigures("cleared when " + String(d.name).trim() + " opened");
-      if (!confirm("Open " + String(d.name).trim() + "?\n\n" +
-          (arch
-            ? arch.counts.reported + " reported figure" + (arch.counts.reported === 1 ? "" : "s") +
-              " and " + arch.counts.notes + " note" + (arch.counts.notes === 1 ? "" : "s") +
-              " from " + REVIEW.name + " are cleared so every unit is asked again.\n" +
-              "They are kept as an archive dated today and can be restored from Archived plans."
-            : "Nothing has been reported yet, so there is nothing to clear."))) {
-        if (arch) ARCHIVES.shift();
-        return;
-      }
-      clearForNewCycle();
       REVIEW = { name:String(d.name).trim(), from:d.from || "", to:d.to || "",
                  due:d.due || "", endsQuarter:Number(d.endsQuarter) || 4,
                  state:"open", note:{}, submitted:{}, cadence:REVIEW.cadence };
@@ -1513,14 +1490,12 @@
         /* One handler for all three levels \u2014 a unit, a function, or everything
            \u2014 so clearing behaves identically wherever it is reached from. */
         var p = b.dataset.clearyes.split("|");
-        /* "cleared" is what the archive will be FILED under, so the list says
-           how a plan left rather than only that it did (§49.2). */
-        if (p[0] === "all") { if (p[1] === "plan") clearAllPlans("cleared"); else clearAllNumbers(); }
+        if (p[0] === "all") { if (p[1] === "plan") clearAllPlans(); else clearAllNumbers(); }
         else if (p[0] === "fnall") {
-          FUNCTION_KEYS.forEach(function(k){ clearFunction(k, p[2] === "plan" ? "plan" : "nums", "cleared"); });
+          FUNCTION_KEYS.forEach(function(k){ clearFunction(k, p[2] === "plan" ? "plan" : "nums"); });
         }
-        else if (p[0] === "fn") { clearFunction(p[1], p[2] === "plan" ? "plan" : "nums", "cleared"); }
-        else if (p[1] === "plan") clearUnitPlan(UNITS[p[0]], "cleared");
+        else if (p[0] === "fn") { clearFunction(p[1], p[2] === "plan" ? "plan" : "nums"); }
+        else if (p[1] === "plan") clearUnitPlan(UNITS[p[0]]);
         else clearUnitNumbers(UNITS[p[0]]);
         CLEARING = null; paint();
       });
@@ -1633,26 +1608,6 @@
         paint();
       });
     });
-    /* Companies get the life every other Setup table has (§49.3): a name that
-       can be typed, an Add, and a Retire that refuses while units belong. The
-       KEY is untouched by a rename, exactly as a unit's is, so every `cceo`
-       role and every `units.company` pointer keeps working. */
-    document.querySelectorAll("input[data-coname]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        var co = COMPANIES[inp.dataset.coname];
-        if (co) co.name = inp.value.trim() || co.name;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-coact]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var ck = b.dataset.coact;
-        if (companyActive(ck)) retireCompany(ck); else restoreCompany(ck);
-        paint();
-      });
-    });
-    var ac = document.getElementById("addcompany");
-    if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
     document.querySelectorAll("[data-as]").forEach(function(b){
       b.addEventListener("click", function(){
         VIEWER = b.dataset.as;
@@ -1711,29 +1666,7 @@
               p.name + "?")) return;
           retirePerson(key);
         } else {
-          /* ── RESTORING ASKS ABOUT THE ROLES (§49.4) ────────────────
-             It used to hand the person back with nothing, so they returned as
-             a Contributor of their unit and nobody was told. A seat somebody
-             else has taken up meanwhile is named and NOT offered — restoring
-             one person must never quietly unseat another. */
-          var back = personHeldRoles(key), free = back.filter(function(r){ return !r.taken; });
-          var give = false;
-          if (back.length) {
-            var name = function(r){ return roleName(r.role) + " of " + roleWhereLabel(r.at); };
-            var taken = back.filter(function(r){ return r.taken; });
-            give = confirm(p.name + " held " + plural(back.length, "role") + " when they were retired.\n\n" +
-              (free.length
-                ? "Give back: " + free.map(name).join(", ") + "\n"
-                : "None can be given back.\n") +
-              (taken.length
-                ? "Held by somebody else now, so left alone: " +
-                  taken.map(function(r){ return name(r) + " (" + personName(r.taken) + ")"; }).join(", ") + "\n"
-                : "") +
-              "\nOK gives back what it can. Cancel brings " + p.name +
-              " back with no role \u2014 a Contributor of their unit.");
-            if (!give && !confirm("Bring " + p.name + " back with no role?")) return;
-          }
-          restorePerson(key, give && free.length > 0);
+          restorePerson(key);
         }
         /* THE MENU CLOSES WHEN ITS ACTION FIRES (§48.7). It was left open, so
            after retiring somebody the panel stayed on screen now reading

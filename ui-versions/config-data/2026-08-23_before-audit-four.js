@@ -462,24 +462,6 @@ function addPerson(o){
    A responsibility role is singular by nature — one head per unit — so
    granting it to someone takes it from whoever held it. That is not a side
    effect to guard against; it is what "this is now their unit" means. */
-/* A unit and a supporting function may share a name — Care and IT are both,
-   in this tenant — and one person is often custodian of each. Unqualified, the
-   row then reads "Strategy custodian · Care" twice and looks like a duplicate
-   rather than two real roles over two different things. The kind is part of
-   the answer, so it is part of the label. */
-function roleWhereLabel(at){
-  if (!at || at === "group") return "the group";
-  if (String(at).indexOf("fn:") === 0) {
-    var f = FUNCTIONS[String(at).slice(3)];
-    return (f ? f.name : String(at).slice(3)) + " (function)";
-  }
-  if (String(at).indexOf("co:") === 0) {
-    var c = COMPANIES[String(at).slice(3)];
-    return c ? c.name : String(at).slice(3);
-  }
-  return UNITS[at] ? UNITS[at].name : at;
-}
-
 function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
   return UNIT_ROLES[k];
@@ -534,58 +516,12 @@ function revokePersonRole(personKey, roleKey, where){
 function retirePerson(key){
   var p = personBy(key);
   if (!p) return;
-  var held = personRoles(p);
-  /* ── RETIRING REMEMBERS WHAT IT TOOK (§49.4) ────────────────────
-     Restoring gave none of it back, so a Strategy custodian who was retired
-     and brought back returned as a Contributor of their unit — the derived
-     role a person attached to a unit and holding nothing else always has. It
-     was not a demotion anybody chose; it was a demotion nobody noticed.
-
-     `contrib` is not stored, because it is not granted: it is read off
-     `p.unit`, which retiring leaves alone (see revokePersonRole), so it comes
-     back by itself. Storing it would make the list say a role was returned
-     that was never taken. */
-  p.heldRoles = held.filter(function(r){ return r.role !== "contrib"; })
-                    .map(function(r){ return { role:r.role, at:r.at }; });
-  if (!p.heldRoles.length) delete p.heldRoles;
-  held.forEach(function(r){ revokePersonRole(key, r.role, r.at); });
+  personRoles(p).forEach(function(r){ revokePersonRole(key, r.role, r.at); });
   p.active = false;
 }
-
-/* What retiring took AND that nobody else has taken up since. A seat filled
-   while its holder was out is not silently taken back off whoever is in it:
-   it is dropped from the offer, and the page says so. */
-function personHeldRoles(key){
+function restorePerson(key){
   var p = personBy(key);
-  return ((p && p.heldRoles) || []).map(function(r){
-    return { role:r.role, at:r.at, taken:roleHolderAt(r.role, r.at) };
-  });
-}
-function roleHolderAt(roleKey, at){
-  if (roleKey === "owner")  return (UNIT_ROLES[at] || {}).head || null;
-  if (roleKey === "fnhead") return (FUNCTIONS[String(at).replace(/^fn:/, "")] || {}).head || null;
-  if (roleKey === "custodian") {
-    return String(at).indexOf("fn:") === 0
-      ? (FUNCTIONS[at.slice(3)] || {}).custodian || null
-      : (UNIT_ROLES[at] || {}).custodian || null;
-  }
-  /* A seat is a property of the PERSON, so two people may hold it at once and
-     restoring one takes nothing from the other (§33). */
-  return null;
-}
-
-/* `giveBack` is the SMO's answer to "and their roles?", asked at the moment of
-   restoring — never assumed either way. */
-function restorePerson(key, giveBack){
-  var p = personBy(key);
-  if (!p) return;
-  delete p.active;
-  if (giveBack) {
-    personHeldRoles(key).forEach(function(r){
-      if (!r.taken) grantPersonRole(key, r.role, r.at);
-    });
-  }
-  delete p.heldRoles;
+  if (p) delete p.active;
 }
 
 /* Where a role can be attached, for the second half of the picker. A role
@@ -594,10 +530,7 @@ function restorePerson(key, giveBack){
 function roleWheres(roleKey){
   if (roleKey === "super" || roleKey === "gceo") return [{ v:"group", label:"the group" }];
   if (roleKey === "cceo") {
-    /* A retired company is not somewhere a new CEO can be seated (§49.3). An
-       existing role pointing at one is left alone — restoring the company
-       restores the seat rather than the seat having silently gone. */
-    return activeCompanyKeys().map(function(c){ return { v:"co:" + c, label: COMPANIES[c].name }; });
+    return COMPANY_KEYS.map(function(c){ return { v:"co:" + c, label: COMPANIES[c].name }; });
   }
   if (roleKey === "fnhead") {
     return FUNCTION_KEYS.map(function(f){ return { v:"fn:" + f, label: FUNCTIONS[f].name }; });
@@ -788,45 +721,6 @@ var UNIT_COMPANY = {
 Object.keys(UNITS).forEach(function(k){
   if (UNITS[k].company === undefined) UNITS[k].company = UNIT_COMPANY[k] || null;
 });
-
-/* ── A COMPANY IS CREATED, RENAMED AND RETIRED LIKE ANYTHING ELSE (§49.3) ──
-   Until now the page offered two visibility dropdowns per company and nothing
-   else: no add, no rename, no retire. There was no `addCompany` anywhere in
-   the product. So a client deployed and inherited Distribution and B2C from
-   the Raya demo — invented content in a real tenant, which §21 forbids
-   outright — with no way to be rid of them. Migration 004 clears the table
-   now, and these three give the page the rest of the life every other Setup
-   table has had since 1.7. */
-function addCompany(){
-  var n = 1, key;
-  do { key = "newco" + n; n++; } while (COMPANIES[key]);
-  COMPANIES[key] = { name:"New company " + (n - 1), ceo:null, seeOthers:false, seeGroup:true };
-  COMPANY_KEYS.push(key);
-  return key;
-}
-
-/* Retired, never deleted — the same contract as a unit or a function, and for
-   the same reason: a company key is written into every `cceo` role as
-   `co:<key>`, and deleting the row would leave the role pointing at nothing.
-   REFUSED while units still belong to it, naming them, rather than quietly
-   orphaning a unit into "its own company" behind the SMO's back. */
-function companyActive(ck){ return COMPANIES[ck] && COMPANIES[ck].active !== false; }
-function activeCompanyKeys(){ return COMPANY_KEYS.filter(companyActive); }
-function companyRetireBlockers(ck){
-  return unitsOfCompany(ck).map(function(k){ return UNITS[k].name; });
-}
-function retireCompany(ck){
-  var co = COMPANIES[ck];
-  if (!co || companyRetireBlockers(ck).length) return false;
-  co.active = false;
-  return true;
-}
-function restoreCompany(ck){
-  var co = COMPANIES[ck];
-  if (!co) return false;
-  delete co.active;
-  return true;
-}
 
 function companyOf(unitKey){
   var u = UNITS[unitKey];
@@ -1049,10 +943,8 @@ function fnsReachable(){
    initiatives, tomorrow enhancement projects. Its PROGRESS is what has been
    reported against that work. The definition is the capability's identity, not
    its plan, so it survives both. */
-function clearCapability(cap, what, why){
+function clearCapability(cap, what){
   if (what === "plan") {
-    /* Archived first, exactly as an upload that replaces it would (§49.2). */
-    var archived = archiveCapPlan(cap, why);
     /* A capability's plan is its key objectives and its PROJECTS, each
        carrying deliverables, outcomes and milestones. Until 2026-08-20 this
        emptied `cap.measures` and `cap.tactics` — the fields a capability
@@ -1062,7 +954,7 @@ function clearCapability(cap, what, why){
        capability's identity, not its plan. */
     if (cap.keyObjectives) cap.keyObjectives.length = 0;
     if (cap.projects) cap.projects.length = 0;
-    return archived;
+    return;
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
   (cap.projects || []).forEach(function(p){
@@ -1073,8 +965,8 @@ function clearCapability(cap, what, why){
 }
 /* One function may carry several capabilities \u2014 Marketing carries two \u2014 so
    clearing at the function level names how many it will take with it. */
-function clearFunction(fnKey, what, why){
-  capsOfFunction(fnKey).forEach(function(c){ clearCapability(c, what, why); });
+function clearFunction(fnKey, what){
+  capsOfFunction(fnKey).forEach(function(c){ clearCapability(c, what); });
 }
 function functionCapCount(fnKey){ return capsOfFunction(fnKey).length; }
 
@@ -1743,150 +1635,6 @@ function capSnapshotCounts(s){
            milestones:ms, objectives:(s.keyObjectives || []).length, reported:rep };
 }
 
-/* ── A CYCLE'S FIGURES ARE ARCHIVED BEFORE THEY ARE CLEARED (§49.1) ──
-   Opening a cycle used to change the name, the dates and the deadline and
-   leave every actual, progress mark, tactic status and note exactly where the
-   last cycle left them — so 163 of 184 items read "reported" the second it
-   opened and a unit head could press Submit without touching a field. The
-   page's own copy already claimed the new cycle "asks every unit again".
-
-   Clearing alone was not the fix: HISTORY keeps a SCORE per unit, never the
-   raw figures, so a clear with nothing behind it destroys the closed cycle's
-   numbers. So opening ARCHIVES first, the same act an import performs on a
-   plan it replaces, and the archive carries a Restore.
-
-   The snapshot is keyed BY ID rather than cloned by position, because a plan
-   may be edited between the close and the restore and a positional snapshot
-   would then put last cycle's number against a different measure. An id that
-   is no longer there is dropped on the way back in. */
-function figuresSnapshot(){
-  var snap = { units:{}, caps:{}, groupCaps:{}, groupKO:{},
-               note:clone(REVIEW.note || {}), submitted:clone(REVIEW.submitted || {}) };
-  var put = function(m, x, fields){
-    if (!x || !x.id) return;
-    var o = {};
-    fields.forEach(function(f){ o[f] = x[f]; });
-    m[x.id] = o;
-  };
-  UNIT_KEYS.forEach(function(k){
-    var u = UNITS[k], m = {};
-    u.keyObjectives.forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-    (u.items || []).forEach(function(p){
-      (p.measures || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-      (p.tactics  || []).forEach(function(x){ put(m, x, ["actual","status","note"]); });
-    });
-    snap.units[k] = m;
-  });
-  (GROUP.keyObjectives || []).forEach(function(x){ put(snap.groupKO, x, ["actual","progress","note"]); });
-  /* A capability is ONE object: the group's headline pair (perf/exec) and the
-     function's own reporting hang off the same record, so they are taken in
-     one pass rather than in two that could disagree. */
-  (GROUP.capabilities || []).forEach(function(c){
-    var m = {};
-    snap.groupCaps[c.id] = { perf:c.perf, exec:c.exec };
-    (c.keyObjectives || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-    (c.projects || []).forEach(function(p){
-      (p.deliverables || []).forEach(function(x){ put(m, x, ["actual","note"]); });
-      (p.outcomes    || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
-      (p.milestones  || []).forEach(function(x){ put(m, x, ["status","note"]); });
-    });
-    snap.caps[c.id] = m;
-  });
-  return snap;
-}
-
-/* What the archive held, counted once — the same contract as a plan's counts,
-   so the Archives table can read every row without walking a snapshot. */
-function figuresSnapshotCounts(s){
-  var reported = 0, total = 0, notes = 0;
-  var walk = function(m){
-    Object.keys(m || {}).forEach(function(id){
-      var o = m[id]; total++;
-      var v = o.actual != null && o.actual !== "" ? o.actual
-            : (o.progress != null ? o.progress : (o.status != null ? o.status : null));
-      if (v != null && v !== "" && v !== "Not started") reported++;
-      if (o.note && String(o.note).trim()) notes++;
-    });
-  };
-  Object.keys(s.units || {}).forEach(function(k){ walk(s.units[k]); });
-  Object.keys(s.caps  || {}).forEach(function(k){ walk(s.caps[k]);  });
-  walk(s.groupKO);
-  return { reported:reported, figures:total, notes:notes,
-           units:Object.keys(s.submitted || {}).length };
-}
-
-function figuresAreEmpty(counts){ return !counts.reported && !counts.notes && !counts.units; }
-
-/* Returns the archive taken, or null when the cycle recorded nothing worth
-   keeping — a first cycle on a fresh tenant archives nothing and says so. */
-function archiveFigures(why){
-  var snap = figuresSnapshot(), counts = figuresSnapshotCounts(snap);
-  if (figuresAreEmpty(counts)) return null;
-  var a = { id:archiveId(), kind:"figures", key:"", name:REVIEW.name || "Unnamed cycle",
-            at:todayLabel(), by:actingName(), why:why || "cleared when a new cycle opened",
-            counts:counts, figures:snap };
-  ARCHIVES.unshift(a);
-  return a;
-}
-
-/* Putting figures back writes ONLY the ids that are still there. A plan edited
-   since the archive was taken keeps its shape; the numbers land where they
-   still have somewhere to land. */
-function applyFiguresSnapshot(s){
-  if (!s) return;
-  var take = function(m, x){
-    if (!x || !x.id || !m || !m[x.id]) return;
-    Object.keys(m[x.id]).forEach(function(f){ x[f] = m[x.id][f]; });
-  };
-  Object.keys(s.units || {}).forEach(function(k){
-    var u = UNITS[k]; if (!u) return;
-    var m = s.units[k];
-    u.keyObjectives.forEach(function(x){ take(m, x); });
-    (u.items || []).forEach(function(p){
-      (p.measures || []).forEach(function(x){ take(m, x); });
-      (p.tactics  || []).forEach(function(x){ take(m, x); });
-    });
-  });
-  (GROUP.keyObjectives || []).forEach(function(x){ take(s.groupKO, x); });
-  (GROUP.capabilities || []).forEach(function(c){
-    var o = (s.groupCaps || {})[c.id];
-    if (o) { c.perf = o.perf; c.exec = o.exec; }
-    var m = (s.caps || {})[c.id]; if (!m) return;
-    (c.keyObjectives || []).forEach(function(x){ take(m, x); });
-    (c.projects || []).forEach(function(p){
-      (p.deliverables || []).forEach(function(x){ take(m, x); });
-      (p.outcomes    || []).forEach(function(x){ take(m, x); });
-      (p.milestones  || []).forEach(function(x){ take(m, x); });
-    });
-  });
-  REVIEW.note = clone(s.note || {});
-  REVIEW.submitted = clone(s.submitted || {});
-}
-
-/* A note explains a figure. Cleared together, or the new cycle opens with last
-   cycle's explanation sitting under a blank number. */
-function clearAllNotes(){
-  UNIT_KEYS.forEach(function(k){
-    var u = UNITS[k];
-    u.keyObjectives.forEach(function(x){ x.note = ""; });
-    (u.items || []).forEach(function(p){
-      (p.measures || []).forEach(function(x){ x.note = ""; });
-      (p.tactics  || []).forEach(function(x){ x.note = ""; });
-    });
-  });
-  (GROUP.keyObjectives || []).forEach(function(x){ x.note = ""; });
-  (GROUP.capabilities || []).forEach(function(c){ clearCapability(c, "nums"); });
-}
-
-/* Everything a new cycle asks again: the units' figures, the group's, the
-   capabilities', the notes beneath them, and who had submitted. */
-function clearForNewCycle(){
-  clearAllNumbers();
-  clearAllNotes();
-  REVIEW.note = {};
-  REVIEW.submitted = {};
-}
-
 /* "1 pillars" is the kind of thing that makes a product feel unfinished. */
 function plural(n, word){ return n + " " + word + (n === 1 ? "" : "s"); }
 
@@ -1934,15 +1682,7 @@ function archiveCapPlan(c, why){
 function restoreArchive(id){
   var a = ARCHIVES.filter(function(x){ return x.id === id; })[0];
   if (!a) return false;
-  /* Figures are restored INTO whatever plan is standing now — the ids that
-     still exist take their numbers back and the rest are dropped (§49.1). The
-     current figures are archived on the way, so a restore can itself be
-     undone, exactly as a plan restore can. */
-  if (a.kind === "figures") {
-    archiveFigures("replaced by restoring the " + a.at + " archive");
-    applyFiguresSnapshot(a.figures);
-  }
-  else if (a.kind === "unit") {
+  if (a.kind === "unit") {
     var u = UNITS[a.key];
     if (!u) return false;
     archiveUnitPlan(u, "replaced by restoring the " + a.at + " archive");
@@ -2019,22 +1759,15 @@ function clearGroupNumbers(){
   GROUP.keyObjectives.forEach(function(m){ m.actual = ""; m.progress = null; });
 }
 function clearAllNumbers(){ UNIT_KEYS.forEach(function(k){ clearUnitNumbers(UNITS[k]); }); clearGroupNumbers(); }
-function clearAllPlans(why){ UNIT_KEYS.forEach(function(k){ clearUnitPlan(UNITS[k], why); }); }
+function clearAllPlans(){ UNIT_KEYS.forEach(function(k){ clearUnitPlan(UNITS[k]); }); }
 
-/* ── CLEARING A PLAN ARCHIVES IT FIRST (§49.2) ───────────────────────
-   An IMPORT that replaces a plan archived the outgoing one and offered a
-   Restore; Clear plan destroyed the identical thing with no archive and no
-   undo. Two routes to the same outcome, one of them reversible. They are the
-   same act now, through the same function, and the confirmation says so. */
-function clearUnitPlan(u, why){
-  var archived = archiveUnitPlan(u, why);
+function clearUnitPlan(u){
   u.items = [];
   u.keyObjectives = [];
   u.swot = { s:[], w:[], o:[], t:[] };
   u.clauses.forEach(function(c){ c[1] = ""; });
   u.aspiration = "";
   u.endInMind = "";
-  return archived;
 }
 
 /* Clearing what was REPORTED, keeping what was COMMITTED TO. This is the start

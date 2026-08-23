@@ -495,6 +495,52 @@ console.log("\n6d · naming a person on a figure");
   check("the SMO can", v.ok, v.refusals.join(" / "));
 })();
 
+/* ── 6e · The BU list (§54.1, spec 011) ────────────────────────────
+   A row's target decides where every person carrying that name is attached
+   the next time an employee file lands, so re-pointing one is a way to walk a
+   department into a unit. It is Setup, and nothing below the SMO may touch
+   it. */
+console.log("\n6e · the BU list");
+(function () {
+  const base = clone(SEED);
+  const from = function (state, who, mutate) {
+    const inc = clone(state); mutate(inc);
+    return A.authorize(state, inc, personOf(state, who));
+  };
+  const put = function (s) { s.group.mainbus = [{ name: "Risk", at: UNIT }]; };
+
+  let v = from(base, headKey, put);
+  check("a unit head cannot point a BU name at their own unit", !v.ok, v.refusals.join(" / "));
+  v = from(base, custKey, put);
+  check("nor can a custodian", !v.ok, v.refusals.join(" / "));
+  v = from(base, "smo", put);
+  check("the SMO can", v.ok, v.refusals.join(" / "));
+
+  /* Re-pointing an existing row is the same act as writing the first one — it
+     is the one that moves people who are already placed. */
+  const withList = clone(base);
+  withList.group.mainbus = [{ name: "Risk", at: null }];
+  v = from(withList, headKey, function (s) { s.group.mainbus[0].at = UNIT; });
+  check("a unit head cannot re-point one either", !v.ok, v.refusals.join(" / "));
+  v = from(withList, "smo", function (s) { s.group.mainbus[0].at = UNIT; });
+  check("the SMO can", v.ok, v.refusals.join(" / "));
+
+  /* And it is NAMED rather than falling into the unknown bucket: a refusal
+     that says "the group's mainbus" sends nobody to a screen.
+
+     UNCONDITIONAL, and it was not: written as `A.classify ? … : null` it
+     skipped in silence, because the export is called collect(). A check that
+     asks whether it can run is a check that passes when it cannot — the
+     fault CLAUDE.md names twice over, walked into while writing the test for
+     something else. */
+  const moved = clone(withList); moved.group.mainbus[0].at = UNIT;
+  const cls = A.collect(withList, moved, null);
+  check("the change is classified as setup, not unknown",
+        cls.some(function (c) { return c.kind === "setup" && c.what === "the BU list"; }) &&
+        !cls.some(function (c) { return c.kind === "unknown"; }),
+        JSON.stringify(cls.map(function (c) { return c.kind + ":" + c.what; })));
+})();
+
 /* ── 7 · A retired person can do nothing ───────────────────────── */
 console.log("\n7 · a retired person");
 (function () {

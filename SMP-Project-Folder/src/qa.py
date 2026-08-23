@@ -252,6 +252,99 @@ with sync_playwright() as p:
         if got != want:
             errs.append("LANDING: %s opens on %r, not %r" % (key, got, want))
         print("%s opens on %s" % (key, got))
+    # ── THE PEOPLE FILE MUST SURVIVE THE SAME ROUND TRIP (54.3) ──────
+    # Same fault line as the plan template, and one more: this file is the
+    # EXPORT as well as the template, so the register downloaded and uploaded
+    # back unchanged has to be a FIXED POINT. If it is not, the first thing
+    # anybody does with the feature — download it to see the shape — reports a
+    # register full of changes that are not changes.
+    #
+    # Driven through the real writer, the real reader and the real planner,
+    # with `asExcel` dropping empty rows exactly as Excel does. The register is
+    # given employee numbers first, because without one every row is skipped
+    # and the fixed point would hold by measuring nothing (51.11).
+    pf = pg.evaluate("""() => {
+      const asExcel = sheets => {
+        const out = {};
+        Object.keys(sheets).forEach(k => {
+          out[k] = (sheets[k] || []).filter(r =>
+            (r || []).some(c => String(c == null ? "" : c).trim() !== ""));
+        });
+        return out;
+      };
+
+      /* Numbers on everybody, and one department that maps and one that does
+         not — the two cases the BU column has to tell apart. */
+      PEOPLE.forEach((p, i) => { p.empId = "E" + (1000 + i); });
+      GROUP.mainbus = [{ name: "Retail", at: UNIT_KEYS[1] }, { name: "Risk", at: null }];
+      PEOPLE[0].mainbu = "Retail";
+      PEOPLE[1].mainbu = "Risk";
+
+      return Promise.resolve(readXlsx(buildXlsx(peopleWorkbook()).buffer)).then(sh => {
+        const rows = peopleFromWorkbook(asExcel(sh));
+        const fixed = planPeopleFile(rows);
+
+        /* THE EDIT IS MADE TO THE FILE, NOT TO THE REGISTER. Written the other
+           way round first — change the person, download again — it proved
+           nothing at all: the download carried the new value too, so both
+           sides agreed and the check reported zero changes while passing.
+           Measuring the wrong thing passes (50.6). */
+        const target = rows.filter(r => r["Emp ID"] === PEOPLE[2].empId)[0];
+        target["Job title"] = "Something else entirely";
+        const moved = planPeopleFile(rows);
+        const movedRow = moved.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
+        target["Job title"] = "";
+
+        /* And the case the whole feature exists for: somebody the register has
+           never met, in a department it has never heard of. */
+        rows.push({ "Emp ID": "102347", "Name": "A New Joiner",
+                    "Job title": "Senior Manager (Sales)", "Email": "new@example.com",
+                    "Mobile": "01000000000", "Main BU": "Maintenance",
+                    "Role": "", "Status": "Active" });
+        const seeded = planPeopleFile(rows);
+        const seededRow = seeded.rows.filter(r => r.id === "102347")[0] || null;
+
+        return {
+          fixedMoving: fixed.rows.filter(r => r.action !== "same").length,
+          fixedProblems: fixed.problems.length,
+          fixedSkipped: fixed.notices.length,
+          rows: fixed.rows.length,
+          people: PEOPLE.length,
+          mappedAt: (fixed.rows.filter(r => r.key === PEOPLE[0].key)[0] || {}).where || null,
+          unmappedAt: (fixed.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
+          movedRows: moved.rows.filter(r => r.action !== "same").length,
+          movedWhat: movedRow ? movedRow.changes.join(",") : "(row missing)",
+          seededAction: seededRow ? seededRow.action : "(row missing)",
+          seededProblems: seeded.problems.length,
+          seededNewBus: seeded.newBus.join(",")
+        };
+      });
+    }""")
+    if pf["rows"] != pf["people"]:
+        errs.append("PEOPLE FILE: %d of %d people came back through the file"
+                    % (pf["rows"], pf["people"]))
+    if pf["fixedProblems"] or pf["fixedSkipped"]:
+        errs.append("PEOPLE FILE: its own download does not read cleanly (%d problems, %d skipped)"
+                    % (pf["fixedProblems"], pf["fixedSkipped"]))
+    if pf["fixedMoving"]:
+        errs.append("PEOPLE FILE: downloading and uploading it back moves %d rows — not a fixed point"
+                    % pf["fixedMoving"])
+    if pf["mappedAt"] != "retailstores" or pf["unmappedAt"]:
+        errs.append("PEOPLE FILE: BU list resolved to %r / %r, wanted 'retailstores' / nothing"
+                    % (pf["mappedAt"], pf["unmappedAt"]))
+    if pf["movedRows"] != 1 or pf["movedWhat"] != "job title":
+        errs.append("PEOPLE FILE: one changed cell produced %d changed rows (%r)"
+                    % (pf["movedRows"], pf["movedWhat"]))
+    if pf["seededAction"] != "add" or pf["seededProblems"]:
+        errs.append("PEOPLE FILE: a new employee in an unknown BU came back as %r (%d problems)"
+                    % (pf["seededAction"], pf["seededProblems"]))
+    if pf["seededNewBus"] != "Maintenance":
+        errs.append("PEOPLE FILE: an unknown BU was not offered to the BU list (%r)"
+                    % pf["seededNewBus"])
+    print("people file: %d rows, fixed point %s, one edited cell -> %d row (%s), "
+          "new joiner -> %s + BU %r"
+          % (pf["rows"], "PASS" if not pf["fixedMoving"] else "FAIL",
+             pf["movedRows"], pf["movedWhat"], pf["seededAction"], pf["seededNewBus"]))
 
     print("ERRORS:", errs if errs else "none")
     b.close()

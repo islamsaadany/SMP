@@ -40,7 +40,7 @@ JS = r"""(root) => {
   });
   return out;
 }"""
-bad=collections.Counter(); samp={}
+bad=collections.Counter(); samp={}; scanned=set()
 with sync_playwright() as p:
     b=p.chromium.launch(executable_path=EXE)
     for pal in ("slate","forefront"):
@@ -58,6 +58,7 @@ with sync_playwright() as p:
         WHERE=['?']
         def scan(w='?', root=None):
             WHERE[0]=w
+            scanned.add(w)
             for r in pg.evaluate(JS, root):
                 k=f"{tag} :: {WHERE[0]} :: {r['sel'][:26]}"; bad[k]+=1
                 samp.setdefault(k, f"{r['ratio']} < {r['need']}  “{r['text']}”")
@@ -179,6 +180,22 @@ with sync_playwright() as p:
                     "    u.keyObjectives[0].actual = null; }"
                     "  paint(); }")
         pg.wait_for_timeout(300)
+        # THE BU LIST HAS TO HAVE ROWS IN IT (54.1). Empty it renders one note
+        # and a header, so the sweep would walk the page, find nothing to
+        # measure and report it clean - the shape of failure 45.2 records
+        # against the figure sets. Two rows: one mapped, one not, which is both
+        # states the "Points at" cell has. And one person is given a Main BU
+        # that disagrees with where they sit, because the drift note in the
+        # register's BU cell is quiet ink on a table row and cannot be reached
+        # by navigating to it.
+        pg.evaluate("() => {"
+                    "  GROUP.mainbus = [{ name:'Distribution', at:'co:'+COMPANY_KEYS[0] },"
+                    "                   { name:'Risk', at:null }];"
+                    "  PEOPLE[2].mainbu = 'Distribution';"
+                    "  PEOPLE[3].mainbu = 'Risk';"
+                    "  PEOPLE[4].mainbu = 'Not on the list';"
+                    "  paint(); }")
+        pg.wait_for_timeout(300)
         # SETUP IS ONE DESTINATION AND A RAIL (46.1, merged with Manage in 47.7).
         # The gear used to open a menu of sixteen; it goes straight to the page
         # now, and every one of those sixteen is a rail row. Walking the rail is
@@ -208,6 +225,9 @@ with sync_playwright() as p:
             except Exception: pass
         c.close()
     b.close()
-print(f"{sum(bad.values())} failing runs across 4 combinations x 34 pages and states\n")
+# COUNTED, NOT TYPED (51.11). The number was a literal and went stale the
+# first time a page was added - a label that names a page count it never
+# measured is the same lie as a label naming a page it never scanned.
+print(f"{sum(bad.values())} failing runs across 4 combinations x {len(scanned)} pages and states\n")
 for k,n in bad.most_common(24):
     print(f"  {n:4}x  {k}\n           {samp[k]}")

@@ -1,6 +1,48 @@
 {
  "group": {
   "org": "Raya Trade",
+  "mainbus": [
+   {
+    "name": "Distribution",
+    "at": null
+   },
+   {
+    "name": "Finance",
+    "at": null
+   },
+   {
+    "name": "IT",
+    "at": null
+   },
+   {
+    "name": "Logistics",
+    "at": null
+   },
+   {
+    "name": "Maintenance",
+    "at": null
+   },
+   {
+    "name": "Marketing",
+    "at": null
+   },
+   {
+    "name": "Mazaya",
+    "at": null
+   },
+   {
+    "name": "Retail",
+    "at": null
+   },
+   {
+    "name": "Risk",
+    "at": null
+   },
+   {
+    "name": "Support Function",
+    "at": null
+   }
+  ],
   "horizon": "2027",
   "sets": [
    {

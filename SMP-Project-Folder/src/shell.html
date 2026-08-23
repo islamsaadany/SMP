@@ -87,6 +87,24 @@
   </div>
 </div>
 
+<!-- MANAGE SLIDES (§51.8). A MODE, not a dialog — the same argument
+     presentation mode makes: preparing the pictures for a review is looking at
+     the deck, and a deck does not fit in a 940px box. The left rail is the
+     WHOLE deck, generated slides included, so where a picture slide sits is
+     said by where it sits rather than by a dropdown describing it. -->
+<div id="slideroot" class="slideroot" role="dialog" aria-modal="true"
+     aria-labelledby="sl-title" tabindex="-1">
+  <div class="slidebar">
+    <span class="sl-title" id="sl-title"></span>
+    <span class="sl-sub"></span>
+    <button data-slexit class="txt" title="Done (Esc)">Done</button>
+  </div>
+  <div class="slidebody">
+    <div class="slidelist" id="slidelist"></div>
+    <div class="slidepane" id="slidepane"></div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-t">
   <div class="modal">
     <div class="modal-h"><div><h3 id="modal-t"></h3><p id="modal-s"></p></div>
@@ -1099,7 +1117,7 @@
        re-wires it). */
     document.querySelectorAll("[data-picedit]").forEach(function(b){
       b.addEventListener("click", function(){
-        picEditorOpen(b.dataset.picedit, b.dataset.pickey);
+        slidesOpen(b.dataset.picedit, b.dataset.pickey);
       });
     });
     /* A capability's reporting writes back. Before the project model these
@@ -2448,6 +2466,7 @@
   }
 
   wireDeck();
+  wireSlides();
 
   var overlay = document.getElementById("overlay");
   /* ══ THE MODAL IS ACTUALLY MODAL NOW (§48.4) ══════════════════════
@@ -2488,9 +2507,6 @@
   }
   function closeModal(){
     if (!overlay.classList.contains("on")) return;
-    /* Before the focus restore, so the button it hands focus back to is the
-       one carrying the right count. */
-    picEditorClosing();
     overlay.classList.remove("on");
     overlay.setAttribute("aria-hidden", "true");
     if (wrapEl) { wrapEl.inert = false; wrapEl.removeAttribute("aria-hidden"); }

@@ -482,7 +482,7 @@ function deckSlidesFn(fk){
    renamed, replaced by an upload or removed between the day a picture was
    placed and the day the deck is opened; the picture then goes to the end,
    where it is still in the room, rather than being silently dropped. */
-function insertPictureSlides(deck, target){
+function insertPictureSlides(deck, target, blank){
   var list = pslidesOf(target);
   if (!list.length) return;
   var host = {}, where = {};
@@ -494,10 +494,11 @@ function insertPictureSlides(deck, target){
   });
   var tail = deck.querySelector("[data-anchor-where='before']");
   list.forEach(function(sl){
-    var html = pslideHtml(sl);
+    var html = pslideHtml(sl, blank);
     /* A slide somebody started and put no picture in is not shown — and it
        must not move the anchor either, or the NEXT slide on that anchor would
-       be placed after whatever happened to follow it. */
+       be placed after whatever happened to follow it. The editor passes
+       `blank` and does see it (§51.8). */
     if (!html) return;
     var at = host[sl.at];
     if (!at) { /* the anchor has gone; the slide has not */

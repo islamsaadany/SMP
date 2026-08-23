@@ -53,6 +53,23 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.21 — the floor is two roles
+
+- **Employee** joins the seven roles: on the register, attached to a part of the
+  business, named on nothing. **Contributor** keeps its meaning — named on a
+  measure or a tactic. Both derived from the plan, neither grantable (§55).
+- The concept behind twelve `"contrib"` checks is named once
+  (`OWN_LINES_ONLY`), so an employee given edit still speaks only for
+  themselves — it cost nothing to add and would have been a silent widening to
+  miss.
+- Employee ships with a Contributor's current access, so no one's view changes
+  on upgrade; the matrix is where it gets tightened. 49 stored grants → 56.
+
+Verified: `test-authorize.js` 136 passed (131 + 5 new, including the widening
+that would otherwise have gone unnoticed); `qa.py` 31 viewers clean; the split
+measured on real data — Ramy Behairy a Contributor, the Group CFO an Employee;
+`test-roundtrip.js` all four PASS on a fresh Postgres 16.
+
 ### v3.21 — a unit and a function are the same product
 
 Five items from Islam, and the middle one is the rule the other four are

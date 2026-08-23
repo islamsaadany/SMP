@@ -159,7 +159,11 @@ console.log("\n6 · a contributor");
   /* A contributor attached to a real UNIT — contrib@group reaches the group
      pages and no unit at all, which is §33 working, not a case to test here. */
   const contribs = base.people.filter(function (p) {
-    return R.personRoleKeys(R.worldOf(base), p).join() === "contrib" && base.units[p.unit];
+    /* Either floor role: somebody attached to a unit and holding nothing else.
+       Which of the two they are depends on whether the plan names them, and
+       this fixture wants "holds nothing else", not one or the other. */
+    return R.personRoleKeys(R.worldOf(base), p).every(R.isOwnLinesRole) &&
+           R.personRoleKeys(R.worldOf(base), p).length === 1 && base.units[p.unit];
   });
   if (!contribs.length) { console.log("  (no contributor in the seed — skipped)"); return; }
   const me = contribs[0];
@@ -609,11 +613,71 @@ console.log("\n8 · the review's picture slides");
       { contrib: Object.assign({}, (base.access || {}).contrib, { a_unit_own: "edit" }) });
     const key = "smp_test_pic_named";
     base.people = base.people.concat([{ key: key, name: "A Contributor", unit: UNIT }]);
+    /* AND THEY HAVE TO BE NAMED ON SOMETHING TO BE ONE. Since the floor split
+       in two, somebody attached to a unit and named on nothing is an EMPLOYEE
+       — so granting `contrib` edit reached nobody and this test failed on
+       reach ("you cannot report for mobile") before it ever got to the act it
+       is about. Naming them on a tactic is what makes them the contributor the
+       test says it is asking about. */
+    const firstTactic = ((base.units[UNIT].items || [])[0] || {}).tactics || [];
+    if (firstTactic[0]) {
+      firstTactic[0].collaborators = (firstTactic[0].collaborators || []).concat(["A Contributor"]);
+    }
     const inc = clone(base); put(inc, UNIT);
     const v = A.authorize(base, inc, personOf(base, key));
     check("the refusal names the picture slides",
           v.refusals.join(" ").indexOf("picture slides") > -1, v.refusals.join(" / "));
   })();
+})();
+
+/* ── 9 · The floor is two roles now (Islam, 2026-08-23) ────────────
+   Somebody attached to a unit and holding nothing else is a CONTRIBUTOR where
+   the plan names them and an EMPLOYEE where it does not. Derived, never
+   granted — and neither of them speaks for the unit.
+
+   The third test is the one that matters. Twelve places asked `onlyVia(...,
+   "contrib")` by name, and a second floor role beside it would have widened
+   every one of them by omission: give Employee edit on its own unit and an
+   employee could submit the unit's report, write the cycle note, add a
+   picture slide and decide who enters a figure. The rule is named once
+   (OWN_LINES_ONLY) so both are covered by construction. */
+console.log("\n9 · employee and contributor");
+(function () {
+  const UNIT = Object.keys(SEED.units)[0];
+  const key = "smp_test_floor";
+  const withPerson = function (named) {
+    const base = clone(SEED);
+    base.people = base.people.concat([{ key: key, name: "Ordinary Person", unit: UNIT }]);
+    if (named) {
+      const t = (((base.units[UNIT].items || [])[0] || {}).tactics || [])[0];
+      if (t) t.collaborators = (t.collaborators || []).concat(["Ordinary Person"]);
+    }
+    return base;
+  };
+
+  let base = withPerson(false);
+  check("named on nothing, they are an Employee",
+        R.personRoleKeys(R.worldOf(base), personOf(base, key)).join() === "employee",
+        R.personRoleKeys(R.worldOf(base), personOf(base, key)).join());
+
+  base = withPerson(true);
+  check("named on a tactic, the same person is a Contributor",
+        R.personRoleKeys(R.worldOf(base), personOf(base, key)).join() === "contrib",
+        R.personRoleKeys(R.worldOf(base), personOf(base, key)).join());
+
+  /* THE WIDENING THAT DID NOT HAPPEN. */
+  base = withPerson(false);
+  base.access = Object.assign({}, base.access,
+    { employee: Object.assign({}, (base.access || {}).employee, { a_unit_own: "edit" }) });
+  const w = R.worldOf(base), person = personOf(base, key);
+  check("an employee given edit still speaks only for themselves",
+        R.onlyOwnLines(w, person, "unit", UNIT),
+        "editing roles: " + R.editingRoles(w, person, "unit", UNIT).join());
+  check("...so they may not decide who enters a figure",
+        !R.mayName(Object.assign({}, w, { naming: true }), person, UNIT));
+  check("neither floor role can be granted from a file",
+        R.isOwnLinesRole("employee") && R.isOwnLinesRole("contrib") &&
+        !R.isOwnLinesRole("owner"));
 })();
 
 console.log("\n" + pass + " passed, " + fail + " failed");

@@ -986,7 +986,7 @@ function peopleReadme(){
     ["Adding somebody", "Fill Emp ID and Name. Everything else is optional."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Main BU", "Your own name for their part of the business. Where it points — which unit, function or company they actually open — is set once on Setup → BU list. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
-    ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
+    ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Contributor is not offered: it is what somebody attached to a unit and holding nothing else already is."],
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
     ["", ""],
@@ -998,9 +998,9 @@ function peopleReadme(){
 
 function peopleWorkbook(){
   var names = mainbuNames();
-  /* Neither floor role is offered, for the same reason the reader refuses
-     them: both are derived, not granted. */
-  var roleNames = ROLES.filter(function(r){ return !SMPRules.isOwnLinesRole(r.key); })
+  /* Contributor is excluded from the dropdown for the same reason the reader
+     refuses it: it is derived, not granted. */
+  var roleNames = ROLES.filter(function(r){ return r.key !== "contrib"; })
                        .map(function(r){ return r.name; });
   var vals = [
     { range:"G2:G2000", list:roleNames,
@@ -1017,7 +1017,7 @@ function peopleWorkbook(){
   }
 
   var rows = PEOPLE.map(function(p){
-    var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
+    var held = personRoles(p).filter(function(r){ return r.role !== "contrib"; });
     return [
       p.empId || "", p.name, p.title || "", p.email || "", p.phone || "",
       p.mainbu || "",

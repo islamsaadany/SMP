@@ -584,10 +584,7 @@ function grantPersonRole(personKey, roleKey, where){
     unitRolesFor(at).custodian = personKey; p.unit = at;
   } else if (roleKey === "fnhead") {
     FUNCTIONS[at.slice(3)].head = personKey; p.fn = at.slice(3);
-  } else if (SMPRules.isOwnLinesRole(roleKey)) {
-    /* Neither floor role is granted (roleIsGrantable refuses both), but the
-       attachment they are read off is the same one thing: which unit this
-       person is in. */
+  } else if (roleKey === "contrib") {
     p.unit = at;
   }
 }
@@ -632,7 +629,7 @@ function retirePerson(key){
      `p.unit`, which retiring leaves alone (see revokePersonRole), so it comes
      back by itself. Storing it would make the list say a role was returned
      that was never taken. */
-  p.heldRoles = held.filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); })
+  p.heldRoles = held.filter(function(r){ return r.role !== "contrib"; })
                     .map(function(r){ return { role:r.role, at:r.at }; });
   if (!p.heldRoles.length) delete p.heldRoles;
   held.forEach(function(r){ revokePersonRole(key, r.role, r.at); });
@@ -922,7 +919,7 @@ function roleKeyByName(name){
    reads off somebody attached to a unit and holding nothing else (§49.5). A
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
-function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+function roleIsGrantable(key){ return key && key !== "contrib"; }
 
 /* Reads the sheet against the stored world and says what would happen. It
    changes NOTHING — the review step exists so that an upload is looked at
@@ -1743,7 +1740,7 @@ function canReport(unitKey){
    offering a field the server will refuse is the fault this is here to avoid. */
 function canReportRow(unitKey, x){
   if (!canReport(unitKey)) return false;
-  if (!SMPRules.onlyOwnLines(world(), viewer(), "unit", unitKey)) return true;
+  if (!SMPRules.onlyVia(world(), viewer(), "unit", unitKey, "contrib")) return true;
   return SMPRules.namedOn({ owner: x.owner, collaborators: x.collaborators }, viewer());
 }
 
@@ -1767,7 +1764,7 @@ function canSpeakFor(target){
     return REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
            grantAt("k_report", t) === "edit";
   }
-  return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
+  return canReport(t) && !SMPRules.onlyVia(world(), viewer(), "unit", t, "contrib");
 }
 
 /* ── The source of a figure (§16.7) ────────────────────────────────

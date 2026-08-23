@@ -222,6 +222,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **The floor is two roles (since v3.21, §55):** somebody attached to a part of
+  the business and holding nothing else is a **Contributor** where a plan names
+  them and an **Employee** where it does not — derived by `namedInUnit()`,
+  never granted, neither offered in the people workbook. Employee ships with a
+  Contributor's current access so nobody's view changes on upgrade; the SMO
+  tightens it on the matrix, which is the point of it being its own row.
+  **`OWN_LINES_ONLY` in `lib/rules.js` names the concept once** — twelve places
+  tested the string `"contrib"`, and a second floor role beside it would have
+  widened every one of them by omission (an employee given edit could have
+  submitted the unit's report and named who enters a figure). Ask
+  `onlyOwnLines()` / `isOwnLinesRole()`, never a role key.
 - **The BU list (since v3.21, §54; spec 011):** the client's own names for
   parts of the business (`GROUP.mainbus`, so `org.extra` and no migration),
   each pointing at a unit, a function, a company, the group — or at NOTHING,

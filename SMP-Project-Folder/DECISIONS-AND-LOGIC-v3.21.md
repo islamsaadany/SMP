@@ -7532,3 +7532,87 @@ Still open, and each needs an answer rather than code:
   *Super user* against a row gives the SMO seat, and it is authorised as Setup
   like everything else here — correct, and worth knowing before a file arrives
   from somebody else's laptop.
+
+---
+
+## 55 · The floor is two roles (v3.21)
+
+*2026-08-23. Islam: "for the people roles we need a role named employee which
+is a normal team member."*
+
+### 55.1 An ordinary team member already had a role, and it was the wrong word
+
+Roles are derived, never stored (§33), and there has always been a floor:
+
+```js
+if (!out.length && p.unit) out.push({ role:"contrib", at:p.unit });
+```
+
+Anybody attached to a unit and holding nothing else **is** a Contributor — not
+granted, not offered in the employee file's dropdown, and refused by the reader
+if a file asks for it, because it arrives by itself (§54.4).
+
+But *Contributor* means "named on a measure or a tactic", and on a real tenant
+the register is the whole company. Most of the people on it carry no strategy at
+all. Calling them Contributors overstates what they are, and it is the first
+thing anybody notices when the employee file lands.
+
+### 55.2 Two roles, because the platform already knows the difference
+
+**Employee** — on the register, attached to a part of the business, named on
+nothing. **Contributor** — named on a measure or a tactic, so they report those
+lines.
+
+Both derived, neither grantable. The difference is a fact the platform already
+computes, because `namedOn()` is what decides whether a Contributor may report a
+line; `namedInUnit()` asks the same question of the whole unit and the floor
+splits on the answer. So a person becomes a Contributor the moment a plan names
+them and stops being one the moment it stops — nothing to maintain, and no way
+for the register to disagree with the plan.
+
+In the worked example it separates immediately: **Ramy Behairy is named on a
+Mobile tactic and is a Contributor; the Group CFO is named on nothing and is an
+Employee.** (Reported here as measured. An earlier probe of mine called
+`SMPRules.worldOf()` with no argument, which builds an EMPTY world — so
+`namedInUnit` had no plan to look in and answered false for both. §50.6 again,
+in my own check rather than in the product: a probe that measures the wrong
+thing agrees with itself.)
+
+### 55.3 The rule that had to be named once
+
+Twelve places asked the literal string `"contrib"`. Every one of them means *is
+this person here only as somebody who speaks for themselves* — and a second
+floor role added beside the first would have widened all twelve by omission.
+
+A tenant that gave Employee edit on its own unit would have got an employee who
+could **submit the unit's report, write the cycle note, add a picture slide to
+the review, and decide who enters a figure**. Nobody would have chosen that, and
+every test would have passed, because the tests name the role too.
+
+So the concept is named once in `lib/rules.js` — `OWN_LINES_ONLY`, with
+`onlyOwnLines()` and `isOwnLinesRole()` — and the twelve call sites ask it
+instead. Same answer for a Contributor, right answer for an Employee. The test
+that would have caught the widening is in the suite (§9 of
+`test-authorize.js`).
+
+### 55.4 Its access starts where a Contributor's already is
+
+A new role's defaults reach every existing tenant the day they upgrade: §30.2
+made an absent key mean *not answered yet*, so `grant()` falls back to the
+shipped default. Shipping a tighter floor would quietly take the group away from
+people who can see it today, without anybody choosing it.
+
+So Employee ships with exactly a Contributor's current access — group view, own
+unit view, nothing else — and the SMO tightens it on the matrix. **That is the
+whole reason it is a row of its own:** on a tenant whose register is the entire
+company, "does an ordinary employee see the group's strategy" is a real question,
+and until now there was no way to answer it separately from "does a person named
+on a tactic".
+
+### 55.5 What was left alone
+
+The employee file offers neither role in its Role dropdown and refuses both by
+name, exactly as it already refused Contributor. Retiring stores neither, because
+neither is taken away — both are read off `p.unit`, which retiring leaves alone
+(§49.6). And the access matrix grew a row rather than a page: 7 roles became 8,
+49 stored grants became 56.

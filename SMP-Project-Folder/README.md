@@ -253,13 +253,37 @@ the registry are two views of one fact. It also caught two defects that would
 have reached production, including a migration ordering flaw that would have
 broken the live database on deploy (§33.5).
 
-**Next:** the people register (§16.11) — an employees page with IDs, titles,
-units and password resets, which is also what item 2 of Islam's list needs
-before a name can be typed rather than picked. Then the rebuild on the HR_ERP
-stack (§20) — sign-in and the shell, then
-the read-only screens, then editing and reporting per action with server-side
-rule checks and the per-figure change log (§16.0a, §19.2). Then the longer-term
-set below and the open model questions in §11.
+Versions **3.9–3.17** built out from there and are recorded in §34–§47. The
+**people register** (§16.11, §35) landed — people are retired, never deleted,
+and the refusal is on the server; the **access matrix** stopped being 25 pages
+× 7 roles and became 7 roles × 7 areas (§37); a **design language** separated
+from the palettes under it (§38–§41); **`/api/state` began authorising every
+save** against the STORED world, with the diff that authorises doubling as the
+change log (§42); the **security floor** went in — the `1234` SMO retired
+rather than removed, rate limiting, security headers read from `vercel.json`
+rather than typed twice (§43); **figure sets** made a number belong to a named
+set rather than to the unit that reports it (§44, spec 008); and **Setup became
+a place** — one railed page behind one door, with Manage folded into it, the
+gear no longer a menu, and Units | Functions a two-position switch (§46, §47).
+
+Then a **due diligence** (§48, §49): thirty-one viewers signed in and walked
+rather than reasoned about. It found reordering had been dead code for
+everybody since §33, Import with no access check at all, a modal that was not
+modal, and a build emitting no `<html>` tag — then four that changed behaviour
+or data and were put to Islam first. **A new cycle now clears the figures it
+archives**, so a unit cannot submit without touching a field; **clearing a plan
+archives it**, as replacing one always did; a **company can be created, renamed
+and retired**; and **retiring remembers what it took**, so restoring does not
+silently demote.
+
+**Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
+the read-only screens, then editing and reporting per action. Then
+**multi-tenant** (§36) — nothing scaffolded, deliberately, and one Postgres
+schema per tenant when it comes. Then the longer-term set below and the open
+model questions in §11. Still open from the security floor and needing
+decisions rather than code: hash-based CSP, key custody and retention, who at
+Forefront may read production, and an external penetration test before go-live
+(§43).
 
 **Longer term:** source teams (§16.7), the help box (§16.8), people and
 credentials (§16.9), strategy versions (§16.10).

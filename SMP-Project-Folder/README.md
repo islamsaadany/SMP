@@ -82,6 +82,7 @@ of it was rejected — which is the point of keeping it.
 | `2026-08-21_fold-accent_SETTLED.html` | Five treatments for the OPEN navigation fold, both palettes. Settled **D**, accent words with no fill (&sect;41.4) |
 | `2026-08-21_closed-fold_SETTLED.html` | Four treatments for the CLOSED navigation fold. Settled **D**, a soft ghost — quiet fill, no border, the row's own type (&sect;41.7) |
 | `2026-08-21_fold-six_SETTLED.html` | Six treatments, closed AND open, redrawn without the phantom `.foldhere`. Settled **4**, one shared segmented container (&sect;41.8) |
+| `2026-08-23_login-client-logo.html` | The tenant's mark on the gate. Not a drawing of the gate &mdash; **the gate itself**, with the mark in it, which is why it is byte-for-byte `index.html`. **Built** (&sect;52) |
 
 ### Settled — build status noted
 

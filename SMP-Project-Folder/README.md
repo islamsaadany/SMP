@@ -84,6 +84,12 @@ of it was rejected — which is the point of keeping it.
 | `2026-08-21_fold-six_SETTLED.html` | Six treatments, closed AND open, redrawn without the phantom `.foldhere`. Settled **4**, one shared segmented container (&sect;41.8) |
 | `2026-08-23_login-client-logo.html` | The tenant's mark on the gate. Not a drawing of the gate &mdash; **the gate itself**, with the mark in it, which is why it is byte-for-byte `index.html`. **Built** (&sect;52) |
 
+### Drawn, awaiting a decision
+
+| File | What it asks |
+|---|---|
+| `2026-08-23_deck-unit-logo/` | The unit lockup on the review deck &mdash; large on the cover, small in the footer of every other slide. Screenshots from the REAL deck, plus the patch that produces them. **Not built**; the sources are reverted and the build is byte-identical to the shipped file (&sect;52.8) |
+
 ### Settled — build status noted
 
 | File | What it holds |

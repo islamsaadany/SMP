@@ -417,7 +417,19 @@ with its space reserved, measured across five units at 27/22/19/19/19 slides
 before and exactly the same after. And **a slide that wears the mark LARGE does
 not wear it small as well** — written first against `.d-cover` it silently took
 the footer off five more, because the SWOT divider, the four pillar dividers and
-Thank you all carry that class.*
+Thank you all carry that class. **§52.10: ALL TEN UNITS NOW CARRY A MARK** —
+eight distinct, because DISTRIBUTION is the COMPANY's and its three units wear
+it, and **B2B Ecomm wears MAZAYA**, which was not a guess but the worked example
+`navName()` has carried since 3.4. Two SILENT failures on the way, both found
+only by looking at the output: **a font subset MAPS far more than it DRAWS**
+(the manual's JetBrains Mono has a cmap entry for every ASCII character and an
+outline for 36, no digits, so `B2B` came out `B B` and nothing complained), and
+**`set_content()` serves from `about:blank`, where Chromium refuses a `file://`
+subresource** — so ten lockups rendered as broken-image icons, 2.5KB each and
+all within 200 bytes of one another, and would have been baked into the seed.
+Both now fail loudly: the generator refuses a character it cannot draw, and the
+renderer COUNTS THE INK and refuses anything under 5%. **A pipeline that
+substitutes silently produces a plausible artefact.***
 
 *Earlier: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
 A one-line ask that was decisions all the way down. **THE TENANT'S MARK GOES ON

@@ -58,14 +58,16 @@ The seven subsidiary lockups, extracted the same way from
 | `logo-nigeria.svg` | RAYA \| NIGERIA |
 | `logo-digital.svg` | RAYA \| DIGITAL |
 
-Three of them are **drawn**, not supplied — Raya's seven cover their
+Five of them are **drawn**, not supplied — Raya's seven cover their
 subsidiaries, and SMP has business units Raya does not name:
 
 | File | Reads | Source |
 |---|---|---|
 | `logo-corporate.svg` | RAYA \| CORPORATE | drawn |
 | `logo-online-shop.svg` | RAYA \| ONLINE SHOP | drawn, two lines |
-| `logo-b2b-ecomm.svg` | RAYA \| B2B ECOMM | drawn, two lines |
+| `logo-b2b-ecomm.svg` | RAYA \| B2B ECOMM | drawn, two lines — spare |
+| `logo-mazaya.svg` | RAYA \| MAZAYA | drawn |
+| `logo-ezee.svg` | RAYA \| EZEE | drawn — spare, no unit yet |
 
 `scripts/make-unit-lockup.py` draws them, and **nothing about them is
 invented**: the RAYA wordmark, its flag and the rule are the client's own
@@ -103,6 +105,32 @@ by rendering the result rather than reading it.
 `#001780` navy and `#225FAC` blue here, against the group mark's `#282E76` and
 `#3A67B1` — the two lockups are drawn in different blues, which is the artwork
 and not a mistake in the extraction.
+
+## Which unit wears which mark
+
+Settled by Islam, 2026-08-23. `unit-marks.json` holds these as the transparent
+PNGs the platform stores, rendered by `scripts/make-unit-marks.py`.
+
+| Unit | Mark | |
+|---|---|---|
+| Mobile | DISTRIBUTION | the company's, worn by its three units |
+| Consumer Electronics | DISTRIBUTION | |
+| IT | DISTRIBUTION | |
+| Retail Stores | RETAIL | supplied |
+| Care | SMART CARE | supplied |
+| Logistics | LOGISTICS | supplied |
+| Nigeria | NIGERIA | supplied |
+| Corporate | CORPORATE | drawn |
+| Online Shop | ONLINE SHOP | drawn |
+| B2B Ecomm | **MAZAYA** | drawn — it is what the unit trades as |
+
+**B2B Ecomm wears MAZAYA**, which is not a guess: *"a unit may be known
+internally by a brand the formal name does not carry — B2B Ecomm trading as
+Mazaya"* has been the worked example in `navName()` since 3.4.
+
+Three lockups have no home and are kept rather than deleted: **DIGITAL**,
+**ELECTRONICS** and **B2B ECOMM** (superseded by Mazaya), plus **EZEE**, which
+was asked for and has no unit to sit on yet.
 
 ## reference/
 

@@ -7028,3 +7028,41 @@ the four pillar dividers and Thank you all carry that class.
 mark is the shape it was before anybody uploaded one, and `unitLogo()` never
 creates what it was looking for (§50.6).
 
+### 52.10 Every unit gets a mark, and two silent failures on the way
+
+Islam confirmed the mapping and asked for the rest to be drawn. All ten units
+carry one now — eight distinct marks, because **DISTRIBUTION is the COMPANY's**
+and its three units (Mobile, Consumer Electronics, IT) wear it.
+
+**B2B ECOMM WEARS MAZAYA**, and that was not a guess: *"a unit may be known
+internally by a brand the formal name does not carry — B2B Ecomm trading as
+Mazaya"* has been the worked example in `navName()` since 3.4. The fact was
+already in the codebase; it only had to be read.
+
+Two failures on the way, both SILENT, both found only by looking at the picture.
+
+**A FONT SUBSET MAPS FAR MORE THAN IT DRAWS.** The JetBrains Mono embedded in
+Raya's manual carries a cmap entry for every ASCII character and an outline for
+only 36 of them — **no digits at all**. `B2B ECOMM` rendered as `B B / ECOMM`
+and nothing complained, because the generator treated a glyph with no outline
+as a space. It now refuses any character it cannot draw, with a space the one
+exception, and the font is the full open-licensed release — proved to be the
+same drawing by redrawing a supplied lockup at 0 differing pixels first.
+
+**`set_content()` SERVES FROM `about:blank`, AND CHROMIUM REFUSES A `file://`
+SUBRESOURCE THERE.** Rendering the lockups to PNG through `set_content` gave
+ten broken-image icons: 2.5KB each, all within 200 bytes of one another, every
+one of them a placeholder rather than a logo. They would have been baked into
+the platform and the seed. The fix is a real `file://` page — and the guard,
+which matters more, is that the renderer now COUNTS THE INK and refuses
+anything under 5%. The good renders run 18–24%.
+
+Both faults share a shape worth naming: **a pipeline that substitutes silently
+produces a plausible artefact.** Neither raised an exception, neither failed a
+test that existed, and both were obvious the moment the output was looked at.
+
+The rendering is a script (`scripts/make-unit-marks.py`) rather than a one-off,
+and it produces exactly what an upload through Setup would: PNG, transparent,
+900px on the long edge. **A rule the SMO must obey is a rule the demo data
+obeys too.**
+

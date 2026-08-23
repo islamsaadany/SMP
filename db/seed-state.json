@@ -2953,6 +2953,18 @@
       }
      ],
      "id": "retailstores-P3"
+    },
+    {
+     "code": "R04",
+     "name": "Merchandising",
+     "sub": "Assortment, space and supplier terms",
+     "kind": "Capability",
+     "theme": "VC",
+     "owner": "Sara Helmy",
+     "by": "merchandising",
+     "measures": [],
+     "tactics": [],
+     "id": "retailstores-P4"
     }
    ],
    "company": "b2c",
@@ -5076,7 +5088,8 @@
   "marketing",
   "it",
   "care",
-  "smo"
+  "smo",
+  "merchandising"
  ],
  "functions": {
   "finance": {
@@ -5134,6 +5147,154 @@
    "head": "smo",
    "custodian": null,
    "active": true
+  },
+  "merchandising": {
+   "name": "Merchandising",
+   "navName": null,
+   "codePrefix": "MRC",
+   "head": "mrchead",
+   "custodian": "own_mrc",
+   "active": true,
+   "format": "pillars",
+   "under": "retailstores",
+   "items": [
+    {
+     "code": "M01",
+     "name": "Assortment and range",
+     "sub": "What we choose to sell",
+     "kind": "Direction",
+     "theme": "VC",
+     "owner": "Sara Helmy",
+     "measures": [
+      {
+       "name": "Range productivity",
+       "dir": "≥",
+       "target": "1.15",
+       "compile": "Latest",
+       "actual": "1.06",
+       "progress": 92
+      },
+      {
+       "name": "Slow-moving SKU share",
+       "dir": "≤",
+       "target": "12%",
+       "compile": "Latest",
+       "actual": "18%",
+       "progress": 67
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Category role definition across the estate",
+       "owner": "Sara Helmy",
+       "collaborators": [
+        "Nour"
+       ],
+       "q1": 1,
+       "q2": 1,
+       "q3": 0,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 75
+      },
+      {
+       "name": "Quarterly range review with the buying team",
+       "owner": "Sara Helmy",
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 60
+      }
+     ]
+    },
+    {
+     "code": "M02",
+     "name": "Space and layout",
+     "sub": "Where it sits in the store",
+     "kind": "Direction",
+     "theme": "OT",
+     "owner": "Tamer Fouad",
+     "measures": [
+      {
+       "name": "Sales per square metre",
+       "dir": "≥",
+       "target": "46K EGP",
+       "compile": "Latest",
+       "actual": "41K EGP",
+       "progress": 89
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Planogram standard for the top five categories",
+       "owner": "Tamer Fouad",
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 55
+      },
+      {
+       "name": "Fixture refresh in the ten largest stores",
+       "owner": "Tamer Fouad",
+       "collaborators": [
+        "Hossam"
+       ],
+       "q1": 0,
+       "q2": 1,
+       "q3": 1,
+       "q4": 1,
+       "status": "WIP",
+       "actual": 40
+      }
+     ]
+    },
+    {
+     "code": "M03",
+     "name": "Supplier terms",
+     "sub": "What the range costs us",
+     "kind": "Capability",
+     "theme": "VC",
+     "owner": "Sara Helmy",
+     "measures": [
+      {
+       "name": "Front margin",
+       "dir": "≥",
+       "target": "18%",
+       "compile": "Latest",
+       "actual": "16.4%",
+       "progress": 91
+      },
+      {
+       "name": "Supplier funding secured",
+       "dir": "≥",
+       "target": "140M EGP",
+       "compile": "Sum",
+       "actual": "92M EGP",
+       "progress": 66
+      }
+     ],
+     "tactics": [
+      {
+       "name": "Renegotiate the twenty largest supplier agreements",
+       "owner": "Sara Helmy",
+       "collaborators": [
+        "Nour",
+        "Hossam"
+       ],
+       "q1": 1,
+       "q2": 1,
+       "q3": 1,
+       "q4": 0,
+       "status": "WIP",
+       "actual": 65
+      }
+     ]
+    }
+   ]
   }
  },
  "people": [
@@ -5276,6 +5437,18 @@
    "name": "Amaka Eze",
    "unit": "nigeria",
    "title": "Strategy custodian, Nigeria"
+  },
+  {
+   "key": "mrchead",
+   "name": "Sara Helmy",
+   "fn": "merchandising",
+   "title": "Head of Merchandising"
+  },
+  {
+   "key": "own_mrc",
+   "name": "Tamer Fouad",
+   "fn": "merchandising",
+   "title": "Strategy custodian, Merchandising"
   },
   {
    "key": "fn_fin",

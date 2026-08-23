@@ -158,8 +158,12 @@
           return secs;
         } },
       { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
+          /* PLAN, not Projects, when the function plans in pillars — the tab
+             has to say what is behind it (spec 010). */
           return [{ k:"found", ac:"k_found", label:"Foundation", render:renderFnFoundation },
-                  { k:"proj",  ac:"k_proj",  label:"Projects",   render:renderFnProjects }];
+                  { k:"proj",  ac:"k_proj",
+                    label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
+                    render:renderFnProjects }];
         } }
     ],
     group: [
@@ -784,11 +788,8 @@
        `u_perf` measured "edit" the whole time — but they were being asked
        against the group, where the answer had just become none, so every tab
        was filtered out and the page said there was nothing to open. The one
-       change the access table is most likely to be asked for took the product
-       away from the person it was configured for. A function head lost
-       everything the same way; a custodian did not, only because `current`
-       happened to be their own unit already and never needed correcting —
-       which is why it looked intermittent rather than total.
+       change the table is most likely to be asked for took the product away
+       from the person it was configured for.
 
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
@@ -2364,37 +2365,39 @@
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              /* THE FUNCTION CELL IS A CAPABILITY'S QUESTION, AND ONLY A
-                 CAPABILITY'S (§51.14). Asked of every plan, it broke uploading
-                 a UNIT's plan outright: a unit's Read me carries no such row,
-                 so the read came back with whatever prose sat at that position
-                 and the upload was refused for naming a function that does not
-                 exist. A unit is resolved first, and a workbook that names one
-                 is never asked about functions at all.
+              /* ONE NAMING IN THE FILE (§51.19). Islam: "I don't think we
+                 should have the capability file with 2 namings capability and
+                 function. we can just upload with the capability and we
+                 connect the function on the platform … to avoid the confusion
+                 between the 2 templates."
 
-                 WITHIN the function when one IS named: two functions may each
-                 carry a capability with the same name, and before §51.2 the
-                 first match in the array won, silently, into the wrong
-                 function's plan. A blank cell still resolves across the tenant,
-                 so a workbook saved before that change still opens. */
-              var wantFn = uk ? "" : readmePickFn(sheets);
-              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
-                return FUNCTIONS[k].name === wantFn; })[0];
-              if (wantFn && !fnKeyWanted) {
-                impFail('no supporting function called "' + wantFn +
-                  '". Open the Read me sheet and choose one from the dropdown beside ' +
-                  '"Supporting function".');
+                 §51.2 put a Supporting function row in the workbook so two
+                 functions with a similarly named capability could be told
+                 apart. It solved that and made a worse problem: the file then
+                 carried TWO names that had to AGREE, and a workbook whose
+                 halves disagreed was refused — "no capability called Customer
+                 Centric under Customer Experience" — for a link the PLATFORM
+                 owns and can see. Which function carries a capability is a
+                 Setup decision, made on the Capabilities page (§51.11).
+
+                 THE AMBIGUITY IS ANSWERED HERE INSTEAD, and better: two
+                 capabilities sharing a name are refused BY NAME, naming both
+                 functions, rather than resolved by whichever came first in the
+                 array. That was the silent wrong-plan §51.2 feared, and it is
+                 now caught at the one moment somebody can still act on it. */
+              var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
+              var cp = caps[0];
+              if (!uk && caps.length > 1) {
+                impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
+                  caps.map(function(x){
+                    var f = FUNCTIONS[x.fn];
+                    return f ? esc(f.name) : "no function";
+                  }).join(" and ") + '. Rename one on Setup \u2192 Capabilities, then upload again.');
                 return;
               }
-              var capPool = GROUP.capabilities.filter(function(x){
-                return !fnKeyWanted || x.fn === fnKeyWanted; });
-              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail(fnKeyWanted
-                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
-                    '. Open the Read me sheet and check B2 and B3 against each other.'
-                  : 'no business unit or capability called "' + picked +
-                    '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail('no business unit or capability called "' + esc(picked) +
+                  '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;

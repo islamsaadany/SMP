@@ -49,6 +49,20 @@ UPDATE org SET aspiration = '', end_in_mind = '', mission = '',
                extra = (extra - 'portfolio' - 'themeView' - 'themePillars'
                               - 'keyObjectivesScore') || '{"values":[]}'::jsonb;
 
+-- ── The horizon, unconditionally (§51.20) ──────────────────────────────
+-- §16.16 and migration 007 cleared it by MATCHING THE SEEDED VALUE —
+-- `WHERE horizon = '2029'` — so it would not overwrite a year a tenant had
+-- chosen. That was careful and it was fragile: the day the demo's horizon
+-- became 2027 the comparison stopped matching and an invented year sailed
+-- through the clean slate into a client's tenant, silently and in the wrong
+-- direction. §45.1's family, a fourth time.
+--
+-- Here it can be unconditional and cannot destroy a choice: 004 runs ONCE, on
+-- a first deployment, immediately after the seed — before anybody has opened
+-- the product, let alone set a year. 007 stays as it is for tenants already
+-- deployed, where a value-matching clear is still the only safe kind.
+UPDATE org SET horizon = '';
+
 -- ── Figure sets (§44) ───────────────────────────────────────────────────
 -- Sets live in org.extra rather than in a table of their own, so they are the
 -- one part of §44 the deletes above cannot reach: `DELETE FROM pillars`
@@ -87,3 +101,16 @@ DELETE FROM sessions    WHERE person_key <> 'smo';
 DELETE FROM unit_roles;
 UPDATE functions SET custodian = NULL;
 UPDATE functions SET head = NULL WHERE head IS DISTINCT FROM 'smo';
+
+-- ── A FUNCTION'S OWN PILLARS (spec 010) ─────────────────────────────────
+-- A function that plans in pillars carries `items` — its pillars, with their
+-- measures and tactics — and until state-io writes them into the `pillars`
+-- table they ride in `functions.extra`, where the DELETE statements above
+-- cannot reach them. So the worked example's Merchandising pillars would have
+-- survived the clean slate and arrived in a client's live tenant as their own
+-- strategy. §21: NEVER put invented content in the database.
+--
+-- The same trap §44's figure sets fell into, and for the same reason: the first
+-- thing a feature stores somewhere the clean slate was not looking is the thing
+-- the clean slate then misses. This line goes when the pillars table owns them.
+UPDATE functions SET extra = extra - 'items';

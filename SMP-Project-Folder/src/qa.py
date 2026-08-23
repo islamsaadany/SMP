@@ -104,14 +104,21 @@ with sync_playwright() as p:
     if rt["unit"] != rt["wantUnit"]:
         errs.append("ROUND TRIP: a unit template comes back naming %r, not %r"
                     % (rt["unit"], rt["wantUnit"]))
-    if rt["fn"]:
-        errs.append("ROUND TRIP: a UNIT template answered the function question with %r"
-                    % rt["fn"])
-    if rt["cap"] != rt["wantCap"] or rt["capFn"] != rt["wantCapFn"]:
-        errs.append("ROUND TRIP: a capability template comes back %r/%r, not %r/%r"
-                    % (rt["cap"], rt["capFn"], rt["wantCap"], rt["wantCapFn"]))
-    print("template round trip: unit=%r fn=%r | cap=%r capFn=%r"
-          % (rt["unit"], rt["fn"], rt["cap"], rt["capFn"]))
+    # ONE NAMING IN EACH FILE (51.19). NEITHER template carries a function
+    # cell any more — the capability workbook named both and the two had to
+    # agree, which refused files for a link the platform owns. So the contract
+    # asserted here is that each file names its OWN subject and answers no
+    # question about functions. Asserting the contract, not the old shape:
+    # a check left asserting what a feature used to do fails on the day the
+    # feature is corrected, and gets edited into agreeing rather than read.
+    if rt["fn"] or rt["capFn"]:
+        errs.append("ROUND TRIP: a template still answers a function question (%r / %r)"
+                    % (rt["fn"], rt["capFn"]))
+    if rt["cap"] != rt["wantCap"]:
+        errs.append("ROUND TRIP: a capability template comes back %r, not %r"
+                    % (rt["cap"], rt["wantCap"]))
+    print("template round trip: unit=%r | cap=%r | neither names a function"
+          % (rt["unit"], rt["cap"]))
 
     print("ERRORS:", errs if errs else "none")
     b.close()

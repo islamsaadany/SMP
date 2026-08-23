@@ -241,6 +241,13 @@ var PEOPLE = [
   { key:"own_it",  name:"Dina Shawky",     unit:"it",                  title:"Strategy custodian, IT" },
   { key:"own_lg",  name:"Mai Sobhy",       unit:"logistics",           title:"Strategy custodian, Logistics" },
   { key:"own_ng",  name:"Amaka Eze",       unit:"nigeria",             title:"Strategy custodian, Nigeria" },
+  /* Merchandising's own two (spec 010 §5). It is a FUNCTION, so its people
+     attach to it by `fn` — and being its head and its custodian is the whole
+     of what lets them run it. Retail reads their numbers and does not type
+     them: a pillar's score is Merchandising's answer, and a unit that could
+     type it would be reporting its own mark. */
+  { key:"mrchead", name:"Sara Helmy",     fn:"merchandising",         title:"Head of Merchandising" },
+  { key:"own_mrc", name:"Tamer Fouad",    fn:"merchandising",         title:"Strategy custodian, Merchandising" },
   { key:"fn_fin",  name:"Hossam Abuelenien", unit:null, fn:"finance",   title:"Head of Finance" },
   { key:"fn_hr",   name:"Noran Adel",        unit:null, fn:"hr",        title:"Head of HR" },
   { key:"fn_tre",  name:"Fayad Sobhy",       unit:null, fn:"treasury",  title:"Head of Treasury" },
@@ -741,7 +748,58 @@ var FUNCTIONS = {
   marketing: { name:"Marketing", navName:null, codePrefix:"MKT", head:"fn_mkt",  custodian:"fn_mkt2",active:true },
   it:        { name:"IT",        navName:null, codePrefix:"ITF", head:"ithead",  custodian:"own_it", active:true },
   care:      { name:"Care",      navName:null, codePrefix:"CAF", head:"cahead",  custodian:"own_ca", active:true },
-  smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true }
+  smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true },
+  /* A FUNCTION THAT PLANS IN PILLARS, AND SITS UNDER A UNIT (spec 010, §52).
+     Islam's own example, and the demo carries it so the feature is visible
+     rather than described — a feature that renders nothing looks like a
+     feature that was not built (§45.2).
+
+     `format:"pillars"` says it plans the way a business unit does, so it has
+     no capabilities and its pages are the unit's. `under:"retailstores"` says
+     whose it is; it still appears in the Functions navigation rather than
+     nested a third level deep (Islam, asked). Its three pillars produce
+     Retail's R04, which names it back — the pointer lives on the PILLAR,
+     because Retail's plan is where the consequence is visible.
+
+     Invented content, like every unit but Mobile (B3). */
+  merchandising: { name:"Merchandising", navName:null, codePrefix:"MRC",
+    head:"mrchead", custodian:"own_mrc", active:true,
+    format:"pillars", under:"retailstores",
+    items:[
+      { code:"M01", name:"Assortment and range", sub:"What we choose to sell",
+        kind:"Direction", theme:"VC", owner:"Sara Helmy",
+        measures:[
+          { name:"Range productivity", dir:"\u2265", target:"1.15", compile:"Latest", actual:"1.06", progress:92 },
+          { name:"Slow-moving SKU share", dir:"\u2264", target:"12%", compile:"Latest", actual:"18%", progress:67 }
+        ],
+        tactics:[
+          { name:"Category role definition across the estate", owner:"Sara Helmy",
+            collaborators:["Nour"], q1:1, q2:1, q3:0, q4:0, status:"WIP", actual:75 },
+          { name:"Quarterly range review with the buying team", owner:"Sara Helmy",
+            q1:1, q2:1, q3:1, q4:1, status:"WIP", actual:60 }
+        ] },
+      { code:"M02", name:"Space and layout", sub:"Where it sits in the store",
+        kind:"Direction", theme:"OT", owner:"Tamer Fouad",
+        measures:[
+          { name:"Sales per square metre", dir:"\u2265", target:"46K EGP", compile:"Latest", actual:"41K EGP", progress:89 }
+        ],
+        tactics:[
+          { name:"Planogram standard for the top five categories", owner:"Tamer Fouad",
+            q1:0, q2:1, q3:1, q4:0, status:"WIP", actual:55 },
+          { name:"Fixture refresh in the ten largest stores", owner:"Tamer Fouad",
+            collaborators:["Hossam"], q1:0, q2:1, q3:1, q4:1, status:"WIP", actual:40 }
+        ] },
+      { code:"M03", name:"Supplier terms", sub:"What the range costs us",
+        kind:"Capability", theme:"VC", owner:"Sara Helmy",
+        measures:[
+          { name:"Front margin", dir:"\u2265", target:"18%", compile:"Latest", actual:"16.4%", progress:91 },
+          { name:"Supplier funding secured", dir:"\u2265", target:"140M EGP", compile:"Sum", actual:"92M EGP", progress:66 }
+        ],
+        tactics:[
+          { name:"Renegotiate the twenty largest supplier agreements", owner:"Sara Helmy",
+            collaborators:["Nour", "Hossam"], q1:1, q2:1, q3:1, q4:0, status:"WIP", actual:65 }
+        ] }
+    ] }
 };
 /* ── Companies (§15.13) ──────────────────────────────────────────────
    A layer between the group and the business unit. A company is a group of
@@ -840,7 +898,11 @@ function soloUnits(){
   return UNIT_KEYS.filter(function(k){ return !UNITS[k].company; });
 }
 
-var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo"];
+/* The ORDER functions appear in, and the only list that decides which exist —
+   `FUNCTIONS` is the record, this is the register. Merchandising is last
+   because it is the newest, not because a function under a unit ranks below
+   one serving the group: `under` says whose it is, position says nothing. */
+var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo","merchandising"];
 
 /* Each capability is allocated to exactly one function. A function may hold
    more than one \u2014 Marketing carries both Brand Positioning and Product Mindset
@@ -1669,14 +1731,110 @@ function projCode(fk, p){
   return i < 0 ? "" : (f.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
 
-function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
-function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
-function dueTactics(p){ return p.tactics.filter(tacticDue); }
+/* ── A FUNCTION THAT PLANS IN PILLARS (spec 010, §52) ─────────────────────
+   Islam: "for some supporting functions plans they built them in the format of
+   the Business units", and "the retail has 3 pillars … 1 of them is a pillar
+   for merchandizing where the merchandizing took and broke down in to 3
+   pillars where their collective performance represents the performance of
+   that pillar."
+
+   ONE SENTENCE HOLDS THE WHOLE DESIGN: a pillar is either scored from its own
+   measures and tactics, or HANDED to a function whose pillars produce its
+   score. Same structure, one level down.
+
+   `format` is a planning TEMPLATE, not a new kind of thing (Islam, asked: "a
+   function that plans in pillars is just a planning template, they shouldn't
+   count as Units"). So a pillars function carries `items[]` of exactly the
+   shape a unit's pillars have and is drawn by the unit's own pages — two
+   screens doing the same job are one screen with different content (A13). */
+function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projects"; }
+function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
+function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
+
+/* WHICH function carries this pillar, if any. Returns null unless the pointer
+   names a function that exists, is active AND plans in pillars — a pointer at a
+   projects function or a retired one is a pointer at something that cannot
+   produce the two numbers, and a pillar reading from it would score against
+   nothing. Absent, never zero (§15.1). */
+/* ── A PILLARS FUNCTION, SHAPED LIKE A UNIT (spec 010 §3) ─────────────────
+   The unit's Performance, Plan and Report pages already draw exactly this —
+   pillars carrying measures and tactics — so a function that plans in pillars
+   is drawn BY THOSE PAGES rather than by copies of them (A13: two screens
+   doing the same job are one screen with different content). This is the
+   adapter that lets it: a unit-shaped view of a function.
+
+   `items` IS THE FUNCTION'S OWN ARRAY, by reference, so an edit made through a
+   unit page writes to the function and not to a copy. Everything a pillars
+   function does not have yet — key objectives, an aspiration, a SWOT — is a
+   SHARED FROZEN EMPTY rather than a fresh container: a reader must never
+   create the field it was looking for, and a page writing into a container
+   that is about to be dropped is the same fault wearing a different coat
+   (§42, §50.6).
+
+   `ukey` carries the "fn:" prefix, which is what every access and reporting
+   question already expects for a function (`canSpeakFor`, `grantAt`). */
+var FN_NO_ROWS = Object.freeze([]);
+var FN_NO_SWOT = Object.freeze({ s:FN_NO_ROWS, w:FN_NO_ROWS, o:FN_NO_ROWS, t:FN_NO_ROWS });
+function fnAsUnit(fk){
+  var f = FUNCTIONS[fk];
+  if (!fnPlansInPillars(f)) return null;
+  return { ukey:"fn:" + fk, fnKey:fk, name:f.name, navName:f.navName,
+           codePrefix:f.codePrefix, items:fnItems(f),
+           keyObjectives:Array.isArray(f.keyObjectives) ? f.keyObjectives : FN_NO_ROWS,
+           aspiration:f.aspiration || "", endInMind:f.endInMind || "",
+           clauses:Array.isArray(f.clauses) ? f.clauses : FN_NO_ROWS,
+           swot:f.swot || FN_NO_SWOT, active:f.active !== false };
+}
+/* Whether a target — a unit key or "fn:<key>" — is drawn by the unit pages. */
+function plansInPillars(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return !!UNITS[t];
+  return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
+}
+
+function pillarCarrier(p){
+  var f = p && p.by ? FUNCTIONS[p.by] : null;
+  if (!f || f.active === false || !fnPlansInPillars(f)) return null;
+  return f;
+}
+/* ONE LEVEL, and the guard is here rather than in a comment. Nothing in the
+   model forbids a function handing one of ITS pillars to another function, and
+   nothing has asked for it — but a cycle would hang the page rather than draw
+   it wrong, so the depth is capped where the recursion is. */
+var PILLAR_DEPTH = 0;
+function viaCarrier(p, own, roll){
+  var f = pillarCarrier(p);
+  if (!f || PILLAR_DEPTH > 0) return own();
+  PILLAR_DEPTH++;
+  try { return roll(f); } finally { PILLAR_DEPTH--; }
+}
+
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
+function pillarPerf(p){
+  return viaCarrier(p,
+    function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
+    function(f){ return avg(fnItems(f).map(pillarPerf)); });
+}
+function dueTactics(p){ return (p.tactics || []).filter(tacticDue); }
 /* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
    unreported, and averaging a zero would say the plan is failing. */
 function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
-function pillarExec(p){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); }
-function pillarPlan(p){ return avg(reportedTactics(p).map(tacticPlanned)); }
+/* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
+   measure performance becomes the pillar's performance and its execution
+   becomes the pillar's execution — nothing is blended, so the parent's two
+   headline numbers stay comparable across all of its pillars, the handed-over
+   one included. `plan` travels with `exec` because the ratio between them is
+   what "of plan" means; averaging a ratio of ratios would say something else. */
+function pillarExec(p){
+  return viaCarrier(p,
+    function(){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); },
+    function(f){ return avg(fnItems(f).map(pillarExec)); });
+}
+function pillarPlan(p){
+  return viaCarrier(p,
+    function(){ return avg(reportedTactics(p).map(tacticPlanned)); },
+    function(f){ return avg(fnItems(f).map(pillarPlan)); });
+}
 function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
 
 function unitPillars(u){ return avg(u.items.map(pillarPerf)); }

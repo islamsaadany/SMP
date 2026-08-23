@@ -2057,6 +2057,11 @@ function projPerformanceBody(p, fk){
 
 function renderFnPerformance(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
+     One branch at the top of each of the four function pages, and nothing
+     below it changes — the alternative was four more renderers that would have
+     to be kept in step with the unit's for ever. */
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPerformance(fnAsUnit(fk));
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
@@ -2119,6 +2124,7 @@ function projPlanBody(p, fk){
 
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   return caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
@@ -2239,6 +2245,7 @@ function capReportBody(c){
 
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -2465,6 +2472,18 @@ function renderUnitPlan(u){
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  /* A pillars function has no capabilities to describe, and no foundation of
+     its own yet — it belongs to whatever it sits under. Said plainly rather
+     than drawn as an empty card: an empty labelled block asserts that
+     something is missing when the plan simply does not work that way (§15.1). */
+  if (fnPlansInPillars(FUNCTIONS[fk])) {
+    var f = FUNCTIONS[fk], parent = f.under ? UNITS[f.under] : null;
+    return '<div class="note"><b>' + esc(f.name) + ' plans in ' +
+      L("pillar","bu").toLowerCase() + '.</b> Its foundation is ' +
+      (parent ? esc(parent.name) + '\u2019s' : 'the group\u2019s') +
+      ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
+      'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
+  }
   return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
     var koBlock = c.keyObjectives.length

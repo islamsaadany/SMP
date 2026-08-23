@@ -89,7 +89,10 @@ function firstDiff(a, b, at) {
        not arrive carrying the demo's 2029. */
     horizonSet:   await count("SELECT count(*) n FROM org WHERE coalesce(horizon,'') <> ''")
   };
-  const slateOk = slate.units === 10 && slate.functions === 7 && slate.themes === 3 &&
+  /* EIGHT functions since spec 010 — Merchandising, which plans in pillars and
+     sits under Retail. Like the ten units and the seven before it, the
+     FUNCTION survives the clean slate and its invented CONTENT does not (§21). */
+  const slateOk = slate.units === 10 && slate.functions === 8 && slate.themes === 3 &&
     slate.capabilities === 8 && slate.people === 1 && slate.pillars === 0 &&
     slate.measures === 0 && slate.tactics === 0 && slate.unitKOs === 0 &&
     slate.groupKOs === 0 && slate.projects === 0 && slate.history === 0 &&

@@ -194,6 +194,11 @@ CREATE TABLE IF NOT EXISTS swot_items (
   PRIMARY KEY (unit_key, cat, idx)
 );
 
+-- A pillar is owned by a UNIT or by a FUNCTION that plans in pillars — the same
+-- row shape either way (spec 010). The FUNCTION half is added by migration 015
+-- rather than here, because `functions` is created BELOW this table and a
+-- foreign key cannot point at a table that does not exist yet. A migration runs
+-- after the whole schema, so it is the only place that can say it.
 CREATE TABLE IF NOT EXISTS pillars (
   id       text PRIMARY KEY,
   unit_key text NOT NULL REFERENCES units(key) ON DELETE CASCADE,

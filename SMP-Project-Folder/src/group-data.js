@@ -680,7 +680,19 @@ var UNITS = {
         tactics: [
           { name: "Store operating standard and audit cycle", owner: "Nour", collaborators: ["Hossam", "Dalia"], q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 60 },
           { name: "Replenishment automation",                 owner: "Nour", q1: 0, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 }
-        ] }
+        ] },
+      /* CARRIED BY A FUNCTION (spec 010) — Islam's own example: "the retail has
+         3 pillars, 2 the retail custodian progress and 1 of them is a pillar
+         for merchandizing where the merchandizing took and broke down in to 3
+         pillars where their collective performance represents the performance
+         of that pillar of the retail."
+
+         It carries NO measures and NO tactics of its own, deliberately: both
+         its numbers come from Merchandising. The empty arrays stay so every
+         reader that counts rows still counts, and reads zero. */
+      { code: "R04", name: "Merchandising", sub: "Assortment, space and supplier terms",
+        kind: "Capability", theme: "VC", owner: "Sara Helmy", by: "merchandising",
+        measures: [], tactics: [] }
     ]
   },
 

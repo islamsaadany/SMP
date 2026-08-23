@@ -3459,19 +3459,38 @@ THEME.apply();
                  a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
     cceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
                  a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+    /* ── SETUP IS THE SMO'S, AND SO IS THE CYCLE'S MACHINERY (§51.18) ──
+       Islam: "no one should have access to the settings except for the SMO."
+
+       `a_cycle` gates Import, Focus measures, Archived plans and the Reporting
+       cycle — the pages that RUN a cycle, not the pages that report into one.
+       Reporting is `a_unit_own` / `a_fn_own` (`u_report`, `k_report`), so
+       closing this takes nothing away from the people entering figures: it
+       closes the office's own machinery to everyone but the office.
+
+       THE GROUP CEO KEEPS IT, deliberately. §37 made marking focus measures a
+       RULE rather than a cell — "focus measures are marked by the CEO and the
+       SMO" — and a CEO who cannot open the page cannot obey a rule addressed
+       to them. Same for the company CEO, who reads the cycle and marks
+       nothing.
+
+       What a unit head, a custodian or a function head is left with behind the
+       gear is only what is theirs by rule: the knowledge base, the figures
+       they report, and the set they fill. Those are `area:"always"` and were
+       never a matrix question. */
     owner:     { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-                 a_fn_own:"view", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     custodian: { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-                 a_fn_own:"edit", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"edit", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     fnhead:    { a_group:"view", a_unit_own:"none", a_unit_other:"none",
-                 a_fn_own:"edit", a_fn_other:"none", a_cycle:"view", a_setup:"none" },
+                 a_fn_own:"edit", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW, at Islam's direction (spec 006 §7.2): "contributors only view, and
        if we allow them they should be allowed to their lines only". The second
        half of that sentence is CONTRIB_OWN_LINES below — a rule with teeth,
        so a tenant that has edit stored here still cannot touch anybody
        else's rows. */
     contrib:   { a_group:"view", a_unit_own:"view", a_unit_other:"none",
-                 a_fn_own:"view", a_fn_other:"none", a_cycle:"view", a_setup:"none" }
+                 a_fn_own:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" }
   };
 
   var STATE_RANK = { none:0, view:1, edit:2 };
@@ -4574,7 +4593,19 @@ var UNITS = {
         tactics: [
           { name: "Store operating standard and audit cycle", owner: "Nour", collaborators: ["Hossam", "Dalia"], q1: 1, q2: 1, q3: 1, q4: 1, status: "WIP", actual: 60 },
           { name: "Replenishment automation",                 owner: "Nour", q1: 0, q2: 1, q3: 1, q4: 0, status: "WIP", actual: 50 }
-        ] }
+        ] },
+      /* CARRIED BY A FUNCTION (spec 010) — Islam's own example: "the retail has
+         3 pillars, 2 the retail custodian progress and 1 of them is a pillar
+         for merchandizing where the merchandizing took and broke down in to 3
+         pillars where their collective performance represents the performance
+         of that pillar of the retail."
+
+         It carries NO measures and NO tactics of its own, deliberately: both
+         its numbers come from Merchandising. The empty arrays stay so every
+         reader that counts rows still counts, and reads zero. */
+      { code: "R04", name: "Merchandising", sub: "Assortment, space and supplier terms",
+        kind: "Capability", theme: "VC", owner: "Sara Helmy", by: "merchandising",
+        measures: [], tactics: [] }
     ]
   },
 
@@ -5234,6 +5265,13 @@ var PEOPLE = [
   { key:"own_it",  name:"Dina Shawky",     unit:"it",                  title:"Strategy custodian, IT" },
   { key:"own_lg",  name:"Mai Sobhy",       unit:"logistics",           title:"Strategy custodian, Logistics" },
   { key:"own_ng",  name:"Amaka Eze",       unit:"nigeria",             title:"Strategy custodian, Nigeria" },
+  /* Merchandising's own two (spec 010 §5). It is a FUNCTION, so its people
+     attach to it by `fn` — and being its head and its custodian is the whole
+     of what lets them run it. Retail reads their numbers and does not type
+     them: a pillar's score is Merchandising's answer, and a unit that could
+     type it would be reporting its own mark. */
+  { key:"mrchead", name:"Sara Helmy",     fn:"merchandising",         title:"Head of Merchandising" },
+  { key:"own_mrc", name:"Tamer Fouad",    fn:"merchandising",         title:"Strategy custodian, Merchandising" },
   { key:"fn_fin",  name:"Hossam Abuelenien", unit:null, fn:"finance",   title:"Head of Finance" },
   { key:"fn_hr",   name:"Noran Adel",        unit:null, fn:"hr",        title:"Head of HR" },
   { key:"fn_tre",  name:"Fayad Sobhy",       unit:null, fn:"treasury",  title:"Head of Treasury" },
@@ -5734,7 +5772,58 @@ var FUNCTIONS = {
   marketing: { name:"Marketing", navName:null, codePrefix:"MKT", head:"fn_mkt",  custodian:"fn_mkt2",active:true },
   it:        { name:"IT",        navName:null, codePrefix:"ITF", head:"ithead",  custodian:"own_it", active:true },
   care:      { name:"Care",      navName:null, codePrefix:"CAF", head:"cahead",  custodian:"own_ca", active:true },
-  smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true }
+  smo:       { name:"Strategy Management Office", navName:null, codePrefix:"SMO", head:"smo", custodian:null, active:true },
+  /* A FUNCTION THAT PLANS IN PILLARS, AND SITS UNDER A UNIT (spec 010, §52).
+     Islam's own example, and the demo carries it so the feature is visible
+     rather than described — a feature that renders nothing looks like a
+     feature that was not built (§45.2).
+
+     `format:"pillars"` says it plans the way a business unit does, so it has
+     no capabilities and its pages are the unit's. `under:"retailstores"` says
+     whose it is; it still appears in the Functions navigation rather than
+     nested a third level deep (Islam, asked). Its three pillars produce
+     Retail's R04, which names it back — the pointer lives on the PILLAR,
+     because Retail's plan is where the consequence is visible.
+
+     Invented content, like every unit but Mobile (B3). */
+  merchandising: { name:"Merchandising", navName:null, codePrefix:"MRC",
+    head:"mrchead", custodian:"own_mrc", active:true,
+    format:"pillars", under:"retailstores",
+    items:[
+      { code:"M01", name:"Assortment and range", sub:"What we choose to sell",
+        kind:"Direction", theme:"VC", owner:"Sara Helmy",
+        measures:[
+          { name:"Range productivity", dir:"\u2265", target:"1.15", compile:"Latest", actual:"1.06", progress:92 },
+          { name:"Slow-moving SKU share", dir:"\u2264", target:"12%", compile:"Latest", actual:"18%", progress:67 }
+        ],
+        tactics:[
+          { name:"Category role definition across the estate", owner:"Sara Helmy",
+            collaborators:["Nour"], q1:1, q2:1, q3:0, q4:0, status:"WIP", actual:75 },
+          { name:"Quarterly range review with the buying team", owner:"Sara Helmy",
+            q1:1, q2:1, q3:1, q4:1, status:"WIP", actual:60 }
+        ] },
+      { code:"M02", name:"Space and layout", sub:"Where it sits in the store",
+        kind:"Direction", theme:"OT", owner:"Tamer Fouad",
+        measures:[
+          { name:"Sales per square metre", dir:"\u2265", target:"46K EGP", compile:"Latest", actual:"41K EGP", progress:89 }
+        ],
+        tactics:[
+          { name:"Planogram standard for the top five categories", owner:"Tamer Fouad",
+            q1:0, q2:1, q3:1, q4:0, status:"WIP", actual:55 },
+          { name:"Fixture refresh in the ten largest stores", owner:"Tamer Fouad",
+            collaborators:["Hossam"], q1:0, q2:1, q3:1, q4:1, status:"WIP", actual:40 }
+        ] },
+      { code:"M03", name:"Supplier terms", sub:"What the range costs us",
+        kind:"Capability", theme:"VC", owner:"Sara Helmy",
+        measures:[
+          { name:"Front margin", dir:"\u2265", target:"18%", compile:"Latest", actual:"16.4%", progress:91 },
+          { name:"Supplier funding secured", dir:"\u2265", target:"140M EGP", compile:"Sum", actual:"92M EGP", progress:66 }
+        ],
+        tactics:[
+          { name:"Renegotiate the twenty largest supplier agreements", owner:"Sara Helmy",
+            collaborators:["Nour", "Hossam"], q1:1, q2:1, q3:1, q4:0, status:"WIP", actual:65 }
+        ] }
+    ] }
 };
 /* ── Companies (§15.13) ──────────────────────────────────────────────
    A layer between the group and the business unit. A company is a group of
@@ -5833,7 +5922,11 @@ function soloUnits(){
   return UNIT_KEYS.filter(function(k){ return !UNITS[k].company; });
 }
 
-var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo"];
+/* The ORDER functions appear in, and the only list that decides which exist —
+   `FUNCTIONS` is the record, this is the register. Merchandising is last
+   because it is the newest, not because a function under a unit ranks below
+   one serving the group: `under` says whose it is, position says nothing. */
+var FUNCTION_KEYS = ["finance","hr","treasury","marketing","it","care","smo","merchandising"];
 
 /* Each capability is allocated to exactly one function. A function may hold
    more than one \u2014 Marketing carries both Brand Positioning and Product Mindset
@@ -6662,14 +6755,110 @@ function projCode(fk, p){
   return i < 0 ? "" : (f.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
 
-function scorableMeasures(p){ return p.measures.filter(function(m){ return m.target && m.progress != null; }); }
-function pillarPerf(p){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); }
-function dueTactics(p){ return p.tactics.filter(tacticDue); }
+/* ── A FUNCTION THAT PLANS IN PILLARS (spec 010, §52) ─────────────────────
+   Islam: "for some supporting functions plans they built them in the format of
+   the Business units", and "the retail has 3 pillars … 1 of them is a pillar
+   for merchandizing where the merchandizing took and broke down in to 3
+   pillars where their collective performance represents the performance of
+   that pillar."
+
+   ONE SENTENCE HOLDS THE WHOLE DESIGN: a pillar is either scored from its own
+   measures and tactics, or HANDED to a function whose pillars produce its
+   score. Same structure, one level down.
+
+   `format` is a planning TEMPLATE, not a new kind of thing (Islam, asked: "a
+   function that plans in pillars is just a planning template, they shouldn't
+   count as Units"). So a pillars function carries `items[]` of exactly the
+   shape a unit's pillars have and is drawn by the unit's own pages — two
+   screens doing the same job are one screen with different content (A13). */
+function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projects"; }
+function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
+function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
+
+/* WHICH function carries this pillar, if any. Returns null unless the pointer
+   names a function that exists, is active AND plans in pillars — a pointer at a
+   projects function or a retired one is a pointer at something that cannot
+   produce the two numbers, and a pillar reading from it would score against
+   nothing. Absent, never zero (§15.1). */
+/* ── A PILLARS FUNCTION, SHAPED LIKE A UNIT (spec 010 §3) ─────────────────
+   The unit's Performance, Plan and Report pages already draw exactly this —
+   pillars carrying measures and tactics — so a function that plans in pillars
+   is drawn BY THOSE PAGES rather than by copies of them (A13: two screens
+   doing the same job are one screen with different content). This is the
+   adapter that lets it: a unit-shaped view of a function.
+
+   `items` IS THE FUNCTION'S OWN ARRAY, by reference, so an edit made through a
+   unit page writes to the function and not to a copy. Everything a pillars
+   function does not have yet — key objectives, an aspiration, a SWOT — is a
+   SHARED FROZEN EMPTY rather than a fresh container: a reader must never
+   create the field it was looking for, and a page writing into a container
+   that is about to be dropped is the same fault wearing a different coat
+   (§42, §50.6).
+
+   `ukey` carries the "fn:" prefix, which is what every access and reporting
+   question already expects for a function (`canSpeakFor`, `grantAt`). */
+var FN_NO_ROWS = Object.freeze([]);
+var FN_NO_SWOT = Object.freeze({ s:FN_NO_ROWS, w:FN_NO_ROWS, o:FN_NO_ROWS, t:FN_NO_ROWS });
+function fnAsUnit(fk){
+  var f = FUNCTIONS[fk];
+  if (!fnPlansInPillars(f)) return null;
+  return { ukey:"fn:" + fk, fnKey:fk, name:f.name, navName:f.navName,
+           codePrefix:f.codePrefix, items:fnItems(f),
+           keyObjectives:Array.isArray(f.keyObjectives) ? f.keyObjectives : FN_NO_ROWS,
+           aspiration:f.aspiration || "", endInMind:f.endInMind || "",
+           clauses:Array.isArray(f.clauses) ? f.clauses : FN_NO_ROWS,
+           swot:f.swot || FN_NO_SWOT, active:f.active !== false };
+}
+/* Whether a target — a unit key or "fn:<key>" — is drawn by the unit pages. */
+function plansInPillars(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return !!UNITS[t];
+  return fnPlansInPillars(FUNCTIONS[t.slice(3)]);
+}
+
+function pillarCarrier(p){
+  var f = p && p.by ? FUNCTIONS[p.by] : null;
+  if (!f || f.active === false || !fnPlansInPillars(f)) return null;
+  return f;
+}
+/* ONE LEVEL, and the guard is here rather than in a comment. Nothing in the
+   model forbids a function handing one of ITS pillars to another function, and
+   nothing has asked for it — but a cycle would hang the page rather than draw
+   it wrong, so the depth is capped where the recursion is. */
+var PILLAR_DEPTH = 0;
+function viaCarrier(p, own, roll){
+  var f = pillarCarrier(p);
+  if (!f || PILLAR_DEPTH > 0) return own();
+  PILLAR_DEPTH++;
+  try { return roll(f); } finally { PILLAR_DEPTH--; }
+}
+
+function scorableMeasures(p){ return (p.measures || []).filter(function(m){ return m.target && m.progress != null; }); }
+function pillarPerf(p){
+  return viaCarrier(p,
+    function(){ return avg(scorableMeasures(p).map(function(m){ return m.progress; })); },
+    function(f){ return avg(fnItems(f).map(pillarPerf)); });
+}
+function dueTactics(p){ return (p.tactics || []).filter(tacticDue); }
 /* A tactic that is due but has nothing reported is not delivering zero \u2014 it is
    unreported, and averaging a zero would say the plan is failing. */
 function reportedTactics(p){ return dueTactics(p).filter(function(t){ return t.actual != null; }); }
-function pillarExec(p){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); }
-function pillarPlan(p){ return avg(reportedTactics(p).map(tacticPlanned)); }
+/* THE TWO SCORES PASS UP SEPARATELY AND STAY APART (Islam, asked). The child's
+   measure performance becomes the pillar's performance and its execution
+   becomes the pillar's execution — nothing is blended, so the parent's two
+   headline numbers stay comparable across all of its pillars, the handed-over
+   one included. `plan` travels with `exec` because the ratio between them is
+   what "of plan" means; averaging a ratio of ratios would say something else. */
+function pillarExec(p){
+  return viaCarrier(p,
+    function(){ return avg(reportedTactics(p).map(function(t){ return t.actual; })); },
+    function(f){ return avg(fnItems(f).map(pillarExec)); });
+}
+function pillarPlan(p){
+  return viaCarrier(p,
+    function(){ return avg(reportedTactics(p).map(tacticPlanned)); },
+    function(f){ return avg(fnItems(f).map(pillarPlan)); });
+}
 function pillarRatio(p){ var pl = pillarPlan(p); return pl ? Math.round(pillarExec(p)/pl*100) : null; }
 
 function unitPillars(u){ return avg(u.items.map(pillarPerf)); }
@@ -9938,21 +10127,28 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 
-/* THE WORKBOOK HAS TO SAY WHICH FUNCTION IT IS FOR (§51.2).
-   B2 named the capability and nothing named the function it sits under, so two
-   functions with a similarly named capability could not be told apart, and a
-   file that came back with B2 retyped rather than chosen simply failed with
-   nothing to point at. B3 is now a dropdown of the tenant's supporting
-   functions, and the import resolves the capability WITHIN it.
+/* ONE NAMING IN THE FILE (§51.19, Islam: "I don't think we should have the
+   capability file with 2 namings capability and function. we can just upload
+   with the capability and we connect the function on the platform").
 
-   Blank B3 still works: an older workbook resolves the capability across the
-   whole tenant exactly as before. A template is a thing people keep on disk
-   for months, and one that stops opening is a template that has broken. */
-function capReadme(kind, capNames, picked, fnNames, pickedFn){
+   §51.2 added a Supporting function row so two functions with a similarly
+   named capability could be told apart. It solved that and created a worse
+   problem: the file then carried TWO names that had to AGREE, and a workbook
+   whose B2 and B3 disagreed was refused — which is what happened to "Customer
+   Centric" under "Customer Experience". A second name is a second thing to get
+   wrong, and it was asking the file to carry a link the platform owns.
+
+   WHICH FUNCTION CARRIES A CAPABILITY IS A SETUP DECISION, made on the
+   Capabilities page where it can be seen and changed (§51.11). The file names
+   the capability and nothing else.
+
+   The ambiguity §51.2 worried about does not go unanswered — it is answered
+   where it belongs, on arrival: two capabilities sharing a name are REFUSED BY
+   NAME rather than resolved by whichever came first in the array. */
+function capReadme(kind, capNames, picked){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
-       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -9966,7 +10162,6 @@ function capReadme(kind, capNames, picked, fnNames, pickedFn){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
-       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -9979,32 +10174,22 @@ function capReadme(kind, capNames, picked, fnNames, pickedFn){
   var sheet = { name:"Read me", widths:[22, 96],
                 rows:lines.map(function(l){ return [l[0], l[1]]; }),
                 validations:[{ range:"B2:B2", list:capNames,
-                               error:"Choose one from the list." },
-                             { range:"B3:B3", list:fnNames || [],
                                error:"Choose one from the list." }] };
   sheet.rows[1][1] = picked || "";
-  sheet.rows[2][1] = pickedFn || "";
   return sheet;
 }
 
-/* The tenant's supporting functions, for the dropdown — retired ones are not
-   offered, for the same reason a retired unit is not offered a plan. */
-function fnSuggestions(){
-  return Object.keys(FUNCTIONS)
-    .filter(function(k){ return FUNCTIONS[k].active !== false; })
-    .map(function(k){ return FUNCTIONS[k].name; });
-}
-/* The function cell, read back. Only a CAPABILITY workbook carries one; a
-   unit's has no such row, so this returns "" for one — which is a legitimate
-   answer and never a refusal. */
-function readmePickFn(sheets){ return readmeCell(sheets, "Supporting function"); }
+/* The function cell is gone with the row (§51.19). Kept as a reader returning
+   "" so a workbook saved while the row existed still opens and is simply not
+   asked the question — a template people keep on disk for months and which
+   stops opening is a template that has broken. */
+function readmePickFn(){ return ""; }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
   var units = unitSuggestions();
   return [
-    capReadme("plan", names, c ? c.name : "", fnSuggestions(),
-              c && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
+    capReadme("plan", names, c ? c.name : ""),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
@@ -10068,8 +10253,7 @@ function capPlanWorkbook(c){
 
 function capProgressWorkbook(c){
   return [
-    capReadme("progress", [c.name], c.name, fnSuggestions(),
-              FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
+    capReadme("progress", [c.name], c.name),
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],
@@ -12244,6 +12428,11 @@ function projPerformanceBody(p, fk){
 
 function renderFnPerformance(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  /* A FUNCTION THAT PLANS IN PILLARS IS DRAWN BY THE UNIT'S PAGE (spec 010).
+     One branch at the top of each of the four function pages, and nothing
+     below it changes — the alternative was four more renderers that would have
+     to be kept in step with the unit's for ever. */
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPerformance(fnAsUnit(fk));
   /* The same Present a unit's Performance page carries (§8.8): available to
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
@@ -12306,6 +12495,7 @@ function projPlanBody(p, fk){
 
 function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   return caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
@@ -12426,6 +12616,7 @@ function capReportBody(c){
 
 function renderFnReport(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  if (fnPlansInPillars(FUNCTIONS[fk])) return renderReport(fnAsUnit(fk));
   if (REVIEW.state !== "open") {
     return '<div class="note"><b>' + esc(REVIEW.name) + ' is closed.</b> ' +
       'Its figures are a record now.</div>';
@@ -12652,6 +12843,18 @@ function renderUnitPlan(u){
    objectives carry the optional weighting and have never had a horizon. */
 function renderFnFoundation(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
+  /* A pillars function has no capabilities to describe, and no foundation of
+     its own yet — it belongs to whatever it sits under. Said plainly rather
+     than drawn as an empty card: an empty labelled block asserts that
+     something is missing when the plan simply does not work that way (§15.1). */
+  if (fnPlansInPillars(FUNCTIONS[fk])) {
+    var f = FUNCTIONS[fk], parent = f.under ? UNITS[f.under] : null;
+    return '<div class="note"><b>' + esc(f.name) + ' plans in ' +
+      L("pillar","bu").toLowerCase() + '.</b> Its foundation is ' +
+      (parent ? esc(parent.name) + '\u2019s' : 'the group\u2019s') +
+      ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
+      'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
+  }
   return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
     var koBlock = c.keyObjectives.length
@@ -17280,8 +17483,12 @@ var SYNC = (function () {
           return secs;
         } },
       { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
+          /* PLAN, not Projects, when the function plans in pillars — the tab
+             has to say what is behind it (spec 010). */
           return [{ k:"found", ac:"k_found", label:"Foundation", render:renderFnFoundation },
-                  { k:"proj",  ac:"k_proj",  label:"Projects",   render:renderFnProjects }];
+                  { k:"proj",  ac:"k_proj",
+                    label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
+                    render:renderFnProjects }];
         } }
     ],
     group: [
@@ -17906,11 +18113,8 @@ var SYNC = (function () {
        `u_perf` measured "edit" the whole time — but they were being asked
        against the group, where the answer had just become none, so every tab
        was filtered out and the page said there was nothing to open. The one
-       change the access table is most likely to be asked for took the product
-       away from the person it was configured for. A function head lost
-       everything the same way; a custodian did not, only because `current`
-       happened to be their own unit already and never needed correcting —
-       which is why it looked intermittent rather than total.
+       change the table is most likely to be asked for took the product away
+       from the person it was configured for.
 
        paintUnits() reads no grant of its own (every call inside it passes an
        explicit target, by the note above), so nothing needs the old value. */
@@ -19486,37 +19690,39 @@ var SYNC = (function () {
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              /* THE FUNCTION CELL IS A CAPABILITY'S QUESTION, AND ONLY A
-                 CAPABILITY'S (§51.14). Asked of every plan, it broke uploading
-                 a UNIT's plan outright: a unit's Read me carries no such row,
-                 so the read came back with whatever prose sat at that position
-                 and the upload was refused for naming a function that does not
-                 exist. A unit is resolved first, and a workbook that names one
-                 is never asked about functions at all.
+              /* ONE NAMING IN THE FILE (§51.19). Islam: "I don't think we
+                 should have the capability file with 2 namings capability and
+                 function. we can just upload with the capability and we
+                 connect the function on the platform … to avoid the confusion
+                 between the 2 templates."
 
-                 WITHIN the function when one IS named: two functions may each
-                 carry a capability with the same name, and before §51.2 the
-                 first match in the array won, silently, into the wrong
-                 function's plan. A blank cell still resolves across the tenant,
-                 so a workbook saved before that change still opens. */
-              var wantFn = uk ? "" : readmePickFn(sheets);
-              var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
-                return FUNCTIONS[k].name === wantFn; })[0];
-              if (wantFn && !fnKeyWanted) {
-                impFail('no supporting function called "' + wantFn +
-                  '". Open the Read me sheet and choose one from the dropdown beside ' +
-                  '"Supporting function".');
+                 §51.2 put a Supporting function row in the workbook so two
+                 functions with a similarly named capability could be told
+                 apart. It solved that and made a worse problem: the file then
+                 carried TWO names that had to AGREE, and a workbook whose
+                 halves disagreed was refused — "no capability called Customer
+                 Centric under Customer Experience" — for a link the PLATFORM
+                 owns and can see. Which function carries a capability is a
+                 Setup decision, made on the Capabilities page (§51.11).
+
+                 THE AMBIGUITY IS ANSWERED HERE INSTEAD, and better: two
+                 capabilities sharing a name are refused BY NAME, naming both
+                 functions, rather than resolved by whichever came first in the
+                 array. That was the silent wrong-plan §51.2 feared, and it is
+                 now caught at the one moment somebody can still act on it. */
+              var caps = GROUP.capabilities.filter(function(x){ return x.name === picked; });
+              var cp = caps[0];
+              if (!uk && caps.length > 1) {
+                impFail('two capabilities are called "' + esc(picked) + '" \u2014 under ' +
+                  caps.map(function(x){
+                    var f = FUNCTIONS[x.fn];
+                    return f ? esc(f.name) : "no function";
+                  }).join(" and ") + '. Rename one on Setup \u2192 Capabilities, then upload again.');
                 return;
               }
-              var capPool = GROUP.capabilities.filter(function(x){
-                return !fnKeyWanted || x.fn === fnKeyWanted; });
-              var cp = capPool.filter(function(x){ return x.name === picked; })[0];
               if (!uk && !cp) {
-                impFail(fnKeyWanted
-                  ? 'no capability called "' + picked + '" under ' + esc(wantFn) +
-                    '. Open the Read me sheet and check B2 and B3 against each other.'
-                  : 'no business unit or capability called "' + picked +
-                    '". Open the Read me sheet and choose one from the dropdown in B2.');
+                impFail('no business unit or capability called "' + esc(picked) +
+                  '". Open the Read me sheet and choose one from the dropdown in B2.');
                 return;
               }
               IMP.unit = uk ? uk : "cap:" + cp.id;

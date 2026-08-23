@@ -714,21 +714,28 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 
-/* THE WORKBOOK HAS TO SAY WHICH FUNCTION IT IS FOR (§51.2).
-   B2 named the capability and nothing named the function it sits under, so two
-   functions with a similarly named capability could not be told apart, and a
-   file that came back with B2 retyped rather than chosen simply failed with
-   nothing to point at. B3 is now a dropdown of the tenant's supporting
-   functions, and the import resolves the capability WITHIN it.
+/* ONE NAMING IN THE FILE (§51.19, Islam: "I don't think we should have the
+   capability file with 2 namings capability and function. we can just upload
+   with the capability and we connect the function on the platform").
 
-   Blank B3 still works: an older workbook resolves the capability across the
-   whole tenant exactly as before. A template is a thing people keep on disk
-   for months, and one that stops opening is a template that has broken. */
-function capReadme(kind, capNames, picked, fnNames, pickedFn){
+   §51.2 added a Supporting function row so two functions with a similarly
+   named capability could be told apart. It solved that and created a worse
+   problem: the file then carried TWO names that had to AGREE, and a workbook
+   whose B2 and B3 disagreed was refused — which is what happened to "Customer
+   Centric" under "Customer Experience". A second name is a second thing to get
+   wrong, and it was asking the file to carry a link the platform owns.
+
+   WHICH FUNCTION CARRIES A CAPABILITY IS A SETUP DECISION, made on the
+   Capabilities page where it can be seen and changed (§51.11). The file names
+   the capability and nothing else.
+
+   The ambiguity §51.2 worried about does not go unanswered — it is answered
+   where it belongs, on arrival: two capabilities sharing a name are REFUSED BY
+   NAME rather than resolved by whichever came first in the array. */
+function capReadme(kind, capNames, picked){
   var lines = kind === "plan"
     ? [["Plan workbook", ""],
        ["Capability", ""],
-       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "One sheet per part of the plan. Fill Projects FIRST \u2014 Deliverables, Outcomes and Milestones choose their project from what you type there."],
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
@@ -742,7 +749,6 @@ function capReadme(kind, capNames, picked, fnNames, pickedFn){
        ["When you are done", "Save as .xlsx and upload it on Manage \u2192 Import."]]
     : [["Progress workbook", ""],
        ["Capability", ""],
-       ["Supporting function", ""],
        ["", ""],
        ["How to fill it", "Type only in the New value or New status column. Everything else is there so you can see what you are reporting against."],
        ["Leaving it blank", "A blank new value means nothing changed. Only the rows you fill are read."],
@@ -755,32 +761,22 @@ function capReadme(kind, capNames, picked, fnNames, pickedFn){
   var sheet = { name:"Read me", widths:[22, 96],
                 rows:lines.map(function(l){ return [l[0], l[1]]; }),
                 validations:[{ range:"B2:B2", list:capNames,
-                               error:"Choose one from the list." },
-                             { range:"B3:B3", list:fnNames || [],
                                error:"Choose one from the list." }] };
   sheet.rows[1][1] = picked || "";
-  sheet.rows[2][1] = pickedFn || "";
   return sheet;
 }
 
-/* The tenant's supporting functions, for the dropdown — retired ones are not
-   offered, for the same reason a retired unit is not offered a plan. */
-function fnSuggestions(){
-  return Object.keys(FUNCTIONS)
-    .filter(function(k){ return FUNCTIONS[k].active !== false; })
-    .map(function(k){ return FUNCTIONS[k].name; });
-}
-/* The function cell, read back. Only a CAPABILITY workbook carries one; a
-   unit's has no such row, so this returns "" for one — which is a legitimate
-   answer and never a refusal. */
-function readmePickFn(sheets){ return readmeCell(sheets, "Supporting function"); }
+/* The function cell is gone with the row (§51.19). Kept as a reader returning
+   "" so a workbook saved while the row existed still opens and is simply not
+   asked the question — a template people keep on disk for months and which
+   stops opening is a template that has broken. */
+function readmePickFn(){ return ""; }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
   var units = unitSuggestions();
   return [
-    capReadme("plan", names, c ? c.name : "", fnSuggestions(),
-              c && FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
+    capReadme("plan", names, c ? c.name : ""),
 
     { name:"Objectives", widths:[40, 11, 14, 12, 10, 12],
       head:["Objective", "Direction", "Target", "Unit", "Weight", "Compile"],
@@ -844,8 +840,7 @@ function capPlanWorkbook(c){
 
 function capProgressWorkbook(c){
   return [
-    capReadme("progress", [c.name], c.name, fnSuggestions(),
-              FUNCTIONS[c.fn] ? FUNCTIONS[c.fn].name : ""),
+    capReadme("progress", [c.name], c.name),
 
     { name:"Objectives", widths:[40, 11, 16, 18, 18, 16], lockedCols:[5],
       head:["Objective", "Direction", "Target", "Currently recorded", "New value", "ID"],

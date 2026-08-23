@@ -606,8 +606,13 @@
      The strip is filled with the page's own ground, so it reads as the space it
      is. Written from the same two numbers as the offset, so it cannot drift out
      of step with what it is covering (§29.4). */
+  /* PAST THE PANE'S BORDER, not up to it. The band spans the pane's PADDING
+     box; the pane's 1px side borders sit outside that and carried on up
+     through the strip, so the covered gap read as a seam with a hairline down
+     each side — the "thin lines on the left and right" Islam saw. The strip
+     covers the borders too, so above the pinned header there is simply page. */
   .pane > .pband::before {
-    content:""; position:absolute; left:0; right:0; bottom:100%;
+    content:""; position:absolute; left:-1px; right:-1px; bottom:100%;
     height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
   /* --stone, NOT --gold-deep. §38.5 for the fourth time: a surface with its
      own ground needs its own ink. `--gold-deep` measures 4.45:1 on

@@ -222,6 +222,15 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **Official BU (renamed from Main BU, v3.21, §58):** the client's own word for
+  a part of the business. **It is measured by nothing** — no plan, no score, no
+  page — and that is a decision, not an omission (§58.3): what carries a score
+  is what the practice identifies and verifies, which is a unit, a supporting
+  function or a company grouping them. The rename is LABELS ONLY: `p.mainbu`,
+  `GROUP.mainbus` and `mainbuAt()` keep their spelling, because renaming a
+  stored field is a migration for a word nobody reads. The people workbook
+  WRITES "Official BU" and READS either — a header is a contract, and somebody
+  is holding a file downloaded before the rename.
 - **A Main BU holds SEVERAL (since v3.21, §57):** `mainbuAts()` reads a string
   as a list of one and an array as itself, so nothing written before it needs a
   migration (`mainbus` is jsonb in `org.extra`). **`mainbuAt()` answers only

@@ -53,6 +53,20 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.21 — Official BU, and it is measured by nothing
+
+- **Main BU → Official BU** everywhere a person reads it (§58): the register's
+  column, the Setup page and its rail entry, the workbook's column and Read-me,
+  and every sentence pointing at the page. *BU* keeps its own name — it is what
+  the official one points at, and what decides access.
+- **The workbook writes the new header and reads either.** Somebody is holding
+  a file downloaded before the rename; a header is a contract.
+- **No logic was built for it, deliberately** — recorded as a decision rather
+  than left as an absence. An Official BU has no plan, no score and no page:
+  what carries a score is a business unit, a supporting function, or a company
+  grouping them, and each already has its own record. The page now says so.
+- Stored field names unchanged (`p.mainbu`, `GROUP.mainbus`), so no migration.
+
 ### v3.21 — a Main BU holds several, and the sign-in list gets short
 
 - **Setup › BU list maps one name to several units and functions** (§57) —

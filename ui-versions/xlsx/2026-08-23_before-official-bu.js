@@ -967,7 +967,7 @@ function capProgressFromWorkbook(c, sheets){
    THREE DROPDOWNS, AND ONE OF THEM IS DELIBERATELY A SUGGESTION. Role and
    Status are closed lists — there are seven roles and two statuses, and a
    typo in either is a person in the wrong place or a person who cannot sign
-   in. Official BU is SOFT, because the list starts empty on a new tenant and a
+   in. Main BU is SOFT, because the list starts empty on a new tenant and a
    locked column would mean no employee file could ever be read until somebody
    had typed ten department names by hand. That is exactly the trap the plan
    template fell into (§22): a fixed list offered nothing, so Excel refused
@@ -985,7 +985,7 @@ function peopleReadme(){
     ["Matching", "Emp ID is who the row is. A number already on the register updates that person; a new one adds them. A row with no Emp ID is skipped — there is nothing to match it on."],
     ["Adding somebody", "Fill Emp ID and Name. Everything else is optional."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
-    ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
+    ["Main BU", "Your own name for their part of the business. Where it points — which unit, function or company they actually open — is set once on Setup → BU list. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
     ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],

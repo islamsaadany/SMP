@@ -305,6 +305,13 @@ with sync_playwright() as p:
 
         /* And the case the whole feature exists for: somebody the register has
            never met, in a department it has never heard of. */
+        /* "Main BU", THE OLD HEADER, ON PURPOSE (58). The column is called
+           Official BU since the rename and the download writes that — which
+           the fixed point above already proves reads. This row is the file
+           somebody downloaded BEFORE the rename and is still holding: a header
+           is a contract, and refusing it would be 54.4's fault arriving
+           through a relabelling. Do not "tidy" this to the new name; the new
+           name is tested three lines up. */
         rows.push({ "Emp ID": "102347", "Name": "A New Joiner",
                     "Job title": "Senior Manager (Sales)", "Email": "new@example.com",
                     "Mobile": "01000000000", "Main BU": "Maintenance",

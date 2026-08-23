@@ -951,18 +951,7 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    records against the plan file.
    ══════════════════════════════════════════════════════════════════ */
 var PEOPLE_FILE_COLS = ["Emp ID", "Name", "Job title", "Email", "Mobile",
-                        "Official BU", "Role", "Status"];
-/* AND THE OLD HEADER IS STILL READ. "Main BU" became "Official BU" for the
-   client's own clarity (§58), and a header is a CONTRACT: somebody is holding
-   a file downloaded before the rename with the old word at the top of that
-   column, and refusing it would be §54.4's fault — the platform turning away
-   its own export — arriving through a relabelling instead of through a rule.
-   Written as the new name, read as either. */
-var PEOPLE_FILE_BU_WAS = "Main BU";
-function fileBu(r){
-  var v = r["Official BU"];
-  return (v == null || String(v).trim() === "") ? r[PEOPLE_FILE_BU_WAS] : v;
-}
+                        "Main BU", "Role", "Status"];
 /* Written by the download, ignored by the upload. A person may hold three
    roles and the Role column holds one, so the rest are shown rather than
    silently dropped from the file — what the column cannot carry, the sheet
@@ -1002,7 +991,7 @@ function planPeopleFile(rows){
     var at = "Row " + (i + 2);
     var id     = fileTxt(r["Emp ID"]);
     var name   = fileTxt(r["Name"]);
-    var mainbu = fileTxt(fileBu(r));
+    var mainbu = fileTxt(r["Main BU"]);
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
     var label  = name || id || "this row";
@@ -1039,7 +1028,7 @@ function planPeopleFile(rows){
       if (!already) {
         plan.newBus.push(mainbu);
         plan.notices.push({ at:at, msg:'"' + mainbu + '" is not on the BU list yet. It will be ' +
-          'added, pointing at nothing until you map it on Setup → Official BU list.' });
+          'added, pointing at nothing until you map it on Setup → BU list.' });
       }
     }
     /* The stored spelling wins, so "support function" typed in a hurry does
@@ -1098,7 +1087,7 @@ function planPeopleFile(rows){
       if (roleKey && !where) {
         plan.problems.push({ at:at, msg:'"' + roleName(roleKey) + '" is held over the person’s own ' +
           'BU, and ' + (buName ? '"' + buName + '" points at nothing yet' : 'this row names no BU') +
-          '. Map it on Setup → Official BU list, or leave Role blank and give it on the register.' });
+          '. Map it on Setup → BU list, or leave Role blank and give it on the register.' });
         return;
       }
       if (roleKey && !roleWheres(roleKey).some(function(w){ return w.v === where; })) {

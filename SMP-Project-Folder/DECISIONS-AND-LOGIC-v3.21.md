@@ -7790,3 +7790,71 @@ Driven end to end: Distribution mapped to Mobile and Consumer Electronics on
 Setup, the SMO given that Main BU, and the sign-in card then offered
 **Distribution (2) · Other business units (8) · Other supporting functions
 (8)** — the pick landing in `bu_declarations` as before.
+
+---
+
+## 58 · Official BU, and it is measured by nothing (v3.21)
+
+*2026-08-23. Islam: "we can even name the Main BU to be Official BU for clear
+naming forward. There is no performance or measurements for the official BU —
+so do nothing for logic for it. The only performance we build is for what we
+verify in our management practice: the business units and functions we
+identify, and of course the companies that already group them."*
+
+### 58.1 The word
+
+**Main BU → Official BU**, everywhere a person reads it: the register's column,
+the Setup page and its rail entry, the people workbook's column and its Read-me
+line, and every sentence that pointed at the page. *BU* keeps its own name — it
+is what the official one points at, and what decides access.
+
+"Main" said which of several was the important one, which is not the
+distinction. **Official** says whose word it is: the client's, off their own
+employee data, as opposed to the platform's.
+
+**The stored field names did not move.** `p.mainbu`, `GROUP.mainbus`,
+`mainbuAt()` and the rest keep their spelling — renaming them is a data
+migration for a word nobody reads, and §51.10's lesson is about a rename whose
+WRITERS were missed. The surest way not to miss one is not to rename the field.
+
+### 58.2 A header is a contract
+
+The workbook's column is written as **Official BU** and read as either. Somebody
+is holding a file downloaded before the rename with the old word at the top of
+that column, and refusing it would be §54.4's fault — the platform turning away
+its own export — arriving through a relabelling rather than through a rule.
+
+Both paths are in `qa.py` and deliberately so: the fixed point proves the new
+header round-trips, and the new-joiner row keeps the OLD header with a note
+saying not to tidy it.
+
+### 58.3 AN OFFICIAL BU IS MEASURED BY NOTHING, AND THAT IS THE DESIGN
+
+Islam's second half is an instruction *not* to build, and it is worth recording
+as a decision rather than as an absence, because the temptation will return
+every time somebody looks at the list and sees ten named things with no score
+beside them.
+
+An Official BU **has no plan, no performance, no execution and no page.** It is
+vocabulary: the client's word for a part of the business, and a pointer to what
+is actually measured. Everything that carries a score is something the practice
+identifies and verifies — **a business unit, a supporting function, or a company
+grouping them** — and each of those already has its own record, its own plan and
+its own way of being scored.
+
+This is the same argument §23 made for companies (*visibility, not strategy: no
+score, no page*), and it holds here for a stronger reason: a name that holds
+several units would have to sum or average them to have a number at all, and
+that number would be a second, quieter answer to a question the group's own
+rollup already answers properly.
+
+The page says so now, in the one place somebody would ask: *"An official BU
+carries no strategy and no score of its own — it is vocabulary, and what it
+points at is what is measured."*
+
+### 58.4 One note that had gone stale
+
+*"A name may point at a company"* was the best a single target could do, and
+exactly why it placed nobody. It now reads **"One name may hold several"**, and
+tells the SMO to map the units themselves — which is what §57 made possible and
+what the sign-in picker reads.

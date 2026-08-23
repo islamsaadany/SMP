@@ -1,6 +1,9 @@
 # 011 · The BU list, and the register as a file
 
-**Version:** v3.21 · **Decisions:** §54 · **Status:** built and verified
+**Version:** v3.21 · **Decisions:** §54, §57, §58 · **Status:** built and verified
+
+> *Renamed in §58: what this spec calls **Official BU** was called **Main BU** until
+> v3.21. And since §57 one name holds SEVERAL units or functions, not one.*
 
 Islam brought one row of Raya's employee data, the official list of ten BUs,
 and four asks: map the main BU onto what the platform calls a BU, give the
@@ -36,7 +39,7 @@ times.
 ## 2 · What is settled
 
 1. **A stored BU list**, on its own Setup page under *Who*, sharing `c_people`.
-2. **The register shows Main BU beside BU.** *Belongs to* → **BU**, *Standing*
+2. **The register shows Official BU beside BU.** *Belongs to* → **BU**, *Standing*
    → **Status**.
 3. **One workbook**, download and upload, on the People page, matched on
    **Emp ID**.
@@ -51,7 +54,7 @@ times.
 
 `at` is `null`, `"group"`, `"co:<company>"`, `"fn:<function>"`, or a unit key:
 **the same vocabulary a role's `at` uses**, and the same one `roleWhereLabel()`
-renders. That reuse is why a Main BU can point at a company without anything
+renders. That reuse is why a Official BU can point at a company without anything
 new being invented — a company CEO is already attached that way (§23).
 
 It lives on `GROUP`, so it lands in `org.extra`: no migration, the same free
@@ -62,7 +65,7 @@ three ride in the `people` row's `extra`: no migration.
 
 ### 3.1 Two questions, two columns
 
-- **Main BU** — the client's word for the person's part of the business. Off
+- **Official BU** — the client's word for the person's part of the business. Off
   the file, never interpreted.
 - **BU** — what it points at here. This is `personAt(p)`, the attachment
   access has always been read from.
@@ -88,7 +91,7 @@ open. A list demanding a target for every name would force a wrong one.
 
 Two sheets. **Read me**, and **People** with eight columns:
 
-`Emp ID · Name · Job title · Email · Mobile · Main BU · Role · Status`
+`Emp ID · Name · Job title · Email · Mobile · Official BU · Role · Status`
 
 plus a ninth, *Also holds*, written by the platform and ignored on the way back
 — a person may hold three roles and the Role column holds one, so the rest is
@@ -110,7 +113,7 @@ the template.
 - **A blank cell means "nothing to say", never "clear it".**
 - **`Status: Retired`** does exactly what the row's own menu does. Restoring
   gives no roles back by itself (§49.4) — the Role column is the answer.
-- **An unknown Main BU is added to the list, unmapped**, rather than refused.
+- **An unknown Official BU is added to the list, unmapped**, rather than refused.
   It is how the ten names arrive; a fresh tenant's list is empty, and a locked
   dropdown would mean no first file could be read (§22).
 - **A role the person already holds is not an ask.** The column gives a role;
@@ -121,7 +124,7 @@ the template.
 
 ### 4.2 Dropdowns
 
-Role and Status are closed lists. **Main BU is a suggestion**, for the reason
+Role and Status are closed lists. **Official BU is a suggestion**, for the reason
 in 4.1.
 
 ---
@@ -178,7 +181,7 @@ are guarded the day they are added.
 
 - **What each of the ten names points at** (D8). Ten dropdowns; only Islam can
   fill them.
-- **The register is 1127px inside a 920px box** — it was 1061px before Main BU.
+- **The register is 1127px inside a 920px box** — it was 1061px before Official BU.
   It scrolls in place and the page does not; Job title or Contact can be
   switched off to recover it. Recorded rather than resolved, because trimming a
   column nobody asked to lose is not this version's decision.

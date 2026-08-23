@@ -787,7 +787,7 @@ var PCOLS_KEY = "smp.people.columns";
 var PEOPLE_COLS = [
   { k:"empid",    label:"Emp. ID", off:true },
   { k:"title",    label:"Job title" },
-  { k:"mainbu",   label:"Official BU" },
+  { k:"mainbu",   label:"Main BU" },
   { k:"bu",       label:"BU" },
   { k:"contact",  label:"Contact",  off:true },
   { k:"roles",    label:"Roles" },
@@ -1053,16 +1053,16 @@ function renderPeople(){
          changed would be the worst kind of helpful. */
       (showCol("mainbu") ? '<td>' + (p.mainbu
         ? '<span class="val">' + esc(p.mainbu) + '</span>' +
-          (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
+          (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the BU list</span>')
         : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
       (showCol("bu") ? '<td>' + (home
         ? '<span class="uchip">' + esc(home) + '</span>' + (drift
             ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
-              esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
+              esc(whereLabel(drift)) + ' on the BU list">BU list says ' +
               esc(whereLabel(drift)) + '</span>'
             : '')
         : (drift
-            ? '<span class="why" style="margin:0">&mdash; the list says ' +
+            ? '<span class="why" style="margin:0">&mdash; BU list says ' +
               esc(whereLabel(drift)) + '</span>'
             : '<span class="why" style="margin:0">&mdash;</span>')) +
         saidWhereNote(p, editable) + '</td>' : '') +
@@ -1202,7 +1202,7 @@ function renderPeople(){
            is where the model is explained (§30) — `c_access` says it there. */
         (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
         (showCol("title")    ? '<th>Job title</th>'  : '') +
-        (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
+        (showCol("mainbu")   ? '<th>Main BU</th>'    : '') +
         (showCol("bu")       ? '<th>BU</th>'         : '') +
         (showCol("contact")  ? '<th>Contact</th>'    : '') +
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
@@ -1241,9 +1241,9 @@ function renderPeopleFile(mayEdit){
         'now, so it is the export as well as the template. ' +
         plural(PEOPLE.length, "row") + ', with Role and Status as dropdowns' +
         (mainbus().length
-          ? ' and your ' + mainbus().length + ' names in the Official BU column'
-          : ' — the Official BU column has no list yet, so type the names and they will be ' +
-            'added to the Official BU list on arrival') + '.</p>' +
+          ? ' and your ' + mainbus().length + ' BU names in the Main BU column'
+          : ' — the Main BU column has no list yet, so type the names and they will be ' +
+            'added to the BU list on arrival') + '.</p>' +
       '<div class="imp-row">' +
         '<button class="editbtn" data-dlppl="1">Download the people template</button>' +
       '</div>' +
@@ -1287,7 +1287,7 @@ function renderPeopleFile(mayEdit){
     var same = plan.rows.length - moving.length;
     var body = moving.length
       ? '<div class="scroll"><table><thead><tr><th>Row</th><th>Person</th>' +
-          '<th>Official BU</th><th class="cc">What happens</th></tr></thead><tbody>' +
+          '<th>Main BU</th><th class="cc">What happens</th></tr></thead><tbody>' +
         moving.map(function(r){
           return '<tr><td class="mono">' + esc(r.id) + '</td>' +
             '<td><b>' + esc(r.name) + '</b></td>' +
@@ -1421,7 +1421,7 @@ function renderMainbus(){
   var table = list.length || editable
     ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
         '<th class="idx" style="width:38px">#</th>' +
-        '<th style="width:30%">Official BU</th>' +
+        '<th style="width:30%">Main BU</th>' +
         '<th style="width:40%">Points at</th>' +
         '<th class="cc" style="width:14%">People</th>' +
         '<th class="cc" style="width:18%"></th>' +
@@ -1430,7 +1430,7 @@ function renderMainbus(){
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
       'nothing, for you to map. Or type them in with Edit.</div>';
 
-  return cfgHead("Official BU list",
+  return cfgHead("BU list",
       ['<span class="pill kind">SMO</span>',
        plural(list.length, "name"),
        mapped + ' mapped'].concat(
@@ -1439,11 +1439,9 @@ function renderMainbus(){
       "people", mayEdit) +
 
     section("", "Your names, and what they point at",
-      "Your organisation's own official names for parts of the business, and which units " +
-      "and supporting functions each one holds here. An official BU carries no strategy and " +
-      "no score of its own — it is vocabulary, and what it points at is what is measured. " +
-      "Set once: every employee file then reads itself, and everyone signs in to a short " +
-      "list instead of the whole organisation.",
+      "The words your own records use for parts of the business, and which unit, supporting " +
+      "function or company each one opens here. Set once — every employee file then reads " +
+      "itself, instead of every row naming a unit five hundred times.",
       table +
       (strays.length
         ? '<div class="note bad-note"><b>' + esc(strays.join(", ")) +
@@ -1456,16 +1454,9 @@ function renderMainbus(){
       'and there is simply nothing for them to open. Mapping it later moves nobody by itself: ' +
       'the register marks where somebody sits somewhere other than their BU says, and leaves ' +
       'the answer to you.</div>' +
-      /* REWRITTEN WITH §57. It used to say a name could point at the COMPANY,
-         which was the best a single target could do and is exactly why it
-         placed nobody: a company holding three units cannot say which one
-         somebody is in. Now the name holds the units themselves, and the
-         person picks from those few when they sign in. */
-      '<div class="note"><b>One name may hold several.</b> Where your own records call ' +
-      'something a BU that is a group of units here, map it to the units themselves rather ' +
-      'than to one of them. Nobody is placed automatically from a name that holds more than ' +
-      'one \u2014 they are offered exactly those to pick from when they first sign in, and you ' +
-      'confirm it on <b>People</b>.</div>');
+      '<div class="note"><b>A name may point at a company.</b> Your records may call something ' +
+      'a BU that is a group of units here \u2014 the platform already knows how to attach somebody ' +
+      'to one, because that is where a company CEO sits.</div>');
 }
 
 function renderCompanies(){

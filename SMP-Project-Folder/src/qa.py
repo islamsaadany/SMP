@@ -194,6 +194,49 @@ with sync_playwright() as p:
           % (where_u, where_f,
              "same shape" if unit_shape == fn_shape else "DIFFERENT"))
 
+    # ── THE STRIP ABOVE A PINNED HEADER IS GROUND (53.7) ──────────────
+    # `.pane > .pband::before` and `.split .rail::before` fill the gap between
+    # the chrome and the pinned pair with the page's own ground, so the pane's
+    # content cannot slide through it. CSS cannot ask whether a sticky element
+    # is currently pinned, so they paint at ALL times — which means whatever
+    # sits immediately above the split has that much of its bottom painted
+    # over. It cost a capability band nine pixels and a key-objectives table
+    # twenty-three, and the unit's Report page had it too.
+    #
+    # `* + .split` leaves the clearance. Asserted here as the distance from the
+    # split's top to the LOWEST thing drawn before it in the page — not just
+    # its previous sibling, because on a function's Projects page the split is
+    # the first child of the capability body and the band is a step further out.
+    clear = pg.evaluate("""() => {
+      const need = parseInt(getComputedStyle(document.documentElement)
+                     .getPropertyValue('--pin-clear')) || 24;
+      const panel = document.getElementById('panel');
+      const out = [];
+      panel.querySelectorAll('.split').forEach(sp => {
+        if (!sp.querySelector(':scope > .rail')) return;      /* setup's rail pins nothing */
+        const top = sp.getBoundingClientRect().top;
+        let lowest = -1e9, who = '(nothing above it)';
+        panel.querySelectorAll('*').forEach(el => {
+          if (el === sp || sp.contains(el) || el.contains(sp)) return;
+          if (!(sp.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)) return;
+          const r = el.getBoundingClientRect();
+          if (!r.width || !r.height) return;
+          if (r.bottom > lowest && r.bottom <= top) {
+            lowest = r.bottom;
+            who = (typeof el.className === 'string' && el.className
+                   ? '.' + el.className.split(' ')[0] : el.tagName);
+          }
+        });
+        out.push({ who: who, gap: lowest < -1e8 ? null : Math.round(top - lowest), need: need });
+      });
+      return out;
+    }""")
+    for c in clear:
+        if c["gap"] is not None and c["gap"] < c["need"]:
+            errs.append("PIN CLEARANCE: a split sits %dpx under %s, less than the %dpx its "
+                        "ground filler paints" % (c["gap"], c["who"], c["need"]))
+    print("pin clearance: " + (", ".join("%s +%s" % (c["who"], c["gap"]) for c in clear) or "no railed split here"))
+
     # A FUNCTION OPENS ON ITS PROJECTS, as a unit opens on its Plan (53.1).
     for key, want in (("mobile", "Strategy / Plan"), ("fn:finance", "Strategy / Projects")):
         w = "Functions" if key.startswith("fn:") else "Units"

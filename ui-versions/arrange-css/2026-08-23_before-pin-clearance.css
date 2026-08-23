@@ -747,13 +747,7 @@
      product, on the one word the band exists to say. It takes what
      `.grouphead` and `.rail .rhead` already take. */
   .capline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);
-    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r);
-    /* The bottom margin is the SPLIT'S CLEARANCE (§53.7), not a spacing
-       preference: when the split below is the capbody's first child there is
-       no sibling gap for `* + .split` to widen, so the band leaves the room
-       itself — or the ground filler above the pinned rail paints over the
-       band's own bottom nine pixels. */
-    margin:16px 0 var(--pin-clear, 24px);
+    color:var(--panel-ink);padding:11px 16px;border-radius:var(--r);margin:16px 0 14px;
     border:1px solid var(--line)}
   .capline:first-child{margin-top:0}
   .captag{font:700 9px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;

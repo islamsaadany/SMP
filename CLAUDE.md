@@ -87,6 +87,22 @@ A drift between specs and code is a documentation bug — report it before silen
   the client for enforcement. (SMP's current access gate is a client-side placeholder and is
   explicitly NOT real security — it must move server-side before SMP holds anything sensitive.)
 
+#### A pinned header's ground filler paints when it is NOT pinned too (§53.7)
+- `.pane > .pband::before` and `.split .rail::before` fill the gap between the
+  chrome and the pinned pair with `--ground`. **CSS cannot ask whether a sticky
+  element is pinned**, so they paint in the flow position as well — over
+  whatever sits immediately above the split.
+- The clearance is one rule: **`* + .split { margin-top: var(--pin-clear) }`**
+  (`--pin-clear` = `--rail-gap + 2`). Never plain `.split`: a split that STARTS
+  its container must keep `margin-top:0` or the rail's flow position stops
+  matching its sticky offset and it slides the difference (§29.4).
+- `.capline` carries the same number as its bottom margin, because on Projects
+  the split is the capbody's first child and has no sibling gap to widen.
+- `--split-gap` is the gutter, named once: the rail's filler has to reach across
+  it to meet the pane's, or the band shows through as a tab between them.
+- **Measure this in PIXELS.** `elementFromPoint` returns an element and a
+  `::before` is not one, so a DOM probe calls the broken build clean.
+
 #### A unit and a function are the same product — test both (2026-08-23, §53.5, A15)
 - **Every functional or visual change is tested on BOTH sides of the navigation
   switch.** A business unit's page and a supporting function's must not drift

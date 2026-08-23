@@ -7161,3 +7161,58 @@ project hands over.
 The two database columns are **dropped**, not left standing and ignored. What
 was in them survives in `plan_archives` for any plan that carried them, which is
 where a replaced plan has lived since §22.
+
+### 53.7 The strip above a pinned header paints whether or not it is pinned
+
+*Reported by Islam against v3.20, from a screenshot: the capability band with a
+piece of its bottom cut out on the right and left hanging below on the left.*
+
+§51.13 pinned the project band and filled the 22px gap between it and the chrome
+with the page's own ground, so the pane's content could not slide through the
+window. Two things were wrong with that filler, and the second is the real one.
+
+**It covered the pane only.** The rail's column beside it had nothing over it, so
+content kept sliding through there — which is why the band was cut off in a
+straight line where the pane began and carried on below it over the rail. The
+rail pins too, so it takes the same filler rather than the pane's being stretched
+left across a track width that would then have to be written twice. Its offset is
+one pixel above the band's, so its strip is one pixel shorter and the two cover
+the same line. The 16px gutter between them is `--split-gap` now, named once and
+read in both places, because the filler has to reach across it (§29.4's rule,
+applied to the gutter).
+
+**And it paints at all times.** CSS cannot ask whether a sticky element is
+currently pinned, so the filler is there in the flow position too — painting the
+page's ground over whatever sits immediately above the split. Nine pixels off the
+bottom of a capability band; **twenty-three off the key-objectives table** above
+the rail on a function's Performance and Report pages; and on **the unit's Report
+page** the same, which is the point: this was never a function-only fault, it was
+just invisible where nothing sits above a split. On a unit's Plan page nothing
+does.
+
+The fix is clearance, and it is one rule:
+
+```css
+* + .split { margin-top: var(--pin-clear); }   /* --pin-clear = --rail-gap + 2 */
+```
+
+`* + .split`, not `.split`: a split that STARTS its container must keep
+`margin-top: 0`, or the rail's flow position stops matching its sticky offset and
+it slides the difference on the first scroll (§29.4, the lurch). And the
+capability band carries the same number as its own bottom margin, because on the
+Projects page the split is the capbody's first child and there is no sibling gap
+for the rule to widen.
+
+**Measured in pixels, not in the DOM.** `elementFromPoint` returns an element and
+a `::before` is not one, so the first probe reported "ok" on the broken build. The
+check that found it screenshots a one-pixel row and reads the colours: for every
+railed split, at eight scroll positions, every pixel of the visible gap must be
+the page's ground. It reports 4 pages on the v3.19 build — including
+`(22, 50, 92)`, the band's own navy, on the function's Projects page — and 0 on
+this one.
+
+`qa.py` asserts the invariant that keeps it fixed rather than the pixels, so it
+needs no image library: for every split holding a rail, the distance from its top
+to the lowest thing drawn before it in the page must be at least `--pin-clear`.
+Not merely its previous sibling — on the Projects page the band is a step further
+out, and a check that looked only at siblings would have called that page clean.

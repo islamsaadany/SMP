@@ -321,10 +321,39 @@ function readme(kind, pickLabel, pickList){
 }
 
 /* Read the one cell that says whose plan this is. */
-function readmePick(sheets){
+/* ── Reading the Read me sheet (§51.14) ──────────────────────────────────
+   BY LABEL, NEVER BY ROW NUMBER. An entirely empty row is not written into an
+   .xlsx at all — Excel skips it — so the blank spacer this sheet uses for air
+   is present when the template is generated and GONE from the file that comes
+   back. Every row below it shifts up by one.
+
+   That is what broke uploading a business unit's plan: the function cell was
+   read at row index 2, which in a returned file is "How to fill it", so the
+   platform refused the upload saying there was no supporting function called
+   "One sheet per part of the plan. Fill Pillars FIRST…". A template downloaded
+   from the product could not be uploaded back into it.
+
+   THE LABEL IN COLUMN A IS THE CELL'S IDENTITY. Position is not: it depends on
+   what is above, and what is above can be dropped by a spreadsheet nobody in
+   this codebase controls. Reading by label also means a row can be added to
+   the Read me sheet later without breaking a file saved before it. */
+function readmeCell(sheets, label){
   var rows = sheets["Read me"];
-  if (!rows || !rows[1]) return "";
-  return String(rows[1][1] == null ? "" : rows[1][1]).trim();
+  if (!rows) return "";
+  var want = String(label).trim().toLowerCase();
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i] || [];
+    if (String(r[0] == null ? "" : r[0]).trim().toLowerCase() === want)
+      return String(r[1] == null ? "" : r[1]).trim();
+  }
+  return "";
+}
+
+/* Whose plan this is. Both templates label it differently — a unit's says
+   "Business unit" and a capability's says "Capability" — so both are asked
+   for, and the one that answers is the answer. */
+function readmePick(sheets){
+  return readmeCell(sheets, "Business unit") || readmeCell(sheets, "Capability");
 }
 
 function planWorkbook(u){
@@ -741,13 +770,10 @@ function fnSuggestions(){
     .filter(function(k){ return FUNCTIONS[k].active !== false; })
     .map(function(k){ return FUNCTIONS[k].name; });
 }
-/* The function cell, read back. Blank is a legitimate answer (see above), so
-   this returns "" rather than refusing. */
-function readmePickFn(sheets){
-  var rows = sheets["Read me"];
-  if (!rows || !rows[2]) return "";
-  return String(rows[2][1] == null ? "" : rows[2][1]).trim();
-}
+/* The function cell, read back. Only a CAPABILITY workbook carries one; a
+   unit's has no such row, so this returns "" for one — which is a legitimate
+   answer and never a refusal. */
+function readmePickFn(sheets){ return readmeCell(sheets, "Supporting function"); }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });

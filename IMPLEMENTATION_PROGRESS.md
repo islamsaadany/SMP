@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.18 · **Last updated:** 2026-08-23
+**Latest version:** v3.19 · **Last updated:** 2026-08-23
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -51,6 +51,37 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.19 — the capability half catches up, and slides get a place
+
+Islam went through the built product and sent notes as he found things. Almost
+none of it is a feature: most are paths broken since a rename, fields nothing
+read, or controls that looked like one thing and behaved as another.
+
+| What | Outcome |
+|---|---|
+| **Adding a capability took the product down** | The add button minted `{name, def, measures, tactics}` — the shape a capability had **before §15**. No id, no function, neither list, and the Capabilities Setup page threw and rendered nothing. Removing one threw before it could confirm. §24's rule with the sign reversed: **when a field is renamed, find the code that CREATES it, not only the code that reads it.** |
+| **The capability table** | Name typed rather than printed, Remove on the row, Add beneath it, and a confirmation naming what would be destroyed. |
+| **Capability pages ↔ pillar pages** | Project codes (FIN01), the coded band on all three project panes, and the function nameplate gone — a unit has no such band, so a function carrying one made the two halves read as two products. |
+| **1.43:1** | Two `.capline` rules in one file; the second won on source order, so the band moved to navy and kept the page's ink. The capability's own name, on the band that exists to say it. Sixth header missed by §41.10 — and the function pages had **never been contrast-checked at all**. |
+| **Manage slides** | A mode, not a dialog: the whole deck down the left as real slides at one tenth, the selected one large on the right. That removed the position dropdown entirely — you place a slide by where you insert it. Add, move up/down, Fit/Fill, crop, caption. |
+| **Fit, not fill** | Two of Islam's notes were one note. Frames were `object-fit:cover`, so a portrait infographic lost both edges and the zoom could only make it worse — 100% was already the tightest crop available. A picture fits whole now; Fill is the deliberate choice. |
+| **One switching button** | Units \| Functions had looked like one control since §41.8 and was two buttons dressed to look like one. I measured the container, showed him it was one box, and argued the point. **The measurement was true and the answer was still wrong.** |
+| **Four found by using it** | A function's "Shown in the nav" read by nothing; the searchable dropdown closing when you scrolled its own list; long-text boxes two lines tall; blank lines shown at last. |
+
+**Verified:** `qa.py` 31 viewers, no console errors. `test-authorize.js` 123
+passed. `test-roundtrip.js` clean slate, round trip, fixed point and archived
+plan against a fresh Postgres 16. Contrast **53 failing runs across 34 pages and
+states** — every one of them the §16.15 family already recorded, none on any
+surface this version built.
+
+**And the checks themselves were wrong three times in one day** (§51.11). A
+sweep labelled a page it had never scanned; a probe of mine broke when I edited
+what it string-matched and reported the page behind as the new surface; and
+removing the two-button fold would have left `qa.py` reporting "ok" having
+walked half the product. **A check keyed on markup that no longer exists does
+not fail — it passes quietly.** Both sweeps now assert what is lit and say which
+page they actually scanned.
 
 ### v3.18 — collaborators get a column, and the review gets pictures
 

@@ -244,6 +244,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
   a tenant column — person keys are short and global (`smo`, `ceo`), so a column
   forces composite keys through `credentials` and `sessions`. Read §36 first.
+- **WHEN A FIELD IS RENAMED, FIND THE CODE THAT CREATES IT** — not only the
+  code that reads it (§51.10). §15 renamed a capability's `measures`/`tactics`
+  to `keyObjectives`/`projects`; the ADD button kept minting the old shape for
+  eleven versions, so adding a capability produced a row with no id, no
+  function and neither list, and the Capabilities page threw and rendered
+  nothing. A reader that crashes is loud; **a writer that mints the old shape
+  is silent until somebody opens the page that reads it** — a different page,
+  reached from a different menu, so the two are never seen together.
+- **A CHECK KEYED ON MARKUP THAT NO LONGER EXISTS DOES NOT FAIL — IT PASSES
+  QUIETLY** (§51.11). Three in one day: the sweep's `unit/perf` label had never
+  scanned Performance; a scoped probe broke when the sweep it string-matched
+  changed and reported the page behind as the new surface; and reshaping the
+  Units | Functions control would have left `qa.py` reporting "ok" having
+  walked half the product. **When a control changes shape, grep the checks for
+  the old selector before trusting the next green run**, and make the label say
+  which page was actually scanned.
+- **MEASURING THE THING YOU BUILT PROVES WHAT YOU BUILT, NOT WHAT WAS ASKED
+  FOR** (§51.7). Islam said Units | Functions was "still 2 buttons"; I measured
+  one container, showed him the box, and argued. The measurement was true and
+  the answer was wrong — it *was* two buttons dressed as one, so pressing it
+  selected a side rather than switching. B1 says verify by measuring; it does
+  not say measure the answer you already have.
+- **Manage slides is a MODE, and its rail is the WHOLE deck** (§51.8): every
+  generated slide as a real slide at one tenth, which is what removed the
+  position dropdown — a picture slide is placed by where it is inserted.
+  `slidesPlace()` is the ONE function behind both Add and the arrows, and it
+  removes the slide from the list before counting what sits before it, or the
+  slide creeps. A blank slide is drawn in the editor only (`pslideHtml(sl,
+  blank)`) — never on a projector. A picture **fits** its frame by default;
+  Fill is chosen, because §16.12 asks for a screenshot first and a screenshot
+  with its edges cut off is not a screenshot of anything.
 - **A READER MUST NEVER CREATE THE FIELD IT WAS LOOKING FOR** (§42, §50.6).
   `branding()` invented a four-null object the database never held, so every
   save carried a phantom group change and every non-SMO save would have been
@@ -362,7 +393,33 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 — **v3.18: a column the data always had, and
+*Last Updated: 2026-08-23 — **v3.19: the capability half catches up, and
+slides get a place** (§51). Almost none of it a feature. **ADDING A CAPABILITY
+TOOK THE PRODUCT DOWN** — the add button had minted the pre-§15 shape for eleven
+versions, so the new row had no id, no function and neither of the lists every
+reader expects, and the Capabilities page threw and rendered nothing; removing
+one threw before it could confirm. §24's rule with the sign reversed: **when a
+field is renamed, the code that CREATES it has to be found as well as the code
+that reads it**, because a writer minting the old shape is silent until somebody
+opens the page that reads it. The capability pages take the pillar pages'
+design — project codes, the coded band on every pane, the nameplate gone — and
+that review found the worst reading in the product: **two `.capline` rules in
+one file**, the second winning on source order, so the band went navy and kept
+the page's ink and the capability's own NAME measured 1.43:1. Nothing had ever
+looked: the function pages had gone twelve versions unswept. **MANAGE SLIDES**
+becomes a mode with the whole deck down the left as real slides at one tenth,
+which is what removed the position dropdown; a picture **fits** its frame rather
+than being cropped by it, because two of Islam's notes turned out to be one
+note and there had been no way to say "show me all of it". **UNITS | FUNCTIONS
+IS ONE BUTTON**, at last — it had looked like one control since §41.8 and was
+two dressed as one, and I measured the container and argued the point before
+understanding him: **measuring the thing you built proves what you built, not
+what was asked for.** And three checks were found lying in one day — a label
+that had never scanned the page it named, a probe that broke when I edited what
+it string-matched, and two sweeps that would have gone green while walking half
+the product.*
+
+*Earlier: 2026-08-23 — **v3.18: a column the data always had, and
 pictures in the review** (§50, spec 009). **COLLABORATORS WERE NEVER MISSING**
 — a tactic has carried them since the import template, the database stores
 them, and being named on one is what lets a Contributor report a line. What was

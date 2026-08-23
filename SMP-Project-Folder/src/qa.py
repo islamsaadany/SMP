@@ -68,5 +68,50 @@ with sync_playwright() as p:
                     pg.click('.setuppane .secrow [data-sub2="%s"]'%k2); pg.wait_for_timeout(160)
                 seen+=1
         print(v,"ok", seen, "destinations")
+
+    # ── THE TEMPLATE MUST SURVIVE A ROUND TRIP (51.14) ───────────────
+    # A template downloaded from the product and uploaded back into it was
+    # REFUSED: an entirely empty row is not written into an .xlsx at all, so the
+    # blank spacer vanished, every row below it shifted up, and a cell read by
+    # row NUMBER came back holding the prose underneath it. Nothing caught it —
+    # the sweeps walk pages, and this is a file LEAVING the product and coming
+    # back. Asserted here on the real writer and the real reader.
+    rt = pg.evaluate("""() => {
+      /* AND IT MUST BE ROUND-TRIPPED THE WAY EXCEL DOES IT. Writing with our
+         own writer and reading with our own reader proves the two AGREE — it
+         does not prove the file survives the tool the customer uses. Our writer
+         keeps the blank spacer row; Excel does not write an entirely empty row
+         at all. The first version of this guard passed on the broken build,
+         which is the fault it exists to catch, arriving inside the catcher.
+         `asExcel` drops empty rows, which is the whole of what Excel did. */
+      const asExcel = sheets => {
+        const out = {};
+        Object.keys(sheets).forEach(k => {
+          out[k] = (sheets[k] || []).filter(r =>
+            (r || []).some(c => String(c == null ? "" : c).trim() !== ""));
+        });
+        return out;
+      };
+      const u = UNITS[UNIT_KEYS[0]], c = GROUP.capabilities[0];
+      return Promise.resolve(readXlsx(buildXlsx(planWorkbook(u)).buffer)).then(us =>
+        Promise.resolve(readXlsx(buildXlsx(capPlanWorkbook(c)).buffer)).then(cs => {
+          const U = asExcel(us), C = asExcel(cs);
+          return { unit: readmePick(U), fn: readmePickFn(U), wantUnit: u.name,
+                   cap: readmePick(C), capFn: readmePickFn(C), wantCap: c.name,
+                   wantCapFn: (FUNCTIONS[c.fn] || {}).name || "" };
+        }));
+    }""")
+    if rt["unit"] != rt["wantUnit"]:
+        errs.append("ROUND TRIP: a unit template comes back naming %r, not %r"
+                    % (rt["unit"], rt["wantUnit"]))
+    if rt["fn"]:
+        errs.append("ROUND TRIP: a UNIT template answered the function question with %r"
+                    % rt["fn"])
+    if rt["cap"] != rt["wantCap"] or rt["capFn"] != rt["wantCapFn"]:
+        errs.append("ROUND TRIP: a capability template comes back %r/%r, not %r/%r"
+                    % (rt["cap"], rt["capFn"], rt["wantCap"], rt["wantCapFn"]))
+    print("template round trip: unit=%r fn=%r | cap=%r capFn=%r"
+          % (rt["unit"], rt["fn"], rt["cap"], rt["capFn"]))
+
     print("ERRORS:", errs if errs else "none")
     b.close()

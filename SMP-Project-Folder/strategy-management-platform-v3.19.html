@@ -919,7 +919,11 @@
      and capabilities. The selected row keeps its place when the tab changes,
      because it is visible \u2014 so it is what you would expect rather than
      hidden state. */
-  .split { display:grid; grid-template-columns:236px 1fr; gap:16px; align-items:start; }
+  /* 236px to 196px (§51.13, Islam: "maybe the rail to be smaller. the focus
+     should be on that right part the left is just for navigation"). At 196 a
+     pillar name still wraps to at most two lines and the sub-line still fits
+     on one; the pane gains 40px. */
+  .split { display:grid; grid-template-columns:196px 1fr; gap:16px; align-items:start; }
   /* Pinned BELOW the chrome, not 12px from the top of the window. It used to
      be `top:12px`, which put it under a sticky header 169–258px tall: the
      rail's first rows slid beneath the chrome, and because the chrome sits
@@ -999,8 +1003,12 @@
   .rail .ritem.on .rnum { color:var(--ink); }
   .rail .rfoot { padding:9px 14px; border-top:1px solid var(--line); background:var(--surface-2);
     font-size:11.5px; color:var(--ink-3); }
+  /* The pane's padding is a NAMED number because the band's sticky offset is
+     derived from it — see the band below, and §29.4 for why the two must be
+     one number rather than two that happen to agree. */
+  :root { --pane-pad:16px; }
   .pane { border:1px solid var(--line); border-radius:var(--r); background:var(--surface);
-    padding:16px 18px 20px; position:relative; }
+    padding:var(--pane-pad) 18px 20px; position:relative; }
   /* WHERE THE HEADING WENT, THE PEN STILL HAS TO LIVE (2026-08-22). With the
      rail carrying the name, the plan pane opens straight onto the tables and
      there is no .ptitle left to hover. The pen keeps the same language — it
@@ -1012,22 +1020,61 @@
      pane and the rail say "this one" in one language rather than two. No
      border: a bordered box inside a bordered pane reads as a control, and this
      is a label. */
-  .pband { display:flex; align-items:center; gap:9px; background:var(--surface-2);
+  /* BIGGER, AND IT STAYS (§51.13). Islam: "the header in the pillar or the
+     capability needs to be sticky and bigger … the focus should be on that
+     right part". 36px to 52px, the name 15px to 19px — the size the pane
+     heading had before §46.3 shrank it, but keeping the code, the gold edge and
+     the quiet ground it gained in exchange.
+
+     ZERO TRAVEL, BY CONSTRUCTION — §29.4's rule, which the rail beside it
+     learned the hard way. A sticky element sits where the flow puts it and only
+     pins when scrolling reaches its offset, so if the flow puts it LOWER it
+     slides the difference and settles, which is the lurch Islam reported about
+     the rail two versions ago.
+
+     The band is pulled OUT through the pane's padding by exactly the padding,
+     so it sits flush against the pane's inner top edge — one border below the
+     pane's top, which is itself `--rail-gap` below the chrome. The offset is
+     written from those same three numbers. Flush also means nothing scrolls
+     through a gap above it: pin it lower and the pane's own padding becomes a
+     window with content sliding past inside it. */
+  .pband { display:flex; align-items:center; gap:11px; background:var(--surface-2);
            border-radius:0 var(--r-sm) var(--r-sm) 0;
            box-shadow:inset 3px 0 0 var(--gold);
-           margin:0 0 15px; padding:8px 12px 8px 15px; }
+           margin:0 0 15px; padding:14px 12px 14px 15px; }
+  .pane > .pband {
+    position:sticky; z-index:4;
+    top:calc(var(--chrome-h, 118px) + var(--rail-gap, 22px) + 1px);
+    margin:calc(var(--pane-pad) * -1) -18px 15px;
+    border-radius:var(--r) var(--r) 0 0;
+    box-shadow:inset 3px 0 0 var(--gold), 0 1px 0 var(--line);
+    padding-left:18px; }
+  /* THE GAP ABOVE A PINNED HEADER IS A WINDOW. The band pins `--rail-gap`
+     below the chrome, so once the pane's own top has scrolled away there is a
+     23px strip between the two with the pane's content sliding past inside it —
+     a navy table header cutting across the page above its own heading. Found by
+     LOOKING at a screenshot; invisible in the source and invisible to a check
+     that only asks where things are.
+
+     The strip is filled with the page's own ground, so it reads as the space it
+     is. Written from the same two numbers as the offset, so it cannot drift out
+     of step with what it is covering (§29.4). */
+  .pane > .pband::before {
+    content:""; position:absolute; left:0; right:0; bottom:100%;
+    height:calc(var(--rail-gap, 22px) + 2px); background:var(--ground); }
   /* --stone, NOT --gold-deep. §38.5 for the fourth time: a surface with its
      own ground needs its own ink. `--gold-deep` measures 4.45:1 on
      `--surface-2` in the house palette — it clears on white, and the band is
      not white. It is also the better answer on the accent budget (§41): the
      3px gold edge is the mark, and a gold code beside it would be a second
      one. The edge says "selected"; the code just says which. */
-  .pband-code { font:600 11.5px/1 var(--mono); color:var(--stone); letter-spacing:.05em;
+  .pband-code { font:600 13px/1 var(--mono); color:var(--stone); letter-spacing:.05em;
                 flex:none; }
-  .pband-name { font:650 15px/1.3 var(--sans); color:var(--ink); letter-spacing:-.008em; }
+  .pband-name { font:650 19px/1.3 var(--sans); color:var(--ink); letter-spacing:-.012em; }
   /* The pen sits in the pane's corner and the band must not run under it. */
   .pane .paneact ~ .pband, .pband { padding-right:38px; }
-  .pane .paneact { position:absolute; top:12px; right:12px; height:0; z-index:3; }
+  /* Above the band, or the pinned band covers the pen it left room for. */
+  .pane .paneact { position:absolute; top:12px; right:12px; height:0; z-index:5; }
   .pane .paneact .penbtn { top:0; right:0; }
   .pane:hover .paneact .penbtn,
   .pane:focus-within .paneact .penbtn { visibility:visible; opacity:1; }
@@ -9469,10 +9516,39 @@ function readme(kind, pickLabel, pickList){
 }
 
 /* Read the one cell that says whose plan this is. */
-function readmePick(sheets){
+/* ── Reading the Read me sheet (§51.14) ──────────────────────────────────
+   BY LABEL, NEVER BY ROW NUMBER. An entirely empty row is not written into an
+   .xlsx at all — Excel skips it — so the blank spacer this sheet uses for air
+   is present when the template is generated and GONE from the file that comes
+   back. Every row below it shifts up by one.
+
+   That is what broke uploading a business unit's plan: the function cell was
+   read at row index 2, which in a returned file is "How to fill it", so the
+   platform refused the upload saying there was no supporting function called
+   "One sheet per part of the plan. Fill Pillars FIRST…". A template downloaded
+   from the product could not be uploaded back into it.
+
+   THE LABEL IN COLUMN A IS THE CELL'S IDENTITY. Position is not: it depends on
+   what is above, and what is above can be dropped by a spreadsheet nobody in
+   this codebase controls. Reading by label also means a row can be added to
+   the Read me sheet later without breaking a file saved before it. */
+function readmeCell(sheets, label){
   var rows = sheets["Read me"];
-  if (!rows || !rows[1]) return "";
-  return String(rows[1][1] == null ? "" : rows[1][1]).trim();
+  if (!rows) return "";
+  var want = String(label).trim().toLowerCase();
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i] || [];
+    if (String(r[0] == null ? "" : r[0]).trim().toLowerCase() === want)
+      return String(r[1] == null ? "" : r[1]).trim();
+  }
+  return "";
+}
+
+/* Whose plan this is. Both templates label it differently — a unit's says
+   "Business unit" and a capability's says "Capability" — so both are asked
+   for, and the one that answers is the answer. */
+function readmePick(sheets){
+  return readmeCell(sheets, "Business unit") || readmeCell(sheets, "Capability");
 }
 
 function planWorkbook(u){
@@ -9889,13 +9965,10 @@ function fnSuggestions(){
     .filter(function(k){ return FUNCTIONS[k].active !== false; })
     .map(function(k){ return FUNCTIONS[k].name; });
 }
-/* The function cell, read back. Blank is a legitimate answer (see above), so
-   this returns "" rather than refusing. */
-function readmePickFn(sheets){
-  var rows = sheets["Read me"];
-  if (!rows || !rows[2]) return "";
-  return String(rows[2][1] == null ? "" : rows[2][1]).trim();
-}
+/* The function cell, read back. Only a CAPABILITY workbook carries one; a
+   unit's has no such row, so this returns "" for one — which is a legitimate
+   answer and never a refusal. */
+function readmePickFn(sheets){ return readmeCell(sheets, "Supporting function"); }
 
 function capPlanWorkbook(c){
   var names = GROUP.capabilities.map(function(x){ return x.name; });
@@ -19340,18 +19413,26 @@ var SYNC = (function () {
                 return;
               }
               var uk = UNIT_KEYS.filter(function(k){ return UNITS[k].name === picked; })[0];
-              /* WITHIN THE FUNCTION NAMED IN B3, when one is named (§51.2).
-                 Two supporting functions may each carry a capability with the
-                 same name, and before this the first match in the array won —
-                 silently, and into the wrong function's plan. A blank B3 still
-                 resolves across the tenant, so a workbook saved before this
-                 change still opens. */
-              var wantFn = readmePickFn(sheets);
+              /* THE FUNCTION CELL IS A CAPABILITY'S QUESTION, AND ONLY A
+                 CAPABILITY'S (§51.14). Asked of every plan, it broke uploading
+                 a UNIT's plan outright: a unit's Read me carries no such row,
+                 so the read came back with whatever prose sat at that position
+                 and the upload was refused for naming a function that does not
+                 exist. A unit is resolved first, and a workbook that names one
+                 is never asked about functions at all.
+
+                 WITHIN the function when one IS named: two functions may each
+                 carry a capability with the same name, and before §51.2 the
+                 first match in the array won, silently, into the wrong
+                 function's plan. A blank cell still resolves across the tenant,
+                 so a workbook saved before that change still opens. */
+              var wantFn = uk ? "" : readmePickFn(sheets);
               var fnKeyWanted = Object.keys(FUNCTIONS).filter(function(k){
                 return FUNCTIONS[k].name === wantFn; })[0];
               if (wantFn && !fnKeyWanted) {
                 impFail('no supporting function called "' + wantFn +
-                  '". Open the Read me sheet and choose one from the dropdown in B3.');
+                  '". Open the Read me sheet and choose one from the dropdown beside ' +
+                  '"Supporting function".');
                 return;
               }
               var capPool = GROUP.capabilities.filter(function(x){

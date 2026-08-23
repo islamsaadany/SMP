@@ -362,7 +362,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 &mdash; **the client's own mark on the door** (§51).
+*Last Updated: 2026-08-23 &mdash; **the client's own mark on the door** (§52).
 A one-line ask that was decisions all the way down. **THE TENANT'S MARK GOES ON
 THE CARD, NOT ON THE WALL** — the person at that door works for the client, so
 their mark belongs on the thing they touch while Forefront's stays on the wall

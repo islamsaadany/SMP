@@ -6607,12 +6607,21 @@ function is exactly the drift `lib/rules.js` exists to prevent.
 
 ---
 
-## 51 · The client's own mark on the door
+## 52 · The client's own mark on the door
+
+*Written as §51 and renumbered on the way to main. **A number was spent in
+code that was never spent in this log**: the capability-parity and Manage
+slides work shipped to main referencing §51 through §51.11 in its commits and
+its source comments, and wrote no §51 section here — so the log said the
+number was free and eleven files said it was taken. Renumbered rather than
+argued, because a number already in shipped code is the harder one to move.
+The gap itself is a documentation bug against rule A7 and is reported, not
+quietly papered over: **§51 is still unwritten.***
 
 Islam, looking at the gate: *"in the login page I need to have the client's
 logo somewhere."* Small ask, and every part of it turned out to be a decision.
 
-### 51.1 The mark goes on the CARD, not on the wall
+### 52.1 The mark goes on the CARD, not on the wall
 
 The gate is a split door since §34: a navy wall arguing the product's case, and
 a glass card floating on a pale field. Forefront's temple mark sits top-left of
@@ -6633,7 +6642,7 @@ It is on **both** cards — signing in, and choosing your own password — becau
 they are two doors into the same tenant. One `<symbol>`, referenced twice,
 never written twice.
 
-### 51.2 The file you are handed is not the asset
+### 52.2 The file you are handed is not the asset
 
 Two JPEGs arrived over WhatsApp, 633×81, one black and one reversed. Neither is
 usable and the reason is not fussiness: **a JPEG has no alpha**, so the black
@@ -6650,7 +6659,7 @@ sampled from a picture of them.
 **The manual draws every lockup over a construction grid**, `#CDDDF0`, and the
 grid is not the mark. Filtering it out is one line; noticing it is the work.
 
-### 51.3 A `<use>` clones into a SHADOW TREE
+### 52.3 A `<use>` clones into a SHADOW TREE
 
 One definition, two references, and the fill themed by the page's tokens — so
 `.clientmark .mk { fill: var(--client-mark) }`. It styled **nothing**. A `<use>`
@@ -6663,7 +6672,7 @@ stops at the shadow boundary; an inherited property does not.*
 Caught only by screenshotting the result. It would have shipped as a black
 lockup in dark mode, on a near-black card.
 
-### 51.4 A HEIGHT IS NOT A WIDTH, and the wall and the card are gated differently
+### 52.4 A HEIGHT IS NOT A WIDTH, and the wall and the card are gated differently
 
 The mark cost the card about 70px. At **1024×560** that was enough to push the
 page 20px past the fold and grow a scrollbar — which is *exactly* §35.4, where
@@ -6684,7 +6693,7 @@ Swept 22 sizes in both themes. Three stacked-layout sizes still scroll by
 this change, and what falls below the fold is the copyright line, never a
 control.
 
-### 51.5 Two lockups, two jobs — do not mix them
+### 52.5 Two lockups, two jobs — do not mix them
 
 The brand manual carries the mark in several forms, and the temptation is to
 pick the nicest one. Islam settled it flatly: **the arrows lockup
@@ -6697,7 +6706,7 @@ wears the line one. They are even drawn in different blues (`#282E76`/`#3A67B1`
 against `#001780`/`#225FAC`), which is the artwork and not drift in the
 extraction.
 
-### 51.6 The divider is a STROKE, and a redaction that removes what it touches removes it
+### 52.6 The divider is a STROKE, and a redaction that removes what it touches removes it
 
 Extracting the seven unit lockups the same way produced seven lockups that still
 looked like lockups — and had **lost the vertical rule** that the file is
@@ -6712,14 +6721,14 @@ either side; it has to be removed only when *covered*.
 Both faults produce a plausible result. Neither is visible in the source. The
 only thing that found them was rendering the output and looking at it.
 
-### 51.7 Where the client's material lives
+### 52.7 Where the client's material lives
 
 `clients/raya-trade/` at the repository root — brand assets and reference,
 deliberately **not** inside `SMP-Project-Folder/`. That folder is the product and
 travels as a zip; a 19 MB brand manual does not belong in the thing you carry.
 A second client is a sibling folder, never a rewrite of this one.
 
-### 51.8 Still open
+### 52.8 Still open
 
 Unit lockups on the review deck — **the cover and the footer of every slide**,
 settled in principle, to be drawn before it is built.

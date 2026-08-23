@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Relative, not root-relative: the gate is opened from disk as well as
+     served, and a leading slash would find nothing on a file:// path. -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<!-- Installable. The gate is the start_url, so this is the page a person
+     installs from and the page the installed app opens on. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- The window chrome around an installed app follows the theme too, or the
+     title bar stays navy-on-white while the page underneath went dark. Two
+     tags, because theme-color takes a media query but not a class.
+
+     Navy in both, and it stays true at every width: on a narrow screen the
+     brand bar is deliberately full-bleed to the top edge, so the colour the
+     chrome claims is the colour actually touching it. -->
+<meta name="theme-color" content="#16325C" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14161A" media="(prefers-color-scheme: dark)">
+<title>SMP — Access</title>
+<script>
+  /* The gate has no theme control of its own — one card and a password field
+     is not the place to be offered a preference. It READS the choice made
+     inside the platform (same browser, same key, so the same choice) and
+     otherwise follows the device. Signing in never changes the colours under
+     you.
+
+     In the head and inline, before the stylesheet is even parsed, so the card
+     never paints light and flips. Absence of the attribute is what hands the
+     decision back to prefers-color-scheme, so "auto" removes rather than sets.
+     Storage throws rather than returning null in a private window, hence the
+     catch: a browser that cannot remember still follows the device. */
+  try {
+    var t = localStorage.getItem("smp.theme");
+    if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  } catch (e) {}
+</script>
+<script>
+  /* Registered from the gate ONLY, and deliberately not from the platform.
+     The worker's scope is the whole origin, so one registration covers both,
+     and reaching the platform at all means having signed in here first - so
+     by the time anyone opens it the worker is already installed and has
+     precached it. A second registration in the built file would be the same
+     five lines kept in step by hand for no gain.
+
+     Guarded on protocol as well as support: opened from a memory stick the
+     platform is a file:// page, where there is no worker to register and the
+     attempt throws. */
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").catch(function () {});
+    });
+  }
+</script>
+<style>
+  /* ------------------------------------------------------------------
+     TOKENS
+
+     Light is the definition; dark redefines the same names and nothing else.
+     Every colour on this page is one of these — a hardcoded #fff or #d8dee8
+     left in a rule is a light value that survives into dark, which is exactly
+     how a "dark mode" ends up with one white box in it.
+
+     The values track the platform's own dark palette (_shared.css) so signing
+     in is not a change of scheme, and the three blocks below are the same
+     three the platform uses: bare :root, the device preference, and the
+     explicit choice. Change one, change all three.
+     ------------------------------------------------------------------ */
+  :root {
+    color-scheme: light;
+    --navy: #0f2544;
+    --navy-light: #1b3a63;
+    --gold: #c9a227;
+    --gold-light: #e6c65c;
+    --bg: #f4f6f9;
+    --danger: #b3261e;
+    --card: #ffffff;
+    --field: #ffffff;
+    --line: #d8dee8;
+    --ink: #171b22;
+    --muted: #45536a;
+    --label: #0f2544;
+    --on-navy: #ffffff;
+    --on-navy-soft: #c8d3e2;
+    --on-gold: #0f2544;
+    --shadow: rgba(15, 37, 68, 0.15);
+    --danger-bg: #fdecea;
+    /* The brand wall on the left: three stops, not one flat fill, so the
+       panel has a direction of light instead of reading as a block of paint. */
+    --brand-a: #0a1c36;
+    --brand-b: #16325c;
+    --brand-c: #1f4478;
+    --halo: rgba(255, 255, 255, 0.03);
+    --halo-line: rgba(255, 255, 255, 0.07);
+    --tile: rgba(255, 255, 255, 0.06);
+    --tile-line: rgba(255, 255, 255, 0.10);
+    --tile-icon: rgba(230, 198, 92, 0.16);
+    /* The field the card floats on. */
+    --stage-a: #f7f9fc;
+    --stage-b: #eaeff6;
+    --dot: rgba(15, 37, 68, 0.16);
+    --glass: rgba(255, 255, 255, 0.82);
+    --glass-line: rgba(255, 255, 255, 0.92);
+    --card-shadow:
+      0 1px 3px rgba(15, 37, 68, 0.05),
+      0 8px 24px rgba(15, 37, 68, 0.07),
+      0 20px 48px rgba(15, 37, 68, 0.05);
+    --ring: rgba(201, 162, 39, 0.22);
+    --btn-a: #1b3a63;
+    --btn-b: #0f2544;
+    --btn-shadow: rgba(15, 37, 68, 0.28);
+    --icon: #8894a8;
+    /* The tenant's own mark. Its two brand colours, read off the vector
+       artwork in the client's brand manual, not sampled from a screenshot. */
+    --client-mark: #282e76;
+    --client-flag: #3a67b1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --navy: #24487a;
+      --navy-light: #2e5794;
+      --gold: #d9b665;
+      --gold-light: #e6c65c;
+      --bg: #14161a;
+      --danger: #d97066;
+      --card: #1c2027;
+      --field: #242932;
+      --line: #333a45;
+      --ink: #e9ecf1;
+      --muted: #b4bcc8;
+      --label: #c3cedc;
+      --on-navy: #eaf0fa;
+      --on-navy-soft: #b9c8de;
+      --on-gold: #14161a;
+      --shadow: rgba(0, 0, 0, 0.45);
+      --danger-bg: #33201e;
+      --brand-a: #070a10;
+      --brand-b: #111a2a;
+      --brand-c: #18273e;
+      --halo: rgba(255, 255, 255, 0.025);
+      --halo-line: rgba(255, 255, 255, 0.05);
+      --tile: rgba(255, 255, 255, 0.05);
+      --tile-line: rgba(255, 255, 255, 0.08);
+      --tile-icon: rgba(217, 182, 101, 0.14);
+      --stage-a: #14161a;
+      --stage-b: #0e1015;
+      --dot: rgba(233, 236, 241, 0.09);
+      --glass: rgba(28, 32, 39, 0.82);
+      --glass-line: rgba(255, 255, 255, 0.07);
+      --card-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.40),
+        0 8px 24px rgba(0, 0, 0, 0.45),
+        0 20px 48px rgba(0, 0, 0, 0.35);
+      --ring: rgba(217, 182, 101, 0.22);
+      --btn-a: #2e5794;
+      --btn-b: #24487a;
+      --btn-shadow: rgba(0, 0, 0, 0.45);
+      --icon: #7f8b9d;
+      /* Reversed on a dark ground, which is how the client supplies it. */
+      --client-mark: #ffffff;
+      --client-flag: #ffffff;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --navy: #24487a;
+    --navy-light: #2e5794;
+    --gold: #d9b665;
+    --gold-light: #e6c65c;
+    --bg: #14161a;
+    --danger: #d97066;
+    --card: #1c2027;
+    --field: #242932;
+    --line: #333a45;
+    --ink: #e9ecf1;
+    --muted: #b4bcc8;
+    --label: #c3cedc;
+    --on-navy: #eaf0fa;
+    --on-navy-soft: #b9c8de;
+    --on-gold: #14161a;
+    --shadow: rgba(0, 0, 0, 0.45);
+    --danger-bg: #33201e;
+    --brand-a: #070a10;
+    --brand-b: #111a2a;
+    --brand-c: #18273e;
+    --halo: rgba(255, 255, 255, 0.025);
+    --halo-line: rgba(255, 255, 255, 0.05);
+    --tile: rgba(255, 255, 255, 0.05);
+    --tile-line: rgba(255, 255, 255, 0.08);
+    --tile-icon: rgba(217, 182, 101, 0.14);
+    --stage-a: #14161a;
+    --stage-b: #0e1015;
+    --dot: rgba(233, 236, 241, 0.09);
+    --glass: rgba(28, 32, 39, 0.82);
+    --glass-line: rgba(255, 255, 255, 0.07);
+    --card-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.40),
+      0 8px 24px rgba(0, 0, 0, 0.45),
+      0 20px 48px rgba(0, 0, 0, 0.35);
+    --ring: rgba(217, 182, 101, 0.22);
+    --btn-a: #2e5794;
+    --btn-b: #24487a;
+    --btn-shadow: rgba(0, 0, 0, 0.45);
+    --icon: #7f8b9d;
+    /* Reversed on a dark ground, which is how the client supplies it. */
+    --client-mark: #ffffff;
+    --client-flag: #ffffff;
+  }
+
+  /* ---------------------------------------------------------------
+     THE TENANT'S OWN MARK
+
+     Whose platform this is, on the thing you actually touch. Forefront's
+     temple stays on the wall to the left; the client's lockup sits on the
+     card, because the person at this door works for the client and the two
+     marks then never compete for the same corner. It is on the card rather
+     than the wall for a second reason: below 980px the wall is gone and the
+     card is all there is, so a mark on the wall would vanish on a phone.
+
+     Inlined as a symbol and referenced twice, never written twice: the
+     sign-in card and the choose-a-password card are two doors into the same
+     tenant, and one definition cannot disagree with itself.
+
+     Drawn from the VECTOR artwork in the client's own brand manual
+     (Chapter 03, Sub-brands - Online, which is the version the manual
+     specifies for screens). The supplied JPEGs are the record of what was
+     handed over, not the asset: they carry an opaque grey ground and would
+     paint a rectangle around themselves here.
+     --------------------------------------------------------------- */
+  .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .clientmark {
+    display: block; width: 150px; height: 31.2px; margin: 0 auto 18px;
+  }
+  /* The fills are declared INLINE inside the symbol, not here: a <use>
+     clones into a shadow tree that a document selector cannot reach.
+     Custom properties cross that boundary, so the tokens still theme it. */
+  /* Separates whose platform this is from the greeting. Without it the
+     lockup reads as a picture inside the greeting rather than a letterhead
+     over it. */
+  .clientmark + hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 20px; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--stage-a);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* NOTHING IS SHOWN UNTIL THE ANSWER IS KNOWN — see show() below. The whole
+     gate, not just the card: a brand wall that paints and is then replaced by
+     the platform half a second later is the same flash the old three-state
+     door had, moved to a bigger element. */
+  .gate { opacity: 0; transition: opacity .18s ease; display: flex; min-height: 100vh; }
+  body.ready .gate { opacity: 1; }
+
+  /* ---------------------------------------------------------------
+     LEFT — the brand wall
+     --------------------------------------------------------------- */
+  .brand {
+    width: 43%;
+    flex: none;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 44px 34px;
+    color: var(--on-navy);
+    background: linear-gradient(160deg, var(--brand-a) 0%, var(--brand-b) 42%, var(--brand-c) 100%);
+  }
+  /* Three faint rings bleeding off the edges. Geometry, not decoration for its
+     own sake — the mark is a temple, and a circle is what a pediment is drawn
+     against. pointer-events:none so they never eat a click. */
+  .halo { position: absolute; border-radius: 50%; pointer-events: none; background: var(--halo); border: 1px solid var(--halo-line); }
+  .halo-a { top: -90px; right: -90px; width: 340px; height: 340px; }
+  .halo-b { bottom: -140px; left: -70px; width: 440px; height: 440px; }
+  .halo-c { top: 44%; right: -50px; width: 190px; height: 190px; background: none; }
+
+  /* Centred rather than top-aligned: the wall is taller than its content on
+     every real screen, and a block pinned to the top leaves the gap between
+     it and the quote — which is the one thing a reader's eye lands on. */
+  .brand-in {
+    position: relative; z-index: 1; flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .mark-row { display: flex; align-items: center; gap: 13px; margin-bottom: 38px; }
+  .mark {
+    flex: none; width: 44px; height: 44px; border-radius: 12px;
+    background: var(--on-navy); display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+  .mark svg { width: 30px; height: 30px; display: block; }
+  .mark-row h1 { font-size: 13px; font-weight: 700; letter-spacing: 0.13em; line-height: 1.3; }
+  .mark-row p { font-size: 11.5px; margin-top: 3px; color: var(--on-navy-soft); letter-spacing: 0.02em; }
+
+  .hero { margin-bottom: 30px; }
+  .hero h2 { font-size: 29px; font-weight: 700; line-height: 1.18; letter-spacing: -0.01em; }
+  /* The half of the sentence that carries the idea, in gold. background-clip
+     needs a colour behind it for browsers that ignore it, hence the fallback
+     declaration first. */
+  .hero em {
+    font-style: normal;
+    color: var(--gold-light);
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { margin-top: 12px; font-size: 14px; line-height: 1.6; max-width: 350px; color: var(--on-navy-soft); }
+
+  .props { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .props li {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px; border-radius: 12px;
+    background: var(--tile); border: 1px solid var(--tile-line);
+    transition: transform .25s ease, background .25s ease;
+  }
+  .props li:hover { transform: translateX(4px); background: var(--tile-line); }
+  .props .ic {
+    flex: none; width: 36px; height: 36px; border-radius: 10px;
+    background: var(--tile-icon); display: flex; align-items: center; justify-content: center;
+    color: var(--gold-light);
+  }
+  .props b { display: block; font-size: 13.5px; font-weight: 600; }
+  .props span { display: block; font-size: 11.5px; margin-top: 2px; color: var(--on-navy-soft); }
+
+  .quote {
+    position: relative; z-index: 1; margin-top: auto; padding: 22px 0 0 16px;
+    border-left: 3px solid var(--gold); margin-left: 1px;
+    font-size: 13.5px; font-style: italic; line-height: 1.55; color: var(--on-navy-soft);
+  }
+
+  /* ---------------------------------------------------------------
+     RIGHT — the stage the card floats on
+     --------------------------------------------------------------- */
+  .stage {
+    flex: 1 1 auto;
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px;
+    background: linear-gradient(180deg, var(--stage-a) 0%, var(--stage-b) 100%);
+  }
+  /* A dot grid, not a texture image: it is three lines of CSS, it scales, and
+     it costs nothing offline. */
+  .dots {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(circle, var(--dot) 0.8px, transparent 0.8px);
+    background-size: 24px 24px;
+  }
+  .frame { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+
+  /* The brand bar for narrow screens. Full-bleed to the top edge so the
+     window chrome's declared navy is the navy actually there. */
+  .mobrand { display: none; }
+
+  /* ---------------------------------------------------------------
+     The card
+     --------------------------------------------------------------- */
+  .card {
+    background: var(--glass);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-line);
+    border-radius: 20px;
+    padding: 38px 34px 34px;
+    box-shadow: var(--card-shadow);
+  }
+  .card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--label); letter-spacing: -0.01em; }
+  .card h2 + p { margin-top: 6px; text-align: center; font-size: 13.5px; color: var(--muted); }
+  .card form { margin-top: 26px; }
+
+  label {
+    display: block; font-size: 12.5px; font-weight: 600; color: var(--label);
+    margin-bottom: 7px; letter-spacing: 0.01em;
+  }
+  /* Icon inside the box rather than a label doing all the work: at a glance
+     the shape of the field says what belongs in it. */
+  .field { position: relative; margin-bottom: 18px; }
+  .field > svg {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    width: 18px; height: 18px; color: var(--icon); pointer-events: none;
+  }
+  input[type="password"], input[type="text"] {
+    width: 100%;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 14px 13px 44px;
+    font-size: 14.5px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+    /* Both stated, or the field keeps the user agent's white-on-black and
+       the one box on the page that takes typing is the one that ignores the
+       theme. */
+    background: var(--field);
+    color: var(--ink);
+  }
+  input[type="password"] { padding-right: 44px; }
+  input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--ring); }
+  /* A password you cannot read back is a password you mistype twice. */
+  .eye {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; padding: 5px; cursor: pointer;
+    color: var(--icon); line-height: 0; border-radius: 8px;
+  }
+  .eye:hover { color: var(--label); }
+  .eye svg { width: 18px; height: 18px; display: block; }
+  .eye .i-shut, .eye.revealed .i-open { display: none; }
+  .eye.revealed .i-shut { display: block; }
+
+  /* Legacy mode has no account to type — it names the one access there is. */
+  .access-name {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--field); border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 13px 14px; font-size: 14.5px; font-weight: 600; color: var(--label);
+    margin-bottom: 18px;
+  }
+  .access-name svg { width: 18px; height: 18px; color: var(--icon); flex: none; }
+
+  button[type="submit"] {
+    width: 100%;
+    background: linear-gradient(135deg, var(--btn-a) 0%, var(--btn-b) 100%);
+    color: var(--on-navy);
+    border: none; border-radius: 12px;
+    padding: 14px; font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--btn-shadow);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  button[type="submit"]:hover { transform: translateY(-1px); box-shadow: 0 6px 20px var(--btn-shadow); }
+  button[type="submit"]:active { transform: translateY(0); }
+
+  .error {
+    color: var(--danger); background: var(--danger-bg);
+    border: 1px solid var(--danger); border-radius: 12px;
+    padding: 11px 13px; font-size: 13px; line-height: 1.45;
+    margin-bottom: 16px; display: none;
+  }
+  .hint { color: var(--muted); font-size: 12px; line-height: 1.5; margin: -10px 0 16px; }
+  .foot { margin-top: 20px; text-align: center; font-size: 11.5px; color: var(--muted); }
+  .copy { margin-top: 26px; text-align: center; font-size: 11px; color: var(--muted); opacity: .8; }
+
+  #change { display: none; }
+
+  /* ---------------------------------------------------------------
+     Entrance. Declared under body.ready so the stagger runs when the gate
+     is revealed, not while it is still hidden and nobody can see it.
+     --------------------------------------------------------------- */
+  @keyframes rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  body.ready .mark-row { animation: rise .5s ease-out both; }
+  body.ready .hero    { animation: rise .5s ease-out .08s both; }
+  body.ready .props li:nth-child(1) { animation: rise .5s ease-out .16s both; }
+  body.ready .props li:nth-child(2) { animation: rise .5s ease-out .22s both; }
+  body.ready .props li:nth-child(3) { animation: rise .5s ease-out .28s both; }
+  body.ready .props li:nth-child(4) { animation: rise .5s ease-out .34s both; }
+  body.ready .quote   { animation: rise .5s ease-out .40s both; }
+  body.ready .frame   { animation: rise .5s ease-out .10s both; }
+
+  /* ---------------------------------------------------------------
+     Widths. Verified by sweep, not by the one width that passes (§27.1):
+     the split holds down to 980px — Islam's laptop is 1000 — and below that
+     the wall becomes a bar rather than being squeezed into a column too
+     narrow to read.
+     --------------------------------------------------------------- */
+  @media (max-width: 1180px) {
+    .brand { padding: 34px 32px 28px; }
+    .hero h2 { font-size: 25px; }
+    .props li { padding: 10px 13px; gap: 11px; }
+  }
+  @media (max-width: 980px) {
+    .brand { display: none; }
+    .stage { padding: 0 20px 32px; justify-content: flex-start; }
+    .mobrand {
+      display: flex; align-items: center; gap: 12px;
+      align-self: stretch; margin: 0 -20px 30px; padding: 20px;
+      background: linear-gradient(135deg, var(--brand-b), var(--brand-c));
+      color: var(--on-navy); position: relative; z-index: 1;
+    }
+    .mobrand h1 { font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; }
+    .mobrand p { font-size: 11px; margin-top: 2px; color: var(--on-navy-soft); }
+    .frame { margin: 0 auto; }
+    body.ready .frame { animation: rise .5s ease-out both; }
+  }
+  @media (max-width: 460px) {
+    .card { padding: 30px 22px 26px; border-radius: 16px; }
+  }
+  /* SHORT windows, not narrow ones. Measured: the wall's content needs about
+     600px of height, so on a 1024x560 laptop the quote fell below the fold and
+     the whole page grew a scrollbar to reach a decorative line. Width was never
+     the constraint here — height was, and a max-width query cannot see it. */
+  @media (max-height: 700px) and (min-width: 981px) {
+    .brand { padding: 26px 32px 22px; }
+    .mark-row { margin-bottom: 22px; }
+    .hero { margin-bottom: 20px; }
+    .hero h2 { font-size: 23px; }
+    .hero p { margin-top: 9px; font-size: 13px; }
+    .props { gap: 8px; }
+    .props li { padding: 9px 13px; }
+    .quote { padding-top: 14px; font-size: 12.5px; }
+  }
+  /* An entrance is a courtesy; for anyone who has asked for less motion it is
+     an obstacle. Nothing here depends on an animation to become visible. */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+<defs>
+  <path id="rt_5_1" d="M.042999269 0 .2290039 .7299957H.3710022L.55700686 0H.44799806L.40400697 .18499756H.19700623L.15299988 0H.042999269M.21699524 .27400209H.3829956L.33299256 .4850006C.32433573 .5223338 .3171692 .5548299 .31149293 .582489 .3058268 .61015829 .30199687 .6289978 .30000306 .63900759 .29799906 .6289978 .29433189 .61015829 .28900147 .582489 .28367106 .5548299 .27633668 .52266439 .2669983 .48599244L.21699524 .27400209Z"/>
+  <path id="rt_5_124" d="M.083999637 0V.7299957H.31300355C.3590037 .7299957 .39900209 .7211609 .43299867 .7034912 .46699525 .6858317 .49349467 .66100057 .51249697 .6289978 .5314992 .59699508 .54100039 .55933126 .54100039 .51600649 .54100039 .46733094 .52849838 .42516075 .50349429 .38949586 .47850038 .35383097 .44466654 .32866416 .4019928 .31399537L.5509949 0H.42799378L.29499818 .30000306H.19200135V0H.083999637M.19200135 .39500428H.31300355C.34900413 .39500428 .3776703 .405838 .39900209 .4275055 .42033387 .44917298 .43099977 .478007 .43099977 .51400759 .43099977 .55134078 .42033387 .5806732 .39900209 .602005 .3776703 .6233368 .34900413 .6340027 .31300355 .6340027H.19200135V.39500428Z"/>
+  <path id="rt_5_136" d="M.2460022 0V.6309967H.050994874V.7310028H.548996V.6309967H.3540039V0H.2460022Z"/>
+  <path id="rt_5_33" d="M.08299255 0V.7299957H.28700257C.33499656 .7299957 .3766581 .72083029 .4119873 .7024994 .44732667 .6841685 .4748281 .6583354 .49449159 .625 .5141652 .5916646 .5240021 .5523326 .5240021 .5070038V.22399903C.5240021 .17933147 .5141652 .13999431 .49449159 .10598755 .4748281 .07199097 .44732667 .04582723 .4119873 .027496338 .3766581 .009165446 .33499656 0 .28700257 0H.08299255M.19099427 .0980072H.28700257C.32700096 .0980072 .35850016 .10917155 .38150025 .13150025 .40450035 .15382894 .41600038 .18466187 .41600038 .22399903V.5070038C.41600038 .54566958 .40450035 .5761668 .38150025 .5984955 .35850016 .62083438 .32700096 .6320038 .28700257 .6320038H.19099427V.0980072Z"/>
+  <path id="rt_5_37" d="M.09399414 0V.7299957H.522995V.6340027H.19999695V.42700196H.4880066V.33200074H.19999695V.09599304H.522995V0H.09399414Z"/>
+</defs>
+<symbol id="raya-trade" viewBox="0 0 157.66 32.82">
+  <g style="fill:var(--client-mark)">
+    <path transform="matrix(1,0,0,-1,54.995805,7.5039064)" d="M0 0-3.68-7.406-7.36 0"/>
+    <path transform="matrix(1,0,0,-1,18.16771,15.65329)" d="M0 0H-4.194V3.552H0C3.133 3.552 3.171 0 0 0M29.972-5.399 24.067 8.079H16.954L9.949-7.474C9.949-4.627 8.903-1.567 6.53-1.567 11.793 .027 10.263 8.079 3.445 8.079H-10.725V-9.686H-4.089V-4.014C1.351-4.014 2.718-2.996 2.718-8.376 2.718-9.486 3.174-9.686 4.086-9.686H15.722L20.726 2.246 24.864-9.686 26.638-9.673 25.379-5.944C25.379-5.944 29.504-5.933 29.76-5.923 30.068-5.825 30.024-5.536 29.972-5.399"/>
+    <path transform="matrix(1,0,0,-1,50.988405,25.338898)" d="M0 0 .286 .012C.955 .012 1.384 .937 1.744 1.64 2.044 2.211 2.278 2.678 2.303 2.729L9.291 17.765H15.763L23.523 0H16.957L12.587 11.932 7.755 0H.359"/>
+    <use data-text="T" xlink:href="#rt_5_136" transform="matrix(14.6443,0,0,-14.6443,108.45041,22.3219)"/>
+    <use data-text="R" xlink:href="#rt_5_124" transform="matrix(14.6443,0,0,-14.6443,118.55498,22.3219)"/>
+    <use data-text="A" xlink:href="#rt_5_1" transform="matrix(14.6443,0,0,-14.6443,128.65955,22.3219)"/>
+    <use data-text="D" xlink:href="#rt_5_33" transform="matrix(14.6443,0,0,-14.6443,138.76412,22.3219)"/>
+    <use data-text="E" xlink:href="#rt_5_37" transform="matrix(14.6443,0,0,-14.6443,148.86867,22.3219)"/>
+  </g>
+  <g style="fill:var(--client-flag)">
+    <path transform="matrix(1,0,0,-1,91.19791,22.0112)" d="M0 0-7.406 3.68 0 7.36"/>
+    <path transform="matrix(1,0,0,-1,92.3763,10.97171)" d="M0 0 7.406-3.68 0-7.36"/>
+  </g>
+</symbol>
+</svg>
+
+<div class="gate">
+
+  <!-- =========================================================
+       The brand wall. Everything claimed here is something SMP
+       actually does — no invented capability on the front door.
+       ========================================================= -->
+  <aside class="brand">
+    <span class="halo halo-a"></span>
+    <span class="halo halo-b"></span>
+    <span class="halo halo-c"></span>
+
+    <div class="brand-in">
+      <div class="mark-row">
+        <span class="mark">
+          <!-- The Strategy Temple, the same drawing as favicon.svg. Inlined
+               rather than linked so the wall paints with no second request,
+               and drawn on the white tile so it keeps its own navy. -->
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path d="M16 5.2 27.4 12H4.6z" fill="#16325C"/>
+            <rect x="5.2" y="13.2" width="21.6" height="2.4" fill="#16325C"/>
+            <rect x="7.2" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+            <rect x="14.4" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+            <rect x="21.6" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+            <rect x="4.4" y="25.6" width="23.2" height="2.8" rx="0.6" fill="#16325C"/>
+          </svg>
+        </span>
+        <div>
+          <h1>FOREFRONT CONSULTING</h1>
+          <p>Strategy Management Platform</p>
+        </div>
+      </div>
+
+      <div class="hero">
+        <h2>Every plan,<br><em>measured the same way</em>.</h2>
+        <p>Group and business-unit strategy — planned, scored, reported and reviewed in one place.</p>
+      </div>
+
+      <ul class="props">
+        <li>
+          <span class="ic">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </span>
+          <div><b>Scores nobody types</b><span>Derived from the plan and the actuals, every time</span></div>
+        </li>
+        <li>
+          <span class="ic">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </span>
+          <div><b>Cycles that keep their record</b><span>Each reporting cycle snapshotted, never overwritten</span></div>
+        </li>
+        <li>
+          <span class="ic">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </span>
+          <div><b>Everyone sees their own view</b><span>By role, from group CEO to strategy custodian</span></div>
+        </li>
+        <li>
+          <span class="ic">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+            </svg>
+          </span>
+          <div><b>Installs, and opens offline</b><span>One file the browser keeps, on any device</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <p class="quote">&ldquo;A strategy you cannot measure is a document.&rdquo;</p>
+  </aside>
+
+  <!-- =========================================================
+       The stage
+       ========================================================= -->
+  <main class="stage">
+    <div class="dots"></div>
+
+    <!-- Shown only below 980px, where the wall is gone. -->
+    <div class="mobrand">
+      <span class="mark">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M16 5.2 27.4 12H4.6z" fill="#16325C"/>
+          <rect x="5.2" y="13.2" width="21.6" height="2.4" fill="#16325C"/>
+          <rect x="7.2" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+          <rect x="14.4" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+          <rect x="21.6" y="17" width="3.2" height="7.4" fill="#C9A24D"/>
+          <rect x="4.4" y="25.6" width="23.2" height="2.8" rx="0.6" fill="#16325C"/>
+        </svg>
+      </span>
+      <div>
+        <h1>FOREFRONT CONSULTING</h1>
+        <p>Strategy Management Platform</p>
+      </div>
+    </div>
+
+    <div class="frame">
+
+      <!-- Sign in -->
+      <div class="card" id="login">
+        <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
+        <hr>
+        <h2>Welcome back</h2>
+        <p>Sign in to continue</p>
+        <form id="loginForm">
+          <label id="accessLabel" for="password">Access</label>
+          <!-- Served with a database behind it, sign-in is a real account (a
+               person key issued by the SMO). Without one — the local file, or
+               static hosting — the original AdminSMO gate stands. -->
+          <div class="field" id="userField" hidden>
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            <input type="text" id="user" autocomplete="username" autocapitalize="none" placeholder="Your person key">
+          </div>
+          <div class="access-name" id="fixedAccess">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            AdminSMO
+          </div>
+
+          <label for="password">Password</label>
+          <div class="field">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <input type="password" id="password" autocomplete="current-password" placeholder="Enter your password" autofocus>
+            <button type="button" class="eye" aria-label="Show password">
+              <svg class="i-open" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg class="i-shut" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M3 3l18 18"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="error" id="error">Incorrect password. Please try again.</div>
+          <button type="submit">Sign In</button>
+        </form>
+        <!-- Stated because it is a promise the product keeps: the session cookie
+             is 30 days (lib/auth.js SESSION_DAYS), so signing in once on a
+             device holds for a month. -->
+        <p class="foot">You will stay signed in on this device for 30 days.</p>
+      </div>
+
+      <!-- First sign-in: the issued password is temporary -->
+      <div class="card" id="change">
+        <svg class="clientmark" role="img" aria-label="Raya Trade"><use href="#raya-trade"/></svg>
+        <hr>
+        <h2>Choose your own password</h2>
+        <p>The one you were issued is temporary</p>
+        <form id="changeForm">
+          <label for="newpw">New password</label>
+          <div class="field">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <input type="password" id="newpw" autocomplete="new-password" placeholder="At least 8 characters">
+            <button type="button" class="eye" aria-label="Show password">
+              <svg class="i-open" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg class="i-shut" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M3 3l18 18"/>
+              </svg>
+            </button>
+          </div>
+          <p class="hint">At least 8 characters, with an uppercase letter, a number and a special character.</p>
+          <label for="newpw2">Repeat it</label>
+          <div class="field">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <input type="password" id="newpw2" autocomplete="new-password" placeholder="Type it again">
+            <button type="button" class="eye" aria-label="Show password">
+              <svg class="i-open" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+              </svg>
+              <svg class="i-shut" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M3 3l18 18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="error" id="changeError"></div>
+          <button type="submit">Set password</button>
+        </form>
+      </div>
+
+      <p class="copy">&copy; 2026 Forefront Consulting</p>
+    </div>
+  </main>
+
+</div>
+
+<!-- The "Starting page" card - a badge, a welcome line and a button that
+     went to the platform - was removed in 3.7. Signing in IS the request to
+     open the platform; a page whose only purpose is to offer a button to the
+     thing you just asked for is a door behind a door. Sign out lives in the
+     platform's own top bar, which is where you are when you want it. -->
+
+<script>
+  /* Two modes, decided once at load.
+
+     SERVER — the page is served next to /api/auth with a database behind it:
+     sign-in is a real account checked on the server, an issued password must
+     be changed on first use, and the session is an httpOnly cookie.
+
+     LEGACY — the local file, or hosting with no database: the original
+     client-side AdminSMO gate, which was always a latch rather than a lock
+     and remains labelled as such in the decisions document (§19). */
+  var LEGACY = { user: "AdminSMO", password: "4123" };
+  var MODE = "legacy";
+  var PERSON = null;
+
+  var loginCard = document.getElementById("login");
+  var changeCard = document.getElementById("change");
+  var errorEl = document.getElementById("error");
+  var changeErrorEl = document.getElementById("changeError");
+  var userEl = document.getElementById("user");
+  var passwordEl = document.getElementById("password");
+
+  /* NOTHING IS SHOWN UNTIL THE ANSWER IS KNOWN.
+
+     The gate used to paint the sign-in card immediately, then reveal the user
+     field when /api/auth answered, then - if a session was already valid -
+     swap the whole card for a starting page. Three states in about a second,
+     which is what Islam saw as "it opens on user and password, lags, then
+     shifts to another window".
+
+     There is one honest thing to show before the answer arrives, and it is
+     nothing. The gate is hidden until the session check resolves; if a session
+     is live the platform is opened and the gate is never seen at all. */
+  function show(which) {
+    loginCard.style.display = which === "login" ? "block" : "none";
+    changeCard.style.display = which === "change" ? "block" : "none";
+    document.body.classList.add("ready");
+    if (which === "login") passwordEl.focus();
+    if (which === "change") document.getElementById("newpw").focus();
+  }
+
+  /* WHERE THE PLATFORM IS, and what the address bar says it is.
+
+     The versioned filename is deliberate — the version IS the cache bust — but
+     it has no business being read by a person: Islam saw
+     /SMP-Project-Folder/strategy-management-platform-v3.18.html and asked,
+     fairly, what the rest of it was for. Served, a Vercel rewrite maps the
+     tenant's own name onto that file, so the address reads
+     <domain>/raya-trade and the repo's shape and the version number stay
+     where they belong, which is out of sight.
+
+     Opened from a memory stick there is no server to rewrite anything, so the
+     real relative path stands. The pretty URL is a property of being hosted,
+     and claiming it offline would just be a broken link.
+
+     When the platform becomes multi-tenant (§36) this is the seam: the slug is
+     already the tenant's, and it is already in the URL. */
+  var TENANT = "raya-trade";
+  var HOSTED = location.protocol === "http:" || location.protocol === "https:";
+  var PLATFORM = HOSTED
+    ? "/" + TENANT
+    : "SMP-Project-Folder/strategy-management-platform-v3.18.html";
+  function openPlatform() { location.replace(PLATFORM); }
+  function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
+  function clearFail(el) { el.style.display = "none"; }
+
+  /* Three password fields now, so the reveal is wired once over all of them
+     rather than three times by hand (DRY: extract at three). */
+  Array.prototype.forEach.call(document.querySelectorAll(".eye"), function (btn) {
+    btn.addEventListener("click", function () {
+      var input = btn.parentNode.querySelector("input");
+      if (!input) return;
+      var reveal = input.type === "password";
+      input.type = reveal ? "text" : "password";
+      btn.classList.toggle("revealed", reveal);
+      btn.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+      input.focus();
+    });
+  });
+
+  function api(body) {
+    return fetch("/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); });
+  }
+
+  function enterServerMode() {
+    MODE = "server";
+    /* The whole field, not just the input: the icon lives in the wrapper, and
+       unhiding one without the other leaves a lock floating on the page. */
+    document.getElementById("userField").hidden = false;
+    document.getElementById("fixedAccess").style.display = "none";
+    document.getElementById("accessLabel").setAttribute("for", "user");
+  }
+  function signedIn(person) {
+    PERSON = person;
+    /* A temporary password is the one thing that stands between signing in and
+       being in: it has to be replaced before the session is any use. Anything
+       else goes straight through. */
+    if (person && person.mustChange) show("change");
+    else openPlatform();
+  }
+
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearFail(errorEl);
+    if (MODE === "server") {
+      api({ action: "login", user: userEl.value.trim(), password: passwordEl.value })
+        .then(function (j) {
+          passwordEl.value = "";
+          if (j.ok) signedIn(j.person);
+          else fail(errorEl, j.error || "Sign-in failed.");
+        })
+        .catch(function () { fail(errorEl, "Could not reach the server."); });
+      return;
+    }
+    if (passwordEl.value === LEGACY.password) {
+      sessionStorage.setItem("smp_access", LEGACY.user);
+      passwordEl.value = "";
+      signedIn({ name: LEGACY.user, mustChange: false });
+    } else {
+      fail(errorEl, "Incorrect password. Please try again.");
+      passwordEl.value = "";
+      passwordEl.focus();
+    }
+  });
+
+  document.getElementById("changeForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    clearFail(changeErrorEl);
+    var a = document.getElementById("newpw").value;
+    var b = document.getElementById("newpw2").value;
+    if (a !== b) return fail(changeErrorEl, "The two entries differ.");
+    api({ action: "change", password: a }).then(function (j) {
+      if (j.ok) {
+        document.getElementById("newpw").value = "";
+        document.getElementById("newpw2").value = "";
+        PERSON.mustChange = false;
+        /* The password is theirs now - straight in, same as any other
+           successful sign-in. */
+        openPlatform();
+      } else fail(changeErrorEl, j.error || "Could not set the password.");
+    }).catch(function () { fail(changeErrorEl, "Could not reach the server."); });
+  });
+
+  /* Sign out lived on the starting page, which no longer exists. It is in the
+     platform's own top bar, which posts to /api/auth and returns here - and
+     here, with no session, is the sign-in card. */
+
+  /* Decide the mode. file:// can never reach an API; over http(s) the answer
+     comes from /api/auth itself — a 503 means hosting with no database, and
+     the legacy gate stands. */
+  function legacyStart() {
+    if (sessionStorage.getItem("smp_access") === LEGACY.user) signedIn({ name: LEGACY.user, mustChange: false });
+    else show("login");
+  }
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    fetch("/api/auth", { cache: "no-store" })
+      .then(function (r) {
+        if (r.status === 503) throw new Error("no db");
+        return r.json();
+      })
+      .then(function (j) {
+        enterServerMode();
+        if (j.ok && j.person) signedIn(j.person);
+        else show("login");
+      })
+      .catch(legacyStart);
+  } else {
+    legacyStart();
+  }
+</script>
+</body>
+</html>

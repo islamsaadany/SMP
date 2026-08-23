@@ -14,18 +14,34 @@ The Raya Trade wordmark, as supplied.
 
 | File | What it is |
 |---|---|
-| `logo-black.jpg` | The lockup in the brand navy, 633 × 81 |
-| `logo-white.jpg` | The reversed lockup, 633 × 81 |
+| `logo-raya-trade.svg` | **The asset.** The lockup in the brand's own colours, vector |
+| `logo-raya-trade-white.svg` | The same lockup reversed, for a dark ground |
+| `logo-black.jpg` | As supplied over WhatsApp, 633 × 81 |
+| `logo-white.jpg` | As supplied over WhatsApp, 633 × 81 |
 
-**Neither is usable in the product as it stands.** They are JPEGs, so they have
+The two SVGs were extracted from the vector artwork on **page 24 of the brand
+manual** (Chapter 03, *Sub-brands - Online / Full Name*) — which is the version
+the manual itself specifies for screens, and the same lockup that was supplied
+as JPEG. The manual draws it over a pale construction grid in `#CDDDF0`; those
+paths are guides, not the mark, and are dropped. Colours are read off the
+artwork rather than sampled from a screenshot: `#282E76` for the wordmark and
+the word TRADE, `#3A67B1` for the flag. The reversed file is the same drawing
+with both set to white, which is how the client supplies it.
+
+There are two other Raya Trade lockups in the manual, deliberately not used
+here: the *offline* sub-brand (page 31, RAYA over a filled TRADE bar) and the
+co-branding lockup (page 33, used when Raya Trade appears beside a line of
+business).
+
+**Neither JPEG is usable in the product.** They are JPEGs, so they have
 no transparency: `logo-black.jpg` carries an opaque `#D9D9D9` ground and
 `logo-white.jpg` an opaque `#F6F6F6` one — the white lockup on a near-white
 rectangle is invisible, and either one dropped onto the sign-in card paints a
 grey box around itself. A logo needs an alpha channel or a vector; these are
 the record of what was supplied, not the asset to ship.
 
-`reference/subsidiary-lockups.pdf` holds the same mark as **vector paths**
-(56 of them, no embedded images), which is where a real asset should come from.
+They are kept as the record of what was handed over. The SVGs above are what
+the product draws.
 
 ## reference/
 

@@ -1554,6 +1554,29 @@
        share one picker now, wired in wirePicker() below (§35). */
     var au = document.getElementById("addunit");
     if (au) au.addEventListener("click", function(){ addBusinessUnit(); paint(); });
+    /* Capabilities: add, name, remove — the SMO's, behind the same key the
+       rest of the page is behind (§51.11). */
+    var ac = document.getElementById("addcap");
+    if (ac) ac.addEventListener("click", function(){
+      if (grant("c_caps") !== "edit") return;
+      addCapability(); paint();
+    });
+    document.querySelectorAll("[data-capname]").forEach(function(el){
+      el.addEventListener("change", function(){
+        if (grant("c_caps") !== "edit") return;
+        var c = GROUP.capabilities[+el.dataset.capname];
+        if (c) { c.name = el.value.trim() || c.name; paint(); }
+      });
+    });
+    document.querySelectorAll("[data-caprm]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (grant("c_caps") !== "edit") return;
+        var i = +b.dataset.caprm, held = capabilityHolds(GROUP.capabilities[i]);
+        if (held && !confirm("Remove " + held + "? This cannot be undone here.")) return;
+        GROUP.capabilities.splice(i, 1);
+        paint();
+      });
+    });
     /* Choosing from the menu closes it and raises the confirmation, so the
        destructive act is still two deliberate presses. */
     document.querySelectorAll("[data-clear]").forEach(function(b){
@@ -1600,8 +1623,12 @@
                              name:"New objective", group:null, dir:"\u2265", target3y:"", target:"",
                              compile:"Latest", actual:"", progress:null });
         if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
-        if (k === "cap")   GROUP.capabilities.push({ name:"New capability", def:"",
-                             measures:[], tactics:[] });
+        /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
+           `measures` and `tactics` — fields §15 removed — so the row had no
+           id, no function and neither list, and the Capabilities page threw on
+           the next paint. One function mints one now, and both places that add
+           a capability call it. */
+        if (k === "cap")   addCapability();
         paint();
       });
     });
@@ -1618,12 +1645,11 @@
           if (m && (m.actual || m.target)) what = 'the objective "' + m.name + '"' +
             (m.actual ? " and its reported " + m.actual : "");
         }
-        if (p[0] === "cap") {
-          var cp = GROUP.capabilities[i];
-          if (cp && (cp.measures.length || cp.tactics.length))
-            what = '"' + cp.name + '" with ' + cp.measures.length + " measures and " +
-                   cp.tactics.length + " tactics under it";
-        }
+        /* Read from the fields a capability ACTUALLY has. This asked for
+           `measures.length` on an object that has not carried `measures` since
+           §15, so it threw before it could confirm anything and the removal
+           never ran (§51.11). */
+        if (p[0] === "cap") what = capabilityHolds(GROUP.capabilities[i]) || null;
         if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);

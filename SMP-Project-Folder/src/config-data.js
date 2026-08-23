@@ -2133,6 +2133,47 @@ GROUP.capabilities.forEach(function(c, ci){
   renumberCapability(c);
 });
 
+/* ── Minting a capability (§51.11) ────────────────────────────────────────
+   THE ONE PLACE A CAPABILITY IS BORN. There was an add button on the Temple
+   page that pushed `{ name, def, measures:[], tactics:[] }` — the shape a
+   capability had BEFORE §15 replaced measures and tactics with key objectives
+   and projects. So the row it made had no id, no function, and neither of the
+   two lists every reader expects, and the Capabilities Setup page threw
+   `Cannot read properties of undefined` and rendered nothing at all. Adding a
+   capability took the product down.
+
+   §24's rule with the sign reversed: when a field is renamed, the code that
+   CREATES it has to be found as well as the code that reads it. A reader that
+   crashes is at least loud; a writer that mints the old shape is silent until
+   somebody opens the page.
+
+   The id must not collide with one already in use, so it is taken from the
+   highest number in play rather than from the length — removing a capability
+   and adding another would otherwise hand the newcomer a dead row's id. */
+function addCapability(fnKey){
+  var n = 0;
+  GROUP.capabilities.forEach(function(c){
+    var m = /^cap(\d+)$/.exec(String(c.id || ""));
+    if (m) n = Math.max(n, +m[1]);
+  });
+  var made = { id:"cap" + (n + 1), name:"New capability", def:"",
+               fn:fnKey || null, keyObjectives:[], projects:[] };
+  GROUP.capabilities.push(made);
+  renumberCapability(made);
+  return made;
+}
+/* What removing one would destroy, in words, or "" when it is an empty row
+   somebody added a moment ago. Read from the fields a capability ACTUALLY has
+   — the old check read `measures` and `tactics` and threw on every real one,
+   so the confirmation never appeared and the removal never happened. */
+function capabilityHolds(c){
+  if (!c) return "";
+  var k = (c.keyObjectives || []).length, p = (c.projects || []).length;
+  if (!k && !p) return "";
+  return '"' + (c.name || "this capability") + '" with ' +
+    plural(k, "key objective") + " and " + plural(p, "project") + " under it";
+}
+
 /* Address any row inside a capability by its id: a key objective, or a
    deliverable, outcome or milestone inside one of its projects. Reporting
    needs this to write an entry back — without it a figure could be typed and

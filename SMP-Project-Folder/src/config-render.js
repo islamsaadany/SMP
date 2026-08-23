@@ -2435,7 +2435,14 @@ function renderCaps(){
   var rows = GROUP.capabilities.map(function(c, i){
     var f = functionOf(c.fn);
     return '<tr><td class="idx">' + (i+1) + '</td>' +
-      '<td><b>' + esc(c.name) + '</b></td>' +
+      /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
+         else, so a capability could be given an owner but never renamed —
+         and a capability added from Temple arrived called "New capability"
+         with no way on this page to say what it actually is. */
+      '<td>' + (editable
+        ? '<input class="fld" value="' + esc(c.name) + '" data-capname="' + i +
+          '" aria-label="Name of capability ' + (i+1) + '">'
+        : '<b>' + esc(c.name) + '</b>') + '</td>' +
       '<td>' + (editable
         /* NAMED. Eight of these on one page announced as eight identical
            unnamed combo boxes, and the searchable button in front of each
@@ -2449,8 +2456,14 @@ function renderCaps(){
             }).join("") + '</select>'
         : '<span class="val">' + esc(f ? f.name : "\u2014") + '</span>') + '</td>' +
       '<td class="nowrapcell">' + esc(f ? (personName(f.head) || "\u2014") : "\u2014") + '</td>' +
-      '<td class="num">' + c.keyObjectives.length + '</td>' +
-      '<td class="num">' + c.projects.length + '</td></tr>';
+      /* Defensive on purpose: a capability minted by an older build carries
+         neither list, and a Setup page that throws takes the whole screen with
+         it. The minting is fixed (§51.11); this is so a graph saved before the
+         fix still opens. */
+      '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
+      '<td class="num">' + (c.projects || []).length + '</td>' +
+      '<td class="cc">' + (editable
+        ? '<button class="rmbtn" data-caprm="' + i + '">Remove</button>' : '') + '</td></tr>';
   }).join("");
 
   var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
@@ -2463,8 +2476,14 @@ function renderCaps(){
          shading rather than as a long name. */
       '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:26%">Capability</th>' +
         '<th style="width:20%">Owned by</th><th style="width:24%">Head</th>' +
-        '<th class="cc">Key objectives</th><th class="cc">Projects</th></tr></thead>' +
+        '<th class="cc">Key objectives</th><th class="cc">Projects</th>' +
+        '<th class="cc"></th></tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
+      (editable
+        ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a capability</button>' +
+          '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
+          'carries it, then upload its projects on Import.</span></div>'
+        : '') +
       '<div class="note"><b>One function each.</b> A function may hold several capabilities \u2014 ' +
         'Marketing carries two \u2014 which is why a custodian is named after the function and never ' +
         'after a capability: naming someone after one breaks the moment a second is assigned.</div>' +

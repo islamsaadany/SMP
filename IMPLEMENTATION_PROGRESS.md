@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.17 · **Last updated:** 2026-08-22
+**Latest version:** v3.18 · **Last updated:** 2026-08-23
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -51,6 +51,43 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.18 — collaborators get a column, and the review gets pictures
+
+Two asks from Islam. The four product decisions inside the second were put to
+him before anything was written; his answers are in §50 and spec 009.
+
+| What | Outcome |
+|---|---|
+| **Collabs.** | A column beside Owner on all three tactics tables — the unit's Performance page, the Plan page and the deck. The data was never missing: `collaborators` has been on a tactic since the import template, is stored in the database, and is what lets a Contributor report a line they are named on. It had no column, no way to be typed, and no demo content — so 116 tactics rendered nothing. §45.2 again. |
+| **Setting them** | Under the SMO's pen on Plan, the same gate as any plan correction. Not tidiness: **being named on a tactic decides who may report it**, so a unit that could edit its own collaborators could grant itself reporting rights the matrix never gave it. |
+| **Picture slides** | The custodian, owner or SMO adds a titled slide of one to four pictures at any of twelve named points in the deck (five for a function), crops each one inside its frame by dragging and zooming, and captions it. Builds backlog §16.12, undesigned since v3.5. |
+| **What is stored** | Never a slide — a title, a position, an arrangement and the pictures. The deck is built fresh every time it opens, and a stored slide would be the exported deck the feature exists to avoid. Lands in `review.extra`, so **no migration**. |
+| **Where they go** | An anchor is written on the deck slide it names and carries its own label; the position picker is built by reading the deck back. **The list of places IS the deck**, so the two cannot drift. An anchor that has gone sends its picture to the end rather than dropping it. |
+| **How long they last** | The cycle. Archived with its figures on close, cleared for the next one — a picture that stayed would present itself as this cycle's until somebody remembered to remove it. |
+| **Who may add one** | Not a new rule: a picture speaks for the whole unit, the same act as submitting and the same act as the cycle note, so it is classified with them and both sides ask one function. |
+| **Taking a picture in** | Shrunk to 1,600px, then **encoded both ways and the smaller kept** — measured, not guessed: a screenshot is 164 KB as PNG against 256 KB as JPEG; a photograph is 395 KB as JPEG against 3,058 KB as PNG. |
+| **One way into the dialog** | §48.4 made the modal actually modal and left two callers setting `.on` by hand. `openModalHtml()` is the single door now; all three go through it. |
+
+**Verified by driving it, not by reading it.** `qa.py` 31 viewers, no console
+errors. Contrast **0 failures on the two new surfaces** across all four
+palette-and-theme combinations. **Screen against server: 527 questions — every
+person against every unit and function — 0 disagreements.**
+`test-authorize.js` 123 passed (8 new). `test-roundtrip.js` with picture slides
+in the graph: clean slate, round trip, fixed point and archived plan all PASS
+against a fresh Postgres 16. Then signed in to a running `dev-server.js`, added
+a picture, watched `POST /api/state` return 200, **reloaded, and read it back
+out of the database** on the slide it was placed on.
+
+**Two checks were found lying, both silently and in the safe direction.** The
+contrast sweep clicked a unit and labelled what appeared `unit/perf` — but since
+§28 a unit opens on Strategy › Plan, so for twelve versions it measured the Plan
+page twice and the Performance page never. Clicking Performance explicitly
+surfaces **31 failures that have been there all along** (§16.15, recorded and
+NOT fixed — a palette decision on a page this version was not asked to touch).
+And a scoped probe of my own broke when I edited the sweep, silently scanning
+the whole page and reporting the page behind as mine; it asserts its contract
+now instead of string-matching it.
 
 ### v3.17 — one door, a switch, and a cycle that asks
 

@@ -192,6 +192,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **Picture slides (since v3.18, §50; spec 009):** the review deck can carry
+  the custodian's own slides of uploaded pictures. **Nothing stores a SLIDE** —
+  `REVIEW.slides` (keyed like `REVIEW.note`) holds a title, an anchor, an
+  arrangement and the pictures, and the slide is assembled when the deck opens,
+  because the deck is built fresh every time and a stored slide would be the
+  exported deck the feature exists to avoid. **Where a picture may go is read
+  BACK OUT of the deck**: `anch()` writes `data-anchor` + `data-anchor-label`
+  on the slide it names and `deckAnchors()` renders the deck into a detached
+  element to build the picker — one list, so a slide added later gets a
+  position or gets none, in one place. Inserted BEFORE `deckFitPass()`, which
+  clones slides to continue long tables. They belong to the **cycle**:
+  archived by `figuresSnapshot()`, cleared by `clearForNewCycle()`. Adding one
+  is authorised as `reportState` — the SAME classification as submitting and
+  the cycle note, asked on both sides through `canSpeakFor()`; **never write a
+  second rule for it**. Pictures are shrunk to 1600px and **encoded as both PNG
+  and JPEG with the smaller kept** — a screenshot is smaller as PNG, a
+  photograph seven times smaller as JPEG, and the file's own type predicts
+  neither. No migration: it lands in the `review` row's `extra`.
+- **Collaborators on a tactic (since the import template; given a COLUMN in
+  v3.18, §50):** `tactics.collaborators` is what `SMPRules.namedOn()` reads to
+  decide whether a Contributor may report a line — so **it is the SMO's to
+  edit**, behind `mayEditPlan()`, or a unit could grant itself reporting
+  rights. `collabNames`/`collabCell`/`collabParse` in `group-render.js` are the
+  one place three tables ask.
 - **Figure sets (since v3.14, §44; spec 008):** a number can belong to a NAMED
   SET (`group.sets`) rather than to the unit that reports it. `row.src` is
   `{set}` or `{by}` — membership on the FIGURE, so one figure/one set is an
@@ -220,6 +244,24 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   comes, use **one Postgres schema per tenant** (`SET search_path`) rather than
   a tenant column — person keys are short and global (`smo`, `ceo`), so a column
   forces composite keys through `credentials` and `sessions`. Read §36 first.
+- **A READER MUST NEVER CREATE THE FIELD IT WAS LOOKING FOR** (§42, §50.6).
+  `branding()` invented a four-null object the database never held, so every
+  save carried a phantom group change and every non-SMO save would have been
+  refused for ever. Accessors return a shared **frozen** empty rather than
+  building a container, the writing half is a separate function, and removing
+  the last item deletes the key again.
+- **A CHECK THAT MEASURES THE WRONG THING PASSES** (§50.6). The contrast sweep
+  clicked a unit and called what appeared `unit/perf`; since §28 a unit opens
+  on Strategy › Plan, so for twelve versions it measured Plan twice and
+  Performance never — 31 real failures invisible the whole time. Same day, a
+  scoped probe broke when the sweep it string-matched changed, and silently
+  reported the page behind as the new surface. **Assert the contract, and make
+  the label say which page was actually scanned.** A MODAL AND A DECK SLIDE ARE
+  NOT PAGES — scan their own subtree, or the page behind is counted again under
+  a second name.
+- **`--gold-deep` on `--surface-2` is 4.45:1** — §38.5, and the fifth time.
+  When an accent must stay the mark, MOVE THE GROUND to `--surface`, and put
+  hover on the border rather than the fill or the failure comes straight back.
 - **Screen preferences live in `localStorage`, never in the state graph**
   (§25, §47.1): the theme, the People page's visible columns
   (`smp.people.columns`), the Setup rail's collapsed state (`smp.setup.rail`).
@@ -320,7 +362,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 — **the due diligence, and the four it could not
+*Last Updated: 2026-08-23 — **v3.18: a column the data always had, and
+pictures in the review** (§50, spec 009). **COLLABORATORS WERE NEVER MISSING**
+— a tactic has carried them since the import template, the database stores
+them, and being named on one is what lets a Contributor report a line. What was
+missing was a COLUMN, any way to type one, and a single demo tactic that had
+any, so 116 of them rendered nothing (§45.2 again). **ONE PERSON IS
+ACCOUNTABLE AND SEVERAL SUPPORT THEM IS TWO FACTS, SO IT IS TWO COLUMNS** —
+and correcting them is the SMO's, not because it is tidier but because **being
+named on a tactic decides who may report it**, so a unit that could edit its own
+collaborators could hand itself reporting rights the matrix never gave it. Then
+§16.12, undesigned since v3.5: **A PICTURE SLIDE IS NOT A SLIDE.** The deck is
+built fresh every time it opens and there is no exported copy, so what is stored
+is a title, a place, an arrangement and the pictures — a stored slide would be
+the exported deck the whole feature exists to avoid. **WHERE A PICTURE MAY GO IS
+READ BACK OUT OF THE DECK ITSELF**, not listed beside it, so the two cannot
+drift; an anchor that has since been renamed away sends its picture to the end
+rather than dropping it. **WHO MAY ADD ONE IS NOT A NEW RULE** — a picture
+speaks for the whole unit, which is submitting and the cycle note, so it is
+classified with them and both sides ask one function; proved by comparing the
+screen's answer with the server's for **527 person-and-target pairs, 0
+disagreements**. **ENCODED BOTH WAYS AND THE SMALLER KEPT**, because §16.12 asks
+for a screenshot AND a photograph and they want opposite formats: 164KB vs
+256KB one way, 395KB vs 3,058KB the other, and the file's own extension predicts
+neither. Three faults found by MEASURING: `--gold-deep` on `--surface-2` at
+4.45:1 (§38.5, fifth time — walked into a trap this file records by number); a
+rule written `.pgrid.pg2` applying to its parent and to nothing else, which
+silently stacked every arrangement into one column and was invisible in the
+source and obvious in a screenshot; and **two checks that were passing because
+they were measuring the wrong thing** — the sweep's `unit/perf` label, which had
+never once scanned the Performance page, and a probe of mine that broke when I
+edited what it string-matched. The 31 failures the first one hid are recorded as
+§16.15 and deliberately NOT fixed: a palette decision on a page this version was
+not asked to touch.*
+
+*Earlier: 2026-08-23 — **the due diligence, and the four it could not
 fix without asking** (§48, §49). Thirty-one viewers were signed in and WALKED,
 not reasoned about, and the method is the finding: **a comparison against a
 field nobody sets fails silently and in the SAFE direction**, so twelve

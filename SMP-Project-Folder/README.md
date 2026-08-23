@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.17.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.18.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.17.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.18.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -253,7 +253,7 @@ the registry are two views of one fact. It also caught two defects that would
 have reached production, including a migration ordering flaw that would have
 broken the live database on deploy (§33.5).
 
-Versions **3.9–3.17** built out from there and are recorded in §34–§47. The
+Versions **3.9–3.18** built out from there and are recorded in §34–§50. The
 **people register** (§16.11, §35) landed — people are retired, never deleted,
 and the refusal is on the server; the **access matrix** stopped being 25 pages
 × 7 roles and became 7 roles × 7 areas (§37); a **design language** separated
@@ -265,6 +265,13 @@ rather than typed twice (§43); **figure sets** made a number belong to a named
 set rather than to the unit that reports it (§44, spec 008); and **Setup became
 a place** — one railed page behind one door, with Manage folded into it, the
 gear no longer a menu, and Units | Functions a two-position switch (§46, §47).
+
+**v3.18** added the two things this round asked for: **Collabs.** beside Owner
+on every tactics table — a field the data had carried since the import template
+and no screen had ever shown or let anybody type — and **picture slides**, the
+backlog's §16.12, where the custodian, owner or SMO puts a titled slide of
+cropped, captioned pictures at a named point in the review deck. Both are
+recorded as §50.
 
 Then a **due diligence** (§48, §49): thirty-one viewers signed in and walked
 rather than reasoned about. It found reordering had been dead code for

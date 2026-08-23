@@ -505,5 +505,70 @@ console.log("\n7 · a retired person");
   check("a retired unit head reports nothing", !v.ok, v.refusals.join(" / "));
 })();
 
+/* ── 8 · Picture slides are the unit's, not a row's (§50.5) ────── */
+console.log("\n8 · the review's picture slides");
+(function () {
+  const slide = { id: "psTEST", title: "Site visit", at: "cover", layout: 1,
+                  pics: [{ src: "data:image/png;base64,AAAA", cap: "", z: 1, x: 50, y: 50 }] };
+  const put = function (s, key) {
+    s.review = s.review || {};
+    s.review.slides = Object.assign({}, s.review.slides);
+    s.review.slides[key] = [slide];
+  };
+
+  /* The three people who prepare and present a review. */
+  allows("smo",   function (s) { put(s, UNIT); }, "the SMO adds a picture slide");
+  allows(headKey, function (s) { put(s, UNIT); }, "the unit's head adds one to their own unit");
+  allows(custKey, function (s) { put(s, UNIT); }, "the strategy custodian adds one");
+
+  /* And the people who must not. */
+  refuses(headKey, function (s) { put(s, OTHER); },
+          "a unit head cannot put a picture in ANOTHER unit's deck");
+  refuses("ceo",   function (s) { put(s, UNIT); },
+          "the group CEO, who views everything, still adds none");
+
+  /* A contributor speaks for their own lines, never for the unit — the same
+     refusal `submitted` and the note already get, which is the whole reason
+     picture slides were classified with them rather than on their own. */
+  (function () {
+    const base = clone(SEED);
+    base.access = Object.assign({}, base.access,
+      { contrib: Object.assign({}, (base.access || {}).contrib, { a_unit_own: "edit" }) });
+    const key = "smp_test_pic_contrib";
+    base.people = base.people.concat([{ key: key, name: "A Contributor", unit: UNIT }]);
+    const inc = clone(base); put(inc, UNIT);
+    const v = A.authorize(base, inc, personOf(base, key));
+    check("a contributor with edit stored still adds no picture slide",
+          !v.ok, v.refusals.join(" / "));
+  })();
+
+  /* A locked cycle has stopped taking the review's content, pictures with it. */
+  (function () {
+    const base = clone(SEED);
+    base.cycle = Object.assign({}, base.cycle, { locked: true });
+    const inc = clone(base); put(inc, UNIT);
+    let v = A.authorize(base, inc, personOf(base, custKey));
+    check("a locked cycle takes no more picture slides", !v.ok, v.refusals.join(" / "));
+    v = A.authorize(base, inc, personOf(base, "smo"));
+    check("...except from the SMO, who locked it", v.ok, v.refusals.join(" / "));
+  })();
+
+  /* And it must be NAMED in the refusal, or a refusal cannot be diagnosed.
+     Asked of the CONTRIBUTOR rather than of a unit head reaching into another
+     unit: there the refusal is "you cannot report for X" and stops before the
+     what, which is correct — reach is answered before the act. */
+  (function () {
+    const base = clone(SEED);
+    base.access = Object.assign({}, base.access,
+      { contrib: Object.assign({}, (base.access || {}).contrib, { a_unit_own: "edit" }) });
+    const key = "smp_test_pic_named";
+    base.people = base.people.concat([{ key: key, name: "A Contributor", unit: UNIT }]);
+    const inc = clone(base); put(inc, UNIT);
+    const v = A.authorize(base, inc, personOf(base, key));
+    check("the refusal names the picture slides",
+          v.refusals.join(" ").indexOf("picture slides") > -1, v.refusals.join(" / "));
+  })();
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

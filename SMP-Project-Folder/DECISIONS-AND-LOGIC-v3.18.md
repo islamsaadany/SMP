@@ -1823,11 +1823,34 @@ the same shelf, exactly as the Copilot is (§16.14).
 standard it produces is built on what has already been tried rather than
 invented beside it.
 
-### 16.12 Later
+### 16.15 The unit's Performance page fails contrast in light mode
+
+*Found 2026-08-23 while building §50, and NOT fixed there — it is a palette
+decision on a page that version was not asked to touch (§25's precedent, where
+light mode's 61 failures were recorded rather than fixed inside a dark-mode
+change).*
+
+**31 failing runs** across the two light palettes: 17 in slate/light, 14 in
+forefront/light, 0 in either dark. Every one of them is a **scoring colour used
+as TYPE** — `71%`, `88%`, `58%` and the `%` suffix beside them, at 3.19–4.45
+against a needed 4.5. That is §38.5, which was closed once by giving every
+scoring colour a `-tx` twin for words; this page did not get them.
+
+**Why nobody saw it.** The contrast sweep clicked a unit and called what
+appeared `unit/perf`. Since §28 a unit opens on **Strategy › Plan**, so that
+label measured the Plan page twice and the Performance page never. The sweep now
+clicks Performance explicitly and labels the landing page `unit/landing`, which
+is what surfaced these. **A check that measures the wrong page passes.**
+
+The fix is the `-tx` twins applied to `num.final`, `rnum`, `.appear b` and the
+`SMALL` suffix on that page. It is small; it is a visual change to a page Islam
+looks at, so it waits for his word (rule 1c).
+
+### 16.12 Images in review mode — BUILT in v3.18
 
 Review mode should accommodate **images**: a screenshot of a platform or an
 outcome, or an uploaded picture slide placed at a chosen point in the deck.
-Not designed yet.
+Designed and built as **§50**, 2026-08-23.
 
 ---
 
@@ -1856,7 +1879,198 @@ way.
 
 Sequenced immediately after v3.5 at Islam's direction.
 
+---
+
+## 50 · Collaborators, and pictures in the review (v3.18)
+
+*2026-08-23. Two asks from Islam, one small and one not: "in the tactics table
+add collaborator so we have Owner which is 1 person and Collabs. which are the
+people who will support", and "in the presentation I want to add a feature for
+the custodian to add a slide with pictures where he uploads pictures to add in
+certain slides and adjust these pictures in the slide."*
+
+### 50.1 The collaborators were already there. Nobody could see them.
+
+A tactic has carried `collaborators` since the import template was built
+(§22): the upload writes them, `tactics.collaborators` stores them, and
+`SMPRules.namedOn()` reads them to decide whether a Contributor may report a
+line that is theirs (§42). Three things kept the feature invisible.
+
+**Nothing in the product could set them.** They arrived with the upload or not
+at all, so a name that changed after a plan landed meant re-uploading a whole
+unit to fix one word.
+
+**There was no column.** They were a small grey *"with A, B"* line under the
+owner's name on the unit's Performance page, and absent from the Plan page and
+from the deck entirely — so on the two surfaces a client actually sees, the
+people supporting a tactic did not exist.
+
+**And no tactic in the demo had any**, so all 116 rendered nothing. This is
+§45.2 exactly: *a feature that renders nothing looks like a feature that was
+not built.*
+
+**ONE PERSON IS ACCOUNTABLE AND SEVERAL SUPPORT THEM — that is two facts, so
+it is two columns.** Owner is unchanged and still one name. Collabs. sits
+beside it on all three tactics tables, quieter than the owner, wrapping rather
+than growing the row (measured: every row still 61px). Nobody supporting reads
+as an em-dash, never "Missing" — absent is a real answer (§15.1).
+
+**Correcting them is the SMO's** (Islam, asked and answered 2026-08-23). It is
+the same pen that corrects the rest of the plan, behind the same gate (§31),
+and the reason is not tidiness: **being named on a tactic is what decides who
+may report it**, so a unit that could edit its own collaborators could hand
+itself reporting rights the access matrix never gave it.
+
+Demo collaborators were added to **Retail Stores only**. Mobile's plan is the
+client's real one, and who supports its tactics is not Forefront's to invent
+(rule A4, §B3).
+
+### 50.2 A picture slide is not a slide. It is a title, a place and a picture.
+
+§16.12 asked for images in review mode and left it undesigned. The design
+follows from the one thing that makes presenting out of the platform worth
+doing: **the deck is built fresh every time it is opened and there is no
+exported copy** (§8.8). A figure corrected an hour before the meeting is the
+figure on the slide.
+
+So what is stored is never a slide. It is a **title**, a **position**, an
+**arrangement** and the **pictures**; the slide is assembled at the moment the
+deck opens, beside figures current to the minute. A stored slide would be the
+exported deck the whole feature exists to avoid.
+
+### 50.3 Where a picture can go is the deck itself, not a list beside it
+
+A position is an **anchor**: a named point written on the slide it names,
+carrying its own label. The picker is built by generating the deck into a
+detached element and reading those anchors back — so **the list of places a
+picture can go IS the deck**, and the two cannot drift. A slide added to the
+deck later gets a position for free, or gets none, and either way that is one
+decision in one place rather than two lists that agree until they do not.
+
+Twelve for a unit (cover, aiming at, where it stands, the objectives table,
+SWOT, the overview, one per pillar, notes, attention, last), five for a
+supporting function.
+
+**Inserted BEFORE the fit pass**, deliberately: the fit pass CLONES a long
+table's slide to continue it, so a picture inserted afterwards could land
+between a table and its own continuation, and an anchor read after cloning
+would match twice.
+
+**AN ANCHOR THAT IS NO LONGER THERE IS NOT A LOST SLIDE.** A pillar can be
+renamed, replaced by an upload or removed between the day a picture was placed
+and the day the deck is opened. The picture then goes to the end, still in the
+room, rather than being silently dropped.
+
+### 50.4 They belong to the CYCLE
+
+*(Islam, asked and answered 2026-08-23.)* A picture is evidence for one review
+— the store that opened, the screen that went live. It is archived with the
+cycle's figures when the cycle closes and the next cycle starts with a clean
+deck, exactly as the unit's note does (§49.1). The alternative was put to him
+and rejected on the reason that decides it: **a picture that stays presents
+itself as this cycle's until somebody remembers to take it out, and nobody
+does.**
+
+Archived rather than dropped, because a restore that gives back the numbers
+and not the pictures has not restored the review.
+
+### 50.5 Who may add one is not a new rule
+
+*(Islam: the custodian, the owner and the SMO.)* A picture put in front of the
+board **speaks for the whole unit** — which is the same act as submitting and
+the same act as the cycle note. So it is not given a rule of its own: it is
+classified with them, under `reportState`, and both sides ask **one function**
+(`canSpeakFor`). A contributor limited to their own lines does none of the
+three; a locked cycle stops taking all three together.
+
+That is §42's whole argument applied rather than re-learned, and it was
+**measured rather than assumed**: for every one of the 31 people against every
+one of the 10 units and 7 functions, the browser's answer was compared with
+the real server authoriser's verdict on the same change. **527 questions, zero
+disagreement.**
+
+The honest consequence, recorded rather than hidden: a locked cycle refuses a
+picture the same way it refuses a figure. That is right for figures and
+arguable for pictures, since a review meeting can happen after the lock. It is
+left matching the note rather than given a fourth rule; revisit if it bites.
+
+### 50.6 What the building taught
+
+**A COLOUR THAT CLEARS ON WHITE IS NOT THEREBY CLEARED — §38.5 for the fifth
+time, and this one is written down by number.** The empty picture slot put
+`--gold-deep` on `--surface-2`: 4.45:1, needing 4.5. CLAUDE.md records that
+exact figure from §46, and I walked into it anyway. The ground moved to
+`--surface`, where the accent clears, and hover moves the BORDER rather than
+the fill — moving the fill would have put the failure straight back.
+
+**A RULE NAMED AFTER ITS PARENT APPLIES TO ITS PARENT AND TO NOTHING ELSE.**
+The arrangement classes were written `.pgrid.pg2`, and the editor's container
+is `.picslots` — so every arrangement silently stacked into one column. It
+cost nothing to fix and would have cost nothing to find, except that it is
+invisible in the source and obvious in a screenshot: **the layout was verified
+by looking at it, not by reading it** (B1).
+
+**READING MUST NEVER WRITE.** `pslidesOf()` returns a shared frozen empty
+array rather than creating the field it was looking for. That is §42's
+`branding()` fault — a reader that mutates what it reads makes every save
+carry a change the database never held, and every non-SMO save is then refused
+for ever. Removing the last picture deletes the key too, so a tenant that
+tries the feature and abandons it is left byte for byte where it started.
+
+**ENCODED BOTH WAYS, AND THE SMALLER ONE KEPT.** §16.12 asks for two different
+things, and they want opposite formats. Measured, not reasoned: a screenshot
+of a table is **164 KB as PNG against 256 KB as JPEG**; a photograph is
+**395 KB as JPEG against 3,058 KB as PNG** — seven times. Guessing from the
+file's own type gets both wrong the moment somebody pastes a screenshot saved
+as .jpg, so the browser encodes it twice and keeps the smaller. Pictures are
+shrunk to 1,600px on the long edge first, because the stage is 1600×900 and
+anything more is detail nobody in the room can see, carried in every save for
+ever.
+
+**ONE WAY INTO THE DIALOG.** §48.4 made the modal actually modal — inert page
+behind, remembered focus, announced only when open — and two callers had been
+left behind setting `.on` by hand. They get a dialog that only looks like one.
+`openModalHtml()` is now the single door and all three go through it.
+
+**AND A CHECK THAT MEASURES THE WRONG PAGE PASSES.** The contrast sweep
+clicked a unit and called what appeared `unit/perf`. Since §28 a unit opens on
+**Strategy › Plan**, so for twelve versions that label measured the Plan page
+twice and the Performance page never — silently, and in the safe direction,
+which is §45.1's fault arriving in a third tree. Clicking Performance
+explicitly surfaces **31 failing runs that have been there all along**, all in
+light mode, all scoring colours used as TYPE (§38.5 again). They are recorded
+here and NOT fixed: that is a palette decision on a page this version was not
+asked to touch (§25's precedent), and it is now item §16.15.
+
+The two new surfaces measure **0** across all four palette-and-theme
+combinations.
+
+### 50.7 What it is not
+
+Free placement was offered and not chosen: dragging pictures anywhere and
+resizing them freely is a drawing tool, and the slides would stop matching the
+rest of the deck — the first thing that reads as a different product (A13).
+The arrangement is chosen, the crop is free within its frame, and a caption is
+optional.
+
+Not sourced from anywhere: pictures are uploaded, never linked. A linked image
+would break the offline single-file handover and put a request to a third
+party on every load of a file holding a client's strategy (§26.1's argument,
+one surface out).
+
+---
+
 ## 17 · Version history
+
+### v3.18 — collaborators get a column, and the review gets pictures
+
+Two asks. **Collabs.** joins Owner on all three tactics tables — the data was
+already there, arriving with the upload and deciding who may report a line,
+with no way to set it and no column to show it. And **picture slides**: the
+custodian, the owner or the SMO adds a titled slide of one to four pictures,
+crops each one inside its frame, captions it, and places it at any of twelve
+named points in the deck. They belong to the cycle and are archived with its
+figures when it closes (§50).
 
 ### v2.9 — two lines of chrome, and one way in
 

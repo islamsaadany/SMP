@@ -2768,6 +2768,10 @@
       {
        "name": "Site selection model using catchment data",
        "owner": "Hossam",
+       "collaborators": [
+        "Dalia",
+        "Nour"
+       ],
        "q1": 1,
        "q2": 1,
        "q3": 1,
@@ -2779,6 +2783,9 @@
       {
        "name": "Standard fit-out programme",
        "owner": "Dalia",
+       "collaborators": [
+        "Hossam"
+       ],
        "q1": 1,
        "q2": 1,
        "q3": 1,
@@ -2847,6 +2854,10 @@
       {
        "name": "Single stock view across store and e-store",
        "owner": "Dalia",
+       "collaborators": [
+        "Nour",
+        "Sherif"
+       ],
        "q1": 1,
        "q2": 1,
        "q3": 0,
@@ -2869,6 +2880,9 @@
       {
        "name": "Unified loyalty across channels",
        "owner": "Nour",
+       "collaborators": [
+        "Dalia"
+       ],
        "q1": 0,
        "q2": 1,
        "q3": 1,
@@ -2914,6 +2928,10 @@
       {
        "name": "Store operating standard and audit cycle",
        "owner": "Nour",
+       "collaborators": [
+        "Hossam",
+        "Dalia"
+       ],
        "q1": 1,
        "q2": 1,
        "q3": 1,

@@ -1350,7 +1350,7 @@ function renderMainbus(){
   var mayEdit = grant("c_people") === "edit";
   var editable = mayEdit && EDITING.people;
   var list = mainbus();
-  var mapped = list.filter(function(b){ return mainbuAts(b).length; }).length;
+  var mapped = list.filter(function(b){ return !!b.at; }).length;
   /* Names people carry that the list has never met. It cannot happen through
      an upload — a new name is added on arrival — but it can through a rename
      the register was mid-edit for, and a list that does not admit it is a list
@@ -1362,34 +1362,20 @@ function renderMainbus(){
   });
 
   var wheres = mainbuWheres();
-  /* A SET OF CHIPS, NOT A DROPDOWN (§57). One name holds several units or
-     functions now, so the cell has to show all of them and take one away
-     without disturbing the rest — which a single <select> cannot do. Each is
-     a chip carrying its own remove; the dropdown underneath adds, and offers
-     only what is not already there, so pressing it can never be a no-op. */
   function target(b){
-    var ats = mainbuAts(b);
-    if (!ats.length && !editable) return '<span class="pill none">Not mapped</span>';
-    var chips = ats.map(function(at){
-      return '<span class="uchip">' + esc(roleWhereLabel(at)) +
-        (editable ? '<button class="chipx" data-mbdrop="' + esc(b.name) + '|' + esc(at) +
-                    '" title="Remove ' + esc(roleWhereLabel(at)) + '">&times;</button>' : '') +
-        '</span>';
-    }).join(" ");
-    if (!editable) return chips;
-    var left = wheres.map(function(g){
-      var opts = g.opts.filter(function(o){ return ats.indexOf(o.v) === -1; });
-      return opts.length
-        ? '<optgroup label="' + esc(g.label) + '">' + opts.map(function(o){
-            return '<option value="' + esc(o.v) + '">' + esc(o.label) + '</option>';
-          }).join("") + '</optgroup>'
-        : '';
-    }).join("");
-    return '<div class="mbcell">' + (chips || '<span class="pill none">Not mapped</span>') +
-      (left
-        ? '<select class="fld mbadd" data-mbadd-at="' + esc(b.name) + '">' +
-            '<option value="">+ add a unit or function\u2026</option>' + left + '</select>'
-        : '') + '</div>';
+    if (!editable) {
+      return b.at
+        ? '<span class="uchip">' + esc(roleWhereLabel(b.at)) + '</span>'
+        : '<span class="pill none">Not mapped</span>';
+    }
+    return '<select class="fld" data-mbat="' + esc(b.name) + '">' +
+      '<option value=""' + (b.at ? "" : " selected") + '>\u2014 not mapped \u2014</option>' +
+      wheres.map(function(g){
+        return '<optgroup label="' + esc(g.label) + '">' + g.opts.map(function(o){
+          return '<option value="' + esc(o.v) + '"' + (o.v === b.at ? " selected" : "") + '>' +
+            esc(o.label) + '</option>';
+        }).join("") + '</optgroup>';
+      }).join("") + '</select>';
   }
 
   var rows = list.map(function(b, i){
@@ -1422,7 +1408,7 @@ function renderMainbus(){
     ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
         '<th class="idx" style="width:38px">#</th>' +
         '<th style="width:30%">Main BU</th>' +
-        '<th style="width:40%">Points at</th>' +
+        '<th style="width:34%">Points at</th>' +
         '<th class="cc" style="width:14%">People</th>' +
         '<th class="cc" style="width:18%"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'

@@ -1828,9 +1828,21 @@
        carries it. The NAME is the key here — unlike a unit or a company,
        which carry a key under the label so a rename detaches nothing — so
        renaming moves the people with it, inside renameMainbu(). */
-    document.querySelectorAll("[data-mbat]").forEach(function(sel){
+    /* ADD AND REMOVE, one target at a time (§57). The dropdown adds and
+       resets itself; the chip's × removes. Neither sends the whole list, so a
+       stale screen can add something twice at worst — never silently drop the
+       four somebody else mapped while this tab was open. */
+    document.querySelectorAll("[data-mbadd-at]").forEach(function(sel){
       sel.addEventListener("change", function(){
-        setMainbuAt(sel.dataset.mbat, sel.value || null);
+        if (!this.value) return;
+        addMainbuAt(this.dataset.mbaddAt, this.value);
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-mbdrop]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = this.dataset.mbdrop.split("|");
+        removeMainbuAt(p[0], p.slice(1).join("|"));
         paint();
       });
     });

@@ -980,30 +980,8 @@
         });
         sel.appendChild(g);
       };
-      /* THEIR OWN FIRST, EVERYTHING ELSE UNDER IT (§57). The server says which
-         units and functions their Main BU holds; those go at the top under the
-         client's own word for that part of the business, so the answer is
-         usually the second thing on the list rather than the thirtieth.
-
-         The rest is still there, and deliberately: a short list that cannot be
-         escaped strands whoever it forgot, and the answer is corrected with
-         them later. Where the Main BU is unmapped or unknown, `near` is empty
-         and this is exactly the flat list it was before. */
-      var all = (j.units || []).concat(j.functions || []);
-      var near = (j.near || []).map(function (at) {
-        return all.filter(function (x) { return x.at === at; })[0];
-      }).filter(Boolean);
-      if (near.length) {
-        add(near, j.mainbu || "Yours");
-        var rest = function (list) {
-          return (list || []).filter(function (x) { return j.near.indexOf(x.at) === -1; });
-        };
-        add(rest(j.units), "Other business units");
-        add(rest(j.functions), "Other supporting functions");
-      } else {
-        add(j.units, "Business units");
-        add(j.functions, "Supporting functions");
-      }
+      add(j.units, "Business units");
+      add(j.functions, "Supporting functions");
       wrap.hidden = false;
     }).catch(function () { /* no question rather than a broken one */ });
   }

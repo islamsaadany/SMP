@@ -53,6 +53,25 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.21 — a Main BU holds several, and the sign-in list gets short
+
+- **Setup › BU list maps one name to several units and functions** (§57) —
+  chips with an ×, a dropdown that offers only what is unmapped. Editable by
+  the SMO, which is what Islam asked for so he can do the mapping himself.
+- **A name that holds several places nobody**: the employee file leaves them
+  unattached and the sign-in picker offers those few instead. The importer was
+  attaching people to the ARRAY until the new assertion caught it.
+- **The gate's list is narrowed on the server** from that mapping — their own
+  under the client's own word, then *Other business units* / *Other supporting
+  functions*, so nothing is unreachable.
+- Reads the old single-target shape, so nothing already mapped is lost and
+  there is no migration.
+
+Verified end to end on a real Postgres: Distribution mapped to Mobile and
+Consumer Electronics on Setup, the SMO given that Main BU, and the sign-in card
+offering **Distribution (2) · Other business units (8) · Other supporting
+functions (8)** with the pick landing in `bu_declarations`.
+
 ### v3.21 — where people say they work, and no attention slide
 
 - **The first sign-in asks where they work** (§56) — every business unit and

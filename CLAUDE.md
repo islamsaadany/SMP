@@ -222,6 +222,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A Main BU holds SEVERAL (since v3.21, §57):** `mainbuAts()` reads a string
+  as a list of one and an array as itself, so nothing written before it needs a
+  migration (`mainbus` is jsonb in `org.extra`). **`mainbuAt()` answers only
+  where the name means ONE place** — several means the file places nobody and
+  the sign-in picker offers those few instead; read `bu.at` directly and you
+  attach somebody to the ARRAY, which is what the importer was doing until
+  `qa.py` asserted the rule. The Setup cell is chips with an × plus a dropdown
+  offering only what is unmapped; add and remove are separate writes, so a
+  stale tab can never drop somebody else's mapping. The gate's list is narrowed
+  **on the server**, with everything else still under *Other* — a short list
+  that cannot be escaped strands whoever it forgot.
 - **Where people say they work (since v3.21, §56):** the first sign-in asks,
   and the answer is a **declaration that grants nothing** — the BU that decides
   access stays the SMO's, who sees *"They said X — Use it"* under the BU on the

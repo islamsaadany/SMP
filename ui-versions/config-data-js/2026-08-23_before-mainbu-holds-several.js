@@ -758,35 +758,9 @@ function mainbuBy(name){
   if (!want) return null;
   return mainbus().filter(function(b){ return mainbuKey(b.name) === want; })[0] || null;
 }
-/* ── A MAIN BU HOLDS SEVERAL (§57) ─────────────────────────────────
-   Islam: "map the main BUs list to the BUs and functions … so everyone gets
-   to the login with a short list to pick from."
-
-   It pointed at exactly ONE thing until now, which is precisely why it could
-   not place anybody in the cases that matter: Distribution is a COMPANY here
-   holding three units, and Support Function is the client's word for eight.
-   One target could name the company and stop there; several name the actual
-   choices, and the sign-in picker offers those and nothing else.
-
-   READS BOTH SHAPES. Every row written before today holds a string, and a
-   tenant that has already mapped some of its list must not have to do it
-   again — so a string is read as a list of one and written back as a list the
-   next time it is touched. There is no migration because `mainbus` lives in
-   `org.extra`, which is jsonb and takes an array without being asked. */
-function mainbuAts(b){
-  if (!b) return [];
-  if (Array.isArray(b.at)) return b.at.filter(Boolean);
-  return b.at ? [b.at] : [];
-}
-/* WHERE ONE NAME MEANS ONE PLACE, and null wherever it does not. A Main BU
-   holding three units cannot say which of them somebody is in — that is the
-   whole reason the question is asked at sign-in — so it answers nothing
-   rather than guessing, and the person stays unattached until they say or the
-   SMO decides. Callers that resolve a person go through here, so the guess is
-   refused in one place rather than in each of them. */
 function mainbuAt(name){
-  var ats = mainbuAts(mainbuBy(name));
-  return ats.length === 1 ? ats[0] : null;
+  var b = mainbuBy(name);
+  return b && b.at ? b.at : null;
 }
 function mainbuNames(){ return mainbus().map(function(b){ return b.name; }); }
 /* Returns the stored name, so a caller can write back the client's casing
@@ -799,27 +773,10 @@ function addMainbu(name){
   mainbuList().push({ name:n, at:null });
   return n;
 }
-/* Add and remove, never "set": the cell is a set of chips now, and a writer
-   that took the whole list would make removing the last one indistinguishable
-   from a stale screen sending an empty one. The key goes when it is empty, so
-   an unmapped row is a row with no `at` rather than one with an empty array
-   (§42's rule: a reader must never create the field it was looking for, and
-   a writer should not leave an empty container behind either). */
-function addMainbuAt(name, at){
+function setMainbuAt(name, at){
   var b = mainbuBy(name);
-  if (!b || !at) return false;
-  var ats = mainbuAts(b);
-  if (ats.indexOf(at) > -1) return false;
-  ats.push(at);
-  b.at = ats;
-  return true;
-}
-function removeMainbuAt(name, at){
-  var b = mainbuBy(name);
-  if (!b) return false;
-  var ats = mainbuAts(b).filter(function(x){ return x !== at; });
-  if (ats.length) b.at = ats; else delete b.at;
-  return true;
+  if (!b) return;
+  if (at) b.at = at; else delete b.at;
 }
 /* A rename carries the people with it. The name IS the key here — unlike a
    unit or a company, which have a key under the label precisely so a rename
@@ -909,18 +866,10 @@ function attachPersonAt(p, at){
    time a row changed would be the worst kind of helpful. */
 function mainbuDrift(p){
   if (!p || !p.mainbu) return null;
-  /* Only where the name means ONE place. A Main BU holding three units does
-     not disagree with somebody sitting in one of the three — it contains
-     them — so there is nothing to report. */
-  var at = mainbuAt(p.mainbu);
-  if (!at) return null;
-  return at === personAt(p) ? null : at;
+  var b = mainbuBy(p.mainbu);
+  if (!b || !b.at) return null;
+  return b.at === personAt(p) ? null : b.at;
 }
-/* The short list a Main BU offers at sign-in: what it holds, or nothing when
-   it holds nothing. Read on the SERVER as well (api/auth.js builds its own
-   from the same stored rows), because a list the client narrowed is a list
-   the client chose. */
-function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
 
 /* ══════════════════════════════════════════════════════════════════
    THE REGISTER AS A FILE (§54.3, spec 011)
@@ -1034,12 +983,7 @@ function planPeopleFile(rows){
     /* The stored spelling wins, so "support function" typed in a hurry does
        not become a second department beside "Support Function". */
     var buName = bu ? bu.name : mainbu;
-    /* THROUGH mainbuAt(), NEVER off the row (§57). A Main BU that holds
-       several places cannot say which of them somebody is in, so it answers
-       nothing and the person arrives unattached — the sign-in picker offers
-       them those few and the SMO accepts. Read straight off `bu.at` this
-       attached people to the ARRAY, which is not a place at all. */
-    var where  = bu ? mainbuAt(bu.name) : null;
+    var where  = bu ? (bu.at || null) : null;
 
     var roleKey = null;
     if (role) {

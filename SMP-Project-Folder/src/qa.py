@@ -276,9 +276,17 @@ with sync_playwright() as p:
       /* Numbers on everybody, and one department that maps and one that does
          not — the two cases the BU column has to tell apart. */
       PEOPLE.forEach((p, i) => { p.empId = "E" + (1000 + i); });
-      GROUP.mainbus = [{ name: "Retail", at: UNIT_KEYS[1] }, { name: "Risk", at: null }];
+      /* Three rows, three answers: a name that means ONE place, a name that
+         means NOTHING, and — since 57 — a name that holds SEVERAL. The third
+         must not be resolved: a Main BU covering three units cannot say which
+         of them somebody is in, which is the whole reason the sign-in asks.
+         `at` is written as a STRING on the first two on purpose, because that
+         is the shape every row saved before 57 still holds. */
+      GROUP.mainbus = [{ name: "Retail", at: UNIT_KEYS[1] }, { name: "Risk", at: null },
+                       { name: "Distribution", at: [UNIT_KEYS[0], UNIT_KEYS[2]] }];
       PEOPLE[0].mainbu = "Retail";
       PEOPLE[1].mainbu = "Risk";
+      PEOPLE[3].mainbu = "Distribution";
 
       return Promise.resolve(readXlsx(buildXlsx(peopleWorkbook()).buffer)).then(sh => {
         const rows = peopleFromWorkbook(asExcel(sh));
@@ -312,6 +320,8 @@ with sync_playwright() as p:
           people: PEOPLE.length,
           mappedAt: (fixed.rows.filter(r => r.key === PEOPLE[0].key)[0] || {}).where || null,
           unmappedAt: (fixed.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
+          severalAt: (fixed.rows.filter(r => r.key === PEOPLE[3].key)[0] || {}).where || null,
+          severalChoices: (SMPRules && mainbuChoices("Distribution")) || [],
           movedRows: moved.rows.filter(r => r.action !== "same").length,
           movedWhat: movedRow ? movedRow.changes.join(",") : "(row missing)",
           seededAction: seededRow ? seededRow.action : "(row missing)",
@@ -332,6 +342,16 @@ with sync_playwright() as p:
     if pf["mappedAt"] != "retailstores" or pf["unmappedAt"]:
         errs.append("PEOPLE FILE: BU list resolved to %r / %r, wanted 'retailstores' / nothing"
                     % (pf["mappedAt"], pf["unmappedAt"]))
+    # A NAME THAT HOLDS SEVERAL PLACES NOBODY (57). It offers the choices to
+    # the sign-in picker instead; guessing one of three would put somebody in a
+    # unit nobody said they were in, and the whole point of asking is that the
+    # file cannot know.
+    if pf["severalAt"]:
+        errs.append("PEOPLE FILE: a Main BU holding several placed somebody at %r"
+                    % pf["severalAt"])
+    if len(pf["severalChoices"]) != 2:
+        errs.append("PEOPLE FILE: a Main BU holding two offers %r to the picker"
+                    % (pf["severalChoices"],))
     if pf["movedRows"] != 1 or pf["movedWhat"] != "job title":
         errs.append("PEOPLE FILE: one changed cell produced %d changed rows (%r)"
                     % (pf["movedRows"], pf["movedWhat"]))

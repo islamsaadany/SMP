@@ -475,30 +475,11 @@
   .cfg.srctable .inchip { font:600 10px/1 var(--mono); color:var(--ink-3);
                           letter-spacing:.04em; white-space:nowrap; }
   .cfg.srctable .inchip.ko { color:var(--gold-deep); font-weight:700; }
-  /* NOT SCOPED TO .srctable ANY MORE. The same chip is what the register's BU
-     cell and the BU list's mapping cell draw, and outside that one table it had
-     no rule at all — so it rendered as bare text on both, which is why nobody
-     had noticed it was meant to be a chip (§24, from the other end: an element
-     with no CSS is as invisible a fault as CSS with no element). */
-  .uchip { font:600 11px/1 var(--sans); color:var(--ink-2);
-           background:var(--surface-2); border:1px solid var(--line);
-           border-radius:var(--r-pill); padding:3px 8px; white-space:nowrap;
-           display:inline-block; max-width:100%; overflow:hidden;
-           text-overflow:ellipsis; }
-  /* ── The BU list's mapping cell (§57) ─────────────────────────────
-     Several chips and the control that adds one more, wrapping rather than
-     scrolling: a row holding eight functions is the case this exists for, and
-     a cell that scrolled would hide exactly the ones somebody came to check. */
-  .mbcell { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
-  .mbcell .uchip { display:inline-flex; align-items:center; gap:5px; }
-  .mbcell .mbadd { flex:1 1 auto; min-width:170px; }
-  /* The × sits INSIDE the chip and takes the chip's ink, so it reads as part
-     of it rather than as a control parked beside it. Bigger than it looks:
-     the padding is the target, which is what makes it pressable at 11px. */
-  .chipx { border:0; background:none; padding:0 0 0 1px; margin:-3px -3px -3px 0;
-           font:700 13px/1 var(--sans); color:var(--ink-3); cursor:pointer;
-           border-radius:var(--r-pill); width:18px; height:18px; }
-  .chipx:hover { color:var(--bad); background:var(--surface); }
+  .cfg.srctable .uchip { font:600 11px/1 var(--sans); color:var(--ink-2);
+                         background:var(--surface-2); border:1px solid var(--line);
+                         border-radius:var(--r-pill); padding:3px 8px; white-space:nowrap;
+                         display:inline-block; max-width:100%; overflow:hidden;
+                         text-overflow:ellipsis; }
   .srcempty { padding:18px 14px; font-size:12.5px; color:var(--none); }
 
   /* ══ PEOPLE: COLUMNS THAT FIT, ROLES THAT CLIP, A ROW MENU (§46.4) ═══

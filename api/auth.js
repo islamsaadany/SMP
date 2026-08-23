@@ -179,9 +179,37 @@ module.exports = async function handler(req, res) {
         "SELECT key, name FROM functions WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows;
       const mine = (await client.query(
         "SELECT at, declared_on FROM bu_declarations WHERE person_key = $1", [person.key])).rows[0];
+
+      /* ── THE SHORT LIST (§57) ──────────────────────────────────────
+         Their own Main BU says which units and functions it holds, so that is
+         what they are offered first. NARROWED ON THE SERVER from the stored
+         BU list, never sent up and filtered by the page: a client that decides
+         its own short list has decided nothing, because it still had the long
+         one to decide from.
+
+         AND THE REST IS STILL THERE, under its own heading. Islam: "they can
+         always choose other and we can adjust with them later if something is
+         missing." A short list that cannot be escaped is a short list that
+         strands whoever it forgot — and the declaration grants nothing either
+         way, so nothing turns on which half they pick from.
+
+         A row written before the list held several still reads: `at` is a
+         string there and an array here, and both mean the same thing. */
+      const mb = (await client.query(
+        "SELECT extra->'mainbus' AS mainbus FROM org LIMIT 1")).rows[0];
+      const rows = (mb && mb.mainbus) || [];
+      const who = (await client.query(
+        "SELECT extra->>'mainbu' AS mainbu FROM people WHERE key = $1", [person.key])).rows[0];
+      const norm = function (x) { return String(x == null ? "" : x).trim().toLowerCase(); };
+      const row = rows.filter(function (b) { return norm(b.name) === norm(who && who.mainbu); })[0];
+      const ats = !row ? []
+        : (Array.isArray(row.at) ? row.at : (row.at ? [row.at] : [])).filter(Boolean);
+
       return send(res, 200, { ok: true,
         units: us.map(function (r) { return { at: r.key, name: r.name }; }),
         functions: fs.map(function (r) { return { at: "fn:" + r.key, name: r.name }; }),
+        mainbu: (row && row.name) || null,
+        near: ats,
         mine: mine ? mine.at : null });
     }
 

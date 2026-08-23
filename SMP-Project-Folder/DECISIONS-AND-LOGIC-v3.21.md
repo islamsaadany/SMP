@@ -7713,3 +7713,80 @@ Fixed by renaming one and by having both handlers read `this` rather than close
 over the element they were wired to. The rule is the finding: the merge report
 is not a substitute for opening the product, because the collisions a merge
 creates are exactly the ones neither side could have tested for.
+
+---
+
+## 57 · A Main BU holds several, and the sign-in list gets short (v3.21)
+
+*2026-08-23. Islam: "just give me a table in the setup and enable the edit for
+me to map the main BUs list to the BUs and functions and I will do it, so
+everyone gets to the login with a short list to pick from — given they can
+always choose other and we can adjust with them later if something is
+missing."*
+
+### 57.1 One target was the reason it could not place anybody
+
+§54 gave each Main BU exactly one target, which was right for *Mazaya* and
+wrong for the two names that matter most. **Distribution is a COMPANY here**
+holding three units, and **Support Function** is the client's one word for
+eight. A single target could name the company and stop — and stopping there is
+precisely what left the register guessing.
+
+Several targets say the actual choices, and the sign-in picker offers those and
+nothing else.
+
+### 57.2 It reads both shapes, and there is no migration
+
+Every row written before today holds a string. `mainbuAts()` reads a string as
+a list of one and the array as itself, so a tenant that has already mapped part
+of its list does not do it again; the row is written back as an array the next
+time it is touched. `mainbus` lives in `org.extra`, which is jsonb and takes an
+array without being asked (§54.1).
+
+### 57.3 Several places means the file places nobody
+
+`mainbuAt()` answers **only where the name means one place** and null wherever
+it does not. A Main BU covering three units cannot say which of them somebody
+is in — that is the entire reason the question is asked at sign-in — so the
+person arrives unattached and the picker offers them those three.
+
+The guard is in one function and every resolver goes through it, which is what
+made the fault findable: the people-file importer was still reading `bu.at`
+directly, so it attached people to **the array** — `['mobile','b2becomm']`, a
+value that is not a place at all. `qa.py` caught it within a minute of the
+assertion existing, because the assertion is the rule: *a name that holds
+several places nobody.*
+
+### 57.4 A set of chips, not a dropdown
+
+One `<select>` cannot show four answers or take one away without disturbing the
+rest. Each mapped target is a chip carrying its own ×; the dropdown underneath
+adds, and **offers only what is not already mapped**, so pressing it can never
+be a no-op. Add and remove are separate writes — neither sends the whole list,
+so a stale tab can duplicate at worst and can never silently drop the four
+somebody else mapped while it was open.
+
+`.uchip` also stopped being scoped to one table. It was defined only under
+`.cfg.srctable`, so the register's BU cell and this one had been drawing bare
+text where a chip was intended — §24 from the other end: **an element with no
+CSS is as invisible a fault as CSS with no element.**
+
+### 57.5 Short at the top, and everything still reachable
+
+The gate asks the server for the list; the server reads the person's Main BU,
+looks it up in the stored rows, and returns what it holds. **Narrowed on the
+server**, never sent up and filtered by the page — a client that decides its own
+short list has decided nothing, because it still had the long one to decide
+from.
+
+Their own go first under the client's own word for that part of the business,
+then *Other business units* and *Other supporting functions*. Islam: "they can
+always choose other and we can adjust with them later if something is missing."
+A short list that cannot be escaped strands whoever it forgot — and since the
+answer is a declaration that grants nothing (§56.1), nothing turns on which half
+they pick from.
+
+Driven end to end: Distribution mapped to Mobile and Consumer Electronics on
+Setup, the SMO given that Main BU, and the sign-in card then offered
+**Distribution (2) · Other business units (8) · Other supporting functions
+(8)** — the pick landing in `bu_declarations` as before.

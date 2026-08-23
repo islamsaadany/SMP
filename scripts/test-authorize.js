@@ -680,5 +680,56 @@ console.log("\n9 · employee and contributor");
         !R.isOwnLinesRole("owner"));
 })();
 
+/* ── 10 · A function that plans in pillars can be reported on (§59) ──
+   The bug this fixes was silent and total: a function's plan and its figures
+   live on the FUNCTION, and every change anywhere in `functions` classified as
+   Setup — so Merchandising's custodian could open the Report page, type a
+   number, and have the save refused with "Setup is the SMO's". Nothing threw
+   and no test failed, because no test had ever asked. */
+console.log("\n10 · a function that plans in pillars");
+(function () {
+  const FK = Object.keys(SEED.functions || {}).filter(function (k) {
+    return String((SEED.functions[k] || {}).format) === "pillars";
+  })[0];
+  if (!FK) { check("the seed carries a pillars function to test with", false); return; }
+  const f = SEED.functions[FK];
+  const custKey = f.custodian;
+
+  /* Report a figure on its first measure — the act that was refused. */
+  const withFigure = function () {
+    const base = clone(SEED);
+    const inc = clone(base);
+    const m = (((inc.functions[FK].items || [])[0] || {}).measures || [])[0];
+    if (m) { m.actual = "99%"; m.progress = 99; }
+    return { base: base, inc: inc, ok: !!m };
+  };
+  let t = withFigure();
+  check("the seed's pillars function has a measure to report", t.ok);
+  let v = A.authorize(t.base, t.inc, personOf(t.base, custKey));
+  check("its custodian may report a figure", v.ok, v.refusals.join(" / "));
+  /* A.collect, NOT A.classify — there is no A.classify, and written that way
+     this line threw rather than skipping, which is the whole difference
+     between §54.5's silent pass and a check that says something. */
+  const kinds = A.collect(t.base, t.inc, R.worldOf(t.base))
+                 .map(function (c) { return c.kind; });
+  check("...classified as reporting, not as setup",
+        kinds.indexOf("unitReporting") > -1, kinds.join());
+
+  /* And the plan is still the SMO's, exactly as a unit's is (§22, §31). */
+  const plan = clone(SEED), planInc = clone(plan);
+  const p0 = (planInc.functions[FK].items || [])[0];
+  if (p0) p0.name = "Renamed by somebody who should not";
+  v = A.authorize(plan, planInc, personOf(plan, custKey));
+  check("but it may not rewrite the plan", !v.ok, v.refusals.join(" / "));
+  v = A.authorize(plan, planInc, personOf(plan, "smo"));
+  check("...which the SMO may", v.ok, v.refusals.join(" / "));
+
+  /* Its settings stay Setup. */
+  const set = clone(SEED), setInc = clone(set);
+  setInc.functions[FK].codePrefix = "ZZ";
+  v = A.authorize(set, setInc, personOf(set, custKey));
+  check("its settings are still the SMO's", !v.ok, v.refusals.join(" / "));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

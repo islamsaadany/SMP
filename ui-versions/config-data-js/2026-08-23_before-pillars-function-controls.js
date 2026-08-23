@@ -1678,23 +1678,9 @@ function navName(x){ return (x && x.navName) ? x.navName : (x ? x.name : ""); }
 /* Same rule as reaches(), for a supporting function: the area answering for it
    decides, and "own" is whether they hold a role in that function. */
 function reachesFn(key){ return grantAt("k_perf", "fn:" + key) !== "none"; }
-/* IS THERE ANYTHING BEHIND THIS FUNCTION (§59). Named once, because it was
-   answered in TWO places with the same wrong test — `fnsReachable()` here and
-   `myFns()` in the shell, each asking whether the function had capabilities.
-
-   That is right for a function whose whole plan lives in its capabilities and
-   wrong for one that plans in PILLARS, whose plan is its own. Merchandising
-   was therefore missing from the navigation entirely: built, scored, rolling
-   into Retail's pillar, and unreachable — and fixing one of the two copies
-   left it exactly as invisible, which is how the second copy was found. */
-function fnHasWork(k){
-  var f = FUNCTIONS[k];
-  if (!f) return false;
-  return fnPlansInPillars(f) ? fnItems(f).length > 0 : capsOfFunction(k).length > 0;
-}
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){
-    return FUNCTIONS[k].active !== false && reachesFn(k) && fnHasWork(k);
+    return FUNCTIONS[k].active !== false && reachesFn(k) && capsOfFunction(k).length;
   });
 }
 /* A function is retired, never deleted \u2014 it carries reported history, exactly
@@ -1786,25 +1772,10 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
-/* A TARGET IS A UNIT KEY OR "fn:<key>", and everything that takes one has to
-   resolve it the same way (§59). `UNITS[key]` alone was right until spec 010
-   let a function be drawn by the unit's pages: `UNITS["fn:merchandising"]` is
-   undefined, and the first thing to ask it for a field threw.
-
-   One resolver, so the next caller cannot get it wrong — and it returns null
-   rather than a shape for a function that plans in projects, because there is
-   no unit-shaped thing there to return. */
-function unitLike(target){
-  var t = String(target || "");
-  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
-  return fnAsUnit(t.slice(3));
-}
 function deltaFor(key){
   var h = lastClose(); if (!h) return null;
-  var u = key === "group" ? null : unitLike(key);
-  if (key !== "group" && !u) return null;
   var was = key === "group" ? h.group : h.units[key];
-  var now = key === "group" ? groupUnitsObjectives() : unitObjectives(u);
+  var now = key === "group" ? groupUnitsObjectives() : unitObjectives(UNITS[key]);
   if (was == null || now == null) return null;
   return { was:was, d:now - was };
 }
@@ -2491,23 +2462,6 @@ function renumberUnit(u){
   });
 }
 UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });
-/* AND A FUNCTION THAT PLANS IN PILLARS GETS THEM TOO (§59). Spec 010 gave a
-   function the unit's plan shape and the unit's pages, and this loop was left
-   running over UNIT_KEYS alone — so Merchandising's three pillars, their
-   measures and their tactics all carried `id: undefined`.
-
-   Silent, and it broke two things at once. The rail keys off the id, and the
-   AUTHORISER compares plans by id: with every row keyed `undefined`, the
-   stored and incoming graphs looked identical and a reported figure classified
-   as NOTHING AT ALL. Found by asking the classifier what it made of a figure
-   somebody had just typed, which returned an empty list — not by reading it.
-
-   `fnAsUnit()` hands over the same object the pages draw, `items` BY
-   REFERENCE, so the ids land on the function's own rows. */
-FUNCTION_KEYS.forEach(function(k){
-  var asU = fnAsUnit(k);
-  if (asU) renumberUnit(asU);
-});
 
 /* The generic template is built against an EMPTY shape, not against a chosen
    unit: the file is the same whichever unit it will end up describing, and the

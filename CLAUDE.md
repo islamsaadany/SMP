@@ -222,6 +222,18 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A function that plans in pillars (spec 010, made usable in §59):** its
+  plan and figures live on the FUNCTION, so `collectFunction()` classifies them
+  through **`collectUnit()` against the `fn:<key>` target** — never a second
+  copy; only its SETTINGS are Setup. `renumberUnit()` runs over pillars
+  functions too, or every row is keyed `undefined` and the authoriser sees NO
+  change at all. `fnHasWork()` answers "is there anything behind this function"
+  once (it was asked twice, both times as "has capabilities", which kept a
+  pillars function out of the navigation). `unitLike(target)` resolves a unit
+  key or `fn:<key>` in one place. **Setup › Supporting functions** carries
+  *Plans in* and *Under*; switching is refused while the other side holds
+  something, and the control is shown DISABLED with the reason rather than
+  hidden.
 - **Official BU (renamed from Main BU, v3.21, §58):** the client's own word for
   a part of the business. **It is measured by nothing** — no plan, no score, no
   page — and that is a decision, not an omission (§58.3): what carries a score

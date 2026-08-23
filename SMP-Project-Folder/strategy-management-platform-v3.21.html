@@ -6963,9 +6963,23 @@ function navName(x){ return (x && x.navName) ? x.navName : (x ? x.name : ""); }
 /* Same rule as reaches(), for a supporting function: the area answering for it
    decides, and "own" is whether they hold a role in that function. */
 function reachesFn(key){ return grantAt("k_perf", "fn:" + key) !== "none"; }
+/* IS THERE ANYTHING BEHIND THIS FUNCTION (§59). Named once, because it was
+   answered in TWO places with the same wrong test — `fnsReachable()` here and
+   `myFns()` in the shell, each asking whether the function had capabilities.
+
+   That is right for a function whose whole plan lives in its capabilities and
+   wrong for one that plans in PILLARS, whose plan is its own. Merchandising
+   was therefore missing from the navigation entirely: built, scored, rolling
+   into Retail's pillar, and unreachable — and fixing one of the two copies
+   left it exactly as invisible, which is how the second copy was found. */
+function fnHasWork(k){
+  var f = FUNCTIONS[k];
+  if (!f) return false;
+  return fnPlansInPillars(f) ? fnItems(f).length > 0 : capsOfFunction(k).length > 0;
+}
 function fnsReachable(){
   return FUNCTION_KEYS.filter(function(k){
-    return FUNCTIONS[k].active !== false && reachesFn(k) && capsOfFunction(k).length;
+    return FUNCTIONS[k].active !== false && reachesFn(k) && fnHasWork(k);
   });
 }
 /* A function is retired, never deleted \u2014 it carries reported history, exactly
@@ -7057,10 +7071,25 @@ var HISTORY = [
             corporate:71, care:66, it:63, logistics:69, nigeria:44 } }
 ];
 function lastClose(){ return HISTORY.length ? HISTORY[HISTORY.length - 1] : null; }
+/* A TARGET IS A UNIT KEY OR "fn:<key>", and everything that takes one has to
+   resolve it the same way (§59). `UNITS[key]` alone was right until spec 010
+   let a function be drawn by the unit's pages: `UNITS["fn:merchandising"]` is
+   undefined, and the first thing to ask it for a field threw.
+
+   One resolver, so the next caller cannot get it wrong — and it returns null
+   rather than a shape for a function that plans in projects, because there is
+   no unit-shaped thing there to return. */
+function unitLike(target){
+  var t = String(target || "");
+  if (t.indexOf("fn:") !== 0) return UNITS[t] || null;
+  return fnAsUnit(t.slice(3));
+}
 function deltaFor(key){
   var h = lastClose(); if (!h) return null;
+  var u = key === "group" ? null : unitLike(key);
+  if (key !== "group" && !u) return null;
   var was = key === "group" ? h.group : h.units[key];
-  var now = key === "group" ? groupUnitsObjectives() : unitObjectives(UNITS[key]);
+  var now = key === "group" ? groupUnitsObjectives() : unitObjectives(u);
   if (was == null || now == null) return null;
   return { was:was, d:now - was };
 }
@@ -7747,6 +7776,23 @@ function renumberUnit(u){
   });
 }
 UNIT_KEYS.forEach(function(k){ UNITS[k].ukey = k; renumberUnit(UNITS[k]); });
+/* AND A FUNCTION THAT PLANS IN PILLARS GETS THEM TOO (§59). Spec 010 gave a
+   function the unit's plan shape and the unit's pages, and this loop was left
+   running over UNIT_KEYS alone — so Merchandising's three pillars, their
+   measures and their tactics all carried `id: undefined`.
+
+   Silent, and it broke two things at once. The rail keys off the id, and the
+   AUTHORISER compares plans by id: with every row keyed `undefined`, the
+   stored and incoming graphs looked identical and a reported figure classified
+   as NOTHING AT ALL. Found by asking the classifier what it made of a figure
+   somebody had just typed, which returned an empty list — not by reading it.
+
+   `fnAsUnit()` hands over the same object the pages draw, `items` BY
+   REFERENCE, so the ids land on the function's own rows. */
+FUNCTION_KEYS.forEach(function(k){
+  var asU = fnAsUnit(k);
+  if (asU) renumberUnit(asU);
+});
 
 /* The generic template is built against an EMPTY shape, not against a chosen
    unit: the file is the same whichever unit it will end up describing, and the
@@ -16677,6 +16723,55 @@ function renderCycle(){
    numbering its work, one head and one Strategy custodian, and retirement
    rather than deletion. Two configuration pages that mean the same thing should
    not behave differently. */
+/* ── The two cells §59 adds ────────────────────────────────────────
+   Kept beside the table rather than inline, because each carries a REFUSAL and
+   a refusal needs room to say why. */
+function planFormatCell(fk, f, editable){
+  var pillars = fnPlansInPillars(f);
+  var word = pillars ? L("pillar","bu") : "Projects";
+  if (!editable) return '<span class="pill kind">' + esc(word) + '</span>';
+  /* What is in the way, if anything. A function holding capabilities cannot
+     become a pillars one and a function holding pillars cannot go back —
+     switching would not delete the work, it would stop DRAWING it, which is
+     worse: the plan is still in the save and nothing shows it. */
+  var caps = capsOfFunction(fk).length, items = fnItems(f).length;
+  /* "its plan" rather than a count on the pillars side: L("pillar") is the
+     tenant's own word and is already a PLURAL noun, so plural() made it
+     "3 pillarss" — and a function with exactly one would have read
+     "1 pillars". The count is only worth showing where it is grammatical. */
+  var blocked = pillars
+    ? (items ? "its plan" : "")
+    : (caps ? caps + (caps === 1 ? " capability" : " capabilities") : "");
+  /* SHOWN AND DISABLED, never hidden. Every function in a live tenant holds
+     something, so a control that disappeared while it did would be a control
+     nobody ever saw — §45.2's "a feature that renders nothing looks like a
+     feature that was not built". Disabled with the reason beside it says the
+     true thing: this is settable, once the row is cleared. */
+  return '<select class="fld" data-fnformat="' + esc(fk) + '"' +
+      (blocked ? ' disabled title="Clear the plan on this row first"' : '') + '>' +
+    '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
+    '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
+    '</select>' +
+    (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
+}
+function planUnderCell(fk, f, editable){
+  /* Only a pillars function borrows a foundation, so only it has somewhere to
+     sit under — offering this to a projects function would be a control that
+     changes nothing. */
+  if (!fnPlansInPillars(f)) return '<span class="why" style="margin:0">&mdash;</span>';
+  var at = f.under && UNITS[f.under] ? f.under : "";
+  if (!editable) {
+    return at ? '<span class="uchip">' + esc(UNITS[at].name) + '</span>'
+              : '<span class="why" style="margin:0">The group</span>';
+  }
+  return '<select class="fld" data-fnunder="' + esc(fk) + '">' +
+    '<option value=""' + (at ? "" : " selected") + '>The group</option>' +
+    activeKeys().map(function(k){
+      return '<option value="' + esc(k) + '"' + (k === at ? " selected" : "") + '>' +
+        esc(UNITS[k].name) + '</option>';
+    }).join("") + '</select>';
+}
+
 function renderFunctions(){
   var editable = grant("c_fns") === "edit" && EDITING.fns;
   /* The same picker the Business units page uses, addressed at "fn:<key>"
@@ -16703,6 +16798,16 @@ function renderFunctions(){
       '<td class="cc">' + (editable
         ? '<input class="fld mono" value="' + esc(f.codePrefix || "") + '" data-fpx="' + fk + '">'
         : '<span class="mono">' + esc(f.codePrefix || "\u2014") + '</span>') + '</td>' +
+      /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
+         Spec 010 built both and gave neither a control: `format` and `under`
+         could only be set by editing the source, so a second Merchandising was
+         impossible to create through the product.
+
+         SWITCHING IS REFUSED WHILE THE OTHER SIDE HOLDS SOMETHING, and it says
+         what is in the way rather than hiding a plan that still exists — the
+         same contract as retiring a company that still holds units (§49.3). */
+      '<td class="cc">' + planFormatCell(fk, f, editable) + '</td>' +
+      '<td class="cc">' + planUnderCell(fk, f, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + caps.length + '</span></td>' +
       '<td class="cc">' + pick("head", f.head, fk) + '</td>' +
       '<td class="cc">' + pick("custodian", f.custodian, fk) + '</td>' +
@@ -16739,11 +16844,13 @@ function renderFunctions(){
       "fns", grant("c_fns") === "edit", "fnall",
       ["Clear all progress", "Clear all plans"]) +
     section("", "", null,
-      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:20%">Function</th>' +
-        '<th style="width:14%">Shown in the nav</th><th class="cc" style="width:8%">Code</th>' +
-        '<th class="cc" style="width:10%">Capabilities</th>' +
-        '<th class="cc" style="width:16%">Head</th><th class="cc" style="width:16%">Strategy custodian</th>' +
-        '<th class="cc" style="width:10%">Status</th></tr></thead>' +
+      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:16%">Function</th>' +
+        '<th style="width:11%">Shown in the nav</th><th class="cc" style="width:6%">Code</th>' +
+        '<th class="cc" style="width:11%">Plans in</th>' +
+        '<th class="cc" style="width:12%">Under</th>' +
+        '<th class="cc" style="width:7%">Capabilities</th>' +
+        '<th class="cc" style="width:14%">Head</th><th class="cc" style="width:14%">Strategy custodian</th>' +
+        '<th class="cc" style="width:9%">Status</th></tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
@@ -19029,7 +19136,9 @@ var SYNC = (function () {
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
-      return FUNCTIONS[k].active !== false && capsOfFunction(k).length &&
+      /* fnHasWork(), not `capsOfFunction(k).length` — the same question
+         fnsReachable() asks, asked once (§59). */
+      return FUNCTIONS[k].active !== false && fnHasWork(k) &&
              allowed(SUBS.fn, "fn:" + k).length;
     });
   }
@@ -19978,6 +20087,31 @@ var SYNC = (function () {
     document.querySelectorAll("[data-fpx]").forEach(function(el){
       el.addEventListener("change", function(){
         FUNCTIONS[el.dataset.fpx].codePrefix = el.value.trim().toUpperCase();
+        paint();
+      });
+    });
+    /* ── How a supporting function plans, and where it sits (§59) ──
+       The cell only offers the switch when nothing is in the way, so by the
+       time this runs the answer is already safe — the guard is in the render
+       and not repeated here, because two copies of a refusal drift and the
+       one that matters is the one the person can see. `format` is deleted
+       rather than set to "projects": the default is what an absent key means
+       (§42, a reader must never create the field it was looking for). */
+    document.querySelectorAll("[data-fnformat]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var f = FUNCTIONS[this.dataset.fnformat];
+        if (this.value === "pillars") f.format = "pillars"; else delete f.format;
+        /* A projects function sits under nothing: the field would be stored
+           and never read, which is the column §53.4 removed from the database
+           for exactly this reason. */
+        if (!fnPlansInPillars(f)) delete f.under;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-fnunder]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var f = FUNCTIONS[this.dataset.fnunder];
+        if (this.value) f.under = this.value; else delete f.under;
         paint();
       });
     });

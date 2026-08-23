@@ -5140,7 +5140,8 @@
        "target": "1.15",
        "compile": "Latest",
        "actual": "1.06",
-       "progress": 92
+       "progress": 92,
+       "id": "fn:merchandising-P1-M1"
       },
       {
        "name": "Slow-moving SKU share",
@@ -5148,7 +5149,8 @@
        "target": "12%",
        "compile": "Latest",
        "actual": "18%",
-       "progress": 67
+       "progress": 67,
+       "id": "fn:merchandising-P1-M2"
       }
      ],
      "tactics": [
@@ -5163,7 +5165,8 @@
        "q3": 0,
        "q4": 0,
        "status": "WIP",
-       "actual": 75
+       "actual": 75,
+       "id": "fn:merchandising-P1-T1"
       },
       {
        "name": "Quarterly range review with the buying team",
@@ -5173,9 +5176,11 @@
        "q3": 1,
        "q4": 1,
        "status": "WIP",
-       "actual": 60
+       "actual": 60,
+       "id": "fn:merchandising-P1-T2"
       }
-     ]
+     ],
+     "id": "fn:merchandising-P1"
     },
     {
      "code": "M02",
@@ -5191,7 +5196,8 @@
        "target": "46K EGP",
        "compile": "Latest",
        "actual": "41K EGP",
-       "progress": 89
+       "progress": 89,
+       "id": "fn:merchandising-P2-M1"
       }
      ],
      "tactics": [
@@ -5203,7 +5209,8 @@
        "q3": 1,
        "q4": 0,
        "status": "WIP",
-       "actual": 55
+       "actual": 55,
+       "id": "fn:merchandising-P2-T1"
       },
       {
        "name": "Fixture refresh in the ten largest stores",
@@ -5216,9 +5223,11 @@
        "q3": 1,
        "q4": 1,
        "status": "WIP",
-       "actual": 40
+       "actual": 40,
+       "id": "fn:merchandising-P2-T2"
       }
-     ]
+     ],
+     "id": "fn:merchandising-P2"
     },
     {
      "code": "M03",
@@ -5234,7 +5243,8 @@
        "target": "18%",
        "compile": "Latest",
        "actual": "16.4%",
-       "progress": 91
+       "progress": 91,
+       "id": "fn:merchandising-P3-M1"
       },
       {
        "name": "Supplier funding secured",
@@ -5242,7 +5252,8 @@
        "target": "140M EGP",
        "compile": "Sum",
        "actual": "92M EGP",
-       "progress": 66
+       "progress": 66,
+       "id": "fn:merchandising-P3-M2"
       }
      ],
      "tactics": [
@@ -5258,9 +5269,11 @@
        "q3": 1,
        "q4": 0,
        "status": "WIP",
-       "actual": 65
+       "actual": 65,
+       "id": "fn:merchandising-P3-T1"
       }
-     ]
+     ],
+     "id": "fn:merchandising-P3"
     }
    ]
   }

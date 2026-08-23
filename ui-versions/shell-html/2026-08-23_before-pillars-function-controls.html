@@ -341,9 +341,7 @@
   }
   function myFns(){
     return FUNCTION_KEYS.filter(function(k){
-      /* fnHasWork(), not `capsOfFunction(k).length` — the same question
-         fnsReachable() asks, asked once (§59). */
-      return FUNCTIONS[k].active !== false && fnHasWork(k) &&
+      return FUNCTIONS[k].active !== false && capsOfFunction(k).length &&
              allowed(SUBS.fn, "fn:" + k).length;
     });
   }
@@ -1292,31 +1290,6 @@
     document.querySelectorAll("[data-fpx]").forEach(function(el){
       el.addEventListener("change", function(){
         FUNCTIONS[el.dataset.fpx].codePrefix = el.value.trim().toUpperCase();
-        paint();
-      });
-    });
-    /* ── How a supporting function plans, and where it sits (§59) ──
-       The cell only offers the switch when nothing is in the way, so by the
-       time this runs the answer is already safe — the guard is in the render
-       and not repeated here, because two copies of a refusal drift and the
-       one that matters is the one the person can see. `format` is deleted
-       rather than set to "projects": the default is what an absent key means
-       (§42, a reader must never create the field it was looking for). */
-    document.querySelectorAll("[data-fnformat]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var f = FUNCTIONS[this.dataset.fnformat];
-        if (this.value === "pillars") f.format = "pillars"; else delete f.format;
-        /* A projects function sits under nothing: the field would be stored
-           and never read, which is the column §53.4 removed from the database
-           for exactly this reason. */
-        if (!fnPlansInPillars(f)) delete f.under;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fnunder]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var f = FUNCTIONS[this.dataset.fnunder];
-        if (this.value) f.under = this.value; else delete f.under;
         paint();
       });
     });

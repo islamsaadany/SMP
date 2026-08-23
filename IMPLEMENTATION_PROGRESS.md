@@ -53,6 +53,33 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.21 — a function that plans in pillars actually works
+
+The piece flagged when spec 010 merged. Building the two Setup controls
+surfaced **four faults from that merge**, each hidden behind the last (§59):
+
+- **Its custodian could not report on it** — every change to a function
+  classified as Setup. Now classified through the unit's own classifier against
+  the `fn:<key>` target, so §42's figure/note/plan split arrives intact.
+- **Its pillars had no ids**, so the authoriser compared them by `undefined`
+  and saw no change at all. `renumberUnit()` runs over them now.
+- **It was not in the navigation** — and the rule was written twice, so fixing
+  one copy left it as invisible. `fnHasWork()` answers it once.
+- **Its Performance page then threw**, because `deltaFor()` resolved a target
+  as `UNITS[key]`. `unitLike()` resolves either kind in one place.
+
+Plus the controls themselves: **Plans in** and **Under** on Setup › Supporting
+functions, refused while the other side holds a plan, shown disabled with the
+reason rather than hidden.
+
+Verified: `test-authorize.js` 142 passed (136 + 6 new, including a custodian
+reporting a figure and being refused the plan); `qa.py` 31 viewers clean — and
+it walks Merchandising for the first time, which is what found the crash;
+`test-roundtrip.js` all four PASS on a fresh Postgres 16.
+
+**Still open on spec 010:** a pillars function's plan cannot yet ARRIVE by
+upload — the plan template lists business units only.
+
 ### v3.21 — Official BU, and it is measured by nothing
 
 - **Main BU → Official BU** everywhere a person reads it (§58): the register's

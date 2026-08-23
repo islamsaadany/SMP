@@ -1,4 +1,7 @@
 # 010 · Functions that plan in pillars, and functions under a unit
+> *Completed in §59: the Setup controls (Plans in, Under), the authoriser
+> classification, ids on a function's pillars, its place in the navigation,
+> and one resolver for a target. The import template is still open.*
 
 **Status:** DESIGNED, being built. Every decision below was put to Islam before
 anything was written; his answers are marked.

@@ -2739,55 +2739,6 @@ function renderCycle(){
    numbering its work, one head and one Strategy custodian, and retirement
    rather than deletion. Two configuration pages that mean the same thing should
    not behave differently. */
-/* ── The two cells §59 adds ────────────────────────────────────────
-   Kept beside the table rather than inline, because each carries a REFUSAL and
-   a refusal needs room to say why. */
-function planFormatCell(fk, f, editable){
-  var pillars = fnPlansInPillars(f);
-  var word = pillars ? L("pillar","bu") : "Projects";
-  if (!editable) return '<span class="pill kind">' + esc(word) + '</span>';
-  /* What is in the way, if anything. A function holding capabilities cannot
-     become a pillars one and a function holding pillars cannot go back —
-     switching would not delete the work, it would stop DRAWING it, which is
-     worse: the plan is still in the save and nothing shows it. */
-  var caps = capsOfFunction(fk).length, items = fnItems(f).length;
-  /* "its plan" rather than a count on the pillars side: L("pillar") is the
-     tenant's own word and is already a PLURAL noun, so plural() made it
-     "3 pillarss" — and a function with exactly one would have read
-     "1 pillars". The count is only worth showing where it is grammatical. */
-  var blocked = pillars
-    ? (items ? "its plan" : "")
-    : (caps ? caps + (caps === 1 ? " capability" : " capabilities") : "");
-  /* SHOWN AND DISABLED, never hidden. Every function in a live tenant holds
-     something, so a control that disappeared while it did would be a control
-     nobody ever saw — §45.2's "a feature that renders nothing looks like a
-     feature that was not built". Disabled with the reason beside it says the
-     true thing: this is settable, once the row is cleared. */
-  return '<select class="fld" data-fnformat="' + esc(fk) + '"' +
-      (blocked ? ' disabled title="Clear the plan on this row first"' : '') + '>' +
-    '<option value="projects"' + (pillars ? "" : " selected") + '>Projects</option>' +
-    '<option value="pillars"' + (pillars ? " selected" : "") + '>' + esc(L("pillar","bu")) + '</option>' +
-    '</select>' +
-    (blocked ? '<span class="why">holds ' + esc(blocked) + '</span>' : '');
-}
-function planUnderCell(fk, f, editable){
-  /* Only a pillars function borrows a foundation, so only it has somewhere to
-     sit under — offering this to a projects function would be a control that
-     changes nothing. */
-  if (!fnPlansInPillars(f)) return '<span class="why" style="margin:0">&mdash;</span>';
-  var at = f.under && UNITS[f.under] ? f.under : "";
-  if (!editable) {
-    return at ? '<span class="uchip">' + esc(UNITS[at].name) + '</span>'
-              : '<span class="why" style="margin:0">The group</span>';
-  }
-  return '<select class="fld" data-fnunder="' + esc(fk) + '">' +
-    '<option value=""' + (at ? "" : " selected") + '>The group</option>' +
-    activeKeys().map(function(k){
-      return '<option value="' + esc(k) + '"' + (k === at ? " selected" : "") + '>' +
-        esc(UNITS[k].name) + '</option>';
-    }).join("") + '</select>';
-}
-
 function renderFunctions(){
   var editable = grant("c_fns") === "edit" && EDITING.fns;
   /* The same picker the Business units page uses, addressed at "fn:<key>"
@@ -2814,16 +2765,6 @@ function renderFunctions(){
       '<td class="cc">' + (editable
         ? '<input class="fld mono" value="' + esc(f.codePrefix || "") + '" data-fpx="' + fk + '">'
         : '<span class="mono">' + esc(f.codePrefix || "\u2014") + '</span>') + '</td>' +
-      /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
-         Spec 010 built both and gave neither a control: `format` and `under`
-         could only be set by editing the source, so a second Merchandising was
-         impossible to create through the product.
-
-         SWITCHING IS REFUSED WHILE THE OTHER SIDE HOLDS SOMETHING, and it says
-         what is in the way rather than hiding a plan that still exists — the
-         same contract as retiring a company that still holds units (§49.3). */
-      '<td class="cc">' + planFormatCell(fk, f, editable) + '</td>' +
-      '<td class="cc">' + planUnderCell(fk, f, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + caps.length + '</span></td>' +
       '<td class="cc">' + pick("head", f.head, fk) + '</td>' +
       '<td class="cc">' + pick("custodian", f.custodian, fk) + '</td>' +
@@ -2860,13 +2801,11 @@ function renderFunctions(){
       "fns", grant("c_fns") === "edit", "fnall",
       ["Clear all progress", "Clear all plans"]) +
     section("", "", null,
-      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:16%">Function</th>' +
-        '<th style="width:11%">Shown in the nav</th><th class="cc" style="width:6%">Code</th>' +
-        '<th class="cc" style="width:11%">Plans in</th>' +
-        '<th class="cc" style="width:12%">Under</th>' +
-        '<th class="cc" style="width:7%">Capabilities</th>' +
-        '<th class="cc" style="width:14%">Head</th><th class="cc" style="width:14%">Strategy custodian</th>' +
-        '<th class="cc" style="width:9%">Status</th></tr></thead>' +
+      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:20%">Function</th>' +
+        '<th style="width:14%">Shown in the nav</th><th class="cc" style="width:8%">Code</th>' +
+        '<th class="cc" style="width:10%">Capabilities</th>' +
+        '<th class="cc" style="width:16%">Head</th><th class="cc" style="width:16%">Strategy custodian</th>' +
+        '<th class="cc" style="width:10%">Status</th></tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is

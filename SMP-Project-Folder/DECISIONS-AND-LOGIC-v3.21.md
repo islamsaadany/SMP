@@ -7858,3 +7858,105 @@ points at is what is measured."*
 exactly why it placed nobody. It now reads **"One name may hold several"**, and
 tells the SMO to map the units themselves — which is what §57 made possible and
 what the sign-in picker reads.
+
+---
+
+## 59 · A function that plans in pillars actually works (v3.21)
+
+*2026-08-23. The piece I flagged when spec 010 merged — the Setup controls it
+never got, and the authoriser gap that made it unusable. Islam: "ok go ahead
+for this."*
+
+Spec 010 was merged as *model, scoring, demo and page routing built; Setup
+controls, authoriser classification and the import template still open*. That
+was true, and it understated it. Building the two controls surfaced **four
+faults, all from the same merge, all invisible because nothing had ever walked
+that path.**
+
+### 59.1 Its custodian could not report on it
+
+A function's plan and its figures live on the FUNCTION, and the authoriser had
+one line for the whole of `functions`: any change anywhere classified as Setup.
+So Merchandising's custodian could open the Report page, type a number, and
+have the save refused as *"Setup is the SMO's."*
+
+**Classified by the unit's own classifier**, run against the `fn:<key>` target
+— not a second copy of it. The verdict already understood a function target
+(`unitReporting` asks `edits(…, "fn", t)`), so §42's whole figure/note/plan
+split arrives intact and cannot drift away from the unit's. What stays Setup is
+the function's SETTINGS, which is what that line was always really about.
+
+The classification is read from the **stored** side, so a save that switched
+`format` and rewrote the plan in one request cannot ask the incoming world
+whether it was allowed (§42.2).
+
+### 59.2 Its pillars had no ids, so the classifier saw nothing
+
+`renumberUnit()` ran over `UNIT_KEYS` alone. Merchandising's three pillars,
+their measures and their tactics all carried `id: undefined`.
+
+Silent, and it broke two things at once: the rail keys off the id, and the
+authoriser compares plans BY id — so with every row keyed `undefined` the
+stored and incoming graphs looked identical and a reported figure classified as
+**nothing at all**. Found by asking the classifier what it made of a figure
+somebody had just typed and getting back an empty list. Not by reading it.
+
+### 59.3 It was not in the navigation, and the rule was written twice
+
+`fnsReachable()` required `capsOfFunction(k).length` — right for a function
+whose whole plan lives in its capabilities, wrong for one whose plan is its
+own. Merchandising was built, scored, rolling into Retail's pillar, and
+**unreachable**.
+
+And fixing it left the row exactly as invisible, which is how the second copy
+was found: `myFns()` in the shell asked the same question with the same wrong
+test. `fnHasWork()` answers it once now.
+
+### 59.4 And then its Performance page threw
+
+Making it reachable is what let the sweep walk it — and the first thing the
+sweep did was crash: `deltaFor()` resolved a target as `UNITS[key]`, and
+`UNITS["fn:merchandising"]` is undefined.
+
+`unitLike(target)` resolves it in one place now. **This is the shape of all
+four:** spec 010 gave a function the unit's pages without giving it everything
+a unit key means, and each gap was invisible until something walked the path.
+The sweep could not walk it because of §59.3, and §59.3 was hidden behind
+§59.2. They came out in order, each one uncovering the next.
+
+### 59.5 The two controls
+
+**Plans in** — *Projects* or *Pillars* — and **Under**, on Setup › Supporting
+functions. Both were built by spec 010 and neither had a control: `format` and
+`under` could only be set by editing the source, so a second Merchandising was
+impossible to create through the product.
+
+**Switching is refused while the other side holds something.** A function
+holding capabilities cannot become a pillars one and a function holding pillars
+cannot go back — switching would not delete the work, it would stop DRAWING it,
+which is worse: the plan is still in the save and nothing shows it. The same
+contract as retiring a company that still holds units (§49.3).
+
+**Shown and disabled, never hidden.** Every function in a live tenant holds
+something, so a control that vanished while it did would be a control nobody
+ever saw — §45.2's *"a feature that renders nothing looks like a feature that
+was not built"*. Disabled with the reason beside it says the true thing: this is
+settable, once the row is cleared.
+
+**Under is offered only to a pillars function**, because only it borrows a
+foundation; and switching back to Projects clears `under` as well as `format`,
+so no field is stored that nothing reads (§53.4's rule about a column the
+platform no longer needs).
+
+Driven through the real controls: a new function is switchable, choosing
+Pillars stores `format`, choosing a unit stores `under`, and going back to
+Projects leaves `{}` — both keys gone.
+
+### 59.6 What is still open on spec 010
+
+**The import template.** A pillars function's plan can be corrected on the page
+and reported on, but it cannot yet ARRIVE by upload the way a unit's does: the
+plan template's Read-me lists business units, and a function is not among them.
+That is the next piece, and it is its own decision — §22 says an upload
+AUTHORS a plan, which for a function means deciding what happens to the
+capabilities it is not using.

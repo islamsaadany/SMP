@@ -1938,6 +1938,9 @@
   .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:var(--on-fill); }
   .minisw button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
 
+  /* One column fewer when the near horizon is hidden (§51.16) — the grid has
+     to lose the track, not just its content, or the row keeps a 96px hole. */
+  .ohead.one, .orow.one { grid-template-columns:minmax(0,1fr) 96px; }
   .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
            padding-bottom:8px; border-bottom:1px solid var(--line); font-size:10px;
            letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }
@@ -6606,6 +6609,22 @@ function avg(a){
    the platform, so reordering renumbers it. The unit prefix is kept because it
    still says which unit a pillar belongs to when pillars are listed together
    at group level. */
+/* ── THE ONE-YEAR TARGET, HIDDEN ON A UNIT'S OBJECTIVES (§51.16) ─────────
+   Islam, 2026-08-23: "the key objectives in the units for now hide the 1 year
+   view and just keep the 3 years."
+
+   "For now" is why this is a switch and not a deletion. The same shape §29's
+   SHOW_KIND took: the field is still stored, still authored, still arrives and
+   leaves with the import template, and still scores the unit — only the two
+   places that show the two horizons SIDE BY SIDE drop the near one.
+
+   It is the UNIT's objectives, not the group's and not a capability's, so the
+   flag is read where the surface knows which it is drawing. And it is not read
+   anywhere a figure is measured against that target — Performance's drill-down,
+   Reporting, and the deck's "where we stand" all keep it, because an actual
+   with nothing to read it against is a number nobody can judge. */
+var SHOW_KO_THIS_YEAR = false;
+
 function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
 }
@@ -11553,20 +11572,37 @@ function koToggle(){
     '<button data-kov="chips" aria-pressed="' + (KO_VIEW === "chips") + '" title="Chips">&#9632;&#9632;</button></span>';
 }
 
-function koView(list){
+/* `isGroup` decides whether the near horizon is shown: it is hidden on a
+   UNIT's objectives and kept on the group's (§51.16). The chips view drops the
+   same value, and the 3-year loses its "3-year" prefix there — with only one
+   number left, a label saying which one it is has nothing to distinguish it
+   from. */
+function koView(list, isGroup){
+  var near = isGroup || SHOW_KO_THIS_YEAR;
+  var miss = '<span class="missing">Missing</span>';
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
+      var far = m.target3y ? esc(m.target3y) : miss;
       return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
-        '<div class="v">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</div>' +
-        '<div class="h">3-year ' + (m.target3y ? esc(m.target3y) : '<span class="missing">Missing</span>') + '</div></div>';
+        (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
+                '<div class="h">3-year ' + far + '</div>'
+              : '<div class="v">' + far + '</div>') + '</div>';
     }).join("") + '</div>';
   }
-  return '<div class="ohead"><span>Objective</span><span>3-year</span><span>This year</span></div>' +
+  return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
+      '<span>' + horizonColLabel() + '</span>' +
+      (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      return '<div class="orow"><span class="on">' + esc(m.name) + '</span>' +
-        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : '<span class="missing">Missing</span>') + '</span>' +
-        '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span></div>';
+      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) + '</span>' +
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
+}
+/* The far column says WHICH year when the tenant has set one — "By 2028" reads
+   as a date and "3-year" reads as a duration, and with the near column gone
+   the heading is the only thing left saying what the number is. */
+function horizonColLabel(){
+  return horizonSet() ? "By " + esc(GROUP.horizon) : "3-year";
 }
 
 /* Edit is where the detail lives — direction and compile never appear in the
@@ -11622,7 +11658,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
     '<div class="divide"></div>' +
     '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
       (editing ? '' : koToggle()) + '</div>' +
-    (editing ? koEdit(objectives) : koView(objectives)) +
+    (editing ? koEdit(objectives) : koView(objectives, isGroup)) +
   '</div>';
 }
 
@@ -15261,12 +15297,19 @@ function deckSlides(u){
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
+  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
+     deck's other side-by-side view of the two, so it drops the same column the
+     Foundation page does — and the scoring slide further on keeps it, because
+     that is where an actual is read against a target. */
+  var aimNear = SHOW_KO_THIS_YEAR;
   var aimRows = u.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
       '<td class="num big3">' + (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>' +
-      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td></tr>';
+      (aimNear
+        ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
+        : '') + '</tr>';
   }).join("");
   S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
@@ -15278,9 +15321,9 @@ function deckSlides(u){
     '</div><div class="aimbottom"><span class="dlab">' + L("keyobj","bu") +
       horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">Dir.</th><th class="num">' +
-        (horizonSet() ? "By " + esc(GROUP.horizon) : "3-year") + '</th>' +
-      '<th class="num">This year</th></tr></thead><tbody>' + aimRows + '</tbody></table>' +
+      '<th class="num">Dir.</th><th class="num">' + horizonColLabel() + '</th>' +
+      (aimNear ? '<th class="num">This year</th>' : '') +
+      '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
 
   /* 3 — the two readings, at the size they deserve. */

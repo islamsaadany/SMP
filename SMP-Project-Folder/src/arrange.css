@@ -141,6 +141,9 @@
   .minisw button[aria-pressed="true"] { background:var(--stone-soft); color:var(--on-fill); }
   .minisw button:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
 
+  /* One column fewer when the near horizon is hidden (§51.16) — the grid has
+     to lose the track, not just its content, or the row keeps a 96px hole. */
+  .ohead.one, .orow.one { grid-template-columns:minmax(0,1fr) 96px; }
   .ohead { display:grid; grid-template-columns:minmax(0,1fr) 96px 96px; gap:14px;
            padding-bottom:8px; border-bottom:1px solid var(--line); font-size:10px;
            letter-spacing:.1em; text-transform:uppercase; color:var(--ink-3); font-weight:700; }

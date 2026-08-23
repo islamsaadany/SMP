@@ -1394,20 +1394,37 @@ function koToggle(){
     '<button data-kov="chips" aria-pressed="' + (KO_VIEW === "chips") + '" title="Chips">&#9632;&#9632;</button></span>';
 }
 
-function koView(list){
+/* `isGroup` decides whether the near horizon is shown: it is hidden on a
+   UNIT's objectives and kept on the group's (§51.16). The chips view drops the
+   same value, and the 3-year loses its "3-year" prefix there — with only one
+   number left, a label saying which one it is has nothing to distinguish it
+   from. */
+function koView(list, isGroup){
+  var near = isGroup || SHOW_KO_THIS_YEAR;
+  var miss = '<span class="missing">Missing</span>';
   if (KO_VIEW === "chips") {
     return '<div class="ochips">' + list.map(function(m){
+      var far = m.target3y ? esc(m.target3y) : miss;
       return '<div class="ochip"><b>' + esc(m.name) + '</b>' +
-        '<div class="v">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</div>' +
-        '<div class="h">3-year ' + (m.target3y ? esc(m.target3y) : '<span class="missing">Missing</span>') + '</div></div>';
+        (near ? '<div class="v">' + (m.target ? esc(m.target) : miss) + '</div>' +
+                '<div class="h">3-year ' + far + '</div>'
+              : '<div class="v">' + far + '</div>') + '</div>';
     }).join("") + '</div>';
   }
-  return '<div class="ohead"><span>Objective</span><span>3-year</span><span>This year</span></div>' +
+  return '<div class="ohead' + (near ? '' : ' one') + '"><span>Objective</span>' +
+      '<span>' + horizonColLabel() + '</span>' +
+      (near ? '<span>This year</span>' : '') + '</div>' +
     list.map(function(m){
-      return '<div class="orow"><span class="on">' + esc(m.name) + '</span>' +
-        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : '<span class="missing">Missing</span>') + '</span>' +
-        '<span class="ot">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</span></div>';
+      return '<div class="orow' + (near ? '' : ' one') + '"><span class="on">' + esc(m.name) + '</span>' +
+        '<span class="ot h">' + (m.target3y ? esc(m.target3y) : miss) + '</span>' +
+        (near ? '<span class="ot">' + (m.target ? esc(m.target) : miss) + '</span>' : '') + '</div>';
     }).join("");
+}
+/* The far column says WHICH year when the tenant has set one — "By 2028" reads
+   as a date and "3-year" reads as a duration, and with the near column gone
+   the heading is the only thing left saying what the number is. */
+function horizonColLabel(){
+  return horizonSet() ? "By " + esc(GROUP.horizon) : "3-year";
 }
 
 /* Edit is where the detail lives — direction and compile never appear in the
@@ -1463,7 +1480,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
     '<div class="divide"></div>' +
     '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
       (editing ? '' : koToggle()) + '</div>' +
-    (editing ? koEdit(objectives) : koView(objectives)) +
+    (editing ? koEdit(objectives) : koView(objectives, isGroup)) +
   '</div>';
 }
 

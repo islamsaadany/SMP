@@ -1625,6 +1625,22 @@ function avg(a){
    the platform, so reordering renumbers it. The unit prefix is kept because it
    still says which unit a pillar belongs to when pillars are listed together
    at group level. */
+/* ── THE ONE-YEAR TARGET, HIDDEN ON A UNIT'S OBJECTIVES (§51.16) ─────────
+   Islam, 2026-08-23: "the key objectives in the units for now hide the 1 year
+   view and just keep the 3 years."
+
+   "For now" is why this is a switch and not a deletion. The same shape §29's
+   SHOW_KIND took: the field is still stored, still authored, still arrives and
+   leaves with the import template, and still scores the unit — only the two
+   places that show the two horizons SIDE BY SIDE drop the near one.
+
+   It is the UNIT's objectives, not the group's and not a capability's, so the
+   flag is read where the surface knows which it is drawing. And it is not read
+   anywhere a figure is measured against that target — Performance's drill-down,
+   Reporting, and the deck's "where we stand" all keep it, because an actual
+   with nothing to read it against is a number nobody can judge. */
+var SHOW_KO_THIS_YEAR = false;
+
 function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
 }

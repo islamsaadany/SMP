@@ -59,12 +59,19 @@ function deckSlides(u){
     '<p class="coversub">Strategy review &middot; ' + esc(REVIEW.name) + '</p></section>');
 
   /* 2 — what we are aiming at: statement above, targets below, no actuals. */
+  /* The near horizon is hidden on a unit's objectives (§51.16). This is the
+     deck's other side-by-side view of the two, so it drops the same column the
+     Foundation page does — and the scoring slide further on keeps it, because
+     that is where an actual is read against a target. */
+  var aimNear = SHOW_KO_THIS_YEAR;
   var aimRows = u.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td class="lead">' + esc(m.name) + fmark(m.id) + '</td>' +
       '<td class="num">' + esc(m.dir) + '</td>' +
       '<td class="num big3">' + (m.target3y ? esc(m.target3y) : "&mdash;") + '</td>' +
-      '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td></tr>';
+      (aimNear
+        ? '<td class="num">' + (m.target ? esc(m.target) : '<span class="missing">Missing</span>') + '</td>'
+        : '') + '</tr>';
   }).join("");
   S.push('<section class="dslide"' + anch("aim", "After \u201cWhat we are aiming at\u201d") +
     '><h2>What we are aiming at</h2>' +
@@ -76,9 +83,9 @@ function deckSlides(u){
     '</div><div class="aimbottom"><span class="dlab">' + L("keyobj","bu") +
       horizonBy() + '</span>' +
       '<table class="zebra dbig"><thead><tr><th class="idx">#</th><th>Objective</th>' +
-      '<th class="num">Dir.</th><th class="num">' +
-        (horizonSet() ? "By " + esc(GROUP.horizon) : "3-year") + '</th>' +
-      '<th class="num">This year</th></tr></thead><tbody>' + aimRows + '</tbody></table>' +
+      '<th class="num">Dir.</th><th class="num">' + horizonColLabel() + '</th>' +
+      (aimNear ? '<th class="num">This year</th>' : '') +
+      '</tr></thead><tbody>' + aimRows + '</tbody></table>' +
     '</div></section>');
 
   /* 3 — the two readings, at the size they deserve. */

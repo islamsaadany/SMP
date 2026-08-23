@@ -2763,7 +2763,15 @@
   .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
                      border:1px solid var(--line); border-radius:var(--r-sm);
                      background:var(--surface); color:var(--ink); max-width:320px; }
-  .picslots { display:grid; gap:12px; }
+  /* THE EDITOR'S SLOTS WRAP (§51.6). They took the same fixed column counts
+     the slide uses, so four across in a 940px dialog gave 200px frames, and
+     on a laptop the row simply ran out of room. The slide keeps its exact
+     arrangement — it is a fixed 1600x900 stage and there is always room —
+     while the editor fits as many as the dialog can hold and wraps the rest.
+     Written WITHOUT a pg-class in front of it so it beats nothing and is
+     beaten by nothing: it is the only rule that sizes .picslots. */
+  .picslots { display:grid; gap:12px;
+              grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); }
   .picslot { display:flex; flex-direction:column; gap:8px; min-width:0; }
   /* A fixed 16:10 well, so the frame in here has the same shape as the frame
      on the slide whatever the arrangement — otherwise the crop chosen against
@@ -15771,7 +15779,7 @@ function picSlideCard(sl){
               (across === n) + '">' + n + '</button>';
           }).join("") + '</span></label>' +
     '</div>' +
-    '<div class="picslots pg' + across + '">' + slots.join("") + '</div>' +
+    '<div class="picslots">' + slots.join("") + '</div>' +
     (pics.length > across
       ? '<p class="picsub picover">' + (pics.length - across) + ' more ' +
         (pics.length - across === 1 ? "picture is" : "pictures are") +
@@ -16134,10 +16142,31 @@ var SEARCHSEL = (function(){
       var first = rows.filter(function(r){ return !r.hidden; })[0];
       if (first && document.activeElement === q) { e.preventDefault(); first.click(); }
     };
-    /* Fixed to the viewport, so a scroll would leave it hanging beside
-       nothing. Closing is honest; following the button is not worth a
-       scroll-frame listener on a page with sticky chrome (§28.3). */
-    var onGone = function(){ close(); };
+    /* IT FOLLOWS THE BUTTON NOW, RATHER THAN CLOSING (§51.6, Islam: "the
+       where it goes list needs to be scrollable as on scrolling it closes").
+
+       It used to close on any scroll, and the note here argued that closing
+       was honest because the popup is `position:fixed` and would otherwise
+       hang beside nothing. That reasoning held while every list was short
+       enough to sit inside the viewport. A LIST LONG ENOUGH TO SCROLL BREAKS
+       IT: reaching for the twelfth entry scrolls the popup's own list, that
+       scroll bubbles to the window with capture on, and the control shuts
+       under the pointer. The list you cannot scroll is the list you cannot
+       use.
+
+       So a scroll INSIDE the popup is left alone, and a scroll anywhere else
+       REPOSITIONS rather than closes — the cost §28.3 warned about is one
+       getBoundingClientRect per scroll frame on an element that is already
+       fixed, which measures nothing and changes nobody's height (§28.3's real
+       rule was never size against a measured value; this only moves). It
+       still closes when the button it belongs to has left the screen, because
+       a popup pointing at nothing is worse than a closed one. */
+    var onGone = function(e){
+      if (e && e.target && e.target.nodeType === 1 && pop.contains(e.target)) return;
+      var r = btn.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) { close(); return; }
+      place(btn, pop);
+    };
 
     document.addEventListener("mousedown", onDoc, true);
     document.addEventListener("keydown", onKey, true);
@@ -16851,13 +16880,25 @@ var SYNC = (function () {
         { fold:"units", label:"Units",     open:NAVFOLD === "units" },
         { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
       ] });
+      /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
+         (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
+         name — so a function's navName was stored, printed in the Setup
+         table, editable there, and read by NOTHING. Setting the Strategy
+         Management Office to "SMO" changed a cell and left the navigation
+         saying "Strategy Management Office".
+
+         Units had gone through navName() since the field existed; functions
+         never did. §45.1's fault in a fourth tree: a field nobody reads fails
+         silently, and it fails looking like the feature was never built. The
+         same one-argument helper answers for both now, so a third kind of
+         thing added later cannot get this wrong on its own. */
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       else
-        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     }
     /* Manage and Setup used to be two glyph buttons here. They are now one
        worded button with a menu, rendered separately (paintMenu) so it can sit
@@ -18086,6 +18127,22 @@ var SYNC = (function () {
         var fn = FIELDS[+el.dataset.fld];
         if (fn) { fn(el.value); paint(); }
       });
+      /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
+         end in mind is not editable in terms of space or empty lines").
+         Every long-text field was `rows="2"`, so a purpose written as three
+         paragraphs was typed through a two-line window — Enter worked, and you
+         could not see that it had. Growing is not a repaint: it sets the
+         element's own height and touches nothing else, so it is safe on
+         `input` where a repaint would destroy the field being typed into
+         (§35). Height is cleared first, or the box can only ever grow. */
+      if (el.tagName === "TEXTAREA") {
+        var fit = function(){
+          el.style.height = "auto";
+          el.style.height = (el.scrollHeight + 2) + "px";
+        };
+        el.addEventListener("input", fit);
+        fit();
+      }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){

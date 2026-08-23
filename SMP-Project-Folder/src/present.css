@@ -208,7 +208,15 @@
   .picfield select { font:inherit; font-size:var(--fs-note); padding:5px 8px;
                      border:1px solid var(--line); border-radius:var(--r-sm);
                      background:var(--surface); color:var(--ink); max-width:320px; }
-  .picslots { display:grid; gap:12px; }
+  /* THE EDITOR'S SLOTS WRAP (§51.6). They took the same fixed column counts
+     the slide uses, so four across in a 940px dialog gave 200px frames, and
+     on a laptop the row simply ran out of room. The slide keeps its exact
+     arrangement — it is a fixed 1600x900 stage and there is always room —
+     while the editor fits as many as the dialog can hold and wraps the rest.
+     Written WITHOUT a pg-class in front of it so it beats nothing and is
+     beaten by nothing: it is the only rule that sizes .picslots. */
+  .picslots { display:grid; gap:12px;
+              grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); }
   .picslot { display:flex; flex-direction:column; gap:8px; min-width:0; }
   /* A fixed 16:10 well, so the frame in here has the same shape as the frame
      on the slide whatever the arrangement — otherwise the crop chosen against

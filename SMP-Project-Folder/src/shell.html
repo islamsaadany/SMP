@@ -357,13 +357,25 @@
         { fold:"units", label:"Units",     open:NAVFOLD === "units" },
         { fold:"caps",  label:"Functions", open:NAVFOLD === "caps" }
       ] });
+      /* A FUNCTION'S "SHOWN IN THE NAV" IS NOW ACTUALLY SHOWN IN THE NAV
+         (§51.7, Islam). Both branches read `FUNCTIONS[k].name` — the full
+         name — so a function's navName was stored, printed in the Setup
+         table, editable there, and read by NOTHING. Setting the Strategy
+         Management Office to "SMO" changed a cell and left the navigation
+         saying "Strategy Management Office".
+
+         Units had gone through navName() since the field existed; functions
+         never did. §45.1's fault in a fourth tree: a field nobody reads fails
+         silently, and it fails looking like the feature was never built. The
+         same one-argument helper answers for both now, so a third kind of
+         thing added later cannot get this wrong on its own. */
       if (NAVFOLD === "units")
         us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
       else
-        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+        cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     } else {
       us.forEach(function(k){ out.push({ k:k, label:navName(UNITS[k]) }); });
-      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:FUNCTIONS[k].name }); });
+      cs.forEach(function(k){ out.push({ k:"fn:" + k, label:navName(FUNCTIONS[k]) }); });
     }
     /* Manage and Setup used to be two glyph buttons here. They are now one
        worded button with a menu, rendered separately (paintMenu) so it can sit
@@ -1592,6 +1604,22 @@
         var fn = FIELDS[+el.dataset.fld];
         if (fn) { fn(el.value); paint(); }
       });
+      /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
+         end in mind is not editable in terms of space or empty lines").
+         Every long-text field was `rows="2"`, so a purpose written as three
+         paragraphs was typed through a two-line window — Enter worked, and you
+         could not see that it had. Growing is not a repaint: it sets the
+         element's own height and touches nothing else, so it is safe on
+         `input` where a repaint would destroy the field being typed into
+         (§35). Height is cleared first, or the box can only ever grow. */
+      if (el.tagName === "TEXTAREA") {
+        var fit = function(){
+          el.style.height = "auto";
+          el.style.height = (el.scrollHeight + 2) + "px";
+        };
+        el.addEventListener("input", fit);
+        fit();
+      }
     });
     document.querySelectorAll("[data-page]").forEach(function(b){
       b.addEventListener("click", function(){

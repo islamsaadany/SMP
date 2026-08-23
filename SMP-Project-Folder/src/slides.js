@@ -212,7 +212,7 @@ function picSlideCard(sl){
               (across === n) + '">' + n + '</button>';
           }).join("") + '</span></label>' +
     '</div>' +
-    '<div class="picslots pg' + across + '">' + slots.join("") + '</div>' +
+    '<div class="picslots">' + slots.join("") + '</div>' +
     (pics.length > across
       ? '<p class="picsub picover">' + (pics.length - across) + ' more ' +
         (pics.length - across === 1 ? "picture is" : "pictures are") +

@@ -153,10 +153,31 @@ var SEARCHSEL = (function(){
       var first = rows.filter(function(r){ return !r.hidden; })[0];
       if (first && document.activeElement === q) { e.preventDefault(); first.click(); }
     };
-    /* Fixed to the viewport, so a scroll would leave it hanging beside
-       nothing. Closing is honest; following the button is not worth a
-       scroll-frame listener on a page with sticky chrome (§28.3). */
-    var onGone = function(){ close(); };
+    /* IT FOLLOWS THE BUTTON NOW, RATHER THAN CLOSING (§51.6, Islam: "the
+       where it goes list needs to be scrollable as on scrolling it closes").
+
+       It used to close on any scroll, and the note here argued that closing
+       was honest because the popup is `position:fixed` and would otherwise
+       hang beside nothing. That reasoning held while every list was short
+       enough to sit inside the viewport. A LIST LONG ENOUGH TO SCROLL BREAKS
+       IT: reaching for the twelfth entry scrolls the popup's own list, that
+       scroll bubbles to the window with capture on, and the control shuts
+       under the pointer. The list you cannot scroll is the list you cannot
+       use.
+
+       So a scroll INSIDE the popup is left alone, and a scroll anywhere else
+       REPOSITIONS rather than closes — the cost §28.3 warned about is one
+       getBoundingClientRect per scroll frame on an element that is already
+       fixed, which measures nothing and changes nobody's height (§28.3's real
+       rule was never size against a measured value; this only moves). It
+       still closes when the button it belongs to has left the screen, because
+       a popup pointing at nothing is worse than a closed one. */
+    var onGone = function(e){
+      if (e && e.target && e.target.nodeType === 1 && pop.contains(e.target)) return;
+      var r = btn.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) { close(); return; }
+      place(btn, pop);
+    };
 
     document.addEventListener("mousedown", onDoc, true);
     document.addEventListener("keydown", onKey, true);

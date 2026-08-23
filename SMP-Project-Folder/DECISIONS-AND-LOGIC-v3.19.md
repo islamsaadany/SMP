@@ -1881,6 +1881,219 @@ Sequenced immediately after v3.5 at Islam's direction.
 
 ---
 
+## 51 · The capability half catches up, and slides get a place (v3.19)
+
+*2026-08-23, in one long sitting. Islam went through the built product and sent
+notes as he found things. Almost none of it is a feature: most are paths that
+had been broken since a rename, or fields nothing read, or controls that looked
+like one thing and behaved as another.*
+
+### 51.1 A paragraph typed as two paragraphs now reads as two
+
+The editing control is a `<textarea>` and kept every line break; the READING
+control was a bare `<span>`, and HTML collapses newlines to a single space. **The
+text was never lost — it was never shown.** `white-space:pre-line` lives on the
+one function every long-text field goes through rather than on each caller.
+
+Half of the complaint was the other end: every box was `rows="2"`, so a purpose
+written as three paragraphs was typed through a two-line window. Enter worked
+and you could not see that it had. The box grows with its content now — which is
+not a repaint, so it is safe on `input` where a repaint would destroy the field
+being typed into (§35). Measured: 104px to 217px.
+
+### 51.2 The capability template says which function it is for
+
+B2 named the capability and nothing named the function under it, so two
+functions with a similarly named capability could not be told apart: the first
+match in the array won, silently, into the wrong function's plan. B3 is a
+dropdown of the tenant's functions now and the import resolves within it.
+
+**A blank B3 still resolves across the tenant**, because a template people keep
+on disk for months and which stops opening is a template that has broken.
+
+### 51.3 A project is the function's pillar, so it is coded and framed like one
+
+The unit rail has shown `MB01` since §46.3 and the project rail beside it showed
+a bare name — the same component, addressable on one page and nameless on the
+next, with no way to say "FIN02" in a meeting. `projCode()` derives
+`prefix + position` exactly as `pillarCode()` does, DERIVED and never stored.
+
+All three project panes carried an `.ptitle` with a 19px `<h3>` — the shape the
+unit's pane had until §46.3 replaced it with the 33px coded band. They wear one
+header now, and `pillarBand`'s `right` slot, which had existed and never been
+used, carries the score.
+
+### 51.4 The function's nameplate is gone
+
+It printed the name, the people, the capability count and "scored by the group"
+above a navigation row that already highlights the function. §24's argument, and
+the unit pages had settled it two versions earlier by having **no such band at
+all**. It was also lying with nobody attached: *"Supporting function · · carries
+1 capability"* — two middots with nothing between them, which is what a joined
+empty list looks like.
+
+### 51.5 The worst reading in the product, on the word the band exists to say
+
+There were **two `.capline` blocks** in one file — one on `--surface-2`, one on
+`--panel` — and the second won on source order, so editing the first did
+nothing (§29.2: a duplicated CSS rule does not fail loudly, it quietly ignores
+you). The band had moved to the navy ground and kept the PAGE's ink: the
+capability's own name measured **1.72:1** in slate and **1.43:1** in forefront.
+
+It takes `--panel-ink` and `--panel-quiet` now, as `.grouphead` and
+`.rail .rhead` already did — §38.5 and §41.10, the **sixth** header, missed when
+the other five were converted.
+
+**And nothing had ever looked.** The contrast sweep covered the group, one unit
+and Setup; every function page had gone twelve versions unmeasured. §41.5 again:
+a page nothing navigates to is a page nothing measures.
+
+### 51.6 Three things found by using it
+
+**A function's "Shown in the nav" was not shown in the nav.** Both branches that
+build the navigation read the full name, so the field was stored, printed in the
+Setup table, editable there, and read by NOTHING. §45.1's fault in a fourth
+tree: a read that never happens fails silently, and it fails looking like the
+feature was never built.
+
+**The searchable dropdown closed on any scroll** — including scrolling its own
+list. The note beside it argued that closing was honest because the popup is
+`position:fixed`; that held while every list fitted the viewport. A list long
+enough to scroll breaks it: reaching for the twelfth entry scrolls the popup's
+list, the scroll bubbles to the window with capture on, and the control shuts
+under the pointer. It follows its button now and closes only once the button has
+left the screen.
+
+**And the editor's picture slots wrapped** — a slide is a fixed 1600×900 stage
+where there is always room, and a dialog is not.
+
+### 51.7 One button, two words
+
+*Islam, twice: "I want it a switching button where the 2 words stay on 1 button
+but on clicking the selection switches."*
+
+It had LOOKED like one segmented control since §41.8 and it was **two buttons
+inside a container dressed to look like one** — so you pressed the side you
+wanted rather than pressing the control, which is a different thing and is what
+he kept reporting. I measured the container, showed him it was one box, and
+argued the point. **The measurement was true and the answer was still wrong:
+measuring the thing you built proves what you built, not what was asked for.**
+
+Hover used to light the unselected word — right for two buttons, since you were
+pointing at the side you meant. With one button it made both halves look lit and
+the state unreadable at the exact moment somebody was looking at it. Hover lifts
+the whole control now.
+
+### 51.8 Manage slides — a mode laid out like the deck it edits
+
+*Islam: "the buttons shouldn't be pictures it should be manage slides which
+opens the slides list on the left like PowerPoint and on the right are the
+slides view … think of the customer experience to have something functional."*
+
+**THE LEFT RAIL IS THE WHOLE DECK**, not just the picture slides — every
+generated slide too, as REAL slides at one tenth rather than drawings of them,
+so a slide that is wrong is wrong in the rail too.
+
+That is what made **the position dropdown disappear**. Where a picture slide
+goes is said by where it sits, which is how anybody who has used slides expects
+to say it. §50.3 is unchanged underneath — the anchor is still read out of the
+deck — but it is read from where you dropped the slide rather than typed into a
+list describing the deck in words.
+
+A **mode** rather than a dialog, for the reason presenting is one: this is
+looking at a deck, and a deck does not fit in a 940px box.
+
+**A blank slide is visible in the editor and nowhere else.** A slide with no
+picture is not a slide and must never reach a projector (§50.2) — but the moment
+after you press Add a slide it is exactly that, and a rail that does not show
+the thing you just made has swallowed it.
+
+**Patching the rendered slide does not survive a field going from empty to
+filled**: typing the first title had no heading element to write into, because a
+slide with no title has none. The selected slide is re-drawn from the one
+function the deck itself uses.
+
+### 51.9 Fit is the default, not fill
+
+*Two of Islam's notes turned out to be one note.* "Allow me to zoom out more as
+the zoom in is too big" and "pictures need to be wrapped to fit in the space you
+give to it in the slide" describe a single fault: the frames were
+`object-fit:cover`, which fills the box and throws away whatever does not reach
+the edge — so a portrait infographic in a landscape frame lost BOTH its edges,
+and the zoom slider could only make it worse, because 100% was already the
+tightest crop on offer. **There was no way to say "show me all of it."**
+
+So a picture fits its frame whole, and FILL is the deliberate choice for a
+photograph that should bleed. §16.12 asks for a screenshot of a platform before
+it asks for anything else, and a screenshot with its edges cut off is not a
+screenshot of anything. Two words rather than a slider position.
+
+The frame's ground moved to the slide's own white: with `contain` the picture no
+longer fills its box, so whatever sits behind it becomes a letterbox band **on
+the slide**, and a grey band around a screenshot reads as part of the design.
+
+**Up and down**: a picture slide steps over its neighbour whatever kind of slide
+that is — which is how a picture gets from the end of the pillars to the end of
+the SWOT without anybody naming an anchor. Add and the arrows are the SAME act,
+so they are one function; it removes the slide from the list FIRST, or the count
+of what sits before it includes itself and the slide creeps.
+
+### 51.10 Adding a capability took the product down
+
+The add button pushed `{ name, def, measures:[], tactics:[] }` — the shape a
+capability had **before §15** replaced measures and tactics with key objectives
+and projects. So the row had no id, no function and neither list, and the
+Capabilities Setup page threw and rendered nothing at all. Removing one read
+`measures.length` on an object that has not carried `measures` since §15, so it
+threw before it could confirm and never removed anything.
+
+**§24's rule with the sign reversed: when a field is renamed, the code that
+CREATES it has to be found as well as the code that reads it.** A reader that
+crashes is at least loud. A writer that mints the old shape is silent until
+somebody opens the page that reads it — which here was a different page, reached
+from a different menu, so the two were never seen together.
+
+One function mints a capability now, with an id taken from the highest in play
+rather than from the length, so removing one and adding another cannot hand the
+newcomer a dead row's id. The Setup table is editable: the name typed rather
+than printed, Remove on the row, Add beneath it, and a confirmation that names
+what would be destroyed.
+
+### 51.11 What the checks taught, three times in one day
+
+**A CHECK KEYED ON MARKUP THAT NO LONGER EXISTS DOES NOT FAIL — IT PASSES
+QUIETLY.** Three instances, all found by looking rather than by a red run:
+
+- The contrast sweep clicked a unit and called what appeared `unit/perf`. Since
+  §28 a unit opens on Strategy › Plan, so for twelve versions it measured the
+  Plan page twice and the Performance page never. Clicking Performance
+  explicitly surfaced **31 failures that had been there all along** (§16.15).
+- A scoped probe of mine broke when I edited the sweep it string-matched, and
+  silently reported the page behind as the new surface — 0 failures became 63,
+  none of them real.
+- Removing the two-button fold would have broken both sweeps: `qa.py` would have
+  iterated nothing and reported "ok" having walked HALF THE PRODUCT, and the
+  contrast sweep, which found buttons by matching text, would have clicked the
+  switch believing it was opening a fold.
+
+**The rule: when a control changes shape, grep the checks for the old selector
+before trusting the next green run — and make the label say which page was
+actually scanned.** Both sweeps ask what is LIT now and fail loudly when the
+answer is wrong; the SMO walks 34 destinations.
+
+### 51.12 Still open, deliberately
+
+**§16.15** — 53 failing contrast runs across both Performance pages, all light
+mode, all scoring colours used as TYPE. Recorded and not fixed: a palette
+decision on pages this version was not asked to touch (§25's precedent).
+
+**The header and the rail** (Islam's item 2: sticky, bigger header, smaller
+rail) — a visual change, so it waits for agreed numbers.
+
+**Functions that plan in pillars** (§52) — designed, not built.
+
+---
+
 ## 50 · Collaborators, and pictures in the review (v3.18)
 
 *2026-08-23. Two asks from Islam, one small and one not: "in the tactics table
@@ -2061,6 +2274,18 @@ one surface out).
 ---
 
 ## 17 · Version history
+
+### v3.19 — the capability half catches up, and slides get a place
+
+Almost none of it a feature. **Adding a capability took the product down** —
+the add button minted the shape a capability had before §15, and the
+Capabilities page threw; it can be added, named and removed now. The capability
+pages take the pillar pages' design: project codes, the coded band on every
+pane, the nameplate gone, and a capability name that measured **1.43:1** on its
+own band. **Manage slides** becomes a mode with the deck down the left and the
+slide on the right, where a picture fits its frame whole and moves with the
+arrows. **Units | Functions becomes one switching button.** And a function's
+"Shown in the nav" is finally shown in the nav (§51).
 
 ### v3.18 — collaborators get a column, and the review gets pictures
 

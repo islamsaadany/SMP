@@ -1,6 +1,8 @@
 # 009 · Collaborators on tactics, and pictures in the review
 
-**Status:** BUILT (2026-08-23), v3.18. Both parts asked for by Islam in one
+**Status:** BUILT (2026-08-23), v3.18; the editor rebuilt as a mode in v3.19
+(see §4a — the position picker described in §5 is gone, the rule behind it is
+not). Both parts asked for by Islam in one
 message; the four product decisions inside the second were put to him before
 anything was written and his answers are in §3 and §6.
 **Builds** backlog §16.12 (*"Review mode should accommodate images"*), which had
@@ -88,6 +90,65 @@ container is created only by an act that puts something in it, and removing the
 last picture deletes the key again. This is §42's `branding()` fault, which made
 every save carry a change the database never held and refused every non-SMO save
 for ever.
+
+---
+
+## 4a · Manage slides — the editor (v3.19, §51.8)
+
+**Status:** BUILT. Replaces the modal editor this spec first described.
+
+Islam, on driving it: *"the buttons shouldn't be pictures it should be manage
+slides which opens the slides list on the left like PowerPoint and on the right
+are the slides view … think of the customer experience to have something
+functional."*
+
+**A mode, not a dialog** — the reason presenting is one: this is looking at a
+deck, and a deck does not fit in a 940px box.
+
+**The left rail is the WHOLE deck**, every generated slide included, rendered as
+real slides at one tenth rather than as drawings of them — so a slide that is
+wrong is wrong in the rail too. **That is what removed the position dropdown
+this spec's §5 described**: a picture slide is placed by where it is inserted.
+The anchor rule underneath is unchanged; it is read from where the slide was
+dropped rather than typed into a list describing the deck in words.
+
+| Control | Behaviour |
+|---|---|
+| **+ Add a slide** | Pinned at the top of the rail. Inserts after the selection. |
+| **▲ ▼** | Steps a picture slide over its neighbour, whatever kind it is — how a picture moves from the pillars to the SWOT without naming an anchor. Only picture slides move. |
+| **1 2 3 4** | How many pictures sit across. Narrowing never destroys pictures. |
+| **Fit / Fill** | Fit shows the whole picture; Fill bleeds it and crops. **Fit is the default** — see below. |
+| **Zoom** | 50–300%, with the number shown. |
+| **Drag** | Reframes the picture; the big slide and its thumbnail move together. |
+
+`slidesPlace()` is the ONE function behind Add and the arrows — they are the
+same act (which anchor, and where among that anchor's others). It removes the
+slide from the list **first**, or the count of what sits before it includes
+itself and the slide creeps.
+
+A **blank slide** is drawn in the editor and nowhere else: a slide with no
+picture is not a slide and must never reach a projector, but the moment after
+Add it is exactly that, and a rail that does not show what you just made has
+swallowed it.
+
+### 4b · Fit is the default, not Fill (§51.9)
+
+Two of Islam's notes — *"allow me to zoom out more as the zoom in is too big"*
+and *"pictures need to be wrapped to fit in the space you give to it in the
+slide"* — are one fault. The frames were `object-fit:cover`, which fills the box
+and discards whatever does not reach the edge, so a portrait infographic in a
+landscape frame lost **both** its edges; and the zoom slider could only make it
+worse, because 100% was already the tightest crop on offer. **There was no way
+to say "show me all of it."**
+
+§1 of this spec asks for a screenshot of a platform before it asks for anything
+else, and a screenshot with its edges cut off is not a screenshot of anything.
+So a picture fits whole and Fill is chosen deliberately, said in two words
+rather than inferred from a slider position.
+
+The frame's ground is the slide's own white: with `contain` the picture no
+longer fills its box, so anything behind it becomes a letterbox band **on the
+slide**, and a grey band around a screenshot reads as part of the design.
 
 ---
 

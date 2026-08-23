@@ -120,7 +120,7 @@ with sync_playwright() as p:
     print("template round trip: unit=%r | cap=%r | neither names a function"
           % (rt["unit"], rt["cap"]))
 
-    # ── THE PEOPLE FILE MUST SURVIVE THE SAME ROUND TRIP (53.3) ──────
+    # ── THE PEOPLE FILE MUST SURVIVE THE SAME ROUND TRIP (54.3) ──────
     # Same fault line as the plan template, and one more: this file is the
     # EXPORT as well as the template, so the register downloaded and uploaded
     # back unchanged has to be a FIXED POINT. If it is not, the first thing

@@ -20,7 +20,7 @@ Nothing proceeds past this line without an answer.
 | # | Decision needed | Why it is blocking | Recorded |
 |---|---|---|---|
 | **D5** | **Go-ahead for R2** — sign-in and the shell on the new stack. | R1 proved the stack; R2 is the first thing anyone would see change. Nothing starts without the word (A1). | §20 |
-| **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §53.1 |
+| **D8** | **What each of the ten BU names points at.** The page and the ten rows are built; the targets are empty. | Until a name points somewhere, everyone carrying it is on the register with nothing to open — and a role cannot be given from the employee file, because a role is held over the person's own BU. **IT is the one to think about: a unit and a supporting function share the name.** | §54.1 |
 
 **Answered:**
 
@@ -85,7 +85,7 @@ counterpart at all. So the file cannot be read against the platform's own list.
 **What the round trip caught immediately:** the platform refused its own
 export — 31 of 33 downloaded rows named a role the upload could not place.
 Fixed by the rule the column already promised: it gives a role, it never takes
-or moves one (§53.4).
+or moves one (§54.4).
 
 **Verified:** `test-authorize.js` 131 passed / 0 failed (five new, covering
 that nobody below the SMO can point a BU row); `qa.py` clean across all 31

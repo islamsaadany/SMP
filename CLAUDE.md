@@ -192,7 +192,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **The BU list (since v3.20, §53; spec 011):** the client's own names for
+- **The BU list (since v3.20, §54; spec 011):** the client's own names for
   parts of the business (`GROUP.mainbus`, so `org.extra` and no migration),
   each pointing at a unit, a function, a company, the group — or at NOTHING,
   which is a real answer for a department that carries no strategy. **The
@@ -416,7 +416,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-23 &mdash; **v3.20: the BU list, and the register as a
-file** (§53, spec 011). A one-row sample and a ten-name list, and **six of the
+file** (§54, spec 011). A one-row sample and a ten-name list, and **six of the
 ten names the client uses do not exist in the platform at all** — Distribution
 is a COMPANY here, Retail is *Retail Stores*, and IT is the name of both a unit
 and a function. Checking that against the tenant rather than assuming it is

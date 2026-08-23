@@ -9,7 +9,7 @@ var GROUP = {
      footer as literal text, so a second screen that needed it \u2014 the deck cover
      \u2014 had nowhere to read it from. */
   org: "Raya Trade",
-  /* ── THE BU LIST (§53.1, spec 011) ───────────────────────────────
+  /* ── THE BU LIST (§54.1, spec 011) ───────────────────────────────
      Raya's own ten names for parts of the business, exactly as its employee
      data spells them (Islam, 2026-08-23). NOT invented (B3) — they are the
      client's official list, which is why they are here rather than made up.

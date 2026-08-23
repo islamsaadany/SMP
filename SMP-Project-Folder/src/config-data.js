@@ -459,7 +459,7 @@ function addPerson(o){
   var p = { key: key, name: String(o.name || "").trim(), title: o.title || "" };
   if (o.phone) p.phone = o.phone;
   /* Three facts the employee file brings and the typed Add row does not, so
-     all three are optional and none is invented when absent (§53.2). `empId`
+     all three are optional and none is invented when absent (§54.2). `empId`
      is the client's own employee number and is what a second upload matches
      on — it survives a marriage, a transfer and a new mail domain, none of
      which the name or the address do. `mainbu` is HR's word for their part of
@@ -647,7 +647,7 @@ function roleWheres(roleKey){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   THE BU LIST (§53, spec 011) — the client's own names for its business
+   THE BU LIST (§54, spec 011) — the client's own names for its business
 
    An employee file arrives with a BU column holding the client's official
    vocabulary: Distribution, Finance, IT, Logistics, Maintenance, Marketing,
@@ -820,7 +820,7 @@ function mainbuDrift(p){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   THE REGISTER AS A FILE (§53.3, spec 011)
+   THE REGISTER AS A FILE (§54.3, spec 011)
 
    Islam: "you give me a template download and upload for the data in the
    people register tab so I can upload an excel with the agreed on format to
@@ -936,7 +936,7 @@ function planPeopleFile(rows){
     var roleKey = null;
     if (role) {
       roleKey = roleKeyByName(role);
-      /* A ROLE THEY ALREADY HOLD IS NOT AN ASK (§53.4). Found by the round
+      /* A ROLE THEY ALREADY HOLD IS NOT AN ASK (§54.4). Found by the round
          trip and not by reading: the download writes each person's current
          role, so 31 of the demo's 33 rows came back naming a role the file
          then could not place — their Main BU is empty, a role is held over

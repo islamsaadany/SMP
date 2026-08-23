@@ -209,7 +209,7 @@
          matrix. */
       { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
-         opens here (§53.1). In *Who* rather than *What we run*, and sharing
+         opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
@@ -1777,7 +1777,7 @@
     var ac = document.getElementById("addcompany");
     if (ac) ac.addEventListener("click", function(){ addCompany(); paint(); });
 
-    /* ── The BU list (§53.1) ────────────────────────────────────────
+    /* ── The BU list (§54.1) ────────────────────────────────────────
        A name, where it points, and a Remove that is refused while anybody
        carries it. The NAME is the key here — unlike a unit or a company,
        which carry a key under the label so a rename detaches nothing — so
@@ -1824,7 +1824,7 @@
       b.addEventListener("click", addTypedMainbu);
     });
 
-    /* ── The register's own file (§53.3) ────────────────────────────
+    /* ── The register's own file (§54.3) ────────────────────────────
        Download, upload, review, apply. The gate is checked HERE as well as on
        the section that draws the controls, for the reason renderImport()
        states: a destination can be reached with a stale page after a role
@@ -1945,7 +1945,7 @@
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
-    /* The two the employee file brings (§53.2). Cleared when emptied rather
+    /* The two the employee file brings (§54.2). Cleared when emptied rather
        than kept as "", so absent and blank stay one word — the codebase reads
        every optional field with == null and a stored empty string would come
        back through the round trip as a field the data never had. */
@@ -2434,7 +2434,7 @@
     paint();
   }
 
-  /* Lifted out of wireImport() 2026-08-23 (§53.3): the People page sends a
+  /* Lifted out of wireImport() 2026-08-23 (§54.3): the People page sends a
      workbook too, and two copies of "build it, wrap it in a blob, click a
      link, revoke the URL" is the second one that gets the revoke wrong. */
   function sendXlsx(sheets, name){

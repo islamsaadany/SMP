@@ -955,7 +955,7 @@ function capProgressFromWorkbook(c, sheets){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   THE PEOPLE WORKBOOK (§53.3, spec 011)
+   THE PEOPLE WORKBOOK (§54.3, spec 011)
 
    Two sheets: how to fill it, and the register. The same file both ways —
    what downloads is who is on the register right now, so it is the export as

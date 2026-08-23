@@ -180,7 +180,7 @@ with sync_playwright() as p:
                     "    u.keyObjectives[0].actual = null; }"
                     "  paint(); }")
         pg.wait_for_timeout(300)
-        # THE BU LIST HAS TO HAVE ROWS IN IT (53.1). Empty it renders one note
+        # THE BU LIST HAS TO HAVE ROWS IN IT (54.1). Empty it renders one note
         # and a header, so the sweep would walk the page, find nothing to
         # measure and report it clean - the shape of failure 45.2 records
         # against the figure sets. Two rows: one mapped, one not, which is both

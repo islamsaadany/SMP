@@ -495,7 +495,7 @@ console.log("\n6d · naming a person on a figure");
   check("the SMO can", v.ok, v.refusals.join(" / "));
 })();
 
-/* ── 6e · The BU list (§53.1, spec 011) ────────────────────────────
+/* ── 6e · The BU list (§54.1, spec 011) ────────────────────────────
    A row's target decides where every person carrying that name is attached
    the next time an employee file lands, so re-pointing one is a way to walk a
    department into a unit. It is Setup, and nothing below the SMO may touch

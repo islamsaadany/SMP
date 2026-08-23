@@ -79,7 +79,7 @@ UPDATE org SET horizon = '';
 -- route into org.extra is the SEED, the seed only runs against an EMPTY
 -- database, and this file runs immediately after it. A tenant with real work
 -- in it is never seeded and therefore never reaches this line twice.
--- `mainbus` joins them (§53.1): the demo carries Raya's own ten department
+-- `mainbus` joins them (§54.1): the demo carries Raya's own ten department
 -- names so the BU list is visible rather than described, and a client's
 -- deployment must not inherit them. This file runs AFTER the seed and once
 -- per tenant, so editing it here reaches every future deployment and no

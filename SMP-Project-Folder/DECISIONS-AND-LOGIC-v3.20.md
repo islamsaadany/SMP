@@ -6997,7 +6997,7 @@ the way in. The seven extracted here are safe because nobody uploaded them.
 
 ---
 
-## 53 · The BU list, and the register as a file — v3.20
+## 54 · The BU list, and the register as a file — v3.20
 
 Islam brought one row of Raya's employee data and one problem:
 
@@ -7015,7 +7015,7 @@ Islam brought one row of Raya's employee data and one problem:
 
 Four things, and only the last one is a rename.
 
-### 53.1 The platform holds none of those ten words
+### 54.1 The platform holds none of those ten words
 
 Checked against the tenant rather than assumed, and that is the whole finding:
 
@@ -7064,7 +7064,7 @@ name of both a business unit and a supporting function**, so the platform
 cannot guess which one an employee in IT belongs to. The demo ships the ten
 names and no mappings.
 
-### 53.2 The register carries two answers, because they are two questions
+### 54.2 The register carries two answers, because they are two questions
 
 Renamed at Islam's word: *"belongs to is not good naming"*. A strategy
 platform's word for a part of the business is **BU**.
@@ -7089,7 +7089,7 @@ needed a migration**: they ride in the `people` row's `extra`, the same free
 ride `active` and `phone` take (§35). The BU list rides in `org.extra`, as
 figure sets do (§44).
 
-### 53.3 The register as a file — and it is the export too
+### 54.3 The register as a file — and it is the export too
 
 One workbook, two sheets, eight columns: Emp ID · Name · Job title · Email ·
 Mobile · Main BU · Role · Status. It downloads what is on the register right
@@ -7125,7 +7125,7 @@ supporting function is not a thing, and the refusal names what the role does
 admit. Contributor is not offered at all: it is not granted, it is what
 somebody attached to a unit and holding nothing else already is (§49.5).
 
-### 53.4 What the round trip caught, immediately
+### 54.4 What the round trip caught, immediately
 
 **THE PLATFORM REFUSED ITS OWN EXPORT.** The download writes each person's
 current role, so 31 of the demo's 33 rows came back naming a role the upload
@@ -7153,7 +7153,7 @@ first version of the one-edited-cell check changed the *person* and downloaded
 again, so both sides agreed and it reported zero changes while passing: **the
 edit has to be made to the FILE** (§50.6, measuring the wrong thing passes).
 
-### 53.5 A check that asks whether it can run is a check that passes
+### 54.5 A check that asks whether it can run is a check that passes
 
 Walked into while writing the test for something else, and recorded because
 this file records it twice already. The new authorisation test was written
@@ -7166,7 +7166,7 @@ empty BU list renders one note and would be reported clean (§45.2); and the
 sweep's page count is **counted rather than typed**, because the literal `34`
 was already stale.
 
-### 53.6 A client must not inherit Raya's departments
+### 54.6 A client must not inherit Raya's departments
 
 The demo carries the ten names so the feature is visible rather than described.
 That put them in `org.extra`, which is **exactly where §45.3's figure set
@@ -7176,7 +7176,7 @@ no existing one, which is correct: an existing tenant is never re-seeded, so it
 never receives them. Verified by deploying to an empty database and asking the
 `org` row, rather than by reading the SQL.
 
-### 53.7 What was measured
+### 54.7 What was measured
 
 - `test-authorize.js`: **131 passed, 0 failed** — five new, covering that a
   unit head and a custodian cannot point or re-point a BU row, that the SMO
@@ -7197,7 +7197,7 @@ never receives them. Verified by deploying to an empty database and asking the
   duplicate employee number, skipped the person with none, offered the unknown
   department, and applied.
 
-### 53.8 What this cost, and what is still open
+### 54.8 What this cost, and what is still open
 
 The register was already wider than its box: **1061px in 920px** at v3.19,
 scrolling in place. Main BU adds 66px, so it is **1127px** now. The box scrolls

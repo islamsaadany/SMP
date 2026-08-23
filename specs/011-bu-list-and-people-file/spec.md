@@ -1,6 +1,6 @@
 # 011 · The BU list, and the register as a file
 
-**Version:** v3.20 · **Decisions:** §53 · **Status:** built and verified
+**Version:** v3.20 · **Decisions:** §54 · **Status:** built and verified
 
 Islam brought one row of Raya's employee data, the official list of ten BUs,
 and four asks: map the main BU onto what the platform calls a BU, give the
@@ -115,7 +115,7 @@ the template.
   dropdown would mean no first file could be read (§22).
 - **A role the person already holds is not an ask.** The column gives a role;
   it never takes one and never moves one. Without this the platform refused its
-  own export on 31 of 33 rows (§53.4).
+  own export on 31 of 33 rows (§54.4).
 - **Contributor is not offered.** It is not granted — it is what somebody
   attached to a unit and holding nothing else already is (§49.5).
 

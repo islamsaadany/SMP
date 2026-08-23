@@ -564,7 +564,7 @@ var FSET = { unit:"mobile" };
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
             read:"", check:null, done:null };
 
-/* The register's own file, on the People page (§53.3). Its own state rather
+/* The register's own file, on the People page (§54.3). Its own state rather
    than a second `kind` on IMP: the import page authors a PLAN for one unit,
    this amends the register for everybody, and the two share no step but the
    word "upload". `plan` is what planPeopleFile() read and nothing has been
@@ -704,7 +704,7 @@ var PWSTATES = null;   /* key -> "none" | "temporary" | "set", once asked */
    register, and HR_ERP reaches the same answer by marking `name` non-hideable
    rather than by trusting nobody to untick it. */
 var PCOLS_KEY = "smp.people.columns";
-/* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§53.1).
+/* RENAMED TWICE IN ONE VERSION, and both are Islam's words (§54.1).
    `belongs` → `bu`: "belongs to is not good naming" — a strategy platform's
    word for a part of the business is BU, and the column says which one the
    person opens. `standing` → `status`: it holds Active or Retired, which is a
@@ -777,7 +777,7 @@ function renderPeople(){
      first and every group-level role read as "elsewhere", because belongsLabel
      said "The group" and whereLabel said "the group". Two renderings of one
      fact will always find a way to disagree; compare the fact. */
-  /* Lifted into config-data.js as personAt() 2026-08-23 (§53.1). It read
+  /* Lifted into config-data.js as personAt() 2026-08-23 (§54.1). It read
      `p.fn` then `p.unit`, which was complete until a Main BU could point at a
      COMPANY — a person attached to Distribution has neither, and the cell read
      as a dash for somebody who is very much somewhere. The file importer has
@@ -972,7 +972,7 @@ function renderPeople(){
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
                    : '<span class="why" style="margin:0">not given</span>')) + '</td>' : '') +
-      /* MAIN BU IS THE CLIENT'S WORD, BU IS OURS (§53.1). The first is typed
+      /* MAIN BU IS THE CLIENT'S WORD, BU IS OURS (§54.1). The first is typed
          (or arrives in the file) and is never interpreted; the second is read
          through the BU list and is what decides which pages open.
 
@@ -1150,7 +1150,7 @@ function renderPeople(){
 
 
 /* ══════════════════════════════════════════════════════════════════
-   THE REGISTER'S FILE (§53.3, spec 011)
+   THE REGISTER'S FILE (§54.3, spec 011)
 
    A section on the People page rather than a page of its own, and not on
    Import either. Import authors ONE UNIT'S PLAN and is reached from the
@@ -1266,7 +1266,7 @@ function renderPeopleFile(mayEdit){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   SETUP · BU LIST (§53.1, spec 011)
+   SETUP · BU LIST (§54.1, spec 011)
 
    Ten rows and one dropdown each. It sits in *Who* rather than *What we run*
    because its only reader is the register: it is not another thing being

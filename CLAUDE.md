@@ -153,6 +153,14 @@ A drift between specs and code is a documentation bug — report it before silen
   checks before pushing. Two branches each adding a `var pf` to `wire()` merged
   with no textual conflict at all and broke a page (§56.7) — a clean merge is
   not a working one.
+- **END EVERY MERGE WITH WHAT TO GO AND CHECK** (Islam, 2026-08-24; CLAUDE-RULES
+  A16). The last thing said after a merge to `main` is a short list of screens:
+  what to open, what to do there, and what should happen — one line each, in the
+  words of the navigation. No rationale, no section numbers; those are in the
+  decisions document. **Anything the merge brought in from another branch is on
+  the list too**, marked as somebody else's: it is in the product now, and not
+  knowing where it came from is exactly why it needs pointing at. Anything that
+  cannot be checked from a screen is named as such rather than left off.
 
 ### 5. Communication
 - **Be proactive about issues** — flag concerns early.

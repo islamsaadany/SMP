@@ -175,6 +175,29 @@ fine; they were fine *differently*. So the check MEASURES the two and asserts
 they AGREE, never what the number is: a deliberate change to both stays green,
 a change to one does not (`qa.py`, "unit/function parity").
 
+### A16 · End every merge with what to go and check
+
+*Islam, 2026-08-24: "always end the merge with in brief the things done so I can
+go check."*
+
+A merge is where work becomes the product, and the reasoning behind it is the
+one thing that does NOT help at that moment — what helps is a short list of
+screens to open. So the last thing said after any merge to `main` is a brief
+list of **what changed and where to look at it**, in this shape:
+
+- **what to open**, in the words of the navigation (Setup → People register),
+- **what to do there** in a few words (upload a file with a repeated address),
+- **what should happen** — one line, so a wrong answer is recognisable.
+
+Nothing else: no rationale, no trade-offs, no section numbers. Those are in the
+decisions document, which is where somebody goes when the list surprises them.
+Anything brought in from ANOTHER branch by the merge is listed too, and marked
+as somebody else's — it is in the product now, so it is Islam's to check, and
+not knowing where it came from is exactly why it needs pointing at.
+
+If something merged cannot be checked from the screen — a database rule, a
+server refusal — say so in one line rather than leaving it off the list.
+
 ---
 
 ## B · Practices Claude adopted — confirm or drop

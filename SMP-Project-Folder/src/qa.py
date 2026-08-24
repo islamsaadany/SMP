@@ -31,6 +31,26 @@ def walk_destinations(pg):
         n += 1
     return n
 
+def go_top(pg, key):
+    """Open the group or a company, wherever the first control has put them.
+    They moved inside a <details> in 68, so a direct click resolves the button
+    and then waits thirty seconds for something hidden. Three places clicked it
+    directly and walk_destinations() was only the first to be found — §51.11's
+    rule, and the reason it is one function now: when a control changes shape,
+    every check that named the old one has to be found, not just the one that
+    crashed first."""
+    el = pg.query_selector('#units [data-u="%s"]' % key)
+    if el and el.is_visible():
+        el.click(); pg.wait_for_timeout(200); return True
+    sm = pg.query_selector("#topsel > summary")
+    if not sm: return False
+    sm.click(); pg.wait_for_timeout(150)
+    el = pg.query_selector('#topsel [data-u="%s"]' % key)
+    if not el or not el.is_visible():
+        sm.click(); return False
+    el.click(); pg.wait_for_timeout(250)
+    return True
+
 def show_units(pg):
     """The navigation row shows ONE list at a time (51.9), and a block that
     left it on Functions strands every later block that names a unit — which
@@ -551,7 +571,7 @@ with sync_playwright() as p:
             on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
             if on and on[0] == w: break
             pg.click("#units .navswitch"); pg.wait_for_timeout(150)
-        pg.click('#units button[data-u="group"]'); pg.wait_for_timeout(200)
+        go_top(pg, "group")
         pg.click('#units button[data-u="%s"]' % key); pg.wait_for_timeout(350)
         got = pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
             b=document.querySelector('#secrow [aria-selected="true"]');
@@ -801,7 +821,7 @@ with sync_playwright() as p:
     if ko["stored"] != "1":
         errs.append("KO YEAR: the choice is not remembered in localStorage (%r)" % ko["stored"])
     show_units(pg)
-    pg.click('#units [data-u="group"]'); pg.wait_for_timeout(200)
+    go_top(pg, "group")
     pg.click('#subtabs button:has-text("Foundation")'); pg.wait_for_timeout(350)
     if pg.query_selector("[data-koyear]"):
         errs.append("KO YEAR: the toggle is on the group, whose objectives always show both")

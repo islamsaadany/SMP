@@ -8648,7 +8648,16 @@ on reporting "ok". §50.6's fault in the one place it costs most. So it walks th
 visible row AND opens the selector to walk what is behind it, which is also how
 the company pages come to be swept for every viewer at all.
 
-**68.8 Recorded rather than narrowed: a unit head sees the companies.** The
+**And THREE places clicked it directly, not one.** `walk_destinations()` was
+merely the first to crash; two more — the landing check and the report-mode
+check — waited thirty seconds each for a hidden button and took the whole sweep
+down with them. That is §51.11's rule arriving as an instruction rather than a
+warning: **when a control changes shape, grep the checks for the old selector
+before trusting the next run**, and fix all of them, not the one that failed
+first. `go_top(pg, key)` is that one place now: it clicks the control where it
+is, opening the selector if it has to.
+
+**68.9 Recorded rather than narrowed: a unit head sees the companies.** The
 control offers a company to anybody whose group access reaches it — and a
 business unit head can already open the group's page, which shows every unit's
 card. So this is consistent and leaks nothing. It is more than they need, and

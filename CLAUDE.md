@@ -238,7 +238,13 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   so the group and a company cannot disagree about the same unit. And **a number
   that is not a score must not wear a scoring colour**: "share of the group" is
   43%, `band(43)` is off-track red, and the card said an ordinary share was
-  failing — `drillCard`'s `plain` uses the quiet mark.
+  failing — `drillCard`'s `plain` uses the quiet mark. **THREE checks clicked
+  the group directly** and only the first crashed; the other two waited thirty
+  seconds each on a hidden button — §51.11 as an instruction, not a warning:
+  when a control changes shape, grep the checks for the old selector and fix
+  ALL of them (`go_top()` is the one place now). Filtering to visible buttons
+  alone would have been worse than the crash: the sweep would have stopped
+  visiting the GROUP and gone on reporting "ok".
 - **Two demos: Filled project and Clear project (§67):** Clear Project is
   **what a client's deployment looks like on day one** — `clearedGraph()`
   mirrors `db/migrations/004-clean-slate.sql` statement for statement, so the

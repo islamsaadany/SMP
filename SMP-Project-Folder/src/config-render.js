@@ -1413,7 +1413,7 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("email") ? '<td>' + (ed
+      (showCol("email") ? '<td class="wrapany">' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
         : (p.email ? '<span class="val">' + esc(p.email) + '</span>'

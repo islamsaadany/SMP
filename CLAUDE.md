@@ -126,6 +126,21 @@ A drift between specs and code is a documentation bug — report it before silen
 - **`main`** — production/stable. Merge to main only when work is complete and verified.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
+- **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and
+  compare — another session may have pushed while this one was working, and it
+  has: §70 landed on main mid-session on 2026-08-24 while §71 was being built.
+  Never merge blind.
+- **Merge with `--ff-only`.** It REFUSES a divergent main instead of inventing a
+  merge commit, so the moment two sessions have touched the same thing you are
+  told rather than shown a silent auto-merge. On a refusal: fetch, merge main
+  into the branch, resolve there, re-run the checks, then fast-forward.
+- **AFTER A MERGE THAT BRINGS IN SOMEBODY ELSE'S SOURCES, REBUILD — never trust
+  git's merge of the built file.** `strategy-management-platform-vX.Y.html` is
+  generated; git will happily splice two versions of it into something that
+  belongs to neither. Run `python3 build.py`, copy it over, and re-run the
+  checks before pushing. Two branches each adding a `var pf` to `wire()` merged
+  with no textual conflict at all and broke a page (§56.7) — a clean merge is
+  not a working one.
 
 ### 5. Communication
 - **Be proactive about issues** — flag concerns early.

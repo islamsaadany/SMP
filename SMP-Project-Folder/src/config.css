@@ -670,7 +670,64 @@
   .peoplecfg tbody tr:nth-child(even) { background:var(--zebra); }
   .peoplecfg tbody tr:hover { background:var(--surface-2); }
   .cfg table.unitcfg.peoplecfg { table-layout:auto; }
-  .peoplecfg td, .peoplecfg th { white-space:nowrap; }
+  /* A SELECT SIZES ITSELF TO ITS LONGEST OPTION, and that option is not on
+     screen. Capabilities carries a function picker whose list includes "Strategy
+     Management Office", so the column was 239px wide to hold a word nobody can
+     see until the list is open — the table measured 552px past its box, three
+     times the register's worst. Capped at the cell: the chooser opens over the
+     page anyway (§45.5), so nothing is lost by the closed control being narrow. */
+  /* AN ABSOLUTE CAP, NOT `max-width:100%`. Under `table-layout:auto` the cell
+     is sized BY its child, so a percentage of the cell is a percentage of the
+     width the select just asked for — circular, and measured as changing
+     nothing: 552px past the box before and after. §46's note about
+     `max-width:0` being a fixed-layout trick, met from the other side. */
+  .cfg table select.fld, .cfg table .ssbtn {
+    max-width:200px; box-sizing:border-box; }
+  .cfg table td { min-width:0; }
+
+  /* ── EVERY SETUP TABLE WRAPS, NOT JUST THE REGISTER (§81.5) ────────
+     `_shared.css` sets `thead th { white-space:nowrap }` and the Setup tables
+     inherited a body to match. Capabilities and Roles & access are both wider
+     than their box for the same reason the register was: one long cell holding
+     its column open. The rule is the same everywhere — prose wraps, tokens do
+     not — so it is written once here and the register's block below only adds
+     what is particular to it. */
+  .cfg table td { white-space:normal; }
+  .cfg table td.cc, .cfg table td.idx, .cfg table td.mono,
+  .cfg table td.nowrapcell, .cfg table .pill, .cfg table .rolechip,
+  .cfg table .chip, .cfg table .pair { white-space:nowrap; }
+  /* A header may wrap too where its words are long — "Sees other companies"
+     is three words holding a 2-row table open. */
+  .cfg table thead th { white-space:normal; }
+  .cfg table thead th.idx, .cfg table thead th.cc { white-space:nowrap; }
+
+  /* ── DATA WRAPS; FURNITURE DOES NOT (Islam, §81.5) ─────────────────
+     "for the tables as well fix the overflow of data by wrapping."
+
+     Every cell was `nowrap`, which is why the register is 1127px wide in a
+     920px box (§54.6) — a job title of nine words held its whole column open at
+     nine words wide, and every other column paid for it at every scroll
+     position because two of them are FROZEN (§69.19).
+
+     THE SPLIT IS BY WHAT THE CELL HOLDS, not by column name. Prose wraps: a
+     job title, an official BU, an address. Things that are read as ONE token do
+     not: a number, a sign-in name, a pill, a date — a broken employee number is
+     harder to read than a wide column, and a pill wrapped mid-word looks
+     broken rather than narrow.
+
+     `overflow-wrap:anywhere` on the address, because an email has no spaces to
+     break at and would otherwise hold its column open exactly as before. */
+  .peoplecfg td, .peoplecfg th { white-space:normal; }
+  .peoplecfg td.idx, .peoplecfg th.idx,
+  .peoplecfg td.cc, .peoplecfg th.cc,
+  .peoplecfg td.kebcell, .peoplecfg th.kebcell,
+  .peoplecfg td.mono, .peoplecfg .pill, .peoplecfg .rolechip,
+  .peoplecfg .dupemark { white-space:nowrap; }
+  .peoplecfg td.wrapany { overflow-wrap:anywhere; }
+  /* A name may wrap now, so its cell has to be able to grow — the frozen
+     column's `overflow:hidden` (§71.2) clips what spills, and a wrapped second
+     line is not spill. */
+  .peoplecfg td.namecell { white-space:normal; }
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }
   /* THE CLIP MOVES INSIDE THE CELL. `width:99%; max-width:0` is a
      FIXED-layout trick — under auto layout `max-width:0` is not a hint, it is

@@ -313,9 +313,68 @@ var UNIT_ROLES = {
   nigeria:             { head:"nghead",  custodian:"own_ng"  }
 };
 
-function personName(key){
+/* ── TWO NAMES, WHEREVER A PERSON IS NAMED (Islam, §81.4) ─────────────
+   "for any placement of the name of people like in the custodian of the unit or
+   the function use the first 2 names only."
+
+   Raya's register carries names of five and six words — *Abd El Hamid Mokhtar
+   Abd El Hamid Ahmed Abd El Wahab* is eight — and every one of them was being
+   printed whole into a table cell, a pill or a chip built for a name.
+
+   IT IS CHANGED HERE, IN THE ONE FUNCTION, and that is the point: all fifteen
+   call sites are display sites — a cell, a chip, a pill, a confirmation — and
+   none of them stores or exports what it gets. A `personShort()` beside a
+   `personName()` would have been fifteen edits and a coin toss on the
+   sixteenth.
+
+   THE REGISTER IS NOT ONE OF THEM. It has its own rule (§81.1): three names,
+   or as many as it takes to tell two people apart, because that column exists
+   to identify somebody and these fifteen exist to remind you who they are.
+   `personFullName()` is here for anything that ever needs the whole thing. */
+/* ── "ABD EL" IS NOT TWO NAMES, IT IS HALF OF ONE (§81.6) ─────────────
+   Counting words gave the Mobile custodian's cell the word **"Abd El"**, which
+   names nobody: half of Raya's register begins that way. A particle binds to
+   the name after it — *Abd El Hamid* is one given name in three tokens, *Abou
+   El Ela* and *Abd El Moniem* likewise — so a NAME is a real word together with
+   whatever particles run in front of it.
+
+   This is not a wider reading of what Islam asked for; it is the only reading
+   under which "the first 2 names" means two names. It is applied to the
+   register's own three-name rule (§81.1) as well, which had the same fault more
+   quietly: *Abd El Hamid* was one name spending the whole budget.
+
+   The list is the particles this register actually contains, plus the European
+   ones a client could arrive with. A word not on it is a name. */
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
+
+var NAMED_ELSEWHERE_WORDS = 2;
+function personFullName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+function personName(key){
+  var n = personFullName(key);
+  if (!n) return n;
+  return nameWords(n, NAMED_ELSEWHERE_WORDS);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -613,10 +672,7 @@ function rowEditCancel(obj){
 function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 
 var SHORT_NAME_WORDS = 3;
-function shortName(name){
-  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
-  return parts.slice(0, SHORT_NAME_WORDS).join(" ");
-}
+function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
 
 /* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
    Three names is the column's budget (§69.21) and it is right for 31 of 33
@@ -635,11 +691,10 @@ function shortName(name){
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
-    var parts = String(p.name == null ? "" : p.name).trim().split(/\s+/).filter(Boolean);
     var n = SHORT_NAME_WORDS;
-    var label = parts.slice(0, n).join(" ");
+    var label = nameWords(p.name, n);
     (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
-    out[p.key] = { parts: parts, at: n, label: label };
+    out[p.key] = { full: p.name, at: n, label: label };
   });
   Object.keys(seen).forEach(function(k){
     if (seen[k].length < 2) return;
@@ -652,14 +707,14 @@ function displayNames(){
       var got = {};
       same = false;
       keys.forEach(function(key){
-        var o = out[key], lab = o.parts.slice(0, n).join(" ").toLowerCase();
+        var lab = nameWords(out[key].full, n).toLowerCase();
         if (got[lab]) same = true;
         got[lab] = 1;
       });
     }
     keys.forEach(function(key){
       out[key].at = n;
-      out[key].label = out[key].parts.slice(0, n).join(" ");
+      out[key].label = nameWords(out[key].full, n);
     });
   });
   return out;

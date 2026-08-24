@@ -10090,3 +10090,76 @@ a clean one shows no marks and offers no filter, and everything after that runs
 against injected ones.
 
 `src/checks/duplicates.py`, 15 assertions.
+
+---
+
+## 82 · The tables stop overflowing, and two names is not two words (v3.24)
+
+**82.1 759px of horizontal overflow, down to 38px.** Islam: *"for the tables as
+well fix the overflow of data by wrapping."*
+
+Every Setup table body was `nowrap`, inherited from `_shared.css`'s rule for
+HEADERS. So one nine-word job title held its column open at nine words wide, and
+on the register every other column paid for it at every scroll position, because
+two of them are FROZEN (§69.19).
+
+**The split is by what the cell HOLDS, not by column name.** Prose wraps — a job
+title, an Official BU, an address. Things read as one token do not — a number, a
+sign-in name, a pill, a date: a broken employee number is harder to read than a
+wide column, and a pill wrapped mid-word looks broken rather than narrow. An
+address gets `overflow-wrap:anywhere`, because it has no spaces to break at and
+would otherwise hold its column open exactly as before.
+
+| | before | after |
+|---|---|---|
+| People register | 207px past its box | **18px** |
+| Capabilities | 552px | **fits** |
+| Roles & access | 20px | 20px (a 49-cell matrix; it gets the freeze instead) |
+
+**82.2 A SELECT SIZES ITSELF TO ITS LONGEST OPTION, AND THAT OPTION IS NOT ON
+SCREEN.** Capabilities was three times worse than the register and none of it
+was text: its function picker's list contains *Strategy Management Office*, so
+the column was 239px wide to hold a word nobody can see until the list is open.
+
+`max-width:100%` did nothing — **measured, 552px before and after**. Under
+`table-layout:auto` the cell is sized BY its child, so a percentage of the cell
+is a percentage of the width the select just asked for. It is circular. §46's
+note that `width:99%; max-width:0` is a fixed-layout trick, met from the other
+side. An absolute cap fixes it, and costs nothing: the chooser opens over the
+page anyway (§45.5), so a narrow closed control loses no list.
+
+**82.3 "ABD EL" IS NOT TWO NAMES — IT IS HALF OF ONE.** Islam: *"for any
+placement of the name of people like in the custodian of the unit or the
+function use the first 2 names only."*
+
+Done in **one function**: all fifteen call sites of `personName()` are display
+sites — a cell, a chip, a pill, a confirmation — and none stores or exports what
+it gets, so a `personShort()` beside it would have been fifteen edits and a coin
+toss on the sixteenth. `personFullName()` is there for anything that ever needs
+the whole thing.
+
+Then the first build put **"Abd El"** in the Mobile custodian's cell, which names
+nobody: half this register begins that way. A particle binds to the name after
+it — *Abd El Hamid* is one given name in three tokens — so `nameWords()` counts
+NAMES, taking the run of particles with the word they belong to. That is not a
+wider reading of the ask; it is the only reading under which "the first 2 names"
+means two names. Applied to the register's own three-name rule (§81.1) as well,
+which had the same fault more quietly.
+
+The register keeps its own rule and that stays right: **that column exists to
+identify somebody, and the other fifteen exist to remind you who they are.**
+
+**82.4 CLAUDE.md HAD NO RULE ABOUT CHECKING MAIN BEFORE MERGING.** Islam asked;
+it did not. Three lines added, and each is a thing that has already happened:
+fetch and look before merging (§70 landed on main mid-session while §71 was
+being built); merge `--ff-only` so a divergent main REFUSES rather than being
+silently auto-merged; and **after a merge that brings in somebody else's
+sources, rebuild — never trust git's merge of the built file**, which is
+generated and which git will happily splice into something belonging to neither
+version. Two branches each adding a `var pf` to one function merged with no
+textual conflict at all and broke a page (§56.7): a clean merge is not a working
+one.
+
+`src/checks/table-widths.py` walks every Setup and Manage page and reports how
+far each table sits past its box, so the number is a measurement rather than an
+impression.

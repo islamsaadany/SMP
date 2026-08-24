@@ -2212,22 +2212,133 @@
     });
     /* The SMO issues a temporary password; the server checks the policy and
        forces a change on first sign-in. */
+    /* ── ISSUING A PASSWORD, IN THE PAGE (§69.22) ────────────────────
+       This was a `prompt()`, and a browser is allowed to SUPPRESS one —
+       Chrome offers "prevent this page from creating additional dialogs"
+       after a few — whereupon it returns null, the old handler read that as
+       "cancelled", and nothing happened at all. No error, nowhere. That is
+       the failure Islam hit, on a path that works perfectly when driven.
+
+       Opening it closes the menu, for positionRowMenu()'s reason: it places
+       `document.querySelector(".kmenu")`, so a second one in the same cell
+       would be left unplaced at the top-left of the window. */
     document.querySelectorAll("[data-setpw]").forEach(function(b){
       b.addEventListener("click", function(){
-        var key = b.dataset.setpw;
-        var pw = prompt("Temporary password for " + key +
-          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-          "\nThey will be asked to choose their own on first sign-in.");
-        if (!pw) return;
+        PSETPW = { key: b.dataset.setpw, pw: "", err: "", done: null };
+        PMENU = null; PDEL = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pwcancel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PSETPW = { key:null, pw:"", err:"", done:null };
+        paint();
+      });
+    });
+    /* TYPING NEVER REPAINTS (§35) — the value is kept in PSETPW so a repaint
+       caused by anything ELSE cannot throw away what is half typed, and this
+       handler only records it. */
+    var pwField = document.getElementById("pwset-field");
+    if (pwField) {
+      pwField.addEventListener("input", function(){ PSETPW.pw = pwField.value; });
+      pwField.addEventListener("keydown", function(e){
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        var go = document.querySelector("[data-pwset]");
+        if (go) go.click();
+      });
+      if (!PSETPW.pw) pwField.focus();
+    }
+    /* GENERATED FROM crypto, never from Math.random: this is a credential, and
+       a predictable one is worse than a weak one somebody chose. One character
+       is taken from each required class first so the result cannot fail the
+       policy, then the rest is filled and the whole thing shuffled — building
+       it in class order would make every generated password start with a
+       capital and end with a symbol. */
+    document.querySelectorAll("[data-pwgen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var sets = ["ABCDEFGHJKLMNPQRSTUVWXYZ", "abcdefghijkmnpqrstuvwxyz",
+                    "23456789", "!?@#$%&*+-="];
+        var n = 14, out = [], pool = sets.join("");
+        var rnd = function(max){
+          var a = new Uint32Array(1);
+          (window.crypto || window.msCrypto).getRandomValues(a);
+          return a[0] % max;
+        };
+        sets.forEach(function(set){ out.push(set[rnd(set.length)]); });
+        while (out.length < n) out.push(pool[rnd(pool.length)]);
+        for (var i = out.length - 1; i > 0; i--) {
+          var j = rnd(i + 1), t = out[i]; out[i] = out[j]; out[j] = t;
+        }
+        PSETPW.pw = out.join(""); PSETPW.err = "";
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pwset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.pwset;
+        var f = document.getElementById("pwset-field");
+        var pw = (f ? f.value : PSETPW.pw) || "";
+        if (!pw.trim()) {
+          PSETPW.err = "Type a password, or press Generate.";
+          paint();
+          return;
+        }
+        PSETPW.pw = pw;
+        /* ONE BUTTON, TWO ENDPOINTS, and the difference is which one the SERVER
+           picks the people for: `issueTemporary` sends a scope and never a list
+           of keys, so a stale screen can only ever issue to FEWER people than it
+           thinks, never more (§35). */
+        if (key.indexOf("bulk:") === 0) {
+          var scope = key.slice(5);
+          SYNC.issueTemporary(pw, scope, function(err, issued){
+            if (err) { PSETPW.err = err; paint(); return; }
+            issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
+            PSETPW.err = "";
+            PSETPW.done = {
+              pw: issued.length ? pw : "",
+              what: issued.length
+                ? "Issued to " + plural(issued.length, "person").replace("persons", "people") + "."
+                : (scope === "all"
+                    ? "Nobody to issue to \u2014 you are the only active person."
+                    : "Nobody needed one \u2014 everybody already has a password.")
+            };
+            paint();
+          });
+          return;
+        }
         SYNC.setPassword(key, pw, function(err){
-          if (err) return alert("Not set: " + err);
+          if (err) {
+            /* The SERVER's sentence, verbatim — it owns the policy, and a
+               second copy here would be a rule in two places (§42). */
+            PSETPW.err = err;
+            paint();
+            return;
+          }
           /* The register shows a password COLUMN now, so a reset that does not
              repaint it leaves the screen claiming the old state. Ask again
              rather than assuming — the server is what knows. */
           if (PWSTATES) PWSTATES[key] = "temporary";
+          PSETPW.err = "";
+          PSETPW.done = pw;
           paint();
-          alert("Set. " + key + " signs in with it once, then chooses their own.");
         });
+      });
+    });
+    document.querySelectorAll("[data-pwcopy]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var el = document.getElementById("pwset-done");
+        if (!el) return;
+        var text = el.textContent;
+        var say = function(ok){ b.textContent = ok ? "Copied" : "Select it and copy"; };
+        /* The clipboard needs a secure context and a permission, and neither is
+           guaranteed — so the failure says what to do instead rather than
+           leaving a button that did nothing (which is the whole fault this
+           panel exists to fix). */
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function(){ say(true); },
+                                                   function(){ say(false); });
+        } else { say(false); }
       });
     });
 
@@ -2522,45 +2633,22 @@
     });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
        REACH. "none" can lock nobody out — it only reaches people who could not
-       sign in anyway. "all" overwrites live passwords and ends sessions, so it
-       is confirmed first, in words that name the number of people it hits. */
+       sign in anyway. "all" overwrites live passwords and ends sessions, so the
+       panel names the number of people it hits before it will do it.
+
+       THE TWO COLLECTIVE ACTIONS OPEN THE SAME PANEL (§69.22). Both were a
+       `confirm()` in front of a `prompt()`, and both could be suppressed —
+       which on the destructive one meant a reset proceeding because its
+       warning had been silenced. The warning is IN the panel now.
+
+       Menu state cleared HERE, before the panel is drawn, never from the
+       button's own teardown: closing the menu first unmounts the control the
+       click is still inside (§47.2). */
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
-        var all = b.dataset.pwbulk === "all";
-        /* Menu state cleared HERE, before the dialogs, never from the button's
-           own teardown — closing the menu first unmounts the control the click
-           is still inside. Same fault HR_ERP records against its bulk password
-           action, and the one CLAUDE.md records from the React side. */
-        PWMENU = false;
-        /* EVERY exit repaints, including the cancelled ones. The first version
-           set the state here and repainted only on success, so pressing Cancel
-           left the menu on screen with PWMENU already false — a panel the next
-           unrelated repaint would make vanish. State and screen diverge in
-           exactly the paths nobody tests. */
-        var done = function(){ paint(); };
-        if (all && !confirm(
-              "Reset the password of everyone in the register except you?\n\n" +
-              "Their open sessions end at once, and each of them has to choose a new " +
-              "password with the one you are about to type. Your own password is not " +
-              "touched.")) return done();
-        var pw = prompt(all
-          ? "One temporary password, for everyone except you." +
-            "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-            "\nEach of them is asked to choose their own the first time they use it."
-          : "One temporary password, for everyone who has none." +
-            "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-            "\nEach of them is asked to choose their own the first time they use it.");
-        if (!pw) return done();
-        SYNC.issueTemporary(pw, all ? "all" : "none", function(err, issued){
-          if (err) { done(); return alert("Not issued: " + err); }
-          issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
-          PMENU = null;
-          paint();
-          alert(issued.length
-            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") + "."
-            : (all ? "Nobody to issue to \u2014 you are the only active person."
-                   : "Nobody needed one \u2014 everybody already has a password."));
-        });
+        PSETPW = { key: "bulk:" + b.dataset.pwbulk, pw: "", err: "", done: null };
+        PWMENU = false; PMENU = null; PDEL = null;
+        paint();
       });
     });
 

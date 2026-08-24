@@ -1109,8 +1109,19 @@ function renderPeople(){
          the reason is a sentence naming a unit and a page (§59). */
       acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
     }
-    if (!acts.length) return '<td class="cc"></td>';
-    return '<td class="cc kebcell">' +
+    if (!acts.length) return '<td class="cc kebcell"></td>';
+    /* THE CELL WITH A PANEL OPEN HAS TO OUTRANK THE CELLS BELOW IT (§69.22).
+       Freezing this column (§69.20) gave every actions cell `position:sticky`
+       and a z-index, which makes each one its own STACKING CONTEXT — so the
+       menu's `z-index:40` is resolved inside its cell, and the sticky cells of
+       every LATER row, being later in the DOM at the same level, paint on top
+       of it. The panel was drawn correctly and buried under the rows beneath
+       it, which is why it read as clipped.
+
+       The open row's cell is lifted instead of raising the menu: the menu's
+       own z-index cannot escape a context its parent created. */
+    var lifted = open || PDEL === p.key || PSETPW.key === p.key;
+    return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
       '<button class="kebab' + (open ? " open" : "") + '" data-pmenu="' + p.key + '" ' +
       'aria-haspopup="true" aria-expanded="' + open + '" ' +
       'title="Actions" aria-label="Actions for ' + esc(p.name) + '">' +
@@ -1118,7 +1129,50 @@ function renderPeople(){
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
       (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-      deletePanel(p) + '</td>';
+      deletePanel(p) + pwPanel(p) + '</td>';
+  }
+
+  /* ── THE PASSWORD PANEL (§69.22) ────────────────────────────────
+     Where the prompt was. It replaces the menu in the same corner, the way
+     the delete question does, so the second press lands where the first one
+     did (§46.2).
+
+     THE RULES ARE THE SERVER'S AND ARE NOT RESTATED AS A CHECK. They are
+     printed so somebody can read them before typing, and the only thing that
+     REFUSES is `auth.passwordPolicy` on the server, whose sentence is shown
+     verbatim. A second copy of the policy here would be a rule in two places,
+     and the two would drift the first time either moved (§42).
+
+     AND THE PASSWORD IS SHOWN AFTER IT IS SET, which the prompt could never
+     do: an issued password exists to be read out to somebody, and the SMO had
+     to remember what they had just typed into a dialog that was already gone. */
+  function pwPanel(p){
+    if (PSETPW.key !== p.key) return "";
+    if (PSETPW.done) {
+      return '<div class="kmenu kconfirm pwset"><div class="cq">' +
+        '<b>Done \u2014 ' + esc(p.name) + ' signs in with this once.</b> ' +
+        'They are asked to choose their own straight afterwards, so it stops ' +
+        'working the moment they do.</div>' +
+        '<div class="pwout"><code class="mono" id="pwset-done">' + esc(PSETPW.done) +
+          '</code><button class="linkbu" data-pwcopy="1">Copy</button></div>' +
+        '<div class="cbtns"><button data-pwcancel="1">Close</button></div></div>';
+    }
+    return '<div class="kmenu kconfirm pwset"><div class="cq">' +
+      '<b>A temporary password for ' + esc(p.name) + '.</b> ' +
+      'Type one or generate it \u2014 they choose their own the first time they use it.</div>' +
+      '<div class="pwrow">' +
+        '<input class="fld" id="pwset-field" type="text" autocomplete="off" ' +
+          'spellcheck="false" autocapitalize="none" placeholder="Temporary password" ' +
+          'aria-label="Temporary password for ' + esc(p.name) + '" value="' + esc(PSETPW.pw) + '">' +
+        '<button class="linkbu" data-pwgen="1">Generate</button>' +
+      '</div>' +
+      '<div class="pwrule">At least 8 characters, with an uppercase letter, a ' +
+        'number and a special character.</div>' +
+      (PSETPW.err ? '<div class="picerr">' + esc(PSETPW.err) + '</div>' : '') +
+      '<div class="cbtns">' +
+        '<button data-pwcancel="1">Cancel</button>' +
+        '<button class="danger" data-pwset="' + esc(p.key) + '">Set it</button>' +
+      '</div></div>';
   }
 
   /* The question, or the reason there is no question. It replaces the menu in
@@ -1393,7 +1447,9 @@ function renderPeople(){
     '<span class="hmenu' + (PWMENU ? " open" : "") + '">' +
       '<button class="hmenu-btn" data-pwmenu="1" aria-haspopup="true" ' +
         'aria-expanded="' + PWMENU + '">Passwords <span class="hcar">&#9662;</span></button>' +
-      (PWMENU
+      (PSETPW.key === "bulk:none" || PSETPW.key === "bulk:all"
+        ? pwBulkPanel(activeCount, noPw)
+        : PWMENU
         ? '<div class="hmenu-panel">' +
             '<button class="hmenu-item" data-pwbulk="none"' + (noPw ? "" : " disabled") + '>' +
               '<span class="t">Issue to those with no password</span>' +
@@ -1408,6 +1464,49 @@ function renderPeople(){
           '</div>'
         : '') +
     '</span>';
+
+  /* THE SAME PANEL, FOR THE TWO COLLECTIVE ACTIONS (§69.22). Both were
+     `prompt()` too, and both had the identical silent failure. It reuses the
+     field's id so the typing, Generate and Enter wiring is one implementation
+     — two would drift, and the second is the one nobody drives.
+
+     THE DESTRUCTIVE ONE CARRIES ITS OWN WARNING IN THE PANEL rather than in a
+     `confirm()` in front of it: a native confirm can be suppressed exactly as
+     the prompt was, and a reset that proceeded because a warning was
+     suppressed is the worst version of this bug. */
+  function pwBulkPanel(activeCount, noPw){
+    var all = PSETPW.key === "bulk:all";
+    if (PSETPW.done) {
+      return '<div class="hmenu-panel pwset"><div class="cq">' +
+        '<b>' + esc(PSETPW.done.what) + '</b> Each of them chooses their own the ' +
+        'first time they use it.</div>' +
+        (PSETPW.done.pw
+          ? '<div class="pwout"><code class="mono" id="pwset-done">' + esc(PSETPW.done.pw) +
+            '</code><button class="linkbu" data-pwcopy="1">Copy</button></div>'
+          : '') +
+        '<div class="cbtns"><button data-pwcancel="1">Close</button></div></div>';
+    }
+    return '<div class="hmenu-panel pwset"><div class="cq">' +
+      (all
+        ? '<b>Reset everyone\u2019s password?</b> All ' + Math.max(0, activeCount - 1) +
+          ' others get the one below and are signed out at once. Never you.'
+        : '<b>One password, for the ' + plural(noPw, "person").replace("persons", "people") +
+          ' with none.</b> Nobody who already has one is touched.') + '</div>' +
+      '<div class="pwrow">' +
+        '<input class="fld" id="pwset-field" type="text" autocomplete="off" ' +
+          'spellcheck="false" autocapitalize="none" placeholder="Temporary password" ' +
+          'aria-label="One temporary password" value="' + esc(PSETPW.pw) + '">' +
+        '<button class="linkbu" data-pwgen="1">Generate</button>' +
+      '</div>' +
+      '<div class="pwrule">At least 8 characters, with an uppercase letter, a ' +
+        'number and a special character.</div>' +
+      (PSETPW.err ? '<div class="picerr">' + esc(PSETPW.err) + '</div>' : '') +
+      '<div class="cbtns">' +
+        '<button data-pwcancel="1">Cancel</button>' +
+        '<button class="danger" data-pwset="' + esc(PSETPW.key) + '">' +
+          (all ? "Reset them all" : "Issue it") + '</button>' +
+      '</div></div>';
+  }
 
   /* The explanation stays; the CONTROLS moved to the header. A note that
      carries buttons is a second place to press them. */

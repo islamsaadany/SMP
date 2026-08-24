@@ -616,6 +616,9 @@
     position:sticky; right:0; z-index:2; background:var(--surface);
     box-shadow:-1px 0 0 var(--line-soft); }
   .peoplecfg thead th.kebcell { z-index:4; }
+  /* Above the header too: a panel opened on the first visible row would
+     otherwise slide under the frozen header the moment the box is scrolled. */
+  .peoplecfg td.kebcell.lifted { z-index:30; }
   .peoplecfg tr.retired td.kebcell { opacity:1; }
   /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
      `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
@@ -689,6 +692,44 @@
      accent and the GROUND moves, which is the answer that file records. */
   .kconfirm .cbtns button.danger { border-color:var(--bad); }
   .kconfirm .cbtns button.danger:hover { background:var(--surface-2); color:var(--bad); }
+  /* ── ISSUING A PASSWORD, IN THE PAGE (§69.22) ─────────────────────
+     Where a `prompt()` was. It wears `.kconfirm` in a row and `.hmenu-panel`
+     in the header, because those are the two places it opens from — what is
+     shared is the FIELD, not the frame. */
+  .pwset { min-width:290px; max-width:340px; }
+  .pwset .pwrow { display:flex; align-items:center; gap:8px; padding:10px 13px 0; }
+  .pwset .pwrow input.fld { flex:1 1 auto; min-width:150px; font-family:var(--mono);
+                            font-size:12.5px; letter-spacing:.02em; }
+  .pwset .pwrow .linkbu { flex:none; white-space:nowrap; }
+  .pwset .pwrule { padding:6px 13px 0; font:400 11.5px/1.45 var(--sans); color:var(--ink-3); }
+  .pwset .picerr { margin:8px 13px 0; }
+  /* The issued password, to be read out. A generated one is 14 characters of
+     mono, so it is given room to sit on its own line and be selected. */
+  /* The issued password gets the WHOLE line and Copy sits under it. Side by
+     side, the code box was squeezed to about 70px and a 14-character password
+     broke across two lines — which is a string somebody has to read out loud
+     down a phone, so it has to be one unbroken run. */
+  .pwset .pwout { display:flex; align-items:center; gap:10px; padding:10px 13px 0;
+                  flex-wrap:wrap; }
+  .pwset .pwout .linkbu { flex:none; margin-left:auto; }
+  .pwset .pwout code { flex:1 1 100%; min-width:0; overflow-wrap:anywhere;
+                       background:var(--surface-2); border:1px solid var(--line);
+                       border-radius:var(--r-sm); padding:6px 9px; font-size:13px;
+                       color:var(--ink); user-select:all; }
+  .pwset .cbtns { display:flex; gap:6px; justify-content:flex-end; padding:11px 11px 11px; }
+  .pwset .cbtns button { display:inline-block; width:auto; white-space:nowrap;
+                         border:1px solid var(--line); padding:5px 11px;
+                         border-radius:var(--r-sm); background:none; cursor:pointer;
+                         font:500 12.5px/1.4 var(--sans); color:var(--ink-2); }
+  .pwset .cbtns button:hover { background:var(--surface-2); color:var(--ink); }
+  .pwset .cbtns button.danger { border-color:var(--bad); color:var(--bad-tx); }
+  .pwset .cbtns button.danger:hover { background:var(--surface-2); color:var(--bad-tx); }
+  /* The header's panel has no `.cq` of its own, and the row's is styled by
+     `.kconfirm`; this is the one the bulk actions need. */
+  .hmenu-panel.pwset .cq { padding:11px 13px 0; font:400 12.5px/1.55 var(--sans);
+                           color:var(--ink-2); }
+  .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
+
   /* ── The role picker, one half per column (§69) ──────────────────
      Both are bounded. A `select.fld` in this table is `width:100%` with no
      intrinsic minimum, so under the auto layout the register uses it claims

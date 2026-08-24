@@ -160,6 +160,23 @@ var PMENU = null;
    so the second press lands where the first one did — the same shape the
    clear-plan confirmation already uses (§46.2). */
 var PDEL = null;
+/* ── ISSUING A PASSWORD, WITHOUT A NATIVE DIALOG (§69.22) ───────────
+   `prompt()` was the control, and Islam hit the one failure it has that
+   nothing can report: a browser is allowed to SUPPRESS it — Chrome offers
+   "prevent this page from creating additional dialogs" after a few — and a
+   suppressed prompt returns null, which the handler read as "cancelled" and
+   did nothing about. Silently. "I can't set the temp password", with no error
+   anywhere, on a code path that works perfectly when driven.
+
+   It was the wrong control for three more reasons that were true all along: a
+   password manager cannot see into it, the rules could not be shown until
+   after they had been broken, and there was nowhere to put the password
+   afterwards — the SMO has to read it out to somebody.
+
+   `pw` is held here rather than read off the input at submit, for §35's
+   reason: a repaint caused by anything else must not throw away what is half
+   typed. Screen state, never saved (§25.2). */
+var PSETPW = { key:null, pw:"", err:"", done:null };
 /* Which person's extra roles are unfolded, and which header menu is open.
    Single keys for the same reason PMENU is: two open at once is a state that
    has to be closed twice. */

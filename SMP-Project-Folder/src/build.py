@@ -71,5 +71,37 @@ out = ("<!doctype html>\n<html lang='en'>\n<meta charset='utf-8'>\n"
        # It has to be inline for the same reason the icon is a data URI:
        # the file has to carry everything it needs.
        "<script>\n" + open('theme.js').read() + "\n</script>\n\n" + shell)
+
+# ── THE BUILT PAGE HAS TO PARSE (§69.22) ────────────────────────────────
+# `node --check` sees the .js sources and CANNOT see inline script in HTML, so
+# a stray brace spliced into shell.html passed every file-level check and
+# produced a page that died on load with "Unexpected token ')'" — a blank
+# platform, and nothing anywhere said why.
+#
+# So the build refuses to emit a page whose script does not parse. Every
+# <script> block is pulled out and run through `new Function`, which parses
+# without executing. It costs one node invocation and it is the only check
+# that looks at what is actually SHIPPED.
+import json, re, shutil, subprocess, sys, tempfile
+
+def check_scripts(html):
+    if not shutil.which("node"):
+        print("  ! node not found — the built page was NOT parse-checked")
+        return
+    blocks = re.findall(r"<script>([\s\S]*?)</script>", html)
+    with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+        json.dump(blocks, f)
+        path = f.name
+    js = ("const b=require(" + json.dumps(path) + ");let bad=[];"
+          "b.forEach(function(s,i){try{new Function(s);}catch(e){bad.push(i+': '+e.message);}});"
+          "if(bad.length){console.error(bad.join('\\n'));process.exit(1);}"
+          "console.log('  '+b.length+' script blocks parse');")
+    r = subprocess.run(["node", "-e", js], capture_output=True, text=True)
+    sys.stdout.write(r.stdout)
+    if r.returncode:
+        sys.stderr.write("BUILD REFUSED — the built page does not parse:\n" + r.stderr)
+        sys.exit(1)
+
+check_scripts(out)
 open('strategy-management-platform.html','w').write(out)
 print("built", len(out))

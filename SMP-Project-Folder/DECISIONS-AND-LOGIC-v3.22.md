@@ -9089,3 +9089,54 @@ back to `p.name`, so shortening the *value* would have overwritten the
 register's real names with two words each — silently, on the first keystroke in
 any row, with the file's own copy gone. Asserted by firing a `change` on an
 untouched field and reading the stored name back.
+
+**69.22 A password is issued in the page, not in a dialog.** Islam: *"I can't
+set the temp password"* — and the code path was **fine**. Driven on the served
+app against a real Postgres it worked perfectly, which is what made it hard:
+there was no error anywhere, on his screen or in the logs.
+
+The control was a native `prompt()`, and it has one failure nothing can report:
+**a browser is allowed to suppress it.** Chrome offers *"prevent this page from
+creating additional dialogs"* after a few, and a suppressed prompt returns
+`null` — which the handler read as *cancelled* and did nothing about. Silently,
+for ever, with the button still there.
+
+It was the wrong control for three more reasons that were true all along: a
+password manager cannot see into it, the rules could not be shown until after
+they had been broken, and there was nowhere to put the password afterwards — an
+issued password exists **to be read out to somebody**, and the SMO had to
+remember what they had just typed into a dialog that was already gone.
+
+So it is a panel in the row, where the delete question already is. It carries a
+field, a **Generate** button, the rules in front of you, and — after it is set —
+the password itself, to copy. The two collective actions open the same panel:
+both were a `confirm()` in front of a `prompt()`, and on the destructive one a
+suppressed confirm meant **a reset proceeding because its warning had been
+silenced**. That warning is in the panel now.
+
+**THE POLICY IS NOT RESTATED AS A CHECK.** The rules are printed so somebody can
+read them; the only thing that REFUSES is `auth.passwordPolicy` on the server,
+whose sentence is shown verbatim. A second copy here would be a rule in two
+places (§42).
+
+**Generated from `crypto`, never `Math.random`** — this is a credential, and a
+predictable one is worse than a weak one somebody chose. One character is taken
+from each required class first so the result cannot fail the policy, then the
+rest is filled and the whole thing shuffled: building it in class order would
+make every generated password start with a capital and end with a symbol.
+
+Two things found while building it, and both are §69.20's bill:
+
+**FREEZING A COLUMN MAKES EVERY CELL IN IT A STACKING CONTEXT.** `position:
+sticky` plus a z-index does that, so the menu's own `z-index:40` is resolved
+*inside its cell*, and the sticky cells of every LATER row paint on top of it.
+The panel was drawn correctly and buried under the rows beneath it — which read
+on screen as clipped text and a squashed field, not as a stacking problem. The
+open row's CELL is lifted; the menu's z-index cannot escape a context its parent
+created.
+
+**AND `node --check` CANNOT SEE INLINE SCRIPT.** A splice left a stray `});` in
+`shell.html`, every file "passed", and the built page died with *Unexpected
+token ')'* — a blank platform. The build is now parse-checked by pulling every
+`<script>` block out of the built file and running `new Function` over it: 15
+blocks, and the one that mattered was the one no tool was looking at.

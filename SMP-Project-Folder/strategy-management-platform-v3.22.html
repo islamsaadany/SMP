@@ -1846,6 +1846,9 @@
     position:sticky; right:0; z-index:2; background:var(--surface);
     box-shadow:-1px 0 0 var(--line-soft); }
   .peoplecfg thead th.kebcell { z-index:4; }
+  /* Above the header too: a panel opened on the first visible row would
+     otherwise slide under the frozen header the moment the box is scrolled. */
+  .peoplecfg td.kebcell.lifted { z-index:30; }
   .peoplecfg tr.retired td.kebcell { opacity:1; }
   /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
      `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
@@ -1919,6 +1922,44 @@
      accent and the GROUND moves, which is the answer that file records. */
   .kconfirm .cbtns button.danger { border-color:var(--bad); }
   .kconfirm .cbtns button.danger:hover { background:var(--surface-2); color:var(--bad); }
+  /* ── ISSUING A PASSWORD, IN THE PAGE (§69.22) ─────────────────────
+     Where a `prompt()` was. It wears `.kconfirm` in a row and `.hmenu-panel`
+     in the header, because those are the two places it opens from — what is
+     shared is the FIELD, not the frame. */
+  .pwset { min-width:290px; max-width:340px; }
+  .pwset .pwrow { display:flex; align-items:center; gap:8px; padding:10px 13px 0; }
+  .pwset .pwrow input.fld { flex:1 1 auto; min-width:150px; font-family:var(--mono);
+                            font-size:12.5px; letter-spacing:.02em; }
+  .pwset .pwrow .linkbu { flex:none; white-space:nowrap; }
+  .pwset .pwrule { padding:6px 13px 0; font:400 11.5px/1.45 var(--sans); color:var(--ink-3); }
+  .pwset .picerr { margin:8px 13px 0; }
+  /* The issued password, to be read out. A generated one is 14 characters of
+     mono, so it is given room to sit on its own line and be selected. */
+  /* The issued password gets the WHOLE line and Copy sits under it. Side by
+     side, the code box was squeezed to about 70px and a 14-character password
+     broke across two lines — which is a string somebody has to read out loud
+     down a phone, so it has to be one unbroken run. */
+  .pwset .pwout { display:flex; align-items:center; gap:10px; padding:10px 13px 0;
+                  flex-wrap:wrap; }
+  .pwset .pwout .linkbu { flex:none; margin-left:auto; }
+  .pwset .pwout code { flex:1 1 100%; min-width:0; overflow-wrap:anywhere;
+                       background:var(--surface-2); border:1px solid var(--line);
+                       border-radius:var(--r-sm); padding:6px 9px; font-size:13px;
+                       color:var(--ink); user-select:all; }
+  .pwset .cbtns { display:flex; gap:6px; justify-content:flex-end; padding:11px 11px 11px; }
+  .pwset .cbtns button { display:inline-block; width:auto; white-space:nowrap;
+                         border:1px solid var(--line); padding:5px 11px;
+                         border-radius:var(--r-sm); background:none; cursor:pointer;
+                         font:500 12.5px/1.4 var(--sans); color:var(--ink-2); }
+  .pwset .cbtns button:hover { background:var(--surface-2); color:var(--ink); }
+  .pwset .cbtns button.danger { border-color:var(--bad); color:var(--bad-tx); }
+  .pwset .cbtns button.danger:hover { background:var(--surface-2); color:var(--bad-tx); }
+  /* The header's panel has no `.cq` of its own, and the row's is styled by
+     `.kconfirm`; this is the one the bulk actions need. */
+  .hmenu-panel.pwset .cq { padding:11px 13px 0; font:400 12.5px/1.55 var(--sans);
+                           color:var(--ink-2); }
+  .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
+
   /* ── The role picker, one half per column (§69) ──────────────────
      Both are bounded. A `select.fld` in this table is `width:100%` with no
      intrinsic minimum, so under the auto layout the register uses it claims
@@ -5830,6 +5871,23 @@ var PMENU = null;
    so the second press lands where the first one did — the same shape the
    clear-plan confirmation already uses (§46.2). */
 var PDEL = null;
+/* ── ISSUING A PASSWORD, WITHOUT A NATIVE DIALOG (§69.22) ───────────
+   `prompt()` was the control, and Islam hit the one failure it has that
+   nothing can report: a browser is allowed to SUPPRESS it — Chrome offers
+   "prevent this page from creating additional dialogs" after a few — and a
+   suppressed prompt returns null, which the handler read as "cancelled" and
+   did nothing about. Silently. "I can't set the temp password", with no error
+   anywhere, on a code path that works perfectly when driven.
+
+   It was the wrong control for three more reasons that were true all along: a
+   password manager cannot see into it, the rules could not be shown until
+   after they had been broken, and there was nowhere to put the password
+   afterwards — the SMO has to read it out to somebody.
+
+   `pw` is held here rather than read off the input at submit, for §35's
+   reason: a repaint caused by anything else must not throw away what is half
+   typed. Screen state, never saved (§25.2). */
+var PSETPW = { key:null, pw:"", err:"", done:null };
 /* Which person's extra roles are unfolded, and which header menu is open.
    Single keys for the same reason PMENU is: two open at once is a state that
    has to be closed twice. */
@@ -16964,8 +17022,19 @@ function renderPeople(){
          the reason is a sentence naming a unit and a page (§59). */
       acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
     }
-    if (!acts.length) return '<td class="cc"></td>';
-    return '<td class="cc kebcell">' +
+    if (!acts.length) return '<td class="cc kebcell"></td>';
+    /* THE CELL WITH A PANEL OPEN HAS TO OUTRANK THE CELLS BELOW IT (§69.22).
+       Freezing this column (§69.20) gave every actions cell `position:sticky`
+       and a z-index, which makes each one its own STACKING CONTEXT — so the
+       menu's `z-index:40` is resolved inside its cell, and the sticky cells of
+       every LATER row, being later in the DOM at the same level, paint on top
+       of it. The panel was drawn correctly and buried under the rows beneath
+       it, which is why it read as clipped.
+
+       The open row's cell is lifted instead of raising the menu: the menu's
+       own z-index cannot escape a context its parent created. */
+    var lifted = open || PDEL === p.key || PSETPW.key === p.key;
+    return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
       '<button class="kebab' + (open ? " open" : "") + '" data-pmenu="' + p.key + '" ' +
       'aria-haspopup="true" aria-expanded="' + open + '" ' +
       'title="Actions" aria-label="Actions for ' + esc(p.name) + '">' +
@@ -16973,7 +17042,50 @@ function renderPeople(){
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
       (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-      deletePanel(p) + '</td>';
+      deletePanel(p) + pwPanel(p) + '</td>';
+  }
+
+  /* ── THE PASSWORD PANEL (§69.22) ────────────────────────────────
+     Where the prompt was. It replaces the menu in the same corner, the way
+     the delete question does, so the second press lands where the first one
+     did (§46.2).
+
+     THE RULES ARE THE SERVER'S AND ARE NOT RESTATED AS A CHECK. They are
+     printed so somebody can read them before typing, and the only thing that
+     REFUSES is `auth.passwordPolicy` on the server, whose sentence is shown
+     verbatim. A second copy of the policy here would be a rule in two places,
+     and the two would drift the first time either moved (§42).
+
+     AND THE PASSWORD IS SHOWN AFTER IT IS SET, which the prompt could never
+     do: an issued password exists to be read out to somebody, and the SMO had
+     to remember what they had just typed into a dialog that was already gone. */
+  function pwPanel(p){
+    if (PSETPW.key !== p.key) return "";
+    if (PSETPW.done) {
+      return '<div class="kmenu kconfirm pwset"><div class="cq">' +
+        '<b>Done \u2014 ' + esc(p.name) + ' signs in with this once.</b> ' +
+        'They are asked to choose their own straight afterwards, so it stops ' +
+        'working the moment they do.</div>' +
+        '<div class="pwout"><code class="mono" id="pwset-done">' + esc(PSETPW.done) +
+          '</code><button class="linkbu" data-pwcopy="1">Copy</button></div>' +
+        '<div class="cbtns"><button data-pwcancel="1">Close</button></div></div>';
+    }
+    return '<div class="kmenu kconfirm pwset"><div class="cq">' +
+      '<b>A temporary password for ' + esc(p.name) + '.</b> ' +
+      'Type one or generate it \u2014 they choose their own the first time they use it.</div>' +
+      '<div class="pwrow">' +
+        '<input class="fld" id="pwset-field" type="text" autocomplete="off" ' +
+          'spellcheck="false" autocapitalize="none" placeholder="Temporary password" ' +
+          'aria-label="Temporary password for ' + esc(p.name) + '" value="' + esc(PSETPW.pw) + '">' +
+        '<button class="linkbu" data-pwgen="1">Generate</button>' +
+      '</div>' +
+      '<div class="pwrule">At least 8 characters, with an uppercase letter, a ' +
+        'number and a special character.</div>' +
+      (PSETPW.err ? '<div class="picerr">' + esc(PSETPW.err) + '</div>' : '') +
+      '<div class="cbtns">' +
+        '<button data-pwcancel="1">Cancel</button>' +
+        '<button class="danger" data-pwset="' + esc(p.key) + '">Set it</button>' +
+      '</div></div>';
   }
 
   /* The question, or the reason there is no question. It replaces the menu in
@@ -17248,7 +17360,9 @@ function renderPeople(){
     '<span class="hmenu' + (PWMENU ? " open" : "") + '">' +
       '<button class="hmenu-btn" data-pwmenu="1" aria-haspopup="true" ' +
         'aria-expanded="' + PWMENU + '">Passwords <span class="hcar">&#9662;</span></button>' +
-      (PWMENU
+      (PSETPW.key === "bulk:none" || PSETPW.key === "bulk:all"
+        ? pwBulkPanel(activeCount, noPw)
+        : PWMENU
         ? '<div class="hmenu-panel">' +
             '<button class="hmenu-item" data-pwbulk="none"' + (noPw ? "" : " disabled") + '>' +
               '<span class="t">Issue to those with no password</span>' +
@@ -17263,6 +17377,49 @@ function renderPeople(){
           '</div>'
         : '') +
     '</span>';
+
+  /* THE SAME PANEL, FOR THE TWO COLLECTIVE ACTIONS (§69.22). Both were
+     `prompt()` too, and both had the identical silent failure. It reuses the
+     field's id so the typing, Generate and Enter wiring is one implementation
+     — two would drift, and the second is the one nobody drives.
+
+     THE DESTRUCTIVE ONE CARRIES ITS OWN WARNING IN THE PANEL rather than in a
+     `confirm()` in front of it: a native confirm can be suppressed exactly as
+     the prompt was, and a reset that proceeded because a warning was
+     suppressed is the worst version of this bug. */
+  function pwBulkPanel(activeCount, noPw){
+    var all = PSETPW.key === "bulk:all";
+    if (PSETPW.done) {
+      return '<div class="hmenu-panel pwset"><div class="cq">' +
+        '<b>' + esc(PSETPW.done.what) + '</b> Each of them chooses their own the ' +
+        'first time they use it.</div>' +
+        (PSETPW.done.pw
+          ? '<div class="pwout"><code class="mono" id="pwset-done">' + esc(PSETPW.done.pw) +
+            '</code><button class="linkbu" data-pwcopy="1">Copy</button></div>'
+          : '') +
+        '<div class="cbtns"><button data-pwcancel="1">Close</button></div></div>';
+    }
+    return '<div class="hmenu-panel pwset"><div class="cq">' +
+      (all
+        ? '<b>Reset everyone\u2019s password?</b> All ' + Math.max(0, activeCount - 1) +
+          ' others get the one below and are signed out at once. Never you.'
+        : '<b>One password, for the ' + plural(noPw, "person").replace("persons", "people") +
+          ' with none.</b> Nobody who already has one is touched.') + '</div>' +
+      '<div class="pwrow">' +
+        '<input class="fld" id="pwset-field" type="text" autocomplete="off" ' +
+          'spellcheck="false" autocapitalize="none" placeholder="Temporary password" ' +
+          'aria-label="One temporary password" value="' + esc(PSETPW.pw) + '">' +
+        '<button class="linkbu" data-pwgen="1">Generate</button>' +
+      '</div>' +
+      '<div class="pwrule">At least 8 characters, with an uppercase letter, a ' +
+        'number and a special character.</div>' +
+      (PSETPW.err ? '<div class="picerr">' + esc(PSETPW.err) + '</div>' : '') +
+      '<div class="cbtns">' +
+        '<button data-pwcancel="1">Cancel</button>' +
+        '<button class="danger" data-pwset="' + esc(PSETPW.key) + '">' +
+          (all ? "Reset them all" : "Issue it") + '</button>' +
+      '</div></div>';
+  }
 
   /* The explanation stays; the CONTROLS moved to the header. A note that
      carries buttons is a second place to press them. */
@@ -23609,22 +23766,133 @@ var SYNC = (function () {
     });
     /* The SMO issues a temporary password; the server checks the policy and
        forces a change on first sign-in. */
+    /* ── ISSUING A PASSWORD, IN THE PAGE (§69.22) ────────────────────
+       This was a `prompt()`, and a browser is allowed to SUPPRESS one —
+       Chrome offers "prevent this page from creating additional dialogs"
+       after a few — whereupon it returns null, the old handler read that as
+       "cancelled", and nothing happened at all. No error, nowhere. That is
+       the failure Islam hit, on a path that works perfectly when driven.
+
+       Opening it closes the menu, for positionRowMenu()'s reason: it places
+       `document.querySelector(".kmenu")`, so a second one in the same cell
+       would be left unplaced at the top-left of the window. */
     document.querySelectorAll("[data-setpw]").forEach(function(b){
       b.addEventListener("click", function(){
-        var key = b.dataset.setpw;
-        var pw = prompt("Temporary password for " + key +
-          "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-          "\nThey will be asked to choose their own on first sign-in.");
-        if (!pw) return;
+        PSETPW = { key: b.dataset.setpw, pw: "", err: "", done: null };
+        PMENU = null; PDEL = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pwcancel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PSETPW = { key:null, pw:"", err:"", done:null };
+        paint();
+      });
+    });
+    /* TYPING NEVER REPAINTS (§35) — the value is kept in PSETPW so a repaint
+       caused by anything ELSE cannot throw away what is half typed, and this
+       handler only records it. */
+    var pwField = document.getElementById("pwset-field");
+    if (pwField) {
+      pwField.addEventListener("input", function(){ PSETPW.pw = pwField.value; });
+      pwField.addEventListener("keydown", function(e){
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        var go = document.querySelector("[data-pwset]");
+        if (go) go.click();
+      });
+      if (!PSETPW.pw) pwField.focus();
+    }
+    /* GENERATED FROM crypto, never from Math.random: this is a credential, and
+       a predictable one is worse than a weak one somebody chose. One character
+       is taken from each required class first so the result cannot fail the
+       policy, then the rest is filled and the whole thing shuffled — building
+       it in class order would make every generated password start with a
+       capital and end with a symbol. */
+    document.querySelectorAll("[data-pwgen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var sets = ["ABCDEFGHJKLMNPQRSTUVWXYZ", "abcdefghijkmnpqrstuvwxyz",
+                    "23456789", "!?@#$%&*+-="];
+        var n = 14, out = [], pool = sets.join("");
+        var rnd = function(max){
+          var a = new Uint32Array(1);
+          (window.crypto || window.msCrypto).getRandomValues(a);
+          return a[0] % max;
+        };
+        sets.forEach(function(set){ out.push(set[rnd(set.length)]); });
+        while (out.length < n) out.push(pool[rnd(pool.length)]);
+        for (var i = out.length - 1; i > 0; i--) {
+          var j = rnd(i + 1), t = out[i]; out[i] = out[j]; out[j] = t;
+        }
+        PSETPW.pw = out.join(""); PSETPW.err = "";
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pwset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.pwset;
+        var f = document.getElementById("pwset-field");
+        var pw = (f ? f.value : PSETPW.pw) || "";
+        if (!pw.trim()) {
+          PSETPW.err = "Type a password, or press Generate.";
+          paint();
+          return;
+        }
+        PSETPW.pw = pw;
+        /* ONE BUTTON, TWO ENDPOINTS, and the difference is which one the SERVER
+           picks the people for: `issueTemporary` sends a scope and never a list
+           of keys, so a stale screen can only ever issue to FEWER people than it
+           thinks, never more (§35). */
+        if (key.indexOf("bulk:") === 0) {
+          var scope = key.slice(5);
+          SYNC.issueTemporary(pw, scope, function(err, issued){
+            if (err) { PSETPW.err = err; paint(); return; }
+            issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
+            PSETPW.err = "";
+            PSETPW.done = {
+              pw: issued.length ? pw : "",
+              what: issued.length
+                ? "Issued to " + plural(issued.length, "person").replace("persons", "people") + "."
+                : (scope === "all"
+                    ? "Nobody to issue to \u2014 you are the only active person."
+                    : "Nobody needed one \u2014 everybody already has a password.")
+            };
+            paint();
+          });
+          return;
+        }
         SYNC.setPassword(key, pw, function(err){
-          if (err) return alert("Not set: " + err);
+          if (err) {
+            /* The SERVER's sentence, verbatim — it owns the policy, and a
+               second copy here would be a rule in two places (§42). */
+            PSETPW.err = err;
+            paint();
+            return;
+          }
           /* The register shows a password COLUMN now, so a reset that does not
              repaint it leaves the screen claiming the old state. Ask again
              rather than assuming — the server is what knows. */
           if (PWSTATES) PWSTATES[key] = "temporary";
+          PSETPW.err = "";
+          PSETPW.done = pw;
           paint();
-          alert("Set. " + key + " signs in with it once, then chooses their own.");
         });
+      });
+    });
+    document.querySelectorAll("[data-pwcopy]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var el = document.getElementById("pwset-done");
+        if (!el) return;
+        var text = el.textContent;
+        var say = function(ok){ b.textContent = ok ? "Copied" : "Select it and copy"; };
+        /* The clipboard needs a secure context and a permission, and neither is
+           guaranteed — so the failure says what to do instead rather than
+           leaving a button that did nothing (which is the whole fault this
+           panel exists to fix). */
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function(){ say(true); },
+                                                   function(){ say(false); });
+        } else { say(false); }
       });
     });
 
@@ -23919,45 +24187,22 @@ var SYNC = (function () {
     });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
        REACH. "none" can lock nobody out — it only reaches people who could not
-       sign in anyway. "all" overwrites live passwords and ends sessions, so it
-       is confirmed first, in words that name the number of people it hits. */
+       sign in anyway. "all" overwrites live passwords and ends sessions, so the
+       panel names the number of people it hits before it will do it.
+
+       THE TWO COLLECTIVE ACTIONS OPEN THE SAME PANEL (§69.22). Both were a
+       `confirm()` in front of a `prompt()`, and both could be suppressed —
+       which on the destructive one meant a reset proceeding because its
+       warning had been silenced. The warning is IN the panel now.
+
+       Menu state cleared HERE, before the panel is drawn, never from the
+       button's own teardown: closing the menu first unmounts the control the
+       click is still inside (§47.2). */
     document.querySelectorAll("[data-pwbulk]").forEach(function(b){
       b.addEventListener("click", function(){
-        var all = b.dataset.pwbulk === "all";
-        /* Menu state cleared HERE, before the dialogs, never from the button's
-           own teardown — closing the menu first unmounts the control the click
-           is still inside. Same fault HR_ERP records against its bulk password
-           action, and the one CLAUDE.md records from the React side. */
-        PWMENU = false;
-        /* EVERY exit repaints, including the cancelled ones. The first version
-           set the state here and repainted only on success, so pressing Cancel
-           left the menu on screen with PWMENU already false — a panel the next
-           unrelated repaint would make vanish. State and screen diverge in
-           exactly the paths nobody tests. */
-        var done = function(){ paint(); };
-        if (all && !confirm(
-              "Reset the password of everyone in the register except you?\n\n" +
-              "Their open sessions end at once, and each of them has to choose a new " +
-              "password with the one you are about to type. Your own password is not " +
-              "touched.")) return done();
-        var pw = prompt(all
-          ? "One temporary password, for everyone except you." +
-            "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-            "\nEach of them is asked to choose their own the first time they use it."
-          : "One temporary password, for everyone who has none." +
-            "\nAt least 8 characters, with an uppercase letter, a number and a special character." +
-            "\nEach of them is asked to choose their own the first time they use it.");
-        if (!pw) return done();
-        SYNC.issueTemporary(pw, all ? "all" : "none", function(err, issued){
-          if (err) { done(); return alert("Not issued: " + err); }
-          issued.forEach(function(k){ if (PWSTATES) PWSTATES[k] = "temporary"; });
-          PMENU = null;
-          paint();
-          alert(issued.length
-            ? "Issued to " + plural(issued.length, "person").replace("persons", "people") + "."
-            : (all ? "Nobody to issue to \u2014 you are the only active person."
-                   : "Nobody needed one \u2014 everybody already has a password."));
-        });
+        PSETPW = { key: "bulk:" + b.dataset.pwbulk, pw: "", err: "", done: null };
+        PWMENU = false; PMENU = null; PDEL = null;
+        paint();
       });
     });
 

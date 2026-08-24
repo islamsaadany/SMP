@@ -10888,3 +10888,45 @@ It does now: **read the live site after every merge**, not the dashboard.
 `sw.js`'s `SHELL` and the served platform's byte count answer it in two
 commands, and both are things a screenshot of a deployment list cannot tell
 you — the list said "Ready" for all four.
+
+---
+
+## 92 · One destination is not a question (v3.24)
+
+Islam: *"I added SMO to Mohamed Essam but the employee role persisted and SMO
+wasn't added."*
+
+It had not been added. The register's role picker is two halves — the role in
+the Roles column, where it is held in the Unit column — and it commits when the
+**second** half is answered (§69.1, and both halves start blank on purpose: a
+picker that commits on its own must never commit something nobody picked).
+
+**A seat held over the group has exactly one place to hold it.** So the control
+rendered a dropdown containing one option and waited to be told which of the one
+to use. Doing nothing looked exactly like a broken button, and Employee stayed
+because Employee is what is read when somebody holds nothing else (§55) — a true
+answer to a grant that never happened.
+
+**§32 had already settled this shape twice** — the gate's Starting page, and a
+Manage menu holding one item: *a door behind a door.* The comment beside this
+very code claimed the one-destination case "says it rather than offering a list
+of one", which is what it should have done and is not what it did.
+
+So: where a role can be held in exactly one place, it is granted **on the role
+pick** and the second half never appears. Everything with a real choice — a unit
+owner among ten units, a custodian among eighteen, a company CEO among two — is
+unchanged and still asks.
+
+**The undo is what makes committing on one press safe**: the × on the role chip,
+which is exactly the argument §69 used to remove Give and Cancel.
+
+Three roles were affected, and they are the three seats: Super user, **SMO
+team** and Group CEO. The new one is the one somebody reached for first.
+
+### 92.1 And the check was wrong before the product was
+
+Asserting the second half of it — that a role with a real choice still asks —
+timed out for thirty seconds waiting for a ⋮ that the register is **right** not
+to draw: the row was still open from the first grant, and an open row shows Save
+and Cancel where the menu was (spec 012 §2.1). The check now asserts that too,
+rather than working around it.

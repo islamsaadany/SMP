@@ -284,6 +284,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **ONE DESTINATION IS NOT A QUESTION (§92):** the register's role picker
+  commits when its SECOND half is answered, and a seat held over the group
+  offers a list of ONE — so picking "SMO team" and stopping looked exactly like
+  a broken control, with Employee still showing because that is what is read
+  when somebody holds nothing else (§55). §32's rule, already settled twice: a
+  door behind a door. A role with one place is granted on the role pick; a role
+  with a real choice still asks. The × on the chip is what makes committing on
+  one press safe.
 - **THE OFFICE IS TWO ROLES (§89):** **SMO team** sits under Super user with the
   SAME grants in every area — the difference could not be a cell, because
   narrower areas would take away whole pages to withhold three acts. It is

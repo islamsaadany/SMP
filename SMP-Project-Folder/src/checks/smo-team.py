@@ -150,6 +150,64 @@ with sync_playwright() as p:
     su = pg.eval_on_selector_all(".kmenu button", "e=>e.map(x=>x.textContent.trim())")
     ck("...and still deletes", any("Delete" in t for t in su), su)
 
+    # ── GIVING THE ROLE, THROUGH THE REGISTER (§92) ──────────────────
+    # Islam: "I added SMO to Mohamed Essam but the employee role persisted and
+    # SMO wasn't added." It had not been — the pair commits when the SECOND
+    # half is answered, and a seat held over the group offers a list of one, so
+    # doing nothing looked exactly like a broken control. Both sides are
+    # asserted: a one-place role commits on the role pick, and a role with a
+    # real choice still asks, or the fix would have removed the question
+    # everywhere.
+    print("── giving the role from the register")
+    # PMENU TOO. The section above ends with a row menu OPEN, and the first
+    # click anywhere else closes it instead of doing what it was aimed at —
+    # §47.2's rule met from the test's side.
+    # A FRESH PAGE, not five sections of accumulated state. Chasing why one
+    # kebab would not click cost more than the reload does, and a check that
+    # depends on what the section before it left behind is a check that breaks
+    # for reasons that are not about its subject.
+    pg.goto(URL)
+    pg.wait_for_timeout(1500)
+    setup(pg, "people")
+    floor = pg.evaluate("""() => PEOPLE.filter(x => personActive(x) &&
+        personRoles(x).every(r => SMPRules.isOwnLinesRole(r.role)))[0].key""")
+    was = pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor)
+    ck("the row starts on the floor role only", was in ("employee", "contrib"), was)
+    pg.click('.kebab[data-pmenu="%s"]' % floor)
+    pg.wait_for_timeout(250)
+    pg.click('[data-pedit="%s"]' % floor)
+    pg.wait_for_timeout(500)
+    pg.click('[data-prole-open="%s"]' % floor)
+    pg.wait_for_timeout(350)
+    pg.select_option('[data-prole-pick="%s"]' % floor, "smoteam")
+    pg.wait_for_timeout(600)
+    now = pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor)
+    ck("picking SMO team gives it, with no second question", now == "smoteam", now)
+    ck("...and the floor role is gone with it", "employee" not in now, now)
+    ck("...and no where control was left waiting",
+       pg.query_selector('[data-prole-where="%s"]' % floor) is None)
+
+    # A ROLE WITH A REAL CHOICE STILL ASKS. Ten units cannot be guessed.
+    #
+    # THE ROW IS STILL OPEN, so it is not re-opened: an open row shows Save and
+    # Cancel where the ⋮ was (spec 012 §2.1), and the first version of this
+    # waited thirty seconds for a kebab the product is right not to draw. The
+    # check was wrong, not the register.
+    pg.evaluate("(k)=>{ revokePersonRole(k,'smoteam','group'); ADDROLE=null; ADDROLE_KIND=''; paint(); }", floor)
+    pg.wait_for_timeout(500)
+    ck("the open row shows Save and Cancel rather than a menu",
+       pg.query_selector('.kebab[data-pmenu="%s"]' % floor) is None and
+       pg.query_selector("[data-rowsave]") is not None)
+    pg.click('[data-prole-open="%s"]' % floor)
+    pg.wait_for_timeout(350)
+    pg.select_option('[data-prole-pick="%s"]' % floor, "owner")
+    pg.wait_for_timeout(500)
+    ck("a unit owner is still asked which unit",
+       pg.query_selector('[data-prole-where="%s"]' % floor) is not None)
+    ck("...and nothing was granted until it is answered",
+       "owner" not in pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor))
+
+
     print("\nerrors:", errs or "none")
     print("ALL GREEN" if bad == 0 and not errs else "%d FAILED" % bad)
     b.close()

@@ -1144,14 +1144,17 @@ function renderPeople(){
       return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
     }
     var wheres = roleWheres(ADDROLE_KIND);
-    /* A role whose scope is the group has exactly ONE answer, so the control
-       says it rather than offering a list of one — and it is still a select,
-       so choosing it is the same act in the same place either way. */
+    /* A ROLE WITH ONE PLACE IS ALREADY GIVEN (§92). This used to render a
+       select holding a single option and wait to be told which of the one to
+       use — the comment here even claimed it "says it rather than offering a
+       list of one", which is what it should have done and not what it did.
+       The grant happens on the role pick now, so this cell is never reached
+       for those; the guard stays because a role list that gains a
+       single-destination entry later must not fall back into asking. */
+    if (wheres.length <= 1) return "";
     return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
       'aria-label="Where ' + esc(p.name) + ' holds it">' +
-      '<option value="" selected>' +
-        (wheres.length === 1 ? 'Choose ' + esc(wheres[0].label) + '\u2026' : 'Choose where\u2026') +
-      '</option>' +
+      '<option value="" selected>Choose where\u2026</option>' +
       wheres.map(function(w){
         return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
       }).join("") + '</select>';

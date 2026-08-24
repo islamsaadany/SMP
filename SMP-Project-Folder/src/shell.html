@@ -2837,7 +2837,32 @@
        of Mobile. Emptying it back to "Choose a role…" empties the other half
        with it, rather than leaving a unit list standing under no role. */
     document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){ ADDROLE_KIND = sel.value; paint(); });
+      sel.addEventListener("change", function(){
+        ADDROLE_KIND = sel.value;
+        /* ── ONE DESTINATION IS NOT A QUESTION (§92, Islam) ────────────
+           "I added SMO to Mohamed Essam but the employee role persisted and
+           SMO wasn't added." It had not been: the pair commits when the SECOND
+           half is answered (§69.1), and for a seat held over the group the
+           second half is a list of one — so the register asked which of the
+           group to pick, and doing nothing looked exactly like the control
+           being broken.
+
+           §32 settled this shape twice already (the gate's Starting page, the
+           Manage menu holding one item): a door behind a door. Where there is
+           one place a role can be held, it is granted here and the second half
+           never appears. Everything with a real choice — a unit owner, a
+           custodian, a company CEO — is unchanged.
+
+           THE UNDO IS THE × ON THE CHIP, which is what let §69 drop Give and
+           Cancel in the first place: a grant that commits on one press is safe
+           precisely because taking it off is one press too. */
+        var wheres = ADDROLE_KIND ? roleWheres(ADDROLE_KIND) : [];
+        if (roleIsGrantable(ADDROLE_KIND) && wheres.length === 1) {
+          grantPersonRole(sel.dataset.prolePick, ADDROLE_KIND, wheres[0].v);
+          ADDROLE = null; ADDROLE_KIND = "";
+        }
+        paint();
+      });
     });
     /* NO GIVE BUTTON. The pair commits itself the moment the second half is
        answered — Islam: "without give or cancel … eventually it's a selection

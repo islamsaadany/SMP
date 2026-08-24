@@ -427,27 +427,7 @@ function pillarList(u){
 }
 
 /* ── GROUP · Performance ─────────────────────────────────────────── */
-/* §64 REVERSES HALF OF THIS SENTENCE, and the half it reverses is worth
-   naming. "It is NOT a roll-up of its pillars' key measures" is still true and
-   is the whole point of the two cards sitting side by side — the objectives
-   figure is the unit's scorecard and nothing else feeds it. What is no longer
-   true is "and never aggregate": Islam asked for the pillars' collective
-   figure as a third headline, and unitPillars() has been computing it since
-   the scoring model existed — it was in the rail's footer as a bare number.
-   The decision that changed is where it is SHOWN, not what it means. */
-var TIP_PERF = "Performance scores this unit's own Key Objectives \u2014 each actual against its target, averaged. It is NOT a roll-up of its pillars' key measures: those average to their own figure, shown beside this one, and the two are meant to be comparable rather than the same number.";
-/* A FUNCTION, not a string. Every other TIP_ is a constant because it names no
-   tenant-specific thing; this one names the tenant's word for a pillar, and a
-   constant would freeze whatever LABELS held when the file loaded — before
-   hydration on a deployed tenant, so it would say "Pillars" for a client who
-   calls them Directions (§30.2's shape, in prose). */
-function tipPillars(){
-  var w = L("pillar", "bu").toLowerCase().replace(/s$/, "");
-  return "The mean of every " + esc(w) + "'s own performance \u2014 each one being " +
-    "its key measures scored against their targets, averaged. It says how the work " +
-    "the unit set itself is going, one level below the Key Objectives it is judged " +
-    "on, and the two are meant to be comparable rather than the same number.";
-}
+var TIP_PERF = "Performance scores this unit's own Key Objectives \u2014 each actual against its target, averaged. It is NOT a roll-up of its pillars' key measures; those are shown per pillar inside the unit and never aggregate.";
 var TIP_EXEC = "Execution scores the tactics under this unit's pillars \u2014 each tactic's percent complete, averaged across those whose quarter span has started. Planned is derived from those same spans.";
 var TIP_THEME = "Performance and execution across every pillar carrying this theme, in every business unit.";
 var TIP_CAP = "Group capabilities are pillars in their own right: performance from their key measures, execution from their tactics.";
@@ -1348,53 +1328,6 @@ function renderUnitPerformance(u){
       : 'Mean across <b>' + u.keyObjectives.length + '</b> objectives, equally weighted: <b>' + ko + '%</b>.') +
     ' This unit contributes at <b>' + u.weight + '%</b> weight to the group figure.</p>';
 
-  /* ── THE THIRD NUMBER (§64) ────────────────────────────────────────
-     Islam: "add to the 2 main numbers of the objectives and the execution a
-     third number in the middle for the pillars collective performance based on
-     the pillars measures."
-
-     It reads what the unit AGREED TO MEASURE ITSELF ON, one level down from
-     the key objectives — and it was already computed and already on screen, in
-     the rail's footer, as a bare number beside a bare execution figure. Two
-     numbers with no card is not the same claim as a headline: unitPillars() is
-     what every pillar's score averages to, so it belongs beside the two
-     figures the page is about rather than under the list.
-
-     WHAT IT IS NOT: the key objectives figure. A unit's objectives are its
-     scorecard and its pillars are how it intends to move them, so the two
-     answer different questions and can disagree — which is the interesting
-     case and the reason for showing both.
-
-     Nothing new is computed. unitPillars() has existed since the scoring model
-     did; only the highest and lowest are worked out here, exactly as the key
-     objectives card does. */
-  var pps = u.items.map(pillarPerf).filter(function(v){ return v != null && !isNaN(v); });
-  var pl = unitPillars(u);
-  var plHi = pps.length ? Math.max.apply(null, pps) : null;
-  var plLo = pps.length ? Math.min.apply(null, pps) : null;
-  var plWord = L("pillar", "bu");
-  var plDrill =
-    '<p class="sub" style="margin:0 0 14px">' + tipPillars() + '</p>' +
-    miniTable(["#", plWord, "Measures", "Scored", "Performance"],
-      u.items.map(function(it, i){
-        var pp = pillarPerf(it), carrier = pillarCarrier(it);
-        /* A pillar handed to a function is scored by ITS pillars, not by
-           measures of its own (§59) — so the count would read 0 beside a real
-           figure and look like a fault. It says whose it is instead. */
-        var ms = carrier ? "\u2014" : String((it.measures || []).length);
-        var sc = carrier
-          ? '<span class="why" style="margin:0">from ' + esc(carrier.name) + '</span>'
-          : String(scorableMeasures(it).length);
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td>' + pillarCode(u, i) + ' ' + esc(it.name) + '</td>' +
-          '<td class="num">' + ms + '</td><td class="num">' + sc + '</td>' +
-          '<td class="num final" style="color:var(--' + band(pp) + ')">' + pct(pp) + '</td></tr>';
-      }).join("")) +
-    '<p class="sub">Mean across <b>' + pps.length + '</b> of <b>' + u.items.length + '</b> ' +
-    plWord.toLowerCase() + ' with something scored: <b>' + pct(pl) + '</b>. ' +
-    'A ' + plWord.toLowerCase().replace(/s$/, "") + ' with no reported measure is left out ' +
-    'rather than counted as zero: nothing reported is not the same as nothing achieved.</p>';
-
   var exDrill =
     '<p class="sub" style="margin:0 0 14px">' + TIP_EXEC + '</p>' +
     miniTable(["#", L("pillar","bu"), "Delivered", "Planned", "Of plan", "Var."],
@@ -1410,8 +1343,6 @@ function renderUnitPerformance(u){
     ' &mdash; <b>' + r + '%</b> of plan. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
 
   var koId = modalFor(esc(u.name) + " &mdash; " + L("keyobj","bu"), "The unit's own scorecard, and how the headline is built", koDrill);
-  var plId = modalFor(esc(u.name) + " &mdash; " + plWord.toLowerCase() + " performance",
-    "What each " + plWord.toLowerCase().replace(/s$/, "") + "'s own measures average to", plDrill);
   var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
 
   return bands(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
@@ -1427,19 +1358,6 @@ function renderUnitPerformance(u){
             pct(koHi) + '</b></div>' +
           '<div><em>Lowest</em><b style="color:var(--' + band(koLo) + ')">' +
             pct(koLo) + '</b></div></div></div>' +
-      /* IN THE MIDDLE, as asked: the objectives are what the unit is judged
-         on, the pillars are how it means to get there, and execution is
-         whether the work happened. Read left to right that is the argument. */
-      '<div class="card tight"><div class="score-h"><h4>' + plWord + ' performance</h4>' +
-        '<span class="pill ' + band(pl) + '">' + bandWord(pl) + '</span></div>' +
-        '<div class="headline"><span class="big" style="color:var(--' + band(pl) + ')">' + pctBig(pl) + '</span>' +
-          '<button class="drill" data-modal="' + plId + '">See the ' +
-            plWord.toLowerCase() + ' &rarr;</button></div>' +
-        '<div class="minirow"><div><em>' + plWord + '</em><b>' + u.items.length + '</b></div>' +
-          '<div><em>Highest</em><b style="color:var(--' + band(plHi) + ')">' +
-            pct(plHi) + '</b></div>' +
-          '<div><em>Lowest</em><b style="color:var(--' + band(plLo) + ')">' +
-            pct(plLo) + '</b></div></div></div>' +
       '<div class="card tight"><div class="score-h"><h4>Execution performance</h4>' +
         '<span class="pill ' + band(r) + '">' + bandWord(r) + '</span></div>' +
         '<div class="headline"><span class="big" style="color:var(--' + band(r) + ')">' + pctBig(r) + '</span>' +

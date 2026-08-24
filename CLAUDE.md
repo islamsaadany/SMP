@@ -222,6 +222,18 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A unit's Performance has THREE headline numbers (§64):** objectives ·
+  **pillars** · execution, read left to right as *what we are judged on · how
+  the work we set ourselves is going · whether the work happened*. Nothing new
+  is computed — `unitPillars()` has existed since the scoring model did and was
+  already on screen as a bare number in the rail's footer. **It reverses half
+  of `TIP_PERF`'s rule**: the objectives figure is still NOT a roll-up of the
+  pillars' measures (that is why the two sit side by side and may disagree),
+  but "those never aggregate" is no longer true. A pillar handed to a function
+  says *"from X"* rather than `0` measures, and a unit with nothing scored
+  reads a **dash, never 0** — `qa.py` blanks every progress figure and asserts
+  it. The tip is a FUNCTION, not a constant, because it names the tenant's word
+  for a pillar and a constant is evaluated before hydration (§30.2, in prose).
 - **Performance opens; reporting is a MODE; arranging belongs to the plan
   (§63):** the Performance tab held two sibling sections, one of them called
   Performance — Islam: *"performance is a result of reporting, so having inside

@@ -8260,3 +8260,73 @@ here is the one about baselines: **a contrast total that moves after a change
 that touches no colour is a check to read, not a number to accept.** The row is
 emptied whenever it is hidden, and the sweep asks for visible buttons anyway,
 because a check that trusts the page it is checking is not a check.
+
+## 64 · A third number, and it reverses half a rule (v3.21)
+
+**64.1 The ask.** Islam: *"for the units performance please add to the 2 main
+numbers of the objectives and the execution a third number in the middle for the
+pillars collective performance based on the pillars measures."*
+
+**64.2 Nothing new is computed.** `unitPillars(u)` is `avg(u.items.map(pillarPerf))`
+and has existed since the scoring model did — it was already on screen, in the
+rail's footer, as a bare number beside a bare execution figure. What changed is
+where it is shown: **two numbers under a list is not the same claim as a
+headline**, and this one answers a question the page was not answering.
+
+**64.3 IT REVERSES HALF OF §5's RULE, and the half matters.** `TIP_PERF` said
+the objectives figure *"is NOT a roll-up of its pillars' key measures; those are
+shown per pillar inside the unit and **never aggregate**."*
+
+The first clause still stands and is the whole reason the two cards sit side by
+side: **the objectives figure is the unit's scorecard and nothing else feeds
+it.** What is reversed is *never aggregate* — the pillars now have a collective
+figure of their own, beside it rather than inside it. The two are meant to be
+**comparable and to be able to disagree**: the objectives are what the unit is
+judged on, the pillars are how it means to move them, and a gap between them is
+the interesting reading. Recorded here rather than quietly edited, because a
+reversal is a decision (A7).
+
+Read left to right the three are an argument: **what we are judged on · how the
+work we set ourselves is going · whether the work happened at all.**
+
+**64.4 The middle card is where a FUNCTION finally gets a score.** Merchandising
+has no key objectives — its foundation is Retail's (§59) — so its Performance
+page led with a dash and an execution figure and carried **no measure-based
+score anywhere**. It now reads 83%, which is what its three pillars average to
+and what Retail's R04 has been scoring from all along. The card was asked for on
+a unit; the function got the bigger share of it, because a function that plans
+in pillars is drawn by the unit's page.
+
+**64.5 Two things the average had to get right.** A pillar **handed to a
+function** has no measures of its own, so its row would read `0` measures beside
+a real figure and look like a fault — it says *"from Merchandising"* instead.
+And a unit with **nothing scored** reads a dash, never `0`: an average is the
+easiest place in the product to turn "unreported" into "achieved nothing", so
+`qa.py` blanks every progress figure and asserts the middle card goes to an
+em-dash.
+
+**64.6 The tip had to become a function.** Every other `TIP_` is a constant
+because it names nothing tenant-specific. This one names the tenant's word for a
+pillar, and a constant is evaluated when the file loads — before hydration on a
+deployed tenant, so it would say "Pillars" for a client who calls them
+Directions. `tipPillars()` is read at render time. Same shape as §30.2, in
+prose.
+
+Swept 1920 → 600: three across down to 900, two to 760, one below, no horizontal
+scroll at any width (§27.1).
+
+**64.7 It ADDS four to §16.15, and that is recorded rather than hidden.** The
+contrast sweep goes 40 → 44, all on `unit/perf` in light mode, all of them the
+new card's own big number and its per-cent sign — the identical elements the two
+cards beside it already fail on. No new kind of failure and no new selector: the
+third card fails exactly as its siblings do, because it is drawn exactly as they
+are.
+
+The remedy is known and is one line — §38.5's `-tx` twins, the tokens this design
+system already defines for a scoring colour used as TYPE rather than as a fill.
+It is **not** applied here, because changing the colour of the two existing
+headline numbers is a visible change to a page Islam reads daily and was not
+what he asked for (rule 1c), and fixing only the new one would make it the odd
+one out of three (§40: converting some of a family is worse than converting
+none). It is his call, and it is a small one: all three headlines together, or
+none.

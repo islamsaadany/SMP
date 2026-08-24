@@ -343,6 +343,57 @@ with sync_playwright() as p:
         print("performance/report/arrange (%s): one page, a Report mode, and %d "
               "sortables all bound" % (label, len(pr["bound"])))
 
+    # ── THREE HEADLINE NUMBERS, AND THE MIDDLE ONE IS COMPUTED (64) ───
+    # Islam asked for the pillars' collective figure between the objectives and
+    # execution. It is unitPillars(), which has existed since the scoring model
+    # did — so the assertion that matters is that the CARD shows what the model
+    # computes, not that a third card exists. A card showing a plausible number
+    # that came from somewhere else is the failure this catches.
+    #
+    # And the dash: a unit with nothing scored must read "—", never 0. That is
+    # the rule the whole scoring model rests on (5.7) and the one a new average
+    # is most likely to break.
+    for label, dest in [("unit", "mobile"), ("function", "fn:merchandising")]:
+        three = pg.evaluate("""(d) => {
+          const u = unitLike(d);
+          const el = document.createElement("div");
+          el.innerHTML = renderUnitPerformance(u);
+          const cards = [...el.querySelector(".scores").querySelectorAll(":scope > .card")]
+            .map(c => ({ h:c.querySelector("h4").textContent.trim(),
+                         big:c.querySelector(".big").textContent.trim() }));
+          /* Nothing scored anywhere: the middle number must be a dash. */
+          const keep = u.items.map(p => (p.measures || []).map(m => m.progress));
+          const by = u.items.map(p => p.by);
+          u.items.forEach(p => { delete p.by;
+            (p.measures || []).forEach(m => { m.progress = null; }); });
+          const bare = document.createElement("div");
+          bare.innerHTML = renderUnitPerformance(u);
+          const blank = [...bare.querySelector(".scores").querySelectorAll(":scope > .card")][1]
+            .querySelector(".big").textContent.trim();
+          u.items.forEach((p, i) => { if (by[i]) p.by = by[i];
+            (p.measures || []).forEach((m, j) => { m.progress = keep[i][j]; }); });
+          return { cards:cards, computed:unitPillars(u), blank:blank };
+        }""", dest)
+        if len(three["cards"]) != 3:
+            errs.append("SCORES (%s): %d headline cards, expected 3 (%r)"
+                        % (label, len(three["cards"]), three["cards"]))
+            continue
+        mid = three["cards"][1]
+        want = "\u2014" if three["computed"] is None else "%d%%" % three["computed"]
+        if mid["big"].replace("\u2014", "\u2014") != want:
+            errs.append("SCORES (%s): the middle card reads %r and unitPillars() "
+                        "computes %r" % (label, mid["big"], want))
+        if "performance" not in mid["h"].lower():
+            errs.append("SCORES (%s): the middle card is not a performance card (%r)"
+                        % (label, mid["h"]))
+        if three["blank"] != "\u2014":
+            errs.append("SCORES (%s): with nothing scored the middle card reads %r, "
+                        "not a dash \u2014 unreported is not nought"
+                        % (label, three["blank"]))
+        print("three numbers (%s): %s / %s / %s, middle agrees with unitPillars(), "
+              "dash when nothing is scored"
+              % (label, three["cards"][0]["big"], mid["big"], three["cards"][2]["big"]))
+
     # ── A UNIT AND A FUNCTION MUST MATCH (53.5) ───────────────────────
     # The rule Islam set on 2026-08-23: any change to how something works or
     # how it looks is tested on BOTH sides of the navigation switch, because a

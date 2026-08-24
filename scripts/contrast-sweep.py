@@ -80,6 +80,36 @@ with sync_playwright() as p:
                 pg.click("#units .navswitch"); pg.wait_for_timeout(200)
             return False
 
+        # A COMPANY'S PAGE, and the menu that reaches it (68). Both are new
+        # surfaces and neither is reachable by walking the row — the menu is a
+        # STATE and the page behind it opens only from inside it, which is
+        # §41.5's rule twice over: a page nothing navigates to is a page
+        # nothing measures. The menu is scanned while OPEN, because that is the
+        # only moment it exists.
+        try:
+            sm = pg.query_selector("#topsel > summary")
+            if sm:
+                sm.click(); pg.wait_for_timeout(300)
+                scan("group/company-menu")
+                ck = pg.eval_on_selector_all("#topsel [data-u]",
+                        "els=>els.map(e=>e.dataset.u).filter(k=>k.indexOf('co:')===0)")
+                if ck:
+                    pg.click('#topsel [data-u="%s"]' % ck[0]); pg.wait_for_timeout(500)
+                    scan("company/performance")
+                    pg.evaluate("()=>{var t=[...document.querySelectorAll('.minisw [data-gview]')]"
+                                ".find(b=>b.dataset.gview.indexOf('table')>-1); if(t)t.click()}")
+                    pg.wait_for_timeout(400); scan("company/performance-table")
+                    pg.evaluate("()=>{var t=[...document.querySelectorAll('.minisw [data-gview]')]"
+                                ".find(b=>b.dataset.gview.indexOf('cards')>-1); if(t)t.click()}")
+                    pg.wait_for_timeout(300)
+                sm2 = pg.query_selector("#topsel > summary")
+                if sm2:
+                    sm2.click(); pg.wait_for_timeout(200)
+                    g = pg.query_selector('#topsel [data-u="group"]')
+                    if g: g.click(); pg.wait_for_timeout(400)
+        except Exception as e:
+            print("   (company sweep skipped: %s)" % e)
+
         show("units")
         pg.wait_for_timeout(250)
         # The switch is a state, not a page, and carries a treatment of its own

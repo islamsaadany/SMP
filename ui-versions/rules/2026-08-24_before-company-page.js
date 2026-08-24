@@ -269,13 +269,6 @@
     if (r.role === "cceo") {
       var ck = at.replace(/^co:/, "");
       if (target === "group") return false;
-      /* THE COMPANY ITSELF IS A TARGET NOW (§68). A company has a Performance
-         page, so `co:<key>` reaches this — and without a case for it the
-         company's own CEO did not OWN their own company, which turned their
-         page into an "other company" and handed the answer to the seeOthers
-         flag. Their own is theirs; anybody else's still goes through
-         companyAllows(). */
-      if (String(target).indexOf("co:") === 0) return at === target;
       return unitsOfCompany(w, ck).indexOf(target) > -1;
     }
     return at === target;

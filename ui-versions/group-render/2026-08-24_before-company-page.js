@@ -129,12 +129,7 @@ function plus(id, label){
 /* A headline figure whose derivation opens in a modal. */
 function drillCard(title, val, opts){
   opts = opts || {};
-  /* A NUMBER THAT IS NOT A SCORE MUST NOT WEAR A SCORING COLOUR (§68). The
-     company page's "share of the group" is 43%, and band(43) is off-track red —
-     so the card said a perfectly ordinary share of a ten-unit group was
-     failing. The bands mean something, and spending them on a number that is
-     not being judged is how they stop meaning it. */
-  var b = opts.plain ? "stone" : band(val);
+  var b = band(val);
   var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
   var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
   var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
@@ -144,8 +139,7 @@ function drillCard(title, val, opts){
       '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
-    '<span class="pill ' + (opts.plain ? "kind" : b) + '">' +
-      (opts.pill || bandWord(val)) + '</span></div>' +
+    '<span class="pill ' + b + '">' + (opts.pill || bandWord(val)) + '</span></div>' +
     body + (opts.sub ? '<p class="sub">' + opts.sub + '</p>' : '') +
     '<p class="sub"><button class="linkbu" data-modal="' + id + '">How this is calculated &rarr;</button></p></div>';
 }
@@ -869,153 +863,6 @@ function renderWeighting(){
       '</div>') + editorBlock;
 }
 
-/* ONE UNIT CARD, DRAWN ON TWO PAGES (§68). The group's Business units section
-   and a company's are the same section over a different list — extracted here
-   rather than copied, because two cards that were meant to be identical and
-   are maintained apart is exactly how the group and a company come to disagree
-   about the same unit.
-
-   `data-oi` is the position in the list being drawn and the handle only
-   appears in arrange mode, which is reachable from the group's page alone — so
-   the company page gets the card and none of the reordering. */
-function unitCards(keys){
-  return keys.map(function(k){
-    var u = UNITS[k];
-    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
-      u.keyObjectives.map(function(m){
-        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
-          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
-          '</td><td class="num">' + m.progress + '%</td></tr>';
-      }).join("")) +
-      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
-      u.weight + '%</b> weight to the group.</p>' +
-      '<h4 class="mini">Pillars beneath</h4>' +
-      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
-                          : ["Pillar","Theme","Performance","Of plan"],
-        u.items.map(function(it, i){
-          return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
-            (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
-            '<td><span class="pill theme">' + it.theme + '</span></td>' +
-            '<td class="num">' + pillarPerf(it) + '%</td>' +
-            '<td class="num">' + pillarRatio(it) + '%</td></tr>';
-        }).join("")) +
-      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
-    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
-      u.items.map(function(it, i){
-        return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
-          '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
-      }).join("")) +
-      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
-      unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
-    return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
-      splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
-        u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
-        unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
-        arranging("group") ? handle("Reorder " + u.name) : '') + '</div>';
-  }).join("");
-}
-
-/* ── COMPANY · Performance (§68) ──────────────────────────────────────
-   Islam: "we will need to add a Companies performance page that includes the
-   overall performance of the company and the general view of the units
-   belonging to them, like the group's first 2 tabs in the performance."
-
-   So it is the group's first two sections over a smaller list, and it is the
-   GROUP's page that is generalised rather than a second one written beside it:
-   `unitCards()` and `unitsTable()` draw the cards on both, and weightedOver()
-   compiles both. A company page that drifted from the group's would be two
-   answers to one question.
-
-   TWO CARDS, NOT THREE. The group's first card is its own Key Objectives — the
-   scorecard it authored — and a company has none: §23 says a company carries
-   visibility rather than strategy, and §68 reverses only the "no score, no
-   page" half of that. What it has is a reading of the units it holds. Stating
-   that in the sub-line rather than leaving a gap where the group has a card:
-   an empty slot asserts something is missing when the model simply does not
-   work that way (§15.1). */
-function renderCompanyPerformance(coKey){
-  var ck = String(coKey).indexOf("co:") === 0 ? String(coKey).slice(3) : String(coKey);
-  var co = COMPANIES[ck];
-  if (!co) return '<div class="note">No such company.</div>';
-  syncWeights();
-  var keys = companyUnitKeys(ck);
-  if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
-    ' holds no business unit yet.</b> A unit belongs to a company on ' +
-    '<b>Setup \u2192 Business units</b>; until one does, there is nothing here to read.</div>';
-
-  var perf = companyObjectives(ck), ex = companyExec(ck),
-      pl = companyPlan(ck), r = companyRatio(ck);
-  var share = companyWeight(ck);
-
-  var perfDrill = miniTable(["Business unit", "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
-    keys.map(function(k){
-      var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
-      return '<tr><td><b>' + esc(u.name) + '</b></td>' +
-        '<td class="num">' + pct(unitObjectives(u)) + '</td>' +
-        '<td class="num">' + w + '%</td>' +
-        '<td class="num">' + (unitObjectives(u) == null ? "&mdash;"
-          : (Math.round(unitObjectives(u) * w) / 100).toFixed(1)) + '</td></tr>';
-    }).join("") +
-    '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td>' +
-    '<td class="num">100%</td><td class="num"><b>' + pct(perf) + '</b></td></tr>') +
-    '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', weighted by the weight it ' +
-    'already carries at group level and <b>re-normalised</b> so this company\u2019s units sum ' +
-    'to 100%. Nothing is weighted twice and nothing is set here \u2014 the weights are composed ' +
-    'on the group\u2019s <b>Weighting</b> tab.</p>';
-
-  var execDrill = miniTable(["Business unit", "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
-    keys.map(function(k){
-      var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
-      return '<tr><td><b>' + esc(u.name) + '</b></td>' +
-        '<td class="num">' + pct(unitRatio(u)) + '</td>' +
-        '<td class="num">' + w + '%</td>' +
-        '<td class="num">' + pct(unitExec(u)) + '</td>' +
-        '<td class="num">' + pct(unitPlan(u)) + '</td>' +
-        '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
-    }).join("") +
-    '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td>' +
-    '<td class="num"><b>' + pct(r) + '</b></td><td class="num">100%</td>' +
-    '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
-    '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
-    '<p class="sub">Tactic completion under every pillar in these units, weighted identically ' +
-    'to performance. The planned line is derived from each tactic\u2019s quarter span, never ' +
-    'entered.</p>';
-
-  var head = '<div class="scores">' +
-    drillCard("Business units &mdash; performance" + tip(TIP_PERF), perf, {
-      primary: true,
-      sub: "The " + plural(keys.length, "unit") + " in " + esc(co.name) +
-        ", each on its own " + L("keyobj","bu").toLowerCase() + ". " + esc(co.name) +
-        " has no scorecard of its own \u2014 what it has is a reading of what it holds.",
-      drill: perfDrill, modalTitle: esc(co.name) + " \u2014 performance",
-      modalSub: "Weighted across the units in this company"
-    }) +
-    drillCard("Business units &mdash; execution" + tip(TIP_EXEC), r, {
-      sub: r == null
-        ? "No tactic in these units has a plan against it yet, so there is nothing to deliver against."
-        : "Delivered <b>" + pct(ex) + "</b> against <b>" + pct(pl) +
-          "</b> planned &mdash; variance <b>" + varCell(ex, pl) + "</b>.",
-      drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
-      modalSub: "Weighted compile of tactic delivery, as a share of plan"
-    }) +
-    drillCard("Share of the group" + tip("What these units together are worth at group level, " +
-        "before this company's own figures are re-normalised. It is the one number that only " +
-        "means something here."), share, {
-      plain: true, pill: "of the group",
-      sub: plural(keys.length, "unit") + " of the group\u2019s " + activeKeys().length +
-        ", carrying <b>" + share + "%</b> of its weight between them.",
-      drill: perfDrill, modalTitle: esc(co.name) + " \u2014 weight",
-      modalSub: "Where this company's share of the group comes from"
-    }) +
-  '</div>';
-
-  return bands("") + head +
-    section("", "Business units", null,
-      GVIEW.units === "table" ? unitsTable(keys)
-        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
-      TIP_PERF, viewToggle("units"));
-}
-
 function renderGroupPerformance(){
   syncWeights();
   /* The one shared list — reordering business units mutates UNIT_KEYS, so a
@@ -1061,8 +908,40 @@ function renderGroupPerformance(){
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
     '<p class="sub">Tactic completion under every unit\'s pillars, weighted identically to performance. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
 
-  var units = unitCards(keys);
-
+  var units = keys.map(function(k){
+    var u = UNITS[k];
+    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
+      u.keyObjectives.map(function(m){
+        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
+          '</td><td class="num">' + m.progress + '%</td></tr>';
+      }).join("")) +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
+      u.weight + '%</b> weight to the group.</p>' +
+      '<h4 class="mini">Pillars beneath</h4>' +
+      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
+                          : ["Pillar","Theme","Performance","Of plan"],
+        u.items.map(function(it, i){
+          return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
+            (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
+            '<td><span class="pill theme">' + it.theme + '</span></td>' +
+            '<td class="num">' + pillarPerf(it) + '%</td>' +
+            '<td class="num">' + pillarRatio(it) + '%</td></tr>';
+        }).join("")) +
+      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
+    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
+      u.items.map(function(it, i){
+        return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
+          '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
+      unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
+    return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
+      splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
+        u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
+        unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
+        arranging("group") ? handle("Reorder " + u.name) : '') + '</div>';
+  }).join("");
 
   var themes = GROUP.themes.map(function(t, ti){
     var st = themeStats(t.ab);

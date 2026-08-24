@@ -178,17 +178,6 @@
                     render:renderFnProjects }];
         } }
     ],
-    /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
-       strategy of its own — no plan, no foundation, no objectives (§23) — so a
-       tab row of one would be a row saying nothing. What it has is a reading
-       of the units it holds, gated on the GROUP's Performance key at the
-       company's target: `companyAllows()` then answers correctly for all
-       three cases, because §23's two flags are already the thing that decides
-       whether a company CEO sees the group and the other companies. */
-    co: [
-      { k:"performance", ac:"g_perf", label:"Performance", primary:true,
-        render:renderCompanyPerformance }
-    ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
@@ -396,28 +385,7 @@
 
   function unitTabs(){
     var out = [];
-    /* ── THE GROUP BUTTON BECOMES A DROPDOWN (§68) ────────────────────
-       Islam, asked where a company should sit: "make the group button name
-       general and make it a drop down that opens group and company."
-
-       So the first button is WHERE YOU ARE at this level — "Group" on the
-       group, the company's name on a company — and pressing it offers the
-       others. That is one button where a row of them would otherwise grow by
-       one per company, and it puts the group and its companies where they
-       belong: the same kind of thing, one above the other.
-
-       WITH ONE DESTINATION IT IS A PLAIN BUTTON. A menu holding a single item
-       is a door behind a door (§32) — and it is the ordinary case, because a
-       tenant with no companies has only the group, and a company CEO whose
-       `seeGroup` flag is off has only their own company. */
-    var tops = [];
-    if (allowed(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
-    companiesReachable().forEach(function(ck){
-      if (allowed(SUBS.co, "co:" + ck).length)
-        tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
-    });
-    if (tops.length === 1) out.push({ k:tops[0].k, label:tops[0].label });
-    else if (tops.length > 1) out.push({ tops:tops });
+    if (allowed(SUBS.group, "group").length) out.push({ k:"group", label:"Group" });
     var us = myUnits(), cs = myFns(), fold = foldsNeeded();
 
     if (fold) {
@@ -622,10 +590,7 @@
   function entrySub(k){
     var d = allowed(defsFor(k));
     if (!d.length) return null;
-    /* A COMPANY OPENS ON PERFORMANCE, and there is nothing else to open.
-       §28's rule — a unit opens on what was AGREED, not on the score — is about
-       plans, and a company has none: its page IS the reading (§68). */
-    if (k !== "group" && k !== "manage" && k !== "setup" && !isCo(k)) {
+    if (k !== "group" && k !== "manage" && k !== "setup") {
       var fn = isFn(k);
       var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
       var strat = d.filter(function(x){ return x.k === tab; })[0];
@@ -639,16 +604,12 @@
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
-  function isCo(k){
-    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
-  }
   function defsFor(k){
     return k === "group" ? SUBS.group
          /* Both keys resolve to the SAME merged list (§47.7). "manage" survives
             only so a stored or in-flight `current` from before the merge lands
             somewhere real rather than on the unit branch. */
          : k === "manage" || k === "setup" ? setupDefs()
-         : isCo(k) ? SUBS.co
          : isFn(k) ? SUBS.fn
          : SUBS.unit;
   }
@@ -660,8 +621,7 @@
        `current` because it is not in the visible list would make expanding a
        fold navigate \u2014 which is exactly what a fold must not do. Only reset when
        the destination is genuinely unreachable for this viewer. */
-    var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }))
-      .concat(companiesReachable().map(function(ck){ return "co:" + ck; }));
+    var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }));
     if (allowed(SUBS.group, "group").length) everything.push("group");
     if (allowed(SUBS.setup, "group").length) everything.push("setup");
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
@@ -697,25 +657,6 @@
             return '<span class="nsw' + (f.open ? " on" : "") + '">' + f.label + '</span>';
           }).join("") + '</button>';
       }
-      if (t.tops) {
-        /* The label is where you ARE, not what the menu is called: a control
-           saying "Group" while you are looking at Distribution is a control
-           that has stopped telling you anything. A <details>, like every other
-           menu here, so the action fires before the menu closes without
-           unmounting the button the click is still inside (§47.2). */
-        var here = t.tops.filter(function(x){ return x.k === current; })[0];
-        return '<details class="dlmenu topsel" id="topsel">' +
-          '<summary role="tab" aria-selected="' + (!!here) + '">' +
-            esc(here ? here.label : t.tops[0].label) +
-            '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-          '<div class="menu" role="menu">' + t.tops.map(function(x){
-            return '<button role="menuitem" data-u="' + esc(x.k) + '"' +
-              (x.k === current ? ' aria-current="true"' : '') + '>' + esc(x.label) +
-              (x.k === "group" ? '' : '<span class="dlsub">' +
-                plural(companyUnitKeys(x.k.slice(3)).length, "business unit") + '</span>') +
-              '</button>';
-          }).join("") + '</div></details>';
-      }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
@@ -745,7 +686,7 @@
         paintUnits();
       });
     });
-    document.querySelectorAll("#units [data-u]").forEach(function(b){
+    document.querySelectorAll("#units button[data-u]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Edit is a decision about the thing being edited, not a lamp that
            stays on while you walk around. Leaving edit modes on across a unit
@@ -990,10 +931,6 @@
        inside the pages themselves. */
     var body = (current === "group" || current === "setup" || current === "manage")
       ? def.render()
-      /* A company is passed its key, the way a function is: there is no
-         UNITS[...] to hand it and inventing a unit-shaped object for something
-         that carries no plan would be a lie about what it is (§68). */
-      : isCo(current) ? def.render(current)
       : isFn(current) ? def.render(current) : def.render(UNITS[current]);
     /* The rail and the page it chose, side by side. `defs` rather than
        SUBS.setup, so a page the viewer may not open is not offered — the rail

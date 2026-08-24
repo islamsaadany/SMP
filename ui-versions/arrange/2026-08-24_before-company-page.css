@@ -411,33 +411,6 @@
      290px of popup past the content column — which `.wrap` clips rather than
      scrolls (§27), so it would have been silently cut off. */
   details.dlmenu.right > .menu { left:auto; right:0; }
-  /* The first thing in the navigation row (§68). Its summary wears the row's
-     own tab styling rather than the pill the other menus use, because it IS a
-     tab — it says where you are and it is lit when you are there. Sized and
-     coloured by the row's `#units button` rules, which reach a <summary> only
-     if it is told to look like one. */
-  /* The summary wears the row's own tab rules, restated here because
-     `.units button` cannot reach a <summary>. Same font, same padding, same
-     3px underline reserved transparent so lighting it cannot move the row
-     (§41's rule, and the reason the row does not jump when you switch). */
-  details.dlmenu.topsel { position:relative; display:flex; }
-  details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
-      align-items:center; gap:7px; cursor:pointer; white-space:nowrap;
-      font:inherit; font-size:var(--fs-small); font-weight:500; padding:0 13px;
-      border-bottom:3px solid transparent; color:var(--panel-quiet);
-      transition:color .15s, border-color .15s; }
-  details.dlmenu.topsel > summary::-webkit-details-marker { display:none; }
-  details.dlmenu.topsel > summary:hover { color:var(--panel-ink); }
-  details.dlmenu.topsel > summary[aria-selected="true"] { color:var(--panel-ink);
-      font-weight:700; border-bottom-color:var(--gold); }
-  details.dlmenu.topsel > summary:focus-visible { outline:2px solid var(--gold);
-      outline-offset:-4px; }
-  /* Open reads as open even when you are not on one of its destinations —
-     otherwise pressing it on a page it does not own looks like nothing
-     happened until the popup is noticed. */
-  details.dlmenu.topsel[open] > summary { color:var(--panel-ink); }
-  details.dlmenu.topsel > .menu { min-width:230px; top:calc(100% + 2px); }
-  details.dlmenu.topsel > .menu button[aria-current="true"] { font-weight:700; }
   details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);

@@ -222,6 +222,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A COMPANY GETS A PAGE (§68):** it **reverses half of §23** — a company still
+  carries no strategy of its own (no plan, no foundation, no objectives), and
+  now carries a **reading of the units it holds**. The compile is each unit's
+  figure weighted by the weight it already carries at group level,
+  **re-normalised** so the company's units sum to 100% — which is what dividing
+  by the total of those weights does, so `weightedOver(keys, of)` is ONE
+  function and the group's version is it called with `UNIT_KEYS`. The **group
+  button is a dropdown** (Islam: *"make the group button name general and make
+  it a drop down that opens group and company"*) whose label is where you ARE,
+  and a **plain button when there is one destination** (§32). One tab, because a
+  company has one thing to say; gated on the group's key at the `co:` target, so
+  §23's two flags already decide — but `roleOwns()` needed a `co:` case or **a
+  company's own CEO did not own their own company**. `unitCards()` is EXTRACTED
+  so the group and a company cannot disagree about the same unit. And **a number
+  that is not a score must not wear a scoring colour**: "share of the group" is
+  43%, `band(43)` is off-track red, and the card said an ordinary share was
+  failing — `drillCard`'s `plain` uses the quiet mark.
 - **Two demos: Filled project and Clear project (§67):** Clear Project is
   **what a client's deployment looks like on day one** — `clearedGraph()`
   mirrors `db/migrations/004-clean-slate.sql` statement for statement, so the

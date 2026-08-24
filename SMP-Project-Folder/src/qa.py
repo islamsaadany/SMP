@@ -4,12 +4,31 @@ url="file://"+str(pathlib.Path("strategy-management-platform.html").resolve())
 errs=[]
 
 def walk_destinations(pg):
-    n=len(pg.query_selector_all("#units button[data-u]"))
+    # VISIBLE ones, and the menu is OPENED to reach the rest (68). The group
+    # and the companies moved inside a <details> — they are still buttons
+    # carrying data-u, so the old selector matched them, found them hidden and
+    # timed out. Left as a filter alone it would have been worse than a crash:
+    # the sweep would have walked the row and quietly stopped visiting the
+    # group at all, which is 50.6's fault in the one place it costs most.
+    def vis():
+        return [e for e in pg.query_selector_all("#units button[data-u]") if e.is_visible()]
+    n = len(vis())
     for ui in range(n):
-        us=pg.query_selector_all("#units button[data-u]")
-        if ui>=len(us): break
+        us = vis()
+        if ui >= len(us): break
         us[ui].click(); pg.wait_for_timeout(120)
         walk_subtabs(pg)
+    # The group and each company, behind the top selector.
+    tops = pg.eval_on_selector_all("#topsel [data-u]", "els=>els.map(e=>e.dataset.u)")
+    for k in tops:
+        sm = pg.query_selector("#topsel > summary")
+        if not sm: break
+        sm.click(); pg.wait_for_timeout(120)
+        el = pg.query_selector('#topsel [data-u="%s"]' % k)
+        if not el or not el.is_visible(): continue
+        el.click(); pg.wait_for_timeout(150)
+        walk_subtabs(pg)
+        n += 1
     return n
 
 def show_units(pg):
@@ -17,7 +36,8 @@ def show_units(pg):
     left it on Functions strands every later block that names a unit — which
     is exactly how the 66 assertions came to sit in the file without ever
     running. Pressing the switch is cheap; assuming the side is not."""
-    if pg.query_selector('#units [data-u="mobile"]'): return
+    el = pg.query_selector('#units [data-u="mobile"]')
+    if el and el.is_visible(): return
     sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
     if sw: sw.click(); pg.wait_for_timeout(250)
 
@@ -787,6 +807,80 @@ with sync_playwright() as p:
         errs.append("KO YEAR: the toggle is on the group, whose objectives always show both")
     print("key objectives: the 1-year toggle is a unit's only, drops a column in "
           "the table and a line on the chip, and is remembered")
+
+    # ── A COMPANY HAS A PAGE (68) ─────────────────────────────────────
+    # Islam: "we will need to add a Companies performance page that includes
+    # the overall performance of the company and the general view of the units
+    # belonging to them." It REVERSES half of §23 — a company still carries no
+    # strategy, and now carries a reading of what it holds.
+    #
+    # The number is asserted against the MODEL rather than against a literal,
+    # so a deliberate change to the compile stays green and a card showing a
+    # plausible figure from somewhere else does not (§64's rule). And the
+    # narrowing is asserted from the one viewer it matters for: a company CEO
+    # whose seeOthers flag is off must see their own and not the other.
+    show_units(pg)
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    co = pg.evaluate("""() => {
+      const ck = COMPANY_KEYS[0];
+      const el = document.createElement("div");
+      el.innerHTML = renderCompanyPerformance("co:" + ck);
+      const big = [].slice.call(el.querySelectorAll(".scores .big"))
+        .map(function (x) { return x.textContent.trim(); });
+      /* A company holding nothing must say so, not render blank (§61's rule). */
+      const was = UNITS[companyUnitKeys(ck)[0]].company;
+      const emptied = document.createElement("div");
+      companyUnitKeys(ck).forEach(function (k) { delete UNITS[k].company; });
+      emptied.innerHTML = renderCompanyPerformance("co:" + ck);
+      unitsOfCompany(ck);
+      const empty = emptied.innerText.trim().length;
+      UNIT_KEYS.forEach(function (k) {
+        if (["mobile", "consumerelectronics", "it"].indexOf(k) > -1) UNITS[k].company = was;
+      });
+      return { ck: ck, big: big, cards: el.querySelectorAll(".scores > .card").length,
+               unitCards: el.querySelectorAll(".gauges .gwrap").length,
+               model: { perf: companyObjectives(ck), ratio: companyRatio(ck),
+                        weight: companyWeight(ck), units: companyUnitKeys(ck).length },
+               emptyChars: empty,
+               reach: companiesReachable() };
+    }""")
+    want = ["%d%%" % co["model"]["perf"], "%d%%" % co["model"]["ratio"],
+            "%d%%" % co["model"]["weight"]]
+    if co["big"] != want:
+        errs.append("COMPANY: the cards read %r and the model computes %r"
+                    % (co["big"], want))
+    if co["unitCards"] != co["model"]["units"]:
+        errs.append("COMPANY: %d unit cards for %d units in the company"
+                    % (co["unitCards"], co["model"]["units"]))
+    if co["emptyChars"] < 40:
+        errs.append("COMPANY: a company holding no unit renders %d characters — "
+                    "a blank page, not an empty state" % co["emptyChars"])
+    # The navigation: a menu when there is more than one destination at this
+    # level, a plain button when there is one (a menu of one is a door behind a
+    # door, §32).
+    nav = pg.evaluate("""() => ({
+      menu: !!document.getElementById("topsel"),
+      items: document.getElementById("topsel")
+        ? [].slice.call(document.querySelectorAll("#topsel [data-u]")).map(e => e.dataset.u)
+        : null })""")
+    if not nav["menu"] or "group" not in (nav["items"] or []):
+        errs.append("COMPANY: the SMO's first control is not a menu holding the group (%r)" % nav)
+    pg.select_option("#asWho", "co_dist"); pg.wait_for_timeout(350)
+    ccnav = pg.evaluate("""() => ({
+      items: document.getElementById("topsel")
+        ? [].slice.call(document.querySelectorAll("#topsel [data-u]")).map(e => e.dataset.u)
+        : [(document.querySelector('#units [data-u]') || {}).dataset
+            ? document.querySelector('#units [data-u]').dataset.u : null],
+      reach: companiesReachable() })""")
+    if "co:b2c" in (ccnav["items"] or []) or "b2c" in (ccnav["reach"] or []):
+        errs.append("COMPANY: Distribution's CEO can reach B2C, whose seeOthers is off (%r)"
+                    % ccnav)
+    if "co:distribution" not in (ccnav["items"] or []):
+        errs.append("COMPANY: Distribution's CEO cannot reach their own company (%r)" % ccnav)
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    print("company page: %s reads %s from %d units, and its CEO reaches their own "
+          "company and not the other"
+          % (co["ck"], co["big"], co["model"]["units"]))
 
     # ── CLEAR PROJECT IS THE DEMO WITH NOTHING FILLED IN (67) ─────────
     # Islam: "Filled Project & Clear Project … the new clear project is a

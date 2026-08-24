@@ -3500,29 +3500,15 @@ function activeKeys(){
   return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
 }
 
-/* ── COMPILING A SET OF UNITS (§68) ───────────────────────────────────
-   The four functions below hard-coded UNIT_KEYS, which was right while the
-   group was the only thing compiled from units. A company is the same maths
-   over a smaller list (Islam, asked and answered): each unit's figure weighted
-   by the weight it already carries, RE-NORMALISED so the company's own units
-   sum to 100% — which is what dividing by the total of those weights does, and
-   is why the group's version needs no change to become general.
-
-   Equal weight was the alternative and it contradicts the Weighting tab: a
-   unit counting for 4% of the group would count the same as one counting for
-   30%. A second weighting table per company was the other, and nobody has
-   asked for two sources of weight that can disagree. */
-function weightedOver(keys, of){
-  var acc = 0, tot = 0;
-  (keys || []).forEach(function(k){
-    var u = UNITS[k]; if (!u) return;
-    var v = of(u);
+function groupUnitsObjectives(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){
+    var v = unitObjectives(UNITS[k]);
     if (v == null) return;
-    acc += v * u.weight; tot += u.weight;
+    acc += v * UNITS[k].weight; tot += UNITS[k].weight;
   });
-  return tot ? Math.round(acc / tot) : null;
+  return tot ? Math.round(acc/tot) : null;
 }
-function groupUnitsObjectives(){ return weightedOver(UNIT_KEYS, unitObjectives); }
 /* NULL IS NEVER ZERO (§5.7), and it is never NaN either.
 
    A tenant with no tactics loaded has nothing delivered and nothing planned,
@@ -3537,36 +3523,17 @@ function groupUnitsObjectives(){ return weightedOver(UNIT_KEYS, unitObjectives);
    drillCard renders null as "Not yet measurable", which is what the two cards
    beside it were doing correctly all along. splitCard had the same guard for
    the same reason; this is that guard, one level up. */
-function groupExec(){ return weightedOver(UNIT_KEYS, unitExec); }
-function groupPlan(){ return weightedOver(UNIT_KEYS, unitPlan); }
-function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
-function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
-
-/* A COMPANY'S OWN READING (§68). Islam: "we will need to add a Companies
-   performance page that includes the overall performance of the company and
-   the general view of the units belonging to them."
-
-   THIS REVERSES §23's "no score, no page", and only that half of it: a company
-   still carries no strategy of its own — no plan, no objectives, no foundation.
-   What it has is a reading of the units it holds, which is a different claim
-   and the one he asked for. Its ACTIVE units only, the same as everywhere
-   else: a retired unit keeps its record and stops appearing. */
-function companyUnitKeys(ck){
-  return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
+function groupExec(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return tot ? Math.round(acc/tot) : null;
 }
-function companyObjectives(ck){ return weightedOver(companyUnitKeys(ck), unitObjectives); }
-function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
-function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
-function companyRatio(ck){ return ratioOf(companyExec(ck), companyPlan(ck)); }
-/* What share of the GROUP this company is, which is the one number that only
-   makes sense at this level — the re-normalised figures above deliberately
-   forget it. */
-function companyWeight(ck){
-  return companyUnitKeys(ck).reduce(function(n, k){ return n + (UNITS[k].weight || 0); }, 0);
+function groupPlan(){
+  var acc=0, tot=0;
+  UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
+  return tot ? Math.round(acc/tot) : null;
 }
-/* The companies somebody may open, in the order they are declared. */
-function companiesReachable(){
-  return activeCompanyKeys().filter(function(ck){
-    return grantAt("g_perf", "co:" + ck) !== "none" && companyUnitKeys(ck).length;
-  });
+function groupRatio(){
+  var e = groupExec(), p = groupPlan();
+  return (e == null || !p) ? null : Math.round(e/p*100);
 }

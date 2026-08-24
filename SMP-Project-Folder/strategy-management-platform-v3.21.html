@@ -2339,6 +2339,33 @@
      290px of popup past the content column — which `.wrap` clips rather than
      scrolls (§27), so it would have been silently cut off. */
   details.dlmenu.right > .menu { left:auto; right:0; }
+  /* The first thing in the navigation row (§68). Its summary wears the row's
+     own tab styling rather than the pill the other menus use, because it IS a
+     tab — it says where you are and it is lit when you are there. Sized and
+     coloured by the row's `#units button` rules, which reach a <summary> only
+     if it is told to look like one. */
+  /* The summary wears the row's own tab rules, restated here because
+     `.units button` cannot reach a <summary>. Same font, same padding, same
+     3px underline reserved transparent so lighting it cannot move the row
+     (§41's rule, and the reason the row does not jump when you switch). */
+  details.dlmenu.topsel { position:relative; display:flex; }
+  details.dlmenu.topsel > summary { list-style:none; display:inline-flex;
+      align-items:center; gap:7px; cursor:pointer; white-space:nowrap;
+      font:inherit; font-size:var(--fs-small); font-weight:500; padding:0 13px;
+      border-bottom:3px solid transparent; color:var(--panel-quiet);
+      transition:color .15s, border-color .15s; }
+  details.dlmenu.topsel > summary::-webkit-details-marker { display:none; }
+  details.dlmenu.topsel > summary:hover { color:var(--panel-ink); }
+  details.dlmenu.topsel > summary[aria-selected="true"] { color:var(--panel-ink);
+      font-weight:700; border-bottom-color:var(--gold); }
+  details.dlmenu.topsel > summary:focus-visible { outline:2px solid var(--gold);
+      outline-offset:-4px; }
+  /* Open reads as open even when you are not on one of its destinations —
+     otherwise pressing it on a page it does not own looks like nothing
+     happened until the popup is noticed. */
+  details.dlmenu.topsel[open] > summary { color:var(--panel-ink); }
+  details.dlmenu.topsel > .menu { min-width:230px; top:calc(100% + 2px); }
+  details.dlmenu.topsel > .menu button[aria-current="true"] { font-weight:700; }
   details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);
@@ -3921,6 +3948,13 @@ THEME.apply();
     if (r.role === "cceo") {
       var ck = at.replace(/^co:/, "");
       if (target === "group") return false;
+      /* THE COMPANY ITSELF IS A TARGET NOW (§68). A company has a Performance
+         page, so `co:<key>` reaches this — and without a case for it the
+         company's own CEO did not OWN their own company, which turned their
+         page into an "other company" and handed the answer to the seeOthers
+         flag. Their own is theirs; anybody else's still goes through
+         companyAllows(). */
+      if (String(target).indexOf("co:") === 0) return at === target;
       return unitsOfCompany(w, ck).indexOf(target) > -1;
     }
     return at === target;
@@ -8951,15 +8985,29 @@ function activeKeys(){
   return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
 }
 
-function groupUnitsObjectives(){
-  var acc=0, tot=0;
-  UNIT_KEYS.forEach(function(k){
-    var v = unitObjectives(UNITS[k]);
+/* ── COMPILING A SET OF UNITS (§68) ───────────────────────────────────
+   The four functions below hard-coded UNIT_KEYS, which was right while the
+   group was the only thing compiled from units. A company is the same maths
+   over a smaller list (Islam, asked and answered): each unit's figure weighted
+   by the weight it already carries, RE-NORMALISED so the company's own units
+   sum to 100% — which is what dividing by the total of those weights does, and
+   is why the group's version needs no change to become general.
+
+   Equal weight was the alternative and it contradicts the Weighting tab: a
+   unit counting for 4% of the group would count the same as one counting for
+   30%. A second weighting table per company was the other, and nobody has
+   asked for two sources of weight that can disagree. */
+function weightedOver(keys, of){
+  var acc = 0, tot = 0;
+  (keys || []).forEach(function(k){
+    var u = UNITS[k]; if (!u) return;
+    var v = of(u);
     if (v == null) return;
-    acc += v * UNITS[k].weight; tot += UNITS[k].weight;
+    acc += v * u.weight; tot += u.weight;
   });
-  return tot ? Math.round(acc/tot) : null;
+  return tot ? Math.round(acc / tot) : null;
 }
+function groupUnitsObjectives(){ return weightedOver(UNIT_KEYS, unitObjectives); }
 /* NULL IS NEVER ZERO (§5.7), and it is never NaN either.
 
    A tenant with no tactics loaded has nothing delivered and nothing planned,
@@ -8974,19 +9022,38 @@ function groupUnitsObjectives(){
    drillCard renders null as "Not yet measurable", which is what the two cards
    beside it were doing correctly all along. splitCard had the same guard for
    the same reason; this is that guard, one level up. */
-function groupExec(){
-  var acc=0, tot=0;
-  UNIT_KEYS.forEach(function(k){ acc += unitExec(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
-  return tot ? Math.round(acc/tot) : null;
+function groupExec(){ return weightedOver(UNIT_KEYS, unitExec); }
+function groupPlan(){ return weightedOver(UNIT_KEYS, unitPlan); }
+function ratioOf(e, p){ return (e == null || !p) ? null : Math.round(e / p * 100); }
+function groupRatio(){ return ratioOf(groupExec(), groupPlan()); }
+
+/* A COMPANY'S OWN READING (§68). Islam: "we will need to add a Companies
+   performance page that includes the overall performance of the company and
+   the general view of the units belonging to them."
+
+   THIS REVERSES §23's "no score, no page", and only that half of it: a company
+   still carries no strategy of its own — no plan, no objectives, no foundation.
+   What it has is a reading of the units it holds, which is a different claim
+   and the one he asked for. Its ACTIVE units only, the same as everywhere
+   else: a retired unit keeps its record and stops appearing. */
+function companyUnitKeys(ck){
+  return unitsOfCompany(ck).filter(function(k){ return UNITS[k].active !== false; });
 }
-function groupPlan(){
-  var acc=0, tot=0;
-  UNIT_KEYS.forEach(function(k){ acc += unitPlan(UNITS[k]) * UNITS[k].weight; tot += UNITS[k].weight; });
-  return tot ? Math.round(acc/tot) : null;
+function companyObjectives(ck){ return weightedOver(companyUnitKeys(ck), unitObjectives); }
+function companyExec(ck){ return weightedOver(companyUnitKeys(ck), unitExec); }
+function companyPlan(ck){ return weightedOver(companyUnitKeys(ck), unitPlan); }
+function companyRatio(ck){ return ratioOf(companyExec(ck), companyPlan(ck)); }
+/* What share of the GROUP this company is, which is the one number that only
+   makes sense at this level — the re-normalised figures above deliberately
+   forget it. */
+function companyWeight(ck){
+  return companyUnitKeys(ck).reduce(function(n, k){ return n + (UNITS[k].weight || 0); }, 0);
 }
-function groupRatio(){
-  var e = groupExec(), p = groupPlan();
-  return (e == null || !p) ? null : Math.round(e/p*100);
+/* The companies somebody may open, in the order they are declared. */
+function companiesReachable(){
+  return activeCompanyKeys().filter(function(ck){
+    return grantAt("g_perf", "co:" + ck) !== "none" && companyUnitKeys(ck).length;
+  });
 }
 
 </script>
@@ -12187,7 +12254,12 @@ function plus(id, label){
 /* A headline figure whose derivation opens in a modal. */
 function drillCard(title, val, opts){
   opts = opts || {};
-  var b = band(val);
+  /* A NUMBER THAT IS NOT A SCORE MUST NOT WEAR A SCORING COLOUR (§68). The
+     company page's "share of the group" is 43%, and band(43) is off-track red —
+     so the card said a perfectly ordinary share of a ten-unit group was
+     failing. The bands mean something, and spending them on a number that is
+     not being judged is how they stop meaning it. */
+  var b = opts.plain ? "stone" : band(val);
   var id = modalFor(opts.modalTitle || title.replace(/<[^>]*>/g, ""), opts.modalSub, opts.drill);
   var vs = opts.planned != null ? ' <span class="vs">vs ' + opts.planned + '% planned</span>' : '';
   var mark = opts.planned != null ? '<div class="marker" style="left:' + opts.planned + '%"></div>' : '';
@@ -12197,7 +12269,8 @@ function drillCard(title, val, opts){
       '<div class="track"><div class="fill" style="width:' + val + '%;background:var(--' + b + ')"></div>' + mark + '</div>';
   return '<div class="card' + (opts.primary ? ' primary-card' : '') + '">' +
     '<div class="score-h"><h3>' + title + (opts.primary ? ' <span class="rank">primary</span>' : '') + '</h3>' +
-    '<span class="pill ' + b + '">' + (opts.pill || bandWord(val)) + '</span></div>' +
+    '<span class="pill ' + (opts.plain ? "kind" : b) + '">' +
+      (opts.pill || bandWord(val)) + '</span></div>' +
     body + (opts.sub ? '<p class="sub">' + opts.sub + '</p>' : '') +
     '<p class="sub"><button class="linkbu" data-modal="' + id + '">How this is calculated &rarr;</button></p></div>';
 }
@@ -12921,6 +12994,153 @@ function renderWeighting(){
       '</div>') + editorBlock;
 }
 
+/* ONE UNIT CARD, DRAWN ON TWO PAGES (§68). The group's Business units section
+   and a company's are the same section over a different list — extracted here
+   rather than copied, because two cards that were meant to be identical and
+   are maintained apart is exactly how the group and a company come to disagree
+   about the same unit.
+
+   `data-oi` is the position in the list being drawn and the handle only
+   appears in arrange mode, which is reachable from the group's page alone — so
+   the company page gets the card and none of the reordering. */
+function unitCards(keys){
+  return keys.map(function(k){
+    var u = UNITS[k];
+    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
+      u.keyObjectives.map(function(m){
+        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
+          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
+          '</td><td class="num">' + m.progress + '%</td></tr>';
+      }).join("")) +
+      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
+      u.weight + '%</b> weight to the group.</p>' +
+      '<h4 class="mini">Pillars beneath</h4>' +
+      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
+                          : ["Pillar","Theme","Performance","Of plan"],
+        u.items.map(function(it, i){
+          return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
+            (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
+            '<td><span class="pill theme">' + it.theme + '</span></td>' +
+            '<td class="num">' + pillarPerf(it) + '%</td>' +
+            '<td class="num">' + pillarRatio(it) + '%</td></tr>';
+        }).join("")) +
+      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
+    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
+      u.items.map(function(it, i){
+        return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
+          '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
+      }).join("")) +
+      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
+      unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
+    return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
+      splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
+        u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
+        unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
+        arranging("group") ? handle("Reorder " + u.name) : '') + '</div>';
+  }).join("");
+}
+
+/* ── COMPANY · Performance (§68) ──────────────────────────────────────
+   Islam: "we will need to add a Companies performance page that includes the
+   overall performance of the company and the general view of the units
+   belonging to them, like the group's first 2 tabs in the performance."
+
+   So it is the group's first two sections over a smaller list, and it is the
+   GROUP's page that is generalised rather than a second one written beside it:
+   `unitCards()` and `unitsTable()` draw the cards on both, and weightedOver()
+   compiles both. A company page that drifted from the group's would be two
+   answers to one question.
+
+   TWO CARDS, NOT THREE. The group's first card is its own Key Objectives — the
+   scorecard it authored — and a company has none: §23 says a company carries
+   visibility rather than strategy, and §68 reverses only the "no score, no
+   page" half of that. What it has is a reading of the units it holds. Stating
+   that in the sub-line rather than leaving a gap where the group has a card:
+   an empty slot asserts something is missing when the model simply does not
+   work that way (§15.1). */
+function renderCompanyPerformance(coKey){
+  var ck = String(coKey).indexOf("co:") === 0 ? String(coKey).slice(3) : String(coKey);
+  var co = COMPANIES[ck];
+  if (!co) return '<div class="note">No such company.</div>';
+  syncWeights();
+  var keys = companyUnitKeys(ck);
+  if (!keys.length) return '<div class="note"><b>' + esc(co.name) +
+    ' holds no business unit yet.</b> A unit belongs to a company on ' +
+    '<b>Setup \u2192 Business units</b>; until one does, there is nothing here to read.</div>';
+
+  var perf = companyObjectives(ck), ex = companyExec(ck),
+      pl = companyPlan(ck), r = companyRatio(ck);
+  var share = companyWeight(ck);
+
+  var perfDrill = miniTable(["Business unit", "Objectives performance", "Weight in " + esc(co.name), "Weighted contribution"],
+    keys.map(function(k){
+      var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
+      return '<tr><td><b>' + esc(u.name) + '</b></td>' +
+        '<td class="num">' + pct(unitObjectives(u)) + '</td>' +
+        '<td class="num">' + w + '%</td>' +
+        '<td class="num">' + (unitObjectives(u) == null ? "&mdash;"
+          : (Math.round(unitObjectives(u) * w) / 100).toFixed(1)) + '</td></tr>';
+    }).join("") +
+    '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td><td></td>' +
+    '<td class="num">100%</td><td class="num"><b>' + pct(perf) + '</b></td></tr>') +
+    '<p class="sub">Each unit\u2019s own ' + L("keyobj","bu") + ', weighted by the weight it ' +
+    'already carries at group level and <b>re-normalised</b> so this company\u2019s units sum ' +
+    'to 100%. Nothing is weighted twice and nothing is set here \u2014 the weights are composed ' +
+    'on the group\u2019s <b>Weighting</b> tab.</p>';
+
+  var execDrill = miniTable(["Business unit", "Of plan", "Weight in " + esc(co.name), "Delivered", "Planned", "Var."],
+    keys.map(function(k){
+      var u = UNITS[k], w = share ? Math.round(u.weight / share * 1000) / 10 : 0;
+      return '<tr><td><b>' + esc(u.name) + '</b></td>' +
+        '<td class="num">' + pct(unitRatio(u)) + '</td>' +
+        '<td class="num">' + w + '%</td>' +
+        '<td class="num">' + pct(unitExec(u)) + '</td>' +
+        '<td class="num">' + pct(unitPlan(u)) + '</td>' +
+        '<td class="num">' + varCell(unitExec(u), unitPlan(u)) + '</td></tr>';
+    }).join("") +
+    '<tr style="background:var(--surface-2)"><td><b>' + esc(co.name) + '</b></td>' +
+    '<td class="num"><b>' + pct(r) + '</b></td><td class="num">100%</td>' +
+    '<td class="num"><b>' + pct(ex) + '</b></td><td class="num"><b>' + pct(pl) + '</b></td>' +
+    '<td class="num"><b>' + varCell(ex, pl) + '</b></td></tr>') +
+    '<p class="sub">Tactic completion under every pillar in these units, weighted identically ' +
+    'to performance. The planned line is derived from each tactic\u2019s quarter span, never ' +
+    'entered.</p>';
+
+  var head = '<div class="scores">' +
+    drillCard("Business units &mdash; performance" + tip(TIP_PERF), perf, {
+      primary: true,
+      sub: "The " + plural(keys.length, "unit") + " in " + esc(co.name) +
+        ", each on its own " + L("keyobj","bu").toLowerCase() + ". " + esc(co.name) +
+        " has no scorecard of its own \u2014 what it has is a reading of what it holds.",
+      drill: perfDrill, modalTitle: esc(co.name) + " \u2014 performance",
+      modalSub: "Weighted across the units in this company"
+    }) +
+    drillCard("Business units &mdash; execution" + tip(TIP_EXEC), r, {
+      sub: r == null
+        ? "No tactic in these units has a plan against it yet, so there is nothing to deliver against."
+        : "Delivered <b>" + pct(ex) + "</b> against <b>" + pct(pl) +
+          "</b> planned &mdash; variance <b>" + varCell(ex, pl) + "</b>.",
+      drill: execDrill, modalTitle: esc(co.name) + " \u2014 execution",
+      modalSub: "Weighted compile of tactic delivery, as a share of plan"
+    }) +
+    drillCard("Share of the group" + tip("What these units together are worth at group level, " +
+        "before this company's own figures are re-normalised. It is the one number that only " +
+        "means something here."), share, {
+      plain: true, pill: "of the group",
+      sub: plural(keys.length, "unit") + " of the group\u2019s " + activeKeys().length +
+        ", carrying <b>" + share + "%</b> of its weight between them.",
+      drill: perfDrill, modalTitle: esc(co.name) + " \u2014 weight",
+      modalSub: "Where this company's share of the group comes from"
+    }) +
+  '</div>';
+
+  return bands("") + head +
+    section("", "Business units", null,
+      GVIEW.units === "table" ? unitsTable(keys)
+        : '<div class="gauges g3">' + unitCards(keys) + '</div>',
+      TIP_PERF, viewToggle("units"));
+}
+
 function renderGroupPerformance(){
   syncWeights();
   /* The one shared list — reordering business units mutates UNIT_KEYS, so a
@@ -12966,40 +13186,8 @@ function renderGroupPerformance(){
     '<td class="num"><b>' + varCell(groupExec(), groupPlan()) + '</b></td></tr>') +
     '<p class="sub">Tactic completion under every unit\'s pillars, weighted identically to performance. The planned line is derived from each tactic\'s quarter span, never entered.</p>';
 
-  var units = keys.map(function(k){
-    var u = UNITS[k];
-    var pd = miniTable(["Key objective","Direction","Target","H1 actual","Progress"],
-      u.keyObjectives.map(function(m){
-        return '<tr><td>' + esc(m.name) + '</td><td class="num">' + esc(m.dir) + '</td>' +
-          '<td class="num">' + esc(m.target) + '</td><td class="num">' + esc(m.actual) +
-          '</td><td class="num">' + m.progress + '%</td></tr>';
-      }).join("")) +
-      '<p class="sub">Headline: <b>' + unitObjectives(u) + '%</b> &mdash; ' + (KO_WEIGHTS[u.ukey] ? 'weighted' : 'equal weight') + ' across its Key Objectives. Contributes at <b>' +
-      u.weight + '%</b> weight to the group.</p>' +
-      '<h4 class="mini">Pillars beneath</h4>' +
-      miniTable(SHOW_KIND ? ["Pillar","Kind","Theme","Performance","Of plan"]
-                          : ["Pillar","Theme","Performance","Of plan"],
-        u.items.map(function(it, i){
-          return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td>' +
-            (SHOW_KIND ? '<td>' + kindPill(it) + '</td>' : '') +
-            '<td><span class="pill theme">' + it.theme + '</span></td>' +
-            '<td class="num">' + pillarPerf(it) + '%</td>' +
-            '<td class="num">' + pillarRatio(it) + '%</td></tr>';
-        }).join("")) +
-      '<p class="sub">The pillars explain the number rather than produce it &mdash; the headline above is the Key Objectives.</p>';
-    var ed = miniTable(["Pillar","Delivered","Planned","Variance"],
-      u.items.map(function(it, i){
-        return '<tr><td>' + pillarCode(u, i) + " " + esc(it.name) + '</td><td class="num">' + pillarExec(it) +
-          '%</td><td class="num">' + pillarPlan(it) + '%</td><td class="num">' + varCell(pillarExec(it), pillarPlan(it)) + '</td></tr>';
-      }).join("")) +
-      '<p class="sub">Mean across the unit\'s pillars: <b>' + unitExec(u) + '%</b> against <b>' +
-      unitPlan(u) + '%</b> planned &mdash; <b>' + unitRatio(u) + '%</b> of plan.</p>';
-    return '<div class="gwrap" data-oi="' + keys.indexOf(k) + '">' +
-      splitCard('<button class="linkbu" data-go="' + k + '">' + esc(u.name) + '</button>',
-        u.weight + "% weight &middot; " + u.items.length + " pillars" + (u.real ? "" : " &middot; illustrative"),
-        unitObjectives(u), unitExec(u), unitPlan(u), pd, ed, u.name,
-        arranging("group") ? handle("Reorder " + u.name) : '') + '</div>';
-  }).join("");
+  var units = unitCards(keys);
+
 
   var themes = GROUP.themes.map(function(t, ti){
     var st = themeStats(t.ab);
@@ -20124,6 +20312,17 @@ var SYNC = (function () {
                     render:renderFnProjects }];
         } }
     ],
+    /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
+       strategy of its own — no plan, no foundation, no objectives (§23) — so a
+       tab row of one would be a row saying nothing. What it has is a reading
+       of the units it holds, gated on the GROUP's Performance key at the
+       company's target: `companyAllows()` then answers correctly for all
+       three cases, because §23's two flags are already the thing that decides
+       whether a company CEO sees the group and the other companies. */
+    co: [
+      { k:"performance", ac:"g_perf", label:"Performance", primary:true,
+        render:renderCompanyPerformance }
+    ],
     group: [
       { k:"performance", ac:"g_perf",   label:"Performance", primary:true, render:renderGroupPerformance },
       { k:"foundation",  ac:"g_found",  label:"Foundation",                render:renderGroupFoundation },
@@ -20331,7 +20530,28 @@ var SYNC = (function () {
 
   function unitTabs(){
     var out = [];
-    if (allowed(SUBS.group, "group").length) out.push({ k:"group", label:"Group" });
+    /* ── THE GROUP BUTTON BECOMES A DROPDOWN (§68) ────────────────────
+       Islam, asked where a company should sit: "make the group button name
+       general and make it a drop down that opens group and company."
+
+       So the first button is WHERE YOU ARE at this level — "Group" on the
+       group, the company's name on a company — and pressing it offers the
+       others. That is one button where a row of them would otherwise grow by
+       one per company, and it puts the group and its companies where they
+       belong: the same kind of thing, one above the other.
+
+       WITH ONE DESTINATION IT IS A PLAIN BUTTON. A menu holding a single item
+       is a door behind a door (§32) — and it is the ordinary case, because a
+       tenant with no companies has only the group, and a company CEO whose
+       `seeGroup` flag is off has only their own company. */
+    var tops = [];
+    if (allowed(SUBS.group, "group").length) tops.push({ k:"group", label:"Group" });
+    companiesReachable().forEach(function(ck){
+      if (allowed(SUBS.co, "co:" + ck).length)
+        tops.push({ k:"co:" + ck, label:COMPANIES[ck].name });
+    });
+    if (tops.length === 1) out.push({ k:tops[0].k, label:tops[0].label });
+    else if (tops.length > 1) out.push({ tops:tops });
     var us = myUnits(), cs = myFns(), fold = foldsNeeded();
 
     if (fold) {
@@ -20536,7 +20756,10 @@ var SYNC = (function () {
   function entrySub(k){
     var d = allowed(defsFor(k));
     if (!d.length) return null;
-    if (k !== "group" && k !== "manage" && k !== "setup") {
+    /* A COMPANY OPENS ON PERFORMANCE, and there is nothing else to open.
+       §28's rule — a unit opens on what was AGREED, not on the score — is about
+       plans, and a company has none: its page IS the reading (§68). */
+    if (k !== "group" && k !== "manage" && k !== "setup" && !isCo(k)) {
       var fn = isFn(k);
       var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
       var strat = d.filter(function(x){ return x.k === tab; })[0];
@@ -20550,12 +20773,16 @@ var SYNC = (function () {
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
+  function isCo(k){
+    return typeof k === "string" && k.indexOf("co:") === 0 && !!COMPANIES[k.slice(3)];
+  }
   function defsFor(k){
     return k === "group" ? SUBS.group
          /* Both keys resolve to the SAME merged list (§47.7). "manage" survives
             only so a stored or in-flight `current` from before the merge lands
             somewhere real rather than on the unit branch. */
          : k === "manage" || k === "setup" ? setupDefs()
+         : isCo(k) ? SUBS.co
          : isFn(k) ? SUBS.fn
          : SUBS.unit;
   }
@@ -20567,7 +20794,8 @@ var SYNC = (function () {
        `current` because it is not in the visible list would make expanding a
        fold navigate \u2014 which is exactly what a fold must not do. Only reset when
        the destination is genuinely unreachable for this viewer. */
-    var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }));
+    var everything = myUnits().concat(myFns().map(function(k){ return "fn:" + k; }))
+      .concat(companiesReachable().map(function(ck){ return "co:" + ck; }));
     if (allowed(SUBS.group, "group").length) everything.push("group");
     if (allowed(SUBS.setup, "group").length) everything.push("setup");
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
@@ -20603,6 +20831,25 @@ var SYNC = (function () {
             return '<span class="nsw' + (f.open ? " on" : "") + '">' + f.label + '</span>';
           }).join("") + '</button>';
       }
+      if (t.tops) {
+        /* The label is where you ARE, not what the menu is called: a control
+           saying "Group" while you are looking at Distribution is a control
+           that has stopped telling you anything. A <details>, like every other
+           menu here, so the action fires before the menu closes without
+           unmounting the button the click is still inside (§47.2). */
+        var here = t.tops.filter(function(x){ return x.k === current; })[0];
+        return '<details class="dlmenu topsel" id="topsel">' +
+          '<summary role="tab" aria-selected="' + (!!here) + '">' +
+            esc(here ? here.label : t.tops[0].label) +
+            '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
+          '<div class="menu" role="menu">' + t.tops.map(function(x){
+            return '<button role="menuitem" data-u="' + esc(x.k) + '"' +
+              (x.k === current ? ' aria-current="true"' : '') + '>' + esc(x.label) +
+              (x.k === "group" ? '' : '<span class="dlsub">' +
+                plural(companyUnitKeys(x.k.slice(3)).length, "business unit") + '</span>') +
+              '</button>';
+          }).join("") + '</div></details>';
+      }
       return ((i === 1 && !tabs[1].folds) ? '<span class="sep"></span>' : '') +
         '<button role="tab" aria-selected="' + (t.k === current) + '" data-u="' + t.k + '"' +
         '>' + t.label + '</button>';
@@ -20632,7 +20879,7 @@ var SYNC = (function () {
         paintUnits();
       });
     });
-    document.querySelectorAll("#units button[data-u]").forEach(function(b){
+    document.querySelectorAll("#units [data-u]").forEach(function(b){
       b.addEventListener("click", function(){
         /* Edit is a decision about the thing being edited, not a lamp that
            stays on while you walk around. Leaving edit modes on across a unit
@@ -20877,6 +21124,10 @@ var SYNC = (function () {
        inside the pages themselves. */
     var body = (current === "group" || current === "setup" || current === "manage")
       ? def.render()
+      /* A company is passed its key, the way a function is: there is no
+         UNITS[...] to hand it and inventing a unit-shaped object for something
+         that carries no plan would be a lie about what it is (§68). */
+      : isCo(current) ? def.render(current)
       : isFn(current) ? def.render(current) : def.render(UNITS[current]);
     /* The rail and the page it chose, side by side. `defs` rather than
        SUBS.setup, so a page the viewer may not open is not offered — the rail

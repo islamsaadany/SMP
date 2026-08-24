@@ -8567,3 +8567,90 @@ attach the way a load does, and asserts all ten rows still know their unit.
 **Nothing in the product would have said a word.** It took a rename plus a
 round trip against a real database — and the rename was asked for as a naming
 tidy-up.
+
+## 68 · A company gets a page (v3.21)
+
+**68.1 The ask, and the half of §23 it reverses.** Islam: *"we will need to add
+a Companies performance page that includes the overall performance of the
+company and the general view of the units belonging to them, like the group's
+first 2 tabs in the performance."*
+
+§23 settled that a company is **visibility, not strategy: no score, no page.**
+Only the second clause moves. A company still carries **no strategy of its
+own** — no plan, no foundation, no key objectives, nothing authored. What it now
+has is a **reading of the units it holds**, which is a different claim: the
+group has always had one, and a company is the same kind of thing over a smaller
+list. Recorded as a reversal rather than edited away (A7).
+
+**68.2 The compile, put to Islam and answered.** Each unit's figure weighted by
+the weight it **already carries at group level**, re-normalised so the company's
+own units sum to 100%. Distribution's 43% share of the group is not spent twice:
+the re-normalisation is exactly what dividing by the total of those weights
+does, which is why the group's own function needed no change to become general —
+`weightedOver(keys, of)` is one function and `groupUnitsObjectives()` is it
+called with `UNIT_KEYS`.
+
+The alternatives were offered and rejected. **Equal weight** contradicts the
+Weighting tab: a unit counting for 4% of the group would count the same as one
+counting for 30%. **Per-company weights** is a second source of weight that can
+disagree with the first, and nobody has asked for it.
+
+**68.3 The group button becomes a dropdown.** Islam, asked where a company
+should sit: *"make the group button name general and make it a drop down that
+opens group and company."*
+
+So the first control in the navigation row **says where you are at this level** —
+"Group" on the group, the company's name on a company — and opens to offer the
+others. One button where a row of them would grow by one per company, and it
+puts the group and its companies where they belong: the same kind of thing, one
+above the other.
+
+**With one destination it is a plain button.** A menu holding a single item is a
+door behind a door (§32), and it is the ordinary case: a tenant with no
+companies has only the group, and a company CEO whose `seeGroup` flag is off has
+only their own.
+
+**68.4 One tab, and that is the point.** A tab row of one would be a row saying
+nothing — a company has exactly one page because it has exactly one thing to
+say. It is gated on the GROUP's Performance key at the company's target, which
+means §23's two flags are already the thing that decides: `companyAllows()`
+answers for the group, for your own company and for somebody else's without a
+new rule.
+
+**`roleOwns()` needed a case for it.** A `co:<key>` target reaches it now, and
+without one **a company's own CEO did not own their own company** — which turned
+their page into an "other company" and handed the answer to the `seeOthers`
+flag. Their own is theirs; anybody else's still goes through the flag.
+
+**68.5 The unit card is EXTRACTED, not copied.** `unitCards(keys)` draws the
+Business units section on both pages. Two cards meant to be identical and
+maintained apart is exactly how the group and a company come to disagree about
+the same unit — and the disagreement would be invisible, because nobody looks at
+the two pages side by side.
+
+**68.6 A number that is not a score must not wear a scoring colour.** The third
+card is the company's **share of the group** — the one figure that only means
+something at this level, since the re-normalised two deliberately forget it. It
+is 43%, and `band(43)` is off-track red, so the card said a perfectly ordinary
+share of a ten-unit group was failing. `drillCard`'s `plain` option uses the
+quiet mark instead. **The bands mean something, and spending them on a number
+nobody is judging is how they stop meaning it.**
+
+**68.7 The sweep stopped visiting the group, and crashed rather than lying.**
+`walk_destinations()` selects `#units button[data-u]`. The group and the
+companies moved inside a `<details>` — they are still buttons carrying `data-u`,
+so the selector matched them, found them hidden, and timed out.
+
+The crash is the lucky half. **Filtering to visible ones alone would have been
+worse than the crash**: the sweep would have walked the unit row and quietly
+stopped visiting the GROUP at all — the page every viewer opens first — and gone
+on reporting "ok". §50.6's fault in the one place it costs most. So it walks the
+visible row AND opens the selector to walk what is behind it, which is also how
+the company pages come to be swept for every viewer at all.
+
+**68.8 Recorded rather than narrowed: a unit head sees the companies.** The
+control offers a company to anybody whose group access reaches it — and a
+business unit head can already open the group's page, which shows every unit's
+card. So this is consistent and leaks nothing. It is more than they need, and
+narrowing it would be a rule nobody has asked for; said here so it is a choice
+rather than an oversight.

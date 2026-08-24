@@ -263,6 +263,40 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE OFFICE IS TWO ROLES (§89):** **SMO team** sits under Super user with the
+  SAME grants in every area — the difference could not be a cell, because
+  narrower areas would take away whole pages to withhold three acts. It is
+  **three rules** in `lib/rules.js` beside §37's: `mayEditAccess` (the matrix is
+  the Super user's — editing it is editing who may edit it), `mayDestroy`
+  (retire yes, delete/clear no; **merge is deliberately not destruction**), and
+  `mayIssuePasswordTo` (**the test is the TARGET**: the client's people yes, a
+  Super user or another team member never — first-issue and reset are the same
+  power, so splitting them protects nobody). **Nine places meant "the office"
+  and said `hasRole("super")`** — reporting past a locked cycle, correcting a
+  plan, marking focus, sending a message — and all nine are `inOffice()` now, or
+  the role would look complete on the matrix and be unable to run a cycle.
+  **THE REGISTER CARRIES THE SEAT, SO IT CARRIES THE MATRIX**: found by the
+  check, not by reading — `people[].role` is where `super` is stored, so an SMO
+  team member editing their own row promoted themselves without opening Roles &
+  access. `lib/authorize.js` classifies a seat move as `access` and a row
+  leaving as `destroy`, whichever screen they came from. Demo data is NOT
+  withheld: it writes nothing (§67), so it is a view, not a delete.
+- **A CONTROL BELOW THE FOLD IS A CONTROL THAT DOES NOTHING (§90):** *"when I
+  press merge with other row nothing happens"* — it rendered 1086px down the
+  page with the page at scroll 0. §70's fault by a different road, and both pass
+  every check that asks whether something is in the document. The merge is the
+  platform's own modal now (`openModalHtml`: inert page, focus returned, Escape)
+  in **three steps**, because who · which survives · confirm are answered at
+  different moments. `mergePaint()` rewrites the DIALOG's body, never `paint()`,
+  which would rebuild the register behind an inert overlay. **The register's
+  file is a header dropdown** beside Columns and Passwords — steps 1 and 2 were
+  permanent furniture for something done twice a year — while the REVIEW stays
+  on the page, because a dropdown is the right home for two buttons and the
+  wrong one for a decision. The upload is a real file input with its **label**
+  styled as the item: a picker cannot be opened from script without a gesture.
+  And the three notes under the table moved to the knowledge base, with the
+  check asserting **both ends** — gone from where they were, present where they
+  went, because a removal is the easiest thing to half-do.
 - **A SETUP TABLE ROW IS ONE LINE (§88):** Islam, on a register row 100px tall
   beside rows of 39px with an address broken mid-word: *"the table should NEVER
   wrap like that where the row gets bigger."* **It reverses §81.5 and §83.2** —

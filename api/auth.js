@@ -13,6 +13,13 @@ const pg = require("pg");
 const io = require("../lib/state-io.js");
 const { ensureReady } = io;
 const auth = require("../lib/auth.js");
+const Rules = require("../lib/rules.js");
+
+/* THE OFFICE, READ OFF THE STORED SEAT (§89). `people.role` holds the seat and
+   nothing else does, so this is one column either way — but it is asked
+   through the shared list rather than by typing the two strings here, because
+   a third office role would otherwise have to be remembered in this file. */
+function isOffice(row) { return Rules.isOfficeRole(String((row && row.role) || "")); }
 
 /* The six env-var spellings Neon and Vercel use between them live in ONE
    place now (lib/state-io.js): this was copied here and into the other
@@ -192,10 +199,17 @@ module.exports = async function handler(req, res) {
 
     if (action === "setPassword") {
       const person = await auth.getSession(client, req);
-      /* The server's own check, not the client's. The SEAT role is stored on
-         the person, so this stays a single column comparison — 'super' is what
-         'smo' was called before roles (§33). */
-      if (!person || person.role !== "super") {
+      /* ── THE SERVER'S OWN CHECK, AND IT IS ABOUT THE TARGET (§89) ──
+         Was `person.role !== "super"` — one column, which is all the question
+         needed while the office was one person. It is two roles now, and the
+         SMO team's limit is not WHAT they may do but WHOSE account they may do
+         it to: the client's people, never a Super user's and never another
+         team member's.
+
+         BOTH ROLES ARE READ OFF THE STORED ROW, never off anything the browser
+         sent — the screen hides the control on the office's rows, and this is
+         what makes hiding it more than decoration (§42). */
+      if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Issuing passwords is the SMO's." });
       }
       /* LOWERCASED, BECAUSE THE DOOR LOWERCASES (§69.11). This stored the key
@@ -207,8 +221,15 @@ module.exports = async function handler(req, res) {
          shape of the fault Islam reported, and a pair of comparisons that
          normalise differently will find each other eventually. */
       const key = String(body.person || "").trim().toLowerCase();
-      const exists = (await client.query("SELECT 1 FROM people WHERE key = $1", [key])).rowCount;
-      if (!exists) return send(res, 400, { ok: false, error: "No person with key " + key + "." });
+      const target = (await client.query("SELECT key, role FROM people WHERE key = $1", [key])).rows[0];
+      if (!target) return send(res, 400, { ok: false, error: "No person with key " + key + "." });
+      /* NAMED, NOT VAGUE. A refusal that says only "not allowed" leaves
+         somebody pressing it again; this says which rule stopped them and
+         who can do it (§16.7). */
+      if (person.role !== "super" && isOffice(target)) {
+        return send(res, 403, { ok: false, error:
+          "That is the strategy office's own account. A Super user resets those." });
+      }
       const why = auth.passwordPolicy(body.password);
       if (why) return send(res, 400, { ok: false, error: "The password needs " + why + "." });
       /* Admin-issued passwords are temporary: the person must choose their
@@ -399,7 +420,7 @@ module.exports = async function handler(req, res) {
 
     if (action === "passwordStates") {
       const person = await auth.getSession(client, req);
-      if (!person || person.role !== "super") {
+      if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Passwords are the SMO's." });
       }
       const rows = (await client.query(
@@ -425,7 +446,7 @@ module.exports = async function handler(req, res) {
        here; resetting one person is the per-row action, deliberately. */
     if (action === "issueTemporary") {
       const person = await auth.getSession(client, req);
-      if (!person || person.role !== "super") {
+      if (!person || !isOffice(person)) {
         return send(res, 403, { ok: false, error: "Issuing passwords is the SMO's." });
       }
       const why = auth.passwordPolicy(body.password);
@@ -448,12 +469,20 @@ module.exports = async function handler(req, res) {
          Retired people are excluded from both. §35 turns them away at the door
          with the correct password, so issuing them one is issuing a password
          that cannot be used. */
+      /* AND THE SET SHRINKS FOR THE SMO TEAM (§89). The screen already counts
+         only who they may reach, but the screen does not decide — this does.
+         A Super user reaches everybody; a team member reaches the client's
+         people, so the office's own rows are excluded in SQL rather than
+         trusted to have been left out of a list nobody sent. */
+      const officeOnly = person.role !== "super"
+        ? " AND COALESCE(p.role,'') NOT IN ('super','smoteam')" : "";
       const all = body.scope === "all";
       const done = await client.query(
         all
           ? "INSERT INTO credentials (person_key, password_hash, must_change) " +
             "SELECT p.key, $1, true FROM people p " +
             "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $2 " +
+            officeOnly +
             "ON CONFLICT (person_key) DO UPDATE " +
             "  SET password_hash = EXCLUDED.password_hash, must_change = true, " +
             "      updated_at = now() " +
@@ -461,6 +490,7 @@ module.exports = async function handler(req, res) {
           : "INSERT INTO credentials (person_key, password_hash, must_change) " +
             "SELECT p.key, $1, true FROM people p " +
             "WHERE COALESCE(p.extra->>'active','true') <> 'false' AND p.key <> $2 " +
+            officeOnly +
             "  AND NOT EXISTS (SELECT 1 FROM credentials c WHERE c.person_key = p.key) " +
             "RETURNING person_key",
         [hash, person.key]);

@@ -195,7 +195,7 @@ var PROLES = null;
    presses Open, or a half-filled form would already have closed the cycle it
    was going to succeed. */
 var NEWCYCLE = null;
-var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
+var PCOLMENU = false, PWMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
@@ -1092,15 +1092,11 @@ function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
   return UNIT_ROLES[k];
 }
-var SEAT_AT_GROUP = ["super", "smoteam", "gceo"];
 function grantPersonRole(personKey, roleKey, where){
   var p = personBy(personKey);
   if (!p) return;
   var at = where || "group";
-  /* THE SEAT ROLES HELD OVER THE GROUP, named once (§89). SMO team joins
-     Super user and Group CEO here: a seat is a property of the PERSON (§33),
-     and adding it to the list is the whole of what "grant it" means. */
-  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) {
+  if (roleKey === "super" || roleKey === "gceo") {
     p.role = roleKey; delete p.company; if (!p.unit) p.unit = "group";
   } else if (roleKey === "cceo") {
     p.role = "cceo"; p.company = at.indexOf("co:") === 0 ? at.slice(3) : at; p.unit = null;
@@ -1122,7 +1118,7 @@ function grantPersonRole(personKey, roleKey, where){
 function revokePersonRole(personKey, roleKey, where){
   var p = personBy(personKey);
   var at = where || "group";
-  if (SEAT_AT_GROUP.indexOf(roleKey) > -1 || roleKey === "cceo") {
+  if (roleKey === "super" || roleKey === "gceo" || roleKey === "cceo") {
     if (p) { delete p.role; delete p.company; }
   } else if (roleKey === "owner") {
     if (UNIT_ROLES[at] && UNIT_ROLES[at].head === personKey) UNIT_ROLES[at].head = null;
@@ -1468,7 +1464,7 @@ function mergePeople(keepKey, dropKey, picks){
    whose scope is the group has exactly one answer, and the control says so
    rather than offering a list of one. */
 function roleWheres(roleKey){
-  if (SEAT_AT_GROUP.indexOf(roleKey) > -1) return [{ v:"group", label:"the group" }];
+  if (roleKey === "super" || roleKey === "gceo") return [{ v:"group", label:"the group" }];
   if (roleKey === "cceo") {
     /* A retired company is not somewhere a new CEO can be seated (§49.3). An
        existing role pointing at one is left alone — restoring the company
@@ -2440,7 +2436,7 @@ function toggleFocus(id){
 }
 function canMarkFocus(){
   var v = viewer();
-  return !CYCLE.locked && (inOffice() || hasRole("gceo"));
+  return !CYCLE.locked && (hasRole("super") || hasRole("gceo"));
 }
 
 /* Standing is derived from the one rule. Three states at a rule of 100%, four
@@ -3129,7 +3125,7 @@ function deltaFor(key){
    correction still goes through one accountable hand rather than a unit
    quietly moving its own target while reporting against it. */
 function planEditable(){
-  return REVIEW.state !== "open" || inOffice();
+  return REVIEW.state !== "open" || hasRole("super");
 }
 
 /* Reporting reaches the unit's owner and its head; the owner is the primary
@@ -3144,7 +3140,7 @@ function canReport(unitKey){
   if (REVIEW.state !== "open") return false;
   /* A locked cycle takes no more figures, from anyone but the SMO — the
      server refuses them, so the screen must not offer them (spec 006 §7.1). */
-  if (CYCLE.locked && !inOffice()) return false;
+  if (CYCLE.locked && !hasRole("super")) return false;
   return grantAt("u_report", unitKey) === "edit";
 }
 
@@ -3175,7 +3171,7 @@ function canReportRow(unitKey, x){
 function canSpeakFor(target){
   var t = String(target || "");
   if (t.indexOf("fn:") === 0) {
-    return REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+    return REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
            grantAt("k_report", t) === "edit";
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
@@ -3252,13 +3248,13 @@ function figureAssignee(x){
 function canEnterFigure(unitKey, x){
   var who = figureAssignee(x);
   if (!who) return canReportRow(unitKey, x);
-  if (inOffice()) return canReport(unitKey);
+  if (hasRole("super")) return canReport(unitKey);
   return who === viewer().key && REVIEW.state === "open" && !CYCLE.locked;
 }
 /* The note stays with the unit whatever the figure does. */
 function canEnterNote(unitKey, x){
   var who = figureAssignee(x);
-  if (who && !inOffice() && who === viewer().key &&
+  if (who && !hasRole("super") && who === viewer().key &&
       grantAt("u_report", unitKey) !== "edit") return false;
   return canReportRow(unitKey, x);
 }
@@ -3492,34 +3488,7 @@ function reaches(unitKey){
    are measured against — that is the point of the rule, and it does not depend
    on a grant. */
 function mayEditPlan(){
-  return inOffice() && grant("u_plan") === "edit";
-}
-
-/* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
-   Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person
-   being viewed as. A second implementation here is the drift that file exists
-   to prevent, and this is the drift that would hand somebody the platform. */
-/* THE OFFICE IS TWO ROLES NOW, AND EVERY OPERATIONAL "is this the SMO" ASKS
-   FOR BOTH (§89). Nine places tested `hasRole("super")` to mean "the strategy
-   management office" — reporting past a locked cycle, correcting a plan,
-   marking a focus measure, sending a message. Every one of them is the job
-   the SMO team exists to do, so leaving them on `super` would have shipped a
-   role that looks complete on the matrix and cannot run a cycle. The three
-   below are the only places the two roles differ. */
-function inOffice(){ return SMPRules.isOffice(world(), viewer()); }
-function mayEditAccess(){ return SMPRules.mayEditAccess(world(), viewer()); }
-function mayDestroy(){ return SMPRules.mayDestroy(world(), viewer()); }
-function mayIssuePasswordTo(target){
-  return SMPRules.mayIssuePasswordTo(world(), viewer(),
-    typeof target === "string" ? personBy(target) : target);
-}
-/* Who a bulk password action would actually reach. The SCREEN counts them so
-   it can say a true number; the SERVER picks the set (§35), so a stale screen
-   can only ever issue to fewer people than it thinks. */
-function passwordReach(){
-  return PEOPLE.filter(function(p){
-    return personActive(p) && p.key !== viewer().key && mayIssuePasswordTo(p);
-  });
+  return hasRole("super") && grant("u_plan") === "edit";
 }
 
 /* What carries reward is the office's decision, not a page permission. The

@@ -775,5 +775,60 @@ console.log("\n11 · a row leaving the register");
   }, "a unit head may not delete themselves");
 })();
 
+/* ── 12 · The SMO team runs it and cannot change who runs it (§89) ──
+   The role holds `a_setup` at edit, which is what makes these three worth
+   asserting HERE rather than trusting to the matrix: every one of them is a
+   setup-shaped change that an ordinary setup grant would wave through, and
+   each is refused by a rule instead. The screen hides all three
+   (src/checks/smo-team.py); this is the half that decides. */
+console.log("\n12 · the SMO team, and the three it does not get");
+(function () {
+  const TEAM = "testcase_office";
+  /* Seated in the STORED world, because that is the world the authoriser
+     reads its roles from (§42's first rule) — a person the incoming state
+     invents authorises nothing. */
+  const base = clone(SEED);
+  base.people = base.people.concat([{ key:TEAM, name:"Testcase Office", role:"smoteam", unit:"group" }]);
+  const asTeam = function (mutate, name, want) {
+    const inc = clone(base); mutate(inc);
+    const v = A.authorize(base, inc, personOf(base, TEAM));
+    check(name, want ? v.ok : !v.ok,
+      want ? v.refusals.join(" / ")
+           : "was ALLOWED — " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
+  };
+
+  /* What they CAN do, first — a check that only proves the refusals would pass
+     a role that could do nothing at all. */
+  asTeam(function (s) { s.group.mission = "A different mission"; },
+         "the SMO team may edit the group", true);
+  asTeam(function (s) { s.labels[0].internal = "Renamed"; },
+         "...and the ordinary Setup pages", true);
+  asTeam(function (s) {
+    s.people = s.people.concat([{ key:"newperson", name:"New Person", unit:"mobile" }]);
+  }, "...and may add somebody to the register", true);
+
+  /* And the three it does not. */
+  asTeam(function (s) {
+    s.access = Object.assign({}, s.access);
+    s.access.smoteam = Object.assign({}, s.access.smoteam || {}, { a_setup:"edit" });
+  }, "1 · may not touch the access matrix", false);
+  asTeam(function (s) {
+    s.access = Object.assign({}, s.access);
+    s.access.contrib = Object.assign({}, s.access.contrib || {}, { a_group:"edit" });
+  }, "...not even somebody else's row", false);
+  asTeam(function (s) {
+    s.people = s.people.filter(function (p) { return p.key !== "smo"; });
+  }, "2 · may not delete a person", false);
+
+  /* THE ESCAPE HATCH, ASKED FOR EXPLICITLY. A role that cannot edit the matrix
+     but can make itself a Super user on the register has not been restricted —
+     it has been inconvenienced. `people` carries the seat. */
+  asTeam(function (s) {
+    s.people = s.people.map(function (p) {
+      return p.key === TEAM ? Object.assign({}, p, { role:"super" }) : p;
+    });
+  }, "3 · and may not promote itself to Super user", false);
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

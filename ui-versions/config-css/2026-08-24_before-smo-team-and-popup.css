@@ -1321,74 +1321,39 @@
   .pkrow.on .pkn { font-weight:600; }
   .pkrow:not(.on) .pkn { color:var(--ink-3); }
 
-  /* ── THE MERGE WIZARD, INSIDE THE PAGE'S MODAL (§90.4) ────────────
-     The section this replaces is gone — with it the .mgbox frame, which was
-     the only thing here that existed to make a panel look like a dialog.
-     Everything below dresses the modal's own body. */
-  .mgsteps { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-  .mgstep { font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
-            color:var(--ink-3); padding:4px 10px; border-radius:999px;
-            background:var(--surface-2); white-space:nowrap; }
-  .mgstep.on { background:var(--stone); color:var(--panel-ink); }
-  .mgstep.done { color:var(--gold-deep); }
-  .mglead { font-size:13px; margin:0 0 9px; color:var(--ink-2); }
-  .mgsug { display:block; width:100%; text-align:left; font:inherit; font-size:12.5px;
-           font-weight:650; border:1px solid var(--gold); background:var(--surface);
-           border-radius:var(--r); padding:9px 12px; color:var(--ink);
-           margin-bottom:8px; cursor:pointer; }
-  .mgsug:hover { background:var(--surface-2); }
-  .mgsug.on { box-shadow:inset 0 0 0 1px var(--gold); background:var(--surface-2); }
-  .mgsug i { font-style:normal; font-weight:400; color:var(--ink-3); font-size:11.5px; }
-  .mgsel { width:100%; }
-  .mgfoot { display:flex; justify-content:space-between; align-items:center; gap:10px;
-            margin-top:16px; padding-top:13px; border-top:1px solid var(--line); }
-  .mgcards { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(232px,1fr));
-             margin-bottom:12px; }
+  /* ── Merging two rows (§87.4) ────────────────────────────────────
+     A section under the table rather than a panel in an 83px column: the
+     question is "which of these two people do we keep", and it cannot be asked
+     without both of them on screen. */
+  .mgbox { border:1px solid var(--gold); border-radius:var(--r-md); padding:14px 16px;
+           background:var(--surface); }
+  .mghead { font-size:13.5px; margin-bottom:10px; }
+  .mgpick { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .mgcands { display:flex; flex-wrap:wrap; gap:6px; }
+  .mgcands .editbtn i { font-style:normal; font-weight:500; opacity:.75; }
+  .mgpick select.fld { flex:1 1 240px; min-width:0; }
+  .mgcards { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+             margin:14px 0 10px; }
   .mgcard { display:flex; gap:9px; align-items:flex-start; padding:11px 12px; cursor:pointer;
-            border:1px solid var(--line); border-radius:var(--r); background:var(--surface); }
+            border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
   .mgcard:hover { border-color:var(--gold); }
   .mgcard.on { border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold);
                background:var(--surface-2); }
   .mgb { min-width:0; flex:1; }
-  .mgb > b { display:block; font-size:13px; margin-bottom:6px; }
+  .mgb > b { display:block; font-size:13px; margin-bottom:5px; }
   .mgf { display:flex; gap:8px; font-size:11.5px; line-height:1.6; }
   .mgf > span:first-child { flex:0 0 84px; color:var(--ink-3); }
   .mgf > span:last-child { min-width:0; overflow-wrap:anywhere; }
-  .mgverdict { font-size:11px; font-weight:700; margin-top:8px; padding-top:7px;
-               border-top:1px solid var(--line-soft); }
-  .mgverdict.keep { color:var(--good-tx); }
-  .mgverdict.drop { color:var(--bad-tx); }
-  .mgmoves { font-size:12.5px; }
+  .mgmoves { margin:10px 0; font-size:12.5px; }
   .mgmoves ul { margin:5px 0 0; padding-left:18px; }
-  .mgmoves li { line-height:1.7; }
-  .mgpicks { font-size:12.5px; }
-  .pkgrid { display:grid; grid-template-columns:76px 1fr 1fr; gap:5px; align-items:center;
-            margin-top:7px; font-size:11.5px; }
-  .pkgrid .h { font-size:9.5px; letter-spacing:.08em; text-transform:uppercase;
-               color:var(--ink-3); font-weight:700; }
-  .pkl { font-weight:650; }
-  .pkopt { display:flex; gap:6px; align-items:center; padding:6px 8px; cursor:pointer;
-           border-radius:var(--r-sm); border:1px solid transparent; }
-  .pkopt.on { background:var(--attn-bg); border-color:var(--gold); }
-  .pkopt span { overflow-wrap:anywhere; }
-  @media (max-width:560px){ .pkgrid { grid-template-columns:1fr; } }
+  .mgmoves li { line-height:1.6; }
+  .mgpicks { margin-top:12px; font-size:12.5px; }
+  .mgpicks .cfg { margin-top:6px; }
+  .mgopt { display:flex; gap:7px; align-items:flex-start; cursor:pointer; }
+  .mgopt span { overflow-wrap:anywhere; }
 
   /* Why a fourth option is not on offer (§87.5). Under the choices rather than
      beside them: it is the answer to "where is the one I wanted", which is a
      question somebody asks after reading the three that are there. */
   .cfnote { margin-top:8px; font-size:11.5px; line-height:1.55; color:var(--ink-2);
             border-left:2px solid var(--attn); padding-left:9px; }
-
-  /* ── THE REGISTER'S FILE, IN THE HEADER (§90) ─────────────────────
-     The upload is a real `<input type=file>` with its LABEL styled as the menu
-     item: a file picker cannot be opened from script without a user gesture,
-     and a button that reaches for a hidden input works in one browser and
-     silently does nothing in the next. The input is hidden the accessible way
-     — off-screen and still focusable — rather than `display:none`, which takes
-     it out of the tab order and out of the label's reach in some readers. */
-  .hmenu-panel label.hmenu-item { display:block; cursor:pointer; }
-  .hmenu-panel input[type=file].vh {
-    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
-    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
-  .hmenu-panel input[type=file].vh:focus-visible + .hmenu-item,
-  .hmenu-panel label.hmenu-item:focus-within { outline:2px solid var(--focus); outline-offset:-2px; }

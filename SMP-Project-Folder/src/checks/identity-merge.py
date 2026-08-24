@@ -104,21 +104,45 @@ with sync_playwright() as p:
     ck("the row's menu offers Merge", pg.query_selector('[data-pmerge="%s"]' % drop) is not None)
     pg.click('[data-pmerge="%s"]' % drop)
     pg.wait_for_timeout(700)
-    ck("the merge section opened", pg.query_selector(".mgbox") is not None)
-    ck("...and it offers the row the mark pointed at",
-       pg.query_selector('[data-pmerge-b="%s"]' % keep) is not None)
-    pg.click('[data-pmerge-b="%s"]' % keep)
-    pg.wait_for_timeout(700)
-    ck("both rows are shown to choose between",
-       pg.eval_on_selector_all(".mgcard", "e=>e.length") == 2)
+    # ── IT IS A POPUP NOW (§90.4) ────────────────────────────────────
+    # The section it replaces rendered 1086px down the page with nothing
+    # scrolling to it, so "does it exist in the DOM" was true the whole time it
+    # was unusable. What is asserted is that it is ON SCREEN: inside the
+    # viewport, over an inert page.
+    ck("the dialog is open", pg.eval_on_selector("#overlay", "e=>e.classList.contains('on')"))
+    ck("...and it is actually in view", pg.evaluate("""() => {
+         const m=document.querySelector('#modal-b'); if(!m) return false;
+         const r=m.getBoundingClientRect();
+         return r.top>=0 && r.top<window.innerHeight && r.height>40; }"""))
+    ck("...and the page behind it is inert",
+       pg.eval_on_selector(".wrap", "e=>e.inert === true"))
+    ck("step 1 offers the row the mark pointed at",
+       pg.query_selector('#modal-b [data-pmerge-b="%s"]' % keep) is not None)
+    pg.click('#modal-b [data-pmerge-b="%s"]' % keep)
+    pg.wait_for_timeout(300)
+    pg.click('#modal-b [data-pmerge-step="2"]')
+    pg.wait_for_timeout(400)
+    ck("step 2 shows both rows to choose between",
+       pg.eval_on_selector_all("#modal-b .mgcard", "e=>e.length") == 2)
     # THE ROW THAT CAN BE MATCHED IS THE ONE OFFERED, because the other is the
     # shape that made the duplicate in the first place.
     ck("the row with an identifier is the default survivor",
-       pg.eval_on_selector_all(".mgcard.on input", "e=>e.map(x=>x.dataset.pmergeKeep)") == [keep])
-    moves = pg.eval_on_selector(".mgmoves", "e=>e.textContent") if pg.query_selector(".mgmoves") else ""
-    ck("it says the role moves across", "owner" in moves.lower() or "Business unit owner" in moves, moves[:120])
-    pg.click("[data-pmerge-go]")
+       pg.eval_on_selector_all("#modal-b .mgcard.on input",
+                               "e=>e.map(x=>x.dataset.pmergeKeep)") == [keep])
+    moves = pg.eval_on_selector("#modal-b .mgmoves", "e=>e.textContent") \
+        if pg.query_selector("#modal-b .mgmoves") else ""
+    ck("it says the role moves across",
+       "owner" in moves.lower() or "Business unit owner" in moves, moves[:120])
+    pg.click('#modal-b [data-pmerge-step="3"]')
+    pg.wait_for_timeout(400)
+    ck("step 3 names what survives",
+       "survives" in pg.eval_on_selector("#modal-b", "e=>e.textContent"))
+    pg.click("#modal-b [data-pmerge-go]")
     pg.wait_for_timeout(900)
+    ck("the dialog closed itself",
+       not pg.eval_on_selector("#overlay", "e=>e.classList.contains('on')"))
+    ck("...and gave the page back",
+       pg.eval_on_selector(".wrap", "e=>e.inert !== true"))
 
     out = pg.evaluate("""() => {
       const k = personBy(window.__keep);
@@ -180,6 +204,37 @@ with sync_playwright() as p:
     ck("the picker searches on the address as well",
        pg.eval_on_selector_all(".pickrow:not([hidden])", "e=>e.length") == 1,
        pg.eval_on_selector_all(".pickrow:not([hidden])", "e=>e.length"))
+
+    # ── THE PAGE'S FURNITURE (§90) ───────────────────────────────────
+    # The file moved into the header and the notes moved to the knowledge base.
+    # Both are REMOVALS, and a removal is the easiest thing in the world to
+    # half-do — so each is asserted from both ends: gone from where it was, and
+    # present where it went.
+    print("── the file is in the header and the notes are in the knowledge base")
+    people_page(pg)
+    body = pg.evaluate("document.body.textContent")
+    ck("no Seed-the-register steps at the foot of the page",
+       "Seed the register from a file" not in body)
+    ck("the three notes are gone from under the table",
+       "People sign in with the email address" not in body)
+    ck("Register file is in the header", pg.query_selector("[data-filemenu]") is not None)
+    pg.click("[data-filemenu]")
+    pg.wait_for_timeout(400)
+    ck("...and holds Download", pg.query_selector("[data-dlppl]") is not None)
+    ck("...and an Upload you can actually press",
+       pg.eval_on_selector('label[for="ppl-file"]', "e=>!!e && e.offsetHeight > 0"))
+    pg.click("[data-colmenu]")
+    pg.wait_for_timeout(300)
+    ck("opening another header menu closes it",
+       pg.eval_on_selector_all("[data-dlppl]", "e=>e.length") == 0)
+
+    pg.click('.setuprail [data-setupgo="kb"]')
+    pg.wait_for_timeout(700)
+    kb = pg.evaluate("document.body.textContent")
+    ck("the door note arrived in the knowledge base",
+       "sign in with the address on the register" in kb)
+    ck("...and the password note",  "chosen their own" in kb or "choose their own" in kb)
+    ck("...and retire-versus-delete", "should never have existed" in kb)
 
     print("── page errors:", errs if errs else "none")
     if errs:

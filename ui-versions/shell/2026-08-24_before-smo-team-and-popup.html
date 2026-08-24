@@ -342,7 +342,7 @@
          (§48.2): there is nothing to read on a composer, so a view grant would
          open a page whose every control the server then refuses. */
       { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
-        when: function(){ return inOffice(); },                          render:renderSendMessage },
+        when: function(){ return hasRole("super"); },                    render:renderSendMessage },
       { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB },
       { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
         when: ownsAnySource,                                render:renderMySources }
@@ -2386,7 +2386,6 @@
       if (grant("c_people") !== "edit") return;
       var file = this.files && this.files[0];
       if (!file) return;
-      PFILEMENU = false;   /* the menu's job is done the moment a file is picked */
       var rx = new FileReader();
       rx.onload = function(){
         readXlsx(rx.result).then(function(sheets){
@@ -2395,10 +2394,10 @@
                the upload is. A plan workbook dropped here is the likely
                mistake, and naming the sheet it is missing is what tells
                somebody which of the two files they picked up. */
-            PPLF.plan = { rows:[], notices:[], newBus:[],
+            PPLF.plan = { rows:[], notices:[], newBus:[], added:0, updated:0,
+                          roles:0, retired:0, restored:0,
                           problems:[{ at:file.name, msg:"has no sheet called People. This is " +
-                            "the people workbook's own sheet \u2014 download the template from " +
-                            "Register file " +
+                            "the people workbook's own sheet \u2014 download the template above " +
                             "and fill that." }] };
             PPLF.read = ""; PPLF.done = null;
             paint();
@@ -2931,22 +2930,14 @@
       });
     });
     /* The two header menus (§47.2). Opening one closes the other. */
-    /* ONE OPEN AT A TIME (§90). Three menus in one cluster, and two of them
-       overlapping is two things covering each other — the same rule the row
-       menus keep with a single PMENU key. */
-    document.querySelectorAll("[data-filemenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation(); PFILEMENU = !PFILEMENU; PCOLMENU = false; PWMENU = false; paint();
-      });
-    });
     document.querySelectorAll("[data-colmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PCOLMENU = !PCOLMENU; PWMENU = false; paint();
       });
     });
     document.querySelectorAll("[data-pwmenu]").forEach(function(b){
       b.addEventListener("click", function(e){
-        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; PFILEMENU = false; paint();
+        e.stopPropagation(); PWMENU = !PWMENU; PCOLMENU = false; paint();
       });
     });
     /* A tick repaints the table but MUST NOT close the menu — you come here to
@@ -3163,15 +3154,55 @@
         mergeReset();
         PMERGE.a = b.dataset.pmerge;
         PMENU = null;
-        /* NO paint() HERE. The register behind goes inert the moment the modal
-           opens, and repainting it first would rebuild the ⋮ this click came
-           from — the control `openModalHtml` is about to remember so it can
-           put focus back on it (§48.4). The row menu closes on the next
-           natural paint, behind a dialog nobody can see it through. */
-        mergeOpen();
+        paint();
+        var sec = document.querySelector(".mgbox");
+        if (sec) sec.scrollIntoView({ block:"center" });
       });
     });
-    /* The receipt's Close is on the PAGE, not in the dialog. */
+    function mergePickOther(key){
+      PMERGE.b = key || null;
+      /* The survivor and the field answers belong to the PAIR, so choosing a
+         different second row starts both again rather than carrying an answer
+         across to fields it was never about. */
+      PMERGE.keep = key ? mergeDefaultKeep(PMERGE.a, key) : null;
+      PMERGE.picks = {}; PMERGE.err = null;
+      paint();
+    }
+    document.querySelectorAll("[data-pmerge-b]").forEach(function(b){
+      b.addEventListener("click", function(){ mergePickOther(b.dataset.pmergeB); });
+    });
+    document.querySelectorAll("[data-pmerge-sel]").forEach(function(sel){
+      sel.addEventListener("change", function(){ mergePickOther(sel.value); });
+    });
+    document.querySelectorAll("[data-pmerge-keep]").forEach(function(r){
+      r.addEventListener("change", function(){
+        PMERGE.keep = r.dataset.pmergeKeep;
+        /* Swapping which row survives turns every field answer round — "keep
+           mine" now means the other value — so the answers are dropped rather
+           than silently reinterpreted. */
+        PMERGE.picks = {}; PMERGE.err = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pmerge-pick]").forEach(function(r){
+      r.addEventListener("change", function(){
+        var p = r.dataset.pmergePick.split("|");
+        PMERGE.picks[p[0]] = p[1] === "take";
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pmerge-go]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pmergeGo.split("|");
+        var keepName = (personBy(p[0]) || {}).name || p[0];
+        var dropName = (personBy(p[1]) || {}).name || p[1];
+        var r = mergePeople(p[0], p[1], PMERGE.picks);
+        if (!r.ok) { PMERGE.err = r.why; paint(); return; }
+        mergeReset();
+        PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
+        paint();   /* which is where a change becomes a save */
+      });
+    });
     document.querySelectorAll("[data-pmerge-close]").forEach(function(b){
       b.addEventListener("click", function(){ mergeReset(); paint(); });
     });
@@ -3527,7 +3558,7 @@
     wirePicker();
 
     if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
-        typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
+        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
       PWSTATES = {};
       SYNC.passwordStates(function(err, st){
         if (err) return;
@@ -3538,7 +3569,7 @@
     /* The same shape and the same moment as the password states: asked once
        per visit to the page, and absent rather than empty from file:// (§56). */
     if (SAIDWHERE === null && document.querySelector('[data-edit="people"]') &&
-        typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
+        typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super")) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
         if (err) return;
@@ -4270,85 +4301,6 @@
     if (wrapEl) { wrapEl.inert = true; wrapEl.setAttribute("aria-hidden", "true"); }
     document.getElementById("modal-x").focus();
   }
-  /* ── THE MERGE WIZARD LIVES IN THAT DIALOG (§90.4) ────────────────
-     `mergePaint()` rewrites the modal's own body and re-wires it, rather than
-     calling paint(): paint() rebuilds the register behind an inert overlay and
-     would leave the dialog showing a step nobody chose — and the elements its
-     handlers are bound to would be gone. This is §30.1's rule from the other
-     side: whoever rewrites the DOM re-wires it, in the same function (§24). */
-  function mergeOpen(){
-    openModalHtml("Merge two rows", "", mergeStepHtml());
-    wireMerge();
-  }
-  function mergePaint(){
-    var body = document.getElementById("modal-b");
-    if (!body) return;
-    body.innerHTML = mergeStepHtml();
-    wireMerge();
-  }
-  function wireMerge(){
-    var body = document.getElementById("modal-b");
-    if (!body) return;
-    function pickOther(key){
-      PMERGE.b = key || null;
-      /* The survivor and the field answers belong to the PAIR, so choosing a
-         different second row starts both again rather than carrying an answer
-         across to fields it was never about. */
-      PMERGE.keep = key ? mergeDefaultKeep(PMERGE.a, key) : null;
-      PMERGE.picks = {}; PMERGE.err = null;
-      mergePaint();
-    }
-    body.querySelectorAll("[data-pmerge-b]").forEach(function(b){
-      b.addEventListener("click", function(){ pickOther(b.dataset.pmergeB); });
-    });
-    body.querySelectorAll("[data-pmerge-sel]").forEach(function(sel){
-      sel.addEventListener("change", function(){ pickOther(sel.value); });
-    });
-    body.querySelectorAll("[data-pmerge-step]").forEach(function(b){
-      b.addEventListener("click", function(){
-        PMERGE.step = Number(b.dataset.pmergeStep) || 1;
-        PMERGE.err = null;
-        mergePaint();
-      });
-    });
-    body.querySelectorAll("[data-pmerge-keep]").forEach(function(r){
-      r.addEventListener("change", function(){
-        PMERGE.keep = r.dataset.pmergeKeep;
-        /* Swapping which row survives turns every field answer round — "keep
-           mine" now means the other value — so the answers are dropped rather
-           than silently reinterpreted. */
-        PMERGE.picks = {}; PMERGE.err = null;
-        mergePaint();
-      });
-    });
-    body.querySelectorAll("[data-pmerge-pick]").forEach(function(r){
-      r.addEventListener("change", function(){
-        var p = r.dataset.pmergePick.split("|");
-        PMERGE.picks[p[0]] = p[1] === "take";
-        mergePaint();
-      });
-    });
-    body.querySelectorAll("[data-pmerge-close]").forEach(function(b){
-      b.addEventListener("click", function(){ mergeReset(); closeModal(); paint(); });
-    });
-    body.querySelectorAll("[data-pmerge-go]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.pmergeGo.split("|");
-        var keepName = (personBy(p[0]) || {}).name || p[0];
-        var dropName = (personBy(p[1]) || {}).name || p[1];
-        var r = mergePeople(p[0], p[1], PMERGE.picks);
-        /* A REFUSAL STAYS IN THE DIALOG. mergePeople() ends in deletePerson(),
-           which refuses if anything still points at the row (§87.4) — that is
-           the check, and its sentence has to be read where the button was. */
-        if (!r.ok) { PMERGE.err = r.why; PMERGE.step = 3; mergePaint(); return; }
-        mergeReset();
-        PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
-        closeModal();
-        paint();   /* which is where a change becomes a save */
-      });
-    });
-  }
-
   function openModal(id){
     var m = MODALS[id]; if (!m) return;
     openModalHtml(m.title, m.sub || "", m.body);
@@ -4384,14 +4336,14 @@
        inside them. `.hmenu` covers both the button and its panel. */
     if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; paint();
     }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; paint();
     }
   });
 

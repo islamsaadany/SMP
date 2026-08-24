@@ -5541,6 +5541,15 @@
    "a_cycle": "edit",
    "a_setup": "edit"
   },
+  "smoteam": {
+   "a_group": "edit",
+   "a_unit_own": "edit",
+   "a_unit_other": "edit",
+   "a_fn_own": "edit",
+   "a_fn_other": "edit",
+   "a_cycle": "edit",
+   "a_setup": "edit"
+  },
   "gceo": {
    "a_group": "view",
    "a_unit_own": "view",

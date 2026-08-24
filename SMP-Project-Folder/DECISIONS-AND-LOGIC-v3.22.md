@@ -10653,3 +10653,163 @@ with an explanatory line under it, the add row at the foot — and failing those
 would push somebody to delete real content to make a check go green. The height
 spread is **printed** beside each table instead, so a table that goes ragged for
 a new reason is visible to whoever reads the run.
+
+---
+
+## 89 · The office is two roles (v3.24)
+
+Islam: *"I need to add the SMO team and their role needs to be below the super
+user but nearly very close … let me know what should be strictly not on them."*
+
+The Super user was doing two jobs — **owning** the deployment and **running** it.
+Only the first is one person's. Until now the only way to give somebody the
+second was to make them a Super user, which is not a smaller grant; it is the
+same one.
+
+### 89.1 The same grants, and three rules
+
+**SMO team** sits directly under Super user and holds every area at edit:
+group, every unit, every function, the reporting cycle, Setup. What separates
+the two is not a cell in that table, and could not be — writing narrower areas
+would take away whole pages in order to withhold three acts, and the team would
+be unable to do the job the role exists for.
+
+So the difference is **three rules**, in `lib/rules.js` beside §37's three,
+because each is true whatever the matrix says:
+
+1. **`mayEditAccess`** — the matrix is the Super user's. Editing it is editing
+   who may edit it, so anybody who can is a Super user whether or not the row
+   says so. The page stays **readable**: knowing what everyone may do is part of
+   running the office.
+2. **`mayDestroy`** — retiring is reversible and keeps every attribution true
+   (§69); deleting, clearing a plan and clearing the tenant are not. **Merging
+   is deliberately absent from this list**: it hands every pointer over before
+   it removes a row and refuses if it cannot (§87.4).
+3. **`mayIssuePasswordTo`** — Islam: *"for the passwords ok for the super user
+   and the team members, but for the client they might be able to reset."* The
+   office may let a colleague on the client's side in; it may not take a seat
+   belonging to the office itself. **The test is on the TARGET, not on the act**
+   — first-issue and reset are the same power, so splitting them would protect
+   nobody. A Super user may still reset anybody, which is what makes them the
+   way back in when the office locks itself out.
+
+### 89.2 Nine places meant "the office" and said "super"
+
+Reporting past a locked cycle, correcting a plan, marking a focus measure,
+sending a message, reading password states. Every one is the job the new role
+exists to do, so `inOffice()` replaced `hasRole("super")` at all of them.
+Leaving them would have shipped a role that looks complete on the matrix and
+**cannot run a cycle**.
+
+### 89.3 THE REGISTER CARRIES THE SEAT, SO IT CARRIES THE MATRIX
+
+Found by the check, not by reading, and it is the finding that matters most in
+this section. An SMO team member holds the register at edit — and
+`people[].role` is where `super` is **stored** (§33). So writing their own row
+made them a Super user without ever opening Roles & access.
+
+A role that cannot edit the matrix but can promote itself has not been
+restricted; it has been inconvenienced.
+
+`lib/authorize.js` classifies a **seat move as `access`**, whichever screen it
+came from, and a **row leaving the register as `destroy`**. Everything else
+about a row — name, address, employee number, where they sit — stays ordinary
+setup, which is the register's day job. The seat is taken out of the comparison
+on both sides afterwards, or one edit would be refused twice.
+
+### 89.4 Enforced on the server, in both files
+
+`api/auth.js` reads the seat off the **stored** row for `setPassword`,
+`passwordStates` and `issueTemporary`, and the bulk query **excludes the office
+in SQL** when a team member asks rather than trusting a list nobody sent (§35).
+`api/state.js` refuses the two classifications above through `lib/rules.js`.
+Hiding a control the server accepts is not a restriction, it is a delay (§42).
+
+Checks: `src/checks/smo-team.py` asks each of the three twice — once of the rule
+the server calls, once of the screen, signed in as one — and asserts the Super
+user still has all three, because a check that only proves the withholding would
+pass a build that withheld them from everybody. Four new cases in
+`scripts/test-authorize.js` (156 passing), including the promotion above.
+
+**Deliberately NOT withheld: Demo data.** It writes nothing — `isDemoMode()`
+refuses every save (§67) — so it is a view, not a delete, and the team demos the
+product.
+
+---
+
+## 90 · The register's furniture, and the merge becomes a popup (v3.24)
+
+Four asks from Islam, and the first of them was a bug report.
+
+### 90.1 "When I press merge with other row nothing happens"
+
+It was not nothing. The merge section rendered **1086px down the page, below
+the fold, with the page still at scroll 0** — drawn, permitted, and unreachable.
+
+§70's fault reached by a different road: there a control invisible until hover,
+here a control below the horizon. Both pass every check that asks whether
+something is in the document.
+
+### 90.2 So it is a popup, and that removes the class of fault
+
+Nothing that appears where you are looking can open where you are not. It
+reuses the platform's own modal (`openModalHtml`) rather than inventing one:
+the page behind goes `inert`, focus moves in and returns to the ⋮ that opened
+it, Escape closes — four things §48.4 had to fix once and nobody should fix
+twice.
+
+**Three steps**, because the three questions are answered at different moments
+and by different reasoning: *who is this the same person as · which of the two
+rows survives · what to do where they disagree*. One panel asking all three is
+the panel that was there before.
+
+`mergePaint()` rewrites the modal's **own** body and re-wires it rather than
+calling `paint()`, which would rebuild the register behind an inert overlay and
+leave the dialog holding a step nobody chose — §30.1's rule, and §24's: whoever
+rewrites the DOM re-wires it, in the same function.
+
+A refusal stays **in** the dialog: `mergePeople()` ends in `deletePerson()`,
+which refuses if anything still points at the row, and its sentence has to be
+read where the button was.
+
+### 90.3 The file is a header button; the review is not furniture
+
+Islam: *"put this as a button on the top beside the passwords with a drop down
+to download the template or upload it, and remove the sections in the bottom of
+the page."*
+
+Steps 1 and 2 were **permanent furniture for something done twice a year**,
+sitting under a 33-row table where the page's scroll ends. They are one dropdown
+now, beside Columns and Passwords, where the register's other collective actions
+already live (§69.22).
+
+**What is not furniture is the review.** Reading a file produces conflicts to
+answer and differences to tick (§87.5, §87.6) — a table with Apply at the end of
+it — so it appears under the register at the moment it exists and goes when it
+is applied or discarded. A dropdown is the right home for two buttons and the
+wrong one for a decision.
+
+The upload is a real `<input type=file>` with its **label** styled as the menu
+item: a file picker cannot be opened from script without a user gesture, and a
+button that reaches for a hidden input works in one browser and silently does
+nothing in the next.
+
+### 90.4 The notes went to the knowledge base, and arrived
+
+Islam: *"remove the notes below the registry table and take them to the
+knowledge base as agreed."* §30's rule applied to the last page still carrying
+three paragraphs of model under its rows.
+
+**Moved, not deleted** — each said something said nowhere else: what people type
+at the door, what an issued password does next, why retiring and deleting are
+different acts. They are a *The people register* section in `c_kb` now, with a
+fifth paragraph on identity and merging, and the check asserts **both ends**:
+gone from where they were, present where they went. A removal is the easiest
+thing in the world to half-do.
+
+### 90.5 The name column was already fixed
+
+§88 made every Setup cell one line, the register included, and `no-wrap.py`
+asserts it at 1440 / 1180 / 1000px. Nothing to do — recorded because the ask was
+made and the answer is "already, and here is what proves it" rather than
+"done".

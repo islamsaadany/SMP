@@ -130,14 +130,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
    Seven roles down, seven areas across. Forty-nine cells, on one screen,
    in place of the 525 controls the page carried before. */
 function renderAccess(){
-  /* ── THE MATRIX IS THE SUPER USER'S (§89) ─────────────────────────
-     A grant cannot express this: the SMO team holds `a_setup` at edit, which
-     is what lets them run every other Setup page — and editing THIS page is
-     editing who may edit this page, so anybody who can is a Super user
-     whatever their row says. The page stays READABLE to them: knowing what
-     everyone may do is part of running the office, and §37's rules are shown
-     to everyone who can open the page. */
-  var editable = grant("c_access") === "edit" && mayEditAccess();
+  var editable = grant("c_access") === "edit";
 
   /* Whether an area can come up at all for a role. Only the own/other pair
      ever collapses, and only upwards: somebody who owns everything has no
@@ -560,8 +553,7 @@ function renderUnits(){
                   '<button class="rmbtn" data-clearyes="' + k + '|nums">Yes, clear the progress</button>' +
                   '<button class="linkbu" data-clearno="1">Cancel</button></span>'
               : '<button class="linkbu" data-clear="' + k + '|nums">Clear progress</button>' +
-                (mayDestroy()
-                  ? '<button class="linkbu" data-clear="' + k + '|plan">Clear plan</button>' : '')) +
+                '<button class="linkbu" data-clear="' + k + '|plan">Clear plan</button>') +
           '</div>'
         : '<span class="pill ' + (u.active ? "good" : "none") + '">' + (u.active ? "Active" : "Retired") + '</span>') +
       '</td></tr>';
@@ -1001,15 +993,10 @@ function renderPeople(){
      rows are two unsaved states and a question about which Save means which. */
   var mayEdit_ = mayEdit;
   function rowOpen(p){ return mayEdit_ && rowEditIs("people", p.key); }
-  var live = typeof SYNC !== "undefined" && SYNC.isLive() && inOffice();
+  var live = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
   var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
-  /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89). A Super user reaches
-     everybody; an SMO team member reaches the client's people and not the
-     office's — so a count taken over the whole register would promise them a
-     number the server is going to shrink (§35: the server picks the set). */
-  var reach = live ? passwordReach() : [];
   var noPw = live && PWSTATES
-    ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
+    ? PEOPLE.filter(function(p){ return personActive(p) && PWSTATES[p.key] === "none"; }).length
     : 0;
 
   /* Lifted out of this function 2026-08-23: restoring a person names the
@@ -1219,12 +1206,7 @@ function renderPeople(){
        the page already has one edit mode, and a second way to edit the same
        row is a second place for the two to disagree. */
     var acts = [];
-    /* WHOSE PASSWORD, NOT WHICH ACT (§89). The SMO team may let anybody on the
-       client's side in and may not touch the office's own — a Super user's or
-       another team member's. The entry is absent on those rows rather than
-       disabled: a disabled control on somebody else's row invites a press and
-       has nowhere to put "because of who they are, not who you are". */
-    if (live && personActive(p) && mayIssuePasswordTo(p)) {
+    if (live && personActive(p)) {
       acts.push('<button data-setpw="' + p.key + '">' +
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
     }
@@ -1254,13 +1236,7 @@ function renderPeople(){
          either asks the question or names what is in the way. A disabled item
          in a menu has nowhere to put the reason — the menu is 240px wide and
          the reason is a sentence naming a unit and a page (§59). */
-      /* DELETING IS THE SUPER USER'S (§89). Retiring stays — it is reversible
-         and keeps every attribution true — so the office loses nothing it
-         needs day to day. The entry is ABSENT rather than disabled: §62's
-         disabled-with-the-reason is right where the reason is about THIS row,
-         and this reason is about the person reading it. */
-      if (mayDestroy())
-        acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
+      acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
     }
     if (!acts.length) return '<td class="cc kebcell"></td>';
     /* THE CELL WITH A PANEL OPEN HAS TO OUTRANK THE CELLS BELOW IT (§69.22).
@@ -1651,39 +1627,6 @@ function renderPeople(){
      from the button's own handler unmounts the control before the click
      finishes. The handlers in shell.html dispatch first and clear PMENUHEAD
      after. */
-  /* ── THE REGISTER'S FILE, WITH THE OTHER COLLECTIVE ACTIONS (§90) ─
-     Two acts, one dropdown, in the header cluster where Columns and Passwords
-     already are. The file input is REAL and hidden behind its own label rather
-     than a button that reaches for one: a `<input type=file>` cannot be opened
-     from script without a user gesture in every browser, and a control that
-     works in Chrome and silently does nothing elsewhere is worse than a plain
-     one (§34's rule about hiding a field's furniture — here the furniture IS
-     the field, so the label is what is styled). */
-  var fileMenu = !mayEdit ? "" :
-    '<span class="hmenu' + (PFILEMENU ? " open" : "") + '">' +
-      '<button class="hmenu-btn" data-filemenu="1" aria-haspopup="true" ' +
-        'aria-expanded="' + PFILEMENU + '">Register file <span class="hcar">&#9662;</span></button>' +
-      (PFILEMENU
-        ? '<div class="hmenu-panel">' +
-            '<button class="hmenu-item" data-dlppl="1">' +
-              '<span class="t">Download the register</span>' +
-              '<span class="d">' + plural(PEOPLE.length, "row") + ', with Role and Status as ' +
-              'dropdowns' + (mainbus().length
-                ? ' and your ' + mainbus().length + ' names in the Official BU column'
-                : ' — the Official BU column has no list yet, so type the names and they ' +
-                  'are added on arrival') + '. The export and the template are one file.</span></button>' +
-            '<div class="hmenu-sep"></div>' +
-            '<label class="hmenu-item" for="ppl-file">' +
-              '<span class="t">Upload a filled file</span>' +
-              '<span class="d">Matched on Emp ID, then Email. A row matching nobody adds ' +
-              'them; a row whose two identifiers disagree is set aside for you to answer. ' +
-              'You review every change before anything is applied.</span></label>' +
-            '<input type="file" id="ppl-file" accept=".xlsx" class="vh" ' +
-              'aria-label="Choose a filled people file to upload">' +
-          '</div>'
-        : '') +
-    '</span>';
-
   var colMenu =
     '<span class="hmenu' + (PCOLMENU ? " open" : "") + '">' +
       '<button class="hmenu-btn" data-colmenu="1" aria-haspopup="true" ' +
@@ -1708,7 +1651,7 @@ function renderPeople(){
       '<button class="hmenu-btn" data-pwmenu="1" aria-haspopup="true" ' +
         'aria-expanded="' + PWMENU + '">Passwords <span class="hcar">&#9662;</span></button>' +
       (PSETPW.key === "bulk:none" || PSETPW.key === "bulk:all"
-        ? pwBulkPanel(reach.length, noPw)
+        ? pwBulkPanel(activeCount, noPw)
         : PWMENU
         ? '<div class="hmenu-panel">' +
             '<button class="hmenu-item" data-pwbulk="none"' + (noPw ? "" : " disabled") + '>' +
@@ -1719,7 +1662,7 @@ function renderPeople(){
             '<div class="hmenu-sep"></div>' +
             '<button class="hmenu-item danger" data-pwbulk="all">' +
               '<span class="t">Reset everyone&rsquo;s password</span>' +
-              '<span class="d">All ' + reach.length + ' others get a temporary ' +
+              '<span class="d">All ' + Math.max(0, activeCount - 1) + ' others get a temporary ' +
               'one and are signed out. Never you.</span></button>' +
           '</div>'
         : '') +
@@ -1748,7 +1691,7 @@ function renderPeople(){
     }
     return '<div class="hmenu-panel pwset"><div class="cq">' +
       (all
-        ? '<b>Reset everyone\u2019s password?</b> All ' + activeCount +
+        ? '<b>Reset everyone\u2019s password?</b> All ' + Math.max(0, activeCount - 1) +
           ' others get the one below and are signed out at once. Never you.'
         : '<b>One password, for the ' + plural(noPw, "person").replace("persons", "people") +
           ' with none.</b> Nobody who already has one is touched.') + '</div>' +
@@ -1768,16 +1711,23 @@ function renderPeople(){
       '</div></div>';
   }
 
-  /* ── THE THREE NOTES ARE IN THE KNOWLEDGE BASE (§90, Islam) ───────
-     "remove the notes below the registry table and take them to the knowledge
-     base as agreed." §30's rule, applied where it had not been: a setup table
-     is where you CHANGE a thing, not where the model is explained — and three
-     paragraphs under a 33-row table are three paragraphs nobody scrolls to.
-
-     They are not deleted. Sign-in by address, how an issued password behaves,
-     and retire-versus-delete are all in `c_kb` now, where the rest of the
-     model lives and where somebody goes when they want to understand rather
-     than to change something. */
+  /* The explanation stays; the CONTROLS moved to the header. A note that
+     carries buttons is a second place to press them. */
+  var bulk = !live ? "" :
+    /* WHAT PEOPLE TYPE AT THE DOOR IS A FACT ABOUT THIS TABLE (§69.11), so it
+       is said here rather than only on the sign-in page — this is the screen
+       the SMO is on when somebody phones to say they cannot get in. */
+    '<div class="note"><b>People sign in with the email address on this ' +
+      'register.</b> Somebody with no address can still sign in with the name in ' +
+      'the <i>Sign-in name</i> column, which is off by default under <i>Columns</i>. ' +
+      'One address on two rows says who nobody is, so the door refuses both until ' +
+      'the register is corrected.</div>' +
+    '<div class="note"><b>Passwords are issued from <i>Passwords</i>, above.</b> ' +
+      'Each person is asked to choose their own the first time they use the one you ' +
+      'issue, so the same password never works twice for the same person. Resetting ' +
+      'everyone ends their open sessions &mdash; and never touches your own password, ' +
+      'because being signed out of the screen you are working in is not a safety ' +
+      'feature.</div>';
 
   /* PEOPLE REGISTER, not People (Islam, 2026-08-24). The page has been called
      "the register" in every sentence written about it since §35; the heading
@@ -1826,7 +1776,7 @@ function renderPeople(){
          (§37, §72.10). Editing is on the row; Add is at the foot of the table
          and gated on `mayEdit` rather than on a mode, so it is reachable
          without opening a row first. */
-      "people", false, null, null, fileMenu + colMenu + pwMenu) +
+      "people", false, null, null, colMenu + pwMenu) +
 
     /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
        own heading now reads "People register" two lines above, so a section
@@ -1887,8 +1837,18 @@ function renderPeople(){
         th("", "cc kebcell") +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>';
       })() +
-
-      "") +
+      bulk +
+      /* THE NOTE HAD TO CHANGE WITH THE FEATURE (§69). It said "People are
+         retired, never deleted", which stopped being true the moment Delete
+         permanently existed — and a page that describes a rule it no longer
+         keeps is worse than one that says nothing. What survives is the
+         REASON: retiring is still the right answer for anybody who was really
+         here, and the delete is for the rows that never were. */
+      '<div class="note"><b>Retire somebody who has left; delete a row that should ' +
+      'never have existed.</b> Retiring takes away every role they hold and closes the ' +
+      'door — they cannot sign in — while everything already attributed to them stays ' +
+      'true. Deleting takes the row, the password and the open sessions, and is refused ' +
+      'while anything still points at the person — the refusal names what.</div>') +
 
     renderPeopleMerge(mayEdit) +
     renderPeopleFile(mayEdit);
@@ -1910,14 +1870,14 @@ function renderPeople(){
    bottom of a 33-row table with no memory of what was pressed would be a
    control nobody could place.
    ══════════════════════════════════════════════════════════════════ */
-var PMERGE = { a:null, b:null, keep:null, picks:{}, err:null, done:null, step:1 };
+var PMERGE = { a:null, b:null, keep:null, picks:{}, err:null, done:null };
 
 function mergeReset(){
-  PMERGE = { a:null, b:null, keep:null, picks:{}, err:null, done:null, step:1 };
+  PMERGE = { a:null, b:null, keep:null, picks:{}, err:null, done:null };
 }
 /* Which row survives, defaulted rather than decided: the one that can be
    matched by a later upload, because the other one is the shape that made the
-   duplicate. Still a default — the card is a radio. */
+   duplicate. Still a default — the radio is what settles it. */
 function mergeDefaultKeep(a, b){
   var pa = personBy(a), pb = personBy(b);
   if (!pa || !pb) return a;
@@ -1925,180 +1885,136 @@ function mergeDefaultKeep(a, b){
     return personIdentified(pa) ? a : b;
   return a;
 }
-function mergeKeepKey(){
-  if (!PMERGE.a || !PMERGE.b) return null;
-  return PMERGE.keep || mergeDefaultKeep(PMERGE.a, PMERGE.b);
-}
-function mergeDropKey(){
-  var k = mergeKeepKey();
-  return k ? (k === PMERGE.a ? PMERGE.b : PMERGE.a) : null;
-}
 
-/* ── THE WIZARD IS THE PAGE'S OWN MODAL (§90.4) ────────────────────
-   Islam, on the section this replaces: "when I press merge with other row
-   nothing happens." It was not nothing — the section rendered 1086px down the
-   page, below the fold, with the page still at scroll 0. It was drawn,
-   permitted and unreachable, which is §70's fault reached by a different road:
-   there, a control invisible until hover; here, a control below the horizon.
-
-   A POPUP REMOVES THE CLASS OF FAULT rather than patching the scroll. Nothing
-   that appears where you are looking can open where you are not.
-
-   IT REUSES `openModalHtml`, and that is the point of using it: the page
-   behind goes `inert`, focus moves in and comes back to the ⋮ that opened it,
-   and Escape closes — four things §48.4 had to fix once and nobody should fix
-   twice. What this adds is a body that REPAINTS without repainting the page:
-   `mergePaint()` rewrites the modal's own element, because paint() would
-   rebuild the register underneath and leave the dialog holding a step nobody
-   chose.
-
-   THREE STEPS, because the three questions are answered at different moments
-   and by different reasoning: who is this the same person AS, which of the two
-   rows survives, and what to do where they disagree. One panel asking all
-   three is the panel that was there before. */
-function mergeStepHtml(){
-  var a = PMERGE.a ? personBy(PMERGE.a) : null;
-  if (!a) return '<div class="note">That row is no longer on the register.</div>';
-  var b = PMERGE.b ? personBy(PMERGE.b) : null;
-  var step = PMERGE.step || 1;
-
-  function chips(n){
-    return '<div class="mgsteps">' +
-      ["1 · who", "2 · which survives", "3 · confirm"].map(function(t, i){
-        return '<span class="mgstep' + (i + 1 === n ? " on" : "") +
-               (i + 1 < n ? " done" : "") + '">' + t + '</span>';
-      }).join("") + '</div>';
-  }
-
-  /* ── step 1 ─────────────────────────────────────────────────── */
-  if (step === 1 || !b) {
-    var cands = mergeCandidates(a.key);
-    var WHY = { empId:"same employee number", email:"same address",
-                name:"same full name", likely:"the name reads the same" };
-    return chips(1) +
-      '<p class="mglead">Merging <b>' + esc(shortName(a.name)) + '</b> with\u2026</p>' +
-      (cands.length
-        ? cands.map(function(c){
-            return '<button class="mgsug' + (b && b.key === c.person.key ? " on" : "") +
-              '" data-pmerge-b="' + esc(c.person.key) + '">' + esc(c.person.name) +
-              ' <i>\u00b7 ' + esc(WHY[c.why] || "looks like a duplicate") + '</i></button>';
-          }).join("")
-        : '<div class="note">Nothing on the register looks like this row. Choose who it ' +
-          'is the same person as below \u2014 the platform will not guess.</div>') +
-      '<select class="fld mgsel" data-pmerge-sel="1" aria-label="Choose the other row">' +
-        '<option value="">' + (cands.length ? "or somebody else\u2026" : "Choose the other row\u2026") +
-        '</option>' +
-        PEOPLE.filter(function(p){ return p.key !== a.key && personActive(p); })
-          .map(function(p){
-            return '<option value="' + esc(p.key) + '"' + (b && b.key === p.key ? " selected" : "") +
-              '>' + esc(p.name) + (p.empId ? " \u00b7 " + esc(p.empId) : "") +
-              (p.email ? " \u00b7 " + esc(p.email) : "") + '</option>';
-          }).join("") +
-      '</select>' +
-      '<div class="mgfoot">' +
-        '<button class="linkbu" data-pmerge-close="1">Cancel</button>' +
-        '<button class="editbtn apply" data-pmerge-step="2"' + (b ? "" : " disabled") +
-          '>Next</button></div>';
-  }
-
-  var keepKey = mergeKeepKey(), dropKey = mergeDropKey();
-  var plan = personMergePlan(keepKey, dropKey);
-  if (!plan) return chips(step) + '<div class="note bad-note">Those are the same row.</div>';
-
-  /* ── step 2 ─────────────────────────────────────────────────── */
-  if (step === 2) {
-    /* THE CARDS SAY WHAT EACH ROW COSTS TO LOSE, and the sign-in name is
-       first: the key is what `credentials` and `sessions` are keyed on (§35),
-       so whichever row goes takes its password with it. */
-    function card(p){
-      var on = p.key === keepKey;
-      var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
-      return '<label class="mgcard' + (on ? " on" : "") + '">' +
-        '<input type="radio" name="mgkeep" data-pmerge-keep="' + esc(p.key) + '"' +
-          (on ? " checked" : "") + '>' +
-        '<div class="mgb"><b>' + esc(p.name) + '</b>' +
-          '<div class="mgf"><span>Sign-in name</span><span class="mono">' + esc(p.key) + '</span></div>' +
-          '<div class="mgf"><span>Emp ID</span><span class="mono">' +
-            (p.empId ? esc(p.empId) : "\u2014") + '</span></div>' +
-          '<div class="mgf"><span>Email</span><span>' +
-            (p.email ? esc(p.email) : "\u2014") + '</span></div>' +
-          '<div class="mgf"><span>Unit</span><span>' +
-            esc(roleWhereLabel2(personAt(p)) || "\u2014") + '</span></div>' +
-          '<div class="mgf"><span>Roles</span><span>' +
-            (held.length ? esc(held.map(function(r){ return roleName(r.role); }).join(", "))
-                         : "\u2014") + '</span></div>' +
-          '<div class="mgverdict ' + (on ? "keep" : "drop") + '">' +
-            (on ? "Survives \u00b7 keeps its password and sign-in name"
-                : "This row goes \u00b7 its password and sessions go with it") +
-          '</div></div></label>';
-    }
-    var moves = [];
-    plan.roles.forEach(function(r){
-      moves.push(roleName(r.role) + " \u00b7 " + roleWhereLabel(r.at) +
-                 (r.already ? " (already theirs)" : ""));
-    });
-    if (plan.seat) moves.push(roleName(plan.seat.role) + " \u00b7 " + roleWhereLabel(plan.seat.at));
-    plan.owns.forEach(function(o){
-      moves.push(o.kind === "set" ? "the figure set " + o.name
-               : o.kind === "figure" ? "the figure " + o.name : o.name);
-    });
-    if (plan.moveTo) moves.push("their place \u2014 " + roleWhereLabel(plan.moveTo));
-    plan.fills.forEach(function(f){ moves.push(f.label.toLowerCase() + " \u2014 " + f.value); });
-
-    return chips(2) +
-      '<div class="mgcards">' + card(personBy(PMERGE.a)) + card(personBy(PMERGE.b)) + '</div>' +
-      (moves.length
-        ? '<div class="mgmoves"><b>What moves across</b><ul>' +
-          moves.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join("") + '</ul></div>'
-        : '<div class="note">Nothing is attached to ' + esc(plan.drop.name) +
-          ' \u2014 only the row goes.</div>') +
-      '<div class="mgfoot">' +
-        '<button class="linkbu" data-pmerge-step="1">Back</button>' +
-        '<button class="editbtn apply" data-pmerge-step="3">Next</button></div>';
-  }
-
-  /* ── step 3 ─────────────────────────────────────────────────── */
-  return chips(3) +
-    (plan.picks.length
-      ? '<div class="mgpicks"><b>They disagree about ' +
-        plural(plan.picks.length, "field") + '</b>' +
-        '<div class="pkgrid"><span class="h"></span>' +
-          '<span class="h">Keep ' + esc(shortName(plan.keep.name)) + '\u2019s</span>' +
-          '<span class="h">Take ' + esc(shortName(plan.drop.name)) + '\u2019s</span>' +
-        plan.picks.map(function(f){
-          var take = !!PMERGE.picks[f.k];
-          return '<span class="pkl">' + esc(f.label) + '</span>' +
-            '<label class="pkopt' + (take ? "" : " on") + '">' +
-              '<input type="radio" name="mgp-' + esc(f.k) + '" data-pmerge-pick="' +
-              esc(f.k) + '|keep"' + (take ? "" : " checked") + '>' +
-              '<span>' + esc(f.keep) + '</span></label>' +
-            '<label class="pkopt' + (take ? " on" : "") + '">' +
-              '<input type="radio" name="mgp-' + esc(f.k) + '" data-pmerge-pick="' +
-              esc(f.k) + '|take"' + (take ? " checked" : "") + '>' +
-              '<span>' + esc(f.drop) + '</span></label>';
-        }).join("") + '</div></div>'
-      : '<div class="note">They agree about everything they both say.</div>') +
-    '<div class="note"><b>' + esc(plan.keep.name) + ' survives.</b> ' +
-      esc(plan.drop.name) + '\u2019s row goes, and with it their password and any ' +
-      'sessions they have open \u2014 <b>' + esc(plan.drop.key) + '</b> stops being a ' +
-      'sign-in name. Blanks are filled from it without asking; there is nothing to lose.</div>' +
-    (PMERGE.err ? '<div class="note bad-note">' + esc(PMERGE.err) + '</div>' : '') +
-    '<div class="mgfoot">' +
-      '<button class="linkbu" data-pmerge-step="2">Back</button>' +
-      '<button class="editbtn apply" data-pmerge-go="' + esc(keepKey) + '|' + esc(dropKey) +
-        '">Merge into ' + esc(shortName(plan.keep.name)) + '</button></div>';
-}
-
-/* THE RECEIPT STAYS ON THE PAGE. The dialog is gone by the time it is read,
-   and a merge is the one act on this register with no row left to point at —
-   so what happened is said where the register is (§62's rule about a
-   confirmation being where the act was). */
 function renderPeopleMerge(mayEdit){
-  if (!mayEdit || !PMERGE.done) return "";
-  return section("", "Merge two rows", null,
-    '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
-    '<div class="imp-row" style="margin-top:12px">' +
-      '<button class="linkbu" data-pmerge-close="1">Close</button></div>');
+  if (!mayEdit) return "";
+  if (PMERGE.done) {
+    return section("", "Merge two rows", null,
+      '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
+      '<div class="imp-row" style="margin-top:12px">' +
+        '<button class="linkbu" data-pmerge-close="1">Close</button></div>');
+  }
+  var a = PMERGE.a ? personBy(PMERGE.a) : null;
+  if (!a) return "";
+  var b = PMERGE.b ? personBy(PMERGE.b) : null;
+
+  /* WHO IT COULD BE. The rows the marks already point at come first and are
+     named; everything else is behind the same searchable select the rest of
+     the platform uses (§45.5), because a register of five hundred people is
+     not a list you scroll. */
+  var cands = mergeCandidates(a.key);
+  var WHY = { empId:"same employee number", email:"same address",
+              name:"same full name", likely:"the name reads the same" };
+  var chooser = '<div class="mgpick">' +
+    (cands.length
+      ? '<div class="mgcands">' + cands.map(function(c){
+          return '<button class="editbtn' + (b && b.key === c.person.key ? ' apply' : '') +
+            '" data-pmerge-b="' + esc(c.person.key) + '">' + esc(c.person.name) +
+            ' <i>' + esc(WHY[c.why] || "looks like a duplicate") + '</i></button>';
+        }).join("") + '</div>'
+      : '') +
+    '<select class="fld" data-pmerge-sel="1" aria-label="Choose the other row">' +
+      '<option value="">' + (cands.length ? 'or somebody else\u2026' : 'Choose the other row\u2026') +
+      '</option>' +
+      PEOPLE.filter(function(p){ return p.key !== a.key && personActive(p); })
+        .map(function(p){
+          return '<option value="' + esc(p.key) + '"' + (b && b.key === p.key ? " selected" : "") +
+            '>' + esc(p.name) + (p.empId ? " \u00b7 " + esc(p.empId) : "") +
+            (p.email ? " \u00b7 " + esc(p.email) : "") + '</option>';
+        }).join("") +
+    '</select></div>';
+
+  var body = "";
+  if (b) {
+    var keepKey = PMERGE.keep || mergeDefaultKeep(a.key, b.key);
+    var dropKey = keepKey === a.key ? b.key : a.key;
+    var plan = personMergePlan(keepKey, dropKey);
+    if (!plan) {
+      body = '<div class="note bad-note">Those are the same row.</div>';
+    } else {
+      /* THE TWO CARDS SAY WHAT EACH ROW COSTS TO LOSE, and the sign-in name is
+         first: the key is what `credentials` and `sessions` are keyed on
+         (§35), so whichever row goes takes its password with it and somebody
+         will be typing the survivor's name at the door tomorrow. */
+      function card(p){
+        var on = p.key === keepKey;
+        var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
+        return '<label class="mgcard' + (on ? " on" : "") + '">' +
+          '<input type="radio" name="mgkeep" data-pmerge-keep="' + esc(p.key) + '"' +
+            (on ? " checked" : "") + '>' +
+          '<div class="mgb"><b>' + esc(p.name) + '</b>' +
+            '<div class="mgf"><span>Sign-in name</span><span class="mono">' + esc(p.key) + '</span></div>' +
+            '<div class="mgf"><span>Emp ID</span><span class="mono">' +
+              (p.empId ? esc(p.empId) : "\u2014") + '</span></div>' +
+            '<div class="mgf"><span>Email</span><span>' +
+              (p.email ? esc(p.email) : "\u2014") + '</span></div>' +
+            '<div class="mgf"><span>Unit</span><span>' +
+              esc(roleWhereLabel2(personAt(p)) || "\u2014") + '</span></div>' +
+            '<div class="mgf"><span>Roles</span><span>' +
+              (held.length ? esc(held.map(function(r){ return roleName(r.role); }).join(", "))
+                           : "\u2014") + '</span></div>' +
+          '</div></label>';
+      }
+      var moves = [];
+      plan.roles.forEach(function(r){
+        moves.push(r.already
+          ? roleName(r.role) + " \u00b7 " + roleWhereLabel(r.at) + " (already theirs)"
+          : roleName(r.role) + " \u00b7 " + roleWhereLabel(r.at));
+      });
+      if (plan.seat) moves.push(roleName(plan.seat.role) + " \u00b7 " + roleWhereLabel(plan.seat.at));
+      plan.owns.forEach(function(o){
+        moves.push(o.kind === "set" ? "the figure set " + o.name
+                 : o.kind === "figure" ? "the figure " + o.name
+                 : o.name);
+      });
+      if (plan.moveTo) moves.push("their place \u2014 " + roleWhereLabel(plan.moveTo));
+      plan.fills.forEach(function(f){ moves.push(f.label.toLowerCase() + " \u2014 " + f.value); });
+
+      body =
+        '<div class="mgcards">' + card(a) + card(b) + '</div>' +
+        '<div class="note"><b>' + esc(plan.keep.name) + ' survives.</b> ' +
+        esc(plan.drop.name) + '\u2019s row goes, and with it their password and any ' +
+        'sessions they have open \u2014 ' + esc(plan.drop.key) + ' stops being a sign-in name.</div>' +
+        (moves.length
+          ? '<div class="mgmoves"><b>What moves across</b><ul>' +
+            moves.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join("") +
+            '</ul></div>'
+          : '<div class="note">Nothing is attached to ' + esc(plan.drop.name) +
+            ' \u2014 only the row goes.</div>') +
+        (plan.picks.length
+          ? '<div class="mgpicks"><b>They disagree about ' +
+            plural(plan.picks.length, "field") + '</b>' +
+            '<div class="cfg"><table><thead><tr><th style="width:20%"></th>' +
+              '<th>Keep ' + esc(shortName(plan.keep.name)) + '\u2019s</th>' +
+              '<th>Take ' + esc(shortName(plan.drop.name)) + '\u2019s</th></tr></thead><tbody>' +
+            plan.picks.map(function(f){
+              var take = !!PMERGE.picks[f.k];
+              return '<tr><td><b>' + esc(f.label) + '</b></td>' +
+                '<td><label class="mgopt"><input type="radio" name="mgp-' + esc(f.k) + '" ' +
+                  'data-pmerge-pick="' + esc(f.k) + '|keep"' + (take ? "" : " checked") + '>' +
+                  '<span>' + esc(f.keep) + '</span></label></td>' +
+                '<td><label class="mgopt"><input type="radio" name="mgp-' + esc(f.k) + '" ' +
+                  'data-pmerge-pick="' + esc(f.k) + '|take"' + (take ? " checked" : "") + '>' +
+                  '<span>' + esc(f.drop) + '</span></label></td></tr>';
+            }).join("") + '</tbody></table></div></div>'
+          : '') +
+        (PMERGE.err ? '<div class="note bad-note">' + esc(PMERGE.err) + '</div>' : '') +
+        '<div class="imp-row" style="margin-top:14px">' +
+          '<button class="editbtn apply" data-pmerge-go="' + esc(keepKey) + '|' + esc(dropKey) +
+            '">Merge into ' + esc(shortName(plan.keep.name)) + '</button>' +
+          '<button class="linkbu" data-pmerge-close="1">Cancel</button></div>';
+    }
+  } else {
+    body = '<div class="imp-row" style="margin-top:12px">' +
+      '<button class="linkbu" data-pmerge-close="1">Cancel</button></div>';
+  }
+
+  return section("", "Merge two rows",
+    "One person on the register twice \u2014 once from the employee file and once typed in, " +
+    "usually. Merging hands every role, figure and setting to the row you keep and takes the " +
+    "other away. Nobody is retired and nothing is left pointing at a row that has gone.",
+    '<div class="mgbox"><div class="mghead">Merging <b>' + esc(a.name) + '</b> with\u2026</div>' +
+    chooser + body + '</div>');
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -2111,26 +2027,37 @@ function renderPeopleMerge(mayEdit){
    three-step shape, the review-before-apply and every class here are the
    import page's, because it is the same job done to a different table.
    ══════════════════════════════════════════════════════════════════ */
-/* ── THE FILE IS A HEADER BUTTON, AND THE REVIEW IS TRANSIENT (§90) ─
-   Islam: "for the seed the register you can [put] this as a button on the top
-   beside the passwords with a drop down to download the template or upload it.
-   And remove the sections in the bottom of the page."
-
-   Steps 1 and 2 were PERMANENT FURNITURE for something done twice a year. They
-   sat under a 33-row table, which is where the page's own scroll ends, and
-   every visit to the register carried them. The two acts are one dropdown now,
-   beside Columns and Passwords, where the page's other collective actions
-   already live (§69.22).
-
-   WHAT IS NOT FURNITURE IS THE REVIEW. Reading a file produces conflicts to
-   answer and differences to tick (§87.5, §87.6) — a table of its own, with
-   Apply at the end of it — so it appears UNDER the register at the moment it
-   exists and goes again when it is applied or discarded. A dropdown is the
-   right home for two buttons and the wrong one for a decision. */
 function renderPeopleFile(mayEdit){
   if (!mayEdit) return "";
   var plan = PPLF.plan;
-  if (!plan && !PPLF.done) return "";
+
+  var step1 =
+    '<div class="imp-step"><div class="imp-n">1</div><div class="imp-b">' +
+      '<h4>Download the register</h4>' +
+      '<p class="sub">The same file both ways: what comes down is who is on the register ' +
+        'now, so it is the export as well as the template. ' +
+        plural(PEOPLE.length, "row") + ', with Role and Status as dropdowns' +
+        (mainbus().length
+          ? ' and your ' + mainbus().length + ' names in the Official BU column'
+          : ' — the Official BU column has no list yet, so type the names and they will be ' +
+            'added to the Official BU list on arrival') + '.</p>' +
+      '<div class="imp-row">' +
+        '<button class="editbtn" data-dlppl="1">Download the people template</button>' +
+      '</div>' +
+    '</div></div>';
+
+  var step2 =
+    '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
+      '<h4>Upload the filled file</h4>' +
+      '<p class="sub">Matched on <b>Emp ID</b>, and where a row has none, on <b>Email</b>. ' +
+        'A row that matches nobody adds them, a row whose two identifiers point at two ' +
+        'different people is set aside for you to answer, and a person the file does not ' +
+        'mention is not touched — <b>an upload never removes anybody</b>.</p>' +
+      '<div class="imp-row"><input type="file" id="ppl-file" accept=".xlsx" ' +
+        'aria-label="Choose a filled people file to upload">' +
+        (PPLF.read ? '<span class="pill quiet">Read &middot; ' + esc(PPLF.read) + '</span>' : '') +
+      '</div>' +
+    '</div></div>';
 
   /* THE RECEIPT, and it names the way back to nothing — you are already on the
      page the change landed on, so it says what moved and stops. */
@@ -2309,11 +2236,11 @@ function renderPeopleFile(mayEdit){
       '</div></div>';
   }
 
-  return section("", PPLF.done ? "The file was applied" : "What this file would change",
-    PPLF.done ? null
-      : "Read from " + esc(PPLF.read || "the file") + ". Nothing has been written yet — " +
-        "an upload adds and amends and never removes anybody.",
-    '<div class="imp">' + step3 + '</div>');
+  return section("", "Seed the register from a file",
+    "One row per person, matched on their employee number. Adds and amends — it never " +
+    "removes anybody, and a blank cell means \u201cnothing to say about this\u201d rather than " +
+    "\u201cclear it\u201d.",
+    '<div class="imp">' + step1 + step2 + step3 + '</div>');
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -2605,14 +2532,6 @@ function renderKB(){
            'on that page — restriction happens by removing the page, never by trimming its ' +
            'contents. A person carries one or more <b>roles</b>, and each role is attached ' +
            'to something: the group, a company, a unit, a function.' },
-      { h: "The office is two roles",
-        p: 'The <b>Super user</b> owns the deployment; the <b>SMO team</b> runs it. The team ' +
-           'has everything the Super user has — every unit, every function, the reporting ' +
-           'cycle, Setup — except three things, which are rules rather than cells: they ' +
-           '<b>read</b> Roles &amp; access and do not change it, they <b>retire</b> rather ' +
-           'than delete, and they set passwords for the client\u2019s people but never for ' +
-           'a Super user or for each other. The register carries the seat, so moving one ' +
-           'there is treated as changing the matrix — not as editing a row.' },
       { h: "Seven roles, seven kinds of page",
         p: 'The table on <b>Roles &amp; access</b> is roles down the side and kinds of page ' +
            'across the top. Not individual pages — a unit\u2019s five pages answer together, ' +
@@ -2647,42 +2566,6 @@ function renderKB(){
         p: 'Signing in is checked on the server against a stored password. Per-action ' +
            'authorisation and the change log are not built yet: today the enforcement is ' +
            'at the door, not at each button.' }
-    ]),
-    /* ── THE REGISTER'S THREE NOTES, MOVED HERE (§90) ────────────────
-       Islam: "remove the notes below the registry table and take them to the
-       knowledge base as agreed." §30's rule — a setup table is where you
-       CHANGE a thing, not where it is explained — applied to the last page
-       still carrying three paragraphs of model under its rows.
-
-       MOVED, NOT DELETED. Each said something true that is said nowhere else:
-       what people actually type at the door, what an issued password does
-       next, and why retiring and deleting are different acts. */
-    kbSection("register", "The people register", [
-      { p: 'One row per person: who they are, where they sit, and what they may do. It is ' +
-           'the same file both ways — what downloads from <b>Register file</b> is the ' +
-           'register as it stands, so the export and the template are one thing.' },
-      { h: "People sign in with the address on the register",
-        p: 'Somebody with no address can still sign in with the name in the <i>Sign-in ' +
-           'name</i> column, which is off by default under <i>Columns</i>. <b>One address ' +
-           'on two rows says who nobody is</b>, so the door refuses both until the register ' +
-           'is corrected \u2014 and the register flags the pair rather than leaving it to be ' +
-           'discovered at the door.' },
-      { h: "An issued password is used once",
-        p: 'Whoever you issue one to is asked to choose their own the first time they use ' +
-           'it, so the same password never works twice for the same person. Resetting ' +
-           'everybody ends their open sessions \u2014 and never touches your own, because ' +
-           'being signed out of the screen you are working in is not a safety feature.' },
-      { h: "Retire somebody who has left; delete a row that should never have existed",
-        p: 'Retiring takes away every role they hold and closes the door, while everything ' +
-           'already attributed to them stays true. Deleting takes the row, the password and ' +
-           'the open sessions, and is <b>refused while anything still points at the ' +
-           'person</b> \u2014 the refusal names what. Deleting is the Super user\u2019s.' },
-      { h: "Two rows that are one person are merged, never guessed",
-        p: 'Who a row <i>is</i> is decided by <b>Emp ID, then email</b> \u2014 never by the ' +
-           'name, because two people really can share one. A row with neither is marked, ' +
-           'because that is the row the next upload cannot match. Where two rows turn out ' +
-           'to be one person, <b>Merge</b> on the row\u2019s menu hands every role, figure ' +
-           'and setting to the row you keep and takes the other away.' }
     ]),
     kbSection("labels", "Labels — what each level is called", [
       { p: 'Every level of the model carries an <b>internal name</b> the platform is built ' +
@@ -3236,7 +3119,7 @@ function renderMySources(){
       '<b>sets</b>, and a set\u2019s owner enters everything in it \u2014 the SMO creates ' +
       'them on <b>Setup &rsaquo; Figure sets</b>.</div>';
   }
-  var open = REVIEW.state === "open" && !(CYCLE.locked && !inOffice());
+  var open = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super"));
   var byUnit = {};
   rows.forEach(function(r){ (byUnit[r.unit] = byUnit[r.unit] || []).push(r); });
 
@@ -4074,8 +3957,7 @@ function renderFunctions(){
                "no"; this one says why, and what to do about it. */
             (function(){
               if (CLEARING !== "fndel|" + fk)
-                return mayDestroy()
-                  ? '<button class="linkbu" data-fndel="' + fk + '">Delete</button>' : '';
+                return '<button class="linkbu" data-fndel="' + fk + '">Delete</button>';
               var why = fnDeleteBlockers(fk);
               if (why.length) return '<span class="confirm wide">' +
                 '<b>' + esc(f.name) + ' cannot be deleted</b>' +
@@ -4120,8 +4002,7 @@ function renderFunctions(){
                   '<button class="rmbtn" data-clearyes="fn|' + fk + '|nums">Yes, clear the progress</button>' +
                   '<button class="linkbu" data-clearno="1">Cancel</button></span>'
               : '<button class="linkbu" data-clear="fn|' + fk + '|nums">Clear progress</button>' +
-                (mayDestroy()
-                  ? '<button class="linkbu" data-clear="fn|' + fk + '|plan">Clear plan</button>' : '')) +
+                '<button class="linkbu" data-clear="fn|' + fk + '|plan">Clear plan</button>') +
           '</div>'
         : '<span class="pill ' + (f.active === false ? "none" : "good") + '">' +
             (f.active === false ? "Retired" : "Active") + '</span>') + '</td></tr>';

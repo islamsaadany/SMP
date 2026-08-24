@@ -9077,9 +9077,14 @@ and that is the argument for both: **what you scroll to reach is the thing you
 do to a row, and what you need beside it is the name of the row you are doing it
 to.**
 
-**69.21 Two names in the column, the whole one on the row.** Islam: *"for the
-employees table names let's make them only the first 2 names so the first column
-wraps better."* The file carries full legal names — *Mohamed Hamed Ahmed Hamed
+**69.21 The first few names in the column, the whole one on the row.** Islam:
+*"for the employees table names let's make them only the first 2 names so the
+first column wraps better"* — and then **three**, having seen two. Two lost the
+surname on the Arabic naming pattern this register is full of: *Mohamed Hamed
+Ahmed Hamed Ahmed* is given name, father, grandfather, so two words name a
+person and their father and nobody's family. The count is a named constant
+(`SHORT_NAME_WORDS`), because the next time it moves it will move for a reason
+and the reason belongs beside the number. The file carries full legal names — *Mohamed Hamed Ahmed Hamed
 Ahmed* — and that column is now FROZEN, so every character it takes is taken
 from every other column at every scroll position.
 

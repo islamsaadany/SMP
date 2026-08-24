@@ -1229,12 +1229,13 @@ function renderPeople(){
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it, and the whole point of the class is that
          the column chooser can reorder everything to its right. */
-      /* ── TWO NAMES IN THE COLUMN, THE WHOLE ONE ON THE ROW (§69.21) ──
-         Islam: "for the employees table names let's make them only the first 2
-         names so the first column wraps better." The file carries full legal
-         names — "Mohamed Hamed Ahmed Hamed Ahmed" — and the column they sit in
-         is now FROZEN (§69.19), so every character it takes is taken from
-         every other column at every scroll position.
+      /* ── THE FIRST FEW NAMES, THE WHOLE ONE ON THE ROW (§69.21) ──────
+         Islam: "let's make them only the first 2 names so the first column
+         wraps better" — then three, having seen two. The file carries full
+         legal names ("Mohamed Hamed Ahmed Hamed Ahmed") and the column they
+         sit in is now FROZEN (§69.19), so every character it takes is taken
+         from every other column at every scroll position. How many words is
+         SHORT_NAME_WORDS in config-data.js.
 
          DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME. This is the
          trap and it is worth the words: the input's value is what

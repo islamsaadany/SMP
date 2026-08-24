@@ -506,17 +506,26 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
-/* The first two words of a name, for a column that has to be narrow (§69.21).
+/* The first few words of a name, for a column that has to be narrow (§69.21).
    NEVER stored and never written back — `p.name` keeps whatever the file
    brought, and this is only what the register's frozen first column shows.
 
+   THREE, at Islam's direction (2026-08-24). Two lost the surname on the
+   Arabic naming pattern this register is full of: "Mohamed Hamed Ahmed Hamed
+   Ahmed" is given name, father, grandfather — so two words name a person and
+   their father and nobody's family, which is a worse answer than the long one.
+   The count is a NAMED CONSTANT rather than a literal in the slice, because
+   the next time it moves it will move for a reason and the reason belongs
+   beside the number.
+
    `split(/\s+/)` on a trimmed string, so a double space between names does not
-   produce an empty second word and a name of one word is returned whole. A
-   name that is already two words or fewer comes back unchanged, which is why
-   there is no "should we shorten this" test at the call site. */
+   produce an empty word and a name of one word is returned whole. A name
+   already at or under the limit comes back unchanged, which is why there is no
+   "should we shorten this" test at the call site. */
+var SHORT_NAME_WORDS = 3;
 function shortName(name){
   var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
-  return parts.length <= 2 ? parts.join(" ") : parts.slice(0, 2).join(" ");
+  return parts.slice(0, SHORT_NAME_WORDS).join(" ");
 }
 
 function personBy(key){

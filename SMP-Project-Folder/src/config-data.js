@@ -1512,6 +1512,55 @@ function planPeopleFile(rows){
   var plan = { rows:[], problems:[], notices:[], newBus:[],
                added:0, updated:0, retired:0, restored:0, roles:0 };
   var seen = {};
+  function addrOf(r){ return fileTxt(r["Email"]).toLowerCase(); }
+  /* Worked out for the whole file first, so no row's verdict depends on where
+     it sits. `holder` is the person already using the address, if any. */
+  var addrPlan = {};
+  (function(){
+    var by = {};
+    (rows || []).forEach(function(r, i){
+      var a = addrOf(r);
+      if (!a) return;
+      (by[a] = by[a] || []).push({ at:"Row " + (i + 2), id:fileTxt(r["Emp ID"]) });
+    });
+    Object.keys(by).forEach(function(a){
+      var claims = by[a];
+      var holder = PEOPLE.filter(function(x){
+        return personActive(x) &&
+               String(x.email == null ? "" : x.email).trim().toLowerCase() === a;
+      })[0];
+      var keep = null;
+      if (holder) {
+        /* The row that IS the holder — matched on the employee number, which is
+           what the file is matched on everywhere else (§54). */
+        var mine = claims.filter(function(c){
+          var e = c.id && personByEmpId(c.id);
+          return e && e.key === holder.key;
+        })[0];
+        keep = mine ? mine.at : null;
+      } else if (claims.length === 1) {
+        keep = claims[0].at;
+      }
+      var refuse = claims.filter(function(c){ return c.at !== keep; })
+                         .map(function(c){ return c.at; });
+      if (!refuse.length) return;
+      addrPlan[a] = { refuse: refuse, msg: function(at){
+        if (holder && keep) {
+          return "the address " + a + " already belongs to " + holder.name +
+            " on the register (" + keep + "). Sign-in takes the address, so a second " +
+            "person holding it would turn both of them away.";
+        }
+        if (holder) {
+          return "the address " + a + " already belongs to " + holder.name +
+            " on the register. Sign-in takes the address, so giving it to a second " +
+            "person would turn both of them away.";
+        }
+        return "the address " + a + " is on " + claims.length + " rows of this file (" +
+          claims.map(function(c){ return c.at; }).join(", ") + "). Sign-in takes the " +
+          "address, so nobody sharing one can get in — give each person their own.";
+      } };
+    });
+  })();
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -1670,6 +1719,33 @@ function planPeopleFile(rows){
         plan.problems.push({ at:at, msg:'"' + status + '" is not a status. It is Active or Retired.' });
         return;
       }
+    }
+
+    /* ── AN ADDRESS ON TWO ROWS, CAUGHT WHERE IT ARRIVES (§83) ────────
+       The file was checked for a repeated employee number and never once for a
+       repeated ADDRESS, in either direction — against another row of the same
+       file, or against somebody already on the register. Both landed silently,
+       and the consequence does not show up here at all: the door refuses BOTH
+       people with the correct password (§69.23), neither is told why, and the
+       only surface that would ever say so is the register's own duplicate mark
+       (§81.2) — a page nobody visits after an upload that reported no problems.
+
+       A PROBLEM, NOT A NOTICE: the row is refused rather than applied. An
+       address is what somebody signs in with, so importing a collision breaks
+       two people who were working — and unlike a missing BU there is no
+       sensible half-answer to fall back on.
+
+       ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR (found by the check). Written
+       as a running tally, the first row to claim an address won it — so a NEW
+       person listed above the person who already holds that address took it,
+       and the rightful owner was refused their own row. The occupancy is worked
+       out for the whole file BEFORE the loop, so the answer does not depend on
+       where a row sits: the person who already holds it keeps it, and if nobody
+       holds it the file is ambiguous and every row claiming it is refused —
+       §69.23's stance at the door, applied one step earlier. */
+    if (addrPlan[addrOf(r)] && addrPlan[addrOf(r)].refuse.indexOf(at) > -1) {
+      plan.problems.push({ at:at, msg:addrPlan[addrOf(r)].msg(at) });
+      return;
     }
 
     var row = { at:at, id:id, key:existing ? existing.key : null,

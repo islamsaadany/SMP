@@ -10163,3 +10163,75 @@ one.
 `src/checks/table-widths.py` walks every Setup and Manage page and reports how
 far each table sits past its box, so the number is a measurement rather than an
 impression.
+
+---
+
+## 83 · A duplicate address, caught where it arrives (v3.24)
+
+Islam: *"Flag it in the page."*
+
+§81 flagged duplicates on the register. This is the other half — **the moment
+they arrive**, which is the upload, and the place a duplicate can be refused
+instead of merely noticed.
+
+**83.1 The file was checked for a repeated employee number and NEVER ONCE for a
+repeated address**, in either direction: against another row of the same file,
+or against somebody already on the register. Both landed silently — and the
+consequence does not appear on the import receipt at all. The door refuses
+**both** people with the correct password (§69.23), neither is told why, and the
+only surface that would ever say so is the register's own duplicate mark, which
+is a page nobody opens after an upload that reported no problems.
+
+It is a **problem, not a notice**: the row is refused rather than applied. An
+address is what somebody signs in with, so importing a collision breaks two
+people who were working — and unlike a missing BU there is no sensible
+half-answer to fall back on.
+
+**ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR, and the first draft let it.**
+Written as a running tally, the first row to claim an address won it. So a NEW
+person listed above the person who already holds that address took it, **and the
+rightful owner was refused their own row** — found by the check, which is why it
+seeds an existing holder and puts them BELOW the claimant. Occupancy is now
+worked out for the whole file before the loop: the person who already holds an
+address keeps it, and if nobody holds it the file is ambiguous and every row
+claiming it is refused. §69.23's stance at the door, applied one step earlier.
+
+**Three of the check's assertions then failed on correct behaviour**, because
+they were written against the wording of the broken version — "also on Row 2",
+and "Row 6 must not appear anywhere". Rewritten to assert **which rows are
+refused**, which is the contract; Constitution XVI, met on my own check rather
+than the product's.
+
+**83.2 One floor, on one column, and it is the address.** Wrapping took the
+register from **207px past its box to 0** — and made one row **382px tall**,
+because an address has no spaces and `overflow-wrap:anywhere` broke it down a
+column that had collapsed to nothing.
+
+Minimums on the name and the job title were tried first and **bought nothing** —
+measured, identical row heights at every value — while costing up to 184px of
+scroll. Swept against the demo register and against the worst row it can produce
+(an eight-word name, a 46-character title and a 30-character address on one
+person):
+
+| address floor | scroll | tallest row |
+|---|---|---|
+| none | 0px | 382px |
+| 60px | 20px | 160px |
+| **75px** | **35px** | **120px** |
+| 90px | 50px | 120px |
+| 120/150/170 on three columns | 184px | 79px |
+
+**75px is where the tall row stops getting shorter**; everything above it buys
+scroll and nothing else. Across every Setup table: **759px of overflow → 55px**,
+and the two that remain (the register at 35, Roles & access at 20) are behind
+frozen columns that make a short scroll workable (§69.20).
+
+**83.3 THE SPLICE MADE A SECOND COPY OF THE RULES, and the later one won.**
+Editing the block by string surgery left the register's wrap rules in the file
+**twice** — sixty-one lines apart, the stale copy last, so every measurement
+after it was of numbers I thought I had removed. That is §51.5, §53.6 and
+§29.2's fault for the fourth time in this file, and the reason it was caught is
+that the number stopped agreeing with the sweep that had just produced it: **a
+measurement that disagrees with the one before it, after a change that should
+not have moved it, is a file to read rather than a number to accept** (§63's
+rule about the contrast total).

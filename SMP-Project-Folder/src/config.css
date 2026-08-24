@@ -727,7 +727,101 @@
   /* A name may wrap now, so its cell has to be able to grow — the frozen
      column's `overflow:hidden` (§71.2) clips what spills, and a wrapped second
      line is not spill. */
-  .peoplecfg td.namecell { white-space:normal; }
+  /* ── ONE FLOOR, ON ONE COLUMN, AND IT IS THE ADDRESS (§83.2) ───────
+     Wrapping alone took the register from 207px past its box to 0. What it
+     also did was make one row 382px tall: an address has no spaces, so
+     `overflow-wrap:anywhere` broke it down a column that had collapsed to
+     nothing.
+
+     THE FIX IS A MINIMUM ON THAT COLUMN AND NOTHING ELSE. Minimums on the name
+     and the job title were tried first and bought NOTHING — measured, identical
+     row heights at every value — while costing up to 184px of scroll. The two
+     numbers that decide this table are the address's floor and nothing at all.
+
+     Swept against the demo register and against the worst row it can produce
+     (an eight-word name, a 46-character title, a 30-character address on one
+     person):
+
+       no floor      0px of scroll  ·  tallest row 382px
+       60px         20px            ·  tallest row 160px
+       75px         35px            ·  tallest row 120px   <- chosen
+       90px         50px            ·  tallest row 120px
+       120/150/170 184px            ·  tallest row  79px
+
+     75px is where the tall row stops getting shorter. Everything above it buys
+     scroll and nothing else. Two lines on an ordinary row, three on the worst
+     one in the register, and 35px of a scroll the frozen columns already make
+     workable (§69.20). */
+  .peoplecfg td.namecell, .peoplecfg th.namecell { white-space:normal; }
+  .peoplecfg td.wrapany, .peoplecfg th.wrapany { overflow-wrap:anywhere; min-width:75px; }
+
+  /* ── AND THE ACTIONS COLUMN FREEZES TO THE RIGHT (§69.20) ──────────
+     Islam: "allow me to remove a full employee in the register, not only
+     retired" — which had been built (§69.4) and could not be REACHED. Measured
+     at 1440px: the row's kebab sits 317px past the right edge of its own
+     scroll box, and Delete permanently is inside that menu. A control nobody
+     can get to is a control that was not built, and the register grew a
+     horizontal scroll the day it grew its ninth column (§54.6, recorded then
+     and not acted on).
+
+     So the last column is frozen the way the first two are — the mirror of the
+     same measurement, and the reason the pair on the left was worth freezing
+     in the first place: what you scroll to reach is the thing you do to a row,
+     and what you need beside it is the name of the row you are doing it to. */
+  .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
+    position:sticky; right:0; z-index:2; background:inherit;
+    box-shadow:-1px 0 0 var(--line-soft); }
+  .peoplecfg thead th.kebcell { z-index:4; }
+  /* Above the header too: a panel opened on the first visible row would
+     otherwise slide under the frozen header the moment the box is scrolled. */
+  .peoplecfg td.kebcell.lifted { z-index:30; }
+  .peoplecfg tr.retired td.kebcell { opacity:1; }
+  /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
+     `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
+     cells would have gone translucent and every row scrolling past would have
+     ghosted through them. The dimming moves to the ink for those two. */
+  .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.namecell { opacity:1; color:var(--ink-3); }
+  .peoplecfg tr.retired td.kebcell .kebab { opacity:.62; }
+  .peoplecfg tr.retired td.namecell b,
+  .peoplecfg tr.retired td.namecell input.fld { color:var(--ink-3); }
+  /* THE GROUND IS ON THE ROW so the frozen cells can inherit it. The platform
+     stripes on `> td` (arrange.css); this says the same thing one level up,
+     for the three cells that cannot read a sibling's background. Both paint
+     the same colour, so they cannot disagree. */
+  .peoplecfg tbody tr { background:var(--surface); }
+  .peoplecfg tbody tr:nth-child(even) { background:var(--zebra); }
+  .peoplecfg tbody tr:hover { background:var(--surface-2); }
+  .cfg table.unitcfg.peoplecfg { table-layout:auto; }
+  /* A SELECT SIZES ITSELF TO ITS LONGEST OPTION, and that option is not on
+     screen. Capabilities carries a function picker whose list includes "Strategy
+     Management Office", so the column was 239px wide to hold a word nobody can
+     see until the list is open — the table measured 552px past its box, three
+     times the register's worst. Capped at the cell: the chooser opens over the
+     page anyway (§45.5), so nothing is lost by the closed control being narrow. */
+  /* AN ABSOLUTE CAP, NOT `max-width:100%`. Under `table-layout:auto` the cell
+     is sized BY its child, so a percentage of the cell is a percentage of the
+     width the select just asked for — circular, and measured as changing
+     nothing: 552px past the box before and after. §46's note about
+     `max-width:0` being a fixed-layout trick, met from the other side. */
+  .cfg table select.fld, .cfg table .ssbtn {
+    max-width:200px; box-sizing:border-box; }
+  .cfg table td { min-width:0; }
+
+  /* ── EVERY SETUP TABLE WRAPS, NOT JUST THE REGISTER (§81.5) ────────
+     `_shared.css` sets `thead th { white-space:nowrap }` and the Setup tables
+     inherited a body to match. Capabilities and Roles & access are both wider
+     than their box for the same reason the register was: one long cell holding
+     its column open. The rule is the same everywhere — prose wraps, tokens do
+     not — so it is written once here and the register's block below only adds
+     what is particular to it. */
+  .cfg table td { white-space:normal; }
+  .cfg table td.cc, .cfg table td.idx, .cfg table td.mono,
+  .cfg table td.nowrapcell, .cfg table .pill, .cfg table .rolechip,
+  .cfg table .chip, .cfg table .pair { white-space:nowrap; }
+  /* A header may wrap too where its words are long — "Sees other companies"
+     is three words holding a 2-row table open. */
+  .cfg table thead th { white-space:normal; }
+  .cfg table thead th.idx, .cfg table thead th.cc { white-space:nowrap; }
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }
   /* THE CLIP MOVES INSIDE THE CELL. `width:99%; max-width:0` is a
      FIXED-layout trick — under auto layout `max-width:0` is not a hint, it is

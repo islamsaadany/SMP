@@ -1697,7 +1697,7 @@ function renderPeople(){
         (showCol("title")    ? th("Job title")  : '') +
         (showCol("mainbu")   ? th("Official BU") : '') +
         (showCol("bu")       ? th("Unit")       : '') +
-        (showCol("email")    ? th("Email")      : '') +
+        (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
            orders them by the text that happens to be rendered, which is not a

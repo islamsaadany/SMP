@@ -599,11 +599,30 @@
   /* A hairline where the frozen pair ends, so a column scrolling under it
      reads as going behind something rather than being cut off. */
   .peoplecfg td.pname, .peoplecfg thead th.pname { box-shadow:1px 0 0 var(--line-soft); }
+  /* ── AND THE ACTIONS COLUMN FREEZES TO THE RIGHT (§69.20) ──────────
+     Islam: "allow me to remove a full employee in the register, not only
+     retired" — which had been built (§69.4) and could not be REACHED. Measured
+     at 1440px: the row's kebab sits 317px past the right edge of its own
+     scroll box, and Delete permanently is inside that menu. A control nobody
+     can get to is a control that was not built, and the register grew a
+     horizontal scroll the day it grew its ninth column (§54.6, recorded then
+     and not acted on).
+
+     So the last column is frozen the way the first two are — the mirror of the
+     same measurement, and the reason the pair on the left was worth freezing
+     in the first place: what you scroll to reach is the thing you do to a row,
+     and what you need beside it is the name of the row you are doing it to. */
+  .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
+    position:sticky; right:0; z-index:2; background:var(--surface);
+    box-shadow:-1px 0 0 var(--line-soft); }
+  .peoplecfg thead th.kebcell { z-index:4; }
+  .peoplecfg tr.retired td.kebcell { opacity:1; }
   /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
      `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
      cells would have gone translucent and every row scrolling past would have
      ghosted through them. The dimming moves to the ink for those two. */
   .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.pname { opacity:1; color:var(--ink-3); }
+  .peoplecfg tr.retired td.kebcell .kebab { opacity:.62; }
   .peoplecfg tr.retired td.pname b,
   .peoplecfg tr.retired td.pname input.fld { color:var(--ink-3); }
   .cfg table.unitcfg.peoplecfg { table-layout:auto; }

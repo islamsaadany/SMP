@@ -489,6 +489,19 @@ function brandChecks(){
    relational meaning, and adding a real column to a table that already exists
    needs a pre-phase migration (§33.5) for nothing gained. */
 function personActive(p){ return SMPRules.personActive(p); }
+/* The first two words of a name, for a column that has to be narrow (§69.21).
+   NEVER stored and never written back — `p.name` keeps whatever the file
+   brought, and this is only what the register's frozen first column shows.
+
+   `split(/\s+/)` on a trimmed string, so a double space between names does not
+   produce an empty second word and a name of one word is returned whole. A
+   name that is already two words or fewer comes back unchanged, which is why
+   there is no "should we shorten this" test at the call site. */
+function shortName(name){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  return parts.length <= 2 ? parts.join(" ") : parts.slice(0, 2).join(" ");
+}
+
 function personBy(key){
   return PEOPLE.filter(function(x){ return x.key === key; })[0] || null;
 }

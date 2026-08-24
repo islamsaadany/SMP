@@ -1175,9 +1175,24 @@ function renderPeople(){
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it, and the whole point of the class is that
          the column chooser can reorder everything to its right. */
-      '<td class="pname" title="' + esc(p.key) + '">' + (editable
+      /* ── TWO NAMES IN THE COLUMN, THE WHOLE ONE ON THE ROW (§69.21) ──
+         Islam: "for the employees table names let's make them only the first 2
+         names so the first column wraps better." The file carries full legal
+         names — "Mohamed Hamed Ahmed Hamed Ahmed" — and the column they sit in
+         is now FROZEN (§69.19), so every character it takes is taken from
+         every other column at every scroll position.
+
+         DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME. This is the
+         trap and it is worth the words: the input's value is what
+         `fieldWire("pname")` writes back to `p.name`, so shortening the value
+         would have overwritten the register's real names with two words each —
+         silently, on the first keystroke in any row, with the file's own copy
+         gone. The short form is a rendering; the stored fact is untouched, and
+         the whole name is on the row's hover and in every other surface that
+         names a person. */
+      '<td class="pname" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc(p.name) + '</b>') + '</td>' +
+        : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -1464,7 +1479,7 @@ function renderPeople(){
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
         (showCol("status")   ? '<th class="cc">Status</th>' : '') +
         (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
-        '<th class="cc"></th>' +
+        '<th class="cc kebcell"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
       bulk +
       /* THE NOTE HAD TO CHANGE WITH THE FEATURE (§69). It said "People are

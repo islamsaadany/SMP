@@ -9063,3 +9063,29 @@ A retired row's frozen cells dim their INK rather than their opacity:
 `tr.retired td` carries `opacity:.62`, and opacity dims the background too — so
 the two sticky cells would have gone translucent and every row scrolling past
 would have ghosted through them.
+
+**69.20 Delete permanently was built and could not be reached.** Islam: *"allow
+me to remove a full employee in the register, not only retired"* — which §69.4
+had built. Measured at 1440px: the row's kebab sits **317px past the right edge
+of its own scroll box**, and Delete permanently is inside that menu. **A control
+nobody can get to is a control that was not built.** The register grew a
+horizontal scroll the day it grew its ninth column (§54.6, recorded then and not
+acted on), and every per-row action has been behind it since.
+
+The actions column freezes to the right, the mirror of the pair on the left —
+and that is the argument for both: **what you scroll to reach is the thing you
+do to a row, and what you need beside it is the name of the row you are doing it
+to.**
+
+**69.21 Two names in the column, the whole one on the row.** Islam: *"for the
+employees table names let's make them only the first 2 names so the first column
+wraps better."* The file carries full legal names — *Mohamed Hamed Ahmed Hamed
+Ahmed* — and that column is now FROZEN, so every character it takes is taken
+from every other column at every scroll position.
+
+**DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME**, which is the trap and
+it is worth writing down: the input's value is what `fieldWire("pname")` writes
+back to `p.name`, so shortening the *value* would have overwritten the
+register's real names with two words each — silently, on the first keystroke in
+any row, with the file's own copy gone. Asserted by firing a `change` on an
+untouched field and reading the stored name back.

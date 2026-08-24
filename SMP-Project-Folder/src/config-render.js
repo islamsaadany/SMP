@@ -3753,10 +3753,14 @@ function paintMailPreview(){
    written into its own element and the composer is left alone. Everything
    typed is mirrored into SENDMSG on `change`, so the one repaint that does
    happen — after a send — does not lose it. */
+/* Which recipient dropdown is open, or null. ONE at a time: two overlapping
+   popups on the same row are two things covering each other. */
+var DDOPEN = null;
 var SENDMSG = null;
 function sendmsg(){
   if (!SENDMSG) SENDMSG = { criteria: { everyone:false, roles:[], targets:[], keys:[] },
                             subject:"", body:"", ctaLabel:"", ctaHref:"",
+                            draftId:null,
                             aud:null, asking:false, busy:false, result:null };
   return SENDMSG;
 }
@@ -3856,64 +3860,113 @@ function renderSendMessage(){
   var st = sendmsg(), c = st.criteria, sh = commsShape();
   var live = (typeof SYNC !== "undefined") && SYNC.isLive();
 
-  function box(list, value, label, sub){
-    var on = list === "everyone" ? !!c.everyone : (c[list] || []).indexOf(value) > -1;
-    return '<label class="audbox' + (on ? ' on' : '') + '">' +
+  /* ── SEARCHABLE DROPDOWNS, SIDE BY SIDE (§76.2) ─────────────────
+     Islam: "for the who gets it just make it multiple drop downs with
+     searchable checklists and the drop downs are beside each other."
+
+     The wall of capsules was thirty controls at once, and thirty controls is a
+     thing you scan rather than a thing you use — with ten units, eight
+     functions and eight roles it only gets worse as the tenant grows. Four
+     buttons that each open a searchable list is the same choice made in the
+     same vocabulary, and what is CHOSEN stays visible on the buttons, so
+     nothing is hidden by closing one.
+
+     One panel open at a time (DDOPEN), because two overlapping popups on one
+     row is two things covering each other. */
+  function ddrow(list, value, label){
+    var on = (c[list] || []).indexOf(value) > -1;
+    return '<label class="ddrow' + (on ? ' on' : '') + '" data-ddtext="' +
+      esc(label.toLowerCase()) + '">' +
       '<input type="checkbox" data-aud="' + esc(list) + '" value="' + esc(value) + '"' +
         (on ? ' checked' : '') + '>' +
-      '<span>' + esc(label) + (sub ? '<i>' + esc(sub) + '</i>' : '') + '</span></label>';
+      '<span>' + esc(label) + '</span></label>';
+  }
+  function dd(key, label, rows, chosen){
+    var open = DDOPEN === key;
+    return '<div class="pickdd' + (open ? ' open' : '') + '">' +
+      '<button class="ddbtn' + (chosen ? ' has' : '') + '" data-ddopen="' + esc(key) + '" ' +
+        'aria-expanded="' + open + '">' +
+        '<span class="ddlab">' + esc(label) + '</span>' +
+        (chosen ? '<span class="ddn">' + chosen + '</span>' : '') +
+        '<span class="ddcar">\u25be</span></button>' +
+      (open
+        ? '<div class="ddpop" data-ddpop="' + esc(key) + '">' +
+            '<input class="fld ddsearch" data-ddsearch="' + esc(key) +
+              '" placeholder="Search\u2026" autocomplete="off">' +
+            '<div class="ddlist">' + rows + '</div>' +
+            (chosen ? '<div class="ddfoot"><button class="linkbu" data-ddclear="' +
+               esc(key) + '">Clear these ' + chosen + '</button></div>' : '') +
+          '</div>'
+        : '') +
+      '</div>';
   }
 
-  var everyone = '<div class="audrow">' + box("everyone", "1", "Everyone on the register") + '</div>';
+  var tg = sendmsgTargets();
+  function tgRows(kind){
+    return tg.filter(function(t){ return (t.kind || "") === kind; })
+             .map(function(t){ return ddrow("targets", t.at, t.label); }).join("");
+  }
+  function tgCount(kind){
+    return tg.filter(function(t){ return (t.kind || "") === kind &&
+             (c.targets || []).indexOf(t.at) > -1; }).length;
+  }
+  var WIDE = "The group and its companies";
 
-  /* The floor roles are offered like the rest: "every employee" is a real
-     audience, and leaving them out would make the list quietly incomplete. */
-  var roles = '<div class="audrow">' + ROLES.map(function(r){
-      return box("roles", r.key, r.name); }).join("") + '</div>';
-
-  var tg = sendmsgTargets(), groups = {};
-  tg.forEach(function(t){ (groups[t.kind || ""] = groups[t.kind || ""] || []).push(t); });
-  var targets = Object.keys(groups).map(function(k){
-      return (k ? '<div class="audkind">' + esc(k) + '</div>' : '') +
-        '<div class="audrow">' + groups[k].map(function(t){
-          return box("targets", t.at, t.label); }).join("") + '</div>';
-    }).join("");
+  /* Wrapped in a row, or the flex COLUMN the picker is stretches this one
+     capsule the full width of the pane — a checkbox with 900px of clickable
+     nothing after it. */
+  var everyone = '<div class="audrow"><label class="audbox' + (c.everyone ? ' on' : '') + '">' +
+      '<input type="checkbox" data-aud="everyone" value="1"' +
+        (c.everyone ? ' checked' : '') + '>' +
+      '<span>Everyone on the register</span></label></div>';
 
   var picked = (c.keys || []).map(function(k){
       var p = personBy(k);
       return '<span class="chip">' + esc(p ? p.name : k) +
         '<button class="chipx" data-audkey="' + esc(k) + '" aria-label="Remove">&times;</button></span>';
     }).join("");
-  var pickable = PEOPLE.filter(function(p){
-      return personActive(p) && (c.keys || []).indexOf(p.key) < 0; });
-  var pick = '<div class="audrow">' + picked +
-    '<select class="fld" id="audpick"><option value="">Add somebody…</option>' +
-    pickable.map(function(p){
-      return '<option value="' + esc(p.key) + '">' + esc(p.name) +
-        (p.email ? '' : ' — no address') + '</option>'; }).join("") +
-    '</select></div>';
+
+  var ddbar = '<div class="ddbar">' +
+    dd("roles", "Roles",
+       ROLES.map(function(r){ return ddrow("roles", r.key, r.name); }).join(""),
+       (c.roles || []).length) +
+    dd("wide", "Group & companies", tgRows(WIDE), tgCount(WIDE)) +
+    dd("units", "Business units", tgRows("Business units"), tgCount("Business units")) +
+    dd("fns", "Functions", tgRows("Supporting functions"), tgCount("Supporting functions")) +
+    dd("people", "People",
+       PEOPLE.filter(personActive).map(function(p){
+         return ddrow("keys", p.key, p.name + (p.email ? "" : " \u2014 no address"));
+       }).join(""),
+       (c.keys || []).length) +
+    '</div>';
 
   var who = section("", "Who gets it",
     "Tick as many as you like — they add up rather than narrow each other. " +
     "Somebody who matches twice still gets one message.",
-    '<div class="cfg audpick">' + everyone +
-      '<div class="audkind">By role</div>' + roles +
-      targets +
-      '<div class="audkind">Somebody in particular</div>' + pick +
+    '<div class="cfg audpick">' + everyone + ddbar +
+      (picked ? '<div class="audrow">' + picked + '</div>' : '') +
       '<div class="audout" id="audout">' + sendmsgAudienceHtml() + '</div>' +
     '</div>');
 
-  var what = section("", "What it says", null,
+  /* ── ONE PLACE TO WRITE IT (§76.3) ──────────────────────────────
+     Islam: "should I edit in separate boxes or can you let me edit inside the
+     final design box?"
+
+     Inside. A subject box above a preview of the subject is the same words
+     twice, and the second copy is the one that is wrong whenever they differ.
+     The heading and the body are typed straight into the message; the button
+     keeps its own two fields, because a label and a link are not text in the
+     flow and there is nowhere in the design to type a URL.
+
+     THE HEADING IS ALSO THE SUBJECT LINE, and the note says so — a person is
+     entitled to know that what they type at the top is what lands in an inbox
+     list, since those are two different places and only one of them is on
+     screen. */
+  var what = section("", "A button", null,
     '<div class="cfg"><table><tbody>' +
-      '<tr><td style="width:26%"><b>Subject</b><span class="why">What they see in the list ' +
-        'before they open it.</span></td>' +
-        '<td><input class="fld" id="msgsubject" value="' + esc(st.subject) +
-          '" placeholder="Reporting for Q3 opens on Monday"></td></tr>' +
-      '<tr><td><b>Message</b><span class="why">A blank line starts a new paragraph.</span></td>' +
-        '<td><textarea class="fld" id="msgbody" rows="8" placeholder="Write it as you would say it.">' +
-          esc(st.body) + '</textarea></td></tr>' +
-      '<tr><td><b>A button</b><span class="why">Optional. Both halves or neither — a button ' +
-        'with no link does nothing and a link with no words is invisible.</span></td>' +
+      '<tr><td style="width:26%"><b>Optional</b><span class="why">Both halves or ' +
+        'neither — a button with no link does nothing and a link with no words is ' +
+        'invisible.</span></td>' +
         '<td><span class="brandpick">' +
           '<input class="fld" id="msgctalabel" value="' + esc(st.ctaLabel) +
             '" placeholder="Open the platform" style="max-width:200px">' +
@@ -3922,16 +3975,23 @@ function renderSendMessage(){
         '</span></td></tr>' +
     '</tbody></table></div>');
 
-  var look = section("", "What they will see",
-    "The real message, drawn by the same code that sends it.",
-    '<div class="mailprev" id="msgprev"></div>');
+  var look = section("", "Write it",
+    "Type straight into the message. The heading is also the subject line people see " +
+    "in their inbox before they open it. Nothing here scrolls — it grows as you write.",
+    '<div class="mailprev grows" id="msgprev"></div>');
 
+  /* ── DRAFTS (§76.1) ─────────────────────────────────────────────
+     Beside Send rather than in a section of its own: saving a draft is the
+     other thing you do when you have finished writing, and putting it three
+     screens away is how a message gets lost instead. */
   var r = st.result;
   var go = section("", "Send it",
     "One message each, never a shared address list — nobody sees who else got it, " +
     "and a failure names the person it failed for.",
     '<div class="cfg"><div class="audrow" style="align-items:center">' +
       '<button class="editbtn apply" id="msgsend"' + (live ? '' : ' disabled') + '>Send</button>' +
+      '<button class="editbtn" id="msgdraft"' + (live ? '' : ' disabled') + '>' +
+        (st.draftId ? 'Save the draft' : 'Save as a draft') + '</button>' +
       '<span class="why" id="msgsaid" style="margin:0">' +
         (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
     '</div>' +
@@ -3947,7 +4007,38 @@ function renderSendMessage(){
        sendmsgHasAny() && st.aud && st.aud.to
          ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen'],
       null, false) +
-    who + what + look + go + renderSentList();
+    who + look + what + go + renderDraftList() + renderSentList();
+}
+
+/* WHAT IS HALF-WRITTEN. Listed above what was sent, because a draft is
+   something you are going to do and a sent message is something you did. */
+var DRAFTLIST = null;   /* null = not asked */
+function renderDraftList(){
+  var rows = (DRAFTLIST && DRAFTLIST.drafts) || [];
+  var st = sendmsg();
+  var body = !DRAFTLIST
+    ? '<span class="why" style="margin:0">Asking\u2026</span>'
+    : DRAFTLIST.error
+      ? '<span class="why" style="margin:0">' + esc(DRAFTLIST.error) + '</span>'
+      : !rows.length
+        ? '<span class="why" style="margin:0">No drafts. Write something and press ' +
+          '<b>Save as a draft</b>.</span>'
+        : '<div class="cfg"><table><thead><tr><th>Heading</th><th>Last saved</th>' +
+          '<th class="cc" style="width:150px">&nbsp;</th></tr></thead><tbody>' +
+          rows.map(function(d){
+            var open = String(st.draftId || "") === String(d.id);
+            return '<tr' + (open ? ' class="focusrow"' : '') + '><td><b>' +
+              esc(d.subject || "(no heading yet)") + '</b>' +
+              (open ? '<span class="why">open now</span>' : '') + '</td>' +
+              '<td>' + esc(String(d.updated_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
+              '<td class="cc">' +
+                '<button class="linkbu" data-draftopen="' + esc(String(d.id)) + '">Open</button> ' +
+                '<button class="linkbu danger" data-draftdel="' + esc(String(d.id)) +
+                  '">Delete</button></td></tr>';
+          }).join("") + '</tbody></table></div>';
+  return section("", "Drafts",
+    "A message you have started. Saved on the server, so it is there on any machine you sign " +
+    "in from — and it stops being a draft the moment it is sent.", body);
 }
 
 /* WHAT WAS SENT. Its own section rather than its own page: the thing you want
@@ -3976,8 +4067,32 @@ function renderSentList(){
     "The record lives outside the saved data, so a save cannot erase it.", body);
 }
 
-/* The preview, on its own so a keystroke redraws it without repainting the
-   page (§72.3's shadow root, same reasons). */
+/* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────
+   The heading and the body are contenteditable, so the message is typed into
+   the design rather than into boxes beside it.
+
+   IT IS REDRAWN ONLY BY THINGS THAT ARE NOT THE TYPING. Rewriting innerHTML on
+   every keystroke would destroy the node the caret is in — §30.1's family, and
+   the reason `typing never repaints` is a rule in this project. So typing
+   writes into SENDMSG and touches nothing; the branding, the button and
+   opening a draft redraw.
+
+   A STYLE BLOCK GOES INTO THE SHADOW ROOT, not the page: the placeholder and
+   the focus ring belong to the editor, and the email's own markup must not
+   carry them — what is sent has no editor in it. */
+var MSGPREV_STYLE =
+  '<style>' +
+  '[data-mail-title],[data-mail-body]{outline:none;border-radius:4px;' +
+    'transition:box-shadow .12s}' +
+  '[data-mail-title]:focus,[data-mail-body]:focus{box-shadow:0 0 0 2px #B8862B66}' +
+  '[data-mail-title]:hover,[data-mail-body]:hover{box-shadow:0 0 0 2px #B8862B22}' +
+  /* A placeholder rather than sample words: sample words typed over become the
+     message, and somebody would send "Your message will appear here." */
+  '[data-mail-title]:empty::before{content:attr(data-ph);color:#9AA3B2}' +
+  '[data-mail-body].blank::before{content:attr(data-ph);color:#9AA3B2;' +
+    'font:400 15px/1.6 Helvetica,Arial,sans-serif}' +
+  '</style>';
+
 function paintMsgPreview(){
   var host = document.getElementById("msgprev");
   if (!host) return;
@@ -3987,11 +4102,52 @@ function paintMsgPreview(){
     root = host.attachShadow({ mode: "open" });
   }
   var st = sendmsg(), sh = commsShape();
-  root.innerHTML = MAIL.html({
+  root.innerHTML = MSGPREV_STYLE + MAIL.html({
     org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
-    title: st.subject || "Your subject will appear here",
+    title: st.subject,
     preheader: st.subject,
-    body: st.body || "Your message will appear here.",
+    body: st.body,
     cta: (st.ctaLabel && st.ctaHref) ? { label: st.ctaLabel, href: st.ctaHref } : null
+  });
+  var t = root.querySelector("[data-mail-title]"),
+      b = root.querySelector("[data-mail-body]");
+  if (t) {
+    t.setAttribute("contenteditable", "true");
+    t.setAttribute("data-ph", "Write the heading\u2026");
+  }
+  if (b) {
+    b.setAttribute("contenteditable", "true");
+    b.setAttribute("data-ph", "Write the message\u2026");
+    if (!st.body) b.classList.add("blank");
+  }
+  wireMsgEditor(root);
+}
+
+/* Reading it back. `innerText` rather than the markup, because the browser is
+   free to produce <div>, <br> or a bare text node depending on how somebody
+   pressed Enter — and what the message IS, is its words and where the blank
+   lines are. MAIL.html turns those back into paragraphs when it sends. */
+function wireMsgEditor(root){
+  var st = sendmsg();
+  var t = root.querySelector("[data-mail-title]"),
+      b = root.querySelector("[data-mail-body]");
+  if (t) t.addEventListener("input", function(){
+    st.subject = t.innerText.replace(/\s+$/, "");
+  });
+  if (b) b.addEventListener("input", function(){
+    st.body = b.innerText.replace(/\s+$/, "");
+    b.classList.toggle("blank", !st.body);
+  });
+  /* PLAIN TEXT ONLY on paste. A message pasted out of a browser arrives
+     carrying its own fonts, colours and links, and none of that survives being
+     read back as innerText — so it would look right while being typed and
+     wrong when it arrived. */
+  [t, b].forEach(function(el){
+    if (!el) return;
+    el.addEventListener("paste", function(ev){
+      ev.preventDefault();
+      var txt = (ev.clipboardData || window.clipboardData).getData("text/plain");
+      document.execCommand("insertText", false, txt);
+    });
   });
 }

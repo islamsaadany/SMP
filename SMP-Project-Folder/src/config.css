@@ -912,6 +912,12 @@
      the message really does arrive light. */
   .mailprev { background:#F4F6FA; border:1px solid var(--line); border-radius:8px;
               padding:4px 0; max-height:520px; overflow:auto; }
+  /* THE ONE YOU WRITE IN DOES NOT SCROLL (Islam, 2026-08-24: "the message box
+     final design expands to fill the message with not scrolling for it"). A
+     box that scrolls hides the end of what you are writing behind an edge, and
+     the whole point of typing into the design is seeing the whole message. It
+     grows instead, because its content is contenteditable and nothing caps it. */
+  .mailprev.grows { max-height:none; overflow:visible; }
   /* Three words in a 90px button is three lines. It sits in a row with a text
      field, so it may keep its own width. */
   [data-mailtest] { white-space:nowrap; }
@@ -946,6 +952,42 @@
                font-weight:600; }
   .audbox input { margin:0; accent-color:var(--gold-deep); }
   .audbox i { font-style:normal; color:var(--ink-3); font-weight:400; padding-left:5px; }
+  /* ── THE DROPDOWNS (§76.2) ─────────────────────────────────────────
+     Four buttons on one row, each opening a searchable checklist. The panel is
+     `position:fixed` and placed by JS, for the reason searchsel's is (§45.5):
+     `.cfg` is an overflow container and would clip an absolute one — and this
+     row sits inside one that already scrolls sideways. */
+  .ddbar { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+  .pickdd { position:relative; }
+  .ddbtn { display:inline-flex; align-items:center; gap:7px; cursor:pointer;
+           border:1px solid var(--line); border-radius:8px; padding:7px 11px;
+           background:var(--surface); font:inherit; font-size:12.5px;
+           color:var(--ink-2); white-space:nowrap;
+           transition:border-color .12s, background .12s; }
+  .ddbtn:hover { border-color:var(--gold); }
+  .pickdd.open .ddbtn { border-color:var(--gold); background:var(--over-bg); color:var(--ink); }
+  /* THE COUNT IS ON THE BUTTON, which is what makes closing a panel safe:
+     nothing chosen is ever hidden by the control that chose it. */
+  .ddbtn .ddn { display:inline-flex; align-items:center; justify-content:center;
+                min-width:19px; height:19px; padding:0 5px; border-radius:999px;
+                background:var(--gold); color:var(--on-accent);
+                font-size:11px; font-weight:700; }
+  .ddbtn.has .ddlab { font-weight:600; color:var(--ink); }
+  .ddcar { color:var(--ink-3); font-size:10px; }
+  .ddpop { position:fixed; z-index:60; width:280px; max-width:92vw;
+           background:var(--surface); border:1px solid var(--line);
+           border-radius:10px; box-shadow:0 12px 32px rgba(0,0,0,.18);
+           padding:8px; display:flex; flex-direction:column; gap:6px; }
+  .ddpop .ddsearch { width:100%; box-sizing:border-box; }
+  .ddlist { max-height:260px; overflow-y:auto; display:flex; flex-direction:column; gap:1px; }
+  .ddrow { display:flex; align-items:center; gap:8px; cursor:pointer;
+           padding:6px 8px; border-radius:6px; font-size:12.5px; color:var(--ink-2); }
+  .ddrow:hover { background:var(--surface-2); }
+  .ddrow.on { background:var(--over-bg); color:var(--ink); font-weight:600; }
+  .ddrow input { margin:0; accent-color:var(--gold-deep); }
+  .ddrow[hidden] { display:none; }
+  .ddfoot { border-top:1px solid var(--line); padding-top:6px; text-align:right; }
+
   .audout { border-top:1px dashed var(--line); padding-top:10px; margin-top:4px;
             font-size:12.5px; color:var(--ink-2); }
   .audnames { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }

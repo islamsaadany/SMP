@@ -9681,3 +9681,89 @@ somebody cannot work out from the screen.
 
 Reproduced exactly — add a person, type an address, go straight to Send without
 waiting — and the person now appears in the resolved list.
+
+---
+
+## 76 · Drafts, dropdowns, and writing inside the design (v3.23)
+
+Three asks in one sitting, and the third one arrived as a question.
+
+**76.1 A draft is real work, so it goes on the server.** Islam: *"allow me to
+save draft messages."*
+
+**Its own table, not a flag on `messages`.** That table is the record of what
+was SENT, and *"what did we send in March"* must not have to remember to say
+*"and not the ones we did not"*. A draft has a different lifetime: it is
+edited, it is deleted, and **it stops existing the moment it becomes a
+message** — sending from a draft removes it, because a sent draft left in the
+list is a trap, and the next person to open it would send it again with nothing
+on it saying so.
+
+**Not `localStorage`, deliberately.** The theme and the People page's columns
+belong there (§25, §47.1) because they are screen preferences. A message
+somebody typed is not: written on a laptop it has to be there on the desk.
+
+Saved over rather than appended to — pressing Save twice leaves one draft, and
+the id the composer holds says which. **A draft deleted in another tab becomes a
+new draft rather than an error**: the alternative is losing the message to a
+row that is no longer there.
+
+**76.2 Thirty capsules become five searchable dropdowns.** Islam: *"for the who
+gets it just make it multiple drop downs with searchable checklists and the drop
+downs are beside each other."*
+
+Right, and the number is the argument: eight roles, ten units, eight functions,
+a group, two companies — thirty controls at once is a thing you scan rather than
+a thing you use, and it only gets worse as the tenant grows. Five buttons, each
+opening a searchable checklist, is the same choice in the same vocabulary.
+
+**The count stays on the button**, which is what makes closing a panel safe:
+nothing chosen is ever hidden by the control that chose it. One panel open at a
+time — two overlapping popups on one row are two things covering each other.
+**Typing in the search never repaints** (§35): the rows are hidden in place,
+because a repaint would replace the input being typed into. And the panel is
+`position:fixed`, placed by JS, for exactly searchsel's reason (§45.5): `.cfg`
+is an overflow container and would clip an absolute one — this row sits inside
+one that already scrolls sideways.
+
+**Clear on one dropdown clears only what that dropdown offers.** Units and
+functions share the `targets` list, so a naive clear on Business units would
+empty the Functions beside it.
+
+**76.3 You write inside the design.** Islam: *"should I edit in separate boxes
+or can you let me edit inside the final design box?"* — and, separately, *"the
+message box final design expands to fill the message with not scrolling."*
+
+Inside. **A subject box above a preview of the subject is the same words twice,
+and the second copy is the one that is wrong whenever they differ.** The heading
+and the body are `contenteditable` in the message itself; the button keeps its
+two fields, because a label and a link are not text in the flow and there is
+nowhere in a design to type a URL. The heading doubles as the subject line, and
+the note says so — that is a real thing to know, since the inbox list is the one
+place the reader sees it and it is not on screen.
+
+Four rules the editor obeys:
+
+- **Typing never redraws it.** Rewriting `innerHTML` on a keystroke destroys the
+  node the caret is in — §30.1's family. Typing writes into `SENDMSG` and
+  touches nothing; the branding, the button and opening a draft redraw.
+- **`innerText`, not the markup.** The browser is free to produce a `<div>`, a
+  `<br>` or a bare text node depending on how Enter was pressed. What a message
+  IS, is its words and where the blank lines are; `MAIL.html` makes paragraphs
+  of them when it sends.
+- **Paste is plain text.** Text pasted from a browser carries its own fonts,
+  colours and links — none of which survive being read back as `innerText`, so
+  it would look right while being typed and wrong when it arrived.
+- **A placeholder, not sample words.** Sample words typed over become the
+  message, and somebody would send *"Your message will appear here."*
+
+The editor's own styles — the focus ring and the placeholder — go in a `<style>`
+inside the **shadow root**, never in the email's markup: what is sent has no
+editor in it. And the box it is in **does not scroll**: a scrolling box hides the
+end of what you are writing behind an edge, which is the whole thing typing into
+the design was for.
+
+`data-mail-title` and `data-mail-body` are hooks written by `mail.js`. A data
+attribute costs a mail client nothing, and it means the editor never has to
+guess which element is the body — a guess that would break the first time that
+markup moved.

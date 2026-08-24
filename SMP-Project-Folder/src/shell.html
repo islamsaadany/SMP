@@ -1265,6 +1265,25 @@
     SYNC.afterPaint();
   }
 
+  /* ── PLACING A DROPDOWN PANEL (§76.2) ──────────────────────────────
+     `position:fixed`, so it is not clipped by the `.cfg` box this row lives in
+     (§45.5) — and fixed means nothing positions it but this. Under its button,
+     nudged left when it would run off the right edge, and flipped above when
+     there is more room up than down. */
+  function positionDD(){
+    var pop = document.querySelector(".ddpop");
+    if (!pop) return;
+    var btn = document.querySelector('[data-ddopen="' + pop.dataset.ddpop + '"]');
+    if (!btn) return;
+    var r = btn.getBoundingClientRect();
+    var w = pop.offsetWidth, h = pop.offsetHeight;
+    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    var below = window.innerHeight - r.bottom;
+    var top = (below < h + 12 && r.top > below) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
+    pop.style.left = Math.round(left) + "px";
+    pop.style.top = Math.round(top) + "px";
+  }
+
   /* A row's action menu is position:fixed, so somebody has to put it where its
      button is. It is placed AFTER the paint that created it — measuring an
      element before it is in the document gives zeroes — and flipped above the
@@ -2975,11 +2994,11 @@
       sendmsgAsk(); paint();
     });
 
-    /* The four typed fields. `input` for the preview so it follows the
-       keystroke, `change` for the store so a repaint cannot lose it — the same
-       field wired twice on purpose, for two different jobs. */
-    [["msgsubject","subject"],["msgbody","body"],
-     ["msgctalabel","ctaLabel"],["msgctahref","ctaHref"]].forEach(function(pair){
+    /* THE BUTTON'S TWO FIELDS ARE THE ONLY BOXES LEFT (§76.3) — the heading
+       and the body are typed into the message itself. These two redraw the
+       preview, because they change what it contains; the typing inside it must
+       never redraw, or the caret dies mid-word. */
+    [["msgctalabel","ctaLabel"],["msgctahref","ctaHref"]].forEach(function(pair){
       var el = document.getElementById(pair[0]);
       if (!el) return;
       el.addEventListener("input", function(){
@@ -2988,6 +3007,105 @@
       });
     });
     paintMsgPreview();
+
+    /* ── The recipient dropdowns (§76.2) ────────────────────────────
+       Opening one repaints (it draws a panel that was not there); TYPING in
+       its search does not — the rows are hidden in place, exactly as the
+       register's own search does it (§35), because a repaint would replace the
+       input being typed into. */
+    document.querySelectorAll("[data-ddopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        DDOPEN = (DDOPEN === b.dataset.ddopen) ? null : b.dataset.ddopen;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-ddsearch]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var q = inp.value.trim().toLowerCase();
+        var pop = inp.closest(".ddpop");
+        if (!pop) return;
+        pop.querySelectorAll(".ddrow").forEach(function(row){
+          row.hidden = !!q && (row.dataset.ddtext || "").indexOf(q) < 0;
+        });
+      });
+      inp.focus();
+    });
+    document.querySelectorAll("[data-ddclear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var k = b.dataset.ddclear, c = sendmsg().criteria;
+        if (k === "roles") c.roles = [];
+        else if (k === "people") c.keys = [];
+        else {
+          /* Only the ones this dropdown offers, or Clear on Business units
+             would empty the functions beside it. */
+          var mine = {};
+          document.querySelectorAll('[data-ddpop="' + k + '"] [data-aud]')
+            .forEach(function(i){ mine[i.value] = 1; });
+          c.targets = (c.targets || []).filter(function(v){ return !mine[v]; });
+        }
+        sendmsgAsk(); paint();
+      });
+    });
+    positionDD();
+
+    /* ── Drafts (§76.1) ─────────────────────────────────────────────
+       The word is written into the element, not painted: pressing Save must
+       not replace the button that was pressed (§63.4). */
+    var msgdraft = document.getElementById("msgdraft");
+    if (msgdraft) msgdraft.addEventListener("click", function(){
+      var st = sendmsg(), out = document.getElementById("msgsaid");
+      if (!st.subject.trim() && !st.body.trim()) {
+        if (out) out.textContent = "There is nothing written to save yet.";
+        return;
+      }
+      msgdraft.disabled = true;
+      if (out) out.textContent = "Saving\u2026";
+      SYNC.mailDraftSave({ id: st.draftId, subject: st.subject, body: st.body,
+                           ctaLabel: st.ctaLabel, ctaHref: st.ctaHref,
+                           criteria: st.criteria }, function(err, j){
+        msgdraft.disabled = false;
+        if (err) { if (out) out.textContent = err; return; }
+        st.draftId = j.id;
+        DRAFTLIST = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-draftopen]").forEach(function(b){
+      b.addEventListener("click", function(){
+        SYNC.mailDraftOpen(b.dataset.draftopen, function(err, j){
+          if (err) return;
+          var d = j.draft, st = sendmsg();
+          st.draftId = String(d.id);
+          st.subject = d.subject || ""; st.body = d.body || "";
+          st.ctaLabel = d.cta_label || ""; st.ctaHref = d.cta_href || "";
+          st.criteria = d.audience || { everyone:false, roles:[], targets:[], keys:[] };
+          /* Whatever was resolved for the message you were writing before is
+             not this message's audience. Cleared, then asked again. */
+          st.aud = null;
+          sendmsgAsk(); paint();
+        });
+      });
+    });
+    document.querySelectorAll("[data-draftdel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!confirm("Delete this draft? It cannot be brought back.")) return;
+        var id = b.dataset.draftdel;
+        SYNC.mailDraftDelete(id, function(){
+          var st = sendmsg();
+          if (String(st.draftId || "") === String(id)) st.draftId = null;
+          DRAFTLIST = null;
+          paint();
+        });
+      });
+    });
+    if (DRAFTLIST === null && document.getElementById("msgsend") &&
+        typeof SYNC !== "undefined" && SYNC.isLive()) {
+      DRAFTLIST = { drafts: [] };
+      SYNC.mailDraftList(function(err, j){
+        DRAFTLIST = err ? { error: err } : { drafts: (j && j.drafts) || [] };
+        paint();
+      });
+    }
 
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){
@@ -3016,6 +3134,7 @@
          holds has to be what is on screen before the send, not after. */
       SYNC.saveNow(function(){
       SYNC.mailSend({
+        draftId: st.draftId,
         criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
         ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
         fromName: sh.fromName, replyTo: sh.replyTo,
@@ -3037,6 +3156,7 @@
            recorded is the record, and a row this page invented would be a
            second copy of it. */
         SENTLIST = null;
+        st.draftId = null; DRAFTLIST = null;
         paint();
       });
       });

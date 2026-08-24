@@ -479,10 +479,25 @@ var SYNC = (function () {
         function (err, j) { done(err, err ? null : j); });
     },
     mailSend: function (o, done) {
-      mailPost({ action: "send", criteria: o.criteria, subject: o.subject, body: o.body,
+      mailPost({ action: "send", draftId: o.draftId,
+                 criteria: o.criteria, subject: o.subject, body: o.body,
                  ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
                  fromName: o.fromName, replyTo: o.replyTo },
         function (err, j) { done(err, err ? null : j); });
+    },
+    mailDraftSave: function (o, done) {
+      mailPost({ action: "draftSave", id: o.id, subject: o.subject, body: o.body,
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, criteria: o.criteria },
+        function (err, j) { done(err, err ? null : j); });
+    },
+    mailDraftList: function (done) {
+      mailPost({ action: "draftList" }, function (err, j) { done(err, err ? null : j); });
+    },
+    mailDraftOpen: function (id, done) {
+      mailPost({ action: "draftOpen", id: id }, function (err, j) { done(err, err ? null : j); });
+    },
+    mailDraftDelete: function (id, done) {
+      mailPost({ action: "draftDelete", id: id }, function (err, j) { done(err, err ? null : j); });
     },
     mailHistory: function (done) {
       mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });

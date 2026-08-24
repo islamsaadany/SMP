@@ -146,11 +146,18 @@ var MAIL = (function(){
           '<tr><td bgcolor="' + accent + '" style="font-size:0;line-height:0;height:3px">&nbsp;</td></tr>' +
 
           '<tr><td style="padding:28px 28px 8px">' +
+            /* `data-mail-title` / `data-mail-body` are HOOKS FOR THE EDITOR
+               (§76.3): the composer makes these two contenteditable so the
+               message is typed into the design rather than into boxes beside
+               it. A data attribute costs an email client nothing and it means
+               the editor never has to guess which element is the body — a
+               guess that would break the first time this markup moved. */
             (o.title
-              ? '<h1 style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
+              ? '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
                 'color:' + ink + '">' + e(o.title) + '</h1>'
-              : "") +
-            paras(o.body, ink) + cta +
+              : '<h1 data-mail-title style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
+                'color:' + ink + '"></h1>') +
+            '<div data-mail-body>' + paras(o.body, ink) + '</div>' + cta +
           '</td></tr>' +
 
           '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +

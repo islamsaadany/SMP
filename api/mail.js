@@ -295,8 +295,57 @@ module.exports = async function handler(req, res) {
       }
       await client.query("UPDATE messages SET sent = $2, failed = $3 WHERE id = $1",
                          [msg.id, ok, failed]);
+      /* A DRAFT THAT HAS BEEN SENT IS NOT A DRAFT. Leaving it in the list is a
+         trap: the next person to open it would send it again, and nothing on
+         it would say it had already gone. */
+      if (body.draftId) {
+        await client.query("DELETE FROM message_drafts WHERE id=$1",
+                           [parseInt(body.draftId, 10) || 0]);
+      }
       return send(res, 200, { ok: true, id: msg.id, sent: ok, failed: failed,
                               skipped: aud.skipped });
+    }
+
+    /* ── DRAFTS (§76) ──────────────────────────────────────────────
+       A draft is one row, saved over rather than appended to: pressing Save
+       twice on the same message should leave one draft, not two. The id the
+       composer is holding is what says which. */
+    if (action === "draftSave") {
+      const id = parseInt(body.id, 10) || null;
+      const vals = [String(body.subject || ""), String(body.body || ""),
+                    String(body.ctaLabel || "").trim() || null,
+                    String(body.ctaHref || "").trim() || null,
+                    JSON.stringify(body.criteria || {})];
+      if (id) {
+        const r = await client.query(
+          "UPDATE message_drafts SET subject=$2, body=$3, cta_label=$4, cta_href=$5, " +
+          "audience=$6, updated_at=now() WHERE id=$1 RETURNING id", [id].concat(vals));
+        if (r.rowCount) return send(res, 200, { ok: true, id: String(id) });
+        /* The draft was deleted from another tab. Saving into nothing would
+           lose the message; it becomes a new draft instead. */
+      }
+      const r2 = await client.query(
+        "INSERT INTO message_drafts (by_key, by_name, subject, body, cta_label, cta_href, audience) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id",
+        [me.key, me.name || null].concat(vals));
+      return send(res, 200, { ok: true, id: String(r2.rows[0].id) });
+    }
+    if (action === "draftList") {
+      const rows = (await client.query(
+        "SELECT id, subject, updated_at, by_name FROM message_drafts " +
+        "ORDER BY updated_at DESC LIMIT 50")).rows;
+      return send(res, 200, { ok: true, drafts: rows });
+    }
+    if (action === "draftOpen") {
+      const id = parseInt(body.id, 10);
+      const d = (await client.query("SELECT * FROM message_drafts WHERE id=$1", [id])).rows[0];
+      if (!d) return send(res, 404, { ok: false, error: "that draft is gone" });
+      return send(res, 200, { ok: true, draft: d });
+    }
+    if (action === "draftDelete") {
+      const id = parseInt(body.id, 10);
+      await client.query("DELETE FROM message_drafts WHERE id=$1", [id]);
+      return send(res, 200, { ok: true });
     }
 
     /* What was sent, newest first. The SMO's own record — and the only place

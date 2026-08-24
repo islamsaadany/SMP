@@ -6504,6 +6504,38 @@ function mainbuBy(name){
    again — so a string is read as a list of one and written back as a list the
    next time it is touched. There is no migration because `mainbus` lives in
    `org.extra`, which is jsonb and takes an array without being asked. */
+/* THE OFFICIAL BU CHOICES FOR ONE ROW (§69.17). The client's own list, plus
+   whatever this row already says if the list has never heard of it — a name
+   the file brought and nobody has mapped is still this person's true answer,
+   and a select that dropped it would silently clear it the first time somebody
+   opened the row to change something else. */
+function mainbuNamesFor(p){
+  var out = mainbus().map(function(b){ return b.name; });
+  var have = String((p && p.mainbu) || "").trim();
+  if (have && !out.some(function(n){ return mainbuKey(n) === mainbuKey(have); })) out.push(have);
+  return out;
+}
+/* EVERYWHERE A PERSON CAN SIT, in `r.at`'s vocabulary — the same strings a
+   role is held at (§54.1), which is what lets somebody be attached to a
+   company without inventing anything. Retired units, functions and companies
+   are left out: a retired one is not somewhere to be seated (§49.3), and an
+   existing attachment to one is left alone because the select keeps whatever
+   the row already says (below). */
+function personAtChoices(){
+  var out = [{ v:"group", label:roleWhereLabel("group") }];
+  UNIT_KEYS.forEach(function(k){
+    if (UNITS[k].active !== false) out.push({ v:k, label:UNITS[k].name });
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    if (FUNCTIONS[k].active !== false)
+      out.push({ v:"fn:" + k, label:FUNCTIONS[k].name + " (function)" });
+  });
+  activeCompanyKeys().forEach(function(c){
+    out.push({ v:"co:" + c, label:COMPANIES[c].name + " (company)" });
+  });
+  return out;
+}
+
 function mainbuAts(b){
   if (!b) return [];
   if (Array.isArray(b.at)) return b.at.filter(Boolean);
@@ -8596,6 +8628,151 @@ FUNCTION_KEYS.forEach(function(k){
   var asU = fnAsUnit(k);
   if (asU) renumberUnit(asU);
 });
+
+/* ── ADDING ONE ROW TO A PLAN (§69.13) ────────────────────────────────────
+   Islam: "in the projects and pillars pages I need to have the edit with
+   include the arrange and add access, to edit current projects and pillars or
+   add one."
+
+   §22 is unchanged and this does not touch it: a plan still ARRIVES by upload,
+   codes are still minted on arrival, replacing still archives. This is §31's
+   pen doing one more thing — correcting a plan afterwards without re-uploading
+   a whole unit — and a pen that can retype every field but cannot add the row
+   somebody forgot is half a pen.
+
+   THEY APPEND, ALWAYS, AND THEY NEVER RENUMBER. `renumberUnit()` rewrites
+   every id from POSITION, which is right when a whole plan is authored at once
+   (import, restoring an archive) and would be quietly destructive here: ids
+   are what a reported figure, a focus mark and a cycle snapshot are keyed on
+   (§48.1), and reordering deliberately does NOT renumber, so after one drag a
+   pillar's position and its id already disagree. Run the renumber on an add
+   and every figure in the unit is orphaned. So a new row is appended and given
+   an id of its OWN, and arranging afterwards moves it without touching either.
+
+   AND NOT length + 1. After a row has been removed, `-P3` can still be held by
+   the last of three — the same collision mintPersonKey() and mintClaimId()
+   already scan for. */
+function mintRowId(list, prefix){
+  var taken = {};
+  (list || []).forEach(function(x){ if (x && x.id) taken[x.id] = 1; });
+  var n = (list || []).length + 1;
+  while (taken[prefix + n]) n++;
+  return prefix + n;
+}
+
+/* A pillar arrives with every field a reader asks for, present and empty
+   (§51.10: the code that CREATES a row has to mint the shape readers expect,
+   and a writer minting the old shape is silent until somebody opens the page
+   that reads it — which is how adding a capability took the product down for
+   eleven versions). `code` is left for pillarCode() to derive positionally,
+   the same way an uploaded pillar's is. */
+function addPillar(u){
+  if (!u || !u.items) return null;
+  var it = { id: mintRowId(u.items, u.ukey + "-P"), code: "", name: "", sub: "",
+             kind: "", theme: "", owner: "", measures: [], tactics: [] };
+  u.items.push(it);
+  return it;
+}
+function addMeasure(it){
+  if (!it) return null;
+  var m = { id: mintRowId(it.measures, it.id + "-M"), name: "", dir: "\u2265",
+            target: "", compile: "Latest", actual: "" };
+  it.measures.push(m);
+  return m;
+}
+/* A tactic's quarters are four separate fields, not an array — that is what
+   the data has carried since the beginning and what qs() reads. All four off:
+   a tactic due in no quarter is asked for in no cycle (§42), which is the
+   right starting state for a row nobody has planned yet. */
+function addTactic(it){
+  if (!it) return null;
+  var t = { id: mintRowId(it.tactics, it.id + "-T"), name: "", owner: "",
+            q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
+  it.tactics.push(t);
+  return t;
+}
+function addProject(c){
+  if (!c || !c.projects) return null;
+  var p = { id: mintRowId(c.projects, c.id + "-P"), capId: c.id, name: "", owner: "",
+            brief: "", stakeholders: [], timeline: "quarter", start: "", end: "",
+            deliverables: [], outcomes: [], milestones: [] };
+  c.projects.push(p);
+  return p;
+}
+/* A DELIVERABLE HAS NO DUE AND NO OWNER (§53.4) — it is delivered when the
+   project ends and the project's owner owns it — so neither is minted here.
+   An outcome keeps measureAt, because a measurement time is a real thing
+   somebody chose. */
+function addDeliverable(p){
+  if (!p) return null;
+  var d = { id: mintRowId(p.deliverables, p.id + "-D"), name: "", kind: "binary", actual: "" };
+  p.deliverables.push(d);
+  return d;
+}
+function addOutcome(p){
+  if (!p) return null;
+  var o = { id: mintRowId(p.outcomes, p.id + "-O"), name: "", dir: "\u2265",
+            target: "", measureAt: "", actual: "" };
+  p.outcomes.push(o);
+  return o;
+}
+function addMilestone(p){
+  if (!p) return null;
+  var m = { id: mintRowId(p.milestones, p.id + "-M"), name: "", covers: "",
+            owner: "", finish: "", status: "" };
+  p.milestones.push(m);
+  return m;
+}
+
+/* Every project in the tenant, and the one with this id. Searched rather than
+   addressed through its capability, because the caller has the row's id and
+   nothing else — and an id already encodes its parent, so passing the parent
+   separately would be a second copy of the same fact for the two to disagree
+   about. */
+function eachProject(fn){
+  (GROUP.capabilities || []).forEach(function(c){
+    (c.projects || []).forEach(function(p){ fn(p, c); });
+  });
+}
+function projById(id){
+  var hit = null;
+  eachProject(function(p){ if (p.id === id) hit = p; });
+  return hit;
+}
+/* WHICH ARRAY A ROW LIVES IN, found by looking rather than by parsing its id.
+   An id looks addressable — `mobile-P1-M2` names its unit and its pillar — and
+   reading it that way would break the moment a key contains a hyphen, which a
+   minted person key cannot but a unit key set by hand certainly can. Scanning
+   is O(the plan) and the plan is small; a wrong answer here splices the wrong
+   row out of somebody's strategy. */
+function listById(kind, id){
+  var out = null;
+  var look = function(list){
+    if (!out && list && list.some(function(x){ return x && x.id === id; })) out = list;
+  };
+  if (kind === "measures" || kind === "tactics") {
+    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+      var u = unitLike(t);
+      ((u && u.items) || []).forEach(function(it){ look(it[kind]); });
+    });
+    return out;
+  }
+  eachProject(function(p){ look(p[kind]); });
+  return out;
+}
+
+/* Removing one. By ID, never by index: the render that drew the button and the
+   array being spliced are a repaint apart, and an index is the thing that goes
+   stale in between (§48.2, the same reason a delete re-asks its blockers).
+   Returns whether anything went, so a caller can tell a no-op from a removal. */
+function removeRowById(list, id){
+  if (!list || !id) return false;
+  var i = -1;
+  list.forEach(function(x, n){ if (x && x.id === id) i = n; });
+  if (i < 0) return false;
+  list.splice(i, 1);
+  return true;
+}
 
 /* The generic template is built against an EMPTY shape, not against a chosen
    unit: the file is the same whichever unit it will end up describing, and the
@@ -14644,14 +14821,22 @@ function railSub(html){
   return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
 }
 
-function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
+/* `opts` carries the two things the PLAN page's rail needs and the
+   Performance page's must not have (§69.13): drag handles, and an Add row at
+   the end. Optional and absent by default, so the four other callers are
+   untouched — a rail that grew an Add button on Performance would be offering
+   to author a plan from the page that reports against it. */
+function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
+  opts = opts || {};
   var lastGroup = null;
-  var rows = list.map(function(it){
+  var rows = list.map(function(it, i){
     var g = groupOf ? groupOf(it) : null, head = "";
     if (g && g !== lastGroup) { head = '<div class="rgroup">' + esc(g) + '</div>'; lastGroup = g; }
     var code = codeOf ? codeOf(it) : "";
     return head +
-      '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) + '">' +
+      '<button class="ritem' + (it.id === sel.id ? " on" : "") + '" data-rail="' + esc(it.id) +
+        '" data-oi="' + i + '">' +
+        (opts.arranging ? handle("Reorder " + it.name) : '') +
         railName(code, it.name) +
         /* NO NUMBER MEANS NO ELEMENT. An empty `.rnum` still takes its column in
          the row's grid, so a rail with nothing to show on the right laid its
@@ -14661,8 +14846,18 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf){
         railSub(subOf ? subOf(it) : "") +
       '</button>';
   }).join("");
-  return '<div class="rail">' + railHead("Projects", list.length) +
-    rows + (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
+  /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5): `data-item=".ritem"`, because
+     picking the selector off `data-kind` is exactly how the unit rail's grips
+     came to be bound to nothing for as long as the rail has had handles. */
+  var body = opts.arranging
+    ? '<div class="sortable" data-item=".ritem" data-kind="projects" data-cap="' +
+        esc(opts.capId || "") + '">' + rows + '</div>'
+    : rows;
+  return '<div class="rail' + (opts.arranging ? ' arranging' : '') + '">' +
+    railHead("Projects", list.length) + body +
+    (opts.add ? '<div class="railadd"><button class="linkbu" data-rowadd="project|' +
+      esc(opts.capId) + '">+ Add a project</button></div>' : '') +
+    (footNote ? '<div class="rfoot">' + footNote + '</div>' : '') + '</div>';
 }
 function splitOrPane(list, sel, rail, pane){
   return railWorthIt(list)
@@ -14869,43 +15064,135 @@ function renderFnPerformance(fnKey){
 /* ── Capability \u2192 Projects ──────────────────────────────────────────
    The plan as it was formed. Nothing here has been reported: no progress, no
    status, no actuals. Those are entered on Reporting and read on Performance. */
+/* ── THE PEN REACHES THE PROJECTS PAGE (§69.13) ────────────────────────
+   Islam: "in the projects and pillars pages I need to have the edit with
+   include the arrange and add access, to edit current projects and pillars or
+   add one."
+
+   The pillars page has had a pen since §31 and drag handles since §63.3; the
+   projects page had NEITHER, which is §53.5 exactly — a unit and a function
+   are the same product, and the two pages were fine DIFFERENTLY. It is the
+   SAME pen: `EDIT_PAGE.plan`, one mode, so pressing it on a function and
+   walking to a unit does not find a second switch in the other position.
+
+   And the same gate. `mayEditPlan()` is the SMO's alone (§31) — a plan
+   correctable by the person measured against it is a different decision from
+   one correctable by its custodian — and giving a function's plan a looser
+   gate than a unit's would be inventing that decision here, on the quiet. */
+function projEditing(){
+  return EDIT_PAGE.plan && typeof mayEditPlan === "function" && mayEditPlan();
+}
+/* Arranging on the projects page, on the same two ways in the plan page has
+   (§63.3): the pen turns the handles on with the fields, and somebody who may
+   reorder but has no pen keeps the explicit button. A capability belongs to a
+   FUNCTION, so the scope is the function's key — `canArrange("unit", "fn:x")`
+   asks grantAt("u_plan", …) against it, which is the same question the unit
+   side asks about a unit. */
+function projArranging(fk){
+  return arranging("unit", "fn:" + fk) || projEditing();
+}
 function projPlanBody(p, fk){
   /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
      project ends, so a date of its own was a second answer to a question the
      project had already answered; and the department carries it, not a named
      person — the project has an owner, and naming somebody per row invited
      the unit to argue about which of them it was. */
+  var ed = projEditing();
+  var on = projArranging(fk);
+  /* The row's own id travels on the row, so removing one is by ID and never by
+     index (§48.2): the render that drew the × and the array being spliced are
+     a repaint apart, and the index is what goes stale in between. */
+  var xb = function(list, id){
+    return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
+      '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
+  };
+  var f = function(v, setter){
+    return ed ? inputOr("plan", v == null ? "" : v, "", setter)
+              : (v ? esc(v) : '<span class="missing">Missing</span>');
+  };
+  var sortAttr = function(kind){
+    return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
+      '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
+  };
   var n = 0;
-  var dxRows = p.deliverables.map(function(d){
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
+  var dxRows = p.deliverables.map(function(d, i){
+    return '<tr data-oi="' + i + '"><td class="idx">' +
+      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (++n) + '</span></td>' +
+      '<td>' + (ed ? inputOr("plan", d.name, "", function(v){ d.name = v; }) : esc(d.name)) +
+        xb("deliverables", d.id) + '</td>' +
       '<td class="cc">' + dxTag("d") + '</td>' +
       '<td class="cc">' + delivKindPill(d) + '</td>' +
       '<td class="num">&mdash;</td>' +
       '<td class="cc">&mdash;</td></tr>';
-  }).join("") + p.outcomes.map(function(o){
-    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+  }).join("") + p.outcomes.map(function(o, i){
+    return '<tr data-oi="' + i + '"><td class="idx">' +
+      (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (++n) + '</span></td>' +
+      '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
+        xb("outcomes", o.id) + '</td>' +
       '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="cc">' + esc(o.dir) + '</td>' +
-      '<td class="num">' + esc(o.target) + '</td>' +
-      '<td class="cc">' + esc(o.measureAt || "\u2014") + '</td></tr>';
-  }).join("");
+      '<td class="num">' + f(o.target, function(v){ o.target = v; }) + '</td>' +
+      '<td class="cc">' + (ed
+        ? inputOr("plan", o.measureAt || "", "", function(v){ o.measureAt = v; })
+        : esc(o.measureAt || "\u2014")) + '</td></tr>';
+  }).join("") +
+  /* TWO ADD ROWS UNDER ONE TABLE, because §53.4 made it one table of two KINDS
+     and a single "add a row" would have to ask which — a question the two
+     buttons answer by existing. */
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
+      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
+      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
+    '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-      '<td>' + esc(m.covers || "") + '</td>' +
-      '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
-      '<td class="cc">' + esc(m.finish) + '</td></tr>';
-  }).join("");
+    return '<tr data-oi="' + i + '"><td class="idx">' +
+      (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+        xb("milestones", m.id) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", m.covers || "", "", function(v){ m.covers = v; })
+                   : esc(m.covers || "")) + '</td>' +
+      '<td class="cc">' + (ed ? inputOr("plan", m.owner || "", "", function(v){ m.owner = v; })
+                              : esc(m.owner || "\u2014")) + '</td>' +
+      '<td class="cc">' + f(m.finish, function(v){ m.finish = v; }) + '</td></tr>';
+  }).join("") +
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
+      '<button class="linkbu" data-rowadd="milestone|' + esc(p.id) + '">Add a milestone</button>' +
+    '</td></tr>' : '');
   /* The owner sits on the band rather than in the rail. A pillar has two
      child lists and a project has three, so the rail's small line is a count
      longer here — adding a name to it took every row to three lines while a
      unit's sat at two, which is the sizing that had to match. */
-  return pillarBand(projCode(fk, p), p.name,
-      (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
-      '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>') +
+  /* THE PANE'S OWN PEN, in the same corner the plan page puts it (§53.2). The
+     band carries the project's NAME, so in edit mode it has to become a field
+     or the one thing a new project needs most cannot be typed — the same
+     exception the pillar heading makes (see unitPlanBody). */
+  var band = ed
+    ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
+        '<span class="pband-name">' +
+          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
+        '<span class="pband-r">' +
+          inputOr("plan", p.owner || "", "", function(v){ p.owner = v; }) +
+          '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") +
+        '</span></span></div>'
+    : pillarBand(projCode(fk, p), p.name,
+        (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
+        '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>');
+  return band +
+    (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '') +
 
-    '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' + esc(p.brief) + '</p>' +
+    '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' +
+      (ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; }) : esc(p.brief)) + '</p>' +
     '<h4 class="mini">Stakeholders</h4>' +
-    (p.stakeholders || []).map(function(s){ return '<span class="pill kind">' + esc(s) + '</span> '; }).join("") +
+    /* Typed as one line and stored as a list, through collabParse/collabNames
+       — the same pair the tactics table uses for collaborators (§50.2), so
+       "how is a list of names typed" has one answer in the platform. */
+    /* collabText() takes the ROW and reads `.collaborators` off it; a project's
+       list is `.stakeholders`, so it is handed a row-shaped object rather than
+       the array — which returned [] and would have blanked every stakeholder
+       list the moment the pen went on. */
+    (ed ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
+            function(v){ p.stakeholders = collabParse(v); })
+        : (p.stakeholders || []).map(function(x){
+            return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverable or outcome","Type","Measured as","Target","Measured at"], dxRows) +
@@ -14918,10 +15205,27 @@ function renderFnProjects(fnKey){
   var fk = fnKeyOf(fnKey), caps = capsOfFunction(fk);
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
-  return caps.map(function(c){
+  var ed = projEditing(), on = projArranging(fk);
+  /* THE ARRANGE BUTTON, for somebody who may reorder but has no pen — §63.3's
+     rule, and the reason it is a rule: tying the handles to the pen alone
+     takes reordering away from the people who use it most, silently. Hidden
+     while the pen is on, because the pen already turned the handles on and a
+     button reading "Done" for a mode it did not start lies about what pressing
+     it will do. */
+  var arr = (canArrange("unit", "fn:" + fk) && !ed)
+    ? '<div class="pageact">' + arrangeBtn("unit", "fn:" + fk) + '</div>' : '';
+  return arr + caps.map(function(c){
     var sel = railPick(c);
+    /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
+       same shape): the note said "No projects yet" and offered nothing, so the
+       only way to get a project was to upload a whole plan. With the pen on it
+       carries the Add button instead — an empty state that says what would
+       fill it AND lets you fill it. */
     if (!sel) return capBand(c) + '<div class="capbody"><div class="note">' +
-      'No projects yet.</div></div>';
+      'No projects yet.' + (ed
+        ? ' <button class="linkbu" data-rowadd="project|' + esc(c.id) +
+          '">Add the first one</button>'
+        : '') + '</div></div>';
     /* THE SAME RAIL A UNIT'S PLAN CARRIES (§53.2). §29.6 took the bare number
        and the footer explaining it off the unit's Plan rail — nothing on a
        plan page has been reported, so there is no figure to explain — and left
@@ -14934,9 +15238,16 @@ function renderFnProjects(fnKey){
         plural(p.outcomes.length, "outcome") + ' &middot; ' +
         plural(p.milestones.length, "milestone"); },
       null, null,
-      function(p){ return projCode(fk, p); });
+      function(p){ return projCode(fk, p); },
+      { arranging: on, add: ed, capId: c.id });
+    /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
+       right for reading and wrong while a plan is being authored: with one
+       project there would be nowhere to press Add. */
+    var pane = projPlanBody(sel, fk);
     return capBand(c) + '<div class="capbody">' +
-      splitOrPane(c.projects, sel, rail, projPlanBody(sel, fk)) + '</div>';
+      ((ed || on)
+        ? '<div class="split">' + rail + '<div class="pane">' + pane + '</div></div>'
+        : splitOrPane(c.projects, sel, rail, pane)) + '</div>';
   }).join("");
 }
 
@@ -15127,7 +15438,15 @@ function unitRailFor(u, sel){
   return '<div class="rail' + (on ? ' arranging' : '') + '">' +
     railHead(L("pillar","bu"), list.length) +
     '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
-      esc(u.ukey) + '">' + rows + '</div></div>';
+      esc(u.ukey) + '">' + rows + '</div>' +
+    /* ADD, in the rail that holds them (§69.13). The same place the projects
+       rail puts it, because a unit and a function are the same product
+       (§53.5) and the two rails drifting is what that rule exists to stop. */
+    (EDIT_PAGE.plan && mayEditPlan()
+      ? '<div class="railadd"><button class="linkbu" data-rowadd="pillar|' +
+        esc(u.ukey) + '">+ Add a ' + L("pillar","bu").toLowerCase().replace(/s$/, "") +
+        '</button></div>'
+      : '') + '</div>';
 }
 /* THE PLAN IS EDITABLE, FOR THE SMO ONLY.
 
@@ -15202,11 +15521,30 @@ function unitPlanBody(it, u, railed){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-u="' + esc(u.ukey) + '" data-pi="' + pi + '"' : '';
   };
+  /* The add row goes INSIDE the tbody the sortable owns, which is why it is
+     not draggable: `data-item="tr"` would pick it up as an item and it would
+     be reorderable into the middle of the list it appends to. `.newrow` has no
+     handle, and makeSortable() binds to handles only (arrange.js), so it sits
+     in the tbody and stays put. */
+  var addRow = function(cols, what, label){
+    if (!ed) return "";
+    return '<tr class="newrow"><td class="idx">+</td><td colspan="' + cols + '">' +
+      '<button class="linkbu" data-rowadd="' + what + '|' + esc(u.ukey) + '|' + pi +
+      '">' + label + '</button></td></tr>';
+  };
+  /* Removing one, by ID rather than by index (§48.2). It rides in the name
+     cell rather than in a column of its own: a column costs every row its
+     width, and the × is only there while the pen is on. */
+  var xb = function(list, id){
+    return ed ? '<button class="xbtn" data-rowoff="' + esc(list) + '|' + esc(id) +
+      '" title="Remove this row" aria-label="Remove this row">&times;</button>' : '';
+  };
   var mRows = it.measures.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
+        xb("measures", m.id) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
@@ -15222,7 +15560,8 @@ function unitPlanBody(it, u, railed){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + t.name) : '') +
       '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) + '</td>' +
+      '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) +
+        xb("tactics", t.id) + '</td>' +
       '<td>' + (ed ? inputOr("plan", t.owner || "", "", function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
       /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
          could only arrive with the upload, so a name that changed after the
@@ -15264,9 +15603,11 @@ function unitPlanBody(it, u, railed){
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
     '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","Compiled"], mRows, sortAttr("measures")) +
+    miniTable(["#","Measure","Dir.","Target","Compiled"],
+      mRows + addRow(5, "measure", "Add a measure"), sortAttr("measures")) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
-    miniTable(["#","Tactic","Owner","Collabs.","Quarters"], tRows, sortAttr("tactics"));
+    miniTable(["#","Tactic","Owner","Collabs.","Quarters"],
+      tRows + addRow(4, "tactic", "Add a tactic"), sortAttr("tactics"));
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);
@@ -16276,7 +16617,19 @@ var PEOPLE_COLS = [
      the default and reappear for everybody who ever touched the chooser
      (§30.2) — the label is what people read, the key is what code holds. */
   { k:"bu",       label:"Unit" },
-  { k:"contact",  label:"Contact",  off:true },
+  /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
+     register table needs to split the email from the contact number").
+     §54 put them together as "one answer to one question" — how you reach
+     somebody — and that reading stopped being true the day the EMAIL became
+     how somebody signs in (§69.11). It is not a contact detail any more; it
+     is their name at the door, and it is now the column the SMO reads when
+     access does not work. So it gets a column of its own, shown by default,
+     and the number keeps one that is off by default. The old `contact` key is
+     GONE rather than repurposed: a stored preference for "contact" meant both,
+     and silently reading it as "email" would turn one answer into another
+     (§30.2, §65). */
+  { k:"email",    label:"Email" },
+  { k:"phone",    label:"Mobile",  off:true },
   { k:"roles",    label:"Roles" },
   { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
@@ -16451,16 +16804,10 @@ function renderPeople(){
       }).join("") + '</select>';
   }
 
-  /* Read-only, and spelled out rather than leaning on `"" || dash` — an
-     expression whose falsiness carries the meaning is one refactor away from
-     being wrong (CLAUDE.md: explicit over clever). */
-  function contactCell(p){
-    var bits = [];
-    if (p.email) bits.push('<span class="val">' + esc(p.email) + '</span>');
-    if (p.phone) bits.push('<span class="mono">' + esc(p.phone) + '</span>');
-    if (!bits.length) return '<span class="why" style="margin:0">&mdash;</span>';
-    return bits.join("");
-  }
+  /* contactCell() was here. It stacked the address over the number in one
+     cell, and the two are two columns now (§69.16) — a function nothing calls
+     is a function the next reader has to prove is dead before touching
+     anything near it (§24). */
 
   /* STATUS ONLY, AND SQUEEZED (Islam, 2026-08-22). The action left this cell
      for the row's kebab; what is left is one word in one pill, so the column
@@ -16627,20 +16974,52 @@ function renderPeople(){
          and a person can be moved by hand afterwards — neither is a fault, and
          a mapping that silently moved thirty people the next time a row
          changed would be the worst kind of helpful. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
-        ? '<span class="val">' + esc(p.mainbu) + '</span>' +
-          (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      (showCol("bu") ? '<td>' + (home
-        ? '<span class="uchip">' + esc(home) + '</span>' + (drift
-            ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
-              esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
-              esc(whereLabel(drift)) + '</span>'
-            : '')
-        : (drift
-            ? '<span class="why" style="margin:0">&mdash; the list says ' +
-              esc(whereLabel(drift)) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>')) +
+      /* BOTH ARE EDITABLE NOW (Islam, 2026-08-24: "in the People register I need
+         to be able to edit the Official BU and the Unit"). They were the only
+         two facts on the register that could be READ and not corrected: the
+         Official BU arrives with the file and the Unit was writable only
+         through the "They said X — Use it" note, so a row the file placed
+         wrongly could be fixed nowhere at all.
+
+         THE OFFICIAL BU IS A SELECT, NOT A FIELD, and the Unit is too, for
+         opposite reasons that are both §54's: the Official BU list is the
+         client's own vocabulary and is SOFT (a name not on it is added
+         unmapped by the file reader, because a fresh tenant could never read
+         its first file otherwise), so the select carries what the list holds
+         plus whatever this row already says. A UNIT IS NOT SOFT — it either
+         exists here or it does not, and typing a new one cannot conjure one. */
+      (showCol("mainbu") ? '<td>' + (editable
+        ? '<select class="fld" data-pmainbu="' + esc(p.key) + '">' +
+            '<option value="">&mdash; none &mdash;</option>' +
+            mainbuNamesFor(p).map(function(nm){
+              return '<option value="' + esc(nm) + '"' +
+                (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
+            }).join("") + '</select>' +
+          (p.mainbu && !mainbuBy(p.mainbu)
+            ? '<span class="why">not on the Official BU list</span>' : '')
+        : (p.mainbu
+            ? '<span class="val">' + esc(p.mainbu) + '</span>' +
+              (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
+            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      (showCol("bu") ? '<td>' + (editable
+        ? '<select class="fld" data-pat="' + esc(p.key) + '">' +
+            '<option value="">&mdash; nowhere yet &mdash;</option>' +
+            personAtChoices().map(function(o){
+              return '<option value="' + esc(o.v) + '"' +
+                (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
+            }).join("") + '</select>' +
+          (drift && drift !== belongsKey(p)
+            ? '<span class="why">the list says ' + esc(whereLabel(drift)) + '</span>' : '')
+        : (home
+            ? '<span class="uchip">' + esc(home) + '</span>' + (drift
+                ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
+                  esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
+                  esc(whereLabel(drift)) + '</span>'
+                : '')
+            : (drift
+                ? '<span class="why" style="margin:0">&mdash; the list says ' +
+                  esc(whereLabel(drift)) + '</span>'
+                : '<span class="why" style="margin:0">&mdash;</span>'))) +
         saidWhereNote(p, editable) +
         /* The role picker's second half (§69). It sits UNDER what the cell
            already says rather than replacing it: where somebody sits and where
@@ -16651,11 +17030,16 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("contact") ? '<td>' + (editable
+      (showCol("email") ? '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-          '" placeholder="Email"><input class="fld" value="' + esc(p.phone || "") +
-          '" data-pphone="' + p.key + '" placeholder="Mobile">'
-        : contactCell(p)) + '</td>' : '') +
+          '" placeholder="Email">'
+        : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      (showCol("phone") ? '<td>' + (editable
+        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
+          '" placeholder="Mobile">'
+        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
       (showCol("roles")
         ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
       /* Standing before Password, at Islam's direction — whether somebody can
@@ -16840,7 +17224,8 @@ function renderPeople(){
         (showCol("title")    ? '<th>Job title</th>'  : '') +
         (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
         (showCol("bu")       ? '<th>Unit</th>'       : '') +
-        (showCol("contact")  ? '<th>Contact</th>'    : '') +
+        (showCol("email")    ? '<th>Email</th>'      : '') +
+        (showCol("phone")    ? '<th>Mobile</th>'     : '') +
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
         (showCol("status")   ? '<th class="cc">Status</th>' : '') +
         (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
@@ -20730,22 +21115,63 @@ var SYNC = (function () {
      session, never by the simulated view. Offline, everything stays as it
      always was. */
   var person = null;
+  /* ── WHO MAY SEE THE CONTROLS THAT LEAVE YOUR OWN VIEW (§69.15) ────
+     The viewer switcher and Demo data are the SMO's, and Tarek — a contributor
+     with no role at all — was served both, with the switcher showing SOMEBODY
+     ELSE'S NAME as the person signed in.
+
+     THE FAULT IS THE DIRECTION OF THE GATE, not the test. Both controls sit in
+     the markup and were CORRECTED afterwards: shown by default, hidden by a
+     step that runs later. Anything that stops that step — an exception above
+     it, an early return, a person the register does not hold — leaves them
+     standing, for everybody. A control that is dangerous when wrong must fail
+     CLOSED: hidden until something proves it should be shown.
+
+     One function, asked by both, so the two can never disagree about who the
+     SMO is (§42's rule about one copy of a rule, on the chrome). `role` is the
+     SEAT role the server returns from the session — never the simulated view,
+     which is the whole point of the simulation. */
+  function isSMOSession() { return !!person && person.role === "super"; }
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
     if (!box || !sel) return;
-    if (PEOPLE.some(function (p) { return p.key === person.key; })) {
+    var known = PEOPLE.some(function (p) { return p.key === person.key; });
+    if (known) {
       window.VIEWER = person.key;
       sel.value = person.key;
+    }
+    /* AND IF THE REGISTER DOES NOT HOLD THEM, RENDER NOBODY. `VIEWER` was
+       simply left where it was — at whoever the list happens to start with —
+       so a person the platform could not find was shown the FIRST PERSON'S
+       VIEW, wearing their own name in the corner. That is the worst reading
+       available: the SMO's pages served to somebody who is not the SMO,
+       with nothing on the screen saying so.
+
+       It cannot happen from a save (the session JOINs `people`), but it can
+       from a hydration that has not caught up, and "it cannot happen" is not a
+       reason to render the wrong person when it does. */
+    if (!known) {
+      var lost = document.createElement("div");
+      lost.className = "note bad-note";
+      lost.style.margin = "18px";
+      lost.innerHTML = "<b></b> ";
+      lost.firstChild.textContent = (person.name || "You") +
+        " is signed in but is not on this register.";
+      lost.appendChild(document.createTextNode(
+        "Nothing is shown rather than somebody else\u2019s view. Ask the SMO to " +
+        "check the People register."));
+      var panel = document.getElementById("panel");
+      if (panel) { panel.textContent = ""; panel.appendChild(lost); }
+      box.hidden = true;
+      return;
     }
     /* THE SEAT ROLE, NOT A LEVEL. This read `person.level !== "smo"` — a name
        that stopped existing when roles replaced levels (§33). The server has
        returned `role` ("super") ever since, so `undefined !== "smo"` was true
-       for EVERYBODY and the switcher was hidden from the one person it is for:
-       the SMO saw "Signed in as …" and lost the simulation entirely. A
-       comparison against a field nobody sets fails silently and in the safe
-       direction, which is why it survived a version. */
-    if (person.role !== "super") {
+       for EVERYBODY and the switcher was hidden from the one person it is for
+       (§45.3). It is asked through isSMOSession() now, in one place. */
+    if (!isSMOSession()) {
       sel.hidden = true;
       var label = box.querySelector("label");
       if (label) label.textContent = "Signed in as";
@@ -20810,10 +21236,21 @@ var SYNC = (function () {
     var btn = document.getElementById("demobtn");
     if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
     /* One or the other, never both and never neither — and only once boot()
-       has found a live dataset, which is what `live` says. */
+       has found a live dataset, which is what `live` says.
+
+       AND ONLY FOR THE SMO (Islam, 2026-08-24: "the demo data button shouldn't
+       appear to anyone but the SMO"). It is not decoration: pressing it
+       replaces every page with invented content (§21), and the person most
+       likely to press it by accident is the one who has never seen it before.
+       Asked through isSMOSession() so the switcher and this cannot disagree
+       about who the SMO is.
+
+       Served from a FILE there is no session and no `live`, so both are hidden
+       by the first clause anyway — the whole product is the example there and
+       there is nothing to switch to. */
     var menu = document.getElementById("demomenu");
-    if (menu) menu.hidden = !live || isDemoMode();
-    if (btn) btn.hidden = !live || !isDemoMode();
+    if (menu) menu.hidden = !live || !isSMOSession() || isDemoMode();
+    if (btn) btn.hidden = !live || !isSMOSession() || !isDemoMode();
     var ban = document.getElementById("banner");
     if (ban) {
       ban.hidden = !isDemoMode();
@@ -23210,6 +23647,41 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* ── THE TWO FACTS THAT COULD BE READ AND NOT CORRECTED (§69.17) ──
+       Both go through the ONE door each already has: attachPersonAt() is where
+       "where does this person sit" is written, shared by the register, the
+       file importer and the Use-it button (§54.1), and `p.mainbu` is the
+       client's own word, stored as first written.
+
+       An Official BU NOT on the list is kept rather than refused — the list is
+       soft (§54) and a name the file brought is still this person's true
+       answer — but it is ADDED to the list unmapped, exactly as the file
+       reader does, so the SMO can then point it somewhere. Two places writing
+       the same fact differently is what mainbuList() exists to prevent. */
+    document.querySelectorAll("[data-pmainbu]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.pmainbu);
+        if (!p) return;
+        var v = sel.value.trim();
+        if (!v) delete p.mainbu;
+        else {
+          p.mainbu = v;
+          if (!mainbuBy(v)) mainbuList().push({ name: v, at: null });
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pat]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.pat);
+        if (!p) return;
+        attachPersonAt(p, sel.value || null);
+        paint();
+      });
+    });
+
     /* ACCEPTING WHAT SOMEBODY SAID ABOUT THEMSELVES (§56). The declaration
        granted nothing; this is the SMO moving them, and it is an ordinary edit
        of the person's BU — attachPersonAt() is the one door the register and
@@ -23557,6 +24029,53 @@ var SYNC = (function () {
         });
       });
     });
+    /* ── ADDING AND REMOVING A PLAN ROW (§69.13) ─────────────────────
+       Both re-ask `mayEditPlan()` rather than trusting the render that drew
+       the button (§48.2, §62): a repaint can happen between the two, and the
+       pen is the SMO's alone (§31).
+
+       Removing is by ID, never by index — the index is the thing that goes
+       stale across a repaint, and splicing a stale one takes the wrong row.
+       Adding APPENDS and mints an id of its own; nothing renumbers, because
+       renumberUnit() rewrites every id from POSITION and every reported
+       figure, focus mark and cycle snapshot is keyed on those (§48.1). */
+    document.querySelectorAll("[data-rowadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rowadd.split("|"), what = a[0];
+        if (what === "pillar")  { addPillar(unitLike(a[1])); }
+        else if (what === "measure" || what === "tactic") {
+          var u = unitLike(a[1]), it = u && u.items[+a[2]];
+          if (!it) return;
+          if (what === "measure") addMeasure(it); else addTactic(it);
+        }
+        else if (what === "project") {
+          var c = capById(a[1]);
+          if (!c) return;
+          var np = addProject(c);
+          /* Select what was just made, or the new project is added to a rail
+             that goes on showing the old one and nothing says it worked. */
+          if (np) RAIL[railKeyFor(c)] = np.id;
+        }
+        else {
+          var pr = projById(a[1]);
+          if (!pr) return;
+          if (what === "deliverable") addDeliverable(pr);
+          else if (what === "outcome") addOutcome(pr);
+          else if (what === "milestone") addMilestone(pr);
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rowoff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
+        removeRowById(listById(list, id), id);
+        paint();
+      });
+    });
+
     document.querySelectorAll(".sortable").forEach(function(c){
       var kind = c.dataset.kind;
       /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5). This used to pick the

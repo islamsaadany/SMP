@@ -220,22 +220,63 @@ var SYNC = (function () {
      session, never by the simulated view. Offline, everything stays as it
      always was. */
   var person = null;
+  /* ── WHO MAY SEE THE CONTROLS THAT LEAVE YOUR OWN VIEW (§69.15) ────
+     The viewer switcher and Demo data are the SMO's, and Tarek — a contributor
+     with no role at all — was served both, with the switcher showing SOMEBODY
+     ELSE'S NAME as the person signed in.
+
+     THE FAULT IS THE DIRECTION OF THE GATE, not the test. Both controls sit in
+     the markup and were CORRECTED afterwards: shown by default, hidden by a
+     step that runs later. Anything that stops that step — an exception above
+     it, an early return, a person the register does not hold — leaves them
+     standing, for everybody. A control that is dangerous when wrong must fail
+     CLOSED: hidden until something proves it should be shown.
+
+     One function, asked by both, so the two can never disagree about who the
+     SMO is (§42's rule about one copy of a rule, on the chrome). `role` is the
+     SEAT role the server returns from the session — never the simulated view,
+     which is the whole point of the simulation. */
+  function isSMOSession() { return !!person && person.role === "super"; }
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
     if (!box || !sel) return;
-    if (PEOPLE.some(function (p) { return p.key === person.key; })) {
+    var known = PEOPLE.some(function (p) { return p.key === person.key; });
+    if (known) {
       window.VIEWER = person.key;
       sel.value = person.key;
+    }
+    /* AND IF THE REGISTER DOES NOT HOLD THEM, RENDER NOBODY. `VIEWER` was
+       simply left where it was — at whoever the list happens to start with —
+       so a person the platform could not find was shown the FIRST PERSON'S
+       VIEW, wearing their own name in the corner. That is the worst reading
+       available: the SMO's pages served to somebody who is not the SMO,
+       with nothing on the screen saying so.
+
+       It cannot happen from a save (the session JOINs `people`), but it can
+       from a hydration that has not caught up, and "it cannot happen" is not a
+       reason to render the wrong person when it does. */
+    if (!known) {
+      var lost = document.createElement("div");
+      lost.className = "note bad-note";
+      lost.style.margin = "18px";
+      lost.innerHTML = "<b></b> ";
+      lost.firstChild.textContent = (person.name || "You") +
+        " is signed in but is not on this register.";
+      lost.appendChild(document.createTextNode(
+        "Nothing is shown rather than somebody else\u2019s view. Ask the SMO to " +
+        "check the People register."));
+      var panel = document.getElementById("panel");
+      if (panel) { panel.textContent = ""; panel.appendChild(lost); }
+      box.hidden = true;
+      return;
     }
     /* THE SEAT ROLE, NOT A LEVEL. This read `person.level !== "smo"` — a name
        that stopped existing when roles replaced levels (§33). The server has
        returned `role` ("super") ever since, so `undefined !== "smo"` was true
-       for EVERYBODY and the switcher was hidden from the one person it is for:
-       the SMO saw "Signed in as …" and lost the simulation entirely. A
-       comparison against a field nobody sets fails silently and in the safe
-       direction, which is why it survived a version. */
-    if (person.role !== "super") {
+       for EVERYBODY and the switcher was hidden from the one person it is for
+       (§45.3). It is asked through isSMOSession() now, in one place. */
+    if (!isSMOSession()) {
       sel.hidden = true;
       var label = box.querySelector("label");
       if (label) label.textContent = "Signed in as";
@@ -300,10 +341,21 @@ var SYNC = (function () {
     var btn = document.getElementById("demobtn");
     if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
     /* One or the other, never both and never neither — and only once boot()
-       has found a live dataset, which is what `live` says. */
+       has found a live dataset, which is what `live` says.
+
+       AND ONLY FOR THE SMO (Islam, 2026-08-24: "the demo data button shouldn't
+       appear to anyone but the SMO"). It is not decoration: pressing it
+       replaces every page with invented content (§21), and the person most
+       likely to press it by accident is the one who has never seen it before.
+       Asked through isSMOSession() so the switcher and this cannot disagree
+       about who the SMO is.
+
+       Served from a FILE there is no session and no `live`, so both are hidden
+       by the first clause anyway — the whole product is the example there and
+       there is nothing to switch to. */
     var menu = document.getElementById("demomenu");
-    if (menu) menu.hidden = !live || isDemoMode();
-    if (btn) btn.hidden = !live || !isDemoMode();
+    if (menu) menu.hidden = !live || !isSMOSession() || isDemoMode();
+    if (btn) btn.hidden = !live || !isSMOSession() || !isDemoMode();
     var ban = document.getElementById("banner");
     if (ban) {
       ban.hidden = !isDemoMode();

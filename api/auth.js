@@ -251,10 +251,21 @@ module.exports = async function handler(req, res) {
     if (action === "whereList") {
       const person = await auth.getSession(client, req);
       if (!person) return send(res, 401, { ok: false, error: "sign in first" });
+      /* `active` IS A COLUMN ON BOTH, NOT A KEY IN `extra` (§69.14). These read
+         `extra->>'active'`, which is never set on a unit or a function — only
+         on a PERSON, where retirement really does ride in the extra blob
+         (§35). So COALESCE returned 'true' every time and the filter passed
+         everything: a retired unit has been offered on the first-sign-in list
+         since §56 shipped, and a retired one is exactly the place somebody
+         must not say they work.
+
+         The same shape as §48.6 and §45.3: a comparison against a field
+         nobody sets fails SILENTLY, and here it failed in the GENEROUS
+         direction, which is why no sweep caught it. Found by asserting it. */
       const us = (await client.query(
-        "SELECT key, name FROM units WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows;
+        "SELECT key, name, company FROM units WHERE active ORDER BY idx")).rows;
       const fs = (await client.query(
-        "SELECT key, name FROM functions WHERE COALESCE(extra->>'active','true') <> 'false' ORDER BY idx")).rows;
+        "SELECT key, name FROM functions WHERE active ORDER BY idx")).rows;
       const mine = (await client.query(
         "SELECT at, declared_on FROM bu_declarations WHERE person_key = $1", [person.key])).rows[0];
 
@@ -280,8 +291,47 @@ module.exports = async function handler(req, res) {
         "SELECT extra->>'mainbu' AS mainbu FROM people WHERE key = $1", [person.key])).rows[0];
       const norm = function (x) { return String(x == null ? "" : x).trim().toLowerCase(); };
       const row = rows.filter(function (b) { return norm(b.name) === norm(who && who.mainbu); })[0];
-      const ats = !row ? []
+      const raw = !row ? []
         : (Array.isArray(row.at) ? row.at : (row.at ? [row.at] : [])).filter(Boolean);
+
+      /* ── A COMPANY IS NOT SOMEWHERE YOU SAY YOU WORK (§69.14) ────────
+         The short list came out EMPTY for the one tenant it was built for, and
+         the page then showed the flat list it shows when nothing is mapped —
+         Islam: "on the selection of the unit on login the whole list was
+         brought while we already set the Official BU he belongs to."
+
+         The cause is §54's own vocabulary meeting §57's narrowing. An Official
+         BU points at whatever `r.at` can name — a unit, `fn:<key>`, `co:<key>`,
+         "group", or nothing — and in THIS tenant Distribution is a COMPANY
+         (§54.1: six of the ten client names are not units here). But this list
+         offers units and functions only, because those are the places a person
+         can BE. So `co:distribution` matched nothing, `near` came back empty,
+         and every narrowing collapsed silently into no narrowing at all —
+         failing in the safe direction and therefore never noticed (§48.6, the
+         fourth time that shape has cost a version).
+
+         A COMPANY EXPANDS TO THE UNITS IT HOLDS, which is the honest reading:
+         "you work at Distribution" narrows the question to Distribution's
+         three units rather than answering it. The GROUP expands to nothing —
+         everything is under the group, so it narrows nothing and offering the
+         full list under a heading saying "yours" would be a lie about where
+         somebody works. */
+      const inCompany = function (co) {
+        return us.filter(function (u) { return u.company === co; })
+                 .map(function (u) { return u.key; });
+      };
+      const ats = [];
+      raw.forEach(function (at) {
+        const t = String(at);
+        if (t === "group") return;
+        if (t.indexOf("co:") === 0) {
+          inCompany(t.slice(3)).forEach(function (k) {
+            if (ats.indexOf(k) === -1) ats.push(k);
+          });
+          return;
+        }
+        if (ats.indexOf(t) === -1) ats.push(t);
+      });
 
       return send(res, 200, { ok: true,
         units: us.map(function (r) { return { at: r.key, name: r.name }; }),
@@ -304,9 +354,13 @@ module.exports = async function handler(req, res) {
         await client.query("DELETE FROM bu_declarations WHERE person_key = $1", [person.key]);
         return send(res, 200, { ok: true, at: null });
       }
+      /* Validated against the same set whereList OFFERS, retirement included —
+         the comment above this handler says "validated against the same list
+         whereList builds", and it was not: this accepted a retired unit the
+         list no longer shows. */
       const known = at.indexOf("fn:") === 0
-        ? (await client.query("SELECT 1 FROM functions WHERE key = $1", [at.slice(3)])).rowCount
-        : (await client.query("SELECT 1 FROM units WHERE key = $1", [at])).rowCount;
+        ? (await client.query("SELECT 1 FROM functions WHERE key = $1 AND active", [at.slice(3)])).rowCount
+        : (await client.query("SELECT 1 FROM units WHERE key = $1 AND active", [at])).rowCount;
       if (!known) return send(res, 400, { ok: false, error: "That is not somewhere in this organisation." });
       await client.query(
         "INSERT INTO bu_declarations (person_key, at) VALUES ($1, $2) " +

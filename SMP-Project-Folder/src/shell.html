@@ -2400,6 +2400,41 @@
         paint();
       });
     });
+    /* ── THE TWO FACTS THAT COULD BE READ AND NOT CORRECTED (§69.17) ──
+       Both go through the ONE door each already has: attachPersonAt() is where
+       "where does this person sit" is written, shared by the register, the
+       file importer and the Use-it button (§54.1), and `p.mainbu` is the
+       client's own word, stored as first written.
+
+       An Official BU NOT on the list is kept rather than refused — the list is
+       soft (§54) and a name the file brought is still this person's true
+       answer — but it is ADDED to the list unmapped, exactly as the file
+       reader does, so the SMO can then point it somewhere. Two places writing
+       the same fact differently is what mainbuList() exists to prevent. */
+    document.querySelectorAll("[data-pmainbu]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.pmainbu);
+        if (!p) return;
+        var v = sel.value.trim();
+        if (!v) delete p.mainbu;
+        else {
+          p.mainbu = v;
+          if (!mainbuBy(v)) mainbuList().push({ name: v, at: null });
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pat]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        if (grant("c_people") !== "edit") return;
+        var p = personBy(sel.dataset.pat);
+        if (!p) return;
+        attachPersonAt(p, sel.value || null);
+        paint();
+      });
+    });
+
     /* ACCEPTING WHAT SOMEBODY SAID ABOUT THEMSELVES (§56). The declaration
        granted nothing; this is the SMO moving them, and it is an ordinary edit
        of the person's BU — attachPersonAt() is the one door the register and
@@ -2747,6 +2782,53 @@
         });
       });
     });
+    /* ── ADDING AND REMOVING A PLAN ROW (§69.13) ─────────────────────
+       Both re-ask `mayEditPlan()` rather than trusting the render that drew
+       the button (§48.2, §62): a repaint can happen between the two, and the
+       pen is the SMO's alone (§31).
+
+       Removing is by ID, never by index — the index is the thing that goes
+       stale across a repaint, and splicing a stale one takes the wrong row.
+       Adding APPENDS and mints an id of its own; nothing renumbers, because
+       renumberUnit() rewrites every id from POSITION and every reported
+       figure, focus mark and cycle snapshot is keyed on those (§48.1). */
+    document.querySelectorAll("[data-rowadd]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rowadd.split("|"), what = a[0];
+        if (what === "pillar")  { addPillar(unitLike(a[1])); }
+        else if (what === "measure" || what === "tactic") {
+          var u = unitLike(a[1]), it = u && u.items[+a[2]];
+          if (!it) return;
+          if (what === "measure") addMeasure(it); else addTactic(it);
+        }
+        else if (what === "project") {
+          var c = capById(a[1]);
+          if (!c) return;
+          var np = addProject(c);
+          /* Select what was just made, or the new project is added to a rail
+             that goes on showing the old one and nothing says it worked. */
+          if (np) RAIL[railKeyFor(c)] = np.id;
+        }
+        else {
+          var pr = projById(a[1]);
+          if (!pr) return;
+          if (what === "deliverable") addDeliverable(pr);
+          else if (what === "outcome") addOutcome(pr);
+          else if (what === "milestone") addMilestone(pr);
+        }
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rowoff]").forEach(function(b){
+      b.addEventListener("click", function(){
+        if (!mayEditPlan()) return;
+        var a = this.dataset.rowoff.split("|"), list = a[0], id = a[1];
+        removeRowById(listById(list, id), id);
+        paint();
+      });
+    });
+
     document.querySelectorAll(".sortable").forEach(function(c){
       var kind = c.dataset.kind;
       /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5). This used to pick the

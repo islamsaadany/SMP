@@ -907,6 +907,38 @@ function mainbuBy(name){
    again — so a string is read as a list of one and written back as a list the
    next time it is touched. There is no migration because `mainbus` lives in
    `org.extra`, which is jsonb and takes an array without being asked. */
+/* THE OFFICIAL BU CHOICES FOR ONE ROW (§69.17). The client's own list, plus
+   whatever this row already says if the list has never heard of it — a name
+   the file brought and nobody has mapped is still this person's true answer,
+   and a select that dropped it would silently clear it the first time somebody
+   opened the row to change something else. */
+function mainbuNamesFor(p){
+  var out = mainbus().map(function(b){ return b.name; });
+  var have = String((p && p.mainbu) || "").trim();
+  if (have && !out.some(function(n){ return mainbuKey(n) === mainbuKey(have); })) out.push(have);
+  return out;
+}
+/* EVERYWHERE A PERSON CAN SIT, in `r.at`'s vocabulary — the same strings a
+   role is held at (§54.1), which is what lets somebody be attached to a
+   company without inventing anything. Retired units, functions and companies
+   are left out: a retired one is not somewhere to be seated (§49.3), and an
+   existing attachment to one is left alone because the select keeps whatever
+   the row already says (below). */
+function personAtChoices(){
+  var out = [{ v:"group", label:roleWhereLabel("group") }];
+  UNIT_KEYS.forEach(function(k){
+    if (UNITS[k].active !== false) out.push({ v:k, label:UNITS[k].name });
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    if (FUNCTIONS[k].active !== false)
+      out.push({ v:"fn:" + k, label:FUNCTIONS[k].name + " (function)" });
+  });
+  activeCompanyKeys().forEach(function(c){
+    out.push({ v:"co:" + c, label:COMPANIES[c].name + " (company)" });
+  });
+  return out;
+}
+
 function mainbuAts(b){
   if (!b) return [];
   if (Array.isArray(b.at)) return b.at.filter(Boolean);
@@ -2999,6 +3031,151 @@ FUNCTION_KEYS.forEach(function(k){
   var asU = fnAsUnit(k);
   if (asU) renumberUnit(asU);
 });
+
+/* ── ADDING ONE ROW TO A PLAN (§69.13) ────────────────────────────────────
+   Islam: "in the projects and pillars pages I need to have the edit with
+   include the arrange and add access, to edit current projects and pillars or
+   add one."
+
+   §22 is unchanged and this does not touch it: a plan still ARRIVES by upload,
+   codes are still minted on arrival, replacing still archives. This is §31's
+   pen doing one more thing — correcting a plan afterwards without re-uploading
+   a whole unit — and a pen that can retype every field but cannot add the row
+   somebody forgot is half a pen.
+
+   THEY APPEND, ALWAYS, AND THEY NEVER RENUMBER. `renumberUnit()` rewrites
+   every id from POSITION, which is right when a whole plan is authored at once
+   (import, restoring an archive) and would be quietly destructive here: ids
+   are what a reported figure, a focus mark and a cycle snapshot are keyed on
+   (§48.1), and reordering deliberately does NOT renumber, so after one drag a
+   pillar's position and its id already disagree. Run the renumber on an add
+   and every figure in the unit is orphaned. So a new row is appended and given
+   an id of its OWN, and arranging afterwards moves it without touching either.
+
+   AND NOT length + 1. After a row has been removed, `-P3` can still be held by
+   the last of three — the same collision mintPersonKey() and mintClaimId()
+   already scan for. */
+function mintRowId(list, prefix){
+  var taken = {};
+  (list || []).forEach(function(x){ if (x && x.id) taken[x.id] = 1; });
+  var n = (list || []).length + 1;
+  while (taken[prefix + n]) n++;
+  return prefix + n;
+}
+
+/* A pillar arrives with every field a reader asks for, present and empty
+   (§51.10: the code that CREATES a row has to mint the shape readers expect,
+   and a writer minting the old shape is silent until somebody opens the page
+   that reads it — which is how adding a capability took the product down for
+   eleven versions). `code` is left for pillarCode() to derive positionally,
+   the same way an uploaded pillar's is. */
+function addPillar(u){
+  if (!u || !u.items) return null;
+  var it = { id: mintRowId(u.items, u.ukey + "-P"), code: "", name: "", sub: "",
+             kind: "", theme: "", owner: "", measures: [], tactics: [] };
+  u.items.push(it);
+  return it;
+}
+function addMeasure(it){
+  if (!it) return null;
+  var m = { id: mintRowId(it.measures, it.id + "-M"), name: "", dir: "\u2265",
+            target: "", compile: "Latest", actual: "" };
+  it.measures.push(m);
+  return m;
+}
+/* A tactic's quarters are four separate fields, not an array — that is what
+   the data has carried since the beginning and what qs() reads. All four off:
+   a tactic due in no quarter is asked for in no cycle (§42), which is the
+   right starting state for a row nobody has planned yet. */
+function addTactic(it){
+  if (!it) return null;
+  var t = { id: mintRowId(it.tactics, it.id + "-T"), name: "", owner: "",
+            q1: 0, q2: 0, q3: 0, q4: 0, status: "", actual: null };
+  it.tactics.push(t);
+  return t;
+}
+function addProject(c){
+  if (!c || !c.projects) return null;
+  var p = { id: mintRowId(c.projects, c.id + "-P"), capId: c.id, name: "", owner: "",
+            brief: "", stakeholders: [], timeline: "quarter", start: "", end: "",
+            deliverables: [], outcomes: [], milestones: [] };
+  c.projects.push(p);
+  return p;
+}
+/* A DELIVERABLE HAS NO DUE AND NO OWNER (§53.4) — it is delivered when the
+   project ends and the project's owner owns it — so neither is minted here.
+   An outcome keeps measureAt, because a measurement time is a real thing
+   somebody chose. */
+function addDeliverable(p){
+  if (!p) return null;
+  var d = { id: mintRowId(p.deliverables, p.id + "-D"), name: "", kind: "binary", actual: "" };
+  p.deliverables.push(d);
+  return d;
+}
+function addOutcome(p){
+  if (!p) return null;
+  var o = { id: mintRowId(p.outcomes, p.id + "-O"), name: "", dir: "\u2265",
+            target: "", measureAt: "", actual: "" };
+  p.outcomes.push(o);
+  return o;
+}
+function addMilestone(p){
+  if (!p) return null;
+  var m = { id: mintRowId(p.milestones, p.id + "-M"), name: "", covers: "",
+            owner: "", finish: "", status: "" };
+  p.milestones.push(m);
+  return m;
+}
+
+/* Every project in the tenant, and the one with this id. Searched rather than
+   addressed through its capability, because the caller has the row's id and
+   nothing else — and an id already encodes its parent, so passing the parent
+   separately would be a second copy of the same fact for the two to disagree
+   about. */
+function eachProject(fn){
+  (GROUP.capabilities || []).forEach(function(c){
+    (c.projects || []).forEach(function(p){ fn(p, c); });
+  });
+}
+function projById(id){
+  var hit = null;
+  eachProject(function(p){ if (p.id === id) hit = p; });
+  return hit;
+}
+/* WHICH ARRAY A ROW LIVES IN, found by looking rather than by parsing its id.
+   An id looks addressable — `mobile-P1-M2` names its unit and its pillar — and
+   reading it that way would break the moment a key contains a hyphen, which a
+   minted person key cannot but a unit key set by hand certainly can. Scanning
+   is O(the plan) and the plan is small; a wrong answer here splices the wrong
+   row out of somebody's strategy. */
+function listById(kind, id){
+  var out = null;
+  var look = function(list){
+    if (!out && list && list.some(function(x){ return x && x.id === id; })) out = list;
+  };
+  if (kind === "measures" || kind === "tactics") {
+    UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+      var u = unitLike(t);
+      ((u && u.items) || []).forEach(function(it){ look(it[kind]); });
+    });
+    return out;
+  }
+  eachProject(function(p){ look(p[kind]); });
+  return out;
+}
+
+/* Removing one. By ID, never by index: the render that drew the button and the
+   array being spliced are a repaint apart, and an index is the thing that goes
+   stale in between (§48.2, the same reason a delete re-asks its blockers).
+   Returns whether anything went, so a caller can tell a no-op from a removal. */
+function removeRowById(list, id){
+  if (!list || !id) return false;
+  var i = -1;
+  list.forEach(function(x, n){ if (x && x.id === id) i = n; });
+  if (i < 0) return false;
+  list.splice(i, 1);
+  return true;
+}
 
 /* The generic template is built against an EMPTY shape, not against a chosen
    unit: the file is the same whichever unit it will end up describing, and the

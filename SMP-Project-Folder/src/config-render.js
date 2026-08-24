@@ -848,7 +848,19 @@ var PEOPLE_COLS = [
      the default and reappear for everybody who ever touched the chooser
      (§30.2) — the label is what people read, the key is what code holds. */
   { k:"bu",       label:"Unit" },
-  { k:"contact",  label:"Contact",  off:true },
+  /* TWO COLUMNS, NOT ONE (Islam, 2026-08-24: "the contact in the People
+     register table needs to split the email from the contact number").
+     §54 put them together as "one answer to one question" — how you reach
+     somebody — and that reading stopped being true the day the EMAIL became
+     how somebody signs in (§69.11). It is not a contact detail any more; it
+     is their name at the door, and it is now the column the SMO reads when
+     access does not work. So it gets a column of its own, shown by default,
+     and the number keeps one that is off by default. The old `contact` key is
+     GONE rather than repurposed: a stored preference for "contact" meant both,
+     and silently reading it as "email" would turn one answer into another
+     (§30.2, §65). */
+  { k:"email",    label:"Email" },
+  { k:"phone",    label:"Mobile",  off:true },
   { k:"roles",    label:"Roles" },
   { k:"status",   label:"Status" },
   { k:"password", label:"Password", live:true }
@@ -1023,16 +1035,10 @@ function renderPeople(){
       }).join("") + '</select>';
   }
 
-  /* Read-only, and spelled out rather than leaning on `"" || dash` — an
-     expression whose falsiness carries the meaning is one refactor away from
-     being wrong (CLAUDE.md: explicit over clever). */
-  function contactCell(p){
-    var bits = [];
-    if (p.email) bits.push('<span class="val">' + esc(p.email) + '</span>');
-    if (p.phone) bits.push('<span class="mono">' + esc(p.phone) + '</span>');
-    if (!bits.length) return '<span class="why" style="margin:0">&mdash;</span>';
-    return bits.join("");
-  }
+  /* contactCell() was here. It stacked the address over the number in one
+     cell, and the two are two columns now (§69.16) — a function nothing calls
+     is a function the next reader has to prove is dead before touching
+     anything near it (§24). */
 
   /* STATUS ONLY, AND SQUEEZED (Islam, 2026-08-22). The action left this cell
      for the row's kebab; what is left is one word in one pill, so the column
@@ -1199,20 +1205,52 @@ function renderPeople(){
          and a person can be moved by hand afterwards — neither is a fault, and
          a mapping that silently moved thirty people the next time a row
          changed would be the worst kind of helpful. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
-        ? '<span class="val">' + esc(p.mainbu) + '</span>' +
-          (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      (showCol("bu") ? '<td>' + (home
-        ? '<span class="uchip">' + esc(home) + '</span>' + (drift
-            ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
-              esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
-              esc(whereLabel(drift)) + '</span>'
-            : '')
-        : (drift
-            ? '<span class="why" style="margin:0">&mdash; the list says ' +
-              esc(whereLabel(drift)) + '</span>'
-            : '<span class="why" style="margin:0">&mdash;</span>')) +
+      /* BOTH ARE EDITABLE NOW (Islam, 2026-08-24: "in the People register I need
+         to be able to edit the Official BU and the Unit"). They were the only
+         two facts on the register that could be READ and not corrected: the
+         Official BU arrives with the file and the Unit was writable only
+         through the "They said X — Use it" note, so a row the file placed
+         wrongly could be fixed nowhere at all.
+
+         THE OFFICIAL BU IS A SELECT, NOT A FIELD, and the Unit is too, for
+         opposite reasons that are both §54's: the Official BU list is the
+         client's own vocabulary and is SOFT (a name not on it is added
+         unmapped by the file reader, because a fresh tenant could never read
+         its first file otherwise), so the select carries what the list holds
+         plus whatever this row already says. A UNIT IS NOT SOFT — it either
+         exists here or it does not, and typing a new one cannot conjure one. */
+      (showCol("mainbu") ? '<td>' + (editable
+        ? '<select class="fld" data-pmainbu="' + esc(p.key) + '">' +
+            '<option value="">&mdash; none &mdash;</option>' +
+            mainbuNamesFor(p).map(function(nm){
+              return '<option value="' + esc(nm) + '"' +
+                (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
+            }).join("") + '</select>' +
+          (p.mainbu && !mainbuBy(p.mainbu)
+            ? '<span class="why">not on the Official BU list</span>' : '')
+        : (p.mainbu
+            ? '<span class="val">' + esc(p.mainbu) + '</span>' +
+              (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
+            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      (showCol("bu") ? '<td>' + (editable
+        ? '<select class="fld" data-pat="' + esc(p.key) + '">' +
+            '<option value="">&mdash; nowhere yet &mdash;</option>' +
+            personAtChoices().map(function(o){
+              return '<option value="' + esc(o.v) + '"' +
+                (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
+            }).join("") + '</select>' +
+          (drift && drift !== belongsKey(p)
+            ? '<span class="why">the list says ' + esc(whereLabel(drift)) + '</span>' : '')
+        : (home
+            ? '<span class="uchip">' + esc(home) + '</span>' + (drift
+                ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
+                  esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
+                  esc(whereLabel(drift)) + '</span>'
+                : '')
+            : (drift
+                ? '<span class="why" style="margin:0">&mdash; the list says ' +
+                  esc(whereLabel(drift)) + '</span>'
+                : '<span class="why" style="margin:0">&mdash;</span>'))) +
         saidWhereNote(p, editable) +
         /* The role picker's second half (§69). It sits UNDER what the cell
            already says rather than replacing it: where somebody sits and where
@@ -1223,11 +1261,16 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("contact") ? '<td>' + (editable
+      (showCol("email") ? '<td>' + (editable
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-          '" placeholder="Email"><input class="fld" value="' + esc(p.phone || "") +
-          '" data-pphone="' + p.key + '" placeholder="Mobile">'
-        : contactCell(p)) + '</td>' : '') +
+          '" placeholder="Email">'
+        : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      (showCol("phone") ? '<td>' + (editable
+        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
+          '" placeholder="Mobile">'
+        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
       (showCol("roles")
         ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
       /* Standing before Password, at Islam's direction — whether somebody can
@@ -1412,7 +1455,8 @@ function renderPeople(){
         (showCol("title")    ? '<th>Job title</th>'  : '') +
         (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
         (showCol("bu")       ? '<th>Unit</th>'       : '') +
-        (showCol("contact")  ? '<th>Contact</th>'    : '') +
+        (showCol("email")    ? '<th>Email</th>'      : '') +
+        (showCol("phone")    ? '<th>Mobile</th>'     : '') +
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
         (showCol("status")   ? '<th class="cc">Status</th>' : '') +
         (live && showCol("password") ? '<th class="cc">Password</th>' : '') +

@@ -8905,3 +8905,96 @@ is a diagnostic now rather than the thing everybody needs.
 Everything after the password already worked and needed nothing: the forced
 change (§43), and the *where do you work* question with a short list narrowed
 from the person's Official BU **on the server** (§56, §57).
+
+**69.13 The pen reaches the projects page, and both pages can add.** Islam:
+*"in the projects and pillars pages I need to have the edit with include the
+arrange and add access, to edit current projects and pillars or add one."*
+
+The pillars page has had a pen since §31 and drag handles since §63.3; the
+projects page had **neither** — §53.5 exactly, the two pages fine *differently*.
+It is the SAME pen (`EDIT_PAGE.plan`) and the same gate (`mayEditPlan()`, the
+SMO's alone): giving a function's plan a looser gate than a unit's would be
+inventing that decision on the quiet.
+
+§22 is untouched. A plan still ARRIVES by upload, codes are still minted on
+arrival, replacing still archives. This is the pen doing one more thing —
+**a pen that can retype every field but cannot add the row somebody forgot is
+half a pen.**
+
+**ADDS APPEND AND NOTHING RENUMBERS.** `renumberUnit()` rewrites every id from
+POSITION, which is right when a whole plan is authored at once (import,
+restoring an archive) and quietly destructive here: ids are what a reported
+figure, a focus mark and a cycle snapshot are keyed on (§48.1), and **reordering
+deliberately does not renumber**, so after one drag a pillar's position and its
+id already disagree. A new row is appended and given an id of its own; removing
+one leaves every other id untouched, which is asserted. And not `length + 1` —
+after a removal, `-P3` can still be held by the last of three.
+
+**69.14 The short list came back empty for the one tenant it was built for.**
+Islam: *"on the selection of the unit on login the whole list was brought while
+we already set the Official BU he belongs to."*
+
+§54's vocabulary meeting §57's narrowing. An Official BU points at whatever
+`r.at` can name — a unit, `fn:<key>`, `co:<key>`, `"group"`, or nothing — and
+the sign-in list offers **units and functions only**, because those are the
+places a person can BE. In this tenant Distribution is a COMPANY (§54.1: six of
+the ten client names are not units here), so `co:distribution` matched nothing,
+`near` came back empty, and the narrowing collapsed into *no narrowing at all* —
+failing in the safe direction and therefore invisible.
+
+**A company expands to the units it holds**, which is the honest reading: *you
+work at Distribution* narrows the question to Distribution's three units rather
+than answering it. **The group expands to nothing** — everything is under the
+group, so it narrows nothing, and a heading saying "yours" over the full list
+would be a lie about where somebody works.
+
+And the test found a second one underneath: **`active` is a COLUMN on units and
+functions, not a key in `extra`** — only a PERSON's retirement rides in the
+extra blob (§35). Both queries read `extra->>'active'`, so COALESCE returned
+`'true'` every time and **a retired unit has been offered on the first-sign-in
+list since §56 shipped.** The fourth instance of a comparison against a field
+nobody sets, and the first to fail in the GENEROUS direction.
+
+**69.15 A control that is dangerous when wrong must fail closed.** Tarek — a
+contributor holding no role — was served the viewer switcher AND the Demo data
+button, with the switcher showing somebody else's name as the person signed in.
+
+**The fault is the direction of the gate, not the test.** Both controls sit in
+the markup and were CORRECTED afterwards: shown by default, hidden by a step
+that runs later. Anything that stops that step — an exception above it, an
+early return, a person the register does not hold — leaves them standing, for
+everybody. `isSMOSession()` is asked by both now, so the two cannot disagree
+about who the SMO is.
+
+**And if the register does not hold the signed-in person, render nobody.**
+`VIEWER` was simply left where it was — at whoever the list happens to start
+with — so a person the platform could not find was shown **the first person's
+view**, wearing their own name in the corner. The SMO's pages served to somebody
+who is not the SMO, with nothing on screen saying so. It cannot happen from a
+save (the session JOINs `people`), and *"it cannot happen"* is not a reason to
+render the wrong person when it does.
+
+**69.16 Email leaves the Contact column.** Islam: *"the contact in the People
+register table needs to split the email from the contact number."* §54 put them
+together as one answer to one question — how you reach somebody — and that
+stopped being true the day the email became **how somebody signs in** (§69.11).
+It is not a contact detail any more; it is their name at the door, and it is the
+column the SMO reads when access does not work. Its own column, shown by
+default; the number keeps one, off by default. The `contact` key is **gone**
+rather than repurposed: a stored preference for "contact" meant both, and
+reading it as "email" would turn one answer into another (§30.2, §65).
+
+**69.17 The two facts that could be read and not corrected.** Islam: *"in the
+People register I need to be able to edit the Official BU and the Unit."* They
+were the only two on the register that could be read and not fixed: the Official
+BU arrives with the file, and the Unit was writable only through the *"They said
+X — Use it"* note — so a row the file placed wrongly could be corrected nowhere.
+
+Both are selects, for opposite reasons that are both §54's. **The Official BU
+list is SOFT** — a name not on it is added unmapped by the file reader, because
+a fresh tenant could never read its first file otherwise — so the select carries
+the list plus whatever this row already says, and a new name is added to the
+list unmapped through `mainbuList()`, the same door the importer uses. **A unit
+is not soft**: it either exists here or it does not, and typing one cannot
+conjure it. The Unit writes through `attachPersonAt()`, the one place that
+answers "where does this person sit".

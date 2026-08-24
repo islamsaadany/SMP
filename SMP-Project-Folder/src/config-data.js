@@ -155,6 +155,11 @@ var NEWMAINBU = "";
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
 var PMENU = null;
+/* Which person the delete confirmation is open for (§69). Its own key rather
+   than a mode on PMENU: the confirmation REPLACES the menu in the same place,
+   so the second press lands where the first one did — the same shape the
+   clear-plan confirmation already uses (§46.2). */
+var PDEL = null;
 /* Which person's extra roles are unfolded, and which header menu is open.
    Single keys for the same reason PMENU is: two open at once is a state that
    has to be closed twice. */
@@ -678,6 +683,130 @@ function restorePerson(key, giveBack){
     });
   }
   delete p.heldRoles;
+}
+
+/* ── DELETED, NOT RETIRED — AND THE REFUSAL IS THE FEATURE (§69) ────
+   The rule above still stands: retiring is what happens when somebody LEAVES,
+   and it is right that it keeps every attribution true. This is the other
+   case, and it is the one Islam asked for — a row typed by mistake, a test
+   person, somebody imported twice. Those could only ever be retired, so the
+   register grew a permanent list of people who were never really there.
+
+   §62's shape, applied to a person: the button is always live, the delete is
+   REFUSED while anything still points at the row, and the refusal NAMES what
+   and where to go and undo it. What points at a person is a short list and it
+   is worth writing down, because each one is a KEY rather than a name:
+
+     UNIT_ROLES[k].head / .custodian      a unit's two seats
+     FUNCTIONS[f].head / .custodian       a function's two
+     p.role (super / gceo / cceo)         the seats held on the person
+     set.owner                            who owns a figure set (§44)
+     row.src.by                           who enters one figure (§44 step 3)
+     claim.by                             an open request for a figure
+
+   A TYPED NAME IS NOT A POINTER. `t.owner` and `t.collaborators` hold text —
+   an imported plan names people who have never been on the register at all
+   (§50.2) — so being named on a line does NOT block. It is said in the
+   confirmation instead, because the name stays where the plan typed it and
+   somebody should know that before pressing Yes.
+
+   NOTHING IN THE STATE GRAPH RECORDS WHO ENTERED A FIGURE. The register's own
+   note has promised that since §16.11 and it has never been true: what exists
+   is `change_log` (§42), which is OUTSIDE the state graph and is deliberately
+   NOT purged — a log that forgets who did something is not a log. The purge is
+   the door: credentials, sessions, the BU declaration and any failed sign-ins
+   go with the row, server-side, or a key minted again from the same name would
+   inherit the deleted person's password (see lib/state-io.js). */
+function personBlock(short, full){ return { short:short, full:full }; }
+function personDeleteBlockers(key){
+  var out = [], p = personBy(key);
+  if (!p) return [personBlock("unknown", "no such person")];
+
+  /* A GRANTED role, never a derived one. Contributor and Employee are read off
+     `p.unit` and off being named (§55) — they are not pointers, they go with
+     the row, and refusing on them would refuse every attached person. */
+  var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
+  if (held.length) out.push(personBlock(
+    plural(held.length, "role"),
+    plural(held.length, "role") + " still held (" +
+    held.map(function(r){ return roleName(r.role) + " · " + roleWhereLabel(r.at); }).join(", ") +
+    ") — take each one off with its × first"));
+
+  var sets = setsList().filter(function(s){ return s.owner === key; })
+                       .map(function(s){ return s.name; });
+  if (sets.length) out.push(personBlock(
+    plural(sets.length, "figure set"),
+    plural(sets.length, "figure set") + " owned (" + sets.join(", ") +
+    ") — hand each one to somebody else on Setup → Figure sets"));
+
+  var figs = [];
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    reportItems(u).forEach(function(x){
+      if (x.obj && x.obj.src && x.obj.src.by === key) figs.push(u.name + " · " + x.obj.name);
+    });
+  });
+  if (figs.length) out.push(personBlock(
+    plural(figs.length, "figure"),
+    plural(figs.length, "figure") + " they enter (" + figs.join(", ") +
+    ") — clear the naming on that unit’s Strategy → Who enters"));
+
+  var claims = claimsList().filter(function(c){ return c.by === key && c.state === "open"; });
+  if (claims.length) out.push(personBlock(
+    plural(claims.length, "open request"),
+    plural(claims.length, "open request") + " for a figure — answer them on the " +
+    "cycle page first, so the request is not left pointing at nobody"));
+
+  return out;
+}
+
+/* What goes with the row, so the confirmation can say it rather than asking
+   somebody to trust a button (§62, §49.2). Two of these are NOT data the
+   platform holds — they are the door — and saying so is the point: deleting a
+   person is what makes their password and their open sessions stop existing. */
+function personDeleteTakes(key){
+  var p = personBy(key), out = [];
+  if (!p) return out;
+  /* NO ITEM MAY CONTAIN THE WORD "and". The confirmation joins these into one
+     sentence, and an item that carries its own conjunction produces "their
+     password and their sessions and anything they said" — read on screen
+     before it was read in the source. */
+  out.push("their row on the register");
+  out.push("their password");
+  out.push("any sessions they have open");
+  out.push("anything they said about where they work");
+  return out;
+}
+
+/* Where the plan still types their NAME after the row has gone. Not a blocker
+   — the plan is text and an imported one names people who were never on the
+   register — but the confirmation says how many, because "deleted" reading as
+   "scrubbed from the plan" is the wrong expectation to leave somebody with. */
+function personNamedLines(key){
+  var p = personBy(key);
+  if (!p) return 0;
+  var n = 0;
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    reportItems(u).forEach(function(x){
+      if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
+    });
+  });
+  return n;
+}
+
+/* Blockers are re-asked HERE and never trusted from the render that drew the
+   button (§62, §48.2): a repaint can happen between the two, and a delete
+   authorised by a stale screen is the one that takes a unit's head with it. */
+function deletePerson(key){
+  if (personDeleteBlockers(key).length) return false;
+  var i = -1;
+  PEOPLE.forEach(function(p, n){ if (p.key === key) i = n; });
+  if (i < 0) return false;
+  PEOPLE.splice(i, 1);
+  return true;
 }
 
 /* Where a role can be attached, for the second half of the picker. A role
@@ -1896,7 +2025,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;

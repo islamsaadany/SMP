@@ -948,64 +948,25 @@ function renderPeople(){
               ? '<button class="rolemore on" data-proles="" title="Show fewer" ' +
                 'aria-label="Show fewer roles">&lsaquo;</button>'
               : ''))
-      /* NO "NO ROLE" PILL WHILE THE PICKER IS OPEN (Islam, 2026-08-24):
-         "remove the no role pill now I'm editing". It is a READING state — it
-         answers "what does this person hold" for somebody scanning the
-         register — and while the two dropdowns are on screen the answer is
-         being typed, not read. */
-      : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
+      : '<span class="pill none">No role</span>';
     if (!editable) return held;
-    /* ── HALF THE PICKER. The other half is in the Unit column ────────
-       Islam: "keep the unit selection in the unit and keep the role selection
-       in the role so I can choose both but each in it's right placement."
-
-       Right, and the old control was the giveaway: it opened a role select AND
-       a where select inside the Roles cell, so the Unit column sat empty
-       beside a dropdown naming a unit. One control spanning two columns is a
-       control that belongs in neither.
-
-       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
-       × is already a selection somebody can take back (§62's "the refusal is
-       where the confirmation would be", turned round: the undo is where the
-       confirmation would be). So the role is granted the moment BOTH halves
-       have been chosen — which is why both start on a blank "Choose…" option
-       rather than pre-selected: a picker that commits on its own must never
-       commit something nobody picked. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
-        ? '<select class="fld rolepick" data-prole-pick="' + p.key + '" ' +
-            'aria-label="Which role to give ' + esc(p.name) + '">' +
-            '<option value=""' + (ADDROLE_KIND ? "" : " selected") + '>Choose a role\u2026</option>' +
-            ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
-              return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
-                '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>'
+        ? '<span class="roleadd">' +
+            '<select class="fld" data-prole-pick="' + p.key + '">' +
+              ROLES.map(function(r){
+                return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
+                  '>' + esc(r.name) + '</option>';
+              }).join("") + '</select>' +
+            '<select class="fld" data-prole-where="' + p.key + '">' +
+              roleWheres(ADDROLE_KIND).map(function(w){
+                return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
+              }).join("") + '</select>' +
+            '<button class="linkbu" data-prole-add="' + p.key + '">Give</button>' +
+            '<button class="linkbu" data-prole-cancel="1">Cancel</button>' +
+          '</span>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
-  }
-
-  /* The second half, drawn in the Unit column and nowhere else. It is only
-     ever present while a role is being given, and it is EMPTY until a role has
-     been picked, because which places are offered depends on which role it is:
-     a company CEO is seated at a company, a function head at a function, and
-     one combined list would offer Company CEO of Mobile (§35). */
-  function roleWhereCell(p){
-    if (ADDROLE !== p.key) return "";
-    if (!ADDROLE_KIND) {
-      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
-    }
-    var wheres = roleWheres(ADDROLE_KIND);
-    /* A role whose scope is the group has exactly ONE answer, so the control
-       says it rather than offering a list of one — and it is still a select,
-       so choosing it is the same act in the same place either way. */
-    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
-      'aria-label="Where ' + esc(p.name) + ' holds it">' +
-      '<option value="" selected>' +
-        (wheres.length === 1 ? 'Choose ' + esc(wheres[0].label) + '\u2026' : 'Choose where\u2026') +
-      '</option>' +
-      wheres.map(function(w){
-        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
-      }).join("") + '</select>';
   }
 
   /* Read-only, and spelled out rather than leaning on `"" || dash` — an
@@ -1080,13 +1041,6 @@ function renderPeople(){
       acts.push('<hr>');
       acts.push('<button class="danger" data-pact="' + p.key + '">' +
         (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
-      /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
-         §62's shape, because it is the same job on a different table: the
-         entry is always LIVE rather than shown disabled, and pressing it
-         either asks the question or names what is in the way. A disabled item
-         in a menu has nowhere to put the reason — the menu is 240px wide and
-         the reason is a sentence naming a unit and a page (§59). */
-      acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
     }
     if (!acts.length) return '<td class="cc"></td>';
     return '<td class="cc kebcell">' +
@@ -1096,44 +1050,7 @@ function renderPeople(){
       '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
-      (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
-      deletePanel(p) + '</td>';
-  }
-
-  /* The question, or the reason there is no question. It replaces the menu in
-     the same corner, so the second press lands where the first one did — the
-     same placement the clear-plan confirmation uses (§46.2).
-
-     BLOCKERS ARE RE-ASKED ON YES, in deletePerson(), and never trusted from
-     the render that drew this (§48.2). What is drawn here is what to READ;
-     what is enforced is asked again at the moment it matters. */
-  function deletePanel(p){
-    if (PDEL !== p.key) return "";
-    var blockers = personDeleteBlockers(p.key);
-    if (blockers.length) {
-      return '<div class="kmenu kconfirm"><div class="cq">' +
-        /* NO "There is/are" LEAD-IN. It was chosen by how many BLOCKERS there
-           are and the blocker itself opens with a count of its own, so one
-           blocker naming two roles read "There is 2 roles still held". The
-           blockers are sentences; they do not need introducing. */
-        '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
-        blockers.map(function(b){ return b.full; }).join('; and ') + '.' +
-        ' <b>Retire</b> closes the door and keeps every attribution true.</div>' +
-        '<div class="cbtns"><button data-pdel-no="1">Close</button></div></div>';
-    }
-    var takes = personDeleteTakes(p.key);
-    var named = personNamedLines(p.key);
-    return '<div class="kmenu kconfirm"><div class="cq">' +
-      '<b>Delete ' + esc(p.name) + ' for good?</b> This takes ' +
-      takes.join(", ").replace(/, ([^,]*)$/, " and $1") + '. It cannot be undone.' +
-      (named
-        ? ' Their name stays where the plan types it (' + plural(named, "line") +
-          ') \u2014 those are text, not a link to this row.'
-        : '') +
-      '</div><div class="cbtns">' +
-        '<button data-pdel-no="1">No</button>' +
-        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Yes, delete</button>' +
-      '</div></div>';
+      (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') + '</td>';
   }
 
   /* THREE COLUMNS THAT WRAP, ONE THAT CLIPS, AND THE ACTIONS AT THE END
@@ -1192,13 +1109,7 @@ function renderPeople(){
             ? '<span class="why" style="margin:0">&mdash; the list says ' +
               esc(whereLabel(drift)) + '</span>'
             : '<span class="why" style="margin:0">&mdash;</span>')) +
-        saidWhereNote(p, editable) +
-        /* The role picker's second half (§69). It sits UNDER what the cell
-           already says rather than replacing it: where somebody sits and where
-           a role reaches are two different facts (§46.4), and a picker that
-           hid the first while choosing the second would be asking the question
-           with the answer covered up. */
-        roleWhereCell(p) + '</td>' : '') +
+        saidWhereNote(p, editable) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -1312,26 +1223,16 @@ function renderPeople(){
       'because being signed out of the screen you are working in is not a safety ' +
       'feature.</div>';
 
-  /* PEOPLE REGISTER, not People (Islam, 2026-08-24). The page has been called
-     "the register" in every sentence written about it since §35; the heading
-     said something else, so the word people use and the word on the door were
-     different words. */
-  return cfgHead("People register",
+  return cfgHead("People",
       ['<span class="pill kind">SMO</span>',
        plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
         retired ? [retired + ' retired'] : []).concat(
         noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []),
       "people", mayEdit, null, null, colMenu + pwMenu) +
 
-    /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
-       own heading now reads "People register" two lines above, so a section
-       called "The register" restated it — §28's rule about an empty header
-       spending its line, with the header full of a word that was already
-       said. The sentence under it explained the MODEL (a role is one fact
-       with two editing surfaces), and the knowledge base is where the model
-       lives (§30). */
-    section("", "",
-      "",
+    section("", "The register",
+      "Everyone the platform knows. A role is given here or on the unit's own page — " +
+      "it is the same fact either way, so the two can never disagree.",
       /* NO COLUMN WIDTHS, and no table-layout:fixed (see .peoplecfg in
          config.css). Islam: "the first column of the name needs to wrap
          around the name length" — the column fits the name, rather than the
@@ -1354,17 +1255,10 @@ function renderPeople(){
         '<th class="cc"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
       bulk +
-      /* THE NOTE HAD TO CHANGE WITH THE FEATURE (§69). It said "People are
-         retired, never deleted", which stopped being true the moment Delete
-         permanently existed — and a page that describes a rule it no longer
-         keeps is worse than one that says nothing. What survives is the
-         REASON: retiring is still the right answer for anybody who was really
-         here, and the delete is for the rows that never were. */
-      '<div class="note"><b>Retire somebody who has left; delete a row that should ' +
-      'never have existed.</b> Retiring takes away every role they hold and closes the ' +
-      'door — they cannot sign in — while everything already attributed to them stays ' +
-      'true. Deleting takes the row, the password and the open sessions, and is refused ' +
-      'while anything still points at the person — the refusal names what.</div>') +
+      '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
+      'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
+      'reported. Retiring takes away every role they hold and closes the door — they ' +
+      'cannot sign in — while everything already attributed to them stays true.</div>') +
 
     renderPeopleFile(mayEdit);
 }

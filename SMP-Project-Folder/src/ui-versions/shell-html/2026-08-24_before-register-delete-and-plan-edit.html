@@ -233,7 +233,7 @@
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -2257,40 +2257,6 @@
       });
     });
 
-    /* ── DELETING A PERSON FOR GOOD (§69) ───────────────────────────
-       Opening the question CLOSES the menu it came from: positionRowMenu()
-       places `document.querySelector(".kmenu")` — the first one — so two of
-       them in one cell would leave the second unplaced at the top-left of the
-       window. One panel open at a time, which is what the state shape already
-       says (PMENU and PDEL are single keys, not flags per row).
-
-       Cleared AFTER the action in every branch, never before: closing it first
-       unmounts the button the click is still inside (§47.2). */
-    document.querySelectorAll("[data-pdel]").forEach(function(b){
-      b.addEventListener("click", function(){
-        PDEL = b.dataset.pdel; PMENU = null; paint();
-      });
-    });
-    document.querySelectorAll("[data-pdel-no]").forEach(function(b){
-      b.addEventListener("click", function(){ PDEL = null; paint(); });
-    });
-    document.querySelectorAll("[data-pdel-yes]").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* deletePerson() re-asks the blockers and refuses on its own (§48.2).
-           This does not check them again — two copies of "may this be deleted"
-           is exactly the drift the one function exists to prevent — it reads
-           the ANSWER, and says so when the answer is no. */
-        var key = b.dataset.pdelYes, p = personBy(key), name = p ? p.name : key;
-        var done = deletePerson(key);
-        PDEL = null;
-        paint();
-        if (!done) {
-          alert(name + " could not be deleted \u2014 something has come to point at " +
-                "them since this was asked. Open the menu again to see what.");
-        }
-      });
-    });
-
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
@@ -2312,39 +2278,27 @@
       b.addEventListener("click", addTypedPerson);
     });
 
-    /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
-       It opens EMPTY. Before this it opened on "owner", so a picker somebody
-       opened by mistake was already holding an answer — which was harmless
-       while a Give button stood between it and the grant, and is not now that
-       choosing both halves IS the grant. */
     document.querySelectorAll("[data-prole-open]").forEach(function(b){
       b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; paint();
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = "owner"; paint();
       });
+    });
+    document.querySelectorAll("[data-prole-cancel]").forEach(function(b){
+      b.addEventListener("click", function(){ ADDROLE = null; paint(); });
     });
     /* Choosing the role repaints, because the SECOND select's options depend
        on the first: a company CEO is attached to a company, a function head to
        a function. One list of every role-times-place would offer Company CEO
-       of Mobile. Emptying it back to "Choose a role…" empties the other half
-       with it, rather than leaving a unit list standing under no role. */
+       of Mobile. */
     document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){ ADDROLE_KIND = sel.value; paint(); });
     });
-    /* NO GIVE BUTTON. The pair commits itself the moment the second half is
-       answered — Islam: "without give or cancel … eventually it's a selection
-       that I can remove after with the x button you made."
-
-       Which is why it is guarded on BOTH halves rather than on this one: a
-       change event on the where select can only fire after a role was picked,
-       but ADDROLE_KIND is a global that a repaint between the two could have
-       cleared, and granting `undefined` at a unit writes a role nothing can
-       name and nothing can take off. */
-    document.querySelectorAll("[data-prole-where]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var key = sel.dataset.proleWhere;
-        if (!sel.value || !roleIsGrantable(ADDROLE_KIND)) return;
-        grantPersonRole(key, ADDROLE_KIND, sel.value);
-        ADDROLE = null; ADDROLE_KIND = "";
+    document.querySelectorAll("[data-prole-add]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.proleAdd;
+        var where = document.querySelector('[data-prole-where="' + key + '"]');
+        grantPersonRole(key, ADDROLE_KIND, where ? where.value : "group");
+        ADDROLE = null;
         paint();
       });
     });

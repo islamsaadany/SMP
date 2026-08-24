@@ -352,8 +352,33 @@
   .cfg table.unitcfg { table-layout:fixed; }
   .cfg .unitcfg input.fld { text-align:left; font-family:var(--sans); }
   .cfg .unitcfg select.fld { min-width:100%; max-width:none; }
+  /* THE EXCEPTION BELONGS BESIDE THE RULE (§69). The register shares
+     `.unitcfg` and does NOT share its premise: it has no fixed layout (see
+     .peoplecfg in config.css — Islam asked for the name column to fit the
+     name), so `min-width:100%` there means "as wide as the cell", the cell is
+     as wide as its content, and a select claiming both is a feedback loop that
+     took the two name columns down to nothing. Written in config.css first and
+     it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
+     later in build.py's concatenation, so it won twice over. */
+  .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
+  .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
+  /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
+     an input NO intrinsic minimum, so under the auto layout the register uses
+     (no table-layout:fixed — the name column fits the name, §46.6) the browser
+     hands those columns their minimum content width, which is nothing. Person
+     measured 216px reading and 86px editing, and 71px with a role picker open
+     beside it: the two columns you edit the page FOR were the two that
+     collapsed, and they collapsed further the more there was to do.
+
+     Beside the rule for the same reason the selects are (§69): this selector
+     is (0,3,1) and later in the concatenation than anything config.css can
+     say. The floors are the READ widths, so turning the pen on stops moving
+     the page. */
+  .cfg .peoplecfg input[data-pname] { min-width:170px; }
+  .cfg .peoplecfg input[data-ptitle] { min-width:150px; }
+  .cfg .peoplecfg input[data-pemail], .cfg .peoplecfg input[data-pphone] { min-width:160px; }
 
   /* A tooltip inherits white-space from its cell. Inside a table header, where
      nowrap keeps column titles on one line, the tooltip inherited it too and

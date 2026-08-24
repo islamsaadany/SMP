@@ -1266,7 +1266,6 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
        then moved — that flash is the jump, only quicker. */
@@ -1277,38 +1276,6 @@
     focusOpenMenu();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
-  }
-
-  /* ── A CLIPPED VALUE IS ONE HOVER FROM THE WHOLE OF ITSELF (§88) ───
-     Setup table cells are one line and clip with an ellipsis, which is only
-     honest if the rest is still reachable. This is the reachability, and it is
-     done HERE rather than in the twenty renderers that build those cells: a
-     `title` written at render time is a guess about whether the value will fit
-     — it depends on the column, the viewport and which columns are switched on
-     — and the twenty guesses would be wrong in different places. Measured
-     after the paint, it is not a guess at all.
-
-     ONLY WHERE SOMETHING IS ACTUALLY HIDDEN, and removed again when it is not:
-     a title on a value you can already read is a tooltip that covers the row
-     you are pointing at. And never over a title somebody else set — the
-     register's name cell carries the full name and the sign-in key on its own
-     hover (§81.1), which says more than this would. */
-  function clipTitles(){
-    document.querySelectorAll(".cfg table td").forEach(function(td){
-      /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The
-         register's name cell carries the full name AND the sign-in key
-         (§81.1); a title on the <b> inside would cover it with less. */
-      if (td.title) return;
-      var kids = td.querySelectorAll(".val, .why, b, .mono");
-      var list = kids.length ? kids : [td];
-      list.forEach(function(el){
-        if (el.dataset.keepTitle) return;
-        var hidden = el.scrollWidth - el.clientWidth > 1;
-        if (hidden && !el.title) el.title = (el.textContent || "").trim();
-        else if (!hidden && el.dataset.clipTitle) el.removeAttribute("title");
-        if (hidden && el.title) el.dataset.clipTitle = "1";
-      });
-    });
   }
 
   /* ── PLACING A DROPDOWN PANEL (§76.2) ──────────────────────────────

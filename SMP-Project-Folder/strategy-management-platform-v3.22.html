@@ -1938,21 +1938,62 @@
     max-width:200px; box-sizing:border-box; }
   .cfg table td { min-width:0; }
 
-  /* ── EVERY SETUP TABLE WRAPS, NOT JUST THE REGISTER (§81.5) ────────
-     `_shared.css` sets `thead th { white-space:nowrap }` and the Setup tables
-     inherited a body to match. Capabilities and Roles & access are both wider
-     than their box for the same reason the register was: one long cell holding
-     its column open. The rule is the same everywhere — prose wraps, tokens do
-     not — so it is written once here and the register's block below only adds
-     what is particular to it. */
-  .cfg table td { white-space:normal; }
-  .cfg table td.cc, .cfg table td.idx, .cfg table td.mono,
-  .cfg table td.nowrapcell, .cfg table .pill, .cfg table .rolechip,
-  .cfg table .chip, .cfg table .pair { white-space:nowrap; }
-  /* A header may wrap too where its words are long — "Sees other companies"
-     is three words holding a 2-row table open. */
-  .cfg table thead th { white-space:normal; }
-  .cfg table thead th.idx, .cfg table thead th.cc { white-space:nowrap; }
+  /* ── A SETUP TABLE ROW IS ONE LINE (§88, Islam 2026-08-24) ────────
+     "the table should NEVER wrap like that where the row gets bigger — that's
+     a visual mistake that should be avoided everywhere in the setup tables."
+
+     THIS REVERSES §81.5 AND §83.2, and both are left in the record below
+     rather than deleted, because the reversal only makes sense beside what it
+     reverses. §81.5 was Islam's own ask — "fix the overflow of data by
+     wrapping" — and wrapping did fix the overflow: the register went from
+     207px past its box to 0. What it produced was a table whose rows were
+     39px, 58px and 100px tall depending on how long somebody's email was, and
+     an address broken mid-word across four lines. §83.2 then bought the worst
+     row down from 382px to 120px with a floor on that column, which is a
+     smaller version of the same thing.
+
+     THE THIRD ANSWER IS THE ONE NEITHER ROUND TOOK: do not wrap AND do not
+     overflow — CLIP. Every cell is one line; a value too long for its column
+     ends in an ellipsis and carries the whole of itself on hover; the column
+     is capped so it cannot hold the table open. Nothing is lost — the row
+     opens for editing, and the full text is one hover away — and every row in
+     every Setup table is the same height.
+
+     WHAT IS EXCLUDED, AND WHY EACH ONE. A cap and `overflow:hidden` on a cell
+     holding a POPUP would clip the popup, which is §69.22's fault in a
+     different tree: the actions column carries the kebab's panels, the roles
+     column carries the picker, and an OPEN ROW carries inputs and selects that
+     must have their own width. Those keep their own sizing. */
+  .cfg table td, .cfg table thead th { white-space:nowrap; }
+  /* ── THE CAP, CHOSEN BY SWEEPING IT (§88) ─────────────────────────
+     A cell that never wraps holds its column open at its longest value, which
+     is the fault §81.5 was asked to fix — so the column is capped and the
+     overflow becomes an ellipsis instead of a second line. How wide the cap is
+     decides how much of the register you have to scroll to, measured against
+     the worst row it can produce (an eight-word legal name, a 46-character job
+     title, a 34-character address):
+
+       cap 130px   register 110px past its box
+       cap 150px             190px            <- chosen
+       cap 170px             270px
+       cap 210px             411px
+       cap 260px             517px
+
+     150px is where the scroll matches what the register cost BEFORE any of
+     this (1127px in a 920px box, §54.6) — a number this product has already
+     lived with, and one the frozen first and last columns were built to make
+     workable (§69.19, §69.20). Anything wider buys scroll; anything narrower
+     buys truncation nobody asked for. */
+  .cfg table td { max-width:var(--cell-cap, 150px); overflow:hidden; text-overflow:ellipsis; }
+  /* A sub-line under a value is a line of its own and clips as one. */
+  .cfg table td .why, .cfg table td .val, .cfg table td b {
+    display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* Cells that hold a control, a panel or an open row size themselves. */
+  .cfg table td.kebcell, .cfg table td.cc, .cfg table td.idx, .cfg table td.roles,
+  .cfg table tr.tk-open td, .cfg table td .mbcell, .cfg table td .rolebox {
+    max-width:none; overflow:visible; text-overflow:clip; }
+  .cfg table tr.tk-open td .why, .cfg table tr.tk-open td .val {
+    overflow:visible; text-overflow:clip; }
 
   /* ── DATA WRAPS; FURNITURE DOES NOT (Islam, §81.5) ─────────────────
      "for the tables as well fix the overflow of data by wrapping."
@@ -1970,13 +2011,8 @@
 
      `overflow-wrap:anywhere` on the address, because an email has no spaces to
      break at and would otherwise hold its column open exactly as before. */
-  .peoplecfg td, .peoplecfg th { white-space:normal; }
-  .peoplecfg td.idx, .peoplecfg th.idx,
-  .peoplecfg td.cc, .peoplecfg th.cc,
-  .peoplecfg td.kebcell, .peoplecfg th.kebcell,
-  .peoplecfg td.mono, .peoplecfg .pill, .peoplecfg .rolechip,
-  .peoplecfg .dupemark { white-space:nowrap; }
-  .peoplecfg td.wrapany { overflow-wrap:anywhere; }
+  /* §81.5's per-column split is gone with the standard it belonged to (§88):
+     every cell in every Setup table is one line now, this one included. */
   /* A name may wrap now, so its cell has to be able to grow — the frozen
      column's `overflow:hidden` (§71.2) clips what spills, and a wrapped second
      line is not spill. */
@@ -2005,8 +2041,10 @@
      scroll and nothing else. Two lines on an ordinary row, three on the worst
      one in the register, and 35px of a scroll the frozen columns already make
      workable (§69.20). */
-  .peoplecfg td.namecell, .peoplecfg th.namecell { white-space:normal; }
-  .peoplecfg td.wrapany, .peoplecfg th.wrapany { overflow-wrap:anywhere; min-width:75px; }
+  /* AND THE FLOOR GOES WITH IT. It existed to stop `overflow-wrap:anywhere`
+     breaking an address into a 382px tower; nothing breaks mid-word now, so a
+     minimum on that column would only widen the table (§88). */
+  .peoplecfg td.wrapany, .peoplecfg th.wrapany { overflow-wrap:normal; }
 
   /* ── AND THE ACTIONS COLUMN FREEZES TO THE RIGHT (§69.20) ──────────
      Islam: "allow me to remove a full employee in the register, not only
@@ -2060,21 +2098,12 @@
     max-width:200px; box-sizing:border-box; }
   .cfg table td { min-width:0; }
 
-  /* ── EVERY SETUP TABLE WRAPS, NOT JUST THE REGISTER (§81.5) ────────
-     `_shared.css` sets `thead th { white-space:nowrap }` and the Setup tables
-     inherited a body to match. Capabilities and Roles & access are both wider
-     than their box for the same reason the register was: one long cell holding
-     its column open. The rule is the same everywhere — prose wraps, tokens do
-     not — so it is written once here and the register's block below only adds
-     what is particular to it. */
-  .cfg table td { white-space:normal; }
-  .cfg table td.cc, .cfg table td.idx, .cfg table td.mono,
-  .cfg table td.nowrapcell, .cfg table .pill, .cfg table .rolechip,
-  .cfg table .chip, .cfg table .pair { white-space:nowrap; }
-  /* A header may wrap too where its words are long — "Sees other companies"
-     is three words holding a 2-row table open. */
-  .cfg table thead th { white-space:normal; }
-  .cfg table thead th.idx, .cfg table thead th.cc { white-space:nowrap; }
+  /* THE SECOND COPY OF §81.5's BLOCK WAS HERE, and it is why editing the
+     first one did nothing (§88). Two identical rule blocks in one stylesheet
+     is one rule — the later wins on source order — and this file has now made
+     that mistake four times (§29.2, §51.5, §53.6, here). The wrap standard it
+     set is reversed above; leaving a dead copy of it below would reverse the
+     reversal on the next paint. */
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }
   /* THE CLIP MOVES INSIDE THE CELL. `width:99%; max-width:0` is a
      FIXED-layout trick — under auto layout `max-width:0` is not a hint, it is
@@ -25979,6 +26008,7 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
        then moved — that flash is the jump, only quicker. */
@@ -25989,6 +26019,38 @@ var SYNC = (function () {
     focusOpenMenu();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
+  }
+
+  /* ── A CLIPPED VALUE IS ONE HOVER FROM THE WHOLE OF ITSELF (§88) ───
+     Setup table cells are one line and clip with an ellipsis, which is only
+     honest if the rest is still reachable. This is the reachability, and it is
+     done HERE rather than in the twenty renderers that build those cells: a
+     `title` written at render time is a guess about whether the value will fit
+     — it depends on the column, the viewport and which columns are switched on
+     — and the twenty guesses would be wrong in different places. Measured
+     after the paint, it is not a guess at all.
+
+     ONLY WHERE SOMETHING IS ACTUALLY HIDDEN, and removed again when it is not:
+     a title on a value you can already read is a tooltip that covers the row
+     you are pointing at. And never over a title somebody else set — the
+     register's name cell carries the full name and the sign-in key on its own
+     hover (§81.1), which says more than this would. */
+  function clipTitles(){
+    document.querySelectorAll(".cfg table td").forEach(function(td){
+      /* A CELL THAT ALREADY SAYS SOMETHING ON HOVER KEEPS SAYING IT. The
+         register's name cell carries the full name AND the sign-in key
+         (§81.1); a title on the <b> inside would cover it with less. */
+      if (td.title) return;
+      var kids = td.querySelectorAll(".val, .why, b, .mono");
+      var list = kids.length ? kids : [td];
+      list.forEach(function(el){
+        if (el.dataset.keepTitle) return;
+        var hidden = el.scrollWidth - el.clientWidth > 1;
+        if (hidden && !el.title) el.title = (el.textContent || "").trim();
+        else if (!hidden && el.dataset.clipTitle) el.removeAttribute("title");
+        if (hidden && el.title) el.dataset.clipTitle = "1";
+      });
+    });
   }
 
   /* ── PLACING A DROPDOWN PANEL (§76.2) ──────────────────────────────

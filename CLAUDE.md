@@ -257,6 +257,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A SETUP TABLE ROW IS ONE LINE (§88):** Islam, on a register row 100px tall
+  beside rows of 39px with an address broken mid-word: *"the table should NEVER
+  wrap like that where the row gets bigger."* **It reverses §81.5 and §83.2** —
+  his own earlier ask, *"fix the overflow of data by wrapping"*, which did fix
+  the overflow and produced a row height that depended on how long somebody's
+  email was. **The third answer is CLIP**: one line per cell, an ellipsis where
+  it does not fit, the column capped so it cannot hold the table open, and the
+  whole value one hover away. **The cap was chosen by sweeping it** — 150px is
+  where the register's scroll matches what it cost before any of this (§54.6),
+  and the frozen first and last columns were built for exactly that scroll
+  (§69.19, §69.20). **THE HOVER IS MEASURED, NOT WRITTEN**: a `title` set at
+  render time is a guess about whether a value will fit, so `clipTitles()` runs
+  at the end of `paint()` and titles only what is actually clipped. And **the
+  rule block was in `config.css` TWICE**, which is why editing it did nothing —
+  the fourth time this file has hit that (§29.2, §51.5, §53.6). Two checks
+  measured the wrong thing on the way, both inside an hour: **a cell's height is
+  the ROW's height** (a cell holding `7` reported as wrapping, 172 times), and
+  **`getClientRects().length` is not the number of lines** (Chrome returns
+  zero-width extras) — it is the number of DISTINCT TOPS among rects with width.
+  `src/checks/no-wrap.py` asserts no text on two lines, nothing clipped without a
+  hover and nothing unreachable, at 1440 / 1180 / 1000px — and deliberately does
+  NOT assert equal row heights, or the fix would be to delete real content.
 - **A NAME IS NEVER AN IDENTIFIER (§87):** who a register row *is* is asked in
   ONE place — `personByIdentity()`: **Emp ID, then email, and no third rung** —
   and it reports which rung answered, because "matched" tells nobody what to

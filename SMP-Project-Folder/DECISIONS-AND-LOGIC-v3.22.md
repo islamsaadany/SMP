@@ -10561,3 +10561,95 @@ for a claimed figure and §62 for a deleted function.
 
 `src/checks/identity-merge.py`, driven through the screen, and the §87 block in
 `qa.py`, driven through the rules.
+
+---
+
+## 88 · A Setup table row is one line (v3.24)
+
+Islam, on the register: *"the table should NEVER NEVER NEVER wrap like that
+where the row gets bigger — that's a visual mistake that should be avoided
+everywhere in the setup tables."*
+
+He was looking at a row 100px tall next to rows of 39px, with an address broken
+mid-word across four lines.
+
+### 88.1 It reverses §81.5 and §83.2, and both stay in the record
+
+§81.5 was **Islam's own ask** — *"for the tables as well fix the overflow of data
+by wrapping"* — and wrapping did what it was asked to: the register went from
+207px past its box to 0. §83.2 then put a 75px floor on the address column and
+brought the worst row down from 382px to 120px.
+
+Both were reasonable and both are reversed here, because what they produced is
+a table whose row height depends on how long somebody's email is. **A reversal
+is recorded beside what it reverses** (Principle II), and the CSS carries the
+same note: a dead copy of the old standard left in the file would reverse the
+reversal on the next paint — which is not hypothetical, see §88.3.
+
+### 88.2 The third answer neither round took
+
+Do not wrap **and** do not overflow — **clip**:
+
+- every cell in every Setup table is **one line**;
+- a value too long for its column ends in an **ellipsis**;
+- the column is **capped** so it cannot hold the table open;
+- the whole value is **one hover away**.
+
+**The cap was chosen by sweeping it**, against the worst row the register can
+produce (an eight-word legal name, a 46-character job title, a 34-character
+address): 130px → 110px of scroll · **150px → 190px** · 170px → 270px · 210px →
+411px · 260px → 517px. 150px is where the scroll matches what the register cost
+*before* any of this (1127px in a 920px box, §54.6) — a number the product has
+already lived with, and one the frozen first and last columns were built to make
+workable (§69.19, §69.20).
+
+**THE HOVER IS MEASURED, NOT WRITTEN.** A `title` set at render time is a guess
+about whether a value will fit — it depends on the column, the viewport and
+which columns are switched on — so twenty renderers would guess wrong in twenty
+places. `clipTitles()` runs at the end of `paint()` and titles only what is
+**actually** clipped, removing it again when it is not. A cell that already
+speaks on hover keeps its own words: the register's name cell carries the full
+name and the sign-in key (§81.1), which says more than the value would.
+
+### 88.3 THE BLOCK WAS IN THE STYLESHEET TWICE, AND THAT IS WHY EDITING IT DID NOTHING
+
+§81.5's rule block appeared **twice** in `config.css`. The first edit changed the
+first copy; the second copy won on source order and every table went on
+wrapping. **This file has now made that mistake four times** (§29.2's `.pane`,
+§51.5's `.capline`, §53.6's `.capbody`, and here).
+
+A duplicated CSS rule does not fail loudly — it quietly ignores you.
+
+### 88.4 Two checks that measured the wrong thing, inside one hour
+
+Both found by disbelieving a number, and both are the same fault this document
+keeps recording (§50.6):
+
+- **A cell's height is the ROW's height.** The first version asked "is this
+  element taller than one line", which reported a cell holding the number `7` as
+  wrapping — 172 times. A `td` is as tall as the tallest cell beside it.
+- **`getClientRects().length` is not the number of lines.** Chrome returns extra
+  zero-width rects, so "Operational Excellence" was reported as two lines with
+  `white-space:nowrap` computed on it. The number of lines is the number of
+  **distinct tops** among rects that have any width.
+
+The measurement that survives is a Range over each text node, counting distinct
+line tops — the direct measurement of the thing being asserted, which nothing
+around it can confuse.
+
+### 88.5 What the check asserts, and what it deliberately does not
+
+`src/checks/no-wrap.py`, at **1440, 1180 and 1000px** (§27.1: a layout verified
+at the widths that pass is not verified — 1000px is the laptop this is used on).
+
+It asserts three things: **no text renders on more than one line**, anywhere in
+any Setup table; **nothing clipped is unreadable** — every clipped element
+carries the whole of itself on hover; and **nothing is unreachable** — a table
+wider than its box must sit in a container that actually scrolls.
+
+It does **not** assert that every row in a table is the same height. A row can
+be legitimately taller than its neighbour — two badges instead of one, a value
+with an explanatory line under it, the add row at the foot — and failing those
+would push somebody to delete real content to make a check go green. The height
+spread is **printed** beside each table instead, so a table that goes ragged for
+a new reason is visible to whoever reads the run.

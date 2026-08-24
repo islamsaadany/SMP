@@ -159,6 +159,18 @@ A drift between specs and code is a documentation bug — report it before silen
   checks before pushing. Two branches each adding a `var pf` to `wire()` merged
   with no textual conflict at all and broke a page (§56.7) — a clean merge is
   not a working one.
+- **PUSH TO `main` BEFORE THE BRANCH, NOT AFTER (§91).** Vercel deduplicates by
+  commit SHA: push the branch first and it builds a **Preview**, and the
+  identical SHA arriving on `main` afterwards builds nothing at all — so the
+  work sits on a preview URL and production stays where it was. Land the commit
+  on `main` first, then push the branch to the same SHA. (The fetch-and-compare
+  rule above still comes first; only the ORDER of the two pushes changes.)
+- **BUMP `SHELL` IN `sw.js` ON EVERY MERGE THAT CHANGES THE BUILT FILE (§91).**
+  Not on a version bump — on a CONTENT change. It sat at `v3.22` through §80 to
+  §90 because the built file kept the same filename the whole time, and the
+  service worker caches by URL: every returning browser would have been served
+  the old platform out of its own disk whatever production served. The trigger
+  is "the built file's bytes changed", which is every merge.
 - **END EVERY MERGE WITH WHAT TO GO AND CHECK** (Islam, 2026-08-24; CLAUDE-RULES
   A16). The last thing said after a merge to `main` is a short list of screens:
   what to open, what to do there, and what should happen — one line each, in the

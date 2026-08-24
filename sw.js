@@ -13,10 +13,21 @@
    icons, the manifest. Those are versioned by filename or change only on a
    deploy, so they are safe to hold.
 
+   BUMP IT WHEN THE SHELL'S CONTENTS CHANGE, NOT WHEN ITS FILENAME DOES (§91).
+   This sat at v3.22 through §80 to §90 — ten sections of work, including a new
+   role and a rewritten register — because the built file kept the SAME NAME the
+   whole time and the checklist that says "bump SHELL" lives under "on each
+   version bump". The cache is keyed on the URL, so an unchanged filename plus
+   an unchanged cache name means every returning browser is served the old
+   platform out of its own disk, whatever production is serving. Nobody would
+   have seen any of it.
+
+   The trigger is: the built file's BYTES changed. That is every merge.
+
    Bump SHELL when anything in the shell list changes — the name IS the
    cache-busting mechanism, and the activate handler deletes every cache that
    is not the current one. */
-const SHELL = "smp-shell-v3.22";
+const SHELL = "smp-shell-v3.24";
 const ASSETS = [
   "/",
   "/index.html",

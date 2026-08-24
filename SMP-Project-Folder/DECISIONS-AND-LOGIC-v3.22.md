@@ -10813,3 +10813,49 @@ thing in the world to half-do.
 asserts it at 1440 / 1180 / 1000px. Nothing to do — recorded because the ask was
 made and the answer is "already, and here is what proves it" rather than
 "done".
+
+---
+
+## 91 · Merged, and nobody could have seen it (v3.24)
+
+Islam, on the deployment card: *"actually it's still on preview."*
+
+Two faults, independent, and either one alone would have made the last several
+merges invisible.
+
+### 91.1 The same SHA cannot be deployed twice
+
+Every merge today pushed the **branch first** and then the identical commit to
+`main`. Vercel deduplicates by commit SHA — having already built `f5e6b0f` as a
+**Preview** for the branch, it built nothing when the same SHA arrived on the
+production branch. Main was correct, the code was correct, and production was
+several merges behind.
+
+**The order is the fix**: `main` first, then the branch to the same SHA. The
+fetch-and-compare before merging is unchanged; only which of the two pushes goes
+first.
+
+### 91.2 `SHELL` had not moved since §69
+
+`sw.js` caches the app shell and **the cache name is the bust**. It sat at
+`smp-shell-v3.22` through §80 to §90 — a new role, a rewritten register, a
+merge wizard, the one-line table standard — because the built file kept the
+**same filename** the whole time and the instruction to bump it lives under
+*"on each version bump"*.
+
+The service worker caches by URL. Same URL, same cache name, and every browser
+that had ever opened the platform would go on serving the old one **out of its
+own disk**, whatever production served. The two faults compound: production was
+stale, and the fix for production would not have reached anybody who had visited
+before.
+
+**The trigger is not a version bump. It is the built file's bytes changing** —
+which is every merge, and is now written where the constant is.
+
+### 91.3 What this says about the checklist
+
+Both faults are the same shape: a step that fires on a **name** changing, for a
+thing that goes wrong when **contents** change. The version-bump checklist in
+`CLAUDE.md` has six items and five of them really are keyed to the filename
+(the gate's link, the rewrite destination, `PLATFORM_FILE`). `SHELL` was sitting
+in that list and does not belong to it.

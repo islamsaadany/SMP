@@ -406,6 +406,11 @@
   .imp-b h4 { margin:0 0 4px; font-family:var(--serif); font-size:18px; }
   .imp-b .sub { margin:0; max-width:74ch; }
   .imp-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
+  /* The filled example (§69.12). A ruled-off block inside step 1 rather than a
+     step of its own: it is an alternative way of doing the same step, not a
+     fourth thing to do, and numbering it 2 would have renumbered Upload. */
+  .imp-sub { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+  .imp-sub .imp-row { margin-top:0; }
   .imp-row select.fld { width:auto; min-width:190px; max-width:none; }
   /* Save draft / Cancel and the word the button says back (§63.2). Pushed to
      the far end of the reporting bar so Submit keeps the emphasis: submitting

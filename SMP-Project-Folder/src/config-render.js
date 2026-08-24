@@ -615,8 +615,14 @@ var FSET = { unit:"mobile" };
 
    `IMP` was declared twice, identically, a few hundred lines apart — the
    second silently won. One declaration now. ── */
+/* `filled` is which plan the EXAMPLE download carries (§69.12), and it is its
+   own field rather than reusing `unit`: that one is the subject a PROGRESS file
+   is for and the two are chosen for opposite reasons — one is who is reporting,
+   the other is whose finished plan makes the clearest example. Sharing the
+   field would move a selection somebody made on one control by pressing the
+   other. Screen state, never saved (§25.2). */
 var IMP = { unit:"mobile", kind:"plan", text:"", diff:null, summary:null,
-            read:"", check:null, done:null };
+            read:"", check:null, done:null, filled:"" };
 
 /* WHICH OF THE TWO PLANS A SUBJECT KEEPS (§61). A business unit and a function
    that plans in pillars take the PILLARS workbook; a capability and the
@@ -2554,6 +2560,70 @@ function renderImport(){
     '<button data-impkind="plan" aria-pressed="' + isPlan + '">Plan</button>' +
     '<button data-impkind="progress" aria-pressed="' + !isPlan + '">Progress</button></span>';
 
+  /* ── A FILLED ONE, TO EXPLAIN THE BLANK ONE (§69.12) ───────────────
+     Islam: "add a button for me to download a prefilled template, and an
+     option for any unit and one for projects for any function, so I can
+     explain using them."
+
+     Which the blank template cannot do. §22's plan file is deliberately
+     generic — one file whoever it is for, no codes, the subject chosen on the
+     Read me sheet — and that is right for AUTHORING and useless for showing
+     somebody what a finished one looks like. An empty grid with a Read me is
+     not an example (§45.2, from the other side: a feature that renders nothing
+     looks like a feature that was not built).
+
+     ONE SELECT AND ONE BUTTON, and THE FORMAT IS READ OFF THE SUBJECT rather
+     than chosen beside it — §61's rule, and the reason it is a rule: a format
+     stored next to a subject is a second fact that can disagree with the
+     first. Picking Mobile downloads the pillars workbook; picking a capability
+     downloads the projects one; nothing else has to be answered.
+
+     Both halves in one list under their own headings, because "any unit" and
+     "projects for any function" are the two things he asked for and putting
+     them in two controls would ask which one first. A capability is labelled
+     with the FUNCTION that improves it, or "projects for any function" cannot
+     be answered from a list of capability names. */
+  var filledOpts = impSubjects("pillars").filter(function(o){
+    var u = unitLike(o.v);
+    return u && u.items && u.items.length;
+  });
+  var filledCaps = impSubjects("projects").filter(function(o){
+    var c = capById(o.v.slice(4));
+    return c && c.projects && c.projects.length;
+  }).map(function(o){
+    var c = capById(o.v.slice(4)), f = c && c.fn ? FUNCTIONS[c.fn] : null;
+    return { v:o.v, label:o.label + (f ? " \u2014 " + f.name : "") };
+  });
+  var filledAll = filledOpts.concat(filledCaps);
+  /* NOTHING FILLED IN, NOTHING TO OFFER. On a clean tenant (§67) there is no
+     plan anywhere, so the control would be a dropdown of nothing beside a
+     button that downloads an empty file — which is the blank template, badly.
+     It is absent, and the sentence says why rather than leaving a gap. */
+  var filled = !isPlan ? "" :
+    '<div class="imp-sub">' +
+      (filledAll.length
+        ? '<p class="sub" style="margin:0 0 8px"><b>Or take one already filled in.</b> ' +
+            'The same file, carrying a real plan &mdash; for showing somebody what a ' +
+            'finished one looks like before they start their own. The format follows ' +
+            'the subject, so there is nothing else to choose.</p>' +
+          '<div class="imp-row">' +
+            '<select class="fld" id="imp-filled" aria-label="Which plan to fill it with">' +
+              (filledOpts.length ? '<optgroup label="Pillars">' + filledOpts.map(function(o){
+                return '<option value="' + esc(o.v) + '"' +
+                  (o.v === IMP.filled ? " selected" : "") + '>' + esc(o.label) + '</option>';
+              }).join("") + '</optgroup>' : '') +
+              (filledCaps.length ? '<optgroup label="Projects">' + filledCaps.map(function(o){
+                return '<option value="' + esc(o.v) + '"' +
+                  (o.v === IMP.filled ? " selected" : "") + '>' + esc(o.label) + '</option>';
+              }).join("") + '</optgroup>' : '') +
+            '</select>' +
+            '<button class="editbtn" data-dlfilled="1">Download it filled in</button>' +
+          '</div>'
+        : '<p class="sub" style="margin:0">Nothing is planned yet, so there is no ' +
+          'filled example to take. Once a plan has been uploaded, the same file comes ' +
+          'back down carrying it.</p>') +
+    '</div>';
+
   var counts;
   if (isCap) {
     var nd = 0, no = 0, nm = 0;
@@ -2596,6 +2666,7 @@ function renderImport(){
           GROUP.capabilities.length + " capabilities and " +
           GROUP.themes.length + " themes are in its dropdowns"
         : counts) + '</p>' +
+      filled +
     '</div></div>';
 
   var step2 =

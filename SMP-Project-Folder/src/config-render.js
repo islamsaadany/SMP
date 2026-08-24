@@ -1245,7 +1245,7 @@ function renderPeople(){
          gone. The short form is a rendering; the stored fact is untouched, and
          the whole name is on the row's hover and in every other surface that
          names a person. */
-      '<td class="pname" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
+      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
@@ -1565,7 +1565,7 @@ function renderPeople(){
          it is given the leftovers. */
       '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
         '<th class="idx">#</th>' +
-        '<th class="pname">Person</th>' +
+        '<th class="namecell">Person</th>' +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */

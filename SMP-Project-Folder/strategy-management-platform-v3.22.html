@@ -146,7 +146,7 @@
     /* NO ZEBRA in this language — rows separate on hover instead, and the
        columns are divided by hairlines. The token stays because a hundred
        rules read it; it just resolves to the surface it sits on. */
-    --zebra:var(--surface); --zebra-focus:#FFFBEB;
+    --zebra:#F6F8FB; --zebra-focus:#FFFBEB;
     --over-bg:#EEF2FF; --over-line:#C7D2FE;
     --on-fill:#FFFFFF;
   }
@@ -164,7 +164,7 @@
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
     --panel:#060B16; --panel-ink:#E8EDF5;
-    --zebra:var(--surface); --zebra-focus:#2E2510;
+    --zebra:#182339; --zebra-focus:#2E2510;
     --over-bg:#1E1B3A; --over-line:#3F3A72;
     --on-fill:#0B1120;
   }
@@ -194,7 +194,7 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
-    --zebra:var(--surface); --zebra-focus:#FDFAF1;
+    --zebra:#F5F7FA; --zebra-focus:#FDFAF1;
     --over-bg:#FBF6E9; --over-line:#E8D9AE;
     --on-fill:#FFFFFF;
   }
@@ -212,7 +212,7 @@
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#0E1014; --panel-ink:#EAF0FA;
-    --zebra:var(--surface); --zebra-focus:#2A2720;
+    --zebra:#212630; --zebra-focus:#2A2720;
     --over-bg:#332C16; --over-line:#4A3F1E;
     --on-fill:#14161A;
   }
@@ -1829,21 +1829,46 @@
      recording: silently, with every property reading back exactly as written.
      The same declarations on the `<tr>` hold it at the top of the box.
 
-     Horizontal sticky on a cell DOES work — `td.pname` held its column in the
-     same measurement — so the two axes are set on two different elements, and
-     that is a browser fact rather than a preference. */
+     Horizontal sticky on a cell DOES work — the name cell held its column in
+     the same measurement — so the two axes are set on two different elements,
+     and that is a browser fact rather than a preference.
+
+     ── AND THE CELL IS `namecell`, NOT `pname` (§73.1) ───────────────
+     §69.19 named this cell `pname`, which has been the PILLAR RAIL's name
+     block since 1.7 — `display:flex; flex-direction:column`. A `<td>` given
+     `display:flex` stops being a table cell, and a box that is not a table
+     cell does not stretch to its row: measured at 1440px, the row was 39px
+     tall and the name cell 31px, the header 29px and 26px. That 8px strip of
+     page showing under a frozen white cell is the "person box" Islam
+     photographed.
+
+     §65.9 exactly, in the same file it was written down in: A CLASS NAME IS
+     ONE GLOBAL NAMESPACE. Nothing was wrong with the register's rules; the
+     cell was wearing the pillar rail's. Both names were valid, both scopes
+     were real, and the collision was silent. */
   .peoplecfg thead tr { position:sticky; top:0; z-index:3; }
   /* `overflow:hidden` because a FROZEN cell must not paint outside itself
      (§71.2). The name input carries `min-width:170px` plus the cell's padding,
      so on a narrow column the box spilled past the frozen boundary and sat on
      top of the column scrolling underneath — which is what made the register
      look like it was flipping between two layouts. */
-  .peoplecfg td.idx, .peoplecfg td.pname { position:sticky; z-index:2;
-                                           background:var(--surface);
+  /* ── A FROZEN CELL WEARS ITS ROW'S GROUND, NOT A FIXED ONE (§73.2) ─
+     These carried `background:var(--surface)`, which was invisible while
+     `--zebra` was `var(--surface)` — the stripe existed in the stylesheet and
+     painted nothing. Give the stripe a real colour and a hard-coded white here
+     leaves the two frozen columns unstriped beside a striped row: the exact
+     seam this pair was frozen to avoid.
+
+     `background:inherit` is the answer, and it needs the ROW to carry a real
+     background rather than the cells — a background is not inherited from a
+     colour nobody set. So the stripe, the base and the hover are all declared
+     on the `<tr>` below, and these three cells take whatever it is. */
+  .peoplecfg td.idx, .peoplecfg td.namecell { position:sticky; z-index:2;
+                                           background:inherit;
                                            overflow:hidden; }
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
-  .peoplecfg td.pname input.fld { max-width:100%; box-sizing:border-box; }
+  .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -1852,15 +1877,15 @@
      three so auto layout has nothing left to decide. */
   .peoplecfg th.idx, .peoplecfg td.idx { width:38px; min-width:38px; max-width:38px; }
   .peoplecfg td.idx   { left:0; }
-  .peoplecfg td.pname { left:38px; }
+  .peoplecfg td.namecell { left:38px; }
   /* The corner belongs to both, so it outranks both. thead's `background` is
      set with !important two files later (§41.10), so these two need no ground
      of their own — they already have the panel's. */
   .peoplecfg thead th.idx   { position:sticky; left:0;    z-index:4; }
-  .peoplecfg thead th.pname { position:sticky; left:38px; z-index:4; }
+  .peoplecfg thead th.namecell { position:sticky; left:38px; z-index:4; }
   /* A hairline where the frozen pair ends, so a column scrolling under it
      reads as going behind something rather than being cut off. */
-  .peoplecfg td.pname, .peoplecfg thead th.pname { box-shadow:1px 0 0 var(--line-soft); }
+  .peoplecfg td.namecell, .peoplecfg thead th.namecell { box-shadow:1px 0 0 var(--line-soft); }
   /* ── AND THE ACTIONS COLUMN FREEZES TO THE RIGHT (§69.20) ──────────
      Islam: "allow me to remove a full employee in the register, not only
      retired" — which had been built (§69.4) and could not be REACHED. Measured
@@ -1875,7 +1900,7 @@
      in the first place: what you scroll to reach is the thing you do to a row,
      and what you need beside it is the name of the row you are doing it to. */
   .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
-    position:sticky; right:0; z-index:2; background:var(--surface);
+    position:sticky; right:0; z-index:2; background:inherit;
     box-shadow:-1px 0 0 var(--line-soft); }
   .peoplecfg thead th.kebcell { z-index:4; }
   /* Above the header too: a panel opened on the first visible row would
@@ -1886,10 +1911,17 @@
      `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
      cells would have gone translucent and every row scrolling past would have
      ghosted through them. The dimming moves to the ink for those two. */
-  .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.pname { opacity:1; color:var(--ink-3); }
+  .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.namecell { opacity:1; color:var(--ink-3); }
   .peoplecfg tr.retired td.kebcell .kebab { opacity:.62; }
-  .peoplecfg tr.retired td.pname b,
-  .peoplecfg tr.retired td.pname input.fld { color:var(--ink-3); }
+  .peoplecfg tr.retired td.namecell b,
+  .peoplecfg tr.retired td.namecell input.fld { color:var(--ink-3); }
+  /* THE GROUND IS ON THE ROW so the frozen cells can inherit it. The platform
+     stripes on `> td` (arrange.css); this says the same thing one level up,
+     for the three cells that cannot read a sibling's background. Both paint
+     the same colour, so they cannot disagree. */
+  .peoplecfg tbody tr { background:var(--surface); }
+  .peoplecfg tbody tr:nth-child(even) { background:var(--zebra); }
+  .peoplecfg tbody tr:hover { background:var(--surface-2); }
   .cfg table.unitcfg.peoplecfg { table-layout:auto; }
   .peoplecfg td, .peoplecfg th { white-space:nowrap; }
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }
@@ -17474,7 +17506,7 @@ function renderPeople(){
          gone. The short form is a rendering; the stored fact is untouched, and
          the whole name is on the row's hover and in every other surface that
          names a person. */
-      '<td class="pname" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
+      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
@@ -17794,7 +17826,7 @@ function renderPeople(){
          it is given the leftovers. */
       '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
         '<th class="idx">#</th>' +
-        '<th class="pname">Person</th>' +
+        '<th class="namecell">Person</th>' +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */

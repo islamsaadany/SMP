@@ -131,7 +131,7 @@
     /* NO ZEBRA in this language — rows separate on hover instead, and the
        columns are divided by hairlines. The token stays because a hundred
        rules read it; it just resolves to the surface it sits on. */
-    --zebra:#F6F8FB; --zebra-focus:#FFFBEB;
+    --zebra:var(--surface); --zebra-focus:#FFFBEB;
     --over-bg:#EEF2FF; --over-line:#C7D2FE;
     --on-fill:#FFFFFF;
   }
@@ -149,7 +149,7 @@
     --good:#34D399; --attn:#FBBF24; --warn:#FB923C; --bad:#F87171; --none:#8B97A9;
     --good-bg:#0A2E22; --attn-bg:#2E2510; --warn-bg:#2E1D10; --bad-bg:#2E1616;
     --panel:#060B16; --panel-ink:#E8EDF5;
-    --zebra:#182339; --zebra-focus:#2E2510;
+    --zebra:var(--surface); --zebra-focus:#2E2510;
     --over-bg:#1E1B3A; --over-line:#3F3A72;
     --on-fill:#0B1120;
   }
@@ -179,7 +179,7 @@
     --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
     --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
     --panel:#16325C; --panel-ink:#FFFFFF;
-    --zebra:#F5F7FA; --zebra-focus:#FDFAF1;
+    --zebra:var(--surface); --zebra-focus:#FDFAF1;
     --over-bg:#FBF6E9; --over-line:#E8D9AE;
     --on-fill:#FFFFFF;
   }
@@ -197,7 +197,7 @@
     --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
     --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
     --panel:#0E1014; --panel-ink:#EAF0FA;
-    --zebra:#212630; --zebra-focus:#2A2720;
+    --zebra:var(--surface); --zebra-focus:#2A2720;
     --over-bg:#332C16; --over-line:#4A3F1E;
     --on-fill:#14161A;
   }

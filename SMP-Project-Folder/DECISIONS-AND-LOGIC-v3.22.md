@@ -9445,3 +9445,58 @@ fixed, and unchanged by this version**.
 roles or certain units, which is the half of Islam's ask this page is the
 foundation for; and whether the tenant's mark can be served from a public URL so
 an email can carry it.
+
+---
+
+## 73 · The person box, and a stripe that was painting nothing (v3.23)
+
+Islam, with a screenshot: *"still there is visual issue see the person box"* and
+*"we need alternating colors with white and grey across the tables."*
+
+**73.1 A CLASS NAME IS ONE GLOBAL NAMESPACE — §65.9, in the file that records
+it.** §69.19 froze the register's first two columns and named the name cell
+`pname`. `.pname` has been the **pillar rail's** name block since 1.7:
+`display:flex; flex-direction:column`.
+
+A `<td>` given `display:flex` **stops being a table cell**, and a box that is
+not a table cell does not stretch to its row. Measured at 1440px: the row 39px
+and the name cell **31px**, the header 29px and **26px**. That 8px strip of page
+showing under a frozen white cell is the box in the photograph.
+
+Nothing was wrong with the register's own rules — the cell was wearing somebody
+else's. Both names were valid, both scopes were real, and the collision was
+silent, exactly as the access matrix's `view` modifier was silent against the
+page region `.view`. The cell is `namecell`; both measurements match the row.
+
+Worth naming the pattern, because this is the third instance: **a one-word class
+that reads naturally in two places will eventually be written in both.** The
+register's cells are `idx`, `namecell`, `kebcell` — none of them a word another
+component would reach for.
+
+**73.2 The stripe existed and painted nothing.** `--zebra` was `var(--surface)`
+in all four palettes — the legacy of §25, where a hardcoded `#F7F9FC` survived
+into dark mode and put a near-white band under near-white text. Neutralising the
+token fixed dark and left the platform with a zebra rule that painted white on
+white. Real values now, per palette, so `tbody tr:nth-child(even)` stripes
+everywhere.
+
+**And the frozen columns had to stop being white.** `td.idx`, `td.namecell` and
+`td.kebcell` carried `background:var(--surface)`, which was indistinguishable
+from the row while the stripe was off — and the moment it is on, those three
+columns stay white beside a grey row: **the exact seam freezing them was meant
+to avoid.** A background cannot be inherited from a colour nobody set, so the
+ground moved onto the `<tr>` (base, stripe and hover) and the three cells take
+`background:inherit`. Measured in both themes: `tr`, `idx`, `namecell`, middle
+cell and `kebcell` all report the same colour on every row.
+
+**73.3 Checked against the new ground BEFORE running anything.** §25's lesson is
+that a new ground under old ink is where this breaks. Every ink token clears on
+the zebra in all four palettes (worst: `--ink-3` at 4.88). Five raw scoring
+colours fail — and they **already fail on plain white** by about the same margin
+(`--good` 3.77 → 3.54), so the stripe is not the cause: §16.15's deferred
+palette family, unchanged. The sweep agrees: **6 failing runs before, 6 after**,
+all of them the company page's `num.final`.
+
+The header's own cells needed nothing: `thead th` takes `--panel` with
+`!important` two files later (§41.10), so a rule for them would have been dead
+code — written, measured as changing nothing, removed.

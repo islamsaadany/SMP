@@ -678,7 +678,47 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-23 &mdash; **v3.21: a unit and a function are the same
+*Last Updated: 2026-08-24 &mdash; **v3.22: the register, the deck, and the
+door** (&sect;69). Eleven things Islam asked for while using the product, and
+the ones worth reading are the four that turned out to be one argument each.
+**A CONTROL SPANNING TWO COLUMNS BELONGS IN NEITHER**: the register's role
+picker opened a role select AND a where select inside the Roles cell, so the
+Unit column sat empty beside a dropdown naming a unit. The two halves go to
+their own columns, and Give and Cancel go entirely &mdash; the result already
+carries an &times;, so the undo is where the confirmation would be (&sect;62
+turned round), which is exactly why both halves now start blank: **a picker that
+commits on its own must never commit something nobody picked.** **A PERSON CAN
+BE DELETED, AND THE REFUSAL IS THE FEATURE** (&sect;62's shape on a different
+table) &mdash; refused while a role, a figure set, a named figure or an open
+claim still points at them, and the refusal NAMES what; a TYPED NAME IS NOT A
+POINTER, so being named on a plan line does not block, because an imported plan
+names people who were never on the register. And **THE DOOR GOES WITH THE ROW**:
+`credentials` survives the TRUNCATE by design, person keys are minted from the
+name, so deleting *Ahmed Ali* and adding *Ahmed Ali* again handed the new person
+the deleted one's password. `change_log` and `login_attempts` are deliberately
+kept &mdash; a log that forgets is not a log. **MANAGE SLIDES WAS SHOWING A DECK
+NOBODY WOULD PROJECT**: three complaints, one cause &mdash; `slidesAssemble()`
+ran neither `deckFootMarks()` nor `deckFitPass()`. And the trap underneath it is
+worth the space: **the fit pass decides by MEASURING, and `scrollHeight` and
+`clientHeight` are both 0 on a detached element**, so a detached deck reports
+every slide as fitting perfectly and the pass silently does nothing &mdash;
+&sect;50.3's detached render is right for reading markup and useless for reading
+a height. **THE DOT ON PERFORMANCE MEANS SOMETHING NOW**: it hung off
+`.primary`, which is the landing page, so it was painted always and everywhere
+while looking exactly like the marks the product uses for something outstanding.
+It is `reportPending()` now &mdash; this subject owes a submission and you could
+make it &mdash; and never shown to a reader, because `canSpeakFor()` is the same
+question Submit asks and asking it differently is how a screen nags somebody who
+has no control that would clear it. **AND THE ONE STRING THE DOOR ACCEPTED WAS
+THE ONE STRING NOBODY HAD**: sign-in took a person key, which is minted from the
+name and appears in a hover title and one prompt. It takes the EMAIL on the
+register now, with the key still working &mdash; the bootstrap SMO has none, and
+a deployment nobody can enter is not a deployment. Two rows sharing an address
+sign NOBODY in and the door says so, a trade against &sect;43.3 made
+deliberately. Everything after the password already worked: the forced change,
+and the short list narrowed from the person's Official BU on the server.*
+
+*Earlier: 2026-08-23 &mdash; **v3.21: a unit and a function are the same
 product** (§53). Four fixes and one rule, and the rule is what the four are
 evidence for. **A FUNCTION OPENED ON PERFORMANCE BECAUSE OF A CLAUSE, NOT A
 DECISION**: §28's argument &mdash; what was agreed is what people come to read, the

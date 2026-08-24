@@ -8697,3 +8697,211 @@ computed shape of "fills its parent". A small marker pseudo fails all three.
 What survives is 6 real ones: `num.final` in the units TABLE view, in light —
 scoring colours used as type, §16.15's family, and previously unmeasured for the
 same reason. Recorded, not fixed: it is the palette decision Islam has deferred.
+
+---
+
+## 69 · The register, the deck, and the door (v3.22)
+
+A working session rather than a feature: eleven things Islam asked for while
+using the product, and the four that turned out to be one argument each are the
+ones worth reading.
+
+**69.1 People register, and the block that said the page's own name.** The page
+has been called *the register* in every sentence written about it since §35 and
+the heading said *People*, so the word people use and the word on the door were
+different words. The rename took the intro block with it: a section headed
+*The register* two lines under a page headed *People register* is §28's empty
+header with the header full, and the sentence beneath it explained the MODEL
+(a role is one fact with two editing surfaces), which is what the knowledge base
+is for (§30).
+
+**69.2 The role picker sits in its two columns.** Islam: *"keep the unit
+selection in the unit and keep the role selection in the role so I can choose
+both but each in it's right placement."*
+
+The old control opened a role select AND a where select inside the Roles cell,
+so the Unit column sat empty beside a dropdown naming a unit. **One control
+spanning two columns belongs in neither.** The role select stays in Roles; the
+where select is drawn in the Unit column, under what that cell already says
+rather than instead of it — where somebody SITS and where a role REACHES are
+two different facts (§46.4), and a picker that covered the first while asking
+the second would be hiding the answer.
+
+**69.3 No Give, no Cancel, and no pill.** Islam: *"in the edit just give me the
+drop downs to select from for both unit and role without give or cancel —
+eventually it's a selection that I can remove after with the x button you
+made."*
+
+The result already carries an ×, so the undo is where the confirmation would be
+— §62's rule turned round. The role is granted the moment BOTH halves are
+answered, which is exactly why both now start on a blank *Choose…* and the
+picker opens on no role at all: **a picker that commits on its own must never
+commit something nobody picked.** The *No role* pill is hidden while it is open,
+because that pill is a READING state and the answer is being typed.
+
+**69.4 Deleted, not retired — and the refusal is the feature.** §62's shape,
+applied to a person. Retiring is still right for anybody who was really here;
+this is for the rows that never were — typed by mistake, imported twice, a test.
+The delete is refused while anything still points at the person and the refusal
+NAMES what: a granted role, a figure set they own, a figure they enter, an open
+claim. Blockers are re-asked inside `deletePerson()` and never trusted from the
+render that drew the button (§48.2).
+
+**A TYPED NAME IS NOT A POINTER.** `t.owner` and `t.collaborators` hold text —
+an imported plan names people who were never on the register at all (§50.2) — so
+being named on a line does not block. The confirmation says how many lines keep
+the name instead, because "deleted" reading as "scrubbed from the plan" is the
+wrong expectation to leave somebody with.
+
+**And the door goes with the row.** `people` is TRUNCATEd and rewritten on every
+save; `credentials`, `sessions` and `bu_declarations` are not, deliberately and
+with no foreign key (§19, §56). That was right while a person could only be
+retired: retirement leaves the row standing and both the sign-in query and
+`getSession()` JOIN `people`, so the join turns them away. A DELETED person has
+no row, so those close by themselves — **and the credential stays.** Person keys
+are minted from the name: delete *Ahmed Ali*, add *Ahmed Ali* again, and
+`mintPersonKey()` hands back `ahmedali`. The new person inherits the deleted
+person's password on their first day and nobody is told.
+
+`change_log` and `login_attempts` are deliberately NOT purged: one is the record
+of who changed what and the other of who is failing to get in, whose own
+migration says a save must not be able to erase it. **A log that forgets is not
+a log.** `scripts/test-person-purge.js` proves it against a real Postgres and
+was itself checked by removing the purge, where it fails five ways and prints
+the inherited hash.
+
+**69.5 Manage slides was showing a deck nobody would project.** Three
+complaints, one cause — Islam: *"the overflowing issue is only in the editing
+view, all is ok in the presentation view."* `slidesAssemble()` ran neither
+`deckFootMarks()` nor `deckFitPass()`, which are the two steps `openDeckWith()`
+runs after building the slides. So content overflowed, the unit's lockup was
+missing from every footer, and a long table ran off the bottom instead of
+continuing. The mode exists to show the real slide at one tenth (§51.8); it was
+showing an unfinished one.
+
+**THE MEASURING BOX HAS TO BE IN THE DOCUMENT**, and that is why this was easy
+to miss. The fit pass decides by comparing `scrollHeight` with `clientHeight`,
+and both are **0** on a detached element — so a detached deck reports every
+slide as fitting perfectly and the pass silently does nothing. §50.3 renders the
+deck detached to read its anchors out: right for reading markup, useless for
+reading a height. The editor assembles into an off-screen 1600×900 `.deck`
+(`left:-99999px`, not `display:none`, which has no layout), inert, removed in a
+`finally`.
+
+`data-ed` is minted AFTER the fit pass, or every continuation slide carries a
+clone of its parent's key — two rail rows with one key, and the arrows stick.
+
+**69.6 Arrows walk the deck while it is being adjusted.** Up/Down because the
+rail is a vertical list, Left/Right because it is a deck, Home/End for the ends.
+Taken only when focus is on nothing that reads them: a `<select>` and a
+`<textarea>` get the same courtesy the guard already gave `<input>`, because a
+picture slide's pane carries both and **stealing Down from an open dropdown
+takes away the ability to choose anything.**
+
+**69.7 Fullscreen gives the whole screen to the slide.** The 62px strip stayed
+up — 7% of the projected image spent on controls the room can see and the
+presenter does not need. It hides on entering fullscreen and returns for 2.2s on
+a move, a touch or a key, because it carries Exit and **a presenter who cannot
+find the way out of somebody else's laptop is stranded.** `transform` rather
+than `display`, so the stage's height never changes and `deckScale()` is not
+re-running on every mouse move. The class is set from `fullscreenchange`, never
+from the button: Escape and the browser can both leave fullscreen. Measured: the
+stage 838 → 900, the deck 0.931 → 0.991.
+
+**69.8 Slide headings go bold.** Measured before changing anything: 400 in the
+projector AND in the editor, identically, and 400 since the deck was written —
+so not a regression and not an editor-only difference. But `--serif` resolves to
+the sans stack (there is no serif face embedded, §38.7) and a display heading at
+400 in a sans reads *light* rather than *quiet*. Put to Islam with the
+measurement; he chose bold. The eyebrows, `.dlab`s and table headers were
+already 700, so the deck arrives at one weight. Checked after: same slide count
+on all ten units, so nothing re-split.
+
+**69.9 The dot on Performance means something.** It was
+`.tabs button.primary::before` — painted on whichever tab is the landing page,
+on every destination, always. So it said *this is the regular view*, which the
+tab being there already says, while looking exactly like the marks the rest of
+the platform uses for something outstanding.
+
+`reportPending()` is the one place that decides: **this subject owes a
+submission on an open cycle, and you are somebody who could make it.** Three
+things it deliberately is not — not the group's and not a company's (neither
+submits, so *has not submitted* is not a state they can be in, §68); not
+"somebody, somewhere, has not submitted", which is the SMO's board and needs a
+page rather than a dot; and not shown to a reader, because `canSpeakFor()` is
+the same question the Submit button asks (§50.4) and **asking it differently
+here is how a screen comes to nag somebody who has no control that would clear
+it.**
+
+To the RIGHT of the word, as asked — and that is where it belongs: a mark after
+a word annotates it, a mark before one is a bullet. A real element rather than a
+pseudo, because the condition lives in JS and because §68.10 records what
+pseudo-elements do to the contrast sweep.
+
+**And Strategy comes first.** §28's argument stands and this is the tab row
+catching up with it: what was agreed is what people come to read and the score
+is a consequence of it — which is already why a unit and a function both OPEN on
+their plan, while the row said the opposite left to right. `primary` keeps its
+own job, which is not order.
+
+**69.10 A function has an Overview, not a Foundation.** Islam: *"the word
+foundation is confusing, the capability doesn't have a foundation"* — and, on
+the other kind, *"the function that plans in pillars has overview as well, the
+foundation is only for business units."*
+
+The page had been saying it in prose for versions: a capability has no clauses,
+no aspiration and no SWOT, and its foundation IS the group's (§15.1). **A tab
+called Foundation over a page whose first sentence denies there is one is the
+label arguing with the content.** Both formats get the same word, because they
+are the same product (§53.5) and a label that changed with the format would be a
+third thing to keep in step. The KEY stays `found` and the access key stays
+`k_found`: renaming either loses every stored preference and every grant
+pointing at it, for a word (§65, §58).
+
+**69.11 The door takes an email address.** Islam, locked out of his own
+deployment with a password he had just issued himself: *"on login it's asking
+for your person key, it should ask for my email and the emails were uploaded in
+the sheet to the people registry."*
+
+He was right and the diagnosis is worth writing down: **the one string the door
+accepted was the one string nobody had.** A person key is minted from the name
+(`mintPersonKey`) and appears in exactly two places — a row's hover title, and
+the Set-a-password prompt. The password was fine; the username was undiscoverable.
+
+**THE KEY STILL WORKS**, and that is not tidiness. The bootstrap SMO has no
+email at all (§43.8 keeps `SMO` / `1234` with `must_change` so a fresh
+deployment has a way in), and neither does anybody whose Email cell is blank —
+today every row of the demo seed. A door that only takes an email locks all of
+them out, and **a deployment nobody can enter is not a deployment.** Resolved on
+the server from ONE query, because two identifiers answered by two lookups are
+two doors.
+
+**TWO ROWS, ONE ADDRESS** is a real state — a shared inbox, or somebody imported
+twice — and nothing has ever enforced uniqueness. Signing one of them in is the
+worst outcome available: nothing on the screen would say which of the two they
+had become. So both are refused, and the door SAYS SO, at Islam's direction.
+That is a deliberate trade against §43.3's rule that a refusal must not confirm
+which names exist: the person stuck cannot fix it themselves and has no other
+way to know who to ask. It records a failure like every other refusal — and the
+limit that actually bounds the enumeration it opens is the **25-per-address**
+one, not the 8-per-key one, because somebody probing addresses varies the key
+every time.
+
+Two smaller things found while tracing it. `setPassword` stored the key as typed
+while `login` lowercases before looking it up, so a mixed-case key would write a
+credential nothing could ever match — the correct password refused for ever,
+with nothing saying why. Latent rather than live (every minted key is already
+lowercase) but **precisely the shape of the fault reported**, and a pair of
+comparisons that normalise differently will find each other eventually. And the
+sign-in card focused the password unconditionally, which was right over a fixed
+name and wrong the moment there was a field above it.
+
+The register gained the two facts that became access facts that day: **N with no
+email** and **N addresses on more than one row**, both counted over active
+people only and both naming the rows in their title. And the sign-in name is an
+off-by-default column: §35 was right to take it out from under the name, and it
+is a diagnostic now rather than the thing everybody needs.
+
+Everything after the password already worked and needed nothing: the forced
+change (§43), and the *where do you work* question with a short list narrowed
+from the person's Official BU **on the server** (§56, §57).

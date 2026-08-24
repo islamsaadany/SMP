@@ -57,6 +57,15 @@ function safeError(e) {
   return "Something went wrong. Try again, and tell the SMO if it keeps happening.";
 }
 
+/* ONE MESSAGE FOR A WRONG NAME AND A WRONG PASSWORD (§43.3). A sign-in screen
+   must not confirm which addresses or keys this tenant holds, so every refusal
+   but one says exactly this. Named once now that two paths reach it — two
+   copies of a security message is how one of them comes to say more than the
+   other. The exception is the duplicate-address refusal below, which Islam
+   settled deliberately and which is rate limited like any other failure. */
+const WRONG_SIGNIN =
+  "Wrong sign-in. Check both fields, or ask the SMO to reset your password.";
+
 function send(res, code, obj) {
   res.statusCode = code;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -77,8 +86,25 @@ module.exports = async function handler(req, res) {
       return send(res, 200, { ok: true, person: person });
     }
 
+    /* ── SIGN IN WITH AN EMAIL ADDRESS (§69.11) ─────────────────────
+       It took a PERSON KEY, and a person key is minted from the name
+       (mintPersonKey) and shown in exactly two places: the Set-a-password
+       prompt and a row's hover title. So the one string the door accepts was
+       the one string nobody had. Islam, locked out of his own deployment with
+       a password he had just issued himself: "it should ask for my email and
+       the emails were uploaded in the sheet to the people registry."
+
+       THE KEY STILL WORKS, and that is not tidiness. The bootstrap SMO has no
+       email at all (§43.8 keeps `SMO` / `1234` with must_change so a fresh
+       deployment has a way in), and so does anybody whose Email cell is blank
+       — which today is every row of the demo seed. A door that only takes an
+       email locks all of them out, and a deployment nobody can enter is not a
+       deployment.
+
+       Resolved on the SERVER, from one query, because the two identifiers have
+       to be answered by the same lookup or they are two doors. */
     if (action === "login") {
-      const key = String(body.user || "").trim().toLowerCase();
+      const typed = String(body.user || "").trim().toLowerCase();
       const ip = auth.clientIp(req);
       /* One DELETE on a path that is already writing — there is no scheduler
          in a serverless deployment, and expired sessions and stale attempts
@@ -86,9 +112,50 @@ module.exports = async function handler(req, res) {
       await auth.pruneExpired(client);
       /* Checked BEFORE the password is verified, or the limiter is a timing
          oracle: a wrong password would take a scrypt hash's worth of time and
-         a locked-out one would not. */
-      const slow = await auth.tooManyAttempts(client, key, ip);
+         a locked-out one would not. Counted against WHAT WAS TYPED rather than
+         against whoever it resolves to: that is the string an attacker varies,
+         and it is also the only thing there is to count when it resolves to
+         nobody. */
+      const slow = await auth.tooManyAttempts(client, typed, ip);
       if (slow) return send(res, 429, { ok: false, error: slow });
+
+      /* An empty box matches nothing. Without this guard `trim(email) = ''`
+         is true of every person who has no address, so pressing Enter on a
+         blank field would report the whole register as an ambiguous match. */
+      if (!typed) {
+        await auth.recordFailure(client, typed, ip);
+        return send(res, 401, { ok: false, error: WRONG_SIGNIN });
+      }
+      const who = (await client.query(
+        "SELECT key FROM people " +
+        "WHERE lower(key) = $1 OR lower(trim(COALESCE(extra->>'email',''))) = $1 " +
+        "ORDER BY idx", [typed])).rows;
+
+      /* TWO ROWS, ONE ADDRESS — a shared inbox, or somebody imported twice.
+         Nothing has ever enforced uniqueness here, so it is a real state and
+         it needs an answer that is not "sign one of them in": signing somebody
+         in as a colleague is the worst outcome available, and nothing on the
+         screen would say which of the two they had become.
+
+         IT SAYS SO AT THE DOOR, at Islam's direction, and that is a
+         deliberate trade against §43.3's rule that a refusal must not confirm
+         which names exist. The person stuck cannot fix it themselves and has
+         no way to know who to ask otherwise.
+
+         IT RECORDS A FAILURE, and it is worth being precise about which limit
+         that buys. Somebody probing addresses uses a DIFFERENT string every
+         time, so the 8-per-key threshold never trips for them — the thing that
+         bounds enumeration here is the 25-per-ADDRESS-in-15-minutes limit, and
+         it only bounds it because this branch records a failure like every
+         other refusal. Take the recordFailure out and the oracle is
+         unlimited. */
+      if (who.length > 1) {
+        await auth.recordFailure(client, typed, ip);
+        return send(res, 401, { ok: false, error:
+          "That address is on more than one row of the register, so it does " +
+          "not say who you are. Ask the SMO." });
+      }
+      const key = who.length ? who[0].key : typed;
       const cred = (await client.query(
         "SELECT c.password_hash, c.must_change, p.name, p.role, " +
         "       COALESCE(p.extra->>'active', 'true') <> 'false' AS active " +
@@ -99,12 +166,15 @@ module.exports = async function handler(req, res) {
          client that stops offering them roles. Retirement is what happens when
          somebody leaves, so it has to close the door, not just the menu. */
       if (!cred || !cred.active || !auth.verifyPassword(body.password, cred.password_hash)) {
-        await auth.recordFailure(client, key, ip);
-        return send(res, 401, { ok: false, error: "Wrong sign-in. Check both fields, or ask the SMO to reset your password." });
+        await auth.recordFailure(client, typed, ip);
+        return send(res, 401, { ok: false, error: WRONG_SIGNIN });
       }
-      /* Getting in clears this key's failures: the threshold is there to slow
-         a guess, and a guess that succeeded is not what it is counting. */
-      await auth.clearFailures(client, key);
+      /* Getting in clears the failures: the threshold is there to slow a
+         guess, and a guess that succeeded is not what it is counting. BOTH
+         strings, because somebody who tried their key a few times and then
+         their address has failures recorded under each. */
+      await auth.clearFailures(client, typed);
+      if (key !== typed) await auth.clearFailures(client, key);
       const token = await auth.createSession(client, key);
       res.setHeader("Set-Cookie", auth.cookieHeader(req, token));
       return send(res, 200, { ok: true, person: { key: key, name: cred.name, role: cred.role, mustChange: cred.must_change } });
@@ -141,7 +211,15 @@ module.exports = async function handler(req, res) {
       if (!person || person.role !== "super") {
         return send(res, 403, { ok: false, error: "Issuing passwords is the SMO's." });
       }
-      const key = String(body.person || "").trim();
+      /* LOWERCASED, BECAUSE THE DOOR LOWERCASES (§69.11). This stored the key
+         exactly as it arrived while login() compares against a lowercased one,
+         so a mixed-case key would write a credential nothing could ever match:
+         the correct password, refused for ever, with nothing anywhere saying
+         why. Latent rather than live — mintPersonKey() lowercases, so every
+         key the platform has ever minted is safe — but it is precisely the
+         shape of the fault Islam reported, and a pair of comparisons that
+         normalise differently will find each other eventually. */
+      const key = String(body.person || "").trim().toLowerCase();
       const exists = (await client.query("SELECT 1 FROM people WHERE key = $1", [key])).rowCount;
       if (!exists) return send(res, 400, { ok: false, error: "No person with key " + key + "." });
       const why = auth.passwordPolicy(body.password);

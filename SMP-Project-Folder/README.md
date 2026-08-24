@@ -13,7 +13,7 @@ given. *(A1 was "mock before building" until 2026-08-20; that rule belonged to
 the prototype era and was retired when Islam said so. The approval it protected
 did not go with it.)*
 
-**`DECISIONS-AND-LOGIC-v3.21.md`** — every decision with its reasoning,
+**`DECISIONS-AND-LOGIC-v3.22.md`** — every decision with its reasoning,
 including reversals recorded as reversals. Three sections matter most:
 
 - **§11** — model questions still open
@@ -28,7 +28,7 @@ records how one feature was cut against it.
 
 ## The platform
 
-**`strategy-management-platform-v3.21.html`** — the built prototype. One file,
+**`strategy-management-platform-v3.22.html`** — the built prototype. One file,
 opens in a browser, no server needed — **and, served on Vercel, it reads and
 writes its whole state through `/api/state` against Neon Postgres** (§18 of
 the decisions document). Opened from disk it runs on its baked-in demo data,
@@ -289,6 +289,22 @@ archives**, so a unit cannot submit without touching a field; **clearing a plan
 archives it**, as replacing one always did; a **company can be created, renamed
 and retired**; and **retiring remembers what it took**, so restoring does not
 silently demote.
+
+Version **3.22** (§69) is a working session rather than a feature. The People
+page becomes the **People register**, its role picker puts each half in its own
+column (role in Roles, where in Unit) and commits itself with no Give and no
+Cancel — the result carries an × already. A person can be **deleted**, refused
+while anything still points at them and naming what, and the delete purges their
+password, sessions and declaration on the server: person keys are minted from
+the name, so without that a re-added name inherited the deleted person's
+password. **Manage slides** shows the deck the projector will show — it ran
+neither the footer pass nor the fit pass, so slides overflowed and the unit's
+lockup was missing — and the arrows walk it. Fullscreen hides the strip. The
+tab row reads **Strategy** then **Performance**, and the orange dot only appears
+where a subject owes a submission on an open cycle. A supporting function's
+Strategy holds **Overview**, not Foundation. And **sign-in takes the email
+address on the register** (the person key still works, for the bootstrap SMO and
+anybody with no address).
 
 Version **3.21** (§59&ndash;§63) finished the supporting-function half. A
 function that plans in pillars can now be reached before it has a plan and

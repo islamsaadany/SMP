@@ -475,10 +475,29 @@
   /* Sub-nav: Performance is the regular view and is marked as such */
   .tabs button.primary { color:var(--gold-deep); font-weight:700; }
   .tabs button.primary[aria-selected="true"] { color:var(--ink); }
-  .tabs button.primary::before {
-    content:""; display:inline-block; width:7px; height:7px; border-radius:99px;
-    background:var(--gold); margin-right:7px; vertical-align:middle;
+  /* ── THE DOT MEANS SOMETHING NOW (§69.9) ─────────────────────────
+     It used to be `.tabs button.primary::before` — painted on whichever tab is
+     the landing page, on every destination, always. So it said "this is the
+     regular view", which the tab being there already says, while looking
+     exactly like the marks the rest of the platform uses for something
+     outstanding. It is drawn only when reportPending() says this subject owes
+     a submission (shell.html), and it sits AFTER the word: a mark following a
+     word annotates it, a mark before one is a bullet.
+
+     A REAL ELEMENT, not a pseudo. Two reasons and both are earned here: the
+     condition lives in JS, so a pseudo would need a second class to drive it
+     and the class would BE the state — and §68.10 records what pseudo-elements
+     do to the contrast sweep, which measures elements. This one has a
+     `.vh` sentence beside it so the state is not colour-only. */
+  .tabs button .tabdot {
+    display:inline-block; width:7px; height:7px; border-radius:99px;
+    background:var(--gold); margin-left:7px; vertical-align:middle;
   }
+  /* Said for a screen reader and for anybody who cannot tell the dot from the
+     tab's own accent. The platform had no visually-hidden class at all — a
+     gap, not a preference — so it is named once here and is reusable. */
+  .vh { position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+        overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0; }
 
   .ns-group { grid-column:1/-1; border-top:1px solid var(--line); padding-top:12px; margin-top:2px; }
   .ns-group-h { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3);
@@ -1811,6 +1830,34 @@
   .kmenu button.danger { color:var(--bad); }
   .kmenu button.danger:hover { background:var(--bad-bg); }
   .kmenu hr { border:0; border-top:1px solid var(--line-soft); margin:4px 0; }
+  /* ── The delete question, and the refusal that replaces it (§69) ──
+     A `.kmenu`, so positionRowMenu() places it in the same corner the menu it
+     replaces was in. Everything else is different, because this one holds a
+     SENTENCE: `.kmenu button` is nowrap and 196px wide, which is right for
+     five menu items and wrong for a reason naming a unit and a page. */
+  .kconfirm { min-width:262px; max-width:330px; padding:0; white-space:normal; }
+  .kconfirm .cq { padding:11px 13px 9px; border-bottom:1px solid var(--line-soft);
+                  font:400 12.5px/1.55 var(--sans); color:var(--ink-2); }
+  .kconfirm .cq b { color:var(--ink); font-weight:700; }
+  .kconfirm .cbtns { display:flex; gap:6px; justify-content:flex-end; padding:7px 9px; }
+  .kconfirm .cbtns button { display:inline-block; width:auto; white-space:nowrap;
+                            border:1px solid var(--line); padding:5px 11px; }
+  /* --bad on --bad-bg is 4.41 and fails (§62, §38.5). The mark stays the
+     accent and the GROUND moves, which is the answer that file records. */
+  .kconfirm .cbtns button.danger { border-color:var(--bad); }
+  .kconfirm .cbtns button.danger:hover { background:var(--surface-2); color:var(--bad); }
+  /* ── The role picker, one half per column (§69) ──────────────────
+     Both are bounded. A `select.fld` in this table is `width:100%` with no
+     intrinsic minimum, so under the auto layout the register uses it claims
+     the whole box and crushes the name columns — measured at 920px before this
+     existed. The Unit column's is the narrower of the two: it holds a unit
+     name, where the Roles one holds "Strategy custodian".
+
+     The two widths themselves are NOT here: `.cfg .unitcfg select.fld` in
+     arrange.css is (0,3,1) and later in the concatenation, so it beats
+     anything this file can say about them. They live beside it (§69). */
+  .peoplecfg select.rolewhere { margin-top:5px; }
+  .peoplecfg .rolewhy { display:block; margin:5px 0 0; }
   /* The two collective actions, side by side and plainly different weights. */
   .bulkrow { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 0; }
   .bulkrow button { display:inline-flex; align-items:center; gap:8px; }
@@ -2280,8 +2327,33 @@
   .cfg table.unitcfg { table-layout:fixed; }
   .cfg .unitcfg input.fld { text-align:left; font-family:var(--sans); }
   .cfg .unitcfg select.fld { min-width:100%; max-width:none; }
+  /* THE EXCEPTION BELONGS BESIDE THE RULE (§69). The register shares
+     `.unitcfg` and does NOT share its premise: it has no fixed layout (see
+     .peoplecfg in config.css — Islam asked for the name column to fit the
+     name), so `min-width:100%` there means "as wide as the cell", the cell is
+     as wide as its content, and a select claiming both is a feedback loop that
+     took the two name columns down to nothing. Written in config.css first and
+     it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
+     later in build.py's concatenation, so it won twice over. */
+  .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
+  .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
+  /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
+     an input NO intrinsic minimum, so under the auto layout the register uses
+     (no table-layout:fixed — the name column fits the name, §46.6) the browser
+     hands those columns their minimum content width, which is nothing. Person
+     measured 216px reading and 86px editing, and 71px with a role picker open
+     beside it: the two columns you edit the page FOR were the two that
+     collapsed, and they collapsed further the more there was to do.
+
+     Beside the rule for the same reason the selects are (§69): this selector
+     is (0,3,1) and later in the concatenation than anything config.css can
+     say. The floors are the READ widths, so turning the pen on stops moving
+     the page. */
+  .cfg .peoplecfg input[data-pname] { min-width:170px; }
+  .cfg .peoplecfg input[data-ptitle] { min-width:150px; }
+  .cfg .peoplecfg input[data-pemail], .cfg .peoplecfg input[data-pphone] { min-width:160px; }
 
   /* A tooltip inherits white-space from its cell. Inside a table header, where
      nowrap keeps column titles on one line, the tooltip inherited it too and
@@ -2900,9 +2972,16 @@
   .dslide { position:absolute; inset:0; display:none; flex-direction:column;
             background:var(--surface); border-radius:5px; padding:52px 62px; overflow:hidden; }
   .dslide.on { display:flex; }
-  .dslide h1 { font:400 76px/1.08 var(--serif); margin:8px 0 22px; }
+  /* BOLD, at Islam's direction (§69.8). Not a regression and not an
+     editor-only difference — measured at 400 in both views and 400 since the
+     deck was written — but `--serif` resolves to the sans stack (there is no
+     serif face embedded, §38.7), and a display heading at 400 in a sans reads
+     as light rather than as quiet. The eyebrows, the `.dlab`s and the table
+     headers are already 700, so this is the whole deck arriving at one weight
+     rather than one more exception. */
+  .dslide h1 { font:700 76px/1.08 var(--serif); margin:8px 0 22px; }
   .dslide h1.cover { font-size:112px; letter-spacing:-.015em; }
-  .dslide h2 { font:400 46px/1.15 var(--serif); margin:0 0 26px; }
+  .dslide h2 { font:700 46px/1.15 var(--serif); margin:0 0 26px; }
   .dslide .eyebrow { font-size:17px; letter-spacing:.16em; text-transform:uppercase;
                      color:var(--gold-deep); font-weight:700; }
   .dlab { display:block; font-size:15px; letter-spacing:.11em; text-transform:uppercase;
@@ -3031,7 +3110,28 @@
 
   .deckbar { position:absolute; left:0; right:0; bottom:0; height:62px; display:flex;
              align-items:center; gap:18px; padding:0 26px; background:rgba(11,26,51,.94);
-             border-top:1px solid rgba(255,255,255,.1); }
+             border-top:1px solid rgba(255,255,255,.1);
+             transition:transform .18s ease, opacity .18s ease; }
+  /* ── FULLSCREEN GIVES THE WHOLE SCREEN TO THE SLIDE (§69.7) ───────
+     Islam: "in the presentation full screen mode the strip attached should
+     hide and the slide should fit the whole screen". It is 62px off a 900px
+     stage — about 7% of the projected image spent on controls the room can see
+     and the presenter does not need.
+
+     HIDDEN, NEVER REMOVED. It carries Exit, and a presenter who cannot find
+     the way out of fullscreen on somebody else's laptop is stranded — so
+     moving the mouse brings it back for a few seconds, which is what every
+     projector tool does and what people already expect. Escape and the arrows
+     work throughout either way.
+
+     `transform`, not `display`, so the stage's height does not change when it
+     comes and goes: `deckScale()` reads clientHeight, and a bar that resized
+     the stage would rescale the whole deck every time the mouse moved. The
+     stage takes the full inset in fullscreen and keeps it. */
+  .deckroot.fs .deckstage { inset:0; }
+  .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
+  .deckroot.fs.peek .deckbar { transform:none; opacity:1; pointer-events:auto; }
+  @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
                     font:inherit; font-size:15px; line-height:1; padding:8px 13px;
                     border-radius:20px; cursor:pointer; }
@@ -3097,6 +3197,13 @@
      slide you are working on filling the right. It borrows the deck's own
      chrome (`.deckroot`, `.deckbar`) rather than inventing a second full-screen
      shell — one product. */
+  /* Where Manage slides assembles the deck so it can be MEASURED (§69.5).
+     Off-screen rather than hidden: deckFitPass() decides by comparing
+     scrollHeight with clientHeight, and both are 0 under `display:none` and on
+     a detached node — which reports every slide as fitting and is exactly how
+     the editor came to show slides the projector would have split. */
+  .slmeasure { position:fixed; left:-99999px; top:0; width:1600px; height:900px;
+               pointer-events:none; }
   .slideroot { position:fixed; inset:0; z-index:60; background:var(--surface-2); display:none; }
   .slideroot.on { display:flex; flex-direction:column; }
   .slidebar { display:flex; align-items:center; gap:12px; padding:10px 16px;
@@ -3829,13 +3936,13 @@ THEME.apply();
     { key:"c_access", area:"a_setup", scope:"setup", label:"Roles & access", note:"Which roles reach which kinds of page" },
     { key:"c_bands",  area:"a_setup", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
     { key:"c_units",  area:"a_setup", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
-    { key:"c_people", area:"a_setup", scope:"setup", label:"People",           note:"Everyone the platform knows, and what they hold" },
+    { key:"c_people", area:"a_setup", scope:"setup", label:"People register", note:"Everyone the platform knows, and what they hold" },
     { key:"c_brand",  area:"a_setup", scope:"setup", label:"Branding",         note:"The tenant's colours, and the type they carry" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
     { key:"k_perf",   area:"fn", scope:"fn",    label:"Performance",     note:"What this function's capabilities read" },
-    { key:"k_found",  area:"fn", scope:"fn",    label:"Capability foundation", note:"What each capability is, and its key objectives" },
+    { key:"k_found",  area:"fn", scope:"fn",    label:"Function overview",     note:"What each capability is, and its key objectives" },
     { key:"k_proj",   area:"fn", scope:"fn",    label:"Projects",        note:"The plan behind each project, with no reported figure on it" },
     { key:"k_report", area:"fn", scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
     { key:"g_focus",  area:"a_group", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
@@ -5640,6 +5747,11 @@ var NEWMAINBU = "";
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
 var PMENU = null;
+/* Which person the delete confirmation is open for (§69). Its own key rather
+   than a mode on PMENU: the confirmation REPLACES the menu in the same place,
+   so the second press lands where the first one did — the same shape the
+   clear-plan confirmation already uses (§46.2). */
+var PDEL = null;
 /* Which person's extra roles are unfolded, and which header menu is open.
    Single keys for the same reason PMENU is: two open at once is a state that
    has to be closed twice. */
@@ -6163,6 +6275,130 @@ function restorePerson(key, giveBack){
     });
   }
   delete p.heldRoles;
+}
+
+/* ── DELETED, NOT RETIRED — AND THE REFUSAL IS THE FEATURE (§69) ────
+   The rule above still stands: retiring is what happens when somebody LEAVES,
+   and it is right that it keeps every attribution true. This is the other
+   case, and it is the one Islam asked for — a row typed by mistake, a test
+   person, somebody imported twice. Those could only ever be retired, so the
+   register grew a permanent list of people who were never really there.
+
+   §62's shape, applied to a person: the button is always live, the delete is
+   REFUSED while anything still points at the row, and the refusal NAMES what
+   and where to go and undo it. What points at a person is a short list and it
+   is worth writing down, because each one is a KEY rather than a name:
+
+     UNIT_ROLES[k].head / .custodian      a unit's two seats
+     FUNCTIONS[f].head / .custodian       a function's two
+     p.role (super / gceo / cceo)         the seats held on the person
+     set.owner                            who owns a figure set (§44)
+     row.src.by                           who enters one figure (§44 step 3)
+     claim.by                             an open request for a figure
+
+   A TYPED NAME IS NOT A POINTER. `t.owner` and `t.collaborators` hold text —
+   an imported plan names people who have never been on the register at all
+   (§50.2) — so being named on a line does NOT block. It is said in the
+   confirmation instead, because the name stays where the plan typed it and
+   somebody should know that before pressing Yes.
+
+   NOTHING IN THE STATE GRAPH RECORDS WHO ENTERED A FIGURE. The register's own
+   note has promised that since §16.11 and it has never been true: what exists
+   is `change_log` (§42), which is OUTSIDE the state graph and is deliberately
+   NOT purged — a log that forgets who did something is not a log. The purge is
+   the door: credentials, sessions, the BU declaration and any failed sign-ins
+   go with the row, server-side, or a key minted again from the same name would
+   inherit the deleted person's password (see lib/state-io.js). */
+function personBlock(short, full){ return { short:short, full:full }; }
+function personDeleteBlockers(key){
+  var out = [], p = personBy(key);
+  if (!p) return [personBlock("unknown", "no such person")];
+
+  /* A GRANTED role, never a derived one. Contributor and Employee are read off
+     `p.unit` and off being named (§55) — they are not pointers, they go with
+     the row, and refusing on them would refuse every attached person. */
+  var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
+  if (held.length) out.push(personBlock(
+    plural(held.length, "role"),
+    plural(held.length, "role") + " still held (" +
+    held.map(function(r){ return roleName(r.role) + " · " + roleWhereLabel(r.at); }).join(", ") +
+    ") — take each one off with its × first"));
+
+  var sets = setsList().filter(function(s){ return s.owner === key; })
+                       .map(function(s){ return s.name; });
+  if (sets.length) out.push(personBlock(
+    plural(sets.length, "figure set"),
+    plural(sets.length, "figure set") + " owned (" + sets.join(", ") +
+    ") — hand each one to somebody else on Setup → Figure sets"));
+
+  var figs = [];
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    reportItems(u).forEach(function(x){
+      if (x.obj && x.obj.src && x.obj.src.by === key) figs.push(u.name + " · " + x.obj.name);
+    });
+  });
+  if (figs.length) out.push(personBlock(
+    plural(figs.length, "figure"),
+    plural(figs.length, "figure") + " they enter (" + figs.join(", ") +
+    ") — clear the naming on that unit’s Strategy → Who enters"));
+
+  var claims = claimsList().filter(function(c){ return c.by === key && c.state === "open"; });
+  if (claims.length) out.push(personBlock(
+    plural(claims.length, "open request"),
+    plural(claims.length, "open request") + " for a figure — answer them on the " +
+    "cycle page first, so the request is not left pointing at nobody"));
+
+  return out;
+}
+
+/* What goes with the row, so the confirmation can say it rather than asking
+   somebody to trust a button (§62, §49.2). Two of these are NOT data the
+   platform holds — they are the door — and saying so is the point: deleting a
+   person is what makes their password and their open sessions stop existing. */
+function personDeleteTakes(key){
+  var p = personBy(key), out = [];
+  if (!p) return out;
+  /* NO ITEM MAY CONTAIN THE WORD "and". The confirmation joins these into one
+     sentence, and an item that carries its own conjunction produces "their
+     password and their sessions and anything they said" — read on screen
+     before it was read in the source. */
+  out.push("their row on the register");
+  out.push("their password");
+  out.push("any sessions they have open");
+  out.push("anything they said about where they work");
+  return out;
+}
+
+/* Where the plan still types their NAME after the row has gone. Not a blocker
+   — the plan is text and an imported one names people who were never on the
+   register — but the confirmation says how many, because "deleted" reading as
+   "scrubbed from the plan" is the wrong expectation to leave somebody with. */
+function personNamedLines(key){
+  var p = personBy(key);
+  if (!p) return 0;
+  var n = 0;
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    reportItems(u).forEach(function(x){
+      if (SMPRules.namedOn({ owner:x.owner, collaborators:x.collaborators }, p)) n++;
+    });
+  });
+  return n;
+}
+
+/* Blockers are re-asked HERE and never trusted from the render that drew the
+   button (§62, §48.2): a repaint can happen between the two, and a delete
+   authorised by a stale screen is the one that takes a unit's head with it. */
+function deletePerson(key){
+  if (personDeleteBlockers(key).length) return false;
+  var i = -1;
+  PEOPLE.forEach(function(p, n){ if (p.key === key) i = n; });
+  if (i < 0) return false;
+  PEOPLE.splice(i, 1);
+  return true;
 }
 
 /* Where a role can be attached, for the second half of the picker. A role
@@ -7381,7 +7617,7 @@ function fnDeleteBlockers(fk){
   if (here.length) out.push(fnBlock(
     plural(here.length, "person", "people") + " attached",
     plural(here.length, "person", "people") + " attached here (" +
-    here.join(", ") + ") \u2014 move them on Setup \u2192 People"));
+    here.join(", ") + ") \u2014 move them on Setup \u2192 People register"));
 
   var mb = (GROUP.mainbus || []).filter(function(b){
     return mainbuAts(b).indexOf("fn:" + fk) > -1;
@@ -7601,6 +7837,42 @@ function canSpeakFor(target){
            grantAt("k_report", t) === "edit";
   }
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
+}
+
+/* ── THE DOT ON THE PERFORMANCE TAB HAS TO MEAN SOMETHING (§69.9) ──
+   It was `.tabs button.primary::before` — painted on whichever tab is the
+   landing page, always, on every destination. So it said "this is the regular
+   view", which the tab being first already says, and it looked exactly like
+   the marks the rest of the platform uses for something outstanding.
+
+   Islam: "bring the orange dot beside it in case of an open cycle for
+   reporting that hasn't been submitted yet. if not just keep it without the
+   dot." So it becomes a state rather than a decoration, and the state is one
+   sentence: THIS SUBJECT owes a submission, and you are somebody who could
+   make it.
+
+   THREE THINGS IT IS DELIBERATELY NOT:
+   · Not the group's and not a company's. Neither submits — a company carries
+     no strategy of its own (§68) and the group's cycle is the thing being
+     submitted TO — so "has not submitted" is not a state they can be in, and a
+     dot there would have to mean something else. One dot, one meaning.
+   · Not "somebody, somewhere, has not submitted". That is the SMO's board on
+     the group's Performance page, which says it in full; a dot cannot.
+   · Not shown to a reader. canSpeakFor() is the same question the Submit
+     button asks (§50.4) — asking it differently here is how a screen comes to
+     nag somebody who has no control that would clear it. */
+function reportPending(target){
+  if (!REVIEW || REVIEW.state !== "open") return false;
+  var t = String(target || "");
+  if (t === "group" || t.indexOf("co:") === 0) return false;
+  /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
+     resolved in ONE place. A function that plans in projects still submits —
+     it is `unitLike()` that has nothing unit-shaped to return for it, not the
+     cycle — so this checks the thing EXISTS rather than what shape it has. */
+  var real = t.indexOf("fn:") === 0 ? !!FUNCTIONS[t.slice(3)] : !!UNITS[t];
+  if (!real) return false;
+  if (REVIEW.submitted && REVIEW.submitted[t]) return false;
+  return canSpeakFor(t);
 }
 
 /* ── The source of a figure (§16.7) ────────────────────────────────
@@ -9573,12 +9845,18 @@ var PAGE_INFO = {
     ]
   },
   k_found: {
-    title: "Capability \u2014 Foundation",
+    title: "Function \u2014 Overview",
     body: [
+      ["Why this is not called Foundation",
+       "A foundation is a business unit's: clauses, an aspiration, a SWOT. A supporting function " +
+       "has none of those \u2014 <b>its foundation is the group's</b> \u2014 so the tab said the one thing " +
+       "the page opens by denying. It is <b>Overview</b> on every function, whichever way that " +
+       "function plans: the two formats are the same product and a label that changed with the " +
+       "format would be a third thing to keep in step."],
       ["What a capability has, and what it does not",
        "A definition and, where it has any, its key objectives. It has no clauses, no aspiration " +
-       "and no SWOT \u2014 <b>its foundation is the group's</b>. That is why a capability's Strategy tab " +
-       "holds two sections against a business unit's three."],
+       "and no SWOT. That is why a function's Strategy tab holds two sections against a business " +
+       "unit's three."],
       ["Why the third column is Weight",
        "A capability's key objectives carry the same optional weighting a unit's do, but they have " +
        "never had a three-year horizon. Same layout as a unit's Foundation, one column different."],
@@ -11999,7 +12277,7 @@ function peopleReadme(){
   var lines = [
     ["People workbook", ""],
     ["", ""],
-    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People."],
+    ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
     ["Matching", "Emp ID is who the row is. A number already on the register updates that person; a new one adds them. A row with no Emp ID is skipped — there is nothing to match it on."],
     ["Adding somebody", "Fill Emp ID and Name. Everything else is optional."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
@@ -12009,7 +12287,7 @@ function peopleReadme(){
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
     ["", ""],
-    ["When you are done", "Save as .xlsx and upload it on Setup → People."]
+    ["When you are done", "Save as .xlsx and upload it on Setup → People register."]
   ];
   return { name:"Read me", widths:[22, 96],
            rows:lines.map(function(l){ return [l[0], l[1]]; }) };
@@ -15968,6 +16246,15 @@ var PCOLS_KEY = "smp.people.columns";
    case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
   { k:"empid",    label:"Emp. ID", off:true },
+  /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
+     name and it was right to: it cost 31 rows a line each to say what the
+     sign-in page already knew. Then the sign-in page stopped knowing — the
+     door asked for it, it was on a hover title and in one prompt, and the SMO
+     could issue a password to somebody who then had no way to discover who
+     they were. Sign-in takes the EMAIL now, so this is a diagnostic rather
+     than the thing everybody needs: a column you can turn on when somebody
+     cannot get in, and nothing at all until then. */
+  { k:"key",      label:"Sign-in name", off:true },
   { k:"title",    label:"Job title" },
   { k:"mainbu",   label:"Official BU" },
   /* "Unit", not "BU" (Islam, §65). The column holds a business unit, a
@@ -16093,25 +16380,64 @@ function renderPeople(){
               ? '<button class="rolemore on" data-proles="" title="Show fewer" ' +
                 'aria-label="Show fewer roles">&lsaquo;</button>'
               : ''))
-      : '<span class="pill none">No role</span>';
+      /* NO "NO ROLE" PILL WHILE THE PICKER IS OPEN (Islam, 2026-08-24):
+         "remove the no role pill now I'm editing". It is a READING state — it
+         answers "what does this person hold" for somebody scanning the
+         register — and while the two dropdowns are on screen the answer is
+         being typed, not read. */
+      : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
     if (!editable) return held;
+    /* ── HALF THE PICKER. The other half is in the Unit column ────────
+       Islam: "keep the unit selection in the unit and keep the role selection
+       in the role so I can choose both but each in it's right placement."
+
+       Right, and the old control was the giveaway: it opened a role select AND
+       a where select inside the Roles cell, so the Unit column sat empty
+       beside a dropdown naming a unit. One control spanning two columns is a
+       control that belongs in neither.
+
+       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
+       × is already a selection somebody can take back (§62's "the refusal is
+       where the confirmation would be", turned round: the undo is where the
+       confirmation would be). So the role is granted the moment BOTH halves
+       have been chosen — which is why both start on a blank "Choose…" option
+       rather than pre-selected: a picker that commits on its own must never
+       commit something nobody picked. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
-        ? '<span class="roleadd">' +
-            '<select class="fld" data-prole-pick="' + p.key + '">' +
-              ROLES.map(function(r){
-                return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
-                  '>' + esc(r.name) + '</option>';
-              }).join("") + '</select>' +
-            '<select class="fld" data-prole-where="' + p.key + '">' +
-              roleWheres(ADDROLE_KIND).map(function(w){
-                return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
-              }).join("") + '</select>' +
-            '<button class="linkbu" data-prole-add="' + p.key + '">Give</button>' +
-            '<button class="linkbu" data-prole-cancel="1">Cancel</button>' +
-          '</span>'
+        ? '<select class="fld rolepick" data-prole-pick="' + p.key + '" ' +
+            'aria-label="Which role to give ' + esc(p.name) + '">' +
+            '<option value=""' + (ADDROLE_KIND ? "" : " selected") + '>Choose a role\u2026</option>' +
+            ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
+              return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
+                '>' + esc(r.name) + '</option>';
+            }).join("") + '</select>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
+  }
+
+  /* The second half, drawn in the Unit column and nowhere else. It is only
+     ever present while a role is being given, and it is EMPTY until a role has
+     been picked, because which places are offered depends on which role it is:
+     a company CEO is seated at a company, a function head at a function, and
+     one combined list would offer Company CEO of Mobile (§35). */
+  function roleWhereCell(p){
+    if (ADDROLE !== p.key) return "";
+    if (!ADDROLE_KIND) {
+      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
+    }
+    var wheres = roleWheres(ADDROLE_KIND);
+    /* A role whose scope is the group has exactly ONE answer, so the control
+       says it rather than offering a list of one — and it is still a select,
+       so choosing it is the same act in the same place either way. */
+    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
+      'aria-label="Where ' + esc(p.name) + ' holds it">' +
+      '<option value="" selected>' +
+        (wheres.length === 1 ? 'Choose ' + esc(wheres[0].label) + '\u2026' : 'Choose where\u2026') +
+      '</option>' +
+      wheres.map(function(w){
+        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
+      }).join("") + '</select>';
   }
 
   /* Read-only, and spelled out rather than leaning on `"" || dash` — an
@@ -16186,6 +16512,13 @@ function renderPeople(){
       acts.push('<hr>');
       acts.push('<button class="danger" data-pact="' + p.key + '">' +
         (personActive(p) ? "Retire this person" : "Restore this person") + '</button>');
+      /* ── DELETE, AND THE REFUSAL IS WHERE THE CONFIRMATION WOULD BE ──
+         §62's shape, because it is the same job on a different table: the
+         entry is always LIVE rather than shown disabled, and pressing it
+         either asks the question or names what is in the way. A disabled item
+         in a menu has nowhere to put the reason — the menu is 240px wide and
+         the reason is a sentence naming a unit and a page (§59). */
+      acts.push('<button class="danger" data-pdel="' + p.key + '">Delete permanently</button>');
     }
     if (!acts.length) return '<td class="cc"></td>';
     return '<td class="cc kebcell">' +
@@ -16195,7 +16528,44 @@ function renderPeople(){
       '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
       '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
       '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
-      (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') + '</td>';
+      (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
+      deletePanel(p) + '</td>';
+  }
+
+  /* The question, or the reason there is no question. It replaces the menu in
+     the same corner, so the second press lands where the first one did — the
+     same placement the clear-plan confirmation uses (§46.2).
+
+     BLOCKERS ARE RE-ASKED ON YES, in deletePerson(), and never trusted from
+     the render that drew this (§48.2). What is drawn here is what to READ;
+     what is enforced is asked again at the moment it matters. */
+  function deletePanel(p){
+    if (PDEL !== p.key) return "";
+    var blockers = personDeleteBlockers(p.key);
+    if (blockers.length) {
+      return '<div class="kmenu kconfirm"><div class="cq">' +
+        /* NO "There is/are" LEAD-IN. It was chosen by how many BLOCKERS there
+           are and the blocker itself opens with a count of its own, so one
+           blocker naming two roles read "There is 2 roles still held". The
+           blockers are sentences; they do not need introducing. */
+        '<b>' + esc(p.name) + ' cannot be deleted.</b> ' +
+        blockers.map(function(b){ return b.full; }).join('; and ') + '.' +
+        ' <b>Retire</b> closes the door and keeps every attribution true.</div>' +
+        '<div class="cbtns"><button data-pdel-no="1">Close</button></div></div>';
+    }
+    var takes = personDeleteTakes(p.key);
+    var named = personNamedLines(p.key);
+    return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>Delete ' + esc(p.name) + ' for good?</b> This takes ' +
+      takes.join(", ").replace(/, ([^,]*)$/, " and $1") + '. It cannot be undone.' +
+      (named
+        ? ' Their name stays where the plan types it (' + plural(named, "line") +
+          ') \u2014 those are text, not a link to this row.'
+        : '') +
+      '</div><div class="cbtns">' +
+        '<button data-pdel-no="1">No</button>' +
+        '<button class="danger" data-pdel-yes="' + esc(p.key) + '">Yes, delete</button>' +
+      '</div></div>';
   }
 
   /* THREE COLUMNS THAT WRAP, ONE THAT CLIPS, AND THE ACTIONS AT THE END
@@ -16223,6 +16593,12 @@ function renderPeople(){
           '" placeholder="Emp. ID">'
         : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
                    : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      /* READ-ONLY WHEREVER IT APPEARS, including in edit mode. The key is
+         minted (§35) and it is what `credentials` and `sessions` are keyed on
+         — retyping it would leave a person whose password and open sessions
+         belong to a key nobody holds. It is shown so somebody can be TOLD it,
+         not so it can be changed. */
+      (showCol("key") ? '<td><span class="mono">' + esc(p.key) + '</span></td>' : '') +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
@@ -16254,7 +16630,13 @@ function renderPeople(){
             ? '<span class="why" style="margin:0">&mdash; the list says ' +
               esc(whereLabel(drift)) + '</span>'
             : '<span class="why" style="margin:0">&mdash;</span>')) +
-        saidWhereNote(p, editable) + '</td>' : '') +
+        saidWhereNote(p, editable) +
+        /* The role picker's second half (§69). It sits UNDER what the cell
+           already says rather than replacing it: where somebody sits and where
+           a role reaches are two different facts (§46.4), and a picker that
+           hid the first while choosing the second would be asking the question
+           with the answer covered up. */
+        roleWhereCell(p) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -16302,6 +16684,30 @@ function renderPeople(){
      resetting everybody and the SMO would otherwise have locked themselves out
      of their own deployment, with no second SMO to ask. */
   var activeCount = PEOPLE.filter(personActive).length;
+
+  /* ── WHAT WOULD STOP SOMEBODY SIGNING IN (§69.11) ──────────────────
+     Sign-in takes the email address on the register, so two register facts
+     became access facts the day that changed, and the SMO has no other way to
+     see either. Both are counted over ACTIVE people only: a retired person is
+     turned away at the door whatever their address says (§35), so counting
+     them would be reporting a problem that is not one.
+
+     THE DUPLICATE IS THE ONE THAT NEEDS SAYING HERE. The door tells the person
+     stuck that their address is on two rows, at Islam's direction — but they
+     cannot fix it, and nothing else in the platform would ever show the SMO
+     which two rows they are. `addrRows` is a map of address to names, so the
+     chip's title can name them rather than just count them. */
+  var addrRows = {};
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var a = String(p.email == null ? "" : p.email).trim().toLowerCase();
+    if (!a) return;
+    (addrRows[a] = addrRows[a] || []).push(p.name);
+  });
+  var dupAddr = Object.keys(addrRows).filter(function(a){ return addrRows[a].length > 1; });
+  var noEmail = PEOPLE.filter(function(p){
+    return personActive(p) && !String(p.email == null ? "" : p.email).trim();
+  }).length;
 
   /* ── THE TWO HEADER MENUS (§47.2) ──────────────────────────────────
      Islam: "the options of password reset needs to be in the top right page —
@@ -16361,6 +16767,14 @@ function renderPeople(){
   /* The explanation stays; the CONTROLS moved to the header. A note that
      carries buttons is a second place to press them. */
   var bulk = !live ? "" :
+    /* WHAT PEOPLE TYPE AT THE DOOR IS A FACT ABOUT THIS TABLE (§69.11), so it
+       is said here rather than only on the sign-in page — this is the screen
+       the SMO is on when somebody phones to say they cannot get in. */
+    '<div class="note"><b>People sign in with the email address on this ' +
+      'register.</b> Somebody with no address can still sign in with the name in ' +
+      'the <i>Sign-in name</i> column, which is off by default under <i>Columns</i>. ' +
+      'One address on two rows says who nobody is, so the door refuses both until ' +
+      'the register is corrected.</div>' +
     '<div class="note"><b>Passwords are issued from <i>Passwords</i>, above.</b> ' +
       'Each person is asked to choose their own the first time they use the one you ' +
       'issue, so the same password never works twice for the same person. Resetting ' +
@@ -16368,16 +16782,37 @@ function renderPeople(){
       'because being signed out of the screen you are working in is not a safety ' +
       'feature.</div>';
 
-  return cfgHead("People",
+  /* PEOPLE REGISTER, not People (Islam, 2026-08-24). The page has been called
+     "the register" in every sentence written about it since §35; the heading
+     said something else, so the word people use and the word on the door were
+     different words. */
+  return cfgHead("People register",
       ['<span class="pill kind">SMO</span>',
        plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
         retired ? [retired + ' retired'] : []).concat(
-        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []),
+        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []).concat(
+        /* A count with no title is a count somebody has to go looking for.
+           Both name the rows, because both are fixed by editing exactly those
+           rows and nothing else on the page points at them. */
+        noEmail ? ['<span class="pill warn" title="Sign-in takes the email address on ' +
+          'this register. Somebody with none can still sign in with the name in the ' +
+          'Sign-in name column — turn it on under Columns.">' + noEmail +
+          ' with no email</span>'] : []).concat(
+        dupAddr.length ? ['<span class="pill bad" title="' + esc(dupAddr.map(function(a){
+            return a + ": " + addrRows[a].join(", ");
+          }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
+          ' on more than one row</span>'] : []),
       "people", mayEdit, null, null, colMenu + pwMenu) +
 
-    section("", "The register",
-      "Everyone the platform knows. A role is given here or on the unit's own page — " +
-      "it is the same fact either way, so the two can never disagree.",
+    /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
+       own heading now reads "People register" two lines above, so a section
+       called "The register" restated it — §28's rule about an empty header
+       spending its line, with the header full of a word that was already
+       said. The sentence under it explained the MODEL (a role is one fact
+       with two editing surfaces), and the knowledge base is where the model
+       lives (§30). */
+    section("", "",
+      "",
       /* NO COLUMN WIDTHS, and no table-layout:fixed (see .peoplecfg in
          config.css). Islam: "the first column of the name needs to wrap
          around the name length" — the column fits the name, rather than the
@@ -16390,6 +16825,7 @@ function renderPeople(){
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
         (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
+        (showCol("key")      ? '<th>Sign-in name</th>' : '') +
         (showCol("title")    ? '<th>Job title</th>'  : '') +
         (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
         (showCol("bu")       ? '<th>Unit</th>'       : '') +
@@ -16400,10 +16836,17 @@ function renderPeople(){
         '<th class="cc"></th>' +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
       bulk +
-      '<div class="note"><b>People are retired, never deleted.</b> Snapshots name whoever ' +
-      'entered a figure, so removing the row would turn a closed cycle into one nobody ' +
-      'reported. Retiring takes away every role they hold and closes the door — they ' +
-      'cannot sign in — while everything already attributed to them stays true.</div>') +
+      /* THE NOTE HAD TO CHANGE WITH THE FEATURE (§69). It said "People are
+         retired, never deleted", which stopped being true the moment Delete
+         permanently existed — and a page that describes a rule it no longer
+         keeps is worse than one that says nothing. What survives is the
+         REASON: retiring is still the right answer for anybody who was really
+         here, and the delete is for the rows that never were. */
+      '<div class="note"><b>Retire somebody who has left; delete a row that should ' +
+      'never have existed.</b> Retiring takes away every role they hold and closes the ' +
+      'door — they cannot sign in — while everything already attributed to them stays ' +
+      'true. Deleting takes the row, the password and the open sessions, and is refused ' +
+      'while anything still points at the person — the refusal names what.</div>') +
 
     renderPeopleFile(mayEdit);
 }
@@ -18732,14 +19175,33 @@ function openDeckFn(fk){
 function closeDeck(){
   var root = document.getElementById("deckroot");
   root.classList.remove("on");
+  /* Both fullscreen classes go with it. `fullscreenchange` would clear them
+     too, but only if the deck was in fullscreen — leaving `peek` set on a deck
+     closed from windowed mode means the NEXT fullscreen opens with the bar
+     already showing and no move to explain it. */
+  root.classList.remove("fs", "peek");
+  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
   document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
-   open, so the deck never reflows while it is being presented. */
-function deckFitPass(){
-  var deck = document.querySelector("#deckroot .deck");
+   open, so the deck never reflows while it is being presented.
+
+   TAKES THE DECK IT IS FITTING (§69.5). It read `#deckroot .deck` off the
+   document, so it could only ever fit the deck that was being PROJECTED — and
+   Manage slides assembles its own copy, which is why the editor showed the one
+   thing the whole mode exists to prevent: a slide overflowing its box, and a
+   long table stopping at the bottom edge instead of continuing. The default
+   keeps every existing caller unchanged.
+
+   IT MEASURES, so whatever is passed has to be IN THE DOCUMENT and laid out
+   at 1600x900: `scrollHeight` and `clientHeight` on a detached element are
+   both 0, and 0 > 0 is false — so a detached deck is reported as fitting
+   perfectly, every slide, every time. That is §50.3's detached-render trick
+   used for the one job it cannot do. */
+function deckFitPass(deck){
+  deck = deck || document.querySelector("#deckroot .deck");
   var all = deck.querySelectorAll(".dslide");
   [].forEach.call(all, function(s){
     s.classList.add("on");
@@ -18798,6 +19260,28 @@ function deckShow(n){
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
 }
 /* Scale the fixed stage into whatever room there is. */
+/* Show the bar, then take it away again after a pause. Only in fullscreen —
+   everywhere else it is simply always there, and a timer running against a
+   class that does nothing is a timer somebody will one day wonder about.
+
+   The timer is cleared before it is set, or a mouse moving continuously leaves
+   one pending timeout per event and the bar hides on the first of them. */
+var DECKPEEK = null;
+function deckPeek(hideNow){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("fs")) return;
+  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
+  if (hideNow) { root.classList.remove("peek"); return; }
+  root.classList.add("peek");
+  DECKPEEK = setTimeout(function(){
+    DECKPEEK = null;
+    var r = document.getElementById("deckroot");
+    /* Never pull it out from under the pointer: a bar that vanishes as you
+       reach for Exit is worse than one that never appeared. */
+    if (r && !r.querySelector(".deckbar:hover")) r.classList.remove("peek");
+  }, 2200);
+}
+
 function deckScale(){
   var root = document.getElementById("deckroot");
   var deck = root.querySelector(".deck");
@@ -18825,11 +19309,37 @@ function wireDeck(){
     var box = ev.target.closest("[data-deckunote]");
     if (box) REVIEW.note[box.dataset.deckunote] = box.textContent;
   });
+  /* Any of the three ways somebody reaches for the controls. `pointermove`
+     covers mouse and pen; a touch is a `pointerdown` that never moves; and the
+     keyboard has to be able to summon it too, or a presenter driving the deck
+     by arrow keys can never see where they are. */
+  root.addEventListener("pointermove", function(){ deckPeek(false); });
+  root.addEventListener("pointerdown", function(){ deckPeek(false); });
   addEventListener("resize", deckScale);
-  addEventListener("fullscreenchange", deckScale);
+  /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
+     The class is set from the EVENT rather than from the button, because
+     fullscreen can be left by pressing Escape or by the browser deciding — and
+     a state kept by whoever pressed the control is a state that is wrong every
+     other way in. `document.fullscreenElement === root` rather than a
+     truthiness test: another element on the page going fullscreen must not
+     take this deck's bar away.
+
+     deckScale() runs after the class, or it measures the stage at its old
+     inset and scales the deck to the box it is about to stop being. */
+  addEventListener("fullscreenchange", function(){
+    var root = document.getElementById("deckroot");
+    root.classList.toggle("fs", document.fullscreenElement === root);
+    root.classList.remove("peek");
+    deckPeek(true);
+    deckScale();
+  });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
+    /* Driving the deck from the keyboard shows the bar too — otherwise a
+       presenter using the arrows in fullscreen has no way to see which slide
+       they are on, and the counter is the one thing the bar is FOR. */
+    deckPeek(false);
     if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); deckShow(DECK.i + 1); }
     if (ev.key === "ArrowLeft") deckShow(DECK.i - 1);
     if (ev.key === "Home") deckShow(0);
@@ -19058,15 +19568,61 @@ var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
    to across a repaint: a picture slide by its own id, a generated slide by its
    running position among the generated ones — which does not move when a
    picture slide is added above it. */
+/* ── THE EDITOR ASSEMBLES THE SAME DECK THE PROJECTOR DOES (§69.5) ──────
+   It did not, and three of Islam's complaints about Manage slides were one
+   cause: content overflowed its slide, the unit's lockup was missing from
+   every footer, and a long table simply ran off the bottom instead of
+   continuing. All three are steps openDeckWith() runs and this did not —
+   deckFootMarks() and deckFitPass() — so the rail and the stage were showing a
+   deck nobody would ever project. The mode exists to show you the real slide
+   at one tenth (§51.8); it was showing an unfinished one.
+
+   THE BOX HAS TO BE IN THE DOCUMENT, and that is the whole reason this was
+   easy to miss. `deckFitPass()` decides by measuring — `s.scrollHeight >
+   s.clientHeight` — and both are 0 on a detached element, so a detached deck
+   reports every slide as fitting and the pass silently does nothing. §50.3
+   renders the deck detached to read its anchors out, which is fine for reading
+   markup and useless for reading a height.
+
+   So it goes into a host that is a real `.deck`: 1600x900, laid out, and
+   parked off-screen with `left:-99999px` rather than hidden — `display:none`
+   has no layout and `visibility:hidden` still keeps the box, but off-screen is
+   the one that is unambiguously measurable (§3.2's lesson from the other end).
+   `inert` and `aria-hidden`, because a full deck of slides in the accessibility
+   tree behind the editor is a screen reader walking the whole review twice. */
 function slidesAssemble(){
+  var host = document.createElement("div");
+  host.className = "slmeasure";
+  host.setAttribute("aria-hidden", "true");
+  host.inert = true;
   var box = document.createElement("div");
-  box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
-  insertPictureSlides(box, SLED.target, true);
-  var g = 0;
-  [].forEach.call(box.querySelectorAll(".dslide"), function(el){
-    var id = el.getAttribute("data-ps");
-    el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
-  });
+  box.className = "deck";
+  host.appendChild(box);
+  document.body.appendChild(host);
+  try {
+    box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
+    insertPictureSlides(box, SLED.target, true);
+    /* The same order openDeckWith() uses, and the order matters both ways:
+       AFTER the picture slides so a custodian's own slide is footed too, and
+       BEFORE the fit pass so a slide it splits carries the footer into every
+       continuation (§52.9). */
+    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
+      deckFootMarks(box, UNITS[SLED.target]);
+    }
+    deckFitPass(box);
+    /* The keys are minted AFTER the fit pass, or a continuation slide it mints
+       carries a clone of its parent's `data-ed` — two rows in the rail with one
+       key, so selecting the second selects the first and the arrows stick. */
+    var g = 0;
+    [].forEach.call(box.querySelectorAll(".dslide"), function(el){
+      var id = el.getAttribute("data-ps");
+      el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
+    });
+  } finally {
+    /* Detached before it is read from, so a failure anywhere above cannot
+       leave a full deck parked in the document for the rest of the session. */
+    host.remove();
+  }
   return box;
 }
 /* A heading carries its own kicker inside it (`.dwhich` — "Key measures",
@@ -19543,7 +20099,51 @@ function wireSlides(){
       return;
     }
     if (ev.key === "Escape") slidesClose();
+    /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
+       Islam: "allow the arrows up and down so I can navigate the slides while
+       adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —
+       and ←/→ move with them, because the thing being walked is a DECK and
+       every projector in the world uses those. Home and End for the same
+       reason the projector has them.
+
+       WHICH ARROW-KEY DEFAULT THIS TAKES OVER IS THE WHOLE CARE HERE. The
+       guard above already leaves an <input> and anything contenteditable
+       alone, and a `<select>` and a `<textarea>` need the same courtesy — a
+       picture slide's controls carry both, and stealing ↓ from an open
+       dropdown is how a keyboard user loses the ability to choose anything.
+       So the keys are taken only when focus is on nothing that reads them. */
+    if (SLIDE_ARROWS[ev.key] && !slidesTyping(ev.target)) {
+      ev.preventDefault();
+      slidesStep(SLIDE_ARROWS[ev.key]);
+    }
   });
+}
+
+/* -1 / +1 / the ends. Written as a map rather than a chain of ifs so the set
+   of keys is one thing to read and one thing to change. */
+var SLIDE_ARROWS = { ArrowDown:1, ArrowRight:1, ArrowUp:-1, ArrowLeft:-1,
+                     PageDown:1, PageUp:-1, Home:"first", End:"last" };
+function slidesTyping(el){
+  if (!el) return false;
+  if (el.isContentEditable) return true;
+  var t = (el.tagName || "").toUpperCase();
+  return t === "INPUT" || t === "TEXTAREA" || t === "SELECT";
+}
+/* The rail's OWN order, read off the rail rather than recomputed. Assembling
+   the deck again to answer "what is next" is a second copy of the list — and
+   the rail is what the person is looking at, so it is the list that has to be
+   right (§51.8: the rail IS the deck). */
+function slidesStep(how){
+  var rows = [].slice.call(document.querySelectorAll("#slidelist [data-slgo]"));
+  if (!rows.length) return;
+  var keys = rows.map(function(r){ return r.dataset.slgo; });
+  var i = keys.indexOf(SLED.sel);
+  var next = how === "first" ? 0
+           : how === "last"  ? keys.length - 1
+           : Math.max(0, Math.min(keys.length - 1, (i < 0 ? 0 : i) + how));
+  if (keys[next] === SLED.sel) return;   /* at an end: nothing to repaint */
+  SLED.sel = keys[next];
+  slidesPaint();
 }
 
 /* The button that opens it, beside Present. It carries the count, because the
@@ -20298,18 +20898,46 @@ var SYNC = (function () {
        two. Reporting is not a page you visit: it is what a cycle asks of you
        for two weeks a quarter, so it appears inside Performance and leaves
        again. See \u00a715.10. */
+    /* STRATEGY FIRST, THEN PERFORMANCE (Islam, 2026-08-24). §28's argument
+       stands and this is the row catching up with it: what was agreed is what
+       people come to read, and the score is a consequence of it — which is
+       already why a unit and a function both OPEN on their plan. The row said
+       the opposite, left to right.
+
+       `primary` stays on Performance and keeps its own job, which is not
+       order: it names the page a destination lands on when nothing else has
+       been chosen, and §28 answers that separately (see the landing rules
+       below). Order is the array. */
     fn: [
-      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
-        render: function(k){
-          return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
-        } },
       { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
           /* PLAN, not Projects, when the function plans in pillars — the tab
              has to say what is behind it (spec 010). */
-          return [{ k:"found", ac:"k_found", label:"Foundation", render:renderFnFoundation },
+          /* OVERVIEW, NOT FOUNDATION (Islam, 2026-08-24): "the word foundation
+             is confusing, the capability doesn't have a foundation it's called
+             Overview" — and, asked about the other kind: "the function that
+             plans in pillars has overview as well. the foundation is only for
+             business units."
+
+             Which the page had already been saying in prose for versions: a
+             capability has no clauses, no aspiration and no SWOT, and its
+             foundation IS the group's (§15.1). A tab called Foundation over a
+             page whose first sentence is "there is no foundation here" is the
+             label arguing with the content. FOUNDATION IS A BUSINESS UNIT'S
+             WORD; a function gets Overview whichever way it plans, because the
+             two formats are the same product (§53.5) and a label that changed
+             with the format would be a third thing to keep in step.
+
+             The KEY stays `found` and the access key stays `k_found`: renaming
+             either would lose every stored preference and every grant pointing
+             at it, for a word (§65, the same rule as `bu`). */
+          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
                   { k:"proj",  ac:"k_proj",
                     label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
                     render:renderFnProjects }];
+        } },
+      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, dot:true,
+        render: function(k){
+          return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
         } }
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
@@ -20331,16 +20959,6 @@ var SYNC = (function () {
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
     ],
     unit: [
-      /* PERFORMANCE IS A RESULT OF REPORTING (§63), so it is one page and not
-         two sibling sections repeating the tab's own word. Reporting is a MODE
-         you enter from it with the Report button and leave again with Cancel —
-         which is what it always was for two weeks a quarter (§15.10), now said
-         in the navigation instead of in a comment. REPORTING holds the TARGET
-         rather than a boolean, so it can never open somebody else's report. */
-      { k:"performance", ac:"u_perf", label:"Performance", primary:true,
-        render: function(u){
-          return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
-        } },
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
           /* Spec 008 §3B. A SECTION of Strategy, not a Setup page: a
              custodian holds no Setup at all, so a Setup page would be
@@ -20352,6 +20970,16 @@ var SYNC = (function () {
                   { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
+        } },
+      /* PERFORMANCE IS A RESULT OF REPORTING (§63), so it is one page and not
+         two sibling sections repeating the tab's own word. Reporting is a MODE
+         you enter from it with the Report button and leave again with Cancel —
+         which is what it always was for two weeks a quarter (§15.10), now said
+         in the navigation instead of in a comment. REPORTING holds the TARGET
+         rather than a boolean, so it can never open somebody else's report. */
+      { k:"performance", ac:"u_perf", label:"Performance", primary:true, dot:true,
+        render: function(u){
+          return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
         } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
@@ -20367,7 +20995,7 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People",   primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", label:"People register", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
@@ -21092,9 +21720,26 @@ var SYNC = (function () {
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
     document.getElementById("tabrow").hidden = railed;
+    /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
+       `.primary`, which is the LANDING PAGE and nothing else — so it was
+       painted on every destination all the time. It now belongs to the tab
+       whose page is where the outstanding report is answered, and only while
+       there is one: reportPending() is the one place that decides.
+
+       `dot` rather than more `primary`, because the two facts are unrelated
+       and one class carrying both is how the dot came to mean nothing. It
+       paints to the RIGHT (Islam), which is also where it belongs — a mark
+       AFTER the word annotates it; a mark before it is a bullet. */
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
-      return '<button role="tab" data-s="' + d.k + '"' + (d.primary ? ' class="primary"' : '') +
-        ' aria-selected="' + (d.k === currentSub) + '">' + d.label + '</button>';
+      var cls = (d.primary ? "primary" : "") +
+        (d.dot && reportPending(TARGET) ? " dot" : "");
+      return '<button role="tab" data-s="' + d.k + '"' +
+        (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
+        ' aria-selected="' + (d.k === currentSub) + '">' + d.label +
+        (d.dot && reportPending(TARGET)
+          ? '<i class="tabdot" aria-hidden="true"></i>' +
+            '<span class="vh"> \u2014 not submitted yet</span>'
+          : '') + '</button>';
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
@@ -22391,6 +23036,40 @@ var SYNC = (function () {
       });
     });
 
+    /* ── DELETING A PERSON FOR GOOD (§69) ───────────────────────────
+       Opening the question CLOSES the menu it came from: positionRowMenu()
+       places `document.querySelector(".kmenu")` — the first one — so two of
+       them in one cell would leave the second unplaced at the top-left of the
+       window. One panel open at a time, which is what the state shape already
+       says (PMENU and PDEL are single keys, not flags per row).
+
+       Cleared AFTER the action in every branch, never before: closing it first
+       unmounts the button the click is still inside (§47.2). */
+    document.querySelectorAll("[data-pdel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        PDEL = b.dataset.pdel; PMENU = null; paint();
+      });
+    });
+    document.querySelectorAll("[data-pdel-no]").forEach(function(b){
+      b.addEventListener("click", function(){ PDEL = null; paint(); });
+    });
+    document.querySelectorAll("[data-pdel-yes]").forEach(function(b){
+      b.addEventListener("click", function(){
+        /* deletePerson() re-asks the blockers and refuses on its own (§48.2).
+           This does not check them again — two copies of "may this be deleted"
+           is exactly the drift the one function exists to prevent — it reads
+           the ANSWER, and says so when the answer is no. */
+        var key = b.dataset.pdelYes, p = personBy(key), name = p ? p.name : key;
+        var done = deletePerson(key);
+        PDEL = null;
+        paint();
+        if (!done) {
+          alert(name + " could not be deleted \u2014 something has come to point at " +
+                "them since this was asked. Open the menu again to see what.");
+        }
+      });
+    });
+
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
@@ -22412,27 +23091,39 @@ var SYNC = (function () {
       b.addEventListener("click", addTypedPerson);
     });
 
+    /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
+       It opens EMPTY. Before this it opened on "owner", so a picker somebody
+       opened by mistake was already holding an answer — which was harmless
+       while a Give button stood between it and the grant, and is not now that
+       choosing both halves IS the grant. */
     document.querySelectorAll("[data-prole-open]").forEach(function(b){
       b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = "owner"; paint();
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; paint();
       });
-    });
-    document.querySelectorAll("[data-prole-cancel]").forEach(function(b){
-      b.addEventListener("click", function(){ ADDROLE = null; paint(); });
     });
     /* Choosing the role repaints, because the SECOND select's options depend
        on the first: a company CEO is attached to a company, a function head to
        a function. One list of every role-times-place would offer Company CEO
-       of Mobile. */
+       of Mobile. Emptying it back to "Choose a role…" empties the other half
+       with it, rather than leaving a unit list standing under no role. */
     document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
       sel.addEventListener("change", function(){ ADDROLE_KIND = sel.value; paint(); });
     });
-    document.querySelectorAll("[data-prole-add]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var key = b.dataset.proleAdd;
-        var where = document.querySelector('[data-prole-where="' + key + '"]');
-        grantPersonRole(key, ADDROLE_KIND, where ? where.value : "group");
-        ADDROLE = null;
+    /* NO GIVE BUTTON. The pair commits itself the moment the second half is
+       answered — Islam: "without give or cancel … eventually it's a selection
+       that I can remove after with the x button you made."
+
+       Which is why it is guarded on BOTH halves rather than on this one: a
+       change event on the where select can only fire after a role was picked,
+       but ADDROLE_KIND is a global that a repaint between the two could have
+       cleared, and granting `undefined` at a unit writes a role nothing can
+       name and nothing can take off. */
+    document.querySelectorAll("[data-prole-where]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var key = sel.dataset.proleWhere;
+        if (!sel.value || !roleIsGrantable(ADDROLE_KIND)) return;
+        grantPersonRole(key, ADDROLE_KIND, sel.value);
+        ADDROLE = null; ADDROLE_KIND = "";
         paint();
       });
     });

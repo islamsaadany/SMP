@@ -698,14 +698,22 @@
         <p>Sign in to continue</p>
         <form id="loginForm">
           <label id="accessLabel" for="password">Access</label>
-          <!-- Served with a database behind it, sign-in is a real account (a
-               person key issued by the SMO). Without one — the local file, or
-               static hosting — the original AdminSMO gate stands. -->
+          <!-- Served with a database behind it, sign-in is a real account.
+               THE EMAIL ADDRESS ON THE REGISTER (§69.11), not the person key:
+               the key is minted from the name and appears in two places
+               nobody looks, so the one string the door accepted was the one
+               string nobody had. The key still works — the bootstrap SMO has
+               no email — which is why this is `type="text"` rather than
+               `type="email"`: the browser must not refuse to submit a key
+               because it has no @ in it. Without a database — the local file,
+               or static hosting — the original AdminSMO gate stands. -->
           <div class="field" id="userField" hidden>
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.5 7l8.5 6 8.5-6"/>
             </svg>
-            <input type="text" id="user" autocomplete="username" autocapitalize="none" placeholder="Your person key">
+            <input type="text" id="user" autocomplete="username" autocapitalize="none"
+                   inputmode="email" spellcheck="false" placeholder="Your work email">
           </div>
           <div class="access-name" id="fixedAccess">
             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -858,7 +866,16 @@
     loginCard.style.display = which === "login" ? "block" : "none";
     changeCard.style.display = which === "change" ? "block" : "none";
     document.body.classList.add("ready");
-    if (which === "login") passwordEl.focus();
+    /* THE FIRST FIELD THAT IS ACTUALLY THERE (§69.11). This focused the
+       password unconditionally, which was right while the only thing above it
+       was the fixed "AdminSMO" name and wrong the moment sign-in grew an email
+       field: the cursor landed in the second box and somebody typing without
+       looking put their address into the password. Whoever reveals a field
+       decides where the cursor goes — §34's rule, one step on. */
+    if (which === "login") {
+      var first = MODE === "server" ? document.getElementById("user") : passwordEl;
+      first.focus();
+    }
     if (which === "change") { document.getElementById("newpw").focus(); loadWhere(); }
   }
 
@@ -866,7 +883,7 @@
 
      The versioned filename is deliberate — the version IS the cache bust — but
      it has no business being read by a person: Islam saw
-     /SMP-Project-Folder/strategy-management-platform-v3.21.html and asked,
+     /SMP-Project-Folder/strategy-management-platform-v3.22.html and asked,
      fairly, what the rest of it was for. Served, a Vercel rewrite maps the
      tenant's own name onto that file, so the address reads
      <domain>/raya-trade and the repo's shape and the version number stay
@@ -882,7 +899,7 @@
   var HOSTED = location.protocol === "http:" || location.protocol === "https:";
   var PLATFORM = HOSTED
     ? "/" + TENANT
-    : "SMP-Project-Folder/strategy-management-platform-v3.21.html";
+    : "SMP-Project-Folder/strategy-management-platform-v3.22.html";
   function openPlatform() { location.replace(PLATFORM); }
   function fail(el, msg) { el.textContent = msg; el.style.display = "block"; }
   function clearFail(el) { el.style.display = "none"; }
@@ -915,7 +932,12 @@
        unhiding one without the other leaves a lock floating on the page. */
     document.getElementById("userField").hidden = false;
     document.getElementById("fixedAccess").style.display = "none";
-    document.getElementById("accessLabel").setAttribute("for", "user");
+    /* The label says what the field wants. It read "Access", which was true
+       of the AdminSMO name it used to sit over and says nothing about an
+       address (§69.11). */
+    var lab = document.getElementById("accessLabel");
+    lab.setAttribute("for", "user");
+    lab.textContent = "Email";
   }
   function signedIn(person) {
     PERSON = person;

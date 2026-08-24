@@ -823,6 +823,15 @@ var PCOLS_KEY = "smp.people.columns";
    case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
   { k:"empid",    label:"Emp. ID", off:true },
+  /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
+     name and it was right to: it cost 31 rows a line each to say what the
+     sign-in page already knew. Then the sign-in page stopped knowing — the
+     door asked for it, it was on a hover title and in one prompt, and the SMO
+     could issue a password to somebody who then had no way to discover who
+     they were. Sign-in takes the EMAIL now, so this is a diagnostic rather
+     than the thing everybody needs: a column you can turn on when somebody
+     cannot get in, and nothing at all until then. */
+  { k:"key",      label:"Sign-in name", off:true },
   { k:"title",    label:"Job title" },
   { k:"mainbu",   label:"Official BU" },
   /* "Unit", not "BU" (Islam, §65). The column holds a business unit, a
@@ -1161,6 +1170,12 @@ function renderPeople(){
           '" placeholder="Emp. ID">'
         : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
                    : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      /* READ-ONLY WHEREVER IT APPEARS, including in edit mode. The key is
+         minted (§35) and it is what `credentials` and `sessions` are keyed on
+         — retyping it would leave a person whose password and open sessions
+         belong to a key nobody holds. It is shown so somebody can be TOLD it,
+         not so it can be changed. */
+      (showCol("key") ? '<td><span class="mono">' + esc(p.key) + '</span></td>' : '') +
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
@@ -1247,6 +1262,30 @@ function renderPeople(){
      of their own deployment, with no second SMO to ask. */
   var activeCount = PEOPLE.filter(personActive).length;
 
+  /* ── WHAT WOULD STOP SOMEBODY SIGNING IN (§69.11) ──────────────────
+     Sign-in takes the email address on the register, so two register facts
+     became access facts the day that changed, and the SMO has no other way to
+     see either. Both are counted over ACTIVE people only: a retired person is
+     turned away at the door whatever their address says (§35), so counting
+     them would be reporting a problem that is not one.
+
+     THE DUPLICATE IS THE ONE THAT NEEDS SAYING HERE. The door tells the person
+     stuck that their address is on two rows, at Islam's direction — but they
+     cannot fix it, and nothing else in the platform would ever show the SMO
+     which two rows they are. `addrRows` is a map of address to names, so the
+     chip's title can name them rather than just count them. */
+  var addrRows = {};
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var a = String(p.email == null ? "" : p.email).trim().toLowerCase();
+    if (!a) return;
+    (addrRows[a] = addrRows[a] || []).push(p.name);
+  });
+  var dupAddr = Object.keys(addrRows).filter(function(a){ return addrRows[a].length > 1; });
+  var noEmail = PEOPLE.filter(function(p){
+    return personActive(p) && !String(p.email == null ? "" : p.email).trim();
+  }).length;
+
   /* ── THE TWO HEADER MENUS (§47.2) ──────────────────────────────────
      Islam: "the options of password reset needs to be in the top right page —
      check the password reset design in the people erp repo."
@@ -1305,6 +1344,14 @@ function renderPeople(){
   /* The explanation stays; the CONTROLS moved to the header. A note that
      carries buttons is a second place to press them. */
   var bulk = !live ? "" :
+    /* WHAT PEOPLE TYPE AT THE DOOR IS A FACT ABOUT THIS TABLE (§69.11), so it
+       is said here rather than only on the sign-in page — this is the screen
+       the SMO is on when somebody phones to say they cannot get in. */
+    '<div class="note"><b>People sign in with the email address on this ' +
+      'register.</b> Somebody with no address can still sign in with the name in ' +
+      'the <i>Sign-in name</i> column, which is off by default under <i>Columns</i>. ' +
+      'One address on two rows says who nobody is, so the door refuses both until ' +
+      'the register is corrected.</div>' +
     '<div class="note"><b>Passwords are issued from <i>Passwords</i>, above.</b> ' +
       'Each person is asked to choose their own the first time they use the one you ' +
       'issue, so the same password never works twice for the same person. Resetting ' +
@@ -1320,7 +1367,18 @@ function renderPeople(){
       ['<span class="pill kind">SMO</span>',
        plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
         retired ? [retired + ' retired'] : []).concat(
-        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []),
+        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []).concat(
+        /* A count with no title is a count somebody has to go looking for.
+           Both name the rows, because both are fixed by editing exactly those
+           rows and nothing else on the page points at them. */
+        noEmail ? ['<span class="pill warn" title="Sign-in takes the email address on ' +
+          'this register. Somebody with none can still sign in with the name in the ' +
+          'Sign-in name column — turn it on under Columns.">' + noEmail +
+          ' with no email</span>'] : []).concat(
+        dupAddr.length ? ['<span class="pill bad" title="' + esc(dupAddr.map(function(a){
+            return a + ": " + addrRows[a].join(", ");
+          }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
+          ' on more than one row</span>'] : []),
       "people", mayEdit, null, null, colMenu + pwMenu) +
 
     /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
@@ -1344,6 +1402,7 @@ function renderPeople(){
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
         (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
+        (showCol("key")      ? '<th>Sign-in name</th>' : '') +
         (showCol("title")    ? '<th>Job title</th>'  : '') +
         (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
         (showCol("bu")       ? '<th>Unit</th>'       : '') +

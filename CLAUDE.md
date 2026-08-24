@@ -135,7 +135,18 @@ A drift between specs and code is a documentation bug — report it before silen
 
 ### 4. Git Workflow
 - **Development branch:** the session-coded branch you start on (e.g. `claude/adminsmo-access-module-wj89vv`). All work is committed here.
-- **`main`** — production/stable. Merge to main only when work is complete and verified.
+- **`main`** — production/stable.
+- **NEVER MERGE TO MAIN WITHOUT DIRECT CONFIRMATION (NON-NEGOTIABLE).** Work is
+  committed and pushed to the branch; the merge is a separate act that Islam
+  asks for, each time, in that message. "It is done and verified" is not
+  permission, an earlier "merge when it's ready" does not carry forward to the
+  next piece of work, and neither does having merged the last five.
+  *(Added 2026-08-24 at Islam's direction, superseding the earlier standing
+  instruction to merge whenever something was complete so he could check it —
+  recorded rather than overwritten, because eleven merges this session were made
+  under that instruction and were right at the time.)*
+  **Ask, and say what is waiting.** Pushing the branch is what makes it
+  reviewable; merging is what makes it live.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
 - **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and

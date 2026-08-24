@@ -144,6 +144,11 @@ can run is a check that skips in silence while the suite reports green.
   definition.
 - The navigation owns `.units`, `.tabs` and `.prow` — prefix new component
   classes.
+- **Merging to `main` is Islam's call, asked for each time** — committed and
+  pushed is the deliverable; merged is a separate act with its own permission.
+  Principle I applied to the last step rather than only the first.
+- **A visual or structural change is drawn before it is built**: a static HTML
+  mockup under `design-mockups/`, signed off, and only then the sources.
 - A handover sends two things: the loose platform HTML, and the full
   `SMP-Project-Folder-vX.Y.zip` with README, rules, decisions, src and mockups.
 

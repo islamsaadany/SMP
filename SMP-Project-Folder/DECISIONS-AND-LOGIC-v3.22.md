@@ -10364,3 +10364,31 @@ the wrapping work and the duplicate marks were all built under the weaker
 
 `design-mockups/` is produced again from today. From here, a visual change is
 drawn, sent, approved, and only then built.
+
+---
+
+## 87 · Merging to main is a separate permission (2026-08-24)
+
+Islam: *"add a rule never merge to main without direct confirmation."*
+
+Recorded as a **supersession, not an overwrite**: the earlier standing
+instruction was the opposite — *"merge to main when things are done so I can
+check"* — and **eleven merges this session were made under it and were right at
+the time**. The note says so, because a rule whose predecessor has been deleted
+reads as though the eleven were mistakes.
+
+What changes is which act carries the permission. Committed and pushed to the
+branch is the deliverable and stays automatic; **the merge is asked for, each
+time, in that message.** Three things that are explicitly *not* permission:
+
+- *"It is done and verified"* — that is a description of the work, not consent
+  to publish it.
+- An earlier *"merge when it's ready"* — it settles that piece and does not
+  carry forward to the next.
+- Having merged the last five without being stopped.
+
+The same shape as Principle I, applied to the last step rather than only the
+first: **pushing the branch is what makes work reviewable; merging is what makes
+it live**, and only the second is Islam's to time. Added to `CLAUDE.md`'s Git
+Workflow and to the constitution's Development Workflow in the same change, so
+a spec review meets it too.

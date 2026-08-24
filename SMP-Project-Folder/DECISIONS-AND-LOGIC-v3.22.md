@@ -9089,3 +9089,44 @@ back to `p.name`, so shortening the *value* would have overwritten the
 register's real names with two words each — silently, on the first keystroke in
 any row, with the file's own copy gone. Asserted by firing a `change` on an
 untouched field and reading the stored name back.
+
+## 70 · Edit and Add were built, and the pen was invisible (v3.22)
+
+**70.1 The ask, and what was already there.** Islam: *"in the project page I need
+to have the edit and add access, to edit current projects or add one. Same for
+the strategy plan page for the units — I can edit, which includes the arrange
+and Add, so I can add a pillar if needed."*
+
+**All of it was already built.** Measured rather than assumed, by turning the
+mode on and counting what appears:
+
+| | fields | drag handles | Add |
+|---|---|---|---|
+| capability · Projects | 34 | 14 | project · deliverable · outcome · milestone |
+| unit · Plan | 25 | 13 | pillar · measure · tactic |
+
+What was missing was any way to find the way in: the pen sits in `.paneact` at
+`opacity:0` **until the pane is hovered**, on the two pages whose whole job is
+reading. On a touch screen there is no hover at all — so a plan could not be
+corrected from a tablet in a meeting, which is exactly where a plan gets
+corrected.
+
+**70.2 §30's rule was right for a card and wrong for a pane.** "The pen-on-hover
+replaces the Edit bar where an edit mode exists" still holds for `.hoverpen`:
+a card is small, the pen sits on its own heading, and the thing you hover IS the
+thing being edited. A **pane** is 920×1015 and the pen is a 28px square in one
+corner of it. One rule was being applied to two components that do not behave
+alike. The pane's changes; the card's does not. Only plan-carrying panes have a
+`.paneact`, so converting that rule converts the whole of its family (§40).
+
+**70.3 A DOM check would have passed every day this was broken.** `mayEditPlan()`
+returned true, `grant("u_plan")` was `edit`, and `querySelector('.penbtn')`
+found the button — all three green while the control could not be pressed. So
+`qa.py` **clicks it the way a person does, with no forcing**: Playwright refuses
+to click something invisible, which is the whole assertion. It then counts the
+fields, the handles and each Add by name, presses Done, and checks that a unit
+head — who may not correct a plan (§31) — is still offered nothing.
+
+"Built and could not be reached" is the second one this week, after the
+register's Delete (§69.20). Both were found by a person trying to use the
+product, not by a check.

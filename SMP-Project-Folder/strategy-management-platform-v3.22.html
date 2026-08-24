@@ -1189,8 +1189,31 @@
   /* Above the band, or the pinned band covers the pen it left room for. */
   .pane .paneact { position:absolute; top:12px; right:12px; height:0; z-index:5; }
   .pane .paneact .penbtn { top:0; right:0; }
-  .pane:hover .paneact .penbtn,
-  .pane:focus-within .paneact .penbtn { visibility:visible; opacity:1; }
+  /* ── THE PEN ON A PLAN IS NOT HOVER-ONLY (§70) ────────────────────
+     Islam: "in the project page I need to have the edit and add access, to
+     edit current projects or add one. Same for the strategy plan page for the
+     units — I can edit, which includes the arrange and Add, so I can add a
+     pillar if needed."
+
+     ALL OF THAT WAS ALREADY BUILT. Turning this pen on gives 34 editable
+     fields, 14 drag handles and Add buttons for a project, a deliverable, an
+     outcome and a milestone on a capability; 25 fields, 13 handles and Add for
+     a pillar, a measure and a tactic on a unit's plan. Measured, not assumed.
+     What was missing was any way to find the pen: `opacity:0` until the pane
+     is hovered, on the two pages whose whole job is reading — and on a touch
+     screen there is no hover at all, so it could not be reached from a tablet
+     in a meeting, which is where a plan gets corrected.
+
+     §30 settled "the pen-on-hover replaces the Edit bar where an edit mode
+     exists", and that still holds for a CARD (`.hoverpen`, its own rule
+     below): a card is small, the pen sits on its own heading, and the hover
+     target is the thing being edited. A PANE is 920×1015 and the pen is a
+     28px square in one corner of it. The rule was right for one component and
+     wrong for the other, and it is the pane's that changes.
+
+     Only the plan-carrying panes have a `.paneact`, so converting this rule
+     converts the whole of its family (§40). */
+  .pane .paneact .penbtn { visibility:visible; opacity:1; }
   .pane .ptitle { display:flex; justify-content:space-between; align-items:flex-start; gap:14px;
     flex-wrap:wrap; padding-bottom:12px; border-bottom:1px solid var(--line-soft); }
   .pane .ptitle h3 { font:400 19px/1.25 var(--serif); margin:0; }

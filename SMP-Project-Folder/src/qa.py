@@ -898,6 +898,68 @@ with sync_playwright() as p:
     if "co:distribution" not in (ccnav["items"] or []):
         errs.append("COMPANY: Distribution's CEO cannot reach their own company (%r)" % ccnav)
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    # ── THE WAY IN HAS TO BE REACHABLE, NOT MERELY PRESENT (70) ───────
+    # Islam asked for edit and add on the projects page and the unit's plan.
+    # Both were already built — 34 fields, 14 handles and four Add buttons on a
+    # capability; 25, 13 and three on a unit — behind a pen at `opacity:0`
+    # until the pane was hovered. On a touch screen there is no hover at all.
+    #
+    # So this CLICKS the pen the way a person does, with no forcing: Playwright
+    # refuses to click something invisible, which is the whole assertion. A
+    # querySelector check would have passed every day the control could not be
+    # reached, which is how it shipped.
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+    for dest, sec, tag, wants in [("fn:finance", "Projects", "capability",
+                                   ["project", "deliverable", "outcome", "milestone"]),
+                                  ("mobile", "Plan", "unit",
+                                   ["pillar", "measure", "tactic"])]:
+        if dest.startswith("fn:"):
+            if not pg.query_selector('#units [data-u="%s"]' % dest):
+                sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+                if sw: sw.click(); pg.wait_for_timeout(250)
+        else:
+            show_units(pg)
+        pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(300)
+        pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
+        pg.click('#secrow button:has-text("%s")' % sec); pg.wait_for_timeout(350)
+        pen = pg.query_selector('.penbtn[data-page="plan"]')
+        if not pen or not pen.is_visible():
+            errs.append("PLAN EDIT (%s): the pen is %s \u2014 the edit mode cannot be "
+                        "reached without a hover" % (tag, "absent" if not pen else "invisible"))
+            continue
+        pen.click(); pg.wait_for_timeout(400)
+        got = pg.evaluate("""() => ({
+          editing: EDIT_PAGE.plan,
+          adds: [...document.querySelectorAll("[data-rowadd]")]
+                  .map(e => e.dataset.rowadd.split("|")[0]),
+          grips: document.querySelectorAll(".grip").length,
+          fields: document.querySelectorAll(".pane .fld, .pane input").length })""")
+        missing = [w for w in wants if w not in got["adds"]]
+        if missing:
+            errs.append("PLAN EDIT (%s): no Add for %s" % (tag, ", ".join(missing)))
+        if not got["grips"]:
+            errs.append("PLAN EDIT (%s): editing gives no drag handles" % tag)
+        if not got["fields"]:
+            errs.append("PLAN EDIT (%s): editing gives no editable fields" % tag)
+        back = pg.query_selector('.penbtn[data-page="plan"]')
+        if back: back.click(); pg.wait_for_timeout(300)
+        if pg.evaluate("() => EDIT_PAGE.plan"):
+            errs.append("PLAN EDIT (%s): pressing Done did not leave edit mode" % tag)
+        print("plan edit (%s): the pen is visible, and turning it on gives %d fields, "
+              "%d handles and Add for %s"
+              % (tag, got["fields"], got["grips"], ", ".join(wants)))
+
+    # And somebody who may NOT correct a plan is still not offered one.
+    pg.select_option("#asWho", "mobhead"); pg.wait_for_timeout(300)
+    show_units(pg)
+    pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(300)
+    pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
+    pg.click('#secrow button:has-text("Plan")'); pg.wait_for_timeout(350)
+    if pg.query_selector('.penbtn[data-page="plan"]'):
+        errs.append("PLAN EDIT: a unit head is offered a pen \u2014 correcting a plan is "
+                    "the SMO's (31)")
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(250)
+
     print("company page: %s reads %s from %d units, and its CEO reaches their own "
           "company and not the other"
           % (co["ck"], co["big"], co["model"]["units"]))

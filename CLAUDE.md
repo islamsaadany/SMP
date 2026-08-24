@@ -222,6 +222,19 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **EDIT AND ADD WERE BUILT, AND THE PEN WAS INVISIBLE (§70):** a capability's
+  Projects pane and a unit's Plan already gave 34/25 editable fields, 14/13 drag
+  handles and Add for a project · deliverable · outcome · milestone / pillar ·
+  measure · tactic — behind a pen at `opacity:0` **until the pane is hovered**,
+  which on a touch screen never happens. §30's pen-on-hover is right for a
+  **card** (`.hoverpen`: small, the pen on its own heading, hovering the thing
+  being edited) and wrong for a **pane** (920×1015, a 28px square in one
+  corner); the pane's rule changes, the card's does not. **A DOM check passed
+  every day this was broken** — `mayEditPlan()` true, the grant `edit`, the
+  button in the document — so `qa.py` CLICKS it with no forcing, because
+  Playwright refuses to click something invisible. Second "built and could not
+  be reached" in a week, after the register's Delete (§69.20), and both were
+  found by somebody trying to use the product.
 - **A COMPANY GETS A PAGE (§68):** it **reverses half of §23** — a company still
   carries no strategy of its own (no plan, no foundation, no objectives), and
   now carries a **reading of the units it holds**. The compile is each unit's

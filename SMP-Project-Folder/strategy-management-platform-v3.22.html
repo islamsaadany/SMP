@@ -2169,6 +2169,53 @@
      field, so it may keep its own width. */
   [data-mailtest] { white-space:nowrap; }
 
+  /* ══ THE COMPOSER'S AUDIENCE PICKER (§74) ══════════════════════════
+     Checkboxes rather than a multi-select: what is ticked has to be readable
+     at a glance, because the thing somebody is about to do is mail people. A
+     select shows the choice only while it is open.
+
+     WRAPPING, NOT SCROLLING. Ten units, eight functions and eight roles is a
+     lot of small controls, and a scroll box would hide half of them behind an
+     edge nobody looks at — the fault §69.20's frozen actions column was for. */
+  .audpick { display:flex; flex-direction:column; gap:10px; }
+  .audkind { font:600 10.5px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase;
+             color:var(--ink-3); margin-top:4px; }
+  .audrow { display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
+  /* NOWRAP, and it is not a nicety. "Business unit owner" broke onto three
+     lines inside its own capsule and "Strategy Management Office" onto two, so
+     a row of pills came out at three different heights and the ticked one was
+     no longer the one that stood out. A capsule is a label; a label that wraps
+     is a paragraph with a border. */
+  .audbox { display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+            white-space:nowrap; border:1px solid var(--line); border-radius:999px;
+            padding:5px 12px 5px 9px;
+            background:var(--surface); font-size:12.5px; color:var(--ink-2);
+            transition:background .12s, border-color .12s; }
+  .audbox:hover { border-color:var(--gold); }
+  /* Lit, not merely ticked. A row of twenty identical capsules with a small
+     mark in some of them is a row you have to read twice (§41's segmented
+     control, one control further out). */
+  .audbox.on { background:var(--over-bg); border-color:var(--gold); color:var(--ink);
+               font-weight:600; }
+  .audbox input { margin:0; accent-color:var(--gold-deep); }
+  .audbox i { font-style:normal; color:var(--ink-3); font-weight:400; padding-left:5px; }
+  .audout { border-top:1px dashed var(--line); padding-top:10px; margin-top:4px;
+            font-size:12.5px; color:var(--ink-2); }
+  .audnames { display:flex; flex-wrap:wrap; gap:5px; margin-top:7px; }
+  /* `.chip` on its own has never had rules — only `.phead2 .chip` does — so a
+     resolved name rendered as bare text beside a capsule that had been ticked
+     to produce it. Named here rather than by widening the header's rule: that
+     one is 11.5px and quiet because it sits in a header. */
+  .audnames .chip { display:inline-flex; align-items:center; gap:4px;
+                    border:1px solid var(--line); border-radius:999px;
+                    padding:3px 10px; background:var(--surface);
+                    font-size:12px; color:var(--ink-2); white-space:nowrap; }
+  .audskip { margin-top:12px; }
+  /* A skipped person and a failed send wear the same mark: something you have
+     to look at, on a page whose other chips are ordinary. */
+  .warnchip { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
+  .warnchip i { font-style:normal; opacity:.85; padding-left:4px; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -4151,6 +4198,17 @@ THEME.apply();
        decide what that name is and what the message looks like is not a
        question about the screen somebody happens to be on. */
     { key:"c_comms",  area:"a_setup", scope:"setup", label:"Communication",     note:"The address emails come from, the name on them, and how they look" },
+    /* WRITING one (§74). It sits with the CYCLE rather than beside the
+       Communication settings — §46.1's split: that page is what you SET, this
+       is what you DO.
+
+       AREA "always", NOT a_cycle, and the page is hidden outright for anybody
+       but the SMO. `api/mail.js` refuses a non-SMO outright, so a matrix cell
+       here would let the SMO grant a page the server then refuses on every
+       press — §42's drift, the thing lib/rules.js exists to prevent. Mailing
+       the whole register in the organisation's name is not "running a cycle",
+       and a_cycle edit is held by more people than that. */
+    { key:"c_send",   area:"always", scope:"manage", label:"Send a message",   note:"Write to the register, or part of it" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -4607,6 +4665,116 @@ THEME.apply();
     namingOn: namingOn, mayName: mayName,
     PICK_SMO: PICK_SMO, PICK_OWNER: PICK_OWNER
   };
+});
+
+</script>
+<script>
+/* WHO A MESSAGE GOES TO (§74).
+   ═══════════════════════════════════════════════════════════════════════
+
+   ONE COPY, RUN ON BOTH SIDES, for the same reason lib/rules.js is: the
+   composer shows the resolved list so somebody can see who they are about to
+   mail, and the server resolves it AGAIN before sending. Two copies of "who
+   does 'unit heads in Mobile' mean" would drift, and the drift here is a
+   message reaching people the page never named.
+
+   THE BROWSER SENDS CRITERIA, NEVER ADDRESSES. A page that posted a list of
+   recipients would be the client deciding who gets mail — §42's rule, one
+   surface further out. The criteria are small and checkable; the register they
+   resolve against is the stored one, on the server.
+
+   NOTHING IN HERE TOUCHES THE DOM, THE DATABASE OR THE NETWORK. It takes a
+   world, a register and a set of criteria, and returns two lists. */
+
+(function (root, factory) {
+  if (typeof module !== "undefined" && module.exports) module.exports = factory(
+    typeof require === "function" ? require("./rules.js") : null);
+  else root.SMPAudience = factory(root.SMPRules);
+})(typeof self !== "undefined" ? self : this, function (Rules) {
+  "use strict";
+
+  function str(v) { return String(v == null ? "" : v).trim(); }
+
+  /* An address the platform is willing to send to. Deliberately loose — the
+     register is filled from a spreadsheet and this is not the place to argue
+     with a real address that happens to look unusual. What it does refuse is
+     the shapes that are certainly not addresses, so a send does not fail
+     halfway down the list on a cell that says "n/a". */
+  function addressOf(p) {
+    var a = str(p && p.email).toLowerCase();
+    return /^[^@\s,;]+@[^@\s,;]+\.[^@\s,;]+$/.test(a) ? a : "";
+  }
+
+  /* Where a person SITS, which is not the same as where they hold a role.
+     The register's own attachment, in the vocabulary every role already uses
+     ("group", "co:…", "fn:…", or a unit key) — §54's rule, so a target can be
+     a company without anything being invented for it. */
+  function seatOf(p) {
+    if (!p) return null;
+    if (p.fn) return "fn:" + p.fn;
+    if (p.company) return "co:" + p.company;
+    if (p.unit) return p.unit;
+    return null;
+  }
+
+  /* CRITERIA ADD UP; THEY DO NOT NARROW EACH OTHER. "Unit heads" and "everyone
+     in Mobile" ticked together means both groups, not the heads of Mobile —
+     four boxes that intersected would need a sentence explaining themselves
+     every time, and the thing somebody actually wants is a list they can see.
+     The resolved list is shown before anything is sent, so the union is
+     checkable rather than something to reason about. */
+  function matches(world, p, c) {
+    if (c.everyone) return true;
+
+    var keys = c.keys || [];
+    if (keys.indexOf(p.key) > -1) return true;
+
+    var roles = c.roles || [], targets = c.targets || [];
+    if (!roles.length && !targets.length) return false;
+
+    var held = Rules ? Rules.personRoles(world, p) : [];
+    var i;
+    for (i = 0; i < held.length; i++) {
+      if (roles.indexOf(held[i].role) > -1) return true;
+      if (targets.indexOf(held[i].at) > -1) return true;
+    }
+    /* Somebody attached to a place with no role there is still THERE. A unit's
+       people are the people in it, not the people with a title in it. */
+    var seat = seatOf(p);
+    return !!(seat && targets.indexOf(seat) > -1);
+  }
+
+  /* SKIPPED PEOPLE ARE NAMED, NOT COUNTED. "3 skipped" tells nobody which
+     three, and the fix for every one of them is a different edit on a
+     different row. */
+  function resolve(world, people, criteria) {
+    var c = criteria || {};
+    var to = [], skipped = [];
+    (people || []).forEach(function (p) {
+      if (!p || !p.key) return;
+      if (Rules && !Rules.personActive(p)) return;   /* retired: not an omission */
+      if (!matches(world, p, c)) return;
+      var a = addressOf(p);
+      if (!a) { skipped.push({ key: p.key, name: p.name || p.key, why: "no address on the register" }); return; }
+      to.push({ key: p.key, name: p.name || p.key, email: a });
+    });
+    /* TWO ROWS, ONE ADDRESS — the register has never enforced uniqueness
+       (§69.23 met it at the door). Here it is harmless and confusing: the same
+       inbox would get the same message twice. First row wins, the second is
+       named. */
+    var seen = {}, out = [];
+    to.forEach(function (r) {
+      if (seen[r.email]) {
+        skipped.push({ key: r.key, name: r.name,
+                       why: "shares an address with " + seen[r.email] });
+        return;
+      }
+      seen[r.email] = r.name; out.push(r);
+    });
+    return { to: out, skipped: skipped };
+  }
+
+  return { resolve: resolve, addressOf: addressOf, seatOf: seatOf };
 });
 
 </script>
@@ -6261,7 +6429,12 @@ function branding(){
    writing half is its own function, and clearing the last field deletes the
    key again — so a tenant that has set nothing writes nothing. */
 var COMMS_EMPTY = Object.freeze({});
-var COMMS_FIELDS = ["fromName", "replyTo", "eyebrow", "footer"];
+/* `headerName` is what the message's HEADER says, and it is not the same
+   question as what the tenant is called (Islam, 2026-08-24: "this header
+   should be in the edits as well"). It defaults to the organisation's name and
+   is separate from it, because renaming the tenant to change what an email says
+   would rename it on every screen in the platform. */
+var COMMS_FIELDS = ["headerName", "fromName", "replyTo", "eyebrow", "footer"];
 function comms(){
   var c = GROUP.comms;
   return (c && typeof c === "object") ? c : COMMS_EMPTY;
@@ -6287,7 +6460,7 @@ function commsSet(key, value){
 function commsShape(){
   var c = comms(), b = branding();
   return {
-    org:      GROUP.org || "",
+    org:      c.headerName || GROUP.org || "",
     fromName: c.fromName || GROUP.org || "Strategy Management Platform",
     replyTo:  c.replyTo || "",
     eyebrow:  c.eyebrow || "Strategy Management Platform",
@@ -19896,6 +20069,11 @@ function renderComms(){
   }
 
   var sender = '<div class="cfg"><table><thead><tr><th>What it is</th><th>Value</th></tr></thead><tbody>' +
+    fld("headerName", "Header name",
+        'The big line in the coloured band at the top of the message. Empty means the ' +
+        'organisation’s name — it is asked separately so changing what an email says does not ' +
+        'rename the tenant on every screen.',
+        sh.org) +
     fld("fromName", "Sender name",
         'The name beside the address in somebody’s inbox. Empty means the organisation’s own name.',
         sh.fromName) +
@@ -19910,7 +20088,7 @@ function renderComms(){
     '</tbody></table></div>' +
     (editing && set
       ? '<div style="margin-top:12px"><button class="linkbu" data-commsreset="1">' +
-        'Put all four back to their defaults</button></div>'
+        'Put them all back to their defaults</button></div>'
       : '');
 
   /* The address the test defaults to is the signed-in person's own, off the
@@ -19990,6 +20168,237 @@ function paintMailPreview(){
     root = host.attachShadow({ mode: "open" });
   }
   root.innerHTML = MAIL.sampleFor(commsShape());
+}
+
+/* ══ WRITING A MESSAGE (§74) ═══════════════════════════════════════════════
+   Islam: "I want to start sending messages … I need the message initiation and
+   sending section."
+
+   THREE QUESTIONS, IN THE ORDER SOMEBODY ANSWERS THEM: who · what · send it.
+
+   THE PAGE HOLDS CRITERIA, NEVER A LIST OF ADDRESSES. Ticking a box changes
+   what was CHOSEN; who that resolves to is the server's answer, asked as you
+   tick and shown before anything is sent. A page that assembled the recipients
+   itself would be the browser deciding who gets mail — §42's rule one surface
+   out — and it would answer from a register that may be a minute stale.
+
+   AND TYPING NEVER REPAINTS (§35, §71.2). The audience comes back from the
+   server while somebody is halfway through a sentence, so the resolved list is
+   written into its own element and the composer is left alone. Everything
+   typed is mirrored into SENDMSG on `change`, so the one repaint that does
+   happen — after a send — does not lose it. */
+var SENDMSG = null;
+function sendmsg(){
+  if (!SENDMSG) SENDMSG = { criteria: { everyone:false, roles:[], targets:[], keys:[] },
+                            subject:"", body:"", ctaLabel:"", ctaHref:"",
+                            aud:null, asking:false, busy:false, result:null };
+  return SENDMSG;
+}
+/* Toggling one entry of a criteria list. The lists are small and the order
+   does not matter, so membership is the whole of it. */
+function sendmsgToggle(list, value, on){
+  var m = sendmsg().criteria, a = m[list] || (m[list] = []);
+  var i = a.indexOf(value);
+  if (on && i < 0) a.push(value);
+  if (!on && i > -1) a.splice(i, 1);
+}
+function sendmsgHasAny(){
+  var c = sendmsg().criteria;
+  return !!(c.everyone || (c.roles||[]).length || (c.targets||[]).length || (c.keys||[]).length);
+}
+
+/* Every place a message can be aimed at, in the vocabulary roles already use
+   (§54): "group", "co:…", "fn:…" or a unit key. One list, so the composer and
+   the resolver cannot disagree about what a target string means. */
+function sendmsgTargets(){
+  /* The group sits WITH the companies rather than alone above them: one
+     capsule under a heading of its own reads as a category with one member,
+     and the two are the same question — how far up do you want this to go. */
+  var WIDE = "The group and its companies";
+  var out = [{ at:"group", label:"The group", kind:WIDE }];
+  Object.keys(COMPANIES || {}).forEach(function(ck){
+    if (companyActive(ck)) out.push({ at:"co:" + ck, label:COMPANIES[ck].name, kind:WIDE });
+  });
+  UNIT_KEYS.forEach(function(k){
+    if (UNITS[k] && UNITS[k].active !== false) out.push({ at:k, label:UNITS[k].name, kind:"Business units" });
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    if (FUNCTIONS[k] && FUNCTIONS[k].active !== false)
+      out.push({ at:"fn:" + k, label:FUNCTIONS[k].name, kind:"Supporting functions" });
+  });
+  return out;
+}
+
+/* What the resolved list says, drawn on its own so it can be replaced without
+   touching the composer around it. */
+function sendmsgAudienceHtml(){
+  var st = sendmsg();
+  if (!sendmsgHasAny())
+    return '<span class="why" style="margin:0">Nobody chosen yet — tick something above.</span>';
+  if (st.asking || !st.aud)
+    return '<span class="why" style="margin:0">Working out who that is…</span>';
+  if (st.aud.error)
+    return '<span class="why" style="margin:0">Could not ask the server: ' + esc(st.aud.error) + '</span>';
+
+  var to = st.aud.to || [], sk = st.aud.skipped || [];
+  var head = '<b>' + plural(to.length, "person", "people") + ' will get this</b>';
+  var names = to.length
+    ? '<div class="audnames">' + to.map(function(r){
+        return '<span class="chip">' + esc(r.name) + '</span>'; }).join("") + '</div>'
+    : '';
+  /* SKIPPED PEOPLE ARE NAMED. "3 skipped" tells nobody which three, and every
+     one of them is a different edit on a different row of the register. */
+  var skip = sk.length
+    ? '<div class="audskip"><b>' + plural(sk.length, "person", "people") + ' skipped</b>' +
+      '<div class="audnames">' + sk.map(function(r){
+        return '<span class="chip warnchip" title="' + esc(r.why) + '">' + esc(r.name) +
+               ' <i>' + esc(r.why) + '</i></span>'; }).join("") + '</div></div>'
+    : '';
+  return head + names + skip;
+}
+
+function renderSendMessage(){
+  var st = sendmsg(), c = st.criteria, sh = commsShape();
+  var live = (typeof SYNC !== "undefined") && SYNC.isLive();
+
+  function box(list, value, label, sub){
+    var on = list === "everyone" ? !!c.everyone : (c[list] || []).indexOf(value) > -1;
+    return '<label class="audbox' + (on ? ' on' : '') + '">' +
+      '<input type="checkbox" data-aud="' + esc(list) + '" value="' + esc(value) + '"' +
+        (on ? ' checked' : '') + '>' +
+      '<span>' + esc(label) + (sub ? '<i>' + esc(sub) + '</i>' : '') + '</span></label>';
+  }
+
+  var everyone = '<div class="audrow">' + box("everyone", "1", "Everyone on the register") + '</div>';
+
+  /* The floor roles are offered like the rest: "every employee" is a real
+     audience, and leaving them out would make the list quietly incomplete. */
+  var roles = '<div class="audrow">' + ROLES.map(function(r){
+      return box("roles", r.key, r.name); }).join("") + '</div>';
+
+  var tg = sendmsgTargets(), groups = {};
+  tg.forEach(function(t){ (groups[t.kind || ""] = groups[t.kind || ""] || []).push(t); });
+  var targets = Object.keys(groups).map(function(k){
+      return (k ? '<div class="audkind">' + esc(k) + '</div>' : '') +
+        '<div class="audrow">' + groups[k].map(function(t){
+          return box("targets", t.at, t.label); }).join("") + '</div>';
+    }).join("");
+
+  var picked = (c.keys || []).map(function(k){
+      var p = personBy(k);
+      return '<span class="chip">' + esc(p ? p.name : k) +
+        '<button class="chipx" data-audkey="' + esc(k) + '" aria-label="Remove">&times;</button></span>';
+    }).join("");
+  var pickable = PEOPLE.filter(function(p){
+      return personActive(p) && (c.keys || []).indexOf(p.key) < 0; });
+  var pick = '<div class="audrow">' + picked +
+    '<select class="fld" id="audpick"><option value="">Add somebody…</option>' +
+    pickable.map(function(p){
+      return '<option value="' + esc(p.key) + '">' + esc(p.name) +
+        (p.email ? '' : ' — no address') + '</option>'; }).join("") +
+    '</select></div>';
+
+  var who = section("", "Who gets it",
+    "Tick as many as you like — they add up rather than narrow each other. " +
+    "Somebody who matches twice still gets one message.",
+    '<div class="cfg audpick">' + everyone +
+      '<div class="audkind">By role</div>' + roles +
+      targets +
+      '<div class="audkind">Somebody in particular</div>' + pick +
+      '<div class="audout" id="audout">' + sendmsgAudienceHtml() + '</div>' +
+    '</div>');
+
+  var what = section("", "What it says", null,
+    '<div class="cfg"><table><tbody>' +
+      '<tr><td style="width:26%"><b>Subject</b><span class="why">What they see in the list ' +
+        'before they open it.</span></td>' +
+        '<td><input class="fld" id="msgsubject" value="' + esc(st.subject) +
+          '" placeholder="Reporting for Q3 opens on Monday"></td></tr>' +
+      '<tr><td><b>Message</b><span class="why">A blank line starts a new paragraph.</span></td>' +
+        '<td><textarea class="fld" id="msgbody" rows="8" placeholder="Write it as you would say it.">' +
+          esc(st.body) + '</textarea></td></tr>' +
+      '<tr><td><b>A button</b><span class="why">Optional. Both halves or neither — a button ' +
+        'with no link does nothing and a link with no words is invisible.</span></td>' +
+        '<td><span class="brandpick">' +
+          '<input class="fld" id="msgctalabel" value="' + esc(st.ctaLabel) +
+            '" placeholder="Open the platform" style="max-width:200px">' +
+          '<input class="fld" id="msgctahref" value="' + esc(st.ctaHref) +
+            '" placeholder="' + esc(sh.href || "https://…") + '" style="max-width:260px">' +
+        '</span></td></tr>' +
+    '</tbody></table></div>');
+
+  var look = section("", "What they will see",
+    "The real message, drawn by the same code that sends it.",
+    '<div class="mailprev" id="msgprev"></div>');
+
+  var r = st.result;
+  var go = section("", "Send it",
+    "One message each, never a shared address list — nobody sees who else got it, " +
+    "and a failure names the person it failed for.",
+    '<div class="cfg"><div class="audrow" style="align-items:center">' +
+      '<button class="editbtn apply" id="msgsend"' + (live ? '' : ' disabled') + '>Send</button>' +
+      '<span class="why" id="msgsaid" style="margin:0">' +
+        (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
+    '</div>' +
+    (r && r.rows ? '<div class="audskip"><b>What happened</b><div class="audnames">' +
+        r.rows.map(function(x){
+          return '<span class="chip' + (x.ok ? '' : ' warnchip') + '">' + esc(x.name) +
+            (x.ok ? '' : ' <i>' + esc(x.why) + '</i>') + '</span>'; }).join("") +
+      '</div></div>' : '') +
+    '</div>');
+
+  return cfgHead("Send a message",
+      ['<span class="pill kind">SMO</span>',
+       sendmsgHasAny() && st.aud && st.aud.to
+         ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen'],
+      null, false) +
+    who + what + look + go + renderSentList();
+}
+
+/* WHAT WAS SENT. Its own section rather than its own page: the thing you want
+   after pressing Send is to see it in the list, and a second destination puts
+   a navigation between the act and its record. */
+var SENTLIST = null;   /* null = not asked */
+function renderSentList(){
+  var rows = (SENTLIST && SENTLIST.messages) || [];
+  var body = !SENTLIST
+    ? '<span class="why" style="margin:0">Asking…</span>'
+    : SENTLIST.error
+      ? '<span class="why" style="margin:0">' + esc(SENTLIST.error) + '</span>'
+      : !rows.length
+        ? '<span class="why" style="margin:0">Nothing has been sent from here yet.</span>'
+        : '<div class="cfg"><table><thead><tr><th>Subject</th><th>Sent</th>' +
+          '<th class="cc">To</th><th class="cc">Failed</th><th>By</th></tr></thead><tbody>' +
+          rows.map(function(m){
+            return '<tr><td><b>' + esc(m.subject) + '</b></td>' +
+              '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
+              '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) + '</td>' +
+              '<td class="cc">' + (m.failed
+                  ? '<span class="pill bad">' + m.failed + '</span>' : '—') + '</td>' +
+              '<td>' + esc(m.by_name || "") + '</td></tr>';
+          }).join("") + '</tbody></table></div>';
+  return section("", "What has been sent",
+    "The record lives outside the saved data, so a save cannot erase it.", body);
+}
+
+/* The preview, on its own so a keystroke redraws it without repainting the
+   page (§72.3's shadow root, same reasons). */
+function paintMsgPreview(){
+  var host = document.getElementById("msgprev");
+  if (!host) return;
+  var root = host.shadowRoot;
+  if (!root) {
+    if (!host.attachShadow) { host.textContent = "This browser cannot draw the preview."; return; }
+    root = host.attachShadow({ mode: "open" });
+  }
+  var st = sendmsg(), sh = commsShape();
+  root.innerHTML = MAIL.html({
+    org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
+    title: st.subject || "Your subject will appear here",
+    preheader: st.subject,
+    body: st.body || "Your message will appear here.",
+    cta: (st.ctaLabel && st.ctaHref) ? { label: st.ctaLabel, href: st.ctaHref } : null
+  });
 }
 
 </script>
@@ -22269,6 +22678,19 @@ var SYNC = (function () {
     mailStatus: function (done) {
       mailPost({ action: "status" }, function (err, j) { done(err, err ? null : j); });
     },
+    mailAudience: function (criteria, done) {
+      mailPost({ action: "audience", criteria: criteria },
+        function (err, j) { done(err, err ? null : j); });
+    },
+    mailSend: function (o, done) {
+      mailPost({ action: "send", criteria: o.criteria, subject: o.subject, body: o.body,
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
+                 fromName: o.fromName, replyTo: o.replyTo },
+        function (err, j) { done(err, err ? null : j); });
+    },
+    mailHistory: function (done) {
+      mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });
+    },
     mailTest: function (o, done) {
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
                  fromName: o.fromName, replyTo: o.replyTo },
@@ -22523,6 +22945,12 @@ var SYNC = (function () {
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
       /* Last in its group: it explains the rest, so it is not where you start. */
+      /* §74. A DOING page, so it sits with the cycle rather than beside the
+         Communication SETTINGS — and gated at edit for Import's reason
+         (§48.2): there is nothing to read on a composer, so a view grant would
+         open a page whose every control the server then refuses. */
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
+        when: function(){ return hasRole("super"); },                    render:renderSendMessage },
       { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB },
       { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
         when: ownsAnySource,                                render:renderMySources }
@@ -22540,6 +22968,48 @@ var SYNC = (function () {
      the rule §29 set for EDIT_PAGE, and every mode added since has had to be
      added here by hand. Named once so the next one cannot be forgotten at
      three call sites out of five (§63.1). */
+  /* ── ASKING WHO THAT IS (§74.2) ─────────────────────────────────────
+     The criteria change, the server answers, and the answer is written into
+     ONE element rather than painted: the composer beside it may have a
+     half-typed sentence in it, and a repaint arriving mid-thought is the fault
+     §71.2 was about. It is also debounced, because ticking four boxes in a row
+     is four questions with only the last one's answer wanted. */
+  var AUDTIMER = null;
+  function sendmsgAsk(){
+    var st = sendmsg();
+    if (!sendmsgHasAny()) { st.aud = null; st.asking = false; return; }
+    st.asking = true;
+    if (AUDTIMER) clearTimeout(AUDTIMER);
+    AUDTIMER = setTimeout(function(){
+      AUDTIMER = null;
+      if (typeof SYNC === "undefined" || !SYNC.isLive()) {
+        st.asking = false;
+        st.aud = { error: "there is no server here to ask" };
+        return paintAudience();
+      }
+      var asked = JSON.stringify(st.criteria);
+      SYNC.mailAudience(st.criteria, function(err, j){
+        /* A stale answer is worse than none: somebody ticked again while this
+           was in flight, and painting it would show a list for criteria that
+           are no longer on screen. */
+        if (JSON.stringify(st.criteria) !== asked) return;
+        st.asking = false;
+        st.aud = err ? { error: err } : { to: j.to || [], skipped: j.skipped || [] };
+        paintAudience();
+      });
+    }, 180);
+  }
+  function paintAudience(){
+    var el = document.getElementById("audout");
+    if (el) el.innerHTML = sendmsgAudienceHtml();
+    var chip = document.querySelector('.phead2 .hright .chip:last-of-type');
+    if (chip && document.getElementById("msgsend")) {
+      var st = sendmsg();
+      chip.textContent = (sendmsgHasAny() && st.aud && st.aud.to)
+        ? plural(st.aud.to.length, "recipient", "recipients") : "nobody chosen";
+    }
+  }
+
   function leaveModes(){
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
@@ -22551,6 +23021,10 @@ var SYNC = (function () {
        side effect is the shape `branding()` had when it was inventing fields
        nobody stored (§42, §50.6). */
     if (typeof MAILSENT !== "undefined") MAILSENT = null;
+    /* A composed message goes with the page too — a subject typed for one
+       audience sitting on the screen after navigating away is a message
+       waiting to be sent to the wrong people. */
+    if (typeof SENDMSG !== "undefined") SENDMSG = null;
   }
   /* Which section of a container tab is open, per tab. Kept per tab rather than
      globally so moving between Performance and Strategy does not reset both. */
@@ -24975,6 +25449,108 @@ var SYNC = (function () {
       });
     });
     paintMailPreview();
+
+    /* ── The composer (§74) ─────────────────────────────────────────
+       TICKING REPAINTS; TYPING DOES NOT. A checkbox changes what the page
+       shows (which capsules are lit, and who it resolves to), so it repaints.
+       The subject and the body are mirrored into SENDMSG on `change` and
+       written straight into the preview on `input`, because a repaint would
+       replace the box being typed into (§35, §71.2). */
+    document.querySelectorAll("[data-aud]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        if (inp.dataset.aud === "everyone") sendmsg().criteria.everyone = inp.checked;
+        else sendmsgToggle(inp.dataset.aud, inp.value, inp.checked);
+        sendmsgAsk();
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-audkey]").forEach(function(b){
+      b.addEventListener("click", function(){
+        sendmsgToggle("keys", b.dataset.audkey, false);
+        sendmsgAsk(); paint();
+      });
+    });
+    var audpick = document.getElementById("audpick");
+    if (audpick) audpick.addEventListener("change", function(){
+      if (!this.value) return;
+      sendmsgToggle("keys", this.value, true);
+      sendmsgAsk(); paint();
+    });
+
+    /* The four typed fields. `input` for the preview so it follows the
+       keystroke, `change` for the store so a repaint cannot lose it — the same
+       field wired twice on purpose, for two different jobs. */
+    [["msgsubject","subject"],["msgbody","body"],
+     ["msgctalabel","ctaLabel"],["msgctahref","ctaHref"]].forEach(function(pair){
+      var el = document.getElementById(pair[0]);
+      if (!el) return;
+      el.addEventListener("input", function(){
+        sendmsg()[pair[1]] = el.value;
+        paintMsgPreview();
+      });
+    });
+    paintMsgPreview();
+
+    var msgsend = document.getElementById("msgsend");
+    if (msgsend) msgsend.addEventListener("click", function(){
+      var st = sendmsg(), out = document.getElementById("msgsaid");
+      function say(msg, ok){
+        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
+        if (!out) return;
+        out.textContent = msg;
+        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+      }
+      if (!sendmsgHasAny()) return say("Choose who it goes to first.", false);
+      if (!st.subject.trim()) return say("It needs a subject.", false);
+      if (!st.body.trim()) return say("It needs something in it.", false);
+      var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
+      if (!n) return say("That comes to nobody with an address.", false);
+      /* THE CONFIRMATION NAMES THE NUMBER, because the number is the thing
+         that cannot be taken back. */
+      if (!confirm("Send \u201c" + st.subject.trim() + "\u201d to " +
+                   plural(n, "person", "people") + "? This cannot be undone."))
+        return;
+      var sh = commsShape();
+      say("Sending to " + plural(n, "person", "people") + "\u2026", null);
+      msgsend.disabled = true;
+      st.busy = true;
+      SYNC.mailSend({
+        criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
+        ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
+        fromName: sh.fromName, replyTo: sh.replyTo,
+        html: MAIL.html({
+          org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
+          eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
+          body: st.body.trim(),
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+        })
+      }, function(err, j){
+        msgsend.disabled = false; st.busy = false;
+        if (err) { say(err, false); return; }
+        st.result = { ok: !j.failed,
+          msg: plural(j.sent, "message", "messages") + " sent" +
+               (j.failed ? ", " + j.failed + " failed" : "") + ".",
+          rows: null };
+        /* The list is asked again rather than guessed at: what the server
+           recorded is the record, and a row this page invented would be a
+           second copy of it. */
+        SENTLIST = null;
+        paint();
+      });
+    });
+
+    if (SENTLIST === null && document.getElementById("msgsend") &&
+        typeof SYNC !== "undefined" && SYNC.isLive()) {
+      SENTLIST = { messages: [] };
+      SYNC.mailHistory(function(err, j){
+        SENTLIST = err ? { error: err } : { messages: (j && j.messages) || [] };
+        paint();
+      });
+    }
+    if (document.getElementById("audout") && sendmsgHasAny() &&
+        !sendmsg().aud && !sendmsg().asking) sendmsgAsk();
+
     /* Asked ONCE PER SESSION, the same shape as the register's password
        states: whether a key is present and what Resend says about the domain
        are the server's facts, and a page that guessed them would report a

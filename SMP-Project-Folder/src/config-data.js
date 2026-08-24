@@ -456,7 +456,12 @@ function branding(){
    writing half is its own function, and clearing the last field deletes the
    key again — so a tenant that has set nothing writes nothing. */
 var COMMS_EMPTY = Object.freeze({});
-var COMMS_FIELDS = ["fromName", "replyTo", "eyebrow", "footer"];
+/* `headerName` is what the message's HEADER says, and it is not the same
+   question as what the tenant is called (Islam, 2026-08-24: "this header
+   should be in the edits as well"). It defaults to the organisation's name and
+   is separate from it, because renaming the tenant to change what an email says
+   would rename it on every screen in the platform. */
+var COMMS_FIELDS = ["headerName", "fromName", "replyTo", "eyebrow", "footer"];
 function comms(){
   var c = GROUP.comms;
   return (c && typeof c === "object") ? c : COMMS_EMPTY;
@@ -482,7 +487,7 @@ function commsSet(key, value){
 function commsShape(){
   var c = comms(), b = branding();
   return {
-    org:      GROUP.org || "",
+    org:      c.headerName || GROUP.org || "",
     fromName: c.fromName || GROUP.org || "Strategy Management Platform",
     replyTo:  c.replyTo || "",
     eyebrow:  c.eyebrow || "Strategy Management Platform",

@@ -474,6 +474,19 @@ var SYNC = (function () {
     mailStatus: function (done) {
       mailPost({ action: "status" }, function (err, j) { done(err, err ? null : j); });
     },
+    mailAudience: function (criteria, done) {
+      mailPost({ action: "audience", criteria: criteria },
+        function (err, j) { done(err, err ? null : j); });
+    },
+    mailSend: function (o, done) {
+      mailPost({ action: "send", criteria: o.criteria, subject: o.subject, body: o.body,
+                 ctaLabel: o.ctaLabel, ctaHref: o.ctaHref, html: o.html,
+                 fromName: o.fromName, replyTo: o.replyTo },
+        function (err, j) { done(err, err ? null : j); });
+    },
+    mailHistory: function (done) {
+      mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });
+    },
     mailTest: function (o, done) {
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
                  fromName: o.fromName, replyTo: o.replyTo },

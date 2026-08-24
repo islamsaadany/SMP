@@ -9500,3 +9500,113 @@ all of them the company page's `num.final`.
 The header's own cells needed nothing: `thead th` takes `--panel` with
 `!important` two files later (§41.10), so a rule for them would have been dead
 code — written, measured as changing nothing, removed.
+
+---
+
+## 74 · Writing a message, and sending it (v3.23)
+
+Islam: *"Man I want to start sending messages, that's the setup. I need the
+message initiation and sending section."*
+
+§72 built the channel. This is the thing that uses it: **Running the cycle ›
+Send a message** — who · what it says · what they will see · send it · what has
+been sent.
+
+**74.1 It is a DOING page, so it sits with the cycle.** §46.1 split Setup into
+what you SET and what you DO, and Communication is the first and this is the
+second. Gated on being the SMO **outright**, not by a matrix cell: `api/mail.js`
+refuses a non-SMO, so a cell here would let the SMO grant a page the server then
+refuses on every press — §42's drift, which `lib/rules.js` exists to prevent.
+Mailing the whole register in the organisation's name is not "running a cycle",
+and `a_cycle` edit is held by more people than that.
+
+**74.2 THE PAGE HOLDS CRITERIA; THE SERVER HOLDS THE RECIPIENTS.** Ticking a box
+changes what was *chosen*. Who that resolves to is asked of the server, shown
+before anything is sent, and **resolved again on the server at send time**. A
+page that assembled the list itself would be the browser deciding who gets mail
+(§42, one surface out), and it would answer from a register that may be a minute
+stale — somebody retired in between must not receive it.
+
+`lib/audience.js` is that resolution, and it is **one copy run on both sides**
+for the same reason `lib/rules.js` is: the composer shows the list and the
+server sends to it, and two answers to "what does *unit heads* mean" would
+differ in the one direction nobody checks.
+
+Four rules inside it:
+
+- **Criteria ADD UP, they do not narrow each other.** Ticking *Business unit
+  owner* and *Mobile* means both groups, not the owners of Mobile. Four boxes
+  that intersected would need a sentence explaining themselves every time, and
+  the thing somebody wants is a list they can see — which is on screen.
+- **Somebody attached to a place with no role there is still there.** A unit's
+  people are the people in it, not the people with a title in it.
+- **A retired person is excluded silently** — retirement is not an omission.
+- **SKIPPED PEOPLE ARE NAMED, NOT COUNTED.** "3 skipped" tells nobody which
+  three, and each one is a different edit on a different row. Two reasons a
+  person is skipped: no address, or **an address somebody else already has** —
+  the register has never enforced uniqueness (§69.23 met that at the door), and
+  here it would quietly send the same inbox the same message twice.
+
+**74.3 One message per person, in one call.** Never a shared To, never a BCC:
+nobody should see anybody else's address, and a failure has to name the person
+it failed for. That is normally a choice between privacy and thirty-three HTTP
+calls — **Resend's batch endpoint takes up to 100 separate messages in one
+request**, so it is neither. It also settles a constraint that would otherwise
+have decided the design: a serverless function has seconds and Resend
+rate-limits at two a second, so a loop over the register would have timed out
+halfway with no record of where it stopped.
+
+**The row is written BEFORE the send, not after.** A send that half succeeds and
+then loses the function is the case a record exists for, and a record written
+afterwards is exactly the one that would be missing.
+
+**74.4 THE JOIN IS BY POSITION, AND THAT IS THE PART THAT FAILS SILENTLY.**
+Resend returns ids in the order they were sent, so recipient *i* is matched to
+answer *i*. Get it wrong and **every row still says "sent"** — against the wrong
+person. `scripts/test-mail-send.js` stubs `fetch` and drives the real handler
+against a real Postgres, then reads the rows back and checks each address
+against its own id. It also drives the case nobody writes by hand — **an answer
+shorter than what was sent** — and asserts the missing one is recorded as
+failed rather than counted as sent. Proved by breaking the join on purpose: 3 of
+13 checks fail, and they are the right three.
+
+It asserts the shape of the request too, not only the rows: one email object per
+person, one address in each `to`, and no address appearing in anybody else's —
+a shared To would pass every row-matching check and still be the bug this design
+exists to avoid.
+
+**74.5 `messages` and `message_recipients` live outside the state graph**
+(migration 020), with credentials, `change_log`, `bu_declarations` and
+`feedback`. A save TRUNCATEs thirty tables CASCADE. **No foreign key to
+`people`**: deleting somebody from the register must not take the history of
+what they were sent with them (§69.23's rule from the other end). Asserted — a
+full `writeState` leaves the sent messages untouched.
+
+The message is stored once and each recipient is a row, because *"did Ashraf get
+it"* and *"what did we send in March"* are different questions and only the
+second is about the message. The **criteria are stored as chosen**, not the list
+they resolved to: the list is in the recipients table, and what you want back
+when a message reached the wrong people is what somebody ticked.
+
+**74.6 Ticking repaints; typing does not (§35, §71.2).** The audience comes back
+from the server while somebody is mid-sentence, so it is written into one
+element and the composer is left alone. The request is debounced, and **a stale
+answer is discarded** — tick again while one is in flight and painting it would
+show a list for criteria no longer on screen.
+
+**74.7 Two things the drawing caught that the measurement did not.** The role
+capsules wrapped mid-word — *Business unit owner* onto three lines, *Strategy
+Management Office* onto two — so a row came out at three different heights and
+the ticked one was no longer the one that stood out. A capsule is a label; a
+label that wraps is a paragraph with a border. And **`.chip` has never had rules
+of its own** — only `.phead2 .chip` does — so every resolved name rendered as
+bare text beside the capsule that had been ticked to produce it.
+
+**74.8 The email's header name is its own field** (Islam: *"this header should
+be in the edits as well"*). It defaults to the organisation's name and is stored
+separately, because renaming the tenant to change what an email says would
+rename it on every screen in the platform.
+
+**Still open:** the cycle chase — the same send with the recipients and the body
+worked out from who owes a submission. It is now one function away, which was
+the point of building this first.

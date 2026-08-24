@@ -21,7 +21,9 @@
 const pg = require("pg");
 const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
-const { ensureReady } = io;
+const Rules = require("../lib/rules.js");
+const Audience = require("../lib/audience.js");
+const { ensureReady, readState } = io;
 function getPool() { return io.getPool(pg); }
 
 const RESEND = "https://api.resend.com";
@@ -95,6 +97,35 @@ async function domainStatus(key, domain) {
        not ask, rather than reporting a domain as unverified on no evidence. */
     return { asked: false, ok: false, why: "could not reach Resend" };
   }
+}
+
+/* ── ONE MESSAGE PER PERSON, IN ONE CALL (§74.3) ──────────────────────────
+   Never a shared To and never a BCC: nobody should see anybody else's address,
+   and when one send fails you have to know WHICH. That is normally the choice
+   between privacy and thirty-three HTTP calls — Resend's batch endpoint takes
+   up to 100 SEPARATE messages in one request, so it is neither.
+
+   It also settles a constraint that would otherwise have decided the design:
+   a serverless function has seconds, and Resend rate-limits at 2 a second, so
+   a loop over thirty-three people would have timed out halfway with no record
+   of where it stopped. */
+const BATCH_MAX = 100;
+
+async function resendBatch(key, emails) {
+  const r = await fetch(RESEND + "/emails/batch", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+    body: JSON.stringify(emails)
+  });
+  const j = await r.json().catch(function () { return null; });
+  if (!r.ok) {
+    const why = (j && (j.message || (j.error && j.error.message))) || ("Resend said " + r.status + ".");
+    const e = new Error(why); e.resend = true; throw e;
+  }
+  /* Resend answers with the ids in the order they were sent, so a result is
+     matched to a recipient by POSITION. Anything short of a full answer is
+     treated as unknown rather than as success. */
+  return (j && (j.data || j)) || [];
 }
 
 async function resendSend(key, payload) {
@@ -177,6 +208,106 @@ module.exports = async function handler(req, res) {
           error: e.resend ? e.message
                           : "Could not reach Resend. Nothing was sent — try again." });
       }
+    }
+
+    /* ── WHO IT WOULD GO TO (§74.2) ────────────────────────────────
+       Resolved HERE, against the stored register, and the composer shows what
+       comes back. The browser never says who the recipients are — it says what
+       was ticked, and this answers. */
+    if (action === "audience") {
+      const stored = await readState(client);
+      const out = Audience.resolve(Rules.worldOf(stored), stored.people || [], body.criteria);
+      return send(res, 200, { ok: true, to: out.to, skipped: out.skipped });
+    }
+
+    if (action === "send") {
+      if (!key) return send(res, 400, { ok: false,
+        error: "No RESEND_API_KEY in this deployment's environment variables." });
+      if (!addr) return send(res, 400, { ok: false,
+        error: "No SMP_MAIL_FROM in this deployment's environment variables." });
+
+      const subject = String(body.subject || "").trim();
+      const bodyText = String(body.body || "").trim();
+      if (!subject) return send(res, 400, { ok: false, error: "A message needs a subject." });
+      if (!bodyText) return send(res, 400, { ok: false, error: "A message needs something in it." });
+
+      /* RESOLVED AGAIN, on the stored register, never taken from the request.
+         The page resolved it a moment ago to show a list; between then and now
+         somebody may have been retired, and in any case a posted list of
+         addresses is the browser deciding who gets mail (§42). */
+      const stored = await readState(client);
+      const aud = Audience.resolve(Rules.worldOf(stored), stored.people || [], body.criteria);
+      if (!aud.to.length) return send(res, 400, { ok: false,
+        error: "Nobody on the register matches that, or none of them has an address." });
+      if (aud.to.length > 500) return send(res, 400, { ok: false,
+        error: "That is more than 500 people. Narrow it, or tell me and I will raise the cap." });
+
+      const name = String(body.fromName || "").trim();
+      const from = name ? name + " <" + addr + ">" : addr;
+      const replyTo = String(body.replyTo || "").trim() || undefined;
+      /* The HTML the PAGE built, so what arrives is what the preview drew
+         (§72.3) — one builder, and the preview is not a picture of it. */
+      const html = String(body.html || "");
+      if (!html) return send(res, 400, { ok: false, error: "Nothing to send." });
+
+      /* THE ROW IS WRITTEN BEFORE THE SEND, not after. A send that half
+         succeeds and then loses the function is the case a record exists for,
+         and a record written afterwards is exactly the one that would be
+         missing. */
+      const msg = (await client.query(
+        "INSERT INTO messages (by_key, by_name, subject, body, cta_label, cta_href, audience, total) " +
+        "VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id",
+        [me.key, me.name || null, subject, bodyText,
+         String(body.ctaLabel || "").trim() || null,
+         String(body.ctaHref || "").trim() || null,
+         JSON.stringify(body.criteria || {}), aud.to.length])).rows[0];
+
+      let ok = 0, failed = 0;
+      for (let i = 0; i < aud.to.length; i += BATCH_MAX) {
+        const chunk = aud.to.slice(i, i + BATCH_MAX);
+        let ids = [], err = null;
+        try {
+          ids = await resendBatch(key, chunk.map(function (r) {
+            return { from: from, to: [r.email], subject: subject, html: html,
+                     reply_to: replyTo };
+          }));
+        } catch (e) {
+          err = e.resend ? e.message : "Could not reach Resend.";
+        }
+        for (let n = 0; n < chunk.length; n++) {
+          const id = (ids && ids[n] && ids[n].id) || null;
+          const good = !err && !!id;
+          if (good) ok++; else failed++;
+          await client.query(
+            "INSERT INTO message_recipients (message_id, person_key, person_name, address, ok, error, provider_id) " +
+            "VALUES ($1,$2,$3,$4,$5,$6,$7)",
+            [msg.id, chunk[n].key, chunk[n].name, chunk[n].email, good,
+             good ? null : (err || "Resend did not answer for this one"), id]);
+        }
+      }
+      await client.query("UPDATE messages SET sent = $2, failed = $3 WHERE id = $1",
+                         [msg.id, ok, failed]);
+      return send(res, 200, { ok: true, id: msg.id, sent: ok, failed: failed,
+                              skipped: aud.skipped });
+    }
+
+    /* What was sent, newest first. The SMO's own record — and the only place
+       "did they get it" can be answered. */
+    if (action === "history") {
+      const rows = (await client.query(
+        "SELECT id, sent_at, by_name, subject, total, sent, failed FROM messages " +
+        "ORDER BY sent_at DESC LIMIT 50")).rows;
+      return send(res, 200, { ok: true, messages: rows });
+    }
+    if (action === "historyOne") {
+      const id = parseInt(body.id, 10);
+      if (!id) return send(res, 400, { ok: false, error: "which message?" });
+      const m = (await client.query("SELECT * FROM messages WHERE id = $1", [id])).rows[0];
+      if (!m) return send(res, 404, { ok: false, error: "no such message" });
+      const to = (await client.query(
+        "SELECT person_name, address, ok, error FROM message_recipients " +
+        "WHERE message_id = $1 ORDER BY ok DESC, person_name", [id])).rows;
+      return send(res, 200, { ok: true, message: m, recipients: to });
     }
 
     return send(res, 400, { ok: false, error: "unknown action" });

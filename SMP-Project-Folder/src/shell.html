@@ -137,6 +137,7 @@
 </main>
 
 <script src="RULES"></script>
+<script src="AUDIENCE"></script>
 <script src="DATA"></script>
 <script src="CONFIGDATA"></script>
 <script src="ARRANGE"></script>
@@ -336,6 +337,12 @@
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
       /* Last in its group: it explains the rest, so it is not where you start. */
+      /* §74. A DOING page, so it sits with the cycle rather than beside the
+         Communication SETTINGS — and gated at edit for Import's reason
+         (§48.2): there is nothing to read on a composer, so a view grant would
+         open a page whose every control the server then refuses. */
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
+        when: function(){ return hasRole("super"); },                    render:renderSendMessage },
       { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB },
       { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
         when: ownsAnySource,                                render:renderMySources }
@@ -353,6 +360,48 @@
      the rule §29 set for EDIT_PAGE, and every mode added since has had to be
      added here by hand. Named once so the next one cannot be forgotten at
      three call sites out of five (§63.1). */
+  /* ── ASKING WHO THAT IS (§74.2) ─────────────────────────────────────
+     The criteria change, the server answers, and the answer is written into
+     ONE element rather than painted: the composer beside it may have a
+     half-typed sentence in it, and a repaint arriving mid-thought is the fault
+     §71.2 was about. It is also debounced, because ticking four boxes in a row
+     is four questions with only the last one's answer wanted. */
+  var AUDTIMER = null;
+  function sendmsgAsk(){
+    var st = sendmsg();
+    if (!sendmsgHasAny()) { st.aud = null; st.asking = false; return; }
+    st.asking = true;
+    if (AUDTIMER) clearTimeout(AUDTIMER);
+    AUDTIMER = setTimeout(function(){
+      AUDTIMER = null;
+      if (typeof SYNC === "undefined" || !SYNC.isLive()) {
+        st.asking = false;
+        st.aud = { error: "there is no server here to ask" };
+        return paintAudience();
+      }
+      var asked = JSON.stringify(st.criteria);
+      SYNC.mailAudience(st.criteria, function(err, j){
+        /* A stale answer is worse than none: somebody ticked again while this
+           was in flight, and painting it would show a list for criteria that
+           are no longer on screen. */
+        if (JSON.stringify(st.criteria) !== asked) return;
+        st.asking = false;
+        st.aud = err ? { error: err } : { to: j.to || [], skipped: j.skipped || [] };
+        paintAudience();
+      });
+    }, 180);
+  }
+  function paintAudience(){
+    var el = document.getElementById("audout");
+    if (el) el.innerHTML = sendmsgAudienceHtml();
+    var chip = document.querySelector('.phead2 .hright .chip:last-of-type');
+    if (chip && document.getElementById("msgsend")) {
+      var st = sendmsg();
+      chip.textContent = (sendmsgHasAny() && st.aud && st.aud.to)
+        ? plural(st.aud.to.length, "recipient", "recipients") : "nobody chosen";
+    }
+  }
+
   function leaveModes(){
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
@@ -364,6 +413,10 @@
        side effect is the shape `branding()` had when it was inventing fields
        nobody stored (§42, §50.6). */
     if (typeof MAILSENT !== "undefined") MAILSENT = null;
+    /* A composed message goes with the page too — a subject typed for one
+       audience sitting on the screen after navigating away is a message
+       waiting to be sent to the wrong people. */
+    if (typeof SENDMSG !== "undefined") SENDMSG = null;
   }
   /* Which section of a container tab is open, per tab. Kept per tab rather than
      globally so moving between Performance and Strategy does not reset both. */
@@ -2788,6 +2841,108 @@
       });
     });
     paintMailPreview();
+
+    /* ── The composer (§74) ─────────────────────────────────────────
+       TICKING REPAINTS; TYPING DOES NOT. A checkbox changes what the page
+       shows (which capsules are lit, and who it resolves to), so it repaints.
+       The subject and the body are mirrored into SENDMSG on `change` and
+       written straight into the preview on `input`, because a repaint would
+       replace the box being typed into (§35, §71.2). */
+    document.querySelectorAll("[data-aud]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        if (inp.dataset.aud === "everyone") sendmsg().criteria.everyone = inp.checked;
+        else sendmsgToggle(inp.dataset.aud, inp.value, inp.checked);
+        sendmsgAsk();
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-audkey]").forEach(function(b){
+      b.addEventListener("click", function(){
+        sendmsgToggle("keys", b.dataset.audkey, false);
+        sendmsgAsk(); paint();
+      });
+    });
+    var audpick = document.getElementById("audpick");
+    if (audpick) audpick.addEventListener("change", function(){
+      if (!this.value) return;
+      sendmsgToggle("keys", this.value, true);
+      sendmsgAsk(); paint();
+    });
+
+    /* The four typed fields. `input` for the preview so it follows the
+       keystroke, `change` for the store so a repaint cannot lose it — the same
+       field wired twice on purpose, for two different jobs. */
+    [["msgsubject","subject"],["msgbody","body"],
+     ["msgctalabel","ctaLabel"],["msgctahref","ctaHref"]].forEach(function(pair){
+      var el = document.getElementById(pair[0]);
+      if (!el) return;
+      el.addEventListener("input", function(){
+        sendmsg()[pair[1]] = el.value;
+        paintMsgPreview();
+      });
+    });
+    paintMsgPreview();
+
+    var msgsend = document.getElementById("msgsend");
+    if (msgsend) msgsend.addEventListener("click", function(){
+      var st = sendmsg(), out = document.getElementById("msgsaid");
+      function say(msg, ok){
+        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
+        if (!out) return;
+        out.textContent = msg;
+        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+      }
+      if (!sendmsgHasAny()) return say("Choose who it goes to first.", false);
+      if (!st.subject.trim()) return say("It needs a subject.", false);
+      if (!st.body.trim()) return say("It needs something in it.", false);
+      var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
+      if (!n) return say("That comes to nobody with an address.", false);
+      /* THE CONFIRMATION NAMES THE NUMBER, because the number is the thing
+         that cannot be taken back. */
+      if (!confirm("Send \u201c" + st.subject.trim() + "\u201d to " +
+                   plural(n, "person", "people") + "? This cannot be undone."))
+        return;
+      var sh = commsShape();
+      say("Sending to " + plural(n, "person", "people") + "\u2026", null);
+      msgsend.disabled = true;
+      st.busy = true;
+      SYNC.mailSend({
+        criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
+        ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
+        fromName: sh.fromName, replyTo: sh.replyTo,
+        html: MAIL.html({
+          org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
+          eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
+          body: st.body.trim(),
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+        })
+      }, function(err, j){
+        msgsend.disabled = false; st.busy = false;
+        if (err) { say(err, false); return; }
+        st.result = { ok: !j.failed,
+          msg: plural(j.sent, "message", "messages") + " sent" +
+               (j.failed ? ", " + j.failed + " failed" : "") + ".",
+          rows: null };
+        /* The list is asked again rather than guessed at: what the server
+           recorded is the record, and a row this page invented would be a
+           second copy of it. */
+        SENTLIST = null;
+        paint();
+      });
+    });
+
+    if (SENTLIST === null && document.getElementById("msgsend") &&
+        typeof SYNC !== "undefined" && SYNC.isLive()) {
+      SENTLIST = { messages: [] };
+      SYNC.mailHistory(function(err, j){
+        SENTLIST = err ? { error: err } : { messages: (j && j.messages) || [] };
+        paint();
+      });
+    }
+    if (document.getElementById("audout") && sendmsgHasAny() &&
+        !sendmsg().aud && !sendmsg().asking) sendmsgAsk();
+
     /* Asked ONCE PER SESSION, the same shape as the register's password
        states: whether a key is present and what Resend says about the domain
        are the server's facts, and a page that guessed them would report a

@@ -9610,3 +9610,74 @@ rename it on every screen in the platform.
 **Still open:** the cycle chase — the same send with the recipients and the body
 worked out from who owes a submission. It is now one function away, which was
 the point of building this first.
+
+---
+
+## 75 · A repaint must not move the page (v3.23)
+
+Islam: *"on every edit in the table the table jumps up to the start. Make any
+editing doesn't make the tables jump!!"* — and, a minute later, *"I'm not able
+to add a role or add a number without the whole thing jumping."*
+
+**75.1 §71.2 fixed the fields it could reach and could never fix the rest.**
+That version took `paint()` OFF the handlers that did not need it, which was
+right and is why typing a name is steady. It does nothing for the edits that
+genuinely have to repaint: **adding a row, giving somebody a role, opening the
+role picker, changing a figure** — these change what the page *says*, not just
+what is in a box. Chasing them one handler at a time is how a fault comes back
+six versions later on the one nobody remembered.
+
+**So the repaint is made harmless instead.** `paint()` replaces the whole of
+`#panel`, and that throws away three things somebody was relying on:
+
+- **where the page was scrolled**
+- **where each scroll BOX inside it was scrolled** — the register is 1127px
+  wide in a 920px box and taller than its own frame, so it has both, and its
+  vertical offset is the one Islam photographed at row 76
+- **which field had the cursor, and where in it**
+
+All three are taken before the rebuild and put back after, **synchronously, in
+the same frame**, so nothing is ever drawn at the top and then moved — that
+flash is the same jump, only quicker. The cost is two walks of the panel per
+paint; the alternative is auditing every handler in the platform for ever.
+
+A box is matched across the rebuild by its class and its ordinal among boxes of
+that class. Same page, same shape, so it holds — and when it does not, the worst
+case is that nothing is restored, which is where the product already was.
+
+**75.2 `focus()` SCROLLS, so the fix caused the fault it was written for.**
+Restoring the scroll and then restoring the focus undoes the first with the
+second: `focus()` brings its element into view by default. Measured — a field
+near the bottom of the register drags the box to 952 whatever it was just set
+to. `focus({preventScroll:true})`, with a plain `focus()` behind a try/catch for
+anything that does not take the option.
+
+**And it was the PROBE that found it**, by focusing a field before scrolling and
+reporting a jump the product had not caused. A check that moves the thing it is
+measuring measures itself — the trial now does its setup *before* setting the
+scroll, so the probe's own focus can never be read as the product's.
+
+Five edits asserted at 1280×820, scroll box at (600, 300) and page at 220:
+editing a job title, opening the role picker, choosing a role in it, changing
+where somebody sits, adding a person. All five: unchanged, and the caret stays
+in the field it was in.
+
+**75.3 "That comes to nobody with an address" was said for three different
+things, and was true of one.** Islam added himself to the register with an
+address, went to Send a message, and was told nobody had one.
+
+The audience is resolved against the **stored** register, which is correct and
+is §74.2's whole point — a posted list of addresses would be the browser
+deciding who gets mail. What it means is that **the screen can be ahead of the
+server**, and nothing on the page said so.
+
+Two halves to the fix. `sendmsgAsk()` and the send both **flush first**:
+`SYNC.saveNow` answers `"clean"` without a request when nothing has changed, so
+it costs nothing on the ordinary path and closes the gap on the one that made a
+correct rule look like a broken feature. And the empty list now says **which of
+the three** it is: nothing matched · everything that matched has no address
+(named) · or the register the server holds, counted, because *that* is the one
+somebody cannot work out from the screen.
+
+Reproduced exactly — add a person, type an address, go straight to Send without
+waiting — and the person now appears in the resolved list.

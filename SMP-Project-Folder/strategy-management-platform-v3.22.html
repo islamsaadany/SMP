@@ -20241,6 +20241,35 @@ function sendmsgAudienceHtml(){
     return '<span class="why" style="margin:0">Could not ask the server: ' + esc(st.aud.error) + '</span>';
 
   var to = st.aud.to || [], sk = st.aud.skipped || [];
+
+  /* ── NOBODY IS THREE DIFFERENT ANSWERS (§75.3) ──────────────────────
+     "That comes to nobody with an address" was said for all of them, and it is
+     only true of one. The three are: nothing matched · everything that matched
+     has no address · the server does not hold the register you are looking at.
+     The third is the one somebody cannot work out from the screen, so the
+     count the server actually holds is named. */
+  if (!to.length) {
+    if (sk.length) {
+      return '<b>Nobody will get this.</b> <span class="why" style="margin:0">' +
+        'The ' + plural(sk.length, "person", "people") +
+        (sk.length === 1 ? ' who matches has' : ' who match have') +
+        ' no usable address:</span>' +
+        '<div class="audnames">' + sk.map(function(r){
+          return '<span class="chip warnchip">' + esc(r.name) + ' <i>' + esc(r.why) + '</i></span>';
+        }).join("") + '</div>';
+    }
+    var known = (st.aud.active == null) ? null : st.aud.active;
+    return '<b>Nobody on the register matches that.</b>' +
+      (known === null ? '' :
+        '<span class="why" style="margin:0"> The server holds ' +
+        plural(known, "active person", "active people") + ', ' +
+        (st.aud.withAddress || 0) + ' of them with an address. ' +
+        (known === 0
+          ? 'Nothing has been saved to it yet.'
+          : 'If somebody you just added is missing, their row had not been saved when this was asked — ' +
+            'change a tick and it will ask again.') + '</span>');
+  }
+
   var head = '<b>' + plural(to.length, "person", "people") + ' will get this</b>';
   var names = to.length
     ? '<div class="audnames">' + to.map(function(r){
@@ -22988,14 +23017,28 @@ var SYNC = (function () {
         return paintAudience();
       }
       var asked = JSON.stringify(st.criteria);
+      /* ── FLUSH FIRST (§75.3) ────────────────────────────────────────
+         The audience is resolved against the STORED register, which is right —
+         a posted list of addresses would be the browser deciding who gets mail
+         (§74.2) — and it means the screen can be ahead of the server. Somebody
+         adds themselves, types an address, comes here and is told nobody
+         matches, with nothing on the page explaining why.
+
+         `saveNow` answers "clean" without a request when nothing has changed,
+         so this costs nothing on the ordinary path and closes the gap on the
+         one that made a correct rule look like a broken feature. */
+      SYNC.saveNow(function(){
       SYNC.mailAudience(st.criteria, function(err, j){
         /* A stale answer is worse than none: somebody ticked again while this
            was in flight, and painting it would show a list for criteria that
            are no longer on screen. */
         if (JSON.stringify(st.criteria) !== asked) return;
         st.asking = false;
-        st.aud = err ? { error: err } : { to: j.to || [], skipped: j.skipped || [] };
+        st.aud = err ? { error: err }
+                     : { to: j.to || [], skipped: j.skipped || [],
+                         active: j.active, withAddress: j.withAddress };
         paintAudience();
+      });
       });
     }, 180);
   }
@@ -23567,8 +23610,94 @@ var SYNC = (function () {
     THEME.setBrand({ palette: b.palette, font: b.font, tokens: brandTokens() });
   }
 
+  /* ══ A REPAINT MUST NOT MOVE THE PAGE (§75) ═══════════════════════
+     Islam: "on every edit in the table the table jumps up to the start … I'm
+     not able to add a role or add a number without the whole thing jumping."
+
+     §71.2 answered this by taking `paint()` OFF the fields that did not need
+     it, which fixed the fields it reached and could never fix the rest: adding
+     a row, giving somebody a role, changing a figure — these genuinely have to
+     repaint, because they change what the page SAYS, not just what is in a box.
+     Chasing them one at a time is how a fault comes back six versions later on
+     the one handler nobody remembered.
+
+     So the repaint is made harmless instead. `paint()` replaces the whole of
+     `#panel`, which throws away three things somebody was relying on: where the
+     page was scrolled, where each scroll BOX inside it was scrolled — the
+     register is 1127px wide in a 920px box and taller than its own frame, so it
+     has both — and which field had the cursor, and where in it.
+
+     All three are taken before the rebuild and put back after, so a repaint
+     leaves the screen exactly where it was. THE COST IS TWO WALKS of the panel
+     per paint; the alternative is auditing every handler in the platform for
+     ever.
+
+     A box is matched across the rebuild by its class and its ordinal among
+     boxes of that class. Same page, same shape, so it holds — and when it does
+     not, the worst case is that nothing is restored, which is where the product
+     was already. */
+  function scrollsIn(root){
+    var out = [], seen = {};
+    (root ? root.querySelectorAll("*") : []).forEach(function(el){
+      if (!el.scrollTop && !el.scrollLeft) return;
+      var k = (typeof el.className === "string" && el.className) || el.tagName;
+      seen[k] = (seen[k] || 0) + 1;
+      out.push({ k:k, n:seen[k], top:el.scrollTop, left:el.scrollLeft });
+    });
+    return out;
+  }
+  function putScrollsIn(root, boxes){
+    if (!root || !boxes.length) return;
+    var seen = {};
+    root.querySelectorAll("*").forEach(function(el){
+      var k = (typeof el.className === "string" && el.className) || el.tagName;
+      seen[k] = (seen[k] || 0) + 1;
+      for (var i = 0; i < boxes.length; i++) {
+        if (boxes[i].k === k && boxes[i].n === seen[k]) {
+          el.scrollTop = boxes[i].top; el.scrollLeft = boxes[i].left;
+          return;
+        }
+      }
+    });
+  }
+  /* The field with the cursor, named by the data attribute it is wired on —
+     every editable control in the platform carries one, which is what makes
+     this possible without giving a thousand cells an id. */
+  function focusMark(){
+    var el = document.activeElement;
+    if (!el || el === document.body || !el.dataset) return null;
+    var mark = null, k;
+    for (k in el.dataset) { mark = { attr:k, val:el.dataset[k] }; break; }
+    if (!mark && el.id) mark = { id:el.id };
+    if (!mark) return null;
+    var o = { mark:mark };
+    try { o.start = el.selectionStart; o.end = el.selectionEnd; } catch (e) {}
+    return o;
+  }
+  function putFocus(f){
+    if (!f) return;
+    var sel = f.mark.id
+      ? "#" + f.mark.id
+      : "[data-" + f.mark.attr.replace(/[A-Z]/g, function(c){ return "-" + c.toLowerCase(); }) +
+        "=" + JSON.stringify(String(f.mark.val)) + "]";
+    var el;
+    try { el = document.querySelector(sel); } catch (e) { return; }
+    if (!el) return;
+    /* `preventScroll`, and it is the whole point. focus() scrolls its element
+       into view by default, so restoring the scroll and THEN restoring the
+       focus undoes the first with the second — the fix causing the fault it
+       was written for. Measured: without it a field near the bottom of the
+       register drags the box to 952 whatever it was set to. */
+    try { el.focus({ preventScroll:true }); } catch (e) { el.focus(); }
+    /* The caret goes back where it was, or a repaint mid-word would put it at
+       the end and the next keystroke would land in the wrong place. */
+    if (f.start != null) { try { el.setSelectionRange(f.start, f.end); } catch (e) {} }
+  }
+
   function paint(){
     if (CLICKING) { PAINT_HELD = true; return; }
+    var _panel = document.getElementById("panel");
+    var _keep = { y: window.pageYOffset || 0, boxes: scrollsIn(_panel), focus: focusMark() };
     /* WHAT THIS PAINT IS ABOUT, set before anything renders. Every grant() with
        no target of its own answers for this — the unit, the function or the
        group currently on screen — because "own business unit" and "other
@@ -23761,6 +23890,12 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
+       the same frame as the rebuild, so nothing is ever drawn at the top and
+       then moved — that flash is the jump, only quicker. */
+    putScrollsIn(document.getElementById("panel"), _keep.boxes);
+    if (_keep.y) window.scrollTo(0, _keep.y);
+    putFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
     /* Every mutation repaints, so this is where a change becomes a save. */
@@ -25514,6 +25649,9 @@ var SYNC = (function () {
       say("Sending to " + plural(n, "person", "people") + "\u2026", null);
       msgsend.disabled = true;
       st.busy = true;
+      /* The server resolves the list again from the stored register, so what it
+         holds has to be what is on screen before the send, not after. */
+      SYNC.saveNow(function(){
       SYNC.mailSend({
         criteria: st.criteria, subject: st.subject.trim(), body: st.body.trim(),
         ctaLabel: st.ctaLabel.trim(), ctaHref: st.ctaHref.trim(),
@@ -25537,6 +25675,7 @@ var SYNC = (function () {
            second copy of it. */
         SENTLIST = null;
         paint();
+      });
       });
     });
 

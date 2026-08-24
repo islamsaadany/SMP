@@ -3807,6 +3807,35 @@ function sendmsgAudienceHtml(){
     return '<span class="why" style="margin:0">Could not ask the server: ' + esc(st.aud.error) + '</span>';
 
   var to = st.aud.to || [], sk = st.aud.skipped || [];
+
+  /* ── NOBODY IS THREE DIFFERENT ANSWERS (§75.3) ──────────────────────
+     "That comes to nobody with an address" was said for all of them, and it is
+     only true of one. The three are: nothing matched · everything that matched
+     has no address · the server does not hold the register you are looking at.
+     The third is the one somebody cannot work out from the screen, so the
+     count the server actually holds is named. */
+  if (!to.length) {
+    if (sk.length) {
+      return '<b>Nobody will get this.</b> <span class="why" style="margin:0">' +
+        'The ' + plural(sk.length, "person", "people") +
+        (sk.length === 1 ? ' who matches has' : ' who match have') +
+        ' no usable address:</span>' +
+        '<div class="audnames">' + sk.map(function(r){
+          return '<span class="chip warnchip">' + esc(r.name) + ' <i>' + esc(r.why) + '</i></span>';
+        }).join("") + '</div>';
+    }
+    var known = (st.aud.active == null) ? null : st.aud.active;
+    return '<b>Nobody on the register matches that.</b>' +
+      (known === null ? '' :
+        '<span class="why" style="margin:0"> The server holds ' +
+        plural(known, "active person", "active people") + ', ' +
+        (st.aud.withAddress || 0) + ' of them with an address. ' +
+        (known === 0
+          ? 'Nothing has been saved to it yet.'
+          : 'If somebody you just added is missing, their row had not been saved when this was asked — ' +
+            'change a tick and it will ask again.') + '</span>');
+  }
+
   var head = '<b>' + plural(to.length, "person", "people") + ' will get this</b>';
   var names = to.length
     ? '<div class="audnames">' + to.map(function(r){

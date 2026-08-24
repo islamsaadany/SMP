@@ -217,7 +217,15 @@ module.exports = async function handler(req, res) {
     if (action === "audience") {
       const stored = await readState(client);
       const out = Audience.resolve(Rules.worldOf(stored), stored.people || [], body.criteria);
-      return send(res, 200, { ok: true, to: out.to, skipped: out.skipped });
+      /* HOW MANY PEOPLE THE SERVER ACTUALLY HOLDS, so "nobody matches" can be
+         told apart from "the server has not got your register yet" — which is
+         the one a person cannot diagnose from the screen (§75.3). */
+      const active = (stored.people || []).filter(function (p) {
+        return Rules.personActive(p); }).length;
+      const withAddr = (stored.people || []).filter(function (p) {
+        return Rules.personActive(p) && Audience.addressOf(p); }).length;
+      return send(res, 200, { ok: true, to: out.to, skipped: out.skipped,
+                              active: active, withAddress: withAddr });
     }
 
     if (action === "send") {

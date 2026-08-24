@@ -149,14 +149,34 @@ A drift between specs and code is a documentation bug — report it before silen
   reviewable; merging is what makes it live.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
-- **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and
-  compare — another session may have pushed while this one was working, and it
+- **BEFORE MERGING, FETCH MAIN AND CHECK FOR CONFLICTS — WITHOUT TOUCHING
+  ANYTHING.** Another session may have pushed while this one was working, and it
   has: §70 landed on main mid-session on 2026-08-24 while §71 was being built.
-  Never merge blind.
+  Never merge blind. The check is a dry run:
+
+  ```
+  git fetch origin main
+  git log --oneline HEAD..origin/main          # what landed while we worked
+  git merge-tree --write-tree origin/main HEAD # exit 0 = clean, 1 = conflicts
+  ```
+
+  `merge-tree` reports the conflicting files and **changes nothing on disk**, so
+  it can be run before anybody is committed to a merge.
+- **IF IT IS NOT CLEAN, STOP AND ASK BEFORE PROCEEDING.** Report, in this order:
+  what landed on main, which files overlap, what each conflict actually is, and
+  the **proposed resolution** — then wait. Do not resolve a conflict on a
+  judgement call about somebody else's work; a merge that compiles is not a
+  merge that is correct.
+- **ASK EVEN WHEN IT IS CLEAN, IF ANYTHING LOOKS WRONG.** `merge-tree` answers
+  "do these texts collide", which is not the same question as "do these changes
+  agree". Two branches each adding a `var pf` to one function merged with no
+  textual conflict at all and broke a page (§56.7). If main has moved in the
+  area this work touches, say so and ask, conflict or no conflict.
 - **Merge with `--ff-only`.** It REFUSES a divergent main instead of inventing a
   merge commit, so the moment two sessions have touched the same thing you are
-  told rather than shown a silent auto-merge. On a refusal: fetch, merge main
-  into the branch, resolve there, re-run the checks, then fast-forward.
+  told rather than shown a silent auto-merge — the backstop for anything the
+  dry run above missed. On a refusal: fetch, merge main into the branch, resolve
+  there **after asking**, re-run every check, then fast-forward.
 - **AFTER A MERGE THAT BRINGS IN SOMEBODY ELSE'S SOURCES, REBUILD — never trust
   git's merge of the built file.** `strategy-management-platform-vX.Y.html` is
   generated; git will happily splice two versions of it into something that

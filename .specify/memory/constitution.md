@@ -146,7 +146,11 @@ can run is a check that skips in silence while the suite reports green.
   classes.
 - **Merging to `main` is Islam's call, asked for each time** — committed and
   pushed is the deliverable; merged is a separate act with its own permission.
-  Principle I applied to the last step rather than only the first.
+  Principle I applied to the last step rather than only the first. Before every
+  merge, `main` is fetched and checked for conflicts **as a dry run that touches
+  nothing**; anything unclean, or anything that merges cleanly while touching
+  what somebody else has just changed, is reported with a proposed resolution
+  and waits for an answer.
 - **A visual or structural change is drawn before it is built**: a static HTML
   mockup under `design-mockups/`, signed off, and only then the sources.
 - A handover sends two things: the loose platform HTML, and the full

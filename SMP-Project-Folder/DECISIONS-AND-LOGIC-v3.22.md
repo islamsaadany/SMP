@@ -10392,3 +10392,47 @@ first: **pushing the branch is what makes work reviewable; merging is what makes
 it live**, and only the second is Islam's to time. Added to `CLAUDE.md`'s Git
 Workflow and to the constitution's Development Workflow in the same change, so
 a spec review meets it too.
+
+---
+
+## 88 · The merge check, and it runs before anybody is committed (2026-08-24)
+
+Islam: *"on merging you need to make a check on the main to check if there is
+conflicts and suggest the resolution — if you need to question something before
+proceeding, not to break something."*
+
+§87 made the merge a separate permission. This says what has to happen inside
+it, and the ordering is the point: **the check is a DRY RUN that changes nothing
+on disk**, so it happens before anybody is committed to a merge rather than
+halfway through one.
+
+```
+git fetch origin main
+git log --oneline HEAD..origin/main          # what landed while we worked
+git merge-tree --write-tree origin/main HEAD # exit 0 = clean, 1 = conflicts
+```
+
+**Verified rather than quoted from the manual**: run against two branches
+changing one line differently, `merge-tree` exits **1** and names the file and
+the conflicting sides, leaving the working tree untouched. A rule written
+against a command nobody ran is a rule that fails the first time it matters.
+
+**Not clean → stop and ask**, reporting in this order: what landed on main,
+which files overlap, what each conflict actually is, and **the proposed
+resolution**. Then wait. Resolving somebody else's work on a judgement call is
+the thing this exists to prevent — **a merge that compiles is not a merge that
+is correct**.
+
+**AND ASK EVEN WHEN IT IS CLEAN, IF ANYTHING LOOKS WRONG.** `merge-tree` answers
+*"do these texts collide"*, which is a different question from *"do these
+changes agree"*. §56.7 is the case: two branches each added a `var pf` to one
+function, six hundred lines apart, **no textual conflict at all** — one binding,
+because `var` is function-scoped, and a page threw on every paint. So if main
+has moved in the area this work touches, that is said out loud whether or not
+git found anything.
+
+`--ff-only` stays as the backstop underneath all of it: it refuses a divergent
+main rather than inventing a merge commit, which catches whatever the dry run
+missed. And §4's other rule still applies afterwards — **a merge that brings in
+somebody else's sources is followed by a rebuild**, never by trusting git's
+merge of the generated file.

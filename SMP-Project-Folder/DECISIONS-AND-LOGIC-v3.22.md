@@ -9767,3 +9767,95 @@ the design was for.
 attribute costs a mail client nothing, and it means the editor never has to
 guess which element is the body — a guess that would break the first time that
 markup moved.
+
+---
+
+## 77 · The whole way in, for every kind of person (v3.23)
+
+Islam: *"can you test the login cycle of multiple roles now to make sure that
+they login?"*
+
+**77.1 The cycle, not the password check.** `scripts/test-login-cycle.js` walks
+one holder of each role through the eight steps in the order a real person meets
+them: the SMO issues a temporary password · they sign in with their **email** ·
+`/api/state` **refuses them** while it is still temporary · they choose their own
+· the platform opens and knows who they are · the where-do-you-work list is the
+**short** one · they can reach a page · and the new password works while the
+temporary one does not.
+
+Step three is the reason this is worth having. It is invisible on screen — the
+gate has always sent people to the change page — so if the SERVER stopped
+caring, nothing would look different until somebody stayed on a temporary
+password for a month (§43.2).
+
+**77.2 Three things the test got wrong before the product did, and each is a
+lesson about checks.**
+
+**It aimed at the wrong endpoint.** `issueTemporary` is the BULK control behind
+the Passwords header menu and **takes no list of people at all** — written
+against it, the first subject silently issued to the whole register and every
+subject after reported `issued: []` while signing in perfectly. A check aimed at
+the wrong endpoint fails in the one direction that looks like a product bug.
+The per-person path Islam actually presses is `setPassword`.
+
+**It had one role to test.** A deployed tenant is clean-slated to the SMO
+(migration 004), so the first run found two roles and both were the SMO — who
+cannot be a subject anyway, because a reset deliberately excludes whoever asked
+for it (§46.4). The test writes the worked example's register in first.
+
+**It walked only the empty case.** Every subject fell through the *"no Official
+BU"* branch, so **the shortlist — the thing Islam reported twice as broken —
+was never exercised**. The demo ships the ten BU names with nothing mapped
+(§54, A4), deliberately, so a client never inherits Raya's departments. The test
+now points two of them somewhere and gives the subjects one each: **Distribution
+at the COMPANY**, which is the interesting branch because it expands to the
+units the company holds. Measured: **2 or 3 of 18** for every role.
+
+And the check is that `near` is a proper SUBSET of what is offered, not that the
+call answered `ok` — "it answered" is what a decoration answers too.
+
+**77.3 It says which roles it could NOT reach.** A clean-slate tenant has no
+plan, and a **Contributor is somebody a plan line names** (§55) — so nobody is
+one, and a run reporting "6 roles, all green" without saying so is a green run
+that covered less than it looks like.
+
+**90 checks, 0 failures**, across Group CEO, Company CEO, Business unit owner,
+Strategy custodian, Supporting function head and Employee.
+
+---
+
+## 78 · Seventy-three people, and what the file said about them (v3.23)
+
+Islam sent the real register as a table and asked for duplicates.
+
+**78.1 There are none** — no repeated Emp ID, no repeated address, no repeated
+name across the 73 rows. Three things the data does say:
+
+- **Two people are indistinguishable in the register.** *Ahmed Mostafa Mohamed
+  El Gebely* (185) and *Ahmed Mostafa Mohamed Abou El Einen* (9648) both display
+  as "Ahmed Mostafa Mohamed", because the Person column shows three names
+  (§69.21). Their minted sign-in keys collide too and the second takes a numeric
+  suffix — harmless since the door takes the EMAIL now (§69.23), but the column
+  needs a fourth name for these two or nobody can tell them apart.
+- **Twelve rows carry no mobile** (`0`, or `#N/A` for one) and **six are missing
+  their leading zero**. The importer takes a ten-digit number as written; it is
+  a phone number and nothing computes with it.
+- **All ten Official BU names already exist** in the platform's list, so nothing
+  arrives unmapped.
+
+**78.2 The file was built by the platform's own exporter, and read back through
+its own reader.** Hand-rolling an `.xlsx` would be a second copy of a format the
+reader expects, and the two would drift the first time a column moved — §65's
+validation-range trap arriving through a script instead of through a rename. So
+the platform is loaded, `PEOPLE` is replaced with the rows to add, and its own
+Download button is pressed.
+
+Then it is **read back through the upload**, on a register that already holds
+people, because that is the state it will meet: **73 rows read, 73 added, no
+problems, no new BU names**, every field where it should be. §52's rule — a
+pipeline that substitutes silently produces a plausible artefact.
+
+**Unit, Role and Status are left blank.** They are the SMO's to decide, and a
+guess written into the file would decide them. The upload adds and amends and
+**never removes** (§54), so anyone already on the register is updated on their
+Emp ID rather than duplicated.

@@ -188,3 +188,33 @@ are guarded the day they are added.
 - **A file can grant a role, including Super user.** Authorised as Setup like
   everything else here, and worth knowing before a file arrives from somebody
   else's laptop.
+
+---
+
+## Addendum — §65 (2026-08-24)
+
+The people workbook carries a second place column, **Unit**, beside Official BU.
+
+**Why it was missing.** §54 put the client's own name for a part of the business
+in the file, and §56/§57 then made the place it opens reachable two other ways —
+the Official BU list mapping it, or the person declaring it at sign-in. Neither
+helps somebody who already knows where people sit and wants to upload it.
+
+**The two columns, and how they settle.** Fill **Unit** and it decides. Leave it
+and the **Official BU** decides, where that name points at exactly one place.
+Leave both and the person stays where they are. Blank has meant "nothing to say"
+in every cell of this file since it existed; the precedence needed no new rule.
+
+**Vocabulary.** `roleWhereLabel()`'s — "the group", "Mobile", "Merchandising
+(function)", "Distribution" — the same words the register's own cell and the
+Official BU list's chips show. The `(function)` suffix disambiguates a tenant
+with a unit and a function of the same name.
+
+**Softness runs opposite ways, deliberately.** An unknown **Official BU** is
+added to the list unmapped, because that is how the client's names arrive at
+all. An unknown **Unit** is refused: a unit exists here or it does not, and
+typing one cannot create it.
+
+**Naming.** The header is *Unit*, not *BU* — Islam, because the column covers
+business units, supporting functions and companies. The stored key stays `bu`,
+and the reader still accepts the old "BU" header.

@@ -103,14 +103,7 @@ function stateCell(roleKey, areaKey, editable, disabled){
      handler, so the click still says only "set this cell to this". */
   var opts = ["view","edit"].map(function(o){
     var on = o === v;
-    /* `st-view`, NOT `view` (§65). A class name is one global namespace, and
-       `.view` is the PAGE REGION — `.view { padding-top: var(--rail-gap) }` —
-       so the lit eye was given 22px of padding inside a 24px box and its icon
-       sat 11px below the middle of its own button. Nothing was wrong with the
-       button's own rules; it was wearing somebody else's. §56.7 in CSS instead
-       of JS: a one-word modifier will eventually collide with a one-word
-       component, and the collision is silent because both rules are valid. */
-    return '<button type="button" class="stbtn' + (on ? " on st-" + o : "") + '" data-ac="' +
+    return '<button type="button" class="stbtn' + (on ? " on " + o : "") + '" data-ac="' +
       roleKey + '|' + areaKey + '|' + (on ? "none" : o) + '" title="' +
       (on ? "Turn off — leaves no access" : o === "view" ? "May read" : "May read and change") +
       '" aria-label="' + (on ? "turn off " + o : o) + '" aria-pressed="' + on + '">' +
@@ -825,14 +818,7 @@ var PEOPLE_COLS = [
   { k:"empid",    label:"Emp. ID", off:true },
   { k:"title",    label:"Job title" },
   { k:"mainbu",   label:"Official BU" },
-  /* "Unit", not "BU" (Islam, §65). The column holds a business unit, a
-     supporting function or a company — "BU" named a third of what it can
-     say, which is why he could read the register and still not see where the
-     other two kinds of person sit. The KEY stays `bu`, because a stored
-     column preference written before the rename would otherwise fall back to
-     the default and reappear for everybody who ever touched the chooser
-     (§30.2) — the label is what people read, the key is what code holds. */
-  { k:"bu",       label:"Unit" },
+  { k:"bu",       label:"BU" },
   { k:"contact",  label:"Contact",  off:true },
   { k:"roles",    label:"Roles" },
   { k:"status",   label:"Status" },
@@ -1247,7 +1233,7 @@ function renderPeople(){
         (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
         (showCol("title")    ? '<th>Job title</th>'  : '') +
         (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
-        (showCol("bu")       ? '<th>Unit</th>'       : '') +
+        (showCol("bu")       ? '<th>BU</th>'         : '') +
         (showCol("contact")  ? '<th>Contact</th>'    : '') +
         (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
         (showCol("status")   ? '<th class="cc">Status</th>' : '') +

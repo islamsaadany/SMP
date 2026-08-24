@@ -8330,3 +8330,108 @@ what he asked for (rule 1c), and fixing only the new one would make it the odd
 one out of three (§40: converting some of a family is worse than converting
 none). It is his call, and it is a small one: all three headlines together, or
 none.
+
+## 65 · The register's file carries where somebody actually sits (v3.21)
+
+**65.1 The ask, and why the column was missing.** Islam: *"for the people
+register table the downloaded template has only the official BU and not the BU
+as well. The BU as far as I understand is the relation we have … we need this in
+the download template as if I know some of them I will upload it ready and we
+don't need to get them from the audience."*
+
+He is right, and the gap was a consequence of the order things were built in.
+§54 put the client's own name for a part of the business in the file. §56 and
+§57 then made the place it opens reachable two other ways — the Official BU list
+mapping a name to exactly one target, or the person declaring it at their first
+sign-in. **Neither of those helps somebody who already knows.** The register
+shows both columns side by side; the file it exports should carry both.
+
+**65.2 It is called Unit, not BU.** Islam, on seeing it: *"it needs to be only
+Unit not BU as it covers BUs and functions as well."* The column holds a
+business unit, a supporting function **or a company** — "BU" named a third of
+what it can say. The register's header changed with it, so the screen and the
+file use one word.
+
+**THE KEY DID NOT CHANGE.** `PEOPLE_COLS` still holds `k:"bu"`, because a
+column preference written before the rename would otherwise miss its key, fall
+back to the shipped default, and reappear for everybody who has ever touched
+the column chooser (§30.2). The label is what people read; the key is what code
+holds.
+
+**65.3 Write the new label, read either.** "BU" was this column's header for
+exactly one build, and somebody may be holding that file. `fileUnit()` takes
+either — the same rule §58 earned for the Official BU rename, applied forward
+this time instead of after the fact.
+
+**65.4 Blank means nothing to say, and that is what makes the two columns work
+together.** Fill Unit and it decides. Leave it and the Official BU decides,
+where that name points at exactly one place. Leave both and the person stays
+where they are. Every other cell in this file already behaves that way (§54), so
+the precedence needed no new rule — only for `attachPersonAt()` to move out from
+under `if (row.mainbu)`, where filling only the new column would have done
+nothing at all and said nothing about why.
+
+**65.5 The vocabulary is `roleWhereLabel()`'s, and the suffix is load-bearing.**
+"the group", "Mobile", "Merchandising (function)", "Distribution" — the same
+words the Official BU list's chips and the register's own cell show, so the file
+and the screen cannot describe one thing two ways. The `(function)` suffix is
+not decoration: this tenant has a business unit called **IT** and a supporting
+function called **IT**, and a bare "IT" in a spreadsheet names neither.
+
+**65.6 An exact match is answered; the near miss is named.** "IT" is the
+business unit's own name, so resolving it to the unit is correct and refusing it
+would turn a right answer into an error message. But somebody typing it meaning
+the FUNCTION gets the unit and is told nothing — the silent wrong answer §61
+refused for capabilities, arriving where a refusal would be wrong. So it
+resolves **and** says what else it could have been, as a notice on the review.
+
+**And only where it would move somebody.** Written on the value alone, that
+notice fired four times against the platform's own download — §54.4 arriving
+through a warning instead of a refusal. A row that leaves somebody where they
+already are has nothing to warn about.
+
+**65.7 The Unit list is NOT soft, and the Official BU list still is.** An
+Official BU the platform has never met is added unmapped, because that is how
+the client's names arrive at all (§54). A unit is the opposite: it exists here
+or it does not, and typing a new one cannot conjure one. So the dropdown is the
+whole answer and a name outside it is refused by name.
+
+**65.8 A validation range is a POSITION.** Inserting Unit moved Role G→H and
+Status H→I, and nothing warns when a range stops matching its column — a Role
+dropdown left on G would have offered role names inside the Unit cell, which is
+the kind of wrong that looks like a feature. The ranges are derived from
+`PEOPLE_FILE_COLS` now, so the next column added cannot leave one behind.
+
+**65.9 A class name is one global namespace.** Islam, on the access matrix:
+*"the eye in this table when it's clicked it drops down it needs to stay in the
+middle of its box."*
+
+The lit eye's icon sat **11px below the centre of its own 24px button** —
+measured, and only on `.on.view`. Nothing was wrong with the button's rules; it
+was wearing somebody else's. `.view` is the **page region**
+(`.view { padding-top: var(--rail-gap) }`), and the button's state modifier was
+the bare word `view`, so the lit eye was given 22px of padding inside a 24px
+box.
+
+**§56.7 in CSS instead of JS**, and the same shape: a one-word modifier and a
+one-word component in one shared scope, valid on both sides, silent when they
+meet. The modifiers are `st-view` / `st-edit` / `st-none` now. `.edit` had not
+collided yet — it is renamed anyway, because a family half-converted is worse
+than one left alone (§40).
+
+**65.10 AND THE NEW COLUMN BROKE TWO CHECKS, CORRECTLY.** The people-file block
+asserts three things about the Official BU mapping — a name that means one
+place, one that means nothing, one that holds several. With the download now
+filling Unit for everybody, those three stopped observing the mapping at all
+and reported where each person already sits: `'group' / 'group'` where
+`'retailstores' / nothing` was wanted, and somebody placed at `logistics` by a
+name that holds several.
+
+**The product was right and the check was right to fail.** The Unit column
+beating the mapping is the whole feature; a check written before it could not
+know that. Fixed by giving those three a copy of the rows with **Unit blanked**,
+which is the documented *"leave it and the Official BU decides"* path — so the
+assertion is now sharper than it was, proving the fallback as well as the
+mapping. That is the line between fixing a check and editing it into agreeing:
+the behaviour it was written to protect is unchanged, and it is now isolated
+well enough to see it.

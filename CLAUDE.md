@@ -222,6 +222,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **The register's file carries WHERE SOMEBODY SITS, and the column is called
+  Unit (§65):** "Official BU" is the client's own word (§58); **Unit** is the
+  business unit, supporting function or company it opens here — Islam renamed
+  it from BU because "it covers BUs and functions as well". The label changed,
+  **the key `bu` did not**, or every saved column preference would miss it and
+  the column would reappear for everybody who touched the chooser (§30.2). The
+  reader takes the old "BU" header too (§58's rule, applied forward). **Blank
+  means nothing to say**: fill Unit and it decides, leave it and the Official BU
+  mapping does, leave both and nobody moves — which only needed
+  `attachPersonAt()` to move out from under `if (row.mainbu)`. The vocabulary is
+  `roleWhereLabel()`'s and **the `(function)` suffix is load-bearing** (this
+  tenant has a unit called IT and a function called IT); an exact match is
+  answered and the near miss is NAMED, but **only where it would move
+  somebody**, or the platform notices four times about its own export (§54.4).
+  The Unit list is **not soft** while the Official BU list still is: a name can
+  be added to the client's own vocabulary, a unit cannot be conjured. And
+  **a validation range is a POSITION** — inserting the column moved Role G→H, so
+  the ranges derive from `PEOPLE_FILE_COLS` now.
+- **A CLASS NAME IS ONE GLOBAL NAMESPACE (§65.9):** the access matrix's lit eye
+  sat 11px below the centre of its own button because its state modifier was the
+  bare word `view` and `.view` is the PAGE REGION, carrying
+  `padding-top: var(--rail-gap)`. Nothing was wrong with the button's rules; it
+  was wearing somebody else's. **§56.7 in CSS instead of JS** — a one-word
+  modifier and a one-word component in one scope, valid on both sides, silent
+  when they meet. Scoped to `st-view` / `st-edit` / `st-none`.
 - **A unit's Performance has THREE headline numbers (§64):** objectives ·
   **pillars** · execution, read left to right as *what we are judged on · how
   the work we set ourselves is going · whether the work happened*. Nothing new

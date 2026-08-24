@@ -551,11 +551,6 @@ function personByEmpId(id){
    row then reads "Strategy custodian · Care" twice and looks like a duplicate
    rather than two real roles over two different things. The kind is part of
    the answer, so it is part of the label. */
-/* roleWhereLabel() for a cell that may legitimately be EMPTY. It answers "the
-   group" for a null, which is right on a role chip (a role is always held over
-   something) and wrong in a file column, where blank means "nothing to say"
-   and "the group" would be an assertion nobody made (§65). */
-function roleWhereLabel2(at){ return at ? roleWhereLabel(at) : ""; }
 function roleWhereLabel(at){
   if (!at || at === "group") return "the group";
   if (String(at).indexOf("fn:") === 0) {
@@ -955,29 +950,8 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    template that could be downloaded and not uploaded back is the fault §51.14
    records against the plan file.
    ══════════════════════════════════════════════════════════════════ */
-/* TWO BU COLUMNS, AND THEY ARE NOT THE SAME QUESTION (§65). "Official BU" is
-   the client's own word for a part of the business (§58); "BU" is what it opens
-   HERE — the unit, function or company that decides access. The file carried
-   only the first, so the second could be arrived at in one of two ways: the
-   Official BU list mapping it to exactly one place, or the person declaring it
-   at their first sign-in (§56).
-
-   Islam: "the BU as far as I understand is the relation we have … we need this
-   in the download template as if I know some of them I will upload it ready and
-   we don't need to get them from the audience." Which is right, and it is the
-   register's own vocabulary: the page shows both columns side by side, so the
-   file it exports should carry both. */
 var PEOPLE_FILE_COLS = ["Emp ID", "Name", "Job title", "Email", "Mobile",
-                        "Official BU", "Unit", "Role", "Status"];
-/* "Unit" is the header the register shows and this file writes. "BU" is read
-   as well, and always will be: it was the header for exactly one build of this
-   column, and a header is a contract with every file already downloaded — the
-   same rule the Official BU rename earned (§58). */
-var PEOPLE_FILE_UNIT_WAS = "BU";
-function fileUnit(r){
-  var v = r["Unit"];
-  return (v == null || String(v).trim() === "") ? r[PEOPLE_FILE_UNIT_WAS] : v;
-}
+                        "Official BU", "Role", "Status"];
 /* AND THE OLD HEADER IS STILL READ. "Main BU" became "Official BU" for the
    client's own clarity (§58), and a header is a CONTRACT: somebody is holding
    a file downloaded before the rename with the old word at the top of that
@@ -989,57 +963,6 @@ function fileBu(r){
   var v = r["Official BU"];
   return (v == null || String(v).trim() === "") ? r[PEOPLE_FILE_BU_WAS] : v;
 }
-/* EVERY PLACE A PERSON CAN SIT, in the words roleWhereLabel() already speaks —
-   the same words the Official BU list's chips and the register's BU column
-   show, so the file and the screen cannot describe the same thing differently.
-   The "(function)" suffix is not decoration: this tenant has a unit called IT
-   and a function called IT, and a bare "IT" in a spreadsheet names neither. */
-function placeOptions(){
-  var out = [];
-  mainbuWheres().forEach(function(g){
-    g.opts.forEach(function(o){ out.push({ v:o.v, label:roleWhereLabel(o.v) }); });
-  });
-  return out;
-}
-/* The reverse, and it REFUSES an ambiguous name rather than picking one. Two
-   things sharing a name is the accident this guards, and resolving it by
-   whichever came first in the array is the silent wrong answer §61 refused for
-   capabilities. Returns one of { at }, { ambiguous:[…] } or { unknown:true }. */
-function placeByLabel(name){
-  var want = String(name == null ? "" : name).trim().toLowerCase();
-  if (!want) return { at:null };
-  if (want === "the group" || want === "group") return { at:"group" };
-  var opts = placeOptions();
-  var exact = opts.filter(function(o){ return o.label.toLowerCase() === want; });
-  if (exact.length > 1) return { ambiguous:exact.map(function(o){ return o.label; }) };
-  if (exact.length === 1) {
-    /* AN EXACT MATCH IS ANSWERED, AND THE NEAR MISS IS NAMED. This tenant has
-       a business unit called IT and a supporting function called IT: "IT" is
-       the unit's own name and resolving it to the unit is correct, so refusing
-       it would turn a right answer into an error message. But somebody typing
-       it meaning the FUNCTION gets the unit and is told nothing — the silent
-       wrong answer §61 refused for capabilities, arriving where a refusal
-       would be wrong. So it resolves AND says what else it could have been,
-       as a notice on the review before Apply is pressed. */
-    var near = opts.filter(function(o){
-      return o.v !== exact[0].v &&
-             o.label.replace(/\s*\(function\)$/i, "").toLowerCase() === want;
-    });
-    return near.length
-      ? { at:exact[0].v, alsoCould:near.map(function(o){ return o.label; }),
-          chose:exact[0].label }
-      : { at:exact[0].v };
-  }
-  /* A name typed without the suffix the download writes. Accepted where it can
-     only mean one thing, refused by name where it cannot. */
-  var bare = opts.filter(function(o){
-    return o.label.replace(/\s*\(function\)$/i, "").toLowerCase() === want;
-  });
-  if (bare.length === 1) return { at:bare[0].v };
-  if (bare.length > 1) return { ambiguous:bare.map(function(o){ return o.label; }) };
-  return { unknown:true };
-}
-
 /* Written by the download, ignored by the upload. A person may hold three
    roles and the Role column holds one, so the rest are shown rather than
    silently dropped from the file — what the column cannot carry, the sheet
@@ -1128,41 +1051,6 @@ function planPeopleFile(rows){
        them those few and the SMO accepts. Read straight off `bu.at` this
        attached people to the ARRAY, which is not a place at all. */
     var where  = bu ? mainbuAt(bu.name) : null;
-
-    /* THE BU COLUMN WINS WHERE IT IS FILLED (§65). The Official BU is a name
-       from the client's own records and only says where somebody sits when it
-       maps to exactly ONE place; this column says it outright. Blank means
-       "nothing to say", as every other cell in this file does — so leaving it
-       empty keeps the Official BU mapping, and leaving BOTH empty keeps
-       whatever the person already has. */
-    var buCell = fileTxt(fileUnit(r));
-    if (buCell) {
-      var hit = placeByLabel(buCell);
-      if (hit.ambiguous) {
-        plan.problems.push({ at:at, msg:'"' + buCell + '" could be ' +
-          hit.ambiguous.join(" or ") + '. Write it exactly as the download does, ' +
-          'so the row says which.' });
-        return;
-      }
-      if (hit.unknown) {
-        plan.problems.push({ at:at, msg:'there is no business unit, supporting function ' +
-          'or company called "' + buCell + '". Choose one from the dropdown in the Unit ' +
-          'column, or leave it blank to keep where they are.' });
-        return;
-      }
-      /* ONLY WHERE IT WOULD MOVE SOMEBODY. The download writes "IT" for the
-         IT business unit, which is exactly what a hand-typed ambiguous "IT"
-         looks like — so noticing on the value alone made the platform report
-         four notices about its own export, which is §54.4 arriving through a
-         warning instead of a refusal. A row that leaves somebody where they
-         already are has nothing to warn about. */
-      if (hit.alsoCould && (!existing || personAt(existing) !== hit.at)) {
-        plan.notices.push({ at:at, msg:'"' + buCell + '" is ' + hit.chose + ' here. There is ' +
-          'also ' + hit.alsoCould.join(" and ") + ' \u2014 write that in full if it is what ' +
-          'you meant.' });
-      }
-      where = hit.at;
-    }
 
     var roleKey = null;
     if (role) {
@@ -1256,11 +1144,7 @@ function planPeopleFile(rows){
       cmp.forEach(function(c){
         if (c[2] && fileTxt(was[c[0]]) !== c[2]) row.changes.push(c[1]);
       });
-      if (buName && mainbuKey(was.mainbu) !== mainbuKey(buName)) row.changes.push("official BU");
-      /* The PLACE, which is the other column and the one that decides access.
-         Reported separately or a review saying "BU" could mean either, and the
-         two really can move independently. */
-      if (where && personAt(was) !== where) row.changes.push("unit");
+      if (buName && mainbuKey(was.mainbu) !== mainbuKey(buName)) row.changes.push("BU");
       if (roleKey) { row.changes.push("role"); plan.roles++; }
       if (wantActive === true  && !personActive(was)) { row.changes.push("restored"); plan.restored++; }
       if (wantActive === false &&  personActive(was)) { row.changes.push("retired");  plan.retired++; }
@@ -1294,17 +1178,14 @@ function applyPeopleFile(plan){
       if (row.email) p.email = row.email;
       if (row.phone) p.phone = row.phone;
       p.empId = row.id;
-      if (row.mainbu) p.mainbu = row.mainbu;
-      /* Only when there is somewhere to put them. A person whose department
-         maps to nothing keeps whatever attachment they already had — moving
-         them to "nowhere" because Risk has not been mapped yet would take away
-         pages they can open today.
-
-         Outside the `if (row.mainbu)` since §65: the BU column stands on its
-         own, so a row that fills only that one still moves the person. Inside
-         it, filling BU and leaving Official BU blank did nothing at all and
-         said nothing about why. */
-      if (row.where) attachPersonAt(p, row.where);
+      if (row.mainbu) {
+        p.mainbu = row.mainbu;
+        /* Only when the list actually points somewhere. A person whose
+           department maps to nothing keeps whatever attachment they already
+           had — moving them to "nowhere" because Risk has not been mapped yet
+           would take away pages they can open today. */
+        if (row.where) attachPersonAt(p, row.where);
+      }
     }
     /* Restoring gives NOTHING back by itself (§49.4): what they get is what
        this file says, which is the Role column or nothing. The page asks;

@@ -566,6 +566,20 @@ with sync_playwright() as p:
         const rows = peopleFromWorkbook(asExcel(sh));
         const fixed = planPeopleFile(rows);
 
+        /* THE MAPPING ASSERTIONS BELOW NEED THE Unit COLUMN EMPTY (65).
+           It exists to BEAT the Official BU mapping, and since the download
+           now fills it for everybody these three stopped observing the mapping
+           at all — they reported where each person already sits, which is the
+           new column working exactly as designed. The check failed, correctly,
+           the first time it was run against it.
+
+           So they run on a copy with Unit blanked, which is the documented
+           "leave it and the Official BU decides" path — the assertion is
+           sharper than before, because it now proves the fallback as well as
+           the mapping. */
+        const mapRows = rows.map(r => Object.assign({}, r, { Unit:"" }));
+        const mapped = planPeopleFile(mapRows);
+
         /* THE EDIT IS MADE TO THE FILE, NOT TO THE REGISTER. Written the other
            way round first — change the person, download again — it proved
            nothing at all: the download carried the new value too, so both
@@ -599,15 +613,57 @@ with sync_playwright() as p:
           fixedSkipped: fixed.notices.length,
           rows: fixed.rows.length,
           people: PEOPLE.length,
-          mappedAt: (fixed.rows.filter(r => r.key === PEOPLE[0].key)[0] || {}).where || null,
-          unmappedAt: (fixed.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
-          severalAt: (fixed.rows.filter(r => r.key === PEOPLE[3].key)[0] || {}).where || null,
+          mappedAt: (mapped.rows.filter(r => r.key === PEOPLE[0].key)[0] || {}).where || null,
+          unmappedAt: (mapped.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
+          severalAt: (mapped.rows.filter(r => r.key === PEOPLE[3].key)[0] || {}).where || null,
           severalChoices: (SMPRules && mainbuChoices("Distribution")) || [],
           movedRows: moved.rows.filter(r => r.action !== "same").length,
           movedWhat: movedRow ? movedRow.changes.join(",") : "(row missing)",
           seededAction: seededRow ? seededRow.action : "(row missing)",
           seededProblems: seeded.problems.length,
-          seededNewBus: seeded.newBus.join(",")
+          seededNewBus: seeded.newBus.join(","),
+
+          /* ── THE Unit COLUMN (65) ──────────────────────────────────
+             Islam: "the BU as far as I understand is the relation we have …
+             we need this in the download template as if I know some of them
+             I will upload it ready." So the file carries where somebody
+             actually sits, not only the client's own name for it.
+
+             Asserted as five facts. It is WRITTEN (a header alone proves
+             nothing — an empty column would still pass a header check). It is
+             READ back to the same place. It WINS over the Official BU
+             mapping, which is the whole point. A name that is not a place is
+             REFUSED, because a column that swallows typos is worse than no
+             column. And the OLD header still reads (58's rule, applied
+             forward: "BU" was this column's header for one build). */
+          unitHead: PEOPLE_FILE_COLS.indexOf("Unit") > -1,
+          unitWritten: rows.filter(r => String(r.Unit || "").trim() !== "").length,
+          unitReadsBack: (() => {
+            const t = rows.filter(r => r["Emp ID"] === PEOPLE[4].empId)[0];
+            return t ? planPeopleFile([t]).rows[0].where : "(row missing)";
+          })(),
+          unitWasAt: personAt(PEOPLE[4]),
+          /* PEOPLE[1] is on "Risk", which points at nothing — so the mapping
+             leaves them unplaced and the column is the only thing that can
+             move them. The strongest case for the feature, so it is the one
+             asserted. */
+          unitOverrides: (() => {
+            const t = rows.filter(r => r["Emp ID"] === PEOPLE[1].empId)[0];
+            if (!t) return "(row missing)";
+            const was = t.Unit; t.Unit = "Treasury (function)";
+            const r = planPeopleFile([t]).rows[0];
+            t.Unit = was;
+            return r ? r.where : "(no row)";
+          })(),
+          unitRefuses: (() => {
+            const t = rows.filter(r => r["Emp ID"] === PEOPLE[1].empId)[0];
+            const was = t.Unit; t.Unit = "Nowhere At All";
+            const n = planPeopleFile([t]).problems.length;
+            t.Unit = was;
+            return n;
+          })(),
+          unitOldHeader: planPeopleFile(
+            [{ "Emp ID":"E-oldhdr", "Name":"Old Header", "BU":"Mobile" }]).rows[0].where
         };
       });
     }""")
@@ -642,10 +698,28 @@ with sync_playwright() as p:
     if pf["seededNewBus"] != "Maintenance":
         errs.append("PEOPLE FILE: an unknown BU was not offered to the BU list (%r)"
                     % pf["seededNewBus"])
+    if not pf["unitHead"]:
+        errs.append("PEOPLE FILE: no Unit column in the workbook")
+    if not pf["unitWritten"]:
+        errs.append("PEOPLE FILE: the Unit column is written empty for everybody")
+    if pf["unitReadsBack"] != pf["unitWasAt"]:
+        errs.append("PEOPLE FILE: Unit comes back as %r, wanted %r"
+                    % (pf["unitReadsBack"], pf["unitWasAt"]))
+    if pf["unitOverrides"] != "fn:treasury":
+        errs.append("PEOPLE FILE: Unit did not beat the Official BU mapping (%r)"
+                    % pf["unitOverrides"])
+    if not pf["unitRefuses"]:
+        errs.append("PEOPLE FILE: a Unit that is not a place was accepted in silence")
+    if pf["unitOldHeader"] != "mobile":
+        errs.append('PEOPLE FILE: the old "BU" header no longer reads (%r)'
+                    % pf["unitOldHeader"])
     print("people file: %d rows, fixed point %s, one edited cell -> %d row (%s), "
           "new joiner -> %s + BU %r"
           % (pf["rows"], "PASS" if not pf["fixedMoving"] else "FAIL",
              pf["movedRows"], pf["movedWhat"], pf["seededAction"], pf["seededNewBus"]))
+    print("unit column: %d of %d rows carry one, it reads back to %s, beats the "
+          "Official BU mapping, and refuses a name that is not a place"
+          % (pf["unitWritten"], pf["rows"], pf["unitReadsBack"]))
 
     print("ERRORS:", errs if errs else "none")
     b.close()

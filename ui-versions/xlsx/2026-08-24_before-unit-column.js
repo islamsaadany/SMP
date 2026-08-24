@@ -1017,7 +1017,6 @@ function peopleReadme(){
     ["Adding somebody", "Fill Emp ID and Name. Everything else is optional."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
-    ["Unit", "Where they actually sit here — the business unit, supporting function or company that decides what they can open. Choose it from the dropdown. Fill it and it is used; leave it blank and their Official BU decides, where that name points at exactly one place; leave both and they are left where they are. This is the column to fill if you already know: nobody then has to be asked at sign-in."],
     ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
     ["Status", "Active or Retired. Retiring takes away every role they hold and closes the door; everything already attributed to them stays true. Nobody is ever deleted by an upload, and a person the file does not mention is not touched."],
     ["Also holds", "Written by the platform, ignored on the way back. It is there so a person with three roles does not look like a person with one."],
@@ -1034,43 +1033,18 @@ function peopleWorkbook(){
      them: both are derived, not granted. */
   var roleNames = ROLES.filter(function(r){ return !SMPRules.isOwnLinesRole(r.key); })
                        .map(function(r){ return r.name; });
-  /* COLUMNS MOVED WHEN Unit WAS INSERTED (§65): Role G→H, Status H→I. A
-     validation range is a POSITION and nothing warns when it stops matching
-     its column — a Role dropdown left on G would have been offering role names
-     in the Unit cell, which is the kind of wrong that looks like a feature.
-     The ranges are derived from PEOPLE_FILE_COLS now, so a column added later
-     cannot leave one behind. */
-  var colLetter = function(head){
-    var i = PEOPLE_FILE_COLS.indexOf(head);
-    return i < 0 ? null : String.fromCharCode(65 + i);
-  };
-  var range = function(head){
-    var c = colLetter(head);
-    return c ? c + "2:" + c + "2000" : null;
-  };
   var vals = [
-    { range:range("Role"), list:roleNames,
+    { range:"G2:G2000", list:roleNames,
       error:"Choose a role from the list, or leave the cell blank." },
-    { range:range("Status"), list:PEOPLE_STATUSES,
+    { range:"H2:H2000", list:PEOPLE_STATUSES,
       error:"Active or Retired." }
   ];
-  /* THE UNIT LIST IS NOT SOFT. An Official BU that the platform has never met
-     is added to the list unmapped (§54), because that is how the client's own
-     names arrive. A unit is the opposite: it either exists here or it does
-     not, and typing a new one cannot conjure one — so the dropdown is the
-     whole answer and a name outside it is refused by the reader with the two
-     it could have meant. */
-  var places = placeOptions().map(function(o){ return o.label; });
-  if (places.length) {
-    vals.push({ range:range("Unit"), list:places,
-      error:"Choose the unit, supporting function or company from the list." });
-  }
   /* An empty list would write formula1 as a pair of quotes with nothing in
      them, which Excel reads as a broken validation rather than as no
      validation. On a tenant whose BU list is still empty the column simply
      has no dropdown — and that is the case the soft list exists for. */
   if (names.length) {
-    vals.unshift({ range:range("Official BU"), list:names, soft:true });
+    vals.unshift({ range:"F2:F2000", list:names, soft:true });
   }
 
   var rows = PEOPLE.map(function(p){
@@ -1078,11 +1052,6 @@ function peopleWorkbook(){
     return [
       p.empId || "", p.name, p.title || "", p.email || "", p.phone || "",
       p.mainbu || "",
-      /* Where they actually sit, in the words the register shows and the
-         reader takes back (§65). Blank for somebody attached to nothing —
-         which is a real state, and writing a guess into it would be the file
-         answering a question only the SMO can. */
-      roleWhereLabel2(personAt(p)),
       held.length ? roleName(held[0].role) : "",
       personActive(p) ? "Active" : "Retired",
       /* Everything after the first, WITH where it is held — the one column
@@ -1095,11 +1064,9 @@ function peopleWorkbook(){
 
   return [
     peopleReadme(),
-    { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
+    { name:"People", widths:[12, 30, 30, 32, 16, 20, 26, 11, 34],
       head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
-      /* "Also holds" is written and never read, so it is locked — and its
-         index moved with the new column (§65). */
-      lockedCols:[9],
+      lockedCols:[8],
       validations:vals,
       rows:rows }
   ];

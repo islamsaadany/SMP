@@ -422,6 +422,13 @@
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
     REPORTING = null;
     CLEARING = null;
+    /* AN EDIT YOU CANNOT SEE IS NOT AN EDIT YOU AGREED TO (spec 012 §2.1).
+       Leaving the page CANCELS the open row rather than keeping it: the fields
+       have already written themselves, so "keep" would mean half-typed values
+       persisting with nothing on screen saying so. */
+    if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
+      rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
+    }
     /* The sentence under Send a test goes with the page (§72.6). Cleared HERE
        rather than read-and-cleared by the renderer: a render function with a
        side effect is the shape `branding()` had when it was inventing fields
@@ -1386,11 +1393,14 @@
     });
     document.querySelectorAll("[data-setupgo]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (currentSub !== b.dataset.setupgo) {
-          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
-          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
-          CLEARING = null;
-        }
+        /* CALLS leaveModes() RATHER THAN REPEATING THREE OF ITS LINES.
+           This was a copy of part of it, and a partial copy is worse than none:
+           every mode added since — the open row, the composed message, the
+           sent-a-test sentence — was cleared when you left a UNIT and kept when
+           you left a SETUP PAGE, which is the same navigation to anybody using
+           it. Found by an abandoned row edit surviving a page change (spec 012
+           §2.1). One rule, one place (Constitution IX, one level down). */
+        if (currentSub !== b.dataset.setupgo) leaveModes();
         currentSub = b.dataset.setupgo;
         paint(); window.scrollTo(0,0);
       });
@@ -2831,14 +2841,128 @@
     document.querySelectorAll(".kmenu [data-as]").forEach(function(b){
       b.addEventListener("click", function(){ PMENU = null; });
     });
+    /* ── TABLEKIT: SEARCH, FILTER, SORT (spec 012 §2.2, §2.3) ───────
+       All three work on the RENDERED rows and none of them repaints. Typing
+       into a box that a repaint would replace is the fault this project has
+       recorded four times (§30.1, §35, §71.2, §75) and is now Constitution XV.
+
+       The state (what is typed, which chip is lit) lives outside the render so
+       that a repaint from somewhere else — adding a row, a role given — puts it
+       back rather than clearing it. */
+    function tkApply(id){
+      var table = document.querySelector('[data-tktable="' + id + '"]');
+      if (!table) return;
+      var q = String(TKQ[id] || "").trim().toLowerCase();
+      var f = TKFILTER[id] || "";
+      var shown = 0, total = 0;
+      [].forEach.call(table.tBodies[0] ? table.tBodies[0].rows : [], function(tr){
+        if (tr.classList.contains("newrow")) return;   /* the Add row is not a row */
+        total++;
+        var okF = !f || (" " + (tr.dataset.tkrow || "") + " ").indexOf(" " + f + " ") > -1;
+        var okQ = !q || tr.innerText.toLowerCase().indexOf(q) > -1;
+        tr.hidden = !(okF && okQ);
+        if (!tr.hidden) shown++;
+      });
+      var out = document.querySelector('[data-tkcount="' + id + '"]');
+      if (out) out.textContent = (q || f)
+        ? shown + " of " + total
+        : (total ? total + " rows" : "");
+    }
+    document.querySelectorAll("[data-tksearch]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        TKQ[inp.dataset.tksearch] = inp.value;
+        tkApply(inp.dataset.tksearch);
+      });
+    });
+    /* A CHIP REPAINTS, because which one is lit is drawn by the render — and it
+       is a press, not typing, so nothing is mid-word. Pressing the lit one
+       clears it: a filter you cannot turn off is a filter that traps you. */
+    document.querySelectorAll("[data-tkfilter]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var bits = b.dataset.tkfilter.split("|");
+        TKFILTER[bits[0]] = (TKFILTER[bits[0]] === bits[1]) ? "" : bits[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-tktable]").forEach(function(t){ tkApply(t.dataset.tktable); });
+
+    document.querySelectorAll("[data-tksort]").forEach(function(th){
+      th.addEventListener("click", function(){
+        var bits = th.dataset.tksort.split("|"), id = bits[0], col = parseInt(bits[1], 10);
+        var cur = TKSORT[id];
+        /* Three states, and the third is the one that matters: asc, desc, and
+           BACK TO THE TABLE'S OWN ORDER. Two states would make the order
+           somebody arranged unreachable once they had sorted once. */
+        if (!cur || cur.col !== col) TKSORT[id] = { col: col, dir: 1 };
+        else if (cur.dir === 1) TKSORT[id] = { col: col, dir: -1 };
+        else TKSORT[id] = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-tktable]").forEach(function(t){
+      var st = TKSORT[t.dataset.tktable];
+      if (!st || !t.tBodies[0]) return;
+      var body = t.tBodies[0];
+      var rows = [].slice.call(body.rows).filter(function(r){
+        return !r.classList.contains("newrow"); });
+      var add = [].slice.call(body.rows).filter(function(r){
+        return r.classList.contains("newrow"); });
+      var val = function(r){
+        var c = r.cells[st.col];
+        return c ? c.innerText.trim().toLowerCase() : "";
+      };
+      rows.sort(function(a, b){
+        var x = val(a), y = val(b);
+        /* Numbers compare as numbers. A column of 1, 2, 10 sorted as text puts
+           10 between 1 and 2, which reads as a broken sort rather than as a
+           text sort. */
+        var nx = parseFloat(x.replace(/[^0-9.\-]/g, "")), ny = parseFloat(y.replace(/[^0-9.\-]/g, ""));
+        var both = x !== "" && y !== "" && !isNaN(nx) && !isNaN(ny) &&
+                   /^[^a-z]*$/.test(x) && /^[^a-z]*$/.test(y);
+        var c = both ? (nx - ny) : x.localeCompare(y);
+        return c * st.dir;
+      });
+      rows.concat(add).forEach(function(r){ body.appendChild(r); });
+      /* The row numbers are the VIEW's, so they still read 1..n after a sort —
+         a first column of 7, 3, 12 would say the sort had failed. */
+      rows.forEach(function(r, i){
+        var c = r.querySelector("td.idx");
+        if (c && /^\s*\d+\s*$/.test(c.textContent)) c.textContent = String(i + 1);
+      });
+    });
+
+    /* ── EDIT THIS ROW (§79.2, spec 012 §2.1) ───────────────────────
+       It used to turn the whole page's edit mode on and put the cursor in this
+       person's name — 297 inputs to change one job title. It opens the ROW now.
+       The snapshot is taken here, before anything is typed, because that is the
+       only moment the original still exists. */
     document.querySelectorAll("[data-pedit]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
         var key = b.dataset.pedit;
-        EDITING.people = true; PMENU = null;
+        rowEditOpen(key, personBy(key));
+        PMENU = null;
         paint();
         var f = document.querySelector('[data-pname="' + key + '"]');
         if (f) { f.focus(); f.select(); }
+      });
+    });
+    /* Save writes nothing of its own: every field has already written itself
+       through `fieldSaved()` (§71.2). What it does is END the mode, which is
+       what makes finishing deliberate — and flush, so leaving the page cannot
+       be the thing that saves. */
+    document.querySelectorAll("[data-rowsave]").forEach(function(b){
+      b.addEventListener("click", function(){
+        rowEditClose();
+        if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rowcancel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        rowEditCancel(ROWEDIT ? personBy(ROWEDIT) : null);
+        if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+        paint();
       });
     });
     /* The row's action menu (§46.4). Opening one closes any other, because

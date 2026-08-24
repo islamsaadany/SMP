@@ -1,6 +1,6 @@
 # 012 · One table standard
 
-**Version:** v3.24 (unbuilt) · **Decisions:** §79 · **Status:** specified, not built
+**Version:** v3.24 (unbuilt) · **Decisions:** §79 · **Status:** answered; building
 **Constitution:** checked against v1.1.0 — principles VI, XIV, XV and XVI carry weight here.
 
 Islam, twice: *"in any table in the app always give it the following
@@ -214,12 +214,28 @@ skipped:
 
 ---
 
-## 6 · Open, and Islam's to answer
+## 6 · Answered (Islam, 2026-08-24)
 
-1. **Quick filters** — the four proposed above are a guess at what is wanted.
-   Which does each table need?
-2. **Sorting the two arranged tables** (Business units, Figure sets) — is a
-   read-only sort useful there, or is it a trap worth removing entirely?
-3. **Retire on the BU list** — an Official BU name has no life today: it is
-   added or removed. Should a name that is no longer used be retired instead,
-   so the people carrying it keep their history?
+1. **Quick filters** — as proposed: *Active / Retired* on the register,
+   *Unmapped* on the BU list, *Retired* on units, companies and functions.
+
+2. **Sorting a table whose order is a setting: it does not sort.** Left to me,
+   and the answer is to remove the mechanism rather than get it right (§32's
+   habit, §28's).
+
+   Business units and Figure sets carry an order somebody **arranged**, and on
+   Business units that order is visible in the navigation and on the group page.
+   Put sorting beside arranging and the two are ambiguous in a way no label
+   fixes: sort by name, then drag a row, and the drag now means something
+   different because what you see is not what is stored. A "sorted for reading"
+   badge would be a warning about a hazard rather than the removal of one.
+
+   And it costs nothing: ten rows and one row. **Search already narrows a
+   ten-row table better than sorting it**, and search is what they get. If a
+   third table ever arrives with an arranged order and two hundred rows, this
+   is the decision to revisit — recorded so it can be.
+
+3. **No retiring on Official BU names.** They are added and removed, and that
+   stays. The names are the client's own vocabulary rather than a thing with a
+   life, and §54 already settled what happens to a name that points nowhere: it
+   is a real answer, not a broken one.

@@ -2258,6 +2258,47 @@
   .warnchip { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
   .warnchip i { font-style:normal; opacity:.85; padding-left:4px; }
 
+  /* ══ TABLEKIT (spec 012) ═══════════════════════════════════════════
+     Prefixed from the first line rather than tidied later (Constitution XIV):
+     a component seven tables share is exactly where the next `pname` collision
+     happens (§73.1). */
+  .tk-bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+            margin:0 0 10px; }
+  .tk-search { max-width:280px; }
+  .tk-chips { display:flex; flex-wrap:wrap; gap:5px; }
+  .tk-chip { cursor:pointer; border:1px solid var(--line); border-radius:999px;
+             padding:4px 11px; background:var(--surface); font:inherit;
+             font-size:12px; color:var(--ink-2); white-space:nowrap;
+             transition:border-color .12s, background .12s; }
+  .tk-chip:hover { border-color:var(--gold); }
+  .tk-chip.on { background:var(--over-bg); border-color:var(--gold);
+                color:var(--ink); font-weight:600; }
+  .tk-count { font-size:12px; color:var(--ink-3); margin-left:auto; }
+
+  /* A SORTABLE HEADER SAYS SO BEFORE IT IS PRESSED. An arrow that appears only
+     once a column is sorted is a control nobody knows is there — the fault §70
+     recorded about the pen at opacity:0, one control further out. Quiet until
+     hovered, solid once it is doing something. */
+  .tk-sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+  .tk-arrow { display:inline-block; width:0; height:0; margin-left:6px;
+              vertical-align:middle; opacity:.32;
+              border-left:4px solid transparent; border-right:4px solid transparent;
+              border-bottom:5px solid currentColor; }
+  .tk-sortable:hover .tk-arrow { opacity:.7; }
+  .tk-sortable.tk-desc .tk-arrow { border-bottom:0; border-top:5px solid currentColor; }
+  .tk-sortable.tk-asc .tk-arrow, .tk-sortable.tk-desc .tk-arrow { opacity:1; }
+  .tk-sortable:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+  /* THE OPEN ROW IS MARKED, because one row in thirty-three being editable is
+     invisible otherwise — the fields look like fields wherever they are. The
+     accent EDGE rather than a fill: §41's budget, and a filled row would fight
+     the zebra and the retired dimming both. */
+  .peoplecfg tbody tr.tk-open > td { background:var(--over-bg); }
+  .peoplecfg tbody tr.tk-open > td:first-child { box-shadow:inset 3px 0 0 var(--gold); }
+  .tk-editcell { white-space:nowrap; }
+  .tk-editcell .tk-save { font-weight:700; color:var(--good-tx); }
+  .tk-editcell .tk-cancel { color:var(--ink-3); }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -6599,6 +6640,34 @@ function personActive(p){ return SMPRules.personActive(p); }
    produce an empty word and a name of one word is returned whole. A name
    already at or under the limit comes back unchanged, which is why there is no
    "should we shorten this" test at the call site. */
+/* ══ ONE ROW OPEN, AND WHAT IT LOOKED LIKE BEFORE (§79.2) ══════════════
+   `ROWEDIT` is the key of the single row being edited, or null. `ROWWAS` is a
+   copy of that row taken WHEN IT OPENED — Cancel restores from it, never by
+   re-reading fields that have already been typed into, which would restore the
+   edits it exists to undo.
+
+   The copy is shallow-plus-arrays: a person's `roles` is the only nested thing
+   the register writes, and a deep clone of the whole graph per row-open would
+   be paid on every press for a case that never needs it. */
+var ROWEDIT = null;
+var ROWWAS = null;
+function rowEditOpen(key, obj){
+  ROWEDIT = key;
+  ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
+}
+/* PUT BACK IN PLACE, never by replacing the object. Something else may already
+   hold a reference to this person — the viewer switcher, a role chip, an open
+   menu — and swapping the object would leave those pointing at the edited one
+   while the register showed the restored one. */
+function rowEditCancel(obj){
+  if (obj && ROWWAS) {
+    Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
+    Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
+  }
+  ROWEDIT = null; ROWWAS = null;
+}
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
+
 var SHORT_NAME_WORDS = 3;
 function shortName(name){
   var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
@@ -17372,7 +17441,25 @@ function showCol(k){ return peopleCols()[k] !== false; }
 
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
-  var editable = mayEdit && EDITING.people;
+  /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
+     Islam, after using the whole-table edit: "I don't need to edit the whole
+     table — maybe by pressing the 3 dots on the right of the row I can work on
+     the row inline and then a small save button."
+
+     He is right and the number says why: whole-table edit turns this register
+     into 33 rows x 9 columns = 297 inputs to change one job title, every one of
+     them a way to change something by accident, and it repaints the whole table
+     to get there.
+
+     `editable` was ONE BOOLEAN read at ten places. It becomes a function of the
+     row, and the ten places do not otherwise change — which is the whole reason
+     this is a small diff rather than a rewrite. The Add row keeps `mayEdit`:
+     adding is not editing a row, and it must be reachable without opening one.
+
+     ROWEDIT holds the key of the one row open. One at a time, because two open
+     rows are two unsaved states and a question about which Save means which. */
+  var mayEdit_ = mayEdit;
+  function rowOpen(p){ return mayEdit_ && ROWEDIT === p.key; }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
   var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
   var noPw = live && PWSTATES
@@ -17414,6 +17501,11 @@ function renderPeople(){
   }
 
   function roleCell(p){
+    /* The role chips' × and the picker belong to the OPEN row, not to a page
+       mode (§79.2). Computed here rather than passed, because roleCell and
+       roleWhereCell are two halves of one control (§69.1) and a parameter one
+       of them forgot would put an × on a closed row. */
+    var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
     /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people
@@ -17500,6 +17592,7 @@ function renderPeople(){
      a company CEO is seated at a company, a function head at a function, and
      one combined list would offer Company CEO of Mobile (§35). */
   function roleWhereCell(p){
+    if (!rowOpen(p)) return "";
     if (ADDROLE !== p.key) return "";
     if (!ADDROLE_KIND) {
       return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
@@ -17554,7 +17647,17 @@ function renderPeople(){
 
      Open state is a single key, not a flag per row: two menus open at once is
      a state nobody wants and one that has to be closed twice. */
-  function kebab(p){
+  function kebab(p, ed){
+    /* ── THE OPEN ROW SHOWS SAVE AND CANCEL, NOT A MENU (spec 012 §2.1) ─
+       The actions cell is where you act on the row, and while the row is open
+       the only two acts are finishing and abandoning. Leaving the ⋮ there as
+       well would offer Retire and Delete on a row with unsaved edits in it —
+       three unrelated outcomes behind one 83px column. */
+    if (ed) {
+      return '<td class="cc kebcell tk-editcell">' +
+        '<button class="linkbu tk-save" data-rowsave="' + esc(p.key) + '">Save</button>' +
+        '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+    }
     var open = PMENU === p.key;
     var st = PWSTATES ? PWSTATES[p.key] : null;
     /* THE ORDER IS WRITTEN DOWN, not produced by splicing into an index. The
@@ -17575,7 +17678,7 @@ function renderPeople(){
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
     }
     if (mayEdit) {
-      acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
+      acts.push('<button data-pedit="' + p.key + '">Edit this row</button>');
     }
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
@@ -17706,7 +17809,17 @@ function renderPeople(){
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
-    return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
+    var ed = rowOpen(p);
+    /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
+       about the person; the word "Active" may not be in the row at all, because
+       the Status column can be turned off under Columns. A filter that searched
+       the visible text would answer differently depending on which columns
+       somebody had hidden. */
+    var flags = (personActive(p) ? "active" : "retired") +
+      (live && PWSTATES && PWSTATES[p.key] === "none" ? " nopw" : "") +
+      (String(p.email == null ? "" : p.email).trim() ? "" : " noemail");
+    return '<tr data-tkrow="' + esc(flags) + '" class="' +
+             (personActive(p) ? '' : 'retired ') + (ed ? 'tk-open' : '') + '">' +
       '<td class="idx">' + (i + 1) + '</td>' +
       /* `pname` so the frozen column can be named rather than counted (§69.19).
          `td:nth-child(2)` would be right today and wrong the first time a
@@ -17728,13 +17841,13 @@ function renderPeople(){
          gone. The short form is a rendering; the stored fact is untouched, and
          the whole name is on the row's hover and in every other surface that
          names a person. */
-      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
+      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
-      (showCol("empid") ? '<td>' + (editable
+      (showCol("empid") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
           '" placeholder="Emp. ID">'
         : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
@@ -17748,7 +17861,7 @@ function renderPeople(){
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
-      (showCol("title") ? '<td>' + (editable
+      (showCol("title") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
@@ -17776,7 +17889,7 @@ function renderPeople(){
          its first file otherwise), so the select carries what the list holds
          plus whatever this row already says. A UNIT IS NOT SOFT — it either
          exists here or it does not, and typing a new one cannot conjure one. */
-      (showCol("mainbu") ? '<td>' + (editable
+      (showCol("mainbu") ? '<td>' + (ed
         ? '<select class="fld" data-pmainbu="' + esc(p.key) + '">' +
             '<option value="">&mdash; none &mdash;</option>' +
             mainbuNamesFor(p).map(function(nm){
@@ -17789,7 +17902,7 @@ function renderPeople(){
             ? '<span class="val">' + esc(p.mainbu) + '</span>' +
               (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
             : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
-      (showCol("bu") ? '<td>' + (editable
+      (showCol("bu") ? '<td>' + (ed
         ? '<select class="fld" data-pat="' + esc(p.key) + '">' +
             '<option value="">&mdash; nowhere yet &mdash;</option>' +
             personAtChoices().map(function(o){
@@ -17808,7 +17921,7 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, editable) +
+        saidWhereNote(p, ed) +
         /* The role picker's second half (§69). It sits UNDER what the cell
            already says rather than replacing it: where somebody sits and where
            a role reaches are two different facts (§46.4), and a picker that
@@ -17818,12 +17931,12 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("email") ? '<td>' + (editable
+      (showCol("email") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
         : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
                    : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
-      (showCol("phone") ? '<td>' + (editable
+      (showCol("phone") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
           '" placeholder="Mobile">'
         : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
@@ -17837,13 +17950,13 @@ function renderPeople(){
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
       (showCol("password") ? pwCell(p) : '') +
-      kebab(p) + '</tr>';
+      kebab(p, ed) + '</tr>';
   }).join("");
 
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
-  var addRow = editable
+  var addRow = mayEdit
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
         '<input class="fld" id="newPersonName" placeholder="Full name" ' +
           'value="' + esc(NEWPERSON) + '">' +
@@ -18030,7 +18143,13 @@ function renderPeople(){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
           ' on more than one row</span>'] : []),
-      "people", mayEdit, null, null, colMenu + pwMenu) +
+      /* NO PEN (spec 012 §2.1). It turned on a mode that no longer exists —
+         `editable` is per row now — so it would have been a control that
+         changes nothing, which this project holds is worse than no control
+         (§37, §72.10). Editing is on the row; Add is at the foot of the table
+         and gated on `mayEdit` rather than on a mode, so it is reachable
+         without opening a row first. */
+      "people", false, null, null, colMenu + pwMenu) +
 
     /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
        own heading now reads "People register" two lines above, so a section
@@ -18039,6 +18158,15 @@ function renderPeople(){
        said. The sentence under it explained the MODEL (a role is one fact
        with two editing surfaces), and the knowledge base is where the model
        lives (§30). */
+    tkBar("people", {
+      placeholder: "Search the register\u2026",
+      filters: [{ k:"active",  label:"Active" },
+                { k:"retired", label:"Retired" },
+                { k:"nopw",    label:"No password",
+                  title:"People who have never had one issued" },
+                { k:"noemail", label:"No email",
+                  title:"They cannot sign in with an address until one is here" }] }) +
+
     section("", "",
       "",
       /* NO COLUMN WIDTHS, and no table-layout:fixed (see .peoplecfg in
@@ -18046,24 +18174,48 @@ function renderPeople(){
          around the name length" — the column fits the name, rather than the
          name being broken to fit the column. Only ROLES is given a width, and
          it is given the leftovers. */
-      '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
-        '<th class="idx">#</th>' +
-        '<th class="namecell">Person</th>' +
+      /* SORTABLE HEADERS ARE BUILT, NOT DECLARED TWICE. The column index a
+         sort needs is a POSITION, and the positions move whenever a column is
+         hidden under Columns — §65's validation-range trap, in a different
+         file. `th()` counts as it emits, so the two can never disagree. */
+      (function(){
+        var n = 0;
+        function th(label, cls, sortable){
+          var i = n++;
+          if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
+          if (sortable === false)
+            return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
+          var st = TKSORT["people"];
+          var on = st && st.col === i;
+          return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
+            (on ? (st.dir === 1 ? ' tk-asc' : ' tk-desc') : '') + '"' +
+            ' data-tksort="people|' + i + '" tabindex="0" role="button"' +
+            ' title="Sort by ' + esc(label.replace(/<[^>]+>/g, "")) + '">' +
+            label + '<i class="tk-arrow"></i></th>';
+        }
+      return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
+        'data-tktable="people"><thead><tr>' +
+        th("#", "idx", false) +
+        th("Person", "namecell") +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
-        (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
-        (showCol("key")      ? '<th>Sign-in name</th>' : '') +
-        (showCol("title")    ? '<th>Job title</th>'  : '') +
-        (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
-        (showCol("bu")       ? '<th>Unit</th>'       : '') +
-        (showCol("email")    ? '<th>Email</th>'      : '') +
-        (showCol("phone")    ? '<th>Mobile</th>'     : '') +
-        (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
-        (showCol("status")   ? '<th class="cc">Status</th>' : '') +
-        (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
-        '<th class="cc kebcell"></th>' +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
+        (showCol("empid")    ? th("Emp. ID")   : '') +
+        (showCol("key")      ? th("Sign-in name") : '') +
+        (showCol("title")    ? th("Job title")  : '') +
+        (showCol("mainbu")   ? th("Official BU") : '') +
+        (showCol("bu")       ? th("Unit")       : '') +
+        (showCol("email")    ? th("Email")      : '') +
+        (showCol("phone")    ? th("Mobile")     : '') +
+        /* Roles is a stack of chips and Password is a pill: sorting either
+           orders them by the text that happens to be rendered, which is not a
+           fact anybody asked about. */
+        (showCol("roles")    ? th("Roles", "roles", false) : '') +
+        (showCol("status")   ? th("Status", "cc") : '') +
+        (live && showCol("password") ? th("Password", "cc", false) : '') +
+        th("", "cc kebcell") +
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>';
+      })() +
       bulk +
       /* THE NOTE HAD TO CHANGE WITH THE FEATURE (§69). It said "People are
          retired, never deleted", which stopped being true the moment Delete
@@ -20634,6 +20786,47 @@ function wireMsgEditor(root){
     });
   });
 }
+
+/* ══ TABLEKIT — SEARCH AND SORT, ONCE (spec 012 §3) ═══════════════════════
+   Seven tables need the same two controls. Seven copies is seven places for
+   the next fault to hide, and this project has already paid for that three
+   times in CSS (§51.5, §53.6) and twice in JS (§56.7).
+
+   THE CLASSES ARE `tk-` PREFIXED, from the first line rather than tidied later
+   (Constitution XIV): `pname` became the pillar rail's rules on a register cell
+   because it was one plain word (§73.1), and a component shared by seven tables
+   is exactly where that happens next.
+
+   IT FILTERS AND SORTS THE DOM, NOT THE DATA. Search hides rows in place and
+   never repaints (Constitution XV) — a repaint would replace the input being
+   typed into. Sort reorders the rendered rows and writes nothing: on a table
+   whose order is a SETTING that would be indistinguishable from rearranging it,
+   which is why those two tables do not sort at all (spec §6.2). */
+var TKSORT = {};    /* table id -> {col, dir} — the view's order, never the data's */
+
+/* The bar above a table. `id` names the table for the sort state and nothing
+   else; `filters` are [{k, label, title}] and are the table's own question. */
+function tkBar(id, opts){
+  opts = opts || {};
+  var f = TKFILTER[id] || "";
+  var chips = (opts.filters || []).map(function(x){
+    return '<button class="tk-chip' + (f === x.k ? ' on' : '') + '" data-tkfilter="' +
+      esc(id + "|" + x.k) + '"' + (x.title ? ' title="' + esc(x.title) + '"' : '') +
+      '>' + esc(x.label) + '</button>';
+  }).join("");
+  return '<div class="tk-bar" data-tkbar="' + esc(id) + '">' +
+    '<input class="fld tk-search" data-tksearch="' + esc(id) + '" type="search" ' +
+      'placeholder="' + esc(opts.placeholder || "Search…") + '" autocomplete="off" ' +
+      'value="' + esc(TKQ[id] || "") + '">' +
+    (chips ? '<div class="tk-chips">' + chips + '</div>' : '') +
+    '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
+  '</div>';
+}
+/* WHAT IS TYPED AND WHICH CHIP IS LIT SURVIVE A REPAINT. Adding a row repaints
+   (§75), and a search that emptied itself when you added somebody would be a
+   filter you have to retype every time you use the page. */
+var TKQ = {};
+var TKFILTER = {};
 
 </script>
 <script>
@@ -23279,6 +23472,13 @@ var SYNC = (function () {
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
     REPORTING = null;
     CLEARING = null;
+    /* AN EDIT YOU CANNOT SEE IS NOT AN EDIT YOU AGREED TO (spec 012 §2.1).
+       Leaving the page CANCELS the open row rather than keeping it: the fields
+       have already written themselves, so "keep" would mean half-typed values
+       persisting with nothing on screen saying so. */
+    if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
+      rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
+    }
     /* The sentence under Send a test goes with the page (§72.6). Cleared HERE
        rather than read-and-cleared by the renderer: a render function with a
        side effect is the shape `branding()` had when it was inventing fields
@@ -24243,11 +24443,14 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-setupgo]").forEach(function(b){
       b.addEventListener("click", function(){
-        if (currentSub !== b.dataset.setupgo) {
-          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
-          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
-          CLEARING = null;
-        }
+        /* CALLS leaveModes() RATHER THAN REPEATING THREE OF ITS LINES.
+           This was a copy of part of it, and a partial copy is worse than none:
+           every mode added since — the open row, the composed message, the
+           sent-a-test sentence — was cleared when you left a UNIT and kept when
+           you left a SETUP PAGE, which is the same navigation to anybody using
+           it. Found by an abandoned row edit surviving a page change (spec 012
+           §2.1). One rule, one place (Constitution IX, one level down). */
+        if (currentSub !== b.dataset.setupgo) leaveModes();
         currentSub = b.dataset.setupgo;
         paint(); window.scrollTo(0,0);
       });
@@ -25688,14 +25891,128 @@ var SYNC = (function () {
     document.querySelectorAll(".kmenu [data-as]").forEach(function(b){
       b.addEventListener("click", function(){ PMENU = null; });
     });
+    /* ── TABLEKIT: SEARCH, FILTER, SORT (spec 012 §2.2, §2.3) ───────
+       All three work on the RENDERED rows and none of them repaints. Typing
+       into a box that a repaint would replace is the fault this project has
+       recorded four times (§30.1, §35, §71.2, §75) and is now Constitution XV.
+
+       The state (what is typed, which chip is lit) lives outside the render so
+       that a repaint from somewhere else — adding a row, a role given — puts it
+       back rather than clearing it. */
+    function tkApply(id){
+      var table = document.querySelector('[data-tktable="' + id + '"]');
+      if (!table) return;
+      var q = String(TKQ[id] || "").trim().toLowerCase();
+      var f = TKFILTER[id] || "";
+      var shown = 0, total = 0;
+      [].forEach.call(table.tBodies[0] ? table.tBodies[0].rows : [], function(tr){
+        if (tr.classList.contains("newrow")) return;   /* the Add row is not a row */
+        total++;
+        var okF = !f || (" " + (tr.dataset.tkrow || "") + " ").indexOf(" " + f + " ") > -1;
+        var okQ = !q || tr.innerText.toLowerCase().indexOf(q) > -1;
+        tr.hidden = !(okF && okQ);
+        if (!tr.hidden) shown++;
+      });
+      var out = document.querySelector('[data-tkcount="' + id + '"]');
+      if (out) out.textContent = (q || f)
+        ? shown + " of " + total
+        : (total ? total + " rows" : "");
+    }
+    document.querySelectorAll("[data-tksearch]").forEach(function(inp){
+      inp.addEventListener("input", function(){
+        TKQ[inp.dataset.tksearch] = inp.value;
+        tkApply(inp.dataset.tksearch);
+      });
+    });
+    /* A CHIP REPAINTS, because which one is lit is drawn by the render — and it
+       is a press, not typing, so nothing is mid-word. Pressing the lit one
+       clears it: a filter you cannot turn off is a filter that traps you. */
+    document.querySelectorAll("[data-tkfilter]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var bits = b.dataset.tkfilter.split("|");
+        TKFILTER[bits[0]] = (TKFILTER[bits[0]] === bits[1]) ? "" : bits[1];
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-tktable]").forEach(function(t){ tkApply(t.dataset.tktable); });
+
+    document.querySelectorAll("[data-tksort]").forEach(function(th){
+      th.addEventListener("click", function(){
+        var bits = th.dataset.tksort.split("|"), id = bits[0], col = parseInt(bits[1], 10);
+        var cur = TKSORT[id];
+        /* Three states, and the third is the one that matters: asc, desc, and
+           BACK TO THE TABLE'S OWN ORDER. Two states would make the order
+           somebody arranged unreachable once they had sorted once. */
+        if (!cur || cur.col !== col) TKSORT[id] = { col: col, dir: 1 };
+        else if (cur.dir === 1) TKSORT[id] = { col: col, dir: -1 };
+        else TKSORT[id] = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-tktable]").forEach(function(t){
+      var st = TKSORT[t.dataset.tktable];
+      if (!st || !t.tBodies[0]) return;
+      var body = t.tBodies[0];
+      var rows = [].slice.call(body.rows).filter(function(r){
+        return !r.classList.contains("newrow"); });
+      var add = [].slice.call(body.rows).filter(function(r){
+        return r.classList.contains("newrow"); });
+      var val = function(r){
+        var c = r.cells[st.col];
+        return c ? c.innerText.trim().toLowerCase() : "";
+      };
+      rows.sort(function(a, b){
+        var x = val(a), y = val(b);
+        /* Numbers compare as numbers. A column of 1, 2, 10 sorted as text puts
+           10 between 1 and 2, which reads as a broken sort rather than as a
+           text sort. */
+        var nx = parseFloat(x.replace(/[^0-9.\-]/g, "")), ny = parseFloat(y.replace(/[^0-9.\-]/g, ""));
+        var both = x !== "" && y !== "" && !isNaN(nx) && !isNaN(ny) &&
+                   /^[^a-z]*$/.test(x) && /^[^a-z]*$/.test(y);
+        var c = both ? (nx - ny) : x.localeCompare(y);
+        return c * st.dir;
+      });
+      rows.concat(add).forEach(function(r){ body.appendChild(r); });
+      /* The row numbers are the VIEW's, so they still read 1..n after a sort —
+         a first column of 7, 3, 12 would say the sort had failed. */
+      rows.forEach(function(r, i){
+        var c = r.querySelector("td.idx");
+        if (c && /^\s*\d+\s*$/.test(c.textContent)) c.textContent = String(i + 1);
+      });
+    });
+
+    /* ── EDIT THIS ROW (§79.2, spec 012 §2.1) ───────────────────────
+       It used to turn the whole page's edit mode on and put the cursor in this
+       person's name — 297 inputs to change one job title. It opens the ROW now.
+       The snapshot is taken here, before anything is typed, because that is the
+       only moment the original still exists. */
     document.querySelectorAll("[data-pedit]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
         var key = b.dataset.pedit;
-        EDITING.people = true; PMENU = null;
+        rowEditOpen(key, personBy(key));
+        PMENU = null;
         paint();
         var f = document.querySelector('[data-pname="' + key + '"]');
         if (f) { f.focus(); f.select(); }
+      });
+    });
+    /* Save writes nothing of its own: every field has already written itself
+       through `fieldSaved()` (§71.2). What it does is END the mode, which is
+       what makes finishing deliberate — and flush, so leaving the page cannot
+       be the thing that saves. */
+    document.querySelectorAll("[data-rowsave]").forEach(function(b){
+      b.addEventListener("click", function(){
+        rowEditClose();
+        if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-rowcancel]").forEach(function(b){
+      b.addEventListener("click", function(){
+        rowEditCancel(ROWEDIT ? personBy(ROWEDIT) : null);
+        if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+        paint();
       });
     });
     /* The row's action menu (§46.4). Opening one closes any other, because

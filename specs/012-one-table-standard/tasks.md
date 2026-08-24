@@ -1,25 +1,25 @@
 # 012 · Tasks
 
-Gated: nothing below starts until spec §6 is answered (Constitution I).
+Spec §6 answered 2026-08-24. Building.
 
 ## Phase 1 — extract, changing nothing
-- [ ] `tablekit` module + `tk-` classes; `data-tablekit` opt-in with a per-table declaration
+- [x] `tablekit` module + `tk-` classes; `data-tablekit` opt-in with a per-table declaration
 - [ ] Move the register's freeze onto it (`<tr>` for vertical, cell for horizontal, `background:inherit`)
 - [ ] Move the columns chooser onto it, keeping merge-with-defaults
 - [ ] Move the row menu onto it
 - [ ] **Assert the register is unchanged**: columns, freeze offsets, actions, scroll — measured before and after
 
 ## Phase 2 — the reversal
-- [ ] *Edit this row* on the row menu; cells become fields in place
-- [ ] Save / Cancel in the actions cell; Cancel restores from the copy taken on open
-- [ ] One row open at a time; leaving the page cancels
-- [ ] Assert: no repaint jump, caret kept, other rows untouched
+- [x] *Edit this row* on the row menu; cells become fields in place
+- [x] Save / Cancel in the actions cell; Cancel restores from the copy taken on open
+- [x] One row open at a time; leaving the page cancels
+- [x] Assert: no repaint jump, caret kept, other rows untouched
 
 ## Phase 3 — search and sort
-- [ ] Search box, filtering in place, appearing above the row threshold
-- [ ] Quick-filter chips (per spec §6.1, once answered)
-- [ ] Header sort: asc → desc → the table's own order
-- [ ] Assert: typing does not repaint; sort is view-only and saves nothing
+- [x] Search box, filtering in place, appearing above the row threshold
+- [x] Quick-filter chips (per spec §6.1, once answered)
+- [x] Header sort: asc → desc → the table's own order
+- [x] Assert: typing does not repaint; sort is view-only and saves nothing
 
 ## Phase 4 — the other six
 - [ ] Official BU list · Business units · Functions · Capabilities · Companies · Figure sets
@@ -31,3 +31,8 @@ Gated: nothing below starts until spec §6 is answered (Constitution I).
 - [ ] `qa.py` and the contrast sweep at baseline
 - [ ] Each new check proved by breaking what it guards
 - [ ] §79 written; spec status updated
+
+
+*Phases 1–3 done on the register, v3.24 (§80). The freeze and the columns
+chooser have not yet MOVED into `tablekit` — they still live in the register's
+own CSS and render, which is why phase 1 is only half ticked.*

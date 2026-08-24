@@ -1,7 +1,6 @@
 # 012 · Plan
 
-**Spec:** `spec.md` · **Constitution:** v1.1.0 · **Status:** awaiting Islam's
-answers to spec §6 before implementation begins (Principle I).
+**Spec:** `spec.md` · **Constitution:** v1.1.0 · **Status:** spec §6 answered 2026-08-24; implementation begun.
 
 ## Order, and why this order
 
@@ -43,8 +42,9 @@ retro-fitting the one page that already does the job.
   one row inline. The nearest relative is the plan pane's pen (§70), which
   edits everything at once — the opposite. Expect the first draft to be wrong
   about where Save sits and how the row looks while open.
-- **Sorting a table whose order is a setting** is the trap in §6.2, unanswered.
-  Until it is answered, those two tables get search and not sort.
+- **Sorting a table whose order is a setting** is settled: those two do not
+  sort at all (§6.2). The risk that remains is somebody adding it later out of
+  consistency, which is why §4 names it.
 - **The columns map** has already caused one silent regression (§30.2). The
   merge-with-defaults rule is asserted by adding a column in the test and
   checking it appears for a map written before it.

@@ -584,6 +584,34 @@ function personActive(p){ return SMPRules.personActive(p); }
    produce an empty word and a name of one word is returned whole. A name
    already at or under the limit comes back unchanged, which is why there is no
    "should we shorten this" test at the call site. */
+/* ══ ONE ROW OPEN, AND WHAT IT LOOKED LIKE BEFORE (§79.2) ══════════════
+   `ROWEDIT` is the key of the single row being edited, or null. `ROWWAS` is a
+   copy of that row taken WHEN IT OPENED — Cancel restores from it, never by
+   re-reading fields that have already been typed into, which would restore the
+   edits it exists to undo.
+
+   The copy is shallow-plus-arrays: a person's `roles` is the only nested thing
+   the register writes, and a deep clone of the whole graph per row-open would
+   be paid on every press for a case that never needs it. */
+var ROWEDIT = null;
+var ROWWAS = null;
+function rowEditOpen(key, obj){
+  ROWEDIT = key;
+  ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
+}
+/* PUT BACK IN PLACE, never by replacing the object. Something else may already
+   hold a reference to this person — the viewer switcher, a role chip, an open
+   menu — and swapping the object would leave those pointing at the edited one
+   while the register showed the restored one. */
+function rowEditCancel(obj){
+  if (obj && ROWWAS) {
+    Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
+    Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
+  }
+  ROWEDIT = null; ROWWAS = null;
+}
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
+
 var SHORT_NAME_WORDS = 3;
 function shortName(name){
   var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);

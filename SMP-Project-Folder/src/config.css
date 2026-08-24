@@ -1004,3 +1004,44 @@
      to look at, on a page whose other chips are ordinary. */
   .warnchip { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
   .warnchip i { font-style:normal; opacity:.85; padding-left:4px; }
+
+  /* ══ TABLEKIT (spec 012) ═══════════════════════════════════════════
+     Prefixed from the first line rather than tidied later (Constitution XIV):
+     a component seven tables share is exactly where the next `pname` collision
+     happens (§73.1). */
+  .tk-bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+            margin:0 0 10px; }
+  .tk-search { max-width:280px; }
+  .tk-chips { display:flex; flex-wrap:wrap; gap:5px; }
+  .tk-chip { cursor:pointer; border:1px solid var(--line); border-radius:999px;
+             padding:4px 11px; background:var(--surface); font:inherit;
+             font-size:12px; color:var(--ink-2); white-space:nowrap;
+             transition:border-color .12s, background .12s; }
+  .tk-chip:hover { border-color:var(--gold); }
+  .tk-chip.on { background:var(--over-bg); border-color:var(--gold);
+                color:var(--ink); font-weight:600; }
+  .tk-count { font-size:12px; color:var(--ink-3); margin-left:auto; }
+
+  /* A SORTABLE HEADER SAYS SO BEFORE IT IS PRESSED. An arrow that appears only
+     once a column is sorted is a control nobody knows is there — the fault §70
+     recorded about the pen at opacity:0, one control further out. Quiet until
+     hovered, solid once it is doing something. */
+  .tk-sortable { cursor:pointer; user-select:none; white-space:nowrap; }
+  .tk-arrow { display:inline-block; width:0; height:0; margin-left:6px;
+              vertical-align:middle; opacity:.32;
+              border-left:4px solid transparent; border-right:4px solid transparent;
+              border-bottom:5px solid currentColor; }
+  .tk-sortable:hover .tk-arrow { opacity:.7; }
+  .tk-sortable.tk-desc .tk-arrow { border-bottom:0; border-top:5px solid currentColor; }
+  .tk-sortable.tk-asc .tk-arrow, .tk-sortable.tk-desc .tk-arrow { opacity:1; }
+  .tk-sortable:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+
+  /* THE OPEN ROW IS MARKED, because one row in thirty-three being editable is
+     invisible otherwise — the fields look like fields wherever they are. The
+     accent EDGE rather than a fill: §41's budget, and a filled row would fight
+     the zebra and the retired dimming both. */
+  .peoplecfg tbody tr.tk-open > td { background:var(--over-bg); }
+  .peoplecfg tbody tr.tk-open > td:first-child { box-shadow:inset 3px 0 0 var(--gold); }
+  .tk-editcell { white-space:nowrap; }
+  .tk-editcell .tk-save { font-weight:700; color:var(--good-tx); }
+  .tk-editcell .tk-cancel { color:var(--ink-3); }

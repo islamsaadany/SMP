@@ -9934,3 +9934,93 @@ retro-fitting the one page that already does the job.
 **Nothing is built yet.** Spec, plan and tasks are written and gated on three
 questions in §6 that are Islam's to answer — which is Principle I, applied to
 the largest remaining piece of work rather than around it.
+
+---
+
+## 80 · The row edits on the row, and the register gets its bar (v3.24)
+
+Spec 012, phases 1–3, on the register. Islam's three answers settled it: quick
+filters as proposed, no retiring on Official BU names, and the sort question was
+left to me.
+
+**80.1 SORTING A TABLE WHOSE ORDER IS A SETTING: IT DOES NOT SORT.** Business
+units and Figure sets carry an order somebody **arranged**, and on Business
+units that order is what appears in the navigation and on the group page. Put
+sorting beside arranging and the two are ambiguous in a way no label fixes: sort
+by name, drag a row, and the drag now means something different because what you
+see is not what is stored. A *"sorted for reading"* badge would be a warning
+about a hazard rather than the removal of one — §32's habit, and §28's: remove
+the mechanism rather than get it right.
+
+It costs nothing. Ten rows and one row, and **search narrows a ten-row table
+better than sorting it**. Recorded so it can be revisited if a third arranged
+table ever arrives with two hundred rows.
+
+**80.2 `editable` was one boolean read at ten places; it became a function of
+the row.** That is the whole of the reversal, and it is why this is a small diff
+rather than a rewrite. The ten call sites did not otherwise change.
+
+Two of them were **outside** the row loop and broke the page on the first build:
+`roleCell` and `roleWhereCell` read the page mode from a closure. They compute
+it from the row now — and not by taking a parameter, because they are two halves
+of one control (§69.1) and a parameter one of them forgot would put a remove-×
+on a closed row.
+
+**The Add row keeps `mayEdit`**, deliberately: adding is not editing a row, and
+it must be reachable without opening one first.
+
+**The pen is gone from the register.** It turned on a mode that no longer
+exists, so it would have been a control that changes nothing — worse than no
+control (§37, §72.10).
+
+**80.3 Cancel restores from a copy, and puts it back IN PLACE.** The snapshot is
+taken when the row opens, because that is the only moment the original still
+exists; restoring by re-reading the fields would restore the edits it exists to
+undo. And it writes back into the same object rather than replacing it —
+something else may already hold a reference to that person (the viewer switcher,
+a role chip, an open menu), and swapping the object would leave those pointing
+at the edited one while the register showed the restored one.
+
+**Leaving the page cancels.** The fields have already written themselves
+(§71.2), so "keep" would mean half-typed values persisting with nothing on
+screen saying so.
+
+**80.4 THE SETUP RAIL HAD A PARTIAL COPY OF `leaveModes()`, AND A PARTIAL COPY
+IS WORSE THAN NONE.** Navigating between Setup pages repeated three of that
+function's lines inline instead of calling it. So every mode added since — the
+open row, the composed message, the sent-a-test sentence — was cleared when you
+left a UNIT and kept when you left a SETUP PAGE, which is the same act to
+anybody using it. Found by an abandoned row edit surviving a page change.
+Constitution IX, one level down: one rule, one place.
+
+**80.5 The sort's column index is a POSITION, so it is counted rather than
+declared.** Columns are hidden and shown under Columns, which moves every index
+after them — §65's validation-range trap in a different file. `th()` counts as
+it emits, so the header and the sort cannot disagree.
+
+Three columns do not sort, and the reason is the same for all three: **Roles** is
+a stack of chips, **Password** is a pill, and **#** is the row's position in the
+view. Sorting any of them orders rows by text that happens to have been
+rendered, which is not a fact anybody asked about. And the row numbers are
+**renumbered after a sort**, because a first column reading 7, 3, 12 says the
+sort failed.
+
+**80.6 The filters read attributes, not the rendered text.** *Active* is a fact
+about a person; the word "Active" may not be in the row at all, because the
+Status column can be turned off under Columns. A filter matching visible text
+would answer differently depending on which columns somebody had hidden.
+
+**80.7 A CHECK KEYED ON THE PEN PASSED BY CRASHING.** Removing `[data-edit=
+"people"]` broke the no-jump probe — the one that guards §75 — and it failed
+loudly, which is the good case. Six probes referenced that selector. Constitution
+XVI as an instruction rather than a warning: when a control changes shape, grep
+the checks for the old selector before trusting the next green run.
+
+The two that matter are now **in the repo** rather than in a scratch directory:
+`src/checks/table-standard.py` (28 assertions) and `src/checks/no-jump.py`
+(seven edits, each asserting the box, the page and the caret do not move —
+search and sort added to it here). Contrast sweep and `qa.py` at baseline.
+
+**Still to build in spec 012:** the columns chooser moving into `tablekit`, and
+phases 4–5 — the other six row-flow tables, and the freeze alone on Roles &
+access.

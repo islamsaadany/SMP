@@ -889,7 +889,25 @@ function showCol(k){ return peopleCols()[k] !== false; }
 
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
-  var editable = mayEdit && EDITING.people;
+  /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
+     Islam, after using the whole-table edit: "I don't need to edit the whole
+     table — maybe by pressing the 3 dots on the right of the row I can work on
+     the row inline and then a small save button."
+
+     He is right and the number says why: whole-table edit turns this register
+     into 33 rows x 9 columns = 297 inputs to change one job title, every one of
+     them a way to change something by accident, and it repaints the whole table
+     to get there.
+
+     `editable` was ONE BOOLEAN read at ten places. It becomes a function of the
+     row, and the ten places do not otherwise change — which is the whole reason
+     this is a small diff rather than a rewrite. The Add row keeps `mayEdit`:
+     adding is not editing a row, and it must be reachable without opening one.
+
+     ROWEDIT holds the key of the one row open. One at a time, because two open
+     rows are two unsaved states and a question about which Save means which. */
+  var mayEdit_ = mayEdit;
+  function rowOpen(p){ return mayEdit_ && ROWEDIT === p.key; }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
   var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
   var noPw = live && PWSTATES
@@ -931,6 +949,11 @@ function renderPeople(){
   }
 
   function roleCell(p){
+    /* The role chips' × and the picker belong to the OPEN row, not to a page
+       mode (§79.2). Computed here rather than passed, because roleCell and
+       roleWhereCell are two halves of one control (§69.1) and a parameter one
+       of them forgot would put an × on a closed row. */
+    var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
     /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people
@@ -1017,6 +1040,7 @@ function renderPeople(){
      a company CEO is seated at a company, a function head at a function, and
      one combined list would offer Company CEO of Mobile (§35). */
   function roleWhereCell(p){
+    if (!rowOpen(p)) return "";
     if (ADDROLE !== p.key) return "";
     if (!ADDROLE_KIND) {
       return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
@@ -1071,7 +1095,17 @@ function renderPeople(){
 
      Open state is a single key, not a flag per row: two menus open at once is
      a state nobody wants and one that has to be closed twice. */
-  function kebab(p){
+  function kebab(p, ed){
+    /* ── THE OPEN ROW SHOWS SAVE AND CANCEL, NOT A MENU (spec 012 §2.1) ─
+       The actions cell is where you act on the row, and while the row is open
+       the only two acts are finishing and abandoning. Leaving the ⋮ there as
+       well would offer Retire and Delete on a row with unsaved edits in it —
+       three unrelated outcomes behind one 83px column. */
+    if (ed) {
+      return '<td class="cc kebcell tk-editcell">' +
+        '<button class="linkbu tk-save" data-rowsave="' + esc(p.key) + '">Save</button>' +
+        '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+    }
     var open = PMENU === p.key;
     var st = PWSTATES ? PWSTATES[p.key] : null;
     /* THE ORDER IS WRITTEN DOWN, not produced by splicing into an index. The
@@ -1092,7 +1126,7 @@ function renderPeople(){
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
     }
     if (mayEdit) {
-      acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
+      acts.push('<button data-pedit="' + p.key + '">Edit this row</button>');
     }
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
@@ -1223,7 +1257,17 @@ function renderPeople(){
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
-    return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
+    var ed = rowOpen(p);
+    /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
+       about the person; the word "Active" may not be in the row at all, because
+       the Status column can be turned off under Columns. A filter that searched
+       the visible text would answer differently depending on which columns
+       somebody had hidden. */
+    var flags = (personActive(p) ? "active" : "retired") +
+      (live && PWSTATES && PWSTATES[p.key] === "none" ? " nopw" : "") +
+      (String(p.email == null ? "" : p.email).trim() ? "" : " noemail");
+    return '<tr data-tkrow="' + esc(flags) + '" class="' +
+             (personActive(p) ? '' : 'retired ') + (ed ? 'tk-open' : '') + '">' +
       '<td class="idx">' + (i + 1) + '</td>' +
       /* `pname` so the frozen column can be named rather than counted (§69.19).
          `td:nth-child(2)` would be right today and wrong the first time a
@@ -1245,13 +1289,13 @@ function renderPeople(){
          gone. The short form is a rendering; the stored fact is untouched, and
          the whole name is on the row's hover and in every other surface that
          names a person. */
-      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (editable
+      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
-      (showCol("empid") ? '<td>' + (editable
+      (showCol("empid") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
           '" placeholder="Emp. ID">'
         : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
@@ -1265,7 +1309,7 @@ function renderPeople(){
       /* The job title is information and nothing else. It sits in the register
          because "who is Mennah" is a fair question; it is never read when
          deciding what anyone may see (§33). */
-      (showCol("title") ? '<td>' + (editable
+      (showCol("title") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
           '" placeholder="Job title">'
         : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
@@ -1293,7 +1337,7 @@ function renderPeople(){
          its first file otherwise), so the select carries what the list holds
          plus whatever this row already says. A UNIT IS NOT SOFT — it either
          exists here or it does not, and typing a new one cannot conjure one. */
-      (showCol("mainbu") ? '<td>' + (editable
+      (showCol("mainbu") ? '<td>' + (ed
         ? '<select class="fld" data-pmainbu="' + esc(p.key) + '">' +
             '<option value="">&mdash; none &mdash;</option>' +
             mainbuNamesFor(p).map(function(nm){
@@ -1306,7 +1350,7 @@ function renderPeople(){
             ? '<span class="val">' + esc(p.mainbu) + '</span>' +
               (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
             : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
-      (showCol("bu") ? '<td>' + (editable
+      (showCol("bu") ? '<td>' + (ed
         ? '<select class="fld" data-pat="' + esc(p.key) + '">' +
             '<option value="">&mdash; nowhere yet &mdash;</option>' +
             personAtChoices().map(function(o){
@@ -1325,7 +1369,7 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, editable) +
+        saidWhereNote(p, ed) +
         /* The role picker's second half (§69). It sits UNDER what the cell
            already says rather than replacing it: where somebody sits and where
            a role reaches are two different facts (§46.4), and a picker that
@@ -1335,12 +1379,12 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("email") ? '<td>' + (editable
+      (showCol("email") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
         : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
                    : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
-      (showCol("phone") ? '<td>' + (editable
+      (showCol("phone") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
           '" placeholder="Mobile">'
         : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
@@ -1354,13 +1398,13 @@ function renderPeople(){
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
       (showCol("password") ? pwCell(p) : '') +
-      kebab(p) + '</tr>';
+      kebab(p, ed) + '</tr>';
   }).join("");
 
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
-  var addRow = editable
+  var addRow = mayEdit
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
         '<input class="fld" id="newPersonName" placeholder="Full name" ' +
           'value="' + esc(NEWPERSON) + '">' +
@@ -1547,7 +1591,13 @@ function renderPeople(){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
           ' on more than one row</span>'] : []),
-      "people", mayEdit, null, null, colMenu + pwMenu) +
+      /* NO PEN (spec 012 §2.1). It turned on a mode that no longer exists —
+         `editable` is per row now — so it would have been a control that
+         changes nothing, which this project holds is worse than no control
+         (§37, §72.10). Editing is on the row; Add is at the foot of the table
+         and gated on `mayEdit` rather than on a mode, so it is reachable
+         without opening a row first. */
+      "people", false, null, null, colMenu + pwMenu) +
 
     /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
        own heading now reads "People register" two lines above, so a section
@@ -1556,6 +1606,15 @@ function renderPeople(){
        said. The sentence under it explained the MODEL (a role is one fact
        with two editing surfaces), and the knowledge base is where the model
        lives (§30). */
+    tkBar("people", {
+      placeholder: "Search the register\u2026",
+      filters: [{ k:"active",  label:"Active" },
+                { k:"retired", label:"Retired" },
+                { k:"nopw",    label:"No password",
+                  title:"People who have never had one issued" },
+                { k:"noemail", label:"No email",
+                  title:"They cannot sign in with an address until one is here" }] }) +
+
     section("", "",
       "",
       /* NO COLUMN WIDTHS, and no table-layout:fixed (see .peoplecfg in
@@ -1563,24 +1622,48 @@ function renderPeople(){
          around the name length" — the column fits the name, rather than the
          name being broken to fit the column. Only ROLES is given a width, and
          it is given the leftovers. */
-      '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
-        '<th class="idx">#</th>' +
-        '<th class="namecell">Person</th>' +
+      /* SORTABLE HEADERS ARE BUILT, NOT DECLARED TWICE. The column index a
+         sort needs is a POSITION, and the positions move whenever a column is
+         hidden under Columns — §65's validation-range trap, in a different
+         file. `th()` counts as it emits, so the two can never disagree. */
+      (function(){
+        var n = 0;
+        function th(label, cls, sortable){
+          var i = n++;
+          if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
+          if (sortable === false)
+            return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
+          var st = TKSORT["people"];
+          var on = st && st.col === i;
+          return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
+            (on ? (st.dir === 1 ? ' tk-asc' : ' tk-desc') : '') + '"' +
+            ' data-tksort="people|' + i + '" tabindex="0" role="button"' +
+            ' title="Sort by ' + esc(label.replace(/<[^>]+>/g, "")) + '">' +
+            label + '<i class="tk-arrow"></i></th>';
+        }
+      return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
+        'data-tktable="people"><thead><tr>' +
+        th("#", "idx", false) +
+        th("Person", "namecell") +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
-        (showCol("empid")    ? '<th>Emp. ID</th>'   : '') +
-        (showCol("key")      ? '<th>Sign-in name</th>' : '') +
-        (showCol("title")    ? '<th>Job title</th>'  : '') +
-        (showCol("mainbu")   ? '<th>Official BU</th>' : '') +
-        (showCol("bu")       ? '<th>Unit</th>'       : '') +
-        (showCol("email")    ? '<th>Email</th>'      : '') +
-        (showCol("phone")    ? '<th>Mobile</th>'     : '') +
-        (showCol("roles")    ? '<th class="roles">Roles</th>' : '') +
-        (showCol("status")   ? '<th class="cc">Status</th>' : '') +
-        (live && showCol("password") ? '<th class="cc">Password</th>' : '') +
-        '<th class="cc kebcell"></th>' +
-      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>' +
+        (showCol("empid")    ? th("Emp. ID")   : '') +
+        (showCol("key")      ? th("Sign-in name") : '') +
+        (showCol("title")    ? th("Job title")  : '') +
+        (showCol("mainbu")   ? th("Official BU") : '') +
+        (showCol("bu")       ? th("Unit")       : '') +
+        (showCol("email")    ? th("Email")      : '') +
+        (showCol("phone")    ? th("Mobile")     : '') +
+        /* Roles is a stack of chips and Password is a pill: sorting either
+           orders them by the text that happens to be rendered, which is not a
+           fact anybody asked about. */
+        (showCol("roles")    ? th("Roles", "roles", false) : '') +
+        (showCol("status")   ? th("Status", "cc") : '') +
+        (live && showCol("password") ? th("Password", "cc", false) : '') +
+        th("", "cc kebcell") +
+      '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>';
+      })() +
       bulk +
       /* THE NOTE HAD TO CHANGE WITH THE FEATURE (§69). It said "People are
          retired, never deleted", which stopped being true the moment Delete
@@ -4151,3 +4234,44 @@ function wireMsgEditor(root){
     });
   });
 }
+
+/* ══ TABLEKIT — SEARCH AND SORT, ONCE (spec 012 §3) ═══════════════════════
+   Seven tables need the same two controls. Seven copies is seven places for
+   the next fault to hide, and this project has already paid for that three
+   times in CSS (§51.5, §53.6) and twice in JS (§56.7).
+
+   THE CLASSES ARE `tk-` PREFIXED, from the first line rather than tidied later
+   (Constitution XIV): `pname` became the pillar rail's rules on a register cell
+   because it was one plain word (§73.1), and a component shared by seven tables
+   is exactly where that happens next.
+
+   IT FILTERS AND SORTS THE DOM, NOT THE DATA. Search hides rows in place and
+   never repaints (Constitution XV) — a repaint would replace the input being
+   typed into. Sort reorders the rendered rows and writes nothing: on a table
+   whose order is a SETTING that would be indistinguishable from rearranging it,
+   which is why those two tables do not sort at all (spec §6.2). */
+var TKSORT = {};    /* table id -> {col, dir} — the view's order, never the data's */
+
+/* The bar above a table. `id` names the table for the sort state and nothing
+   else; `filters` are [{k, label, title}] and are the table's own question. */
+function tkBar(id, opts){
+  opts = opts || {};
+  var f = TKFILTER[id] || "";
+  var chips = (opts.filters || []).map(function(x){
+    return '<button class="tk-chip' + (f === x.k ? ' on' : '') + '" data-tkfilter="' +
+      esc(id + "|" + x.k) + '"' + (x.title ? ' title="' + esc(x.title) + '"' : '') +
+      '>' + esc(x.label) + '</button>';
+  }).join("");
+  return '<div class="tk-bar" data-tkbar="' + esc(id) + '">' +
+    '<input class="fld tk-search" data-tksearch="' + esc(id) + '" type="search" ' +
+      'placeholder="' + esc(opts.placeholder || "Search…") + '" autocomplete="off" ' +
+      'value="' + esc(TKQ[id] || "") + '">' +
+    (chips ? '<div class="tk-chips">' + chips + '</div>' : '') +
+    '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
+  '</div>';
+}
+/* WHAT IS TYPED AND WHICH CHIP IS LIT SURVIVE A REPAINT. Adding a row repaints
+   (§75), and a search that emptied itself when you added somebody would be a
+   filter you have to retype every time you use the page. */
+var TKQ = {};
+var TKFILTER = {};

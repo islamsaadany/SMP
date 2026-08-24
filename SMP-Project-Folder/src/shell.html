@@ -429,7 +429,7 @@
     if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
       rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
     }
-    /* AND THE MERGE COMPARISON GOES WITH IT (§85.4). It names two people and
+    /* AND THE MERGE COMPARISON GOES WITH IT (§87.4). It names two people and
        carries an answer per field; coming back to the register an hour later
        and finding it half-answered is the same fault §63 fixed for reporting —
        a mode left standing after you navigated away from it. Nothing is lost:
@@ -2387,7 +2387,7 @@
       rx.readAsArrayBuffer(file);
     });
 
-    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§85.5) ────────────
+    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§87.5) ────────────
        The answer is written onto the plan row and the row is re-read against
        the person it now means — through peopleRowChoose(), never by setting
        `choice` here, or the differences on screen would still be the ones
@@ -2401,7 +2401,7 @@
         paint();
       });
     });
-    /* WHICH OF THE FILE'S VALUES TO TAKE (§85.6). Ticking repaints, because
+    /* WHICH OF THE FILE'S VALUES TO TAKE (§87.6). Ticking repaints, because
        the tally above the table counts what is ticked — a review whose summary
        disagreed with its own list would be worse than no summary. Typing is
        what must never repaint (§35); this is not typing. */
@@ -2732,7 +2732,7 @@
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
-    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§85.3, §35).
+    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§87.3, §35).
        Each keystroke writes its own field of NEWPERSON and nothing else — the
        stop line under the row is drawn from `hit`, which is only set when Add
        is pressed. Checking on every keystroke would repaint the row being
@@ -2764,7 +2764,7 @@
       newPersonReset();
       /* A resemblance is reported AFTER the add, never instead of it: it is
          not a reason to refuse, and two people with similar names is a normal
-         register (§85.2). It is cleared by the next add or the next paint of
+         register (§87.2). It is cleared by the next add or the next paint of
          somebody else's doing. */
       if (!chk.stop && chk.by === "name") NEWPERSON.warn = chk.person.key;
       paint();
@@ -3096,7 +3096,7 @@
         paint();
       });
     });
-    /* ── MERGING TWO ROWS (§85.4) ───────────────────────────────────
+    /* ── MERGING TWO ROWS (§87.4) ───────────────────────────────────
        Opening it from the row records WHICH row, and clears everything the
        last merge left behind — a picks map carried over from a different pair
        would silently apply one person's answer to another's fields. */
@@ -3579,7 +3579,7 @@
         var mlf = document.getElementById("pickNewEmail");
         var o = { name:name, empId:(idf ? idf.value : "").trim(),
                   email:(mlf ? mlf.value : "").trim() };
-        /* REFUSED, IN THE PICKER, NAMING WHO (§85.3). An employee number or an
+        /* REFUSED, IN THE PICKER, NAMING WHO (§87.3). An employee number or an
            address already on the register means the person is already on the
            register, and the thing to do is give them the role — which is the
            control directly above this one. The refusal stays in the popover
@@ -3640,7 +3640,7 @@
         r.hidden = !hit;
         if (hit) any = true;
       });
-      /* ── THE SPELLING IS WHY THE TWINS EXIST (§85.3) ───────────────
+      /* ── THE SPELLING IS WHY THE TWINS EXIST (§87.3) ───────────────
          A plain substring search finds nobody the moment the name is typed a
          little differently from the way HR spelled it — and what the picker
          then offers is "+ Add", which is exactly how three people ended up on

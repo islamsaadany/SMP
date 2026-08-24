@@ -145,7 +145,7 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
-/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§85.3) ────
+/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§87.3) ────
    It was a name and nothing else. `NEWPERSON` is what has been typed into all
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
@@ -766,7 +766,7 @@ function registerDupes(){
            likely: likelyDupes() };
 }
 
-/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§85.2) ───────────
+/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§87.2) ───────────
    The three above all match on a value the two rows SHARE. The pair that sent
    a message to nobody shared nothing: one row came off the employee file with
    an address and a long legal name, the other was typed into the role picker
@@ -794,7 +794,7 @@ function registerDupes(){
    Retired rows are excluded for the same reason the other three exclude them:
    they cannot sign in, no upload places them, and a merge of one would be
    tidying a row that is already out of the way. */
-/* NOT `nameWords`, WHICH IS SOMEBODY ELSE'S (§85.2, found by the merge).
+/* NOT `nameWords`, WHICH IS SOMEBODY ELSE'S (§87.2, found by the merge).
    §82's `nameWords(name, n)` returns the first n NAMES as a string, counting
    "Abd El Ghany" as one; this returns every WORD as an array, which is what a
    chain comparison needs. Two function declarations of one name in one script
@@ -901,7 +901,7 @@ function mintPersonKey(name){
   return base + n;
 }
 
-/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§85.3) ─────────
+/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§87.3) ─────────
    Both hand-typed doors — the Add row at the foot of the register and the role
    picker's "add new" — took a NAME and nothing else, which is how the three
    twins were made: somebody gave a role to a person who was already here,
@@ -912,7 +912,7 @@ function mintPersonKey(name){
    share a name, so refusing on one would refuse a real colleague; an employee
    number or an address on two rows is always a fault. A resemblance in the
    name is worth SAYING, so it is returned as a warning that does not stop
-   anything — the same split the register's marks keep (§85.2).
+   anything — the same split the register's marks keep (§87.2).
 
    AND NEITHER IS REQUIRED. The SMO often knows a name and a role and nothing
    else, and a door that demanded an employee number would mean a unit could
@@ -955,7 +955,7 @@ function addPerson(o){
   return key;
 }
 
-/* ── WHO A ROW IS, ASKED IN ONE PLACE (§85.1) ──────────────────────
+/* ── WHO A ROW IS, ASKED IN ONE PLACE (§87.1) ──────────────────────
    Islam: "the name is not the challenge, the identifier really would be the ID
    and the email."
 
@@ -1013,7 +1013,7 @@ function personByIdentity(id, email){
 }
 /* A row with neither is not a fault — the SMO may know somebody's name and
    nothing else, and refusing to add them would mean a role could not be given
-   until HR answered an email (§85.3). It is a row that cannot be matched by
+   until HR answered an email (§87.3). It is a row that cannot be matched by
    anything, so it is MARKED, and marking it is what stops it quietly becoming
    somebody's second row. */
 function personIdentified(p){
@@ -1290,7 +1290,7 @@ function deletePerson(key){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TWO ROWS, ONE PERSON (§85.4)
+   TWO ROWS, ONE PERSON (§87.4)
 
    Retiring is for somebody who LEFT and deleting is for a row that should
    never have existed (§69). This is the third case and it is neither: two rows
@@ -1316,7 +1316,7 @@ function deletePerson(key){
    survivor is filled from the other row without asking — there is nothing to
    lose. Where both rows say something and they differ, the SMO picks, and the
    default is the survivor's own, because that is the row they chose to keep
-   (§85.5's rule, in the other direction: what is already recorded wins unless
+   (§87.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
   { k:"name",   label:"Name" },
@@ -1860,7 +1860,7 @@ function planPeopleFile(rows){
      their own row. The occupancy is worked out for the WHOLE FILE before the
      loop, so no row's verdict depends on where it sits.
 
-     TWO THINGS §85 CHANGED, AND BOTH FOLLOW FROM THE LADDER.
+     TWO THINGS §87 CHANGED, AND BOTH FOLLOW FROM THE LADDER.
 
      The holder's own row may carry NO EMPLOYEE NUMBER at all, because a row
      with none is now matched on the address itself — so where exactly one
@@ -1871,7 +1871,7 @@ function planPeopleFile(rows){
      conflict path instead of refused. It is the one case where the file is not
      contradicting itself but contradicting the register — the row may be that
      person under a new employee number, or a new colleague given a leaver's
-     address, and those need a person to tell them apart (§85.5). What the
+     address, and those need a person to tell them apart (§87.5). What the
      conflict does NOT offer is adding a third person, for exactly the reason
      this pre-pass exists. */
   function addrOf(r){ return fileTxt(r["Email"]).toLowerCase(); }
@@ -1891,7 +1891,7 @@ function planPeopleFile(rows){
       var keep = null;
       if (holder) {
         /* The row that IS the holder — by employee number, or by carrying no
-           number at all where it is the only such row (§85.1's ladder). */
+           number at all where it is the only such row (§87.1's ladder). */
         var mine = claims.filter(function(c){
           var e = c.id && personByEmpId(c.id);
           return e && e.key === holder.key;
@@ -1940,7 +1940,7 @@ function planPeopleFile(rows){
     var status = fileTxt(r["Status"]);
     var label  = name || id || email || "this row";
 
-    /* ── THE LADDER, ROW BY ROW (§85.5) ────────────────────────────
+    /* ── THE LADDER, ROW BY ROW (§87.5) ────────────────────────────
        Emp ID, then email, then nothing — personByIdentity()'s rule, asked
        here so the review can SAY which rung answered. A row with neither is
        still left alone: there is nothing to match it on and nothing to add it
@@ -1969,7 +1969,7 @@ function planPeopleFile(rows){
        of them it meant. It is a problem rather than a question, because the
        fix is on the register and there is now a control for it — the answer
        is to merge those two rows, not to pick one here and leave the pair
-       standing (§85.4). */
+       standing (§87.4). */
     var mailHits = peopleByEmail(email);
     if (mailHits.length > 1) {
       plan.problems.push({ at:at, msg:email + ' is on ' + plural(mailHits.length, "row") +
@@ -1981,7 +1981,7 @@ function planPeopleFile(rows){
     var existing = byId || byMail;
     var matchedBy = byId ? "empId" : (byMail ? "email" : null);
 
-    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§85.5) ─────────
+    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§87.5) ─────────
        Islam: "adding a new person of course should conflict, but the name is
        not the challenge — the identifier really would be the ID and the
        email."
@@ -2103,7 +2103,7 @@ function planPeopleFile(rows){
       /* NOT WHILE THE ROW IS A CONFLICT. "They already hold it" is read off
          the person the row was matched to, and a conflict has not been matched
          to anybody yet — dropping the grant on one reading would silently drop
-         it on the other (§85.5). */
+         it on the other (§87.5). */
       var holdsIt = !conflict && existing &&
         personRoles(existing).some(function(r){ return r.role === roleKey; });
       /* Cleared BEFORE anything is asked of it, and the checks below are then
@@ -2188,7 +2188,7 @@ function planPeopleFile(rows){
   return plan;
 }
 
-/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§85.6) ──────────
+/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§87.6) ──────────
    Islam, asked who wins where the file and the register disagree: the
    register. That is the right way round and it is not the obvious one — the
    file looks newer because it was just uploaded, and it very often is not: it
@@ -2312,7 +2312,7 @@ function applyPeopleFile(plan){
       p = personBy(key);
       if (!p) return;
     } else {
-      /* ONLY WHAT WAS TICKED (§85.6). Every field the file would change is on
+      /* ONLY WHAT WAS TICKED (§87.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
          either blank in the file or the same on both sides — in neither case
          is there anything to write. The employee number is the exception and

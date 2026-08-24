@@ -1,4 +1,4 @@
-"""WHO A ROW IS, AND TWO ROWS THAT ARE ONE PERSON (§85).
+"""WHO A ROW IS, AND TWO ROWS THAT ARE ONE PERSON (§87).
 
 Driven through the SCREEN, not through the functions. qa.py already asserts the
 rules — the ladder, the conflicts, the merge — and every one of them was true

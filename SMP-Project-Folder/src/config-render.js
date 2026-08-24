@@ -420,7 +420,7 @@ function assignPicker(where, roleKey, current, editable){
   }
   var pool = peopleFor(where);
   /* SEARCHABLE ON WHAT IDENTIFIES SOMEBODY, not only on what they are called
-     (§85.3). `data-name` stays the NAME alone, because the near-name fallback
+     (§87.3). `data-name` stays the NAME alone, because the near-name fallback
      compares chains of names and an employee number in the string would break
      it; `data-find` is what the substring search reads. */
   var row = function(p){
@@ -450,7 +450,7 @@ function assignPicker(where, roleKey, current, editable){
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
     /* ── A PERSON CREATED HERE IS IDENTIFIABLE, OR THEY ARE THE NEXT
-           DUPLICATE (§85.3) ────────────────────────────────────────
+           DUPLICATE (§87.3) ────────────────────────────────────────
        This control is where the twins were made: it takes a typed name and
        mints a row with no employee number and no address, which is precisely
        the row a later upload cannot match — so the upload adds the person a
@@ -928,7 +928,7 @@ function showCol(k){ return peopleCols()[k] !== false; }
 function dupeMark(dupes){
   if (!dupes || !dupes.length) return "";
   var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
-  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§85.2). The first
+  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§87.2). The first
      three are two rows holding the same value and are always a fault; this one
      is two rows that LOOK like one person and may well be two. Saying both in
      the same words would either overstate the guess or understate the fault. */
@@ -1199,7 +1199,7 @@ function renderPeople(){
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
-    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§85.4).
+    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).
        Retire and Delete are below the rule because they take something away;
        merging two rows that were always one person takes nothing away, and it
        is the ordinary fix for what the marks on this row are pointing at. */
@@ -1346,7 +1346,7 @@ function renderPeople(){
   var dupId = Object.keys(DUPES.empId).length;
   var dupName = Object.keys(DUPES.name).length;
   var likely = (DUPES.likely || []).length;
-  /* ── A ROW NOTHING CAN MATCH (§85.3) ──────────────────────────────
+  /* ── A ROW NOTHING CAN MATCH (§87.3) ──────────────────────────────
      Counted over active rows only, like every other count on this header: a
      retired row is not what the next upload is going to fail to find.
 
@@ -1514,7 +1514,7 @@ function renderPeople(){
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
-  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§85.3) ───────
+  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§87.3) ───────
      Three fields where there was one. Neither identifier is required — the SMO
      often knows a name and a role and nothing else, and a door that demanded
      an employee number would mean a unit could not be given its head until HR
@@ -1740,7 +1740,7 @@ function renderPeople(){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
           ' on more than one row</span>'] : []).concat(
-        /* AMBER, NOT RED (§85.2). The three above are collisions and are
+        /* AMBER, NOT RED (§87.2). The three above are collisions and are
            always wrong. These two are a resemblance and a gap: a row that
            looks like somebody else may be a second person with a similar
            name, and a row with no identifier is a normal thing to have typed
@@ -1839,7 +1839,7 @@ function renderPeople(){
 
 
 /* ══════════════════════════════════════════════════════════════════
-   MERGING TWO ROWS (§85.4)
+   MERGING TWO ROWS (§87.4)
 
    A SECTION UNDER THE TABLE, NOT A PANEL IN THE ROW. Retire and Delete ask one
    question and fit in the 83px actions column (§69.20); this one has to show
@@ -2061,7 +2061,7 @@ function renderPeopleFile(mayEdit){
           '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
       }).join("");
 
-    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§85.5) ────────────
+    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§87.5) ────────────
        They are the only thing on this screen that BLOCKS, so putting them
        under a table of thirty ordinary updates would mean scrolling past the
        work to find the reason Apply is off. Each one names both readings with
@@ -2146,7 +2146,7 @@ function renderPeopleFile(mayEdit){
         moving.map(function(r){
           var i = plan.rows.indexOf(r);
           var ch = peopleRowChanges(r);
-          /* ── EVERY DIFFERENCE IS AN OFFER (§85.6) ─────────────────
+          /* ── EVERY DIFFERENCE IS AN OFFER (§87.6) ─────────────────
              Recorded on the left, the file's on the right, and the file's is
              taken only where it is ticked. The default is what is already
              recorded, because a people file is usually an export somebody
@@ -3966,7 +3966,7 @@ function renderFunctions(){
 
          The widths went with the conversion to sortable heads (§84): they were
          declared as percentages summing to the whole, which auto layout treats
-         as a suggestion anyway, and wrapping (§85) is what decides these now. */
+         as a suggestion anyway, and wrapping (§87) is what decides these now. */
       '<div class="cfg"><table data-tktable="fns"><thead><tr>' +
         (function(){ var h = tkHead("fns");
           return h("#", "idx", false) + h("Function") + h("Nav name") +

@@ -1,6 +1,6 @@
 # 013 · Who a row is, and merging two rows that are one person
 
-**Version:** v3.24 (built) · **Decisions:** §85 · **Status:** answered; built
+**Version:** v3.24 (built) · **Decisions:** §87 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam, sending a screenshot of the message composer: *"in the send message
@@ -101,7 +101,7 @@ right. The platform notices, names both sides, and refuses to guess.
   refuses and then relents, the pair is marked, the merge runs from the ⋮ menu,
   the role lands on the row with an address, and the picker suggests before it
   creates.
-- The §85 block in `src/qa.py` — driven through the **rules**: the ladder, both
+- The §87 block in `src/qa.py` — driven through the **rules**: the ladder, both
   conflicts, the block until answered, and the name that must never stop an add.
 - The people-file fixed point re-measured with every pick **taken**, or it would
   be measuring the defaults (§51.11).

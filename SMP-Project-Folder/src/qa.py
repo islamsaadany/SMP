@@ -615,7 +615,7 @@ with sync_playwright() as p:
       PEOPLE[1].mainbu = "Risk";
       PEOPLE[3].mainbu = "Distribution";
 
-      /* ── THE FIXED POINT IS MEASURED WITH EVERYTHING TAKEN (85.6) ──
+      /* ── THE FIXED POINT IS MEASURED WITH EVERYTHING TAKEN (87.6) ──
          Since a difference is an OFFER rather than an instruction, a plan
          whose ticks are all off changes nothing whatever the file says — so a
          fixed point measured on the defaults would be measuring the defaults
@@ -689,7 +689,7 @@ with sync_playwright() as p:
           severalChoices: (SMPRules && mainbuChoices("Distribution")) || [],
           movedRows: movingRows(moved).length,
           movedWhat: movedRow ? peopleRowChanges(movedRow).join(",") : "(row missing)",
-          /* THE DEFAULT IS THE REGISTER'S (85.6). The same file, the same
+          /* THE DEFAULT IS THE REGISTER'S (87.6). The same file, the same
              changed cell, nothing ticked: it must propose the change and
              apply none of it. */
           untakenOffers: untakenRow ? untakenRow.picks.length : -1,
@@ -767,7 +767,7 @@ with sync_playwright() as p:
     if pf["movedRows"] != 1 or pf["movedWhat"] != "job title":
         errs.append("PEOPLE FILE: one changed cell produced %d changed rows (%r)"
                     % (pf["movedRows"], pf["movedWhat"]))
-    # AND THE SAME CELL, UNTICKED, CHANGES NOTHING (85.6). Both halves, or the
+    # AND THE SAME CELL, UNTICKED, CHANGES NOTHING (87.6). Both halves, or the
     # check proves only that the offer exists and never that it is an offer.
     if pf["untakenOffers"] != 1 or pf["untakenDoes"] != 0:
         errs.append("PEOPLE FILE: an unticked difference offered %d and did %d, wanted 1 and 0"
@@ -797,7 +797,7 @@ with sync_playwright() as p:
           "new joiner -> %s + BU %r"
           % (pf["rows"], "PASS" if not pf["fixedMoving"] else "FAIL",
              pf["movedRows"], pf["movedWhat"], pf["seededAction"], pf["seededNewBus"]))
-    # ── WHO A ROW IS, AND TWO ROWS THAT ARE ONE PERSON (85) ──────────
+    # ── WHO A ROW IS, AND TWO ROWS THAT ARE ONE PERSON (87) ──────────
     # The fault this is here for was found by USING the product: three people
     # were on the register twice — once from the employee file with an address,
     # once typed into the role picker with nothing — and a message aimed at a
@@ -884,7 +884,7 @@ with sync_playwright() as p:
         errs.append("IDENTITY: a matching NAME stopped an add (%r) / did not warn (%r)"
                     % (ident["nameStops"], ident["nameWarns"]))
 
-    # ── MERGING TWO ROWS THAT ARE ONE PERSON (85.4) ──────────────────
+    # ── MERGING TWO ROWS THAT ARE ONE PERSON (87.4) ──────────────────
     # Built the way the real ones were built: the employee file's row carries
     # the address, the typed row carries the ROLE and nothing else. Both are
     # asserted — that the register FINDS the pair without being told, and that

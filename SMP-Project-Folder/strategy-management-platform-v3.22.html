@@ -2461,10 +2461,10 @@
               vertical-align:1px; }
 
   /* ══════════════════════════════════════════════════════════════
-     IDENTITY, CONFLICTS AND MERGING (§85)
+     IDENTITY, CONFLICTS AND MERGING (§87)
      ══════════════════════════════════════════════════════════════ */
 
-  /* A RESEMBLANCE WEARS A DIFFERENT COLOUR FROM A COLLISION (§85.2). The three
+  /* A RESEMBLANCE WEARS A DIFFERENT COLOUR FROM A COLLISION (§87.2). The three
      hard duplicates are always a fault and are red; this one is a pair the SMO
      has to look at and may well keep as two people. Same shape, so it reads as
      the same KIND of mark; the colour is the whole of the difference. */
@@ -2485,7 +2485,7 @@
   .addwarn { background:var(--warn-bg); color:var(--warn-tx); border:1px solid var(--warn); }
   .addstop .linkbu, .addwarn .linkbu { color:inherit; text-decoration:underline; }
 
-  /* The picker's two identifier fields and its refusal (§85.3). */
+  /* The picker's two identifier fields and its refusal (§87.3). */
   .picknew { display:flex; gap:6px; margin-bottom:6px; }
   .picknew input.fld { width:auto; flex:1 1 0; min-width:0; margin-bottom:0; }
   .pickerr { font-size:11.5px; line-height:1.45; margin-bottom:6px; padding:6px 8px;
@@ -2493,7 +2493,7 @@
              border:1px solid var(--bad); }
   .pickdym { font-size:11px; font-weight:600; color:var(--warn-tx); padding:6px 4px 2px; }
 
-  /* ── The rows an upload could not place (§85.5) ──────────────────
+  /* ── The rows an upload could not place (§87.5) ──────────────────
      Above the table of ordinary changes, because they are the only thing that
      stops Apply and a reason sitting below thirty rows is a reason nobody
      finds. */
@@ -2514,7 +2514,7 @@
   .cfopt i { display:block; font-style:normal; font-size:11px; color:var(--ink-3); margin-top:2px; }
   .cfopt .why { display:block; font-size:11px; }
 
-  /* ── One tick per difference (§85.6) ─────────────────────────────
+  /* ── One tick per difference (§87.6) ─────────────────────────────
      Recorded on the left, the file's on the right, and an arrow between them
      so which way it would go is not something to work out. */
   .pk { margin-top:6px; display:grid; gap:3px; }
@@ -2531,7 +2531,7 @@
   .pkrow.on .pkn { font-weight:600; }
   .pkrow:not(.on) .pkn { color:var(--ink-3); }
 
-  /* ── Merging two rows (§85.4) ────────────────────────────────────
+  /* ── Merging two rows (§87.4) ────────────────────────────────────
      A section under the table rather than a panel in an 83px column: the
      question is "which of these two people do we keep", and it cannot be asked
      without both of them on screen. */
@@ -2562,7 +2562,7 @@
   .mgopt { display:flex; gap:7px; align-items:flex-start; cursor:pointer; }
   .mgopt span { overflow-wrap:anywhere; }
 
-  /* Why a fourth option is not on offer (§85.5). Under the choices rather than
+  /* Why a fourth option is not on offer (§87.5). Under the choices rather than
      beside them: it is the answer to "where is the one I wanted", which is a
      question somebody asks after reading the three that are there. */
   .cfnote { margin-top:8px; font-size:11.5px; line-height:1.55; color:var(--ink-2);
@@ -6470,7 +6470,7 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
-/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§85.3) ────
+/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§87.3) ────
    It was a name and nothing else. `NEWPERSON` is what has been typed into all
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
@@ -7091,7 +7091,7 @@ function registerDupes(){
            likely: likelyDupes() };
 }
 
-/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§85.2) ───────────
+/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§87.2) ───────────
    The three above all match on a value the two rows SHARE. The pair that sent
    a message to nobody shared nothing: one row came off the employee file with
    an address and a long legal name, the other was typed into the role picker
@@ -7119,7 +7119,7 @@ function registerDupes(){
    Retired rows are excluded for the same reason the other three exclude them:
    they cannot sign in, no upload places them, and a merge of one would be
    tidying a row that is already out of the way. */
-/* NOT `nameWords`, WHICH IS SOMEBODY ELSE'S (§85.2, found by the merge).
+/* NOT `nameWords`, WHICH IS SOMEBODY ELSE'S (§87.2, found by the merge).
    §82's `nameWords(name, n)` returns the first n NAMES as a string, counting
    "Abd El Ghany" as one; this returns every WORD as an array, which is what a
    chain comparison needs. Two function declarations of one name in one script
@@ -7226,7 +7226,7 @@ function mintPersonKey(name){
   return base + n;
 }
 
-/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§85.3) ─────────
+/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§87.3) ─────────
    Both hand-typed doors — the Add row at the foot of the register and the role
    picker's "add new" — took a NAME and nothing else, which is how the three
    twins were made: somebody gave a role to a person who was already here,
@@ -7237,7 +7237,7 @@ function mintPersonKey(name){
    share a name, so refusing on one would refuse a real colleague; an employee
    number or an address on two rows is always a fault. A resemblance in the
    name is worth SAYING, so it is returned as a warning that does not stop
-   anything — the same split the register's marks keep (§85.2).
+   anything — the same split the register's marks keep (§87.2).
 
    AND NEITHER IS REQUIRED. The SMO often knows a name and a role and nothing
    else, and a door that demanded an employee number would mean a unit could
@@ -7280,7 +7280,7 @@ function addPerson(o){
   return key;
 }
 
-/* ── WHO A ROW IS, ASKED IN ONE PLACE (§85.1) ──────────────────────
+/* ── WHO A ROW IS, ASKED IN ONE PLACE (§87.1) ──────────────────────
    Islam: "the name is not the challenge, the identifier really would be the ID
    and the email."
 
@@ -7338,7 +7338,7 @@ function personByIdentity(id, email){
 }
 /* A row with neither is not a fault — the SMO may know somebody's name and
    nothing else, and refusing to add them would mean a role could not be given
-   until HR answered an email (§85.3). It is a row that cannot be matched by
+   until HR answered an email (§87.3). It is a row that cannot be matched by
    anything, so it is MARKED, and marking it is what stops it quietly becoming
    somebody's second row. */
 function personIdentified(p){
@@ -7615,7 +7615,7 @@ function deletePerson(key){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TWO ROWS, ONE PERSON (§85.4)
+   TWO ROWS, ONE PERSON (§87.4)
 
    Retiring is for somebody who LEFT and deleting is for a row that should
    never have existed (§69). This is the third case and it is neither: two rows
@@ -7641,7 +7641,7 @@ function deletePerson(key){
    survivor is filled from the other row without asking — there is nothing to
    lose. Where both rows say something and they differ, the SMO picks, and the
    default is the survivor's own, because that is the row they chose to keep
-   (§85.5's rule, in the other direction: what is already recorded wins unless
+   (§87.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
   { k:"name",   label:"Name" },
@@ -8185,7 +8185,7 @@ function planPeopleFile(rows){
      their own row. The occupancy is worked out for the WHOLE FILE before the
      loop, so no row's verdict depends on where it sits.
 
-     TWO THINGS §85 CHANGED, AND BOTH FOLLOW FROM THE LADDER.
+     TWO THINGS §87 CHANGED, AND BOTH FOLLOW FROM THE LADDER.
 
      The holder's own row may carry NO EMPLOYEE NUMBER at all, because a row
      with none is now matched on the address itself — so where exactly one
@@ -8196,7 +8196,7 @@ function planPeopleFile(rows){
      conflict path instead of refused. It is the one case where the file is not
      contradicting itself but contradicting the register — the row may be that
      person under a new employee number, or a new colleague given a leaver's
-     address, and those need a person to tell them apart (§85.5). What the
+     address, and those need a person to tell them apart (§87.5). What the
      conflict does NOT offer is adding a third person, for exactly the reason
      this pre-pass exists. */
   function addrOf(r){ return fileTxt(r["Email"]).toLowerCase(); }
@@ -8216,7 +8216,7 @@ function planPeopleFile(rows){
       var keep = null;
       if (holder) {
         /* The row that IS the holder — by employee number, or by carrying no
-           number at all where it is the only such row (§85.1's ladder). */
+           number at all where it is the only such row (§87.1's ladder). */
         var mine = claims.filter(function(c){
           var e = c.id && personByEmpId(c.id);
           return e && e.key === holder.key;
@@ -8265,7 +8265,7 @@ function planPeopleFile(rows){
     var status = fileTxt(r["Status"]);
     var label  = name || id || email || "this row";
 
-    /* ── THE LADDER, ROW BY ROW (§85.5) ────────────────────────────
+    /* ── THE LADDER, ROW BY ROW (§87.5) ────────────────────────────
        Emp ID, then email, then nothing — personByIdentity()'s rule, asked
        here so the review can SAY which rung answered. A row with neither is
        still left alone: there is nothing to match it on and nothing to add it
@@ -8294,7 +8294,7 @@ function planPeopleFile(rows){
        of them it meant. It is a problem rather than a question, because the
        fix is on the register and there is now a control for it — the answer
        is to merge those two rows, not to pick one here and leave the pair
-       standing (§85.4). */
+       standing (§87.4). */
     var mailHits = peopleByEmail(email);
     if (mailHits.length > 1) {
       plan.problems.push({ at:at, msg:email + ' is on ' + plural(mailHits.length, "row") +
@@ -8306,7 +8306,7 @@ function planPeopleFile(rows){
     var existing = byId || byMail;
     var matchedBy = byId ? "empId" : (byMail ? "email" : null);
 
-    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§85.5) ─────────
+    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§87.5) ─────────
        Islam: "adding a new person of course should conflict, but the name is
        not the challenge — the identifier really would be the ID and the
        email."
@@ -8428,7 +8428,7 @@ function planPeopleFile(rows){
       /* NOT WHILE THE ROW IS A CONFLICT. "They already hold it" is read off
          the person the row was matched to, and a conflict has not been matched
          to anybody yet — dropping the grant on one reading would silently drop
-         it on the other (§85.5). */
+         it on the other (§87.5). */
       var holdsIt = !conflict && existing &&
         personRoles(existing).some(function(r){ return r.role === roleKey; });
       /* Cleared BEFORE anything is asked of it, and the checks below are then
@@ -8513,7 +8513,7 @@ function planPeopleFile(rows){
   return plan;
 }
 
-/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§85.6) ──────────
+/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§87.6) ──────────
    Islam, asked who wins where the file and the register disagree: the
    register. That is the right way round and it is not the obvious one — the
    file looks newer because it was just uploaded, and it very often is not: it
@@ -8637,7 +8637,7 @@ function applyPeopleFile(plan){
       p = personBy(key);
       if (!p) return;
     } else {
-      /* ONLY WHAT WAS TICKED (§85.6). Every field the file would change is on
+      /* ONLY WHAT WAS TICKED (§87.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
          either blank in the file or the same on both sides — in neither case
          is there anything to write. The employee number is the exception and
@@ -17978,7 +17978,7 @@ function assignPicker(where, roleKey, current, editable){
   }
   var pool = peopleFor(where);
   /* SEARCHABLE ON WHAT IDENTIFIES SOMEBODY, not only on what they are called
-     (§85.3). `data-name` stays the NAME alone, because the near-name fallback
+     (§87.3). `data-name` stays the NAME alone, because the near-name fallback
      compares chains of names and an employee number in the string would break
      it; `data-find` is what the substring search reads. */
   var row = function(p){
@@ -18008,7 +18008,7 @@ function assignPicker(where, roleKey, current, editable){
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
     /* ── A PERSON CREATED HERE IS IDENTIFIABLE, OR THEY ARE THE NEXT
-           DUPLICATE (§85.3) ────────────────────────────────────────
+           DUPLICATE (§87.3) ────────────────────────────────────────
        This control is where the twins were made: it takes a typed name and
        mints a row with no employee number and no address, which is precisely
        the row a later upload cannot match — so the upload adds the person a
@@ -18486,7 +18486,7 @@ function showCol(k){ return peopleCols()[k] !== false; }
 function dupeMark(dupes){
   if (!dupes || !dupes.length) return "";
   var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
-  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§85.2). The first
+  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§87.2). The first
      three are two rows holding the same value and are always a fault; this one
      is two rows that LOOK like one person and may well be two. Saying both in
      the same words would either overstate the guess or understate the fault. */
@@ -18757,7 +18757,7 @@ function renderPeople(){
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
-    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§85.4).
+    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§87.4).
        Retire and Delete are below the rule because they take something away;
        merging two rows that were always one person takes nothing away, and it
        is the ordinary fix for what the marks on this row are pointing at. */
@@ -18904,7 +18904,7 @@ function renderPeople(){
   var dupId = Object.keys(DUPES.empId).length;
   var dupName = Object.keys(DUPES.name).length;
   var likely = (DUPES.likely || []).length;
-  /* ── A ROW NOTHING CAN MATCH (§85.3) ──────────────────────────────
+  /* ── A ROW NOTHING CAN MATCH (§87.3) ──────────────────────────────
      Counted over active rows only, like every other count on this header: a
      retired row is not what the next upload is going to fail to find.
 
@@ -19072,7 +19072,7 @@ function renderPeople(){
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
-  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§85.3) ───────
+  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§87.3) ───────
      Three fields where there was one. Neither identifier is required — the SMO
      often knows a name and a role and nothing else, and a door that demanded
      an employee number would mean a unit could not be given its head until HR
@@ -19298,7 +19298,7 @@ function renderPeople(){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
           ' on more than one row</span>'] : []).concat(
-        /* AMBER, NOT RED (§85.2). The three above are collisions and are
+        /* AMBER, NOT RED (§87.2). The three above are collisions and are
            always wrong. These two are a resemblance and a gap: a row that
            looks like somebody else may be a second person with a similar
            name, and a row with no identifier is a normal thing to have typed
@@ -19397,7 +19397,7 @@ function renderPeople(){
 
 
 /* ══════════════════════════════════════════════════════════════════
-   MERGING TWO ROWS (§85.4)
+   MERGING TWO ROWS (§87.4)
 
    A SECTION UNDER THE TABLE, NOT A PANEL IN THE ROW. Retire and Delete ask one
    question and fit in the 83px actions column (§69.20); this one has to show
@@ -19619,7 +19619,7 @@ function renderPeopleFile(mayEdit){
           '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
       }).join("");
 
-    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§85.5) ────────────
+    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§87.5) ────────────
        They are the only thing on this screen that BLOCKS, so putting them
        under a table of thirty ordinary updates would mean scrolling past the
        work to find the reason Apply is off. Each one names both readings with
@@ -19704,7 +19704,7 @@ function renderPeopleFile(mayEdit){
         moving.map(function(r){
           var i = plan.rows.indexOf(r);
           var ch = peopleRowChanges(r);
-          /* ── EVERY DIFFERENCE IS AN OFFER (§85.6) ─────────────────
+          /* ── EVERY DIFFERENCE IS AN OFFER (§87.6) ─────────────────
              Recorded on the left, the file's on the right, and the file's is
              taken only where it is ticked. The default is what is already
              recorded, because a people file is usually an export somebody
@@ -21524,7 +21524,7 @@ function renderFunctions(){
 
          The widths went with the conversion to sortable heads (§84): they were
          declared as percentages summing to the whole, which auto layout treats
-         as a suggestion anyway, and wrapping (§85) is what decides these now. */
+         as a suggestion anyway, and wrapping (§87) is what decides these now. */
       '<div class="cfg"><table data-tktable="fns"><thead><tr>' +
         (function(){ var h = tkHead("fns");
           return h("#", "idx", false) + h("Function") + h("Nav name") +
@@ -24999,7 +24999,7 @@ var SYNC = (function () {
     if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
       rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
     }
-    /* AND THE MERGE COMPARISON GOES WITH IT (§85.4). It names two people and
+    /* AND THE MERGE COMPARISON GOES WITH IT (§87.4). It names two people and
        carries an answer per field; coming back to the register an hour later
        and finding it half-answered is the same fault §63 fixed for reporting —
        a mode left standing after you navigated away from it. Nothing is lost:
@@ -26957,7 +26957,7 @@ var SYNC = (function () {
       rx.readAsArrayBuffer(file);
     });
 
-    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§85.5) ────────────
+    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§87.5) ────────────
        The answer is written onto the plan row and the row is re-read against
        the person it now means — through peopleRowChoose(), never by setting
        `choice` here, or the differences on screen would still be the ones
@@ -26971,7 +26971,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* WHICH OF THE FILE'S VALUES TO TAKE (§85.6). Ticking repaints, because
+    /* WHICH OF THE FILE'S VALUES TO TAKE (§87.6). Ticking repaints, because
        the tally above the table counts what is ticked — a review whose summary
        disagreed with its own list would be worse than no summary. Typing is
        what must never repaint (§35); this is not typing. */
@@ -27302,7 +27302,7 @@ var SYNC = (function () {
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
-    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§85.3, §35).
+    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§87.3, §35).
        Each keystroke writes its own field of NEWPERSON and nothing else — the
        stop line under the row is drawn from `hit`, which is only set when Add
        is pressed. Checking on every keystroke would repaint the row being
@@ -27334,7 +27334,7 @@ var SYNC = (function () {
       newPersonReset();
       /* A resemblance is reported AFTER the add, never instead of it: it is
          not a reason to refuse, and two people with similar names is a normal
-         register (§85.2). It is cleared by the next add or the next paint of
+         register (§87.2). It is cleared by the next add or the next paint of
          somebody else's doing. */
       if (!chk.stop && chk.by === "name") NEWPERSON.warn = chk.person.key;
       paint();
@@ -27666,7 +27666,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* ── MERGING TWO ROWS (§85.4) ───────────────────────────────────
+    /* ── MERGING TWO ROWS (§87.4) ───────────────────────────────────
        Opening it from the row records WHICH row, and clears everything the
        last merge left behind — a picks map carried over from a different pair
        would silently apply one person's answer to another's fields. */
@@ -28149,7 +28149,7 @@ var SYNC = (function () {
         var mlf = document.getElementById("pickNewEmail");
         var o = { name:name, empId:(idf ? idf.value : "").trim(),
                   email:(mlf ? mlf.value : "").trim() };
-        /* REFUSED, IN THE PICKER, NAMING WHO (§85.3). An employee number or an
+        /* REFUSED, IN THE PICKER, NAMING WHO (§87.3). An employee number or an
            address already on the register means the person is already on the
            register, and the thing to do is give them the role — which is the
            control directly above this one. The refusal stays in the popover
@@ -28210,7 +28210,7 @@ var SYNC = (function () {
         r.hidden = !hit;
         if (hit) any = true;
       });
-      /* ── THE SPELLING IS WHY THE TWINS EXIST (§85.3) ───────────────
+      /* ── THE SPELLING IS WHY THE TWINS EXIST (§87.3) ───────────────
          A plain substring search finds nobody the moment the name is typed a
          little differently from the way HR spelled it — and what the picker
          then offers is "+ Add", which is exactly how three people ended up on

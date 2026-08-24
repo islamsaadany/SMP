@@ -13,7 +13,7 @@ with sync_playwright() as p:
     pg.goto(URL); pg.wait_for_timeout(1500)
     # give somebody on the register an address, so the second case has something to hit
     pg.evaluate("PEOPLE[1].email='taken@rayacorp.com'; PEOPLE[1].empId='OLD1';")
-    # THE TALLY IS READ, NOT STORED (§85.6). A difference the file proposes is
+    # THE TALLY IS READ, NOT STORED (§87.6). A difference the file proposes is
     # an OFFER now, so a plan counts nothing until its picks are answered — the
     # amended row here would report "0 updated" with the ticks off, which is the
     # feature working, not the check failing. takeAll() answers them the way

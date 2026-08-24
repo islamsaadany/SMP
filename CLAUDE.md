@@ -237,7 +237,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **A NAME IS NEVER AN IDENTIFIER (§85):** who a register row *is* is asked in
+- **A NAME IS NEVER AN IDENTIFIER (§87):** who a register row *is* is asked in
   ONE place — `personByIdentity()`: **Emp ID, then email, and no third rung** —
   and it reports which rung answered, because "matched" tells nobody what to
   check. An address on two rows answers **nothing** (§57's rule, §69.23's door).
@@ -743,7 +743,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;85, spec 013).
+*Last Updated: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the
 registry"* &mdash; and nothing in the resolver was wrong: **the three people were
 on the register twice.** Once from the employee file with an address and a long

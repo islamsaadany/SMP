@@ -10291,7 +10291,7 @@ with Save and Cancel in the actions cell. That is the reversal Islam asked for
 in §79.2 and it is the piece with no precedent anywhere in the platform.
 
 `src/checks/table-standard-all.py`, 44 assertions across the seven.
-## 85 · Who a row is, and two rows that are one person (v3.24)
+## 87 · Who a row is, and two rows that are one person (v3.24)
 
 Islam, sending a screenshot of the message composer: *"in the send message
 functionality I got 3 people skipped but they have an email in the registry."*
@@ -10306,7 +10306,7 @@ about a row nobody was looking at.
 Nothing in `lib/audience.js` was wrong. **The register let one human become two
 rows, and then had no way to say so.**
 
-### 85.1 A name is never an identifier
+### 87.1 A name is never an identifier
 
 Islam: *"the name is not the challenge, the identifier really would be the ID
 and the email."* That is the whole of it, and the register already proved it
@@ -10328,7 +10328,7 @@ only where the address means ONE person — §57's rule about a Main BU that hol
 several, arriving in a second place, and the same rule the door already keeps
 (§69.23). Read past it and you attach somebody to a coincidence.
 
-### 85.2 The fourth kind of duplicate, and it is the one that bit
+### 87.2 The fourth kind of duplicate, and it is the one that bit
 
 §81's three all match on a value two rows **share**. The pair that sent a
 message to nobody shared nothing at all, so nothing was flagged.
@@ -10347,7 +10347,7 @@ Two rules keep it quiet enough to read:
   score** — a score needs a threshold, and a threshold is a number nobody can
   defend the day it puts two strangers together.
 
-### 85.3 Both hand-typed doors ask for an identifier now
+### 87.3 Both hand-typed doors ask for an identifier now
 
 The register's Add row and the role picker's *add new* both took a name and
 nothing else. **That is where the twins were made.**
@@ -10373,7 +10373,7 @@ one of these?"* — shown, never substituted, with Add still underneath. The
 search also reads the employee number and the address, because a register of
 five hundred people is not a list you scroll.
 
-### 85.4 Two rows, one person — the merge
+### 87.4 Two rows, one person — the merge
 
 Retiring is for somebody who **left**; deleting is for a row that should never
 have existed (§69). This is the third case and it is neither: two rows that were
@@ -10404,7 +10404,7 @@ question and fit in the 83px actions column (§69.20); this one has to show two
 whole people side by side, and "which of these two do we keep" is unreadable in
 a 240px popover.
 
-### 85.5 The upload matches on the ladder, and sets aside what it cannot place
+### 87.5 The upload matches on the ladder, and sets aside what it cannot place
 
 The reader matched on **Emp ID only**, and a row with none was skipped. It now
 matches on Emp ID, then email — so a tenant that has never had employee numbers
@@ -10428,7 +10428,7 @@ rows first* rather than picking one and leaving the pair standing.
 
 **AND §83 IS KEPT WHOLE, WHICH DECIDED WHAT A CONFLICT MAY OFFER.** §83 refuses
 any upload row that would hand one address to two people, because sign-in takes
-the address and two holders turns both away (§69.23). §85 arrived at the same
+the address and two holders turns both away (§69.23). §87 arrived at the same
 function from the other side and the two had to be reconciled by hand rather
 than by git:
 
@@ -10436,7 +10436,7 @@ than by git:
   the same address, or a row taking an address from the person who holds it
   while that person is also in the file, are refused exactly as before — worked
   out for the whole file first, so order cannot decide who the impostor is.
-- **A single row contradicting the register is §85's question.** One claim on an
+- **A single row contradicting the register is §87's question.** One claim on an
   address somebody already holds is not the file contradicting itself; it is the
   file contradicting the register, and it needs a person to say whether this is
   that colleague under a new employee number or a new colleague given a leaver's
@@ -10453,7 +10453,7 @@ than by git:
   claim is the holder's; two ID-less rows on one address still say nothing about
   which is which, and both are refused.
 
-### 85.6 A difference is an offer, never an instruction
+### 87.6 A difference is an offer, never an instruction
 
 Asked who wins where the file and the register disagree, Islam said the
 register. That is the right way round and it is not the obvious one: **the file
@@ -10478,7 +10478,7 @@ downloaded and uploaded back proposes nothing, which is the stronger claim; and
 it asserts the other half too, that the same edited cell **unticked** offers one
 change and makes none.
 
-### 85.7 What this does not do
+### 87.7 What this does not do
 
 **Nothing merges itself.** Every join in this section is a person answering a
 question the platform could not: which of two readings a file row meant, which
@@ -10486,5 +10486,5 @@ of two rows survives, which of two values is right. The platform's job is to
 notice, to name both sides, and to refuse to guess — the same division §44 drew
 for a claimed figure and §62 for a deleted function.
 
-`src/checks/identity-merge.py`, driven through the screen, and the §85 block in
+`src/checks/identity-merge.py`, driven through the screen, and the §87 block in
 `qa.py`, driven through the rules.

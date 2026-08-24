@@ -731,5 +731,32 @@ console.log("\n10 · a function that plans in pillars");
   check("its settings are still the SMO's", !v.ok, v.refusals.join(" / "));
 })();
 
+/* ── 11 · A row LEAVING the register is the SMO's (§69) ──────────
+   Deleting a person is a change to `people`, which is in TOP_SETUP, so this
+   is §42's "an unrecognised change is the SMO's" already covering a feature
+   that did not exist when it was written — exactly as it did for deleting a
+   function (§62). It is asserted rather than assumed, because the whole point
+   of that rule is that nobody has to remember it, and the way to keep it
+   honest is to check it the day the feature lands. */
+console.log("\n11 · a row leaving the register");
+(function () {
+  const victim = SEED.people.filter(function (p) {
+    return p.key !== "smo" && p.key !== headKey && p.key !== custKey;
+  })[0];
+  if (!victim) { check("the seed has somebody to delete", false); return; }
+  const drop = function (s) {
+    s.people = s.people.filter(function (p) { return p.key !== victim.key; });
+  };
+  allows("smo", drop, "the SMO may delete " + victim.key);
+  refuses(headKey, drop, "a unit head may not delete " + victim.key);
+  refuses(custKey, drop, "a strategy custodian may not delete " + victim.key);
+  /* And deleting YOURSELF is refused for everybody who is not the SMO, which
+     is the same rule and worth naming: the escape hatch a save could otherwise
+     use is removing the row the authoriser reads its own roles from. */
+  refuses(headKey, function (s) {
+    s.people = s.people.filter(function (p) { return p.key !== headKey; });
+  }, "a unit head may not delete themselves");
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

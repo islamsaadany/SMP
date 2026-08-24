@@ -1923,7 +1923,158 @@
   .peoplecfg tbody tr:nth-child(even) { background:var(--zebra); }
   .peoplecfg tbody tr:hover { background:var(--surface-2); }
   .cfg table.unitcfg.peoplecfg { table-layout:auto; }
-  .peoplecfg td, .peoplecfg th { white-space:nowrap; }
+  /* A SELECT SIZES ITSELF TO ITS LONGEST OPTION, and that option is not on
+     screen. Capabilities carries a function picker whose list includes "Strategy
+     Management Office", so the column was 239px wide to hold a word nobody can
+     see until the list is open — the table measured 552px past its box, three
+     times the register's worst. Capped at the cell: the chooser opens over the
+     page anyway (§45.5), so nothing is lost by the closed control being narrow. */
+  /* AN ABSOLUTE CAP, NOT `max-width:100%`. Under `table-layout:auto` the cell
+     is sized BY its child, so a percentage of the cell is a percentage of the
+     width the select just asked for — circular, and measured as changing
+     nothing: 552px past the box before and after. §46's note about
+     `max-width:0` being a fixed-layout trick, met from the other side. */
+  .cfg table select.fld, .cfg table .ssbtn {
+    max-width:200px; box-sizing:border-box; }
+  .cfg table td { min-width:0; }
+
+  /* ── EVERY SETUP TABLE WRAPS, NOT JUST THE REGISTER (§81.5) ────────
+     `_shared.css` sets `thead th { white-space:nowrap }` and the Setup tables
+     inherited a body to match. Capabilities and Roles & access are both wider
+     than their box for the same reason the register was: one long cell holding
+     its column open. The rule is the same everywhere — prose wraps, tokens do
+     not — so it is written once here and the register's block below only adds
+     what is particular to it. */
+  .cfg table td { white-space:normal; }
+  .cfg table td.cc, .cfg table td.idx, .cfg table td.mono,
+  .cfg table td.nowrapcell, .cfg table .pill, .cfg table .rolechip,
+  .cfg table .chip, .cfg table .pair { white-space:nowrap; }
+  /* A header may wrap too where its words are long — "Sees other companies"
+     is three words holding a 2-row table open. */
+  .cfg table thead th { white-space:normal; }
+  .cfg table thead th.idx, .cfg table thead th.cc { white-space:nowrap; }
+
+  /* ── DATA WRAPS; FURNITURE DOES NOT (Islam, §81.5) ─────────────────
+     "for the tables as well fix the overflow of data by wrapping."
+
+     Every cell was `nowrap`, which is why the register is 1127px wide in a
+     920px box (§54.6) — a job title of nine words held its whole column open at
+     nine words wide, and every other column paid for it at every scroll
+     position because two of them are FROZEN (§69.19).
+
+     THE SPLIT IS BY WHAT THE CELL HOLDS, not by column name. Prose wraps: a
+     job title, an official BU, an address. Things that are read as ONE token do
+     not: a number, a sign-in name, a pill, a date — a broken employee number is
+     harder to read than a wide column, and a pill wrapped mid-word looks
+     broken rather than narrow.
+
+     `overflow-wrap:anywhere` on the address, because an email has no spaces to
+     break at and would otherwise hold its column open exactly as before. */
+  .peoplecfg td, .peoplecfg th { white-space:normal; }
+  .peoplecfg td.idx, .peoplecfg th.idx,
+  .peoplecfg td.cc, .peoplecfg th.cc,
+  .peoplecfg td.kebcell, .peoplecfg th.kebcell,
+  .peoplecfg td.mono, .peoplecfg .pill, .peoplecfg .rolechip,
+  .peoplecfg .dupemark { white-space:nowrap; }
+  .peoplecfg td.wrapany { overflow-wrap:anywhere; }
+  /* A name may wrap now, so its cell has to be able to grow — the frozen
+     column's `overflow:hidden` (§71.2) clips what spills, and a wrapped second
+     line is not spill. */
+  /* ── ONE FLOOR, ON ONE COLUMN, AND IT IS THE ADDRESS (§83.2) ───────
+     Wrapping alone took the register from 207px past its box to 0. What it
+     also did was make one row 382px tall: an address has no spaces, so
+     `overflow-wrap:anywhere` broke it down a column that had collapsed to
+     nothing.
+
+     THE FIX IS A MINIMUM ON THAT COLUMN AND NOTHING ELSE. Minimums on the name
+     and the job title were tried first and bought NOTHING — measured, identical
+     row heights at every value — while costing up to 184px of scroll. The two
+     numbers that decide this table are the address's floor and nothing at all.
+
+     Swept against the demo register and against the worst row it can produce
+     (an eight-word name, a 46-character title, a 30-character address on one
+     person):
+
+       no floor      0px of scroll  ·  tallest row 382px
+       60px         20px            ·  tallest row 160px
+       75px         35px            ·  tallest row 120px   <- chosen
+       90px         50px            ·  tallest row 120px
+       120/150/170 184px            ·  tallest row  79px
+
+     75px is where the tall row stops getting shorter. Everything above it buys
+     scroll and nothing else. Two lines on an ordinary row, three on the worst
+     one in the register, and 35px of a scroll the frozen columns already make
+     workable (§69.20). */
+  .peoplecfg td.namecell, .peoplecfg th.namecell { white-space:normal; }
+  .peoplecfg td.wrapany, .peoplecfg th.wrapany { overflow-wrap:anywhere; min-width:75px; }
+
+  /* ── AND THE ACTIONS COLUMN FREEZES TO THE RIGHT (§69.20) ──────────
+     Islam: "allow me to remove a full employee in the register, not only
+     retired" — which had been built (§69.4) and could not be REACHED. Measured
+     at 1440px: the row's kebab sits 317px past the right edge of its own
+     scroll box, and Delete permanently is inside that menu. A control nobody
+     can get to is a control that was not built, and the register grew a
+     horizontal scroll the day it grew its ninth column (§54.6, recorded then
+     and not acted on).
+
+     So the last column is frozen the way the first two are — the mirror of the
+     same measurement, and the reason the pair on the left was worth freezing
+     in the first place: what you scroll to reach is the thing you do to a row,
+     and what you need beside it is the name of the row you are doing it to. */
+  .peoplecfg td.kebcell, .peoplecfg thead th.kebcell {
+    position:sticky; right:0; z-index:2; background:inherit;
+    box-shadow:-1px 0 0 var(--line-soft); }
+  .peoplecfg thead th.kebcell { z-index:4; }
+  /* Above the header too: a panel opened on the first visible row would
+     otherwise slide under the frozen header the moment the box is scrolled. */
+  .peoplecfg td.kebcell.lifted { z-index:30; }
+  .peoplecfg tr.retired td.kebcell { opacity:1; }
+  /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
+     `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
+     cells would have gone translucent and every row scrolling past would have
+     ghosted through them. The dimming moves to the ink for those two. */
+  .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.namecell { opacity:1; color:var(--ink-3); }
+  .peoplecfg tr.retired td.kebcell .kebab { opacity:.62; }
+  .peoplecfg tr.retired td.namecell b,
+  .peoplecfg tr.retired td.namecell input.fld { color:var(--ink-3); }
+  /* THE GROUND IS ON THE ROW so the frozen cells can inherit it. The platform
+     stripes on `> td` (arrange.css); this says the same thing one level up,
+     for the three cells that cannot read a sibling's background. Both paint
+     the same colour, so they cannot disagree. */
+  .peoplecfg tbody tr { background:var(--surface); }
+  .peoplecfg tbody tr:nth-child(even) { background:var(--zebra); }
+  .peoplecfg tbody tr:hover { background:var(--surface-2); }
+  .cfg table.unitcfg.peoplecfg { table-layout:auto; }
+  /* A SELECT SIZES ITSELF TO ITS LONGEST OPTION, and that option is not on
+     screen. Capabilities carries a function picker whose list includes "Strategy
+     Management Office", so the column was 239px wide to hold a word nobody can
+     see until the list is open — the table measured 552px past its box, three
+     times the register's worst. Capped at the cell: the chooser opens over the
+     page anyway (§45.5), so nothing is lost by the closed control being narrow. */
+  /* AN ABSOLUTE CAP, NOT `max-width:100%`. Under `table-layout:auto` the cell
+     is sized BY its child, so a percentage of the cell is a percentage of the
+     width the select just asked for — circular, and measured as changing
+     nothing: 552px past the box before and after. §46's note about
+     `max-width:0` being a fixed-layout trick, met from the other side. */
+  .cfg table select.fld, .cfg table .ssbtn {
+    max-width:200px; box-sizing:border-box; }
+  .cfg table td { min-width:0; }
+
+  /* ── EVERY SETUP TABLE WRAPS, NOT JUST THE REGISTER (§81.5) ────────
+     `_shared.css` sets `thead th { white-space:nowrap }` and the Setup tables
+     inherited a body to match. Capabilities and Roles & access are both wider
+     than their box for the same reason the register was: one long cell holding
+     its column open. The rule is the same everywhere — prose wraps, tokens do
+     not — so it is written once here and the register's block below only adds
+     what is particular to it. */
+  .cfg table td { white-space:normal; }
+  .cfg table td.cc, .cfg table td.idx, .cfg table td.mono,
+  .cfg table td.nowrapcell, .cfg table .pill, .cfg table .rolechip,
+  .cfg table .chip, .cfg table .pair { white-space:nowrap; }
+  /* A header may wrap too where its words are long — "Sees other companies"
+     is three words holding a 2-row table open. */
+  .cfg table thead th { white-space:normal; }
+  .cfg table thead th.idx, .cfg table thead th.cc { white-space:nowrap; }
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }
   /* THE CLIP MOVES INSIDE THE CELL. `width:99%; max-width:0` is a
      FIXED-layout trick — under auto layout `max-width:0` is not a hint, it is
@@ -2310,10 +2461,10 @@
               vertical-align:1px; }
 
   /* ══════════════════════════════════════════════════════════════
-     IDENTITY, CONFLICTS AND MERGING (§82)
+     IDENTITY, CONFLICTS AND MERGING (§85)
      ══════════════════════════════════════════════════════════════ */
 
-  /* A RESEMBLANCE WEARS A DIFFERENT COLOUR FROM A COLLISION (§82.2). The three
+  /* A RESEMBLANCE WEARS A DIFFERENT COLOUR FROM A COLLISION (§85.2). The three
      hard duplicates are always a fault and are red; this one is a pair the SMO
      has to look at and may well keep as two people. Same shape, so it reads as
      the same KIND of mark; the colour is the whole of the difference. */
@@ -2334,7 +2485,7 @@
   .addwarn { background:var(--warn-bg); color:var(--warn-tx); border:1px solid var(--warn); }
   .addstop .linkbu, .addwarn .linkbu { color:inherit; text-decoration:underline; }
 
-  /* The picker's two identifier fields and its refusal (§82.3). */
+  /* The picker's two identifier fields and its refusal (§85.3). */
   .picknew { display:flex; gap:6px; margin-bottom:6px; }
   .picknew input.fld { width:auto; flex:1 1 0; min-width:0; margin-bottom:0; }
   .pickerr { font-size:11.5px; line-height:1.45; margin-bottom:6px; padding:6px 8px;
@@ -2342,7 +2493,7 @@
              border:1px solid var(--bad); }
   .pickdym { font-size:11px; font-weight:600; color:var(--warn-tx); padding:6px 4px 2px; }
 
-  /* ── The rows an upload could not place (§82.5) ──────────────────
+  /* ── The rows an upload could not place (§85.5) ──────────────────
      Above the table of ordinary changes, because they are the only thing that
      stops Apply and a reason sitting below thirty rows is a reason nobody
      finds. */
@@ -2363,7 +2514,7 @@
   .cfopt i { display:block; font-style:normal; font-size:11px; color:var(--ink-3); margin-top:2px; }
   .cfopt .why { display:block; font-size:11px; }
 
-  /* ── One tick per difference (§82.6) ─────────────────────────────
+  /* ── One tick per difference (§85.6) ─────────────────────────────
      Recorded on the left, the file's on the right, and an arrow between them
      so which way it would go is not something to work out. */
   .pk { margin-top:6px; display:grid; gap:3px; }
@@ -2380,7 +2531,7 @@
   .pkrow.on .pkn { font-weight:600; }
   .pkrow:not(.on) .pkn { color:var(--ink-3); }
 
-  /* ── Merging two rows (§82.4) ────────────────────────────────────
+  /* ── Merging two rows (§85.4) ────────────────────────────────────
      A section under the table rather than a panel in an 83px column: the
      question is "which of these two people do we keep", and it cannot be asked
      without both of them on screen. */
@@ -2410,6 +2561,12 @@
   .mgpicks .cfg { margin-top:6px; }
   .mgopt { display:flex; gap:7px; align-items:flex-start; cursor:pointer; }
   .mgopt span { overflow-wrap:anywhere; }
+
+  /* Why a fourth option is not on offer (§85.5). Under the choices rather than
+     beside them: it is the answer to "where is the one I wanted", which is a
+     question somebody asks after reading the three that are there. */
+  .cfnote { margin-top:8px; font-size:11.5px; line-height:1.55; color:var(--ink-2);
+            border-left:2px solid var(--attn); padding-left:9px; }
 
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
@@ -6313,7 +6470,7 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
-/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§82.3) ────
+/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§85.3) ────
    It was a name and nothing else. `NEWPERSON` is what has been typed into all
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
@@ -6490,9 +6647,68 @@ var UNIT_ROLES = {
   nigeria:             { head:"nghead",  custodian:"own_ng"  }
 };
 
-function personName(key){
+/* ── TWO NAMES, WHEREVER A PERSON IS NAMED (Islam, §81.4) ─────────────
+   "for any placement of the name of people like in the custodian of the unit or
+   the function use the first 2 names only."
+
+   Raya's register carries names of five and six words — *Abd El Hamid Mokhtar
+   Abd El Hamid Ahmed Abd El Wahab* is eight — and every one of them was being
+   printed whole into a table cell, a pill or a chip built for a name.
+
+   IT IS CHANGED HERE, IN THE ONE FUNCTION, and that is the point: all fifteen
+   call sites are display sites — a cell, a chip, a pill, a confirmation — and
+   none of them stores or exports what it gets. A `personShort()` beside a
+   `personName()` would have been fifteen edits and a coin toss on the
+   sixteenth.
+
+   THE REGISTER IS NOT ONE OF THEM. It has its own rule (§81.1): three names,
+   or as many as it takes to tell two people apart, because that column exists
+   to identify somebody and these fifteen exist to remind you who they are.
+   `personFullName()` is here for anything that ever needs the whole thing. */
+/* ── "ABD EL" IS NOT TWO NAMES, IT IS HALF OF ONE (§81.6) ─────────────
+   Counting words gave the Mobile custodian's cell the word **"Abd El"**, which
+   names nobody: half of Raya's register begins that way. A particle binds to
+   the name after it — *Abd El Hamid* is one given name in three tokens, *Abou
+   El Ela* and *Abd El Moniem* likewise — so a NAME is a real word together with
+   whatever particles run in front of it.
+
+   This is not a wider reading of what Islam asked for; it is the only reading
+   under which "the first 2 names" means two names. It is applied to the
+   register's own three-name rule (§81.1) as well, which had the same fault more
+   quietly: *Abd El Hamid* was one name spending the whole budget.
+
+   The list is the particles this register actually contains, plus the European
+   ones a client could arrive with. A word not on it is a name. */
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
+
+var NAMED_ELSEWHERE_WORDS = 2;
+function personFullName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+function personName(key){
+  var n = personFullName(key);
+  if (!n) return n;
+  return nameWords(n, NAMED_ELSEWHERE_WORDS);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -6790,10 +7006,7 @@ function rowEditCancel(obj){
 function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 
 var SHORT_NAME_WORDS = 3;
-function shortName(name){
-  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
-  return parts.slice(0, SHORT_NAME_WORDS).join(" ");
-}
+function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
 
 /* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
    Three names is the column's budget (§69.21) and it is right for 31 of 33
@@ -6812,11 +7025,10 @@ function shortName(name){
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
-    var parts = String(p.name == null ? "" : p.name).trim().split(/\s+/).filter(Boolean);
     var n = SHORT_NAME_WORDS;
-    var label = parts.slice(0, n).join(" ");
+    var label = nameWords(p.name, n);
     (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
-    out[p.key] = { parts: parts, at: n, label: label };
+    out[p.key] = { full: p.name, at: n, label: label };
   });
   Object.keys(seen).forEach(function(k){
     if (seen[k].length < 2) return;
@@ -6829,14 +7041,14 @@ function displayNames(){
       var got = {};
       same = false;
       keys.forEach(function(key){
-        var o = out[key], lab = o.parts.slice(0, n).join(" ").toLowerCase();
+        var lab = nameWords(out[key].full, n).toLowerCase();
         if (got[lab]) same = true;
         got[lab] = 1;
       });
     }
     keys.forEach(function(key){
       out[key].at = n;
-      out[key].label = out[key].parts.slice(0, n).join(" ");
+      out[key].label = nameWords(out[key].full, n);
     });
   });
   return out;
@@ -6879,7 +7091,7 @@ function registerDupes(){
            likely: likelyDupes() };
 }
 
-/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§82.2) ───────────
+/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§85.2) ───────────
    The three above all match on a value the two rows SHARE. The pair that sent
    a message to nobody shared nothing: one row came off the employee file with
    an address and a long legal name, the other was typed into the role picker
@@ -6907,7 +7119,14 @@ function registerDupes(){
    Retired rows are excluded for the same reason the other three exclude them:
    they cannot sign in, no upload places them, and a merge of one would be
    tidying a row that is already out of the way. */
-function nameWords(v){
+/* NOT `nameWords`, WHICH IS SOMEBODY ELSE'S (§85.2, found by the merge).
+   §82's `nameWords(name, n)` returns the first n NAMES as a string, counting
+   "Abd El Ghany" as one; this returns every WORD as an array, which is what a
+   chain comparison needs. Two function declarations of one name in one script
+   is one function — the later wins — and the register threw on every paint
+   with nothing in either branch looking wrong. §56.7's `var pf`, in a file
+   instead of a function: a clean merge is not a working one. */
+function nameTokens(v){
   return String(v == null ? "" : v).trim().toLowerCase().split(/\s+/).filter(Boolean);
 }
 /* Is every word of `few`, in order, somewhere in `many`. Not a similarity
@@ -6922,7 +7141,7 @@ function nameRunsThrough(few, many){
   return i === few.length;
 }
 function namesLookLikeOne(a, b){
-  var x = nameWords(a), y = nameWords(b);
+  var x = nameTokens(a), y = nameTokens(b);
   if (!x.length || !y.length) return false;
   if (x[0] !== y[0]) return false;   /* the chain starts with the given name */
   return x.length <= y.length ? nameRunsThrough(x, y) : nameRunsThrough(y, x);
@@ -6934,7 +7153,7 @@ function likelyDupes(){
   var live = [];
   PEOPLE.forEach(function(p){
     if (personActive(p))
-      live.push({ p:p, w:nameWords(p.name), id:personIdentified(p) });
+      live.push({ p:p, w:nameTokens(p.name), id:personIdentified(p) });
   });
   var out = [];
   live.forEach(function(a){
@@ -7007,7 +7226,7 @@ function mintPersonKey(name){
   return base + n;
 }
 
-/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§82.3) ─────────
+/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§85.3) ─────────
    Both hand-typed doors — the Add row at the foot of the register and the role
    picker's "add new" — took a NAME and nothing else, which is how the three
    twins were made: somebody gave a role to a person who was already here,
@@ -7018,7 +7237,7 @@ function mintPersonKey(name){
    share a name, so refusing on one would refuse a real colleague; an employee
    number or an address on two rows is always a fault. A resemblance in the
    name is worth SAYING, so it is returned as a warning that does not stop
-   anything — the same split the register's marks keep (§82.2).
+   anything — the same split the register's marks keep (§85.2).
 
    AND NEITHER IS REQUIRED. The SMO often knows a name and a role and nothing
    else, and a door that demanded an employee number would mean a unit could
@@ -7061,7 +7280,7 @@ function addPerson(o){
   return key;
 }
 
-/* ── WHO A ROW IS, ASKED IN ONE PLACE (§82.1) ──────────────────────
+/* ── WHO A ROW IS, ASKED IN ONE PLACE (§85.1) ──────────────────────
    Islam: "the name is not the challenge, the identifier really would be the ID
    and the email."
 
@@ -7119,7 +7338,7 @@ function personByIdentity(id, email){
 }
 /* A row with neither is not a fault — the SMO may know somebody's name and
    nothing else, and refusing to add them would mean a role could not be given
-   until HR answered an email (§82.3). It is a row that cannot be matched by
+   until HR answered an email (§85.3). It is a row that cannot be matched by
    anything, so it is MARKED, and marking it is what stops it quietly becoming
    somebody's second row. */
 function personIdentified(p){
@@ -7396,7 +7615,7 @@ function deletePerson(key){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TWO ROWS, ONE PERSON (§82.4)
+   TWO ROWS, ONE PERSON (§85.4)
 
    Retiring is for somebody who LEFT and deleting is for a row that should
    never have existed (§69). This is the third case and it is neither: two rows
@@ -7422,7 +7641,7 @@ function deletePerson(key){
    survivor is filled from the other row without asking — there is nothing to
    lose. Where both rows say something and they differ, the SMO picks, and the
    default is the survivor's own, because that is the row they chose to keep
-   (§82.5's rule, in the other direction: what is already recorded wins unless
+   (§85.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
   { k:"name",   label:"Name" },
@@ -7953,7 +8172,85 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
    way past would make the review a report of what had already been done. */
 function planPeopleFile(rows){
   var plan = { rows:[], problems:[], notices:[], newBus:[] };
-  var seenId = {}, seenMail = {};
+  var seenId = {};
+
+  /* ── AN ADDRESS MAY ONLY EVER REACH ONE ROW (§83, kept whole) ─────
+     Sign-in takes the address on the register, so two people holding one turns
+     BOTH of them away (§69.23). A file that hands the same address to two rows
+     is therefore refused at the door rather than applied and cleaned up after.
+
+     ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR. Written as a running tally the
+     first row to claim an address won it, so a new person listed above the
+     person who already holds it took it and the rightful owner was refused
+     their own row. The occupancy is worked out for the WHOLE FILE before the
+     loop, so no row's verdict depends on where it sits.
+
+     TWO THINGS §85 CHANGED, AND BOTH FOLLOW FROM THE LADDER.
+
+     The holder's own row may carry NO EMPLOYEE NUMBER at all, because a row
+     with none is now matched on the address itself — so where exactly one
+     claim is ID-less, that claim is the holder's. Two ID-less rows on one
+     address say nothing about which is the holder, and both are refused.
+
+     And a SINGLE claim on an address somebody already holds is handed to the
+     conflict path instead of refused. It is the one case where the file is not
+     contradicting itself but contradicting the register — the row may be that
+     person under a new employee number, or a new colleague given a leaver's
+     address, and those need a person to tell them apart (§85.5). What the
+     conflict does NOT offer is adding a third person, for exactly the reason
+     this pre-pass exists. */
+  function addrOf(r){ return fileTxt(r["Email"]).toLowerCase(); }
+  var addrPlan = {};
+  (function(){
+    var by = {};
+    (rows || []).forEach(function(r, i){
+      var a = addrOf(r);
+      if (!a) return;
+      (by[a] = by[a] || []).push({ at:"Row " + (i + 2), id:fileTxt(r["Emp ID"]) });
+    });
+    Object.keys(by).forEach(function(a){
+      var claims = by[a];
+      var holder = PEOPLE.filter(function(x){
+        return personActive(x) && personMailKey(x.email) === a;
+      })[0];
+      var keep = null;
+      if (holder) {
+        /* The row that IS the holder — by employee number, or by carrying no
+           number at all where it is the only such row (§85.1's ladder). */
+        var mine = claims.filter(function(c){
+          var e = c.id && personByEmpId(c.id);
+          return e && e.key === holder.key;
+        })[0];
+        if (!mine) {
+          var idless = claims.filter(function(c){ return !c.id; });
+          if (idless.length === 1) mine = idless[0];
+        }
+        keep = mine ? mine.at : null;
+        /* ONE ROW, AND IT IS NOT THEIRS: a question, not a refusal. */
+        if (!mine && claims.length === 1) return;
+      } else if (claims.length === 1) {
+        keep = claims[0].at;
+      }
+      var refuse = claims.filter(function(c){ return c.at !== keep; })
+                         .map(function(c){ return c.at; });
+      if (!refuse.length) return;
+      addrPlan[a] = { refuse: refuse, msg: function(at){
+        if (holder && keep) {
+          return "the address " + a + " already belongs to " + holder.name +
+            " on the register (" + keep + "). Sign-in takes the address, so a second " +
+            "person holding it would turn both of them away.";
+        }
+        if (holder) {
+          return "the address " + a + " already belongs to " + holder.name +
+            " on the register. Sign-in takes the address, so giving it to a second " +
+            "person would turn both of them away.";
+        }
+        return "the address " + a + " is on " + claims.length + " rows of this file (" +
+          claims.map(function(c){ return c.at; }).join(", ") + "). Sign-in takes the " +
+          "address, so nobody sharing one can get in — give each person their own.";
+      } };
+    });
+  })();
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -7968,7 +8265,7 @@ function planPeopleFile(rows){
     var status = fileTxt(r["Status"]);
     var label  = name || id || email || "this row";
 
-    /* ── THE LADDER, ROW BY ROW (§82.5) ────────────────────────────
+    /* ── THE LADDER, ROW BY ROW (§85.5) ────────────────────────────
        Emp ID, then email, then nothing — personByIdentity()'s rule, asked
        here so the review can SAY which rung answered. A row with neither is
        still left alone: there is nothing to match it on and nothing to add it
@@ -7984,19 +8281,20 @@ function planPeopleFile(rows){
         'also on ' + seenId[id] + '. One row per person.' });
       return;
     }
-    if (email && seenMail[personMailKey(email)]) {
-      plan.problems.push({ at:at, msg:email + ' is used twice in this file — also on ' +
-        seenMail[personMailKey(email)] + '. One row per person.' });
+    if (id) seenId[id] = at;
+    /* AN ADDRESS TWO ROWS OF THIS FILE BOTH CLAIM, or one this file gives to
+       somebody who is not its holder (§83). Worked out for the whole file
+       above, so the verdict does not depend on where a row sits. */
+    if (addrPlan[addrOf(r)] && addrPlan[addrOf(r)].refuse.indexOf(at) > -1) {
+      plan.problems.push({ at:at, msg:addrPlan[addrOf(r)].msg(at) });
       return;
     }
-    if (id) seenId[id] = at;
-    if (email) seenMail[personMailKey(email)] = at;
 
     /* AN ADDRESS ON TWO ROWS ANSWERS NOTHING, and the file cannot decide which
        of them it meant. It is a problem rather than a question, because the
        fix is on the register and there is now a control for it — the answer
        is to merge those two rows, not to pick one here and leave the pair
-       standing (§82.4). */
+       standing (§85.4). */
     var mailHits = peopleByEmail(email);
     if (mailHits.length > 1) {
       plan.problems.push({ at:at, msg:email + ' is on ' + plural(mailHits.length, "row") +
@@ -8008,7 +8306,7 @@ function planPeopleFile(rows){
     var existing = byId || byMail;
     var matchedBy = byId ? "empId" : (byMail ? "email" : null);
 
-    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§82.5) ─────────
+    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§85.5) ─────────
        Islam: "adding a new person of course should conflict, but the name is
        not the challenge — the identifier really would be the ID and the
        email."
@@ -8130,7 +8428,7 @@ function planPeopleFile(rows){
       /* NOT WHILE THE ROW IS A CONFLICT. "They already hold it" is read off
          the person the row was matched to, and a conflict has not been matched
          to anybody yet — dropping the grant on one reading would silently drop
-         it on the other (§82.5). */
+         it on the other (§85.5). */
       var holdsIt = !conflict && existing &&
         personRoles(existing).some(function(r){ return r.role === roleKey; });
       /* Cleared BEFORE anything is asked of it, and the checks below are then
@@ -8170,6 +8468,33 @@ function planPeopleFile(rows){
       }
     }
 
+    /* ── AN ADDRESS ON TWO ROWS, CAUGHT WHERE IT ARRIVES (§83) ────────
+       The file was checked for a repeated employee number and never once for a
+       repeated ADDRESS, in either direction — against another row of the same
+       file, or against somebody already on the register. Both landed silently,
+       and the consequence does not show up here at all: the door refuses BOTH
+       people with the correct password (§69.23), neither is told why, and the
+       only surface that would ever say so is the register's own duplicate mark
+       (§81.2) — a page nobody visits after an upload that reported no problems.
+
+       A PROBLEM, NOT A NOTICE: the row is refused rather than applied. An
+       address is what somebody signs in with, so importing a collision breaks
+       two people who were working — and unlike a missing BU there is no
+       sensible half-answer to fall back on.
+
+       ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR (found by the check). Written
+       as a running tally, the first row to claim an address won it — so a NEW
+       person listed above the person who already holds that address took it,
+       and the rightful owner was refused their own row. The occupancy is worked
+       out for the whole file BEFORE the loop, so the answer does not depend on
+       where a row sits: the person who already holds it keeps it, and if nobody
+       holds it the file is ambiguous and every row claiming it is refused —
+       §69.23's stance at the door, applied one step earlier. */
+    if (addrPlan[addrOf(r)] && addrPlan[addrOf(r)].refuse.indexOf(at) > -1) {
+      plan.problems.push({ at:at, msg:addrPlan[addrOf(r)].msg(at) });
+      return;
+    }
+
     var row = { at:at, id:id, key:existing ? existing.key : null,
                 matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
@@ -8188,7 +8513,7 @@ function planPeopleFile(rows){
   return plan;
 }
 
-/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§82.6) ──────────
+/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§85.6) ──────────
    Islam, asked who wins where the file and the register disagree: the
    register. That is the right way round and it is not the obvious one — the
    file looks newer because it was just uploaded, and it very often is not: it
@@ -8312,7 +8637,7 @@ function applyPeopleFile(plan){
       p = personBy(key);
       if (!p) return;
     } else {
-      /* ONLY WHAT WAS TICKED (§82.6). Every field the file would change is on
+      /* ONLY WHAT WAS TICKED (§85.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
          either blank in the file or the same on both sides — in neither case
          is there anything to write. The employee number is the exception and
@@ -17653,7 +17978,7 @@ function assignPicker(where, roleKey, current, editable){
   }
   var pool = peopleFor(where);
   /* SEARCHABLE ON WHAT IDENTIFIES SOMEBODY, not only on what they are called
-     (§82.3). `data-name` stays the NAME alone, because the near-name fallback
+     (§85.3). `data-name` stays the NAME alone, because the near-name fallback
      compares chains of names and an employee number in the string would break
      it; `data-find` is what the substring search reads. */
   var row = function(p){
@@ -17683,7 +18008,7 @@ function assignPicker(where, roleKey, current, editable){
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
     /* ── A PERSON CREATED HERE IS IDENTIFIABLE, OR THEY ARE THE NEXT
-           DUPLICATE (§82.3) ────────────────────────────────────────
+           DUPLICATE (§85.3) ────────────────────────────────────────
        This control is where the twins were made: it takes a typed name and
        mints a row with no employee number and no address, which is precisely
        the row a later upload cannot match — so the upload adds the person a
@@ -17719,7 +18044,8 @@ function renderUnits(){
        meant a new unit could never be given its first head. It is the shared
        picker now — search, the unit's own people first, and Add new (§35). */
     var pick = function(role, sel){ return assignPicker(k, role === "head" ? "owner" : "custodian", sel, editable); };
-    return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
+    return '<tr data-tkrow="' + (u.active ? "active" : "retired") + '"' +
+      (u.active ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(u.name) + '" data-uname="' + k + '">'
@@ -17787,8 +18113,15 @@ function renderUnits(){
       "units", grant("c_units") === "edit", "all",
       ["Clear all progress", "Clear all plans"]) +
 
+    /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
+       the units appear in the navigation and on the group page — somebody
+       ARRANGED it — so a sort would be indistinguishable from a rearrangement
+       the moment a row is dragged, and no label fixes that. Ten rows: search
+       narrows it better than sorting would anyway. */
     section("", "Business units", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+      tkBar("units", { placeholder:"Search the units\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
+      '<div class="cfg"><table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
@@ -18153,7 +18486,7 @@ function showCol(k){ return peopleCols()[k] !== false; }
 function dupeMark(dupes){
   if (!dupes || !dupes.length) return "";
   var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
-  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§82.2). The first
+  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§85.2). The first
      three are two rows holding the same value and are always a fault; this one
      is two rows that LOOK like one person and may well be two. Saying both in
      the same words would either overstate the guess or understate the fault. */
@@ -18424,7 +18757,7 @@ function renderPeople(){
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
-    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§82.4).
+    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§85.4).
        Retire and Delete are below the rule because they take something away;
        merging two rows that were always one person takes nothing away, and it
        is the ordinary fix for what the marks on this row are pointing at. */
@@ -18571,7 +18904,7 @@ function renderPeople(){
   var dupId = Object.keys(DUPES.empId).length;
   var dupName = Object.keys(DUPES.name).length;
   var likely = (DUPES.likely || []).length;
-  /* ── A ROW NOTHING CAN MATCH (§82.3) ──────────────────────────────
+  /* ── A ROW NOTHING CAN MATCH (§85.3) ──────────────────────────────
      Counted over active rows only, like every other count on this header: a
      retired row is not what the next upload is going to fail to find.
 
@@ -18714,7 +19047,7 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("email") ? '<td>' + (ed
+      (showCol("email") ? '<td class="wrapany">' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
         : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
@@ -18739,7 +19072,7 @@ function renderPeople(){
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
-  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§82.3) ───────
+  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§85.3) ───────
      Three fields where there was one. Neither identifier is required — the SMO
      often knows a name and a role and nothing else, and a door that demanded
      an employee number would mean a unit could not be given its head until HR
@@ -18965,7 +19298,7 @@ function renderPeople(){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
           ' on more than one row</span>'] : []).concat(
-        /* AMBER, NOT RED (§82.2). The three above are collisions and are
+        /* AMBER, NOT RED (§85.2). The three above are collisions and are
            always wrong. These two are a resemblance and a gap: a row that
            looks like somebody else may be a second person with a similar
            name, and a row with no identifier is a normal thing to have typed
@@ -19020,19 +19353,8 @@ function renderPeople(){
          file. `th()` counts as it emits, so the two can never disagree. */
       (function(){
         var n = 0;
-        function th(label, cls, sortable){
-          var i = n++;
-          if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
-          if (sortable === false)
-            return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
-          var st = TKSORT["people"];
-          var on = st && st.col === i;
-          return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
-            (on ? (st.dir === 1 ? ' tk-asc' : ' tk-desc') : '') + '"' +
-            ' data-tksort="people|' + i + '" tabindex="0" role="button"' +
-            ' title="Sort by ' + esc(label.replace(/<[^>]+>/g, "")) + '">' +
-            label + '<i class="tk-arrow"></i></th>';
-        }
+      var th = tkHead("people");
+
       return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
         'data-tktable="people"><thead><tr>' +
         th("#", "idx", false) +
@@ -19045,7 +19367,7 @@ function renderPeople(){
         (showCol("title")    ? th("Job title")  : '') +
         (showCol("mainbu")   ? th("Official BU") : '') +
         (showCol("bu")       ? th("Unit")       : '') +
-        (showCol("email")    ? th("Email")      : '') +
+        (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
            orders them by the text that happens to be rendered, which is not a
@@ -19075,7 +19397,7 @@ function renderPeople(){
 
 
 /* ══════════════════════════════════════════════════════════════════
-   MERGING TWO ROWS (§82.4)
+   MERGING TWO ROWS (§85.4)
 
    A SECTION UNDER THE TABLE, NOT A PANEL IN THE ROW. Retire and Delete ask one
    question and fit in the 83px actions column (§69.20); this one has to show
@@ -19297,7 +19619,7 @@ function renderPeopleFile(mayEdit){
           '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
       }).join("");
 
-    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§82.5) ────────────
+    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§85.5) ────────────
        They are the only thing on this screen that BLOCKS, so putting them
        under a table of thirty ordinary updates would mean scrolling past the
        work to find the reason Apply is off. Each one names both readings with
@@ -19342,10 +19664,27 @@ function renderPeopleFile(mayEdit){
             opts = choice(row, i, "match", c.byMail.key, who(c.byMail),
               "the address matches them \u2014 give them this employee number");
           }
-          opts += choice(row, i, "add", "", "<b>Somebody new</b>",
-                         "add a row, with this number and this address");
+          /* ── "SOMEBODY NEW" IS NOT ON OFFER, AND THE REASON IS §83 ──
+             Every conflict is a row whose address ALREADY BELONGS to somebody
+             on the register — that is what makes it a conflict. Adding a third
+             person with it would hand one address to two people, and sign-in
+             takes the address, so it would turn both of them away (§69.23).
+             The upload refuses that everywhere else in this reader; offering
+             it here as one choice of four would be the same reader answering
+             the same question two ways.
+
+             SO IT IS SAID, NOT HIDDEN. A genuinely new colleague who has been
+             given a leaver's address is a real case, and the way through it is
+             on the register — clear the address from the row that holds it
+             first. A missing option explains nothing; this one names what to
+             go and do (§59, §16.7). */
           opts += choice(row, i, "skip", "", "<b>Leave it</b>", "change nothing for this row");
-          return head + '<div class="cfopts">' + opts + '</div></div>';
+          return head + '<div class="cfopts">' + opts + '</div>' +
+            '<div class="cfnote">Adding this as a third person is not offered: ' +
+            esc(c.byMail.name) + ' already holds <b>' + esc(row.email) + '</b>, and sign-in ' +
+            'takes the address — two people holding one turns both of them away. If this ' +
+            'really is somebody new, clear the address from ' + esc(c.byMail.name) +
+            '\u2019s row first.</div></div>';
         }).join("") +
         '</div>'
       : '';
@@ -19365,7 +19704,7 @@ function renderPeopleFile(mayEdit){
         moving.map(function(r){
           var i = plan.rows.indexOf(r);
           var ch = peopleRowChanges(r);
-          /* ── EVERY DIFFERENCE IS AN OFFER (§82.6) ─────────────────
+          /* ── EVERY DIFFERENCE IS AN OFFER (§85.6) ─────────────────
              Recorded on the left, the file's on the right, and the file's is
              taken only where it is ticked. The default is what is already
              recorded, because a people file is usually an export somebody
@@ -19503,7 +19842,13 @@ function renderMainbus(){
 
   var rows = list.map(function(b, i){
     var n = peopleOfMainbu(b.name).length;
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
+    /* MAPPED IS "POINTS AT SOMETHING", and a name may hold several (§57), so it
+       is the LIST that decides — `b.at` alone was written first and is not even
+       the field: it is `mainbuAts()`. Caught immediately, because the row map's
+       parameter is `b` and the reference threw. */
+    var mapped = mainbuAts(b).length > 0;
+    return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"><td class="idx">' +
+      (i + 1) + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
         : '<b>' + esc(b.name) + '</b>') + '</td>' +
@@ -19527,13 +19872,22 @@ function renderMainbus(){
       '</td><td class="cc"><button class="linkbu" data-mbadd="1">Add</button></td></tr>'
     : '';
 
+  /* §84. Ten names today and one per department the client has, so it crosses
+     the search threshold the day a second client arrives. *Unmapped* is the
+     only filter worth having: the whole page exists to get that number to
+     zero. */
+  var mbth = tkHead("mainbu");
   var table = list.length || editable
-    ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th>' +
-        '<th style="width:30%">Official BU</th>' +
-        '<th style="width:40%">Points at</th>' +
-        '<th class="cc" style="width:14%">People</th>' +
-        '<th class="cc" style="width:18%"></th>' +
+    ? tkBar("mainbu", { placeholder:"Search the list\u2026",
+          filters:[{ k:"unmapped", label:"Unmapped",
+                     title:"Names that point at nothing here yet" },
+                   { k:"mapped", label:"Mapped" }] }) +
+      '<div class="cfg"><table class="unitcfg" data-tktable="mainbu"><thead><tr>' +
+        mbth("#", "idx", false) +
+        mbth("Official BU") +
+        mbth("Points at") +
+        mbth("People", "cc") +
+        mbth("", "cc", false) +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
     : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
@@ -19587,12 +19941,19 @@ function renderCompanies(){
          live < COMPANY_KEYS.length ? [(COMPANY_KEYS.length - live) + ' retired'] : []),
       "units", grant("c_units") === "edit") +
     section("", "Companies", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:24%">Company</th>' +
-        '<th class="cc" style="width:8%">Units</th>' +
-        '<th class="cc" style="width:18%">Sees other companies</th>' +
-        '<th class="cc" style="width:18%">Sees the group</th>' +
-        '<th class="cc" style="width:20%">Status</th></tr></thead><tbody>' +
+      /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
+         nothing and costs a header — the threshold is in the spec (§2.2) and
+         this is the table it was written for. It still sorts and still carries
+         the retired filter, because both are one attribute each and a client
+         with fifteen companies gets them for free. */
+      tkBar("companies", { placeholder:"Search the companies\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
+      '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
+        (function(){ var h = tkHead("companies");
+          return h("#", "idx", false) + h("Company") + h("Units", "cc") +
+                 h("Sees other companies", "cc") + h("Sees the group", "cc") +
+                 h("Status", "cc"); })() +
+      '</tr></thead><tbody>' +
       COMPANY_KEYS.map(function(ck, i){
         var co = COMPANIES[ck], on = companyActive(ck), blockers = companyRetireBlockers(ck);
         var flag = function(field, val){
@@ -19602,7 +19963,8 @@ function renderCompanies(){
             '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
             '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
         };
-        return '<tr' + (on ? '' : ' class="retired"') + '><td class="idx">' + (i+1) + '</td>' +
+        return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
+          (on ? '' : ' class="retired"') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + (editable
             ? '<input class="fld" value="' + esc(co.name) + '" data-coname="' + ck + '">'
             : '<b>' + esc(co.name) + '</b>') +
@@ -20049,7 +20411,15 @@ function renderSetsSetup(){
       [sets.length + (sets.length === 1 ? " set" : " sets"),
        claimed + " figure" + (claimed === 1 ? "" : "s") + " claimed"],
       "sets", mayEdit, null, null) +
-    '<div class="cfg"><table><thead><tr>' +
+    /* §84. NO SEARCH, NO SORT, and both are the spec (§2.2, §6.2) rather than
+       an omission. One set today: a search box above one row is furniture. And
+       the order of the sets is the order somebody put them in — the same
+       argument as Business units — so sorting would be indistinguishable from
+       rearranging. It is wired into the kit anyway, so a tenant that grows to
+       twenty sets gets the search by crossing the threshold rather than by
+       somebody remembering this page. */
+    tkBar("sets", { rows:sets.length, placeholder:"Search the sets\u2026" }) +
+    '<div class="cfg"><table data-tktable="sets"><thead><tr>' +
       '<th style="width:34px">#</th><th style="width:26%">Set</th>' +
       '<th style="width:16%">Team</th><th style="width:22%">Owner</th>' +
       '<th style="width:20%">Who picks its figures</th>' +
@@ -21032,7 +21402,8 @@ function renderFunctions(){
 
   var rows = FUNCTION_KEYS.map(function(fk, i){
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
-    return '<tr' + (f.active === false ? ' class="retired"' : '') + '>' +
+    return '<tr data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
+      (f.active === false ? ' class="retired"' : '') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(f.name) + '" data-fname="' + fk + '">'
@@ -21140,18 +21511,26 @@ function renderFunctions(){
       "fns", grant("c_fns") === "edit", "fnall",
       ["Clear all progress", "Clear all plans"]) +
     section("", "", null,
-      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:16%">Function</th>' +
-        /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
-           at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
-           custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
-           overlapping their neighbours, which adding a ninth column caused.
-           Each still says what its column is; the long forms were describing
-           what the row already shows. */
-        '<th style="width:11%">Nav name</th><th class="cc" style="width:6%">Code</th>' +
-        '<th class="cc" style="width:15%">Plans in</th>' +
-        '<th class="cc" style="width:8%">Caps</th>' +
-        '<th class="cc" style="width:14%">Head</th><th class="cc" style="width:14%">Custodian</th>' +
-        '<th class="cc" style="width:9%">Status</th></tr></thead>' +
+      /* §84. Eight rows and nine columns — over the search threshold, and its
+         order is a plain list rather than something arranged, so it sorts. */
+      tkBar("fns", { placeholder:"Search the functions\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
+      /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
+         at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
+         custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
+         overlapping their neighbours, which adding a ninth column caused.
+         Each still says what its column is; the long forms were describing
+         what the row already shows.
+
+         The widths went with the conversion to sortable heads (§84): they were
+         declared as percentages summing to the whole, which auto layout treats
+         as a suggestion anyway, and wrapping (§85) is what decides these now. */
+      '<div class="cfg"><table data-tktable="fns"><thead><tr>' +
+        (function(){ var h = tkHead("fns");
+          return h("#", "idx", false) + h("Function") + h("Nav name") +
+                 h("Code", "cc") + h("Plans in", "cc") + h("Caps", "cc") +
+                 h("Head", "cc") + h("Custodian", "cc") + h("Status", "cc"); })() +
+        '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
@@ -21168,7 +21547,8 @@ function renderCaps(){
   var editable = grant("c_caps") === "edit";
   var rows = GROUP.capabilities.map(function(c, i){
     var f = functionOf(c.fn);
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
+    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '">' +
+      '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
          else, so a capability could be given an owner but never renamed —
          and a capability added from Temple arrived called "New capability"
@@ -21208,10 +21588,17 @@ function renderCaps(){
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
          shading rather than as a long name. */
-      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:26%">Capability</th>' +
-        '<th style="width:20%">Owned by</th><th style="width:24%">Head</th>' +
-        '<th class="cc">Key objectives</th><th class="cc">Projects</th>' +
-        '<th class="cc"></th></tr></thead>' +
+      /* §84. Eight rows and it grows with the practice; *Unassigned* is the
+         filter because an unassigned capability is the one thing this page
+         exists to fix, and the header has counted them since §15. */
+      tkBar("caps", { placeholder:"Search the capabilities\u2026",
+          filters:[{ k:"unassigned", label:"Unassigned",
+                     title:"Capabilities with no function carrying them" }] }) +
+      '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
+        (function(){ var h = tkHead("caps");
+          return h("#", "idx", false) + h("Capability") + h("Owned by") + h("Head") +
+                 h("Key objectives", "cc") + h("Projects", "cc") + h("", "cc", false); })() +
+        '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (editable
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a capability</button>' +
@@ -21902,8 +22289,17 @@ var TKSORT = {};    /* table id -> {col, dir} — the view's order, never the da
 
 /* The bar above a table. `id` names the table for the sort state and nothing
    else; `filters` are [{k, label, title}] and are the table's own question. */
+/* THE BAR APPEARS WHEN THERE IS SOMETHING TO SEARCH. Below nine rows a search
+   box hides nothing and costs a header — Companies has two and Figure sets has
+   one. `rows` is the count the caller already has; a table that omits it always
+   gets a bar, which is the register's case and the safe default. One number, so
+   a table crosses the threshold as the tenant grows rather than when somebody
+   remembers the page (spec §2.2). */
+var TK_SEARCH_FROM = 9;
 function tkBar(id, opts){
   opts = opts || {};
+  if (typeof opts.rows === "number" && opts.rows < TK_SEARCH_FROM &&
+      !(opts.filters || []).length) return "";
   var f = TKFILTER[id] || "";
   var chips = (opts.filters || []).map(function(x){
     return '<button class="tk-chip' + (f === x.k ? ' on' : '') + '" data-tkfilter="' +
@@ -21918,6 +22314,34 @@ function tkBar(id, opts){
     '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
   '</div>';
 }
+/* ── THE HEADER ROW, FOR ANY TABLE (§84) ──────────────────────────────
+   Extracted from the register, where it was a local closure with "people"
+   written into it three times. Six more tables need exactly this and none of
+   them needs a second copy — a sort arrow drawn slightly differently on the
+   seventh table is how a standard stops being one.
+
+   `sortable:false` is the column's own answer (the index and the actions
+   column), and a whole table opts out by never asking for a head at all.
+   The column INDEX is counted here rather than passed, because a caller
+   counting its own columns gets it wrong the first time a column becomes
+   conditional — which every one of these tables has. */
+function tkHead(id){
+  var n = 0;
+  return function(label, cls, sortable){
+    var i = n++;
+    if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
+    if (sortable === false)
+      return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
+    var st = TKSORT[id];
+    var on = st && st.col === i;
+    return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
+      (on ? (st.dir === 1 ? ' tk-asc' : ' tk-desc') : '') + '"' +
+      ' data-tksort="' + esc(id) + '|' + i + '" tabindex="0" role="button"' +
+      ' title="Sort by ' + esc(String(label).replace(/<[^>]+>/g, "")) + '">' +
+      label + '<i class="tk-arrow"></i></th>';
+  };
+}
+
 /* WHAT IS TYPED AND WHICH CHIP IS LIT SURVIVE A REPAINT. Adding a row repaints
    (§75), and a search that emptied itself when you added somebody would be a
    filter you have to retype every time you use the page. */
@@ -24575,7 +24999,7 @@ var SYNC = (function () {
     if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
       rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
     }
-    /* AND THE MERGE COMPARISON GOES WITH IT (§82.4). It names two people and
+    /* AND THE MERGE COMPARISON GOES WITH IT (§85.4). It names two people and
        carries an answer per field; coming back to the register an hour later
        and finding it half-answered is the same fault §63 fixed for reporting —
        a mode left standing after you navigated away from it. Nothing is lost:
@@ -26533,7 +26957,7 @@ var SYNC = (function () {
       rx.readAsArrayBuffer(file);
     });
 
-    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§82.5) ────────────
+    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§85.5) ────────────
        The answer is written onto the plan row and the row is re-read against
        the person it now means — through peopleRowChoose(), never by setting
        `choice` here, or the differences on screen would still be the ones
@@ -26547,7 +26971,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* WHICH OF THE FILE'S VALUES TO TAKE (§82.6). Ticking repaints, because
+    /* WHICH OF THE FILE'S VALUES TO TAKE (§85.6). Ticking repaints, because
        the tally above the table counts what is ticked — a review whose summary
        disagreed with its own list would be worse than no summary. Typing is
        what must never repaint (§35); this is not typing. */
@@ -26878,7 +27302,7 @@ var SYNC = (function () {
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
-    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§82.3, §35).
+    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§85.3, §35).
        Each keystroke writes its own field of NEWPERSON and nothing else — the
        stop line under the row is drawn from `hit`, which is only set when Add
        is pressed. Checking on every keystroke would repaint the row being
@@ -26910,7 +27334,7 @@ var SYNC = (function () {
       newPersonReset();
       /* A resemblance is reported AFTER the add, never instead of it: it is
          not a reason to refuse, and two people with similar names is a normal
-         register (§82.2). It is cleared by the next add or the next paint of
+         register (§85.2). It is cleared by the next add or the next paint of
          somebody else's doing. */
       if (!chk.stop && chk.by === "name") NEWPERSON.warn = chk.person.key;
       paint();
@@ -27085,6 +27509,39 @@ var SYNC = (function () {
        The state (what is typed, which chip is lit) lives outside the render so
        that a repaint from somewhere else — adding a row, a role given — puts it
        back rather than clearing it. */
+    /* ── WHAT A ROW SAYS, AS OPPOSED TO WHAT IT CONTAINS (§84.2) ──────
+       `tr.innerText` looked right and was wrong on any table with a `<select>`
+       in it: a select carries EVERY option, so on Capabilities — where each row
+       has a picker listing all eight functions — searching "Treasury" matched
+       all eight rows. Measured: 8 of 8. The reader sees one function per row and
+       the search saw eight.
+
+       The reverse fault is in the same sentence: an `<input>` contributes no
+       text at all, so with the table in edit mode a search would have matched
+       NOTHING. Both are the same mistake — reading the markup instead of what
+       is on screen.
+
+       So the row's text is: its cells with the pickers taken out, plus each
+       select's CHOSEN option, plus each input's VALUE. `textContent` rather
+       than `innerText` on the clone, because a detached node reports `innerText`
+       as empty (§69.5's lesson, in a fourth place). */
+    function tkCellText(el){
+      var clone = el.cloneNode(true);
+      [].forEach.call(clone.querySelectorAll("select"), function(sel){
+        sel.parentNode.removeChild(sel);
+      });
+      var t = clone.textContent || "";
+      [].forEach.call(el.querySelectorAll("select"), function(sel){
+        var o = sel.options[sel.selectedIndex];
+        if (o) t += " " + o.text;
+      });
+      [].forEach.call(el.querySelectorAll("input, textarea"), function(i){
+        if (i.type !== "checkbox" && i.type !== "radio") t += " " + i.value;
+      });
+      return t.trim().toLowerCase();
+    }
+    function tkRowText(tr){ return tkCellText(tr); }
+
     function tkApply(id){
       var table = document.querySelector('[data-tktable="' + id + '"]');
       if (!table) return;
@@ -27095,7 +27552,7 @@ var SYNC = (function () {
         if (tr.classList.contains("newrow")) return;   /* the Add row is not a row */
         total++;
         var okF = !f || (" " + (tr.dataset.tkrow || "") + " ").indexOf(" " + f + " ") > -1;
-        var okQ = !q || tr.innerText.toLowerCase().indexOf(q) > -1;
+        var okQ = !q || tkRowText(tr).indexOf(q) > -1;
         tr.hidden = !(okF && okQ);
         if (!tr.hidden) shown++;
       });
@@ -27143,9 +27600,17 @@ var SYNC = (function () {
         return !r.classList.contains("newrow"); });
       var add = [].slice.call(body.rows).filter(function(r){
         return r.classList.contains("newrow"); });
+      /* THE SAME READING THE SEARCH USES (§84.3), and for the same reason: a
+         cell holding an `<input>` has NO text, so Capabilities — editable for
+         the SMO without a pen — sorted every row as the empty string and the
+         order never moved. It looked like a sort that did nothing, which is
+         indistinguishable from a sort that is not wired up.
+
+         `tkCellText` is `tkRowText`'s single-cell twin: the chosen option of a
+         picker, the value of a field, otherwise the words. */
       var val = function(r){
         var c = r.cells[st.col];
-        return c ? c.innerText.trim().toLowerCase() : "";
+        return c ? tkCellText(c) : "";
       };
       rows.sort(function(a, b){
         var x = val(a), y = val(b);
@@ -27201,7 +27666,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* ── MERGING TWO ROWS (§82.4) ───────────────────────────────────
+    /* ── MERGING TWO ROWS (§85.4) ───────────────────────────────────
        Opening it from the row records WHICH row, and clears everything the
        last merge left behind — a picks map carried over from a different pair
        would silently apply one person's answer to another's fields. */
@@ -27684,7 +28149,7 @@ var SYNC = (function () {
         var mlf = document.getElementById("pickNewEmail");
         var o = { name:name, empId:(idf ? idf.value : "").trim(),
                   email:(mlf ? mlf.value : "").trim() };
-        /* REFUSED, IN THE PICKER, NAMING WHO (§82.3). An employee number or an
+        /* REFUSED, IN THE PICKER, NAMING WHO (§85.3). An employee number or an
            address already on the register means the person is already on the
            register, and the thing to do is give them the role — which is the
            control directly above this one. The refusal stays in the popover
@@ -27745,7 +28210,7 @@ var SYNC = (function () {
         r.hidden = !hit;
         if (hit) any = true;
       });
-      /* ── THE SPELLING IS WHY THE TWINS EXIST (§82.3) ───────────────
+      /* ── THE SPELLING IS WHY THE TWINS EXIST (§85.3) ───────────────
          A plain substring search finds nobody the moment the name is typed a
          little differently from the way HR spelled it — and what the picker
          then offers is "+ Add", which is exactly how three people ended up on

@@ -10093,7 +10093,205 @@ against injected ones.
 
 ---
 
-## 82 · Who a row is, and two rows that are one person (v3.24)
+## 82 · The tables stop overflowing, and two names is not two words (v3.24)
+
+**82.1 759px of horizontal overflow, down to 38px.** Islam: *"for the tables as
+well fix the overflow of data by wrapping."*
+
+Every Setup table body was `nowrap`, inherited from `_shared.css`'s rule for
+HEADERS. So one nine-word job title held its column open at nine words wide, and
+on the register every other column paid for it at every scroll position, because
+two of them are FROZEN (§69.19).
+
+**The split is by what the cell HOLDS, not by column name.** Prose wraps — a job
+title, an Official BU, an address. Things read as one token do not — a number, a
+sign-in name, a pill, a date: a broken employee number is harder to read than a
+wide column, and a pill wrapped mid-word looks broken rather than narrow. An
+address gets `overflow-wrap:anywhere`, because it has no spaces to break at and
+would otherwise hold its column open exactly as before.
+
+| | before | after |
+|---|---|---|
+| People register | 207px past its box | **18px** |
+| Capabilities | 552px | **fits** |
+| Roles & access | 20px | 20px (a 49-cell matrix; it gets the freeze instead) |
+
+**82.2 A SELECT SIZES ITSELF TO ITS LONGEST OPTION, AND THAT OPTION IS NOT ON
+SCREEN.** Capabilities was three times worse than the register and none of it
+was text: its function picker's list contains *Strategy Management Office*, so
+the column was 239px wide to hold a word nobody can see until the list is open.
+
+`max-width:100%` did nothing — **measured, 552px before and after**. Under
+`table-layout:auto` the cell is sized BY its child, so a percentage of the cell
+is a percentage of the width the select just asked for. It is circular. §46's
+note that `width:99%; max-width:0` is a fixed-layout trick, met from the other
+side. An absolute cap fixes it, and costs nothing: the chooser opens over the
+page anyway (§45.5), so a narrow closed control loses no list.
+
+**82.3 "ABD EL" IS NOT TWO NAMES — IT IS HALF OF ONE.** Islam: *"for any
+placement of the name of people like in the custodian of the unit or the
+function use the first 2 names only."*
+
+Done in **one function**: all fifteen call sites of `personName()` are display
+sites — a cell, a chip, a pill, a confirmation — and none stores or exports what
+it gets, so a `personShort()` beside it would have been fifteen edits and a coin
+toss on the sixteenth. `personFullName()` is there for anything that ever needs
+the whole thing.
+
+Then the first build put **"Abd El"** in the Mobile custodian's cell, which names
+nobody: half this register begins that way. A particle binds to the name after
+it — *Abd El Hamid* is one given name in three tokens — so `nameWords()` counts
+NAMES, taking the run of particles with the word they belong to. That is not a
+wider reading of the ask; it is the only reading under which "the first 2 names"
+means two names. Applied to the register's own three-name rule (§81.1) as well,
+which had the same fault more quietly.
+
+The register keeps its own rule and that stays right: **that column exists to
+identify somebody, and the other fifteen exist to remind you who they are.**
+
+**82.4 CLAUDE.md HAD NO RULE ABOUT CHECKING MAIN BEFORE MERGING.** Islam asked;
+it did not. Three lines added, and each is a thing that has already happened:
+fetch and look before merging (§70 landed on main mid-session while §71 was
+being built); merge `--ff-only` so a divergent main REFUSES rather than being
+silently auto-merged; and **after a merge that brings in somebody else's
+sources, rebuild — never trust git's merge of the built file**, which is
+generated and which git will happily splice into something belonging to neither
+version. Two branches each adding a `var pf` to one function merged with no
+textual conflict at all and broke a page (§56.7): a clean merge is not a working
+one.
+
+`src/checks/table-widths.py` walks every Setup and Manage page and reports how
+far each table sits past its box, so the number is a measurement rather than an
+impression.
+
+---
+
+## 83 · A duplicate address, caught where it arrives (v3.24)
+
+Islam: *"Flag it in the page."*
+
+§81 flagged duplicates on the register. This is the other half — **the moment
+they arrive**, which is the upload, and the place a duplicate can be refused
+instead of merely noticed.
+
+**83.1 The file was checked for a repeated employee number and NEVER ONCE for a
+repeated address**, in either direction: against another row of the same file,
+or against somebody already on the register. Both landed silently — and the
+consequence does not appear on the import receipt at all. The door refuses
+**both** people with the correct password (§69.23), neither is told why, and the
+only surface that would ever say so is the register's own duplicate mark, which
+is a page nobody opens after an upload that reported no problems.
+
+It is a **problem, not a notice**: the row is refused rather than applied. An
+address is what somebody signs in with, so importing a collision breaks two
+people who were working — and unlike a missing BU there is no sensible
+half-answer to fall back on.
+
+**ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR, and the first draft let it.**
+Written as a running tally, the first row to claim an address won it. So a NEW
+person listed above the person who already holds that address took it, **and the
+rightful owner was refused their own row** — found by the check, which is why it
+seeds an existing holder and puts them BELOW the claimant. Occupancy is now
+worked out for the whole file before the loop: the person who already holds an
+address keeps it, and if nobody holds it the file is ambiguous and every row
+claiming it is refused. §69.23's stance at the door, applied one step earlier.
+
+**Three of the check's assertions then failed on correct behaviour**, because
+they were written against the wording of the broken version — "also on Row 2",
+and "Row 6 must not appear anywhere". Rewritten to assert **which rows are
+refused**, which is the contract; Constitution XVI, met on my own check rather
+than the product's.
+
+**83.2 One floor, on one column, and it is the address.** Wrapping took the
+register from **207px past its box to 0** — and made one row **382px tall**,
+because an address has no spaces and `overflow-wrap:anywhere` broke it down a
+column that had collapsed to nothing.
+
+Minimums on the name and the job title were tried first and **bought nothing** —
+measured, identical row heights at every value — while costing up to 184px of
+scroll. Swept against the demo register and against the worst row it can produce
+(an eight-word name, a 46-character title and a 30-character address on one
+person):
+
+| address floor | scroll | tallest row |
+|---|---|---|
+| none | 0px | 382px |
+| 60px | 20px | 160px |
+| **75px** | **35px** | **120px** |
+| 90px | 50px | 120px |
+| 120/150/170 on three columns | 184px | 79px |
+
+**75px is where the tall row stops getting shorter**; everything above it buys
+scroll and nothing else. Across every Setup table: **759px of overflow → 55px**,
+and the two that remain (the register at 35, Roles & access at 20) are behind
+frozen columns that make a short scroll workable (§69.20).
+
+**83.3 THE SPLICE MADE A SECOND COPY OF THE RULES, and the later one won.**
+Editing the block by string surgery left the register's wrap rules in the file
+**twice** — sixty-one lines apart, the stale copy last, so every measurement
+after it was of numbers I thought I had removed. That is §51.5, §53.6 and
+§29.2's fault for the fourth time in this file, and the reason it was caught is
+that the number stopped agreeing with the sweep that had just produced it: **a
+measurement that disagrees with the one before it, after a change that should
+not have moved it, is a file to read rather than a number to accept** (§63's
+rule about the contrast total).
+
+---
+
+## 84 · The table standard reaches all seven (v3.24)
+
+Spec 012, phases 1, 3 and 4. Search, quick filters and sortable headers now work
+on every table that has an individual row flow — the register, the Official BU
+list, Business units, Companies, Functions, Capabilities and Figure sets.
+
+**84.1 The header row was extracted, not copied.** It was a closure inside
+`renderPeople` with `"people"` written into it three times. `tkHead(id)` counts
+the column INDEX itself rather than taking it, because every one of these tables
+has conditional columns and a caller counting its own gets it wrong the first
+time one becomes conditional.
+
+**Two tables do not sort at all**, and that is the spec (§6.2) rather than an
+omission: Business units and Figure sets carry an order somebody ARRANGED, and
+on Business units that order is the navigation. **Two do not get a search box**
+for the same kind of reason — one row and two rows — and the threshold is one
+number (`TK_SEARCH_FROM`), so a table crosses it as the tenant grows rather than
+when somebody remembers the page.
+
+**84.2 A `<select>` PUTS EVERY OPTION IN THE ROW'S TEXT.** `tr.innerText` looked
+right and was wrong on any table with a picker in it: on Capabilities each row
+lists all eight functions, so searching *Treasury* matched **8 of 8**. The
+reader sees one function per row and the search saw eight.
+
+The reverse fault is in the same sentence: an `<input>` contributes **no text at
+all**, so with a table in edit mode a search would have matched nothing. Both
+are one mistake — reading the markup instead of what is on screen. A row's text
+is now its cells with the pickers removed, plus each select's CHOSEN option,
+plus each input's VALUE. `textContent` rather than `innerText` on the clone,
+because a detached node reports `innerText` as empty (§69.5, in a fourth place).
+
+**84.3 AND SORTING AN EDITABLE TABLE DID NOTHING, for exactly that reason.**
+The comparator read `cell.innerText`, and Capabilities is editable for the SMO
+without a pen — so every row sorted as the empty string and the order never
+moved. It looked like a sort that does nothing, which is indistinguishable from
+a sort that was never wired up. `tkCellText()` is now the one reader and
+`tkRowText()` is it applied to the whole row: **one function, so the search and
+the sort cannot disagree about what a row says.**
+
+Found because the check drives all seven rather than the one it was written on.
+
+**84.4 Two of the check's own assertions were wrong before the product was.**
+It read `cells[1].innerText` — the same fault it was hunting — and it clicked a
+header **twice**, which returns a two-row table to where it started, so
+Companies reported "sorting does nothing" while sorting correctly. Every sort
+step is captured now and at least one must differ. Constitution XVI, on my own
+check twice in one session.
+
+**Still to come (spec 012 phase 2):** the row edited on the row, from the ⋮,
+with Save and Cancel in the actions cell. That is the reversal Islam asked for
+in §79.2 and it is the piece with no precedent anywhere in the platform.
+
+`src/checks/table-standard-all.py`, 44 assertions across the seven.
+## 85 · Who a row is, and two rows that are one person (v3.24)
 
 Islam, sending a screenshot of the message composer: *"in the send message
 functionality I got 3 people skipped but they have an email in the registry."*
@@ -10108,7 +10306,7 @@ about a row nobody was looking at.
 Nothing in `lib/audience.js` was wrong. **The register let one human become two
 rows, and then had no way to say so.**
 
-### 82.1 A name is never an identifier
+### 85.1 A name is never an identifier
 
 Islam: *"the name is not the challenge, the identifier really would be the ID
 and the email."* That is the whole of it, and the register already proved it
@@ -10130,7 +10328,7 @@ only where the address means ONE person — §57's rule about a Main BU that hol
 several, arriving in a second place, and the same rule the door already keeps
 (§69.23). Read past it and you attach somebody to a coincidence.
 
-### 82.2 The fourth kind of duplicate, and it is the one that bit
+### 85.2 The fourth kind of duplicate, and it is the one that bit
 
 §81's three all match on a value two rows **share**. The pair that sent a
 message to nobody shared nothing at all, so nothing was flagged.
@@ -10149,7 +10347,7 @@ Two rules keep it quiet enough to read:
   score** — a score needs a threshold, and a threshold is a number nobody can
   defend the day it puts two strangers together.
 
-### 82.3 Both hand-typed doors ask for an identifier now
+### 85.3 Both hand-typed doors ask for an identifier now
 
 The register's Add row and the role picker's *add new* both took a name and
 nothing else. **That is where the twins were made.**
@@ -10175,7 +10373,7 @@ one of these?"* — shown, never substituted, with Add still underneath. The
 search also reads the employee number and the address, because a register of
 five hundred people is not a list you scroll.
 
-### 82.4 Two rows, one person — the merge
+### 85.4 Two rows, one person — the merge
 
 Retiring is for somebody who **left**; deleting is for a row that should never
 have existed (§69). This is the third case and it is neither: two rows that were
@@ -10206,7 +10404,7 @@ question and fit in the 83px actions column (§69.20); this one has to show two
 whole people side by side, and "which of these two do we keep" is unreadable in
 a 240px popover.
 
-### 82.5 The upload matches on the ladder, and sets aside what it cannot place
+### 85.5 The upload matches on the ladder, and sets aside what it cannot place
 
 The reader matched on **Emp ID only**, and a row with none was skipped. It now
 matches on Emp ID, then email — so a tenant that has never had employee numbers
@@ -10228,7 +10426,34 @@ An address on two register rows is a **problem**, not a question: the fix is on
 the register and there is now a control for it, so the reader says *merge those
 rows first* rather than picking one and leaving the pair standing.
 
-### 82.6 A difference is an offer, never an instruction
+**AND §83 IS KEPT WHOLE, WHICH DECIDED WHAT A CONFLICT MAY OFFER.** §83 refuses
+any upload row that would hand one address to two people, because sign-in takes
+the address and two holders turns both away (§69.23). §85 arrived at the same
+function from the other side and the two had to be reconciled by hand rather
+than by git:
+
+- **A contested address is still §83's refusal.** Two rows of one file claiming
+  the same address, or a row taking an address from the person who holds it
+  while that person is also in the file, are refused exactly as before — worked
+  out for the whole file first, so order cannot decide who the impostor is.
+- **A single row contradicting the register is §85's question.** One claim on an
+  address somebody already holds is not the file contradicting itself; it is the
+  file contradicting the register, and it needs a person to say whether this is
+  that colleague under a new employee number or a new colleague given a leaver's
+  address.
+- **Which is why a conflict does not offer "somebody new".** Every conflict is a
+  row whose address already belongs to someone — that is what makes it one — so
+  adding a third person with it is the very thing §83 exists to refuse. Offering
+  it as one choice of four would be one reader answering one question two ways.
+  It is **said rather than hidden**: the panel names who holds the address and
+  says to clear it from their row first (§59's disabled-with-the-reason, §16.7's
+  refusal that sends somebody somewhere).
+- **The ladder reached back into §83's pre-pass.** The holder's own row may now
+  carry no employee number at all, so where exactly one claim is ID-less that
+  claim is the holder's; two ID-less rows on one address still say nothing about
+  which is which, and both are refused.
+
+### 85.6 A difference is an offer, never an instruction
 
 Asked who wins where the file and the register disagree, Islam said the
 register. That is the right way round and it is not the obvious one: **the file
@@ -10253,7 +10478,7 @@ downloaded and uploaded back proposes nothing, which is the stronger claim; and
 it asserts the other half too, that the same edited cell **unticked** offers one
 change and makes none.
 
-### 82.7 What this does not do
+### 85.7 What this does not do
 
 **Nothing merges itself.** Every join in this section is a person answering a
 question the platform could not: which of two readings a file row meant, which
@@ -10261,5 +10486,5 @@ of two rows survives, which of two values is right. The platform's job is to
 notice, to name both sides, and to refuse to guess — the same division §44 drew
 for a claimed figure and §62 for a deleted function.
 
-`src/checks/identity-merge.py`, driven through the screen, and the §82 block in
+`src/checks/identity-merge.py`, driven through the screen, and the §85 block in
 `qa.py`, driven through the rules.

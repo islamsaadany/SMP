@@ -61,7 +61,7 @@ an email in the registry."* They did. **The three were on the register twice** �
 once from the employee file with an address, once typed into the role picker
 with a shorter spelling of the same name and no identifier — and the role sat on
 the copy that could not be emailed. Nothing in the resolver was wrong; the
-register let one human become two rows and had no way to say so (§82, spec 013).
+register let one human become two rows and had no way to say so (§85, spec 013).
 
 - **A name is never an identifier.** Emp ID, then email, and no third rung —
   `personByIdentity()` is the one answer and it says which rung decided. An
@@ -87,7 +87,7 @@ register let one human become two rows and had no way to say so (§82, spec 013)
   moves; the last act is the delete, so anything the merge forgot refuses it and
   fails loudly rather than dropping a role.
 
-Verified: `qa.py` green including the new §82 block and the people-file fixed
+Verified: `qa.py` green including the new §85 block and the people-file fixed
 point **re-measured with every pick taken** (with the ticks off it would have
 been measuring the defaults, §51.11), plus `src/checks/identity-merge.py`
 driving the screen — the add row refuses and then relents, the merge runs from

@@ -145,7 +145,7 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
-/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§82.3) ────
+/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§85.3) ────
    It was a name and nothing else. `NEWPERSON` is what has been typed into all
    three, and `hit` is the register row the identifier landed on — the stop,
    held here rather than recomputed on every paint, because the person
@@ -322,9 +322,68 @@ var UNIT_ROLES = {
   nigeria:             { head:"nghead",  custodian:"own_ng"  }
 };
 
-function personName(key){
+/* ── TWO NAMES, WHEREVER A PERSON IS NAMED (Islam, §81.4) ─────────────
+   "for any placement of the name of people like in the custodian of the unit or
+   the function use the first 2 names only."
+
+   Raya's register carries names of five and six words — *Abd El Hamid Mokhtar
+   Abd El Hamid Ahmed Abd El Wahab* is eight — and every one of them was being
+   printed whole into a table cell, a pill or a chip built for a name.
+
+   IT IS CHANGED HERE, IN THE ONE FUNCTION, and that is the point: all fifteen
+   call sites are display sites — a cell, a chip, a pill, a confirmation — and
+   none of them stores or exports what it gets. A `personShort()` beside a
+   `personName()` would have been fifteen edits and a coin toss on the
+   sixteenth.
+
+   THE REGISTER IS NOT ONE OF THEM. It has its own rule (§81.1): three names,
+   or as many as it takes to tell two people apart, because that column exists
+   to identify somebody and these fifteen exist to remind you who they are.
+   `personFullName()` is here for anything that ever needs the whole thing. */
+/* ── "ABD EL" IS NOT TWO NAMES, IT IS HALF OF ONE (§81.6) ─────────────
+   Counting words gave the Mobile custodian's cell the word **"Abd El"**, which
+   names nobody: half of Raya's register begins that way. A particle binds to
+   the name after it — *Abd El Hamid* is one given name in three tokens, *Abou
+   El Ela* and *Abd El Moniem* likewise — so a NAME is a real word together with
+   whatever particles run in front of it.
+
+   This is not a wider reading of what Islam asked for; it is the only reading
+   under which "the first 2 names" means two names. It is applied to the
+   register's own three-name rule (§81.1) as well, which had the same fault more
+   quietly: *Abd El Hamid* was one name spending the whole budget.
+
+   The list is the particles this register actually contains, plus the European
+   ones a client could arrive with. A word not on it is a name. */
+var NAME_PARTICLES = ["abd","abdel","abd-el","el","al","abu","abou","bin","ben",
+                      "ibn","bint","van","von","de","del","della","der","den",
+                      "di","da","dos","du","la","le","st","st.","mac","mc"];
+function nameWords(name, n){
+  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return "";
+  var out = [], names = 0, i = 0;
+  while (i < parts.length && names < n) {
+    /* Take the run of particles, then the word they belong to. A name ENDING
+       in a particle (a truncated row) still terminates, or this loops. */
+    var start = i;
+    while (i < parts.length &&
+           NAME_PARTICLES.indexOf(parts[i].toLowerCase().replace(/[^a-z.-]/g, "")) > -1) i++;
+    if (i < parts.length) i++;
+    else if (i === start) break;
+    names++;
+    out = parts.slice(0, i);
+  }
+  return out.join(" ");
+}
+
+var NAMED_ELSEWHERE_WORDS = 2;
+function personFullName(key){
   var p = PEOPLE.filter(function(x){ return x.key === key; })[0];
   return p ? p.name : null;
+}
+function personName(key){
+  var n = personFullName(key);
+  if (!n) return n;
+  return nameWords(n, NAMED_ELSEWHERE_WORDS);
 }
 
 /* ══════════════════════════════════════════════════════════════════
@@ -622,10 +681,7 @@ function rowEditCancel(obj){
 function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 
 var SHORT_NAME_WORDS = 3;
-function shortName(name){
-  var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
-  return parts.slice(0, SHORT_NAME_WORDS).join(" ");
-}
+function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
 
 /* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
    Three names is the column's budget (§69.21) and it is right for 31 of 33
@@ -644,11 +700,10 @@ function shortName(name){
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
-    var parts = String(p.name == null ? "" : p.name).trim().split(/\s+/).filter(Boolean);
     var n = SHORT_NAME_WORDS;
-    var label = parts.slice(0, n).join(" ");
+    var label = nameWords(p.name, n);
     (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
-    out[p.key] = { parts: parts, at: n, label: label };
+    out[p.key] = { full: p.name, at: n, label: label };
   });
   Object.keys(seen).forEach(function(k){
     if (seen[k].length < 2) return;
@@ -661,14 +716,14 @@ function displayNames(){
       var got = {};
       same = false;
       keys.forEach(function(key){
-        var o = out[key], lab = o.parts.slice(0, n).join(" ").toLowerCase();
+        var lab = nameWords(out[key].full, n).toLowerCase();
         if (got[lab]) same = true;
         got[lab] = 1;
       });
     }
     keys.forEach(function(key){
       out[key].at = n;
-      out[key].label = out[key].parts.slice(0, n).join(" ");
+      out[key].label = nameWords(out[key].full, n);
     });
   });
   return out;
@@ -711,7 +766,7 @@ function registerDupes(){
            likely: likelyDupes() };
 }
 
-/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§82.2) ───────────
+/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§85.2) ───────────
    The three above all match on a value the two rows SHARE. The pair that sent
    a message to nobody shared nothing: one row came off the employee file with
    an address and a long legal name, the other was typed into the role picker
@@ -739,7 +794,14 @@ function registerDupes(){
    Retired rows are excluded for the same reason the other three exclude them:
    they cannot sign in, no upload places them, and a merge of one would be
    tidying a row that is already out of the way. */
-function nameWords(v){
+/* NOT `nameWords`, WHICH IS SOMEBODY ELSE'S (§85.2, found by the merge).
+   §82's `nameWords(name, n)` returns the first n NAMES as a string, counting
+   "Abd El Ghany" as one; this returns every WORD as an array, which is what a
+   chain comparison needs. Two function declarations of one name in one script
+   is one function — the later wins — and the register threw on every paint
+   with nothing in either branch looking wrong. §56.7's `var pf`, in a file
+   instead of a function: a clean merge is not a working one. */
+function nameTokens(v){
   return String(v == null ? "" : v).trim().toLowerCase().split(/\s+/).filter(Boolean);
 }
 /* Is every word of `few`, in order, somewhere in `many`. Not a similarity
@@ -754,7 +816,7 @@ function nameRunsThrough(few, many){
   return i === few.length;
 }
 function namesLookLikeOne(a, b){
-  var x = nameWords(a), y = nameWords(b);
+  var x = nameTokens(a), y = nameTokens(b);
   if (!x.length || !y.length) return false;
   if (x[0] !== y[0]) return false;   /* the chain starts with the given name */
   return x.length <= y.length ? nameRunsThrough(x, y) : nameRunsThrough(y, x);
@@ -766,7 +828,7 @@ function likelyDupes(){
   var live = [];
   PEOPLE.forEach(function(p){
     if (personActive(p))
-      live.push({ p:p, w:nameWords(p.name), id:personIdentified(p) });
+      live.push({ p:p, w:nameTokens(p.name), id:personIdentified(p) });
   });
   var out = [];
   live.forEach(function(a){
@@ -839,7 +901,7 @@ function mintPersonKey(name){
   return base + n;
 }
 
-/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§82.3) ─────────
+/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§85.3) ─────────
    Both hand-typed doors — the Add row at the foot of the register and the role
    picker's "add new" — took a NAME and nothing else, which is how the three
    twins were made: somebody gave a role to a person who was already here,
@@ -850,7 +912,7 @@ function mintPersonKey(name){
    share a name, so refusing on one would refuse a real colleague; an employee
    number or an address on two rows is always a fault. A resemblance in the
    name is worth SAYING, so it is returned as a warning that does not stop
-   anything — the same split the register's marks keep (§82.2).
+   anything — the same split the register's marks keep (§85.2).
 
    AND NEITHER IS REQUIRED. The SMO often knows a name and a role and nothing
    else, and a door that demanded an employee number would mean a unit could
@@ -893,7 +955,7 @@ function addPerson(o){
   return key;
 }
 
-/* ── WHO A ROW IS, ASKED IN ONE PLACE (§82.1) ──────────────────────
+/* ── WHO A ROW IS, ASKED IN ONE PLACE (§85.1) ──────────────────────
    Islam: "the name is not the challenge, the identifier really would be the ID
    and the email."
 
@@ -951,7 +1013,7 @@ function personByIdentity(id, email){
 }
 /* A row with neither is not a fault — the SMO may know somebody's name and
    nothing else, and refusing to add them would mean a role could not be given
-   until HR answered an email (§82.3). It is a row that cannot be matched by
+   until HR answered an email (§85.3). It is a row that cannot be matched by
    anything, so it is MARKED, and marking it is what stops it quietly becoming
    somebody's second row. */
 function personIdentified(p){
@@ -1228,7 +1290,7 @@ function deletePerson(key){
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   TWO ROWS, ONE PERSON (§82.4)
+   TWO ROWS, ONE PERSON (§85.4)
 
    Retiring is for somebody who LEFT and deleting is for a row that should
    never have existed (§69). This is the third case and it is neither: two rows
@@ -1254,7 +1316,7 @@ function deletePerson(key){
    survivor is filled from the other row without asking — there is nothing to
    lose. Where both rows say something and they differ, the SMO picks, and the
    default is the survivor's own, because that is the row they chose to keep
-   (§82.5's rule, in the other direction: what is already recorded wins unless
+   (§85.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
   { k:"name",   label:"Name" },
@@ -1785,7 +1847,85 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
    way past would make the review a report of what had already been done. */
 function planPeopleFile(rows){
   var plan = { rows:[], problems:[], notices:[], newBus:[] };
-  var seenId = {}, seenMail = {};
+  var seenId = {};
+
+  /* ── AN ADDRESS MAY ONLY EVER REACH ONE ROW (§83, kept whole) ─────
+     Sign-in takes the address on the register, so two people holding one turns
+     BOTH of them away (§69.23). A file that hands the same address to two rows
+     is therefore refused at the door rather than applied and cleaned up after.
+
+     ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR. Written as a running tally the
+     first row to claim an address won it, so a new person listed above the
+     person who already holds it took it and the rightful owner was refused
+     their own row. The occupancy is worked out for the WHOLE FILE before the
+     loop, so no row's verdict depends on where it sits.
+
+     TWO THINGS §85 CHANGED, AND BOTH FOLLOW FROM THE LADDER.
+
+     The holder's own row may carry NO EMPLOYEE NUMBER at all, because a row
+     with none is now matched on the address itself — so where exactly one
+     claim is ID-less, that claim is the holder's. Two ID-less rows on one
+     address say nothing about which is the holder, and both are refused.
+
+     And a SINGLE claim on an address somebody already holds is handed to the
+     conflict path instead of refused. It is the one case where the file is not
+     contradicting itself but contradicting the register — the row may be that
+     person under a new employee number, or a new colleague given a leaver's
+     address, and those need a person to tell them apart (§85.5). What the
+     conflict does NOT offer is adding a third person, for exactly the reason
+     this pre-pass exists. */
+  function addrOf(r){ return fileTxt(r["Email"]).toLowerCase(); }
+  var addrPlan = {};
+  (function(){
+    var by = {};
+    (rows || []).forEach(function(r, i){
+      var a = addrOf(r);
+      if (!a) return;
+      (by[a] = by[a] || []).push({ at:"Row " + (i + 2), id:fileTxt(r["Emp ID"]) });
+    });
+    Object.keys(by).forEach(function(a){
+      var claims = by[a];
+      var holder = PEOPLE.filter(function(x){
+        return personActive(x) && personMailKey(x.email) === a;
+      })[0];
+      var keep = null;
+      if (holder) {
+        /* The row that IS the holder — by employee number, or by carrying no
+           number at all where it is the only such row (§85.1's ladder). */
+        var mine = claims.filter(function(c){
+          var e = c.id && personByEmpId(c.id);
+          return e && e.key === holder.key;
+        })[0];
+        if (!mine) {
+          var idless = claims.filter(function(c){ return !c.id; });
+          if (idless.length === 1) mine = idless[0];
+        }
+        keep = mine ? mine.at : null;
+        /* ONE ROW, AND IT IS NOT THEIRS: a question, not a refusal. */
+        if (!mine && claims.length === 1) return;
+      } else if (claims.length === 1) {
+        keep = claims[0].at;
+      }
+      var refuse = claims.filter(function(c){ return c.at !== keep; })
+                         .map(function(c){ return c.at; });
+      if (!refuse.length) return;
+      addrPlan[a] = { refuse: refuse, msg: function(at){
+        if (holder && keep) {
+          return "the address " + a + " already belongs to " + holder.name +
+            " on the register (" + keep + "). Sign-in takes the address, so a second " +
+            "person holding it would turn both of them away.";
+        }
+        if (holder) {
+          return "the address " + a + " already belongs to " + holder.name +
+            " on the register. Sign-in takes the address, so giving it to a second " +
+            "person would turn both of them away.";
+        }
+        return "the address " + a + " is on " + claims.length + " rows of this file (" +
+          claims.map(function(c){ return c.at; }).join(", ") + "). Sign-in takes the " +
+          "address, so nobody sharing one can get in — give each person their own.";
+      } };
+    });
+  })();
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -1800,7 +1940,7 @@ function planPeopleFile(rows){
     var status = fileTxt(r["Status"]);
     var label  = name || id || email || "this row";
 
-    /* ── THE LADDER, ROW BY ROW (§82.5) ────────────────────────────
+    /* ── THE LADDER, ROW BY ROW (§85.5) ────────────────────────────
        Emp ID, then email, then nothing — personByIdentity()'s rule, asked
        here so the review can SAY which rung answered. A row with neither is
        still left alone: there is nothing to match it on and nothing to add it
@@ -1816,19 +1956,20 @@ function planPeopleFile(rows){
         'also on ' + seenId[id] + '. One row per person.' });
       return;
     }
-    if (email && seenMail[personMailKey(email)]) {
-      plan.problems.push({ at:at, msg:email + ' is used twice in this file — also on ' +
-        seenMail[personMailKey(email)] + '. One row per person.' });
+    if (id) seenId[id] = at;
+    /* AN ADDRESS TWO ROWS OF THIS FILE BOTH CLAIM, or one this file gives to
+       somebody who is not its holder (§83). Worked out for the whole file
+       above, so the verdict does not depend on where a row sits. */
+    if (addrPlan[addrOf(r)] && addrPlan[addrOf(r)].refuse.indexOf(at) > -1) {
+      plan.problems.push({ at:at, msg:addrPlan[addrOf(r)].msg(at) });
       return;
     }
-    if (id) seenId[id] = at;
-    if (email) seenMail[personMailKey(email)] = at;
 
     /* AN ADDRESS ON TWO ROWS ANSWERS NOTHING, and the file cannot decide which
        of them it meant. It is a problem rather than a question, because the
        fix is on the register and there is now a control for it — the answer
        is to merge those two rows, not to pick one here and leave the pair
-       standing (§82.4). */
+       standing (§85.4). */
     var mailHits = peopleByEmail(email);
     if (mailHits.length > 1) {
       plan.problems.push({ at:at, msg:email + ' is on ' + plural(mailHits.length, "row") +
@@ -1840,7 +1981,7 @@ function planPeopleFile(rows){
     var existing = byId || byMail;
     var matchedBy = byId ? "empId" : (byMail ? "email" : null);
 
-    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§82.5) ─────────
+    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§85.5) ─────────
        Islam: "adding a new person of course should conflict, but the name is
        not the challenge — the identifier really would be the ID and the
        email."
@@ -1962,7 +2103,7 @@ function planPeopleFile(rows){
       /* NOT WHILE THE ROW IS A CONFLICT. "They already hold it" is read off
          the person the row was matched to, and a conflict has not been matched
          to anybody yet — dropping the grant on one reading would silently drop
-         it on the other (§82.5). */
+         it on the other (§85.5). */
       var holdsIt = !conflict && existing &&
         personRoles(existing).some(function(r){ return r.role === roleKey; });
       /* Cleared BEFORE anything is asked of it, and the checks below are then
@@ -2002,6 +2143,33 @@ function planPeopleFile(rows){
       }
     }
 
+    /* ── AN ADDRESS ON TWO ROWS, CAUGHT WHERE IT ARRIVES (§83) ────────
+       The file was checked for a repeated employee number and never once for a
+       repeated ADDRESS, in either direction — against another row of the same
+       file, or against somebody already on the register. Both landed silently,
+       and the consequence does not show up here at all: the door refuses BOTH
+       people with the correct password (§69.23), neither is told why, and the
+       only surface that would ever say so is the register's own duplicate mark
+       (§81.2) — a page nobody visits after an upload that reported no problems.
+
+       A PROBLEM, NOT A NOTICE: the row is refused rather than applied. An
+       address is what somebody signs in with, so importing a collision breaks
+       two people who were working — and unlike a missing BU there is no
+       sensible half-answer to fall back on.
+
+       ORDER MUST NOT DECIDE WHO IS THE IMPOSTOR (found by the check). Written
+       as a running tally, the first row to claim an address won it — so a NEW
+       person listed above the person who already holds that address took it,
+       and the rightful owner was refused their own row. The occupancy is worked
+       out for the whole file BEFORE the loop, so the answer does not depend on
+       where a row sits: the person who already holds it keeps it, and if nobody
+       holds it the file is ambiguous and every row claiming it is refused —
+       §69.23's stance at the door, applied one step earlier. */
+    if (addrPlan[addrOf(r)] && addrPlan[addrOf(r)].refuse.indexOf(at) > -1) {
+      plan.problems.push({ at:at, msg:addrPlan[addrOf(r)].msg(at) });
+      return;
+    }
+
     var row = { at:at, id:id, key:existing ? existing.key : null,
                 matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
@@ -2020,7 +2188,7 @@ function planPeopleFile(rows){
   return plan;
 }
 
-/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§82.6) ──────────
+/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§85.6) ──────────
    Islam, asked who wins where the file and the register disagree: the
    register. That is the right way round and it is not the obvious one — the
    file looks newer because it was just uploaded, and it very often is not: it
@@ -2144,7 +2312,7 @@ function applyPeopleFile(plan){
       p = personBy(key);
       if (!p) return;
     } else {
-      /* ONLY WHAT WAS TICKED (§82.6). Every field the file would change is on
+      /* ONLY WHAT WAS TICKED (§85.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
          either blank in the file or the same on both sides — in neither case
          is there anything to write. The employee number is the exception and

@@ -126,6 +126,21 @@ A drift between specs and code is a documentation bug — report it before silen
 - **`main`** — production/stable. Merge to main only when work is complete and verified.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
+- **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and
+  compare — another session may have pushed while this one was working, and it
+  has: §70 landed on main mid-session on 2026-08-24 while §71 was being built.
+  Never merge blind.
+- **Merge with `--ff-only`.** It REFUSES a divergent main instead of inventing a
+  merge commit, so the moment two sessions have touched the same thing you are
+  told rather than shown a silent auto-merge. On a refusal: fetch, merge main
+  into the branch, resolve there, re-run the checks, then fast-forward.
+- **AFTER A MERGE THAT BRINGS IN SOMEBODY ELSE'S SOURCES, REBUILD — never trust
+  git's merge of the built file.** `strategy-management-platform-vX.Y.html` is
+  generated; git will happily splice two versions of it into something that
+  belongs to neither. Run `python3 build.py`, copy it over, and re-run the
+  checks before pushing. Two branches each adding a `var pf` to `wire()` merged
+  with no textual conflict at all and broke a page (§56.7) — a clean merge is
+  not a working one.
 
 ### 5. Communication
 - **Be proactive about issues** — flag concerns early.
@@ -222,7 +237,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
-- **A NAME IS NEVER AN IDENTIFIER (§82):** who a register row *is* is asked in
+- **A NAME IS NEVER AN IDENTIFIER (§85):** who a register row *is* is asked in
   ONE place — `personByIdentity()`: **Emp ID, then email, and no third rung** —
   and it reports which rung answered, because "matched" tells nobody what to
   check. An address on two rows answers **nothing** (§57's rule, §69.23's door).
@@ -728,7 +743,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;82, spec 013).
+*Last Updated: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;85, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the
 registry"* &mdash; and nothing in the resolver was wrong: **the three people were
 on the register twice.** Once from the employee file with an address and a long

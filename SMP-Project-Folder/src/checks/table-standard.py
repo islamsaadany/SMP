@@ -20,7 +20,7 @@ with sync_playwright() as p:
     ck("no whole-table pen any more", pg.evaluate("!document.querySelector('[data-edit=\"people\"]')"))
     ck("a search box", pg.evaluate("!!document.querySelector('[data-tksearch]')"))
     # THE FOUR THAT ARE ALWAYS THERE, BY NAME. Asserted as a count first, which
-    # broke the day a fifth was added for a real reason (§82.3's "no ID or
+    # broke the day a fifth was added for a real reason (§85.3's "no ID or
     # email") — a check keyed on a magic number reports a deliberate change as
     # a fault, and the fix people reach for is to bump the number. The
     # conditional filters come and go with what the register holds, so what is

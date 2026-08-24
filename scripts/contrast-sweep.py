@@ -282,7 +282,7 @@ with sync_playwright() as p:
                                                   "els=>els.map(e=>e.dataset.sub2)"):
                     pg.click(f'.setuppane .secrow [data-sub2="{k2}"]'); pg.wait_for_timeout(420)
                     scan("setup/"+key+"/"+k2)
-                # THE REGISTER'S THREE NEW SURFACES ARE STATES, NOT PAGES (82).
+                # THE REGISTER'S THREE NEW SURFACES ARE STATES, NOT PAGES (85).
                 # The add row's refusal, the merge comparison and the upload's
                 # conflict box exist only after somebody does something, and
                 # every one of them is coloured type on a coloured ground —

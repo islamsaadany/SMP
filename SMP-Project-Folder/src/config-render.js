@@ -420,7 +420,7 @@ function assignPicker(where, roleKey, current, editable){
   }
   var pool = peopleFor(where);
   /* SEARCHABLE ON WHAT IDENTIFIES SOMEBODY, not only on what they are called
-     (§82.3). `data-name` stays the NAME alone, because the near-name fallback
+     (§85.3). `data-name` stays the NAME alone, because the near-name fallback
      compares chains of names and an employee number in the string would break
      it; `data-find` is what the substring search reads. */
   var row = function(p){
@@ -450,7 +450,7 @@ function assignPicker(where, roleKey, current, editable){
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
     /* ── A PERSON CREATED HERE IS IDENTIFIABLE, OR THEY ARE THE NEXT
-           DUPLICATE (§82.3) ────────────────────────────────────────
+           DUPLICATE (§85.3) ────────────────────────────────────────
        This control is where the twins were made: it takes a typed name and
        mints a row with no employee number and no address, which is precisely
        the row a later upload cannot match — so the upload adds the person a
@@ -486,7 +486,8 @@ function renderUnits(){
        meant a new unit could never be given its first head. It is the shared
        picker now — search, the unit's own people first, and Add new (§35). */
     var pick = function(role, sel){ return assignPicker(k, role === "head" ? "owner" : "custodian", sel, editable); };
-    return '<tr' + (u.active ? '' : ' class="retired"') + '>' +
+    return '<tr data-tkrow="' + (u.active ? "active" : "retired") + '"' +
+      (u.active ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(u.name) + '" data-uname="' + k + '">'
@@ -554,8 +555,15 @@ function renderUnits(){
       "units", grant("c_units") === "edit", "all",
       ["Clear all progress", "Clear all plans"]) +
 
+    /* §84. SEARCH BUT NO SORT (spec §6.2). This table's row order is the order
+       the units appear in the navigation and on the group page — somebody
+       ARRANGED it — so a sort would be indistinguishable from a rearrangement
+       the moment a row is dragged, and no label fixes that. Ten rows: search
+       narrows it better than sorting would anyway. */
     section("", "Business units", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
+      tkBar("units", { placeholder:"Search the units\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
+      '<div class="cfg"><table class="unitcfg" data-tktable="units"><thead><tr>' +
         '<th class="idx" style="width:38px">#</th><th style="width:18%">Unit</th>' +
         '<th style="width:14%">Shown in the nav</th>' +
         '<th class="cc" style="width:8%">Code</th>' +
@@ -920,7 +928,7 @@ function showCol(k){ return peopleCols()[k] !== false; }
 function dupeMark(dupes){
   if (!dupes || !dupes.length) return "";
   var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
-  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§82.2). The first
+  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§85.2). The first
      three are two rows holding the same value and are always a fault; this one
      is two rows that LOOK like one person and may well be two. Saying both in
      the same words would either overstate the guess or understate the fault. */
@@ -1191,7 +1199,7 @@ function renderPeople(){
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
-    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§82.4).
+    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§85.4).
        Retire and Delete are below the rule because they take something away;
        merging two rows that were always one person takes nothing away, and it
        is the ordinary fix for what the marks on this row are pointing at. */
@@ -1338,7 +1346,7 @@ function renderPeople(){
   var dupId = Object.keys(DUPES.empId).length;
   var dupName = Object.keys(DUPES.name).length;
   var likely = (DUPES.likely || []).length;
-  /* ── A ROW NOTHING CAN MATCH (§82.3) ──────────────────────────────
+  /* ── A ROW NOTHING CAN MATCH (§85.3) ──────────────────────────────
      Counted over active rows only, like every other count on this header: a
      retired row is not what the next upload is going to fail to find.
 
@@ -1481,7 +1489,7 @@ function renderPeople(){
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
-      (showCol("email") ? '<td>' + (ed
+      (showCol("email") ? '<td class="wrapany">' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
         : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
@@ -1506,7 +1514,7 @@ function renderPeople(){
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
-  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§82.3) ───────
+  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§85.3) ───────
      Three fields where there was one. Neither identifier is required — the SMO
      often knows a name and a role and nothing else, and a door that demanded
      an employee number would mean a unit could not be given its head until HR
@@ -1732,7 +1740,7 @@ function renderPeople(){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
           ' on more than one row</span>'] : []).concat(
-        /* AMBER, NOT RED (§82.2). The three above are collisions and are
+        /* AMBER, NOT RED (§85.2). The three above are collisions and are
            always wrong. These two are a resemblance and a gap: a row that
            looks like somebody else may be a second person with a similar
            name, and a row with no identifier is a normal thing to have typed
@@ -1787,19 +1795,8 @@ function renderPeople(){
          file. `th()` counts as it emits, so the two can never disagree. */
       (function(){
         var n = 0;
-        function th(label, cls, sortable){
-          var i = n++;
-          if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
-          if (sortable === false)
-            return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
-          var st = TKSORT["people"];
-          var on = st && st.col === i;
-          return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
-            (on ? (st.dir === 1 ? ' tk-asc' : ' tk-desc') : '') + '"' +
-            ' data-tksort="people|' + i + '" tabindex="0" role="button"' +
-            ' title="Sort by ' + esc(label.replace(/<[^>]+>/g, "")) + '">' +
-            label + '<i class="tk-arrow"></i></th>';
-        }
+      var th = tkHead("people");
+
       return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
         'data-tktable="people"><thead><tr>' +
         th("#", "idx", false) +
@@ -1812,7 +1809,7 @@ function renderPeople(){
         (showCol("title")    ? th("Job title")  : '') +
         (showCol("mainbu")   ? th("Official BU") : '') +
         (showCol("bu")       ? th("Unit")       : '') +
-        (showCol("email")    ? th("Email")      : '') +
+        (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
            orders them by the text that happens to be rendered, which is not a
@@ -1842,7 +1839,7 @@ function renderPeople(){
 
 
 /* ══════════════════════════════════════════════════════════════════
-   MERGING TWO ROWS (§82.4)
+   MERGING TWO ROWS (§85.4)
 
    A SECTION UNDER THE TABLE, NOT A PANEL IN THE ROW. Retire and Delete ask one
    question and fit in the 83px actions column (§69.20); this one has to show
@@ -2064,7 +2061,7 @@ function renderPeopleFile(mayEdit){
           '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
       }).join("");
 
-    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§82.5) ────────────
+    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§85.5) ────────────
        They are the only thing on this screen that BLOCKS, so putting them
        under a table of thirty ordinary updates would mean scrolling past the
        work to find the reason Apply is off. Each one names both readings with
@@ -2109,10 +2106,27 @@ function renderPeopleFile(mayEdit){
             opts = choice(row, i, "match", c.byMail.key, who(c.byMail),
               "the address matches them \u2014 give them this employee number");
           }
-          opts += choice(row, i, "add", "", "<b>Somebody new</b>",
-                         "add a row, with this number and this address");
+          /* ── "SOMEBODY NEW" IS NOT ON OFFER, AND THE REASON IS §83 ──
+             Every conflict is a row whose address ALREADY BELONGS to somebody
+             on the register — that is what makes it a conflict. Adding a third
+             person with it would hand one address to two people, and sign-in
+             takes the address, so it would turn both of them away (§69.23).
+             The upload refuses that everywhere else in this reader; offering
+             it here as one choice of four would be the same reader answering
+             the same question two ways.
+
+             SO IT IS SAID, NOT HIDDEN. A genuinely new colleague who has been
+             given a leaver's address is a real case, and the way through it is
+             on the register — clear the address from the row that holds it
+             first. A missing option explains nothing; this one names what to
+             go and do (§59, §16.7). */
           opts += choice(row, i, "skip", "", "<b>Leave it</b>", "change nothing for this row");
-          return head + '<div class="cfopts">' + opts + '</div></div>';
+          return head + '<div class="cfopts">' + opts + '</div>' +
+            '<div class="cfnote">Adding this as a third person is not offered: ' +
+            esc(c.byMail.name) + ' already holds <b>' + esc(row.email) + '</b>, and sign-in ' +
+            'takes the address — two people holding one turns both of them away. If this ' +
+            'really is somebody new, clear the address from ' + esc(c.byMail.name) +
+            '\u2019s row first.</div></div>';
         }).join("") +
         '</div>'
       : '';
@@ -2132,7 +2146,7 @@ function renderPeopleFile(mayEdit){
         moving.map(function(r){
           var i = plan.rows.indexOf(r);
           var ch = peopleRowChanges(r);
-          /* ── EVERY DIFFERENCE IS AN OFFER (§82.6) ─────────────────
+          /* ── EVERY DIFFERENCE IS AN OFFER (§85.6) ─────────────────
              Recorded on the left, the file's on the right, and the file's is
              taken only where it is ticked. The default is what is already
              recorded, because a people file is usually an export somebody
@@ -2270,7 +2284,13 @@ function renderMainbus(){
 
   var rows = list.map(function(b, i){
     var n = peopleOfMainbu(b.name).length;
-    return '<tr><td class="idx">' + (i + 1) + '</td>' +
+    /* MAPPED IS "POINTS AT SOMETHING", and a name may hold several (§57), so it
+       is the LIST that decides — `b.at` alone was written first and is not even
+       the field: it is `mainbuAts()`. Caught immediately, because the row map's
+       parameter is `b` and the reference threw. */
+    var mapped = mainbuAts(b).length > 0;
+    return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"><td class="idx">' +
+      (i + 1) + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
         : '<b>' + esc(b.name) + '</b>') + '</td>' +
@@ -2294,13 +2314,22 @@ function renderMainbus(){
       '</td><td class="cc"><button class="linkbu" data-mbadd="1">Add</button></td></tr>'
     : '';
 
+  /* §84. Ten names today and one per department the client has, so it crosses
+     the search threshold the day a second client arrives. *Unmapped* is the
+     only filter worth having: the whole page exists to get that number to
+     zero. */
+  var mbth = tkHead("mainbu");
   var table = list.length || editable
-    ? '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th>' +
-        '<th style="width:30%">Official BU</th>' +
-        '<th style="width:40%">Points at</th>' +
-        '<th class="cc" style="width:14%">People</th>' +
-        '<th class="cc" style="width:18%"></th>' +
+    ? tkBar("mainbu", { placeholder:"Search the list\u2026",
+          filters:[{ k:"unmapped", label:"Unmapped",
+                     title:"Names that point at nothing here yet" },
+                   { k:"mapped", label:"Mapped" }] }) +
+      '<div class="cfg"><table class="unitcfg" data-tktable="mainbu"><thead><tr>' +
+        mbth("#", "idx", false) +
+        mbth("Official BU") +
+        mbth("Points at") +
+        mbth("People", "cc") +
+        mbth("", "cc", false) +
       '</tr></thead><tbody>' + rows + addRow + '</tbody></table></div>'
     : '<div class="note"><b>Empty.</b> Names arrive by themselves the first time an employee ' +
       'file is uploaded on <b>People</b> — every BU it mentions is added here, pointing at ' +
@@ -2354,12 +2383,19 @@ function renderCompanies(){
          live < COMPANY_KEYS.length ? [(COMPANY_KEYS.length - live) + ' retired'] : []),
       "units", grant("c_units") === "edit") +
     section("", "Companies", null,
-      '<div class="cfg"><table class="unitcfg"><thead><tr>' +
-        '<th class="idx" style="width:38px">#</th><th style="width:24%">Company</th>' +
-        '<th class="cc" style="width:8%">Units</th>' +
-        '<th class="cc" style="width:18%">Sees other companies</th>' +
-        '<th class="cc" style="width:18%">Sees the group</th>' +
-        '<th class="cc" style="width:20%">Status</th></tr></thead><tbody>' +
+      /* §84. NO SEARCH BAR: two rows, and a search box above two rows hides
+         nothing and costs a header — the threshold is in the spec (§2.2) and
+         this is the table it was written for. It still sorts and still carries
+         the retired filter, because both are one attribute each and a client
+         with fifteen companies gets them for free. */
+      tkBar("companies", { placeholder:"Search the companies\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
+      '<div class="cfg"><table class="unitcfg" data-tktable="companies"><thead><tr>' +
+        (function(){ var h = tkHead("companies");
+          return h("#", "idx", false) + h("Company") + h("Units", "cc") +
+                 h("Sees other companies", "cc") + h("Sees the group", "cc") +
+                 h("Status", "cc"); })() +
+      '</tr></thead><tbody>' +
       COMPANY_KEYS.map(function(ck, i){
         var co = COMPANIES[ck], on = companyActive(ck), blockers = companyRetireBlockers(ck);
         var flag = function(field, val){
@@ -2369,7 +2405,8 @@ function renderCompanies(){
             '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
             '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
         };
-        return '<tr' + (on ? '' : ' class="retired"') + '><td class="idx">' + (i+1) + '</td>' +
+        return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
+          (on ? '' : ' class="retired"') + '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + (editable
             ? '<input class="fld" value="' + esc(co.name) + '" data-coname="' + ck + '">'
             : '<b>' + esc(co.name) + '</b>') +
@@ -2816,7 +2853,15 @@ function renderSetsSetup(){
       [sets.length + (sets.length === 1 ? " set" : " sets"),
        claimed + " figure" + (claimed === 1 ? "" : "s") + " claimed"],
       "sets", mayEdit, null, null) +
-    '<div class="cfg"><table><thead><tr>' +
+    /* §84. NO SEARCH, NO SORT, and both are the spec (§2.2, §6.2) rather than
+       an omission. One set today: a search box above one row is furniture. And
+       the order of the sets is the order somebody put them in — the same
+       argument as Business units — so sorting would be indistinguishable from
+       rearranging. It is wired into the kit anyway, so a tenant that grows to
+       twenty sets gets the search by crossing the threshold rather than by
+       somebody remembering this page. */
+    tkBar("sets", { rows:sets.length, placeholder:"Search the sets\u2026" }) +
+    '<div class="cfg"><table data-tktable="sets"><thead><tr>' +
       '<th style="width:34px">#</th><th style="width:26%">Set</th>' +
       '<th style="width:16%">Team</th><th style="width:22%">Owner</th>' +
       '<th style="width:20%">Who picks its figures</th>' +
@@ -3799,7 +3844,8 @@ function renderFunctions(){
 
   var rows = FUNCTION_KEYS.map(function(fk, i){
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
-    return '<tr' + (f.active === false ? ' class="retired"' : '') + '>' +
+    return '<tr data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
+      (f.active === false ? ' class="retired"' : '') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
         ? '<input class="fld" value="' + esc(f.name) + '" data-fname="' + fk + '">'
@@ -3907,18 +3953,26 @@ function renderFunctions(){
       "fns", grant("c_fns") === "edit", "fnall",
       ["Clear all progress", "Clear all plans"]) +
     section("", "", null,
-      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:16%">Function</th>' +
-        /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
-           at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
-           custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
-           overlapping their neighbours, which adding a ninth column caused.
-           Each still says what its column is; the long forms were describing
-           what the row already shows. */
-        '<th style="width:11%">Nav name</th><th class="cc" style="width:6%">Code</th>' +
-        '<th class="cc" style="width:15%">Plans in</th>' +
-        '<th class="cc" style="width:8%">Caps</th>' +
-        '<th class="cc" style="width:14%">Head</th><th class="cc" style="width:14%">Custodian</th>' +
-        '<th class="cc" style="width:9%">Status</th></tr></thead>' +
+      /* §84. Eight rows and nine columns — over the search threshold, and its
+         order is a plain list rather than something arranged, so it sorts. */
+      tkBar("fns", { placeholder:"Search the functions\u2026",
+          filters:[{ k:"retired", label:"Retired" }] }) +
+      /* SHORTENED, BECAUSE THEY NO LONGER FIT. Measured rather than judged:
+         at 920px "Shown in the nav" wanted 119px in a 94px cell, "Strategy
+         custodian" 129 in 119 and "Capabilities" 86 in 68 — three headers
+         overlapping their neighbours, which adding a ninth column caused.
+         Each still says what its column is; the long forms were describing
+         what the row already shows.
+
+         The widths went with the conversion to sortable heads (§84): they were
+         declared as percentages summing to the whole, which auto layout treats
+         as a suggestion anyway, and wrapping (§85) is what decides these now. */
+      '<div class="cfg"><table data-tktable="fns"><thead><tr>' +
+        (function(){ var h = tkHead("fns");
+          return h("#", "idx", false) + h("Function") + h("Nav name") +
+                 h("Code", "cc") + h("Plans in", "cc") + h("Caps", "cc") +
+                 h("Head", "cc") + h("Custodian", "cc") + h("Status", "cc"); })() +
+        '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A
          setup table is where you change a thing; it is not where the thing is
@@ -3935,7 +3989,8 @@ function renderCaps(){
   var editable = grant("c_caps") === "edit";
   var rows = GROUP.capabilities.map(function(c, i){
     var f = functionOf(c.fn);
-    return '<tr><td class="idx">' + (i+1) + '</td>' +
+    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '">' +
+      '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
          else, so a capability could be given an owner but never renamed —
          and a capability added from Temple arrived called "New capability"
@@ -3975,10 +4030,17 @@ function renderCaps(){
       /* Widths set so a long head name \u2014 "Strategy Management Office" \u2014 does not
          wrap and leave one row taller than the rest, which reads as broken
          shading rather than as a long name. */
-      '<div class="cfg"><table><thead><tr><th class="idx">#</th><th style="width:26%">Capability</th>' +
-        '<th style="width:20%">Owned by</th><th style="width:24%">Head</th>' +
-        '<th class="cc">Key objectives</th><th class="cc">Projects</th>' +
-        '<th class="cc"></th></tr></thead>' +
+      /* §84. Eight rows and it grows with the practice; *Unassigned* is the
+         filter because an unassigned capability is the one thing this page
+         exists to fix, and the header has counted them since §15. */
+      tkBar("caps", { placeholder:"Search the capabilities\u2026",
+          filters:[{ k:"unassigned", label:"Unassigned",
+                     title:"Capabilities with no function carrying them" }] }) +
+      '<div class="cfg"><table data-tktable="caps"><thead><tr>' +
+        (function(){ var h = tkHead("caps");
+          return h("#", "idx", false) + h("Capability") + h("Owned by") + h("Head") +
+                 h("Key objectives", "cc") + h("Projects", "cc") + h("", "cc", false); })() +
+        '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       (editable
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a capability</button>' +
@@ -4669,8 +4731,17 @@ var TKSORT = {};    /* table id -> {col, dir} — the view's order, never the da
 
 /* The bar above a table. `id` names the table for the sort state and nothing
    else; `filters` are [{k, label, title}] and are the table's own question. */
+/* THE BAR APPEARS WHEN THERE IS SOMETHING TO SEARCH. Below nine rows a search
+   box hides nothing and costs a header — Companies has two and Figure sets has
+   one. `rows` is the count the caller already has; a table that omits it always
+   gets a bar, which is the register's case and the safe default. One number, so
+   a table crosses the threshold as the tenant grows rather than when somebody
+   remembers the page (spec §2.2). */
+var TK_SEARCH_FROM = 9;
 function tkBar(id, opts){
   opts = opts || {};
+  if (typeof opts.rows === "number" && opts.rows < TK_SEARCH_FROM &&
+      !(opts.filters || []).length) return "";
   var f = TKFILTER[id] || "";
   var chips = (opts.filters || []).map(function(x){
     return '<button class="tk-chip' + (f === x.k ? ' on' : '') + '" data-tkfilter="' +
@@ -4685,6 +4756,34 @@ function tkBar(id, opts){
     '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
   '</div>';
 }
+/* ── THE HEADER ROW, FOR ANY TABLE (§84) ──────────────────────────────
+   Extracted from the register, where it was a local closure with "people"
+   written into it three times. Six more tables need exactly this and none of
+   them needs a second copy — a sort arrow drawn slightly differently on the
+   seventh table is how a standard stops being one.
+
+   `sortable:false` is the column's own answer (the index and the actions
+   column), and a whole table opts out by never asking for a head at all.
+   The column INDEX is counted here rather than passed, because a caller
+   counting its own columns gets it wrong the first time a column becomes
+   conditional — which every one of these tables has. */
+function tkHead(id){
+  var n = 0;
+  return function(label, cls, sortable){
+    var i = n++;
+    if (!label) return '<th' + (cls ? ' class="' + cls + '"' : '') + '></th>';
+    if (sortable === false)
+      return '<th' + (cls ? ' class="' + cls + '"' : '') + '>' + label + '</th>';
+    var st = TKSORT[id];
+    var on = st && st.col === i;
+    return '<th' + (cls ? ' class="' + cls + ' tk-sortable' : ' class="tk-sortable') +
+      (on ? (st.dir === 1 ? ' tk-asc' : ' tk-desc') : '') + '"' +
+      ' data-tksort="' + esc(id) + '|' + i + '" tabindex="0" role="button"' +
+      ' title="Sort by ' + esc(String(label).replace(/<[^>]+>/g, "")) + '">' +
+      label + '<i class="tk-arrow"></i></th>';
+  };
+}
+
 /* WHAT IS TYPED AND WHICH CHIP IS LIT SURVIVE A REPAINT. Adding a row repaints
    (§75), and a search that emptied itself when you added somebody would be a
    filter you have to retype every time you use the page. */

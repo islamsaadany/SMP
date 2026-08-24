@@ -449,11 +449,18 @@ function assignPicker(where, roleKey, current, editable){
 }
 
 function renderUnits(){
-  var editable = grant("c_units") === "edit" && EDITING.units;
+  /* ── EDITED ON THE ROW (§85, spec 012 §2.1) ────────────────────────
+     `EDITING.units` turned every field on ten rows at once — 110 inputs to
+     rename one unit. `mayEdit` is now whether the pen is DRAWN, and `editable`
+     inside a row is whether THAT row is open. Retiring and clearing keep their
+     own controls, because they are not edits to the row's fields (§62): a
+     retire is a decision about the unit, not a correction to it. */
+  var mayEdit = grant("c_units") === "edit";
   var live = activeUnits().length;
 
   var rows = UNIT_KEYS.map(function(k, i){
     var u = UNITS[k];
+    var editable = mayEdit && rowEditIs("units", k);
     var wrow = GROUP.weighting.units.filter(function(r){ return r.key === k; })[0];
     var roles = UNIT_ROLES[k] || {};
     /* Was a <select> limited to people already attached to this unit, which
@@ -461,10 +468,10 @@ function renderUnits(){
        picker now — search, the unit's own people first, and Add new (§35). */
     var pick = function(role, sel){ return assignPicker(k, role === "head" ? "owner" : "custodian", sel, editable); };
     return '<tr data-tkrow="' + (u.active ? "active" : "retired") + '"' +
-      (u.active ? '' : ' class="retired"') + '>' +
+      (editable ? ' class="tk-open"' : (u.active ? '' : ' class="retired"')) + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
-        ? '<input class="fld" value="' + esc(u.name) + '" data-uname="' + k + '">'
+        ? '<input class="fld tk-firstfield" value="' + esc(u.name) + '" data-uname="' + k + '">'
         : '<b>' + esc(u.name) + '</b>') +
         '<span class="why mono">key ' + k + '</span></td>' +
       /* Short name for the navigation only \u2014 everywhere else keeps the full
@@ -499,8 +506,13 @@ function renderUnits(){
                      : '<span class="why" style="margin:0">its own company</span>')) + '</td>' +
       '<td class="cc">' + pick("head", roles.head) + '</td>' +
       '<td class="cc">' + pick("custodian", roles.custodian) + '</td>' +
-      '<td class="cc">' + (editable
+      '<td class="cc">' + (mayEdit
         ? '<div class="rowacts">' +
+            (editable
+              ? '<button class="linkbu tk-save" data-rowsave="units|' + k + '">Save</button>' +
+                '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>'
+              : '<button class="ico tk-pen" data-rowedit="units|' + k + '" ' +
+                  'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>') +
             '<button class="rmbtn' + (u.active ? '' : ' on') + '" data-uact="' + k + '">' +
               (u.active ? "Retire" : "Restore") + '</button>' +
             (CLEARING === k + "|plan"
@@ -547,9 +559,14 @@ function renderUnits(){
         '<th class="cc" style="width:14%">BU head</th><th class="cc" style="width:15%">Strategy custodian</th>' +
         '<th class="cc" style="width:9%">Status</th>' +
       '</tr></thead><tbody>' + rows + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : '')) +
+      /* ADD IS THE PAGE'S, NOT A ROW'S — `mayEdit`, so it stays reachable while
+         a row happens to be open, and does not vanish the moment the last pen
+         is pressed. */
+      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addunit">+ Add a business unit</button></div>' : '')) +
 
-    renderUnitMarks(editable);
+    /* The marks section keeps the page-level gate it always had: a mark is
+       uploaded, not typed into a row, so it has no row to open. */
+    renderUnitMarks(mayEdit);
 }
 
 /* ── The units' own marks (§52.9) ────────────────────────────────────
@@ -932,7 +949,7 @@ function renderPeople(){
      ROWEDIT holds the key of the one row open. One at a time, because two open
      rows are two unsaved states and a question about which Save means which. */
   var mayEdit_ = mayEdit;
-  function rowOpen(p){ return mayEdit_ && ROWEDIT === p.key; }
+  function rowOpen(p){ return mayEdit_ && rowEditIs("people", p.key); }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && hasRole("super");
   var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
   var noPw = live && PWSTATES
@@ -1849,8 +1866,10 @@ function renderPeopleFile(mayEdit){
    ten-row table would be a switch nobody ever moves.
    ══════════════════════════════════════════════════════════════════ */
 function renderMainbus(){
+  /* §85. A name has two editable things — what it is called and what it points
+     at — and the second is chips with their own × plus a dropdown, which is
+     already per-row. The pen now opens the NAME as well, in the same row. */
   var mayEdit = grant("c_people") === "edit";
-  var editable = mayEdit && EDITING.people;
   var list = mainbus();
   var mapped = list.filter(function(b){ return mainbuAts(b).length; }).length;
   /* Names people carry that the list has never met. It cannot happen through
@@ -1869,7 +1888,12 @@ function renderMainbus(){
      without disturbing the rest — which a single <select> cannot do. Each is
      a chip carrying its own remove; the dropdown underneath adds, and offers
      only what is not already there, so pressing it can never be a no-op. */
-  function target(b){
+  /* `ed` PASSED, NOT CAPTURED (§85.2, the second time in one change). This is
+     defined outside the row map, so once editability moved into the row it was
+     reading a variable that no longer existed at its scope — the fault that
+     rendered the whole Functions page as nothing. Caught here by looking for
+     the shape rather than by running into it again. */
+  function target(b, editable){
     var ats = mainbuAts(b);
     if (!ats.length && !editable) return '<span class="pill none">Not mapped</span>';
     var chips = ats.map(function(at){
@@ -1895,31 +1919,37 @@ function renderMainbus(){
   }
 
   var rows = list.map(function(b, i){
+    var editable = mayEdit && rowEditIs("mainbu", String(i));
     var n = peopleOfMainbu(b.name).length;
     /* MAPPED IS "POINTS AT SOMETHING", and a name may hold several (§57), so it
        is the LIST that decides — `b.at` alone was written first and is not even
        the field: it is `mainbuAts()`. Caught immediately, because the row map's
        parameter is `b` and the reference threw. */
     var mapped = mainbuAts(b).length > 0;
-    return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"><td class="idx">' +
+    return '<tr data-tkrow="' + (mapped ? "mapped" : "unmapped") + '"' +
+      (editable ? ' class="tk-open"' : '') + '><td class="idx">' +
       (i + 1) + '</td>' +
       '<td>' + (editable
-        ? '<input class="fld" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
+        ? '<input class="fld tk-firstfield" value="' + esc(b.name) + '" data-mbname="' + esc(b.name) + '">'
         : '<b>' + esc(b.name) + '</b>') + '</td>' +
-      '<td>' + target(b) + '</td>' +
+      '<td>' + target(b, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + n + '</span></td>' +
-      '<td class="cc">' + (editable
-        /* Deleted rather than retired, and that is safe only because it is
-           REFUSED while anybody carries the name — the same contract as
-           retiring a company that still holds units (§49.3). A list row
-           records nothing, so there is no history to protect. */
-        ? (n
-            ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
-            : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')
-        : '') + '</td></tr>';
+      /* Deleted rather than retired, and that is safe only because it is
+         REFUSED while anybody carries the name — the same contract as retiring
+         a company that still holds units (§49.3). A list row records nothing,
+         so there is no history to protect. */
+      rowActions("mainbu", String(i), editable,
+        !mayEdit || editable ? '' :
+          (n ? '<span class="pill none" title="' + n + ' on the register">held by ' + n + '</span>'
+             : '<button class="linkbu danger" data-mbdel="' + esc(b.name) + '">Remove</button>')) +
+      '</tr>';
   }).join("");
 
-  var addRow = editable
+  /* The Add row and the table's own existence are the PAGE's question, not a
+     row's — `mayEdit`, so adding a name stays available while a row is open
+     and the table does not disappear when the last pen closes (§85.2, third
+     instance of the same shape in one change). */
+  var addRow = mayEdit
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="3">' +
         '<input class="fld" id="newMainbu" placeholder="Business unit name, as your own records spell it" ' +
         'value="' + esc(NEWMAINBU) + '">' +
@@ -1931,7 +1961,7 @@ function renderMainbus(){
      only filter worth having: the whole page exists to get that number to
      zero. */
   var mbth = tkHead("mainbu");
-  var table = list.length || editable
+  var table = list.length || mayEdit
     ? tkBar("mainbu", { placeholder:"Search the list\u2026",
           filters:[{ k:"unmapped", label:"Unmapped",
                      title:"Names that point at nothing here yet" },
@@ -1986,7 +2016,9 @@ function renderMainbus(){
 }
 
 function renderCompanies(){
-  var editable = grant("c_units") === "edit" && EDITING.units;
+  /* §85: the page-wide pen becomes a pen per row. `mayEdit` draws it; a row's
+     own `editable` is whether that row is open. */
+  var mayEdit = grant("c_units") === "edit";
   var live = activeCompanyKeys().length;
   return cfgHead("Companies",
       ['<span class="pill kind">SMO</span>',
@@ -2017,10 +2049,12 @@ function renderCompanies(){
             '<option value="no"' + (val ? "" : " selected") + '>No</option>' +
             '<option value="yes"' + (val ? " selected" : "") + '>Yes</option></select>';
         };
+        var editable = mayEdit && rowEditIs("companies", ck);
         return '<tr data-tkrow="' + (on ? "active" : "retired") + '"' +
-          (on ? '' : ' class="retired"') + '><td class="idx">' + (i+1) + '</td>' +
+          (editable ? ' class="tk-open"' : (on ? '' : ' class="retired"')) +
+          '><td class="idx">' + (i+1) + '</td>' +
           '<td>' + (editable
-            ? '<input class="fld" value="' + esc(co.name) + '" data-coname="' + ck + '">'
+            ? '<input class="fld tk-firstfield" value="' + esc(co.name) + '" data-coname="' + ck + '">'
             : '<b>' + esc(co.name) + '</b>') +
             '<span class="why mono">key ' + ck + '</span></td>' +
           '<td class="cc"><span class="mono">' + unitsOfCompany(ck).length + '</span></td>' +
@@ -2028,16 +2062,27 @@ function renderCompanies(){
           '<td class="cc">' + flag("seeGroup", co.seeGroup) + '</td>' +
           /* Retiring is REFUSED while units still belong here, and the cell says
              how many rather than going quiet about why there is no button. */
-          '<td class="cc">' + (editable
-            ? (on && blockers.length
-                ? '<span class="pill none" title="' + esc(blockers.join(", ")) + '">holds ' +
-                    plural(blockers.length, "unit") + '</span>'
-                : '<button class="rmbtn' + (on ? '' : ' on') + '" data-coact="' + ck + '">' +
-                    (on ? "Retire" : "Restore") + '</button>')
+          '<td class="cc">' + (mayEdit
+            ? '<div class="rowacts">' +
+                (editable
+                  ? '<button class="linkbu tk-save" data-rowsave="companies|' + ck + '">Save</button>' +
+                    '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>'
+                  : '<button class="ico tk-pen" data-rowedit="companies|' + ck + '" ' +
+                      'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>' +
+                    /* Retire keeps its own control and its own refusal (§48.2):
+                       a company holding units is refused with the count, and
+                       that is a decision about the company rather than a
+                       correction to its fields. */
+                    (on && blockers.length
+                      ? '<span class="pill none" title="' + esc(blockers.join(", ")) + '">holds ' +
+                          plural(blockers.length, "unit") + '</span>'
+                      : '<button class="rmbtn' + (on ? '' : ' on') + '" data-coact="' + ck + '">' +
+                          (on ? "Retire" : "Restore") + '</button>')) +
+              '</div>'
             : '<span class="pill ' + (on ? "good" : "none") + '">' +
                 (on ? "Active" : "Retired") + '</span>') + '</td></tr>';
       }).join("") + '</tbody></table></div>' +
-      (editable ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
+      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addcompany">+ Add a company</button></div>' : '') +
       '<div class="note"><b>A company groups business units so a company CEO sees their own.</b> ' +
       'In this version it carries <b>no score and no page</b> — it decides who sees what, nothing ' +
       'more. Supporting functions belong to no company: they serve all of them. ' +
@@ -2421,11 +2466,13 @@ function renderSetsSetup(){
   };
 
   var rows = sets.map(function(st, i){
+    /* §85. `editing` was the whole page; a row's own is whether it is open. */
+    var editing = mayEdit && rowEditIs("sets", st.id);
     var n = SMPRules.rowsOfSet(world(), st.id).length;
-    return '<tr>' +
+    return '<tr' + (editing ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editing
-        ? '<input class="fld" value="' + esc(st.name) + '" data-setname="' + esc(st.id) + '">'
+        ? '<input class="fld tk-firstfield" value="' + esc(st.name) + '" data-setname="' + esc(st.id) + '">'
         : '<b>' + esc(st.name) + '</b>') +
         '<span class="why mono">id ' + esc(st.id) + '</span></td>' +
       '<td>' + (editing
@@ -2443,12 +2490,14 @@ function renderSetsSetup(){
             ? '<span class="pill attn">Its owner picks</span>'
             : '<span class="pill kind">The SMO fills it</span>')) + '</td>' +
       '<td class="num">' + n + '</td>' +
-      '<td class="cc">' + (editing
-        ? '<button class="linkbu" data-setdel="' + esc(st.id) + '">Remove</button>'
-        : '') + '</td></tr>';
+      rowActions("sets", st.id, editing,
+        mayEdit && !editing
+          ? '<button class="linkbu" data-setdel="' + esc(st.id) + '">Remove</button>' : '') +
+      '</tr>';
   }).join("");
 
-  var addRow = editing
+  /* The Add row is the page's, so it stays while a row is open (§85.2). */
+  var addRow = mayEdit
     ? '<tr class="newrow"><td class="idx">+</td>' +
       '<td><input class="fld" id="newset-name" value="' + esc(NEWSET.name) +
         '" placeholder="Financial Figures"></td>' +
@@ -2478,7 +2527,7 @@ function renderSetsSetup(){
       '<th style="width:16%">Team</th><th style="width:22%">Owner</th>' +
       '<th style="width:20%">Who picks its figures</th>' +
       '<th class="cc" style="width:9%">Figures</th><th class="cc" style="width:9%"></th>' +
-    '</tr></thead><tbody>' + (rows || (editing ? "" :
+    '</tr></thead><tbody>' + (rows || (mayEdit ? "" :
       '<tr><td colspan="7" class="why">No sets yet. A set is how a number that ' +
       'belongs to Finance stops being typed by ten business units.</td></tr>')) +
       addRow + '</tbody></table></div>' +
@@ -3445,22 +3494,34 @@ function planUnderCell(fk, f, editable){
 }
 
 function renderFunctions(){
-  var editable = grant("c_fns") === "edit" && EDITING.fns;
+  /* §85: a pen per row. Retire and Delete keep their own controls — they are
+     decisions about the function, not corrections to its fields (§62). */
+  var mayEdit = grant("c_fns") === "edit";
   /* The same picker the Business units page uses, addressed at "fn:<key>"
      rather than a unit key — search, this function's own people first, and Add
      new (§35). It replaces a <select> that listed every person in the tenant
      in one flat list, retired ones included. */
-  var pick = function(role, current, fk){
-    return assignPicker("fn:" + fk, role === "head" ? "fnhead" : "custodian", current, editable);
+  /* `ed` IS AN ARGUMENT NOW, NOT A CAPTURE (§85.2). This closure is defined
+     OUTSIDE the row map and used to close over a page-level `editable`. Moving
+     editability into the row left it referring to a variable that no longer
+     exists at its scope — "editable is not defined", and the whole Functions
+     page rendered as nothing.
+
+     A closure written beside a loop and called inside it is the shape to watch
+     whenever a page-wide flag becomes a per-row one; the units page happens to
+     define its picker INSIDE the map and so needed nothing. */
+  var pick = function(role, current, fk, ed){
+    return assignPicker("fn:" + fk, role === "head" ? "fnhead" : "custodian", current, ed);
   };
 
   var rows = FUNCTION_KEYS.map(function(fk, i){
+    var editable = mayEdit && rowEditIs("fns", fk);
     var f = FUNCTIONS[fk], caps = capsOfFunction(fk);
     return '<tr data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
-      (f.active === false ? ' class="retired"' : '') + '>' +
+      (editable ? ' class="tk-open"' : (f.active === false ? ' class="retired"' : '')) + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
       '<td>' + (editable
-        ? '<input class="fld" value="' + esc(f.name) + '" data-fname="' + fk + '">'
+        ? '<input class="fld tk-firstfield" value="' + esc(f.name) + '" data-fname="' + fk + '">'
         : '<b>' + esc(f.name) + '</b>') +
         '<span class="why mono">key ' + fk + '</span></td>' +
       '<td>' + (editable
@@ -3481,10 +3542,15 @@ function renderFunctions(){
          same contract as retiring a company that still holds units (§49.3). */
       '<td class="cc">' + planCell(fk, f, editable) + '</td>' +
       '<td class="cc"><span class="mono">' + caps.length + '</span></td>' +
-      '<td class="cc">' + pick("head", f.head, fk) + '</td>' +
-      '<td class="cc">' + pick("custodian", f.custodian, fk) + '</td>' +
-      '<td class="cc">' + (editable
+      '<td class="cc">' + pick("head", f.head, fk, editable) + '</td>' +
+      '<td class="cc">' + pick("custodian", f.custodian, fk, editable) + '</td>' +
+      '<td class="cc">' + (mayEdit
         ? '<div class="rowacts">' +
+            (editable
+              ? '<button class="linkbu tk-save" data-rowsave="fns|' + fk + '">Save</button>' +
+                '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>'
+              : '<button class="ico tk-pen" data-rowedit="fns|' + fk + '" ' +
+                  'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>') +
             '<button class="linkbu" data-fnretire="' + fk + '">' +
               (f.active === false ? "Reinstate" : "Retire") + '</button>' +
             /* DELETE, AND THE REFUSAL IS THE FEATURE (§62).
@@ -3590,7 +3656,7 @@ function renderFunctions(){
          setup table is where you change a thing; it is not where the thing is
          explained, and three paragraphs of prose under every table is how a
          configuration screen stops being scannable. */
-      (editable ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>' : ''));
+      (mayEdit ? '<div class="addrow"><button class="editbtn" id="addfn">+ Add a supporting function</button></div>' : ''));
 }
 
 /* ── Setup · Capabilities ───────────────────────────────────────────
@@ -3598,17 +3664,22 @@ function renderFunctions(){
    belongs to exactly one function; the enhancement work inside them arrives by
    template, the way a unit's plan does. */
 function renderCaps(){
-  var editable = grant("c_caps") === "edit";
+  /* §85. This page had NO pen at all — it was editable for the SMO the whole
+     time, which is how §84.3's silent sort bug hid: every name cell was an
+     input. A row now opens deliberately, like the other six. */
+  var mayEdit = grant("c_caps") === "edit";
   var rows = GROUP.capabilities.map(function(c, i){
     var f = functionOf(c.fn);
-    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '">' +
+    var editable = mayEdit && rowEditIs("caps", String(i));
+    return '<tr data-tkrow="' + (c.fn ? "assigned" : "unassigned") + '"' +
+      (editable ? ' class="tk-open"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td>' +
       /* THE NAME IS TYPED HERE (§51.11, Islam). It was printed and nothing
          else, so a capability could be given an owner but never renamed —
          and a capability added from Temple arrived called "New capability"
          with no way on this page to say what it actually is. */
       '<td>' + (editable
-        ? '<input class="fld" value="' + esc(c.name) + '" data-capname="' + i +
+        ? '<input class="fld tk-firstfield" value="' + esc(c.name) + '" data-capname="' + i +
           '" aria-label="Name of capability ' + (i+1) + '">'
         : '<b>' + esc(c.name) + '</b>') + '</td>' +
       '<td>' + (editable
@@ -3630,8 +3701,9 @@ function renderCaps(){
          fix still opens. */
       '<td class="num">' + (c.keyObjectives || []).length + '</td>' +
       '<td class="num">' + (c.projects || []).length + '</td>' +
-      '<td class="cc">' + (editable
-        ? '<button class="rmbtn" data-caprm="' + i + '">Remove</button>' : '') + '</td></tr>';
+      rowActions("caps", String(i), editable,
+        mayEdit && !editable ? '<button class="rmbtn" data-caprm="' + i + '">Remove</button>' : '') +
+      '</tr>';
   }).join("");
 
   var orphan = GROUP.capabilities.filter(function(c){ return !c.fn; }).length;
@@ -3654,7 +3726,7 @@ function renderCaps(){
                  h("Key objectives", "cc") + h("Projects", "cc") + h("", "cc", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
-      (editable
+      (mayEdit
         ? '<div class="addrow"><button class="editbtn" id="addcap">+ Add a capability</button>' +
           '<span class="picsub" style="margin-left:10px">Name it, choose the function that ' +
           'carries it, then upload its projects on Import.</span></div>'
@@ -4368,6 +4440,29 @@ function tkBar(id, opts){
     '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
   '</div>';
 }
+/* ── THE ACTIONS CELL, FOR ANY TABLE (§85) ───────────────────────────
+   Open, it is Save and Cancel; closed, it is a pen and whatever else the row
+   can do. The register puts Edit in its ⋮ because it has five other acts to
+   put there; the other six have one or two, and a menu holding one item is a
+   door behind a door (§32). So the pen is inline on those and the outcome is
+   the same — Islam asked for "work on the row inline and then a small save
+   button", and the ⋮ was how he got there rather than the point.
+
+   `extra` is the row's own controls (Retire, Remove), drawn only while the row
+   is CLOSED: offering Remove beside an unsaved edit is three unrelated outcomes
+   in one 83px column, which is the argument the register's own cell makes. */
+function rowActions(table, key, ed, extra){
+  if (ed) {
+    return '<td class="cc tk-editcell">' +
+      '<button class="linkbu tk-save" data-rowsave="' + esc(table + "|" + key) + '">Save</button>' +
+      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+  }
+  return '<td class="cc">' +
+    '<button class="ico tk-pen" data-rowedit="' + esc(table + "|" + key) + '" ' +
+      'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>' +
+    (extra || '') + '</td>';
+}
+
 /* ── THE HEADER ROW, FOR ANY TABLE (§84) ──────────────────────────────
    Extracted from the register, where it was a local closure with "people"
    written into it three times. Six more tables need exactly this and none of

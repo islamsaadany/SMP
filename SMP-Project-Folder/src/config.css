@@ -1206,3 +1206,18 @@
               border:1px solid var(--bad); font-size:10.5px; font-weight:700;
               letter-spacing:.02em; white-space:nowrap; cursor:help;
               vertical-align:1px; }
+
+  /* ── THE INLINE PEN AND THE OPEN ROW (§85) ─────────────────────────
+     The pen sits in the actions cell rather than appearing on hover: §70's
+     lesson is that a control at `opacity:0` until hover is a control a touch
+     screen never reveals, and this is the one way into editing a row. */
+  .tk-pen { width:26px; height:24px; padding:0; }
+  .tk-editcell { white-space:nowrap; }
+  .tk-editcell .linkbu { padding:2px 6px; }
+  .tk-save { font-weight:700; color:var(--good-tx); }
+  .tk-cancel { color:var(--ink-3); }
+  /* THE OPEN ROW IS LIT, so the two Save buttons on screen — one in the row,
+     one nowhere — cannot be confused, and so an edit left open while somebody
+     scrolls is visible when they come back. */
+  tbody tr.tk-open > td { background:var(--over-bg); }
+  tbody tr.tk-open > td:first-child { box-shadow:inset 3px 0 0 var(--gold); }

@@ -10291,3 +10291,76 @@ with Save and Cancel in the actions cell. That is the reversal Islam asked for
 in §79.2 and it is the piece with no precedent anywhere in the platform.
 
 `src/checks/table-standard-all.py`, 44 assertions across the seven.
+
+---
+
+## 85 · A row is edited on the row, on all seven (v3.24)
+
+Spec 012 phase 2 — Islam's reversal from §79.2, now on every table with an
+individual row flow. A pen opens **one** row; its fields become editable in
+place; **Save** and **Cancel** sit in the actions cell; Cancel restores from a
+copy taken when the row opened; and leaving the page cancels, because an edit
+you cannot see is not an edit you agreed to.
+
+**85.1 The pen is inline where there is no ⋮.** The register puts *Edit this
+row* in its menu because it has five other acts to put there. The other six have
+one or two, and **a menu holding one item is a door behind a door** (§32) — so
+the pen sits in the actions cell and the outcome is identical. Islam asked for
+*"work on the row inline and then a small save button"*; the ⋮ was how he got
+there rather than the point.
+
+Retire, Restore, Remove and Delete keep their own controls and are drawn only
+while the row is **closed**: offering Remove beside an unsaved edit is three
+unrelated outcomes in one 83px column, which is the argument the register's own
+cell already makes.
+
+**`ROWEDIT` carries its table now.** It was a bare row key, which is right while
+one table has the feature and wrong the moment a second does — Business units
+and Functions both have a row keyed `it`, so opening one would have opened the
+other. And `ROWFIND` is one registry saying how to find a row per table, rather
+than six copies of that question spread through the shell.
+
+**85.2 A CLOSURE DEFINED BESIDE A LOOP AND CALLED INSIDE IT — three times in one
+change.** Moving editability from the page into the row leaves anything that
+*captured* the page-level flag reading a variable that no longer exists at its
+scope:
+
+- Functions' `pick()` — **the whole page rendered as nothing**, "editable is not
+  defined".
+- The Official BU list's `target()` — the same, one page later.
+- Both pages' **Add row and empty state**, which are the page's question and not
+  a row's: written against `editable` they vanished the moment no row was open.
+
+The units page needed none of it, purely because its picker happens to be
+defined *inside* the map. **That is the shape to look for whenever a page-wide
+flag becomes a per-row one**, and after the second instance it was found by
+looking rather than by running into it.
+
+**85.3 A ROW THAT LOSES ITS IDENTITY WHEN YOU EDIT IT CANNOT BE EDITED.** The BU
+list keys a row by its **name** — which is right everywhere else and fatal here,
+because renaming is the first thing the pen is for: type one character and the
+open row stopped matching itself and closed mid-edit. Keyed by index instead.
+Capabilities has the same shape (no id of its own) and was written that way from
+the start.
+
+**85.4 Two of the check's assertions were about the check, not the product.**
+*"Every row offers a pen"* was written as **more than one**, which fails on the
+one-row Figure sets table for having exactly the right number — it is `pens ==
+rows` now. And the probe assumed a second row existed to open. Both are
+Constitution XVI: assert the contract, and the contract is one pen per row.
+
+`src/checks/row-edit.py`, 14 assertions × six tables, plus the register's own 28.
+
+---
+
+## 86 · Mockup-first is reinstated (2026-08-24)
+
+Islam restored the rule §1c retired on 2026-08-20: **no visual or structural
+change without a static HTML mockup signed off first.** Recorded in `CLAUDE.md`
+as a REVERSAL rather than a swap, per Principle II — the note it replaces is
+still readable, and the intervening versions matter: §80–§85's table standard,
+the wrapping work and the duplicate marks were all built under the weaker
+"describe it in words" rule. That is the gap the reinstatement closes.
+
+`design-mockups/` is produced again from today. From here, a visual change is
+drawn, sent, approved, and only then built.

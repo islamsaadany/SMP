@@ -652,17 +652,51 @@ function personActive(p){ return SMPRules.personActive(p); }
    The copy is shallow-plus-arrays: a person's `roles` is the only nested thing
    the register writes, and a deep clone of the whole graph per row-open would
    be paid on every press for a case that never needs it. */
+/* ── AND THE KEY CARRIES ITS TABLE (§85) ──────────────────────────────
+   `ROWEDIT` was a bare row key, which is exactly right while one table has the
+   feature and wrong the moment a second does: Business units and Functions both
+   have a row keyed `it`, so opening one would have opened the other's too.
+   It is `table:key` now.
+
+   `ROWFIND` is how Cancel gets back to the LIVE object. The caller used to pass
+   it — `personBy(ROWEDIT)` — which works for one table and becomes six copies
+   of "how do I find a row" spread across the shell. One registry, and each
+   table says once how to find its own. */
 var ROWEDIT = null;
 var ROWWAS = null;
-function rowEditOpen(key, obj){
-  ROWEDIT = key;
+var ROWFIND = {
+  people:    function(k){ return personBy(k); },
+  units:     function(k){ return UNITS[k]; },
+  companies: function(k){ return COMPANIES[k]; },
+  fns:       function(k){ return FUNCTIONS[k]; },
+  caps:      function(k){ return GROUP.capabilities[parseInt(k, 10)]; },
+  sets:      function(k){ return setsList().filter(function(s){ return s.id === k; })[0]; },
+  /* BY INDEX, NOT BY NAME. A BU row's handle everywhere else is its name — and
+     renaming is the first thing the pen is for, so the moment somebody typed a
+     character the open row stopped matching itself and closed mid-edit. A row
+     that loses its own identity when you edit it cannot be edited (§85.3). */
+  mainbu:    function(k){ return mainbus()[parseInt(k, 10)]; }
+};
+function rowEditIs(table, key){ return ROWEDIT === table + ":" + key; }
+function rowEditTable(){ return ROWEDIT ? ROWEDIT.split(":")[0] : null; }
+function rowEditKey(){ return ROWEDIT ? ROWEDIT.slice(ROWEDIT.indexOf(":") + 1) : null; }
+function rowEditLive(){
+  var t = rowEditTable();
+  return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
+}
+function rowEditOpen(table, key, obj){
+  ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
    menu — and swapping the object would leave those pointing at the edited one
    while the register showed the restored one. */
+/* THE LIVE OBJECT IS LOOKED UP HERE, not handed in (§48.2): the render that
+   drew the Cancel button may be several repaints old, and a row found again is
+   a row that still exists. */
 function rowEditCancel(obj){
+  if (obj === undefined) obj = rowEditLive();
   if (obj && ROWWAS) {
     Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
     Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });

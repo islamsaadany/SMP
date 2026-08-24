@@ -1045,3 +1045,13 @@
   .tk-editcell { white-space:nowrap; }
   .tk-editcell .tk-save { font-weight:700; color:var(--good-tx); }
   .tk-editcell .tk-cancel { color:var(--ink-3); }
+
+  /* A duplicate NAMES the other rows on its hover rather than being a dot to
+     hunt for (§81.2). Inline after the name, so the eye finds it on the row it
+     belongs to — the register is eleven columns and a mark in any other one is
+     a mark behind a horizontal scroll. */
+  .dupemark { display:inline-block; margin-left:7px; padding:1px 7px;
+              border-radius:999px; background:var(--bad-bg); color:var(--bad-tx);
+              border:1px solid var(--bad); font-size:10.5px; font-weight:700;
+              letter-spacing:.02em; white-space:nowrap; cursor:help;
+              vertical-align:1px; }

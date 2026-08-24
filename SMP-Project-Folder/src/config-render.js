@@ -887,6 +887,23 @@ function setPeopleCol(k, on){
 }
 function showCol(k){ return peopleCols()[k] !== false; }
 
+/* The mark itself, and it NAMES THE OTHER ROWS rather than saying "duplicate".
+   "Emp ID 10154 is on two rows" is a fact somebody can act on; a red dot is a
+   thing to hunt for — §62's rule about a refusal naming what is in the way,
+   applied to a warning. */
+function dupeMark(dupes){
+  if (!dupes || !dupes.length) return "";
+  var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
+  var why = dupes.map(function(d){
+    var others = d.rows.map(function(x){ return x.name; }).join(", ");
+    return WORD[d.kind] + " " + d.value + " is on " +
+           plural(d.rows.length, "row") + ": " + others;
+  }).join(" \u00b7 ");
+  return '<span class="dupemark" title="' + esc(why) + '">' +
+    dupes.map(function(d){ return esc(WORD[d.kind]); }).join(" + ") +
+    ' twice</span>';
+}
+
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
@@ -1254,6 +1271,20 @@ function renderPeople(){
      The key is gone from under the name. It is the username, it is generated
      from the name, and it was costing 31 rows a line each to say what the
      sign-in page already knows. It is still on the row's hover. */
+  /* ── COMPUTED BEFORE THE ROWS THAT READ IT (§81.2) ─────────────────
+     It sat with the other counts two hundred lines below the row map, and
+     `var` hoists the declaration without the value — so every row read
+     `undefined` and the first person with no employee number and no address
+     threw, because the first two tests short-circuited past it and the third
+     did not. A "one fact, three surfaces" helper has to be computed before the
+     first surface, not beside the last. */
+  var DUPES = registerDupes();
+  var DNAMES = displayNames();
+  var dupRows = PEOPLE.filter(function(p){
+    return personActive(p) && personDupe(p, DUPES).length; }).length;
+  var dupId = Object.keys(DUPES.empId).length;
+  var dupName = Object.keys(DUPES.name).length;
+
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
@@ -1263,9 +1294,11 @@ function renderPeople(){
        the Status column can be turned off under Columns. A filter that searched
        the visible text would answer differently depending on which columns
        somebody had hidden. */
+    var dupes = personDupe(p, DUPES);
     var flags = (personActive(p) ? "active" : "retired") +
       (live && PWSTATES && PWSTATES[p.key] === "none" ? " nopw" : "") +
-      (String(p.email == null ? "" : p.email).trim() ? "" : " noemail");
+      (String(p.email == null ? "" : p.email).trim() ? "" : " noemail") +
+      (dupes.length ? " dupe" : "");
     return '<tr data-tkrow="' + esc(flags) + '" class="' +
              (personActive(p) ? '' : 'retired ') + (ed ? 'tk-open' : '') + '">' +
       '<td class="idx">' + (i + 1) + '</td>' +
@@ -1291,7 +1324,8 @@ function renderPeople(){
          names a person. */
       '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
+        : '<b>' + esc((DNAMES[p.key] || {}).label || shortName(p.name)) + '</b>' +
+          dupeMark(dupes)) + '</td>' +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -1587,6 +1621,14 @@ function renderPeople(){
           'this register. Somebody with none can still sign in with the name in the ' +
           'Sign-in name column — turn it on under Columns.">' + noEmail +
           ' with no email</span>'] : []).concat(
+        dupId ? ['<span class="pill bad" title="' + esc(Object.keys(DUPES.empId).map(function(k){
+            return k + ": " + DUPES.empId[k].map(function(x){ return x.name; }).join(", ");
+          }).join(" \u00b7 ")) + '">' + plural(dupId, "employee number") +
+          ' on more than one row</span>'] : []).concat(
+        dupName ? ['<span class="pill bad" title="' + esc(Object.keys(DUPES.name).map(function(k){
+            return DUPES.name[k].map(function(x){ return x.name + " (" + (x.empId || x.key) + ")"; }).join(" / ");
+          }).join(" \u00b7 ")) + '">' + plural(dupName, "name") +
+          ' on more than one row</span>'] : []).concat(
         dupAddr.length ? ['<span class="pill bad" title="' + esc(dupAddr.map(function(a){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
@@ -1613,7 +1655,9 @@ function renderPeople(){
                 { k:"nopw",    label:"No password",
                   title:"People who have never had one issued" },
                 { k:"noemail", label:"No email",
-                  title:"They cannot sign in with an address until one is here" }] }) +
+                  title:"They cannot sign in with an address until one is here" }]
+        .concat(dupRows ? [{ k:"dupe", label:"Duplicates (" + dupRows + ")",
+          title:"Rows sharing an employee number, an address or a full name" }] : []) }) +
 
     section("", "",
       "",

@@ -618,6 +618,102 @@ function shortName(name){
   return parts.slice(0, SHORT_NAME_WORDS).join(" ");
 }
 
+/* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
+   Three names is the column's budget (§69.21) and it is right for 31 of 33
+   rows — but Raya's register carries *Ahmed Mostafa Mohamed El Gebely* and
+   *Ahmed Mostafa Mohamed Abou El Einen*, and at three names those are the same
+   row twice.
+
+   FIXING IT BEATS FLAGGING IT. A warning would say "these two are
+   indistinguishable" and leave them indistinguishable; adding the fourth name
+   makes them distinguishable, and only for the pair that needs it. Everybody
+   else keeps three.
+
+   Computed over the WHOLE register including retired rows: a retired person is
+   still on screen when the Retired filter is on, and a display that changes
+   depending on a filter is worse than a long one. */
+function displayNames(){
+  var seen = {}, out = {};
+  PEOPLE.forEach(function(p){
+    var parts = String(p.name == null ? "" : p.name).trim().split(/\s+/).filter(Boolean);
+    var n = SHORT_NAME_WORDS;
+    var label = parts.slice(0, n).join(" ");
+    (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
+    out[p.key] = { parts: parts, at: n, label: label };
+  });
+  Object.keys(seen).forEach(function(k){
+    if (seen[k].length < 2) return;
+    /* Lengthen every member of the clash together, one name at a time, until
+       they differ — or until there is nothing left to add, which is the real
+       case of two people with the same full name and needs the flag instead. */
+    var keys = seen[k], n = SHORT_NAME_WORDS, same = true;
+    while (same && n < 8) {
+      n++;
+      var got = {};
+      same = false;
+      keys.forEach(function(key){
+        var o = out[key], lab = o.parts.slice(0, n).join(" ").toLowerCase();
+        if (got[lab]) same = true;
+        got[lab] = 1;
+      });
+    }
+    keys.forEach(function(key){
+      out[key].at = n;
+      out[key].label = out[key].parts.slice(0, n).join(" ");
+    });
+  });
+  return out;
+}
+
+/* ── WHAT IS DUPLICATED, AND WHERE (§81.2) ────────────────────────────
+   Islam: "in case of duplication in the registry flag it in the app."
+
+   TWO KINDS, and only one of them is a data fault:
+
+     an EMP ID on two rows  — the people workbook matches on it (§54), so an
+       upload would amend one of them and nobody could say which. This is
+       broken and it is broken now.
+     an ADDRESS on two rows — the door refuses BOTH of them (§69.23), so two
+       people who cannot sign in and a message that reaches one inbox twice.
+
+   A repeated NAME is neither: two people really can be called the same thing,
+   and `displayNames()` above tells them apart rather than complaining. Only a
+   name that cannot be told apart even at eight words is reported.
+
+   RETIRED ROWS ARE EXCLUDED. They cannot sign in and no upload places them, so
+   counting them would report a problem nobody has. */
+function registerDupes(){
+  var byId = {}, byAddr = {}, byName = {};
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var id = String(p.empId == null ? "" : p.empId).trim();
+    if (id) (byId[id] = byId[id] || []).push(p);
+    var a = String(p.email == null ? "" : p.email).trim().toLowerCase();
+    if (a) (byAddr[a] = byAddr[a] || []).push(p);
+    var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
+    if (n) (byName[n] = byName[n] || []).push(p);
+  });
+  function only(m){
+    var out = {};
+    Object.keys(m).forEach(function(k){ if (m[k].length > 1) out[k] = m[k]; });
+    return out;
+  }
+  return { empId: only(byId), email: only(byAddr), name: only(byName) };
+}
+/* Is THIS row part of one, and what should the mark say. One function, so the
+   row's mark, the header's count and the filter cannot disagree about who is
+   affected (§33's shape: one fact, three surfaces). */
+function personDupe(p, d){
+  var out = [];
+  var id = String(p.empId == null ? "" : p.empId).trim();
+  var a = String(p.email == null ? "" : p.email).trim().toLowerCase();
+  var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
+  if (id && d.empId[id]) out.push({ kind:"empId", value:id, rows:d.empId[id] });
+  if (a && d.email[a]) out.push({ kind:"email", value:a, rows:d.email[a] });
+  if (n && d.name[n]) out.push({ kind:"name", value:p.name, rows:d.name[n] });
+  return out;
+}
+
 function personBy(key){
   return PEOPLE.filter(function(x){ return x.key === key; })[0] || null;
 }

@@ -2299,6 +2299,16 @@
   .tk-editcell .tk-save { font-weight:700; color:var(--good-tx); }
   .tk-editcell .tk-cancel { color:var(--ink-3); }
 
+  /* A duplicate NAMES the other rows on its hover rather than being a dot to
+     hunt for (§81.2). Inline after the name, so the eye finds it on the row it
+     belongs to — the register is eleven columns and a mark in any other one is
+     a mark behind a horizontal scroll. */
+  .dupemark { display:inline-block; margin-left:7px; padding:1px 7px;
+              border-radius:999px; background:var(--bad-bg); color:var(--bad-tx);
+              border:1px solid var(--bad); font-size:10.5px; font-weight:700;
+              letter-spacing:.02em; white-space:nowrap; cursor:help;
+              vertical-align:1px; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -6672,6 +6682,102 @@ var SHORT_NAME_WORDS = 3;
 function shortName(name){
   var parts = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
   return parts.slice(0, SHORT_NAME_WORDS).join(" ");
+}
+
+/* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
+   Three names is the column's budget (§69.21) and it is right for 31 of 33
+   rows — but Raya's register carries *Ahmed Mostafa Mohamed El Gebely* and
+   *Ahmed Mostafa Mohamed Abou El Einen*, and at three names those are the same
+   row twice.
+
+   FIXING IT BEATS FLAGGING IT. A warning would say "these two are
+   indistinguishable" and leave them indistinguishable; adding the fourth name
+   makes them distinguishable, and only for the pair that needs it. Everybody
+   else keeps three.
+
+   Computed over the WHOLE register including retired rows: a retired person is
+   still on screen when the Retired filter is on, and a display that changes
+   depending on a filter is worse than a long one. */
+function displayNames(){
+  var seen = {}, out = {};
+  PEOPLE.forEach(function(p){
+    var parts = String(p.name == null ? "" : p.name).trim().split(/\s+/).filter(Boolean);
+    var n = SHORT_NAME_WORDS;
+    var label = parts.slice(0, n).join(" ");
+    (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
+    out[p.key] = { parts: parts, at: n, label: label };
+  });
+  Object.keys(seen).forEach(function(k){
+    if (seen[k].length < 2) return;
+    /* Lengthen every member of the clash together, one name at a time, until
+       they differ — or until there is nothing left to add, which is the real
+       case of two people with the same full name and needs the flag instead. */
+    var keys = seen[k], n = SHORT_NAME_WORDS, same = true;
+    while (same && n < 8) {
+      n++;
+      var got = {};
+      same = false;
+      keys.forEach(function(key){
+        var o = out[key], lab = o.parts.slice(0, n).join(" ").toLowerCase();
+        if (got[lab]) same = true;
+        got[lab] = 1;
+      });
+    }
+    keys.forEach(function(key){
+      out[key].at = n;
+      out[key].label = out[key].parts.slice(0, n).join(" ");
+    });
+  });
+  return out;
+}
+
+/* ── WHAT IS DUPLICATED, AND WHERE (§81.2) ────────────────────────────
+   Islam: "in case of duplication in the registry flag it in the app."
+
+   TWO KINDS, and only one of them is a data fault:
+
+     an EMP ID on two rows  — the people workbook matches on it (§54), so an
+       upload would amend one of them and nobody could say which. This is
+       broken and it is broken now.
+     an ADDRESS on two rows — the door refuses BOTH of them (§69.23), so two
+       people who cannot sign in and a message that reaches one inbox twice.
+
+   A repeated NAME is neither: two people really can be called the same thing,
+   and `displayNames()` above tells them apart rather than complaining. Only a
+   name that cannot be told apart even at eight words is reported.
+
+   RETIRED ROWS ARE EXCLUDED. They cannot sign in and no upload places them, so
+   counting them would report a problem nobody has. */
+function registerDupes(){
+  var byId = {}, byAddr = {}, byName = {};
+  PEOPLE.forEach(function(p){
+    if (!personActive(p)) return;
+    var id = String(p.empId == null ? "" : p.empId).trim();
+    if (id) (byId[id] = byId[id] || []).push(p);
+    var a = String(p.email == null ? "" : p.email).trim().toLowerCase();
+    if (a) (byAddr[a] = byAddr[a] || []).push(p);
+    var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
+    if (n) (byName[n] = byName[n] || []).push(p);
+  });
+  function only(m){
+    var out = {};
+    Object.keys(m).forEach(function(k){ if (m[k].length > 1) out[k] = m[k]; });
+    return out;
+  }
+  return { empId: only(byId), email: only(byAddr), name: only(byName) };
+}
+/* Is THIS row part of one, and what should the mark say. One function, so the
+   row's mark, the header's count and the filter cannot disagree about who is
+   affected (§33's shape: one fact, three surfaces). */
+function personDupe(p, d){
+  var out = [];
+  var id = String(p.empId == null ? "" : p.empId).trim();
+  var a = String(p.email == null ? "" : p.email).trim().toLowerCase();
+  var n = String(p.name == null ? "" : p.name).trim().toLowerCase().replace(/\s+/g, " ");
+  if (id && d.empId[id]) out.push({ kind:"empId", value:id, rows:d.empId[id] });
+  if (a && d.email[a]) out.push({ kind:"email", value:a, rows:d.email[a] });
+  if (n && d.name[n]) out.push({ kind:"name", value:p.name, rows:d.name[n] });
+  return out;
 }
 
 function personBy(key){
@@ -17439,6 +17545,23 @@ function setPeopleCol(k, on){
 }
 function showCol(k){ return peopleCols()[k] !== false; }
 
+/* The mark itself, and it NAMES THE OTHER ROWS rather than saying "duplicate".
+   "Emp ID 10154 is on two rows" is a fact somebody can act on; a red dot is a
+   thing to hunt for — §62's rule about a refusal naming what is in the way,
+   applied to a warning. */
+function dupeMark(dupes){
+  if (!dupes || !dupes.length) return "";
+  var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
+  var why = dupes.map(function(d){
+    var others = d.rows.map(function(x){ return x.name; }).join(", ");
+    return WORD[d.kind] + " " + d.value + " is on " +
+           plural(d.rows.length, "row") + ": " + others;
+  }).join(" \u00b7 ");
+  return '<span class="dupemark" title="' + esc(why) + '">' +
+    dupes.map(function(d){ return esc(WORD[d.kind]); }).join(" + ") +
+    ' twice</span>';
+}
+
 function renderPeople(){
   var mayEdit = grant("c_people") === "edit";
   /* ── A ROW IS EDITED ON THE ROW (§79.2, spec 012 §2.1) ─────────────
@@ -17806,6 +17929,20 @@ function renderPeople(){
      The key is gone from under the name. It is the username, it is generated
      from the name, and it was costing 31 rows a line each to say what the
      sign-in page already knows. It is still on the row's hover. */
+  /* ── COMPUTED BEFORE THE ROWS THAT READ IT (§81.2) ─────────────────
+     It sat with the other counts two hundred lines below the row map, and
+     `var` hoists the declaration without the value — so every row read
+     `undefined` and the first person with no employee number and no address
+     threw, because the first two tests short-circuited past it and the third
+     did not. A "one fact, three surfaces" helper has to be computed before the
+     first surface, not beside the last. */
+  var DUPES = registerDupes();
+  var DNAMES = displayNames();
+  var dupRows = PEOPLE.filter(function(p){
+    return personActive(p) && personDupe(p, DUPES).length; }).length;
+  var dupId = Object.keys(DUPES.empId).length;
+  var dupName = Object.keys(DUPES.name).length;
+
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
@@ -17815,9 +17952,11 @@ function renderPeople(){
        the Status column can be turned off under Columns. A filter that searched
        the visible text would answer differently depending on which columns
        somebody had hidden. */
+    var dupes = personDupe(p, DUPES);
     var flags = (personActive(p) ? "active" : "retired") +
       (live && PWSTATES && PWSTATES[p.key] === "none" ? " nopw" : "") +
-      (String(p.email == null ? "" : p.email).trim() ? "" : " noemail");
+      (String(p.email == null ? "" : p.email).trim() ? "" : " noemail") +
+      (dupes.length ? " dupe" : "");
     return '<tr data-tkrow="' + esc(flags) + '" class="' +
              (personActive(p) ? '' : 'retired ') + (ed ? 'tk-open' : '') + '">' +
       '<td class="idx">' + (i + 1) + '</td>' +
@@ -17843,7 +17982,8 @@ function renderPeople(){
          names a person. */
       '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc(shortName(p.name)) + '</b>') + '</td>' +
+        : '<b>' + esc((DNAMES[p.key] || {}).label || shortName(p.name)) + '</b>' +
+          dupeMark(dupes)) + '</td>' +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -18139,6 +18279,14 @@ function renderPeople(){
           'this register. Somebody with none can still sign in with the name in the ' +
           'Sign-in name column — turn it on under Columns.">' + noEmail +
           ' with no email</span>'] : []).concat(
+        dupId ? ['<span class="pill bad" title="' + esc(Object.keys(DUPES.empId).map(function(k){
+            return k + ": " + DUPES.empId[k].map(function(x){ return x.name; }).join(", ");
+          }).join(" \u00b7 ")) + '">' + plural(dupId, "employee number") +
+          ' on more than one row</span>'] : []).concat(
+        dupName ? ['<span class="pill bad" title="' + esc(Object.keys(DUPES.name).map(function(k){
+            return DUPES.name[k].map(function(x){ return x.name + " (" + (x.empId || x.key) + ")"; }).join(" / ");
+          }).join(" \u00b7 ")) + '">' + plural(dupName, "name") +
+          ' on more than one row</span>'] : []).concat(
         dupAddr.length ? ['<span class="pill bad" title="' + esc(dupAddr.map(function(a){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
@@ -18165,7 +18313,9 @@ function renderPeople(){
                 { k:"nopw",    label:"No password",
                   title:"People who have never had one issued" },
                 { k:"noemail", label:"No email",
-                  title:"They cannot sign in with an address until one is here" }] }) +
+                  title:"They cannot sign in with an address until one is here" }]
+        .concat(dupRows ? [{ k:"dupe", label:"Duplicates (" + dupRows + ")",
+          title:"Rows sharing an employee number, an address or a full name" }] : []) }) +
 
     section("", "",
       "",

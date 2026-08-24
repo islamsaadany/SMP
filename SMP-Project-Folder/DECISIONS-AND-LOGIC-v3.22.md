@@ -10024,3 +10024,69 @@ search and sort added to it here). Contrast sweep and `qa.py` at baseline.
 **Still to build in spec 012:** the columns chooser moving into `tablekit`, and
 phases 4–5 — the other six row-flow tables, and the freeze alone on Roles &
 access.
+
+---
+
+## 81 · Duplicates, flagged where they are (v3.24)
+
+Islam: *"in case of duplication in the registry flag it in the app."* Said after
+I had reported the 73-row file's duplicates in chat — which answers the question
+once, for one file, to one person.
+
+**81.1 FIXING IT BEATS FLAGGING IT, where the thing is fixable.** The register
+shows three names (§69.21) and Raya's file carries *Ahmed Mostafa Mohamed El
+Gebely* and *Ahmed Mostafa Mohamed Abou El Einen* — at three names, the same row
+twice. A warning would say "these two are indistinguishable" and leave them
+indistinguishable.
+
+`displayNames()` shows **the shortest prefix that tells them apart**: three
+names for the 31 rows that do not clash, four for the two that do. It lengthens
+every member of a clash **together**, or the pair would still read as one long
+name and one short one and look like an error rather than a distinction. And it
+is computed over the whole register **including retired rows**, because a
+retired person is on screen when that filter is on and a name that changes
+length with a filter is worse than a long one.
+
+Two people with the genuinely identical full name cannot be separated at any
+length. That case falls through to the flag, which is correct — it is the one
+case where "these are indistinguishable" is the whole truth.
+
+**81.2 Two kinds of duplicate matter, and a repeated name is not one of them.**
+
+- **An Emp ID on two rows** is broken now: the people workbook matches on it
+  (§54), so an upload amends one of them and nothing can say which.
+- **An address on two rows** turns BOTH people away at the door (§69.23), and
+  sends one inbox the same message twice (§74.2).
+- A repeated **name** is neither — two people really can be called the same
+  thing — so only a name that survives §81.1 unseparated is reported.
+
+**Retired rows are excluded.** They cannot sign in and no upload places them, so
+counting them would report a problem nobody has.
+
+**The mark is ON THE ROW and it NAMES THE OTHER ROWS.** A count in a header is a
+number you then have to go and find, in a register of 33 rows and eleven
+columns — §62's rule that a refusal names what is in the way, applied to a
+warning. It sits **inline after the name**, because the first column is frozen
+and a mark in any other one is a mark behind a horizontal scroll (§69.20's
+lesson). The header keeps its counts, and the new **Duplicates** quick filter
+takes you straight to them — which is what the table standard's filter row is
+for (§80).
+
+`registerDupes()` and `personDupe()` are **one pair answering for three
+surfaces** — the row's mark, the header's counts and the filter — so they cannot
+disagree about who is affected (§33's shape).
+
+**81.3 `var` HOISTS THE DECLARATION AND NOT THE VALUE.** The computation was
+written with the other counts, two hundred lines **below** the row map that
+reads it. Every row therefore read `undefined` — and it did not throw until the
+first person with **no employee number and no address**, because the first two
+tests short-circuited past `d` and the third did not. A helper that answers for
+three surfaces has to be computed before the first of them, not beside the last.
+
+Found in seconds by the check, because the check injects all three kinds of
+duplicate rather than trusting a register that has none. **A clean register
+proves nothing about a flag for duplicates** — the first two assertions are that
+a clean one shows no marks and offers no filter, and everything after that runs
+against injected ones.
+
+`src/checks/duplicates.py`, 15 assertions.

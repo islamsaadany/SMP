@@ -429,12 +429,6 @@
     if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
       rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
     }
-    /* AND THE MERGE COMPARISON GOES WITH IT (§82.4). It names two people and
-       carries an answer per field; coming back to the register an hour later
-       and finding it half-answered is the same fault §63 fixed for reporting —
-       a mode left standing after you navigated away from it. Nothing is lost:
-       it writes nothing until Merge is pressed. */
-    if (typeof mergeReset === "function") mergeReset();
     /* The sentence under Send a test goes with the page (§72.6). Cleared HERE
        rather than read-and-cleared by the renderer: a render function with a
        side effect is the shape `branding()` had when it was inventing fields
@@ -2387,68 +2381,21 @@
       rx.readAsArrayBuffer(file);
     });
 
-    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§82.5) ────────────
-       The answer is written onto the plan row and the row is re-read against
-       the person it now means — through peopleRowChoose(), never by setting
-       `choice` here, or the differences on screen would still be the ones
-       computed against the other reading. */
-    document.querySelectorAll("[data-cfchoice]").forEach(function(r){
-      r.addEventListener("change", function(){
-        var p = r.dataset.cfchoice.split("|");     /* index|mode|key */
-        var row = PPLF.plan && PPLF.plan.rows[Number(p[0])];
-        if (!row) return;
-        peopleRowChoose(row, p[1] === "match" ? { mode:"match", key:p[2] } : { mode:p[1] });
-        paint();
-      });
-    });
-    /* WHICH OF THE FILE'S VALUES TO TAKE (§82.6). Ticking repaints, because
-       the tally above the table counts what is ticked — a review whose summary
-       disagreed with its own list would be worse than no summary. Typing is
-       what must never repaint (§35); this is not typing. */
-    document.querySelectorAll("[data-pplpick]").forEach(function(c){
-      c.addEventListener("change", function(){
-        var p = c.dataset.pplpick.split("|");      /* index|field */
-        var row = PPLF.plan && PPLF.plan.rows[Number(p[0])];
-        if (!row) return;
-        row.picks.forEach(function(f){ if (f.k === p[1]) f.take = c.checked; });
-        paint();
-      });
-    });
-    function pplPickAll(on){
-      if (!PPLF.plan) return;
-      PPLF.plan.rows.forEach(function(row){
-        row.picks.forEach(function(f){ f.take = on; });
-      });
-      paint();
-    }
-    document.querySelectorAll("[data-pplpickall]").forEach(function(b){
-      b.addEventListener("click", function(){ pplPickAll(true); });
-    });
-    document.querySelectorAll("[data-pplpicknone]").forEach(function(b){
-      b.addEventListener("click", function(){ pplPickAll(false); });
-    });
-
     document.querySelectorAll("[data-pplapply]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_people") !== "edit") return;
         var plan = PPLF.plan;
         if (!plan || plan.problems.length) return;
-        /* THE BLOCK IS RE-ASKED HERE and never trusted from the render that
-           drew the button (§48.2, §62): a repaint can happen in between, and
-           an apply authorised by a stale screen is the one that writes an
-           answer nobody gave. */
-        var tally = peopleFileTally(plan);
-        if (tally.undecided) return;
         applyPeopleFile(plan);
         /* The receipt is written from what the plan SAID, before the state
            moved under it — counted after the fact it would be counting the
            register rather than the file. */
         var parts = [];
-        if (tally.added)    parts.push(plural(tally.added, "person").replace("persons", "people") + " added");
-        if (tally.updated)  parts.push(tally.updated + " updated");
-        if (tally.roles)    parts.push(plural(tally.roles, "role") + " given");
-        if (tally.retired)  parts.push(tally.retired + " retired");
-        if (tally.restored) parts.push(tally.restored + " restored");
+        if (plan.added)    parts.push(plural(plan.added, "person").replace("persons", "people") + " added");
+        if (plan.updated)  parts.push(plan.updated + " updated");
+        if (plan.roles)    parts.push(plural(plan.roles, "role") + " given");
+        if (plan.retired)  parts.push(plan.retired + " retired");
+        if (plan.restored) parts.push(plan.restored + " restored");
         if (plan.newBus.length) parts.push(plural(plan.newBus.length, "BU name") + " added to the BU list");
         PPLF.done = parts.length ? parts.join(", ") + "." : "Nothing to change \u2014 the file matched the register.";
         PPLF.plan = null; PPLF.read = "";
@@ -2732,59 +2679,22 @@
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
-    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§82.3, §35).
-       Each keystroke writes its own field of NEWPERSON and nothing else — the
-       stop line under the row is drawn from `hit`, which is only set when Add
-       is pressed. Checking on every keystroke would repaint the row being
-       typed into, which is the fault §35 and §71.2 both record. */
-    ["Name|name", "Id|empId", "Email|email"].forEach(function(pair){
-      var bits = pair.split("|");
-      var inp = document.getElementById("newPerson" + bits[0]);
-      if (!inp) return;
-      inp.addEventListener("input", function(){ NEWPERSON[bits[1]] = inp.value; });
-      inp.addEventListener("keydown", function(e){
-        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(false); }
+    var newName = document.getElementById("newPersonName");
+    if (newName) {
+      newName.addEventListener("input", function(){ NEWPERSON = newName.value; });
+      newName.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(); }
       });
-    });
-    /* `anyway` is the second press, and it is the ONLY thing that gets past an
-       identifier already on the register — pressing Add again must not, or the
-       stop would be a message that goes away by itself. */
-    function addTypedPerson(anyway){
-      var name = String(NEWPERSON.name || "").trim();
+    }
+    function addTypedPerson(){
+      var name = (NEWPERSON || "").trim();
       if (!name) return;
-      var o = { name:name, empId:String(NEWPERSON.empId || "").trim(),
-                email:String(NEWPERSON.email || "").trim() };
-      var chk = personAddCheck(o);
-      if (chk.stop && !anyway) {
-        NEWPERSON.hit = chk.person.key; NEWPERSON.hitBy = chk.by; NEWPERSON.warn = null;
-        paint();
-        return;
-      }
-      addPerson(o);
-      newPersonReset();
-      /* A resemblance is reported AFTER the add, never instead of it: it is
-         not a reason to refuse, and two people with similar names is a normal
-         register (§82.2). It is cleared by the next add or the next paint of
-         somebody else's doing. */
-      if (!chk.stop && chk.by === "name") NEWPERSON.warn = chk.person.key;
+      addPerson({ name: name });
+      NEWPERSON = "";
       paint();
     }
     document.querySelectorAll("[data-padd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        addTypedPerson(b.dataset.padd === "anyway");
-      });
-    });
-    /* Open somebody's row from a line that names them — the stop under the add
-       row, and the merge marks. It opens the ROW rather than only scrolling to
-       it, because the reason to go and look is almost always to correct it. */
-    document.querySelectorAll("[data-pgo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var key = b.dataset.pgo;
-        rowEditOpen(key, personBy(key));
-        PMENU = null; paint();
-        var f = document.querySelector('[data-pname="' + key + '"]');
-        if (f) { f.scrollIntoView({ block:"center" }); f.focus(); f.select(); }
-      });
+      b.addEventListener("click", addTypedPerson);
     });
 
     /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
@@ -3055,69 +2965,6 @@
         paint();
       });
     });
-    /* ── MERGING TWO ROWS (§82.4) ───────────────────────────────────
-       Opening it from the row records WHICH row, and clears everything the
-       last merge left behind — a picks map carried over from a different pair
-       would silently apply one person's answer to another's fields. */
-    document.querySelectorAll("[data-pmerge]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        mergeReset();
-        PMERGE.a = b.dataset.pmerge;
-        PMENU = null;
-        paint();
-        var sec = document.querySelector(".mgbox");
-        if (sec) sec.scrollIntoView({ block:"center" });
-      });
-    });
-    function mergePickOther(key){
-      PMERGE.b = key || null;
-      /* The survivor and the field answers belong to the PAIR, so choosing a
-         different second row starts both again rather than carrying an answer
-         across to fields it was never about. */
-      PMERGE.keep = key ? mergeDefaultKeep(PMERGE.a, key) : null;
-      PMERGE.picks = {}; PMERGE.err = null;
-      paint();
-    }
-    document.querySelectorAll("[data-pmerge-b]").forEach(function(b){
-      b.addEventListener("click", function(){ mergePickOther(b.dataset.pmergeB); });
-    });
-    document.querySelectorAll("[data-pmerge-sel]").forEach(function(sel){
-      sel.addEventListener("change", function(){ mergePickOther(sel.value); });
-    });
-    document.querySelectorAll("[data-pmerge-keep]").forEach(function(r){
-      r.addEventListener("change", function(){
-        PMERGE.keep = r.dataset.pmergeKeep;
-        /* Swapping which row survives turns every field answer round — "keep
-           mine" now means the other value — so the answers are dropped rather
-           than silently reinterpreted. */
-        PMERGE.picks = {}; PMERGE.err = null;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-pmerge-pick]").forEach(function(r){
-      r.addEventListener("change", function(){
-        var p = r.dataset.pmergePick.split("|");
-        PMERGE.picks[p[0]] = p[1] === "take";
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-pmerge-go]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.pmergeGo.split("|");
-        var keepName = (personBy(p[0]) || {}).name || p[0];
-        var dropName = (personBy(p[1]) || {}).name || p[1];
-        var r = mergePeople(p[0], p[1], PMERGE.picks);
-        if (!r.ok) { PMERGE.err = r.why; paint(); return; }
-        mergeReset();
-        PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
-        paint();   /* which is where a change becomes a save */
-      });
-    });
-    document.querySelectorAll("[data-pmerge-close]").forEach(function(b){
-      b.addEventListener("click", function(){ mergeReset(); paint(); });
-    });
-
     /* The row's action menu (§46.4). Opening one closes any other, because
        PMENU is a single key rather than a flag per row. */
     document.querySelectorAll("[data-pmenu]").forEach(function(b){
@@ -3534,29 +3381,8 @@
       b.addEventListener("click", function(){
         var name = (PICKQ || "").trim();
         if (!name) return;
-        var idf = document.getElementById("pickNewId");
-        var mlf = document.getElementById("pickNewEmail");
-        var o = { name:name, empId:(idf ? idf.value : "").trim(),
-                  email:(mlf ? mlf.value : "").trim() };
-        /* REFUSED, IN THE PICKER, NAMING WHO (§82.3). An employee number or an
-           address already on the register means the person is already on the
-           register, and the thing to do is give them the role — which is the
-           control directly above this one. The refusal stays in the popover
-           rather than repainting the page away from it. */
-        var chk = personAddCheck(o);
-        if (chk.stop) {
-          var er = document.querySelector(".pickerr");
-          if (er) {
-            er.hidden = false;
-            er.textContent = chk.person.name + " is already on the register with that " +
-              (chk.by === "empId" ? "employee number" : "address") +
-              " \u2014 search for them above and give them the role.";
-          }
-          return;
-        }
         var p = b.dataset.pickNew.split("|");
-        o.where = p[0]; o.role = p[1];
-        addPerson(o);
+        addPerson({ name: name, role: p[1], where: p[0] });
         PICKING = null; PICKQ = ""; paint();
       });
     });
@@ -3595,28 +3421,10 @@
       var needle = PICKQ.trim().toLowerCase();
       var any = false;
       document.querySelectorAll(".pickrow").forEach(function(r){
-        var hit = !needle || r.dataset.find.indexOf(needle) > -1;
+        var hit = !needle || r.dataset.name.indexOf(needle) > -1;
         r.hidden = !hit;
         if (hit) any = true;
       });
-      /* ── THE SPELLING IS WHY THE TWINS EXIST (§82.3) ───────────────
-         A plain substring search finds nobody the moment the name is typed a
-         little differently from the way HR spelled it — and what the picker
-         then offers is "+ Add", which is exactly how three people ended up on
-         this register twice. So when nothing matched, ask the looser question
-         before offering to create anybody: the same one the register's marks
-         use, the chain of names in order rather than a similarity score.
-
-         SHOWN, NOT SUBSTITUTED. Add stays available underneath — two people
-         really can have names that read alike, and the picker must not be the
-         thing that decides they are one person. */
-      var near = false;
-      if (needle && !any) {
-        document.querySelectorAll(".pickrow").forEach(function(r){
-          if (!namesLookLikeOne(needle, r.dataset.name)) return;
-          r.hidden = false; near = true;
-        });
-      }
       /* A heading with nothing under it is a heading that lies about what the
          list contains. */
       document.querySelectorAll(".pickhead").forEach(function(h){
@@ -3628,22 +3436,12 @@
         h.hidden = !shown;
       });
       var empty = document.querySelector(".pickempty");
-      if (empty) {
-        empty.hidden = any || near;
-      }
-      var did = document.querySelector(".pickdym");
-      if (did) did.hidden = !near;
+      if (empty) empty.hidden = any;
       var add = document.querySelector("[data-pick-new]");
       if (add) {
         add.hidden = !needle;
         add.textContent = '+ Add \u201c' + PICKQ.trim() + '\u201d';
       }
-      /* The two identifier fields appear with the Add button and go with it:
-         they belong to adding somebody, not to searching for them. */
-      var mk = document.querySelector(".picknew");
-      if (mk) mk.hidden = !needle;
-      var er = document.querySelector(".pickerr");
-      if (er) { er.hidden = true; er.textContent = ""; }
       var hint = document.querySelector(".pickhint");
       if (hint) hint.hidden = !!needle;
     });

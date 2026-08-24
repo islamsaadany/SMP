@@ -58,11 +58,22 @@ with sync_playwright() as p:
       """() => { const el=document.querySelector('[data-pat]'); if(!el) return;
                  el.value='mobile'; el.dispatchEvent(new Event('change',{bubbles:true})); }""")
 
+    # THE VALUE HAS TO BE DISPATCHED, NOT ASSIGNED. Setting `.value` fires no
+    # event, and what the Add row reads is `input` — so this measured a paint
+    # that added nobody, and printed "33 -> 33" while reporting no jump. A
+    # print is not an assertion; the count is asserted now (§50.6).
     n0 = pg.evaluate("PEOPLE.length")
     trial("adding a person", None,
       """() => { const i=document.getElementById('newPersonName');
-                 i.value='Test Person Added'; document.querySelector('[data-padd]').click(); }""")
-    print("          rows", n0, "->", pg.evaluate("PEOPLE.length"))
+                 i.value='Test Person Added';
+                 i.dispatchEvent(new Event('input',{bubbles:true}));
+                 document.querySelector('[data-padd="1"]').click(); }""")
+    n1 = pg.evaluate("PEOPLE.length")
+    if n1 != n0 + 1:
+        bad += 1
+        print("  NOBODY   ...and nobody was actually added (%d -> %d)" % (n0, n1))
+    else:
+        print("  ok      ...and somebody was actually added (%d -> %d)" % (n0, n1))
 
     trial("searching", None,
       """() => { const i=document.querySelector('[data-tksearch]');

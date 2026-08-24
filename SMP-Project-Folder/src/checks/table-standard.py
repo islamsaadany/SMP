@@ -19,8 +19,15 @@ with sync_playwright() as p:
     print("── the bar")
     ck("no whole-table pen any more", pg.evaluate("!document.querySelector('[data-edit=\"people\"]')"))
     ck("a search box", pg.evaluate("!!document.querySelector('[data-tksearch]')"))
-    ck("four quick filters", pg.eval_on_selector_all('[data-tkfilter]',"e=>e.length")==4,
-       pg.eval_on_selector_all('[data-tkfilter]',"e=>e.length"))
+    # THE FOUR THAT ARE ALWAYS THERE, BY NAME. Asserted as a count first, which
+    # broke the day a fifth was added for a real reason (§82.3's "no ID or
+    # email") — a check keyed on a magic number reports a deliberate change as
+    # a fault, and the fix people reach for is to bump the number. The
+    # conditional filters come and go with what the register holds, so what is
+    # asserted is that the standard four are present.
+    keys = pg.eval_on_selector_all('[data-tkfilter]', "e=>e.map(x=>x.dataset.tkfilter)")
+    want = ["people|active", "people|retired", "people|nopw", "people|noemail"]
+    ck("the four standard quick filters", all(k in keys for k in want), keys)
     ck("Add is reachable without opening anything",
        pg.evaluate("!!document.querySelector('[data-padd]')"))
 

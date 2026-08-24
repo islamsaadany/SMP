@@ -10090,3 +10090,176 @@ a clean one shows no marks and offers no filter, and everything after that runs
 against injected ones.
 
 `src/checks/duplicates.py`, 15 assertions.
+
+---
+
+## 82 · Who a row is, and two rows that are one person (v3.24)
+
+Islam, sending a screenshot of the message composer: *"in the send message
+functionality I got 3 people skipped but they have an email in the registry."*
+
+They did. **The three people were on the register twice.** Once from the
+employee file, with an address and a long legal name; once typed into the role
+picker, with a shorter spelling of the same name and nothing else. The role sat
+on the typed row, so a message aimed at that role resolved to the copy with no
+address and reported it as *"no address on the register"* — a true sentence
+about a row nobody was looking at.
+
+Nothing in `lib/audience.js` was wrong. **The register let one human become two
+rows, and then had no way to say so.**
+
+### 82.1 A name is never an identifier
+
+Islam: *"the name is not the challenge, the identifier really would be the ID
+and the email."* That is the whole of it, and the register already proved it
+twice over: it holds *Ahmed Mostafa Mohamed El Gebely* and *Ahmed Mostafa
+Mohamed Abou El Einen* (§81.1), and it held the same person under two spellings
+of their own name.
+
+**The ladder is Emp ID, then email, and there is no third rung.** The employee
+number survives a marriage, a transfer and a new mail domain (§54.2); the
+address survives a tenant that never had employee numbers. Anything below those
+two is a *resemblance* — something to show the SMO, never something to act on.
+
+`personByIdentity()` in `config-data.js` is the one place that answers it, and
+it returns **which rung answered**, because every caller has to say so: a review
+line reading "matched" tells nobody whether the number or the address decided.
+
+**An address on two rows answers nothing.** `personByEmail()` returns a person
+only where the address means ONE person — §57's rule about a Main BU that holds
+several, arriving in a second place, and the same rule the door already keeps
+(§69.23). Read past it and you attach somebody to a coincidence.
+
+### 82.2 The fourth kind of duplicate, and it is the one that bit
+
+§81's three all match on a value two rows **share**. The pair that sent a
+message to nobody shared nothing at all, so nothing was flagged.
+
+`likelyDupes()` is a **resemblance**, said as one — amber where the other three
+are red, because they are always a fault and this one may well be two people.
+Two rules keep it quiet enough to read:
+
+- **One side must be unidentified.** Two rows that both carry an employee number
+  are two employees, whatever they are called. What is suspicious is a row with
+  *nothing* to identify it that looks like somebody already here.
+- **The shorter name must run through the longer one, in order, for at least two
+  names.** Arabic names are a chain and the chain's order is part of it:
+  *Mirna Gamal Sadek* inside *Mirna Gamal Sadek Soliman* is one person written
+  short; *Mohamed Ali* inside *Ahmed Mohamed Ali* is not. **Not a similarity
+  score** — a score needs a threshold, and a threshold is a number nobody can
+  defend the day it puts two strangers together.
+
+### 82.3 Both hand-typed doors ask for an identifier now
+
+The register's Add row and the role picker's *add new* both took a name and
+nothing else. **That is where the twins were made.**
+
+Both now carry an Emp ID and an Email field, and **the stop is on the
+identifier, never on the name**: a number or an address already on the register
+refuses, names who it already is, and offers their row. A matching *name* is a
+remark that stops nothing — two people really can share one, and refusing would
+refuse a real colleague.
+
+**Neither identifier is required** (Islam: yes, and mark the row). The SMO often
+knows a name and a role and nothing else, and a door that demanded an employee
+number would mean a unit could not be given its head until HR replied. The row
+is added and **marked** — an unidentified row is exactly the shape the next
+upload cannot match, and the register says so on the row rather than the fact
+surfacing months later in a message that reached nobody.
+
+**And the picker suggests before it offers to create.** A plain substring search
+finds nobody the moment a name is typed a little differently from the way HR
+spelled it, and what the picker then offered was *"+ Add"*. When nothing matches
+exactly it now asks the looser question first and shows those rows under *"is it
+one of these?"* — shown, never substituted, with Add still underneath. The
+search also reads the employee number and the address, because a register of
+five hundred people is not a list you scroll.
+
+### 82.4 Two rows, one person — the merge
+
+Retiring is for somebody who **left**; deleting is for a row that should never
+have existed (§69). This is the third case and it is neither: two rows that were
+both real entries about the same human, one holding the address and the other
+holding the role. Retiring either loses something; deleting either is refused,
+because a row holding a role is a row something points at.
+
+**The survivor is chosen, never derived.** "Keep the older one" and "keep the one
+with the address" are both defensible and both wrong sometimes, and the cost of
+guessing is a sign-in name changing under somebody who is using it — the key is
+minted from the name (§35) and `credentials` is keyed on it, so **the row that
+survives is the password that survives**. The panel asks, defaulting to the row
+that *can* be matched by a later upload, and names what each row would cost.
+
+**What moves is every pointer `personDeleteBlockers()` refuses a delete for** —
+and that is not a coincidence, it is the same list read the other way round. A
+merge is a delete that first hands each pointer to somebody, which is why the
+last thing `mergePeople()` does is call `deletePerson()`: **if anything was
+missed the delete refuses and the merge fails loudly** rather than dropping a
+role.
+
+**Values are not pointers and are asked about separately.** A blank on the
+survivor is filled from the other row without asking; where both say something
+and they differ, the SMO picks.
+
+**A section under the table, not a panel in the row.** Retire and Delete ask one
+question and fit in the 83px actions column (§69.20); this one has to show two
+whole people side by side, and "which of these two do we keep" is unreadable in
+a 240px popover.
+
+### 82.5 The upload matches on the ladder, and sets aside what it cannot place
+
+The reader matched on **Emp ID only**, and a row with none was skipped. It now
+matches on Emp ID, then email — so a tenant that has never had employee numbers
+can be maintained by file at all, which it could not before.
+
+**Two conflicts, and neither is guessed:**
+
+- an employee number and an address that point at **two different people**
+- an address already here arriving under a number the register has **never seen**
+
+Applying either reading silently is the fault: matching on the number would
+quietly move somebody else's address, matching on the address would quietly
+renumber somebody. So the row is set aside, both readings are named **with the
+people they mean**, and **nothing in the file can be applied until every one has
+been answered** — the same shape §22 gave a plan import, with the answer moved
+from "refuse the file" to "ask about the row".
+
+An address on two register rows is a **problem**, not a question: the fix is on
+the register and there is now a control for it, so the reader says *merge those
+rows first* rather than picking one and leaving the pair standing.
+
+### 82.6 A difference is an offer, never an instruction
+
+Asked who wins where the file and the register disagree, Islam said the
+register. That is the right way round and it is not the obvious one: **the file
+looks newer because it was just uploaded, and it very often is not** — it is the
+export somebody downloaded three weeks ago, edited two cells of, and sent back.
+What is on the register is what people have been correcting by hand ever since.
+
+So every field the file would change is listed, recorded value beside proposed
+one, and **nothing moves until it is ticked**. *Take everything from the file* is
+one press above the list, because a real HR export legitimately changes thirty
+job titles and a safe default costing thirty clicks is a default people work
+around by not reading the list at all.
+
+A blank cell is still *"nothing to say"* and never appears here — that rule did
+not change (§54).
+
+**The fixed point had to be re-measured for this.** With the ticks off a plan
+changes nothing whatever the file says, so a fixed-point check on the defaults
+would be measuring the defaults — §51.11's check that passes because it asks
+nothing. `qa.py` turns every pick **on** and then asserts the register
+downloaded and uploaded back proposes nothing, which is the stronger claim; and
+it asserts the other half too, that the same edited cell **unticked** offers one
+change and makes none.
+
+### 82.7 What this does not do
+
+**Nothing merges itself.** Every join in this section is a person answering a
+question the platform could not: which of two readings a file row meant, which
+of two rows survives, which of two values is right. The platform's job is to
+notice, to name both sides, and to refuse to guess — the same division §44 drew
+for a claimed figure and §62 for a deleted function.
+
+`src/checks/identity-merge.py`, driven through the screen, and the §82 block in
+`qa.py`, driven through the rules.

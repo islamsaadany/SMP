@@ -615,9 +615,24 @@ with sync_playwright() as p:
       PEOPLE[1].mainbu = "Risk";
       PEOPLE[3].mainbu = "Distribution";
 
+      /* ── THE FIXED POINT IS MEASURED WITH EVERYTHING TAKEN (82.6) ──
+         Since a difference is an OFFER rather than an instruction, a plan
+         whose ticks are all off changes nothing whatever the file says — so a
+         fixed point measured on the defaults would be measuring the defaults
+         (51.11, the check that passes because it asks nothing). Every pick is
+         turned ON first, and the assertion is then the real one: the register
+         downloaded and uploaded back proposes nothing to change even when you
+         accept all of it. */
+      const takeAll = plan => {
+        plan.rows.forEach(r => (r.picks || []).forEach(f => { f.take = true; }));
+        return plan;
+      };
+      const movingRows = plan => plan.rows.filter(r =>
+        peopleRowEffective(r).mode === "add" || peopleRowChanges(r).length);
+
       return Promise.resolve(readXlsx(buildXlsx(peopleWorkbook()).buffer)).then(sh => {
         const rows = peopleFromWorkbook(asExcel(sh));
-        const fixed = planPeopleFile(rows);
+        const fixed = takeAll(planPeopleFile(rows));
 
         /* THE MAPPING ASSERTIONS BELOW NEED THE Unit COLUMN EMPTY (65).
            It exists to BEAT the Official BU mapping, and since the download
@@ -640,7 +655,9 @@ with sync_playwright() as p:
            Measuring the wrong thing passes (50.6). */
         const target = rows.filter(r => r["Emp ID"] === PEOPLE[2].empId)[0];
         target["Job title"] = "Something else entirely";
-        const moved = planPeopleFile(rows);
+        const untaken = planPeopleFile(rows);
+        const untakenRow = untaken.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
+        const moved = takeAll(planPeopleFile(rows));
         const movedRow = moved.rows.filter(r => r.id === PEOPLE[2].empId)[0] || null;
         target["Job title"] = "";
 
@@ -661,7 +678,7 @@ with sync_playwright() as p:
         const seededRow = seeded.rows.filter(r => r.id === "102347")[0] || null;
 
         return {
-          fixedMoving: fixed.rows.filter(r => r.action !== "same").length,
+          fixedMoving: movingRows(fixed).length,
           fixedProblems: fixed.problems.length,
           fixedSkipped: fixed.notices.length,
           rows: fixed.rows.length,
@@ -670,8 +687,13 @@ with sync_playwright() as p:
           unmappedAt: (mapped.rows.filter(r => r.key === PEOPLE[1].key)[0] || {}).where || null,
           severalAt: (mapped.rows.filter(r => r.key === PEOPLE[3].key)[0] || {}).where || null,
           severalChoices: (SMPRules && mainbuChoices("Distribution")) || [],
-          movedRows: moved.rows.filter(r => r.action !== "same").length,
-          movedWhat: movedRow ? movedRow.changes.join(",") : "(row missing)",
+          movedRows: movingRows(moved).length,
+          movedWhat: movedRow ? peopleRowChanges(movedRow).join(",") : "(row missing)",
+          /* THE DEFAULT IS THE REGISTER'S (82.6). The same file, the same
+             changed cell, nothing ticked: it must propose the change and
+             apply none of it. */
+          untakenOffers: untakenRow ? untakenRow.picks.length : -1,
+          untakenDoes: untakenRow ? peopleRowChanges(untakenRow).length : -1,
           seededAction: seededRow ? seededRow.action : "(row missing)",
           seededProblems: seeded.problems.length,
           seededNewBus: seeded.newBus.join(","),
@@ -745,6 +767,11 @@ with sync_playwright() as p:
     if pf["movedRows"] != 1 or pf["movedWhat"] != "job title":
         errs.append("PEOPLE FILE: one changed cell produced %d changed rows (%r)"
                     % (pf["movedRows"], pf["movedWhat"]))
+    # AND THE SAME CELL, UNTICKED, CHANGES NOTHING (82.6). Both halves, or the
+    # check proves only that the offer exists and never that it is an offer.
+    if pf["untakenOffers"] != 1 or pf["untakenDoes"] != 0:
+        errs.append("PEOPLE FILE: an unticked difference offered %d and did %d, wanted 1 and 0"
+                    % (pf["untakenOffers"], pf["untakenDoes"]))
     if pf["seededAction"] != "add" or pf["seededProblems"]:
         errs.append("PEOPLE FILE: a new employee in an unknown BU came back as %r (%d problems)"
                     % (pf["seededAction"], pf["seededProblems"]))
@@ -770,6 +797,169 @@ with sync_playwright() as p:
           "new joiner -> %s + BU %r"
           % (pf["rows"], "PASS" if not pf["fixedMoving"] else "FAIL",
              pf["movedRows"], pf["movedWhat"], pf["seededAction"], pf["seededNewBus"]))
+    # ── WHO A ROW IS, AND TWO ROWS THAT ARE ONE PERSON (82) ──────────
+    # The fault this is here for was found by USING the product: three people
+    # were on the register twice — once from the employee file with an address,
+    # once typed into the role picker with nothing — and a message aimed at a
+    # role reached the copy with no address and reported them as having none.
+    #
+    # Four things are asserted, and the first is the one the old code got
+    # wrong: A NAME IS NEVER AN IDENTIFIER, so nothing here matches on one.
+    ident = pg.evaluate("""() => {
+      const before = PEOPLE.length;
+      const anchor = PEOPLE[0];
+      anchor.empId = "IDENT-1"; anchor.email = "ident.one@example.com";
+      const other = PEOPLE[1];
+      other.empId = "IDENT-2"; other.email = "ident.two@example.com";
+
+      /* 1. THE LADDER. A row with no employee number and a known address is
+            that person, not a new one. */
+      const byMail = planPeopleFile([{ "Name":"Whoever", "Email":"IDENT.ONE@example.com" }]);
+      const byMailRow = byMail.rows[0] || null;
+
+      /* 2. THE CONFLICT. One row whose number says one person and whose
+            address says another cannot be applied by guessing, and must not be
+            appliable at all until it is answered. */
+      const clash = planPeopleFile([{ "Emp ID":"IDENT-1", "Name":"Whoever",
+                                      "Email":"ident.two@example.com" }]);
+      const clashRow = clash.rows[0] || null;
+      const beforeChoice = peopleFileTally(clash).undecided;
+      if (clashRow) peopleRowChoose(clashRow, { mode:"match", key:other.key });
+      const afterChoice = peopleFileTally(clash).undecided;
+
+      /* 3. A NEW NUMBER FOR AN ADDRESS ALREADY HERE is the other conflict, and
+            it must not silently renumber somebody. */
+      const renum = planPeopleFile([{ "Emp ID":"IDENT-NEW", "Name":"Whoever",
+                                      "Email":"ident.one@example.com" }]);
+      const renumRow = renum.rows[0] || null;
+
+      /* 4. AND ADDING SOMEBODY ALREADY HERE IS STOPPED ON THE IDENTIFIER,
+            never on the name. */
+      const stopId   = personAddCheck({ name:"Anybody", empId:"IDENT-1" });
+      const stopMail = personAddCheck({ name:"Anybody", email:"ident.one@example.com" });
+      const namesOnly = personAddCheck({ name:anchor.name });
+
+      return { before: before, after: PEOPLE.length,
+               byMailAction: byMailRow ? byMailRow.action : "(none)",
+               byMailKey: byMailRow ? byMailRow.key : null,
+               byMailBy: byMailRow ? byMailRow.matchedBy : null,
+               anchorKey: anchor.key, otherKey: other.key,
+               clashAction: clashRow ? clashRow.action : "(none)",
+               clashKind: clashRow && clashRow.conflict ? clashRow.conflict.kind : "(none)",
+               beforeChoice: beforeChoice, afterChoice: afterChoice,
+               chosen: clashRow ? peopleRowEffective(clashRow).key : null,
+               renumKind: renumRow && renumRow.conflict ? renumRow.conflict.kind : "(none)",
+               stopId: !!stopId.stop, stopMail: !!stopMail.stop,
+               nameStops: !!namesOnly.stop, nameWarns: namesOnly.by === "name" };
+    }""")
+    if ident["after"] != ident["before"]:
+        errs.append("IDENTITY: planning a file changed the register (%d -> %d)"
+                    % (ident["before"], ident["after"]))
+    if ident["byMailAction"] != "match" or ident["byMailKey"] != ident["anchorKey"]:
+        errs.append("IDENTITY: a row with only an address came back as %r on %r, wanted the "
+                    "person it belongs to" % (ident["byMailAction"], ident["byMailKey"]))
+    if ident["byMailBy"] != "email":
+        errs.append("IDENTITY: the review does not say the address is what matched (%r)"
+                    % ident["byMailBy"])
+    if ident["clashAction"] != "conflict" or ident["clashKind"] != "twoPeople":
+        errs.append("IDENTITY: a number and an address pointing at two people came back as %r/%r"
+                    % (ident["clashAction"], ident["clashKind"]))
+    if ident["beforeChoice"] != 1 or ident["afterChoice"] != 0:
+        errs.append("IDENTITY: an unanswered conflict left %d waiting and an answered one %d"
+                    % (ident["beforeChoice"], ident["afterChoice"]))
+    if ident["chosen"] != ident["otherKey"]:
+        errs.append("IDENTITY: answering a conflict did not point the row at who was chosen (%r)"
+                    % ident["chosen"])
+    if ident["renumKind"] != "newId":
+        errs.append("IDENTITY: a new number for an address already here came back as %r"
+                    % ident["renumKind"])
+    if not ident["stopId"] or not ident["stopMail"]:
+        errs.append("IDENTITY: adding somebody on an existing identifier was not stopped (%r/%r)"
+                    % (ident["stopId"], ident["stopMail"]))
+    # A NAME MUST NOT STOP ANYTHING. Two people can share one, and refusing on
+    # a name would refuse a real colleague — it is a remark, and the register
+    # is what decides. Asserted in BOTH directions, or a check that only proves
+    # the stop would pass a version that stopped everybody.
+    if ident["nameStops"] or not ident["nameWarns"]:
+        errs.append("IDENTITY: a matching NAME stopped an add (%r) / did not warn (%r)"
+                    % (ident["nameStops"], ident["nameWarns"]))
+
+    # ── MERGING TWO ROWS THAT ARE ONE PERSON (82.4) ──────────────────
+    # Built the way the real ones were built: the employee file's row carries
+    # the address, the typed row carries the ROLE and nothing else. Both are
+    # asserted — that the register FINDS the pair without being told, and that
+    # merging moves the role onto the row that can be emailed.
+    mg = pg.evaluate("""() => {
+      const unit = UNIT_KEYS[0];
+      const full = "Testcase Gamal Sadek Soliman";
+      const keepKey = addPerson({ name: full, empId:"MG-1",
+                                  email:"testcase.merge@example.com" });
+      /* The twin: the same person, typed shorter, given the unit's seat. */
+      const dropKey = addPerson({ name:"Testcase Gamal Sadek", where: unit, role:"owner" });
+
+      const found = registerDupes().likely.filter(l =>
+        (l.key === dropKey && l.other === keepKey) || (l.key === keepKey && l.other === dropKey));
+      const marked = personDupe(personBy(dropKey), registerDupes())
+        .filter(d => d.kind === "likely").length;
+      /* THE ROW WITH AN IDENTIFIER IS THE DEFAULT SURVIVOR, because the other
+         one is the shape that made the duplicate. */
+      const dflt = mergeDefaultKeep(dropKey, keepKey);
+      const plan = personMergePlan(keepKey, dropKey);
+      const rolesMoving = plan ? plan.roles.length : -1;
+
+      const before = PEOPLE.length;
+      const r = mergePeople(keepKey, dropKey, {});
+      /* READ BEFORE THE TIDY-UP. Written into the returned object instead, it
+         was evaluated after the two test rows had been removed again and
+         reported that merging took two rows away — the check measuring its own
+         cleanup (50.6, in miniature). */
+      const removed = before - PEOPLE.length;
+      const gone = !personBy(dropKey);
+      const keep = personBy(keepKey);
+      const held = keep ? personRoles(keep).map(x => x.role + "@" + x.at) : [];
+
+      /* And the audience is the whole reason this exists: the role now reaches
+         somebody with an address. */
+      const aud = SMPAudience.resolve(world(), PEOPLE,
+                                      { roles:["owner"], targets:[], keys:[], everyone:false });
+      const reached = aud.to.filter(x => x.key === keepKey).length;
+      const skipped = aud.skipped.filter(x => x.key === dropKey || x.key === keepKey).length;
+
+      /* Put the register back, so nothing after this measures a tenant with a
+         test person in it. */
+      if (keep) { revokePersonRole(keepKey, "owner", unit); deletePerson(keepKey); }
+      return { ok:!!r.ok, why:r.why || "", found:found.length, marked:marked, dflt:dflt,
+               keepKey:keepKey, dropKey:dropKey, rolesMoving:rolesMoving,
+               removed: removed, gone: gone,
+               held: held.join(","), email: keep ? keep.email : null,
+               name: keep ? keep.name : null, reached: reached, skipped: skipped };
+    }""")
+    if not mg["found"] or not mg["marked"]:
+        errs.append("MERGE: the register did not spot the pair by itself (%d found, %d marked)"
+                    % (mg["found"], mg["marked"]))
+    if mg["dflt"] != mg["keepKey"]:
+        errs.append("MERGE: the row with no identifier was offered as the survivor (%r)" % mg["dflt"])
+    if mg["rolesMoving"] != 1:
+        errs.append("MERGE: %d roles were listed as moving, wanted 1" % mg["rolesMoving"])
+    if not mg["ok"]:
+        errs.append("MERGE: refused (%s)" % mg["why"])
+    if mg["removed"] != 1 or not mg["gone"]:
+        errs.append("MERGE: %d rows went and the second row is %s"
+                    % (mg["removed"], "gone" if mg["gone"] else "still here"))
+    if "owner@" + "" not in mg["held"] and "owner" not in mg["held"]:
+        errs.append("MERGE: the role did not move across (%r)" % mg["held"])
+    if mg["email"] != "testcase.merge@example.com":
+        errs.append("MERGE: the surviving row lost its address (%r)" % mg["email"])
+    # THE FAULT ITSELF, MEASURED. Before the merge the role reached a row with
+    # no address; after it, the same role reaches somebody who can be emailed
+    # and nobody is skipped.
+    if mg["reached"] != 1 or mg["skipped"]:
+        errs.append("MERGE: after merging, the role reached %d with an address and skipped %d"
+                    % (mg["reached"], mg["skipped"]))
+    print("identity: address matches, %s conflict named, add stopped on the identifier; "
+          "merge: pair found, role moved, %d reached"
+          % (ident["clashKind"], mg["reached"]))
+
     # ── THE 1-YEAR TOGGLE ON A UNIT'S FOUNDATION (66) ────────────────
     # Islam: "for the key objectives for the business units make a toggle to
     # show and hide the 1 year view in the foundation page."

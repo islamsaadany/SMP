@@ -2309,6 +2309,108 @@
               letter-spacing:.02em; white-space:nowrap; cursor:help;
               vertical-align:1px; }
 
+  /* ══════════════════════════════════════════════════════════════
+     IDENTITY, CONFLICTS AND MERGING (§82)
+     ══════════════════════════════════════════════════════════════ */
+
+  /* A RESEMBLANCE WEARS A DIFFERENT COLOUR FROM A COLLISION (§82.2). The three
+     hard duplicates are always a fault and are red; this one is a pair the SMO
+     has to look at and may well keep as two people. Same shape, so it reads as
+     the same KIND of mark; the colour is the whole of the difference. */
+  .dupemark.soft { background:var(--warn-bg); color:var(--warn-tx); border-color:var(--warn); }
+
+  /* The add row: three fields on one line, the name given the room. */
+  .addppl { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .addppl input.fld { flex:1 1 180px; min-width:0; }
+  .addppl input#newPersonId { flex:0 0 110px; }
+  .addppl input#newPersonEmail { flex:1 1 220px; }
+  /* THE STOP AND THE WARNING ARE THE SAME SHAPE and differ only in colour: one
+     refuses until a second press, the other is a remark. A reader learns one
+     pattern and reads the colour for how much it matters (§38.4's rule about a
+     fill and a word, applied to two notices). */
+  .addstop, .addwarn { margin-top:7px; padding:7px 10px; border-radius:var(--r-sm);
+                       font-size:12px; line-height:1.5; }
+  .addstop { background:var(--bad-bg); color:var(--bad-tx); border:1px solid var(--bad); }
+  .addwarn { background:var(--warn-bg); color:var(--warn-tx); border:1px solid var(--warn); }
+  .addstop .linkbu, .addwarn .linkbu { color:inherit; text-decoration:underline; }
+
+  /* The picker's two identifier fields and its refusal (§82.3). */
+  .picknew { display:flex; gap:6px; margin-bottom:6px; }
+  .picknew input.fld { width:auto; flex:1 1 0; min-width:0; margin-bottom:0; }
+  .pickerr { font-size:11.5px; line-height:1.45; margin-bottom:6px; padding:6px 8px;
+             border-radius:var(--r-sm); background:var(--bad-bg); color:var(--bad-tx);
+             border:1px solid var(--bad); }
+  .pickdym { font-size:11px; font-weight:600; color:var(--warn-tx); padding:6px 4px 2px; }
+
+  /* ── The rows an upload could not place (§82.5) ──────────────────
+     Above the table of ordinary changes, because they are the only thing that
+     stops Apply and a reason sitting below thirty rows is a reason nobody
+     finds. */
+  .cfbox { border:1px solid var(--attn); background:var(--attn-bg); border-radius:var(--r-md);
+           padding:12px 14px; margin:12px 0; }
+  .cfbox > b { font-size:13.5px; color:var(--attn-tx); }
+  .cfbox .sub { margin:4px 0 10px; font-size:12px; color:var(--ink-2); line-height:1.5; }
+  .cfrow { border-top:1px solid var(--line); padding-top:10px; margin-top:10px; }
+  .cfrow:first-of-type { border-top:none; padding-top:0; margin-top:0; }
+  .cfwhat { font-size:13px; margin-bottom:7px; }
+  .cfwhat .why { display:block; font-size:11px; }
+  .cfopts { display:grid; gap:6px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); }
+  .cfopt { display:flex; gap:8px; align-items:flex-start; padding:8px 10px; cursor:pointer;
+           border:1px solid var(--line); border-radius:var(--r-sm); background:var(--surface);
+           font-size:12.5px; line-height:1.45; }
+  .cfopt:hover { border-color:var(--gold); }
+  .cfopt.on { border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold); }
+  .cfopt i { display:block; font-style:normal; font-size:11px; color:var(--ink-3); margin-top:2px; }
+  .cfopt .why { display:block; font-size:11px; }
+
+  /* ── One tick per difference (§82.6) ─────────────────────────────
+     Recorded on the left, the file's on the right, and an arrow between them
+     so which way it would go is not something to work out. */
+  .pk { margin-top:6px; display:grid; gap:3px; }
+  .pkrow { display:grid; grid-template-columns:auto 92px 1fr 14px 1fr; gap:6px;
+           align-items:center; font-size:11.5px; padding:3px 6px; border-radius:var(--r-sm);
+           cursor:pointer; }
+  .pkrow:hover { background:var(--surface-2); }
+  .pkrow.on { background:var(--attn-bg); }
+  .pkl { font-weight:600; color:var(--ink-2); }
+  .pkw { color:var(--ink-3); text-decoration:line-through; }
+  .pkrow:not(.on) .pkw { text-decoration:none; color:var(--ink); font-weight:600; }
+  .pka { color:var(--ink-3); text-align:center; }
+  .pkn { color:var(--ink); }
+  .pkrow.on .pkn { font-weight:600; }
+  .pkrow:not(.on) .pkn { color:var(--ink-3); }
+
+  /* ── Merging two rows (§82.4) ────────────────────────────────────
+     A section under the table rather than a panel in an 83px column: the
+     question is "which of these two people do we keep", and it cannot be asked
+     without both of them on screen. */
+  .mgbox { border:1px solid var(--gold); border-radius:var(--r-md); padding:14px 16px;
+           background:var(--surface); }
+  .mghead { font-size:13.5px; margin-bottom:10px; }
+  .mgpick { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .mgcands { display:flex; flex-wrap:wrap; gap:6px; }
+  .mgcands .editbtn i { font-style:normal; font-weight:500; opacity:.75; }
+  .mgpick select.fld { flex:1 1 240px; min-width:0; }
+  .mgcards { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+             margin:14px 0 10px; }
+  .mgcard { display:flex; gap:9px; align-items:flex-start; padding:11px 12px; cursor:pointer;
+            border:1px solid var(--line); border-radius:var(--r-md); background:var(--surface); }
+  .mgcard:hover { border-color:var(--gold); }
+  .mgcard.on { border-color:var(--gold); box-shadow:inset 0 0 0 1px var(--gold);
+               background:var(--surface-2); }
+  .mgb { min-width:0; flex:1; }
+  .mgb > b { display:block; font-size:13px; margin-bottom:5px; }
+  .mgf { display:flex; gap:8px; font-size:11.5px; line-height:1.6; }
+  .mgf > span:first-child { flex:0 0 84px; color:var(--ink-3); }
+  .mgf > span:last-child { min-width:0; overflow-wrap:anywhere; }
+  .mgmoves { margin:10px 0; font-size:12.5px; }
+  .mgmoves ul { margin:5px 0 0; padding-left:18px; }
+  .mgmoves li { line-height:1.6; }
+  .mgpicks { margin-top:12px; font-size:12.5px; }
+  .mgpicks .cfg { margin-top:6px; }
+  .mgopt { display:flex; gap:7px; align-items:flex-start; cursor:pointer; }
+  .mgopt span { overflow-wrap:anywhere; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -6211,7 +6313,16 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
-var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
+/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§82.3) ────
+   It was a name and nothing else. `NEWPERSON` is what has been typed into all
+   three, and `hit` is the register row the identifier landed on — the stop,
+   held here rather than recomputed on every paint, because the person
+   answering it may go and look at the row it names and come back. */
+var ADDROLE = null, ADDROLE_KIND = "owner";
+var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+function newPersonReset(){
+  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+}
 /* The same treatment for the BU list's add row, and for the same reason:
    held in a global rather than read off the input at submit time, because
    the repaint any other change causes would otherwise throw away what is
@@ -6764,7 +6875,82 @@ function registerDupes(){
     Object.keys(m).forEach(function(k){ if (m[k].length > 1) out[k] = m[k]; });
     return out;
   }
-  return { empId: only(byId), email: only(byAddr), name: only(byName) };
+  return { empId: only(byId), email: only(byAddr), name: only(byName),
+           likely: likelyDupes() };
+}
+
+/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§82.2) ───────────
+   The three above all match on a value the two rows SHARE. The pair that sent
+   a message to nobody shared nothing: one row came off the employee file with
+   an address and a long legal name, the other was typed into the role picker
+   with a shorter spelling of the same name and no identifier at all. Nothing
+   matched, so nothing was flagged, and the role sat on the row with no way to
+   reach anybody.
+
+   SO THIS ONE IS A RESEMBLANCE, AND IT IS SAID AS ONE. It never merges
+   anything and never blocks anything — it puts the pair in front of the SMO,
+   who is the only one who can know.
+
+   TWO RULES KEEP IT QUIET ENOUGH TO READ:
+
+     ONE SIDE MUST BE UNIDENTIFIED. Two rows that both carry an employee number
+       are two employees, whatever they are called — this tenant really does
+       hold two people whose first four names are identical (§81.1), and
+       pairing those every time the page paints would teach whoever reads it to
+       stop reading it. What is suspicious is a row with NOTHING to identify it
+       that looks like somebody already here.
+     THE SHORTER NAME MUST RUN THROUGH THE LONGER ONE, in order, for at least
+       two names. Arabic names are a chain and the chain's ORDER is part of it:
+       "Mirna Gamal Sadek" inside "Mirna Gamal Sadek Soliman" is the same
+       person written short; "Mohamed Ali" inside "Ahmed Mohamed Ali" is not.
+
+   Retired rows are excluded for the same reason the other three exclude them:
+   they cannot sign in, no upload places them, and a merge of one would be
+   tidying a row that is already out of the way. */
+function nameWords(v){
+  return String(v == null ? "" : v).trim().toLowerCase().split(/\s+/).filter(Boolean);
+}
+/* Is every word of `few`, in order, somewhere in `many`. Not a similarity
+   score: a score needs a threshold, and a threshold is a number nobody can
+   defend when it puts two strangers together. */
+function nameRunsThrough(few, many){
+  if (few.length < 2 || few.length > many.length) return false;
+  var i = 0;
+  for (var j = 0; j < many.length && i < few.length; j++) {
+    if (many[j] === few[i]) i++;
+  }
+  return i === few.length;
+}
+function namesLookLikeOne(a, b){
+  var x = nameWords(a), y = nameWords(b);
+  if (!x.length || !y.length) return false;
+  if (x[0] !== y[0]) return false;   /* the chain starts with the given name */
+  return x.length <= y.length ? nameRunsThrough(x, y) : nameRunsThrough(y, x);
+}
+function likelyDupes(){
+  /* The names are split ONCE. This is the only quadratic walk on the page and
+     the client's register is five hundred rows — splitting both sides inside
+     the comparison did it a quarter of a million times per paint. */
+  var live = [];
+  PEOPLE.forEach(function(p){
+    if (personActive(p))
+      live.push({ p:p, w:nameWords(p.name), id:personIdentified(p) });
+  });
+  var out = [];
+  live.forEach(function(a){
+    if (a.id) return;                         /* one side must be unidentified */
+    live.forEach(function(b){
+      if (b.p.key === a.p.key) return;
+      if (!a.w.length || !b.w.length || a.w[0] !== b.w[0]) return;
+      var few = a.w.length <= b.w.length ? a.w : b.w;
+      var many = few === a.w ? b.w : a.w;
+      if (!nameRunsThrough(few, many)) return;
+      /* Both unidentified: report the pair ONCE rather than from each end. */
+      if (!b.id && b.p.key < a.p.key) return;
+      out.push({ key:a.p.key, other:b.p.key });
+    });
+  });
+  return out;
 }
 /* Is THIS row part of one, and what should the mark say. One function, so the
    row's mark, the header's count and the filter cannot disagree about who is
@@ -6777,6 +6963,30 @@ function personDupe(p, d){
   if (id && d.empId[id]) out.push({ kind:"empId", value:id, rows:d.empId[id] });
   if (a && d.email[a]) out.push({ kind:"email", value:a, rows:d.email[a] });
   if (n && d.name[n]) out.push({ kind:"name", value:p.name, rows:d.name[n] });
+  var near = (d.likely || []).filter(function(l){
+    return l.key === p.key || l.other === p.key;
+  }).map(function(l){
+    return personBy(l.key === p.key ? l.other : l.key);
+  }).filter(Boolean);
+  if (near.length) out.push({ kind:"likely", value:p.name, rows:near });
+  return out;
+}
+/* Who this row could be merged with, most likely first. The merge control
+   reads it, so the mark and the offer name the same rows. */
+/* `dupes` is passed in wherever the caller already has it. The register draws
+   this for EVERY row, and registerDupes() walks the whole list — asked afresh
+   per row it is the register squared, which on 33 people is invisible and on
+   the 500-row client file is the page not painting. */
+function mergeCandidates(key, dupes){
+  var p = personBy(key);
+  if (!p) return [];
+  var d = dupes || registerDupes(), seen = {}, out = [];
+  personDupe(p, d).forEach(function(x){
+    x.rows.forEach(function(q){
+      if (!q || q.key === key || seen[q.key]) return;
+      seen[q.key] = 1; out.push({ person:q, why:x.kind });
+    });
+  });
   return out;
 }
 
@@ -6795,6 +7005,37 @@ function mintPersonKey(name){
   var n = 2;
   while (personBy(base + n)) n++;
   return base + n;
+}
+
+/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§82.3) ─────────
+   Both hand-typed doors — the Add row at the foot of the register and the role
+   picker's "add new" — took a NAME and nothing else, which is how the three
+   twins were made: somebody gave a role to a person who was already here,
+   spelled their name a little differently, and got a second row with no
+   address on it.
+
+   THE STOP IS ON THE IDENTIFIER, NEVER ON THE NAME. Two people really can
+   share a name, so refusing on one would refuse a real colleague; an employee
+   number or an address on two rows is always a fault. A resemblance in the
+   name is worth SAYING, so it is returned as a warning that does not stop
+   anything — the same split the register's marks keep (§82.2).
+
+   AND NEITHER IS REQUIRED. The SMO often knows a name and a role and nothing
+   else, and a door that demanded an employee number would mean a unit could
+   not be given its head until HR replied. The row is added and MARKED instead:
+   an unidentified row is exactly the shape the next upload cannot match, and
+   the register says so on the row rather than finding out months later. */
+function personAddCheck(o){
+  var id = personIdKey(o && o.empId), mail = personMailKey(o && o.email);
+  var byId = id ? personByEmpId(id) : null;
+  if (byId) return { stop:true, by:"empId", value:id, person:byId };
+  var hits = mail ? peopleByEmail(mail) : [];
+  if (hits.length) return { stop:true, by:"email", value:mail, person:hits[0] };
+  var like = PEOPLE.filter(function(p){
+    return personActive(p) && namesLookLikeOne(o && o.name, p.name);
+  });
+  if (like.length) return { stop:false, by:"name", person:like[0], others:like };
+  return { stop:false };
 }
 
 /* Create and return the key. `where` follows the same encoding personRoles()
@@ -6820,15 +7061,69 @@ function addPerson(o){
   return key;
 }
 
+/* ── WHO A ROW IS, ASKED IN ONE PLACE (§82.1) ──────────────────────
+   Islam: "the name is not the challenge, the identifier really would be the ID
+   and the email."
+
+   THE NAME IS NEVER AN IDENTIFIER, and the register proves why twice over: it
+   holds *Ahmed Mostafa Mohamed El Gebely* and *Ahmed Mostafa Mohamed Abou El
+   Einen* (§81.1), and it holds the same human under two spellings of their own
+   name — which is how three people ended up on it twice, each once from the
+   employee file with an address and once typed into the role picker with
+   nothing. A name tells a PERSON who they are looking at; it must never tell
+   the platform.
+
+   THE LADDER IS EMP ID, THEN EMAIL, AND THERE IS NO THIRD RUNG. The employee
+   number survives a marriage, a transfer and a new mail domain (§54.2); the
+   address survives a tenant that never had employee numbers. Anything below
+   those two is a RESEMBLANCE, and a resemblance is something to show the SMO,
+   never something to act on.
+
+   AN ADDRESS ON TWO ROWS ANSWERS NOTHING, exactly as it answers nothing at the
+   door (§69.23): `personByEmail` returns a person only where the address means
+   ONE person, and the caller is told it was ambiguous rather than handed the
+   first row. This is §57's rule about a Main BU that holds several, in a
+   second place — read past it and you attach somebody to a coincidence. */
+function personIdKey(v){ return String(v == null ? "" : v).trim(); }
+function personMailKey(v){ return String(v == null ? "" : v).trim().toLowerCase(); }
+
 /* The employee number, matched the way the file will spell it: trimmed, and
    compared as text because a leading zero is part of an employee number and
    102347 read as a number is not the same string as 0102347. */
 function personByEmpId(id){
-  var want = String(id == null ? "" : id).trim();
+  var want = personIdKey(id);
   if (!want) return null;
   return PEOPLE.filter(function(p){
-    return String(p.empId == null ? "" : p.empId).trim() === want;
+    return personIdKey(p.empId) === want;
   })[0] || null;
+}
+function peopleByEmail(email){
+  var want = personMailKey(email);
+  if (!want) return [];
+  return PEOPLE.filter(function(p){ return personMailKey(p.email) === want; });
+}
+function personByEmail(email){
+  var hits = peopleByEmail(email);
+  return hits.length === 1 ? hits[0] : null;
+}
+/* `by` is which rung answered, because every caller has to SAY so: a review
+   line reading "matched" tells nobody whether the employee number or the
+   address decided, and those are two different things to check. */
+function personByIdentity(id, email){
+  var byId = personByEmpId(id);
+  if (byId) return { person:byId, by:"empId" };
+  var hits = peopleByEmail(email);
+  if (hits.length === 1) return { person:hits[0], by:"email" };
+  if (hits.length > 1) return { person:null, by:"ambiguous", rows:hits };
+  return null;
+}
+/* A row with neither is not a fault — the SMO may know somebody's name and
+   nothing else, and refusing to add them would mean a role could not be given
+   until HR answered an email (§82.3). It is a row that cannot be matched by
+   anything, so it is MARKED, and marking it is what stops it quietly becoming
+   somebody's second row. */
+function personIdentified(p){
+  return !!(p && (personIdKey(p.empId) || personMailKey(p.email)));
 }
 
 /* ── One fact, two editing surfaces ─────────────────────────────────
@@ -7098,6 +7393,143 @@ function deletePerson(key){
   if (i < 0) return false;
   PEOPLE.splice(i, 1);
   return true;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   TWO ROWS, ONE PERSON (§82.4)
+
+   Retiring is for somebody who LEFT and deleting is for a row that should
+   never have existed (§69). This is the third case and it is neither: two rows
+   that were both real entries about the same human, one of which has the
+   address and the other of which has the role. Retiring either loses
+   something; deleting either is refused, because a row holding a role is a row
+   something points at.
+
+   THE SURVIVOR IS CHOSEN, NEVER DERIVED. "Keep the older one" or "keep the one
+   with the address" are both defensible and both wrong sometimes, and the cost
+   of guessing is a sign-in name changing under somebody who is using it — the
+   key is minted from the name (§35) and `credentials` is keyed on it, so the
+   row that survives is the password that survives. So the panel asks, and
+   names what each row would cost.
+
+   WHAT MOVES IS EVERY POINTER `personDeleteBlockers` REFUSES A DELETE FOR, and
+   that is not a coincidence — it is the same list read the other way round. A
+   merge is a delete that first hands each pointer to somebody, which is why
+   the last thing it does is call deletePerson(): if anything was missed the
+   delete refuses and the merge fails LOUDLY rather than dropping a role.
+
+   VALUES ARE NOT POINTERS AND ARE ASKED ABOUT SEPARATELY. A blank on the
+   survivor is filled from the other row without asking — there is nothing to
+   lose. Where both rows say something and they differ, the SMO picks, and the
+   default is the survivor's own, because that is the row they chose to keep
+   (§82.5's rule, in the other direction: what is already recorded wins unless
+   somebody says otherwise). */
+var MERGE_FIELDS = [
+  { k:"name",   label:"Name" },
+  { k:"empId",  label:"Emp ID" },
+  { k:"email",  label:"Email" },
+  { k:"title",  label:"Job title" },
+  { k:"phone",  label:"Mobile" },
+  { k:"mainbu", label:"Official BU" }
+];
+function mergeVal(p, k){ return String((p && p[k]) == null ? "" : p[k]).trim(); }
+
+/* What would happen, said before it happens. Changes nothing — the same
+   contract planPeopleFile() keeps, and for the same reason. */
+function personMergePlan(keepKey, dropKey){
+  var keep = personBy(keepKey), drop = personBy(dropKey);
+  if (!keep || !drop || keep.key === drop.key) return null;
+  var plan = { keep:keep, drop:drop, fills:[], picks:[], roles:[], owns:[], seat:null };
+
+  MERGE_FIELDS.forEach(function(f){
+    var a = mergeVal(keep, f.k), b = mergeVal(drop, f.k);
+    if (!b) return;
+    if (!a) { plan.fills.push({ k:f.k, label:f.label, value:b }); return; }
+    if (a.toLowerCase() !== b.toLowerCase())
+      plan.picks.push({ k:f.k, label:f.label, keep:a, drop:b, take:false });
+  });
+
+  /* GRANTED ROLES ONLY. Contributor and Employee are read off an attachment
+     and off being named (§55) — they are not held and there is nothing to
+     hand over; they arrive by themselves once the survivor sits where the
+     other row sat. */
+  personRoles(drop).forEach(function(r){
+    if (SMPRules.isOwnLinesRole(r.role)) return;
+    if (r.role === "super" || r.role === "gceo" || r.role === "cceo") {
+      plan.seat = { role:r.role, at:r.at };
+      return;
+    }
+    plan.roles.push({ role:r.role, at:r.at,
+                      already: roleHolderAt(r.role, r.at) === keep.key });
+  });
+
+  setsList().forEach(function(s){
+    if (s.owner === drop.key) plan.owns.push({ kind:"set", name:s.name });
+  });
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    reportItems(u).forEach(function(x){
+      if (x.obj && x.obj.src && x.obj.src.by === drop.key)
+        plan.owns.push({ kind:"figure", name:u.name + " \u00b7 " + x.obj.name });
+    });
+  });
+  claimsList().forEach(function(c){
+    if (c.by === drop.key && c.state === "open")
+      plan.owns.push({ kind:"claim", name:"an open request for a figure" });
+  });
+
+  /* Where the other row sat, offered only when the survivor sits nowhere —
+     moving somebody who already has a unit is a real act and a merge must not
+     do it as a side effect (§54.4's rule about the Role column, applied to
+     the attachment). */
+  var at = personAt(drop);
+  if (at && !personAt(keep)) plan.moveTo = at;
+  return plan;
+}
+
+/* `picks` is a map of field key to true, meaning "take the other row's". The
+   panel passes what was ticked; nothing is read back off the DOM here. */
+function mergePeople(keepKey, dropKey, picks){
+  var plan = personMergePlan(keepKey, dropKey);
+  if (!plan) return { ok:false, why:"There is nothing to merge." };
+  var keep = plan.keep, drop = plan.drop, took = picks || {};
+
+  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
+  plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
+
+  /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
+     afterwards. grantPersonRole() writes `p.unit` as part of seating somebody
+     (that is what "this is now their unit" means, §33) — which is right when a
+     picker does it and wrong here, where the survivor already sits somewhere
+     and the merge was not asked to move them. */
+  if (plan.moveTo) attachPersonAt(keep, plan.moveTo);
+  var sat = personAt(keep);
+
+  if (plan.seat && !keep.role) grantPersonRole(keep.key, plan.seat.role, plan.seat.at);
+  plan.roles.forEach(function(r){
+    revokePersonRole(drop.key, r.role, r.at);
+    grantPersonRole(keep.key, r.role, r.at);
+  });
+  if (sat && personAt(keep) !== sat) attachPersonAt(keep, sat);
+
+  setsList().forEach(function(s){ if (s.owner === drop.key) s.owner = keep.key; });
+  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
+    var u = unitLike(t);
+    if (!u) return;
+    reportItems(u).forEach(function(x){
+      if (x.obj && x.obj.src && x.obj.src.by === drop.key) x.obj.src.by = keep.key;
+    });
+  });
+  claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
+
+  /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
+     still pointing at the row, so the delete refuses and the merge reports it
+     rather than leaving a role attached to a person who no longer exists. */
+  var left = personDeleteBlockers(drop.key);
+  if (left.length) return { ok:false, why:left.map(function(b){ return b.full; }).join("; and ") };
+  if (!deletePerson(drop.key)) return { ok:false, why:"The second row could not be removed." };
+  return { ok:true, keep:keep.key, name:keep.name };
 }
 
 /* Where a role can be attached, for the second half of the picker. A role
@@ -7520,9 +7952,8 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
    before it lands, exactly as a plan's is, and a reader that mutated on the
    way past would make the review a report of what had already been done. */
 function planPeopleFile(rows){
-  var plan = { rows:[], problems:[], notices:[], newBus:[],
-               added:0, updated:0, retired:0, restored:0, roles:0 };
-  var seen = {};
+  var plan = { rows:[], problems:[], notices:[], newBus:[] };
+  var seenId = {}, seenMail = {};
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -7531,27 +7962,79 @@ function planPeopleFile(rows){
     var at = "Row " + (i + 2);
     var id     = fileTxt(r["Emp ID"]);
     var name   = fileTxt(r["Name"]);
+    var email  = fileTxt(r["Email"]);
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
-    var label  = name || id || "this row";
+    var label  = name || id || email || "this row";
 
-    if (!id) {
-      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number, so there is ' +
-        'nothing to match them on. Left exactly as they are.' });
+    /* ── THE LADDER, ROW BY ROW (§82.5) ────────────────────────────
+       Emp ID, then email, then nothing — personByIdentity()'s rule, asked
+       here so the review can SAY which rung answered. A row with neither is
+       still left alone: there is nothing to match it on and nothing to add it
+       under, and inventing a person from a name is exactly what put three
+       humans on this register twice. */
+    if (!id && !email) {
+      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number and no email, so ' +
+        'there is nothing to match them on. Left exactly as they are.' });
       return;
     }
-    if (seen[id]) {
+    if (id && seenId[id]) {
       plan.problems.push({ at:at, msg:'employee number ' + id + ' is used twice in this file — ' +
-        'also on ' + seen[id] + '. One row per person.' });
+        'also on ' + seenId[id] + '. One row per person.' });
       return;
     }
-    seen[id] = at;
+    if (email && seenMail[personMailKey(email)]) {
+      plan.problems.push({ at:at, msg:email + ' is used twice in this file — also on ' +
+        seenMail[personMailKey(email)] + '. One row per person.' });
+      return;
+    }
+    if (id) seenId[id] = at;
+    if (email) seenMail[personMailKey(email)] = at;
 
-    var existing = personByEmpId(id);
-    if (!existing && !name) {
-      plan.problems.push({ at:at, msg:'employee number ' + id + ' is not on the register and the ' +
-        'row has no name, so there is nobody to add.' });
+    /* AN ADDRESS ON TWO ROWS ANSWERS NOTHING, and the file cannot decide which
+       of them it meant. It is a problem rather than a question, because the
+       fix is on the register and there is now a control for it — the answer
+       is to merge those two rows, not to pick one here and leave the pair
+       standing (§82.4). */
+    var mailHits = peopleByEmail(email);
+    if (mailHits.length > 1) {
+      plan.problems.push({ at:at, msg:email + ' is on ' + plural(mailHits.length, "row") +
+        ' of the register already (' + mailHits.map(function(p){ return p.name; }).join(", ") +
+        '). Merge those rows first — the ⋮ menu on either one.' });
+      return;
+    }
+    var byId = personByEmpId(id), byMail = mailHits[0] || null;
+    var existing = byId || byMail;
+    var matchedBy = byId ? "empId" : (byMail ? "email" : null);
+
+    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§82.5) ─────────
+       Islam: "adding a new person of course should conflict, but the name is
+       not the challenge — the identifier really would be the ID and the
+       email."
+
+       Both of these are a row whose two identifiers disagree, and the platform
+       cannot know which is right: an employee number and an address that point
+       at two DIFFERENT people (a recycled address, a mistyped number, or two
+       rows that are really one person), and an address already here arriving
+       under a number the register has never seen (a new payroll system, or a
+       genuinely new colleague given a leaver's address).
+
+       APPLYING EITHER READING SILENTLY IS THE FAULT. Matching on the number
+       would quietly move somebody else's address; matching on the address
+       would quietly renumber somebody. So the row is set aside, the two
+       readings are named with the people they mean, and nothing in the file
+       can be applied until every one of them has been answered. */
+    var conflict = null;
+    if (byId && byMail && byId.key !== byMail.key) {
+      conflict = { kind:"twoPeople", byId:byId, byMail:byMail };
+    } else if (!byId && id && byMail) {
+      conflict = { kind:"newId", byId:null, byMail:byMail };
+    }
+
+    if (!existing && !conflict && !name) {
+      plan.problems.push({ at:at, msg:(id ? 'employee number ' + id : email) +
+        ' is not on the register and the row has no name, so there is nobody to add.' });
       return;
     }
 
@@ -7644,7 +8127,11 @@ function planPeopleFile(rows){
           'to a unit and holding nothing else already is. Leave Role blank.' });
         return;
       }
-      var holdsIt = existing &&
+      /* NOT WHILE THE ROW IS A CONFLICT. "They already hold it" is read off
+         the person the row was matched to, and a conflict has not been matched
+         to anybody yet — dropping the grant on one reading would silently drop
+         it on the other (§82.5). */
+      var holdsIt = !conflict && existing &&
         personRoles(existing).some(function(r){ return r.role === roleKey; });
       /* Cleared BEFORE anything is asked of it, and the checks below are then
          skipped rather than run against a role nobody is granting. Written the
@@ -7684,43 +8171,126 @@ function planPeopleFile(rows){
     }
 
     var row = { at:at, id:id, key:existing ? existing.key : null,
+                matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
-                title:fileTxt(r["Job title"]), email:fileTxt(r["Email"]),
+                title:fileTxt(r["Job title"]), email:email,
                 phone:fileTxt(r["Mobile"]), mainbu:buName, where:where,
-                role:roleKey, wantActive:wantActive, changes:[] };
+                role:roleKey, wantActive:wantActive,
+                conflict:conflict, choice:null, picks:[] };
 
-    if (!existing) {
-      row.action = "add";
-      plan.added++;
-      if (roleKey) plan.roles++;
-      if (wantActive === false) plan.retired++;
-    } else {
-      row.action = "update";
-      /* WHAT ACTUALLY MOVES, field by field. A review saying "31 people
-         updated" when 31 rows came back unchanged from the download teaches
-         whoever reads it to stop reading it. A blank cell is "nothing to say
-         about this", never "clear it" — the file is an amendment, and an
-         amendment that erased every field it left empty would empty the
-         register on its first round trip. */
-      var was = existing;
-      var cmp = [["name", "name", row.name], ["title", "job title", row.title],
-                 ["email", "email", row.email], ["phone", "mobile", row.phone]];
-      cmp.forEach(function(c){
-        if (c[2] && fileTxt(was[c[0]]) !== c[2]) row.changes.push(c[1]);
-      });
-      if (buName && mainbuKey(was.mainbu) !== mainbuKey(buName)) row.changes.push("official BU");
-      /* The PLACE, which is the other column and the one that decides access.
-         Reported separately or a review saying "BU" could mean either, and the
-         two really can move independently. */
-      if (where && personAt(was) !== where) row.changes.push("unit");
-      if (roleKey) { row.changes.push("role"); plan.roles++; }
-      if (wantActive === true  && !personActive(was)) { row.changes.push("restored"); plan.restored++; }
-      if (wantActive === false &&  personActive(was)) { row.changes.push("retired");  plan.retired++; }
-      if (row.changes.length) plan.updated++; else row.action = "same";
-    }
+    row.action = conflict ? "conflict" : (existing ? "match" : "add");
+    /* A conflict is matched to NOBODY until it is answered, so there is
+       nothing to compare against and no picks to show. They are built by
+       peopleRowChoose() the moment the reading is chosen. */
+    peopleRowPicks(row, conflict ? null : existing);
     plan.rows.push(row);
   });
   return plan;
+}
+
+/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§82.6) ──────────
+   Islam, asked who wins where the file and the register disagree: the
+   register. That is the right way round and it is not the obvious one — the
+   file looks newer because it was just uploaded, and it very often is not: it
+   is the export somebody downloaded three weeks ago, edited two cells of, and
+   sent back. What is on the register is what people have been correcting by
+   hand ever since.
+
+   SO A DIFFERENCE IS AN OFFER, NEVER AN INSTRUCTION. Every field the file
+   would change is listed with what is recorded beside what would replace it,
+   and nothing moves until it is ticked. Take all from the file is one press
+   above the list, because a real HR export legitimately changes thirty job
+   titles and thirty ticks would make the safe default the unusable one.
+
+   A BLANK CELL IS STILL "NOTHING TO SAY" and never appears here at all — it is
+   the rule the whole file is read under (§54) and it did not change. */
+var PEOPLE_FILE_PICKS = [
+  { k:"name",   label:"Name" },
+  { k:"title",  label:"Job title" },
+  { k:"email",  label:"Email" },
+  { k:"phone",  label:"Mobile" },
+  { k:"mainbu", label:"Official BU" }
+];
+function peopleRowPicks(row, existing){
+  row.picks = [];
+  if (!existing) return row;
+  PEOPLE_FILE_PICKS.forEach(function(f){
+    var now = fileTxt(row[f.k]);
+    if (!now) return;
+    var was = fileTxt(existing[f.k]);
+    var same = f.k === "mainbu" ? mainbuKey(was) === mainbuKey(now)
+                                : was === now;
+    if (same) return;
+    /* A blank on the register is not a disagreement — there is nothing to
+       lose, so it is filled and not asked about. */
+    row.picks.push({ k:f.k, label:f.label, was:was, now:now, take:!was });
+  });
+  return row;
+}
+/* WHAT THIS ROW WOULD ACTUALLY DO, read live. The picks are ticked after the
+   plan is built, so a tally counted at plan time would be describing a screen
+   nobody is looking at any more — and a row whose only differences are all
+   untaken changes nothing and must say so. */
+function peopleRowChanges(row){
+  var out = [];
+  var eff = peopleRowEffective(row);
+  if (eff.mode === "add") return ["added"];
+  if (eff.mode !== "match") return [];
+  var was = eff.key ? personBy(eff.key) : null;
+  row.picks.forEach(function(f){ if (f.take) out.push(f.label.toLowerCase()); });
+  if (was) {
+    if (row.where && personAt(was) !== row.where) out.push("unit");
+    if (row.role) out.push("role");
+    if (row.wantActive === true  && !personActive(was)) out.push("restored");
+    if (row.wantActive === false &&  personActive(was)) out.push("retired");
+  }
+  return out;
+}
+function peopleFileTally(plan){
+  var t = { added:0, updated:0, same:0, roles:0, retired:0, restored:0,
+            conflicts:0, undecided:0 };
+  (plan.rows || []).forEach(function(row){
+    if (row.action === "conflict") {
+      t.conflicts++;
+      if (!row.choice) { t.undecided++; return; }
+      if (row.choice.mode === "skip") return;
+    }
+    var eff = peopleRowEffective(row);
+    if (eff.mode === "skip") return;
+    if (eff.mode === "add") { t.added++; if (row.role) t.roles++;
+                              if (row.wantActive === false) t.retired++; return; }
+    var ch = peopleRowChanges(row);
+    if (!ch.length) { t.same++; return; }
+    t.updated++;
+    if (ch.indexOf("role") > -1) t.roles++;
+    if (ch.indexOf("retired") > -1) t.retired++;
+    if (ch.indexOf("restored") > -1) t.restored++;
+  });
+  return t;
+}
+/* One reading of a row, whatever route it took to get here: a plain match, an
+   add, a skip, or the answer somebody gave a conflict. The renderer and the
+   applier both ask this, or the review would describe one thing and the Apply
+   would do another. */
+function peopleRowEffective(row){
+  if (row.action === "conflict") {
+    if (!row.choice) return { mode:"undecided", key:null };
+    if (row.choice.mode === "skip") return { mode:"skip", key:null };
+    if (row.choice.mode === "add")  return { mode:"add",  key:null };
+    return { mode:"match", key:row.choice.key };
+  }
+  return row.action === "add" ? { mode:"add", key:null }
+                              : { mode:"match", key:row.key };
+}
+/* Answering a conflict re-reads the row against the person it now means: the
+   picks were built against nobody (or against the other reading), and a review
+   that went on showing the first reading's differences would be describing a
+   decision nobody made. */
+function peopleRowChoose(row, choice){
+  row.choice = choice;
+  var eff = peopleRowEffective(row);
+  peopleRowPicks(row, eff.key ? personBy(eff.key) : null);
+  return row;
 }
 
 /* Applies what the plan says, in the one order that works: the department
@@ -7732,8 +8302,9 @@ function applyPeopleFile(plan){
   plan.newBus.forEach(function(n){ addMainbu(n); });
 
   plan.rows.forEach(function(row){
-    if (row.action === "same") return;
-    var p = row.key ? personBy(row.key) : null;
+    var eff = peopleRowEffective(row);
+    if (eff.mode === "skip" || eff.mode === "undecided") return;
+    var p = eff.key ? personBy(eff.key) : null;
     if (!p) {
       var key = addPerson({ name:row.name, title:row.title, phone:row.phone,
                             empId:row.id, email:row.email, mainbu:row.mainbu,
@@ -7741,12 +8312,14 @@ function applyPeopleFile(plan){
       p = personBy(key);
       if (!p) return;
     } else {
-      if (row.name)  p.name  = row.name;
-      if (row.title) p.title = row.title;
-      if (row.email) p.email = row.email;
-      if (row.phone) p.phone = row.phone;
-      p.empId = row.id;
-      if (row.mainbu) p.mainbu = row.mainbu;
+      /* ONLY WHAT WAS TICKED (§82.6). Every field the file would change is on
+         `row.picks` with its own answer, and a field that is not there is
+         either blank in the file or the same on both sides — in neither case
+         is there anything to write. The employee number is the exception and
+         is not a pick: it is the identity the row was matched ON, or the
+         number a conflict was answered by accepting. */
+      row.picks.forEach(function(f){ if (f.take) p[f.k] = f.now; });
+      if (row.id) p.empId = row.id;
       /* Only when there is somewhere to put them. A person whose department
          maps to nothing keeps whatever attachment they already had — moving
          them to "nowhere" because Risk has not been mapped yet would take away
@@ -13154,9 +13727,11 @@ function peopleReadme(){
     ["People workbook", ""],
     ["", ""],
     ["What it is", "The register as it stands, and the form for changing it. Download it, edit it, upload it back on Setup → People register."],
-    ["Matching", "Emp ID is who the row is. A number already on the register updates that person; a new one adds them. A row with no Emp ID is skipped — there is nothing to match it on."],
-    ["Adding somebody", "Fill Emp ID and Name. Everything else is optional."],
+    ["Matching", "Emp ID is who the row is. Where a row has none, the Email decides. A number or an address already on the register updates that person; a row matching neither adds them; a row with no Emp ID and no Email is skipped, because there is nothing to match it on. The Name is never used to match — two people can share one."],
+    ["If the two disagree", "A row whose Emp ID points at one person and whose Email points at another is set aside on the review screen and named, with both readings, for you to answer. Nothing in the file is applied until every one of them has been."],
+    ["Adding somebody", "Fill Name, and Emp ID or Email. Everything else is optional — but a row with neither identifier cannot be matched by the next upload, so it gets added a second time."],
     ["Blank cells", "Mean “nothing to say about this”, never “clear it”. A field you leave empty keeps whatever is recorded."],
+    ["Cells that differ", "Are offered, not applied. The review lists what is recorded beside what this file says, and takes the file’s only where you tick it — what is on the register is what people have been correcting by hand. “Take everything from the file” is one press above the list."],
     ["Official BU", "Your own official name for their part of the business. Which unit or supporting function it opens here is set once on Setup → Official BU list, and one name may hold several. A name this file uses for the first time is added there, pointing at nothing, for you to map."],
     ["Unit", "Where they actually sit here — the business unit, supporting function or company that decides what they can open. Choose it from the dropdown. Fill it and it is used; leave it blank and their Official BU decides, where that name points at exactly one place; leave both and they are left where they are. This is the column to fill if you already know: nobody then has to be asked at sign-in."],
     ["Role", "A role is always held over the person's own BU, so there is nothing to type but the role itself. Leave it blank and their roles are left alone — this column gives, it never takes away. Employee and Contributor are not offered: they are what somebody attached to a part of the business and holding nothing else already is — Contributor where a plan names them, Employee where it does not."],
@@ -17077,11 +17652,18 @@ function assignPicker(where, roleKey, current, editable){
       (held ? esc(held) : 'unassigned') + '</button>';
   }
   var pool = peopleFor(where);
+  /* SEARCHABLE ON WHAT IDENTIFIES SOMEBODY, not only on what they are called
+     (§82.3). `data-name` stays the NAME alone, because the near-name fallback
+     compares chains of names and an employee number in the string would break
+     it; `data-find` is what the substring search reads. */
   var row = function(p){
+    var find = [p.name, p.empId || "", p.email || ""].join(" ").toLowerCase();
     return '<button class="pickrow" data-name="' + esc(p.name.toLowerCase()) + '" ' +
+      'data-find="' + esc(find) + '" ' +
       'data-pick-set="' + esc(id + '|' + p.key) + '">' +
       '<b>' + esc(p.name) + '</b>' +
       (p.title ? '<span class="why" style="margin:0">' + esc(p.title) + '</span>' : '') +
+      (p.email ? '<span class="why mono" style="margin:0">' + esc(p.email) + '</span>' : '') +
       '</button>';
   };
   var group = function(label, list){
@@ -17093,10 +17675,29 @@ function assignPicker(where, roleKey, current, editable){
     '<input class="fld" id="pickQ" placeholder="Search people…" autocomplete="off" ' +
       'aria-label="Search people">' +
     '<div class="picklist">' +
+      /* ABOVE the names it is talking about \u2014 a "did you mean" under the list
+         is a caption on something the reader has already scrolled past. */
+      '<div class="pickdym" hidden>Nothing matches exactly \u2014 is it one of these?</div>' +
       group(String(where).indexOf("fn:") === 0 ? "In this function" : "In this unit", pool.here) +
       group("Everyone else", pool.rest) +
       '<div class="pickempty" hidden>No name matches. Add them below.</div>' +
     '</div>' +
+    /* ── A PERSON CREATED HERE IS IDENTIFIABLE, OR THEY ARE THE NEXT
+           DUPLICATE (§82.3) ────────────────────────────────────────
+       This control is where the twins were made: it takes a typed name and
+       mints a row with no employee number and no address, which is precisely
+       the row a later upload cannot match — so the upload adds the person a
+       second time, and the role sits on the copy nobody can email.
+
+       Two fields, and neither is required (the SMO may know only a name), but
+       they are IN FRONT OF the person adding somebody rather than a correction
+       to make later on a page they have no reason to open. */
+    '<div class="picknew" hidden>' +
+      '<input class="fld" id="pickNewId" placeholder="Emp ID" autocomplete="off">' +
+      '<input class="fld" id="pickNewEmail" placeholder="Email" type="email" ' +
+        'autocomplete="off" spellcheck="false">' +
+    '</div>' +
+    '<div class="pickerr" hidden></div>' +
     '<div class="pickfoot">' +
       '<button class="linkbu" data-pick-new="' + esc(id) + '" hidden></button>' +
       '<span class="why pickhint" style="margin:0">Type a name to add someone new</span>' +
@@ -17552,14 +18153,31 @@ function showCol(k){ return peopleCols()[k] !== false; }
 function dupeMark(dupes){
   if (!dupes || !dupes.length) return "";
   var WORD = { empId:"Emp ID", email:"Email", name:"Name" };
-  var why = dupes.map(function(d){
-    var others = d.rows.map(function(x){ return x.name; }).join(", ");
-    return WORD[d.kind] + " " + d.value + " is on " +
-           plural(d.rows.length, "row") + ": " + others;
-  }).join(" \u00b7 ");
-  return '<span class="dupemark" title="' + esc(why) + '">' +
-    dupes.map(function(d){ return esc(WORD[d.kind]); }).join(" + ") +
-    ' twice</span>';
+  /* A RESEMBLANCE IS MARKED DIFFERENTLY FROM A COLLISION (§82.2). The first
+     three are two rows holding the same value and are always a fault; this one
+     is two rows that LOOK like one person and may well be two. Saying both in
+     the same words would either overstate the guess or understate the fault. */
+  var near = dupes.filter(function(d){ return d.kind === "likely"; });
+  var hard = dupes.filter(function(d){ return d.kind !== "likely"; });
+  var out = "";
+  if (hard.length) {
+    var why = hard.map(function(d){
+      var others = d.rows.map(function(x){ return x.name; }).join(", ");
+      return WORD[d.kind] + " " + d.value + " is on " +
+             plural(d.rows.length, "row") + ": " + others;
+    }).join(" \u00b7 ");
+    out += '<span class="dupemark" title="' + esc(why) + '">' +
+      hard.map(function(d){ return esc(WORD[d.kind]); }).join(" + ") +
+      ' twice</span>';
+  }
+  if (near.length) {
+    var names = near[0].rows.map(function(x){ return x.name; });
+    out += '<span class="dupemark soft" title="' + esc('This row has no employee number and no ' +
+      'address, and the name reads like ' + names.join(", ") + '. If they are the same person, ' +
+      'merge the two rows from the \u22ee menu.') + '">looks like ' +
+      esc(shortName(names[0])) + '</span>';
+  }
+  return out;
 }
 
 function renderPeople(){
@@ -17806,6 +18424,16 @@ function renderPeople(){
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
     }
+    /* MERGE IS NOT A DESTRUCTIVE ACTION AND DOES NOT SIT WITH THEM (§82.4).
+       Retire and Delete are below the rule because they take something away;
+       merging two rows that were always one person takes nothing away, and it
+       is the ordinary fix for what the marks on this row are pointing at. */
+    if (mayEdit && personActive(p)) {
+      var cands = mergeCandidates(p.key, DUPES);
+      acts.push('<button data-pmerge="' + p.key + '">Merge with another row' +
+        (cands.length === 1 ? ' (' + esc(shortName(cands[0].person.name)) + ')' : '\u2026') +
+        '</button>');
+    }
     if (mayEdit) {
       acts.push('<hr>');
       acts.push('<button class="danger" data-pact="' + p.key + '">' +
@@ -17942,6 +18570,20 @@ function renderPeople(){
     return personActive(p) && personDupe(p, DUPES).length; }).length;
   var dupId = Object.keys(DUPES.empId).length;
   var dupName = Object.keys(DUPES.name).length;
+  var likely = (DUPES.likely || []).length;
+  /* ── A ROW NOTHING CAN MATCH (§82.3) ──────────────────────────────
+     Counted over active rows only, like every other count on this header: a
+     retired row is not what the next upload is going to fail to find.
+
+     AND SAID ONLY WHERE IT DISTINGUISHES SOMEBODY. A register nobody has ever
+     uploaded a file to has no employee numbers and no addresses at all, and a
+     warning naming every row on it is a warning about nothing — §45.2 turned
+     round. What is worth pointing at is the handful of rows that were typed in
+     beside five hundred that came from the file. */
+  var identified = PEOPLE.filter(function(p){
+    return personActive(p) && personIdentified(p); }).length;
+  var noIdent = !identified ? 0 : PEOPLE.filter(function(p){
+    return personActive(p) && !personIdentified(p); }).length;
 
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
@@ -17956,6 +18598,7 @@ function renderPeople(){
     var flags = (personActive(p) ? "active" : "retired") +
       (live && PWSTATES && PWSTATES[p.key] === "none" ? " nopw" : "") +
       (String(p.email == null ? "" : p.email).trim() ? "" : " noemail") +
+      (personIdentified(p) ? "" : " noident") +
       (dupes.length ? " dupe" : "");
     return '<tr data-tkrow="' + esc(flags) + '" class="' +
              (personActive(p) ? '' : 'retired ') + (ed ? 'tk-open' : '') + '">' +
@@ -18096,10 +18739,41 @@ function renderPeople(){
   var cols = 3 + PEOPLE_COLS.filter(function(c){
     return showCol(c.k) && (!c.live || live);
   }).length;
+  /* ── ADD ASKS FOR AN IDENTIFIER, AND DOES NOT INSIST (§82.3) ───────
+     Three fields where there was one. Neither identifier is required — the SMO
+     often knows a name and a role and nothing else, and a door that demanded
+     an employee number would mean a unit could not be given its head until HR
+     replied — but a row with neither is marked on the register the moment it
+     exists, because that is the row the next upload cannot match.
+
+     THE STOP IS SHOWN IN THE ROW IT WOULD HAVE ADDED. A number or an address
+     already here means the person is already here, and the answer is almost
+     never "add them again": the line names them, offers their row, and keeps
+     Add anyway for the case where it really is a coincidence somebody has
+     checked. */
+  var addHit = NEWPERSON.hit ? personBy(NEWPERSON.hit) : null;
+  var addWarn = NEWPERSON.warn ? personBy(NEWPERSON.warn) : null;
   var addRow = mayEdit
     ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
-        '<input class="fld" id="newPersonName" placeholder="Full name" ' +
-          'value="' + esc(NEWPERSON) + '">' +
+        '<div class="addppl">' +
+          '<input class="fld" id="newPersonName" placeholder="Full name" ' +
+            'value="' + esc(NEWPERSON.name) + '">' +
+          '<input class="fld" id="newPersonId" placeholder="Emp ID" size="10" ' +
+            'value="' + esc(NEWPERSON.empId) + '">' +
+          '<input class="fld" id="newPersonEmail" placeholder="Email" type="email" ' +
+            'autocomplete="off" spellcheck="false" value="' + esc(NEWPERSON.email) + '">' +
+        '</div>' +
+        (addHit
+          ? '<div class="addstop"><b>' + esc(addHit.name) + ' is already on the register</b> ' +
+            'with that ' + (NEWPERSON.hitBy === "empId" ? 'employee number' : 'address') + '. ' +
+            '<button class="linkbu" data-pgo="' + esc(addHit.key) + '">Open their row</button>' +
+            ' \u00b7 <button class="linkbu" data-padd="anyway">Add anyway as a new person</button>' +
+            '</div>'
+          : addWarn
+          ? '<div class="addwarn"><b>' + esc(addWarn.name) + '</b> is already here and the name ' +
+            'reads the same. Add if they are two people; if not, give the role to them instead.' +
+            ' <button class="linkbu" data-pgo="' + esc(addWarn.key) + '">Open their row</button></div>'
+          : '') +
       '</td><td class="cc"><button class="linkbu" data-padd="1">Add</button></td></tr>'
     : '';
 
@@ -18290,7 +18964,20 @@ function renderPeople(){
         dupAddr.length ? ['<span class="pill bad" title="' + esc(dupAddr.map(function(a){
             return a + ": " + addrRows[a].join(", ");
           }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
-          ' on more than one row</span>'] : []),
+          ' on more than one row</span>'] : []).concat(
+        /* AMBER, NOT RED (§82.2). The three above are collisions and are
+           always wrong. These two are a resemblance and a gap: a row that
+           looks like somebody else may be a second person with a similar
+           name, and a row with no identifier is a normal thing to have typed
+           five minutes ago. Both need looking at; neither is broken. */
+        likely ? ['<span class="pill warn" title="' + esc((DUPES.likely || []).map(function(l){
+            var a = personBy(l.key), b = personBy(l.other);
+            return (a ? a.name : l.key) + " / " + (b ? b.name : l.other);
+          }).join(" \u00b7 ")) + '">' + plural(likely, "possible duplicate") + '</span>'] : []).concat(
+        noIdent ? ['<span class="pill warn" title="A row with no employee number and no email ' +
+          'cannot be matched by an upload, so the next file adds them a second time. It is what ' +
+          'put three people on this register twice.">' + noIdent +
+          ' with nothing to identify them</span>'] : []),
       /* NO PEN (spec 012 §2.1). It turned on a mode that no longer exists —
          `editable` is per row now — so it would have been a control that
          changes nothing, which this project holds is worse than no control
@@ -18314,8 +19001,11 @@ function renderPeople(){
                   title:"People who have never had one issued" },
                 { k:"noemail", label:"No email",
                   title:"They cannot sign in with an address until one is here" }]
+        .concat(noIdent ? [{ k:"noident", label:"No ID or email (" + noIdent + ")",
+          title:"An upload cannot match these rows, so the next file adds them again" }] : [])
         .concat(dupRows ? [{ k:"dupe", label:"Duplicates (" + dupRows + ")",
-          title:"Rows sharing an employee number, an address or a full name" }] : []) }) +
+          title:"Rows sharing an employee number, an address or a full name, and rows with " +
+                "nothing to identify them that read like somebody already here" }] : []) }) +
 
     section("", "",
       "",
@@ -18379,9 +19069,172 @@ function renderPeople(){
       'true. Deleting takes the row, the password and the open sessions, and is refused ' +
       'while anything still points at the person — the refusal names what.</div>') +
 
+    renderPeopleMerge(mayEdit) +
     renderPeopleFile(mayEdit);
 }
 
+
+/* ══════════════════════════════════════════════════════════════════
+   MERGING TWO ROWS (§82.4)
+
+   A SECTION UNDER THE TABLE, NOT A PANEL IN THE ROW. Retire and Delete ask one
+   question and fit in the 83px actions column (§69.20); this one has to show
+   two whole people side by side and every field they disagree about, and the
+   answer to "which of these two do we keep" is unreadable in a 240px popover.
+   It follows the file review's three-step shape for the same reason that one
+   has it: look at what would happen, then do it (A13).
+
+   IT OPENS FROM THE ROW AND SAYS SO. The ⋮ menu sets which row started it, and
+   the section names that person in its heading — a panel that appeared at the
+   bottom of a 33-row table with no memory of what was pressed would be a
+   control nobody could place.
+   ══════════════════════════════════════════════════════════════════ */
+var PMERGE = { a:null, b:null, keep:null, picks:{}, err:null, done:null };
+
+function mergeReset(){
+  PMERGE = { a:null, b:null, keep:null, picks:{}, err:null, done:null };
+}
+/* Which row survives, defaulted rather than decided: the one that can be
+   matched by a later upload, because the other one is the shape that made the
+   duplicate. Still a default — the radio is what settles it. */
+function mergeDefaultKeep(a, b){
+  var pa = personBy(a), pb = personBy(b);
+  if (!pa || !pb) return a;
+  if (personIdentified(pa) !== personIdentified(pb))
+    return personIdentified(pa) ? a : b;
+  return a;
+}
+
+function renderPeopleMerge(mayEdit){
+  if (!mayEdit) return "";
+  if (PMERGE.done) {
+    return section("", "Merge two rows", null,
+      '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
+      '<div class="imp-row" style="margin-top:12px">' +
+        '<button class="linkbu" data-pmerge-close="1">Close</button></div>');
+  }
+  var a = PMERGE.a ? personBy(PMERGE.a) : null;
+  if (!a) return "";
+  var b = PMERGE.b ? personBy(PMERGE.b) : null;
+
+  /* WHO IT COULD BE. The rows the marks already point at come first and are
+     named; everything else is behind the same searchable select the rest of
+     the platform uses (§45.5), because a register of five hundred people is
+     not a list you scroll. */
+  var cands = mergeCandidates(a.key);
+  var WHY = { empId:"same employee number", email:"same address",
+              name:"same full name", likely:"the name reads the same" };
+  var chooser = '<div class="mgpick">' +
+    (cands.length
+      ? '<div class="mgcands">' + cands.map(function(c){
+          return '<button class="editbtn' + (b && b.key === c.person.key ? ' apply' : '') +
+            '" data-pmerge-b="' + esc(c.person.key) + '">' + esc(c.person.name) +
+            ' <i>' + esc(WHY[c.why] || "looks like a duplicate") + '</i></button>';
+        }).join("") + '</div>'
+      : '') +
+    '<select class="fld" data-pmerge-sel="1" aria-label="Choose the other row">' +
+      '<option value="">' + (cands.length ? 'or somebody else\u2026' : 'Choose the other row\u2026') +
+      '</option>' +
+      PEOPLE.filter(function(p){ return p.key !== a.key && personActive(p); })
+        .map(function(p){
+          return '<option value="' + esc(p.key) + '"' + (b && b.key === p.key ? " selected" : "") +
+            '>' + esc(p.name) + (p.empId ? " \u00b7 " + esc(p.empId) : "") +
+            (p.email ? " \u00b7 " + esc(p.email) : "") + '</option>';
+        }).join("") +
+    '</select></div>';
+
+  var body = "";
+  if (b) {
+    var keepKey = PMERGE.keep || mergeDefaultKeep(a.key, b.key);
+    var dropKey = keepKey === a.key ? b.key : a.key;
+    var plan = personMergePlan(keepKey, dropKey);
+    if (!plan) {
+      body = '<div class="note bad-note">Those are the same row.</div>';
+    } else {
+      /* THE TWO CARDS SAY WHAT EACH ROW COSTS TO LOSE, and the sign-in name is
+         first: the key is what `credentials` and `sessions` are keyed on
+         (§35), so whichever row goes takes its password with it and somebody
+         will be typing the survivor's name at the door tomorrow. */
+      function card(p){
+        var on = p.key === keepKey;
+        var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
+        return '<label class="mgcard' + (on ? " on" : "") + '">' +
+          '<input type="radio" name="mgkeep" data-pmerge-keep="' + esc(p.key) + '"' +
+            (on ? " checked" : "") + '>' +
+          '<div class="mgb"><b>' + esc(p.name) + '</b>' +
+            '<div class="mgf"><span>Sign-in name</span><span class="mono">' + esc(p.key) + '</span></div>' +
+            '<div class="mgf"><span>Emp ID</span><span class="mono">' +
+              (p.empId ? esc(p.empId) : "\u2014") + '</span></div>' +
+            '<div class="mgf"><span>Email</span><span>' +
+              (p.email ? esc(p.email) : "\u2014") + '</span></div>' +
+            '<div class="mgf"><span>Unit</span><span>' +
+              esc(roleWhereLabel2(personAt(p)) || "\u2014") + '</span></div>' +
+            '<div class="mgf"><span>Roles</span><span>' +
+              (held.length ? esc(held.map(function(r){ return roleName(r.role); }).join(", "))
+                           : "\u2014") + '</span></div>' +
+          '</div></label>';
+      }
+      var moves = [];
+      plan.roles.forEach(function(r){
+        moves.push(r.already
+          ? roleName(r.role) + " \u00b7 " + roleWhereLabel(r.at) + " (already theirs)"
+          : roleName(r.role) + " \u00b7 " + roleWhereLabel(r.at));
+      });
+      if (plan.seat) moves.push(roleName(plan.seat.role) + " \u00b7 " + roleWhereLabel(plan.seat.at));
+      plan.owns.forEach(function(o){
+        moves.push(o.kind === "set" ? "the figure set " + o.name
+                 : o.kind === "figure" ? "the figure " + o.name
+                 : o.name);
+      });
+      if (plan.moveTo) moves.push("their place \u2014 " + roleWhereLabel(plan.moveTo));
+      plan.fills.forEach(function(f){ moves.push(f.label.toLowerCase() + " \u2014 " + f.value); });
+
+      body =
+        '<div class="mgcards">' + card(a) + card(b) + '</div>' +
+        '<div class="note"><b>' + esc(plan.keep.name) + ' survives.</b> ' +
+        esc(plan.drop.name) + '\u2019s row goes, and with it their password and any ' +
+        'sessions they have open \u2014 ' + esc(plan.drop.key) + ' stops being a sign-in name.</div>' +
+        (moves.length
+          ? '<div class="mgmoves"><b>What moves across</b><ul>' +
+            moves.map(function(m){ return '<li>' + esc(m) + '</li>'; }).join("") +
+            '</ul></div>'
+          : '<div class="note">Nothing is attached to ' + esc(plan.drop.name) +
+            ' \u2014 only the row goes.</div>') +
+        (plan.picks.length
+          ? '<div class="mgpicks"><b>They disagree about ' +
+            plural(plan.picks.length, "field") + '</b>' +
+            '<div class="cfg"><table><thead><tr><th style="width:20%"></th>' +
+              '<th>Keep ' + esc(shortName(plan.keep.name)) + '\u2019s</th>' +
+              '<th>Take ' + esc(shortName(plan.drop.name)) + '\u2019s</th></tr></thead><tbody>' +
+            plan.picks.map(function(f){
+              var take = !!PMERGE.picks[f.k];
+              return '<tr><td><b>' + esc(f.label) + '</b></td>' +
+                '<td><label class="mgopt"><input type="radio" name="mgp-' + esc(f.k) + '" ' +
+                  'data-pmerge-pick="' + esc(f.k) + '|keep"' + (take ? "" : " checked") + '>' +
+                  '<span>' + esc(f.keep) + '</span></label></td>' +
+                '<td><label class="mgopt"><input type="radio" name="mgp-' + esc(f.k) + '" ' +
+                  'data-pmerge-pick="' + esc(f.k) + '|take"' + (take ? " checked" : "") + '>' +
+                  '<span>' + esc(f.drop) + '</span></label></td></tr>';
+            }).join("") + '</tbody></table></div></div>'
+          : '') +
+        (PMERGE.err ? '<div class="note bad-note">' + esc(PMERGE.err) + '</div>' : '') +
+        '<div class="imp-row" style="margin-top:14px">' +
+          '<button class="editbtn apply" data-pmerge-go="' + esc(keepKey) + '|' + esc(dropKey) +
+            '">Merge into ' + esc(shortName(plan.keep.name)) + '</button>' +
+          '<button class="linkbu" data-pmerge-close="1">Cancel</button></div>';
+    }
+  } else {
+    body = '<div class="imp-row" style="margin-top:12px">' +
+      '<button class="linkbu" data-pmerge-close="1">Cancel</button></div>';
+  }
+
+  return section("", "Merge two rows",
+    "One person on the register twice \u2014 once from the employee file and once typed in, " +
+    "usually. Merging hands every role, figure and setting to the row you keep and takes the " +
+    "other away. Nobody is retired and nothing is left pointing at a row that has gone.",
+    '<div class="mgbox"><div class="mghead">Merging <b>' + esc(a.name) + '</b> with\u2026</div>' +
+    chooser + body + '</div>');
+}
 
 /* ══════════════════════════════════════════════════════════════════
    THE REGISTER'S FILE (§54.3, spec 011)
@@ -18415,9 +19268,10 @@ function renderPeopleFile(mayEdit){
   var step2 =
     '<div class="imp-step"><div class="imp-n">2</div><div class="imp-b">' +
       '<h4>Upload the filled file</h4>' +
-      '<p class="sub">Matched on <b>Emp ID</b>. A number already here updates that person, ' +
-        'a new one adds them, and a person the file does not mention is not touched — ' +
-        '<b>an upload never removes anybody</b>.</p>' +
+      '<p class="sub">Matched on <b>Emp ID</b>, and where a row has none, on <b>Email</b>. ' +
+        'A row that matches nobody adds them, a row whose two identifiers point at two ' +
+        'different people is set aside for you to answer, and a person the file does not ' +
+        'mention is not touched — <b>an upload never removes anybody</b>.</p>' +
       '<div class="imp-row"><input type="file" id="ppl-file" accept=".xlsx" ' +
         'aria-label="Choose a filled people file to upload">' +
         (PPLF.read ? '<span class="pill quiet">Read &middot; ' + esc(PPLF.read) + '</span>' : '') +
@@ -18431,7 +19285,8 @@ function renderPeopleFile(mayEdit){
     : "";
 
   if (!step3 && plan) {
-    var blocked = plan.problems.length;
+    var tally = peopleFileTally(plan);
+    var blocked = plan.problems.length || tally.undecided;
     var checks =
       plan.problems.map(function(x){
         return '<div class="chk bad"><span class="pill bad">Problem</span>' +
@@ -18442,51 +19297,142 @@ function renderPeopleFile(mayEdit){
           '<b>' + esc(x.at) + '</b><span>' + esc(x.msg) + '</span></div>';
       }).join("");
 
+    /* ── THE ROWS THAT NEED AN ANSWER COME FIRST (§82.5) ────────────
+       They are the only thing on this screen that BLOCKS, so putting them
+       under a table of thirty ordinary updates would mean scrolling past the
+       work to find the reason Apply is off. Each one names both readings with
+       the person they mean, so the answer is a recognition rather than a
+       deduction. */
+    var conf = plan.rows.filter(function(r){ return r.action === "conflict"; });
+    function who(p){
+      return '<b>' + esc(p.name) + '</b>' +
+        '<span class="why" style="margin:0">' +
+        (p.empId ? 'Emp ID ' + esc(p.empId) : 'no employee number') + ' \u00b7 ' +
+        (p.email ? esc(p.email) : 'no address') + '</span>';
+    }
+    function choice(row, i, mode, key, label, note){
+      var on = row.choice && row.choice.mode === mode &&
+               (mode !== "match" || row.choice.key === key);
+      return '<label class="cfopt' + (on ? " on" : "") + '">' +
+        '<input type="radio" name="cf-' + i + '" data-cfchoice="' + i + '|' + mode +
+          '|' + esc(key || "") + '"' + (on ? " checked" : "") + '>' +
+        '<span>' + label + (note ? '<i>' + esc(note) + '</i>' : '') + '</span></label>';
+    }
+    var conflicts = conf.length
+      ? '<div class="cfbox"><b>' + plural(conf.length, "row") + ' need' +
+        (conf.length === 1 ? 's' : '') + ' your decision</b>' +
+        '<p class="sub">The employee number and the email on ' +
+        (conf.length === 1 ? 'this row do' : 'these rows do') +
+        ' not point at the same person, so the file cannot say who it means. ' +
+        'Nothing is applied until every one is answered.</p>' +
+        conf.map(function(row){
+          var i = plan.rows.indexOf(row);
+          var c = row.conflict;
+          var head = '<div class="cfrow"><div class="cfwhat"><b>' + esc(row.at) + '</b> ' +
+            esc(row.name || "\u2014") +
+            '<span class="why" style="margin:0">' +
+            (row.id ? 'Emp ID ' + esc(row.id) : 'no employee number') + ' \u00b7 ' +
+            (row.email ? esc(row.email) : 'no address') + '</span></div>';
+          var opts = "";
+          if (c.kind === "twoPeople") {
+            opts =
+              choice(row, i, "match", c.byId.key, who(c.byId), "the employee number matches them") +
+              choice(row, i, "match", c.byMail.key, who(c.byMail), "the address matches them");
+          } else {
+            opts = choice(row, i, "match", c.byMail.key, who(c.byMail),
+              "the address matches them \u2014 give them this employee number");
+          }
+          opts += choice(row, i, "add", "", "<b>Somebody new</b>",
+                         "add a row, with this number and this address");
+          opts += choice(row, i, "skip", "", "<b>Leave it</b>", "change nothing for this row");
+          return head + '<div class="cfopts">' + opts + '</div></div>';
+        }).join("") +
+        '</div>'
+      : '';
+
     /* WHAT MOVES, PERSON BY PERSON. A tally alone ("31 updated") is unreadable
        against a file that came straight back off the download with two cells
        changed — the whole point of reviewing is seeing which two. Rows that
        change nothing are counted and not listed, or the table is the file. */
-    var moving = plan.rows.filter(function(r){ return r.action !== "same"; });
-    var same = plan.rows.length - moving.length;
+    var moving = plan.rows.filter(function(r){
+      if (r.action === "conflict") return false;
+      var eff = peopleRowEffective(r);
+      return eff.mode === "add" || peopleRowChanges(r).length || r.picks.length;
+    });
     var body = moving.length
       ? '<div class="scroll"><table><thead><tr><th>Row</th><th>Person</th>' +
-          '<th>Official BU</th><th class="cc">What happens</th></tr></thead><tbody>' +
+          '<th>Official BU</th><th>What happens</th></tr></thead><tbody>' +
         moving.map(function(r){
-          return '<tr><td class="mono">' + esc(r.id) + '</td>' +
-            '<td><b>' + esc(r.name) + '</b></td>' +
+          var i = plan.rows.indexOf(r);
+          var ch = peopleRowChanges(r);
+          /* ── EVERY DIFFERENCE IS AN OFFER (§82.6) ─────────────────
+             Recorded on the left, the file's on the right, and the file's is
+             taken only where it is ticked. The default is what is already
+             recorded, because a people file is usually an export somebody
+             edited two cells of — and thirty untouched cells coming back are
+             not thirty decisions to overwrite thirty corrections. */
+          var picks = r.picks.length
+            ? '<div class="pk">' + r.picks.map(function(f){
+                return '<label class="pkrow' + (f.take ? " on" : "") + '">' +
+                  '<input type="checkbox" data-pplpick="' + i + '|' + esc(f.k) + '"' +
+                    (f.take ? " checked" : "") + '>' +
+                  '<span class="pkl">' + esc(f.label) + '</span>' +
+                  '<span class="pkw">' + (f.was ? esc(f.was) : '<i>blank</i>') + '</span>' +
+                  '<span class="pka">\u2192</span>' +
+                  '<span class="pkn">' + esc(f.now) + '</span></label>';
+              }).join("") + '</div>'
+            : '';
+          return '<tr><td class="mono">' + esc(r.id || r.email || r.at) + '</td>' +
+            '<td><b>' + esc(r.name) + '</b>' +
+            (r.matchedBy === "email"
+              ? '<span class="why" style="margin:0">matched on their email</span>' : '') +
+            '</td>' +
             '<td>' + (r.mainbu
               ? esc(r.mainbu) + (r.where
                   ? ' <span class="why" style="margin:0">&rarr; ' + esc(roleWhereLabel(r.where)) + '</span>'
                   : ' <span class="why" style="margin:0">&rarr; not mapped</span>')
               : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' +
-            '<td class="cc">' + (r.action === "add"
+            '<td>' + (peopleRowEffective(r).mode === "add"
               ? '<span class="pill good">Added</span>'
-              : '<span class="pill attn">' + esc(r.changes.join(", ")) + '</span>') +
-            '</td></tr>';
-        }).join("") + '</tbody></table></div>'
+              : (ch.length
+                  ? '<span class="pill attn">' + esc(ch.join(", ")) + '</span>'
+                  : '<span class="pill quiet">nothing ticked</span>')) +
+            picks + '</td></tr>';
+        }).join("") + '</tbody></table></div>' +
+        /* ONE PRESS FOR THIRTY TICKS. A real HR export legitimately changes
+           thirty job titles, and a safe default that costs thirty clicks is a
+           default people work around by not reading the list at all. */
+        '<div class="imp-row" style="margin-top:10px">' +
+          '<button class="linkbu" data-pplpickall="1">Take everything from the file</button>' +
+          ' &middot; <button class="linkbu" data-pplpicknone="1">Keep everything as recorded</button>' +
+        '</div>'
       : '<div class="note">Nothing in this file differs from what is recorded.</div>';
 
     step3 =
       '<div class="imp-step"><div class="imp-n">3</div><div class="imp-b">' +
         '<h4>Review, then apply</h4>' +
         (checks ? '<div class="imp-checks">' + checks + '</div>' : '') +
-        (blocked
+        (plan.problems.length
           ? '<div class="note bad-note"><b>Nothing can be applied while a problem stands.</b> ' +
             'Data that loads badly is harder to find later than a file that refuses to load.</div>'
           : '') +
+        conflicts +
         '<div class="imp-tally">' +
-          (plan.added   ? '<span class="pill good">' + plan.added + ' added</span>' : '') +
-          (plan.updated ? '<span class="pill attn">' + plan.updated + ' updated</span>' : '') +
-          (plan.roles   ? '<span class="pill kind">' + plan.roles + ' given a role</span>' : '') +
-          (plan.retired ? '<span class="pill bad">' + plan.retired + ' retired</span>' : '') +
-          (plan.restored? '<span class="pill good">' + plan.restored + ' restored</span>' : '') +
+          (tally.added   ? '<span class="pill good">' + tally.added + ' added</span>' : '') +
+          (tally.updated ? '<span class="pill attn">' + tally.updated + ' updated</span>' : '') +
+          (tally.roles   ? '<span class="pill kind">' + tally.roles + ' given a role</span>' : '') +
+          (tally.retired ? '<span class="pill bad">' + tally.retired + ' retired</span>' : '') +
+          (tally.restored? '<span class="pill good">' + tally.restored + ' restored</span>' : '') +
+          (tally.undecided
+            ? '<span class="pill bad">' + tally.undecided + ' waiting on you</span>' : '') +
           (plan.newBus.length
             ? '<span class="pill attn">' + plural(plan.newBus.length, "new BU name") + '</span>' : '') +
-          (same ? '<span class="pill quiet">' + same + ' unchanged</span>' : '') +
+          (tally.same ? '<span class="pill quiet">' + tally.same + ' unchanged</span>' : '') +
         '</div>' + body +
         '<div class="imp-row" style="margin-top:14px">' +
           (blocked
-            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">Apply blocked</button>'
+            ? '<button class="editbtn" disabled style="opacity:.45;cursor:not-allowed">' +
+              (plan.problems.length ? 'Apply blocked' : 'Answer the rows above first') + '</button>'
             : '<button class="editbtn apply" data-pplapply="1">Apply to the register</button>') +
           '<button class="linkbu" data-pplcancel="1">Discard</button></div>' +
       '</div></div>';
@@ -23629,6 +24575,12 @@ var SYNC = (function () {
     if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
       rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
     }
+    /* AND THE MERGE COMPARISON GOES WITH IT (§82.4). It names two people and
+       carries an answer per field; coming back to the register an hour later
+       and finding it half-answered is the same fault §63 fixed for reporting —
+       a mode left standing after you navigated away from it. Nothing is lost:
+       it writes nothing until Merge is pressed. */
+    if (typeof mergeReset === "function") mergeReset();
     /* The sentence under Send a test goes with the page (§72.6). Cleared HERE
        rather than read-and-cleared by the renderer: a render function with a
        side effect is the shape `branding()` had when it was inventing fields
@@ -25581,21 +26533,68 @@ var SYNC = (function () {
       rx.readAsArrayBuffer(file);
     });
 
+    /* ── ANSWERING A ROW THE FILE COULD NOT PLACE (§82.5) ────────────
+       The answer is written onto the plan row and the row is re-read against
+       the person it now means — through peopleRowChoose(), never by setting
+       `choice` here, or the differences on screen would still be the ones
+       computed against the other reading. */
+    document.querySelectorAll("[data-cfchoice]").forEach(function(r){
+      r.addEventListener("change", function(){
+        var p = r.dataset.cfchoice.split("|");     /* index|mode|key */
+        var row = PPLF.plan && PPLF.plan.rows[Number(p[0])];
+        if (!row) return;
+        peopleRowChoose(row, p[1] === "match" ? { mode:"match", key:p[2] } : { mode:p[1] });
+        paint();
+      });
+    });
+    /* WHICH OF THE FILE'S VALUES TO TAKE (§82.6). Ticking repaints, because
+       the tally above the table counts what is ticked — a review whose summary
+       disagreed with its own list would be worse than no summary. Typing is
+       what must never repaint (§35); this is not typing. */
+    document.querySelectorAll("[data-pplpick]").forEach(function(c){
+      c.addEventListener("change", function(){
+        var p = c.dataset.pplpick.split("|");      /* index|field */
+        var row = PPLF.plan && PPLF.plan.rows[Number(p[0])];
+        if (!row) return;
+        row.picks.forEach(function(f){ if (f.k === p[1]) f.take = c.checked; });
+        paint();
+      });
+    });
+    function pplPickAll(on){
+      if (!PPLF.plan) return;
+      PPLF.plan.rows.forEach(function(row){
+        row.picks.forEach(function(f){ f.take = on; });
+      });
+      paint();
+    }
+    document.querySelectorAll("[data-pplpickall]").forEach(function(b){
+      b.addEventListener("click", function(){ pplPickAll(true); });
+    });
+    document.querySelectorAll("[data-pplpicknone]").forEach(function(b){
+      b.addEventListener("click", function(){ pplPickAll(false); });
+    });
+
     document.querySelectorAll("[data-pplapply]").forEach(function(b){
       b.addEventListener("click", function(){
         if (grant("c_people") !== "edit") return;
         var plan = PPLF.plan;
         if (!plan || plan.problems.length) return;
+        /* THE BLOCK IS RE-ASKED HERE and never trusted from the render that
+           drew the button (§48.2, §62): a repaint can happen in between, and
+           an apply authorised by a stale screen is the one that writes an
+           answer nobody gave. */
+        var tally = peopleFileTally(plan);
+        if (tally.undecided) return;
         applyPeopleFile(plan);
         /* The receipt is written from what the plan SAID, before the state
            moved under it — counted after the fact it would be counting the
            register rather than the file. */
         var parts = [];
-        if (plan.added)    parts.push(plural(plan.added, "person").replace("persons", "people") + " added");
-        if (plan.updated)  parts.push(plan.updated + " updated");
-        if (plan.roles)    parts.push(plural(plan.roles, "role") + " given");
-        if (plan.retired)  parts.push(plan.retired + " retired");
-        if (plan.restored) parts.push(plan.restored + " restored");
+        if (tally.added)    parts.push(plural(tally.added, "person").replace("persons", "people") + " added");
+        if (tally.updated)  parts.push(tally.updated + " updated");
+        if (tally.roles)    parts.push(plural(tally.roles, "role") + " given");
+        if (tally.retired)  parts.push(tally.retired + " retired");
+        if (tally.restored) parts.push(tally.restored + " restored");
         if (plan.newBus.length) parts.push(plural(plan.newBus.length, "BU name") + " added to the BU list");
         PPLF.done = parts.length ? parts.join(", ") + "." : "Nothing to change \u2014 the file matched the register.";
         PPLF.plan = null; PPLF.read = "";
@@ -25879,22 +26878,59 @@ var SYNC = (function () {
     /* The typed name is held in a global rather than read off the input at
        submit time, because the repaint that follows any other change would
        otherwise throw it away mid-typing. */
-    var newName = document.getElementById("newPersonName");
-    if (newName) {
-      newName.addEventListener("input", function(){ NEWPERSON = newName.value; });
-      newName.addEventListener("keydown", function(e){
-        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(); }
+    /* THREE FIELDS, ONE HOLDER, AND TYPING STILL NEVER REPAINTS (§82.3, §35).
+       Each keystroke writes its own field of NEWPERSON and nothing else — the
+       stop line under the row is drawn from `hit`, which is only set when Add
+       is pressed. Checking on every keystroke would repaint the row being
+       typed into, which is the fault §35 and §71.2 both record. */
+    ["Name|name", "Id|empId", "Email|email"].forEach(function(pair){
+      var bits = pair.split("|");
+      var inp = document.getElementById("newPerson" + bits[0]);
+      if (!inp) return;
+      inp.addEventListener("input", function(){ NEWPERSON[bits[1]] = inp.value; });
+      inp.addEventListener("keydown", function(e){
+        if (e.key === "Enter") { e.preventDefault(); addTypedPerson(false); }
       });
-    }
-    function addTypedPerson(){
-      var name = (NEWPERSON || "").trim();
+    });
+    /* `anyway` is the second press, and it is the ONLY thing that gets past an
+       identifier already on the register — pressing Add again must not, or the
+       stop would be a message that goes away by itself. */
+    function addTypedPerson(anyway){
+      var name = String(NEWPERSON.name || "").trim();
       if (!name) return;
-      addPerson({ name: name });
-      NEWPERSON = "";
+      var o = { name:name, empId:String(NEWPERSON.empId || "").trim(),
+                email:String(NEWPERSON.email || "").trim() };
+      var chk = personAddCheck(o);
+      if (chk.stop && !anyway) {
+        NEWPERSON.hit = chk.person.key; NEWPERSON.hitBy = chk.by; NEWPERSON.warn = null;
+        paint();
+        return;
+      }
+      addPerson(o);
+      newPersonReset();
+      /* A resemblance is reported AFTER the add, never instead of it: it is
+         not a reason to refuse, and two people with similar names is a normal
+         register (§82.2). It is cleared by the next add or the next paint of
+         somebody else's doing. */
+      if (!chk.stop && chk.by === "name") NEWPERSON.warn = chk.person.key;
       paint();
     }
     document.querySelectorAll("[data-padd]").forEach(function(b){
-      b.addEventListener("click", addTypedPerson);
+      b.addEventListener("click", function(){
+        addTypedPerson(b.dataset.padd === "anyway");
+      });
+    });
+    /* Open somebody's row from a line that names them — the stop under the add
+       row, and the merge marks. It opens the ROW rather than only scrolling to
+       it, because the reason to go and look is almost always to correct it. */
+    document.querySelectorAll("[data-pgo]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var key = b.dataset.pgo;
+        rowEditOpen(key, personBy(key));
+        PMENU = null; paint();
+        var f = document.querySelector('[data-pname="' + key + '"]');
+        if (f) { f.scrollIntoView({ block:"center" }); f.focus(); f.select(); }
+      });
     });
 
     /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
@@ -26165,6 +27201,69 @@ var SYNC = (function () {
         paint();
       });
     });
+    /* ── MERGING TWO ROWS (§82.4) ───────────────────────────────────
+       Opening it from the row records WHICH row, and clears everything the
+       last merge left behind — a picks map carried over from a different pair
+       would silently apply one person's answer to another's fields. */
+    document.querySelectorAll("[data-pmerge]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        mergeReset();
+        PMERGE.a = b.dataset.pmerge;
+        PMENU = null;
+        paint();
+        var sec = document.querySelector(".mgbox");
+        if (sec) sec.scrollIntoView({ block:"center" });
+      });
+    });
+    function mergePickOther(key){
+      PMERGE.b = key || null;
+      /* The survivor and the field answers belong to the PAIR, so choosing a
+         different second row starts both again rather than carrying an answer
+         across to fields it was never about. */
+      PMERGE.keep = key ? mergeDefaultKeep(PMERGE.a, key) : null;
+      PMERGE.picks = {}; PMERGE.err = null;
+      paint();
+    }
+    document.querySelectorAll("[data-pmerge-b]").forEach(function(b){
+      b.addEventListener("click", function(){ mergePickOther(b.dataset.pmergeB); });
+    });
+    document.querySelectorAll("[data-pmerge-sel]").forEach(function(sel){
+      sel.addEventListener("change", function(){ mergePickOther(sel.value); });
+    });
+    document.querySelectorAll("[data-pmerge-keep]").forEach(function(r){
+      r.addEventListener("change", function(){
+        PMERGE.keep = r.dataset.pmergeKeep;
+        /* Swapping which row survives turns every field answer round — "keep
+           mine" now means the other value — so the answers are dropped rather
+           than silently reinterpreted. */
+        PMERGE.picks = {}; PMERGE.err = null;
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pmerge-pick]").forEach(function(r){
+      r.addEventListener("change", function(){
+        var p = r.dataset.pmergePick.split("|");
+        PMERGE.picks[p[0]] = p[1] === "take";
+        paint();
+      });
+    });
+    document.querySelectorAll("[data-pmerge-go]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var p = b.dataset.pmergeGo.split("|");
+        var keepName = (personBy(p[0]) || {}).name || p[0];
+        var dropName = (personBy(p[1]) || {}).name || p[1];
+        var r = mergePeople(p[0], p[1], PMERGE.picks);
+        if (!r.ok) { PMERGE.err = r.why; paint(); return; }
+        mergeReset();
+        PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
+        paint();   /* which is where a change becomes a save */
+      });
+    });
+    document.querySelectorAll("[data-pmerge-close]").forEach(function(b){
+      b.addEventListener("click", function(){ mergeReset(); paint(); });
+    });
+
     /* The row's action menu (§46.4). Opening one closes any other, because
        PMENU is a single key rather than a flag per row. */
     document.querySelectorAll("[data-pmenu]").forEach(function(b){
@@ -26581,8 +27680,29 @@ var SYNC = (function () {
       b.addEventListener("click", function(){
         var name = (PICKQ || "").trim();
         if (!name) return;
+        var idf = document.getElementById("pickNewId");
+        var mlf = document.getElementById("pickNewEmail");
+        var o = { name:name, empId:(idf ? idf.value : "").trim(),
+                  email:(mlf ? mlf.value : "").trim() };
+        /* REFUSED, IN THE PICKER, NAMING WHO (§82.3). An employee number or an
+           address already on the register means the person is already on the
+           register, and the thing to do is give them the role — which is the
+           control directly above this one. The refusal stays in the popover
+           rather than repainting the page away from it. */
+        var chk = personAddCheck(o);
+        if (chk.stop) {
+          var er = document.querySelector(".pickerr");
+          if (er) {
+            er.hidden = false;
+            er.textContent = chk.person.name + " is already on the register with that " +
+              (chk.by === "empId" ? "employee number" : "address") +
+              " \u2014 search for them above and give them the role.";
+          }
+          return;
+        }
         var p = b.dataset.pickNew.split("|");
-        addPerson({ name: name, role: p[1], where: p[0] });
+        o.where = p[0]; o.role = p[1];
+        addPerson(o);
         PICKING = null; PICKQ = ""; paint();
       });
     });
@@ -26621,10 +27741,28 @@ var SYNC = (function () {
       var needle = PICKQ.trim().toLowerCase();
       var any = false;
       document.querySelectorAll(".pickrow").forEach(function(r){
-        var hit = !needle || r.dataset.name.indexOf(needle) > -1;
+        var hit = !needle || r.dataset.find.indexOf(needle) > -1;
         r.hidden = !hit;
         if (hit) any = true;
       });
+      /* ── THE SPELLING IS WHY THE TWINS EXIST (§82.3) ───────────────
+         A plain substring search finds nobody the moment the name is typed a
+         little differently from the way HR spelled it — and what the picker
+         then offers is "+ Add", which is exactly how three people ended up on
+         this register twice. So when nothing matched, ask the looser question
+         before offering to create anybody: the same one the register's marks
+         use, the chain of names in order rather than a similarity score.
+
+         SHOWN, NOT SUBSTITUTED. Add stays available underneath — two people
+         really can have names that read alike, and the picker must not be the
+         thing that decides they are one person. */
+      var near = false;
+      if (needle && !any) {
+        document.querySelectorAll(".pickrow").forEach(function(r){
+          if (!namesLookLikeOne(needle, r.dataset.name)) return;
+          r.hidden = false; near = true;
+        });
+      }
       /* A heading with nothing under it is a heading that lies about what the
          list contains. */
       document.querySelectorAll(".pickhead").forEach(function(h){
@@ -26636,12 +27774,22 @@ var SYNC = (function () {
         h.hidden = !shown;
       });
       var empty = document.querySelector(".pickempty");
-      if (empty) empty.hidden = any;
+      if (empty) {
+        empty.hidden = any || near;
+      }
+      var did = document.querySelector(".pickdym");
+      if (did) did.hidden = !near;
       var add = document.querySelector("[data-pick-new]");
       if (add) {
         add.hidden = !needle;
         add.textContent = '+ Add \u201c' + PICKQ.trim() + '\u201d';
       }
+      /* The two identifier fields appear with the Add button and go with it:
+         they belong to adding somebody, not to searching for them. */
+      var mk = document.querySelector(".picknew");
+      if (mk) mk.hidden = !needle;
+      var er = document.querySelector(".pickerr");
+      if (er) { er.hidden = true; er.textContent = ""; }
       var hint = document.querySelector(".pickhint");
       if (hint) hint.hidden = !!needle;
     });

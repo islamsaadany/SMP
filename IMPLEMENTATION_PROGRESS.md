@@ -6,7 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.21 · **Last updated:** 2026-08-23
+**Latest version:** v3.22 shipped · v3.24 in progress on the branch
+**Last updated:** 2026-08-24
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -52,6 +53,51 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.24 — who a row is, and merging two rows that are one person
+
+Islam: *"in the send message functionality I got 3 people skipped but they have
+an email in the registry."* They did. **The three were on the register twice** —
+once from the employee file with an address, once typed into the role picker
+with a shorter spelling of the same name and no identifier — and the role sat on
+the copy that could not be emailed. Nothing in the resolver was wrong; the
+register let one human become two rows and had no way to say so (§82, spec 013).
+
+- **A name is never an identifier.** Emp ID, then email, and no third rung —
+  `personByIdentity()` is the one answer and it says which rung decided. An
+  address on two rows answers nothing, the same as at the door (§69.23).
+- **Both hand-typed doors ask for one now**, and refuse an identifier already
+  here by naming who it is. A matching *name* stops nothing — two people can
+  share one. Neither is required; the row is **marked** instead, because that is
+  the shape the next upload cannot match.
+- **The role picker suggests before it creates.** A name typed a little
+  differently matched nobody and the only offer was *"+ Add"*; it now shows the
+  rows whose chain of names runs through what was typed, and searches on the
+  employee number and the address too.
+- **The upload sets aside what it cannot place** — an ID and an email pointing at
+  two people, or an address arriving under a number never seen — names both
+  readings with the people they mean, and applies **nothing** until each is
+  answered.
+- **A difference is an offer, never an instruction.** Recorded value beside
+  proposed one, taken only where ticked, with *take everything from the file* as
+  one press. The register wins by default: a people file is usually an export
+  somebody edited two cells of.
+- **Merge**, from the row's ⋮. The survivor is chosen (defaulting to the row that
+  can be matched later); every role, figure set, named figure and open claim
+  moves; the last act is the delete, so anything the merge forgot refuses it and
+  fails loudly rather than dropping a role.
+
+Verified: `qa.py` green including the new §82 block and the people-file fixed
+point **re-measured with every pick taken** (with the ticks off it would have
+been measuring the defaults, §51.11), plus `src/checks/identity-merge.py`
+driving the screen — the add row refuses and then relents, the merge runs from
+the menu, and the role ends up on a row a message can reach.
+
+**Still to do, and it needs Islam:** the three real pairs in the live tenant.
+The merge button is built and the register now points at the pairs itself, but
+this session has no access to the production database — merging them is three
+presses on the People page, or send the register export and the exact pairs can
+be named first.
 
 ### v3.21 — a function that plans in pillars actually works
 

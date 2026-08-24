@@ -222,6 +222,26 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **A NAME IS NEVER AN IDENTIFIER (§82):** who a register row *is* is asked in
+  ONE place — `personByIdentity()`: **Emp ID, then email, and no third rung** —
+  and it reports which rung answered, because "matched" tells nobody what to
+  check. An address on two rows answers **nothing** (§57's rule, §69.23's door).
+  Three people were on the register twice — once from the employee file with an
+  address, once typed into the role picker with a shorter spelling and nothing
+  else — so a message aimed at a role reached the copy with no address and said
+  they had none. Both hand-typed doors ask for an identifier now and refuse one
+  already here by NAMING who; a matching **name** stops nothing, because two
+  people really can share one. Neither is required — the row is **marked**
+  instead, since that is the shape the next upload cannot match. The upload
+  matches on the same ladder, **sets aside** a row whose ID and email point at
+  two people (or whose address arrives under an unknown number) and applies
+  nothing until each is answered. **A difference is an OFFER, never an
+  instruction**: the register wins by default, because a people file is usually
+  an export somebody edited two cells of — which meant the fixed-point check had
+  to be re-measured with every pick TAKEN, or it was measuring the defaults
+  (§51.11). And **merge** is a delete that first hands over every pointer, which
+  is why its last act is `deletePerson()`: anything it forgot refuses the delete
+  and fails loudly rather than dropping a role.
 - **EDIT AND ADD WERE BUILT, AND THE PEN WAS INVISIBLE (§70):** a capability's
   Projects pane and a unit's Plan already gave 34/25 editable fields, 14/13 drag
   handles and Add for a project · deliverable · outcome · milestone / pillar ·
@@ -708,7 +728,42 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-24 &mdash; **v3.22: the register, the deck, and the
+*Last Updated: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;82, spec 013).
+One screenshot &mdash; *"I got 3 people skipped but they have an email in the
+registry"* &mdash; and nothing in the resolver was wrong: **the three people were
+on the register twice.** Once from the employee file with an address and a long
+legal name, once typed into the role picker with a shorter spelling and no
+identifier at all; the role sat on the typed row, so the message resolved to the
+copy nobody could email. The Name column shows the first three words
+(&sect;81.1), which is why the two rows read as one on screen. **A NAME IS NEVER
+AN IDENTIFIER** &mdash; this register already holds *Ahmed Mostafa Mohamed El
+Gebely* and *Ahmed Mostafa Mohamed Abou El Einen*, and it held one human under
+two spellings of their own name. So identity is **Emp ID, then email**, asked in
+one place, reporting which rung answered. **THE FOURTH KIND OF DUPLICATE IS A
+RESEMBLANCE AND IS SAID AS ONE**: &sect;81's three all match on a value two rows
+SHARE and this pair shared nothing, so it is flagged amber, only where one side
+has no identifier at all, and only where the shorter name **runs through** the
+longer one in order &mdash; a chain of names, never a similarity score, because
+a score needs a threshold and a threshold is a number nobody can defend the day
+it pairs two strangers. **BOTH HAND-TYPED DOORS WERE THE FACTORY** and both ask
+for an identifier now, refusing one already here by naming who &mdash; while a
+matching NAME stops nothing, and neither identifier is required, because the SMO
+often knows a name and a role and nothing else; the row is MARKED instead.
+**THE PICKER SUGGESTS BEFORE IT CREATES**: a name typed a little differently
+matched nobody and the only thing on offer was "+ Add", which is exactly how the
+twins were made. **A DIFFERENCE IS AN OFFER, NEVER AN INSTRUCTION** (Islam's
+ruling, and it is not the obvious way round): the file looks newer because it
+was just uploaded and very often is not &mdash; it is the export somebody edited
+two cells of three weeks ago. Which forced the round trip to be re-measured with
+every pick TAKEN, or the fixed point was measuring the defaults (&sect;51.11
+again). And **MERGE IS A DELETE THAT HANDS OVER EVERY POINTER FIRST**, ending in
+`deletePerson()` on purpose: anything it forgot still points at the row, so the
+delete refuses and the merge fails loudly instead of dropping a role. Nothing in
+&sect;82 merges itself &mdash; every join is a person answering a question the
+platform could not, and the platform's job is to notice, name both sides, and
+refuse to guess.*
+
+*Earlier: 2026-08-24 &mdash; **v3.22: the register, the deck, and the
 door** (&sect;69). Eleven things Islam asked for while using the product, and
 the ones worth reading are the four that turned out to be one argument each.
 **A CONTROL SPANNING TWO COLUMNS BELONGS IN NEITHER**: the register's role

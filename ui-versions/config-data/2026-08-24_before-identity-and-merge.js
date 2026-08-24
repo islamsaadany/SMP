@@ -145,16 +145,7 @@ var SRCSET = { set: null, unit: "", inw: "", status: "", q: "" };
 /* What has been typed into the "add a set" row. Screen state, never saved. */
 var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
 
-/* ── THE ADD ROW HOLDS THREE FIELDS NOW, AND ONE ANSWER (§82.3) ────
-   It was a name and nothing else. `NEWPERSON` is what has been typed into all
-   three, and `hit` is the register row the identifier landed on — the stop,
-   held here rather than recomputed on every paint, because the person
-   answering it may go and look at the row it names and come back. */
-var ADDROLE = null, ADDROLE_KIND = "owner";
-var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
-function newPersonReset(){
-  NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
-}
+var ADDROLE = null, ADDROLE_KIND = "owner", NEWPERSON = "";
 /* The same treatment for the BU list's add row, and for the same reason:
    held in a global rather than read off the input at submit time, because
    the repaint any other change causes would otherwise throw away what is
@@ -707,82 +698,7 @@ function registerDupes(){
     Object.keys(m).forEach(function(k){ if (m[k].length > 1) out[k] = m[k]; });
     return out;
   }
-  return { empId: only(byId), email: only(byAddr), name: only(byName),
-           likely: likelyDupes() };
-}
-
-/* ── THE FOURTH KIND, AND IT IS THE ONE THAT BIT (§82.2) ───────────
-   The three above all match on a value the two rows SHARE. The pair that sent
-   a message to nobody shared nothing: one row came off the employee file with
-   an address and a long legal name, the other was typed into the role picker
-   with a shorter spelling of the same name and no identifier at all. Nothing
-   matched, so nothing was flagged, and the role sat on the row with no way to
-   reach anybody.
-
-   SO THIS ONE IS A RESEMBLANCE, AND IT IS SAID AS ONE. It never merges
-   anything and never blocks anything — it puts the pair in front of the SMO,
-   who is the only one who can know.
-
-   TWO RULES KEEP IT QUIET ENOUGH TO READ:
-
-     ONE SIDE MUST BE UNIDENTIFIED. Two rows that both carry an employee number
-       are two employees, whatever they are called — this tenant really does
-       hold two people whose first four names are identical (§81.1), and
-       pairing those every time the page paints would teach whoever reads it to
-       stop reading it. What is suspicious is a row with NOTHING to identify it
-       that looks like somebody already here.
-     THE SHORTER NAME MUST RUN THROUGH THE LONGER ONE, in order, for at least
-       two names. Arabic names are a chain and the chain's ORDER is part of it:
-       "Mirna Gamal Sadek" inside "Mirna Gamal Sadek Soliman" is the same
-       person written short; "Mohamed Ali" inside "Ahmed Mohamed Ali" is not.
-
-   Retired rows are excluded for the same reason the other three exclude them:
-   they cannot sign in, no upload places them, and a merge of one would be
-   tidying a row that is already out of the way. */
-function nameWords(v){
-  return String(v == null ? "" : v).trim().toLowerCase().split(/\s+/).filter(Boolean);
-}
-/* Is every word of `few`, in order, somewhere in `many`. Not a similarity
-   score: a score needs a threshold, and a threshold is a number nobody can
-   defend when it puts two strangers together. */
-function nameRunsThrough(few, many){
-  if (few.length < 2 || few.length > many.length) return false;
-  var i = 0;
-  for (var j = 0; j < many.length && i < few.length; j++) {
-    if (many[j] === few[i]) i++;
-  }
-  return i === few.length;
-}
-function namesLookLikeOne(a, b){
-  var x = nameWords(a), y = nameWords(b);
-  if (!x.length || !y.length) return false;
-  if (x[0] !== y[0]) return false;   /* the chain starts with the given name */
-  return x.length <= y.length ? nameRunsThrough(x, y) : nameRunsThrough(y, x);
-}
-function likelyDupes(){
-  /* The names are split ONCE. This is the only quadratic walk on the page and
-     the client's register is five hundred rows — splitting both sides inside
-     the comparison did it a quarter of a million times per paint. */
-  var live = [];
-  PEOPLE.forEach(function(p){
-    if (personActive(p))
-      live.push({ p:p, w:nameWords(p.name), id:personIdentified(p) });
-  });
-  var out = [];
-  live.forEach(function(a){
-    if (a.id) return;                         /* one side must be unidentified */
-    live.forEach(function(b){
-      if (b.p.key === a.p.key) return;
-      if (!a.w.length || !b.w.length || a.w[0] !== b.w[0]) return;
-      var few = a.w.length <= b.w.length ? a.w : b.w;
-      var many = few === a.w ? b.w : a.w;
-      if (!nameRunsThrough(few, many)) return;
-      /* Both unidentified: report the pair ONCE rather than from each end. */
-      if (!b.id && b.p.key < a.p.key) return;
-      out.push({ key:a.p.key, other:b.p.key });
-    });
-  });
-  return out;
+  return { empId: only(byId), email: only(byAddr), name: only(byName) };
 }
 /* Is THIS row part of one, and what should the mark say. One function, so the
    row's mark, the header's count and the filter cannot disagree about who is
@@ -795,30 +711,6 @@ function personDupe(p, d){
   if (id && d.empId[id]) out.push({ kind:"empId", value:id, rows:d.empId[id] });
   if (a && d.email[a]) out.push({ kind:"email", value:a, rows:d.email[a] });
   if (n && d.name[n]) out.push({ kind:"name", value:p.name, rows:d.name[n] });
-  var near = (d.likely || []).filter(function(l){
-    return l.key === p.key || l.other === p.key;
-  }).map(function(l){
-    return personBy(l.key === p.key ? l.other : l.key);
-  }).filter(Boolean);
-  if (near.length) out.push({ kind:"likely", value:p.name, rows:near });
-  return out;
-}
-/* Who this row could be merged with, most likely first. The merge control
-   reads it, so the mark and the offer name the same rows. */
-/* `dupes` is passed in wherever the caller already has it. The register draws
-   this for EVERY row, and registerDupes() walks the whole list — asked afresh
-   per row it is the register squared, which on 33 people is invisible and on
-   the 500-row client file is the page not painting. */
-function mergeCandidates(key, dupes){
-  var p = personBy(key);
-  if (!p) return [];
-  var d = dupes || registerDupes(), seen = {}, out = [];
-  personDupe(p, d).forEach(function(x){
-    x.rows.forEach(function(q){
-      if (!q || q.key === key || seen[q.key]) return;
-      seen[q.key] = 1; out.push({ person:q, why:x.kind });
-    });
-  });
   return out;
 }
 
@@ -837,37 +729,6 @@ function mintPersonKey(name){
   var n = 2;
   while (personBy(base + n)) n++;
   return base + n;
-}
-
-/* ── ADDING SOMEBODY THE REGISTER MAY ALREADY HAVE (§82.3) ─────────
-   Both hand-typed doors — the Add row at the foot of the register and the role
-   picker's "add new" — took a NAME and nothing else, which is how the three
-   twins were made: somebody gave a role to a person who was already here,
-   spelled their name a little differently, and got a second row with no
-   address on it.
-
-   THE STOP IS ON THE IDENTIFIER, NEVER ON THE NAME. Two people really can
-   share a name, so refusing on one would refuse a real colleague; an employee
-   number or an address on two rows is always a fault. A resemblance in the
-   name is worth SAYING, so it is returned as a warning that does not stop
-   anything — the same split the register's marks keep (§82.2).
-
-   AND NEITHER IS REQUIRED. The SMO often knows a name and a role and nothing
-   else, and a door that demanded an employee number would mean a unit could
-   not be given its head until HR replied. The row is added and MARKED instead:
-   an unidentified row is exactly the shape the next upload cannot match, and
-   the register says so on the row rather than finding out months later. */
-function personAddCheck(o){
-  var id = personIdKey(o && o.empId), mail = personMailKey(o && o.email);
-  var byId = id ? personByEmpId(id) : null;
-  if (byId) return { stop:true, by:"empId", value:id, person:byId };
-  var hits = mail ? peopleByEmail(mail) : [];
-  if (hits.length) return { stop:true, by:"email", value:mail, person:hits[0] };
-  var like = PEOPLE.filter(function(p){
-    return personActive(p) && namesLookLikeOne(o && o.name, p.name);
-  });
-  if (like.length) return { stop:false, by:"name", person:like[0], others:like };
-  return { stop:false };
 }
 
 /* Create and return the key. `where` follows the same encoding personRoles()
@@ -893,69 +754,15 @@ function addPerson(o){
   return key;
 }
 
-/* ── WHO A ROW IS, ASKED IN ONE PLACE (§82.1) ──────────────────────
-   Islam: "the name is not the challenge, the identifier really would be the ID
-   and the email."
-
-   THE NAME IS NEVER AN IDENTIFIER, and the register proves why twice over: it
-   holds *Ahmed Mostafa Mohamed El Gebely* and *Ahmed Mostafa Mohamed Abou El
-   Einen* (§81.1), and it holds the same human under two spellings of their own
-   name — which is how three people ended up on it twice, each once from the
-   employee file with an address and once typed into the role picker with
-   nothing. A name tells a PERSON who they are looking at; it must never tell
-   the platform.
-
-   THE LADDER IS EMP ID, THEN EMAIL, AND THERE IS NO THIRD RUNG. The employee
-   number survives a marriage, a transfer and a new mail domain (§54.2); the
-   address survives a tenant that never had employee numbers. Anything below
-   those two is a RESEMBLANCE, and a resemblance is something to show the SMO,
-   never something to act on.
-
-   AN ADDRESS ON TWO ROWS ANSWERS NOTHING, exactly as it answers nothing at the
-   door (§69.23): `personByEmail` returns a person only where the address means
-   ONE person, and the caller is told it was ambiguous rather than handed the
-   first row. This is §57's rule about a Main BU that holds several, in a
-   second place — read past it and you attach somebody to a coincidence. */
-function personIdKey(v){ return String(v == null ? "" : v).trim(); }
-function personMailKey(v){ return String(v == null ? "" : v).trim().toLowerCase(); }
-
 /* The employee number, matched the way the file will spell it: trimmed, and
    compared as text because a leading zero is part of an employee number and
    102347 read as a number is not the same string as 0102347. */
 function personByEmpId(id){
-  var want = personIdKey(id);
+  var want = String(id == null ? "" : id).trim();
   if (!want) return null;
   return PEOPLE.filter(function(p){
-    return personIdKey(p.empId) === want;
+    return String(p.empId == null ? "" : p.empId).trim() === want;
   })[0] || null;
-}
-function peopleByEmail(email){
-  var want = personMailKey(email);
-  if (!want) return [];
-  return PEOPLE.filter(function(p){ return personMailKey(p.email) === want; });
-}
-function personByEmail(email){
-  var hits = peopleByEmail(email);
-  return hits.length === 1 ? hits[0] : null;
-}
-/* `by` is which rung answered, because every caller has to SAY so: a review
-   line reading "matched" tells nobody whether the employee number or the
-   address decided, and those are two different things to check. */
-function personByIdentity(id, email){
-  var byId = personByEmpId(id);
-  if (byId) return { person:byId, by:"empId" };
-  var hits = peopleByEmail(email);
-  if (hits.length === 1) return { person:hits[0], by:"email" };
-  if (hits.length > 1) return { person:null, by:"ambiguous", rows:hits };
-  return null;
-}
-/* A row with neither is not a fault — the SMO may know somebody's name and
-   nothing else, and refusing to add them would mean a role could not be given
-   until HR answered an email (§82.3). It is a row that cannot be matched by
-   anything, so it is MARKED, and marking it is what stops it quietly becoming
-   somebody's second row. */
-function personIdentified(p){
-  return !!(p && (personIdKey(p.empId) || personMailKey(p.email)));
 }
 
 /* ── One fact, two editing surfaces ─────────────────────────────────
@@ -1225,143 +1032,6 @@ function deletePerson(key){
   if (i < 0) return false;
   PEOPLE.splice(i, 1);
   return true;
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   TWO ROWS, ONE PERSON (§82.4)
-
-   Retiring is for somebody who LEFT and deleting is for a row that should
-   never have existed (§69). This is the third case and it is neither: two rows
-   that were both real entries about the same human, one of which has the
-   address and the other of which has the role. Retiring either loses
-   something; deleting either is refused, because a row holding a role is a row
-   something points at.
-
-   THE SURVIVOR IS CHOSEN, NEVER DERIVED. "Keep the older one" or "keep the one
-   with the address" are both defensible and both wrong sometimes, and the cost
-   of guessing is a sign-in name changing under somebody who is using it — the
-   key is minted from the name (§35) and `credentials` is keyed on it, so the
-   row that survives is the password that survives. So the panel asks, and
-   names what each row would cost.
-
-   WHAT MOVES IS EVERY POINTER `personDeleteBlockers` REFUSES A DELETE FOR, and
-   that is not a coincidence — it is the same list read the other way round. A
-   merge is a delete that first hands each pointer to somebody, which is why
-   the last thing it does is call deletePerson(): if anything was missed the
-   delete refuses and the merge fails LOUDLY rather than dropping a role.
-
-   VALUES ARE NOT POINTERS AND ARE ASKED ABOUT SEPARATELY. A blank on the
-   survivor is filled from the other row without asking — there is nothing to
-   lose. Where both rows say something and they differ, the SMO picks, and the
-   default is the survivor's own, because that is the row they chose to keep
-   (§82.5's rule, in the other direction: what is already recorded wins unless
-   somebody says otherwise). */
-var MERGE_FIELDS = [
-  { k:"name",   label:"Name" },
-  { k:"empId",  label:"Emp ID" },
-  { k:"email",  label:"Email" },
-  { k:"title",  label:"Job title" },
-  { k:"phone",  label:"Mobile" },
-  { k:"mainbu", label:"Official BU" }
-];
-function mergeVal(p, k){ return String((p && p[k]) == null ? "" : p[k]).trim(); }
-
-/* What would happen, said before it happens. Changes nothing — the same
-   contract planPeopleFile() keeps, and for the same reason. */
-function personMergePlan(keepKey, dropKey){
-  var keep = personBy(keepKey), drop = personBy(dropKey);
-  if (!keep || !drop || keep.key === drop.key) return null;
-  var plan = { keep:keep, drop:drop, fills:[], picks:[], roles:[], owns:[], seat:null };
-
-  MERGE_FIELDS.forEach(function(f){
-    var a = mergeVal(keep, f.k), b = mergeVal(drop, f.k);
-    if (!b) return;
-    if (!a) { plan.fills.push({ k:f.k, label:f.label, value:b }); return; }
-    if (a.toLowerCase() !== b.toLowerCase())
-      plan.picks.push({ k:f.k, label:f.label, keep:a, drop:b, take:false });
-  });
-
-  /* GRANTED ROLES ONLY. Contributor and Employee are read off an attachment
-     and off being named (§55) — they are not held and there is nothing to
-     hand over; they arrive by themselves once the survivor sits where the
-     other row sat. */
-  personRoles(drop).forEach(function(r){
-    if (SMPRules.isOwnLinesRole(r.role)) return;
-    if (r.role === "super" || r.role === "gceo" || r.role === "cceo") {
-      plan.seat = { role:r.role, at:r.at };
-      return;
-    }
-    plan.roles.push({ role:r.role, at:r.at,
-                      already: roleHolderAt(r.role, r.at) === keep.key });
-  });
-
-  setsList().forEach(function(s){
-    if (s.owner === drop.key) plan.owns.push({ kind:"set", name:s.name });
-  });
-  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
-    var u = unitLike(t);
-    if (!u) return;
-    reportItems(u).forEach(function(x){
-      if (x.obj && x.obj.src && x.obj.src.by === drop.key)
-        plan.owns.push({ kind:"figure", name:u.name + " \u00b7 " + x.obj.name });
-    });
-  });
-  claimsList().forEach(function(c){
-    if (c.by === drop.key && c.state === "open")
-      plan.owns.push({ kind:"claim", name:"an open request for a figure" });
-  });
-
-  /* Where the other row sat, offered only when the survivor sits nowhere —
-     moving somebody who already has a unit is a real act and a merge must not
-     do it as a side effect (§54.4's rule about the Role column, applied to
-     the attachment). */
-  var at = personAt(drop);
-  if (at && !personAt(keep)) plan.moveTo = at;
-  return plan;
-}
-
-/* `picks` is a map of field key to true, meaning "take the other row's". The
-   panel passes what was ticked; nothing is read back off the DOM here. */
-function mergePeople(keepKey, dropKey, picks){
-  var plan = personMergePlan(keepKey, dropKey);
-  if (!plan) return { ok:false, why:"There is nothing to merge." };
-  var keep = plan.keep, drop = plan.drop, took = picks || {};
-
-  plan.fills.forEach(function(f){ keep[f.k] = f.value; });
-  plan.picks.forEach(function(f){ if (took[f.k]) keep[f.k] = f.drop; });
-
-  /* THE ATTACHMENT BEFORE THE ROLES, and the survivor’s own kept
-     afterwards. grantPersonRole() writes `p.unit` as part of seating somebody
-     (that is what "this is now their unit" means, §33) — which is right when a
-     picker does it and wrong here, where the survivor already sits somewhere
-     and the merge was not asked to move them. */
-  if (plan.moveTo) attachPersonAt(keep, plan.moveTo);
-  var sat = personAt(keep);
-
-  if (plan.seat && !keep.role) grantPersonRole(keep.key, plan.seat.role, plan.seat.at);
-  plan.roles.forEach(function(r){
-    revokePersonRole(drop.key, r.role, r.at);
-    grantPersonRole(keep.key, r.role, r.at);
-  });
-  if (sat && personAt(keep) !== sat) attachPersonAt(keep, sat);
-
-  setsList().forEach(function(s){ if (s.owner === drop.key) s.owner = keep.key; });
-  UNIT_KEYS.concat(FUNCTION_KEYS.map(function(f){ return "fn:" + f; })).forEach(function(t){
-    var u = unitLike(t);
-    if (!u) return;
-    reportItems(u).forEach(function(x){
-      if (x.obj && x.obj.src && x.obj.src.by === drop.key) x.obj.src.by = keep.key;
-    });
-  });
-  claimsList().forEach(function(c){ if (c.by === drop.key) c.by = keep.key; });
-
-  /* AND THE DELETE IS THE CHECK. Anything this function forgot to hand over is
-     still pointing at the row, so the delete refuses and the merge reports it
-     rather than leaving a role attached to a person who no longer exists. */
-  var left = personDeleteBlockers(drop.key);
-  if (left.length) return { ok:false, why:left.map(function(b){ return b.full; }).join("; and ") };
-  if (!deletePerson(drop.key)) return { ok:false, why:"The second row could not be removed." };
-  return { ok:true, keep:keep.key, name:keep.name };
 }
 
 /* Where a role can be attached, for the second half of the picker. A role
@@ -1784,8 +1454,9 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
    before it lands, exactly as a plan's is, and a reader that mutated on the
    way past would make the review a report of what had already been done. */
 function planPeopleFile(rows){
-  var plan = { rows:[], problems:[], notices:[], newBus:[] };
-  var seenId = {}, seenMail = {};
+  var plan = { rows:[], problems:[], notices:[], newBus:[],
+               added:0, updated:0, retired:0, restored:0, roles:0 };
+  var seen = {};
   (rows || []).forEach(function(r, i){
     /* THE FILE'S OWN ROW NUMBER, not the index. Whoever fixes a problem is
        looking at Excel, where the header is row 1 and the first person is row
@@ -1794,79 +1465,27 @@ function planPeopleFile(rows){
     var at = "Row " + (i + 2);
     var id     = fileTxt(r["Emp ID"]);
     var name   = fileTxt(r["Name"]);
-    var email  = fileTxt(r["Email"]);
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
     var status = fileTxt(r["Status"]);
-    var label  = name || id || email || "this row";
+    var label  = name || id || "this row";
 
-    /* ── THE LADDER, ROW BY ROW (§82.5) ────────────────────────────
-       Emp ID, then email, then nothing — personByIdentity()'s rule, asked
-       here so the review can SAY which rung answered. A row with neither is
-       still left alone: there is nothing to match it on and nothing to add it
-       under, and inventing a person from a name is exactly what put three
-       humans on this register twice. */
-    if (!id && !email) {
-      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number and no email, so ' +
-        'there is nothing to match them on. Left exactly as they are.' });
+    if (!id) {
+      plan.notices.push({ at:at, msg:'"' + label + '" has no employee number, so there is ' +
+        'nothing to match them on. Left exactly as they are.' });
       return;
     }
-    if (id && seenId[id]) {
+    if (seen[id]) {
       plan.problems.push({ at:at, msg:'employee number ' + id + ' is used twice in this file — ' +
-        'also on ' + seenId[id] + '. One row per person.' });
+        'also on ' + seen[id] + '. One row per person.' });
       return;
     }
-    if (email && seenMail[personMailKey(email)]) {
-      plan.problems.push({ at:at, msg:email + ' is used twice in this file — also on ' +
-        seenMail[personMailKey(email)] + '. One row per person.' });
-      return;
-    }
-    if (id) seenId[id] = at;
-    if (email) seenMail[personMailKey(email)] = at;
+    seen[id] = at;
 
-    /* AN ADDRESS ON TWO ROWS ANSWERS NOTHING, and the file cannot decide which
-       of them it meant. It is a problem rather than a question, because the
-       fix is on the register and there is now a control for it — the answer
-       is to merge those two rows, not to pick one here and leave the pair
-       standing (§82.4). */
-    var mailHits = peopleByEmail(email);
-    if (mailHits.length > 1) {
-      plan.problems.push({ at:at, msg:email + ' is on ' + plural(mailHits.length, "row") +
-        ' of the register already (' + mailHits.map(function(p){ return p.name; }).join(", ") +
-        '). Merge those rows first — the ⋮ menu on either one.' });
-      return;
-    }
-    var byId = personByEmpId(id), byMail = mailHits[0] || null;
-    var existing = byId || byMail;
-    var matchedBy = byId ? "empId" : (byMail ? "email" : null);
-
-    /* ── THE TWO CONFLICTS, AND NEITHER IS GUESSED (§82.5) ─────────
-       Islam: "adding a new person of course should conflict, but the name is
-       not the challenge — the identifier really would be the ID and the
-       email."
-
-       Both of these are a row whose two identifiers disagree, and the platform
-       cannot know which is right: an employee number and an address that point
-       at two DIFFERENT people (a recycled address, a mistyped number, or two
-       rows that are really one person), and an address already here arriving
-       under a number the register has never seen (a new payroll system, or a
-       genuinely new colleague given a leaver's address).
-
-       APPLYING EITHER READING SILENTLY IS THE FAULT. Matching on the number
-       would quietly move somebody else's address; matching on the address
-       would quietly renumber somebody. So the row is set aside, the two
-       readings are named with the people they mean, and nothing in the file
-       can be applied until every one of them has been answered. */
-    var conflict = null;
-    if (byId && byMail && byId.key !== byMail.key) {
-      conflict = { kind:"twoPeople", byId:byId, byMail:byMail };
-    } else if (!byId && id && byMail) {
-      conflict = { kind:"newId", byId:null, byMail:byMail };
-    }
-
-    if (!existing && !conflict && !name) {
-      plan.problems.push({ at:at, msg:(id ? 'employee number ' + id : email) +
-        ' is not on the register and the row has no name, so there is nobody to add.' });
+    var existing = personByEmpId(id);
+    if (!existing && !name) {
+      plan.problems.push({ at:at, msg:'employee number ' + id + ' is not on the register and the ' +
+        'row has no name, so there is nobody to add.' });
       return;
     }
 
@@ -1959,11 +1578,7 @@ function planPeopleFile(rows){
           'to a unit and holding nothing else already is. Leave Role blank.' });
         return;
       }
-      /* NOT WHILE THE ROW IS A CONFLICT. "They already hold it" is read off
-         the person the row was matched to, and a conflict has not been matched
-         to anybody yet — dropping the grant on one reading would silently drop
-         it on the other (§82.5). */
-      var holdsIt = !conflict && existing &&
+      var holdsIt = existing &&
         personRoles(existing).some(function(r){ return r.role === roleKey; });
       /* Cleared BEFORE anything is asked of it, and the checks below are then
          skipped rather than run against a role nobody is granting. Written the
@@ -2003,126 +1618,43 @@ function planPeopleFile(rows){
     }
 
     var row = { at:at, id:id, key:existing ? existing.key : null,
-                matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
-                title:fileTxt(r["Job title"]), email:email,
+                title:fileTxt(r["Job title"]), email:fileTxt(r["Email"]),
                 phone:fileTxt(r["Mobile"]), mainbu:buName, where:where,
-                role:roleKey, wantActive:wantActive,
-                conflict:conflict, choice:null, picks:[] };
+                role:roleKey, wantActive:wantActive, changes:[] };
 
-    row.action = conflict ? "conflict" : (existing ? "match" : "add");
-    /* A conflict is matched to NOBODY until it is answered, so there is
-       nothing to compare against and no picks to show. They are built by
-       peopleRowChoose() the moment the reading is chosen. */
-    peopleRowPicks(row, conflict ? null : existing);
+    if (!existing) {
+      row.action = "add";
+      plan.added++;
+      if (roleKey) plan.roles++;
+      if (wantActive === false) plan.retired++;
+    } else {
+      row.action = "update";
+      /* WHAT ACTUALLY MOVES, field by field. A review saying "31 people
+         updated" when 31 rows came back unchanged from the download teaches
+         whoever reads it to stop reading it. A blank cell is "nothing to say
+         about this", never "clear it" — the file is an amendment, and an
+         amendment that erased every field it left empty would empty the
+         register on its first round trip. */
+      var was = existing;
+      var cmp = [["name", "name", row.name], ["title", "job title", row.title],
+                 ["email", "email", row.email], ["phone", "mobile", row.phone]];
+      cmp.forEach(function(c){
+        if (c[2] && fileTxt(was[c[0]]) !== c[2]) row.changes.push(c[1]);
+      });
+      if (buName && mainbuKey(was.mainbu) !== mainbuKey(buName)) row.changes.push("official BU");
+      /* The PLACE, which is the other column and the one that decides access.
+         Reported separately or a review saying "BU" could mean either, and the
+         two really can move independently. */
+      if (where && personAt(was) !== where) row.changes.push("unit");
+      if (roleKey) { row.changes.push("role"); plan.roles++; }
+      if (wantActive === true  && !personActive(was)) { row.changes.push("restored"); plan.restored++; }
+      if (wantActive === false &&  personActive(was)) { row.changes.push("retired");  plan.retired++; }
+      if (row.changes.length) plan.updated++; else row.action = "same";
+    }
     plan.rows.push(row);
   });
   return plan;
-}
-
-/* ── WHAT THE FILE WOULD OVERWRITE, ONE TICK EACH (§82.6) ──────────
-   Islam, asked who wins where the file and the register disagree: the
-   register. That is the right way round and it is not the obvious one — the
-   file looks newer because it was just uploaded, and it very often is not: it
-   is the export somebody downloaded three weeks ago, edited two cells of, and
-   sent back. What is on the register is what people have been correcting by
-   hand ever since.
-
-   SO A DIFFERENCE IS AN OFFER, NEVER AN INSTRUCTION. Every field the file
-   would change is listed with what is recorded beside what would replace it,
-   and nothing moves until it is ticked. Take all from the file is one press
-   above the list, because a real HR export legitimately changes thirty job
-   titles and thirty ticks would make the safe default the unusable one.
-
-   A BLANK CELL IS STILL "NOTHING TO SAY" and never appears here at all — it is
-   the rule the whole file is read under (§54) and it did not change. */
-var PEOPLE_FILE_PICKS = [
-  { k:"name",   label:"Name" },
-  { k:"title",  label:"Job title" },
-  { k:"email",  label:"Email" },
-  { k:"phone",  label:"Mobile" },
-  { k:"mainbu", label:"Official BU" }
-];
-function peopleRowPicks(row, existing){
-  row.picks = [];
-  if (!existing) return row;
-  PEOPLE_FILE_PICKS.forEach(function(f){
-    var now = fileTxt(row[f.k]);
-    if (!now) return;
-    var was = fileTxt(existing[f.k]);
-    var same = f.k === "mainbu" ? mainbuKey(was) === mainbuKey(now)
-                                : was === now;
-    if (same) return;
-    /* A blank on the register is not a disagreement — there is nothing to
-       lose, so it is filled and not asked about. */
-    row.picks.push({ k:f.k, label:f.label, was:was, now:now, take:!was });
-  });
-  return row;
-}
-/* WHAT THIS ROW WOULD ACTUALLY DO, read live. The picks are ticked after the
-   plan is built, so a tally counted at plan time would be describing a screen
-   nobody is looking at any more — and a row whose only differences are all
-   untaken changes nothing and must say so. */
-function peopleRowChanges(row){
-  var out = [];
-  var eff = peopleRowEffective(row);
-  if (eff.mode === "add") return ["added"];
-  if (eff.mode !== "match") return [];
-  var was = eff.key ? personBy(eff.key) : null;
-  row.picks.forEach(function(f){ if (f.take) out.push(f.label.toLowerCase()); });
-  if (was) {
-    if (row.where && personAt(was) !== row.where) out.push("unit");
-    if (row.role) out.push("role");
-    if (row.wantActive === true  && !personActive(was)) out.push("restored");
-    if (row.wantActive === false &&  personActive(was)) out.push("retired");
-  }
-  return out;
-}
-function peopleFileTally(plan){
-  var t = { added:0, updated:0, same:0, roles:0, retired:0, restored:0,
-            conflicts:0, undecided:0 };
-  (plan.rows || []).forEach(function(row){
-    if (row.action === "conflict") {
-      t.conflicts++;
-      if (!row.choice) { t.undecided++; return; }
-      if (row.choice.mode === "skip") return;
-    }
-    var eff = peopleRowEffective(row);
-    if (eff.mode === "skip") return;
-    if (eff.mode === "add") { t.added++; if (row.role) t.roles++;
-                              if (row.wantActive === false) t.retired++; return; }
-    var ch = peopleRowChanges(row);
-    if (!ch.length) { t.same++; return; }
-    t.updated++;
-    if (ch.indexOf("role") > -1) t.roles++;
-    if (ch.indexOf("retired") > -1) t.retired++;
-    if (ch.indexOf("restored") > -1) t.restored++;
-  });
-  return t;
-}
-/* One reading of a row, whatever route it took to get here: a plain match, an
-   add, a skip, or the answer somebody gave a conflict. The renderer and the
-   applier both ask this, or the review would describe one thing and the Apply
-   would do another. */
-function peopleRowEffective(row){
-  if (row.action === "conflict") {
-    if (!row.choice) return { mode:"undecided", key:null };
-    if (row.choice.mode === "skip") return { mode:"skip", key:null };
-    if (row.choice.mode === "add")  return { mode:"add",  key:null };
-    return { mode:"match", key:row.choice.key };
-  }
-  return row.action === "add" ? { mode:"add", key:null }
-                              : { mode:"match", key:row.key };
-}
-/* Answering a conflict re-reads the row against the person it now means: the
-   picks were built against nobody (or against the other reading), and a review
-   that went on showing the first reading's differences would be describing a
-   decision nobody made. */
-function peopleRowChoose(row, choice){
-  row.choice = choice;
-  var eff = peopleRowEffective(row);
-  peopleRowPicks(row, eff.key ? personBy(eff.key) : null);
-  return row;
 }
 
 /* Applies what the plan says, in the one order that works: the department
@@ -2134,9 +1666,8 @@ function applyPeopleFile(plan){
   plan.newBus.forEach(function(n){ addMainbu(n); });
 
   plan.rows.forEach(function(row){
-    var eff = peopleRowEffective(row);
-    if (eff.mode === "skip" || eff.mode === "undecided") return;
-    var p = eff.key ? personBy(eff.key) : null;
+    if (row.action === "same") return;
+    var p = row.key ? personBy(row.key) : null;
     if (!p) {
       var key = addPerson({ name:row.name, title:row.title, phone:row.phone,
                             empId:row.id, email:row.email, mainbu:row.mainbu,
@@ -2144,14 +1675,12 @@ function applyPeopleFile(plan){
       p = personBy(key);
       if (!p) return;
     } else {
-      /* ONLY WHAT WAS TICKED (§82.6). Every field the file would change is on
-         `row.picks` with its own answer, and a field that is not there is
-         either blank in the file or the same on both sides — in neither case
-         is there anything to write. The employee number is the exception and
-         is not a pick: it is the identity the row was matched ON, or the
-         number a conflict was answered by accepting. */
-      row.picks.forEach(function(f){ if (f.take) p[f.k] = f.now; });
-      if (row.id) p.empId = row.id;
+      if (row.name)  p.name  = row.name;
+      if (row.title) p.title = row.title;
+      if (row.email) p.email = row.email;
+      if (row.phone) p.phone = row.phone;
+      p.empId = row.id;
+      if (row.mainbu) p.mainbu = row.mainbu;
       /* Only when there is somewhere to put them. A person whose department
          maps to nothing keeps whatever attachment they already had — moving
          them to "nowhere" because Risk has not been mapped yet would take away

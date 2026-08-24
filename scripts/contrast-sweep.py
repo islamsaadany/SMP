@@ -282,7 +282,40 @@ with sync_playwright() as p:
                                                   "els=>els.map(e=>e.dataset.sub2)"):
                     pg.click(f'.setuppane .secrow [data-sub2="{k2}"]'); pg.wait_for_timeout(420)
                     scan("setup/"+key+"/"+k2)
-            except Exception: pass
+                # THE REGISTER'S THREE NEW SURFACES ARE STATES, NOT PAGES (82).
+                # The add row's refusal, the merge comparison and the upload's
+                # conflict box exist only after somebody does something, and
+                # every one of them is coloured type on a coloured ground —
+                # exactly what §38.5 keeps catching. 41.5 again: a state
+                # nothing navigates to is a state nothing measures.
+                if key == "people":
+                    pg.evaluate('''() => {
+                      window.__a = addPerson({ name:"Sweep Case Gamal Soliman", empId:"SW-1",
+                                               email:"sweep.case@example.com" });
+                      window.__b = addPerson({ name:"Sweep Case Gamal", where:UNIT_KEYS[0],
+                                               role:"owner" });
+                      NEWPERSON = { name:"Sweep Case Gamal Soliman", empId:"",
+                                    email:"sweep.case@example.com",
+                                    hit: window.__a, hitBy:"email", warn:null };
+                      PPLF.plan = planPeopleFile([
+                        { "Emp ID":"SW-1", "Name":"Sweep Case", "Email":"nobody.else@example.com",
+                          "Job title":"A different title" },
+                        { "Emp ID":"SW-NEW", "Name":"Sweep Case",
+                          "Email":"sweep.case@example.com" }]);
+                      mergeReset(); PMERGE.a = window.__b; PMERGE.b = window.__a;
+                      PMERGE.keep = window.__a;
+                      paint(); }''')
+                    pg.wait_for_timeout(500)
+                    scan("setup/people/states")
+                    pg.evaluate('''() => {
+                      NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
+                      PPLF.plan = null; mergeReset();
+                      revokePersonRole(window.__b, "owner", UNIT_KEYS[0]);
+                      deletePerson(window.__b); deletePerson(window.__a);
+                      paint(); }''')
+                    pg.wait_for_timeout(400)
+            except Exception as e:
+                print("   (setup/%s partly skipped: %s)" % (key, e))
         c.close()
     b.close()
 # COUNTED, NOT TYPED (51.11). The number was a literal and went stale the

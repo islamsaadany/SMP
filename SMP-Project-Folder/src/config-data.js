@@ -442,6 +442,63 @@ function branding(){
   return b;
 }
 
+/* ══ COMMUNICATION (§72) ═══════════════════════════════════════════
+   What the tenant sets about the mail the platform sends: the display name it
+   arrives under, where a reply goes, the kicker over the header and the small
+   print at the bottom. The ADDRESS is not here — it is tied to the domain
+   verified with Resend, so it lives in the deployment's environment
+   (`SMP_MAIL_FROM`) where changing it is a deployment decision.
+
+   A READER MUST NEVER CREATE THE FIELD IT WAS LOOKING FOR (§42, §50.6): the
+   `branding()` shape above is the one that taught this, by inventing a
+   four-null object the database never held and so putting a phantom group
+   change in every save. `comms()` hands back a shared FROZEN empty, the
+   writing half is its own function, and clearing the last field deletes the
+   key again — so a tenant that has set nothing writes nothing. */
+var COMMS_EMPTY = Object.freeze({});
+var COMMS_FIELDS = ["fromName", "replyTo", "eyebrow", "footer"];
+function comms(){
+  var c = GROUP.comms;
+  return (c && typeof c === "object") ? c : COMMS_EMPTY;
+}
+function commsWritable(){
+  if (!GROUP.comms || typeof GROUP.comms !== "object") GROUP.comms = {};
+  return GROUP.comms;
+}
+function commsSet(key, value){
+  if (COMMS_FIELDS.indexOf(key) < 0) return;
+  var v = String(value == null ? "" : value).trim();
+  var c = commsWritable();
+  if (v) c[key] = v; else delete c[key];
+  if (!Object.keys(c).length) delete GROUP.comms;
+}
+
+/* WHAT AN EMAIL ACTUALLY CARRIES, resolved once. The preview on the setup
+   page, the test send and every message the platform will send later all read
+   THIS — a preview drawn from anywhere else is a picture of an email nobody
+   receives. Defaults are computed here rather than stored, for the same reason
+   BRAND_DEFAULT is not written into the graph: a stored copy stops tracking
+   the shipped one the moment it improves. */
+function commsShape(){
+  var c = comms(), b = branding();
+  return {
+    org:      GROUP.org || "",
+    fromName: c.fromName || GROUP.org || "Strategy Management Platform",
+    replyTo:  c.replyTo || "",
+    eyebrow:  c.eyebrow || "Strategy Management Platform",
+    footer:   c.footer || COMMS_FOOTER_DEFAULT(),
+    accent:   b.accent || "",
+    panel:    b.bar || "",
+    href:     (typeof location !== "undefined" && location.origin && location.origin !== "null")
+                ? location.origin + "/" : ""
+  };
+}
+function COMMS_FOOTER_DEFAULT(){
+  return "Sent from the Strategy Management Platform" +
+         (GROUP.org ? " for " + GROUP.org : "") +
+         ". If you were not expecting this, tell your SMO.";
+}
+
 /* Every token the two inputs decide, worked out here so the page, the live
    preview and the applied result cannot disagree — one function, three
    readers. Returns {} when the tenant has set nothing. */

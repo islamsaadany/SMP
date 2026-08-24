@@ -528,6 +528,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
   in a browser, in **both** live and demo mode.
+- **Email (since v3.23, §72):** `api/mail.js` is the only place `RESEND_API_KEY`
+  is read, and nothing it returns contains it. **The ADDRESS is `SMP_MAIL_FROM`
+  in the environment** (tied to the domain verified with Resend — a deployment
+  decision); the **display name, reply-to, kicker and footer are `GROUP.comms`**,
+  which rides in `org.extra` and needs no migration. `SMP-Project-Folder/src/mail.js`
+  (`MAIL.html`) builds the message, and the **preview on Setup › Communication is
+  that same call** — drawn into a **shadow root, never an iframe**, because the
+  CSP says `frame-src 'none'`. Email is not the web: tables not divs, every style
+  inline, colours literal, and **no data-URI image** (Gmail and Outlook block
+  them, so the tenant's mark cannot travel in a message). **The accent is a FILL,
+  never type** — as the kicker it measured 3.94:1, §38.4 for the sixth time — and
+  the ink over the tenant's bar is DERIVED, so a light bar does not silently
+  produce white on white. `scripts/test-mail-contrast.js` reads the builder's
+  OUTPUT and tracks the ground with a stack of `<td bgcolor>`; run it after
+  touching `mail.js`. "Present" ≠ "accepted" ≠ "verified": the page reports only
+  what was actually asked, and matches a bad key on Resend's MESSAGE because
+  Resend answers an invalid key with **400**, not 401.
 - **PWA (since v3.1, §26):** `manifest.webmanifest`, `sw.js` and `icons/` at the
   repo root; `vercel.json` sets the content types, and `scripts/dev-server.js`
   carries the same list so it can be tested locally. The worker caches the shell

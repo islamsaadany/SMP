@@ -490,14 +490,7 @@
             white-space:pre; overflow:auto; }
   td.was { color:var(--ink-3); text-decoration:line-through; }
   td.now { color:var(--ink); font-weight:600; }
-  /* --good IS A FILL, --good-tx IS THE WORD (§38.4/§38.5, seventh time).
-     `.editbtn.danger` two rules down already takes `--bad-tx` and this took the
-     raw `--good`: half a family converted, which is worse than none. Measured
-     at 3.77:1 on slate/light — found by the sweep the day a page put this
-     button somewhere the sweep could actually reach it, having sat unread on
-     Import's Apply buttons, which only appear once a file has been chosen. The
-     BORDER keeps `--good`: a border has no ratio to meet. */
-  .editbtn.apply { border-color:var(--good); color:var(--good-tx); }
+  .editbtn.apply { border-color:var(--good); color:var(--good); }
   .editbtn.apply:hover { background:var(--good-bg); }
 
   /* Three states, and the first two were too close to tell apart: a quarter

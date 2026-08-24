@@ -300,13 +300,7 @@
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding },
-      /* §72. In *How it looks* rather than a group of its own, and that is the
-         argument rather than the leftover: an email leaves wearing the tenant's
-         accent, the tenant's name and the tenant's footer, so what it looks
-         like is the same subject Branding answers — one step further out, where
-         the reader is not in the platform at all. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Communication",         render:renderComms }
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -359,11 +353,6 @@
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
     REPORTING = null;
     CLEARING = null;
-    /* The sentence under Send a test goes with the page (§72.6). Cleared HERE
-       rather than read-and-cleared by the renderer: a render function with a
-       side effect is the shape `branding()` had when it was inventing fields
-       nobody stored (§42, §50.6). */
-    if (typeof MAILSENT !== "undefined") MAILSENT = null;
   }
   /* Which section of a container tab is open, per tab. Kept per tab rather than
      globally so moving between Performance and Strategy does not reset both. */
@@ -2735,74 +2724,6 @@
         applyBrand(); paint();
       });
     });
-
-    /* ── Communication (§72) ────────────────────────────────────────
-       `fieldSaved()` rather than `paint()`, the same rule the register learned
-       in §71.2: a repaint on `change` replaces the field somebody has just
-       tabbed out of, and the next field they meant to reach has moved. What
-       DOES have to follow the edit is the preview, so it is redrawn on its
-       own — one element, not the page. */
-    document.querySelectorAll("[data-comms]").forEach(function(inp){
-      inp.addEventListener("change", function(){
-        commsSet(inp.dataset.comms, inp.value);
-        fieldSaved();
-        paintMailPreview();
-      });
-    });
-    document.querySelectorAll("[data-commsreset]").forEach(function(b){
-      b.addEventListener("click", function(){
-        delete GROUP.comms;
-        paint();
-      });
-    });
-    /* THE WORD IS WRITTEN INTO THE ELEMENT, not painted (§63.4): a repaint
-       would replace the button that was just pressed, and with it the sentence
-       saying what pressing it did. */
-    document.querySelectorAll("[data-mailtest]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var to = document.getElementById("mailto");
-        var out = document.getElementById("mailsent");
-        var addr = to ? to.value.trim() : "";
-        /* `good-tx` and `bad-tx` are TOKENS, not classes — written as a class
-           name this line would have silently coloured nothing. */
-        function say(msg, ok){
-          MAILSENT = { ok: ok, msg: msg };
-          if (!out) return;
-          out.textContent = msg;
-          out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
-        }
-        if (!addr) return say("Type an address first.", false);
-        say("Sending…", null);
-        b.disabled = true;
-        var sh = commsShape();
-        SYNC.mailTest({
-          to: addr,
-          subject: "Test from " + (sh.org || "the Strategy Management Platform"),
-          html: MAIL.sampleFor(sh),
-          fromName: sh.fromName,
-          replyTo: sh.replyTo
-        }, function(err){
-          b.disabled = false;
-          say(err ? err : ("Sent to " + addr + ". If it is not there, look in the junk folder."), !err);
-        });
-      });
-    });
-    paintMailPreview();
-    /* Asked ONCE PER SESSION, the same shape as the register's password
-       states: whether a key is present and what Resend says about the domain
-       are the server's facts, and a page that guessed them would report a
-       working deployment as broken. Once, not once per paint — and not once
-       per visit either, because the answer depends on environment variables
-       that cannot change without a redeploy. The section says so, so nobody
-       reads a stale verdict as a live one. */
-    if (MAILSTATE === null && document.getElementById("mailprev") &&
-        typeof SYNC !== "undefined" && SYNC.isLive()) {
-      MAILSTATE = { pending:true };
-      SYNC.mailStatus(function(err, st){
-        MAILSTATE = err ? { error: err } : st;
-        paint();
-      });
-    }
 
     wirePicker();
 

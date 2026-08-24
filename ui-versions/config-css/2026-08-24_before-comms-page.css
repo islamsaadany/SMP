@@ -865,21 +865,3 @@
   .umarkimg { display:block; max-width:190px; max-height:34px; width:auto; height:auto; }
   .umarkpick { cursor:pointer; }
   .logonote { color:var(--bad); margin:10px 0 0; }
-
-  /* ══ THE EMAIL PREVIEW (§72) ═══════════════════════════════════════
-     The host for a shadow root, not a box with rules of its own — the email's
-     own markup carries every style it has (it must: mail clients strip
-     stylesheets), and the shadow boundary is what stops the platform's
-     stylesheet reaching in. An iframe would have done the same job and the
-     tenant's CSP says `frame-src 'none'` (§43.6), so it would have drawn a
-     blank box instead.
-
-     The ground is the mail client's, not the platform's: the email is drawn on
-     #F4F6FA on purpose and a preview on the page's own surface would show a
-     card with no edge. It stays that colour in dark mode for the same reason —
-     the message really does arrive light. */
-  .mailprev { background:#F4F6FA; border:1px solid var(--line); border-radius:8px;
-              padding:4px 0; max-height:520px; overflow:auto; }
-  /* Three words in a 90px button is three lines. It sits in a row with a text
-     field, so it may keep its own width. */
-  [data-mailtest] { white-space:nowrap; }

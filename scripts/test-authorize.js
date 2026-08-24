@@ -100,6 +100,23 @@ refuses(headKey, function (s) { s.group.branding = { accent: "#123456" }; },
   "a unit head cannot change the tenant's branding");
 allows("smo", function (s) { s.group.branding = { accent: "#123456" }; },
   "the SMO can");
+/* Communication (§72). The same shape as branding, and asserted rather than
+   left to the unknown bucket: an unclassified change IS refused for everybody
+   but the SMO, so this passes either way — what it pins is that the refusal
+   names Setup, which is what sends the person somewhere (§16.7). */
+refuses(headKey, function (s) { s.group.comms = { fromName: "Raya Trade" }; },
+  "a unit head cannot change the communication settings");
+allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
+  "the SMO can");
+(function () {
+  /* A.collect, NOT A.classify — the lesson §54.5 left further down this file,
+     applied forward rather than re-learned. */
+  const inc = clone(SEED); inc.group.comms = { fromName: "Raya Trade" };
+  const ch = A.collect(SEED, inc, R.worldOf(SEED))
+              .filter(function (c) { return c.what === "the communication settings"; })[0];
+  check("a communication change is classified as setup, not as unknown",
+        !!ch && ch.kind === "setup", ch ? ch.kind : "not classified at all");
+})();
 
 /* The regression that the browser found and the unit tests did not: the
    platform used to send a branding of four nulls that the database never

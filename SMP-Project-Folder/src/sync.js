@@ -407,6 +407,15 @@ var SYNC = (function () {
       .catch(function (e) { done(String(e.message || e), null); });
   }
 
+  function mailPost(body, done) {
+    fetch("/api/mail", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
+      .catch(function (e) { done(String(e.message || e), null); });
+  }
+
   return {
     isLive: function () { return live; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
@@ -451,6 +460,24 @@ var SYNC = (function () {
     declarations: function (done) {
       authPost({ action: "declarations" },
         function (err, j) { done(err, err ? null : (j.said || {})); });
+    },
+    /* ── MAIL (§72) ─────────────────────────────────────────────────
+       Its own endpoint, and its own two lines here rather than a third copy of
+       authPost's six: /api/mail is not /api/auth, and the key it holds must
+       never be somewhere a caller could ask for it by accident. `status` says
+       whether the deployment can send at all and what address it would send
+       from — never the key itself.
+
+       `test` carries the HTML the PAGE built, so the message that arrives is
+       the one the preview drew. Building it a second time on the server would
+       be the drift §72 exists to prevent, one medium out. */
+    mailStatus: function (done) {
+      mailPost({ action: "status" }, function (err, j) { done(err, err ? null : j); });
+    },
+    mailTest: function (o, done) {
+      mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
+                 fromName: o.fromName, replyTo: o.replyTo },
+        function (err, j) { done(err, err ? null : j); });
     },
     boot: function (paint) {
       repaint = paint;

@@ -10,6 +10,7 @@ const path = require("path");
 const stateHandler = require("../api/state.js");
 const authHandler = require("../api/auth.js");
 const feedbackHandler = require("../api/feedback.js");
+const mailHandler = require("../api/mail.js");
 
 const ROOT = path.join(__dirname, "..");
 const PORT = parseInt(process.argv[2], 10) || 3999;
@@ -42,6 +43,7 @@ http.createServer(function (req, res) {
   if (url.pathname === "/api/state") return stateHandler(req, res);
   if (url.pathname === "/api/auth") return authHandler(req, res);
   if (url.pathname === "/api/feedback") return feedbackHandler(req, res);
+  if (url.pathname === "/api/mail") return mailHandler(req, res);
   if (url.pathname === "/favicon.ico") { res.statusCode = 204; return res.end(); }
   let p = path.normalize(path.join(ROOT, decodeURIComponent(url.pathname)));
   if (!p.startsWith(ROOT)) { res.statusCode = 403; return res.end(); }

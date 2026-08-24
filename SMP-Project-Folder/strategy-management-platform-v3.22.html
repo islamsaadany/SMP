@@ -2119,6 +2119,24 @@
   .umarkpick { cursor:pointer; }
   .logonote { color:var(--bad); margin:10px 0 0; }
 
+  /* ══ THE EMAIL PREVIEW (§72) ═══════════════════════════════════════
+     The host for a shadow root, not a box with rules of its own — the email's
+     own markup carries every style it has (it must: mail clients strip
+     stylesheets), and the shadow boundary is what stops the platform's
+     stylesheet reaching in. An iframe would have done the same job and the
+     tenant's CSP says `frame-src 'none'` (§43.6), so it would have drawn a
+     blank box instead.
+
+     The ground is the mail client's, not the platform's: the email is drawn on
+     #F4F6FA on purpose and a preview on the page's own surface would show a
+     card with no edge. It stays that colour in dark mode for the same reason —
+     the message really does arrive light. */
+  .mailprev { background:#F4F6FA; border:1px solid var(--line); border-radius:8px;
+              padding:4px 0; max-height:520px; overflow:auto; }
+  /* Three words in a 90px button is three lines. It sits in a row with a text
+     field, so it may keep its own width. */
+  [data-mailtest] { white-space:nowrap; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -2611,7 +2629,14 @@
             white-space:pre; overflow:auto; }
   td.was { color:var(--ink-3); text-decoration:line-through; }
   td.now { color:var(--ink); font-weight:600; }
-  .editbtn.apply { border-color:var(--good); color:var(--good); }
+  /* --good IS A FILL, --good-tx IS THE WORD (§38.4/§38.5, seventh time).
+     `.editbtn.danger` two rules down already takes `--bad-tx` and this took the
+     raw `--good`: half a family converted, which is worse than none. Measured
+     at 3.77:1 on slate/light — found by the sweep the day a page put this
+     button somewhere the sweep could actually reach it, having sat unread on
+     Import's Apply buttons, which only appear once a file has been chosen. The
+     BORDER keeps `--good`: a border has no ratio to meet. */
+  .editbtn.apply { border-color:var(--good); color:var(--good-tx); }
   .editbtn.apply:hover { background:var(--good-bg); }
 
   /* Three states, and the first two were too close to tell apart: a quarter
@@ -4089,6 +4114,11 @@ THEME.apply();
     { key:"c_units",  area:"a_setup", scope:"setup", label:"Business units",  note:"Names, codes and which units are active" },
     { key:"c_people", area:"a_setup", scope:"setup", label:"People register", note:"Everyone the platform knows, and what they hold" },
     { key:"c_brand",  area:"a_setup", scope:"setup", label:"Branding",         note:"The tenant's colours, and the type they carry" },
+    /* Sending mail OUT of the platform (§72). Setup, and the same argument
+       branding makes: an email leaves over the organisation's name, so who may
+       decide what that name is and what the message looks like is not a
+       question about the screen somebody happens to be on. */
+    { key:"c_comms",  area:"a_setup", scope:"setup", label:"Communication",     note:"The address emails come from, the name on them, and how they look" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -6183,6 +6213,63 @@ function branding(){
     if (!(k in b)) b[k] = BRAND_DEFAULT[k];
   });
   return b;
+}
+
+/* ══ COMMUNICATION (§72) ═══════════════════════════════════════════
+   What the tenant sets about the mail the platform sends: the display name it
+   arrives under, where a reply goes, the kicker over the header and the small
+   print at the bottom. The ADDRESS is not here — it is tied to the domain
+   verified with Resend, so it lives in the deployment's environment
+   (`SMP_MAIL_FROM`) where changing it is a deployment decision.
+
+   A READER MUST NEVER CREATE THE FIELD IT WAS LOOKING FOR (§42, §50.6): the
+   `branding()` shape above is the one that taught this, by inventing a
+   four-null object the database never held and so putting a phantom group
+   change in every save. `comms()` hands back a shared FROZEN empty, the
+   writing half is its own function, and clearing the last field deletes the
+   key again — so a tenant that has set nothing writes nothing. */
+var COMMS_EMPTY = Object.freeze({});
+var COMMS_FIELDS = ["fromName", "replyTo", "eyebrow", "footer"];
+function comms(){
+  var c = GROUP.comms;
+  return (c && typeof c === "object") ? c : COMMS_EMPTY;
+}
+function commsWritable(){
+  if (!GROUP.comms || typeof GROUP.comms !== "object") GROUP.comms = {};
+  return GROUP.comms;
+}
+function commsSet(key, value){
+  if (COMMS_FIELDS.indexOf(key) < 0) return;
+  var v = String(value == null ? "" : value).trim();
+  var c = commsWritable();
+  if (v) c[key] = v; else delete c[key];
+  if (!Object.keys(c).length) delete GROUP.comms;
+}
+
+/* WHAT AN EMAIL ACTUALLY CARRIES, resolved once. The preview on the setup
+   page, the test send and every message the platform will send later all read
+   THIS — a preview drawn from anywhere else is a picture of an email nobody
+   receives. Defaults are computed here rather than stored, for the same reason
+   BRAND_DEFAULT is not written into the graph: a stored copy stops tracking
+   the shipped one the moment it improves. */
+function commsShape(){
+  var c = comms(), b = branding();
+  return {
+    org:      GROUP.org || "",
+    fromName: c.fromName || GROUP.org || "Strategy Management Platform",
+    replyTo:  c.replyTo || "",
+    eyebrow:  c.eyebrow || "Strategy Management Platform",
+    footer:   c.footer || COMMS_FOOTER_DEFAULT(),
+    accent:   b.accent || "",
+    panel:    b.bar || "",
+    href:     (typeof location !== "undefined" && location.origin && location.origin !== "null")
+                ? location.origin + "/" : ""
+  };
+}
+function COMMS_FOOTER_DEFAULT(){
+  return "Sent from the Strategy Management Platform" +
+         (GROUP.org ? " for " + GROUP.org : "") +
+         ". If you were not expecting this, tell your SMO.";
 }
 
 /* Every token the two inputs decide, worked out here so the page, the live
@@ -12768,6 +12855,194 @@ function peopleFromWorkbook(sheets){
 
 </script>
 <script>
+/* ══ THE EMAIL THE PLATFORM SENDS (§72) ═══════════════════════════════════
+   Islam: "I need to have a test email send to see the design of the email and
+   the sender of the email name etc."
+
+   ONE FUNCTION BUILDS THE HTML, and the preview on the setup page and the test
+   send are the SAME call — a preview drawn from anything but the real builder
+   is a picture of an email nobody will receive (§50's rule about the deck,
+   one medium further out).
+
+   EMAIL IS NOT THE WEB, and the whole shape of this file is that sentence:
+
+   · TABLES, NOT DIVS. Outlook renders through Word, which has no flexbox, no
+     grid, and no reliable `max-width` on a block. A table with fixed widths is
+     the only layout every client agrees on.
+   · EVERY STYLE INLINE. Gmail strips <style> from the head on some clients and
+     keeps it on others, so a design that depends on it is a design that is
+     right half the time.
+   · NO DATA-URI IMAGE, and this is the one that cost a decision. The tenant's
+     mark is stored as a data URI (§52) — and Gmail and Outlook BLOCK data-URI
+     images outright. An <img src="data:…"> is not "sometimes hidden"; it is a
+     broken-image box in the clients most people read mail in. So the header is
+     TYPOGRAPHIC: the organisation's name set in the tenant's own accent
+     colour. To carry the real mark, the platform would have to serve it from a
+     URL an email client can fetch unauthenticated — which is a decision about
+     making a logo public, and it is Islam's to make rather than mine to
+     assume.
+   · COLOURS ARE LITERAL. No custom properties: `var()` is not supported in
+     most mail clients, so every colour is written out.
+   ──────────────────────────────────────────────────────────────────────── */
+var MAIL = (function(){
+
+  /* Email has no esc() to borrow and its own reasons to want one: a subject or
+     a signature is typed by a person, and it lands inside markup. */
+  function e(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  /* A typed paragraph becomes paragraphs. The composer is a textarea, so the
+     line breaks somebody put in are the only structure the message has —
+     §51.1's lesson (a paragraph typed as two must read as two), in a medium
+     where `white-space:pre-line` is not dependable. */
+  function paras(text, colour){
+    var blocks = String(text == null ? "" : text).split(/\n{2,}/)
+      .map(function(b){ return b.trim(); }).filter(Boolean);
+    if (!blocks.length) return "";
+    return blocks.map(function(b){
+      return '<p style="margin:0 0 16px;font:400 15px/1.6 Helvetica,Arial,sans-serif;' +
+        'color:' + colour + '">' + e(b).replace(/\n/g, "<br>") + '</p>';
+    }).join("");
+  }
+
+  /* The tenant's own accent, falling back to the house gold. Read from
+     branding where the tenant has set one, so an email looks like the platform
+     it came from rather than like a different product. */
+  function accentOf(o){
+    var a = String((o && o.accent) || "").trim();
+    return /^#[0-9a-fA-F]{3,8}$/.test(a) ? a : "#B8862B";
+  }
+  function panelOf(o){
+    var p = String((o && o.panel) || "").trim();
+    return /^#[0-9a-fA-F]{3,8}$/.test(p) ? p : "#16325C";
+  }
+
+  /* ── A COLOUR THAT WORKS AS A FILL USUALLY FAILS AS TYPE (§38.4) ──────
+     Written first with the accent as the kicker over the panel, which measures
+     3.94:1 on the house pair — the same trap this project has walked into five
+     times, and the first version of this file walked into it again. The accent
+     moves to a BAR, which is a fill and has no ratio to meet, and the kicker
+     takes the panel's own ink softened toward it.
+
+     AND THE INK IS DERIVED, NOT ASSUMED. `--panel` is whatever Branding sets,
+     so white-on-panel is only safe while the tenant keeps a dark bar. The
+     platform derives `--panel-ink` for exactly this reason and an email cannot
+     read a custom property, so the six lines are here. */
+  function rgbOf(h){
+    h = String(h || "").replace("#", "");
+    if (h.length === 3) h = h.charAt(0)+h.charAt(0)+h.charAt(1)+h.charAt(1)+h.charAt(2)+h.charAt(2);
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return [22, 50, 92];
+    return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+  }
+  function lumOf(c){
+    var s = c.map(function(v){ v /= 255;
+      return v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); });
+    return 0.2126*s[0] + 0.7152*s[1] + 0.0722*s[2];
+  }
+  function hexOf(c){
+    return "#" + c.map(function(v){
+      var x = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+      return x.length < 2 ? "0"+x : x;
+    }).join("").toUpperCase();
+  }
+  function inkOn(bg){ return lumOf(rgbOf(bg)) > 0.42 ? "#111A28" : "#FFFFFF"; }
+  function mix(a, b, t){
+    var A = rgbOf(a), B = rgbOf(b);
+    return hexOf([0,1,2].map(function(i){ return A[i]*(1-t) + B[i]*t; }));
+  }
+
+  /* o: { org, title, body, footer, accent, panel, cta:{label,href} } */
+  function html(o){
+    o = o || {};
+    var accent = accentOf(o), panel = panelOf(o);
+    var org = o.org || "Strategy Management Platform";
+    var onPanel = inkOn(panel), kicker = mix(onPanel, panel, 0.28);
+    /* #8A94A6 on the mail ground is 2.83:1 — measured, and the second of the
+       two failures in this file's first draft. */
+    var ink = "#1B2330", quiet = "#6B7686", line = "#E3E8EF", outer = "#626C7C";
+
+    var cta = (o.cta && o.cta.label && o.cta.href)
+      /* A button is a table with a background, because a styled <a> loses its
+         padding in Outlook and collapses to underlined text. */
+      ? '<table role="presentation" cellpadding="0" cellspacing="0" border="0" ' +
+          'style="margin:8px 0 22px"><tr><td bgcolor="' + panel + '" ' +
+          'style="border-radius:6px"><a href="' + e(o.cta.href) + '" ' +
+          'style="display:inline-block;padding:11px 22px;font:600 14px/1 Helvetica,Arial,sans-serif;' +
+          'color:' + onPanel + ';text-decoration:none">' + e(o.cta.label) + '</a></td></tr></table>'
+      : "";
+
+    return '<!doctype html><html><head><meta charset="utf-8">' +
+      '<meta name="viewport" content="width=device-width">' +
+      /* Says the design has a light ground on purpose, so a dark-mode client
+         does not invert it into something nobody drew. */
+      '<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">' +
+      '<title>' + e(o.title || org) + '</title></head>' +
+      '<body style="margin:0;padding:0;background:#F4F6FA">' +
+      /* What a mail list shows beside the subject. Hidden, and it is the one
+         piece of text most people read before deciding to open anything. */
+      '<div style="display:none;max-height:0;overflow:hidden;opacity:0">' +
+        e(o.preheader || o.title || "") + '</div>' +
+      '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" ' +
+        'style="background:#F4F6FA"><tr><td align="center" style="padding:28px 12px">' +
+        '<table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" ' +
+          'style="width:600px;max-width:100%;background:#FFFFFF;border:1px solid ' + line + ';' +
+          'border-radius:10px;overflow:hidden">' +
+
+          /* The header. Typographic, for the reason at the top of this file. */
+          '<tr><td bgcolor="' + panel + '" style="padding:20px 28px">' +
+            '<div style="font:700 15px/1.3 Helvetica,Arial,sans-serif;color:' + onPanel + ';' +
+              'letter-spacing:.01em">' + e(org) + '</div>' +
+            '<div style="font:600 10.5px/1.4 Helvetica,Arial,sans-serif;color:' + kicker + ';' +
+              'letter-spacing:.14em;text-transform:uppercase;padding-top:3px">' +
+              e(o.eyebrow || "Strategy Management Platform") + '</div>' +
+          '</td></tr>' +
+          /* THE ACCENT, WHERE AN ACCENT BELONGS: 3px of fill under the header.
+             It is the tenant's mark on the message and it has no word in it. */
+          '<tr><td bgcolor="' + accent + '" style="font-size:0;line-height:0;height:3px">&nbsp;</td></tr>' +
+
+          '<tr><td style="padding:28px 28px 8px">' +
+            (o.title
+              ? '<h1 style="margin:0 0 14px;font:700 22px/1.3 Helvetica,Arial,sans-serif;' +
+                'color:' + ink + '">' + e(o.title) + '</h1>'
+              : "") +
+            paras(o.body, ink) + cta +
+          '</td></tr>' +
+
+          '<tr><td style="padding:0 28px"><div style="border-top:1px solid ' + line + '"></div></td></tr>' +
+          '<tr><td style="padding:16px 28px 24px">' +
+            '<p style="margin:0;font:400 12px/1.55 Helvetica,Arial,sans-serif;color:' + quiet + '">' +
+              (o.footer ? e(o.footer).replace(/\n/g, "<br>") : "") + '</p>' +
+          '</td></tr>' +
+        '</table>' +
+        '<div style="font:400 11px/1.5 Helvetica,Arial,sans-serif;color:' + outer + ';padding:14px 8px 0">' +
+          e(org) + '</div>' +
+      '</td></tr></table></body></html>';
+  }
+
+  /* What the test send carries, so pressing it shows the real thing rather
+     than a page of lorem: every part of the template with something in it. */
+  function sampleFor(o){
+    return html({
+      org: o.org, accent: o.accent, panel: o.panel, footer: o.footer,
+      eyebrow: o.eyebrow,
+      title: "This is what your emails will look like",
+      preheader: "A test from the Strategy Management Platform.",
+      body: "This is a test, sent from the platform so you can see the design, " +
+            "the sender name and the address it arrives from before anybody else " +
+            "receives one.\n\nThe header carries your organisation's name and your " +
+            "accent colour. The footer below carries whatever you set on the " +
+            "Communication page.\n\nIf this looks right, it is ready to use.",
+      cta: { label: "Open the platform", href: o.href || "#" }
+    });
+  }
+
+  return { html: html, sampleFor: sampleFor };
+})();
+
+</script>
+<script>
 /* VOCABULARY, fixed after review:
      Group theme  = One Trade / Deepen Value Chain / Diversification.
                     The group's motto elements; the temple's columns.
@@ -18012,12 +18287,37 @@ function renderKB(){
         p: 'Installed, the platform opens with no network on the data baked into the file, ' +
            'and says so. Live figures are never cached — a stale actual shown as current ' +
            'is worse than one that will not load.' }
+    ]),
+    kbSection("mail", "Email — what the platform sends", [
+      { p: 'Mail leaves over the organisation\u2019s name, so <b>Setup \u203a Communication</b> ' +
+           'is the SMO\u2019s. It says whether this deployment can send at all, what a message ' +
+           'arrives as, what it looks like, and lets you send one to yourself before anybody ' +
+           'else receives one.' },
+      { h: "The address and the name are set in different places",
+        p: 'The <b>sending address</b> lives in the deployment\u2019s settings, because it is ' +
+           'tied to the domain verified with the mail service — changing it is a deployment ' +
+           'decision. The <b>sender name</b> beside it is yours, on this page, and changing ' +
+           'it takes effect at once.' },
+      { h: "Verified is not the same as working",
+        p: 'Until the domain is verified, a test can succeed and reach nobody but the ' +
+           'account holder. The page says which of those you are in, rather than reporting ' +
+           'a green light it has not earned.' },
+      { h: "The preview is the real message",
+        p: 'What you see on the page is drawn by the same code that builds what is sent — ' +
+           'never a picture of it. It carries your accent and your organisation\u2019s name ' +
+           'from <b>Branding</b>, so an email looks like the platform it came from.' },
+      { h: "Why there is no logo on it",
+        p: 'Mail clients block images carried inside a message, so a logo stored here would ' +
+           'arrive as a broken box in the places most people read mail. The header is set in ' +
+           'type instead. Putting the real mark on it means publishing it at an address ' +
+           'anyone can fetch, which is a decision to take rather than assume.' }
     ])
   ];
 
   var toc = '<div class="kb-toc">' + [
       ["scoring","Scoring"],["access","Access"],["labels","Labels"],
-      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"]
+      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"],
+      ["mail","Email"]
     ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
   return cfgHead("Knowledge base",
@@ -19425,6 +19725,239 @@ function renderCaps(){
         'the card is hidden rather than shown at zero. Each project carries a brief, its ' +
         'deliverables and outcomes \u2014 half its performance each \u2014 and its milestones, which are ' +
         'its execution.</div>');
+}
+
+/* ══ COMMUNICATION (§72) ══════════════════════════════════════════════════
+   Islam: "I need to have a test email send to see the design of the email and
+   the sender of the email name etc. A communication setup page should handle
+   all the relevant details."
+
+   FOUR SECTIONS, IN THE ORDER THE QUESTIONS ARRIVE: can this deployment send
+   at all · what does it arrive as · what does it look like · prove it.
+
+   THE FIRST SECTION IS THE SERVER'S ANSWER, NOT THE PAGE'S GUESS. Whether a
+   key is present and whether Resend has verified the domain are facts only the
+   server holds, so the page ASKS (once per visit, the same shape as the
+   register's password states) and says "not asked yet" while it waits rather
+   than reporting a working deployment as broken.
+
+   THE PREVIEW IS THE REAL BUILDER'S OUTPUT. `MAIL.html()` draws it and the
+   test send carries the same string — a preview drawn from anything else is a
+   picture of an email nobody receives.
+
+   AND IT IS DRAWN INSIDE A SHADOW ROOT, not an iframe: the tenant's own CSP
+   says `frame-src 'none'` (§43.6), so an iframe is a blank box. A shadow root
+   gives the same isolation the iframe was for — nothing in the platform's
+   stylesheet can reach into it, and nothing in the email's markup can reach
+   out — with no policy to widen. */
+var MAILSTATE = null;   /* the server's answer, once asked */
+var MAILSENT  = null;   /* {ok,msg} from the last test send, until the next paint */
+
+function commsStatusRows(){
+  var live = (typeof SYNC !== "undefined") && SYNC.isLive();
+  if (!live) {
+    return '<tr><td colspan="2"><span class="why" style="margin:0">' +
+      'There is no server here. Opened from a file the platform cannot send anything — ' +
+      'this page still sets what the sender looks like, and a deployment does the sending.' +
+      '</span></td></tr>';
+  }
+  var m = MAILSTATE;
+  /* NOT ASKED and ASKED-AND-ANSWERED-NOTHING are different sentences. The
+     guard sets a pending marker before the request goes out (which is what
+     stops every repaint asking again), so without this the page would spend
+     the round trip reporting a working deployment as having no key at all —
+     §30.2's distinction, on a different kind of absence. */
+  if (!m || m.pending) {
+    return '<tr><td><b>Asking the server</b></td><td class="cc"><span class="why" style="margin:0">…</span></td></tr>';
+  }
+  if (m.error) {
+    return '<tr><td><b>Could not ask</b><span class="why">' + esc(m.error) + '</span></td>' +
+           '<td class="cc"><span class="pill bad">Unknown</span></td></tr>';
+  }
+  /* Resend's own sentences end without a full stop, so relaying one straight
+     into a sentence of ours reads "API key is invalid The variable is set". */
+  function sentence(t){
+    t = String(t == null ? "" : t).trim();
+    return t && !/[.!?]$/.test(t) ? t + "." : t;
+  }
+  function row(label, why, verdict, good){
+    return '<tr><td><b>' + esc(label) + '</b>' +
+      (why ? '<span class="why">' + why + '</span>' : '') + '</td>' +
+      '<td class="cc"><span class="pill ' + (good ? "good" : "bad") + '">' + esc(verdict) + '</span></td></tr>';
+  }
+  /* A KEY BEING SET IS NOT A KEY BEING ACCEPTED, and only the domain check
+     ever finds that out — it is the one call the status makes with the key in
+     it. Reported here rather than on the domain row, where "not verified"
+     would send somebody to their DNS records over a typo in a variable. */
+  var d = m.domainCheck;
+  var bad = !!(d && d.keyBad);
+  /* AND "PRESENT" IS NOT "ACCEPTED" EITHER. The only moment the key is put to
+     Resend is the domain check, so when there is no address to check a domain
+     for, nothing has been asked — and a page that said "accepted" there would
+     be reporting a fact nobody established. */
+  var tried = !!(d && d.asked);
+  var out = row("A key to send with",
+    !m.hasKey ? 'Set <span class="mono">RESEND_API_KEY</span> in the deployment’s environment variables.'
+      : bad ? esc(sentence(d.why) || "Resend does not accept it.") +
+              ' The variable is set — the value in it is not one Resend knows.'
+      : tried ? 'Held by the deployment, never shown here. Resend accepted it.'
+              : 'Held by the deployment, never shown here. It has not been put to Resend yet.',
+    !m.hasKey ? "Missing" : bad ? "Not accepted" : tried ? "Accepted" : "Present",
+    !!m.hasKey && !bad);
+
+  out += row("The address it comes from",
+    m.from ? '<span class="mono">' + esc(m.from) + '</span>'
+           : 'Set <span class="mono">SMP_MAIL_FROM</span> in the deployment’s environment variables. ' +
+             'It lives there rather than here because it is tied to the domain verified with Resend.',
+    m.from ? "Set" : "Missing", !!m.from);
+
+  /* THE DOMAIN IS THE ONE THAT CATCHES PEOPLE OUT. Until Resend has verified
+     it, a send succeeds for the account holder and silently reaches nobody
+     else — so "ready" and "ready, for you only" have to be different words. */
+  if (m.from && !bad) {
+    if (m.sandbox) {
+      out += row("Resend’s test domain",
+        'Mail from <span class="mono">resend.dev</span> reaches the address the Resend account was opened with ' +
+        'and nobody else. Verify your own domain before sending to anyone here.',
+        "For you only", false);
+    } else if (!d) {
+      out += row("The domain " + (m.domain || ""),
+        'Not checked — there is no key to ask with.', "Unknown", false);
+    } else if (!d.asked) {
+      out += row("The domain " + (m.domain || ""),
+        esc(sentence(d.why) || "Resend could not be reached.") + ' This says nothing about the domain either way.',
+        "Not asked", false);
+    } else {
+      out += row("The domain " + (m.domain || ""),
+        d.ok ? 'Verified with Resend, so mail from it reaches anybody.'
+             : esc(sentence(d.why) || ("Resend says it is " + (d.status || "not verified") + ".")) +
+               ' Until it is verified, only the Resend account holder receives anything.',
+        d.ok ? "Verified" : "Not verified", !!d.ok);
+    }
+  }
+  return out;
+}
+
+function renderComms(){
+  /* THE PEN DOES SOMETHING HERE. Branding draws one and gates its fields on
+     the grant alone, so its edit icon is decoration — a control that changes
+     nothing is worse than no control. Four settings that go out over the
+     organisation's name are worth one deliberate press first, and it is the
+     shape Islam asked every Setup table to take: the edit icon, top right. */
+  var mayEdit = grant("c_comms") === "edit";
+  var editing = mayEdit && !!EDITING["comms"];
+  var c = comms(), sh = commsShape();
+  var set = COMMS_FIELDS.some(function(k){ return !!c[k]; });
+
+  function fld(key, label, why, placeholder, area){
+    var v = c[key] || "";
+    return '<tr><td style="width:32%"><b>' + esc(label) + '</b><span class="why">' + why + '</span></td>' +
+      '<td>' + (editing
+        ? (area
+            ? '<textarea class="fld" rows="3" data-comms="' + key + '" placeholder="' +
+              esc(placeholder) + '">' + esc(v) + '</textarea>'
+            : '<input class="fld" data-comms="' + key + '" value="' + esc(v) +
+              '" placeholder="' + esc(placeholder) + '">')
+        : (v ? '<span class="val">' + esc(v) + '</span>'
+             : '<span class="why" style="margin:0">' + esc(placeholder) + '</span>')) +
+      '</td></tr>';
+  }
+
+  var sender = '<div class="cfg"><table><thead><tr><th>What it is</th><th>Value</th></tr></thead><tbody>' +
+    fld("fromName", "Sender name",
+        'The name beside the address in somebody’s inbox. Empty means the organisation’s own name.',
+        sh.fromName) +
+    fld("replyTo", "Replies go to",
+        'Where a reply lands. Empty means the sending address, which nobody reads.',
+        "nobody — replies go to the sending address") +
+    fld("eyebrow", "Kicker",
+        'The small line under the organisation’s name in the header.',
+        sh.eyebrow) +
+    fld("footer", "Footer",
+        'The small print at the bottom of every message.', sh.footer, true) +
+    '</tbody></table></div>' +
+    (editing && set
+      ? '<div style="margin-top:12px"><button class="linkbu" data-commsreset="1">' +
+        'Put all four back to their defaults</button></div>'
+      : '');
+
+  /* The address the test defaults to is the signed-in person's own, off the
+     register — a test that has to be typed before it can be pressed is a test
+     most people do not run. */
+  var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
+  var mine = me ? personBy(me.key) : null;
+  var to = (mine && mine.email) || "";
+  var live = (typeof SYNC !== "undefined") && SYNC.isLive();
+  var sent = MAILSENT;
+
+  var test = '<div class="cfg"><table><tbody><tr>' +
+    '<td style="width:32%"><b>Send it to</b><span class="why">' +
+      (to ? 'Your own address, from the register.'
+          : 'You have no address on the register, so type one.') + '</span></td>' +
+    '<td><span class="brandpick">' +
+      '<input class="fld" id="mailto" value="' + esc(to) + '" placeholder="somebody@example.com"' +
+        (live ? '' : ' disabled') + ' style="max-width:280px">' +
+      '<button class="editbtn apply" data-mailtest="1"' + (live ? '' : ' disabled') + '>Send a test</button>' +
+      /* READ ONCE AND CLEARED. The sentence is written straight into the
+         element when the send answers, because a repaint would replace the
+         button that was just pressed (§63.4) — so this only exists to survive
+         a repaint that happens to land in between. Left standing, "API key is
+         invalid" would still be sitting under the button on a visit three days
+         later, describing a send nobody made. */
+      '<span class="why" id="mailsent" style="margin:0' +
+        (sent && sent.ok !== null ? ';color:var(--' + (sent.ok ? "good" : "bad") + '-tx)' : '') + '">' +
+        (sent ? esc(sent.msg) : (live ? '' : 'There is no server here to send it.')) +
+      '</span>' +
+    '</span></td></tr></tbody></table></div>';
+
+  return cfgHead("Communication",
+      ['<span class="pill kind">SMO</span>',
+       set ? 'set for this tenant' : 'using the defaults'],
+      "comms", mayEdit, null) +
+
+    section("", "Can this deployment send?",
+      "The key and the address live in the deployment’s environment variables, not here — " +
+      "they are tied to the domain verified with Resend, so changing one is a deployment decision " +
+      "rather than a screen one. This is the server’s own answer, asked once when you first " +
+      "opened this page — reload after changing a variable.",
+      '<div class="cfg"><table><thead><tr><th>What was checked</th>' +
+      '<th class="cc" style="width:18%">Verdict</th></tr></thead><tbody>' +
+      commsStatusRows() + '</tbody></table></div>') +
+
+    section("", "What it arrives as",
+      "Four things about the message that are the tenant’s to set. Everything else about how it " +
+      "looks comes from Branding, so an email looks like the platform it came from.",
+      sender) +
+
+    section("", "What it looks like",
+      "The real thing, drawn by the same code that builds what is sent — not a picture of it.",
+      '<div class="mailprev" id="mailprev"></div>') +
+
+    section("", "Prove it",
+      "One message, to one address, with every part of the template filled in. Nothing else is sent " +
+      "and nobody else is told.",
+      test);
+}
+
+/* THE PREVIEW, DRAWN INTO A SHADOW ROOT. Its own function because it is redrawn
+   on every field change without repainting the page — and because attachShadow
+   throws if one is already there, so "have I done this" has to be asked in
+   exactly one place. */
+function paintMailPreview(){
+  var host = document.getElementById("mailprev");
+  if (!host) return;
+  var root = host.shadowRoot;
+  if (!root) {
+    if (!host.attachShadow) {
+      /* No shadow DOM: say so rather than injecting the email into the page,
+         where the platform's own rules would restyle it and the preview would
+         be a picture of something nobody receives. */
+      host.textContent = "This browser cannot draw the preview.";
+      return;
+    }
+    root = host.attachShadow({ mode: "open" });
+  }
+  root.innerHTML = MAIL.sampleFor(commsShape());
 }
 
 </script>
@@ -21637,6 +22170,15 @@ var SYNC = (function () {
       .catch(function (e) { done(String(e.message || e), null); });
   }
 
+  function mailPost(body, done) {
+    fetch("/api/mail", { method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json(); })
+      .then(function (j) { done(j.ok ? null : (j.error || "failed"), j); })
+      .catch(function (e) { done(String(e.message || e), null); });
+  }
+
   return {
     isLive: function () { return live; },
     /* Flush now rather than on the next 800ms tick, and say what happened.
@@ -21681,6 +22223,24 @@ var SYNC = (function () {
     declarations: function (done) {
       authPost({ action: "declarations" },
         function (err, j) { done(err, err ? null : (j.said || {})); });
+    },
+    /* ── MAIL (§72) ─────────────────────────────────────────────────
+       Its own endpoint, and its own two lines here rather than a third copy of
+       authPost's six: /api/mail is not /api/auth, and the key it holds must
+       never be somewhere a caller could ask for it by accident. `status` says
+       whether the deployment can send at all and what address it would send
+       from — never the key itself.
+
+       `test` carries the HTML the PAGE built, so the message that arrives is
+       the one the preview drew. Building it a second time on the server would
+       be the drift §72 exists to prevent, one medium out. */
+    mailStatus: function (done) {
+      mailPost({ action: "status" }, function (err, j) { done(err, err ? null : j); });
+    },
+    mailTest: function (o, done) {
+      mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
+                 fromName: o.fromName, replyTo: o.replyTo },
+        function (err, j) { done(err, err ? null : j); });
     },
     boot: function (paint) {
       repaint = paint;
@@ -21895,7 +22455,13 @@ var SYNC = (function () {
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding }
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding },
+      /* §72. In *How it looks* rather than a group of its own, and that is the
+         argument rather than the leftover: an email leaves wearing the tenant's
+         accent, the tenant's name and the tenant's footer, so what it looks
+         like is the same subject Branding answers — one step further out, where
+         the reader is not in the platform at all. */
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Communication",         render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -21948,6 +22514,11 @@ var SYNC = (function () {
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
     REPORTING = null;
     CLEARING = null;
+    /* The sentence under Send a test goes with the page (§72.6). Cleared HERE
+       rather than read-and-cleared by the renderer: a render function with a
+       side effect is the shape `branding()` had when it was inventing fields
+       nobody stored (§42, §50.6). */
+    if (typeof MAILSENT !== "undefined") MAILSENT = null;
   }
   /* Which section of a container tab is open, per tab. Kept per tab rather than
      globally so moving between Performance and Strategy does not reset both. */
@@ -24319,6 +24890,74 @@ var SYNC = (function () {
         applyBrand(); paint();
       });
     });
+
+    /* ── Communication (§72) ────────────────────────────────────────
+       `fieldSaved()` rather than `paint()`, the same rule the register learned
+       in §71.2: a repaint on `change` replaces the field somebody has just
+       tabbed out of, and the next field they meant to reach has moved. What
+       DOES have to follow the edit is the preview, so it is redrawn on its
+       own — one element, not the page. */
+    document.querySelectorAll("[data-comms]").forEach(function(inp){
+      inp.addEventListener("change", function(){
+        commsSet(inp.dataset.comms, inp.value);
+        fieldSaved();
+        paintMailPreview();
+      });
+    });
+    document.querySelectorAll("[data-commsreset]").forEach(function(b){
+      b.addEventListener("click", function(){
+        delete GROUP.comms;
+        paint();
+      });
+    });
+    /* THE WORD IS WRITTEN INTO THE ELEMENT, not painted (§63.4): a repaint
+       would replace the button that was just pressed, and with it the sentence
+       saying what pressing it did. */
+    document.querySelectorAll("[data-mailtest]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var to = document.getElementById("mailto");
+        var out = document.getElementById("mailsent");
+        var addr = to ? to.value.trim() : "";
+        /* `good-tx` and `bad-tx` are TOKENS, not classes — written as a class
+           name this line would have silently coloured nothing. */
+        function say(msg, ok){
+          MAILSENT = { ok: ok, msg: msg };
+          if (!out) return;
+          out.textContent = msg;
+          out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+        }
+        if (!addr) return say("Type an address first.", false);
+        say("Sending…", null);
+        b.disabled = true;
+        var sh = commsShape();
+        SYNC.mailTest({
+          to: addr,
+          subject: "Test from " + (sh.org || "the Strategy Management Platform"),
+          html: MAIL.sampleFor(sh),
+          fromName: sh.fromName,
+          replyTo: sh.replyTo
+        }, function(err){
+          b.disabled = false;
+          say(err ? err : ("Sent to " + addr + ". If it is not there, look in the junk folder."), !err);
+        });
+      });
+    });
+    paintMailPreview();
+    /* Asked ONCE PER SESSION, the same shape as the register's password
+       states: whether a key is present and what Resend says about the domain
+       are the server's facts, and a page that guessed them would report a
+       working deployment as broken. Once, not once per paint — and not once
+       per visit either, because the answer depends on environment variables
+       that cannot change without a redeploy. The section says so, so nobody
+       reads a stale verdict as a live one. */
+    if (MAILSTATE === null && document.getElementById("mailprev") &&
+        typeof SYNC !== "undefined" && SYNC.isLive()) {
+      MAILSTATE = { pending:true };
+      SYNC.mailStatus(function(err, st){
+        MAILSTATE = err ? { error: err } : st;
+        paint();
+      });
+    }
 
     wirePicker();
 

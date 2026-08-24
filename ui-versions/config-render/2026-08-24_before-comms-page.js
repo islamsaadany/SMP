@@ -2058,37 +2058,12 @@ function renderKB(){
         p: 'Installed, the platform opens with no network on the data baked into the file, ' +
            'and says so. Live figures are never cached — a stale actual shown as current ' +
            'is worse than one that will not load.' }
-    ]),
-    kbSection("mail", "Email — what the platform sends", [
-      { p: 'Mail leaves over the organisation\u2019s name, so <b>Setup \u203a Communication</b> ' +
-           'is the SMO\u2019s. It says whether this deployment can send at all, what a message ' +
-           'arrives as, what it looks like, and lets you send one to yourself before anybody ' +
-           'else receives one.' },
-      { h: "The address and the name are set in different places",
-        p: 'The <b>sending address</b> lives in the deployment\u2019s settings, because it is ' +
-           'tied to the domain verified with the mail service — changing it is a deployment ' +
-           'decision. The <b>sender name</b> beside it is yours, on this page, and changing ' +
-           'it takes effect at once.' },
-      { h: "Verified is not the same as working",
-        p: 'Until the domain is verified, a test can succeed and reach nobody but the ' +
-           'account holder. The page says which of those you are in, rather than reporting ' +
-           'a green light it has not earned.' },
-      { h: "The preview is the real message",
-        p: 'What you see on the page is drawn by the same code that builds what is sent — ' +
-           'never a picture of it. It carries your accent and your organisation\u2019s name ' +
-           'from <b>Branding</b>, so an email looks like the platform it came from.' },
-      { h: "Why there is no logo on it",
-        p: 'Mail clients block images carried inside a message, so a logo stored here would ' +
-           'arrive as a broken box in the places most people read mail. The header is set in ' +
-           'type instead. Putting the real mark on it means publishing it at an address ' +
-           'anyone can fetch, which is a decision to take rather than assume.' }
     ])
   ];
 
   var toc = '<div class="kb-toc">' + [
       ["scoring","Scoring"],["access","Access"],["labels","Labels"],
-      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"],
-      ["mail","Email"]
+      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"]
     ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
   return cfgHead("Knowledge base",
@@ -3533,48 +3508,22 @@ function commsStatusRows(){
       '</span></td></tr>';
   }
   var m = MAILSTATE;
-  /* NOT ASKED and ASKED-AND-ANSWERED-NOTHING are different sentences. The
-     guard sets a pending marker before the request goes out (which is what
-     stops every repaint asking again), so without this the page would spend
-     the round trip reporting a working deployment as having no key at all —
-     §30.2's distinction, on a different kind of absence. */
-  if (!m || m.pending) {
+  if (!m) {
     return '<tr><td><b>Asking the server</b></td><td class="cc"><span class="why" style="margin:0">…</span></td></tr>';
   }
   if (m.error) {
     return '<tr><td><b>Could not ask</b><span class="why">' + esc(m.error) + '</span></td>' +
            '<td class="cc"><span class="pill bad">Unknown</span></td></tr>';
   }
-  /* Resend's own sentences end without a full stop, so relaying one straight
-     into a sentence of ours reads "API key is invalid The variable is set". */
-  function sentence(t){
-    t = String(t == null ? "" : t).trim();
-    return t && !/[.!?]$/.test(t) ? t + "." : t;
-  }
   function row(label, why, verdict, good){
     return '<tr><td><b>' + esc(label) + '</b>' +
       (why ? '<span class="why">' + why + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="pill ' + (good ? "good" : "bad") + '">' + esc(verdict) + '</span></td></tr>';
   }
-  /* A KEY BEING SET IS NOT A KEY BEING ACCEPTED, and only the domain check
-     ever finds that out — it is the one call the status makes with the key in
-     it. Reported here rather than on the domain row, where "not verified"
-     would send somebody to their DNS records over a typo in a variable. */
-  var d = m.domainCheck;
-  var bad = !!(d && d.keyBad);
-  /* AND "PRESENT" IS NOT "ACCEPTED" EITHER. The only moment the key is put to
-     Resend is the domain check, so when there is no address to check a domain
-     for, nothing has been asked — and a page that said "accepted" there would
-     be reporting a fact nobody established. */
-  var tried = !!(d && d.asked);
   var out = row("A key to send with",
-    !m.hasKey ? 'Set <span class="mono">RESEND_API_KEY</span> in the deployment’s environment variables.'
-      : bad ? esc(sentence(d.why) || "Resend does not accept it.") +
-              ' The variable is set — the value in it is not one Resend knows.'
-      : tried ? 'Held by the deployment, never shown here. Resend accepted it.'
-              : 'Held by the deployment, never shown here. It has not been put to Resend yet.',
-    !m.hasKey ? "Missing" : bad ? "Not accepted" : tried ? "Accepted" : "Present",
-    !!m.hasKey && !bad);
+    m.hasKey ? 'Held by the deployment, never shown here.'
+             : 'Set <span class="mono">RESEND_API_KEY</span> in the deployment’s environment variables.',
+    m.hasKey ? "Present" : "Missing", !!m.hasKey);
 
   out += row("The address it comes from",
     m.from ? '<span class="mono">' + esc(m.from) + '</span>'
@@ -3585,7 +3534,8 @@ function commsStatusRows(){
   /* THE DOMAIN IS THE ONE THAT CATCHES PEOPLE OUT. Until Resend has verified
      it, a send succeeds for the account holder and silently reaches nobody
      else — so "ready" and "ready, for you only" have to be different words. */
-  if (m.from && !bad) {
+  if (m.from) {
+    var d = m.domainCheck;
     if (m.sandbox) {
       out += row("Resend’s test domain",
         'Mail from <span class="mono">resend.dev</span> reaches the address the Resend account was opened with ' +
@@ -3596,12 +3546,12 @@ function commsStatusRows(){
         'Not checked — there is no key to ask with.', "Unknown", false);
     } else if (!d.asked) {
       out += row("The domain " + (m.domain || ""),
-        esc(sentence(d.why) || "Resend could not be reached.") + ' This says nothing about the domain either way.',
+        esc(d.why || "Resend could not be reached.") + ' This says nothing about the domain either way.',
         "Not asked", false);
     } else {
       out += row("The domain " + (m.domain || ""),
         d.ok ? 'Verified with Resend, so mail from it reaches anybody.'
-             : esc(sentence(d.why) || ("Resend says it is " + (d.status || "not verified") + ".")) +
+             : esc(d.why || ("Resend says it is " + (d.status || "not verified") + ".")) +
                ' Until it is verified, only the Resend account holder receives anything.',
         d.ok ? "Verified" : "Not verified", !!d.ok);
     }
@@ -3610,20 +3560,14 @@ function commsStatusRows(){
 }
 
 function renderComms(){
-  /* THE PEN DOES SOMETHING HERE. Branding draws one and gates its fields on
-     the grant alone, so its edit icon is decoration — a control that changes
-     nothing is worse than no control. Four settings that go out over the
-     organisation's name are worth one deliberate press first, and it is the
-     shape Islam asked every Setup table to take: the edit icon, top right. */
   var mayEdit = grant("c_comms") === "edit";
-  var editing = mayEdit && !!EDITING["comms"];
   var c = comms(), sh = commsShape();
   var set = COMMS_FIELDS.some(function(k){ return !!c[k]; });
 
   function fld(key, label, why, placeholder, area){
     var v = c[key] || "";
     return '<tr><td style="width:32%"><b>' + esc(label) + '</b><span class="why">' + why + '</span></td>' +
-      '<td>' + (editing
+      '<td>' + (mayEdit
         ? (area
             ? '<textarea class="fld" rows="3" data-comms="' + key + '" placeholder="' +
               esc(placeholder) + '">' + esc(v) + '</textarea>'
@@ -3647,7 +3591,7 @@ function renderComms(){
     fld("footer", "Footer",
         'The small print at the bottom of every message.', sh.footer, true) +
     '</tbody></table></div>' +
-    (editing && set
+    (mayEdit && set
       ? '<div style="margin-top:12px"><button class="linkbu" data-commsreset="1">' +
         'Put all four back to their defaults</button></div>'
       : '');
@@ -3659,7 +3603,6 @@ function renderComms(){
   var mine = me ? personBy(me.key) : null;
   var to = (mine && mine.email) || "";
   var live = (typeof SYNC !== "undefined") && SYNC.isLive();
-  var sent = MAILSENT;
 
   var test = '<div class="cfg"><table><tbody><tr>' +
     '<td style="width:32%"><b>Send it to</b><span class="why">' +
@@ -3669,15 +3612,8 @@ function renderComms(){
       '<input class="fld" id="mailto" value="' + esc(to) + '" placeholder="somebody@example.com"' +
         (live ? '' : ' disabled') + ' style="max-width:280px">' +
       '<button class="editbtn apply" data-mailtest="1"' + (live ? '' : ' disabled') + '>Send a test</button>' +
-      /* READ ONCE AND CLEARED. The sentence is written straight into the
-         element when the send answers, because a repaint would replace the
-         button that was just pressed (§63.4) — so this only exists to survive
-         a repaint that happens to land in between. Left standing, "API key is
-         invalid" would still be sitting under the button on a visit three days
-         later, describing a send nobody made. */
-      '<span class="why" id="mailsent" style="margin:0' +
-        (sent && sent.ok !== null ? ';color:var(--' + (sent.ok ? "good" : "bad") + '-tx)' : '') + '">' +
-        (sent ? esc(sent.msg) : (live ? '' : 'There is no server here to send it.')) +
+      '<span class="why" id="mailsent" style="margin:0">' +
+        (MAILSENT ? esc(MAILSENT.msg) : (live ? '' : 'There is no server here to send it.')) +
       '</span>' +
     '</span></td></tr></tbody></table></div>';
 
@@ -3689,8 +3625,7 @@ function renderComms(){
     section("", "Can this deployment send?",
       "The key and the address live in the deployment’s environment variables, not here — " +
       "they are tied to the domain verified with Resend, so changing one is a deployment decision " +
-      "rather than a screen one. This is the server’s own answer, asked once when you first " +
-      "opened this page — reload after changing a variable.",
+      "rather than a screen one. This is the server’s own answer, asked when the page opened.",
       '<div class="cfg"><table><thead><tr><th>What was checked</th>' +
       '<th class="cc" style="width:18%">Verdict</th></tr></thead><tbody>' +
       commsStatusRows() + '</tbody></table></div>') +
@@ -3708,25 +3643,4 @@ function renderComms(){
       "One message, to one address, with every part of the template filled in. Nothing else is sent " +
       "and nobody else is told.",
       test);
-}
-
-/* THE PREVIEW, DRAWN INTO A SHADOW ROOT. Its own function because it is redrawn
-   on every field change without repainting the page — and because attachShadow
-   throws if one is already there, so "have I done this" has to be asked in
-   exactly one place. */
-function paintMailPreview(){
-  var host = document.getElementById("mailprev");
-  if (!host) return;
-  var root = host.shadowRoot;
-  if (!root) {
-    if (!host.attachShadow) {
-      /* No shadow DOM: say so rather than injecting the email into the page,
-         where the platform's own rules would restyle it and the preview would
-         be a picture of something nobody receives. */
-      host.textContent = "This browser cannot draw the preview.";
-      return;
-    }
-    root = host.attachShadow({ mode: "open" });
-  }
-  root.innerHTML = MAIL.sampleFor(commsShape());
 }

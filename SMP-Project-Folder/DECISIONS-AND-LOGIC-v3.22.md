@@ -9294,3 +9294,154 @@ decision), **Archived plans** can be removed but never added (they are records),
 no row to add because the row is a calculation, and on the 4–10 row tables
 (Labels, Scoring bands, Weighting factors) a search box, a freeze and a columns
 chooser are controls that hide nothing.
+
+---
+
+## 72 · Communication: a page for what the platform says out loud (v3.23)
+
+Islam: *"we need to setup an email in the people registry for now to send for
+the whole list or certain roles or certain units etc. — a communication email"*,
+then, once the Resend variables were in place: *"for the email sending I need to
+have a test email send to see the design of the email and the sender of the
+email name etc. A communication setup page should handle all the relevant
+details."*
+
+This is the second half of that ask: the **channel** — can this deployment send,
+what does a message arrive as, what does it look like, and prove it. Choosing
+recipients (the whole list, certain roles, certain units) is the composer, and
+it goes on top of this rather than beside it.
+
+**72.1 The address is a deployment decision; the name is a screen one.** Two
+halves, deliberately kept apart:
+
+| | Where it lives | Why there |
+|---|---|---|
+| the sending **address** | `SMP_MAIL_FROM` in the environment | it is tied to the domain verified with Resend — changing it is a redeploy |
+| the **display name** | `comms.fromName`, the tenant's own settings | "Raya Trade" is a thing to change on a Tuesday |
+
+Together they make `Raya Trade <smp@domain>`. Written apart, they cannot drift:
+there is exactly one place each lives. **The key never leaves the server** —
+`RESEND_API_KEY` is read in `api/mail.js` and nowhere else, and `status` reports
+whether a key is *present*, never what it is.
+
+**72.2 "Present" is not "accepted", and "accepted" is not "verified".** Three
+different facts, and the first draft of the page collapsed them into one. An
+environment variable being set says nothing about whether Resend knows the
+value; a key being accepted says nothing about whether the domain will reach
+anybody but the account holder. So the status section reports each separately,
+and — the part that matters — **it reports only what was actually asked**: the
+key is put to Resend exactly once, by the domain check, so with no address
+configured there is nothing to check a domain for and the page says *"it has not
+been put to Resend yet"* rather than claiming an acceptance nobody established.
+A refused key is reported on the **key** row, not the domain row: "not verified"
+would send somebody to their DNS records over a typo in a variable.
+
+Matched on Resend's **message**, not its status code, because Resend answers an
+invalid key with **400** rather than 401 — measured against the live service,
+not assumed. The status codes stay in the test as well, so if Resend corrects
+that, the code becomes the honest signal.
+
+**72.3 The preview is the real builder's output, in a shadow root.** `MAIL.html()`
+draws the preview and the test send carries the same string — a preview drawn
+from anything else is a picture of an email nobody receives (§50's rule about
+the deck, one medium further out).
+
+It is a **shadow root and not an iframe**, and that is the tenant's own CSP
+deciding: `frame-src 'none'` (§43.6) would have drawn a blank box. A shadow root
+gives exactly what the iframe was for — nothing in the platform's stylesheet can
+reach in, nothing in the email's markup can reach out — with no policy to widen.
+Measured: the 600px card renders at 600px, centred, in Helvetica, with the
+platform's four embedded faces nowhere near it.
+
+**72.4 Email is not the web, and the whole shape of `mail.js` is that sentence.**
+Tables and not divs (Outlook renders through Word: no flexbox, no grid, no
+reliable `max-width` on a block). Every style inline (Gmail strips `<style>` on
+some clients and keeps it on others, so a design that depends on it is right
+half the time). Colours literal, because `var()` is not supported.
+
+And **no data-URI image**, which cost a decision. The tenant's mark is stored as
+a data URI (§52) and **Gmail and Outlook block data-URI images outright** — not
+"sometimes hidden", a broken-image box in the clients most people read mail in.
+So the header is typographic. Carrying the real mark would mean serving it from
+a URL an email client can fetch unauthenticated, which is a decision about making
+a logo public and Islam's to make rather than mine to assume.
+
+**72.5 A COLOUR THAT WORKS AS A FILL USUALLY FAILS AS TYPE — the sixth time
+(§38.4, §38.5).** The header's kicker was written in the tenant's accent over
+the tenant's panel: **3.94:1** on the house pair, measured. This project records
+that trap by number in five places and the first draft of this file walked into
+it anyway.
+
+The accent moved to where an accent belongs — **3px of fill under the header**,
+which has no ratio to meet and reads as the tenant's mark on the message — and
+the kicker takes the panel's own ink softened toward it (7.41:1). A second
+failure came out of the same measurement: the line under the card was #8A94A6 on
+the mail ground at **2.83:1**.
+
+**And the ink is DERIVED, not assumed.** White-on-panel is only safe while the
+tenant keeps a dark bar; `--panel` is whatever Branding sets. The platform
+derives `--panel-ink` for exactly this reason and an email cannot read a custom
+property, so six lines of luminance maths live in `mail.js`. Asserted against a
+light bar and a bright accent as well as the shipped palette.
+
+**`scripts/test-mail-contrast.js` reads the builder's OUTPUT**, not a list of
+the colours I intended — arithmetic on what I intended proves what I intended.
+It tracks the ground with a **stack of `<td bgcolor>`**, because the first
+version looked backwards for the nearest one and reported the CTA's white label
+as white-on-white: the button sits inside the card's cell and carries a ground of
+its own, so a check that measures the wrong thing fails for reasons that have
+nothing to do with the product (§50.6, from the other side). 16 pairs, 0
+failures, and proved by putting the accent back and watching it fail.
+
+**72.6 The sentence saying what a send did is written into the element.** A
+repaint would replace the button that was just pressed (§63.4). It is also
+**read once and cleared**, or "API key is invalid" would still be sitting under
+the button on a visit three days later, describing a send nobody made. And the
+relayed error is **Resend's own sentence or ours, never undici's**: a refusal
+from Resend names the real cause far better than anything generic could, and a
+network failure names nothing at all — "fetch failed" tells somebody neither
+what broke nor whether the message went.
+
+**72.7 Nothing needed a migration, and nothing needed a second rule.**
+`comms` rides in `org.extra` like `branding`, `sets` and `mainbus` — proved
+against a real Postgres by round-tripping four fields. `lib/authorize.js`
+already refused it as `unknown`, which is §42's "an unrecognised change is the
+SMO's" covering a feature that did not exist yet; it is **named** as `setup`
+anyway, so the refusal sends somebody to Setup rather than reporting "the
+group's comms" (§16.7). `c_comms` is `area:"a_setup"`, so the matrix already
+says only the SMO — and `api/mail.js` asks the same question on the server,
+because a page that only hides a control is decoration (§42).
+
+**72.8 The accessor returns a shared frozen empty (§42, §50.6).** `comms()`
+never creates the field it was looking for; `commsWritable()` is the writing
+half; clearing the last field **deletes the key again**, so a tenant that has
+set nothing writes nothing. This is the exact fault `branding()` taught by
+inventing a four-null object the database never held. Asserted in the browser:
+clear both fields and `'comms' in GROUP` is false.
+
+**72.9 Fields save without repainting (§71.2).** `fieldSaved()`, not `paint()` —
+a repaint on `change` replaces the field somebody has just tabbed out of. What
+does have to follow the edit is the preview, so it is redrawn on its own: one
+element, not the page.
+
+**72.10 The pen does something here, and the sweep found a seventh §38.5.**
+Branding draws an edit icon and gates its fields on the grant alone, so its pen
+is decoration — a control that changes nothing is worse than no control. Four
+settings that go out over the organisation's name are worth one deliberate press
+first, and it is the shape Islam asked every Setup table to take.
+
+Putting the Send-a-test button on the page also put `.editbtn.apply` somewhere
+the contrast sweep could reach it for the first time: **`--good` as the word,
+3.77:1 on slate/light**, while `.editbtn.danger` two rules below already took
+`--bad-tx`. Half a family converted, which is worse than none — and it had been
+sitting unread on Import's two Apply buttons, which only appear once a file has
+been chosen. The border keeps `--good`; a border has no ratio to meet.
+
+The other six failures in the sweep are `num.final` on the company and units
+table views, which are §16.15's deferred palette decision — **recorded, not
+fixed, and unchanged by this version**.
+
+**Still open, and deliberately:** the composer — choosing the whole list, certain
+roles or certain units, which is the half of Islam's ask this page is the
+foundation for; and whether the tenant's mark can be served from a public URL so
+an email can carry it.

@@ -214,15 +214,61 @@ var SLED = { target:null, kind:null, key:null, sel:null, err:"" };
    to across a repaint: a picture slide by its own id, a generated slide by its
    running position among the generated ones — which does not move when a
    picture slide is added above it. */
+/* ── THE EDITOR ASSEMBLES THE SAME DECK THE PROJECTOR DOES (§69.5) ──────
+   It did not, and three of Islam's complaints about Manage slides were one
+   cause: content overflowed its slide, the unit's lockup was missing from
+   every footer, and a long table simply ran off the bottom instead of
+   continuing. All three are steps openDeckWith() runs and this did not —
+   deckFootMarks() and deckFitPass() — so the rail and the stage were showing a
+   deck nobody would ever project. The mode exists to show you the real slide
+   at one tenth (§51.8); it was showing an unfinished one.
+
+   THE BOX HAS TO BE IN THE DOCUMENT, and that is the whole reason this was
+   easy to miss. `deckFitPass()` decides by measuring — `s.scrollHeight >
+   s.clientHeight` — and both are 0 on a detached element, so a detached deck
+   reports every slide as fitting and the pass silently does nothing. §50.3
+   renders the deck detached to read its anchors out, which is fine for reading
+   markup and useless for reading a height.
+
+   So it goes into a host that is a real `.deck`: 1600x900, laid out, and
+   parked off-screen with `left:-99999px` rather than hidden — `display:none`
+   has no layout and `visibility:hidden` still keeps the box, but off-screen is
+   the one that is unambiguously measurable (§3.2's lesson from the other end).
+   `inert` and `aria-hidden`, because a full deck of slides in the accessibility
+   tree behind the editor is a screen reader walking the whole review twice. */
 function slidesAssemble(){
+  var host = document.createElement("div");
+  host.className = "slmeasure";
+  host.setAttribute("aria-hidden", "true");
+  host.inert = true;
   var box = document.createElement("div");
-  box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
-  insertPictureSlides(box, SLED.target, true);
-  var g = 0;
-  [].forEach.call(box.querySelectorAll(".dslide"), function(el){
-    var id = el.getAttribute("data-ps");
-    el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
-  });
+  box.className = "deck";
+  host.appendChild(box);
+  document.body.appendChild(host);
+  try {
+    box.innerHTML = SLED.kind === "fn" ? deckSlidesFn(SLED.key) : deckSlides(UNITS[SLED.key]);
+    insertPictureSlides(box, SLED.target, true);
+    /* The same order openDeckWith() uses, and the order matters both ways:
+       AFTER the picture slides so a custodian's own slide is footed too, and
+       BEFORE the fit pass so a slide it splits carries the footer into every
+       continuation (§52.9). */
+    if (SLED.target.indexOf("fn:") !== 0 && UNITS[SLED.target]) {
+      deckFootMarks(box, UNITS[SLED.target]);
+    }
+    deckFitPass(box);
+    /* The keys are minted AFTER the fit pass, or a continuation slide it mints
+       carries a clone of its parent's `data-ed` — two rows in the rail with one
+       key, so selecting the second selects the first and the arrows stick. */
+    var g = 0;
+    [].forEach.call(box.querySelectorAll(".dslide"), function(el){
+      var id = el.getAttribute("data-ps");
+      el.dataset.ed = id ? "ps:" + id : "gen:" + (g++);
+    });
+  } finally {
+    /* Detached before it is read from, so a failure anywhere above cannot
+       leave a full deck parked in the document for the rest of the session. */
+    host.remove();
+  }
   return box;
 }
 /* A heading carries its own kicker inside it (`.dwhich` — "Key measures",
@@ -699,7 +745,51 @@ function wireSlides(){
       return;
     }
     if (ev.key === "Escape") slidesClose();
+    /* ── WALK THE DECK WHILE ADJUSTING IT (§69.6) ─────────────────
+       Islam: "allow the arrows up and down so I can navigate the slides while
+       adjusting". The rail is a vertical list, so ↑/↓ are the natural pair —
+       and ←/→ move with them, because the thing being walked is a DECK and
+       every projector in the world uses those. Home and End for the same
+       reason the projector has them.
+
+       WHICH ARROW-KEY DEFAULT THIS TAKES OVER IS THE WHOLE CARE HERE. The
+       guard above already leaves an <input> and anything contenteditable
+       alone, and a `<select>` and a `<textarea>` need the same courtesy — a
+       picture slide's controls carry both, and stealing ↓ from an open
+       dropdown is how a keyboard user loses the ability to choose anything.
+       So the keys are taken only when focus is on nothing that reads them. */
+    if (SLIDE_ARROWS[ev.key] && !slidesTyping(ev.target)) {
+      ev.preventDefault();
+      slidesStep(SLIDE_ARROWS[ev.key]);
+    }
   });
+}
+
+/* -1 / +1 / the ends. Written as a map rather than a chain of ifs so the set
+   of keys is one thing to read and one thing to change. */
+var SLIDE_ARROWS = { ArrowDown:1, ArrowRight:1, ArrowUp:-1, ArrowLeft:-1,
+                     PageDown:1, PageUp:-1, Home:"first", End:"last" };
+function slidesTyping(el){
+  if (!el) return false;
+  if (el.isContentEditable) return true;
+  var t = (el.tagName || "").toUpperCase();
+  return t === "INPUT" || t === "TEXTAREA" || t === "SELECT";
+}
+/* The rail's OWN order, read off the rail rather than recomputed. Assembling
+   the deck again to answer "what is next" is a second copy of the list — and
+   the rail is what the person is looking at, so it is the list that has to be
+   right (§51.8: the rail IS the deck). */
+function slidesStep(how){
+  var rows = [].slice.call(document.querySelectorAll("#slidelist [data-slgo]"));
+  if (!rows.length) return;
+  var keys = rows.map(function(r){ return r.dataset.slgo; });
+  var i = keys.indexOf(SLED.sel);
+  var next = how === "first" ? 0
+           : how === "last"  ? keys.length - 1
+           : Math.max(0, Math.min(keys.length - 1, (i < 0 ? 0 : i) + how));
+  if (keys[next] === SLED.sel) return;   /* at an end: nothing to repaint */
+  SLED.sel = keys[next];
+  slidesPaint();
 }
 
 /* The button that opens it, beside Present. It carries the count, because the

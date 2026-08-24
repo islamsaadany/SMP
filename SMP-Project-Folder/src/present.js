@@ -509,14 +509,33 @@ function openDeckFn(fk){
 function closeDeck(){
   var root = document.getElementById("deckroot");
   root.classList.remove("on");
+  /* Both fullscreen classes go with it. `fullscreenchange` would clear them
+     too, but only if the deck was in fullscreen — leaving `peek` set on a deck
+     closed from windowed mode means the NEXT fullscreen opens with the bar
+     already showing and no move to explain it. */
+  root.classList.remove("fs", "peek");
+  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
   document.body.classList.remove("presenting");
   if (document.fullscreenElement) document.exitFullscreen();
 }
 
 /* Squeeze anything that overruns, then split what still does. Run once on
-   open, so the deck never reflows while it is being presented. */
-function deckFitPass(){
-  var deck = document.querySelector("#deckroot .deck");
+   open, so the deck never reflows while it is being presented.
+
+   TAKES THE DECK IT IS FITTING (§69.5). It read `#deckroot .deck` off the
+   document, so it could only ever fit the deck that was being PROJECTED — and
+   Manage slides assembles its own copy, which is why the editor showed the one
+   thing the whole mode exists to prevent: a slide overflowing its box, and a
+   long table stopping at the bottom edge instead of continuing. The default
+   keeps every existing caller unchanged.
+
+   IT MEASURES, so whatever is passed has to be IN THE DOCUMENT and laid out
+   at 1600x900: `scrollHeight` and `clientHeight` on a detached element are
+   both 0, and 0 > 0 is false — so a detached deck is reported as fitting
+   perfectly, every slide, every time. That is §50.3's detached-render trick
+   used for the one job it cannot do. */
+function deckFitPass(deck){
+  deck = deck || document.querySelector("#deckroot .deck");
   var all = deck.querySelectorAll(".dslide");
   [].forEach.call(all, function(s){
     s.classList.add("on");
@@ -575,6 +594,28 @@ function deckShow(n){
   root.querySelector(".dcount-c").textContent = DECK.i + 1;
 }
 /* Scale the fixed stage into whatever room there is. */
+/* Show the bar, then take it away again after a pause. Only in fullscreen —
+   everywhere else it is simply always there, and a timer running against a
+   class that does nothing is a timer somebody will one day wonder about.
+
+   The timer is cleared before it is set, or a mouse moving continuously leaves
+   one pending timeout per event and the bar hides on the first of them. */
+var DECKPEEK = null;
+function deckPeek(hideNow){
+  var root = document.getElementById("deckroot");
+  if (!root || !root.classList.contains("fs")) return;
+  if (DECKPEEK) { clearTimeout(DECKPEEK); DECKPEEK = null; }
+  if (hideNow) { root.classList.remove("peek"); return; }
+  root.classList.add("peek");
+  DECKPEEK = setTimeout(function(){
+    DECKPEEK = null;
+    var r = document.getElementById("deckroot");
+    /* Never pull it out from under the pointer: a bar that vanishes as you
+       reach for Exit is worse than one that never appeared. */
+    if (r && !r.querySelector(".deckbar:hover")) r.classList.remove("peek");
+  }, 2200);
+}
+
 function deckScale(){
   var root = document.getElementById("deckroot");
   var deck = root.querySelector(".deck");
@@ -602,11 +643,37 @@ function wireDeck(){
     var box = ev.target.closest("[data-deckunote]");
     if (box) REVIEW.note[box.dataset.deckunote] = box.textContent;
   });
+  /* Any of the three ways somebody reaches for the controls. `pointermove`
+     covers mouse and pen; a touch is a `pointerdown` that never moves; and the
+     keyboard has to be able to summon it too, or a presenter driving the deck
+     by arrow keys can never see where they are. */
+  root.addEventListener("pointermove", function(){ deckPeek(false); });
+  root.addEventListener("pointerdown", function(){ deckPeek(false); });
   addEventListener("resize", deckScale);
-  addEventListener("fullscreenchange", deckScale);
+  /* ── The bar hides in fullscreen, and comes back on a move (§69.7) ──
+     The class is set from the EVENT rather than from the button, because
+     fullscreen can be left by pressing Escape or by the browser deciding — and
+     a state kept by whoever pressed the control is a state that is wrong every
+     other way in. `document.fullscreenElement === root` rather than a
+     truthiness test: another element on the page going fullscreen must not
+     take this deck's bar away.
+
+     deckScale() runs after the class, or it measures the stage at its old
+     inset and scales the deck to the box it is about to stop being. */
+  addEventListener("fullscreenchange", function(){
+    var root = document.getElementById("deckroot");
+    root.classList.toggle("fs", document.fullscreenElement === root);
+    root.classList.remove("peek");
+    deckPeek(true);
+    deckScale();
+  });
   addEventListener("keydown", function(ev){
     if (!root.classList.contains("on")) return;
     if (ev.target.isContentEditable) { if (ev.key === "Escape") ev.target.blur(); return; }
+    /* Driving the deck from the keyboard shows the bar too — otherwise a
+       presenter using the arrows in fullscreen has no way to see which slide
+       they are on, and the counter is the one thing the bar is FOR. */
+    deckPeek(false);
     if (ev.key === "ArrowRight" || ev.key === " ") { ev.preventDefault(); deckShow(DECK.i + 1); }
     if (ev.key === "ArrowLeft") deckShow(DECK.i - 1);
     if (ev.key === "Home") deckShow(0);

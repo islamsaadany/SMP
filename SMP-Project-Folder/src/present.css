@@ -147,7 +147,28 @@
 
   .deckbar { position:absolute; left:0; right:0; bottom:0; height:62px; display:flex;
              align-items:center; gap:18px; padding:0 26px; background:rgba(11,26,51,.94);
-             border-top:1px solid rgba(255,255,255,.1); }
+             border-top:1px solid rgba(255,255,255,.1);
+             transition:transform .18s ease, opacity .18s ease; }
+  /* ── FULLSCREEN GIVES THE WHOLE SCREEN TO THE SLIDE (§69.7) ───────
+     Islam: "in the presentation full screen mode the strip attached should
+     hide and the slide should fit the whole screen". It is 62px off a 900px
+     stage — about 7% of the projected image spent on controls the room can see
+     and the presenter does not need.
+
+     HIDDEN, NEVER REMOVED. It carries Exit, and a presenter who cannot find
+     the way out of fullscreen on somebody else's laptop is stranded — so
+     moving the mouse brings it back for a few seconds, which is what every
+     projector tool does and what people already expect. Escape and the arrows
+     work throughout either way.
+
+     `transform`, not `display`, so the stage's height does not change when it
+     comes and goes: `deckScale()` reads clientHeight, and a bar that resized
+     the stage would rescale the whole deck every time the mouse moved. The
+     stage takes the full inset in fullscreen and keeps it. */
+  .deckroot.fs .deckstage { inset:0; }
+  .deckroot.fs .deckbar { transform:translateY(100%); opacity:0; pointer-events:none; }
+  .deckroot.fs.peek .deckbar { transform:none; opacity:1; pointer-events:auto; }
+  @media (prefers-reduced-motion: reduce) { .deckbar { transition:none; } }
   .deckbar button { background:none; border:1px solid rgba(255,255,255,.25); color:#C3CEE0;
                     font:inherit; font-size:15px; line-height:1; padding:8px 13px;
                     border-radius:20px; cursor:pointer; }
@@ -213,6 +234,13 @@
      slide you are working on filling the right. It borrows the deck's own
      chrome (`.deckroot`, `.deckbar`) rather than inventing a second full-screen
      shell — one product. */
+  /* Where Manage slides assembles the deck so it can be MEASURED (§69.5).
+     Off-screen rather than hidden: deckFitPass() decides by comparing
+     scrollHeight with clientHeight, and both are 0 under `display:none` and on
+     a detached node — which reports every slide as fitting and is exactly how
+     the editor came to show slides the projector would have split. */
+  .slmeasure { position:fixed; left:-99999px; top:0; width:1600px; height:900px;
+               pointer-events:none; }
   .slideroot { position:fixed; inset:0; z-index:60; background:var(--surface-2); display:none; }
   .slideroot.on { display:flex; flex-direction:column; }
   .slidebar { display:flex; align-items:center; gap:12px; padding:10px 16px;

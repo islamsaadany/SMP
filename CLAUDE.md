@@ -159,12 +159,21 @@ A drift between specs and code is a documentation bug — report it before silen
   checks before pushing. Two branches each adding a `var pf` to `wire()` merged
   with no textual conflict at all and broke a page (§56.7) — a clean merge is
   not a working one.
-- **PUSH TO `main` BEFORE THE BRANCH, NOT AFTER (§91).** Vercel deduplicates by
-  commit SHA: push the branch first and it builds a **Preview**, and the
-  identical SHA arriving on `main` afterwards builds nothing at all — so the
-  work sits on a preview URL and production stays where it was. Land the commit
-  on `main` first, then push the branch to the same SHA. (The fetch-and-compare
-  rule above still comes first; only the ORDER of the two pushes changes.)
+- **NEVER PUSH ONE COMMIT TO TWO REFS AT ONCE (§91, corrected).** Vercel
+  deduplicates by commit SHA, so a SHA that reaches `main` and the branch within
+  a second of each other produces exactly ONE deployment — and which ref it is
+  attributed to is a race. Production sat three merges behind on §88 because
+  that race was lost three times running. **Order does not fix it** (§91.4 was
+  written saying it did, and `8de38f8` went to `main` first and still never
+  built): what fixes it is the branch not carrying the same SHA. Push the merge
+  to `main`, CHECK IT DEPLOYED, and only then fast-forward the branch. (The
+  fetch-and-compare rule above still comes first.)
+- **AFTER EVERY MERGE, READ THE LIVE SITE — DO NOT READ THE DASHBOARD (§91.5).**
+  `curl https://smp-orpin-tau.vercel.app/sw.js | grep SHELL` and compare the
+  built file's byte count against the local one. Three merges reported as
+  "merged to main" were true and not deployed, and no amount of looking at git
+  would have shown it. The deployment is part of the merge, and the only thing
+  that proves it is the bytes the client's browser would receive.
 - **BUMP `SHELL` IN `sw.js` ON EVERY MERGE THAT CHANGES THE BUILT FILE (§91).**
   Not on a version bump — on a CONTENT change. It sat at `v3.22` through §80 to
   §90 because the built file kept the same filename the whole time, and the

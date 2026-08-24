@@ -10859,3 +10859,32 @@ thing that goes wrong when **contents** change. The version-bump checklist in
 `CLAUDE.md` has six items and five of them really are keyed to the filename
 (the gate's link, the rewrite destination, `PLATFORM_FILE`). `SHELL` was sitting
 in that list and does not belong to it.
+
+### 91.4 The order was not the fix, and saying so is the point
+
+§91.1 above concluded that pushing `main` before the branch would solve it. It
+does not. `8de38f8` was pushed to `main` first, by itself, and produced **no
+production deployment at all** — production stayed on `29fe69d` (§88), proved
+byte-for-byte: the served platform is 2,016,692 bytes, identical to that
+commit's built file.
+
+What actually happens is a **race**, not an order. Both refs receive the same
+SHA within a second; Vercel deduplicates by SHA and builds once, attributing
+that one deployment to whichever ref it processed first. §88 won the race and
+became Production. The three merges after it lost it and became Previews of a
+branch.
+
+**So the fix is that the branch must not carry the same SHA yet.** Push the
+merge to `main`, confirm it deployed, and fast-forward the branch afterwards.
+
+### 91.5 And the only proof is the bytes
+
+Three merges were reported as done — correctly, against git — while production
+served none of them. Every check in this project ran against the local build,
+and the local build was right. Nothing in the workflow ever asked the question
+the client's browser asks.
+
+It does now: **read the live site after every merge**, not the dashboard.
+`sw.js`'s `SHELL` and the served platform's byte count answer it in two
+commands, and both are things a screenshot of a deployment list cannot tell
+you — the list said "Ready" for all four.

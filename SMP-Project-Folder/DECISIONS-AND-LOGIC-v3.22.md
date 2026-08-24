@@ -8998,3 +8998,68 @@ list unmapped through `mainbuList()`, the same door the importer uses. **A unit
 is not soft**: it either exists here or it does not, and typing one cannot
 conjure it. The Unit writes through `attachPersonAt()`, the one place that
 answers "where does this person sit".
+
+**69.18 The switcher a non-SMO must never see, and the list that stayed long.**
+Two of §69.14 and §69.15's fixes did not take, and both failures are worth more
+than the fixes were.
+
+**THE BUTTON IS FOUND BY POSITION, AND SOMETHING WAS INSERTED BETWEEN.**
+`searchsel.js` states the contract in its own header, rule 3: *"sync.js hides
+the viewer switcher for anyone who is not the SMO by setting `hidden` on the
+select itself; the button follows it, or a non-SMO would get a live control in
+front of a hidden field."* It followed by reading `sel.previousSibling` — and
+sync.js, in the same breath as hiding the select, inserts the person's name with
+`box.insertBefore(nm, sel)`. The name lands **between the button and the
+select**, `previousSibling` stops being the button, the sync is skipped, and the
+button stays live showing whoever it was built with.
+
+Ashraf saw *"Signed in as [Mohamed Essam ▾]"* beside his own name: a working
+viewer switcher, on a screen where it must never appear, naming the SMO as the
+person signed in. The comment beside the insertion had even anticipated the
+shape of it — *"reparenting the select would break that"* — and guarded against
+reparenting, not against inserting between. A WeakMap cannot be broken by
+either: **the pairing is held by identity rather than by adjacency.** And
+sync.js now takes the button down itself rather than describing the removal to
+a component two files away.
+
+**HALF THE REGISTER HAS NO OFFICIAL BU.** §57 narrowed the first-sign-in list by
+the Official BU and nothing else, and in Raya's own file some rows carry an
+Official BU and no Unit while others carry a Unit and no Official BU. For
+everybody in the second group the short list was empty for a reason that had
+nothing to do with them: **the SMO had already said where they sit, and the
+question ignored it.** The person's own attachment is added to the offer — not a
+second source of truth, since `unit_key`/`fn_key`/`company` are what personAt()
+already reads (§54.1), and the declaration still grants nothing either way.
+
+`near` is also filtered against what the list actually serves, so a retired unit
+cannot be smuggled in by an Official BU or by a stale attachment — §57's gate
+reads `near.indexOf`, so an `at` the page cannot find makes the "yours" group
+claim members it never renders.
+
+**69.19 A vertical sticky on a table CELL does nothing, and says nothing.**
+Islam: *"for the People register table please make the 1st column and first row
+sticky."* Written the obvious way — `thead th { position:sticky; top:0 }`, which
+is what `.cfg.srctable` uses and what every reference shows — **it did not
+work**, and it failed the way this file keeps recording: `position` computed to
+`sticky`, `top` to `0px`, and the header scrolled away with the body. Chromium
+does not honour a vertical sticky on a table cell under
+`border-collapse:collapse`. The same declarations on the `<tr>` hold it.
+Horizontal sticky on a cell DOES work — measured in the same run, `td.pname`
+held its column — so **the two axes live on two different elements, and that is
+a browser fact rather than a preference.**
+
+**TWO COLUMNS ARE FROZEN, NOT ONE.** The first is `#`, which alone would keep a
+row number and lose the name: a frozen column that answers *which row is this*
+with *row 17* has frozen the wrong thing.
+
+**AND THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAD TO BE ONE.** `left` for the
+second frozen column must equal the first's rendered border-box width, and under
+`table-layout:auto` a declared `width` is a suggestion the browser may grow —
+the `#` column rendered wider than its 38px, so Person sat on top of it and the
+header read "# J". Pinned at min, max and width so auto layout has nothing left
+to decide.
+
+A retired row's frozen cells dim their INK rather than their opacity:
+`tr.retired td` carries `opacity:.62`, and opacity dims the background too — so
+the two sticky cells would have gone translucent and every row scrolling past
+would have ghosted through them.

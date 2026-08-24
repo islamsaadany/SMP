@@ -1171,7 +1171,11 @@ function renderPeople(){
     var drift = mainbuDrift(p);
     return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
-      '<td title="' + esc(p.key) + '">' + (editable
+      /* `pname` so the frozen column can be named rather than counted (§69.19).
+         `td:nth-child(2)` would be right today and wrong the first time a
+         column is added before it, and the whole point of the class is that
+         the column chooser can reorder everything to its right. */
+      '<td class="pname" title="' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(p.name) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
@@ -1446,7 +1450,7 @@ function renderPeople(){
          it is given the leftovers. */
       '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
         '<th class="idx">#</th>' +
-        '<th>Person</th>' +
+        '<th class="pname">Person</th>' +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */

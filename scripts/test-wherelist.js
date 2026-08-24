@@ -123,6 +123,32 @@ function post(port, body, cookie) {
      (j.units || []).length > 0 && (j.functions || []).length > 0,
      (j.units || []).length + " units, " + (j.functions || []).length + " functions");
 
+  /* ── AND WHERE THE REGISTER ALREADY PUTS THEM (§69.18) ────────────
+     Half of Raya's own file has a Unit and no Official BU, and for every one
+     of those the short list was empty for a reason that had nothing to do with
+     them: the SMO had already said where they sit and the question ignored it. */
+  await client.query("DELETE FROM login_attempts");
+  state.people.push({ key: "byunit", name: "Placed By The SMO", unit: someUnit });
+  state.people.push({ key: "byfn",   name: "Placed On A Function", fn: someFn });
+  state.people.push({ key: "both",   name: "Both", mainbu: "Retail", unit: held[1] });
+  await io.writeState(client, state);
+  for (const k of ["byunit", "byfn", "both"]) {
+    await client.query(
+      "INSERT INTO credentials (person_key, password_hash, must_change) VALUES ($1,$2,false) " +
+      "ON CONFLICT (person_key) DO UPDATE SET password_hash = EXCLUDED.password_hash, " +
+      "must_change = false", [k, auth.hashPassword(P)]);
+  }
+  j = await near("byunit");
+  ok("no Official BU, but the SMO placed them: their unit is offered",
+     j.near.length === 1 && j.near[0] === someUnit, JSON.stringify(j.near));
+  j = await near("byfn");
+  ok("...and a function attachment the same way",
+     j.near.length === 1 && j.near[0] === "fn:" + someFn, JSON.stringify(j.near));
+  j = await near("both");
+  ok("both facts are offered, and neither is duplicated",
+     j.near.length === 2 && j.near.indexOf(someUnit) > -1 && j.near.indexOf(held[1]) > -1,
+     JSON.stringify(j.near));
+
   /* A RETIRED unit is not somewhere to be seated, so a company holding one
      must not offer it (the list itself already excludes retired units). */
   state.units[held[0]].active = false;
@@ -131,6 +157,21 @@ function post(port, body, cookie) {
   ok("a retired unit is not offered, even from its own company",
      j.near.indexOf(held[0]) === -1 && j.near.length === held.length - 1,
      JSON.stringify(j.near));
+  /* AND NOT VIA A PERSON'S OWN ROW EITHER — an attachment to a unit that has
+     since been retired is exactly the case `near` must not smuggle past the
+     list that no longer holds it. */
+  state.people.push({ key: "onretired", name: "On A Retired Unit", unit: held[0] });
+  await io.writeState(client, state);
+  await client.query(
+    "INSERT INTO credentials (person_key, password_hash, must_change) VALUES ($1,$2,false) " +
+    "ON CONFLICT (person_key) DO UPDATE SET password_hash = EXCLUDED.password_hash, " +
+    "must_change = false", ["onretired", auth.hashPassword(P)]);
+  j = await near("onretired");
+  ok("...nor through the person's own attachment to it", j.near.length === 0,
+     JSON.stringify(j.near));
+  ok("every `near` is something the list actually serves",
+     j.near.concat((await near("atco")).near).every(function (at) {
+       return j.units.concat(j.functions).some(function (x) { return x.at === at; }); }));
 
   server.close();
   await client.end();

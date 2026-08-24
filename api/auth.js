@@ -288,7 +288,8 @@ module.exports = async function handler(req, res) {
         "SELECT extra->'mainbus' AS mainbus FROM org LIMIT 1")).rows[0];
       const rows = (mb && mb.mainbus) || [];
       const who = (await client.query(
-        "SELECT extra->>'mainbu' AS mainbu FROM people WHERE key = $1", [person.key])).rows[0];
+        "SELECT extra->>'mainbu' AS mainbu, unit_key, fn_key, extra->>'company' AS company " +
+        "FROM people WHERE key = $1", [person.key])).rows[0];
       const norm = function (x) { return String(x == null ? "" : x).trim().toLowerCase(); };
       const row = rows.filter(function (b) { return norm(b.name) === norm(who && who.mainbu); })[0];
       const raw = !row ? []
@@ -320,6 +321,24 @@ module.exports = async function handler(req, res) {
         return us.filter(function (u) { return u.company === co; })
                  .map(function (u) { return u.key; });
       };
+      /* ── AND WHERE THE REGISTER ALREADY PUTS THEM (§69.18) ──────────
+         The Official BU was the only thing this narrowed by, and it is the one
+         fact half the register does not carry: in Raya's own file some rows
+         have an Official BU and no Unit, and others have a Unit and no
+         Official BU. For everybody in the second group the short list was
+         empty for a reason that had nothing to do with them — the SMO had
+         already said where they sit, and the question ignored it.
+
+         So the person's own attachment is added to the offer. It is not a
+         second source of truth: `unit_key` / `fn_key` / `company` are what
+         personAt() reads (§54.1), and the declaration still grants nothing
+         either way — this only decides which two or three names are at the
+         top of a list of eighteen. */
+      if (who) {
+        if (who.unit_key && who.unit_key !== "group") raw.push(who.unit_key);
+        if (who.fn_key) raw.push("fn:" + who.fn_key);
+        if (who.company) raw.push("co:" + who.company);
+      }
       const ats = [];
       raw.forEach(function (at) {
         const t = String(at);
@@ -332,12 +351,21 @@ module.exports = async function handler(req, res) {
         }
         if (ats.indexOf(t) === -1) ats.push(t);
       });
+      /* AND ONLY THINGS THIS LIST ACTUALLY OFFERS. A unit or function that has
+         since been retired can still be named by an Official BU or held on a
+         person's row, and an `at` the page cannot find is an `at` that makes
+         `near` look longer than the group it renders (§57's gate reads
+         `near.indexOf`). Filtered against what is being served, so the two
+         halves of the answer cannot disagree. */
+      const offered = us.map(function (u) { return u.key; })
+        .concat(fs.map(function (f) { return "fn:" + f.key; }));
+      const near = ats.filter(function (a) { return offered.indexOf(a) > -1; });
 
       return send(res, 200, { ok: true,
         units: us.map(function (r) { return { at: r.key, name: r.name }; }),
         functions: fs.map(function (r) { return { at: "fn:" + r.key, name: r.name }; }),
         mainbu: (row && row.name) || null,
-        near: ats,
+        near: near,
         mine: mine ? mine.at : null });
     }
 

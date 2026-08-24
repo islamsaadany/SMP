@@ -551,7 +551,61 @@
      screen). Nine columns in the 880px a Setup pane leaves is a table that
      genuinely scrolls, so it is given the box to scroll in — the same answer
      `.acgrid` reached for the access matrix. */
-  .cfg.peoplebox { overflow-x:auto; }
+  /* ── THE HEADER AND THE NAME STAY PUT (§69.19) ─────────────────────
+     Islam: "make the 1st column and first row sticky". The register is 33 rows
+     of nine columns in an 880px pane — it scrolls both ways, and both scrolls
+     lose the thing that says which cell you are looking at.
+
+     TWO COLUMNS ARE FROZEN, NOT ONE. The first is `#`, which on its own would
+     keep a row number and lose the name — a frozen column that answers "which
+     row is this" with "row 17" has frozen the wrong thing. Person goes with
+     it, and the pair is 38px + the name.
+
+     `overflow:auto` and a max-height, because a sticky header pins to its
+     SCROLL CONTAINER: without a height to overflow there is nothing to pin to
+     and `top:0` does nothing at all. Capped against the viewport rather than
+     at a fixed number so a tall screen shows more rows — the same shape
+     `.cfg.srctable` already uses for the Who-enters table. */
+  .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
+  /* THE VERTICAL STICKY GOES ON THE ROW, NOT ON THE CELL (§69.19). Written
+     on `thead th` first, which is what `.cfg.srctable` uses and what every
+     reference does — and it did NOTHING: measured, the header scrolled away
+     with the body while `position` computed to `sticky` and `top` to `0px`.
+     Chromium does not honour a vertical sticky on a table CELL under
+     `border-collapse:collapse`, and it fails the way this file keeps
+     recording: silently, with every property reading back exactly as written.
+     The same declarations on the `<tr>` hold it at the top of the box.
+
+     Horizontal sticky on a cell DOES work — `td.pname` held its column in the
+     same measurement — so the two axes are set on two different elements, and
+     that is a browser fact rather than a preference. */
+  .peoplecfg thead tr { position:sticky; top:0; z-index:3; }
+  .peoplecfg td.idx, .peoplecfg td.pname { position:sticky; z-index:2;
+                                           background:var(--surface); }
+  /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
+     the second frozen column must equal the first one's rendered BORDER-BOX
+     width, and under `table-layout:auto` a `width` is a suggestion the browser
+     is free to grow — the `#` column rendered wider than the 38px declared for
+     it, so Person sat on top of it and the header read "# J". Pinned at all
+     three so auto layout has nothing left to decide. */
+  .peoplecfg th.idx, .peoplecfg td.idx { width:38px; min-width:38px; max-width:38px; }
+  .peoplecfg td.idx   { left:0; }
+  .peoplecfg td.pname { left:38px; }
+  /* The corner belongs to both, so it outranks both. thead's `background` is
+     set with !important two files later (§41.10), so these two need no ground
+     of their own — they already have the panel's. */
+  .peoplecfg thead th.idx   { position:sticky; left:0;    z-index:4; }
+  .peoplecfg thead th.pname { position:sticky; left:38px; z-index:4; }
+  /* A hairline where the frozen pair ends, so a column scrolling under it
+     reads as going behind something rather than being cut off. */
+  .peoplecfg td.pname, .peoplecfg thead th.pname { box-shadow:1px 0 0 var(--line-soft); }
+  /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
+     `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
+     cells would have gone translucent and every row scrolling past would have
+     ghosted through them. The dimming moves to the ink for those two. */
+  .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.pname { opacity:1; color:var(--ink-3); }
+  .peoplecfg tr.retired td.pname b,
+  .peoplecfg tr.retired td.pname input.fld { color:var(--ink-3); }
   .cfg table.unitcfg.peoplecfg { table-layout:auto; }
   .peoplecfg td, .peoplecfg th { white-space:nowrap; }
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }

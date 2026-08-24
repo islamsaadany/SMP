@@ -278,6 +278,20 @@ var SYNC = (function () {
        (§45.3). It is asked through isSMOSession() now, in one place. */
     if (!isSMOSession()) {
       sel.hidden = true;
+      /* AND ITS FURNITURE, HERE AND NOW (§69.18). Hiding the select alone was
+         the whole mechanism, and it relied on SEARCHSEL noticing on the next
+         paint — which it stopped doing the moment the name below was inserted
+         BETWEEN the button and the select. searchsel.js is fixed to pair them
+         by reference rather than by adjacency, and this does not lean on that
+         being true: the control that must never appear on this screen is taken
+         down by the code that decided it must never appear, in the same
+         function, rather than by a component two files away agreeing.
+
+         §3.4's rule with the sign reversed — whoever decides a control is
+         wrong removes it, rather than describing the removal to somebody
+         else. */
+      var btn = box.querySelector(".ssbtn");
+      if (btn) btn.hidden = true;
       var label = box.querySelector("label");
       if (label) label.textContent = "Signed in as";
       var nm = document.createElement("span");

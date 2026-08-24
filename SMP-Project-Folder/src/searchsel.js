@@ -188,13 +188,43 @@ var SEARCHSEL = (function(){
     q.focus();
   }
 
+  /* ── THE BUTTON IS FOUND BY REFERENCE, NOT BY POSITION (§69.18) ─────
+     This was `sel.previousSibling`, and rule 3 above — "the button follows
+     [the select's hidden], or a non-SMO would get a live control in front of a
+     hidden field" — is EXACTLY what stopped happening. sync.js hides the
+     switcher for a non-SMO and then inserts their name with
+     `box.insertBefore(nm, sel)`: the name lands BETWEEN the button and the
+     select, `previousSibling` stops being the button, the sync is skipped, and
+     the button stays live and visible showing whoever it was built with.
+
+     Ashraf saw "Signed in as [Mohamed Essam ▾]" beside his own name — a live
+     viewer switcher, on a screen where it must never appear, offering the SMO
+     as the person signed in.
+
+     The comment beside the insertion even anticipated the shape of it:
+     "sync.js reaches for the viewer select by id and inserts a name beside it
+     — reparenting the select would break that." It guarded against
+     REPARENTING and not against INSERTING BETWEEN. A WeakMap cannot be broken
+     by either: the pairing is held by identity rather than by adjacency, and
+     nothing in the DOM has to stay next to anything. */
+  var BTN_OF = (typeof WeakMap === "function") ? new WeakMap() : null;
+  function buttonFor(sel){
+    var b = BTN_OF && BTN_OF.get(sel);
+    if (b && b.isConnected) return b;
+    /* A page old enough to have been wired before this existed, or a browser
+       with no WeakMap: fall back to the position, which is right whenever
+       nothing has been inserted between them. */
+    var prev = sel.previousSibling;
+    return (prev && prev.classList && prev.classList.contains("ssbtn")) ? prev : null;
+  }
+
   function enhance(sel){
     if (sel.multiple || sel.disabled) return;
     if (sel.dataset.nosearch === "1") return;
     if (sel.options.length < MIN) return;
     if (sel.dataset.ss === "1") {           /* already wrapped this paint */
-      var prev = sel.previousSibling;
-      if (prev && prev.classList && prev.classList.contains("ssbtn")) {
+      var prev = buttonFor(sel);
+      if (prev) {
         setLabel(sel, prev);
         prev.hidden = sel.hidden;
       }
@@ -241,6 +271,7 @@ var SEARCHSEL = (function(){
        viewer select by id and inserts a name beside it — reparenting the
        select would break that from a file this component has never heard of. */
     sel.parentNode.insertBefore(btn, sel);
+    if (BTN_OF) BTN_OF.set(sel, btn);
     btn.hidden = sel.hidden;
 
     btn.addEventListener("click", function(e){

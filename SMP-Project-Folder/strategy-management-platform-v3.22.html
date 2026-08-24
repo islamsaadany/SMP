@@ -1781,7 +1781,61 @@
      screen). Nine columns in the 880px a Setup pane leaves is a table that
      genuinely scrolls, so it is given the box to scroll in — the same answer
      `.acgrid` reached for the access matrix. */
-  .cfg.peoplebox { overflow-x:auto; }
+  /* ── THE HEADER AND THE NAME STAY PUT (§69.19) ─────────────────────
+     Islam: "make the 1st column and first row sticky". The register is 33 rows
+     of nine columns in an 880px pane — it scrolls both ways, and both scrolls
+     lose the thing that says which cell you are looking at.
+
+     TWO COLUMNS ARE FROZEN, NOT ONE. The first is `#`, which on its own would
+     keep a row number and lose the name — a frozen column that answers "which
+     row is this" with "row 17" has frozen the wrong thing. Person goes with
+     it, and the pair is 38px + the name.
+
+     `overflow:auto` and a max-height, because a sticky header pins to its
+     SCROLL CONTAINER: without a height to overflow there is nothing to pin to
+     and `top:0` does nothing at all. Capped against the viewport rather than
+     at a fixed number so a tall screen shows more rows — the same shape
+     `.cfg.srctable` already uses for the Who-enters table. */
+  .cfg.peoplebox { overflow:auto; max-height:calc(100vh - 300px); }
+  /* THE VERTICAL STICKY GOES ON THE ROW, NOT ON THE CELL (§69.19). Written
+     on `thead th` first, which is what `.cfg.srctable` uses and what every
+     reference does — and it did NOTHING: measured, the header scrolled away
+     with the body while `position` computed to `sticky` and `top` to `0px`.
+     Chromium does not honour a vertical sticky on a table CELL under
+     `border-collapse:collapse`, and it fails the way this file keeps
+     recording: silently, with every property reading back exactly as written.
+     The same declarations on the `<tr>` hold it at the top of the box.
+
+     Horizontal sticky on a cell DOES work — `td.pname` held its column in the
+     same measurement — so the two axes are set on two different elements, and
+     that is a browser fact rather than a preference. */
+  .peoplecfg thead tr { position:sticky; top:0; z-index:3; }
+  .peoplecfg td.idx, .peoplecfg td.pname { position:sticky; z-index:2;
+                                           background:var(--surface); }
+  /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
+     the second frozen column must equal the first one's rendered BORDER-BOX
+     width, and under `table-layout:auto` a `width` is a suggestion the browser
+     is free to grow — the `#` column rendered wider than the 38px declared for
+     it, so Person sat on top of it and the header read "# J". Pinned at all
+     three so auto layout has nothing left to decide. */
+  .peoplecfg th.idx, .peoplecfg td.idx { width:38px; min-width:38px; max-width:38px; }
+  .peoplecfg td.idx   { left:0; }
+  .peoplecfg td.pname { left:38px; }
+  /* The corner belongs to both, so it outranks both. thead's `background` is
+     set with !important two files later (§41.10), so these two need no ground
+     of their own — they already have the panel's. */
+  .peoplecfg thead th.idx   { position:sticky; left:0;    z-index:4; }
+  .peoplecfg thead th.pname { position:sticky; left:38px; z-index:4; }
+  /* A hairline where the frozen pair ends, so a column scrolling under it
+     reads as going behind something rather than being cut off. */
+  .peoplecfg td.pname, .peoplecfg thead th.pname { box-shadow:1px 0 0 var(--line-soft); }
+  /* A RETIRED ROW DIMS ITS TEXT, NOT ITS FROZEN CELLS. `tr.retired td` carries
+     `opacity:.62`, and opacity dims the BACKGROUND too — so the two sticky
+     cells would have gone translucent and every row scrolling past would have
+     ghosted through them. The dimming moves to the ink for those two. */
+  .peoplecfg tr.retired td.idx, .peoplecfg tr.retired td.pname { opacity:1; color:var(--ink-3); }
+  .peoplecfg tr.retired td.pname b,
+  .peoplecfg tr.retired td.pname input.fld { color:var(--ink-3); }
   .cfg table.unitcfg.peoplecfg { table-layout:auto; }
   .peoplecfg td, .peoplecfg th { white-space:nowrap; }
   .peoplecfg td b { color:var(--ink); font-weight:650; font-size:13px; }
@@ -16940,7 +16994,11 @@ function renderPeople(){
     var drift = mainbuDrift(p);
     return '<tr' + (personActive(p) ? '' : ' class="retired"') + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
-      '<td title="' + esc(p.key) + '">' + (editable
+      /* `pname` so the frozen column can be named rather than counted (§69.19).
+         `td:nth-child(2)` would be right today and wrong the first time a
+         column is added before it, and the whole point of the class is that
+         the column chooser can reorder everything to its right. */
+      '<td class="pname" title="' + esc(p.key) + '">' + (editable
         ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
         : '<b>' + esc(p.name) + '</b>') + '</td>' +
       /* The employee number. Off by default — it is the client's own
@@ -17215,7 +17273,7 @@ function renderPeople(){
          it is given the leftovers. */
       '<div class="cfg peoplebox"><table class="unitcfg peoplecfg"><thead><tr>' +
         '<th class="idx">#</th>' +
-        '<th>Person</th>' +
+        '<th class="pname">Person</th>' +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
@@ -20805,13 +20863,43 @@ var SEARCHSEL = (function(){
     q.focus();
   }
 
+  /* ── THE BUTTON IS FOUND BY REFERENCE, NOT BY POSITION (§69.18) ─────
+     This was `sel.previousSibling`, and rule 3 above — "the button follows
+     [the select's hidden], or a non-SMO would get a live control in front of a
+     hidden field" — is EXACTLY what stopped happening. sync.js hides the
+     switcher for a non-SMO and then inserts their name with
+     `box.insertBefore(nm, sel)`: the name lands BETWEEN the button and the
+     select, `previousSibling` stops being the button, the sync is skipped, and
+     the button stays live and visible showing whoever it was built with.
+
+     Ashraf saw "Signed in as [Mohamed Essam ▾]" beside his own name — a live
+     viewer switcher, on a screen where it must never appear, offering the SMO
+     as the person signed in.
+
+     The comment beside the insertion even anticipated the shape of it:
+     "sync.js reaches for the viewer select by id and inserts a name beside it
+     — reparenting the select would break that." It guarded against
+     REPARENTING and not against INSERTING BETWEEN. A WeakMap cannot be broken
+     by either: the pairing is held by identity rather than by adjacency, and
+     nothing in the DOM has to stay next to anything. */
+  var BTN_OF = (typeof WeakMap === "function") ? new WeakMap() : null;
+  function buttonFor(sel){
+    var b = BTN_OF && BTN_OF.get(sel);
+    if (b && b.isConnected) return b;
+    /* A page old enough to have been wired before this existed, or a browser
+       with no WeakMap: fall back to the position, which is right whenever
+       nothing has been inserted between them. */
+    var prev = sel.previousSibling;
+    return (prev && prev.classList && prev.classList.contains("ssbtn")) ? prev : null;
+  }
+
   function enhance(sel){
     if (sel.multiple || sel.disabled) return;
     if (sel.dataset.nosearch === "1") return;
     if (sel.options.length < MIN) return;
     if (sel.dataset.ss === "1") {           /* already wrapped this paint */
-      var prev = sel.previousSibling;
-      if (prev && prev.classList && prev.classList.contains("ssbtn")) {
+      var prev = buttonFor(sel);
+      if (prev) {
         setLabel(sel, prev);
         prev.hidden = sel.hidden;
       }
@@ -20858,6 +20946,7 @@ var SEARCHSEL = (function(){
        viewer select by id and inserts a name beside it — reparenting the
        select would break that from a file this component has never heard of. */
     sel.parentNode.insertBefore(btn, sel);
+    if (BTN_OF) BTN_OF.set(sel, btn);
     btn.hidden = sel.hidden;
 
     btn.addEventListener("click", function(e){
@@ -21173,6 +21262,20 @@ var SYNC = (function () {
        (§45.3). It is asked through isSMOSession() now, in one place. */
     if (!isSMOSession()) {
       sel.hidden = true;
+      /* AND ITS FURNITURE, HERE AND NOW (§69.18). Hiding the select alone was
+         the whole mechanism, and it relied on SEARCHSEL noticing on the next
+         paint — which it stopped doing the moment the name below was inserted
+         BETWEEN the button and the select. searchsel.js is fixed to pair them
+         by reference rather than by adjacency, and this does not lean on that
+         being true: the control that must never appear on this screen is taken
+         down by the code that decided it must never appear, in the same
+         function, rather than by a component two files away agreeing.
+
+         §3.4's rule with the sign reversed — whoever decides a control is
+         wrong removes it, rather than describing the removal to somebody
+         else. */
+      var btn = box.querySelector(".ssbtn");
+      if (btn) btn.hidden = true;
       var label = box.querySelector("label");
       if (label) label.textContent = "Signed in as";
       var nm = document.createElement("span");

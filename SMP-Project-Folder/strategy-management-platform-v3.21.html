@@ -3568,7 +3568,22 @@ THEME.apply();
            its own name in the face it names, so you can see one without
            pressing it. It goes when the choice is settled. -->
       <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
-      <button class="infobtn" id="demobtn" hidden>Demo data</button>
+      <!-- TWO DEMOS, SO A MENU (§67). "Filled Project" is the full worked
+           example; "Clear Project" is the same organisation with nothing
+           filled in, for explaining the cycle from the beginning. A <details>
+           for the same reason every other menu here is one: the action fires
+           before the menu closes, and closing a <details> from inside its own
+           click hides the button rather than unmounting it (§47.2).
+           Both hidden until SYNC finds a live dataset to tell them apart
+           from — opened as a file the whole product IS the example. -->
+      <details class="dlmenu right demomenu" id="demomenu" hidden>
+        <summary class="infobtn">Demo data<span class="dlcar" aria-hidden="true">&#9662;</span></summary>
+        <div class="menu" role="menu">
+          <button role="menuitem" data-demomode="demo">Filled project<span class="dlsub">The full worked example, every page populated</span></button>
+          <button role="menuitem" data-demomode="demoClear">Clear project<span class="dlsub">The same organisation with nothing filled in yet</span></button>
+        </div>
+      </details>
+      <button class="infobtn" id="demobtn" hidden>Exit demo</button>
     </div>
   </div>
 </header>
@@ -5265,7 +5280,21 @@ var UNITS = {
     ] },
   it: {
     logo: UNIT_MARKS["distribution"],
-    name: "IT", codePrefix: "IT", weight: 0, real: false,
+    /* "IT Dist.", not "IT" (Islam, §67.4). The tenant has a business unit
+       called IT and a supporting function called IT, and two things with one
+       name is a real ambiguity rather than a cosmetic one: it is the exact
+       case the people file's Unit column has to disambiguate with a
+       "(function)" suffix (§65.5), and the one a bare "IT" in a spreadsheet
+       could not answer. The unit is the group's IT products DISTRIBUTOR — its
+       own first clause says so, and it wears Distribution's mark — so the
+       name was short rather than right.
+
+       THE KEY IS UNTOUCHED. A unit is identified by its key everywhere and the
+       name is display only, so nothing looks this up and nothing breaks;
+       migration 018 carries it to a tenant already deployed, matching on the
+       old value so a name somebody has since chosen is never overwritten
+       (§51.20's rule for an existing tenant). */
+    name: "IT Dist.", codePrefix: "IT", weight: 0, real: false,
     clauses: [
       ["We are", "the group's IT products and infrastructure distributor"],
       ["We provide", "distribution, configuration and infrastructure services"],
@@ -8188,7 +8217,23 @@ var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlin
    same as any other label — so renaming one cannot break a lookup. The
    weighting table used to match on the name string, which meant a rename
    silently detached a unit from its weight with no error anywhere. */
+/* THE KEY THE ROW ALREADY CARRIES WINS (§67.6). This line existed to FIX
+   name-matching — the note above records that matching on the name meant a
+   rename silently detached a unit from its weight — and it added `key` to
+   every row and then went on overwriting it FROM THE NAME anyway. So the fault
+   it was written against was still live, and worse than silent.
+
+   Renaming a unit on Setup → Business units survives the session, because this
+   runs once at load. On the NEXT load the name no longer matches, `row.key`
+   becomes null, and `weighting_rows.unit_key` is NOT NULL — so every save from
+   that moment on fails with a constraint violation and the tenant cannot write
+   anything at all. Found by renaming IT to "IT Dist." and running the round
+   trip; nothing else in the product would have said a word.
+
+   The name-match stays as the FALLBACK, for a row written before rows carried
+   a key. */
 GROUP.weighting.units.forEach(function(row){
+  if (row.key && UNITS[row.key]) return;
   row.key = UNIT_KEYS.filter(function(k){ return UNITS[k].name === row.unit; })[0] || null;
 });
 
@@ -8634,6 +8679,90 @@ function clearUnitPlan(u, why){
   u.aspiration = "";
   u.endInMind = "";
   return archived;
+}
+
+/* ── CLEAR PROJECT: THE DEMO WITH NOTHING FILLED IN (§67) ─────────────
+   Islam: "another demo data view … Filled Project & Clear Project. The new
+   clear project is a project with the same setup but with no uploaded data at
+   all, not plans no performance nothing — so I can explain for them the cycle
+   there."
+
+   WHAT IT IS: exactly what a client's own deployment looks like on day one.
+   That is not a new idea — it is `db/migrations/004-clean-slate.sql`, which has
+   run once on every tenant since §21, and this mirrors it statement for
+   statement so the screen he shows and the screen they get are the same screen.
+
+   SO THE RISK IS DRIFT, and it is the fault 004 has already been bitten by
+   THREE times: §44's figure sets, §54's BU list and spec 010's function pillars
+   each arrived somewhere the clean slate was not looking, and each had to be
+   added afterwards. A second copy in JavaScript is a fourth place to forget.
+
+   It cannot be avoided — 004 is SQL against thirty tables and this is a graph
+   in a browser — so it is ASSERTED instead. `scripts/test-clean-parity.js`
+   deploys to a real Postgres, reads back what 004 actually leaves, and compares
+   it field by field with what this produces. The two disagreeing is a failing
+   test, rather than a client being shown a screen that is not what they will
+   get. THE COMMENT IS NOT THE GUARD; THE TEST IS.
+
+   Operates on a GRAPH — the same shape sync.js hydrates from — rather than on
+   the globals, so it is a pure function and the test can call it with nothing
+   loaded. */
+function clearedGraph(g){
+  var out = clone(g);
+
+  /* ── Business unit strategy ───────────────────────────────────────── */
+  (out.unitKeys || []).forEach(function(k){
+    var u = out.units[k]; if (!u) return;
+    u.items = [];                 /* pillars, and with them measures + tactics */
+    u.keyObjectives = [];
+    u.swot = { s:[], w:[], o:[], t:[] };
+    u.clauses = [];
+    u.aspiration = ""; u.endInMind = "";
+    u.real = true;                /* nothing left to mark as illustrative */
+    if (u.extra) delete u.extra.perf;
+    delete u.perf;
+  });
+
+  /* ── Group foundation ─────────────────────────────────────────────── */
+  var G = out.group || {};
+  G.clauses = []; G.keyObjectives = [];
+  G.aspiration = ""; G.endInMind = ""; G.mission = "";
+  G.values = [];
+  G.horizon = "";
+  delete G.portfolio; delete G.themeView; delete G.themePillars;
+  delete G.keyObjectivesScore;
+  /* §44's sets, §54's BU list — the two that 004 had to be amended for. */
+  delete G.sets; delete G.claims; delete G.naming; delete G.mainbus;
+
+  /* ── Capability content (the names and their function stay) ───────── */
+  (G.capabilities || []).forEach(function(c){
+    c.def = "";
+    c.keyObjectives = [];
+    c.projects = [];
+  });
+
+  /* ── The reporting cycle ──────────────────────────────────────────── */
+  out.history = [];
+  out.koWeights = {};
+  out.cycle = { name:"", rewardAt:100, locked:false, focus:{} };
+  out.review = { name:"", from:"", to:"", due:"", endsQuarter:4,
+                 state:"closed", cadence:null, note:{}, submitted:{} };
+  out.archives = [];
+
+  /* ── People ───────────────────────────────────────────────────────── */
+  out.people = (out.people || []).filter(function(p){ return p.key === "smo"; });
+  out.unitRoles = {};
+  (out.functionKeys || []).forEach(function(k){
+    var f = out.functions[k]; if (!f) return;
+    f.custodian = null;
+    if (f.head !== "smo") f.head = null;
+    /* spec 010's pillars, which rode in functions.extra where every DELETE
+       above could not reach them — 004's third amendment. */
+    delete f.items;
+    if (f.extra) delete f.extra.items;
+  });
+
+  return out;
 }
 
 /* Clearing what was REPORTED, keeping what was COMMITTED TO. This is the start
@@ -10923,6 +11052,22 @@ function sheetXml(sh){
     }).join("") + '</row>');
   });
 
+  /* EXCEL DROPS AN INLINE LIST OVER 255 CHARACTERS, AND SAYS NOTHING (§67.5).
+     The file opens, the column looks right, and the dropdown is simply empty —
+     which is how the Unit column shipped: 21 places is 301 characters, and the
+     Official BU list beside it is 93, so one worked and one did not.
+
+     A list that grows with the tenant will cross that line one day whatever it
+     is today, so the writer refuses rather than truncating: `from` is the way
+     to write a long list and this makes forgetting it loud. */
+  (sh.validations || []).forEach(function(v){
+    if (v.from) return;
+    var n = ('"' + (v.list || []).join(",") + '"').length;
+    if (n > 255) throw new Error(
+      "xlsx: a dropdown of " + (v.list || []).length + " values is " + n +
+      " characters, and Excel silently ignores an inline list over 255. " +
+      "Put the values in a sheet and use `from` instead (" + v.range + ").");
+  });
   var dv = (sh.validations || []).map(function(v){
     var f = v.from ? xesc(v.from) : '"' + xesc((v.list || []).join(",")) + '"';
     return '<dataValidation type="list" allowBlank="1" showInputMessage="1" ' +
@@ -11051,6 +11196,10 @@ function unitSuggestions(){
    and Excel then refused every pillar name typed into the column. That is why
    a first plan could not be authored from the template at all. */
 var PILLAR_RANGE = "Pillars!$A$2:$A$400";
+/* Sized to the list rather than padded to a round number: a range with blank
+   rows in it puts blank entries in the dropdown. */
+function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
+function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
 /* ── The Read me sheet ────────────────────────────────────────────────────
@@ -11830,10 +11979,18 @@ function peopleWorkbook(){
      names arrive. A unit is the opposite: it either exists here or it does
      not, and typing a new one cannot conjure one — so the dropdown is the
      whole answer and a name outside it is refused by the reader with the two
-     it could have meant. */
+     it could have meant.
+
+     BOTH LISTS COME FROM A SHEET, not from the formula (§67.5). The Unit list
+     is 301 characters and Excel ignores an inline list over 255 — silently, so
+     the column looked right and the dropdown was empty. The Official BU list
+     is 93 today and would have gone the same way the moment a client had
+     twenty departments, which is the fault arriving later and quieter, so it
+     moves too: converting one member of a family and leaving the other is how
+     the second one gets forgotten (§40). */
   var places = placeOptions().map(function(o){ return o.label; });
   if (places.length) {
-    vals.push({ range:range("Unit"), list:places,
+    vals.push({ range:range("Unit"), from:LISTS_UNIT_RANGE(places.length),
       error:"Choose the unit, supporting function or company from the list." });
   }
   /* An empty list would write formula1 as a pair of quotes with nothing in
@@ -11841,7 +11998,8 @@ function peopleWorkbook(){
      validation. On a tenant whose BU list is still empty the column simply
      has no dropdown — and that is the case the soft list exists for. */
   if (names.length) {
-    vals.unshift({ range:range("Official BU"), list:names, soft:true });
+    vals.unshift({ range:range("Official BU"), from:LISTS_BU_RANGE(names.length),
+                   soft:true });
   }
 
   var rows = PEOPLE.map(function(p){
@@ -11864,8 +12022,21 @@ function peopleWorkbook(){
     ];
   });
 
+  /* A sheet the reader never looks at — peopleFromWorkbook() asks for "People"
+     by name — carrying the two lists the dropdowns point at. Visible rather
+     than hidden: a hidden sheet is a thing somebody finds by accident and
+     deletes, and a validation whose range has gone is a dropdown that is empty
+     again, which is the bug this exists to fix. */
+  var listRows = [];
+  for (var i = 0; i < Math.max(places.length, names.length); i++) {
+    listRows.push([places[i] || "", names[i] || ""]);
+  }
+
   return [
     peopleReadme(),
+    { name:"Lists", widths:[38, 30],
+      head:["Unit, function or company", "Official BU"],
+      rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
       head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
       /* "Also holds" is written and never read, so it is locked — and its
@@ -19628,7 +19799,7 @@ var SYNC = (function () {
   function save(done) {
     var say = function (state) { if (done) done(state); };
     /* The guard that matters: demo data must never reach the database. */
-    if (!live || mode === "demo") return say("offline");
+    if (!live || isDemoMode()) return say("offline");
     if (saving) return say("busy");
     var now = serialize();
     if (now === lastSaved) return say("clean");
@@ -19740,11 +19911,28 @@ var SYNC = (function () {
      so returning restores it exactly rather than the snapshot taken at boot —
      otherwise an edit made before opening the demo would vanish from the
      screen. Anything typed while in demo is discarded, by design. */
+  /* THREE DATASETS, NOT TWO (§67). Islam: "Filled Project & Clear Project …
+     the new clear project is a project with the same setup but with no
+     uploaded data at all." So "demo" became two modes, and everything that
+     asked `mode === "demo"` has to ask `isDemoMode()` instead — the save guard
+     above most of all, because a Clear Project that could be saved would write
+     an EMPTY tenant over a real one, which is worse than writing an invented
+     one over it.
+
+     The cleared graph is derived on switch rather than baked at boot: it costs
+     a clone of a graph the browser already holds, and a second stored copy is
+     a second thing to keep in step. */
+  function isDemoMode() { return mode === "demo" || mode === "demoClear"; }
+  function datasetFor(m) {
+    if (m === "demo") return clone(DEMO);
+    if (m === "demoClear") return clearedGraph(DEMO);
+    return clone(LIVE);
+  }
   function setMode(next, paint) {
     if (!DEMO || next === mode) return;
     if (mode === "live") LIVE = clone(graph());
     mode = next;
-    hydrate(clone(mode === "demo" ? DEMO : LIVE));
+    hydrate(datasetFor(mode));
     markMode();
     paint();
     if (mode === "live") lastSaved = serialize();
@@ -19756,16 +19944,33 @@ var SYNC = (function () {
      and is hidden in live. */
   function markMode() {
     var btn = document.getElementById("demobtn");
-    if (btn) btn.textContent = mode === "demo" ? "Exit demo" : "Demo data";
+    if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
+    /* One or the other, never both and never neither — and only once boot()
+       has found a live dataset, which is what `live` says. */
+    var menu = document.getElementById("demomenu");
+    if (menu) menu.hidden = !live || isDemoMode();
+    if (btn) btn.hidden = !live || !isDemoMode();
     var ban = document.getElementById("banner");
     if (ban) {
-      ban.hidden = mode !== "demo";
+      ban.hidden = !isDemoMode();
+      /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
+         is saved, but the second sentence is only true of the filled one —
+         a Clear Project has no invented content in it to warn about, and
+         warning about it anyway would teach people to stop reading the
+         banner. */
       if (mode === "demo") {
         ban.innerHTML =
           '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
           'example, for explaining how the platform works.</span>' +
           '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
           'capability\u2019s content and every reported figure is invented.</span>';
+      } else if (mode === "demoClear") {
+        ban.innerHTML =
+          '<span><strong>Clear project \u00b7 nothing here is saved.</strong> The same ' +
+          'organisation with nothing filled in \u2014 what a new deployment looks like on ' +
+          'day one.</span>' +
+          '<span>Every plan, figure and reported number is gone; the companies, business ' +
+          'units, supporting functions and settings stay.</span>';
       }
     }
   }
@@ -19787,7 +19992,12 @@ var SYNC = (function () {
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
-    isDemo: function () { return mode === "demo"; },
+    isDemo: function () { return isDemoMode(); },
+    /* Which of the two, for anything that needs to tell them apart. */
+    demoMode: function () { return isDemoMode() ? mode : null; },
+    /* `repaint` is the paint function boot() kept — the same one every other
+       caller in here uses, so a menu item does not have to be handed one. */
+    setMode: function (next) { setMode(next, repaint || function(){}); },
     person: function () { return person; },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
@@ -19849,15 +20059,25 @@ var SYNC = (function () {
           lastSaved = serialize();
           setInterval(save, 5000);
 
-          /* The Demo button exists only where there is a live dataset to tell
-             the example apart from. Opened as a file the whole product IS the
-             example, so the button would mean nothing. */
+          /* The Demo controls exist only where there is a live dataset to
+             tell the example apart from. Opened as a file the whole product IS
+             the example, so they would mean nothing.
+
+             Wired ONCE, here, and never repainted — they live in the chrome
+             rather than in the page, so paint() does not replace them and
+             markMode() only has to show and hide the right one (§67). */
+          var menu = document.getElementById("demomenu");
+          if (menu) {
+            menu.querySelectorAll("[data-demomode]").forEach(function (b) {
+              b.addEventListener("click", function () {
+                menu.open = false;
+                setMode(this.dataset.demomode, paint);
+              });
+            });
+          }
           var btn = document.getElementById("demobtn");
           if (btn) {
-            btn.hidden = false;
-            btn.addEventListener("click", function () {
-              setMode(mode === "demo" ? "live" : "demo", paint);
-            });
+            btn.addEventListener("click", function () { setMode("live", paint); });
           }
           markMode();
         })

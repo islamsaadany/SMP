@@ -55,22 +55,7 @@
            its own name in the face it names, so you can see one without
            pressing it. It goes when the choice is settled. -->
       <button class="infobtn fontbtn" id="fontbtn" type="button" hidden></button>
-      <!-- TWO DEMOS, SO A MENU (§67). "Filled Project" is the full worked
-           example; "Clear Project" is the same organisation with nothing
-           filled in, for explaining the cycle from the beginning. A <details>
-           for the same reason every other menu here is one: the action fires
-           before the menu closes, and closing a <details> from inside its own
-           click hides the button rather than unmounting it (§47.2).
-           Both hidden until SYNC finds a live dataset to tell them apart
-           from — opened as a file the whole product IS the example. -->
-      <details class="dlmenu right demomenu" id="demomenu" hidden>
-        <summary class="infobtn">Demo data<span class="dlcar" aria-hidden="true">&#9662;</span></summary>
-        <div class="menu" role="menu">
-          <button role="menuitem" data-demomode="demo">Filled project<span class="dlsub">The full worked example, every page populated</span></button>
-          <button role="menuitem" data-demomode="demoClear">Clear project<span class="dlsub">The same organisation with nothing filled in yet</span></button>
-        </div>
-      </details>
-      <button class="infobtn" id="demobtn" hidden>Exit demo</button>
+      <button class="infobtn" id="demobtn" hidden>Demo data</button>
     </div>
   </div>
 </header>

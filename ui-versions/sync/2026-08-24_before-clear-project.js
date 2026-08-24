@@ -153,7 +153,7 @@ var SYNC = (function () {
   function save(done) {
     var say = function (state) { if (done) done(state); };
     /* The guard that matters: demo data must never reach the database. */
-    if (!live || isDemoMode()) return say("offline");
+    if (!live || mode === "demo") return say("offline");
     if (saving) return say("busy");
     var now = serialize();
     if (now === lastSaved) return say("clean");
@@ -265,28 +265,11 @@ var SYNC = (function () {
      so returning restores it exactly rather than the snapshot taken at boot —
      otherwise an edit made before opening the demo would vanish from the
      screen. Anything typed while in demo is discarded, by design. */
-  /* THREE DATASETS, NOT TWO (§67). Islam: "Filled Project & Clear Project …
-     the new clear project is a project with the same setup but with no
-     uploaded data at all." So "demo" became two modes, and everything that
-     asked `mode === "demo"` has to ask `isDemoMode()` instead — the save guard
-     above most of all, because a Clear Project that could be saved would write
-     an EMPTY tenant over a real one, which is worse than writing an invented
-     one over it.
-
-     The cleared graph is derived on switch rather than baked at boot: it costs
-     a clone of a graph the browser already holds, and a second stored copy is
-     a second thing to keep in step. */
-  function isDemoMode() { return mode === "demo" || mode === "demoClear"; }
-  function datasetFor(m) {
-    if (m === "demo") return clone(DEMO);
-    if (m === "demoClear") return clearedGraph(DEMO);
-    return clone(LIVE);
-  }
   function setMode(next, paint) {
     if (!DEMO || next === mode) return;
     if (mode === "live") LIVE = clone(graph());
     mode = next;
-    hydrate(datasetFor(mode));
+    hydrate(clone(mode === "demo" ? DEMO : LIVE));
     markMode();
     paint();
     if (mode === "live") lastSaved = serialize();
@@ -298,33 +281,16 @@ var SYNC = (function () {
      and is hidden in live. */
   function markMode() {
     var btn = document.getElementById("demobtn");
-    if (btn) btn.textContent = mode === "demoClear" ? "Exit clear project" : "Exit demo";
-    /* One or the other, never both and never neither — and only once boot()
-       has found a live dataset, which is what `live` says. */
-    var menu = document.getElementById("demomenu");
-    if (menu) menu.hidden = !live || isDemoMode();
-    if (btn) btn.hidden = !live || !isDemoMode();
+    if (btn) btn.textContent = mode === "demo" ? "Exit demo" : "Demo data";
     var ban = document.getElementById("banner");
     if (ban) {
-      ban.hidden = !isDemoMode();
-      /* THE BANNER SAYS WHICH ONE IS ON SCREEN. Both are demo data and neither
-         is saved, but the second sentence is only true of the filled one —
-         a Clear Project has no invented content in it to warn about, and
-         warning about it anyway would teach people to stop reading the
-         banner. */
+      ban.hidden = mode !== "demo";
       if (mode === "demo") {
         ban.innerHTML =
           '<span><strong>Demo data \u00b7 nothing here is saved.</strong> The full worked ' +
           'example, for explaining how the platform works.</span>' +
           '<span><strong>Only Mobile\u2019s plan is real</strong> \u2014 every other unit, every ' +
           'capability\u2019s content and every reported figure is invented.</span>';
-      } else if (mode === "demoClear") {
-        ban.innerHTML =
-          '<span><strong>Clear project \u00b7 nothing here is saved.</strong> The same ' +
-          'organisation with nothing filled in \u2014 what a new deployment looks like on ' +
-          'day one.</span>' +
-          '<span>Every plan, figure and reported number is gone; the companies, business ' +
-          'units, supporting functions and settings stay.</span>';
       }
     }
   }
@@ -346,12 +312,7 @@ var SYNC = (function () {
     /* Flush now rather than on the next 800ms tick, and say what happened.
        The ONLY caller is a button somebody pressed; nothing schedules it. */
     saveNow: function (done) { save(done); },
-    isDemo: function () { return isDemoMode(); },
-    /* Which of the two, for anything that needs to tell them apart. */
-    demoMode: function () { return isDemoMode() ? mode : null; },
-    /* `repaint` is the paint function boot() kept — the same one every other
-       caller in here uses, so a menu item does not have to be handed one. */
-    setMode: function (next) { setMode(next, repaint || function(){}); },
+    isDemo: function () { return mode === "demo"; },
     person: function () { return person; },
     /* The three password operations, all SMO-only and all checked again on
        the server — this object is the convenience, never the enforcement. */
@@ -413,25 +374,15 @@ var SYNC = (function () {
           lastSaved = serialize();
           setInterval(save, 5000);
 
-          /* The Demo controls exist only where there is a live dataset to
-             tell the example apart from. Opened as a file the whole product IS
-             the example, so they would mean nothing.
-
-             Wired ONCE, here, and never repainted — they live in the chrome
-             rather than in the page, so paint() does not replace them and
-             markMode() only has to show and hide the right one (§67). */
-          var menu = document.getElementById("demomenu");
-          if (menu) {
-            menu.querySelectorAll("[data-demomode]").forEach(function (b) {
-              b.addEventListener("click", function () {
-                menu.open = false;
-                setMode(this.dataset.demomode, paint);
-              });
-            });
-          }
+          /* The Demo button exists only where there is a live dataset to tell
+             the example apart from. Opened as a file the whole product IS the
+             example, so the button would mean nothing. */
           var btn = document.getElementById("demobtn");
           if (btn) {
-            btn.addEventListener("click", function () { setMode("live", paint); });
+            btn.hidden = false;
+            btn.addEventListener("click", function () {
+              setMode(mode === "demo" ? "live" : "demo", paint);
+            });
           }
           markMode();
         })

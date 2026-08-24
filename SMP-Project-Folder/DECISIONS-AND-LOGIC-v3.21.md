@@ -8473,3 +8473,97 @@ grid TRACK (`.ohead.one` exists precisely so the row does not keep a 96px hole);
 the chips view drops a line inside each chip. A check on one proves nothing
 about the other, so `qa.py` asserts both — 2 columns off and 3 on, and the chip
 carrying "3-year" only when the toggle is lit.
+
+## 67 · Two demos, a name that meant two things, and an empty dropdown (v3.21)
+
+**67.1 Filled project and Clear project.** Islam: *"another demo data view … so
+when I press on the top view of demo data I get a drop down of 2 things, Filled
+Project & Clear Project. The new clear project is a project with the same setup
+but with no uploaded data at all, not plans no performance nothing — so I can
+explain for them the cycle there."*
+
+**What Clear Project IS: exactly what a client's own deployment looks like on
+day one.** That is not a new idea — it is `db/migrations/004-clean-slate.sql`,
+which has run once on every tenant since §21. `clearedGraph()` mirrors it
+statement for statement, so the screen he shows and the screen they get are the
+same screen.
+
+**67.2 So the risk is drift, and it is asserted rather than trusted.** 004 has
+already been amended THREE times — §44's figure sets, §54's BU list and spec
+010's function pillars each arrived somewhere the clean slate was not looking. A
+second copy in JavaScript is a fourth place to forget, and it cannot be avoided:
+004 is SQL against thirty tables and this is a graph in a browser.
+
+`scripts/test-clean-parity.js` deploys to a real Postgres, reads back what 004
+actually leaves, and compares it field by field with what `clearedGraph()`
+produces — reading the function OUT of the source rather than holding a copy,
+because a test carrying its own copy of the thing it tests proves only that the
+copy agrees with itself. **The comment is not the guard; the test is.**
+
+Confirmed end to end on a live tenant: a clean-slate deployment shows 10 units,
+8 functions, 2 companies, 8 capabilities, 1 person and 0 pillars — and Clear
+Project shows exactly that, from the full example's 33 people and 25 pillars.
+
+**67.3 The save guard had to widen with it.** Everything asking `mode ===
+"demo"` now asks `isDemoMode()`, the save guard most of all: **a Clear Project
+that could save would write an EMPTY tenant over a real one**, which is worse
+than writing an invented one over it. The banner says which of the two is on
+screen, and the second sentence — *only Mobile's plan is real* — appears on the
+filled one only: a Clear Project has no invented content to warn about, and
+warning anyway teaches people to stop reading the banner.
+
+**67.4 The IT unit becomes "IT Dist."** Islam: *"we have IT in the units and IT
+in the supporting functions, let's name the IT unit IT Dist."* Two things with
+one name is a real ambiguity, not a cosmetic one — it is the exact case §65.5's
+`(function)` suffix exists for, and the one a bare "IT" in a spreadsheet could
+not answer. The unit is the group's IT products **distributor**; its own first
+clause says so and it wears Distribution's mark, so the name was short rather
+than wrong. Migration 018 carries it to a deployed tenant, **matching on the old
+value** so a name somebody has since chosen is never overwritten (§51.20).
+
+**67.5 AN INLINE DROPDOWN OVER 255 CHARACTERS IS AN EMPTY DROPDOWN.** Islam:
+*"the drop down in the units in the people registry template is empty."*
+
+Excel ignores a data-validation list longer than 255 characters **and says
+nothing**: the file opens, the column looks right, and the list is gone.
+Measured: the Unit column's 21 places are **301** characters; the Official BU
+list beside it is 93. That is the whole of why one worked and one did not.
+
+Both move to a **Lists** sheet and are referenced by range. Both, not only the
+one that broke: the Official BU list crosses 255 the moment a client has twenty
+departments, and it would fail the same silent way — converting one member of a
+family and leaving the other is how the second one gets forgotten (§40). The
+sheet is visible rather than hidden, because a hidden sheet is something
+somebody deletes by accident and a validation whose range has gone is an empty
+dropdown again.
+
+**And the writer refuses now.** `buildXlsx` throws on an inline list over 255
+with the count, the length and the column — a list that grows with the tenant
+will cross that line one day whatever it is today, and this is the one class of
+bug where the artefact looks perfect. Swept across all five workbooks the
+platform builds: 24 inline lists, longest 136.
+
+**67.6 RENAMING A UNIT BROKE EVERY SAVE, AND HAD FOR AS LONG AS THE FIX
+EXISTED.** The rename in §67.4 would not apply — the round trip died on
+`weighting_rows.unit_key` violating NOT NULL.
+
+The line that attaches a weighting row to a unit was written to FIX
+name-matching. The note above it records the fault exactly: *"the weighting
+table used to match on the name string, which meant a rename silently detached
+a unit from its weight with no error anywhere."* It added `key` to every row —
+**and went on overwriting that key from the name anyway.**
+
+So the fault it was written against was still live, and worse than silent.
+A rename survives the session, because the attach runs once at load. On the
+NEXT load the name no longer matches, `row.key` becomes null, and every save
+from that moment fails with a constraint violation — **the tenant can no longer
+write anything at all.** Renaming a unit is a supported act on Setup → Business
+units.
+
+The key the row carries wins; the name-match stays as the fallback for a row
+written before rows carried a key. `qa.py` renames every unit, re-runs the
+attach the way a load does, and asserts all ten rows still know their unit.
+
+**Nothing in the product would have said a word.** It took a rename plus a
+round trip against a real database — and the rename was asked for as a naming
+tidy-up.

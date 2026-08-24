@@ -299,6 +299,11 @@ way; the plan template is one button with two entries (**Pillars** /
 enter and leave and **Presentation** as a menu &mdash; arranging having moved to
 the Plan, where the order is decided.
 
+The **Demo data** button is now a menu with two entries (§67): **Filled
+project**, the full worked example, and **Clear project**, the same organisation
+with nothing filled in &mdash; what a new deployment looks like on day one, for
+explaining the reporting cycle from the beginning. Neither can be saved.
+
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action. Then
 **multi-tenant** (§36) — nothing scaffolded, deliberately, and one Postgres

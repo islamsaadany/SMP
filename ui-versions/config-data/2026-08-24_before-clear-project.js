@@ -2766,23 +2766,7 @@ var UNIT_KEYS = ["mobile","retailstores","b2becomm","consumerelectronics","onlin
    same as any other label — so renaming one cannot break a lookup. The
    weighting table used to match on the name string, which meant a rename
    silently detached a unit from its weight with no error anywhere. */
-/* THE KEY THE ROW ALREADY CARRIES WINS (§67.6). This line existed to FIX
-   name-matching — the note above records that matching on the name meant a
-   rename silently detached a unit from its weight — and it added `key` to
-   every row and then went on overwriting it FROM THE NAME anyway. So the fault
-   it was written against was still live, and worse than silent.
-
-   Renaming a unit on Setup → Business units survives the session, because this
-   runs once at load. On the NEXT load the name no longer matches, `row.key`
-   becomes null, and `weighting_rows.unit_key` is NOT NULL — so every save from
-   that moment on fails with a constraint violation and the tenant cannot write
-   anything at all. Found by renaming IT to "IT Dist." and running the round
-   trip; nothing else in the product would have said a word.
-
-   The name-match stays as the FALLBACK, for a row written before rows carried
-   a key. */
 GROUP.weighting.units.forEach(function(row){
-  if (row.key && UNITS[row.key]) return;
   row.key = UNIT_KEYS.filter(function(k){ return UNITS[k].name === row.unit; })[0] || null;
 });
 
@@ -3228,90 +3212,6 @@ function clearUnitPlan(u, why){
   u.aspiration = "";
   u.endInMind = "";
   return archived;
-}
-
-/* ── CLEAR PROJECT: THE DEMO WITH NOTHING FILLED IN (§67) ─────────────
-   Islam: "another demo data view … Filled Project & Clear Project. The new
-   clear project is a project with the same setup but with no uploaded data at
-   all, not plans no performance nothing — so I can explain for them the cycle
-   there."
-
-   WHAT IT IS: exactly what a client's own deployment looks like on day one.
-   That is not a new idea — it is `db/migrations/004-clean-slate.sql`, which has
-   run once on every tenant since §21, and this mirrors it statement for
-   statement so the screen he shows and the screen they get are the same screen.
-
-   SO THE RISK IS DRIFT, and it is the fault 004 has already been bitten by
-   THREE times: §44's figure sets, §54's BU list and spec 010's function pillars
-   each arrived somewhere the clean slate was not looking, and each had to be
-   added afterwards. A second copy in JavaScript is a fourth place to forget.
-
-   It cannot be avoided — 004 is SQL against thirty tables and this is a graph
-   in a browser — so it is ASSERTED instead. `scripts/test-clean-parity.js`
-   deploys to a real Postgres, reads back what 004 actually leaves, and compares
-   it field by field with what this produces. The two disagreeing is a failing
-   test, rather than a client being shown a screen that is not what they will
-   get. THE COMMENT IS NOT THE GUARD; THE TEST IS.
-
-   Operates on a GRAPH — the same shape sync.js hydrates from — rather than on
-   the globals, so it is a pure function and the test can call it with nothing
-   loaded. */
-function clearedGraph(g){
-  var out = clone(g);
-
-  /* ── Business unit strategy ───────────────────────────────────────── */
-  (out.unitKeys || []).forEach(function(k){
-    var u = out.units[k]; if (!u) return;
-    u.items = [];                 /* pillars, and with them measures + tactics */
-    u.keyObjectives = [];
-    u.swot = { s:[], w:[], o:[], t:[] };
-    u.clauses = [];
-    u.aspiration = ""; u.endInMind = "";
-    u.real = true;                /* nothing left to mark as illustrative */
-    if (u.extra) delete u.extra.perf;
-    delete u.perf;
-  });
-
-  /* ── Group foundation ─────────────────────────────────────────────── */
-  var G = out.group || {};
-  G.clauses = []; G.keyObjectives = [];
-  G.aspiration = ""; G.endInMind = ""; G.mission = "";
-  G.values = [];
-  G.horizon = "";
-  delete G.portfolio; delete G.themeView; delete G.themePillars;
-  delete G.keyObjectivesScore;
-  /* §44's sets, §54's BU list — the two that 004 had to be amended for. */
-  delete G.sets; delete G.claims; delete G.naming; delete G.mainbus;
-
-  /* ── Capability content (the names and their function stay) ───────── */
-  (G.capabilities || []).forEach(function(c){
-    c.def = "";
-    c.keyObjectives = [];
-    c.projects = [];
-  });
-
-  /* ── The reporting cycle ──────────────────────────────────────────── */
-  out.history = [];
-  out.koWeights = {};
-  out.cycle = { name:"", rewardAt:100, locked:false, focus:{} };
-  out.review = { name:"", from:"", to:"", due:"", endsQuarter:4,
-                 state:"closed", cadence:null, note:{}, submitted:{} };
-  out.archives = [];
-
-  /* ── People ───────────────────────────────────────────────────────── */
-  out.people = (out.people || []).filter(function(p){ return p.key === "smo"; });
-  out.unitRoles = {};
-  (out.functionKeys || []).forEach(function(k){
-    var f = out.functions[k]; if (!f) return;
-    f.custodian = null;
-    if (f.head !== "smo") f.head = null;
-    /* spec 010's pillars, which rode in functions.extra where every DELETE
-       above could not reach them — 004's third amendment. */
-    delete f.items;
-    if (f.extra) delete f.extra.items;
-  });
-
-  return out;
 }
 
 /* Clearing what was REPORTED, keeping what was COMMITTED TO. This is the start

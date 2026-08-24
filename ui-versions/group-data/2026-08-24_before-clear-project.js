@@ -1021,21 +1021,7 @@ var UNITS = {
     ] },
   it: {
     logo: UNIT_MARKS["distribution"],
-    /* "IT Dist.", not "IT" (Islam, §67.4). The tenant has a business unit
-       called IT and a supporting function called IT, and two things with one
-       name is a real ambiguity rather than a cosmetic one: it is the exact
-       case the people file's Unit column has to disambiguate with a
-       "(function)" suffix (§65.5), and the one a bare "IT" in a spreadsheet
-       could not answer. The unit is the group's IT products DISTRIBUTOR — its
-       own first clause says so, and it wears Distribution's mark — so the
-       name was short rather than right.
-
-       THE KEY IS UNTOUCHED. A unit is identified by its key everywhere and the
-       name is display only, so nothing looks this up and nothing breaks;
-       migration 018 carries it to a tenant already deployed, matching on the
-       old value so a name somebody has since chosen is never overwritten
-       (§51.20's rule for an existing tenant). */
-    name: "IT Dist.", codePrefix: "IT", weight: 0, real: false,
+    name: "IT", codePrefix: "IT", weight: 0, real: false,
     clauses: [
       ["We are", "the group's IT products and infrastructure distributor"],
       ["We provide", "distribution, configuration and infrastructure services"],

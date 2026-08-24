@@ -12,6 +12,15 @@ def walk_destinations(pg):
         walk_subtabs(pg)
     return n
 
+def show_units(pg):
+    """The navigation row shows ONE list at a time (51.9), and a block that
+    left it on Functions strands every later block that names a unit — which
+    is exactly how the 66 assertions came to sit in the file without ever
+    running. Pressing the switch is cheap; assuming the side is not."""
+    if pg.query_selector('#units [data-u="mobile"]'): return
+    sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+    if sw: sw.click(); pg.wait_for_timeout(250)
+
 def walk_subtabs(pg):
     m=len(pg.query_selector_all("#subtabs button"))
     for si in range(m):
@@ -278,8 +287,12 @@ with sync_playwright() as p:
 
     for label, dest, sec in [("unit", "mobile", "plan"),
                              ("function", "fn:merchandising", "plan")]:
-        if dest.startswith("fn:") and pg.query_selector("#units .navswitch .nsw:not(.on)"):
-            pg.click("#units .navswitch .nsw:not(.on)"); pg.wait_for_timeout(200)
+        if dest.startswith("fn:"):
+            if not pg.query_selector('#units [data-u="%s"]' % dest):
+                sw = pg.query_selector("#units .navswitch .nsw:not(.on)")
+                if sw: sw.click(); pg.wait_for_timeout(250)
+        else:
+            show_units(pg)
         pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(250)
         # Performance is ONE page now: no section row, and a Report button.
         pg.click('#subtabs button:has-text("Performance")'); pg.wait_for_timeout(300)
@@ -729,6 +742,7 @@ with sync_playwright() as p:
     # both and have nothing to toggle.
     pg.select_option("#asWho", "smo"); pg.wait_for_timeout(200)
     pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year'); } catch (e) {} }")
+    show_units(pg)
     pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(200)
     pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
     fnd = pg.query_selector('#secrow-in [data-sub2="found"]')
@@ -766,12 +780,136 @@ with sync_playwright() as p:
                     % ko["chipsOff"]["chip"])
     if ko["stored"] != "1":
         errs.append("KO YEAR: the choice is not remembered in localStorage (%r)" % ko["stored"])
+    show_units(pg)
     pg.click('#units [data-u="group"]'); pg.wait_for_timeout(200)
     pg.click('#subtabs button:has-text("Foundation")'); pg.wait_for_timeout(350)
     if pg.query_selector("[data-koyear]"):
         errs.append("KO YEAR: the toggle is on the group, whose objectives always show both")
     print("key objectives: the 1-year toggle is a unit's only, drops a column in "
           "the table and a line on the chip, and is remembered")
+
+    # ── CLEAR PROJECT IS THE DEMO WITH NOTHING FILLED IN (67) ─────────
+    # Islam: "Filled Project & Clear Project … the new clear project is a
+    # project with the same setup but with no uploaded data at all."
+    #
+    # The org shape must SURVIVE and everything authored or reported must GO —
+    # asserted as both halves, because a clearer that emptied the units too
+    # would pass a check that only looked for zeroes. Fidelity against what
+    # migration 004 actually leaves is scripts/test-clean-parity.js, which
+    # needs a database; this is the half that can be checked in a browser.
+    cp = pg.evaluate("""() => {
+      const g = { group: GROUP, unitKeys: UNIT_KEYS, units: UNITS,
+                  functionKeys: FUNCTION_KEYS, functions: FUNCTIONS,
+                  companyKeys: COMPANY_KEYS, companies: COMPANIES,
+                  people: PEOPLE, unitRoles: UNIT_ROLES, access: ACCESS,
+                  labels: LABELS.entries, bands: BANDS.bands, koWeights: KO_WEIGHTS,
+                  cycle: CYCLE, review: REVIEW, history: HISTORY,
+                  priorCycle: PRIOR_CYCLE, archives: ARCHIVES };
+      const c = clearedGraph(g);
+      const count = x => ({
+        units: (x.unitKeys || []).length, fns: (x.functionKeys || []).length,
+        cos: (x.companyKeys || []).length,
+        caps: ((x.group || {}).capabilities || []).length,
+        themes: ((x.group || {}).themes || []).length,
+        bands: (x.bands || []).length, labels: (x.labels || []).length,
+        pillars: (x.unitKeys || []).reduce((n, k) =>
+          n + ((x.units[k] || {}).items || []).length, 0),
+        gko: ((x.group || {}).keyObjectives || []).length,
+        people: (x.people || []).length, history: (x.history || []).length,
+        horizon: (x.group || {}).horizon || "",
+        mainbus: ((x.group || {}).mainbus || []).length,
+        sets: ((x.group || {}).sets || []).length,
+        fnItems: (x.functionKeys || []).reduce((n, k) =>
+          n + ((x.functions[k] || {}).items || []).length, 0),
+        capContent: ((x.group || {}).capabilities || []).reduce((n, c2) =>
+          n + (c2.projects || []).length + (c2.keyObjectives || []).length, 0)
+      });
+      /* And it must not have touched the graph it was given. */
+      const before = count(g), after = count(clearedGraph(g)), live = count(g);
+      return { full: before, clear: after, unharmed: JSON.stringify(before) === JSON.stringify(live) };
+    }""")
+    keep = ["units", "fns", "cos", "caps", "themes", "bands", "labels"]
+    for k in keep:
+        if cp["clear"][k] != cp["full"][k]:
+            errs.append("CLEAR PROJECT: %s went from %r to %r — the setup must stay"
+                        % (k, cp["full"][k], cp["clear"][k]))
+    gone = ["pillars", "gko", "history", "mainbus", "sets", "fnItems", "capContent"]
+    for k in gone:
+        if cp["clear"][k]:
+            errs.append("CLEAR PROJECT: %s still holds %r" % (k, cp["clear"][k]))
+    if cp["clear"]["horizon"]:
+        errs.append("CLEAR PROJECT: the horizon survived as %r" % cp["clear"]["horizon"])
+    if cp["clear"]["people"] != 1:
+        errs.append("CLEAR PROJECT: %d people left, wanted 1 (the SMO)"
+                    % cp["clear"]["people"])
+    if not cp["unharmed"]:
+        errs.append("CLEAR PROJECT: clearedGraph() mutated the graph it was given")
+    print("clear project: the setup stays (%d units, %d functions, %d companies, "
+          "%d capabilities) and everything filled in goes (%d pillars -> 0, "
+          "%d people -> 1)"
+          % (cp["clear"]["units"], cp["clear"]["fns"], cp["clear"]["cos"],
+             cp["clear"]["caps"], cp["full"]["pillars"], cp["full"]["people"]))
+
+    # ── A DROPDOWN OVER 255 CHARACTERS IS AN EMPTY DROPDOWN (67.5) ────
+    # Islam: "the drop down in the units in the people registry template is
+    # empty." Excel ignores an inline data-validation list longer than 255
+    # characters and says nothing — the file opens, the column looks right, and
+    # the list is gone. The Unit column was 301; the Official BU list beside it
+    # was 93, which is why one worked and one did not.
+    #
+    # Asserted across EVERY workbook the platform builds, not only the one that
+    # broke: any list that grows with the tenant crosses that line eventually,
+    # and the failure is silent every time. The writer throws now, so this
+    # also proves the throw is reachable rather than decorative.
+    dv = pg.evaluate("""() => {
+      const out = [];
+      const check = (name, sheets) => {
+        sheets.forEach(sh => (sh.validations || []).forEach(v => {
+          if (v.from) return;
+          out.push([name + "/" + sh.name + " " + v.range,
+                    ('"' + (v.list || []).join(",") + '"').length]);
+        }));
+      };
+      check("people", peopleWorkbook());
+      check("plan", planWorkbook(blankUnitShape()));
+      check("capplan", capPlanWorkbook(blankCapShape()));
+      check("progress", progressWorkbook(UNITS[UNIT_KEYS[0]]));
+      check("capprogress", capProgressWorkbook(GROUP.capabilities[0]));
+      let threw = "";
+      const long = []; for (let i = 0; i < 40; i++) long.push("A long option name " + i);
+      try { buildXlsx([{ name:"S", head:["x"], rows:[["y"]],
+              validations:[{ range:"A2:A9", list:long }] }]); }
+      catch (e) { threw = e.message; }
+      /* And the two that moved to a sheet must actually point at one, sized to
+         the list — a range with blank rows shows blank entries. */
+      const pw = peopleWorkbook();
+      const people = pw.filter(sh => sh.name === "People")[0] || {};
+      const lists = pw.filter(sh => sh.name === "Lists")[0] || {};
+      const froms = {};
+      (people.validations || []).forEach(v => { if (v.from) froms[v.range] = v.from; });
+      return { inline: out, threw: threw,
+               froms: froms, listRows: (lists.rows || []).length,
+               places: placeOptions().length, bus: mainbuNames().length };
+    }""")
+    over = [r for r in dv["inline"] if r[1] > 255]
+    if over:
+        errs.append("XLSX: %d inline dropdowns over Excel's 255 limit — %r" % (len(over), over))
+    if "255" not in (dv["threw"] or ""):
+        errs.append("XLSX: the writer does not refuse an over-long inline list (%r)"
+                    % dv["threw"])
+    if len(dv["froms"]) != 2:
+        errs.append("XLSX: the people workbook has %d sheet-backed dropdowns, wanted 2 "
+                    "(Unit and Official BU) — %r" % (len(dv["froms"]), dv["froms"]))
+    if dv["listRows"] != max(dv["places"], dv["bus"]):
+        errs.append("XLSX: the Lists sheet holds %d rows for %d places and %d BUs"
+                    % (dv["listRows"], dv["places"], dv["bus"]))
+    for rng, frm in dv["froms"].items():
+        want = str(dv["places"] + 1) if "$A$" in frm else str(dv["bus"] + 1)
+        if not frm.endswith(want):
+            errs.append("XLSX: %s points at %r, which is not sized to its list" % (rng, frm))
+    print("xlsx dropdowns: %d inline, longest %d of 255; Unit and Official BU "
+          "come from the Lists sheet, and an over-long list now throws"
+          % (len(dv["inline"]), max(r[1] for r in dv["inline"])))
 
     print("unit column: %d of %d rows carry one, it reads back to %s, beats the "
           "Official BU mapping, and refuses a name that is not a place"

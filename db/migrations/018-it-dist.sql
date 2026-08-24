@@ -1,0 +1,18 @@
+-- 018 · The IT business unit becomes "IT Dist." (2026-08-24, Islam).
+--
+-- The tenant has a business unit called IT and a supporting function called
+-- IT. Two things with one name is a real ambiguity, not a cosmetic one: it is
+-- the case the people file's Unit column has to disambiguate with a
+-- "(function)" suffix (§65.5), and the one a bare "IT" in a spreadsheet could
+-- not answer. The unit is the group's IT products DISTRIBUTOR — its own first
+-- clause says so — so the name was short rather than right.
+--
+-- A unit is identified by its KEY everywhere and the name is display only, so
+-- nothing looks this up and nothing else has to move.
+--
+-- MATCHED ON THE OLD VALUE, deliberately. This runs on tenants that are
+-- already deployed and being used, where somebody may have renamed the unit
+-- themselves on Setup → Business units. An unconditional UPDATE would throw
+-- their choice away silently — §51.20 allows the unconditional kind only in
+-- 004, which runs once before anybody has opened the product.
+UPDATE units SET name = 'IT Dist.' WHERE key = 'it' AND name = 'IT';

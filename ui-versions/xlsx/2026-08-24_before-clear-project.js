@@ -152,22 +152,6 @@ function sheetXml(sh){
     }).join("") + '</row>');
   });
 
-  /* EXCEL DROPS AN INLINE LIST OVER 255 CHARACTERS, AND SAYS NOTHING (§67.5).
-     The file opens, the column looks right, and the dropdown is simply empty —
-     which is how the Unit column shipped: 21 places is 301 characters, and the
-     Official BU list beside it is 93, so one worked and one did not.
-
-     A list that grows with the tenant will cross that line one day whatever it
-     is today, so the writer refuses rather than truncating: `from` is the way
-     to write a long list and this makes forgetting it loud. */
-  (sh.validations || []).forEach(function(v){
-    if (v.from) return;
-    var n = ('"' + (v.list || []).join(",") + '"').length;
-    if (n > 255) throw new Error(
-      "xlsx: a dropdown of " + (v.list || []).length + " values is " + n +
-      " characters, and Excel silently ignores an inline list over 255. " +
-      "Put the values in a sheet and use `from` instead (" + v.range + ").");
-  });
   var dv = (sh.validations || []).map(function(v){
     var f = v.from ? xesc(v.from) : '"' + xesc((v.list || []).join(",")) + '"';
     return '<dataValidation type="list" allowBlank="1" showInputMessage="1" ' +
@@ -296,10 +280,6 @@ function unitSuggestions(){
    and Excel then refused every pillar name typed into the column. That is why
    a first plan could not be authored from the template at all. */
 var PILLAR_RANGE = "Pillars!$A$2:$A$400";
-/* Sized to the list rather than padded to a round number: a range with blank
-   rows in it puts blank entries in the dropdown. */
-function LISTS_UNIT_RANGE(n){ return "Lists!$A$2:$A$" + (n + 1); }
-function LISTS_BU_RANGE(n){ return "Lists!$B$2:$B$" + (n + 1); }
 var PROJECT_RANGE = "Projects!$A$2:$A$100";
 
 /* ── The Read me sheet ────────────────────────────────────────────────────
@@ -1079,18 +1059,10 @@ function peopleWorkbook(){
      names arrive. A unit is the opposite: it either exists here or it does
      not, and typing a new one cannot conjure one — so the dropdown is the
      whole answer and a name outside it is refused by the reader with the two
-     it could have meant.
-
-     BOTH LISTS COME FROM A SHEET, not from the formula (§67.5). The Unit list
-     is 301 characters and Excel ignores an inline list over 255 — silently, so
-     the column looked right and the dropdown was empty. The Official BU list
-     is 93 today and would have gone the same way the moment a client had
-     twenty departments, which is the fault arriving later and quieter, so it
-     moves too: converting one member of a family and leaving the other is how
-     the second one gets forgotten (§40). */
+     it could have meant. */
   var places = placeOptions().map(function(o){ return o.label; });
   if (places.length) {
-    vals.push({ range:range("Unit"), from:LISTS_UNIT_RANGE(places.length),
+    vals.push({ range:range("Unit"), list:places,
       error:"Choose the unit, supporting function or company from the list." });
   }
   /* An empty list would write formula1 as a pair of quotes with nothing in
@@ -1098,8 +1070,7 @@ function peopleWorkbook(){
      validation. On a tenant whose BU list is still empty the column simply
      has no dropdown — and that is the case the soft list exists for. */
   if (names.length) {
-    vals.unshift({ range:range("Official BU"), from:LISTS_BU_RANGE(names.length),
-                   soft:true });
+    vals.unshift({ range:range("Official BU"), list:names, soft:true });
   }
 
   var rows = PEOPLE.map(function(p){
@@ -1122,21 +1093,8 @@ function peopleWorkbook(){
     ];
   });
 
-  /* A sheet the reader never looks at — peopleFromWorkbook() asks for "People"
-     by name — carrying the two lists the dropdowns point at. Visible rather
-     than hidden: a hidden sheet is a thing somebody finds by accident and
-     deletes, and a validation whose range has gone is a dropdown that is empty
-     again, which is the bug this exists to fix. */
-  var listRows = [];
-  for (var i = 0; i < Math.max(places.length, names.length); i++) {
-    listRows.push([places[i] || "", names[i] || ""]);
-  }
-
   return [
     peopleReadme(),
-    { name:"Lists", widths:[38, 30],
-      head:["Unit, function or company", "Official BU"],
-      rows:listRows },
     { name:"People", widths:[12, 30, 30, 32, 16, 20, 22, 26, 11, 34],
       head:PEOPLE_FILE_COLS.concat([PEOPLE_FILE_EXTRA]),
       /* "Also holds" is written and never read, so it is locked — and its

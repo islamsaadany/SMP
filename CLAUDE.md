@@ -222,6 +222,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **Two demos: Filled project and Clear project (§67):** Clear Project is
+  **what a client's deployment looks like on day one** — `clearedGraph()`
+  mirrors `db/migrations/004-clean-slate.sql` statement for statement, so the
+  screen shown and the screen they get are the same screen. That is a second
+  copy of a rule and it cannot be avoided (SQL against thirty tables vs a graph
+  in a browser), so **`scripts/test-clean-parity.js` asserts it** against a real
+  Postgres, reading the function OUT of the source rather than holding a copy.
+  004 has been amended three times already; the fourth time, this fails. The
+  save guard widened with it (`isDemoMode()`): **a Clear Project that could save
+  would write an EMPTY tenant over a real one.**
+- **AN INLINE XLSX DROPDOWN OVER 255 CHARACTERS IS AN EMPTY DROPDOWN (§67.5):**
+  Excel ignores it and says nothing — the file opens, the column looks right,
+  the list is gone. The Unit column measured **301**; the Official BU list
+  beside it 93, which is why one worked and one did not. Both moved to a
+  **Lists** sheet referenced by range (both, or the second is forgotten — §40),
+  and **`buildXlsx` now throws** on an over-long inline list, because a list
+  that grows with the tenant crosses that line eventually and the artefact
+  looks perfect every time.
+- **RENAMING A UNIT BROKE EVERY SAVE (§67.6):** the line attaching a weighting
+  row to a unit was written to FIX name-matching, added `key` to every row —
+  **and went on overwriting that key from the name anyway.** A rename survives
+  the session; on the NEXT load `row.key` is null, `weighting_rows.unit_key` is
+  NOT NULL, and the tenant can never write again. Found only by renaming a unit
+  AND running the round trip against a real database. The row's own key wins
+  now; the name-match is the fallback.
 - **The 1-year view on a unit's key objectives is a TOGGLE (§66):** §51.16's
   hard-coded `false` said "for now" in the code; this is the control it was
   waiting for, and **it still starts hidden**. A screen preference

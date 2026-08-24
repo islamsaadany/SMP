@@ -351,12 +351,18 @@ var PAGE_INFO = {
     ]
   },
   k_found: {
-    title: "Capability \u2014 Foundation",
+    title: "Function \u2014 Overview",
     body: [
+      ["Why this is not called Foundation",
+       "A foundation is a business unit's: clauses, an aspiration, a SWOT. A supporting function " +
+       "has none of those \u2014 <b>its foundation is the group's</b> \u2014 so the tab said the one thing " +
+       "the page opens by denying. It is <b>Overview</b> on every function, whichever way that " +
+       "function plans: the two formats are the same product and a label that changed with the " +
+       "format would be a third thing to keep in step."],
       ["What a capability has, and what it does not",
        "A definition and, where it has any, its key objectives. It has no clauses, no aspiration " +
-       "and no SWOT \u2014 <b>its foundation is the group's</b>. That is why a capability's Strategy tab " +
-       "holds two sections against a business unit's three."],
+       "and no SWOT. That is why a function's Strategy tab holds two sections against a business " +
+       "unit's three."],
       ["Why the third column is Weight",
        "A capability's key objectives carry the same optional weighting a unit's do, but they have " +
        "never had a three-year horizon. Same layout as a unit's Foundation, one column different."],

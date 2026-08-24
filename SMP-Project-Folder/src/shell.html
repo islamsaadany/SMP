@@ -164,18 +164,46 @@
        two. Reporting is not a page you visit: it is what a cycle asks of you
        for two weeks a quarter, so it appears inside Performance and leaves
        again. See \u00a715.10. */
+    /* STRATEGY FIRST, THEN PERFORMANCE (Islam, 2026-08-24). §28's argument
+       stands and this is the row catching up with it: what was agreed is what
+       people come to read, and the score is a consequence of it — which is
+       already why a unit and a function both OPEN on their plan. The row said
+       the opposite, left to right.
+
+       `primary` stays on Performance and keeps its own job, which is not
+       order: it names the page a destination lands on when nothing else has
+       been chosen, and §28 answers that separately (see the landing rules
+       below). Order is the array. */
     fn: [
-      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
-        render: function(k){
-          return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
-        } },
       { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
           /* PLAN, not Projects, when the function plans in pillars — the tab
              has to say what is behind it (spec 010). */
-          return [{ k:"found", ac:"k_found", label:"Foundation", render:renderFnFoundation },
+          /* OVERVIEW, NOT FOUNDATION (Islam, 2026-08-24): "the word foundation
+             is confusing, the capability doesn't have a foundation it's called
+             Overview" — and, asked about the other kind: "the function that
+             plans in pillars has overview as well. the foundation is only for
+             business units."
+
+             Which the page had already been saying in prose for versions: a
+             capability has no clauses, no aspiration and no SWOT, and its
+             foundation IS the group's (§15.1). A tab called Foundation over a
+             page whose first sentence is "there is no foundation here" is the
+             label arguing with the content. FOUNDATION IS A BUSINESS UNIT'S
+             WORD; a function gets Overview whichever way it plans, because the
+             two formats are the same product (§53.5) and a label that changed
+             with the format would be a third thing to keep in step.
+
+             The KEY stays `found` and the access key stays `k_found`: renaming
+             either would lose every stored preference and every grant pointing
+             at it, for a word (§65, the same rule as `bu`). */
+          return [{ k:"found", ac:"k_found", label:"Overview", render:renderFnFoundation },
                   { k:"proj",  ac:"k_proj",
                     label:fnPlansInPillars(FUNCTIONS[fnKeyOf(k)]) ? "Plan" : "Projects",
                     render:renderFnProjects }];
+        } },
+      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, dot:true,
+        render: function(k){
+          return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
         } }
     ],
     /* A COMPANY HAS ONE TAB, AND THAT IS THE POINT (§68). It carries no
@@ -197,16 +225,6 @@
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
     ],
     unit: [
-      /* PERFORMANCE IS A RESULT OF REPORTING (§63), so it is one page and not
-         two sibling sections repeating the tab's own word. Reporting is a MODE
-         you enter from it with the Report button and leave again with Cancel —
-         which is what it always was for two weeks a quarter (§15.10), now said
-         in the navigation instead of in a comment. REPORTING holds the TARGET
-         rather than a boolean, so it can never open somebody else's report. */
-      { k:"performance", ac:"u_perf", label:"Performance", primary:true,
-        render: function(u){
-          return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
-        } },
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
           /* Spec 008 §3B. A SECTION of Strategy, not a Setup page: a
              custodian holds no Setup at all, so a Setup page would be
@@ -218,6 +236,16 @@
                   { k:"plan",  ac:"u_plan",  label:"Plan",       render:renderUnitPlan },
                   { k:"who",   ac:"u_src",   label:"Who enters", when:namingOn,
                     render:renderUnitNaming }];
+        } },
+      /* PERFORMANCE IS A RESULT OF REPORTING (§63), so it is one page and not
+         two sibling sections repeating the tab's own word. Reporting is a MODE
+         you enter from it with the Report button and leave again with Cancel —
+         which is what it always was for two weeks a quarter (§15.10), now said
+         in the navigation instead of in a comment. REPORTING holds the TARGET
+         rather than a boolean, so it can never open somebody else's report. */
+      { k:"performance", ac:"u_perf", label:"Performance", primary:true, dot:true,
+        render: function(u){
+          return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
         } }
     ],
     /* Setup is what EXISTS: decided once, revisited rarely.
@@ -958,9 +986,26 @@
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
     document.getElementById("tabrow").hidden = railed;
+    /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
+       `.primary`, which is the LANDING PAGE and nothing else — so it was
+       painted on every destination all the time. It now belongs to the tab
+       whose page is where the outstanding report is answered, and only while
+       there is one: reportPending() is the one place that decides.
+
+       `dot` rather than more `primary`, because the two facts are unrelated
+       and one class carrying both is how the dot came to mean nothing. It
+       paints to the RIGHT (Islam), which is also where it belongs — a mark
+       AFTER the word annotates it; a mark before it is a bullet. */
     document.getElementById("subtabs").innerHTML = railed ? "" : defs.map(function(d){
-      return '<button role="tab" data-s="' + d.k + '"' + (d.primary ? ' class="primary"' : '') +
-        ' aria-selected="' + (d.k === currentSub) + '">' + d.label + '</button>';
+      var cls = (d.primary ? "primary" : "") +
+        (d.dot && reportPending(TARGET) ? " dot" : "");
+      return '<button role="tab" data-s="' + d.k + '"' +
+        (cls.trim() ? ' class="' + cls.trim() + '"' : '') +
+        ' aria-selected="' + (d.k === currentSub) + '">' + d.label +
+        (d.dot && reportPending(TARGET)
+          ? '<i class="tabdot" aria-hidden="true"></i>' +
+            '<span class="vh"> \u2014 not submitted yet</span>'
+          : '') + '</button>';
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];

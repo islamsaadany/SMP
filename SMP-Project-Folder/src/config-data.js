@@ -2247,6 +2247,42 @@ function canSpeakFor(target){
   return canReport(t) && !SMPRules.onlyOwnLines(world(), viewer(), "unit", t);
 }
 
+/* ── THE DOT ON THE PERFORMANCE TAB HAS TO MEAN SOMETHING (§69.9) ──
+   It was `.tabs button.primary::before` — painted on whichever tab is the
+   landing page, always, on every destination. So it said "this is the regular
+   view", which the tab being first already says, and it looked exactly like
+   the marks the rest of the platform uses for something outstanding.
+
+   Islam: "bring the orange dot beside it in case of an open cycle for
+   reporting that hasn't been submitted yet. if not just keep it without the
+   dot." So it becomes a state rather than a decoration, and the state is one
+   sentence: THIS SUBJECT owes a submission, and you are somebody who could
+   make it.
+
+   THREE THINGS IT IS DELIBERATELY NOT:
+   · Not the group's and not a company's. Neither submits — a company carries
+     no strategy of its own (§68) and the group's cycle is the thing being
+     submitted TO — so "has not submitted" is not a state they can be in, and a
+     dot there would have to mean something else. One dot, one meaning.
+   · Not "somebody, somewhere, has not submitted". That is the SMO's board on
+     the group's Performance page, which says it in full; a dot cannot.
+   · Not shown to a reader. canSpeakFor() is the same question the Submit
+     button asks (§50.4) — asking it differently here is how a screen comes to
+     nag somebody who has no control that would clear it. */
+function reportPending(target){
+  if (!REVIEW || REVIEW.state !== "open") return false;
+  var t = String(target || "");
+  if (t === "group" || t.indexOf("co:") === 0) return false;
+  /* A real subject, asked the way §59 says to ask: a unit key or fn:<key>,
+     resolved in ONE place. A function that plans in projects still submits —
+     it is `unitLike()` that has nothing unit-shaped to return for it, not the
+     cycle — so this checks the thing EXISTS rather than what shape it has. */
+  var real = t.indexOf("fn:") === 0 ? !!FUNCTIONS[t.slice(3)] : !!UNITS[t];
+  if (!real) return false;
+  if (REVIEW.submitted && REVIEW.submitted[t]) return false;
+  return canSpeakFor(t);
+}
+
 /* ── The source of a figure (§16.7) ────────────────────────────────
    A key objective or a measure may carry `src` — the team that is master of
    the number and the person in it who enters it. Where it does, the UNIT sees

@@ -16,9 +16,16 @@
   .dslide { position:absolute; inset:0; display:none; flex-direction:column;
             background:var(--surface); border-radius:5px; padding:52px 62px; overflow:hidden; }
   .dslide.on { display:flex; }
-  .dslide h1 { font:400 76px/1.08 var(--serif); margin:8px 0 22px; }
+  /* BOLD, at Islam's direction (§69.8). Not a regression and not an
+     editor-only difference — measured at 400 in both views and 400 since the
+     deck was written — but `--serif` resolves to the sans stack (there is no
+     serif face embedded, §38.7), and a display heading at 400 in a sans reads
+     as light rather than as quiet. The eyebrows, the `.dlab`s and the table
+     headers are already 700, so this is the whole deck arriving at one weight
+     rather than one more exception. */
+  .dslide h1 { font:700 76px/1.08 var(--serif); margin:8px 0 22px; }
   .dslide h1.cover { font-size:112px; letter-spacing:-.015em; }
-  .dslide h2 { font:400 46px/1.15 var(--serif); margin:0 0 26px; }
+  .dslide h2 { font:700 46px/1.15 var(--serif); margin:0 0 26px; }
   .dslide .eyebrow { font-size:17px; letter-spacing:.16em; text-transform:uppercase;
                      color:var(--gold-deep); font-weight:700; }
   .dlab { display:block; font-size:15px; letter-spacing:.11em; text-transform:uppercase;

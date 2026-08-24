@@ -9859,3 +9859,78 @@ pipeline that substitutes silently produces a plausible artefact.
 guess written into the file would decide them. The upload adds and amends and
 **never removes** (§54), so anyone already on the register is updated on their
 Emp ID rather than duplicated.
+
+---
+
+## 79 · Spec-kit across everything, and a row edited on the row (v3.23)
+
+Islam: *"we need to start using spec-kit across the platform, across everything,
+to make sure things are well structured and in place."*
+
+**79.1 The constitution was the gap, not the specs.** Eleven specs exist and the
+last is §54 (v3.21) — everything from §55 to §78 has none. But writing
+twenty-four retrospective documents would be an exercise: the decisions document
+already carries the reasoning, at more length than a spec would.
+
+What was actually missing is upstream of that. `.specify/memory/constitution.md`
+was **v1.0.0, ratified before roles replaced levels** — so a spec review checked
+compliance against a set of principles that predated server authorisation, the
+security floor, records outside the state graph, and every law the last twenty
+sections earned. **A spec cannot be checked against a rule nobody wrote down
+where the check happens.**
+
+Amended to **1.1.0** with eight principles, IX–XVI. None is new; each is a law
+the work earned by breaking it, several repeatedly:
+
+| | | Earned |
+|---|---|---|
+| IX | One copy of a rule, run on both sides | §42, §74.2 |
+| X | The server decides; the browser only draws | §42, §74.2 |
+| XI | A record a save can erase is not a record | §69.23, §71, §74.5 |
+| XII | A reader never creates what it was looking for | §42, §50.6 |
+| XIII | A colour that works as a fill fails as type | **seven times** |
+| XIV | A class name is one global namespace | **three times** |
+| XV | Typing never repaints; a repaint never moves the page | §30.1, §35, §71.2, §75 |
+| XVI | A check that measures the wrong thing passes | §50.6, §51.11, §54.5, §74.4 |
+
+And the workflow now says it outright: **every feature gets a spec before it
+gets code**, and work already built without one is backfilled **when it is next
+touched** — so the gap closes where it matters rather than as an exercise.
+
+**79.2 A ROW IS EDITED ON THE ROW, which reverses the fifth of the seven.**
+Islam asked for *"edit icon in the top right to edit"* and then, after using it:
+*"I don't need to edit the whole table — maybe by pressing the 3 dots on the
+right of the row I can work on the row inline and then a small save button."*
+
+Recorded as a reversal, and the number is why he is right: whole-table edit
+turns the register into **297 inputs** to change one job title, every one of
+them a way to change something by accident — and it repaints the whole table to
+get there. The row menu already holds *Delete permanently* and *Set a password*;
+editing belongs beside them.
+
+One row open at a time (two open rows are two unsaved states and a question
+about which Save means which); Cancel restores from a copy taken when the row
+opened, never by re-reading fields already typed into; and leaving the page
+cancels, because an edit you cannot see is not an edit you agreed to.
+
+**79.3 The inventory was counted, not remembered.** Driven across all eighteen
+Setup and Manage pages: **19 tables, one with a row menu, three wider than their
+box**. And only **seven have an individual row flow** — which is Islam's own
+qualifier, *"the tables that has individual row flow"*, turned into a list.
+
+The other twelve are named in the spec **with what they must not be given**,
+because the failure mode of a standard is applying it out of consistency: Roles
+& access is a 49-cell matrix where sorting scrambles the argument the table
+makes; Scoring bands and Labels are fixed sets whose rows cannot be added or
+removed; Branding and Communication are settings wearing a table's shape.
+
+**79.4 It is built UNDER the register, not beside it.** The register already
+carries five of the seven, and every one was paid for with a real fault —
+§69.19's sticky-on-the-row, §69.20's unreachable Delete, §71.2's jumping,
+§73.1's class collision. Extracting from a page that works, and asserting it
+still works, is a smaller risk than writing the component from the spec and
+retro-fitting the one page that already does the job.
+
+**Nothing is built yet.** Spec, plan and tasks are written and gated on three
+questions in §6 that are Islam's to answer — which is Principle I, applied to
+the largest remaining piece of work rather than around it.

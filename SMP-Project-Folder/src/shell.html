@@ -2849,6 +2849,39 @@
        The state (what is typed, which chip is lit) lives outside the render so
        that a repaint from somewhere else — adding a row, a role given — puts it
        back rather than clearing it. */
+    /* ── WHAT A ROW SAYS, AS OPPOSED TO WHAT IT CONTAINS (§84.2) ──────
+       `tr.innerText` looked right and was wrong on any table with a `<select>`
+       in it: a select carries EVERY option, so on Capabilities — where each row
+       has a picker listing all eight functions — searching "Treasury" matched
+       all eight rows. Measured: 8 of 8. The reader sees one function per row and
+       the search saw eight.
+
+       The reverse fault is in the same sentence: an `<input>` contributes no
+       text at all, so with the table in edit mode a search would have matched
+       NOTHING. Both are the same mistake — reading the markup instead of what
+       is on screen.
+
+       So the row's text is: its cells with the pickers taken out, plus each
+       select's CHOSEN option, plus each input's VALUE. `textContent` rather
+       than `innerText` on the clone, because a detached node reports `innerText`
+       as empty (§69.5's lesson, in a fourth place). */
+    function tkCellText(el){
+      var clone = el.cloneNode(true);
+      [].forEach.call(clone.querySelectorAll("select"), function(sel){
+        sel.parentNode.removeChild(sel);
+      });
+      var t = clone.textContent || "";
+      [].forEach.call(el.querySelectorAll("select"), function(sel){
+        var o = sel.options[sel.selectedIndex];
+        if (o) t += " " + o.text;
+      });
+      [].forEach.call(el.querySelectorAll("input, textarea"), function(i){
+        if (i.type !== "checkbox" && i.type !== "radio") t += " " + i.value;
+      });
+      return t.trim().toLowerCase();
+    }
+    function tkRowText(tr){ return tkCellText(tr); }
+
     function tkApply(id){
       var table = document.querySelector('[data-tktable="' + id + '"]');
       if (!table) return;
@@ -2859,7 +2892,7 @@
         if (tr.classList.contains("newrow")) return;   /* the Add row is not a row */
         total++;
         var okF = !f || (" " + (tr.dataset.tkrow || "") + " ").indexOf(" " + f + " ") > -1;
-        var okQ = !q || tr.innerText.toLowerCase().indexOf(q) > -1;
+        var okQ = !q || tkRowText(tr).indexOf(q) > -1;
         tr.hidden = !(okF && okQ);
         if (!tr.hidden) shown++;
       });
@@ -2907,9 +2940,17 @@
         return !r.classList.contains("newrow"); });
       var add = [].slice.call(body.rows).filter(function(r){
         return r.classList.contains("newrow"); });
+      /* THE SAME READING THE SEARCH USES (§84.3), and for the same reason: a
+         cell holding an `<input>` has NO text, so Capabilities — editable for
+         the SMO without a pen — sorted every row as the empty string and the
+         order never moved. It looked like a sort that did nothing, which is
+         indistinguishable from a sort that is not wired up.
+
+         `tkCellText` is `tkRowText`'s single-cell twin: the chosen option of a
+         picker, the value of a field, otherwise the words. */
       var val = function(r){
         var c = r.cells[st.col];
-        return c ? c.innerText.trim().toLowerCase() : "";
+        return c ? tkCellText(c) : "";
       };
       rows.sort(function(a, b){
         var x = val(a), y = val(b);

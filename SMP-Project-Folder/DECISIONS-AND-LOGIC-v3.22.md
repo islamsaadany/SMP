@@ -10235,3 +10235,59 @@ that the number stopped agreeing with the sweep that had just produced it: **a
 measurement that disagrees with the one before it, after a change that should
 not have moved it, is a file to read rather than a number to accept** (§63's
 rule about the contrast total).
+
+---
+
+## 84 · The table standard reaches all seven (v3.24)
+
+Spec 012, phases 1, 3 and 4. Search, quick filters and sortable headers now work
+on every table that has an individual row flow — the register, the Official BU
+list, Business units, Companies, Functions, Capabilities and Figure sets.
+
+**84.1 The header row was extracted, not copied.** It was a closure inside
+`renderPeople` with `"people"` written into it three times. `tkHead(id)` counts
+the column INDEX itself rather than taking it, because every one of these tables
+has conditional columns and a caller counting its own gets it wrong the first
+time one becomes conditional.
+
+**Two tables do not sort at all**, and that is the spec (§6.2) rather than an
+omission: Business units and Figure sets carry an order somebody ARRANGED, and
+on Business units that order is the navigation. **Two do not get a search box**
+for the same kind of reason — one row and two rows — and the threshold is one
+number (`TK_SEARCH_FROM`), so a table crosses it as the tenant grows rather than
+when somebody remembers the page.
+
+**84.2 A `<select>` PUTS EVERY OPTION IN THE ROW'S TEXT.** `tr.innerText` looked
+right and was wrong on any table with a picker in it: on Capabilities each row
+lists all eight functions, so searching *Treasury* matched **8 of 8**. The
+reader sees one function per row and the search saw eight.
+
+The reverse fault is in the same sentence: an `<input>` contributes **no text at
+all**, so with a table in edit mode a search would have matched nothing. Both
+are one mistake — reading the markup instead of what is on screen. A row's text
+is now its cells with the pickers removed, plus each select's CHOSEN option,
+plus each input's VALUE. `textContent` rather than `innerText` on the clone,
+because a detached node reports `innerText` as empty (§69.5, in a fourth place).
+
+**84.3 AND SORTING AN EDITABLE TABLE DID NOTHING, for exactly that reason.**
+The comparator read `cell.innerText`, and Capabilities is editable for the SMO
+without a pen — so every row sorted as the empty string and the order never
+moved. It looked like a sort that does nothing, which is indistinguishable from
+a sort that was never wired up. `tkCellText()` is now the one reader and
+`tkRowText()` is it applied to the whole row: **one function, so the search and
+the sort cannot disagree about what a row says.**
+
+Found because the check drives all seven rather than the one it was written on.
+
+**84.4 Two of the check's own assertions were wrong before the product was.**
+It read `cells[1].innerText` — the same fault it was hunting — and it clicked a
+header **twice**, which returns a two-row table to where it started, so
+Companies reported "sorting does nothing" while sorting correctly. Every sort
+step is captured now and at least one must differ. Constitution XVI, on my own
+check twice in one session.
+
+**Still to come (spec 012 phase 2):** the row edited on the row, from the ⋮,
+with Save and Cancel in the actions cell. That is the reversal Islam asked for
+in §79.2 and it is the piece with no precedent anywhere in the platform.
+
+`src/checks/table-standard-all.py`, 44 assertions across the seven.

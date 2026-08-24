@@ -2060,6 +2060,21 @@
   .boxhead { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
   .boxlab { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
             color:var(--ink-3); font-weight:700; }
+  /* ONE STATE, SHOWN LIT OR NOT (§66). The layout switch beside it is two
+     choices and is drawn as a segmented pair; this is one thing that is on or
+     off, and a two-button control for that would put a permanently-lit half
+     next to a permanently-dark one. `margin-left:auto` here and NOT on the
+     .minisw after it: the first auto margin in the row eats the free space, so
+     both carrying one would separate them across the whole header. */
+  .minitog { margin-left:auto; font:inherit; font-size:11px; line-height:1;
+             padding:5px 10px; cursor:pointer; border:1px solid var(--line);
+             border-radius:var(--r); background:var(--surface); color:var(--ink-3); }
+  .minitog:hover { border-color:var(--stone); color:var(--ink-2); }
+  .minitog.on { background:var(--stone-soft); border-color:var(--stone-soft);
+                color:var(--on-fill); }
+  .minitog:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  .minitog + .minisw { margin-left:0; }
+
   .minisw { display:inline-flex; margin-left:auto; border:1px solid var(--line);
             border-radius:var(--r); overflow:hidden; }
   .minisw button { font:inherit; font-size:11px; line-height:1; padding:5px 9px; border:0;
@@ -7967,7 +7982,23 @@ function avg(a){
    anywhere a figure is measured against that target — Performance's drill-down,
    Reporting, and the deck's "where we stand" all keep it, because an actual
    with nothing to read it against is a number nobody can judge. */
-var SHOW_KO_THIS_YEAR = false;
+/* NOW A TOGGLE, AND STILL DEFAULTING TO HIDDEN (§66). Islam: "for the key
+   objectives for the business units make a toggle to show and hide the 1 year
+   view in the foundation page." So "for now" became a control rather than a
+   constant, and the answer it starts on is the one it has been giving.
+
+   A SCREEN PREFERENCE, in localStorage and never in the state graph (§25,
+   §47.1) — the same shape as the theme, the People page's columns and the
+   rail's terse switch. One person deciding to see both horizons must not
+   decide it for the whole tenant, and a toggle that autosaved would. */
+var KO_YEAR_KEY = "smp.ko.year";
+var SHOW_KO_THIS_YEAR = (function(){
+  try { return localStorage.getItem(KO_YEAR_KEY) === "1"; } catch (e) { return false; }
+})();
+function setKoThisYear(on){
+  SHOW_KO_THIS_YEAR = !!on;
+  try { localStorage.setItem(KO_YEAR_KEY, SHOW_KO_THIS_YEAR ? "1" : "0"); } catch (e) {}
+}
 
 function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");
@@ -13394,6 +13425,15 @@ function inputOr(page, value, cls, setter){
 /* Two readings of the same targets. Columns compares them down a line; chips
    read this year as a figure. A toggle rather than a decision, because which
    one is better depends on how many objectives a unit has written. */
+/* Show or hide the near horizon on a unit's objectives (§66). A switch, not a
+   pair of buttons: there are two states and one of them is on — the same shape
+   §47.5 settled for Units | Functions, at the size a header allows. */
+function koYearToggle(){
+  return '<button class="minitog' + (SHOW_KO_THIS_YEAR ? " on" : "") + '" data-koyear="1"' +
+    ' aria-pressed="' + SHOW_KO_THIS_YEAR + '"' +
+    ' title="' + (SHOW_KO_THIS_YEAR ? "Hide this year\u2019s target" : "Show this year\u2019s target") +
+    '">This year</button>';
+}
 function koToggle(){
   return '<span class="minisw" role="group" aria-label="Objectives layout">' +
     '<button data-kov="cols"  aria-pressed="' + (KO_VIEW === "cols")  + '" title="Columns">&#9776;</button>' +
@@ -13485,7 +13525,11 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
       : '') +
     '<div class="divide"></div>' +
     '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
-      (editing ? '' : koToggle()) + '</div>' +
+      /* THE UNIT'S ONLY, because the group's objectives have always shown both
+         and there is nothing there to toggle (§51.16). Hidden in edit for the
+         same reason the layout switch is: authoring shows every field there is,
+         so a control that hides one would be lying about what is stored. */
+      (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
     (editing ? koEdit(objectives) : koView(objectives, isGroup)) +
   '</div>';
 }
@@ -20989,6 +21033,13 @@ var SYNC = (function () {
     });
     /* Just the names, or the names with their detail (§60). A screen
        preference: written to localStorage and repainted, never saved. */
+    /* §66. A screen preference, so it is stored and repainted — nothing here
+       touches the graph and nothing here is saved to the tenant. */
+    document.querySelectorAll("[data-koyear]").forEach(function(b){
+      b.addEventListener("click", function(){
+        setKoThisYear(!SHOW_KO_THIS_YEAR); paint();
+      });
+    });
     document.querySelectorAll("[data-railterse]").forEach(function(b){
       b.addEventListener("click", function(){
         RAIL_TERSE = !RAIL_TERSE;

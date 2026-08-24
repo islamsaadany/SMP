@@ -222,6 +222,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **The 1-year view on a unit's key objectives is a TOGGLE (§66):** §51.16's
+  hard-coded `false` said "for now" in the code; this is the control it was
+  waiting for, and **it still starts hidden**. A screen preference
+  (`smp.ko.year` in `localStorage`), never the state graph — one person seeing
+  both horizons must not decide it for the tenant (§25, §47.1). **The unit's
+  only**: the group's objectives have always shown both, so the control is
+  absent rather than present and inert, and it is hidden in edit mode because
+  authoring shows every field there is. One state, so ONE button — a segmented
+  pair would put a permanently-lit half beside a permanently-dark one. Asserted
+  on **both layouts**, which fail differently: the columns view drops a grid
+  TRACK, the chips view drops a line.
 - **The register's file carries WHERE SOMEBODY SITS, and the column is called
   Unit (§65):** "Official BU" is the client's own word (§58); **Unit** is the
   business unit, supporting function or company it opens here — Islam renamed

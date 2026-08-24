@@ -717,6 +717,62 @@ with sync_playwright() as p:
           "new joiner -> %s + BU %r"
           % (pf["rows"], "PASS" if not pf["fixedMoving"] else "FAIL",
              pf["movedRows"], pf["movedWhat"], pf["seededAction"], pf["seededNewBus"]))
+    # ── THE 1-YEAR TOGGLE ON A UNIT'S FOUNDATION (66) ────────────────
+    # Islam: "for the key objectives for the business units make a toggle to
+    # show and hide the 1 year view in the foundation page."
+    #
+    # 51.16 hid it behind a hard-coded false "for now"; this is the control it
+    # was waiting for, and it still STARTS hidden. Asserted on BOTH layouts —
+    # the columns view drops a grid TRACK and the chips view drops a line, so
+    # they fail differently and a check on one proves nothing about the other.
+    # And it must not appear on the GROUP, whose objectives have always shown
+    # both and have nothing to toggle.
+    pg.select_option("#asWho", "smo"); pg.wait_for_timeout(200)
+    pg.evaluate("() => { try { localStorage.removeItem('smp.ko.year'); } catch (e) {} }")
+    pg.click('#units [data-u="mobile"]'); pg.wait_for_timeout(200)
+    pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
+    fnd = pg.query_selector('#secrow-in [data-sub2="found"]')
+    if fnd: fnd.click(); pg.wait_for_timeout(300)
+    ko = pg.evaluate("""() => {
+      const read = () => {
+        const oh = document.querySelector('.ohead');
+        return { on: SHOW_KO_THIS_YEAR,
+                 cols: oh ? oh.querySelectorAll('span').length : null,
+                 chip: (document.querySelector('.ochip') || {}).innerText || null };
+      };
+      const out = { toggle: !!document.querySelector('[data-koyear]') };
+      KO_VIEW = "cols"; setKoThisYear(false); paint();
+      out.colsOff = read();
+      setKoThisYear(true); paint();
+      out.colsOn = read();
+      KO_VIEW = "chips"; setKoThisYear(false); paint();
+      out.chipsOff = read();
+      setKoThisYear(true); paint();
+      out.chipsOn = read();
+      out.stored = localStorage.getItem("smp.ko.year");
+      setKoThisYear(false); KO_VIEW = "chips"; paint();
+      return out;
+    }""")
+    if not ko["toggle"]:
+        errs.append("KO YEAR: no toggle on a unit's foundation")
+    if ko["colsOff"]["cols"] != 2 or ko["colsOn"]["cols"] != 3:
+        errs.append("KO YEAR: the columns view shows %r off and %r on, wanted 2 and 3"
+                    % (ko["colsOff"]["cols"], ko["colsOn"]["cols"]))
+    if not ko["chipsOn"]["chip"] or "3-year" not in ko["chipsOn"]["chip"]:
+        errs.append("KO YEAR: the chips view does not carry both horizons when on (%r)"
+                    % ko["chipsOn"]["chip"])
+    if ko["chipsOff"]["chip"] and "3-year" in ko["chipsOff"]["chip"]:
+        errs.append("KO YEAR: the chips view still carries both when off (%r)"
+                    % ko["chipsOff"]["chip"])
+    if ko["stored"] != "1":
+        errs.append("KO YEAR: the choice is not remembered in localStorage (%r)" % ko["stored"])
+    pg.click('#units [data-u="group"]'); pg.wait_for_timeout(200)
+    pg.click('#subtabs button:has-text("Foundation")'); pg.wait_for_timeout(350)
+    if pg.query_selector("[data-koyear]"):
+        errs.append("KO YEAR: the toggle is on the group, whose objectives always show both")
+    print("key objectives: the 1-year toggle is a unit's only, drops a column in "
+          "the table and a line on the chip, and is remembered")
+
     print("unit column: %d of %d rows carry one, it reads back to %s, beats the "
           "Official BU mapping, and refuses a name that is not a place"
           % (pf["unitWritten"], pf["rows"], pf["unitReadsBack"]))

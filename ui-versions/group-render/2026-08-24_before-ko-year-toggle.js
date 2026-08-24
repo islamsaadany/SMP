@@ -1538,15 +1538,6 @@ function inputOr(page, value, cls, setter){
 /* Two readings of the same targets. Columns compares them down a line; chips
    read this year as a figure. A toggle rather than a decision, because which
    one is better depends on how many objectives a unit has written. */
-/* Show or hide the near horizon on a unit's objectives (§66). A switch, not a
-   pair of buttons: there are two states and one of them is on — the same shape
-   §47.5 settled for Units | Functions, at the size a header allows. */
-function koYearToggle(){
-  return '<button class="minitog' + (SHOW_KO_THIS_YEAR ? " on" : "") + '" data-koyear="1"' +
-    ' aria-pressed="' + SHOW_KO_THIS_YEAR + '"' +
-    ' title="' + (SHOW_KO_THIS_YEAR ? "Hide this year\u2019s target" : "Show this year\u2019s target") +
-    '">This year</button>';
-}
 function koToggle(){
   return '<span class="minisw" role="group" aria-label="Objectives layout">' +
     '<button data-kov="cols"  aria-pressed="' + (KO_VIEW === "cols")  + '" title="Columns">&#9776;</button>' +
@@ -1638,11 +1629,7 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
       : '') +
     '<div class="divide"></div>' +
     '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
-      /* THE UNIT'S ONLY, because the group's objectives have always shown both
-         and there is nothing there to toggle (§51.16). Hidden in edit for the
-         same reason the layout switch is: authoring shows every field there is,
-         so a control that hides one would be lying about what is stored. */
-      (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
+      (editing ? '' : koToggle()) + '</div>' +
     (editing ? koEdit(objectives) : koView(objectives, isGroup)) +
   '</div>';
 }

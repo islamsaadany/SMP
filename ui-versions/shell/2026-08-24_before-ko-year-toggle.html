@@ -1292,13 +1292,6 @@
     });
     /* Just the names, or the names with their detail (§60). A screen
        preference: written to localStorage and repainted, never saved. */
-    /* §66. A screen preference, so it is stored and repainted — nothing here
-       touches the graph and nothing here is saved to the tenant. */
-    document.querySelectorAll("[data-koyear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        setKoThisYear(!SHOW_KO_THIS_YEAR); paint();
-      });
-    });
     document.querySelectorAll("[data-railterse]").forEach(function(b){
       b.addEventListener("click", function(){
         RAIL_TERSE = !RAIL_TERSE;

@@ -2560,23 +2560,7 @@ function avg(a){
    anywhere a figure is measured against that target — Performance's drill-down,
    Reporting, and the deck's "where we stand" all keep it, because an actual
    with nothing to read it against is a number nobody can judge. */
-/* NOW A TOGGLE, AND STILL DEFAULTING TO HIDDEN (§66). Islam: "for the key
-   objectives for the business units make a toggle to show and hide the 1 year
-   view in the foundation page." So "for now" became a control rather than a
-   constant, and the answer it starts on is the one it has been giving.
-
-   A SCREEN PREFERENCE, in localStorage and never in the state graph (§25,
-   §47.1) — the same shape as the theme, the People page's columns and the
-   rail's terse switch. One person deciding to see both horizons must not
-   decide it for the whole tenant, and a toggle that autosaved would. */
-var KO_YEAR_KEY = "smp.ko.year";
-var SHOW_KO_THIS_YEAR = (function(){
-  try { return localStorage.getItem(KO_YEAR_KEY) === "1"; } catch (e) { return false; }
-})();
-function setKoThisYear(on){
-  SHOW_KO_THIS_YEAR = !!on;
-  try { localStorage.setItem(KO_YEAR_KEY, SHOW_KO_THIS_YEAR ? "1" : "0"); } catch (e) {}
-}
+var SHOW_KO_THIS_YEAR = false;
 
 function pillarCode(u, i){
   return (u.codePrefix || "") + String(i + 1).padStart(2, "0");

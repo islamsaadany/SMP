@@ -132,21 +132,6 @@
   .boxhead { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
   .boxlab { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
             color:var(--ink-3); font-weight:700; }
-  /* ONE STATE, SHOWN LIT OR NOT (§66). The layout switch beside it is two
-     choices and is drawn as a segmented pair; this is one thing that is on or
-     off, and a two-button control for that would put a permanently-lit half
-     next to a permanently-dark one. `margin-left:auto` here and NOT on the
-     .minisw after it: the first auto margin in the row eats the free space, so
-     both carrying one would separate them across the whole header. */
-  .minitog { margin-left:auto; font:inherit; font-size:11px; line-height:1;
-             padding:5px 10px; cursor:pointer; border:1px solid var(--line);
-             border-radius:var(--r); background:var(--surface); color:var(--ink-3); }
-  .minitog:hover { border-color:var(--stone); color:var(--ink-2); }
-  .minitog.on { background:var(--stone-soft); border-color:var(--stone-soft);
-                color:var(--on-fill); }
-  .minitog:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  .minitog + .minisw { margin-left:0; }
-
   .minisw { display:inline-flex; margin-left:auto; border:1px solid var(--line);
             border-radius:var(--r); overflow:hidden; }
   .minisw button { font:inherit; font-size:11px; line-height:1; padding:5px 9px; border:0;

@@ -8435,3 +8435,41 @@ assertion is now sharper than it was, proving the fallback as well as the
 mapping. That is the line between fixing a check and editing it into agreeing:
 the behaviour it was written to protect is unchanged, and it is now isolated
 well enough to see it.
+
+## 66 · The 1-year view becomes a toggle (v3.21)
+
+**66.1 "For now" was waiting for this.** Islam, 2026-08-23: *"the key objectives
+in the units for now hide the 1 year view and just keep the 3 years."* §51.16
+made that a hard-coded `false`, and said in the code that "for now" was why it
+was a switch and not a deletion. Today: *"for the key objectives for the business
+units make a toggle to show and hide the 1 year view in the foundation page."*
+
+**It still starts hidden.** The default is the answer it has been giving for
+three versions, so nobody's page changes until they press it.
+
+**66.2 A screen preference, never the state graph.** `localStorage`, key
+`smp.ko.year` — the same shape as the theme, the People page's visible columns
+and the rail's terse switch (§25, §47.1). One person deciding to see both
+horizons must not decide it for the whole tenant, and a toggle that autosaved
+would do exactly that.
+
+**66.3 The unit's only.** The group's objectives have always shown both, so
+there is nothing there to toggle — the control is absent rather than present and
+inert. Hidden in edit mode too, for the same reason the layout switch is:
+authoring shows every field there is, and a control that hid one would be lying
+about what is stored.
+
+**66.4 One state, so one button.** The layout switch beside it is two choices
+and is drawn as a segmented pair; this is one thing that is on or off, and a
+two-button control for it would put a permanently-lit half beside a
+permanently-dark one — §41.8's argument at the size a card header allows.
+
+`margin-left:auto` sits on the toggle and is removed from the `.minisw` that
+follows it: the first auto margin in a flex row eats the free space, so both
+carrying one would have thrown them to opposite ends of the header.
+
+**66.5 Both layouts, because they fail differently.** The columns view drops a
+grid TRACK (`.ohead.one` exists precisely so the row does not keep a 96px hole);
+the chips view drops a line inside each chip. A check on one proves nothing
+about the other, so `qa.py` asserts both — 2 columns off and 3 on, and the chip
+carrying "3-year" only when the toggle is lit.

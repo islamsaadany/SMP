@@ -150,7 +150,11 @@ with sync_playwright() as p:
     pg.wait_for_timeout(700)
     pg.click('.setuprail [data-setupgo="units"]')
     pg.wait_for_timeout(800)
-    pg.click('[data-edit="units"]')
+    # A UNIT IS EDITED ON ITS ROW NOW (§85, landed on main mid-branch). The
+    # whole-table pen this used to press is gone, so the route in is the row's
+    # own — §51.11: when a control changes shape, the checks keyed on the old
+    # one break, and the ones that do not break are the ones to worry about.
+    pg.click('[data-rowedit^="units|"]')
     pg.wait_for_timeout(700)
     pg.click(".pickbtn")
     pg.wait_for_timeout(500)

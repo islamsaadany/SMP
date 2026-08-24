@@ -9,7 +9,7 @@ Spec §6 answered 2026-08-24. Building.
 - [x] Move the row menu onto it
 - [x] **Assert the register is unchanged**: columns, freeze offsets, actions, scroll — measured before and after
 
-## Phase 2 — the reversal  *(next)*
+## Phase 2 — the reversal
 - [x] *Edit this row* on the row menu; cells become fields in place
 - [x] Save / Cancel in the actions cell; Cancel restores from the copy taken on open
 - [x] One row open at a time; leaving the page cancels

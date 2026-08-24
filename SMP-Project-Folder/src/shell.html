@@ -427,7 +427,7 @@
        have already written themselves, so "keep" would mean half-typed values
        persisting with nothing on screen saying so. */
     if (typeof ROWEDIT !== "undefined" && ROWEDIT) {
-      rowEditCancel(typeof personBy === "function" ? personBy(ROWEDIT) : null);
+      rowEditCancel();
     }
     /* AND THE MERGE COMPARISON GOES WITH IT (§87.4). It names two people and
        carries an answer per field; coming back to the register an hour later
@@ -3071,7 +3071,7 @@
       b.addEventListener("click", function(e){
         e.stopPropagation();
         var key = b.dataset.pedit;
-        rowEditOpen(key, personBy(key));
+        rowEditOpen("people", key, personBy(key));
         PMENU = null;
         paint();
         var f = document.querySelector('[data-pname="' + key + '"]');
@@ -3082,6 +3082,21 @@
        through `fieldSaved()` (§71.2). What it does is END the mode, which is
        what makes finishing deliberate — and flush, so leaving the page cannot
        be the thing that saves. */
+    /* THE SAME PEN, ON THE SIX TABLES THAT HAVE NO ⋮ (§85). `data-pedit` above
+       is the register's, inside its menu; this is the inline one. Both do the
+       one thing: take the snapshot, name the row, repaint, and put the cursor
+       in the row's first field — which the render marks rather than this
+       guessing, because every table's first editable column is different. */
+    document.querySelectorAll("[data-rowedit]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        var bits = b.dataset.rowedit.split("|"), table = bits[0], key = bits.slice(1).join("|");
+        rowEditOpen(table, key, ROWFIND[table] ? ROWFIND[table](key) : null);
+        paint();
+        var f = document.querySelector(".tk-firstfield");
+        if (f) { f.focus(); if (f.select) f.select(); }
+      });
+    });
     document.querySelectorAll("[data-rowsave]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditClose();
@@ -3091,7 +3106,7 @@
     });
     document.querySelectorAll("[data-rowcancel]").forEach(function(b){
       b.addEventListener("click", function(){
-        rowEditCancel(ROWEDIT ? personBy(ROWEDIT) : null);
+        rowEditCancel();
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });

@@ -44,7 +44,19 @@ A drift between specs and code is a documentation bug — report it before silen
 - **This includes: colors, borders, spacing, card designs, labels, icons, section order, font sizes — EVERYTHING visual.**
 - **Product design language is navy/gold** (carried over from the Forefront house style; the SMP starting page already uses it).
 - **When restoring a design, match the original EXACTLY.**
-- **Describe the change in words and get approval before making it** — what moves, what it replaces, what it costs. *(Superseded 2026-08-20: this used to demand a static HTML mockup before any visual change. That belonged to the prototype era and is retired — the approval it protected is not. `design-mockups/` is no longer produced; `SMP-Project-Folder/mockups/` stays as the historical record of what was settled and what was rejected.)*
+- **Describe the change in words and get approval before making it** — what moves, what it replaces, what it costs.
+- **MOCKUP-FIRST (NON-NEGOTIABLE): never adjust a design — layout, structure, section order,
+  styling, or any visual element — without first showing a static HTML mockup of the proposed
+  look and getting explicit sign-off on that HTML view.** Build the mockup (self-contained
+  HTML, navy/gold, saved under `design-mockups/<feature>/<YYYY-MM-DD>_<desc>.html` and sent
+  for review), wait for approval, and only then touch the real sources. **No "I'll just build
+  it and you review at the end" for visual or structural changes.**
+  *(REINSTATED 2026-08-24 at Islam's direction, reversing the 2026-08-20 note that retired it
+  as belonging to the prototype era. Recorded as a reversal rather than overwritten, per
+  Principle II: the intervening versions built visual work — §80–§85's table standard among
+  it — under the weaker "describe it in words" rule, and that is why the reversal exists.
+  `SMP-Project-Folder/mockups/` remains the historical record of what was settled and what was
+  rejected; `design-mockups/` is produced again from today.)*
 - **After ANY UI change, save a snapshot of the changed file to `ui-versions/` (see UI Version Tracking below).**
 
 ### 2. Think Before Acting

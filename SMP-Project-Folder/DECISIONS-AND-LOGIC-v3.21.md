@@ -8663,3 +8663,37 @@ business unit head can already open the group's page, which shows every unit's
 card. So this is consistent and leaks nothing. It is more than they need, and
 narrowing it would be a rule nobody has asked for; said here so it is a choice
 rather than an oversight.
+
+**68.10 THE COMPANY PAGE FAILED CONTRAST TWELVE TIMES AND DID NOT.** With the
+company page swept for the first time, the total went 44 → 62 and the new
+entries read `company/performance :: B — 1.93 < 3` on the unit gauges, in dark,
+on both palettes. The group's identical cards passed, which is the thing that
+did not add up: `unitCards()` draws both.
+
+**Because the group's Business units section had never been scanned either.**
+The group's Performance page opens on its FIRST section, "Overall performance",
+and the sweep scans what is on screen — so the unit cards had been on the group
+page for versions without a check ever seeing them. The company page has no
+section row, so it put them in front of the sweep for the first time.
+
+**And the failure was the check's, not the page's.** `.gauge` is a
+conic-gradient donut and `.gauge::before` paints an opaque hole over the middle
+of it. The number sits on the HOLE; `bgsOf()` reads the element's own
+`backgroundImage` and measured the number against the ORANGE ARC. Proved by
+**sampling the rendered pixels** rather than by reasoning: `rgb(19,28,46)` all
+round the glyphs, against ink of `rgb(232,237,245)` — about 14:1, not 1.93.
+
+**§53.7's blind spot, from the other side.** That one recorded a DOM probe
+calling a broken build clean, because `elementFromPoint` cannot return a
+`::before`. This is the same gap producing the opposite lie: a correct build
+called broken, twelve times, and it would have been "fixed" by somebody
+repainting a gauge that was never wrong.
+
+`coverOf()` is the rule, and it is narrow enough not to hide anything: a
+pseudo-element is the background of what sits inside it when it has content, is
+absolutely positioned, and **none of its four insets is auto** — which is the
+computed shape of "fills its parent". A small marker pseudo fails all three.
+
+What survives is 6 real ones: `num.final` in the units TABLE view, in light —
+scoring colours used as type, §16.15's family, and previously unmeasured for the
+same reason. Recorded, not fixed: it is the palette decision Islam has deferred.

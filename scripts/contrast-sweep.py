@@ -11,8 +11,32 @@ JS = r"""(root) => {
   const stops=s=>{const o=[];const re=/rgba?\(([^)]+)\)/g;let m;
     while((m=re.exec(s))){const p=m[1].split(',').map(x=>parseFloat(x));
       if(p.length<3||(p.length>3&&p[3]<0.6))continue;o.push([p[0],p[1],p[2]])}return o};
+  /* A PSEUDO-ELEMENT THAT FILLS ITS PARENT IS THE BACKGROUND OF WHAT IS
+     INSIDE IT (68.10). `.gauge` is a conic-gradient donut and `.gauge::before`
+     paints an opaque hole over the middle of it — the number sits on the HOLE,
+     and reading only the element's own backgroundImage measured it against the
+     ORANGE ARC: 1.93:1 in dark, on twelve runs, for text that is actually
+     about 14:1. §53.7's blind spot from the other side; that one called a
+     broken build clean, this one called a correct one broken. Proved by
+     sampling the rendered pixels: rgb(19,28,46) all round the glyphs.
+
+     "Fills its parent" is checkable and narrow: it has content, it is
+     absolutely positioned, and none of its four insets is auto. A small marker
+     pseudo fails all three and is ignored, so this cannot hide a real
+     failure. */
+  const coverOf=n=>{
+    for (const which of ['::before','::after']) {
+      const cs=getComputedStyle(n,which);
+      if(!cs||cs.content==='none'||cs.position!=='absolute')continue;
+      if([cs.top,cs.right,cs.bottom,cs.left].some(v=>v==='auto'))continue;
+      const b=parse(cs.backgroundColor);
+      if(b&&b.a>0.6)return[b.c];
+    }
+    return null;
+  };
   const bgsOf=el=>{let n=el;
     while(n&&n!==document.documentElement){const cs=getComputedStyle(n);
+      const cov=coverOf(n);if(cov)return cov;
       const g=stops(cs.backgroundImage||'');if(g.length)return g;
       const b=parse(cs.backgroundColor);if(b&&b.a>0.6)return[b.c];n=n.parentElement}
     const rb=parse(getComputedStyle(document.body).backgroundColor);

@@ -244,7 +244,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   when a control changes shape, grep the checks for the old selector and fix
   ALL of them (`go_top()` is the one place now). Filtering to visible buttons
   alone would have been worse than the crash: the sweep would have stopped
-  visiting the GROUP and gone on reporting "ok".
+  visiting the GROUP and gone on reporting "ok". **And the company page failed
+  contrast twelve times and did not** (§68.10): `.gauge` is a conic-gradient
+  donut whose `::before` paints an opaque hole, the number sits on the HOLE,
+  and `bgsOf()` measured it against the ORANGE ARC — 1.93:1 for text that
+  samples at about 14:1. **§53.7's blind spot from the other side**: that one
+  called a broken build clean, this called a correct one broken. `coverOf()`
+  now treats a pseudo-element as the background when it has content, is
+  absolutely positioned and **none of its four insets is auto** — the computed
+  shape of "fills its parent", narrow enough that a marker pseudo fails it. The
+  group's Business units section had never been scanned either: the group page
+  opens on its FIRST section, so those cards had been unmeasured for versions.
 - **Two demos: Filled project and Clear project (§67):** Clear Project is
   **what a client's deployment looks like on day one** — `clearedGraph()`
   mirrors `db/migrations/004-clean-slate.sql` statement for statement, so the

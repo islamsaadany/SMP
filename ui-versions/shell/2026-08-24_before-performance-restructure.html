@@ -150,9 +150,12 @@
        for two weeks a quarter, so it appears inside Performance and leaves
        again. See \u00a715.10. */
     fn: [
-      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true,
-        render: function(k){
-          return REPORTING === k ? renderFnReport(k) : renderFnPerformance(k);
+      { k:"fnperf", ac:"k_perf", label:"Performance", primary:true, sections: function(k){
+          var secs = [{ k:"perf", ac:"k_perf", label:"Performance", render:renderFnPerformance }];
+          var r = reportSectionState();
+          if (r) secs.push({ k:"report", ac:"k_report", label:"Report" + r.badge,
+                             cls:r.cls, render:renderFnReport });
+          return secs;
         } },
       { k:"fnstrat", ac:"k_found", label:"Strategy", sections: function(k){
           /* PLAN, not Projects, when the function plans in pillars — the tab
@@ -171,15 +174,12 @@
       { k:"weighting",   ac:"g_weight", label:"Weighting",                 render:renderWeighting }
     ],
     unit: [
-      /* PERFORMANCE IS A RESULT OF REPORTING (§63), so it is one page and not
-         two sibling sections repeating the tab's own word. Reporting is a MODE
-         you enter from it with the Report button and leave again with Cancel —
-         which is what it always was for two weeks a quarter (§15.10), now said
-         in the navigation instead of in a comment. REPORTING holds the TARGET
-         rather than a boolean, so it can never open somebody else's report. */
-      { k:"performance", ac:"u_perf", label:"Performance", primary:true,
-        render: function(u){
-          return REPORTING === u.ukey ? renderReport(u) : renderUnitPerformance(u);
+      { k:"performance", ac:"u_perf", label:"Performance", primary:true, sections: function(u){
+          var secs = [{ k:"perf", ac:"u_perf", label:"Performance", render:renderUnitPerformance }];
+          var r = reportSectionState();
+          if (r) secs.push({ k:"report", ac:"u_report", label:"Report" + r.badge,
+                             cls:r.cls, render:renderReport });
+          return secs;
         } },
       { k:"strategy", ac:"u_found", label:"Strategy", sections: function(u){
           /* Spec 008 §3B. A SECTION of Strategy, not a Setup page: a
@@ -282,23 +282,6 @@
   };
 
   var current = "group", currentSub = "performance";
-  /* WHOSE report is open, or null. A target rather than a boolean: the page is
-     per unit or per function, and a flag would follow you onto the next one
-     (§63.1). Dropped by every navigation, exactly as the edit modes are. */
-  var REPORTING = null;
-
-  /* EVERY MODE IS LEFT WHEN YOU GO SOMEWHERE ELSE. Edit is a decision about
-     the thing being edited, not a lamp that stays on while you walk around —
-     the rule §29 set for EDIT_PAGE, and every mode added since has had to be
-     added here by hand. Named once so the next one cannot be forgotten at
-     three call sites out of five (§63.1). */
-  function leaveModes(){
-    Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
-    Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
-    if (typeof ARRANGE !== "undefined") ARRANGE = false;
-    REPORTING = null;
-    CLEARING = null;
-  }
   /* Which section of a container tab is open, per tab. Kept per tab rather than
      globally so moving between Performance and Strategy does not reset both. */
   var CURSEC = {};
@@ -677,7 +660,12 @@
            stays on while you walk around. Leaving edit modes on across a unit
            switch landed you editing a different unit's foundation without
            ever pressing Edit on it. Arrange mode drops for the same reason. */
-        if (current !== b.dataset.u) leaveModes();
+        if (current !== b.dataset.u) {
+          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
+          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
+          if (typeof ARRANGE !== "undefined") ARRANGE = false;
+          CLEARING = null;
+        }
         current = b.dataset.u;
         /* A business unit opens on its PLAN and a supporting function on its
            PROJECTS, not on Performance. What was agreed is the thing people
@@ -740,7 +728,12 @@
         e.stopPropagation();
         /* Same rule as a unit tab: going somewhere else drops every edit mode,
            or you land editing a page you never pressed Edit on. */
-        if (current !== b.dataset.md) leaveModes();
+        if (current !== b.dataset.md) {
+          Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
+          Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
+          if (typeof ARRANGE !== "undefined") ARRANGE = false;
+          CLEARING = null;
+        }
         current = b.dataset.md;
         currentSub = b.dataset.ms;
         paint(); window.scrollTo(0,0);
@@ -943,21 +936,11 @@
       }).join("");
     } else {
       secrow.hidden = !onSecPage;
-      /* HIDDEN IS NOT EMPTY, AND IT HAS TO BE BOTH (§63.6). The row kept the
-         buttons of whatever page was on screen last: hidden, but still in the
-         document, still focusable, still found by anything that queries for
-         them. Two things went looking. The contrast sweep read the section
-         buttons after choosing a tab, so with Performance's sections gone it
-         found STRATEGY's left over, pressed them, and reported what it
-         measured as `fn/performance/foundation` — 7 extra failures counted
-         twice under a name for a page it was not on (§50.6, again). And a
-         hidden control is still a tab stop, which is §48's `opacity:0` lesson
-         arriving in a third tree. Emptied whenever it is hidden. */
-      document.getElementById("secrow-in").innerHTML = onSecPage
-        ? GROUP_SECTIONS.map(function(t, i){
-            return '<button role="tab" data-sec="' + i + '" aria-selected="' + (i === GSEC) + '">' + t + '</button>';
-          }).join("")
-        : "";
+      if (onSecPage) {
+        document.getElementById("secrow-in").innerHTML = GROUP_SECTIONS.map(function(t, i){
+          return '<button role="tab" data-sec="' + i + '" aria-selected="' + (i === GSEC) + '">' + t + '</button>';
+        }).join("");
+      }
     }
     wire();
     /* LAST, and after wire(). Every <select> the paint just produced gets a
@@ -1049,15 +1032,7 @@
 
   function wire(){
     document.querySelectorAll("#subtabs button").forEach(function(b){
-      b.addEventListener("click", function(){
-        /* A TAB IS SOMEWHERE ELSE TOO. Only the destination change dropped the
-           modes, so pressing Strategy while reporting and coming back landed
-           you in the report again — and, once the plan's pen turns the drag
-           handles on (§63.3), it would have carried the handles onto
-           Performance with no control there to turn them off. */
-        if (currentSub !== b.dataset.s) leaveModes();
-        currentSub = b.dataset.s; paint(); window.scrollTo(0,0);
-      });
+      b.addEventListener("click", function(){ currentSub = b.dataset.s; paint(); window.scrollTo(0,0); });
     });
     document.querySelectorAll("[data-sub2]").forEach(function(b){
       b.addEventListener("click", function(){ CURSEC[currentSub] = b.dataset.sub2; paint(); window.scrollTo(0,0); });
@@ -1221,16 +1196,14 @@
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
+    var pb = document.querySelector("[data-present]");
+    if (pb) pb.addEventListener("click", function(){ openDeck(UNITS[current]); });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
-    document.querySelectorAll("[data-present]").forEach(function(b){
-      b.addEventListener("click", function(){
-        closeDlMenu(this);
-        var t = this.dataset.present;
-        if (t.indexOf("fn:") === 0) openDeckFn(t.slice(3));
-        else openDeck(UNITS[t]);
-      });
+    var presentFn = document.querySelector("[data-present-fn]");
+    if (presentFn) presentFn.addEventListener("click", function(){
+      openDeckFn(this.dataset.presentFn);
     });
     /* Picture slides — beside Present, because it is the deck they go into
        (§50.4). Wired here with the rest of the page's actions, in the function
@@ -1238,8 +1211,7 @@
        re-wires it). */
     document.querySelectorAll("[data-picedit]").forEach(function(b){
       b.addEventListener("click", function(){
-        closeDlMenu(this);
-        slidesOpen(this.dataset.picedit, this.dataset.pickey);
+        slidesOpen(b.dataset.picedit, b.dataset.pickey);
       });
     });
     /* A capability's reporting writes back. Before the project model these
@@ -2537,71 +2509,21 @@
     document.querySelectorAll("[data-arrange]").forEach(function(b){
       b.addEventListener("click", function(){ ARRANGE = !ARRANGE; paint(); });
     });
-
-    /* ── Reporting is a MODE now (§63.1) ─────────────────────────────
-       Enter from Performance, leave with Cancel. Nothing is written by either:
-       every figure was already saved as it was typed. */
-    document.querySelectorAll("[data-report]").forEach(function(b){
-      b.addEventListener("click", function(){
-        REPORTING = this.dataset.report; paint(); window.scrollTo(0,0);
-      });
-    });
-    document.querySelectorAll("[data-repcancel]").forEach(function(b){
-      b.addEventListener("click", function(){ REPORTING = null; paint(); window.scrollTo(0,0); });
-    });
-    /* SAVE DRAFT, AND IT SAYS THE TRUE THING (§63.2). The word is written into
-       the element rather than through a repaint: paint() would replace the
-       button that was just pressed, and the reassurance would vanish in the
-       same frame it appeared. */
-    document.querySelectorAll("[data-repsave]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var say = this.parentElement.querySelector("[data-savesay]");
-        var show = function(text, cls){
-          if (!say) return;
-          say.textContent = text;
-          say.className = "savesay " + (cls || "");
-        };
-        show("Saving…", "");
-        if (typeof SYNC === "undefined" || !SYNC.saveNow) { show("Saved", "ok"); return; }
-        SYNC.saveNow(function(state){
-          if (state === "saved" || state === "clean") show("Saved", "ok");
-          else if (state === "offline") show("Nothing to save — no server here", "");
-          else if (state === "busy") show("Saving…", "");
-          else show("Not saved — see the message above", "bad");
-        });
-      });
-    });
     document.querySelectorAll(".sortable").forEach(function(c){
       var kind = c.dataset.kind;
-      /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5). This used to pick the
-         selector from `data-kind`, and "pillars" meant `.prow-wrap` — which
-         does not exist inside a rail, so the rail's grips were bound to
-         nothing and dragging a pillar did nothing at all, on every unit, for
-         as long as the rail has had handles. Measured: 4 grips, 0 bound. */
-      var sel = c.dataset.item || "tr";
+      var isTable = kind === "measures" || kind === "tactics";
+      var sel = isTable ? "tr" : (kind === "pillars" ? ".prow-wrap" : ".gwrap");
       makeSortable(c, sel, function(order){
         var open = [];
         document.querySelectorAll('.prow[aria-expanded="true"]').forEach(function(r){ open.push(+r.dataset.p); });
 
-        /* unitLike(), not UNITS[...] — a function that plans in pillars is
-           drawn by these same pages and its key carries the "fn:" prefix
-           (§59). Read off the CONTAINER rather than off `current`, so a
-           container can never be committed against a different subject than
-           the one it was rendered for. */
-        var subj = unitLike(c.dataset.u || current);
-        if (kind === "pillars") applyOrder(subj.items, order);
+        if (kind === "pillars") applyOrder(UNITS[current].items, order);
         else if (kind === "units") applyOrder(UNIT_KEYS, order);
         else if (kind === "caps") applyOrder(GROUP.capabilities, order);
         else if (kind === "themes") applyOrder(GROUP.themes, order); else {
-          /* The plan states the pillar outright; the Performance accordion
-             still answers by walking up to the row above it. */
-          var pi;
-          if (c.dataset.pi != null) pi = +c.dataset.pi;
-          else {
-            var body = c.closest(".pbody");
-            pi = +body.previousElementSibling.dataset.p;
-          }
-          var it = subj.items[pi];
+          var body = c.closest(".pbody");
+          var pi = +body.previousElementSibling.dataset.p;
+          var it = UNITS[current].items[pi];
           applyOrder(kind === "measures" ? it.measures : it.tactics, order);
         }
 

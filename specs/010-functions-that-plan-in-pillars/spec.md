@@ -181,3 +181,23 @@ too. The upload resolves that name to `fn:<key>` and applies through the same
 *Projects template* — on both the plan and the progress step. On progress the
 subject list is narrowed to the subjects that keep the chosen format, and the
 format is read off the selected subject rather than stored beside it.
+
+---
+
+## Addendum — §63 (2026-08-23)
+
+Two of the three faults §63 found were on the function side, and both were
+invisible because a function that plans in pillars is drawn by the unit's pages
+and so inherits whatever the unit's page emits.
+
+**Present.** The unit's page emitted `data-present="1"` and the handler read
+`UNITS[current]` — undefined for `fn:merchandising`, so a pillars function
+could not be presented at all. The button carries its target and the handler
+resolves it with the same rule everything else uses.
+
+**Reordering.** The plan's pillar rail is the unit's rail, and its drag handles
+were bound to nothing on both sides. Fixed once, asserted on both.
+
+The rule this makes explicit: **inheriting a page means inheriting its bugs, and
+the function's copy of them is the one nobody looks at.** Every §63 assertion in
+`qa.py` runs against a unit AND against `fn:merchandising`.

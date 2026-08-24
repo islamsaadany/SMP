@@ -222,6 +222,30 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **Performance opens; reporting is a MODE; arranging belongs to the plan
+  (§63):** the Performance tab held two sibling sections, one of them called
+  Performance — Islam: *"performance is a result of reporting, so having inside
+  performance 2 buttons performance and reporting actually doesn't make
+  sense."* **Report** and **Presentation ▾** (Present / Manage slides) sit on
+  the page; `REPORTING` holds the **target**, not a boolean, and `leaveModes()`
+  drops it — **on a tab change as well as a destination change**, which nothing
+  did before. **Save draft FLUSHES and says which of the five real outcomes
+  happened** (saved / already saved / refused / failed / no server here), and
+  the word is written into the element because `paint()` would replace the
+  button that was just pressed. **Arrange left Performance for the Plan**: the
+  order of a unit's pillars is what was agreed, not how it is going, and
+  Progress and Performance need nothing to follow it because the order IS the
+  array. Two ways in, one mode — the SMO's pen turns handles on with the
+  fields, a BU head (who has no pen, §31) keeps an explicit button. Three
+  things that had never worked, found by moving them: **a pillars function
+  could not be Presented** (`UNITS["fn:…"]` is undefined — §59's `unitLike()`
+  rule, one place still asking differently); **the rail's drag grips were bound
+  to nothing** (4 grips, 0 bound: `data-kind="pillars"` meant `.prow-wrap`,
+  which no rail contains — **the container says what it holds** via `data-item`
+  now); and **a hidden section row is not an empty one**, so the contrast sweep
+  pressed the last page's buttons and reported them under this page's name
+  (§50.6, fourth time — **a contrast total that moves after a change touching
+  no colour is a check to read, not a number to accept**).
 - **A function can be DELETED, and the refusal is the feature (§62):** retired
   is still the default, because a function key is written into `c.fn` on a
   capability, `p.by` on a pillar, `p.fn` on a person, `fn:<key>` in the

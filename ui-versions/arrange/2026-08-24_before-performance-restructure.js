@@ -20,27 +20,7 @@
    meant to open a row. */
 var ARRANGE = false;
 
-/* ARRANGE MOVED TO THE PLAN (§63.3). Islam: "the arrange should be something
-   in the plan that moves pillars up and down or arrange the measures and
-   tactics tables … so in the plan when we press the edit button we find that
-   we can edit the fields and even rearrange things."
-
-   Which is right, and it was on the wrong page: the order of a unit's pillars
-   is part of what was agreed, not part of how it is going. Progress and
-   Performance already follow it — order is stored on the object, so there was
-   never a second arrangement to keep in step.
-
-   TWO WAYS IN, ONE MODE. The SMO's plan pen turns the handles on with the
-   fields, exactly as asked. A BU head has no pen — mayEditPlan() is the SMO's
-   (§31) — and could arrange before this, so they keep an explicit button:
-   tying the handles to the pen alone would have taken reordering away from
-   the people who use it most, silently. */
-function arranging(scope, unitKey){
-  if (!canArrange(scope, unitKey)) return false;
-  if (ARRANGE) return true;
-  return scope === "unit" && typeof EDIT_PAGE !== "undefined" &&
-         EDIT_PAGE.plan && typeof mayEditPlan === "function" && mayEditPlan();
-}
+function arranging(scope, unitKey){ return ARRANGE && canArrange(scope, unitKey); }
 
 /* ROLES, NOT LEVELS — THE THIRD INSTANCE OF THE SAME FAULT (§48.6).
    This read `v.level === "smo"` and `v.level === "n1"`. `level` was deleted in

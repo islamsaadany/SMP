@@ -18,6 +18,23 @@ def walk_subtabs(pg):
         ss=pg.query_selector_all("#subtabs button")
         if si>=len(ss): break
         ss[si].click(); pg.wait_for_timeout(120)
+        # THE SECTION ROW, AND THE REPORT MODE (63). Neither was ever walked:
+        # the sweep pressed the tabs and stopped, so the reporting page — the
+        # busiest page in the product for two weeks a quarter — had never once
+        # been rendered by a check. Reporting is a BUTTON now rather than a
+        # section, which would have made that gap permanent and invisible.
+        for s2 in pg.eval_on_selector_all("#secrow-in [data-sub2]",
+                                          "els=>els.map(e=>e.dataset.sub2)"):
+            # Re-queried and checked for visibility each time: pressing one
+            # section repaints, and the row itself can disappear (a tab whose
+            # sections drop to one has no row at all).
+            el = pg.query_selector('#secrow-in [data-sub2="%s"]' % s2)
+            if el and el.is_visible(): el.click(); pg.wait_for_timeout(120)
+        rep = pg.query_selector("[data-report]")
+        if rep:
+            rep.click(); pg.wait_for_timeout(150)
+            back = pg.query_selector("[data-repcancel]")
+            if back: back.click(); pg.wait_for_timeout(120)
 
 with sync_playwright() as p:
     b=p.chromium.launch(); pg=b.new_page(viewport={"width":1400,"height":1000})
@@ -233,6 +250,98 @@ with sync_playwright() as p:
     print("delete: %d of %d functions blocked, a spare one deletes through the "
           "button, and the refusal names what is in the way"
           % (len(dele["blocked"]) - len(unblocked), len(dele["blocked"])))
+
+    # ── PERFORMANCE OPENS, REPORTING IS A MODE, ARRANGE IS ON THE PLAN (63) ──
+    # Three of Islam's asks in one place, and one bug they uncovered.
+    #
+    # A HANDLE THAT RENDERS LOOKS LIKE A FEATURE THAT WAS BUILT. The pillar
+    # rail's grips were bound to NOTHING — the shell picked the item selector
+    # from data-kind, and "pillars" meant the accordion's .prow-wrap, which
+    # does not exist inside a rail. Four grips, zero bound, on every unit, for
+    # as long as the rail has had them. So this asserts the BINDING, not the
+    # presence: every sortable's grips must find their row.
+    #
+    # And both sides (A15): a unit's plan and a pillars function's are the same
+    # page, so the same three facts are asserted on each.
+    def arrange_probe(pg, dest):
+        return pg.evaluate("""(d) => {
+          const out = { bound:[], order:unitLike(d).items.map(x => x.name) };
+          document.querySelectorAll(".sortable").forEach(c => {
+            const sel = c.dataset.item || "tr";
+            let bound = 0;
+            c.querySelectorAll(".grip").forEach(g => { if (g.closest(sel)) bound++; });
+            out.bound.push({ kind:c.dataset.kind, grips:c.querySelectorAll(".grip").length,
+                             bound:bound });
+          });
+          return out;
+        }""", dest)
+
+    for label, dest, sec in [("unit", "mobile", "plan"),
+                             ("function", "fn:merchandising", "plan")]:
+        if dest.startswith("fn:") and pg.query_selector("#units .navswitch .nsw:not(.on)"):
+            pg.click("#units .navswitch .nsw:not(.on)"); pg.wait_for_timeout(200)
+        pg.click('#units [data-u="%s"]' % dest); pg.wait_for_timeout(250)
+        # Performance is ONE page now: no section row, and a Report button.
+        pg.click('#subtabs button:has-text("Performance")'); pg.wait_for_timeout(300)
+        perf = pg.evaluate("""() => ({
+          secrow: !document.getElementById("secrow").hidden,
+          report: !!document.querySelector("[data-report]"),
+          present: !!document.querySelector("details.dlmenu [data-present]"),
+          arrange: !!document.querySelector("[data-arrange]") })""")
+        if perf["secrow"]:
+            errs.append("PERFORMANCE (%s): still has a section row" % label)
+        if not perf["report"]:
+            errs.append("PERFORMANCE (%s): no Report button in an open cycle" % label)
+        if not perf["present"]:
+            errs.append("PERFORMANCE (%s): Present is not in the Presentation menu" % label)
+        if perf["arrange"]:
+            errs.append("PERFORMANCE (%s): Arrange is still here — it belongs to the plan"
+                        % label)
+        pg.click("[data-report]"); pg.wait_for_timeout(300)
+        inrep = pg.evaluate("""() => ({
+          bar: !!document.querySelector(".rep-bar"),
+          save: !!document.querySelector("[data-repsave]"),
+          cancel: !!document.querySelector("[data-repcancel]") })""")
+        if not (inrep["bar"] and inrep["save"] and inrep["cancel"]):
+            errs.append("REPORT (%s): the mode does not carry its own bar (%r)" % (label, inrep))
+        pg.click("[data-repcancel]"); pg.wait_for_timeout(250)
+        if pg.query_selector(".rep-bar"):
+            errs.append("REPORT (%s): Cancel did not leave the mode" % label)
+
+        # The plan, in edit mode: fields AND handles, and every handle bound.
+        pg.click('#subtabs button:has-text("Strategy")'); pg.wait_for_timeout(250)
+        el = pg.query_selector('#secrow-in [data-sub2="%s"]' % sec)
+        if el: el.click(); pg.wait_for_timeout(250)
+        pg.locator(".pane").first.hover(); pg.wait_for_timeout(120)
+        pen = pg.query_selector(".penbtn")
+        if not pen:
+            errs.append("PLAN (%s): no edit pen for the SMO" % label); continue
+        pen.click(); pg.wait_for_timeout(300)
+        pr = arrange_probe(pg, dest)
+        if not pr["bound"]:
+            errs.append("PLAN (%s): the pen turned on no handles at all" % label)
+        for c in pr["bound"]:
+            if c["grips"] != c["bound"] or not c["grips"]:
+                errs.append("PLAN (%s): %s has %d grips and %d bound to a row"
+                            % (label, c["kind"], c["grips"], c["bound"]))
+        # Reorder by keyboard, and Performance must follow — it reads the same
+        # array, so this asserts there is no second arrangement anywhere.
+        grips = pg.query_selector_all(".rail .grip")
+        if len(grips) > 1:
+            grips[1].focus(); pg.keyboard.press("ArrowUp"); pg.wait_for_timeout(300)
+        after = pg.evaluate("(d) => unitLike(d).items.map(x => x.name)", dest)
+        if after == pr["order"]:
+            errs.append("PLAN (%s): dragging a pillar in the rail changed nothing" % label)
+        pg.click('#subtabs button:has-text("Performance")'); pg.wait_for_timeout(300)
+        follows = pg.eval_on_selector_all(".rail .ritem b", "els => els.map(e => e.textContent)")
+        if follows != after:
+            errs.append("PLAN (%s): Performance does not follow the plan's order (%r vs %r)"
+                        % (label, follows, after))
+        if pg.query_selector(".grip"):
+            errs.append("PLAN (%s): the handles came with us to Performance, "
+                        "where nothing can turn them off" % label)
+        print("performance/report/arrange (%s): one page, a Report mode, and %d "
+              "sortables all bound" % (label, len(pr["bound"])))
 
     # ── A UNIT AND A FUNCTION MUST MATCH (53.5) ───────────────────────
     # The rule Islam set on 2026-08-23: any change to how something works or

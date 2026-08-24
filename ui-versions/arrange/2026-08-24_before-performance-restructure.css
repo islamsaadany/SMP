@@ -367,15 +367,6 @@
   .imp-b .sub { margin:0; max-width:74ch; }
   .imp-row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:12px; }
   .imp-row select.fld { width:auto; min-width:190px; max-width:none; }
-  /* Save draft / Cancel and the word the button says back (§63.2). Pushed to
-     the far end of the reporting bar so Submit keeps the emphasis: submitting
-     is the act that ends the cycle for this unit, and saving a draft is
-     housekeeping the platform is already doing. */
-  .repdraft { display:flex; align-items:center; gap:10px; margin-left:auto; }
-  .savesay { font-size:12px; color:var(--ink-2); min-width:0; white-space:nowrap; }
-  .savesay.ok { color:var(--good-tx); font-weight:600; }
-  .savesay.bad { color:var(--bad-tx); font-weight:600; }
-
   .imp-row input[type=file] { font:inherit; font-size:13px; }
 
   /* ONE BUTTON WITH TWO ENTRIES (§61). A <details>, so the open state is the
@@ -390,12 +381,6 @@
   details.dlmenu > summary:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   .dlcar { font-size:10px; line-height:1; transform:translateY(1px); }
   details.dlmenu[open] > summary .dlcar { transform:translateY(1px) rotate(180deg); }
-  /* A menu opens from the edge its button is anchored to. The template button
-     sits at the left of its row and opens rightward; the Performance page's
-     sits at the RIGHT end of the legend, and opening rightward there pushed
-     290px of popup past the content column — which `.wrap` clips rather than
-     scrolls (§27), so it would have been silently cut off. */
-  details.dlmenu.right > .menu { left:auto; right:0; }
   details.dlmenu > .menu { position:absolute; z-index:40; top:calc(100% + 6px); left:0;
                            min-width:290px; background:var(--surface);
                            border:1px solid var(--line); border-radius:var(--r);

@@ -704,6 +704,11 @@ function wireSlides(){
 
 /* The button that opens it, beside Present. It carries the count, because the
    one thing you want to know before a review is whether the pictures are in. */
-/* picBtn() was here. It became the "Manage slides" entry inside the
-   Presentation menu (§63), and a function nothing calls is a function the next
-   reader has to prove is dead before touching anything near it (§24). */
+function picBtn(kind, key){
+  var target = kind === "fn" ? "fn:" + key : key;
+  if (!canSpeakFor(target)) return "";
+  var n = pslidesOf(target).length;
+  return '<button class="editbtn" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) +
+    '" title="Add and arrange your own picture slides">Manage slides' +
+    (n ? ' <span class="pill kind">' + n + '</span>' : '') + '</button>';
+}

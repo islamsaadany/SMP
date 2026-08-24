@@ -8162,3 +8162,101 @@ ever sees states that are pages (§41.4, again).
 "1 capabilitys". The explicit plural is optional, so every existing call is
 unchanged — and it lives in `plural()` rather than at the call sites because
 this file already records "3 pillarss" (§59) as the cost of doing it by hand.
+
+## 63 · Performance opens, reporting is a mode, arranging belongs to the plan (v3.21)
+
+**63.1 Performance is a result of reporting.** Islam: *"generally performance
+is a result of reporting, so having inside performance 2 buttons performance
+and reporting actually doesn't make sense."*
+
+The Performance tab held two sibling sections, one of them called Performance —
+the tab asking its own word twice, and calling the other one a page. Reporting
+is not a page you visit: it is what a cycle asks of you for two weeks a
+quarter, which §15.10 said in a comment and the navigation contradicted.
+
+Performance is what opens. **Report** is a button on it; pressing it enters a
+mode, and Cancel leaves. `REPORTING` holds the **target**, not a boolean, so it
+can never open somebody else's report — and it is dropped by every navigation,
+which needed the drop to happen on a **tab** change as well as a destination
+change. It did not before: only the destination cleared the edit modes, so
+pressing Strategy and coming back landed you in the report again.
+
+`leaveModes()` is that clearing, named once. It had been written out by hand at
+two call sites and every mode added since has had to be added to both — and
+this version adds two more (`REPORTING`, and the plan's pen driving the drag
+handles), which is exactly when a fourth copy gets forgotten.
+
+**63.2 Save draft, and it says the true thing.** Islam: *"keep save draft button
+as a feeling for the user that he is saving keeping the autosave just in case."*
+
+The autosave is untouched and is still the thing that actually protects the
+work. This is the reassurance — and **reassurance that lies is worse than
+none**, so it FLUSHES rather than pretending to, and reports which of the real
+outcomes happened: saved, already saved, refused, or there is no server here at
+all. Opened from a file it says *"Nothing to save — no server here"*, which is
+true and is not the word "Saved".
+
+The word is written into the element rather than through a repaint: `paint()`
+replaces the button that was just pressed, and the reassurance would vanish in
+the frame it appeared in.
+
+Proved against a real server rather than reasoned about: dev-server on a
+throwaway Postgres, signed in as the SMO, a cycle note typed, Save draft
+pressed — the button says **Saved**, and `select notes from review` comes back
+holding it.
+
+**63.3 Arranging belongs to the plan.** Islam: *"the arrange should be something
+in the plan that moves pillars up and down or arrange the measures and tactics
+tables and eventually the progress and performance pages follow the same
+arrangement so in the plan when we press the edit button we find that we can
+edit the fields and even rearrange things."*
+
+Right, and it was on the wrong page: the order of a unit's pillars is part of
+what was agreed, not part of how it is going. **Progress and Performance need
+nothing to follow it** — order is stored on the object, so there was never a
+second arrangement to keep in step; asserted rather than assumed, by reordering
+on the plan and then reading the Performance rail.
+
+**TWO WAYS IN, ONE MODE.** The SMO's plan pen turns the handles on with the
+fields, exactly as asked. A BU head has **no pen** — correcting a plan is the
+SMO's (§31) — and could arrange before this, so they keep an explicit Arrange
+button, hidden while the pen is on because a button reading "Done" for a mode
+it did not start is a lie about what pressing it will do.
+
+**63.4 Two things that had never worked, found by moving them.**
+
+**A pillars function could not be presented at all.** It is drawn by the unit's
+pages, so it rendered the unit's Present button, and that handler read
+`UNITS[current]` — which for `fn:merchandising` is undefined. §59's `unitLike()`
+rule, applied to the one place that still asked differently. The button carries
+its target now and the handler resolves it.
+
+**63.5 A handle that renders looks like a feature that was built.** The pillar
+rail's grips were bound to **nothing**. The shell chose the drag item selector
+from `data-kind`, and `"pillars"` meant the accordion's `.prow-wrap`, which does
+not exist inside a rail — so `closest()` returned null and every drag returned
+before it started. Measured, not reasoned: **4 grips, 0 bound, 0 items**, on
+every unit, for as long as the rail has had handles.
+
+**THE CONTAINER SAYS WHAT IT HOLDS** now (`data-item`), so the two cannot
+disagree, and `qa.py` asserts the BINDING rather than the presence — on a unit's
+plan and a pillars function's alike (A15).
+
+**63.6 Hidden is not empty, and it had to be both.** The section row kept the
+buttons of whatever page was last on screen: hidden, but still in the document,
+still a tab stop, and still found by anything that queries for them.
+
+Two things went looking. A hidden control is still focusable, which is §48's
+`opacity:0` lesson arriving in a third tree. And the contrast sweep reads the
+section buttons after choosing a tab — so with Performance's sections gone it
+found **Strategy's left over**, pressed them, and reported what it measured as
+`fn/performance/foundation`: seven pre-existing failures counted a second time
+under the name of a page it was not on. 53 → 60 → 53.
+
+That is §50.6 for the fourth time, and the shape is always the same: **the check
+did not break, it started measuring something else and kept reporting.** The
+number moved, which is the only reason it was looked at — so the rule earned
+here is the one about baselines: **a contrast total that moves after a change
+that touches no colour is a check to read, not a number to accept.** The row is
+emptied whenever it is hidden, and the sweep asks for visible buttons anyway,
+because a check that trusts the page it is checking is not a check.

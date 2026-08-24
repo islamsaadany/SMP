@@ -159,8 +159,14 @@ with sync_playwright() as p:
                 pg.evaluate("(t)=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()===t); if(x)x.click()}", t)
                 pg.wait_for_timeout(500); scan("fn/" + t.lower())
                 # ...and every section inside it, for the same reason.
-                for k2 in pg.eval_on_selector_all("#secrow-in button",
-                                                  "els=>els.map(e=>e.textContent.trim())"):
+                # VISIBLE section buttons only. The row used to keep the last
+                # page's buttons after being hidden, so this walked STRATEGY's
+                # sections while labelling them Performance (§63.6). The
+                # product empties the row now; this asks anyway, because a
+                # check that trusts the page it is checking is not a check.
+                for k2 in pg.eval_on_selector_all(
+                        "#secrow-in button",
+                        "els=>els.filter(e=>e.offsetParent!==null).map(e=>e.textContent.trim())"):
                     pg.evaluate("(k)=>{var x=[...document.querySelectorAll('#secrow-in button')].find(b=>b.textContent.trim()===k); if(x)x.click()}", k2)
                     pg.wait_for_timeout(450); scan("fn/" + t.lower() + "/" + k2.lower())
             show("units")

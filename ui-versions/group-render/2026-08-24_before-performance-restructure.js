@@ -186,12 +186,10 @@ function splitCard(name, sub, perf, exec, planned, perfDrill, execDrill, ctx, ct
     '</div></div>';
 }
 
-/* `sort` is the tbody's attributes when the table can be reordered — the
-   container says what it holds, so nothing outside has to know (§63.3). */
-function miniTable(head, rows, sort){
+function miniTable(head, rows){
   return '<div class="scroll"><table><thead><tr>' +
     head.map(function(h){ return '<th>' + h + '</th>'; }).join("") +
-    '</tr></thead><tbody' + (sort || "") + '>' + rows + '</tbody></table></div>';
+    '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function barRow(main, sub, perf, exec, planned, opts){
@@ -395,11 +393,11 @@ function pillarBody(it, u){
               scored.length ? Math.min.apply(null, scored) : null) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
-      '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
+      '<tbody class="sortable" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
-      '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
+      '<tbody class="sortable" data-kind="tactics" data-u="' + uk + '">' +
       tacticRows(it.tactics, uk) + '</tbody></table></div>' +
   '</div>';
 }
@@ -413,7 +411,7 @@ function pillarList(u){
       '<span>Kind</span><span>Theme</span><span>Owner</span>' +
       '<span class="num">Perform.</span><span class="num">Execution</span>' +
       '<span class="num">Var.</span><span></span></div></div>' +
-    '<div class="sortable" data-item=".prow-wrap" data-kind="pillars" data-u="' + u.ukey + '">' +
+    '<div class="sortable" data-kind="pillars" data-u="' + u.ukey + '">' +
       u.items.map(function(it, i){ return pillarRow(it, i, u); }).join("") + '</div>' +
     '<div class="ptotal" style="' + pgrid(on) + '">' +
       (on ? '<span></span>' : '') +
@@ -449,74 +447,6 @@ function bands(action){
 function arrangeBtn(scope, unitKey){
   return canArrange(scope, unitKey)
     ? '<button class="editbtn" data-arrange="1">' + (ARRANGE ? "Done" : "Arrange") + '</button>' : '';
-}
-
-/* ── The Performance page's own actions (§63) ─────────────────────────
-   PERFORMANCE IS A RESULT OF REPORTING, so a row of two sibling tabs reading
-   Performance | Report inside a tab already called Performance was asking the
-   same word twice and calling one of them a page. Islam: "having inside
-   performance 2 buttons performance and reporting actually doesn't make
-   sense." Performance is now what opens, and reporting is something you GO AND
-   DO from it and come back from — which is what it always was for two weeks a
-   quarter (§15.10), finally said in the navigation.
-
-   REPORT, then PRESENTATION. Entering figures is the thing somebody came here
-   to do during a cycle; presenting is the thing they do at the end of one.
-   Arrange has left entirely: it belongs to the plan, which is where the order
-   is decided (§63.3). */
-function reportBtn(target){
-  var r = reportSectionState();
-  if (!r) return "";
-  var ac = String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
-  if (grantAt(ac, target) === "none") return "";
-  return '<button class="editbtn" data-report="' + esc(target) + '"' +
-    ' title="Enter this cycle\u2019s figures">Report' + r.badge + '</button>';
-}
-
-/* SAVE DRAFT AND CANCEL (§63.2). Islam: "keep save draft button as a feeling
-   for the user that he is saving keeping the autosave just in case."
-
-   The autosave is unchanged and still the thing that actually protects the
-   work — this is the reassurance, and reassurance that lies is worse than
-   none. So it FLUSHES rather than pretending to, and says which of the real
-   outcomes happened: saved, already saved, refused, or there is no server here
-   at all (opened from a file). Cancel leaves the mode; it does not undo,
-   because there is nothing to undo — every figure was saved as it was typed,
-   which is exactly why the button had to be honest about what it does. */
-function draftBtns(){
-  return '<span class="repdraft">' +
-    '<button class="editbtn" data-repsave="1">Save draft</button>' +
-    '<button class="linkbu" data-repcancel="1">Cancel</button>' +
-    '<span class="savesay" data-savesay="1" role="status" aria-live="polite"></span>' +
-    '</span>';
-}
-
-/* One button with two entries, the same <details> the template download uses
-   (§61) — so a menu's action cannot unmount the button the click is still in
-   (§47.2). "Present" starts the deck; "Manage slides" is the editor, and it
-   keeps the name §51.8 settled on rather than gaining a second one. */
-function presentMenu(kind, key){
-  var target = kind === "fn" ? "fn:" + key : key;
-  var slides = canSpeakFor(target)
-    ? '<button role="menuitem" data-picedit="' + esc(kind) + '" data-pickey="' + esc(key) + '">' +
-        'Manage slides' + (pslidesOf(target).length
-          ? ' <span class="pill kind">' + pslidesOf(target).length + '</span>' : '') +
-        '<span class="dlsub">Add and arrange your own picture slides</span></button>'
-    : "";
-  /* ONE ATTRIBUTE, CARRYING THE TARGET. It used to be `data-present="1"` for a
-     unit and `data-present-fn="<key>"` for a function, and the unit handler
-     read `UNITS[current]` — so a FUNCTION THAT PLANS IN PILLARS could not be
-     presented at all: it is drawn by the unit's page, so it rendered the unit's
-     button, and `UNITS["fn:merchandising"]` is undefined (§63.4). The button
-     now says which target it is for and the handler resolves it, which is
-     §59's `unitLike()` rule applied to the one place that still asked
-     differently. */
-  var present = '<button role="menuitem" data-present="' + esc(target) + '">Present' +
-    '<span class="dlsub">Open the review deck for this ' +
-    (String(target).indexOf("fn:") === 0 ? "function" : "unit") + '</span></button>';
-  return '<details class="dlmenu right"><summary class="editbtn">Presentation' +
-    '<span class="dlcar" aria-hidden="true">\u25be</span></summary>' +
-    '<div class="menu" role="menu">' + present + slides + '</div></details>';
 }
 
 /* ── Cards or a table (§16.6) ────────────────────────────────────────
@@ -1059,20 +989,20 @@ function renderGroupPerformance(){
       GVIEW.units === "table"
         ? unitsTable(keys)
         : arrangeBar("business units", UNIT_KEYS.length) +
-          '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="units">' + units + '</div>',
+          '<div class="gauges g3 sortable" data-kind="units">' + units + '</div>',
       TIP_PERF, viewToggle("units")) });
 
   SECS.push({ t: "Group themes", h: section("", "Group themes",
       null,
       arrangeBar("themes", GROUP.themes.length) +
-      '<div class="gauges g3 sortable" data-item=".gwrap" data-kind="themes">' + themes + '</div>', TIP_THEME) });
+      '<div class="gauges g3 sortable" data-kind="themes">' + themes + '</div>', TIP_THEME) });
 
   SECS.push({ t: "Group capabilities", h: section("", "Group capabilities",
       null,
       GVIEW.caps === "table"
         ? capsTable()
         : arrangeBar("capabilities", GROUP.capabilities.length) +
-          '<div class="gauges g4 sortable" data-item=".gwrap" data-kind="caps">' + caps + '</div>',
+          '<div class="gauges g4 sortable" data-kind="caps">' + caps + '</div>',
       TIP_CAP, viewToggle("caps")) });
 
   GROUP_SECTIONS = SECS.map(function(x){ return x.t; });
@@ -1345,7 +1275,8 @@ function renderUnitPerformance(u){
   var koId = modalFor(esc(u.name) + " &mdash; " + L("keyobj","bu"), "The unit's own scorecard, and how the headline is built", koDrill);
   var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
 
-  return bands(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
+  return bands('<button class="editbtn" data-present="1" title="Present this unit">Present</button>' +
+      picBtn("unit", u.ukey) + arrangeBtn("unit", u.ukey)) +
 
     '<div class="scores">' +
       '<div class="card tight primary"><div class="score-h"><h4>' + L("keyobj","bu") + ' performance</h4>' +
@@ -1375,10 +1306,11 @@ function renderUnitPerformance(u){
        is exactly the space the rail needs to stay in view while the pane
        beside it scrolls. The arrange hint stays: it appears only in arrange
        mode and says something the rail does not. */
-    /* The arrange hint went with the button (§63.3): reordering is decided on
-       the plan now, and a hint on a page with no control is a hint about
-       something you cannot do from here. */
-    section("", "", null, unitPerfRail(u));
+    section("", "", null,
+      (canArrange("unit", u.ukey) && ARRANGE
+        ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
+          ' &middot; drag by the handle to reorder</p>' : '') +
+      unitPerfRail(u));
 }
 
 /* ── Foundation ────────────────────────────────────────────────────
@@ -1860,7 +1792,6 @@ function renderReport(u){
               '<button class="linkbu" data-unsubmit="' + u.ukey + '">Reopen my report</button>'
             : '<button class="editbtn" data-submit="' + u.ukey + '">Submit to the SMO</button>')
         : '<span class="pill none">View only</span>') +
-      draftBtns() +
     '</div>';
 
   var summary =
@@ -2213,7 +2144,8 @@ function renderFnPerformance(fnKey){
      anyone who can view this page, assembling the review from whatever the
      platform holds at that moment. */
   if (!caps.length) return fnNothingBehind(fk);
-  return '<div class="pageact">' + reportBtn("fn:" + fk) + presentMenu("fn", fk) + '</div>' +
+  return '<div class="pageact"><button class="editbtn" data-present-fn="' + esc(fk) +
+      '" title="Present this function">Present</button>' + picBtn("fn", fk) + '</div>' +
     caps.map(function(c){
     var sel = railPick(c);
     if (!sel) return capBand(c) + '<div class="capbody">' + capScoreCards(c) + capKOTable(c) +
@@ -2436,7 +2368,6 @@ function renderFnReport(fnKey){
       '<div class="kpi"><b>' + done + '</b><span>of ' + total + ' reported</span></div>' +
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      draftBtns() +
     '</div>';
   return bar + caps.map(function(c){
     return capBand(c) + '<div class="capbody">' + capReportBody(c) + '</div>';
@@ -2466,10 +2397,6 @@ function unitRailFor(u, sel){
      drawing; the distinction is on the item itself and splitting the rail on it
      bought nothing at this size. Kept in the backlog rather than the code. */
   var list = u.items;
-  /* ORDER IS DECIDED ON THE PLAN (§63.3). It is part of what was agreed, not
-     part of how it is going — and Progress and Performance need nothing to
-     follow it, because the order IS the array. */
-  var on = arranging("unit", u.ukey);
   var rows = list.map(function(it, i){
     /* THE CODE SHOWN IS DERIVED; THE CODE STORED IS AN IDENTIFIER, and they
        are not the same thing (found 2026-08-22, §46.3). `it.code` is what the
@@ -2484,8 +2411,7 @@ function unitRailFor(u, sel){
        `it.code`. Change that and the rail stops being able to find the pillar
        it just selected. */
     return '<button class="ritem' + (it.code === sel.code ? " on" : "") + '" data-urail="' +
-        esc(u.ukey) + '|' + esc(it.code) + '" data-oi="' + i + '">' +
-        (on ? handle("Reorder " + it.name) : '') +
+        esc(u.ukey) + '|' + esc(it.code) + '">' +
         railName(pillarCode(u, i), it.name) +
         /* Both counts, both labelled, on one line. It used to put the tactics
            count in the small line and the MEASURES count as a bare number on
@@ -2500,10 +2426,7 @@ function unitRailFor(u, sel){
   /* No footer. It said "Figure shown is key measures", explaining a number
      that no longer exists - and on the PLAN page there is no figure to explain
      in the first place: nothing here has been reported. */
-  return '<div class="rail' + (on ? ' arranging' : '') + '">' +
-    railHead(L("pillar","bu"), list.length) +
-    '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' +
-      esc(u.ukey) + '">' + rows + '</div></div>';
+  return '<div class="rail">' + railHead(L("pillar","bu"), list.length) + rows + '</div>';
 }
 /* THE PLAN IS EDITABLE, FOR THE SMO ONLY.
 
@@ -2568,20 +2491,8 @@ function unitPlanBody(it, u, railed){
     return ed ? inputOr("plan", v == null ? "" : v, cls || "", setter)
               : (v ? esc(v) : '<span class="missing">Missing</span>');
   };
-  var on = arranging("unit", u.ukey);
-  var pi = u.items.indexOf(it);
-  /* The tbody carries the pillar it belongs to. On Performance the shell found
-     it by walking up to `.pbody` and reading the accordion row above; the plan
-     has no accordion, and a second way of answering the same question is how
-     the two come to disagree (§63.3). */
-  var sortAttr = function(kind){
-    return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
-      '" data-u="' + esc(u.ukey) + '" data-pi="' + pi + '"' : '';
-  };
   var mRows = it.measures.map(function(m, i){
-    return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + m.name) : '') +
-      '<span class="idx-n">' + (i+1) + '</span></td>' +
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) + '</td>' +
       '<td class="cc">' + esc(m.dir) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
@@ -2595,9 +2506,7 @@ function unitPlanBody(it, u, railed){
       '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
-    return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + t.name) : '') +
-      '<span class="idx-n">' + (i+1) + '</span></td>' +
+    return '<tr><td class="idx">' + (i+1) + '</td>' +
       '<td>' + (ed ? inputOr("plan", t.name, "", function(v){ t.name = v; }) : esc(t.name)) + '</td>' +
       '<td>' + (ed ? inputOr("plan", t.owner || "", "", function(v){ t.owner = v; }) : esc(t.owner)) + '</td>' +
       /* THE ONE PLACE COLLABORATORS CAN BE TYPED (§50.2). Before this they
@@ -2640,9 +2549,9 @@ function unitPlanBody(it, u, railed){
        table headings say "as planned", and every actual column reads em-dash -
        three statements of the same thing above a fourth. */
     '<h4 class="mini">Key measures <em>\u2014 as planned: this year\u2019s target, and how it compiles</em></h4>' +
-    miniTable(["#","Measure","Dir.","Target","Compiled"], mRows, sortAttr("measures")) +
+    miniTable(["#","Measure","Dir.","Target","Compiled"], mRows) +
     '<h4 class="mini">Tactics <em>\u2014 who carries it, who supports, and in which quarters</em></h4>' +
-    miniTable(["#","Tactic","Owner","Collabs.","Quarters"], tRows, sortAttr("tactics"));
+    miniTable(["#","Tactic","Owner","Collabs.","Quarters"], tRows);
 }
 function renderUnitPlan(u){
   var sel = unitRailPick(u);
@@ -2662,18 +2571,7 @@ function renderUnitPlan(u){
      where you already knew you were - the same redundancy the chrome shed in
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
-  /* The Arrange control, for somebody who may reorder but has no pen (§63.3).
-     Hidden while the pen is on, because the pen already turned the handles on
-     and a button reading "Done" for a mode it did not start is a lie about
-     what pressing it will do. */
-  var arr = (canArrange("unit", u.ukey) && !(EDIT_PAGE.plan && mayEditPlan()))
-    ? '<div class="pageact">' + arrangeBtn("unit", u.ukey) + '</div>' : '';
-  return arr +
-    (arranging("unit", u.ukey)
-      ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
-        ' &middot; drag by the handle to reorder, here and inside each ' +
-        L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
-    (u.items.length >= 2
+  return (u.items.length >= 2
       ? '<div class="split">' + unitRailFor(u, sel) + '<div class="pane">' + unitPlanBody(sel, u, true) + '</div></div>'
       : '<div class="pane">' + unitPlanBody(sel, u, false) + '</div>');
 }
@@ -2754,14 +2652,7 @@ function unitPerfRail(u){
   }).join("");
   var rail = '<div class="rail' + (on ? ' arranging' : '') + '">' +
     railHead(L("pillar","bu"), u.items.length) +
-    /* `.ritem`, NOT `.prow-wrap` (§63.5). The rail's four grips rendered and
-       were bound to NOTHING: the shell chose the item selector from `data-kind`
-       and "pillars" meant the accordion's `.prow-wrap`, which does not exist
-       inside a rail — so `g.closest(sel)` returned null and every drag
-       returned before it started. Measured, not reasoned: 4 grips, 0 bound, 0
-       items. A handle that renders is a feature that looks built (§51.11). The
-       CONTAINER says what it holds now, so the two cannot disagree. */
-    '<div class="sortable" data-item=".ritem" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
+    '<div class="sortable" data-kind="pillars" data-u="' + u.ukey + '">' + rows + '</div>' +
     '<div class="rfoot">' + pct(unitPillars(u)) + ' across ' + u.items.length + ' &middot; execution ' +
       pct(unitRatio(u)) + '</div></div>';
   return u.items.length >= 2
@@ -2792,10 +2683,10 @@ function unitPerfPane(it, u, railed){
               scored.length ? Math.min.apply(null, scored) : null) +
     '<h5 class="mini">' + L("measure","bu") + '</h5>' +
     '<div class="scroll"><table>' + measureHead() +
-      '<tbody class="sortable" data-item="tr" data-kind="measures" data-u="' + uk + '">' +
+      '<tbody class="sortable" data-kind="measures" data-u="' + uk + '">' +
       measureRows(it.measures, { unit: uk }) + '</tbody></table></div>' +
     '<h5 class="mini">' + L("tactic","bu") + '</h5>' +
     '<div class="scroll"><table>' + tacticHead() +
-      '<tbody class="sortable" data-item="tr" data-kind="tactics" data-u="' + uk + '">' +
+      '<tbody class="sortable" data-kind="tactics" data-u="' + uk + '">' +
       tacticRows(it.tactics, uk) + '</tbody></table></div>';
 }

@@ -290,6 +290,15 @@ archives it**, as replacing one always did; a **company can be created, renamed
 and retired**; and **retiring remembers what it took**, so restoring does not
 silently demote.
 
+Version **3.21** (§59&ndash;§63) finished the supporting-function half. A
+function that plans in pillars can now be reached before it has a plan and
+receive one by upload; a function can be **deleted** where nothing points at it
+and nothing was ever reported against it, and the refusal names what is in the
+way; the plan template is one button with two entries (**Pillars** /
+**Projects**); and **Performance opens directly**, with **Report** as a mode you
+enter and leave and **Presentation** as a menu &mdash; arranging having moved to
+the Plan, where the order is decided.
+
 **Next:** the rebuild on the HR_ERP stack (§20) — sign-in and the shell, then
 the read-only screens, then editing and reporting per action. Then
 **multi-tenant** (§36) — nothing scaffolded, deliberately, and one Postgres

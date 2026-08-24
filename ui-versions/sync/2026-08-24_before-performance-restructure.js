@@ -142,22 +142,12 @@ var SYNC = (function () {
     });
   }
 
-  /* SAVE, WITH SOMEBODY POSSIBLY WATCHING (§63). Islam asked for a Save draft
-     button on the reporting page — "as a feeling for the user that he is
-     saving, keeping the autosave just in case". A button that lies is worse
-     than no button, so `done` is told WHICH of the five outcomes happened and
-     the page says the true one: there is nothing to save here (opened from a
-     file), everything is already saved, it just saved, the server refused it,
-     or it could not be reached. The autosave calls this with no callback and
-     behaves exactly as it did. */
-  function save(done) {
-    var say = function (state) { if (done) done(state); };
+  function save() {
     /* The guard that matters: demo data must never reach the database. */
-    if (!live || mode === "demo") return say("offline");
-    if (saving) return say("busy");
+    if (!live || mode === "demo" || saving) return;
     var now = serialize();
-    if (now === lastSaved) return say("clean");
-    if (now === refusedBody) return say("refused");
+    if (now === lastSaved) return;
+    if (now === refusedBody) return;
     saving = true;
     fetch("/api/state", {
       method: "POST",
@@ -176,7 +166,6 @@ var SYNC = (function () {
       if (r.status === 401) { location.replace("/"); return; }
       if (r.status === 403) {
         refusedBody = now;
-        say("refused");
         return r.json().then(function (j) {
           if (j && j.mustChange) { location.replace("/"); return; }
           showRefusal(j && j.refusals);
@@ -200,15 +189,10 @@ var SYNC = (function () {
              every save. */
           if (repaint && document.querySelector('[data-edit="people"]')) repaint();
         }
-        say("saved");
       }
-      else {
-        say("failed");
-        console.warn("SMP: save failed (HTTP " + r.status + ") — will retry on the next change");
-      }
+      else console.warn("SMP: save failed (HTTP " + r.status + ") — will retry on the next change");
     }).catch(function (e) {
       saving = false;
-      say("failed");
       console.warn("SMP: save failed (" + e.message + ") — will retry on the next change");
     });
   }
@@ -309,9 +293,6 @@ var SYNC = (function () {
 
   return {
     isLive: function () { return live; },
-    /* Flush now rather than on the next 800ms tick, and say what happened.
-       The ONLY caller is a button somebody pressed; nothing schedules it. */
-    saveNow: function (done) { save(done); },
     isDemo: function () { return mode === "demo"; },
     person: function () { return person; },
     /* The three password operations, all SMO-only and all checked again on

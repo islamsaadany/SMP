@@ -175,6 +175,25 @@ fine; they were fine *differently*. So the check MEASURES the two and asserts
 they AGREE, never what the number is: a deliberate change to both stays green,
 a change to one does not (`qa.py`, "unit/function parity").
 
+### A17 · A mockup is an artifact, not a file to download
+
+*Islam, 2026-08-24: "the mockup needs to be always an artifact here not a
+downloadable html."*
+
+Mockup-first only works if the mockup is actually looked at, and a file that has
+to be saved and opened is a review that happens later or not at all. Every
+mockup is **published as an artifact** and the link is what is handed over.
+
+The HTML still lives under `design-mockups/<feature>/<YYYY-MM-DD>_<desc>.html`
+and is committed — that is the record of what was proposed, settled or rejected
+(§86). What changes is the delivery, not the record.
+
+It carries the product's own palette and type so that what is being signed off
+looks like the thing being built — and it says, on the page, that nothing is
+built yet.
+
+---
+
 ### A16 · End every merge with what to go and check
 
 *Islam, 2026-08-24: "always end the merge with in brief the things done so I can

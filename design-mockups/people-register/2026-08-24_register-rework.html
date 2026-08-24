@@ -1,0 +1,511 @@
+<title>People Register Rework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+
+<style>
+/* ─────────────────────────────────────────────────────────────
+   Two layers, and they must never be mistaken for one another:
+
+   THE PRODUCT  — rendered at real fidelity in SMP's own Forefront
+                  palette and its own UI face (Inter). What is drawn
+                  inside a plate is what the screen would look like.
+   THE REVIEW   — the frame around it: Source Sans 3, italic notes,
+                  a quieter ground. Nothing here is product chrome.
+
+   Tokens are SMP's, light and dark, so the mockup wears the same
+   colours the platform does in whichever theme you are reading in.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  /* SMP · forefront · light */
+  --stone:#16325C; --gold:#C9A24D; --gold-deep:#8A6B22;
+  --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+  --line:#D6DCE5; --line-soft:#E6EAF0;
+  --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+  --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434; --none:#676C73;
+  --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+  --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+  --panel:#16325C; --panel-ink:#FFFFFF; --zebra:#F5F7FA;
+  /* the review layer */
+  --page:#EEF0F4; --plate:#FFFFFF; --edge:#D9DEE6;
+  --r-sm:6px; --r:8px; --r-md:12px;
+  --ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --say:'Source Sans 3','Inter',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --zebra:#212630;
+    --page:#0B0D10; --plate:#1C2027; --edge:#2C333D;
+  }
+}
+:root[data-theme="dark"]{
+  --stone:#7FA3D8; --gold:#D9B665; --gold-deep:#C9A24D;
+  --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+  --line:#333A45; --line-soft:#2A303A;
+  --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+  --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066; --none:#8E97A3;
+  --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+  --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+  --panel:#0E1014; --panel-ink:#EAF0FA; --zebra:#212630;
+  --page:#0B0D10; --plate:#1C2027; --edge:#2C333D;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+     font-family:var(--say);font-size:15px;line-height:1.6}
+.sheet{max-width:1000px;margin:0 auto;padding:38px 22px 80px;
+       display:flex;flex-direction:column;gap:34px}
+
+/* ── the review layer ─────────────────────────────────────── */
+header.top{display:flex;flex-direction:column;gap:8px}
+.kicker{font-family:var(--ui);font-size:10.5px;font-weight:800;letter-spacing:.16em;
+        text-transform:uppercase;color:var(--gold-deep)}
+h1{font-family:var(--ui);font-size:29px;font-weight:800;letter-spacing:-.02em;
+   margin:0;text-wrap:balance;line-height:1.15}
+.stand{font-size:16px;color:var(--ink-2);max-width:62ch;margin:0}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.meta span{font-family:var(--ui);font-size:11px;font-weight:600;padding:3px 10px;
+           border-radius:999px;background:var(--surface-2);border:1px solid var(--line);
+           color:var(--ink-2)}
+.meta .live{background:var(--attn-bg);border-color:var(--attn);color:var(--attn-tx)}
+
+.plate{background:var(--plate);border:1px solid var(--edge);border-radius:14px;
+       overflow:hidden;box-shadow:0 1px 2px rgb(15 23 42/.05)}
+.plate > .label{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;
+       padding:13px 18px;border-bottom:1px solid var(--edge);background:var(--surface-2)}
+.plate > .label .n{font-family:var(--mono);font-size:12px;font-weight:600;
+       color:var(--gold-deep)}
+.plate > .label h2{font-family:var(--ui);font-size:14.5px;font-weight:700;margin:0;flex:1}
+.screen{padding:20px;background:var(--ground)}
+.say{padding:13px 18px 16px;border-top:1px solid var(--edge);font-size:14px;
+     color:var(--ink-2);line-height:1.6}
+.say b{color:var(--ink);font-weight:600}
+.say em{font-style:italic;color:var(--ink-3)}
+
+/* ── the product layer ────────────────────────────────────── */
+.ui{font-family:var(--ui);font-size:13.5px;color:var(--ink);line-height:1.5}
+.phead{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+.phead h3{font-size:17px;margin:0;font-weight:700}
+.chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.chip{font-size:11px;background:var(--surface-2);border:1px solid var(--line);
+      border-radius:999px;padding:2px 9px;color:var(--ink-2);white-space:nowrap}
+.chip.kind{background:var(--stone);color:var(--panel-ink);border-color:var(--stone);font-weight:700}
+.chip.warn{background:var(--warn-bg);color:var(--warn-tx);border-color:var(--warn)}
+.hright{display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.hbtn{font:inherit;font-size:12.5px;font-weight:600;background:var(--surface);
+      border:1px solid var(--line);border-radius:var(--r);padding:6px 12px;
+      display:inline-flex;align-items:center;gap:7px;color:var(--ink)}
+.hbtn .car{font-size:9px;color:var(--ink-3)}
+.hbtn.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.holder{position:relative}
+.menu{position:absolute;right:0;z-index:5;margin-top:6px;background:var(--surface);
+      border:1px solid var(--line);border-radius:var(--r);
+      box-shadow:0 12px 30px rgb(15 23 42/.16);width:310px;padding:6px;text-align:left}
+.menu .item{padding:8px 10px;border-radius:var(--r-sm)}
+.menu .item + .item{border-top:1px solid var(--line-soft);margin-top:4px;padding-top:9px}
+.menu .t{display:block;font-size:12.5px;font-weight:650}
+.menu .d{display:block;font-size:11px;color:var(--ink-3);margin-top:1px;line-height:1.45}
+
+.tbox{border:1px solid var(--line);border-radius:var(--r);overflow-x:auto;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;
+      font-variant-numeric:tabular-nums}
+thead th{background:var(--panel);color:var(--panel-ink);text-align:left;
+         font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+         padding:9px 10px;white-space:nowrap;font-weight:700}
+td{padding:8px 10px;border-top:1px solid var(--line-soft);white-space:nowrap;
+   max-width:150px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+tbody tr:nth-child(even){background:var(--zebra)}
+td b{display:block;overflow:hidden;text-overflow:ellipsis;font-weight:650;white-space:nowrap}
+td.idx{color:var(--ink-3);width:34px;max-width:none}
+td.keb{width:34px;max-width:none;text-align:center;color:var(--ink-3)}
+.pill{display:inline-block;font-size:11px;border-radius:999px;padding:2px 9px;
+      background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.pill.role{font-weight:650}
+.pill.none{border-style:dashed;color:var(--none);background:none}
+.mark{display:inline-block;margin-left:7px;padding:1px 7px;border-radius:999px;
+      background:var(--warn-bg);color:var(--warn-tx);border:1px solid var(--warn);
+      font-size:10.5px;font-weight:700;white-space:nowrap}
+
+/* ── the popup ────────────────────────────────────────────── */
+.scrim{background:rgb(9 14 26/.46);border-radius:var(--r);padding:22px;
+       display:flex;justify-content:center}
+.modal{background:var(--surface);border-radius:var(--r-md);width:min(660px,100%);
+       box-shadow:0 26px 64px rgb(9 14 26/.34);overflow:hidden;
+       border:1px solid var(--line)}
+.mhead{display:flex;align-items:center;gap:10px;padding:13px 17px;
+       border-bottom:1px solid var(--line)}
+.mhead h4{margin:0;font-size:14.5px;flex:1;font-weight:700}
+.mx{font-size:16px;color:var(--ink-3)}
+.steps{display:flex;gap:6px;padding:11px 17px 0}
+.step{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      color:var(--ink-3);padding:4px 10px;border-radius:999px;background:var(--surface-2);
+      white-space:nowrap}
+.step.on{background:var(--stone);color:var(--panel-ink)}
+.mbody{padding:14px 17px 6px}
+.mfoot{display:flex;justify-content:space-between;gap:10px;
+       padding:12px 17px;border-top:1px solid var(--line);background:var(--surface-2)}
+.btn{font:inherit;font-size:12.5px;font-weight:650;border-radius:var(--r);padding:7px 14px;
+     border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.go{background:var(--stone);border-color:var(--stone);color:var(--panel-ink)}
+.btn.quiet{border-color:transparent;background:none;color:var(--ink-2)}
+.suggest{width:100%;text-align:left;display:block;font:inherit;font-size:12.5px;
+         font-weight:650;border:1px solid var(--gold);background:var(--surface);
+         border-radius:var(--r);padding:9px 12px;color:var(--ink);margin-bottom:9px}
+.suggest i{font-style:normal;font-weight:400;color:var(--ink-3);font-size:11.5px}
+.field{width:100%;padding:8px 11px;border:1px solid var(--line);border-radius:var(--r);
+       font:inherit;font-size:12.5px;background:var(--surface);color:var(--ink-3)}
+.note{background:var(--surface-2);border-left:2px solid var(--gold);border-radius:var(--r-sm);
+      padding:9px 12px;font-size:11.5px;color:var(--ink-2);line-height:1.55;margin:11px 0 0}
+.note b{color:var(--ink)}
+.cards{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:2px 0 12px}
+.pcard{border:1px solid var(--line);border-radius:var(--r);padding:11px 12px;background:var(--surface)}
+.pcard.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}
+.pcard > b{display:block;font-size:13px;margin-bottom:7px;font-weight:700}
+.f{display:flex;gap:8px;font-size:11.5px;line-height:1.65}
+.f > span:first-child{flex:0 0 82px;color:var(--ink-3)}
+.f > span:last-child{min-width:0;overflow-wrap:anywhere}
+.verdict{font-size:11px;font-weight:700;margin-top:8px;padding-top:7px;
+         border-top:1px solid var(--line-soft)}
+.verdict.keep{color:var(--good-tx)}
+.verdict.drop{color:var(--bad-tx)}
+.mlist{margin:6px 0 0;padding-left:18px;font-size:12px;line-height:1.75}
+.pk{display:grid;grid-template-columns:76px 1fr 1fr;gap:5px;font-size:11.5px;
+    align-items:center;margin-top:7px}
+.pk .h{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+       color:var(--ink-3);font-weight:700}
+.pk .opt{display:flex;gap:6px;align-items:center;padding:6px 8px;border-radius:var(--r-sm);
+         border:1px solid transparent}
+.pk .opt.on{background:var(--attn-bg);border-color:var(--gold)}
+.dot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--ink-3);flex:none}
+.dot.on{border-color:var(--gold-deep);background:radial-gradient(circle,var(--gold-deep) 0 3px,transparent 3.5px)}
+.lead{font-size:12.5px;margin:0 0 9px;color:var(--ink-2)}
+.lead b{color:var(--ink)}
+
+/* ── the matrix ───────────────────────────────────────────── */
+.mx-tbl td{max-width:none;white-space:normal}
+.mx-tbl td.g{text-align:center;font-weight:700;font-size:11.5px}
+.g.edit{color:var(--good-tx)}
+.g.view{color:var(--ink-3)}
+.g.no{color:var(--bad-tx)}
+.rowname{font-weight:650}
+.rowname small{display:block;font-weight:400;font-size:11px;color:var(--ink-3);
+               margin-top:1px;white-space:normal}
+.mx-tbl tr.new{background:var(--attn-bg)}
+:root[data-theme="dark"] .mx-tbl tr.new,
+:root:not([data-theme="light"]) .mx-tbl tr.new{background:var(--attn-bg)}
+
+.withheld{display:grid;gap:9px;margin-top:14px}
+.wh{display:flex;gap:11px;align-items:flex-start;background:var(--surface);
+    border:1px solid var(--line);border-left:3px solid var(--bad);
+    border-radius:var(--r);padding:11px 13px}
+.wh .no{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--bad-tx);flex:none}
+.wh div{font-size:13px;line-height:1.55}
+.wh b{font-weight:650}
+.wh span{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+
+/* ── the ask ──────────────────────────────────────────────── */
+.ask{background:var(--stone);color:var(--panel-ink);border-radius:14px;padding:24px 26px}
+.ask h2{font-family:var(--ui);font-size:16px;margin:0 0 4px;font-weight:700;color:var(--panel-ink)}
+.ask p{margin:0 0 14px;font-size:14px;opacity:.82;max-width:60ch}
+.ask ol{margin:0;padding-left:20px;display:grid;gap:9px;font-size:14.5px;line-height:1.55}
+.ask li b{font-weight:700}
+.ask li span{opacity:.78;font-size:13.5px}
+
+@media (max-width:640px){
+  .sheet{padding:26px 14px 60px}
+  h1{font-size:23px}
+  .screen{padding:13px}
+  .pk{grid-template-columns:1fr}
+}
+</style>
+
+<div class="sheet">
+
+  <header class="top">
+    <div class="kicker">Mockup · nothing built</div>
+    <h1>People Register Rework</h1>
+    <p class="stand">Four changes to the register, and the new SMO team role. Drawn
+      first, per the mockup-first rule — the sources are untouched until this is
+      signed off.</p>
+    <div class="meta">
+      <span>Setup → People register</span>
+      <span>Forefront palette</span>
+      <span class="live">Awaiting sign-off</span>
+    </div>
+  </header>
+
+  <!-- ══════════ items 6 · 3 · 5 ══════════ -->
+  <section class="plate">
+    <div class="label">
+      <span class="n">6 · 3 · 5</span>
+      <h2>The file moves into the header, names stay on one line, the notes go</h2>
+    </div>
+    <div class="screen ui">
+      <div class="phead">
+        <h3>People register</h3>
+        <div class="chips">
+          <span class="chip kind">SMO</span>
+          <span class="chip">33 active</span>
+          <span class="chip warn">2 possible duplicates</span>
+        </div>
+        <div class="hright">
+          <div class="holder">
+            <div class="hbtn on">Register file <span class="car">▼</span></div>
+            <div class="menu">
+              <div class="item">
+                <span class="t">Download the register</span>
+                <span class="d">33 rows, with Role and Status as dropdowns. The export and
+                  the template are the same file.</span>
+              </div>
+              <div class="item">
+                <span class="t">Upload a filled file</span>
+                <span class="d">Matched on Emp ID, then Email. You review every change
+                  before anything is applied.</span>
+              </div>
+            </div>
+          </div>
+          <div class="hbtn">Columns <span class="car">▼</span></div>
+          <div class="hbtn">Passwords <span class="car">▼</span></div>
+        </div>
+      </div>
+
+      <div class="tbox" style="margin-top:96px">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Person</th><th>Job title</th><th>Official BU</th>
+            <th>Unit</th><th>Email</th><th>Roles</th><th></th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="idx">1</td>
+              <td><b>Mohamed Essam</b></td>
+              <td>Head of the Strat…</td>
+              <td>—</td>
+              <td><span class="pill">the group</span></td>
+              <td>—</td>
+              <td><span class="pill role">Super user</span></td>
+              <td class="keb">⋮</td>
+            </tr>
+            <tr>
+              <td class="idx">2</td>
+              <td><b>Mohamed Hassanin Ehsan</b></td>
+              <td>Chief Executive</td>
+              <td>Distribution</td>
+              <td><span class="pill">the group</span></td>
+              <td>mohamed_ehsan@ray…</td>
+              <td><span class="pill role">Group CEO</span></td>
+              <td class="keb">⋮</td>
+            </tr>
+            <tr>
+              <td class="idx">3</td>
+              <td><b>Mirna Gamal Sadek Sol…</b><span class="mark">looks like Mirna Gamal</span></td>
+              <td>Category Manager</td>
+              <td>—</td>
+              <td><span class="pill">B2B Ecomm</span></td>
+              <td>Mirna_soliman@ray…</td>
+              <td><span class="pill none">No role</span></td>
+              <td class="keb">⋮</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="say"><b>Register file</b> sits with Columns and Passwords, and holds the
+      two things the page used to carry at its foot — download, upload. Both
+      <em>Seed the register from a file</em> sections at the bottom of the page go, and so
+      do the three paragraphs of notes under the table; those move to the knowledge base.
+      Every row stays 39px: a name too long for its column ends in an ellipsis and shows
+      in full on hover, and never wraps.</p>
+  </section>
+
+  <!-- ══════════ item 4 ══════════ -->
+  <section class="plate">
+    <div class="label">
+      <span class="n">4 · i</span>
+      <h2>Merge becomes a popup — who</h2>
+    </div>
+    <div class="screen">
+      <div class="scrim"><div class="modal ui">
+        <div class="mhead"><h4>Merge two rows</h4><span class="mx">✕</span></div>
+        <div class="steps">
+          <span class="step on">1 · who</span>
+          <span class="step">2 · which survives</span>
+          <span class="step">3 · confirm</span>
+        </div>
+        <div class="mbody">
+          <p class="lead">Merging <b>Mirna Gamal Sadek</b> with…</p>
+          <div class="suggest">Mirna Gamal Sadek Soliman <i>· the name reads the same</i></div>
+          <input class="field" value="or search by name, Emp ID or email…" readonly>
+          <div class="note"><b>Why this row is flagged.</b> It carries no employee number
+            and no address, and its name runs through the other one. That is a resemblance,
+            not a match — which is why the platform asks instead of merging.</div>
+        </div>
+        <div class="mfoot"><span class="btn quiet">Cancel</span><span class="btn go">Next</span></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="plate">
+    <div class="label">
+      <span class="n">4 · ii</span>
+      <h2>Which row survives</h2>
+    </div>
+    <div class="screen">
+      <div class="scrim"><div class="modal ui">
+        <div class="mhead"><h4>Merge two rows</h4><span class="mx">✕</span></div>
+        <div class="steps">
+          <span class="step">1 · who</span>
+          <span class="step on">2 · which survives</span>
+          <span class="step">3 · confirm</span>
+        </div>
+        <div class="mbody">
+          <div class="cards">
+            <div class="pcard on">
+              <b>Mirna Gamal Sadek Soliman</b>
+              <div class="f"><span>Sign-in name</span><span>mirnagamalsad</span></div>
+              <div class="f"><span>Emp ID</span><span>10442</span></div>
+              <div class="f"><span>Email</span><span>Mirna_soliman@rayacorp.com</span></div>
+              <div class="f"><span>Roles</span><span>—</span></div>
+              <div class="verdict keep">Survives · keeps its password and sign-in name</div>
+            </div>
+            <div class="pcard">
+              <b>Mirna Gamal Sadek</b>
+              <div class="f"><span>Sign-in name</span><span>mirnagamalsa2</span></div>
+              <div class="f"><span>Emp ID</span><span>—</span></div>
+              <div class="f"><span>Email</span><span>—</span></div>
+              <div class="f"><span>Roles</span><span>Business unit owner · B2B Ecomm</span></div>
+              <div class="verdict drop">This row goes · its password and sessions go with it</div>
+            </div>
+          </div>
+          <b style="font-size:12.5px">What moves across</b>
+          <ul class="mlist">
+            <li>Business unit owner · B2B Ecomm</li>
+            <li>their place — B2B Ecomm</li>
+          </ul>
+        </div>
+        <div class="mfoot"><span class="btn quiet">Back</span><span class="btn go">Next</span></div>
+      </div></div>
+    </div>
+    <p class="say">The row that can be matched by a later upload is offered as the
+      survivor, because the other one is the shape that made the duplicate. It is a
+      default, not a decision — the card is a radio.</p>
+  </section>
+
+  <section class="plate">
+    <div class="label">
+      <span class="n">4 · iii</span>
+      <h2>The disagreements, then confirm</h2>
+    </div>
+    <div class="screen">
+      <div class="scrim"><div class="modal ui">
+        <div class="mhead"><h4>Merge two rows</h4><span class="mx">✕</span></div>
+        <div class="steps">
+          <span class="step">1 · who</span>
+          <span class="step">2 · which survives</span>
+          <span class="step on">3 · confirm</span>
+        </div>
+        <div class="mbody">
+          <b style="font-size:12.5px">They disagree about one field</b>
+          <div class="pk">
+            <span class="h"></span>
+            <span class="h">Keep Mirna Gamal Sadek Soliman’s</span>
+            <span class="h">Take the other row’s</span>
+            <span style="font-weight:650">Job title</span>
+            <span class="opt on"><span class="dot on"></span>Category Manager</span>
+            <span class="opt"><span class="dot"></span>Senior Category Manager</span>
+          </div>
+          <div class="note"><b>Mirna Gamal Sadek Soliman survives.</b> The other row goes,
+            and with it their password and any sessions they have open —
+            <b>mirnagamalsa2</b> stops being a sign-in name. Blanks are filled from it
+            without asking; there is nothing to lose.</div>
+        </div>
+        <div class="mfoot"><span class="btn quiet">Back</span>
+          <span class="btn go">Merge into Mirna Gamal Sadek Soliman</span></div>
+      </div></div>
+    </div>
+    <p class="say"><b>Three steps rather than one long panel</b> — and it is what fixes
+      item 2. The panel opened 1086px down the page, below the fold, with nothing
+      scrolling to it: it rendered, it was permitted, and nobody could see it. A popup
+      removes that class of fault rather than patching the scroll.</p>
+  </section>
+
+  <!-- ══════════ item 1 ══════════ -->
+  <section class="plate">
+    <div class="label">
+      <span class="n">1</span>
+      <h2>SMO team — the new row in Roles &amp; access</h2>
+    </div>
+    <div class="screen ui">
+      <div class="tbox">
+        <table class="mx-tbl">
+          <thead><tr>
+            <th>Role</th><th>Group</th><th>Any business unit</th>
+            <th>Any function</th><th>Reporting cycle</th><th>Setup</th>
+            <th>Roles &amp; access</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td class="rowname">Super user<small>the platform’s owner here</small></td>
+              <td class="g edit">Edit</td><td class="g edit">Edit</td><td class="g edit">Edit</td>
+              <td class="g edit">Edit</td><td class="g edit">Edit</td><td class="g edit">Edit</td>
+            </tr>
+            <tr class="new">
+              <td class="rowname">SMO team<small>runs the platform day to day</small></td>
+              <td class="g edit">Edit</td><td class="g edit">Edit</td><td class="g edit">Edit</td>
+              <td class="g edit">Edit</td><td class="g edit">Edit</td><td class="g view">View</td>
+            </tr>
+            <tr>
+              <td class="rowname">Group CEO<small>reads everything, owns nothing</small></td>
+              <td class="g view">View</td><td class="g view">View</td><td class="g view">View</td>
+              <td class="g view">View</td><td class="g no">None</td><td class="g no">None</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="withheld">
+        <div class="wh"><span class="no">01</span><div>
+          <b>Roles &amp; access is read-only for them</b>
+          <span>Editing the matrix is editing who may edit the matrix. Without this line,
+            the role is Super user with extra steps.</span>
+        </div></div>
+        <div class="wh"><span class="no">02</span><div>
+          <b>No deleting, no clearing</b>
+          <span>Retiring a person, unit, function or company — yes. Deleting one, clearing
+            a plan, clearing the tenant, restoring the demo — no. Those are irreversible
+            at tenant scale.</span>
+        </div></div>
+        <div class="wh"><span class="no">03</span><div>
+          <b>Passwords: the client’s, never their own kind</b>
+          <span>They may set and reset a password for anyone on the client’s side. They
+            may not touch a Super user’s, and not another SMO team member’s — including
+            their own colleagues. Enforced on the server, not by hiding the button.</span>
+        </div></div>
+      </div>
+    </div>
+    <p class="say">Left to the Super user alone, as a consequence: the access matrix,
+      every delete and clear, and passwords for the SMO’s own people. Everything else the
+      SMO team can do — which is the point of the role.</p>
+  </section>
+
+  <div class="ask">
+    <h2>What I need from you</h2>
+    <p>Two words and I build all six together.</p>
+    <ol>
+      <li><b>Sign off this mockup</b> <span>— or name what to change.</span></li>
+      <li><b>Confirm the password line</b>
+        <span>— they reset for the client’s people; never a Super user, never another SMO
+          team member. That is my reading of “ok for the super user and the team members,
+          but for the client they might be able to reset”.</span></li>
+    </ol>
+  </div>
+
+</div>

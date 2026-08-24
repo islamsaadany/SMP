@@ -48,8 +48,14 @@ A drift between specs and code is a documentation bug — report it before silen
 - **MOCKUP-FIRST (NON-NEGOTIABLE): never adjust a design — layout, structure, section order,
   styling, or any visual element — without first showing a static HTML mockup of the proposed
   look and getting explicit sign-off on that HTML view.** Build the mockup (self-contained
-  HTML, navy/gold, saved under `design-mockups/<feature>/<YYYY-MM-DD>_<desc>.html` and sent
-  for review), wait for approval, and only then touch the real sources. **No "I'll just build
+  HTML, navy/gold, saved under `design-mockups/<feature>/<YYYY-MM-DD>_<desc>.html`), wait
+  for approval, and only then touch the real sources.
+  **A MOCKUP IS PUBLISHED AS AN ARTIFACT, NEVER SENT AS A FILE TO DOWNLOAD**
+  (Islam, 2026-08-24: *"the mockup needs to be always an artifact here not a
+  downloadable html"*). A mockup exists to be LOOKED AT, and a file that has to be
+  saved and opened is a review that happens later or not at all. The file still
+  lives under `design-mockups/` — that is the record — and the thing handed over is
+  the published page. **No "I'll just build
   it and you review at the end" for visual or structural changes.**
   *(REINSTATED 2026-08-24 at Islam's direction, reversing the 2026-08-20 note that retired it
   as belonging to the prototype era. Recorded as a reversal rather than overwritten, per

@@ -580,8 +580,17 @@
      same measurement — so the two axes are set on two different elements, and
      that is a browser fact rather than a preference. */
   .peoplecfg thead tr { position:sticky; top:0; z-index:3; }
+  /* `overflow:hidden` because a FROZEN cell must not paint outside itself
+     (§71.2). The name input carries `min-width:170px` plus the cell's padding,
+     so on a narrow column the box spilled past the frozen boundary and sat on
+     top of the column scrolling underneath — which is what made the register
+     look like it was flipping between two layouts. */
   .peoplecfg td.idx, .peoplecfg td.pname { position:sticky; z-index:2;
-                                           background:var(--surface); }
+                                           background:var(--surface);
+                                           overflow:hidden; }
+  /* And the input is bounded BY the cell rather than by a number of its own,
+     so the two can never disagree about where the column ends. */
+  .peoplecfg td.pname input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser

@@ -9186,3 +9186,111 @@ head — who may not correct a plan (§31) — is still offered nothing.
 "Built and could not be reached" is the second one this week, after the
 register's Delete (§69.20). Both were found by a person trying to use the
 product, not by a check.
+
+---
+
+## 71 · Feedback, and a table that stays still (v3.23)
+
+**71.1 Feedback lives outside the state graph.** Islam: *"some sort of feedback
+box in the bottom right of the page where the person who is using it, if he
+finds any issue with a page or a number, can submit an issue or feedback or a
+request … and this feedback should land in the admin page."*
+
+Its own tables and its own endpoint, for the reason `credentials`, `change_log`
+and `bu_declarations` have theirs: **a save TRUNCATEs thirty tables CASCADE**, so
+feedback stored in the graph would be erased by the next autosave — by the very
+person it was reported to. A foreign key to `people(key)` would be worse still:
+the CASCADE would take the whole table. `person_key` is plain text, resolved at
+read time, so **a report from somebody since deleted still stands** — the report
+is about the PRODUCT, and it does not stop being true when its author leaves.
+
+**WHERE IT WAS RAISED IS CAPTURED, NOT TYPED.** The page, the target, the cycle
+and the build are what the screen already knew; a description of them would be
+wrong more often than the machine's answer, and asking for it is asking somebody
+to do the computer's job.
+
+**Who may do what is the design, and the refusals are the part worth testing.**
+Anybody signed in may RAISE one — the people most likely to spot a wrong number
+are the ones with the least access, and a feedback box only they cannot reach is
+worse than none. Everybody reads their own, so nothing disappears into silence.
+The SMO reads all, sets status, removes. Islam chose a **thread** over a bare
+status, so both sides can reply on an item that is theirs — and a reply from the
+SMO moves it off *new* by itself, because **a status you have to remember to set
+is the status nobody sets**.
+
+**THE LIST CARRIES NO SCREENSHOT.** The image is three orders of magnitude
+larger than the rest of the row, and forty reports would carry forty images to
+draw forty one-line rows. `has_shot` says whether to offer it; `one` fetches it.
+A `shot` that is a URL is REFUSED — the admin page renders it into an `<img>`,
+and a URL is somebody else's server learning who opened the report.
+
+And `getPool()` was copied into two endpoints identically and would have been a
+third. What is copied is **the six env-var spellings** Neon and Vercel use
+between them, so a third copy is a third place to forget one the day the
+integration renames something. One list, in `lib/state-io.js`.
+
+**71.2 A text field writes its value and repaints nothing.** Islam: *"when I
+edit things of the table let the table stay stable — it jumps to other cells or
+refreshes the whole page."*
+
+It did. Every editable field called `paint()`, which rebuilds the entire panel.
+Tabbing out of a name threw away **the scroll position, the focus, the open menu
+and every enhanced select on the page**, and rebuilt thirty-three rows to record
+one word — on a table you edit by moving across it, so it happened on EVERY
+cell. Measured, with the repaint in place: scroll `300,120` → `0,0`, the row
+moved 305px → 605px, focus lost. Without it: all three hold, and the value is
+still written.
+
+**Nothing needed the repaint.** The value is already correct in the box it was
+typed into; the copies of it elsewhere — a chip counting who has no email, a
+name echoed in the navigation — refresh on the next natural paint. That is a
+summary going stale for a few seconds against losing your place on every field
+exit, and it is not close.
+
+**SAVED, THOUGH.** `SYNC.afterPaint()` schedules the write and was only ever
+reached THROUGH `paint()` — so removing the repaint without `fieldSaved()` would
+have left every edit on screen and never in the database until something else
+happened to repaint. That is the trap in this change and it is the whole of it.
+
+Applied to the register's five fields, to **every field on a plan** (`data-fld`
+— a pillar's name, a target, an owner, a tactic, on the one screen somebody
+fills in left to right), and to the plain name fields on Business units,
+Functions, Companies and Capabilities. **`mbname` keeps its repaint**, and that
+is the line: renaming an Official BU can be REFUSED, and it changes what other
+rows point at.
+
+**And a frozen cell must not paint outside itself.** The name input carries
+`min-width:170px` plus the cell's padding, so on a narrow column the box spilled
+past the frozen boundary and sat on top of the column scrolling underneath —
+which is what made the register look like it was flipping between two layouts.
+`overflow:hidden` on the sticky cells, and the input bounded BY the cell rather
+than by a number of its own, so the two can never disagree about where the
+column ends.
+
+**71.3 The table standard, and what it cannot reach.** Islam, as a standing
+rule: every table gets a search with quick filters, sortable headers, a frozen
+first row and column, a columns chooser, an edit pen, Add, and Remove-or-retire
+with warnings — **in Setup and Manage only** (asked, and answered: the plan and
+reporting tables are not in scope).
+
+That answer removes the one real conflict. On a plan table the ORDER IS THE
+DATA — it is what was agreed, it is stored, and it drives the deck, the export
+and the drag handles (§63.3) — so a sortable header there either shows an order
+that disagrees with everything else or rewrites the plan when somebody clicks a
+column heading. In Setup, row order carries no meaning and the question does not
+arise.
+
+The audit, which found less than expected: **nothing in the platform sorts** —
+zero sortable headers anywhere. Only the People register has a columns chooser
+or a frozen row. **No table filters its own rows**; the three search boxes are
+the people PICKER inside dropdowns and the Figure-sets fill table. Eight of the
+sixteen Setup pages have an edit pen, three have an Add row, four have a
+remove.
+
+What genuinely cannot have all seven: **Roles & access** has no rows to add (the
+seven roles live in `lib/rules.js`; adding one is a code change and a security
+decision), **Archived plans** can be removed but never added (they are records),
+**derived tables** — group and company performance, weighting composites — have
+no row to add because the row is a calculation, and on the 4–10 row tables
+(Labels, Scoring bands, Weighting factors) a search box, a freeze and a columns
+chooser are controls that hide nothing.

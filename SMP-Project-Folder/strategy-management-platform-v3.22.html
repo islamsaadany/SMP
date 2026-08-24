@@ -1833,8 +1833,17 @@
      same measurement — so the two axes are set on two different elements, and
      that is a browser fact rather than a preference. */
   .peoplecfg thead tr { position:sticky; top:0; z-index:3; }
+  /* `overflow:hidden` because a FROZEN cell must not paint outside itself
+     (§71.2). The name input carries `min-width:170px` plus the cell's padding,
+     so on a narrow column the box spilled past the frozen boundary and sat on
+     top of the column scrolling underneath — which is what made the register
+     look like it was flipping between two layouts. */
   .peoplecfg td.idx, .peoplecfg td.pname { position:sticky; z-index:2;
-                                           background:var(--surface); }
+                                           background:var(--surface);
+                                           overflow:hidden; }
+  /* And the input is bounded BY the cell rather than by a number of its own,
+     so the two can never disagree about where the column ends. */
+  .peoplecfg td.pname input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -22889,13 +22898,13 @@ var SYNC = (function () {
         UNITS[inp.dataset.uname].name = inp.value || UNITS[inp.dataset.uname].name;
         var row = GROUP.weighting.units.filter(function(r){ return r.key === inp.dataset.uname; })[0];
         if (row) row.unit = UNITS[inp.dataset.uname].name;
-        paint();
+        fieldSaved();                       /* §71.2 — write, do not rebuild */
       });
     });
     document.querySelectorAll("input[data-upx]").forEach(function(inp){
       inp.addEventListener("change", function(){
         UNITS[inp.dataset.upx].codePrefix = inp.value.toUpperCase().slice(0,3);
-        paint();
+        fieldSaved();
       });
     });
     /* A unit's own mark (§52.9). The refusal is shown ON THE PAGE, because a
@@ -23025,7 +23034,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-unav]").forEach(function(el){
       el.addEventListener("change", function(){
         UNITS[el.dataset.unav].navName = el.value.trim() || null;
-        paint();
+        fieldSaved();
       });
     });
     document.querySelectorAll("[data-clearmenu]").forEach(function(b){
@@ -23039,19 +23048,19 @@ var SYNC = (function () {
     document.querySelectorAll("[data-fname]").forEach(function(el){
       el.addEventListener("change", function(){
         FUNCTIONS[el.dataset.fname].name = el.value.trim() || FUNCTIONS[el.dataset.fname].name;
-        paint();
+        fieldSaved();
       });
     });
     document.querySelectorAll("[data-fnav]").forEach(function(el){
       el.addEventListener("change", function(){
         FUNCTIONS[el.dataset.fnav].navName = el.value.trim() || null;
-        paint();
+        fieldSaved();
       });
     });
     document.querySelectorAll("[data-fpx]").forEach(function(el){
       el.addEventListener("change", function(){
         FUNCTIONS[el.dataset.fpx].codePrefix = el.value.trim().toUpperCase();
-        paint();
+        fieldSaved();
       });
     });
     /* ── How a supporting function plans, and where it sits (§59) ──
@@ -23457,7 +23466,7 @@ var SYNC = (function () {
       el.addEventListener("change", function(){
         if (grant("c_caps") !== "edit") return;
         var c = GROUP.capabilities[+el.dataset.capname];
-        if (c) { c.name = el.value.trim() || c.name; paint(); }
+        if (c) { c.name = el.value.trim() || c.name; fieldSaved(); }
       });
     });
     document.querySelectorAll("[data-caprm]").forEach(function(b){
@@ -23551,8 +23560,13 @@ var SYNC = (function () {
     });
     document.querySelectorAll("[data-fld]").forEach(function(el){
       el.addEventListener("change", function(){
+        /* Written and saved, NOT repainted (§71.2). This is every editable
+           field on a plan — a pillar's name, a target, an owner, a tactic —
+           and with the pen on it was rebuilding the whole page each time the
+           cursor left a cell, on the one screen somebody fills in left to
+           right. */
         var fn = FIELDS[+el.dataset.fld];
-        if (fn) { fn(el.value); paint(); }
+        if (fn) { fn(el.value); fieldSaved(); }
       });
       /* THE BOX GROWS WITH WHAT IS TYPED IN IT (§51.1, Islam: "the foundation
          end in mind is not editable in terms of space or empty lines").
@@ -23629,7 +23643,7 @@ var SYNC = (function () {
       inp.addEventListener("change", function(){
         var co = COMPANIES[inp.dataset.coname];
         if (co) co.name = inp.value.trim() || co.name;
-        paint();
+        fieldSaved();
       });
     });
     document.querySelectorAll("[data-coact]").forEach(function(b){
@@ -23933,12 +23947,36 @@ var SYNC = (function () {
        Three text fields, a standing toggle, an add row, the role controls and
        the bulk issue. Everything writes the same data the Business units page
        writes — there is no second copy to keep in step. */
+    /* ── A TEXT FIELD WRITES ITS VALUE AND REPAINTS NOTHING (§71.2) ──
+       Islam: "when I edit things of the table let the table stay stable — it
+       jumps to other cells or refreshes the whole page."
+
+       It did: every one of these called `paint()`, which rebuilds the entire
+       panel. Tabbing out of a name threw away the scroll position, the focus,
+       the open menu and every enhanced select on the page, and rebuilt
+       thirty-three rows to record one word — on a table you edit by moving
+       across it, so it happened on EVERY cell.
+
+       Nothing needs the repaint. The value is already correct in the box it
+       was typed into; the copies of it elsewhere (a chip counting how many
+       people have no email, a name echoed in the navigation) refresh on the
+       next natural paint. That is a summary going stale for a few seconds
+       against losing your place on every field exit, and it is not close.
+
+       SAVED, THOUGH. `SYNC.afterPaint()` is what schedules the write, and it
+       was only ever reached THROUGH paint() — so removing the repaint without
+       this would have made every edit stay on screen and never reach the
+       database until something else happened to repaint. */
+    function fieldSaved(){
+      if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+    }
     function fieldWire(attr, apply){
       document.querySelectorAll("[data-" + attr + "]").forEach(function(inp){
         inp.addEventListener("change", function(){
           var p = personBy(inp.dataset[attr]);
-          if (p) apply(p, inp.value.trim());
-          paint();
+          if (!p) return;
+          apply(p, inp.value.trim());
+          fieldSaved();
         });
       });
     }

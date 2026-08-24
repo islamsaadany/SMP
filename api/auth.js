@@ -10,28 +10,15 @@
    so a forgotten password is reset by the SMO. */
 
 const pg = require("pg");
-const { ensureReady, tuneTypes } = require("../lib/state-io.js");
+const io = require("../lib/state-io.js");
+const { ensureReady } = io;
 const auth = require("../lib/auth.js");
 
-let pool = null;
-function getPool() {
-  if (pool) return pool;
-  tuneTypes(pg);
-  const url =
-    process.env.DATABASE_URL ||
-    process.env.POSTGRES_URL ||
-    process.env.POSTGRES_PRISMA_URL ||
-    process.env.DATABASE_URL_UNPOOLED ||
-    process.env.POSTGRES_URL_NON_POOLING ||
-    process.env.NEON_DATABASE_URL;
-  if (!url) {
-    const e = new Error("No database connection configured.");
-    e.code = "NO_DB";
-    throw e;
-  }
-  pool = new pg.Pool({ connectionString: url, max: 3 });
-  return pool;
-}
+/* The six env-var spellings Neon and Vercel use between them live in ONE
+   place now (lib/state-io.js): this was copied here and into the other
+   endpoint identically, and what is copied is the list — a third copy would
+   be a third place to forget one the day the integration renames something. */
+function getPool() { return io.getPool(pg); }
 
 function readBody(req) {
   if (req.body !== undefined && req.body !== null) {

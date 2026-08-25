@@ -2334,7 +2334,7 @@ function splitOrPane(list, sel, rail, pane){
 function delivKindPill(d){
   return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
 }
-/* ── ONE TABLE, TWO HALVES (§96) ───────────────────────────────────────
+/* ── ONE TABLE, TWO HALVES (§97) ───────────────────────────────────────
    §53.4 put a deliverable and an outcome in one table with a Type column,
    and its argument survives: they are two kinds of evidence that the project
    achieved what it set out to, they are read together, and the SCORE still
@@ -2353,7 +2353,7 @@ function delivKindPill(d){
    which kind they are, and a pill repeating it is the same fact twice (§93's
    one chip too many). The `#` and the NAME hold their position across the
    split so the eye still runs down one list, and where a half has a figure
-   the score is built from (`Reads`) it stays in the LAST column for both
+   the score is built from (`Performance`, §97.8) it stays in the LAST column for both
    halves, so that column still runs down one edge.
 
    This is also the shape the product already had everywhere else: the plan
@@ -2381,7 +2381,7 @@ function dxHead(cells){
       (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
   }).join("") + '</tr>';
 }
-/* WHAT IS NOT THERE IS NOT DRAWN (§96.7). The split first shipped with an
+/* WHAT IS NOT THERE IS NOT DRAWN (§97.7). The split first shipped with an
    empty half saying "No outcomes yet" over its own band and column strip —
    §45.2's rule, that a feature rendering nothing looks like one that was
    never built. Islam: *"the presence of outcomes or deliverables that would
@@ -2507,9 +2507,9 @@ function capKOTable(c){
 function projPerformanceBody(p, fk){
   /* A DELIVERABLE HAS NO TARGET, so it no longer shows a dash under one
      (§53.4 removed the field; the column outlived it by two versions).
-     `Reads` is the last column on BOTH halves — it is the figure projPerf is
-     built from, and a score column that moves between halves is a score
-     column nobody can run their eye down. */
+     The score column is the last on BOTH halves — it is the figure projPerf
+     is built from, and one that moves between halves is one nobody can run
+     their eye down. Named in the dxSplit call below, not here (§97.8). */
   var dRows = p.deliverables.map(function(d, i){
     return '<tr>' + dxIdx(i) + '<td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
@@ -2528,10 +2528,21 @@ function projPerformanceBody(p, fk){
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
   }).join("");
+  /* PERFORMANCE, not Reads (§97.8). Islam: *"Reads is a strange title, we need
+     something else."* It was the platform's own word for how a figure resolves
+     into a score, and it was the only place using it — every other table
+     naming this same 0-100 says Score, Progress or Performance. His pick was
+     Performance, over Score, which is what the Key objectives table two blocks
+     up this same page says. Recorded because the cost is real and was stated
+     before he chose: the pane now carries THREE words for one kind of number —
+     the card's *Project performance*, the objectives table's *Score*, and this.
+     Progress was never a candidate here: the milestone table directly below
+     uses it for a STATUS, and one word for a status and a percentage two
+     tables apart is how §87's twins get made. */
   var sh = dxShown(p);
   var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Reads", "num"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Reads", "num"]], rows: oRows });
+    { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Performance", "num"]], rows: dRows },
+    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Performance", "num"]], rows: oRows });
   var mRows = p.milestones.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td>' +
@@ -2662,7 +2673,7 @@ function projPlanBody(p, fk){
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
   /* MEASURED AS BELONGS TO A DELIVERABLE AND A DIRECTION TO AN OUTCOME, and
-     for two versions one heading carried both (§96). Each half declares its
+     for two versions one heading carried both (§97). Each half declares its
      own columns now; the deliverable's kind spans the three the outcome uses
      for direction, target and date, because a half with fewer facts still has
      to end where the other one does. */

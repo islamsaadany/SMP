@@ -347,7 +347,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
-        '<th class="num">Reported</th><th class="num">Reads</th>' +
+        '<th class="num">Reported</th><th class="num">Performance</th>' +
         '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
 
       var oRows = p.outcomes.map(function(o, i){
@@ -368,7 +368,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'O">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Outcomes</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Outcome</th>' +
-        '<th class="num">Target</th><th class="num">Actual</th><th class="num">Reads</th>' +
+        '<th class="num">Target</th><th class="num">Actual</th><th class="num">Performance</th>' +
         '<th>Note</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });

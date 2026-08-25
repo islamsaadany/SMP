@@ -12072,7 +12072,7 @@ standard secondary button, on every page, since long before this version.
 Recorded rather than quietly changed: it is one token pair governing every
 button in the platform, and §95 was asked for a page.
 
-## 96 · One table, two halves (v3.25)
+## 97 · One table, two halves (v3.25)
 
 It began as a question about a column that was there: *"for the project plans
 the milestones has no due date? or am I confused?"* He was not confused about
@@ -12089,7 +12089,7 @@ Then the real ask: *"for deliverables and outcomes the mixing of both caused
 confusion. we can have them in 1 table but we need a split as outcomes has
 target and measure date and deliverables has measured as."*
 
-### 96.1 §53.4's argument survives; its header row does not
+### 97.1 §53.4's argument survives; its header row does not
 
 §53.4 put a deliverable and an outcome in one table with a **Type** column, and
 everything it argued is still true: they are two kinds of evidence that the
@@ -12112,7 +12112,7 @@ there were two per deliverable on the plan pane and one on each of the other
 two. The em-dash is the giveaway: it is the shape a table makes when it has been
 asked to hold two things at once.
 
-### 96.2 Still one table, split by a band
+### 97.2 Still one table, split by a band
 
 He said *1 table*, and it is one `<table>`. A band opens each half — the same
 ground `--panel` gives every table header in the product (§41.10), so a half
@@ -12135,7 +12135,7 @@ than two stacked:
 facts still end where the other one does** — a deliverable's *Measured as*
 spans the three columns an outcome uses for direction, target and date.
 
-### 96.3 Three things go with the split
+### 97.3 Three things go with the split
 
 **THE TYPE COLUMN.** The band above the rows already says which kind they are; a
 pill repeating it is the same fact twice — §93's one chip too many, in a
@@ -12152,7 +12152,7 @@ single *"add a row"* would have had to ask which kind — *a question the two
 buttons answer by existing*. The split answers it by where the button sits, so
 each says only its own name.
 
-### 96.4 Finish becomes Due date, on every surface and in both directions
+### 97.4 Finish becomes Due date, on every surface and in both directions
 
 The three panes, the review deck and both workbooks. **The stored field keeps
 its spelling** — renaming `finish` would be a migration for a word nobody
@@ -12165,7 +12165,7 @@ outcome sheets, under the same read-either rule.
 outcome stays as it is: a column heading is a noun and a pill is a sentence, and
 rewriting the sentence to match the noun would make it read worse.
 
-### 96.5 The check asserts the problem, not the layout
+### 97.5 The check asserts the problem, not the layout
 
 `src/checks/project-tables.py`, and the shape is §94.8's lesson taken
 seriously — *a check written against the last instruction has to be rewritten
@@ -12193,7 +12193,7 @@ Two things it had to be taught, both of which would have made it lie:
 cell injected into a live row is caught, and a colspan broken by hand is caught.
 A suite printing *all passed* is worth what its assertions can detect.
 
-### 96.6 Found while restructuring, not fixed: the drag handles reorder nothing
+### 97.6 Found while restructuring, not fixed: the drag handles reorder nothing
 
 `projPlanBody` defines `sortAttr()` and **never applies it to either table**, so
 a project's deliverables, outcomes and milestones draw drag grips in arranging
@@ -12208,7 +12208,7 @@ plan pane's rows now sit in two halves of one table, so what a drop between
 halves should mean is a decision, not a detail), and CLAUDE.md's rule is that
 touching something the user did not mention is asked first.
 
-### 96.7 A half that is not there is not drawn — reversed the same hour
+### 97.7 A half that is not there is not drawn — reversed the same hour
 
 The split first shipped with an empty half drawing its band, its column strip
 and a dimmed *"No outcomes yet"*, on §45.2's rule: **a feature that renders
@@ -12254,3 +12254,45 @@ had to MAKE the state: `checks/project-tables.py` empties one half of one
 project, the other half of the next and both halves of a third, then asserts
 what is drawn against an exact list, including an EMPTY one. §94.2's rule, and
 the only kind of assertion that can see a control that should not be there.
+
+### 97.8 Reads becomes Performance, and a deliverable's kind stays in the plan
+
+Two asks in one message. *"On reporting, the in-progress for the deliverables —
+should the user submit % of progress? And Reads is a strange title, we need
+something else."*
+
+**THE FIRST ONE WAS ALREADY ANSWERED BY THE PLAN, WHICH IS WHERE IT BELONGS.** A
+deliverable's `kind` decides how it is reported: `binary` gives the reporter a
+dropdown that scores 100 or 0, `pct` gives them a percentage box. So a
+deliverable CAN be reported as a percentage — the SMO sets *Measured as* to
+*% delivered* when authoring. Nothing built, and the reason is the interesting
+part: **how a thing is measured is a plan decision, not a reporting one.**
+Letting the reporter pick would let a unit change how it is measured while
+being measured, which is what §42 exists to prevent; and a third *In progress*
+state with no number would force the score to invent one, which is §47's
+hard-coded guess with a friendlier face. Recorded so the question is not
+re-opened without those two costs in front of it.
+
+**THE SECOND IS A RENAME, AND THE VOCABULARY WAS ALREADY DRIFTING.** `Reads`
+was the platform's own word for how a figure resolves into a score, and these
+two tables were the only place it was ever printed. The same 0–100 is called
+**Score** by the capability's Key objectives table *two blocks up the same
+page*, **Progress** on a unit's objectives and measures, and **Performance** by
+the group's projects table.
+
+I recommended **Score**, on the same-page argument. Islam picked
+**Performance**. **The cost was stated before he chose and is recorded rather
+than argued again**: the Performance pane now carries three words for one kind
+of number — the card's *Project performance*, the objectives table's *Score*,
+and this column. **Progress was never a candidate here**, and that part is not
+taste: the milestone table directly below uses *Progress* for a STATUS
+(Completed / In progress / Not started), and one word for a status and a
+percentage two tables apart is exactly how §87's twins get made.
+
+The rename reaches the pane and the **review deck**, which had the word in two
+of its own headers. `src/checks/project-tables.py` asserts both ends on both
+surfaces — and **the pane assertion needed no editing at all**, because it
+reads the last column's label off the page and compares the two halves to each
+other rather than to a literal (§53.5). A check written against the problem
+survives somebody changing their mind about the wording; one written against
+the wording does not.

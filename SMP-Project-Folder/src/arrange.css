@@ -540,7 +540,7 @@
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
 
-  /* ── ONE TABLE, TWO HALVES (§96) ─────────────────────────────────
+  /* ── ONE TABLE, TWO HALVES (§97) ─────────────────────────────────
      The band that splits a project's deliverables from its outcomes. It
      wears `--panel`, which is what Setup › Branding sets for the navigation
      bar and what every table header in the product wears (§41.10), so each

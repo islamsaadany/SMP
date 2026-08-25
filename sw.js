@@ -69,7 +69,7 @@
    moment it is read. Checked here against origin/main and against every
    name this repository has ever carried: v3.25, b, c, d are used.
 
-   §96 STOPS TAKING THE NEXT LETTER. Twice in one day two sessions reached
+   §97 STOPS TAKING THE NEXT LETTER. Twice in one day two sessions reached
    for the same one, because "the next letter after the one main is serving"
    is a rule both of them can follow correctly and still collide on -- and
    when they do, git merges the bare line with no conflict at all while the
@@ -77,7 +77,17 @@
    to prevent. A name taken from what the branch DID cannot be arrived at by
    coincidence. Checked at merge time: main was serving v3.25g, and this
    repository has carried v3.21, v3.22, v3.24, b, c, d, v3.25, b, c, d, e, f
-   and g. */
+   and g.
+
+   AND THE SAME FAULT HAS A THIRD FACE: the SECTION NUMBER in the decisions
+   document. This branch was written as §95, renumbered to §96 when main took
+   §95, and renumbered again to §97 when main took §96 -- three sessions on
+   one day, each correctly taking "the next number" from a main that had
+   moved since they read it. A sequential name claimed at AUTHORING time is
+   claimed against a snapshot; it is only real at MERGE time. Anything
+   sequential and shared -- a cache name, a section number, a migration
+   number -- is chosen in the same breath as the fetch-and-look that precedes
+   every merge, and never before. */
 
 const SHELL = "smp-shell-v3.25-tables";
 const ASSETS = [

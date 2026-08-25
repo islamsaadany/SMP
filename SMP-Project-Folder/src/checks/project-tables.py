@@ -1,4 +1,4 @@
-"""ONE TABLE, TWO HALVES (§96).
+"""ONE TABLE, TWO HALVES (§97).
 
 A deliverable and an outcome shared one header row on all three of a
 capability project's panes, so `Measured as` meant the delivery kind on one
@@ -266,7 +266,30 @@ with sync_playwright() as p:
     ck("a workbook written before the rename still reads",
        old_new["then"] == ["20 Mar 2026"], old_new["then"])
 
-    # ── A HALF THAT IS NOT THERE IS NOT DRAWN (§96.7) ────────────────────
+    # ── THE REVIEW DECK ──────────────────────────────────────────────────
+    # The deck already gave a deliverables slide and an outcomes slide of its
+    # own (§15), so the split needed nothing there — but BOTH renames reach
+    # it, and a rename is the easiest thing to half-do (§90). Asked of the
+    # real builder rather than of a page, because the deck is assembled fresh
+    # every time it opens and never stored (§50).
+    print("── the review deck")
+    deck = pg.evaluate("""() => {
+      const box = document.createElement("div");
+      box.innerHTML = deckSlidesFn("finance");
+      const h = [...box.querySelectorAll("thead th")].map(e => e.textContent.trim());
+      return { slides: box.querySelectorAll(".dslide").length,
+               reads: h.filter(x => x === "Reads").length,
+               finish: h.filter(x => x === "Finish").length,
+               perf: h.filter(x => x === "Performance").length,
+               due: h.filter(x => x === "Due date").length };
+    }""")
+    ck("the deck still builds", deck["slides"] > 0, deck["slides"])
+    ck("no slide still says Reads", deck["reads"] == 0, deck["reads"])
+    ck("no slide still says Finish", deck["finish"] == 0, deck["finish"])
+    ck("the deck's score column says Performance", deck["perf"] > 0, deck["perf"])
+    ck("the deck's milestone column says Due date", deck["due"] > 0, deck["due"])
+
+    # ── A HALF THAT IS NOT THERE IS NOT DRAWN (§97.7) ────────────────────
     # THE POINT OF THIS BLOCK IS A CONTROL THAT SHOULD NOT BE DRAWN, which is
     # the one thing a check looking for something PRESENT can never see
     # (§94.2). No demo project has an empty half — 0 of 19 — so the state has

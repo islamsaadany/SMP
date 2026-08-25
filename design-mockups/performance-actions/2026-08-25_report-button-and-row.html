@@ -1,0 +1,282 @@
+<title>Performance Actions</title>
+<style>
+  /* ── SMP tokens, forefront palette, copied from src/_shared.css ──
+     Nothing here is invented: the mockup wears the product's own values so
+     what is being judged is the CHANGE and not a second design language. */
+  :root {
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --r:8px; --r-pill:999px;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#E3E7EE; --line-soft:#EFF2F6;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --attn-bg:#F7EFD6;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    /* ── THE PROPOSAL: two new tokens, one line per palette ──
+       The fill is the palette's own orange at the weight that carries TYPE,
+       and the ink is chosen against it. §38.4's rule, used the other way
+       round: a colour that works as type usually works as a fill, and the
+       one that works as a fill often cannot carry white. */
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    /* The mockup's own chrome — deliberately NOT the product's, so the
+       commentary can never be mistaken for a screen. */
+    --page:#EDEEF1; --pen:#5A6270; --rule:#D6DAE1;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#2C323B; --line-soft:#242932;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+      --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+      --gold:#D9B665; --gold-deep:#C9A24D; --attn-bg:#332C16;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+      --page:#0E1013; --pen:#8A93A0; --rule:#282D35;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#2C323B; --line-soft:#242932;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --gold:#D9B665; --gold-deep:#C9A24D; --attn-bg:#332C16;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+    --page:#0E1013; --pen:#8A93A0; --rule:#282D35;
+  }
+
+  body { background:var(--page); color:var(--ink); font-family:var(--sans);
+         margin:0; padding:36px 22px 80px; }
+  .sheet { max-width:1080px; margin:0 auto; display:flex; flex-direction:column; gap:40px; }
+
+  header.top { display:flex; flex-direction:column; gap:10px; }
+  .kick { font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+          font-weight:700; color:var(--pen); }
+  h1 { font-size:26px; line-height:1.2; margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .lede { font-size:14px; line-height:1.6; color:var(--ink-2); max-width:64ch; margin:0; }
+
+  .block { display:flex; flex-direction:column; gap:14px; }
+  .blabel { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .blabel h2 { font-size:12px; letter-spacing:.13em; text-transform:uppercase;
+               font-weight:700; margin:0; color:var(--ink); }
+  .blabel .tag { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+                 font-weight:700; border-radius:var(--r-pill); padding:3px 10px;
+                 border:1px solid var(--rule); color:var(--pen); }
+  .blabel .tag.now { }
+  .blabel .tag.next { border-color:var(--cta); color:var(--cta); }
+  .blabel p { margin:0; font-size:13px; color:var(--pen); }
+
+  /* The frame standing in for the platform's page area. */
+  .screen { background:var(--ground); border:1px solid var(--rule); border-radius:12px;
+            padding:24px; overflow-x:auto; }
+  .screen > .inner { min-width:640px; }
+
+  /* ── The product's own components ─────────────────────────── */
+  .bands { display:flex; gap:20px; flex-wrap:wrap; align-items:center; font-size:12.5px;
+           color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r); padding:11px 16px; margin:0 0 24px;
+           justify-content:flex-start; }
+  .bands b { font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; margin-right:2px; }
+  .bands span { display:flex; align-items:center; gap:7px; }
+  .bands i { width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .bands-act { margin-left:auto; display:inline-flex; gap:8px; }
+
+  .pageact { display:flex; justify-content:flex-end; gap:8px; margin:0 0 16px; }
+
+  .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+             font-weight:700; color:var(--gold-deep); background:none;
+             border:1px solid var(--gold); border-radius:var(--r-pill);
+             padding:6px 15px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .editbtn:hover { background:var(--attn-bg); }
+  .bands-act .editbtn { padding:5px 14px; }
+  .dlcar { font-size:10px; }
+
+  /* THE ONE NEW RULE. A solid fill, and the ink comes from the same pair as
+     the fill so neither theme can end up with white on white. */
+  .editbtn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .editbtn.cta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+
+  /* Enough of the page beneath it to judge the change in context. */
+  .scores { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+  .score-h { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .score-h h4 { margin:0; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+                color:var(--ink-3); font-weight:700; }
+  .pill { font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; font-weight:700;
+          border-radius:var(--r-pill); padding:3px 9px; white-space:nowrap; }
+  .pill.attn { background:var(--attn-bg); color:var(--attn-tx); }
+  .big { font-size:34px; font-weight:700; font-family:var(--mono);
+         font-variant-numeric:tabular-nums; line-height:1; }
+
+  /* ── The commentary rail ──────────────────────────────────── */
+  .why { display:flex; flex-direction:column; gap:8px; border-left:3px solid var(--rule);
+         padding-left:16px; }
+  .why p { margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-2); max-width:68ch; }
+  .why p strong { color:var(--ink); }
+
+  table.num { width:100%; border-collapse:collapse; font-size:13px; }
+  table.num th { text-align:left; font-size:10.5px; letter-spacing:.11em;
+                 text-transform:uppercase; color:var(--ink-3); font-weight:700;
+                 padding:8px 10px; border-bottom:1px solid var(--rule); }
+  table.num td { padding:9px 10px; border-bottom:1px solid var(--line-soft); color:var(--ink-2); }
+  table.num td.n { font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--ink); }
+  table.num tr:last-child td { border-bottom:0; }
+  .swatch { display:inline-block; width:26px; height:14px; border-radius:3px;
+            vertical-align:-2px; margin-right:8px; border:1px solid var(--rule); }
+  .tablewrap { background:var(--surface); border:1px solid var(--line);
+               border-radius:var(--r); overflow-x:auto; }
+
+  .ask { background:var(--surface); border:1px solid var(--cta); border-radius:var(--r);
+         padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
+  .ask h3 { margin:0; font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+            color:var(--cta); font-weight:700; }
+  .ask p { margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-2); }
+
+  @media (max-width:720px) { .scores { grid-template-columns:1fr; } }
+  @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+</style>
+
+<div class="sheet">
+
+  <header class="top">
+    <div class="kick">SMP &middot; mockup &middot; 25 Aug 2026</div>
+    <h1>The two buttons come out of the legend, and Report goes solid</h1>
+    <p class="lede">A unit&rsquo;s <b>Performance</b> page, top of the panel, during an open
+      cycle. Only the action row changes &mdash; the legend, the score cards and everything
+      below them are untouched.</p>
+  </header>
+
+  <div class="block">
+    <div class="blabel">
+      <h2>Today</h2><span class="tag now">v3.24</span>
+      <p>Both buttons ride at the right-hand end of the &ldquo;Reading the colours&rdquo; strip.</p>
+    </div>
+    <div class="screen"><div class="inner">
+      <div class="bands">
+        <b>Reading the colours</b>
+        <span><i style="background:var(--good)"></i> On track &mdash; 85%+</span>
+        <span><i style="background:var(--attn)"></i> Needs attention &mdash; 70&ndash;84%</span>
+        <span><i style="background:var(--warn)"></i> At risk &mdash; 50&ndash;69%</span>
+        <span><i style="background:var(--bad)"></i> Off track &mdash; below 50%</span>
+        <span class="bands-act">
+          <button class="editbtn" type="button">Report</button>
+          <button class="editbtn" type="button">Presentation <span class="dlcar" aria-hidden="true">&#9662;</span></button>
+        </span>
+      </div>
+      <div class="scores">
+        <div class="card"><div class="score-h"><h4>Key objectives performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">78%</span></div>
+        <div class="card"><div class="score-h"><h4>Pillars performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">74%</span></div>
+        <div class="card"><div class="score-h"><h4>Execution performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">81%</span></div>
+      </div>
+    </div></div>
+    <div class="why">
+      <p>Two problems, one cause. The legend is a <strong>reference strip</strong> &mdash; it
+        explains what the colours below it mean &mdash; and the one thing a person came to
+        this page to <em>do</em> during a cycle is parked inside it, in the same quiet
+        outline as everything else. On a narrow window the legend wraps and the buttons go
+        with it, so where Report sits depends on how wide the browser is.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel">
+      <h2>Proposed</h2><span class="tag next">v3.25</span>
+      <p>Their own row above the strip, right-aligned. Report is a solid orange call to action.</p>
+    </div>
+    <div class="screen"><div class="inner">
+      <div class="pageact">
+        <button class="editbtn cta" type="button">Report</button>
+        <button class="editbtn" type="button">Presentation <span class="dlcar" aria-hidden="true">&#9662;</span></button>
+      </div>
+      <div class="bands">
+        <b>Reading the colours</b>
+        <span><i style="background:var(--good)"></i> On track &mdash; 85%+</span>
+        <span><i style="background:var(--attn)"></i> Needs attention &mdash; 70&ndash;84%</span>
+        <span><i style="background:var(--warn)"></i> At risk &mdash; 50&ndash;69%</span>
+        <span><i style="background:var(--bad)"></i> Off track &mdash; below 50%</span>
+      </div>
+      <div class="scores">
+        <div class="card"><div class="score-h"><h4>Key objectives performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">78%</span></div>
+        <div class="card"><div class="score-h"><h4>Pillars performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">74%</span></div>
+        <div class="card"><div class="score-h"><h4>Execution performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">81%</span></div>
+      </div>
+    </div></div>
+    <div class="why">
+      <p><strong>The row already exists in the product.</strong> A supporting function&rsquo;s
+        Performance page has carried its Report and Presentation buttons in exactly this row
+        (<code>.pageact</code>) since &sect;63. So this is the unit catching up with the
+        function rather than a new component &mdash; &sect;53.5, the two halves being made the
+        same product again.</p>
+      <p><strong>The legend goes back to being only a legend</strong>, full width, and stops
+        deciding where the actions sit when it wraps.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel"><h2>The orange</h2>
+      <p>Two tokens, one line per palette. No new colour is invented.</p></div>
+    <div class="tablewrap">
+      <table class="num">
+        <thead><tr><th>Palette</th><th>Fill &mdash; <code>--cta</code></th>
+          <th>Ink &mdash; <code>--cta-ink</code></th><th>Contrast</th></tr></thead>
+        <tbody>
+          <tr><td>Forefront &middot; light</td>
+            <td class="n"><span class="swatch" style="background:#A4512C"></span>#A4512C</td>
+            <td class="n">white</td><td class="n">5.54 : 1</td></tr>
+          <tr><td>Forefront &middot; dark</td>
+            <td class="n"><span class="swatch" style="background:#E1935F"></span>#E1935F</td>
+            <td class="n">#14161A</td><td class="n">7.26 : 1</td></tr>
+          <tr><td>Slate &middot; light</td>
+            <td class="n"><span class="swatch" style="background:#C2410C"></span>#C2410C</td>
+            <td class="n">white</td><td class="n">5.18 : 1</td></tr>
+          <tr><td>Slate &middot; dark</td>
+            <td class="n"><span class="swatch" style="background:#FB923C"></span>#FB923C</td>
+            <td class="n">#0B1120</td><td class="n">7.89 : 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="why">
+      <p>In light themes the fill is the palette&rsquo;s <em>deep</em> orange &mdash; the value
+        the palette already uses for orange WORDS &mdash; carrying white. In dark themes it is
+        the palette&rsquo;s bright orange carrying the page&rsquo;s own near-black. That is
+        &sect;38.4 read the other way round: the bright orange that works as a fill on a card
+        cannot carry white type (2.5&nbsp;:&nbsp;1), and a solid button is type on a fill.
+        The button is themed with the tenant, so a client&rsquo;s palette gets its own orange
+        rather than this one.</p>
+      <p><strong>It is one button, once, and only during an open cycle.</strong> Report is
+        drawn only while a cycle is open and only for somebody who may report &mdash; so the
+        accent budget (&sect;41) is spent on the single act the page exists to prompt, and the
+        page is back to its quiet register the rest of the quarter.</p>
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>What I need a yes on</h3>
+    <p>1 &middot; The buttons move to their own right-aligned row above the legend, on a
+      unit&rsquo;s Performance page. The function&rsquo;s page already looks like this.</p>
+    <p>2 &middot; Report becomes a solid orange fill; Presentation stays the outlined button
+      it is, so the two do not compete.</p>
+    <p>3 &middot; The orange is the palette&rsquo;s own, per the table above &mdash; it changes
+      with the tenant&rsquo;s branding rather than being fixed at this hex.</p>
+  </div>
+
+</div>

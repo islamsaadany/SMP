@@ -1008,6 +1008,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (the server half, against a real Postgres, signing in as somebody with no
   role because a check that only looks for something PRESENT cannot see a shut
   door, §94.2).
+- **THE CHAT HAS A SWITCH, AND POLLING WAS THE REAL COST (since v3.27, §96):**
+  five controls in a **Settings dropdown on the Messages page header** (§90's
+  shape, never a second Setup page — §32) — on/off, Live/Relaxed, the promise
+  the panel shows, screenshots, and email-when-away. Stored in `GROUP.chat` →
+  `org.extra`, so **no migration**; `SMPRules.chatCfg()` is the ONE thing that
+  decides what an absent key means and `chatBeat()` the one that turns
+  Live/Relaxed into milliseconds. **A value put back to its default DELETES
+  its key** and the last key leaving deletes `GROUP.chat` (§50.6 — a reader
+  that creates what it looked for made every save carry a phantom change).
+  **THE SERVER REFUSES `say` AND `reply` WHEN IT IS OFF**: with the corner not
+  drawn, nothing in the product can reach them, which is exactly why they are
+  guarded — a switch that only hides a control is decoration (§42, §44).
+  **OFF NEVER DELETES A CONVERSATION** (§44) and **the Messages page stays in
+  the rail**, or the only way to turn it back on would be to turn it on first
+  (§61's trap). **Replying goes off with the chat** — a reply nobody can open
+  is written into a room with no door. **AND MESSAGES ARE NOT WHAT COSTS**: one
+  poll was **14 database round trips**, ten of them `ensureReady()` re-running
+  the schema and both migration phases on *every request*. It is memoised per
+  process now (**14 → 5**), the client **stops polling entirely while the tab
+  is hidden**, and the idle beat is 180s. The two real limits are a licence and
+  a database, not a quota: **Vercel Hobby is not licensed for commercial use**,
+  and **Neon's free compute never autosuspends while anything polls**. Proved
+  by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
+  pressed the bubble to open a panel that was already open, closing it) and by
+  `scripts/test-chat.js`.
 - **Email (since v3.23, §72; the credential moved in §95.5):** **`lib/mailer.js`
   is the only place `RESEND_API_KEY` is read**, and nothing it returns contains
   it — `api/mail.js` and `api/chat.js` both call it. §72's rule is unchanged;
@@ -1198,7 +1223,41 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.26: talking to the Strategy Office**
+*Last Updated: 2026-08-25 &mdash; **v3.27: the chat gets a switch, and a poll
+gets cheaper** (&sect;96). Two asks that turned out to be one subject. *"How much
+can vercel handle as messages per day?"* &mdash; and the answer is that
+**messages are not the unit**: a message costs one request and an open tab costs
+900 an hour. Measured against the real endpoint rather than estimated, one poll
+was **14 database round trips**, and **ten of them were `ensureReady()`
+re-running the whole schema and both migration phases on every single
+request** &mdash; invisible while a request meant a page load, and not invisible
+once a corner asks every four seconds. Memoised per process (**14 &rarr; 5**),
+the client now **stops polling entirely while the tab is hidden**, and the idle
+beat goes from 60s to 180s. **THE TWO REAL LIMITS ARE A LICENCE AND A DATABASE,
+NOT A QUOTA**: Vercel's Hobby plan is not licensed for commercial use, and
+Neon's free compute never autosuspends while anything is polling &mdash; one
+signed-in tab keeps it awake whether or not a word is written, which is what
+makes the hidden-tab stop a correctness change and not only a saving. Then the
+switch: *"I will need in the setup page to enable or disable the chat with some
+settings maybe."* Five controls in a **dropdown on the Messages page header**
+(&sect;90's shape; five switches behind their own rail entry is a door behind a
+door), and **the cost is stated in the row where the choice is made** &mdash;
+which is the whole reason the cadence is a setting rather than a number in the
+source. **THE SERVER REFUSES, WHICH IS THE HALF THAT IS NOT ON SCREEN**: with
+the chat off the corner is not drawn, so nothing in the product can reach `say`
+or `reply`, and that is exactly why both are guarded (&sect;42, &sect;44 &mdash;
+a switch that only hides a control is decoration). **Off never deletes a
+conversation and the page stays reachable**, or the only way to turn it back on
+would be to turn it on first (&sect;61's trap). Three things were found by
+running it rather than by reading: the office pressed Off and **watched nothing
+happen for three minutes**, because their own corner was on the new idle beat;
+the panel's second line **hid the promise at the one moment somebody wants
+it**, while they are waiting; and the new check **passed for the wrong reason**
+&mdash; it pressed the bubble to open a panel that was already open, closing it,
+and then read stale values while the cadence assertion passed with zero polls.
+Ask, then act.*
+
+*Earlier: 2026-08-25 &mdash; **v3.26: talking to the Strategy Office**
 (&sect;95, spec 014). A bubble in the bottom-right corner, one running
 conversation with the office, and a Setup page the office answers from. **AND
 HE HAD ASKED FOR IT ONCE ALREADY**: &sect;71 built the endpoint, the tables, the

@@ -32,8 +32,19 @@ var CHAT = (function(){
      thing that can change is a number on a badge. Both stamp `here_at`, which
      is the whole of the presence test the email rule reads (§95.5) — so the
      slow one also has to be fast enough that "away" means away. */
-  var POLL_OPEN = 4000, POLL_SHUT = 60000;
+  /* Open, this is `cfg.beat` — the office's own Live/Relaxed setting, decided
+     by SMPRules.chatBeat() so the switch and the number cannot drift (§96).
+     Shut, the only thing that can change is a number on a badge, so three
+     minutes is plenty: at 60s a single tab left open overnight was eight
+     hundred requests for nothing (§96.1). */
+  var POLL_SHUT = 180000;
   var PIC_EDGE = 1600;
+
+  /* What the server last told us the office has set. Started from the shared
+     defaults so the first paint is not a guess, and replaced by the answer —
+     never invented here, or the two sides would decide it separately (§42). */
+  var cfg = SMPRules.chatCfg(null);
+  cfg.beat = SMPRules.chatBeat(null);
 
   var open = false, mounted = false, timer = null;
   var state = { messages: [], unread: 0, thread: null, office: false };
@@ -257,15 +268,25 @@ var CHAT = (function(){
 
     var sub = el("chatsub");
     if (sub) {
-      sub.innerHTML = state.messages.length && state.thread && state.thread.waiting
-        ? '<span class="chatdot" style="background:var(--attn)"></span> With the office'
-        : '<span class="chatdot"></span> Usually answers the same day';
+      /* THE DOT CARRIES THE STATUS AND THE WORDS CARRY THE PROMISE. It used
+         to be either/or — "With the office" while something was outstanding,
+         the promise otherwise — which hid the promise at the one moment
+         somebody actually wants it, which is while they are waiting. Two
+         facts, two channels; the office's sentence is always on screen (§96).
+         The words are `chatCfg`'s choice, so there is no second fallback here
+         to disagree with it. */
+      var waiting = state.messages.length && state.thread && state.thread.waiting;
+      sub.innerHTML = '<span class="chatdot"' +
+        (waiting ? ' style="background:var(--attn)"' : '') + '></span> ' +
+        esc2(cfg.promise);
     }
     var n = el("chatn");
     if (n) {
       if (state.unread > 0 && !open) { n.hidden = false; n.textContent = String(state.unread); }
       else n.hidden = true;
     }
+    var pic = el("chatpic");
+    if (pic) pic.hidden = !cfg.shots;
     var note = el("chatnote");
     if (note) {
       note.className = "chnote" + (lastErr ? " bad" : "");
@@ -284,7 +305,21 @@ var CHAT = (function(){
         state.thread = j.thread || null;
         state.office = !!j.office;
         loaded = true;
-        var dock = el("chatdock"); if (dock) dock.hidden = false;
+        /* THE SETTINGS ARRIVE WITH THE ANSWER, so a switch the office flips
+           reaches every open browser within one beat. If the cadence changed,
+           the clock is reset — not on the next open, which could be tomorrow. */
+        if (j.chat) {
+          var wasBeat = cfg.beat;
+          cfg = j.chat;
+          if (cfg.beat !== wasBeat) beat();
+        }
+        var dock = el("chatdock");
+        /* OFF MEANS GONE (§96.2). Not disabled, not explaining itself — the
+           corner is simply not there, and nothing polls, which is the whole
+           saving. The panel is closed with it, or somebody reading a
+           conversation when the office switched it off would keep the box. */
+        if (dock) dock.hidden = !cfg.on;
+        if (!cfg.on && open) setOpen(false);
         drawPanel();
         /* Opened, and something new arrived while it was open — read it. */
         if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
@@ -301,7 +336,14 @@ var CHAT = (function(){
   function stop(){ if (timer) { clearInterval(timer); timer = null; } }
   function beat(){
     stop();
-    timer = setInterval(poll, open ? POLL_OPEN : POLL_SHUT);
+    /* NOTHING RUNS WHILE THE TAB IS HIDDEN (§96.1). Browsers already throttle
+       a background timer to about once a minute; this takes it to nothing at
+       all, which is what lets the database go to sleep overnight instead of
+       being woken by a tab somebody forgot on Friday. `visibilitychange`
+       starts it again, and the poll it fires on the way back is what makes
+       the badge right before anybody has looked at it. */
+    if (document.hidden) return;
+    timer = setInterval(poll, open ? (cfg.beat || 4000) : POLL_SHUT);
   }
 
   function setOpen(v){
@@ -391,8 +433,16 @@ var CHAT = (function(){
       this.style.height = Math.min(120, this.scrollHeight) + "px";
     });
     /* Coming back to the tab is the moment a badge is most likely to be
-       wrong, and the cheapest time to ask. */
-    window.addEventListener("focus", function(){ if (mounted) poll(); });
+       wrong, and the cheapest time to ask. `visibilitychange` is the one that
+       matters — `focus` alone does not fire when a background tab is brought
+       forward in some browsers, and it is the hidden case the clock stops
+       for (§96.1). */
+    window.addEventListener("focus", function(){ if (mounted && !document.hidden) poll(); });
+    document.addEventListener("visibilitychange", function(){
+      if (!mounted) return;
+      if (document.hidden) { stop(); return; }
+      poll(); beat();
+    });
     poll();
     beat();
   }
@@ -403,8 +453,94 @@ var CHAT = (function(){
      clock, writing into two nodes. That is what lets the reply box survive a
      message arriving while somebody is typing into it. */
 
+  /* ── THE SETTINGS, IN A HEADER DROPDOWN (§96.2) ────────────────────────
+     The shape §90 gave the register's own twice-a-year controls, for the same
+     reason: these are touched about as often, and the queue is what the page
+     is for — a settings block above the table would push the work down the
+     screen every day to serve a decision made twice a year (§93.5).
+
+     IT IS DRAWN AND RE-DRAWN BY THIS FILE, not by paint(). Opening a menu
+     that rebuilt the page would throw away the thread the office is reading
+     and the reply they are half way through typing — the rule this whole file
+     is built around. */
+  var SETMENU = false;
+
+  /* SCHEDULE THE WRITE WITHOUT A REPAINT (§71.2). `fieldSaved()` in the shell
+     does exactly this, but it is scoped inside wire() and not reachable from
+     here — so this calls the same thing it calls, rather than a copy of it. */
+  function saved(){
+    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
+  }
+
+  function segHtml(key, off, on, val, lit){
+    return '<span class="seg' + (lit ? " lit" : "") + '">' +
+      '<button type="button" data-chset="' + key + '" data-chval="0" aria-pressed="' +
+        (!val) + '">' + off + '</button>' +
+      '<button type="button" data-chset="' + key + '" data-chval="1" aria-pressed="' +
+        (!!val) + '">' + on + '</button></span>';
+  }
+
+  function settingsHtml(){
+    var c = chatCfg();
+    if (!SETMENU) {
+      return '<span class="hmenu"><button class="hmenu-btn" data-chsetmenu="1" ' +
+        'aria-haspopup="true" aria-expanded="false">Settings ' +
+        '<span class="hcar">&#9662;</span></button></span>';
+    }
+    return '<span class="hmenu open"><button class="hmenu-btn" data-chsetmenu="1" ' +
+      'aria-haspopup="true" aria-expanded="true">Settings ' +
+      '<span class="hcar">&#9662;</span></button>' +
+      '<div class="hmenu-panel chset">' +
+        '<div class="chset-h">The chat</div>' +
+
+        '<div class="chset-row"><div class="chset-lab">People can write to the office' +
+          '<span class="chset-ctl">' + segHtml("on", "Off", "On", c.on, true) + '</span></div>' +
+          '<div class="chset-hint">Off removes the bubble from every page. Nothing is ' +
+          'deleted &mdash; every conversation stays here and stays readable.</div></div>' +
+
+        '<div class="chset-row"><div class="chset-lab">Checking for replies' +
+          '<span class="chset-ctl">' + segHtml("fast", "Relaxed", "Live", c.fast, false) +
+          '</span></div>' +
+          '<div class="chset-hint">How often an open chat asks whether anything has ' +
+          'arrived &mdash; every 4 seconds, or every 15.</div>' +
+          /* THE COST, IN THE ROW WHERE THE CHOICE IS MADE. It is the whole
+             reason this is a setting rather than a number in the source. */
+          '<div class="chset-cost"><b>Relaxed cuts the busiest case by about three ' +
+          'quarters.</b> A reply takes up to 15 seconds to appear instead of 4.</div></div>' +
+
+        '<div class="chset-row"><div class="chset-lab">What the panel promises</div>' +
+          '<input class="chset-in" type="text" data-chpromise="1" ' +
+            'value="' + esc2(c.promise) + '" aria-label="What the panel promises">' +
+          '<div class="chset-hint">Shown under &ldquo;Strategy Office&rdquo; on every open ' +
+          'chat. It is a promise the office is making to the whole tenant.</div></div>' +
+
+        '<div class="chset-row"><div class="chset-lab">People can attach a screenshot' +
+          '<span class="chset-ctl">' + segHtml("shots", "Off", "On", c.shots, true) +
+          '</span></div>' +
+          '<div class="chset-hint">The only thing here with real storage cost &mdash; up to ' +
+          '3&nbsp;MB a picture, shrunk before it is sent.</div></div>' +
+
+        '<div class="chset-row"><div class="chset-lab">Email a reply to somebody who is away' +
+          '<span class="chset-ctl">' + segHtml("mail", "Off", "On", c.mail, true) +
+          '</span></div>' +
+          '<div class="chset-hint">When they have not had the platform open for three ' +
+          'minutes. Off keeps every conversation inside the platform.</div></div>' +
+      '</div></span>';
+  }
+
   function renderInbox(){
-    return '' +
+    var c = chatCfg();
+    return cfgHead("Messages", [], null, false, null, null,
+        '<span class="chsetwrap">' + settingsHtml() + '</span>') +
+      /* OFF IS SAID ON THE PAGE, because this is the one screen that still
+         works when it is off and the one place it can be turned back on.
+         ALWAYS RENDERED, hidden or not, so flipping the switch shows it
+         without the page being rebuilt — the no-paint() rule at the top of
+         this file applies to a deliberate click as much as to a poll. */
+      '<div class="chset-off" id="chsetoff"' + (c.on ? " hidden" : "") + '>' +
+        '<b>The chat is off.</b> Nobody can write to the office and the bubble is not ' +
+        'drawn on any page. Everything below is still here, and turning it back on ' +
+        'changes nothing about it.</div>' +
       '<div class="chinbox" id="chinbox">' +
         '<div class="chq">' +
           '<div class="chqtop">' +
@@ -479,6 +615,13 @@ var CHAT = (function(){
      is the office being shown the rule, never the rule itself. */
   function presenceHtml(d){
     var name = String(d.name || "They").split(/\s+/)[0];
+    /* THE FIFTH STATE, AND IT COMES FIRST. With the chat off nobody can open
+       an answer, so what somebody's presence would have decided does not
+       arise — saying "Yara is away" here would be true and beside the point. */
+    if (!chatCfg().on) {
+      return '<div class="chpres none">' + ICON_CLOCK +
+        " The chat is off, so nobody would see a reply. Turn it back on in Settings.</div>";
+    }
     if (d.here) {
       return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
         " has the platform open — they will see this straight away, so no email will be sent.</div>";
@@ -524,11 +667,13 @@ var CHAT = (function(){
       "</div>" +
       '<div class="chtbody" id="chtbody">' + threadHtml(d.messages || [], true, true) + "</div>" +
       '<div class="chtfoot">' + presenceHtml(d) +
-        '<div class="chcomp">' +
+        '<div class="chcomp' + (chatCfg().on ? "" : " shut") + '">' +
           '<textarea rows="1" data-chreply="' + esc2(d.person) + '" ' +
+            (chatCfg().on ? "" : 'disabled ') +
             'placeholder="Reply to ' + esc2(String(d.name || "them").split(/\s+/)[0]) + '…" ' +
             'aria-label="Your reply"></textarea>' +
-          '<button class="chsend" data-chreplysend="' + esc2(d.person) + '" type="button">Send</button>' +
+          '<button class="chsend" data-chreplysend="' + esc2(d.person) + '" type="button"' +
+            (chatCfg().on ? "" : " disabled") + '>Send</button>' +
         "</div>" +
         '<div class="chnote' + (box.note && box.note.bad ? " bad" : "") + '" id="chreplynote">' +
           esc2(box.note ? box.note.text : "") + "</div>" +
@@ -627,7 +772,67 @@ var CHAT = (function(){
   /* Called at the end of paint(), beside SEARCHSEL.wire(). Everything is bound
      on the CONTAINER rather than on each row, because the rows are rewritten
      every ten seconds and a handler bound to one would go with it (§24). */
+  /* Redraw ONLY the menu, in place. Its container is outside `#chinbox`, so
+     nothing about the queue or the open thread is disturbed — and the reply
+     box, which may be half typed, is never in the region rewritten. */
+  function setMenuPaint(){
+    var wrap = document.querySelector(".chsetwrap");
+    if (!wrap) return;
+    wrap.innerHTML = settingsHtml();
+  }
+
+  function wireSettings(){
+    var wrap = document.querySelector(".chsetwrap");
+    if (!wrap || wrap.dataset.chwired) return;
+    wrap.dataset.chwired = "1";
+
+    wrap.addEventListener("click", function(e){
+      var t = e.target.closest("[data-chsetmenu]");
+      if (t) { SETMENU = !SETMENU; setMenuPaint(); return; }
+
+      var seg = e.target.closest("[data-chset]");
+      if (seg) {
+        chatSet(seg.dataset.chset, seg.dataset.chval === "1");
+        /* SAVED WITHOUT A REPAINT (§71.2), then the menu redraws itself so the
+           lit half moves. The corner and everybody else's browser pick the
+           change up from the SERVER on their next poll — never from this
+           object, or the screen and the database would disagree until the
+           autosave landed. */
+        saved();
+        setMenuPaint();
+        /* The two things on the page that this changes, written into the nodes
+           they are about — never paint(), which would rebuild the queue and
+           the half-typed reply behind an open menu (§30.1). */
+        if (seg.dataset.chset === "on") {
+          var nowOn = chatCfg().on;
+          var banner = el("chsetoff");
+          if (banner) banner.hidden = nowOn;
+          drawThread();
+          /* AND THE CORNER OF THE PERSON WHO JUST FLIPPED IT. Everybody else's
+             catches up on their next poll, which with the panel shut is up to
+             three minutes (§96.1) — fine for them and wrong for the office,
+             who would otherwise press Off and watch nothing happen. The server
+             is still what decides; this only spares them the wait. */
+          cfg.on = nowOn;
+          var dock = el("chatdock");
+          if (dock) dock.hidden = !nowOn;
+          if (!nowOn && open) setOpen(false);
+        }
+        return;
+      }
+    });
+    /* TYPING NEVER REPAINTS (§35). The promise is written on `change`, which
+       fires on blur, so the box is never replaced under the cursor. */
+    wrap.addEventListener("change", function(e){
+      var inp = e.target.closest("[data-chpromise]");
+      if (!inp) return;
+      chatSet("promise", inp.value);
+      saved();
+    });
+  }
+
   function wireInbox(){
+    wireSettings();
     var root = el("chinbox");
     if (!root) { if (box.timer) { clearInterval(box.timer); box.timer = null; } return; }
     if (root.dataset.chwired) return;

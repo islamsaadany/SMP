@@ -32,7 +32,9 @@ SEED = json.loads((ROOT / "db/seed-state.json").read_text())
 PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
 # What the stub /api/chat answers with, and whether it answers at all.
-CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": []}
+CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
+        "cfg": {"on": True, "shots": True, "promise": "Usually answers the same day",
+                "beat": 4000}}
 errs, bad = [], 0
 
 
@@ -89,7 +91,8 @@ class H(http.server.BaseHTTPRequestHandler):
             CHAT["polls"] += 1
         self._send(200, json.dumps({
             "ok": True, "office": True, "messages": CHAT["messages"],
-            "unread": CHAT["unread"], "thread": CHAT["thread"]}).encode(), "application/json")
+            "unread": CHAT["unread"], "thread": CHAT["thread"],
+            "chat": CHAT["cfg"]}).encode(), "application/json")
 
 
 srv = socketserver.ThreadingTCPServer(("127.0.0.1", 0), H)
@@ -203,15 +206,74 @@ with sync_playwright() as p:
     ck("and says what to do when nothing is picked",
        "Pick somebody" in pg.inner_text("#chthread"))
 
+    # ── 6 · THE SETTINGS THE OFFICE HAS SET REACH THE CORNER (§96) ───────
+    # Asserted from the PERSON's side, because that is the side the settings
+    # are for — the office's own menu writes to the state graph, which this
+    # stub does not carry, and `scripts/test-chat.js` covers that end.
+    #
+    # THE PANEL HAS TO BE OPEN, AND OPENING IT IS NOT A CLICK. It was left
+    # open by section 2, so a blind press CLOSED it — and a closed panel polls
+    # every three minutes, which made every assertion below read a stale value
+    # while the cadence check passed for the wrong reason. Ask, then act.
+    print("\n6 · what the office has set reaches the corner")
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+
+    def next_poll(within=8000):
+        """Wait for the client to actually ask again, rather than guessing."""
+        was = CHAT["polls"]
+        waited = 0
+        while CHAT["polls"] == was and waited < within:
+            pg.wait_for_timeout(250); waited += 250
+        return CHAT["polls"] > was
+
+    CHAT["cfg"] = {"on": True, "shots": True, "beat": 4000,
+                   "promise": "We answer 9-5, within two working days"}
+    ck("the client asks again on its own", next_poll())
+    pg.wait_for_timeout(300)
+    ck("the panel wears the office's own promise",
+       "9-5" in pg.inner_text("#chatsub"), pg.inner_text("#chatsub"))
+    # AND IT IS STILL THERE WITH SOMETHING OUTSTANDING, which is the moment
+    # somebody actually wants it — the status is the DOT, not the words.
+    ck("and it is still there while a message is waiting",
+       "9-5" in pg.inner_text("#chatsub") and len(CHAT["messages"]) > 0)
+
+    CHAT["cfg"] = dict(CHAT["cfg"], shots=False)
+    next_poll(); pg.wait_for_timeout(300)
+    ck("screenshots off takes the attach control away",
+       pg.eval_on_selector("#chatpic", "e => e.hidden"))
+
+    # THE CADENCE IS A NUMBER THE CLIENT USES, not a label. Counted over a
+    # window long enough that 4s and 15s cannot be confused for one another.
+    CHAT["cfg"] = dict(CHAT["cfg"], beat=15000)
+    next_poll()                       # the change itself has to land first
+    before = CHAT["polls"]
+    pg.wait_for_timeout(9000)
+    slow = CHAT["polls"] - before
+    ck("Relaxed really slows the clock (%d polls in 9s, Live would be 2)" % slow,
+       slow <= 1, slow)
+
+    # AND OFF MEANS GONE — the third absence, arriving by a setting rather
+    # than by a refusal.
+    CHAT["cfg"] = dict(CHAT["cfg"], on=False)
+    ck("and the client asks once more", next_poll(20000))
+    pg.wait_for_timeout(400)
+    ck("turning the chat off takes the corner down",
+       pg.eval_on_selector("#chatdock", "e => e.hidden"))
+    ck("and closes the panel with it",
+       pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000)
+
     ck("no console errors", not errs, errs[:4])
 
-    # ── 6 · AND THE THIRD ABSENCE, LAST ON PURPOSE ───────────────────────
+    # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control
     # that answers every press with a refusal. It runs AFTER the console
     # assertion because flipping the stub to 401 makes the page already open
     # log a resource failure — deliberately. Ordering it last is honest; a
     # filter that swallowed "401" would also swallow a real one.
-    print("\n6 · a session the server refuses")
+    print("\n7 · a session the server refuses")
     CHAT["status"] = 401
     pg2 = b.new_page(viewport={"width": 1400, "height": 950})
     pg2.goto(URL, wait_until="networkidle")

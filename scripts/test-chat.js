@@ -170,6 +170,63 @@ async function signIn(who, password) {
     r = await call("", { action: "mine" });
     ok(r.status === 401, "no session, no conversation");
 
+    /* ── THE SETTINGS, AND THE HALF THAT IS NOT ON SCREEN (§96) ───────
+       A switch that only hides a control is decoration (§42, §44). With the
+       chat off the corner is not drawn at all, so nothing in the PRODUCT can
+       reach these — which is exactly why they are worth a test: the browser is
+       not the thing being guarded against. */
+    async function setChat(patch) {
+      await client.query(
+        "UPDATE org SET extra = jsonb_set(COALESCE(extra,'{}'::jsonb), '{chat}', $1::jsonb, true) WHERE id = 1",
+        [JSON.stringify(patch)]);
+    }
+
+    console.log("\nTHE SETTINGS TRAVEL WITH THE POLL.");
+    await setChat({});
+    r = await call(her.cookie, { action: "mine" });
+    ok(r.body.chat && r.body.chat.on === true, "on by default when nothing was ever set");
+    ok(r.body.chat.beat === 4000, "Live means 4000ms, from the shared rule");
+    ok(r.body.chat.promise === "Usually answers the same day", "and the shipped promise");
+    await setChat({ fast: false, promise: "We answer 9-5" });
+    r = await call(her.cookie, { action: "mine" });
+    ok(r.body.chat.beat === 15000, "Relaxed means 15000ms");
+    ok(r.body.chat.promise === "We answer 9-5", "and the office's own words travel");
+
+    console.log("\nWITH THE CHAT OFF, THE SERVER REFUSES — NOT JUST THE SCREEN.");
+    await setChat({ on: false });
+    r = await call(her.cookie, { action: "say", body: "let me through anyway" });
+    ok(r.status === 403, "writing is refused");
+    ok(/off/i.test(String(r.body.error)), "and it says why: " + JSON.stringify(r.body.error));
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "hello?" });
+    ok(r.status === 403, "and so is replying — nobody could see it");
+    r = await call(her.cookie, { action: "mine" });
+    ok(r.body.chat.on === false, "the corner is told to take itself down");
+    ok(r.body.ok === true, "but reading the conversation still works");
+    r = await call(smo.cookie, { action: "queue" });
+    ok(r.status === 200 && r.body.threads.length > 0,
+       "and the office can still read every conversation");
+
+    console.log("\nSCREENSHOTS OFF MEANS THE PICTURE IS REFUSED, NOT DROPPED.");
+    await setChat({ shots: false });
+    r = await call(her.cookie, { action: "say", body: "with a picture",
+                                 shot: "data:image/png;base64,AAAA" });
+    ok(r.status === 400, "a picture is refused when they are turned off");
+    ok(/screenshot/i.test(String(r.body.error)), "and named: " + JSON.stringify(r.body.error));
+    r = await call(her.cookie, { action: "say", body: "without one" });
+    ok(r.status === 200, "and the words still go through");
+
+    console.log("\nEMAIL OFF MEANS NO CHASE, AND IT SAYS SO.");
+    await setChat({ mail: false });
+    await client.query(
+      "UPDATE chat_threads SET here_at = now() - interval '10 minutes' WHERE person_key = $1",
+      [OTHER.key]);
+    r = await call(smo.cookie, { action: "reply", person: OTHER.key, body: "still looking" });
+    ok(r.status === 200 && r.body.here === false, "she is away, and the reply lands");
+    ok(r.body.mailed && r.body.mailed.sent === false &&
+       /turned off/i.test(String(r.body.mailed.why)),
+       "no email went out, and the reason is the setting: " + JSON.stringify(r.body.mailed));
+    await setChat({});
+
     console.log("\nAND DROPPING ONE IS THE SUPER USER'S ALONE (§89).");
     r = await call(smo.cookie, { action: "drop", person: OTHER.key });
     ok(r.status === 200 && r.body.ok, "the Super user drops a conversation");

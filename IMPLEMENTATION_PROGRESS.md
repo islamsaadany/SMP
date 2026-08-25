@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.22 shipped · **v3.26 in progress on the branch**
+**Latest version:** v3.22 shipped · **v3.27 in progress on the branch**
 **Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -53,6 +53,42 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.27 — the chat gets a switch, and a poll gets cheaper (§96)
+
+Two asks, one subject.
+
+**What a poll was costing.** Measured, not estimated: one poll was **14
+database round trips**, of which **ten were `ensureReady()`** re-running the
+whole schema and both migration phases on every request. Memoised per process:
+**14 → 5**, and that helps `/api/state` as much as the chat. The client also
+**stops polling entirely while the tab is hidden**, and the idle beat goes from
+60s to 180s.
+
+The two real limits are worth knowing and neither is a request quota:
+**Vercel's Hobby plan is not licensed for commercial use** (a licence term, so
+a client deployment wants Pro whatever the volume), and **Neon's free compute
+never autosuspends while anything polls** — one signed-in tab keeps the
+database awake whether or not a word is written.
+
+**Five settings**, in a dropdown on the Messages page header: on/off,
+Live/Relaxed, the promise the panel shows, screenshots, email-when-away. Off
+removes the corner everywhere, stops all polling, and turns the office's reply
+box off with it — nothing is deleted, and the page stays in the rail so it can
+be turned back on.
+
+**Verified, and how:**
+
+- `scripts/test-chat.js` — **52 checks, all clear** against a real Postgres,
+  including every setting enforced **on the server** with the corner not drawn.
+- `SMP-Project-Folder/src/checks/office-chat.py` — **29 checks, all clear.**
+- Browser drive of the settings — **21 checks**: the menu, each control, the
+  corner going and coming back, and the tenant storing **nothing at all** once
+  everything is back at its default.
+- `scripts/test-roundtrip.js` on a **virgin** database — clean slate PASS,
+  round trip PASS, fixed point PASS. (It first read FAIL on a database I had
+  already run it against; the assertion only holds on a first deployment.)
+- `qa.py` — **ERRORS: none**. `test-authorize.js` — 165 passed.
 
 ### v3.26 — talking to the Strategy Office (§95, spec 014)
 

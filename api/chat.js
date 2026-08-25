@@ -81,6 +81,24 @@ const MSG_COLS =
   "id, at, from_office, by_key, by_name, body, page, target, cycle, build, flag, " +
   "(shot IS NOT NULL) AS has_shot";
 
+/* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§96) ───────────────────────
+   ONE SMALL QUERY, not `readState()`. This endpoint has never read the
+   strategy graph — it answers from the two chat tables and the session, which
+   is why it is cheap enough to be asked every four seconds — and reading
+   thirty tables to find five booleans would undo exactly the saving the
+   settings exist to make. The five live in `org.extra` (§44's naming switch,
+   the same place), and `SMPRules.chatCfg` is the ONE thing that decides what
+   an absent key means, on this side and on the screen.
+
+   AND THE SERVER HAS TO ASK AT ALL, which is the whole point of the setting:
+   with the chat off, the browser simply does not draw the corner — and a
+   switch that only hides a control is decoration (§42, §44). */
+async function chatSettings(client) {
+  const r = await client.query("SELECT extra FROM org WHERE id = 1");
+  const extra = (r.rows[0] && r.rows[0].extra) || {};
+  return Rules.chatCfg(extra.chat);
+}
+
 /* A thread is made on first contact and never before: a person who has never
    written to the office has no row, which is what makes "who is waiting" a
    list of real conversations rather than a list of everybody. */
@@ -120,6 +138,7 @@ module.exports = async function handler(req, res) {
        session and nothing a session is for; the chat is no exception. */
     if (me.mustChange) return send(res, 403, { ok: false, error: "choose a password first" });
     const office = Rules.isOfficeRole(me.role);
+    const cfg = await chatSettings(client);
 
     /* ── WHAT THE PERSON'S OWN PANEL ASKS FOR ─────────────────────────
        And the one thing it writes without being told to: `here_at`, which is
@@ -131,6 +150,13 @@ module.exports = async function handler(req, res) {
         "UPDATE chat_threads SET here_at = now() WHERE person_key = $1", [me.key]);
       const out = await mine(client, me);
       out.office = office;
+      /* THE SETTINGS TRAVEL WITH THE POLL, so the corner never needs a second
+         request to know how to draw itself — and so a switch flipped by the
+         office reaches every open browser within one beat rather than on the
+         next save. `beat` is the number, not the flag, because the number is
+         what the client sets its clock to (§96). */
+      out.chat = { on: cfg.on, shots: cfg.shots, promise: cfg.promise,
+                   beat: Rules.chatBeat({ fast: cfg.fast }) };
       return send(res, 200, out);
     }
 
@@ -145,7 +171,21 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "say") {
+      /* THE SWITCH, ENFORCED WHERE IT COUNTS. With the chat off the corner is
+         not drawn at all, so nothing in the product can reach this — which is
+         exactly why it has to be here: the browser is not the thing being
+         guarded against (§42). */
+      if (!cfg.on) {
+        return send(res, 403, { ok: false, error: "The chat is off at the moment." });
+      }
       const text = str(body.body);
+      /* A PICTURE THE OFFICE HAS TURNED OFF IS NOT STORED, and the refusal
+         says so rather than silently dropping it — a message that arrived
+         without the screenshot somebody attached is worse than one that was
+         refused, because only the second tells them to say it in words. */
+      if (body.shot && !cfg.shots) {
+        return send(res, 400, { ok: false, error: "Screenshots are turned off for this platform." });
+      }
       const shot = body.shot ? String(body.shot) : null;
       if (!text && !shot) return send(res, 400, { ok: false, error: "Nothing to send." });
       if (shot && shot.length > MAX_SHOT) {
@@ -215,6 +255,9 @@ module.exports = async function handler(req, res) {
         "ORDER BY t.waiting DESC, t.last_at DESC LIMIT 300")).rows;
       return send(res, 200, {
         ok: true, office: true, threads: rows,
+        /* The settings, so the page draws the menu from the same answer the
+           server just enforced rather than from its own copy of the graph. */
+        chat: cfg,
         waiting: rows.filter(function (r) { return r.waiting; }).length,
         flagged: rows.filter(function (r) { return +r.flagged > 0; }).length,
         hereMinutes: HERE_MINUTES,
@@ -244,7 +287,10 @@ module.exports = async function handler(req, res) {
         gone: !t.live_name, unit: t.unit_key, fn: t.fn_key, title: t.title,
         address: Audience.addressOf(t.extra || {}),
         waiting: t.waiting, here: !!here, hereAt: t.here_at,
-        mail: mailer.configured(), messages: msgs
+        /* `mail` is BOTH questions at once: can this deployment send at all,
+           and has the office asked it to. The line above the reply box says
+           one sentence, so it needs one answer (§96.2). */
+        mail: mailer.configured() && cfg.mail, chatOn: cfg.on, messages: msgs
       });
     }
 
@@ -259,6 +305,14 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "reply") {
+      /* REPLYING GOES OFF WITH THE CHAT, deliberately (§96.2). If the corner
+         is not drawn, nobody can open an answer — so a reply that landed would
+         be written into a room with no door, and a reply that also EMAILED
+         would point somebody at a platform they cannot answer from. Reading
+         the history stays open; writing into it does not. */
+      if (!cfg.on) {
+        return send(res, 403, { ok: false, error: "The chat is off, so nobody would see a reply." });
+      }
       const who = str(body.person, 120);
       const text = str(body.body);
       if (!who) return send(res, 400, { ok: false, error: "Which conversation?" });
@@ -289,7 +343,11 @@ module.exports = async function handler(req, res) {
          never a recipient. */
       const here = t.here_at && (Date.now() - new Date(t.here_at).getTime()) < HERE_MINUTES * 60000;
       let mailed = null;
-      if (!here && body.html) {
+      if (!here && !cfg.mail) {
+        /* SAID, NOT SILENT. The office is shown the same sentence before it
+           presses Send; if the two ever disagree, this one is the truth. */
+        mailed = { sent: false, why: "chasing by email is turned off" };
+      } else if (!here && body.html) {
         const p = (await client.query(
           "SELECT name, extra FROM people WHERE key = $1 " +
           "  AND COALESCE(extra->>'active','true') <> 'false'", [who])).rows[0];

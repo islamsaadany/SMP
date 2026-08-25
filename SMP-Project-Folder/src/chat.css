@@ -191,6 +191,55 @@ body.presenting .chatdock { display:none; }
 .chpres.none { background:var(--surface-2); border-color:var(--line); }
 .chpres svg { width:13px; height:13px; flex:none; }
 
+/* ── THE SETTINGS MENU (§96) ───────────────────────────────────────────
+   It borrows `.hmenu` / `.hmenu-btn` / `.hmenu-panel` from the register's own
+   header dropdown (§90) — the same control, so it needs no second appearance —
+   and adds only the rows inside it. */
+.hmenu-panel.chset { width:392px; }
+.chset-h { font-size:var(--fs-micro); letter-spacing:.11em; text-transform:uppercase;
+           font-weight:800; color:var(--ink-3); background:var(--surface-2);
+           padding:8px 14px; border-bottom:1px solid var(--line); }
+.chset-row { padding:12px 14px; border-bottom:1px solid var(--line-soft);
+             display:flex; flex-direction:column; gap:7px; }
+.chset-row:last-child { border-bottom:none; }
+.chset-lab { font-size:var(--fs-note); font-weight:650; color:var(--ink);
+             display:flex; align-items:center; gap:8px; }
+.chset-ctl { margin-left:auto; flex:none; }
+.chset-hint { font-size:var(--fs-micro); color:var(--ink-3); line-height:1.5; }
+.chset-in { width:100%; border:1px solid var(--line); border-radius:6px;
+            background:var(--ground); color:var(--ink); padding:7px 9px;
+            font-family:inherit; font-size:var(--fs-note); }
+.chset-in:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+/* THE COST, WHERE THE CHOICE IS MADE. A semantic colour, not the accent: it
+   is a consequence being stated, not something being emphasised. */
+.chset-cost { font-size:var(--fs-micro); color:var(--attn-tx); background:var(--attn-bg);
+              border:1px solid var(--attn); border-radius:5px; padding:5px 8px;
+              line-height:1.45; }
+.chset-off { margin:0 0 14px; padding:12px 14px; border-radius:var(--r);
+             background:var(--attn-bg); border:1px solid var(--attn);
+             font-size:var(--fs-note); color:var(--ink-2); line-height:1.5; }
+.chset-off b { color:var(--ink); }
+.chset-off[hidden] { display:none; }
+
+/* The Off/On pair, §44's naming switch — two named sides, the live one lit. */
+.chsetwrap .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px;
+                  overflow:hidden; flex:none; }
+.chsetwrap .seg button { background:var(--surface); border:none; cursor:pointer;
+                         font-family:inherit; font-size:var(--fs-micro); font-weight:700;
+                         letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+                         padding:5px 11px; }
+.chsetwrap .seg button + button { box-shadow:inset 1px 0 0 var(--line); }
+.chsetwrap .seg button[aria-pressed="true"] { background:var(--surface-2); color:var(--ink); }
+.chsetwrap .seg.lit button[aria-pressed="true"] { background:var(--gold);
+                                                  color:var(--on-accent,#1B1400); }
+.chsetwrap .seg button:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+
+/* A composer that is off is dimmed rather than removed, because the line above
+   it explains why — and a box that vanished would leave that line explaining
+   something no longer on screen. */
+.chcomp.shut { opacity:.55; }
+.chcomp.shut textarea, .chcomp.shut .chsend { cursor:default; }
+
 .chnothing { margin:auto; text-align:center; color:var(--ink-3);
              font-size:var(--fs-note); padding:30px 20px; max-width:34ch; line-height:1.55; }
 

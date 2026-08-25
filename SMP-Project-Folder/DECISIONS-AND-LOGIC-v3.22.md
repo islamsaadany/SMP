@@ -11964,3 +11964,155 @@ first run's failures were the check being wrong rather than the product
 (a rendered `text-transform:uppercase` compared against mixed case; a "she is
 away" that the test's own poll had made false), and both were worth fixing in
 the check rather than loosening.
+
+---
+
+## 96 · Turning the chat off, and what a poll was costing (v3.27)
+
+Two things in one version, and they turned out to be the same subject. Islam
+asked what Vercel could carry — *"how much can vercel handle as messages per
+day or per time for free?"* — and then: *"I will need in the setup page to
+enable or disable the chat with some settings maybe."*
+
+**THE ANSWER TO THE FIRST QUESTION IS THAT MESSAGES ARE NOT THE UNIT.** A
+message costs one request. **An open tab costs 900 an hour.** Measured against
+the real endpoint rather than estimated: one poll was **14 database round
+trips**, and a thirty-person tenant with tabs left open came to **~550,000
+requests a month** while sending perhaps ten messages a day. Nothing about that
+is visible in a message count, which is why the question had to be answered by
+measuring rather than by reading the pricing page.
+
+### 96.1 Ten of the fourteen round trips were doing nothing
+
+`ensureReady()` takes an advisory lock, executes the whole of `schema.sql`,
+runs both migration phases and checks the bootstrap credential — **on every
+request**. That was invisible while a request meant a page load. It stopped
+being invisible the moment the corner started asking every four seconds.
+
+**THE GUARD IS PER PROCESS, WHICH IS EXACTLY THE RIGHT LIFETIME.** A serverless
+instance is replaced constantly and a DEPLOY replaces every one of them, so a
+newly added migration still runs on the first request each fresh instance
+serves — the only moment it needs to. What is skipped is the second and
+subsequent requests to a WARM instance, where the answer cannot have changed,
+because nothing but that function writes migrations.
+
+**IT REMEMBERS THE PROMISE, NOT A BOOLEAN.** Two requests can reach a warm
+instance before the first has finished; awaiting the same promise makes the
+second wait for the real answer rather than racing past a flag that is not true
+yet. And a **failed** bootstrap is deliberately not remembered — caching the
+rejection would leave an instance permanently broken over one lost connection.
+
+**ONLY THE CALL THAT DID THE WORK REPORTS HAVING DONE IT**, and that was found
+by a test rather than by reading: `test-roundtrip.js` asserts that a second
+`ensureReady` returns `seeded: false`, and handing back the remembered result
+told every later caller `true` on a database nothing had seeded. A lie whatever
+asserts it.
+
+Measured after: **14 round trips → 5**, one of which is the new settings query.
+Two more changes on the client, both about the same thing:
+
+- **NOTHING POLLS WHILE THE TAB IS HIDDEN.** Browsers already throttle a
+  background timer to about once a minute; this takes it to nothing at all,
+  which is what lets the database go to sleep overnight instead of being woken
+  by a tab somebody left open on Friday. `visibilitychange` starts it again,
+  and the poll it fires on the way back is what makes the badge right before
+  anybody has looked at it.
+- **THE IDLE BEAT GOES FROM 60s TO 180s.** With the panel shut the only thing
+  that can change is a number on a badge. At 60 seconds a single tab left open
+  overnight was eight hundred requests for nothing.
+
+**AND THE REAL CONSTRAINT IS NEITHER VERCEL'S QUOTA NOR THE MESSAGE COUNT.**
+Two things sit in front of it, and both are worth writing down: **Vercel's
+Hobby plan is not licensed for commercial use**, which is a licence term rather
+than a limit and settles the question for a client deployment on its own; and
+**Neon's free compute autosuspends after about five minutes idle**, which
+polling prevents by definition — one signed-in tab anywhere keeps the database
+awake, whether or not anybody writes a word. That is why the hidden-tab stop is
+a correctness change and not only a saving.
+
+### 96.2 Five settings, in a dropdown, and the switch is the cost control
+
+Islam picked all four settings beside the on/off, chose that **anyone in the
+office** may change them, and chose that off means **the corner is simply not
+there**.
+
+**A DROPDOWN ON THE PAGE HEADER, NOT A SECOND SETUP PAGE.** Five switches
+behind their own rail entry is a door behind a door (§32); a settings block
+above the queue would push the day's work down the screen to serve a decision
+made twice a year (§93.5, and §90 put the register's own twice-a-year controls
+in exactly this menu). The Off/On pair is **§44's naming switch unchanged** —
+a tenant switch already looks like this here, and a second shape for one idea
+is how a design language comes apart.
+
+**THE COST IS STATED IN THE ROW WHERE THE CHOICE IS MADE.** *Relaxed cuts the
+busiest case by about three quarters; a reply takes up to 15 seconds instead of
+4.* That sentence is the whole reason the cadence is a setting rather than a
+number in the source: a client on a small deployment can make the trade, and
+should be able to see it while making it.
+
+**THE SERVER REFUSES, AND THAT IS THE HALF THAT IS NOT ON SCREEN.** §42's
+argument, one endpoint further out: with the chat off the corner is not drawn,
+so nothing in the product can reach `say` or `reply` — which is precisely why
+both are refused on the server, because the browser is not the thing being
+guarded against. A switch that only hides a control is decoration (§44 recorded
+it once already). Screenshots-off **refuses the picture and says so** rather
+than dropping it silently: a message that arrived without the screenshot
+somebody attached is worse than one that was refused, because only the second
+tells them to say it in words.
+
+**ONE SMALL QUERY, NOT `readState()`.** The endpoint has never read the
+strategy graph, which is why it is cheap enough to ask every four seconds —
+and reading thirty tables to find five booleans would undo exactly the saving
+the settings exist to make. `SELECT extra FROM org`, and `SMPRules.chatCfg` is
+the ONE thing that decides what an absent key means, on both sides.
+
+**A VALUE PUT BACK TO ITS DEFAULT DELETES ITS KEY**, and the last key leaving
+deletes `GROUP.chat` — §50.6, where `branding()` invented a four-null object
+the database never held and made every save carry a phantom group change. A
+tenant that never opens the menu writes nothing at all, which the browser drive
+asserts by putting everything back and checking the key is gone.
+
+### 96.3 What "off" actually does, and the two traps in it
+
+The corner goes, **and nothing polls** — that is the saving, and it is why
+"still there, explaining itself" was rejected: it would have kept every browser
+asking and saved nothing.
+
+**REPLYING GOES OFF WITH IT.** If the bubble is not drawn, nobody can open an
+answer — so a reply would be written into a room with no door, and a reply that
+also EMAILED would point somebody at a platform they cannot answer from.
+
+**THE PAGE HAS TO STAY REACHABLE, AND THAT IS NOT A DETAIL.** If Messages
+disappeared with the chat, the only way to turn it back on would be to turn it
+on first — §61's exact trap, which hid every supporting function on a fresh
+tenant. **And nothing is ever deleted**: §44 settled that in one line, *a
+switch that destroys data is not a switch*.
+
+**THE OFFICE'S OWN CORNER GOES AT ONCE; EVERYBODY ELSE'S CATCHES UP.** Found by
+driving it: with the idle beat now three minutes, the person who pressed Off
+watched nothing happen for three minutes. The server still decides — the local
+update only spares the one person who already knows.
+
+### 96.4 The dot carries the status; the words carry the promise
+
+The panel's second line used to be either/or: *"With the office"* while
+something was outstanding, the promise otherwise. **Which hid the promise at
+the one moment somebody wants it** — while they are waiting for an answer. Two
+facts, two channels: the dot goes amber, the words stay the office's sentence.
+Found by a check written against the wrong expectation, which is the honest
+way it usually happens.
+
+### 96.5 What the checks learned
+
+`src/checks/office-chat.py` grew a sixth section, and the first version of it
+**passed for the wrong reason**: it pressed the bubble to open the panel, the
+panel was already open from an earlier section, so the press CLOSED it — and a
+closed panel polls every three minutes, which made every assertion below read a
+stale value while the cadence check passed with zero polls. **Ask, then act**,
+and wait for the client to actually poll rather than guessing a duration:
+`next_poll()` watches the stub's own counter.
+
+`scripts/test-chat.js` gained the settings, and the shape is the one §94.2
+argues for: with the chat off, **nothing in the product can reach the refused
+actions**, so the only way to know they are refused is to ask the endpoint
+directly with a session the product would never give that state to.

@@ -1,6 +1,6 @@
 # 014 · Talking to the Strategy Office
 
-**Version:** v3.26 (built) · **Decisions:** §95 · **Status:** answered; built
+**Version:** v3.26, extended in v3.27 · **Decisions:** §95, §96 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Regarding any questions that the team might have or might need to
@@ -201,3 +201,43 @@ person and tries every one of the office's actions with their session.
 away case has to age the row deliberately — asserting only the *here* half
 would leave the whole email rule untested by a check that can only see the
 state it happens to be in.
+
+
+---
+
+## 8 · The switch, and what a poll cost (v3.27, §96)
+
+Islam: *"I will need in the setup page to enable or disable the chat with some
+settings maybe."* And, before it: *"how much can vercel handle as messages per
+day or per time for free?"*
+
+**MESSAGES ARE NOT THE UNIT.** A message costs one request; an open tab costs
+900 an hour. One poll was **14 database round trips**, ten of them
+`ensureReady()` re-running the schema and both migration phases *on every
+request*. Memoised per process — **14 → 5** — plus no polling at all while the
+tab is hidden, and an idle beat of 180s rather than 60s.
+
+**Five settings**, in a dropdown on the Messages page header (§90's shape):
+
+| | default | what it does |
+|---|---|---|
+| people can write | on | off removes the corner everywhere and stops all polling |
+| checking for replies | Live | Live 4s / Relaxed 15s, with the cost stated in the row |
+| what the panel promises | *Usually answers the same day* | the office's own words, shown under "Strategy Office" |
+| screenshots | on | off refuses a picture and says so, rather than dropping it |
+| email when away | on | off keeps every conversation inside the platform |
+
+Stored in `GROUP.chat` → `org.extra`, so no migration. `SMPRules.chatCfg()` is
+the one thing that decides what an absent key means, on both sides; a value put
+back to its default deletes its key, and the last key leaving deletes
+`GROUP.chat` (§50.6).
+
+**The server refuses `say` and `reply` when it is off** — with the corner not
+drawn, nothing in the product can reach them, which is exactly why they are
+guarded. **Off never deletes a conversation** (§44) and **the Messages page
+stays in the rail**, or the only way to turn it back on would be to turn it on
+first (§61).
+
+**The two real hosting limits are a licence and a database, not a quota:**
+Vercel's Hobby plan is not licensed for commercial use, and Neon's free compute
+never autosuspends while anything polls.

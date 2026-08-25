@@ -5,7 +5,7 @@
 
    THE KEY NEVER LEAVES THE SERVER. The platform ships as one HTML file, so it
    is worth being explicit: `RESEND_API_KEY` is read in exactly ONE place —
-   `lib/mailer.js`, which this endpoint and api/chat.js both call (§95.5) — it
+   `lib/mailer.js`, which this endpoint and api/chat.js both call (§97.5) — it
    is not in the repo, and nothing either endpoint returns contains it:
    `status` reports whether a key is PRESENT, never what it is.
 
@@ -24,7 +24,7 @@ const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
 const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
-/* THE CREDENTIAL AND THE PROVIDER CALLS MOVED OUT (§95.5). §72's rule —
+/* THE CREDENTIAL AND THE PROVIDER CALLS MOVED OUT (§97.5). §72's rule —
    RESEND_API_KEY is read in exactly one place — is unchanged; the place is
    lib/mailer.js now, because api/chat.js has to send too and the alternative
    was a second copy of it. */

@@ -1,4 +1,4 @@
-/* ══ TALKING TO THE STRATEGY OFFICE (§95) ═══════════════════════════════════
+/* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    The corner, the panel it opens, and the office's own inbox on Setup.
 
    CONCATENATED LAST, like arrange.css, and for the same reason: everything in
@@ -182,7 +182,7 @@ body.presenting .chatdock { display:none; }
 .chtfoot { border-top:1px solid var(--line); background:var(--surface); padding:10px 12px;
            display:flex; flex-direction:column; gap:8px; }
 
-/* WHAT WILL HAPPEN WHEN SEND IS PRESSED, said before it is pressed (§95.5).
+/* WHAT WILL HAPPEN WHEN SEND IS PRESSED, said before it is pressed (§97.5).
    Semantic colours, not the accent: this is a state, not an emphasis. */
 .chpres { display:flex; align-items:center; gap:7px; font-size:var(--fs-small);
           color:var(--ink-2); background:var(--good-bg); border:1px solid var(--good);
@@ -191,7 +191,7 @@ body.presenting .chatdock { display:none; }
 .chpres.none { background:var(--surface-2); border-color:var(--line); }
 .chpres svg { width:13px; height:13px; flex:none; }
 
-/* ── THE SETTINGS MENU (§96) ───────────────────────────────────────────
+/* ── THE SETTINGS MENU (§98) ───────────────────────────────────────────
    It borrows `.hmenu` / `.hmenu-btn` / `.hmenu-panel` from the register's own
    header dropdown (§90) — the same control, so it needs no second appearance —
    and adds only the rows inside it. */

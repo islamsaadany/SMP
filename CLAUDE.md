@@ -181,7 +181,11 @@ A drift between specs and code is a documentation bug — report it before silen
   browser holding the other session's copy would never fetch this one. §91's
   fault by a route §91 did not predict. **`git show origin/main:sw.js` before
   choosing**, in the same breath as the fetch-and-look that precedes every
-  merge: a merge will not tell you.
+  merge: a merge will not tell you. **AND CONFIRM IT AGAIN IMMEDIATELY BEFORE
+  THE PUSH (§94.16)** — it collided a SECOND time the same day, because the
+  window between reading main and pushing is as long as running the checks, and
+  a name chosen at the start of it is chosen from stale information. The
+  confirmation is the LAST step of a merge, not the first.
 - **BUMP `SHELL` IN `sw.js` ON EVERY MERGE THAT CHANGES THE BUILT FILE (§91).**
   Not on a version bump — on a CONTENT change. It sat at `v3.22` through §80 to
   §90 because the built file kept the same filename the whole time, and the
@@ -478,6 +482,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Who enters** — behind a tenant switch that is off by default, so turning it on
   is the office deliberately handing naming to the custodian (spec 008 §3B), and
   **a rule cannot close a door somebody has to open on purpose.**
+- **THE ARRANGE BUTTON GOES, BECAUSE §94.3 TOOK AWAY ITS REASON (§94.15):**
+  §63.3 kept an explicit Arrange beside the pen for a stated reason — *"a BU
+  head has no pen and could arrange before this, so they keep an explicit
+  button"* — and §94.3 closed reordering to the office, who all have one. The
+  sentence that justified it stopped being true the same day. **A control with
+  no audience of its own is not a choice, it is a duplicate**, and the two were
+  already an either/or dressed as two things (the button had to hide whenever
+  the pen was on). **THE GROUP KEEPS ITS OWN and that is the point, not an
+  exception**: its Performance page has no pen, so that button is the only way
+  to reorder units, themes and capabilities — "remove the Arrange button" read
+  one page too widely would have taken away the one that still does something.
+  **AND IT NEARLY SHIPPED RETURNING `undefined`**: deleting the leading term of
+  `return arr + (…)` left `return` alone on a line, where automatic semicolon
+  insertion ends the statement — the same scar `renderGroupFoundation()` already
+  carries. The page RENDERS the word rather than throwing, so the check reads
+  `#panel` for it. Assert **both ends** — the button absent AND the pen still
+  producing handles — or a build that lost the handles too would pass.
 - **EVERY PAGE GETS THE WHOLE WINDOW, AND THE FAULT WAS AN ALIGNMENT (§94.13):**
   the complaint reads as "the page is too narrow" and is not quite that — the
   destination row had been let past the cap (`.units-in.folded{max-width:none}`,
@@ -971,7 +992,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
   in a browser, in **both** live and demo mode.
-- **TALKING TO THE STRATEGY OFFICE (since v3.26, §95; spec 014):** a bubble in
+- **TALKING TO THE STRATEGY OFFICE (since v3.26, §97; spec 015):** a bubble in
   the bottom-right corner of every page opens **one running conversation with
   the office**; the office answers from **Setup › Running the cycle ›
   Messages**. It is **§71 finished, not a second feature** — that section built
@@ -1008,7 +1029,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (the server half, against a real Postgres, signing in as somebody with no
   role because a check that only looks for something PRESENT cannot see a shut
   door, §94.2).
-- **THE CHAT HAS A SWITCH, AND POLLING WAS THE REAL COST (since v3.27, §96):**
+- **THE CHAT HAS A SWITCH, AND POLLING WAS THE REAL COST (since v3.27, §98):**
   five controls in a **Settings dropdown on the Messages page header** (§90's
   shape, never a second Setup page — §32) — on/off, Live/Relaxed, the promise
   the panel shows, screenshots, and email-when-away. Stored in `GROUP.chat` →
@@ -1033,7 +1054,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
-- **Email (since v3.23, §72; the credential moved in §95.5):** **`lib/mailer.js`
+- **Email (since v3.23, §72; the credential moved in §97.5):** **`lib/mailer.js`
   is the only place `RESEND_API_KEY` is read**, and nothing it returns contains
   it — `api/mail.js` and `api/chat.js` both call it. §72's rule is unchanged;
   the address it points at moved, because the alternative was a second copy of
@@ -1188,13 +1209,13 @@ cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
-                                # because the whole feature is invisible over file:// (§95.9)
+                                # because the whole feature is invisible over file:// (§97.9)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
 `SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
 The chat's **server** half needs a database and a running dev-server:
-`DATABASE_URL=… node scripts/test-chat.js <smo-password>` (§95.9).
+`DATABASE_URL=… node scripts/test-chat.js <smo-password>` (§97.9).
 
 ---
 
@@ -1224,7 +1245,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-25 &mdash; **v3.27: the chat gets a switch, and a poll
-gets cheaper** (&sect;96). Two asks that turned out to be one subject. *"How much
+gets cheaper** (&sect;98). Two asks that turned out to be one subject. *"How much
 can vercel handle as messages per day?"* &mdash; and the answer is that
 **messages are not the unit**: a message costs one request and an open tab costs
 900 an hour. Measured against the real endpoint rather than estimated, one poll
@@ -1258,7 +1279,7 @@ and then read stale values while the cadence assertion passed with zero polls.
 Ask, then act.*
 
 *Earlier: 2026-08-25 &mdash; **v3.26: talking to the Strategy Office**
-(&sect;95, spec 014). A bubble in the bottom-right corner, one running
+(&sect;97, spec 015). A bubble in the bottom-right corner, one running
 conversation with the office, and a Setup page the office answers from. **AND
 HE HAD ASKED FOR IT ONCE ALREADY**: &sect;71 built the endpoint, the tables, the
 reply thread, the screenshot handling and the access rules under a commit whose
@@ -1298,6 +1319,107 @@ And two of the first test run's failures were **the check being wrong rather
 than the product** &mdash; a rendered uppercase compared against mixed case, and
 an "she is away" that the test's own poll had made false &mdash; both fixed in
 the check rather than loosened.*
+
+*Earlier: 2026-08-25 &mdash; **v3.25: the objectives editor was drawn and
+connected to nothing** (&sect;96). Islam, on a unit's Foundation with the pen
+open: *"I can't remove objectives."* Measured before touching anything: **20
+input fields, 0 wired; 4 Remove buttons, 0 wired; the Add button, 0 wired.**
+Every control in that table was decoration &mdash; typing a name, changing a
+direction, correcting a target, removing a row and adding one all looked
+accepted and were discarded on the next repaint. **IT IS THE FAULT THE `FIELDS`
+REGISTRY EXISTS TO PREVENT**, and the comment three lines above the broken
+function says so in the PAST TENSE: that fix went to `fieldOr` and `inputOr` and
+`koEdit` was left behind, because it builds its own `<input>` tags rather than
+calling them. **A helper that exists is not a helper that was used**, and
+nothing catches the difference &mdash; a bound field and an unbound one differ
+by one absent attribute, the page renders, nothing throws, and every keystroke
+is accepted before being thrown away. It survived because `renderTempleEdit` has
+the SAME table, fully wired, editing the SAME `GROUP.keyObjectives`: one of the
+two surfaces onto that list worked, so the list never looked broken, and the
+unit's Foundation &mdash; which has no second surface &mdash; had nothing at
+all. `selectOr` joins the family, because **a `<select>` is not an `<input>`**
+and building its own is exactly how `koEdit` came to build unbound ones.
+**MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT** (&sect;96.2): remove the
+middle of KO1&middot;KO2&middot;KO3 and Add, and the count says 3 while KO3 is
+still on screen &mdash; the authoriser compares plans BY ID (&sect;59) and a
+snapshot is keyed by id and never by position (&sect;48), so a collision is not
+cosmetic; the Temple's own handler carried it too and is corrected through the
+same function. **AND THE GROUP'S SIX OBJECTIVES CARRY NO IDS AT ALL**
+(&sect;96.4) &mdash; `null` in the seed and in the database, because only rows
+ADDED have ever been given one; survivable until this editor mints them, because
+a list where one row is identified and six are not is worse than either state.
+Filled in, never rewritten, and **from Add and Remove rather than from paint**,
+or a reader that writes what it reads puts a phantom change into every save
+(&sect;42). **AND `9.6999999999999993%` CAME FROM EXCEL VERBATIM** (&sect;96.3):
+not the platform's arithmetic &mdash; JavaScript prints that number as `9.7`
+&mdash; but the RAW TEXT of the cell, which Excel writes at full precision
+whenever a value came from a calculation. Numeric cells go through the shortest
+string that reads back as the same double, and the two guards are the fix: never
+into exponential notation, and **anything that does not round-trip is left
+exactly as it arrived**. **THE CHECK ASKS THE ONLY QUESTION THAT SEPARATES
+THEM** &mdash; every existing check asks whether the pen is there and whether
+fields appear, and all of that was TRUE the whole time; `foundation-objectives.py`
+asks whether pressing the control CHANGES THE DATA, on both callers of the one
+table, because they had drifted apart in silence and only asking both found it.
+**AND THE TABLE GETS THE WINDOW WHILE IT IS BEING WRITTEN** (&sect;96.6):
+*"when I edit the objectives table the table is very tight and crammed."* The
+Foundation is a two-column grid, so the aspiration card gets 45% of the page and
+was holding a six-column table with a text field in every cell &mdash; **696px,
+the name clipped at twelve characters and the direction dropdown too narrow to
+show its own value**; as a band beneath both columns it has **1493px**.
+**READING MODE IS UNTOUCHED**, because the objectives belong inside the
+aspiration when you are READING it and it is only authoring that needs the room
+&mdash; `koBlock()` is the one renderer and the card and the band both call it.
+**DELIBERATELY NOT THE WHOLE PAGE STACKING**, which was the other half of the
+question: the two prose columns read BETTER side by side, and stacking them
+would push the table further down to solve a problem it does not have. Settled
+from a mockup made of the REAL platform (both sides the same build, the proposal
+produced by moving the block in the browser), with the cost &mdash; a short
+aspiration card and a gap beside "Who we are" while editing &mdash; in its own
+panel before it was agreed. The check asserts the **relationship** and never the
+number: out of the grid, in a band, as wide as the page, and back inside the
+card the moment the pen closes.*
+
+*Earlier: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
+(&sect;95, spec 014). Six changes to Send a message, and the argument under five
+of them is the same one: **the page had exactly one part whose size was not
+fixed, and everything else was below it.** Every recipient rendered as a chip,
+so a group-wide send put nine hundred pixels of names between the message and
+the button &mdash; add a unit to the business and Send moves further away. It is
+a **bounded summary** now, and **THE SKIPPED COUNT IS NEVER BEHIND THE
+DISCLOSURE**: it is the fault that started this whole thread (&sect;87), so it
+reads on the line whether or not anybody opens the names, and the names put the
+skipped FIRST, because "3 skipped" tells nobody which three. **THE COUNT IS ON
+THE CONTROL THAT ACTS** &mdash; *Send to 76 people*, on a bar pinned to the foot
+of the window. **SEND ME A COPY** is the missing safeguard and the cheapest one:
+the same message, the same builder, one copy, **to the person SIGNED IN and
+never the person being viewed as** &mdash; `viewer()` is the simulation and a
+test that followed it would put a real message in a real colleague's inbox.
+`confirm()` is gone: a browser dialog can be silenced permanently on some other
+site, and this is the most irreversible act in the product &mdash; the
+platform's own modal names the subject, the count, **who will not receive it**,
+and that there is no undo. Drafts and Sent leave the scroll for header
+dropdowns carrying their counts (&sect;90's move, on the page that needed it
+next). **AND THE PARTIAL REPAINT OWNED MORE THAN IT KNEW** (&sect;95.7):
+`paintAudience()` deliberately does not call `paint()` &mdash; the composer
+beside it may have a half-typed sentence in it &mdash; which was right until the
+count went onto the Send button, the one control it then had to update and did
+not; the same replacement killed *Show the names*, bound in `wire()` inside the
+element being replaced, **at the only moment there is ever anything to
+disclose**. And the header's count was found by `.chip:last-of-type`, which
+counts TAGS &mdash; two dropdown spans went in after the chips and it silently
+matched nothing, so the header read "nobody chosen" over a resolved seventy-six.
+**THE CHECK COULD NOT LIVE IN `qa.py`**: every other screen check opens the
+built file over `file://`, where this whole page is the empty state &mdash; and
+so is what the CONTRAST SWEEP has been calling clean for as long as the page has
+existed. `src/checks/send-message.py` serves the built file with a stub, and
+measures contrast with the sweep's OWN function read out of its source rather
+than copied (&sect;67). Which found &sect;16.17 by accident: Chromium keeps
+`:hover` after a click, so a still-lit button measured 4.34:1 &mdash;
+`.editbtn:hover`, on every page, since long before this version. **Every
+`:hover`, `:focus` and `:disabled` colour in this product is unmeasured**,
+because a sweep that walks pages and states never touches a control. Recorded,
+not quietly changed.*
 
 *Earlier: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
 solid button** (&sect;94). Three asks in one message, two of them half built
@@ -1361,7 +1483,13 @@ had been let past the 1180 cap and the content had not, so at 1670px the row ran
 edge to edge above a page sitting centred with 238px of nothing down each side.
 Two containers that used to agree stopped agreeing. &sect;93.9 finished: the cap
 comes off everywhere, the 1600 ceiling goes with it, and the check asserts the
-AGREEMENT rather than the number, so a later change to the gutters stays green.*
+AGREEMENT rather than the number, so a later change to the gutters stays green.
+**AND THE ARRANGE BUTTON GOES** (&sect;94.15): &sect;63.3 kept it beside the pen
+for people who had no pen, and &sect;94.3 closed reordering to the office, who
+all have one &mdash; so its reason expired the same day it was written down. The
+group keeps its own, because that page has no pen at all. It nearly shipped
+returning `undefined`: deleting the leading term of `return arr + (…)` left
+`return` alone on a line, and the page RENDERS that word rather than throwing.*
 
 *Earlier: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the

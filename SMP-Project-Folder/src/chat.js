@@ -1,4 +1,4 @@
-/* ══ TALKING TO THE STRATEGY OFFICE (§95) ═══════════════════════════════════
+/* ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════════
    Islam: "can we have some sort of a chat but on the platform where on the
    bottom right they have this … so it sounds like a chat, people chatting,
    sending messages, and picks the people and replies to them."
@@ -30,13 +30,13 @@ var CHAT = (function(){
   /* Two cadences, and the difference is what somebody is doing. Open, they are
      waiting for an answer and four seconds is a conversation; closed, the only
      thing that can change is a number on a badge. Both stamp `here_at`, which
-     is the whole of the presence test the email rule reads (§95.5) — so the
+     is the whole of the presence test the email rule reads (§97.5) — so the
      slow one also has to be fast enough that "away" means away. */
   /* Open, this is `cfg.beat` — the office's own Live/Relaxed setting, decided
-     by SMPRules.chatBeat() so the switch and the number cannot drift (§96).
+     by SMPRules.chatBeat() so the switch and the number cannot drift (§98).
      Shut, the only thing that can change is a number on a badge, so three
      minutes is plenty: at 60s a single tab left open overnight was eight
-     hundred requests for nothing (§96.1). */
+     hundred requests for nothing (§98.1). */
   var POLL_SHUT = 180000;
   var PIC_EDGE = 1600;
 
@@ -272,7 +272,7 @@ var CHAT = (function(){
          to be either/or — "With the office" while something was outstanding,
          the promise otherwise — which hid the promise at the one moment
          somebody actually wants it, which is while they are waiting. Two
-         facts, two channels; the office's sentence is always on screen (§96).
+         facts, two channels; the office's sentence is always on screen (§98).
          The words are `chatCfg`'s choice, so there is no second fallback here
          to disagree with it. */
       var waiting = state.messages.length && state.thread && state.thread.waiting;
@@ -314,7 +314,7 @@ var CHAT = (function(){
           if (cfg.beat !== wasBeat) beat();
         }
         var dock = el("chatdock");
-        /* OFF MEANS GONE (§96.2). Not disabled, not explaining itself — the
+        /* OFF MEANS GONE (§98.2). Not disabled, not explaining itself — the
            corner is simply not there, and nothing polls, which is the whole
            saving. The panel is closed with it, or somebody reading a
            conversation when the office switched it off would keep the box. */
@@ -336,7 +336,7 @@ var CHAT = (function(){
   function stop(){ if (timer) { clearInterval(timer); timer = null; } }
   function beat(){
     stop();
-    /* NOTHING RUNS WHILE THE TAB IS HIDDEN (§96.1). Browsers already throttle
+    /* NOTHING RUNS WHILE THE TAB IS HIDDEN (§98.1). Browsers already throttle
        a background timer to about once a minute; this takes it to nothing at
        all, which is what lets the database go to sleep overnight instead of
        being woken by a tab somebody forgot on Friday. `visibilitychange`
@@ -436,7 +436,7 @@ var CHAT = (function(){
        wrong, and the cheapest time to ask. `visibilitychange` is the one that
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
-       for (§96.1). */
+       for (§98.1). */
     window.addEventListener("focus", function(){ if (mounted && !document.hidden) poll(); });
     document.addEventListener("visibilitychange", function(){
       if (!mounted) return;
@@ -453,7 +453,7 @@ var CHAT = (function(){
      clock, writing into two nodes. That is what lets the reply box survive a
      message arriving while somebody is typing into it. */
 
-  /* ── THE SETTINGS, IN A HEADER DROPDOWN (§96.2) ────────────────────────
+  /* ── THE SETTINGS, IN A HEADER DROPDOWN (§98.2) ────────────────────────
      The shape §90 gave the register's own twice-a-year controls, for the same
      reason: these are touched about as often, and the queue is what the page
      is for — a settings block above the table would push the work down the
@@ -611,7 +611,7 @@ var CHAT = (function(){
   }
 
   /* WHAT WILL HAPPEN WHEN SEND IS PRESSED, SAID BEFORE IT IS PRESSED. The
-     server makes the same call again when the reply lands (§95.5) — this line
+     server makes the same call again when the reply lands (§97.5) — this line
      is the office being shown the rule, never the rule itself. */
   function presenceHtml(d){
     var name = String(d.name || "They").split(/\s+/)[0];
@@ -810,7 +810,7 @@ var CHAT = (function(){
           drawThread();
           /* AND THE CORNER OF THE PERSON WHO JUST FLIPPED IT. Everybody else's
              catches up on their next poll, which with the panel shut is up to
-             three minutes (§96.1) — fine for them and wrong for the office,
+             three minutes (§98.1) — fine for them and wrong for the office,
              who would otherwise press Off and watch nothing happen. The server
              is still what decides; this only spares them the wait. */
           cfg.on = nowOn;

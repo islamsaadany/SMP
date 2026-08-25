@@ -1868,6 +1868,29 @@ The fix is the `-tx` twins applied to `num.final`, `rnum`, `.appear b` and the
 `SMALL` suffix on that page. It is small; it is a visual change to a page Islam
 looks at, so it waits for his word (rule 1c).
 
+### 16.17 Every secondary button's HOVER fails contrast in light mode
+
+*Found 2026-08-25 while building §95, and NOT fixed there — it is one token pair
+governing every `.editbtn` in the platform, and §95 was asked for a page, not a
+palette (rule 1c, and §16.15's precedent one line above).*
+
+`.editbtn:hover` paints `--gold-deep` (`#8A6B22`) on `--over-bg` (`#F7EFD6`):
+**4.34:1 against a needed 4.5.** Dark mode is clear. It is §38.5's family for
+the sixth time — an accent that reads as a mark and fails as type — and §38.5
+already records the answer that works: **move the GROUND, not the mark**, so
+the hover would go to `--surface-2` and the accent would stay what it is.
+
+**Why nothing has ever seen it.** `scripts/contrast-sweep.py` walks pages and
+states, and **a hover is neither** — nothing in the suite has ever moved a
+mouse onto a control and measured what it becomes. This surfaced by accident:
+Chromium keeps `:hover` after a click, `checks/send-message.py` presses *Send me
+a copy* a few lines before it measures, and the button was still lit. **The
+accident is the finding worth keeping** — every `:hover`, `:focus` and
+`:disabled` colour in this product is unmeasured, and this is the first one
+anybody has looked at.
+
+The fix is small and the sweep extension is not. Both wait for Islam's word.
+
 ### 16.12 Images in review mode — BUILT in v3.18
 
 Review mode should accommodate **images**: a screenshot of a platform or an
@@ -11337,6 +11360,57 @@ here (§58.3), so a row carrying only that is still a row nobody has placed.
 **Decided on the server**, like the short list beside it and for the same reason:
 a page that decides whether to ask has decided nothing, because it still had the
 question.
+### 93.15 The platform knew, and had no screen that could say so
+
+> *"A very strange thing. I sent a message, everyone received it but not the SMO
+> team."* … *"I added them by function and by people selection directly, and
+> still they didn't receive the email."*
+
+**I guessed twice and was wrong twice**, which is the part of this worth keeping.
+The first guess was that the SMO team sit at the group and a units-only
+selection would miss them — true of the resolver, and irrelevant here, because a
+direct People pick matches unconditionally. The second was the shape of the
+audience criteria. Both were reasoning where a measurement was available.
+
+**The measurement was available.** Every send writes a `message_recipients` row
+per person: the address it used, whether the provider accepted it, the provider's
+error, and the provider's own id. `historyOne` has returned all of it since the
+table existed. **Nothing in the client has ever called it** — the record was
+written on every send and could not be read back from any screen, so the single
+question a record exists to answer had to be guessed at.
+
+**The three outcomes are three different problems**, and separating them is the
+whole value of the screen:
+
+| | | |
+|---|---|---|
+| **absent** | never resolved into the audience | fix is on the register |
+| **failed** | the provider refused it, and said why | fix is the address |
+| **sent** | handed over, id returned | delivery — a filter, a rule, a full mailbox |
+
+The last one is the one nothing on this side can fix, and **knowing that is the
+point**. "44 of 47" tells you a number and none of the three.
+
+Failures sort first and are named, the same rule the audience summary already
+follows: *3 failed* tells nobody which three, and each is a different fix.
+
+### 93.15a Two CSS lessons, one of them mine from the same day
+
+**A `table-layout:fixed` table takes every width from the header row (§46), and
+four attempts were spent refusing to believe it.** `.cfg table` is fixed;
+`table-layout:auto` was written at three increasing specificities and stayed
+computed as `fixed`, while a `width` from the *very next line* applied. Setting
+the four header widths instead worked first time. When a layout mode will not
+turn off, build with it rather than against it.
+
+**And §93.11 happened again, hours after being written down.** Editing a comment
+left a paragraph after the `*/` that closed it, so the parser met prose where a
+selector belonged and discarded the block. It is the same fix and the same
+check: ask `document.styleSheets` what the browser actually holds — though note
+that query is not decisive on its own, because a rule missing from the dump can
+still be applying. **The element is the authority**: `matches()` for whether the
+selector hits, and `getComputedStyle` for whether the declaration won.
+
 ---
 
 ## 94 · The strategy tab is the office's, people open where they work, and Report goes solid (v3.25)
@@ -11740,9 +11814,439 @@ A zero-width row is skipped rather than failed: Setup has no tab row at all
 (§46.1), and asserting against it would be measuring a thing the page is right
 not to draw.
 
+### 94.15 The Arrange button goes, because §94.3 took away its reason
+
+> *"Remove the arrange button from the units and functions as it's already
+> embedded in the edit button — when I press the pencil I can arrange, so the
+> button is not needed."*
+
+He is right, and the interesting part is *why* it was there. §63.3 kept it for a
+precise, stated reason:
+
+> *"A BU head has no pen — `mayEditPlan()` is the SMO's (§31) — and could
+> arrange before this, so they keep an explicit button: tying the handles to the
+> pen alone would have taken reordering away from the people who use it most,
+> silently."*
+
+**§94.3 closed reordering to the office**, who are exactly the people who *do*
+have the pen. So the sentence that justified the button stopped being true the
+same day, and what was left was a second control doing what the pen beside it
+already does. **A control with no audience of its own is not a choice, it is a
+duplicate** — and the two were already an either/or dressed as two things,
+because the button had to be hidden whenever the pen was on (a button reading
+"Done" for a mode it did not start lies about what pressing it will do).
+
+**THE GROUP KEEPS ITS OWN, AND THAT IS THE POINT RATHER THAN AN EXCEPTION.** The
+group's Performance page has no pen at all, so `arrangeBtn("group")` is the only
+way to reorder units, themes and capabilities. The button is redundant precisely
+where a pen sits beside it, and nowhere else — which is why "remove the Arrange
+button", read one page too widely, would have taken away the one that still
+does something.
+
+Gone from both sides in the same breath (§53.5): a button removed from a unit
+and left on a function is exactly the drift that rule exists to stop.
+
+**AND IT NEARLY SHIPPED RETURNING `undefined`.** The unit's Plan ended
+`return arr + (…)`; deleting the leading term left `return` alone on a line, and
+automatic semicolon insertion ends the statement there — the function returns
+undefined and everything below it becomes dead code. This file already carries
+that scar on `renderGroupFoundation()`, which rendered the literal word
+"undefined" for versions. Caught by reading the diff before building; the check
+now reads `#panel` for the word, because **the page renders it rather than
+throwing**, so nothing else would have said so.
+
+The check asserts **both ends**: that the button is absent, and that pressing
+the pen still produces handles — 13 on a unit, 14 on a capability. Proving the
+button is gone proves nothing on its own, because a build that had lost the
+handles too would pass it.
+
+*(A note on the check that found nothing: the first run reported the function's
+pen giving zero handles. The product was fine — the test navigated by setting
+`current` directly, which does not drop modes, so the page arrived with the pen
+already on and the click turned it OFF. §51.11's shape, in a scratch script: the
+measurement was true and it was measuring the wrong state.)*
 ---
 
-## 95 · Talking to the Strategy Office (v3.26)
+### 94.16 The cache name collided a second time, so the rule moved
+
+§94.12 said: check `git show origin/main:sw.js` before choosing a `SHELL` name,
+because two sessions can pick the same one and **a merge will not tell you** —
+the same string on both sides merges cleanly while the bytes behind it differ,
+and a returning browser then serves the other session's build out of its own
+disk for ever.
+
+That was done. Main said `v3.25e`, so this took `v3.25f` — and by the time the
+merge was ready to push, another session had taken `v3.25f` too.
+
+**THE WINDOW BETWEEN READING MAIN AND PUSHING IS AS LONG AS RUNNING THE
+CHECKS**, which is twenty minutes on this repo, and a name chosen at the start
+of it is a name chosen from stale information. So the check moves to where it
+cannot go stale: **the name is confirmed against `origin/main` after the last
+fetch and immediately before the push** — the final step of a merge rather than
+the first.
+
+Twice in one day is a pattern rather than bad luck. It is the same shape as
+§91's original fault (a returning browser served the old platform out of its own
+disk) reached from a third direction, and the reason it keeps arriving is that
+every symptom of it is invisible from inside git.
+
+## 95 · The composer stays one screen (v3.25)
+
+Islam: *"the send message needs a reform for a better user experience. evaluate
+the page and come back to me with your proposal and mockup of how this page
+should be interacted with what's missing and the page design and flow."*
+
+Evaluated, drawn, signed off, built. Six changes, and the argument under five of
+them is the same one: **the page had exactly one part whose size was not fixed,
+and everything else was below it.**
+
+### 95.1 The audience is a summary, not a list
+
+Every resolved recipient rendered as a chip. On this tenant a group-wide send
+comes to seventy-six people, so ticking one box put roughly nine hundred pixels
+of names between the message and the button that sends it — and the fault is not
+that the names are long, it is that **the one thing on the page that grows with
+the tenant sat above everything the person came to do.** Add a unit, and the
+Send button moves.
+
+So the block is a **bounded summary**: how many will get it, how many will not,
+why not in one phrase where they share one, and *Show the names* for the rest.
+It measures under 140px at seventy-six recipients and does not grow.
+
+**THE SKIPPED COUNT IS NEVER BEHIND THE DISCLOSURE.** It is the fault that
+started this whole thread — three people silently missed (§87, §93.15) — so it
+reads on the line whether or not anybody opens the names, and the names when
+opened put the skipped **first**, because "3 skipped" tells nobody which three
+and each one is a different edit on a different row.
+
+§75.3's three different "nobody" answers are kept whole: nothing matched ·
+everything that matched has no address · the server does not hold the register
+you are looking at. A summary that collapsed those into one line would be
+undoing the section that separated them.
+
+`SENDNAMES` is a **screen preference that is not even remembered** — it lives in
+a page variable and nowhere else. Who you are sending to is not a thing to carry
+between sessions (§25, §47.1, and this is the case where even `localStorage` is
+too much memory).
+
+### 95.2 The bar does not move, and the button says what it will do
+
+*Send* sat at the end of the scroll, which is why the audience pushed it away.
+It is a **sticky bar at the foot of the window** now, carrying Send, Save draft,
+*Send me a copy* and whatever the page last said. It is pressable at scroll 0
+and at the end of the page, and the check measures that with
+`elementFromPoint` at the button's own centre rather than asking whether the
+element exists — §90 and §93.4 are both controls that were present, styled and
+enabled while hitting `BODY`, and neither would have failed a query.
+
+**THE COUNT IS ON THE CONTROL THAT ACTS.** *Send to 76 people* rather than
+*Send*: the number that cannot be taken back belongs on the button, not a scroll
+away in a summary.
+
+**ONE SOLID FILL** — §94.8's budget, on the next page along. Send is the CTA;
+Save draft and the test are quiet beside it, and the check asserts the **order
+of loudness** rather than any particular colour.
+
+### 95.3 Send me a copy
+
+The missing safeguard, and the cheapest one there is: a message to seventy-six
+people cannot be recalled, and until now the only way to see the real thing was
+to send the real thing. This builds **the same message with the same builder**
+(§72.3) and sends one copy — the subject unprefixed, or the preview is a preview
+of something else.
+
+**IT GOES TO THE PERSON SIGNED IN, NEVER THE PERSON BEING VIEWED AS.**
+`viewer()` is the simulation (§45.1) and the SMO uses it constantly; a test that
+followed it would put a real message in a real colleague's inbox, sent from a
+screen the sender was only looking through. `SYNC.person()` is the session,
+which is the one thing the viewer switcher cannot move.
+
+**The address comes off the register**, because the session carries a key, a
+name and a role and no address (`api/auth.js`) — and where the register holds
+none for them the page says so and names the screen to fix it, rather than
+failing at the API with somebody else's error message.
+
+### 95.4 The confirmation is the platform's own
+
+It was `confirm()` — the browser dialog, which a person can silence permanently
+with a checkbox on some other site, after which **the most irreversible act in
+this product happens on one press with nothing shown.** §69.22 removed exactly
+this from the register's password reset for exactly this reason, and this is the
+more dangerous of the two.
+
+And it gets to say more. A native dialog is one line of text; this one names the
+subject, the count, that nobody sees who else got it, that there is no undo —
+and, the part that matters, **who will not receive it**, which is the fault this
+whole thread is about.
+
+### 95.5 Drafts and Sent leave the scroll
+
+§90's move, on the page that needed it next. Both sat **below** the Send button,
+each loading lazily, so somebody arriving to pick up a draft scrolled past the
+whole composer to find it, and somebody arriving to check what was sent did the
+same. They are header dropdowns now, carrying their counts, so *is there a draft
+waiting* is answered without opening anything.
+
+`renderDraftList()` and `renderSentList()` are **unchanged** and are what the
+panels show: one renderer, so the list cannot say two different things depending
+on where it is drawn.
+
+### 95.6 The button is part of the message
+
+*A button, if you want one* was a top-level section between the message and
+Send, with a heading as loud as *Who gets it* — for two optional fields. It is a
+row under the composer now: same controls, same rules, no longer a step of its
+own.
+
+### 95.7 The one control a partial repaint did not update
+
+Found by the new check, in the assertion that looked too obvious to write.
+
+`paintAudience()` writes the server's answer into `#audout` and the header chip
+and **deliberately does not call `paint()`** — the composer beside it may have a
+half-typed sentence in it, and a repaint arriving mid-thought is the fault §71.2
+was about. That was right while the count lived in those two places. §95.2 put
+it on the **Send button**, which `paint()` draws and this never touched.
+
+So the button said *Send* for the entire life of every message: tick a box, the
+page repaints with no answer yet, the answer arrives here a moment later, and
+the one control that had to carry the number is the one thing not updated.
+**THE RULE IS §29.5's, one level down: whoever rewrites part of a screen owns
+everything that part decides, not just the element they were thinking about.**
+
+The same replacement killed the disclosure. `[data-audnames]` was bound in
+`wire()` like everything else, and `paintAudience()` replaces the innerHTML that
+button lives in — **at the only moment there is ever anything to disclose.** It
+is bound on `#audout` instead, which survives, because that element is only ever
+replaced by `paint()`, and `paint()` runs `wire()` after it. And it redraws the
+block rather than the page, for the same reason `paintAudience()` exists at all.
+
+### 95.8 The check that could not live in `qa.py`
+
+`src/checks/send-message.py`. Every other screen check opens the built file over
+`file://`, where `SYNC.isLive()` is false — and **this whole page is gated on a
+server**: the audience is resolved by one (§74.2), the drafts and the sent list
+are its records. Opened from a file the page says *there is no server here to
+send from* and every measurement is of an empty screen — §45.2's fault, which
+becomes §51.11's the moment nobody notices.
+
+So it serves the built file with a stub answering the four calls this page
+makes, and it deliberately **does not measure the resolver**: who a set of
+criteria comes to is `lib/audience.js`'s answer, tested against a real register
+elsewhere, and a stub that reproduced it would be a second copy of a rule (§42).
+What is measured is what the page does with the answer.
+
+Two of its assertions are about the shape of the measurement rather than the
+product, and both are old lessons:
+
+- **Shown, not merely present.** `closeModal()` drops a class and leaves the
+  markup where it is (§3.2, §48.3), so asking whether `.sendconfirm` exists
+  calls an open dialog closed and a closed one open.
+- **`elementFromPoint` answers about the viewport.** The first run reported the
+  header's Drafts button as unreachable because the page had been scrolled to
+  the end a moment earlier — §68.10's fault in miniature, a correct build called
+  broken.
+
+### 95.9 And the contrast sweep had never seen any of this
+
+`scripts/contrast-sweep.py` walks every Setup page, this one included, over
+`file://` — where `SYNC.isLive()` is false. So what it has been measuring here
+for as long as the page has existed is the **empty state**: no counts, no
+capsules, no dropdown panels, no confirmation dialog. §45.2's fault, reported as
+a clean page every time.
+
+So the surfaces this version added are measured in `send-message.py`, in both
+themes, each as **its own subtree** — a modal scanned with the page behind it
+counts that page's failures again under a second name (§50.6) — and with the
+sweep's **own** function, pulled out of its source rather than copied, the way
+`test-clean-parity.js` reads `clearedGraph()` out of the platform (§67). Two
+contrast rules would drift, and the one that drifts is the one nobody is
+looking at.
+
+All clear in both themes. And it found something else on the way, which is
+§16.17: **every `:hover` colour in this product is unmeasured**, because a
+sweep that walks pages and states never touches a control. Chromium keeps
+`:hover` after a click, the check presses *Send me a copy* a few lines earlier,
+and the still-lit button measured 4.34:1 — `.editbtn:hover`, the product's
+standard secondary button, on every page, since long before this version.
+Recorded rather than quietly changed: it is one token pair governing every
+button in the platform, and §95 was asked for a page.
+
+---
+
+## 96 · The objectives editor was drawn and connected to nothing (v3.25)
+
+Islam, on a unit's Foundation with the pen open: *"I'm trying to edit the
+foundation page. I can't remove objectives."*
+
+Measured before touching anything: **20 input fields, 0 of them wired; 4 Remove
+buttons, 0 wired; the Add button, 0 wired.** Every control in that table was
+decoration. Typing an objective's name, changing its direction, correcting a
+target, removing a row and adding one all looked accepted and were discarded on
+the next repaint.
+
+### 96.1 The helper existed; it was not used
+
+This is the fault the `FIELDS` registry exists to prevent, and the comment
+three lines above the broken function says so **in the past tense**:
+
+> *"Before this the foundation rendered inputs that were bound to nothing, so
+> every edit looked accepted and was silently discarded on the next repaint."*
+
+That fix went to `fieldOr` and `inputOr` — the prose fields in the same card —
+and `koEdit` was left behind, because it builds its own `<input>` tags rather
+than calling them. **A helper that exists is not a helper that was used**, and
+nothing catches the difference: a bound field and an unbound one differ by one
+absent attribute, the page renders, no error is thrown, and every keystroke is
+accepted before being thrown away.
+
+**Why it survived so long**: `renderTempleEdit` — the group's Strategy › Temple
+— has the same table, fully wired since it was written, editing **the same
+`GROUP.keyObjectives`**. One of the two surfaces onto one list worked, so the
+list was never obviously broken; it was the unit's Foundation, where there is no
+second surface, that had nothing at all.
+
+Every cell goes through `fieldOr` / `inputOr` / `selectOr` now, so there is no
+second way to draw one of these fields and no second place to forget.
+`selectOr` is new and is the third member of that family: a `<select>` is not an
+`<input>`, `koEdit` was building its own, and that is exactly how it ended up
+building unbound ones. `data-fld` already worked for a select — the shell's
+handler reads `el.value` and asks nothing about the tag.
+
+### 96.2 Minted from the maximum, never from the count
+
+Remove the middle of KO1 · KO2 · KO3 and press Add: the count says 3, and KO3 is
+still on screen. Two rows, one id.
+
+That is not cosmetic. The authoriser compares plans **by id** (§59), a reporting
+snapshot is keyed **by id and never by position** (§48), and the rail selects on
+it. `koMint()` reads the highest number actually present and adds one. The
+group's own Temple handler had minted from the count since it was written and
+carried the same latent collision — corrected there too, through the same
+function, rather than left as the one place that still does it.
+
+### 96.3 A number Excel wrote at full precision
+
+Same message, second screenshot: a key objective reading
+**`9.6999999999999993%`**.
+
+It is not the platform's arithmetic. JavaScript prints that number as `9.7` —
+`String(9.7)` cannot produce those characters — and there is no sum, ratio or
+conversion anywhere near a target. It is the **raw text of the cell**: Excel
+writes a value's full 17-digit form whenever it came from a calculation rather
+than from somebody typing it, and `readXlsx` took `vn.textContent` and stored
+the characters.
+
+`shortestNum()` puts a numeric cell through the shortest string that parses back
+to the **same double**. Three rules, and the second two are what make it safe:
+
+- Anything already short is returned untouched.
+- **Never into exponential notation.** `-0.0000001` shortens to `-1e-7`, which
+  is the same number and the wrong thing to put in a plan target — shorter is
+  only better while it is still the spelling a person would write.
+- **Anything that does not round-trip is left exactly as it arrived.** A
+  twenty-digit identifier beyond a double's precision must never be quietly
+  rewritten by a reader — §50.6's rule, in its narrowest form that still fixes
+  the bug.
+
+It fixes what arrives from now on. The value already stored has to be retyped
+once, which needed §96.1 to be possible at all.
+
+### 96.4 The group's own objectives carry no ids
+
+Found by the check, in the moment it asked the group the same questions it asks
+a unit: all six read `null` — in the seed and in the database — because only
+rows **added** through the Temple's button have ever been given one.
+
+That was survivable while nothing minted ids into that list. It stops being
+survivable the moment this editor does, because **a list where one row is
+identified and six are not is worse than either state**. So `koSettle()` fills
+in the missing ones and never rewrites an existing one — the same rule
+`renumberUnit` already applies to a pillar's code, for the same reason: a code
+already quoted somewhere else is not ours to change.
+
+**It runs from Add and Remove, not from paint.** A reader that writes what it
+reads puts a phantom change into every save and would have every non-SMO save
+refused for ever (§42, §50.6). This only ever runs inside an edit that is
+already the group's to make.
+
+And it runs **before** the new row is minted as well as after, or the six
+id-less rows are filled in as KO1..KO6 a moment after the new row has already
+taken KO1.
+
+### 96.5 The check asks the only question that separates them
+
+`src/checks/foundation-objectives.py`. Every existing check of this page asks
+whether the pen is there and whether fields appear — `strategy-office.py` counts
+controls, `qa.py` walks the page — and **all of that was true the whole time.**
+
+So this asks the one thing that tells a wired field from an unwired one:
+**does pressing the control change the data?** Rename, both dropdowns, Add,
+Remove, the remove-then-add id collision, and that closing the pen leaves no
+editor behind — on a unit's Foundation *and* on the group's, because the two
+callers of one table had drifted apart in silence and only asking both found it.
+
+It also drove out a trap of its own: the group's tab key is `foundation` and a
+unit's is `found`. A sub key that does not exist renders the landing page, and
+every measurement below would then have been of a screen the check never opened
+(§50.6, again).
+
+### 96.6 The table gets the window while it is being written
+
+Islam, in the same session: *"when I edit the objectives table the table is very
+tight and crammed. Do you suggest that when I edit the foundation to have the
+sections over each other, or at least split the table to be below the other
+sections to take the full page width?"*
+
+Settled from a **mockup made of the real platform** rather than a drawing
+(`design-mockups/foundation-edit/`): screenshots at 1600px, today beside the
+proposal, both themes, with the proposal produced by moving the block in the
+browser so that both sides are the same build.
+
+The Foundation is a two-column grid, so the aspiration card gets about 45% of
+the page — and it was being asked to hold a six-column table with a text field
+in every cell. Measured at a 1537px page: the table had **696px**, the objective
+name clipped at about twelve characters, and the direction dropdown was too
+narrow to show its own value. As a band it has **1493px**.
+
+**READING MODE IS UNTOUCHED.** The objectives belong inside the aspiration when
+you are reading it — the aspiration says where the unit is going and the
+objectives say how you would know it got there (§1.7's argument, unchanged) —
+and it is only authoring that needs the room. `koBlock()` is the one renderer
+and the card and the band both call it, so the two can never come to say
+different things about the same list.
+
+**DELIBERATELY NOT THE WHOLE PAGE STACKING**, which was the other half of the
+question. "Who we are" and the aspiration statement are short prose and read
+*better* side by side; stacking everything would push the table further down the
+page to solve a problem it does not have.
+
+**The cost is recorded rather than glossed**: with the table gone from it the
+Winning Aspiration card becomes short, so there is empty space beside "Who we
+are" while editing. That was on the mockup, in its own panel, before it was
+agreed.
+
+`koBand()` asks `authoring()` for itself rather than taking a flag from its
+caller (§94): the viewer switcher repaints without leaving modes, so the band
+has to be able to decide that this page is no longer open to whoever is now
+looking at it.
+
+**The check asserts the RELATIONSHIP, not the number** (§53.5, §94.14): that the
+table is out of the two-column grid, in a band, and as wide as the page it sits
+on — and, at the other end, that closing the pen leaves no band and puts the
+objectives back inside the card. A later change to the gutters or the grid ratio
+keeps it green; putting the table back inside a column does not.
+
+---
+
+*(§95 and §96 in this document are another session's — the composer and the
+objectives editor — and they reached `main` first, so they keep the numbers.
+What follows was written as §95 and §96 on its branch and is renumbered here,
+which is the same thing that happened to §93 and §94 on 2026-08-25. The rule is
+simply whoever lands first.)*
+---
+
+## 97 · Talking to the Strategy Office (v3.26)
 
 Islam: *"Regarding any questions that the team might have or might need to
 communicate with us as the Strategy Management Office, can we have some sort of
@@ -11766,7 +12270,7 @@ Five things were settled before anything was drawn, then drawn as a mockup and
 signed off before a single source was touched
 (`design-mockups/office-chat/2026-08-25_talking-to-the-office.html`).
 
-### 95.1 One conversation per person, and the queue is people
+### 97.1 One conversation per person, and the queue is people
 
 `chat_threads.person_key` is the PRIMARY KEY, so **one person, one
 conversation** is an invariant rather than a rule somebody remembers to check —
@@ -11790,7 +12294,7 @@ writes and false when the office replies, because **a status you have to
 remember to set is the status nobody sets** (§71, unchanged). *Mark answered*
 exists for the conversation that needs no reply, and toggles back.
 
-### 95.2 Who may read it is a rule, not a matrix cell
+### 97.2 Who may read it is a rule, not a matrix cell
 
 Reading what everybody in the tenant wrote in confidence is not a thing to
 leave to a tick somebody could set on a bad afternoon. §37 settled three cells
@@ -11813,7 +12317,7 @@ endpoint, which is the drift that file exists to prevent.
 **AND THE REFUSAL NEVER NAMES THE MISSING ROLE.** Saying which of the two
 somebody lacks tells an outsider the shape of the office.
 
-### 95.3 The office is the addressee; the reply is signed
+### 97.3 The office is the addressee; the reply is signed
 
 You write to *the office*, so nobody is a dead end when somebody is on leave
 and nobody has to guess which of them owns the question — and the answer comes
@@ -11822,7 +12326,7 @@ back with a name on it, because a reply from an institution is not a reply.
 register would change under a rename and vanish under a delete, and the person
 who answered still answered.
 
-### 95.4 Where they were is captured, and it speaks the navigation's language
+### 97.4 Where they were is captured, and it speaks the navigation's language
 
 §71's rule, unchanged: the page, the subject, the cycle and the build are
 things the screen already knows, and asking somebody to describe them is asking
@@ -11846,7 +12350,7 @@ file's bytes do (§91) — and refuses to build if it cannot find it. A version
 literal in a source goes stale, and one that lies about which build somebody
 was looking at is worse than none.
 
-### 95.5 Email only when they are away, and the edge is stated
+### 97.5 Email only when they are away, and the edge is stated
 
 The reply is emailed only if the person is not on the platform, and **the
 office is told which way it will go before pressing Send**, on the line above
@@ -11877,7 +12381,7 @@ still built by the one builder in the browser (§72.3) and the **address is
 still resolved on the server** from the stored register (§74.2) — the browser
 sends content, never a recipient.
 
-### 95.6 Nothing in the client file ever calls `paint()`
+### 97.6 Nothing in the client file ever calls `paint()`
 
 The rule the whole file is built around. `paint()` rebuilds the entire panel: it
 would throw away the half-typed message, the focus, the scroll position and the
@@ -11908,7 +12412,7 @@ a new place:
   `file://` as the SMO, and which is the reason the sweep is run against a
   change that "obviously" only touches a new file.
 
-### 95.7 Where the corner is not drawn
+### 97.7 Where the corner is not drawn
 
 Three absences, and each is a state in which *no bubble* is the pass — §94.2's
 lesson, that a check which only looks for something PRESENT cannot see a
@@ -11929,7 +12433,7 @@ which is what the accent budget is for (§41). The check asks a **probe** wearin
 `--surface` and only the rows inside it are navy, so naming one would be
 asserting the layout while claiming to assert the colour.
 
-### 95.8 §71's tables go, and 019 stays
+### 97.8 §71's tables go, and 019 stays
 
 `022-office-chat.sql` DROPs `feedback` and `feedback_replies`. **No human has
 ever been able to raise a feedback item**, because the client half was never
@@ -11944,7 +12448,7 @@ record: every deployment already in the world ran 019, and a migration
 directory that disagrees with `_sql_migrations` about what was applied is a
 confusion this project keeps writing rules about.
 
-### 95.9 Three suites, because no one of them can see the whole thing
+### 97.9 Three suites, because no one of them can see the whole thing
 
 `src/checks/office-chat.py` serves the built file over HTTP with a stub
 `/api/chat` — **the entire feature is invisible over `file://`**, so a build
@@ -11967,7 +12471,7 @@ the check rather than loosening.
 
 ---
 
-## 96 · Turning the chat off, and what a poll was costing (v3.27)
+## 98 · Turning the chat off, and what a poll was costing (v3.27)
 
 Two things in one version, and they turned out to be the same subject. Islam
 asked what Vercel could carry — *"how much can vercel handle as messages per
@@ -11982,7 +12486,7 @@ requests a month** while sending perhaps ten messages a day. Nothing about that
 is visible in a message count, which is why the question had to be answered by
 measuring rather than by reading the pricing page.
 
-### 96.1 Ten of the fourteen round trips were doing nothing
+### 98.1 Ten of the fourteen round trips were doing nothing
 
 `ensureReady()` takes an advisory lock, executes the whole of `schema.sql`,
 runs both migration phases and checks the bootstrap credential — **on every
@@ -12030,7 +12534,7 @@ polling prevents by definition — one signed-in tab anywhere keeps the database
 awake, whether or not anybody writes a word. That is why the hidden-tab stop is
 a correctness change and not only a saving.
 
-### 96.2 Five settings, in a dropdown, and the switch is the cost control
+### 98.2 Five settings, in a dropdown, and the switch is the cost control
 
 Islam picked all four settings beside the on/off, chose that **anyone in the
 office** may change them, and chose that off means **the corner is simply not
@@ -12072,7 +12576,7 @@ the database never held and made every save carry a phantom group change. A
 tenant that never opens the menu writes nothing at all, which the browser drive
 asserts by putting everything back and checking the key is gone.
 
-### 96.3 What "off" actually does, and the two traps in it
+### 98.3 What "off" actually does, and the two traps in it
 
 The corner goes, **and nothing polls** — that is the saving, and it is why
 "still there, explaining itself" was rejected: it would have kept every browser
@@ -12093,7 +12597,7 @@ driving it: with the idle beat now three minutes, the person who pressed Off
 watched nothing happen for three minutes. The server still decides — the local
 update only spares the one person who already knows.
 
-### 96.4 The dot carries the status; the words carry the promise
+### 98.4 The dot carries the status; the words carry the promise
 
 The panel's second line used to be either/or: *"With the office"* while
 something was outstanding, the promise otherwise. **Which hid the promise at
@@ -12102,7 +12606,7 @@ facts, two channels: the dot goes amber, the words stay the office's sentence.
 Found by a check written against the wrong expectation, which is the honest
 way it usually happens.
 
-### 96.5 What the checks learned
+### 98.5 What the checks learned
 
 `src/checks/office-chat.py` grew a sixth section, and the first version of it
 **passed for the wrong reason**: it pressed the bubble to open the panel, the

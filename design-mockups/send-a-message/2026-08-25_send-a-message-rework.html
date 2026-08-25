@@ -1,0 +1,351 @@
+<title>Send A Message Rework</title>
+<style>
+  /* The product's own tokens (src/_shared.css, forefront palette), so what is
+     drawn here is what would be built. */
+  :root {
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-accent:#E6C65C;
+    --zebra:#F5F7FA; --over-bg:#FBF6E9;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px; --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+      --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --zebra:#212630; --over-bg:#332C16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --zebra:#212630; --over-bg:#332C16;
+  }
+
+  body { background:var(--ground); color:var(--ink); font:400 14px/1.55 var(--sans);
+         margin:0; padding:28px 24px 80px; }
+  .page { max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:34px; }
+  h1 { font:400 20px/1.25 var(--sans); margin:0; }
+  h2 { font:400 17px/1.3 var(--sans); margin:0; }
+  .kicker { font:700 10.5px/1 var(--sans); text-transform:uppercase;
+            letter-spacing:var(--track); color:var(--ink-3); }
+  .lede { color:var(--ink-2); font-size:13px; margin:6px 0 0; max-width:76ch; }
+  .why { color:var(--ink-3); font-size:12.5px; margin:0; max-width:80ch; }
+  .why b { color:var(--ink-2); }
+  .block { display:flex; flex-direction:column; gap:12px; }
+
+  .card { background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r); padding:16px; }
+  .flat { background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r); }
+
+  .num { font:700 26px/1 var(--sans); font-variant-numeric:tabular-nums; }
+  .metrics { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
+  .metric { background:var(--surface); border:1px solid var(--line);
+            border-radius:var(--r); padding:13px 15px; }
+  .metric .k { font:700 10px/1 var(--sans); text-transform:uppercase;
+               letter-spacing:var(--track); color:var(--ink-3); display:block;
+               margin-bottom:7px; }
+  .metric .s { font-size:12px; color:var(--ink-3); display:block; margin-top:4px; }
+  .bad .num { color:var(--bad-tx); }
+  .ok  .num { color:var(--good-tx); }
+
+  .pill { display:inline-block; font:700 10.5px/1 var(--sans); letter-spacing:.04em;
+          border-radius:var(--r-pill); padding:4px 9px; white-space:nowrap; }
+  .pill.good { background:var(--good-bg); color:var(--good-tx); }
+  .pill.warn { background:var(--warn-bg); color:var(--warn-tx); }
+  .pill.q    { background:var(--surface-2); color:var(--ink-3); }
+  .tag { font:700 10px/1 var(--sans); letter-spacing:var(--track); text-transform:uppercase;
+         padding:4px 9px; border-radius:var(--r-pill); display:inline-block; }
+  .tag.before { background:var(--bad-bg); color:var(--bad-tx); }
+  .tag.after  { background:var(--good-bg); color:var(--good-tx); }
+  .hd { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+  /* ── the mock chrome ───────────────────────────────────────── */
+  .pane { background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r); overflow:hidden; }
+  .phead { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+           padding:14px 16px; border-bottom:1px solid var(--line-soft); }
+  .phead .t { font:400 18px/1.2 var(--sans); margin-right:auto; }
+  .chip { display:inline-flex; align-items:center; gap:5px; font:600 11.5px/1 var(--sans);
+          color:var(--ink-2); background:var(--surface-2); border:1px solid var(--line);
+          border-radius:var(--r-pill); padding:5px 10px; white-space:nowrap; }
+  .chip.kind { font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+               font-size:10px; }
+  .chip.hasmenu::after { content:"\25BE"; color:var(--ink-3); font-size:10px; }
+  .chip.count { background:var(--over-bg); border-color:var(--gold); color:var(--ink); }
+  .body { padding:16px; display:flex; flex-direction:column; gap:20px; }
+
+  .step { display:flex; flex-direction:column; gap:9px; }
+  .steph { display:flex; align-items:baseline; gap:9px; }
+  .stepn { font:700 10px/1 var(--mono); color:var(--panel-ink); background:var(--panel);
+           border-radius:var(--r-pill); padding:5px 8px; }
+  .steph b { font:700 13px/1 var(--sans); }
+  .steph .why { margin-left:auto; }
+
+  .ddbar { display:flex; gap:8px; flex-wrap:wrap; }
+  .dd { font:600 12px/1 var(--sans); color:var(--ink-2); background:var(--surface);
+        border:1px solid var(--line); border-radius:var(--r-pill); padding:8px 12px; }
+  .dd::after { content:" \25BE"; color:var(--ink-3); }
+  .dd.on { background:var(--over-bg); border-color:var(--gold); color:var(--ink); }
+
+  /* THE SUMMARY LINE — the whole point of the rework. */
+  .audsum { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+            background:var(--surface-2); border:1px solid var(--line);
+            border-radius:var(--r); padding:11px 13px; }
+  .audsum .n { font:700 15px/1 var(--sans); font-variant-numeric:tabular-nums; }
+  .disc { font:600 12px/1 var(--sans); color:var(--gold-deep); background:none;
+          border:0; padding:0; text-decoration:underline; text-underline-offset:2px;
+          cursor:pointer; margin-left:auto; }
+
+  .mailbox { background:var(--surface-2); border:1px solid var(--line);
+             border-radius:var(--r); padding:18px; display:flex; justify-content:center; }
+  .mail { width:min(460px,100%); background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r-sm); overflow:hidden; }
+  .mail .bar { background:var(--panel); color:var(--panel-ink); padding:13px 16px;
+               border-bottom:3px solid var(--panel-accent); }
+  .mail .bar b { display:block; font-size:14px; }
+  .mail .bar span { font:700 9.5px/1 var(--sans); letter-spacing:var(--track);
+                    text-transform:uppercase; opacity:.85; }
+  .mail .in { padding:16px; display:flex; flex-direction:column; gap:11px; }
+  .mail h3 { font:400 19px/1.25 var(--sans); margin:0; color:var(--ink); }
+  .mail p { margin:0; font-size:13.5px; color:var(--ink-2); }
+  .mail .ghost { color:var(--ink-3); }
+  .mail .btn { align-self:flex-start; background:var(--cta); color:var(--cta-ink);
+               font:700 11px/1 var(--sans); letter-spacing:var(--track);
+               text-transform:uppercase; border-radius:var(--r-sm); padding:11px 16px; }
+  .mail .foot { font-size:11.5px; color:var(--ink-3); border-top:1px solid var(--line-soft);
+                padding-top:10px; }
+
+  .ctarow { display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+            border-top:1px dashed var(--line); padding-top:12px; }
+  .fld { font:400 13px/1 var(--sans); color:var(--ink); background:var(--surface);
+         border:1px solid var(--line); border-radius:var(--r-sm); padding:8px 10px; }
+  .fld.ghost { color:var(--ink-3); }
+
+  /* THE BAR THAT DOES NOT MOVE. */
+  .sendbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+             background:var(--surface); border-top:1px solid var(--line);
+             padding:13px 16px; }
+  .btn { font:700 11px/1 var(--sans); letter-spacing:var(--track); text-transform:uppercase;
+         border-radius:var(--r-pill); padding:11px 17px; border:1px solid var(--line);
+         background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .btn.solid { background:var(--cta); color:var(--cta-ink); border-color:var(--cta); }
+  .btn.quiet { border-color:transparent; color:var(--gold-deep); text-decoration:underline;
+               text-underline-offset:2px; }
+
+  .modal { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md);
+           box-shadow:0 4px 6px -1px rgb(15 23 42/.14); max-width:460px; overflow:hidden; }
+  .modal .mh { padding:15px 17px 0; }
+  .modal .mh b { font:400 17px/1.3 var(--sans); }
+  .modal .mb { padding:11px 17px 0; font-size:13px; color:var(--ink-2);
+               display:flex; flex-direction:column; gap:9px; }
+  .modal .mf { display:flex; gap:9px; justify-content:flex-end; padding:15px 17px; }
+  .kv { display:flex; gap:9px; align-items:baseline; }
+  .kv .k { font:700 10px/1.4 var(--sans); text-transform:uppercase;
+           letter-spacing:var(--track); color:var(--ink-3); min-width:74px; }
+
+  ul { margin:0; padding-left:18px; color:var(--ink-2); font-size:13px; }
+  li { margin:6px 0; }
+  li b { color:var(--ink); }
+  .grid2 { display:grid; gap:20px; }
+  @media (min-width:900px) { .grid2 { grid-template-columns:1fr 1fr; } }
+  code { font:400 12px var(--mono); background:var(--surface-2); padding:1px 5px;
+         border-radius:4px; }
+  .foot { color:var(--ink-3); font-size:12px; border-top:1px solid var(--line);
+          padding-top:14px; }
+  .rule { border:0; border-top:1px solid var(--line); margin:0; }
+</style>
+
+<div class="page">
+
+  <div>
+    <span class="kicker">Setup &middot; Running the cycle</span>
+    <h1 style="margin-top:6px">Send a message &mdash; what to fix</h1>
+    <p class="lede">Measured on the built file, not estimated. The page works; what it
+    does badly is hold the one irreversible act in the product at the far end of a
+    scroll that gets longer the more carefully you choose who it goes to.</p>
+  </div>
+
+  <div class="metrics">
+    <div class="metric bad"><span class="k">Send button sits</span>
+      <span class="num">1122px</span><span class="s">down an empty page</span></div>
+    <div class="metric bad"><span class="k">Audience list</span>
+      <span class="num">299px</span><span class="s">for 33 people &middot; yours has 76</span></div>
+    <div class="metric bad"><span class="k">Drafts &amp; Sent</span>
+      <span class="num">below</span><span class="s">the Send button, lazily loaded</span></div>
+    <div class="metric bad"><span class="k">Confirmation</span>
+      <span class="num">confirm()</span><span class="s">the browser dialog &sect;69.22 removed</span></div>
+  </div>
+
+  <div class="block">
+    <h2>What is actually wrong</h2>
+    <div class="grid2">
+      <ul>
+        <li><b>The primary action runs away from you.</b> Every recipient draws a named
+        chip, so choosing more people pushes Send further down. At 33 people the block is
+        299px; on your register it is roughly double.</li>
+        <li><b>The page does three jobs in one scroll.</b> Compose, pick up a draft,
+        review what was sent &mdash; and the two you might have come for are underneath
+        the one you did not.</li>
+        <li><b>You always land in an empty composer.</b> There is no way in from a draft
+        or from something already sent.</li>
+      </ul>
+      <ul>
+        <li><b>The confirmation is <code>confirm()</code>.</b> A browser dialog that can
+        be permanently silenced &mdash; and then the send just happens. &sect;69.22
+        removed exactly this from the register's password reset for exactly this reason.</li>
+        <li><b>&ldquo;A button&rdquo; is a section.</b> Two optional fields sit between the
+        message and Send with a heading as loud as &ldquo;Who gets it&rdquo;.</li>
+        <li><b>No way to see it in your own inbox first</b> before it goes to
+        seventy-six people and cannot be recalled.</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">The page proposed</h2>
+      <span class="tag after">Send never moves</span>
+      <span class="tag after">two jobs leave the scroll</span></div>
+
+    <div class="pane">
+      <div class="phead">
+        <span class="t">Send a message</span>
+        <span class="chip kind">SMO</span>
+        <span class="chip count">47 recipients &middot; 3 skipped</span>
+        <span class="chip hasmenu">Drafts&nbsp;2</span>
+        <span class="chip hasmenu">Sent</span>
+      </div>
+
+      <div class="body">
+        <div class="step">
+          <div class="steph"><span class="stepn">1</span><b>Who gets it</b>
+            <span class="why">They add up rather than narrow each other.</span></div>
+          <div class="ddbar">
+            <span class="dd on">Roles&nbsp;1</span><span class="dd">Group &amp; companies</span>
+            <span class="dd on">Business units&nbsp;3</span><span class="dd">Functions</span>
+            <span class="dd on">People&nbsp;2</span>
+          </div>
+          <div class="audsum">
+            <span class="pill good">Will get it</span><span class="n">47</span>
+            <span class="pill warn">Skipped</span><span class="n">3</span>
+            <span class="why">&mdash; no address on the register</span>
+            <button class="disc">Show the names</button>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="steph"><span class="stepn">2</span><b>Write it</b>
+            <span class="why">The heading is the subject line people see before they open it.</span></div>
+          <div class="mailbox">
+            <div class="mail">
+              <div class="bar"><b>Raya Trade</b><span>Strategy Management Platform</span></div>
+              <div class="in">
+                <h3>Q3 reporting opens on Monday</h3>
+                <p>Your unit&rsquo;s figures are due by the 12th. Everything you need is
+                on your Performance page &mdash; the measures are already there, so it is
+                a number and a note against each.</p>
+                <div class="btn">Open the platform</div>
+                <p class="foot">Sent from the Strategy Management Platform for Raya
+                Trade. If you were not expecting this, tell your SMO.</p>
+              </div>
+            </div>
+          </div>
+          <div class="ctarow">
+            <span class="why"><b>A button, if you want one.</b> Both halves or neither.</span>
+            <span class="fld">Open the platform</span>
+            <span class="fld ghost">https://&hellip;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sendbar">
+        <button class="btn solid">Send to 47</button>
+        <button class="btn">Save draft</button>
+        <button class="btn quiet">Send me a copy first</button>
+        <span class="why" style="margin-left:auto">Saved a moment ago</span>
+      </div>
+    </div>
+    <p class="why"><b>The bar is pinned to the foot of the pane.</b> It carries the count,
+    so the button says what it will do &mdash; and it stays put whether the audience is
+    three people or seventy-six. Solid orange because it is the CTA on the page, which is
+    &sect;94.8's rule: one solid button, and everything around it quiet.</p>
+  </div>
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">And the confirmation is the platform's own</h2>
+      <span class="tag after">cannot be silenced</span></div>
+    <div class="modal">
+      <div class="mh"><b>Send to 47 people?</b></div>
+      <div class="mb">
+        <div class="kv"><span class="k">Subject</span><span>Q3 reporting opens on Monday</span></div>
+        <div class="kv"><span class="k">Goes to</span><span><b>47 people</b>, one message
+          each &mdash; nobody sees who else got it.</span></div>
+        <div class="kv"><span class="k">Skipped</span><span><b>3</b> with no address:
+          Mennah Farouk, Dalia Sabry, Kareem Hafez</span></div>
+        <div class="kv"><span class="k">No undo</span><span>A message that has gone
+          cannot be recalled.</span></div>
+      </div>
+      <div class="mf"><button class="btn">Cancel</button>
+        <button class="btn solid">Yes, send it</button></div>
+    </div>
+    <p class="why">The browser's <code>confirm()</code> can be silenced by a checkbox the
+    person ticked six months ago on a different site, and after that the most irreversible
+    act in the product happens on one press with nothing shown. The platform's own dialog
+    also gets to <b>name the three who will not receive it</b> &mdash; which is the fault
+    that started all of this.</p>
+  </div>
+
+  <div class="block">
+    <h2>The six changes</h2>
+    <div class="grid2">
+      <ul>
+        <li><b>The audience result becomes a summary line.</b> Two counts and a
+        disclosure; the names open on request. Fixed height, so Send stops moving.</li>
+        <li><b>Drafts and Sent become header dropdowns.</b> &sect;90's move: a thing done
+        occasionally belongs in the header, and the page is for the thing you came to
+        do.</li>
+        <li><b>A sticky send bar</b> at the foot of the pane, carrying the count.</li>
+      </ul>
+      <ul>
+        <li><b>&ldquo;A button&rdquo; folds into &ldquo;Write it&rdquo;</b> as one row.
+        It is part of the message, not a peer of the audience.</li>
+        <li><b>The confirmation becomes a real dialog</b> that names the subject, the
+        count and the skipped.</li>
+        <li><b>&ldquo;Send me a copy first&rdquo;</b> &mdash; the missing safeguard. One
+        message, to you, with this audience's own resolution, before the real send.</li>
+      </ul>
+    </div>
+    <p class="why"><b>Not proposed, deliberately:</b> the audience is resolved on the
+    server on every tick, which is right &mdash; the server holds the register and the
+    screen must not guess. Worth debouncing so five ticks are one request, but that is a
+    performance fix, not a design one, and it changes nothing you can see.</p>
+  </div>
+
+  <p class="foot">Mockup for sign-off before any source is touched. Colours, type and
+  controls are the product's own tokens from <code>src/_shared.css</code>.</p>
+</div>

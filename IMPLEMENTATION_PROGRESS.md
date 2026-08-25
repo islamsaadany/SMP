@@ -54,7 +54,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.27 — the chat gets a switch, and a poll gets cheaper (§96)
+### v3.27 — the chat gets a switch, and a poll gets cheaper (§98)
 
 Two asks, one subject.
 
@@ -90,7 +90,7 @@ be turned back on.
   already run it against; the assertion only holds on a first deployment.)
 - `qa.py` — **ERRORS: none**. `test-authorize.js` — 165 passed.
 
-### v3.26 — talking to the Strategy Office (§95, spec 014)
+### v3.26 — talking to the Strategy Office (§97, spec 015)
 
 A bubble in the bottom-right corner of every page opens **one running
 conversation with the office**. The office answers from **Setup › Running the

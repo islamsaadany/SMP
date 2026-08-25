@@ -1,4 +1,4 @@
-"""TALKING TO THE STRATEGY OFFICE (§95).
+"""TALKING TO THE STRATEGY OFFICE (§97).
 
 TWO REASONS THIS CANNOT BE PART OF `qa.py`, and they are the two lessons the
 suite has already learned the hard way.
@@ -206,7 +206,7 @@ with sync_playwright() as p:
     ck("and says what to do when nothing is picked",
        "Pick somebody" in pg.inner_text("#chthread"))
 
-    # ── 6 · THE SETTINGS THE OFFICE HAS SET REACH THE CORNER (§96) ───────
+    # ── 6 · THE SETTINGS THE OFFICE HAS SET REACH THE CORNER (§98) ───────
     # Asserted from the PERSON's side, because that is the side the settings
     # are for — the office's own menu writes to the state graph, which this
     # stub does not carry, and `scripts/test-chat.js` covers that end.

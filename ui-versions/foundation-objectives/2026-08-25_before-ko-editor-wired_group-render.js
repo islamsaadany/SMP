@@ -1382,10 +1382,9 @@ function renderGroupFoundation(){
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
           function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
-          true, GROUP) +
+          true) +
       '</div>' +
     '</div>' +
-    koBand(GROUP.keyObjectives, "foundation", "g_found", GROUP, true) +
 
     '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
@@ -1702,21 +1701,6 @@ function inputOr(page, value, cls, setter){
   return '<input class="fld ' + (cls || '') + '" data-fld="' + i + '" value="' + esc(value) + '">';
 }
 
-/* THE THIRD WAY TO DRAW A BOUND FIELD, because a `<select>` is not an
-   `<input>` and `koEdit` was building its own — which is exactly how it ended
-   up building unbound ones (§96). `data-fld` already works for a select: the
-   shell's handler reads `el.value` and asks nothing about the tag. */
-function selectOr(page, value, opts, cls, setter){
-  if (!EDIT_PAGE[page] || !setter)
-    return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
-  var i = FIELDS.push(setter) - 1;
-  return '<select class="fld ' + (cls || '') + '" data-fld="' + i + '">' +
-    opts.map(function(o){
-      return '<option' + (String(value) === String(o) ? " selected" : "") + '>' +
-        esc(o) + '</option>';
-    }).join("") + '</select>';
-}
-
 /* Two readings of the same targets. Columns compares them down a line; chips
    read this year as a figure. A toggle rather than a decision, because which
    one is better depends on how many objectives a unit has written. */
@@ -1768,108 +1752,23 @@ function horizonColLabel(){
   return horizonSet() ? "By " + esc(GROUP.horizon) : "3-year";
 }
 
-/* ── THE OBJECTIVES EDITOR WAS DRAWN AND CONNECTED TO NOTHING (§96) ──
-   Islam, on a unit's Foundation with the pen open: *"I can't remove
-   objectives."* Measured: **20 inputs, 0 wired; 4 Remove buttons, 0 wired; the
-   Add button, 0 wired.** Every control in this table was decoration — typing a
-   name, changing a direction, correcting a target, removing a row and adding
-   one all looked accepted and were discarded on the next repaint.
-
-   IT IS THE FAULT THE `FIELDS` REGISTRY EXISTS TO PREVENT, three lines above
-   this, in the comment that says so in the past tense: *"Before this the
-   foundation rendered inputs that were bound to nothing, so every edit looked
-   accepted and was silently discarded."* That fix went to `fieldOr` and
-   `inputOr` — the prose fields in the same card — and this table was left
-   behind, because it builds its own `<input>` tags rather than calling them.
-   **A helper that exists is not a helper that was used**, and nothing catches
-   the difference: the markup is identical apart from one absent attribute.
-
-   The group's own Temple edit (`renderTempleEdit`) has the same table and has
-   been fully wired the whole time, which is why this never came up — the two
-   surfaces edit THE SAME `GROUP.keyObjectives` and only one of them worked.
-
-   Every field goes through `fieldOr`/`inputOr`/`selectOr` now, so there is no
-   second way to draw one of these cells and no second place to forget. */
-function koEdit(list, page, acKey, owner){
-  var editing = authoring(page, acKey), pg = editing ? page : null;
-  /* WHICH LIST THIS IS. Add and Remove act on an array, and the two callers
-     hand in two different arrays (the group's and a unit's) — so the table
-     registers its own, exactly as a field registers its own setter. */
-  var li = KOLISTS.push({ list: list, owner: owner }) - 1;
+/* Edit is where the detail lives — direction and compile never appear in the
+   view, because reading a foundation is not the same act as authoring one. */
+function koEdit(list){
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
-    list.map(function(m, i){
-      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.dir, ["\u2265", "\u2264"], "",
-          function(v){ m.dir = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.target3y || "", "mono",
-          function(v){ m.target3y = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
-          function(v){ m.target = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.compile, ["Sum", "Latest", "Average"], "",
-          function(v){ m.compile = v; }) + '</td>' +
-        '<td class="cc">' + (editing
-          ? '<button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
-        '</td></tr>';
+    list.map(function(m){
+      return '<tr><td><input class="fld" value="' + esc(m.name) + '"></td>' +
+        '<td class="cc"><select class="fld"><option' + (m.dir === "\u2265" ? " selected" : "") + '>\u2265</option>' +
+        '<option' + (m.dir === "\u2264" ? " selected" : "") + '>\u2264</option></select></td>' +
+        '<td class="cc"><input class="fld mono" value="' + esc(m.target3y || "") + '"></td>' +
+        '<td class="cc"><input class="fld mono" value="' + esc(m.target) + '"></td>' +
+        '<td class="cc"><select class="fld"><option' + (m.compile === "Sum" ? " selected" : "") + '>Sum</option>' +
+        '<option' + (m.compile === "Latest" ? " selected" : "") + '>Latest</option>' +
+        '<option' + (m.compile === "Average" ? " selected" : "") + '>Average</option></select></td>' +
+        '<td><button class="rmbtn">Remove</button></td></tr>';
     }).join("") + '</tbody></table></div>' +
-    (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
-      '">+ Add an objective</button></div>' : '');
-}
-
-/* WHERE ADD AND REMOVE WRITE. Registered during render and emptied on every
-   repaint beside `FIELDS`, or stale arrays accumulate and an index from the
-   last paint acts on the paint before it. */
-var KOLISTS = [];
-
-/* MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT (§96.2). Removing the middle
-   of KO1·KO2·KO3 and adding leaves two rows and mints "KO3" — the id the
-   surviving third row already holds. Two rows with one id is not cosmetic: the
-   authoriser compares plans BY ID (§59), a reporting snapshot is keyed by id
-   and never by position (§48), and the rail selects on it. The group's own
-   Temple handler has minted from the count since it was written and carries
-   the same latent collision; it is corrected there too rather than left as the
-   one place that still does it. */
-function koMint(list, prefix){
-  var top = 0;
-  list.forEach(function(m){
-    var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
-    if (n && +n[1] > top) top = +n[1];
-  });
-  return { id: prefix + "-KO" + (top + 1), name: "New objective", dir: "\u2265",
-           target3y: "", target: "", compile: "Latest", actual: "", progress: null };
-}
-
-/* A unit numbers its whole plan positionally at load (`renumberUnit`), so a
-   row added or removed here is brought back into that sequence at once rather
-   than waiting for the next load to disagree with what is on screen.
-
-   THE GROUP'S OWN OBJECTIVES CARRY NO IDS AT ALL (§96.4), found by the check
-   the moment it asked the group the same questions it asks a unit: all six
-   read `null`, in the seed and in the database, because only rows ADDED
-   through the Temple's button have ever been given one. That was survivable
-   while nothing minted ids into that list; it stops being survivable the
-   moment this editor does, because a list where one row is identified and six
-   are not is worse than either state — the authoriser compares plans by id
-   (§59) and a reporting snapshot is keyed by id and never by position (§48).
-
-   So the missing ones are FILLED IN, and an existing one is never rewritten —
-   the same rule `renumberUnit` already applies to a pillar's code, and for the
-   same reason: a code already quoted somewhere else is not ours to change.
-
-   IT RUNS FROM ADD AND REMOVE, NOT FROM PAINT. A reader that writes what it
-   reads puts a phantom change into every save and would have every non-SMO
-   save refused for ever (§42, §50.6) — this only ever runs inside an edit that
-   is already the group's to make. */
-function koSettle(entry){
-  var o = entry && entry.owner;
-  if (o && o.ukey && typeof renumberUnit === "function") { renumberUnit(o); return; }
-  if (!o || !o.keyObjectives) return;
-  var top = 0;
-  o.keyObjectives.forEach(function(m){
-    var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
-    if (n && +n[1] > top) top = +n[1];
-  });
-  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = "group-KO" + (++top); });
+    '<div class="addrow"><button class="editbtn">+ Add an objective</button></div>';
 }
 
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
@@ -1885,11 +1784,7 @@ function koSettle(entry){
    The horizon is still SHOWN on a unit, as a pill: it is the horizon the unit's
    objectives are measured against and reading it there is the point. Only the
    input is the group's (§48.1). */
-/* `owner` is what Add and Remove act ON — the group or the unit whose list
-   this is. It is passed rather than inferred from `isGroup`, because a unit
-   also has to be renumbered afterwards and a boolean cannot say which unit
-   (§96). */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup){
   var editing = authoring(page, acKey), pg = editing ? page : null;
   return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
     penBtn(page, acKey) +
@@ -1907,50 +1802,15 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
       ? '<div class="endin"><span class="boxlab">End in mind</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
-    /* ── WHILE THE PEN IS OPEN THE TABLE IS NOT IN HERE (§96.6) ────
-       Islam: *"when I edit the objectives table the table is very tight and
-       crammed."* The Foundation is a two-column grid, so this card gets about
-       45% of the page — and it was being asked to hold a six-column table with
-       a text field in every cell. Measured at a 1537px page: the table had
-       **696px**, the objective name clipped at about twelve characters, and the
-       direction dropdown was too narrow to show its own value.
-
-       READING MODE IS UNTOUCHED. The objectives belong inside the aspiration
-       when you are reading it — the aspiration says where the unit is going and
-       the objectives say how you would know it got there — and it is only
-       AUTHORING that needs the room. So the block stays here when it is being
-       read and moves out to `koBand()` when it is being written.
-
-       DELIBERATELY NOT THE WHOLE PAGE STACKING, which is the other thing that
-       was asked about: "Who we are" and the aspiration statement are short
-       prose and read BETTER side by side. Stacking everything would push the
-       table further down the page to solve a problem it does not have. */
-    (editing ? '' : '<div class="divide"></div>' +
-      koBlock(objectives, page, acKey, owner, isGroup, false)) +
-  '</div>';
-}
-
-/* The objectives, wherever they are being drawn. One function, so the card and
-   the band cannot come to say different things about the same list. */
-function koBlock(objectives, page, acKey, owner, isGroup, editing){
-  return '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
+    '<div class="divide"></div>' +
+    '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
       /* THE UNIT'S ONLY, because the group's objectives have always shown both
          and there is nothing there to toggle (§51.16). Hidden in edit for the
          same reason the layout switch is: authoring shows every field there is,
          so a control that hides one would be lying about what is stored. */
       (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
-    (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup));
-}
-
-/* THE BAND ASKS THE SAME QUESTION THE CARD ASKS (§94). `authoring()` and not a
-   flag passed down from the caller: the viewer switcher repaints without
-   leaving modes, so the band has to be able to decide for itself that this page
-   is no longer open to whoever is now looking at it. Nothing is drawn at all
-   when it is not — the band exists only while the pen is on. */
-function koBand(objectives, page, acKey, owner, isGroup){
-  if (!authoring(page, acKey)) return '';
-  return '<div class="card koband">' +
-    koBlock(objectives, page, acKey, owner, isGroup, true) + '</div>';
+    (editing ? koEdit(objectives) : koView(objectives, isGroup)) +
+  '</div>';
 }
 
 function renderUnitFoundation(u){
@@ -1962,10 +1822,8 @@ function renderUnitFoundation(u){
           fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u) +
-    '</div>' +
-    koBand(u.keyObjectives, "foundation", "u_found", u, false);
+        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found") +
+    '</div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────

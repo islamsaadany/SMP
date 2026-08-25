@@ -197,15 +197,8 @@
 <script src="PRESENT"></script>
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
-<script src="CHAT"></script>
 <script src="SYNC"></script>
 <script>
-/* WHICH BUILD THIS IS, stamped by build.py out of sw.js's SHELL constant —
-   the one string that is guaranteed to change whenever the built file's bytes
-   do (§91). A chat message carries it, so "it showed 4.2 on my screen" can be
-   answered without asking anybody which version they were looking at. */
-var BUILD_ID = "BUILDID";
-
 /* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
    a stacked list for Manage. They were replaced in 2.9 by one worded button
    with a menu: the same ten destinations, but named rather than guessed at. */
@@ -376,20 +369,6 @@ var BUILD_ID = "BUILDID";
       /* FIRST, because it is the page you open before the others — and now
          also because the gear lands on whichever def is `primary`. */
       { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
-      /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
-         Second in the group, immediately under the cycle it is mostly about.
-
-         GATED BY A RULE, NOT BY A MATRIX CELL, and deliberately: reading what
-         everybody in the tenant wrote in confidence is not a thing to leave to
-         a tick somebody could set on a bad afternoon. §37 already settled three
-         cells that way and §89 three more — this is the same argument, and
-         `c_send` beside it is the same shape (area "always", the office test
-         done here). `inOffice()` is the SMO team as well as the Super user, or
-         the office would be one person deep on the one page that has to be
-         answered the day somebody is on leave. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Messages",
-        when: function(){ return inOffice() && CHAT.servable(); },
-        render:function(){ return CHAT.renderInbox(); } },
       /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
          `view` for every role, so gating the row on "not none" put Import in
          the rail of a contributor, a unit owner, a custodian and a company
@@ -479,30 +458,15 @@ var BUILD_ID = "BUILDID";
       });
     }, 180);
   }
-  /* ── EVERYTHING THE ANSWER CHANGES, IN ONE PLACE (§95) ──────────────
-     This used to write the audience block and the header chip and stop there,
-     which was right while the count lived in exactly those two places. §95 put
-     it on the SEND BUTTON — the whole point of "Send to 76 people" is that the
-     number you are about to act on is on the control that acts — and the
-     button is drawn by `paint()`, which this deliberately does not call.
-
-     So it said "Send" for the entire life of every message: tick a box, the
-     page repaints with no answer yet, the answer arrives here a moment later,
-     and the one control that had to carry the count was the one thing not
-     updated. THE RULE IS §29.5's, one level down: whoever rewrites part of a
-     screen owns everything that part decides, not just the element they were
-     thinking about. */
   function paintAudience(){
     var el = document.getElementById("audout");
     if (el) el.innerHTML = sendmsgAudienceHtml();
-    var st = sendmsg();
-    var n = (sendmsgHasAny() && st.aud && st.aud.to) ? st.aud.to.length : 0;
-    var chip = document.querySelector("[data-audcount]");
-    if (chip) chip.textContent = n ? plural(n, "recipient", "recipients")
-                                   : "nobody chosen";
-    var send = document.getElementById("msgsend");
-    if (send && !st.busy)
-      send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
+    var chip = document.querySelector('.phead2 .hright .chip:last-of-type');
+    if (chip && document.getElementById("msgsend")) {
+      var st = sendmsg();
+      chip.textContent = (sendmsgHasAny() && st.aud && st.aud.to)
+        ? plural(st.aud.to.length, "recipient", "recipients") : "nobody chosen";
+    }
   }
 
   function leaveModes(){
@@ -1228,10 +1192,6 @@ var BUILD_ID = "BUILDID";
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
-    /* Same reason, same line (§96): the objectives editor registers the array
-       its Add and Remove act on, and an index from the last paint would act on
-       the paint before it. */
-    if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
     fillViewers();
     paintUnits();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
@@ -1420,12 +1380,6 @@ var BUILD_ID = "BUILDID";
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
-    /* The office's inbox, if this paint drew it. It binds ONCE per rendered
-       frame and then fills and refreshes itself on its own clock — nothing in
-       it ever calls paint(), or a reply being typed would be thrown away every
-       ten seconds (§35, §71.2). Called here so it is also the place the clock
-       is STOPPED when a paint navigates away from the page. */
-    CHAT.wireInbox();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
@@ -2344,14 +2298,9 @@ var BUILD_ID = "BUILDID";
     document.querySelectorAll("[data-tadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var k = b.dataset.tadd;
-        /* MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT (§96.2). Remove the
-           middle of KO1·KO2·KO3 and add: the count says 3 and KO3 is still on
-           screen, so two rows share an id. The authoriser compares plans BY ID
-           (§59) and a reporting snapshot is keyed by id and never by position
-           (§48), so a collision is not cosmetic. `koMint` is the one place
-           that answers it, shared with the Foundation's own editor. */
-        if (k === "ko")    GROUP.keyObjectives.push(
-                             Object.assign(koMint(GROUP.keyObjectives, "group"), { group:null }));
+        if (k === "ko")    GROUP.keyObjectives.push({ id:"group-KO" + (GROUP.keyObjectives.length + 1),
+                             name:"New objective", group:null, dir:"\u2265", target3y:"", target:"",
+                             compile:"Latest", actual:"", progress:null });
         if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
         /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
            `measures` and `tactics` — fields §15 removed — so the row had no
@@ -2384,50 +2333,6 @@ var BUILD_ID = "BUILDID";
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
         if (p[0] === "cap")   GROUP.capabilities.splice(i, 1);
-        paint();
-      });
-    });
-    /* ── ADD AND REMOVE AN OBJECTIVE, ON A FOUNDATION (§96) ─────────
-       These two buttons have existed on this page for as long as the page has,
-       with nothing bound to them. The group's Temple edit has had working ones
-       the whole time, editing THE SAME list — which is why nobody noticed.
-
-       Removal ASKS ONCE when the row carries anything, and goes without
-       ceremony when it does not: a reported objective is history and a row
-       added a moment ago is not. The same sentence the Temple's handler uses,
-       because they are the same act on the same data. */
-    document.querySelectorAll("[data-korm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.korm.split("|"), e = KOLISTS[+p[0]], i = +p[1];
-        if (!e) return;
-        var m = e.list[i];
-        if (!m) return;
-        var what = (m.actual || m.target)
-          ? 'the objective "' + (m.name || "") + '"' +
-            (m.actual ? " and its reported " + m.actual : "")
-          : null;
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
-        e.list.splice(i, 1);
-        koSettle(e);
-        fieldSaved();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-koadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = KOLISTS[+b.dataset.koadd];
-        if (!e) return;
-        /* SETTLED BEFORE THE NEW ROW IS MINTED, or the group's six id-less
-           objectives are filled in as KO1..KO6 a moment after the new row has
-           already taken KO1 (§96.4). Once before, so the maximum is true; once
-           after, because a unit renumbers positionally. */
-        koSettle(e);
-        /* The prefix a unit's ids already use, and "group" for the group's —
-           read off the owner rather than passed in, so the two cannot be given
-           different answers at two call sites. */
-        e.list.push(koMint(e.list, (e.owner && e.owner.ukey) || "group"));
-        koSettle(e);
-        fieldSaved();
         paint();
       });
     });
@@ -3815,40 +3720,6 @@ var BUILD_ID = "BUILDID";
     var sentClose = document.querySelector("[data-sentclose]");
     if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
-    /* ── SEND A MESSAGE'S HEADER MENUS AND DISCLOSURE (§95) ──────────
-       The same shape as the register's, and one open at a time. */
-    document.querySelectorAll("[data-draftmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        DRAFTMENU = !DRAFTMENU; SENTMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-sentmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        SENTMENU = !SENTMENU; DRAFTMENU = false; paint();
-      });
-    });
-    /* THE NAMES ARE A DISCLOSURE, not a repaint of the composer — but the
-       audience block is its own element and paint() is what redraws it, so
-       this is one of the few things on this page that may repaint (§35: what
-       must not repaint is the TYPING, and this is not it). */
-    /* ── BOUND ON THE CONTAINER, NOT ON THE BUTTON (§95) ───────────
-       `paintAudience()` replaces `#audout`'s innerHTML, so a handler bound to
-       the button inside it dies the moment the server answers — which is the
-       only moment there is ever anything to disclose. Bound here it survives,
-       because `#audout` itself is only ever replaced by `paint()`, which runs
-       `wire()` after it (§29.5).
-
-       AND IT REDRAWS THE BLOCK RATHER THAN THE PAGE. A full repaint would
-       replace the composer, and the composer may have a half-typed sentence in
-       it that has not reached SENDMSG yet (§35, §71.2). */
-    var audout = document.getElementById("audout");
-    if (audout) audout.addEventListener("click", function(e){
-      if (!e.target.closest("[data-audnames]")) return;
-      SENDNAMES = !SENDNAMES; paintAudience();
-    });
-
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){
       var st = sendmsg(), out = document.getElementById("msgsaid");
@@ -3863,58 +3734,11 @@ var BUILD_ID = "BUILDID";
       if (!st.body.trim()) return say("It needs something in it.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
-      /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
-         It was `confirm()` — the browser dialog, which a person can silence
-         permanently with a checkbox on some other site, after which the most
-         irreversible act in this product happens on one press with nothing
-         shown. §69.22 removed exactly this from the register's password reset
-         for exactly this reason, and this is the more dangerous of the two.
-
-         AND IT GETS TO SAY MORE. A native dialog is one line of text; this one
-         names the subject, the count, and — the part that matters — WHO WILL
-         NOT RECEIVE IT, which is the fault that started this whole thread. */
-      var sk = (st.aud && st.aud.skipped) || [];
-      openModalHtml("Send to " + plural(n, "person", "people") + "?", "",
-        '<div class="sendconfirm">' +
-          '<div class="kv"><span class="k">Subject</span><span>' +
-            esc(st.subject.trim()) + '</span></div>' +
-          '<div class="kv"><span class="k">Goes to</span><span><b>' +
-            plural(n, "person", "people") + '</b>, one message each \u2014 nobody ' +
-            'sees who else got it.</span></div>' +
-          (sk.length
-            ? '<div class="kv"><span class="k">Skipped</span><span><b>' + sk.length +
-              '</b> with no usable address: ' +
-              esc(sk.slice(0, 6).map(function(x){ return x.name; }).join(", ")) +
-              (sk.length > 6 ? ", and " + (sk.length - 6) + " more" : "") + '</span></div>'
-            : '') +
-          '<div class="kv"><span class="k">No undo</span><span>A message that has ' +
-            'gone cannot be recalled.</span></div>' +
-          '<div class="cbtns"><button data-sendno="1">Cancel</button>' +
-          '<button class="danger" data-sendyes="1">Yes, send it</button></div>' +
-        '</div>');
-      var box = document.getElementById("modal-b");
-      if (box) {
-        var no = box.querySelector("[data-sendno]");
-        if (no) no.addEventListener("click", function(){ closeModal(); });
-        var yes = box.querySelector("[data-sendyes]");
-        if (yes) yes.addEventListener("click", function(){ closeModal(); reallySend(); });
-      }
-      return;
-    });
-
-    /* The send itself, lifted out so the confirmation can call it. Everything
-       below this line is what the button used to do after `confirm()` said
-       yes, unchanged. */
-    function reallySend(){
-      var st = sendmsg(), out = document.getElementById("msgsaid");
-      function say(msg, ok){
-        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
-        if (!out) return;
-        out.textContent = msg;
-        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
-      }
-      var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
-      var msgsend = document.getElementById("msgsend");
+      /* THE CONFIRMATION NAMES THE NUMBER, because the number is the thing
+         that cannot be taken back. */
+      if (!confirm("Send \u201c" + st.subject.trim() + "\u201d to " +
+                   plural(n, "person", "people") + "? This cannot be undone."))
+        return;
       var sh = commsShape();
       say("Sending to " + plural(n, "person", "people") + "\u2026", null);
       msgsend.disabled = true;
@@ -3948,65 +3772,6 @@ var BUILD_ID = "BUILDID";
         st.draftId = null; DRAFTLIST = null;
         paint();
       });
-      });
-    }
-
-    /* ── SEND ME A COPY (§95) ───────────────────────────────────────
-       The cheapest safeguard there is, and it was missing: a message to
-       seventy-six people cannot be recalled, and until now the only way to see
-       the real thing was to send the real thing. This builds THE SAME message
-       with THE SAME builder (§72.3) and sends one copy, so what the sender
-       reads in their own inbox is what the recipients will read — the subject
-       included, unprefixed, or the preview would be a preview of something
-       else.
-
-       IT GOES TO THE PERSON SIGNED IN, NEVER THE PERSON BEING VIEWED AS.
-       `viewer()` is the simulation (§45.1) and the SMO uses it constantly; a
-       test that followed it would put a real message in a real colleague's
-       inbox, addressed from a screen the sender was only looking through.
-       `SYNC.person()` is the session, which is the one thing the switcher
-       cannot move.
-
-       THE ADDRESS COMES OFF THE REGISTER, because the session carries a key, a
-       name and a role and no address (api/auth.js) — and if the register has
-       none for them it says so and names the row to fix, rather than failing
-       at the API with somebody else's error message. */
-    var msgtestme = document.getElementById("msgtestme");
-    if (msgtestme) msgtestme.addEventListener("click", function(){
-      var st = sendmsg(), out = document.getElementById("msgsaid");
-      function say(msg, ok){
-        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
-        if (!out) return;
-        out.textContent = msg;
-        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
-      }
-      if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
-      if (!st.body.trim()) return say("It needs something in it.", false);
-      var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
-      var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
-      var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
-      if (!addr)
-        return say("There is no address on your own row on the register, so there is " +
-                   "nowhere to send the copy. Add one on People.", false);
-      var sh = commsShape();
-      say("Sending you a copy…", null);
-      msgtestme.disabled = true;
-      SYNC.mailTest({
-        to: addr,
-        subject: st.subject.trim(),
-        html: MAIL.html({
-          org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
-          eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
-          body: st.body.trim(),
-          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
-                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
-        }),
-        fromName: sh.fromName,
-        replyTo: sh.replyTo
-      }, function(err){
-        msgtestme.disabled = false;
-        say(err ? err : ("One copy sent to " + addr + ". Nobody else has had it. " +
-                         "If it is not there, look in the junk folder."), !err);
       });
     });
 
@@ -4936,21 +4701,17 @@ var BUILD_ID = "BUILDID";
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU) &&
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
     }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU)) {
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
     }
   });
 

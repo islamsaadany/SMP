@@ -1,5 +1,5 @@
 -- @phase: pre
--- ══ TALKING TO THE STRATEGY OFFICE (§95) ═══════════════════════════════
+-- ══ TALKING TO THE STRATEGY OFFICE (§97) ═══════════════════════════════
 -- Islam: "can we have some sort of a chat but on the platform where on the
 -- bottom right they have this … they open the chat and they send a message
 -- there and they have a conversation with one of our team … so it sounds like
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS chat_threads (
   seen_by_us   TIMESTAMPTZ,
   -- WHEN THIS PERSON'S BROWSER LAST ASKED. This is the whole of the presence
   -- test behind "email only if they are away" — their own polling says it, and
-  -- there is no scheduler on Vercel to say it any other way (§95.5).
+  -- there is no scheduler on Vercel to say it any other way (§97.5).
   here_at      TIMESTAMPTZ
 );
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   at          TIMESTAMPTZ NOT NULL DEFAULT now(),
   from_office BOOLEAN NOT NULL DEFAULT FALSE,
   -- WHO WROTE IT, stored as it was at the time. A reply is signed by a name
-  -- (§95.3) and a name read back through the register would change under a
+  -- (§97.3) and a name read back through the register would change under a
   -- rename or vanish under a delete — the person who answered still answered.
   by_key      TEXT NOT NULL,
   by_name     TEXT,

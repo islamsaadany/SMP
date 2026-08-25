@@ -588,28 +588,6 @@ function refToCol(ref){
   return n - 1;
 }
 
-/* THE SAME NUMBER, SPELLED THE WAY SOMEBODY WOULD WRITE IT (§96.3).
-   Returns the raw text unchanged unless a round trip through Number lands on
-   exactly the same characters-to-double value AND is shorter — so `9.7` wins
-   over `9.6999999999999993`, `0.1` and `1e21` are left alone, and a 20-digit
-   account number, which cannot round-trip, is never touched. */
-function shortestNum(raw){
-  var txt = String(raw == null ? "" : raw).trim();
-  if (!txt) return txt;
-  var n = Number(txt);
-  if (!isFinite(n)) return txt;
-  var short = String(n);
-  /* AND NEVER INTO EXPONENTIAL NOTATION. `-0.0000001` shortens to `-1e-7`,
-     which is the same number and the wrong thing to put in a plan target —
-     shorter is only better while it is still the spelling a person would
-     write. */
-  if (/[eE]/.test(short) && !/[eE]/.test(txt)) return txt;
-  /* The test is that the SHORT form reads back as the same double, not that
-     the two strings look alike — that is what makes it safe to substitute. */
-  if (short.length < txt.length && Number(short) === n) return short;
-  return txt;
-}
-
 async function readXlsx(buf){
   var files = await unzip(buf);
 
@@ -654,25 +632,6 @@ async function readXlsx(buf){
           var vn = c.getElementsByTagName("v")[0];
           v = vn ? vn.textContent : "";
           if (t === "s") v = shared[+v] != null ? shared[+v] : "";
-          /* ── A NUMBER EXCEL WROTE AT FULL PRECISION (§96.3) ────────
-             Islam, on a key objective reading `9.6999999999999993%`.
-
-             It is not the platform's arithmetic — JavaScript prints that
-             number as `9.7`, and there is no sum, ratio or conversion
-             anywhere near a target. It is the RAW TEXT of the cell: Excel
-             writes a value's full 17-digit form whenever it came from a
-             calculation rather than from somebody typing it, and this reader
-             took `vn.textContent` and stored the characters.
-
-             So a numeric cell is put through the shortest string that parses
-             back to the SAME double. `9.6999999999999993` and `9.7` are one
-             number, and the short spelling is the one a person wrote.
-             Anything already short is untouched, and anything that does NOT
-             round-trip is left exactly as it arrived — a long identifier
-             beyond a double's precision must not be quietly rewritten by a
-             reader (§50.6: a reader that changes what it reads is the fault,
-             and this is the narrowest form of it that still fixes the bug). */
-          if (!t || t === "n") v = shortestNum(v);
         }
         cells[idx] = v;
       });

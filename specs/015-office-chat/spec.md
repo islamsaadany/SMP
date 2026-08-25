@@ -1,6 +1,6 @@
-# 014 · Talking to the Strategy Office
+# 015 · Talking to the Strategy Office
 
-**Version:** v3.26, extended in v3.27 · **Decisions:** §95, §96 · **Status:** answered; built
+**Version:** v3.26, extended in v3.27 · **Decisions:** §97, §98 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Regarding any questions that the team might have or might need to
@@ -205,7 +205,7 @@ state it happens to be in.
 
 ---
 
-## 8 · The switch, and what a poll cost (v3.27, §96)
+## 8 · The switch, and what a poll cost (v3.27, §98)
 
 Islam: *"I will need in the setup page to enable or disable the chat with some
 settings maybe."* And, before it: *"how much can vercel handle as messages per

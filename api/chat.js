@@ -1,4 +1,4 @@
-/* ── TALKING TO THE STRATEGY OFFICE (§95) ─────────────────────────────────
+/* ── TALKING TO THE STRATEGY OFFICE (§97) ─────────────────────────────────
    Islam: "can we have some sort of a chat but on the platform where on the
    bottom right they have this … they open the chat and they send a message
    there and they have a conversation with one of our team … so it sounds like
@@ -44,7 +44,7 @@ const MAX_SHOT = 3 * 1024 * 1024;
 const MAX_TEXT = 4000;
 const FLAGS = ["issue", "idea", "question"];
 
-/* HOW LONG SOMEBODY COUNTS AS "HERE" (§95.5). Their own browser stamps
+/* HOW LONG SOMEBODY COUNTS AS "HERE" (§97.5). Their own browser stamps
    here_at every time it asks for new messages — 4 seconds while the panel is
    open, 60 while it is not — so 3 minutes is comfortably longer than the slow
    cadence plus a missed beat, and short enough that a closed laptop stops
@@ -81,7 +81,7 @@ const MSG_COLS =
   "id, at, from_office, by_key, by_name, body, page, target, cycle, build, flag, " +
   "(shot IS NOT NULL) AS has_shot";
 
-/* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§96) ───────────────────────
+/* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
    ONE SMALL QUERY, not `readState()`. This endpoint has never read the
    strategy graph — it answers from the two chat tables and the session, which
    is why it is cheap enough to be asked every four seconds — and reading
@@ -142,7 +142,7 @@ module.exports = async function handler(req, res) {
 
     /* ── WHAT THE PERSON'S OWN PANEL ASKS FOR ─────────────────────────
        And the one thing it writes without being told to: `here_at`, which is
-       the whole of the presence test the email rule reads (§95.5). Stamped on
+       the whole of the presence test the email rule reads (§97.5). Stamped on
        the POLL rather than on a send, because being present is about looking
        at the screen, not about having typed. */
     if (action === "mine") {
@@ -154,7 +154,7 @@ module.exports = async function handler(req, res) {
          request to know how to draw itself — and so a switch flipped by the
          office reaches every open browser within one beat rather than on the
          next save. `beat` is the number, not the flag, because the number is
-         what the client sets its clock to (§96). */
+         what the client sets its clock to (§98). */
       out.chat = { on: cfg.on, shots: cfg.shots, promise: cfg.promise,
                    beat: Rules.chatBeat({ fast: cfg.fast }) };
       return send(res, 200, out);
@@ -229,7 +229,7 @@ module.exports = async function handler(req, res) {
        an outsider the shape of the office. */
     if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
 
-    /* THE QUEUE IS PEOPLE, NOT TICKETS (§95.2). Two groups, and the last line
+    /* THE QUEUE IS PEOPLE, NOT TICKETS (§97.2). Two groups, and the last line
        of each conversation so a name has something under it. */
     if (action === "queue") {
       const rows = (await client.query(
@@ -289,7 +289,7 @@ module.exports = async function handler(req, res) {
         waiting: t.waiting, here: !!here, hereAt: t.here_at,
         /* `mail` is BOTH questions at once: can this deployment send at all,
            and has the office asked it to. The line above the reply box says
-           one sentence, so it needs one answer (§96.2). */
+           one sentence, so it needs one answer (§98.2). */
         mail: mailer.configured() && cfg.mail, chatOn: cfg.on, messages: msgs
       });
     }
@@ -305,7 +305,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (action === "reply") {
-      /* REPLYING GOES OFF WITH THE CHAT, deliberately (§96.2). If the corner
+      /* REPLYING GOES OFF WITH THE CHAT, deliberately (§98.2). If the corner
          is not drawn, nobody can open an answer — so a reply that landed would
          be written into a room with no door, and a reply that also EMAILED
          would point somebody at a platform they cannot answer from. Reading
@@ -330,7 +330,7 @@ module.exports = async function handler(req, res) {
         "UPDATE chat_threads SET waiting = false, last_at = now(), seen_by_us = now() " +
         "WHERE person_key = $1", [who]);
 
-      /* ── AND THE ONE THING THAT LEAVES THE PLATFORM (§95.5) ────────
+      /* ── AND THE ONE THING THAT LEAVES THE PLATFORM (§97.5) ────────
          Only if they are not here. The decision is made HERE and reported
          back, because the office was shown which way it would go before
          pressing Send and the two must agree — a screen that predicts and a

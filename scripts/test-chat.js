@@ -1,4 +1,4 @@
-/* ── WHAT THE CHAT ENDPOINT REFUSES (§95) ─────────────────────────────────
+/* ── WHAT THE CHAT ENDPOINT REFUSES (§97) ─────────────────────────────────
    Run against a dev-server with a database behind it:
 
      DATABASE_URL=postgres://… node scripts/dev-server.js 3999 &
@@ -121,7 +121,7 @@ async function signIn(who, password) {
     ok(hers && +hers.unread === 1, "with her message counted unread");
     ok(hers && hers.waiting === true, "and her conversation waiting on us");
 
-    console.log("\nPRESENCE IS DECIDED BY POLLING, AND BY NOTHING ELSE (§95.5).");
+    console.log("\nPRESENCE IS DECIDED BY POLLING, AND BY NOTHING ELSE (§97.5).");
     /* BOTH SIDES OF THE RULE, and the second one has to be staged: she polled
        a moment ago as part of this run, so the only honest way to ask "and
        what about somebody who has been away?" is to age the row. Asserting
@@ -170,7 +170,7 @@ async function signIn(who, password) {
     r = await call("", { action: "mine" });
     ok(r.status === 401, "no session, no conversation");
 
-    /* ── THE SETTINGS, AND THE HALF THAT IS NOT ON SCREEN (§96) ───────
+    /* ── THE SETTINGS, AND THE HALF THAT IS NOT ON SCREEN (§98) ───────
        A switch that only hides a control is decoration (§42, §44). With the
        chat off the corner is not drawn at all, so nothing in the PRODUCT can
        reach these — which is exactly why they are worth a test: the browser is

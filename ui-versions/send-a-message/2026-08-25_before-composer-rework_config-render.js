@@ -4785,107 +4785,59 @@ function sendmsgTargets(){
 
 /* What the resolved list says, drawn on its own so it can be replaced without
    touching the composer around it. */
-/* ── THE AUDIENCE IS A SUMMARY, NOT A LIST OF EVERYBODY (§95) ─────────
-   Islam, on the page as a whole: "the send message needs a reform for a better
-   user experience."
-
-   THE PRIMARY ACTION USED TO RUN AWAY FROM YOU. Every recipient drew a named
-   chip, so the more carefully somebody chose who a message went to, the
-   further Send moved down the page — 299px of chips for 33 people, and this
-   register holds 76. Measured, not guessed: Send sat 1122px down an EMPTY
-   page and further with every tick.
-
-   So the counts are the answer and the names are one press away. Two numbers,
-   because they are two different facts and only one of them is a problem:
-   how many will get it, and how many will not.
-
-   THE SKIPPED COUNT IS NEVER BEHIND THE DISCLOSURE. It is the thing that
-   started all of this — three people silently missed — so it reads on the line
-   whether or not anybody opens the names.
-
-   `SENDNAMES` is a screen preference and lives nowhere but this page's state:
-   who you are sending to is not a thing to remember between sessions. */
-var SENDNAMES = false;
-
 function sendmsgAudienceHtml(){
   var st = sendmsg();
   if (!sendmsgHasAny())
-    return '<span class="why" style="margin:0">Nobody chosen yet \u2014 tick something above.</span>';
+    return '<span class="why" style="margin:0">Nobody chosen yet — tick something above.</span>';
   if (st.asking || !st.aud)
-    return '<span class="why" style="margin:0">Working out who that is\u2026</span>';
+    return '<span class="why" style="margin:0">Working out who that is…</span>';
   if (st.aud.error)
     return '<span class="why" style="margin:0">Could not ask the server: ' + esc(st.aud.error) + '</span>';
 
   var to = st.aud.to || [], sk = st.aud.skipped || [];
 
-  /* ── NOBODY IS THREE DIFFERENT ANSWERS (§75.3, kept whole) ──────────
-     "That comes to nobody with an address" was said for all of them and is
-     true of one. The three are: nothing matched · everything that matched has
-     no address · the server does not hold the register you are looking at. */
+  /* ── NOBODY IS THREE DIFFERENT ANSWERS (§75.3) ──────────────────────
+     "That comes to nobody with an address" was said for all of them, and it is
+     only true of one. The three are: nothing matched · everything that matched
+     has no address · the server does not hold the register you are looking at.
+     The third is the one somebody cannot work out from the screen, so the
+     count the server actually holds is named. */
   if (!to.length) {
     if (sk.length) {
-      return '<div class="audsum bad">' +
-        '<b>Nobody will get this.</b>' +
-        '<span class="why" style="margin:0">The ' +
-          plural(sk.length, "person", "people") +
-          (sk.length === 1 ? ' who matches has' : ' who match have') +
-          ' no usable address.</span>' +
-        '<button class="linkbu audmore" data-audnames="1">' +
-          (SENDNAMES ? "Hide the names" : "Show the names") + '</button>' +
-        '</div>' + (SENDNAMES ? sendmsgNamesHtml([], sk) : '');
+      return '<b>Nobody will get this.</b> <span class="why" style="margin:0">' +
+        'The ' + plural(sk.length, "person", "people") +
+        (sk.length === 1 ? ' who matches has' : ' who match have') +
+        ' no usable address:</span>' +
+        '<div class="audnames">' + sk.map(function(r){
+          return '<span class="chip warnchip">' + esc(r.name) + ' <i>' + esc(r.why) + '</i></span>';
+        }).join("") + '</div>';
     }
     var known = (st.aud.active == null) ? null : st.aud.active;
-    return '<div class="audsum bad"><b>Nobody on the register matches that.</b>' +
+    return '<b>Nobody on the register matches that.</b>' +
       (known === null ? '' :
-        '<span class="why" style="margin:0">The server holds ' + known + ', ' +
+        '<span class="why" style="margin:0"> The server holds ' +
+        plural(known, "active person", "active people") + ', ' +
         (st.aud.withAddress || 0) + ' of them with an address. ' +
         (known === 0
           ? 'Nothing has been saved to it yet.'
-          : 'If somebody you just added is missing, their row had not been saved ' +
-            'when this was asked \u2014 change a tick and it will ask again.') +
-        '</span>') + '</div>';
+          : 'If somebody you just added is missing, their row had not been saved when this was asked — ' +
+            'change a tick and it will ask again.') + '</span>');
   }
 
-  return '<div class="audsum">' +
-      '<span class="pill good">Will get it</span><span class="audn">' + to.length + '</span>' +
-      (sk.length
-        ? '<span class="pill warn">Skipped</span><span class="audn">' + sk.length + '</span>' +
-          '<span class="why" style="margin:0">' + esc(sendmsgSkipWhy(sk)) + '</span>'
-        : '<span class="why" style="margin:0">Nobody is being skipped.</span>') +
-      '<button class="linkbu audmore" data-audnames="1">' +
-        (SENDNAMES ? "Hide the names" : "Show the names") + '</button>' +
-    '</div>' +
-    (SENDNAMES ? sendmsgNamesHtml(to, sk) : '');
-}
-
-/* WHY, IN ONE PHRASE, WHEN THEY ALL SHARE ONE. Every skipped person carries a
-   reason and they are usually the same reason; saying it once on the line is
-   what makes the count actionable without opening anything. Where they differ
-   it says so and the names carry the detail. */
-function sendmsgSkipWhy(sk){
-  var seen = {}, n = 0, first = "";
-  sk.forEach(function(r){
-    var w = String(r.why || "");
-    if (!seen[w]) { seen[w] = 1; n++; if (!first) first = w; }
-  });
-  return n === 1 ? "\u2014 " + first : "\u2014 for several different reasons";
-}
-
-/* SKIPPED FIRST AND NAMED (§75.3). "3 skipped" tells nobody which three, and
-   the fix for every one of them is a different edit on a different row. */
-function sendmsgNamesHtml(to, sk){
-  return '<div class="audnamebox">' +
-    (sk.length
-      ? '<div class="audskip"><b>' + plural(sk.length, "person", "people") + ' skipped</b>' +
-        '<div class="audnames">' + sk.map(function(r){
-          return '<span class="chip warnchip" title="' + esc(r.why) + '">' + esc(r.name) +
-                 ' <i>' + esc(r.why) + '</i></span>'; }).join("") + '</div></div>'
-      : '') +
-    (to.length
-      ? '<div class="audnames">' + to.map(function(r){
-          return '<span class="chip">' + esc(r.name) + '</span>'; }).join("") + '</div>'
-      : '') +
-    '</div>';
+  var head = '<b>' + plural(to.length, "person", "people") + ' will get this</b>';
+  var names = to.length
+    ? '<div class="audnames">' + to.map(function(r){
+        return '<span class="chip">' + esc(r.name) + '</span>'; }).join("") + '</div>'
+    : '';
+  /* SKIPPED PEOPLE ARE NAMED. "3 skipped" tells nobody which three, and every
+     one of them is a different edit on a different row of the register. */
+  var skip = sk.length
+    ? '<div class="audskip"><b>' + plural(sk.length, "person", "people") + ' skipped</b>' +
+      '<div class="audnames">' + sk.map(function(r){
+        return '<span class="chip warnchip" title="' + esc(r.why) + '">' + esc(r.name) +
+               ' <i>' + esc(r.why) + '</i></span>'; }).join("") + '</div></div>'
+    : '';
+  return head + names + skip;
 }
 
 function renderSendMessage(){
@@ -4994,99 +4946,52 @@ function renderSendMessage(){
      entitled to know that what they type at the top is what lands in an inbox
      list, since those are two different places and only one of them is on
      screen. */
-  /* ── THE BUTTON IS PART OF THE MESSAGE (§95) ────────────────────
-     It was a top-level section between the message and Send, with a heading as
-     loud as "Who gets it" — for two optional fields. It is a row under the
-     composer now: same controls, same rules, no longer a step of its own. */
-  var ctarow =
-    '<div class="ctarow">' +
-      '<span class="why" style="margin:0"><b>A button, if you want one.</b> ' +
-        'Both halves or neither \u2014 a button with no link does nothing and a ' +
-        'link with no words is invisible.</span>' +
-      '<input class="fld" id="msgctalabel" value="' + esc(st.ctaLabel) +
-        '" placeholder="Open the platform">' +
-      '<input class="fld" id="msgctahref" value="' + esc(st.ctaHref) +
-        '" placeholder="' + esc(sh.href || "https://\u2026") + '">' +
-    '</div>';
+  var what = section("", "A button", null,
+    '<div class="cfg"><table><tbody>' +
+      '<tr><td style="width:26%"><b>Optional</b><span class="why">Both halves or ' +
+        'neither — a button with no link does nothing and a link with no words is ' +
+        'invisible.</span></td>' +
+        '<td><span class="brandpick">' +
+          '<input class="fld" id="msgctalabel" value="' + esc(st.ctaLabel) +
+            '" placeholder="Open the platform" style="max-width:200px">' +
+          '<input class="fld" id="msgctahref" value="' + esc(st.ctaHref) +
+            '" placeholder="' + esc(sh.href || "https://…") + '" style="max-width:260px">' +
+        '</span></td></tr>' +
+    '</tbody></table></div>');
 
   var look = section("", "Write it",
     "Type straight into the message. The heading is also the subject line people see " +
-    "in their inbox before they open it. Nothing here scrolls \u2014 it grows as you write.",
-    '<div class="mailprev grows" id="msgprev"></div>' + ctarow);
+    "in their inbox before they open it. Nothing here scrolls — it grows as you write.",
+    '<div class="mailprev grows" id="msgprev"></div>');
 
-  /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
-     Pinned to the foot of the pane rather than sitting at the end of the
-     scroll, so it stays put whether the audience is three people or
-     seventy-six — which is the whole complaint, since every recipient used to
-     push it further away.
-
-     THE BUTTON SAYS WHAT IT WILL DO. "Send to 47" is the count that cannot be
-     taken back, on the control that does it; a bare "Send" makes somebody scroll
-     up to check what they are about to do.
-
-     ONE SOLID BUTTON (§94.8's budget). Send is the CTA; Save draft and the test
-     are quiet beside it. */
+  /* ── DRAFTS (§76.1) ─────────────────────────────────────────────
+     Beside Send rather than in a section of its own: saving a draft is the
+     other thing you do when you have finished writing, and putting it three
+     screens away is how a message gets lost instead. */
   var r = st.result;
-  var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
-  var ready = live && sendmsgHasAny() && st.subject.trim() && st.body.trim() && n;
-  var bar =
-    '<div class="sendbar">' +
-      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') + '>' +
-        (n ? 'Send to ' + plural(n, "person", "people") : 'Send') + '</button>' +
+  var go = section("", "Send it",
+    "One message each, never a shared address list — nobody sees who else got it, " +
+    "and a failure names the person it failed for.",
+    '<div class="cfg"><div class="audrow" style="align-items:center">' +
+      '<button class="editbtn apply" id="msgsend"' + (live ? '' : ' disabled') + '>Send</button>' +
       '<button class="editbtn" id="msgdraft"' + (live ? '' : ' disabled') + '>' +
         (st.draftId ? 'Save the draft' : 'Save as a draft') + '</button>' +
-      /* ── SEND ME A COPY FIRST (§95) ────────────────────────────
-         The missing safeguard, and the cheapest one: a message to
-         seventy-six people cannot be recalled, and until now there was no way
-         to see the real thing in your own inbox before it went. It sends THIS
-         message, built by the same builder (§72.3), to the person pressing it
-         — so what they read is what everybody else will read. */
-      '<button class="editbtn" id="msgtestme"' +
-        (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
-        ' title="One copy, to you, before it goes to anybody else">' +
-        'Send me a copy</button>' +
       '<span class="why" id="msgsaid" style="margin:0">' +
         (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
-    '</div>';
-
-  /* WHAT HAPPENED, after a send. It belongs with the record rather than the
-     composer, so it sits above the bar and goes when the next one starts. */
-  var said = (r && r.rows)
-    ? section("", "What happened", null,
-        '<div class="cfg"><div class="audnames">' +
-          r.rows.map(function(x){
-            return '<span class="chip' + (x.ok ? '' : ' warnchip') + '">' + esc(x.name) +
-              (x.ok ? '' : ' <i>' + esc(x.why) + '</i>') + '</span>'; }).join("") +
-        '</div></div>')
-    : "";
-
-  /* ── DRAFTS AND SENT LEAVE THE SCROLL (§95) ─────────────────────
-     §90's move, on the page that needed it next: a thing done occasionally
-     belongs in the header, and the page is for the thing you came to do. Both
-     sat BELOW the Send button, each loading lazily — so somebody arriving to
-     pick up a draft scrolled past the whole composer to find it, and somebody
-     arriving to check what was sent did the same.
-
-     They are dropdowns now, and they carry their counts, so "is there a draft
-     waiting" is answered without opening anything. */
-  var draftMenu = renderDraftMenu();
-  var sentMenu  = renderSentMenu();
+    '</div>' +
+    (r && r.rows ? '<div class="audskip"><b>What happened</b><div class="audnames">' +
+        r.rows.map(function(x){
+          return '<span class="chip' + (x.ok ? '' : ' warnchip') + '">' + esc(x.name) +
+            (x.ok ? '' : ' <i>' + esc(x.why) + '</i>') + '</span>'; }).join("") +
+      '</div></div>' : '') +
+    '</div>');
 
   return cfgHead("Send a message",
       ['<span class="pill kind">SMO</span>',
-       /* ── THE COUNT CARRIES ITS OWN HOOK (§95.7) ─────────────────
-          `paintAudience()` used to find this by `.chip:last-of-type`, and
-          `:last-of-type` counts TAGS rather than classes — so the moment §95.5
-          put two `<span>` dropdowns after the chips in this same header, the
-          selector matched nothing and the header sat on "nobody chosen" while
-          the page had resolved seventy-six. §51.11's fault in the PRODUCT
-          rather than in a check, which is how §93 hit it too: silent, and in
-          the safe-looking direction. */
-       '<span data-audcount>' + (sendmsgHasAny() && st.aud && st.aud.to
-         ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen') +
-       '</span>'],
-      null, false, null, null, draftMenu + sentMenu) +
-    who + look + said + bar + renderSentOne();
+       sendmsgHasAny() && st.aud && st.aud.to
+         ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen'],
+      null, false) +
+    who + look + what + go + renderDraftList() + renderSentList();
 }
 
 /* WHAT IS HALF-WRITTEN. Listed above what was sent, because a draft is
@@ -5102,15 +5007,8 @@ function renderDraftList(){
       : !rows.length
         ? '<span class="why" style="margin:0">No drafts. Write something and press ' +
           '<b>Save as a draft</b>.</span>'
-        /* THE WIDTHS ARE ON THE HEADER ROW, because `.cfg table` is
-           `table-layout:fixed` and fixed layout takes every column width from
-           the header and ignores a body cell's (§46). In a 600px panel the
-           heading was clipped to "Half-wri…" while a 150px actions column sat
-           half empty — and the heading is the ONLY thing that tells one draft
-           from another. */
-        : '<div class="cfg"><table><thead><tr><th style="width:52%">Heading</th>' +
-          '<th style="width:27%">Last saved</th>' +
-          '<th class="cc" style="width:21%">&nbsp;</th></tr></thead><tbody>' +
+        : '<div class="cfg"><table><thead><tr><th>Heading</th><th>Last saved</th>' +
+          '<th class="cc" style="width:150px">&nbsp;</th></tr></thead><tbody>' +
           rows.map(function(d){
             var open = String(st.draftId || "") === String(d.id);
             return '<tr' + (open ? ' class="focusrow"' : '') + '><td><b>' +
@@ -5125,35 +5023,6 @@ function renderDraftList(){
   return section("", "Drafts",
     "A message you have started. Saved on the server, so it is there on any machine you sign " +
     "in from — and it stops being a draft the moment it is sent.", body);
-}
-
-/* ── THE SAME LIST, IN THE HEADER (§95) ───────────────────────────────
-   `renderDraftList()` above is unchanged and is what the panel shows: one
-   renderer, so the list cannot say two different things depending on where it
-   is drawn. This wraps it in the header dropdown and puts the count on the
-   button, which is the part that answers "is there anything waiting" without
-   opening anything. */
-function renderDraftMenu(){
-  var rows = (DRAFTLIST && DRAFTLIST.drafts) || [];
-  var n = rows.length;
-  return '<span class="hmenu' + (DRAFTMENU ? " open" : "") + '">' +
-    '<button class="hmenu-btn" data-draftmenu="1" aria-haspopup="true" ' +
-      'aria-expanded="' + DRAFTMENU + '">Drafts' +
-      (n ? ' <span class="hcount">' + n + '</span>' : '') +
-      ' <span class="hcar">&#9662;</span></button>' +
-    (DRAFTMENU ? '<div class="hmenu-panel wide">' + renderDraftList() + '</div>' : '') +
-    '</span>';
-}
-
-function renderSentMenu(){
-  var rows = (SENTLIST && SENTLIST.messages) || [];
-  return '<span class="hmenu' + (SENTMENU ? " open" : "") + '">' +
-    '<button class="hmenu-btn" data-sentmenu="1" aria-haspopup="true" ' +
-      'aria-expanded="' + SENTMENU + '">Sent' +
-      (rows.length ? ' <span class="hcount">' + rows.length + '</span>' : '') +
-      ' <span class="hcar">&#9662;</span></button>' +
-    (SENTMENU ? '<div class="hmenu-panel wide">' + renderSentList() + '</div>' : '') +
-    '</span>';
 }
 
 /* WHAT WAS SENT. Its own section rather than its own page: the thing you want
@@ -5243,18 +5112,8 @@ function renderSentList(){
       ? '<span class="why" style="margin:0">' + esc(SENTLIST.error) + '</span>'
       : !rows.length
         ? '<span class="why" style="margin:0">Nothing has been sent from here yet.</span>'
-        /* EVERY COLUMN GETS A SHARE, adding to 100 (§95.5). Under
-           `table-layout:fixed` a column left to itself does NOT get the
-           leftover — Chrome hands the excess to the columns that asked, so a
-           118px "Last saved" came out at 243px and the Heading, which is the
-           only thing telling one draft from another, was clipped to
-           "Half-wri…" in a 600px panel. Percentages, because the panel's width
-           is a `min()` of the window. */
-        : '<div class="cfg"><table><thead><tr><th style="width:36%">Subject</th>' +
-          '<th style="width:24%">Sent</th>' +
-          '<th class="cc" style="width:11%">To</th>' +
-          '<th class="cc" style="width:12%">Failed</th>' +
-          '<th style="width:17%">By</th></tr></thead><tbody>' +
+        : '<div class="cfg"><table><thead><tr><th>Subject</th><th>Sent</th>' +
+          '<th class="cc">To</th><th class="cc">Failed</th><th>By</th></tr></thead><tbody>' +
           rows.map(function(m){
             /* THE ROW OPENS (§93.15). The subject is the control, because it is
                the thing somebody is already looking for when they come here to

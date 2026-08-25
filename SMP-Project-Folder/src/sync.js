@@ -38,7 +38,7 @@ var SYNC = (function () {
       document.documentElement.classList.remove("booting");
       document.documentElement.removeAttribute("aria-busy");
     } catch (e) {}
-    /* THE CORNER ARRIVES WITH THE PAGE, NOT BEFORE IT (§95.1). This is the one
+    /* THE CORNER ARRIVES WITH THE PAGE, NOT BEFORE IT (§97.1). This is the one
        place the skeleton comes down, with four ways in (the answer, a failure,
        the 8s backstop, file://) — so hanging the chat off it means the bubble
        can never be drawn on top of the grey, and can never be forgotten by one
@@ -536,6 +536,12 @@ var SYNC = (function () {
     },
     mailHistory: function (done) {
       mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });
+    },
+    /* ONE MESSAGE, AND WHAT HAPPENED TO EACH PERSON (§93.15). The endpoint has
+       existed since §77 and nothing has ever called it — the record was written
+       on every send and could not be read back from any screen. */
+    mailHistoryOne: function (id, done) {
+      mailPost({ action: "historyOne", id: id }, function (err, j) { done(err, err ? null : j); });
     },
     mailTest: function (o, done) {
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,

@@ -27,6 +27,21 @@
    Bump SHELL when anything in the shell list changes — the name IS the
    cache-busting mechanism, and the activate handler deletes every cache that
    is not the current one. */
+/* IT COLLIDED A SECOND TIME, SO THE RULE CHANGED (§94.16).
+   §94.12 said: check `git show origin/main:sw.js` before choosing a name,
+   because a merge will not tell you two sessions picked the same one. That was
+   done — main said v3.25e, so this took v3.25f — and by the time the merge was
+   pushed ANOTHER session had taken v3.25f too. The window between reading main
+   and pushing is exactly as long as running the checks, which is twenty
+   minutes, and a name chosen at the start of it is a name chosen from stale
+   information.
+
+   So the check moves to where it cannot go stale: the name is confirmed
+   against `origin/main` AFTER the last fetch and IMMEDIATELY BEFORE the push,
+   as the final step of a merge rather than the first. Twice in one day is a
+   pattern, not bad luck — and the cost is silent, because the same string on
+   both sides merges cleanly while the bytes behind it differ, so a returning
+   browser serves the other session's build out of its own disk for ever. */
 /* v3.25c, NOT v3.25b — AND THE COLLISION WAS SILENT (§94.12).
    Two sessions merged on the same day and both chose `v3.25b` independently.
    git saw the same string on both sides and merged it without a conflict, so
@@ -40,11 +55,25 @@
    changed, so the name changes. What this adds is that the name has to be one
    NOBODY has served — check `git show origin/main:sw.js` before choosing,
    because a merge will not tell you. */
-/* v3.26 — the corner, and the office's inbox (§95). NOT "v3.25e": origin/main
-   is already serving that name from another session, and a worker caches by
-   NAME, so a browser holding main's copy would never fetch this one (§94.12).
-   Checked with `git show origin/main:sw.js` before choosing, which is the only
-   thing that can tell you — a merge will not. */
+/* v3.25e, AND v3.25d COLLIDED TOO (§94.12, a second time). That rule says
+   to check `git show origin/main:sw.js` before choosing, and I did -- main
+   was serving v3.25c, so v3.25d was free. Main then moved again while this
+   branch was running its sweep, and the other session picked v3.25d as
+   well. git conflicted only because the comments above it differed; had
+   both sides written the bare line, it would have merged silently for the
+   second time in a day.
+
+   SO THE CHECK IS NOT ONCE, IT IS AT THE MOMENT OF THE MERGE -- the same
+   discipline as the fetch-and-compare it rides beside, and for the same
+   reason: main is a moving target and anything read from it goes stale the
+   moment it is read. Checked here against origin/main and against every
+   name this repository has ever carried: v3.25, b, c, d are used. */
+
+/* v3.26 — the corner, the office's inbox and its switch (§97, §98). NOT any
+   v3.25 name: this merge brings in main's v3.25h, and §94.16's rule is that the
+   name is confirmed against origin/main AFTER the last fetch and IMMEDIATELY
+   BEFORE the push, because the window between reading main and pushing is as
+   long as running the checks. Done in that order here. */
 const SHELL = "smp-shell-v3.26";
 const ASSETS = [
   "/",

@@ -6,7 +6,7 @@ css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('present.css').read() + "\n" + open('chat.css').read())
 shell = open('shell.html').read()
 
-# ── WHICH BUILD A MESSAGE WAS SENT FROM (§95.4) ─────────────────────────
+# ── WHICH BUILD A MESSAGE WAS SENT FROM (§97.4) ─────────────────────────
 # Read out of sw.js's SHELL constant rather than written here, because that is
 # the ONE string this project already guarantees changes whenever the built
 # file's bytes do (§91) — a version literal in a source is a version literal

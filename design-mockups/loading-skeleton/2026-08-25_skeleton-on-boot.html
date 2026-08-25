@@ -1,0 +1,267 @@
+<title>Loading Skeleton</title>
+<style>
+  /* SMP tokens, forefront palette, copied from src/_shared.css — so what is
+     being judged is the CHANGE and not a second design language. */
+  :root {
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --r:8px; --r-sm:6px; --r-pill:999px;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#E3E7EE; --line-soft:#EFF2F6;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434;
+    --attn-tx:#7A5D1C; --attn-bg:#F7EFD6;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#8FA2BE;
+    --cta:#A4512C; --cta-ink:#FFFFFF;
+    /* ── THE SKELETON'S OWN GREYS ──
+       Deliberately NOT the tenant's and not the palette's accent — the whole
+       point is that nothing on screen has a colour it will have to change. */
+    --sk:#DFE3EA; --sk-2:#E9ECF1; --sk-bar:#3A4149; --sk-bar-2:#4A525B;
+    /* The mockup's own chrome, never the product's. */
+    --page:#EDEEF1; --pen:#5A6270; --rule:#D6DAE1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#2C323B; --line-soft:#242932;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+      --attn-tx:#E8CA6A; --attn-bg:#332C16;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#7B8695;
+      --cta:#E1935F; --cta-ink:#14161A;
+      --sk:#2B313A; --sk-2:#242932; --sk-bar:#23272E; --sk-bar-2:#2E343C;
+      --page:#0E1013; --pen:#8A93A0; --rule:#282D35;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#2C323B; --line-soft:#242932;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+    --attn-tx:#E8CA6A; --attn-bg:#332C16;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#7B8695;
+    --cta:#E1935F; --cta-ink:#14161A;
+    --sk:#2B313A; --sk-2:#242932; --sk-bar:#23272E; --sk-bar-2:#2E343C;
+    --page:#0E1013; --pen:#8A93A0; --rule:#282D35;
+  }
+
+  body { background:var(--page); color:var(--ink); font-family:var(--sans);
+         margin:0; padding:36px 22px 80px; }
+  .sheet { max-width:1080px; margin:0 auto; display:flex; flex-direction:column; gap:40px; }
+
+  header.top { display:flex; flex-direction:column; gap:10px; }
+  .kick { font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+          font-weight:700; color:var(--pen); }
+  h1 { font-size:26px; line-height:1.2; margin:0; letter-spacing:-.01em; text-wrap:balance; }
+  .lede { font-size:14px; line-height:1.6; color:var(--ink-2); max-width:64ch; margin:0; }
+
+  .block { display:flex; flex-direction:column; gap:14px; }
+  .blabel { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .blabel h2 { font-size:12px; letter-spacing:.13em; text-transform:uppercase;
+               font-weight:700; margin:0; color:var(--ink); }
+  .blabel .tag { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+                 font-weight:700; border-radius:var(--r-pill); padding:3px 10px;
+                 border:1px solid var(--rule); color:var(--pen); }
+  .blabel .tag.bad { border-color:var(--bad); color:var(--bad); }
+  .blabel .tag.next { border-color:var(--cta); color:var(--cta); }
+  .blabel p { margin:0; font-size:13px; color:var(--pen); }
+
+  /* A browser window standing in for the product. */
+  .win { border:1px solid var(--rule); border-radius:12px; overflow:hidden;
+         background:var(--ground); }
+  .winbar { display:flex; gap:6px; align-items:center; padding:9px 12px;
+            background:var(--surface-2); border-bottom:1px solid var(--rule); }
+  .winbar i { width:9px; height:9px; border-radius:50%; background:var(--rule); display:block; }
+  .winbody { min-height:300px; }
+
+  /* ── The product's chrome ─────────────────────────────── */
+  .chrome { background:var(--panel); color:var(--panel-ink); }
+  .chrome.sk { background:var(--sk-bar); }
+  .ctop { display:flex; align-items:center; gap:14px; padding:11px 18px; }
+  .ctop .name { font-size:14px; font-weight:700; letter-spacing:-.01em; }
+  .ctop .org { font-size:13px; color:var(--panel-quiet); }
+  .ctop .sp { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .ctop .chip { font-size:11px; border:1px solid var(--panel-quiet);
+                color:var(--panel-quiet); border-radius:var(--r-pill); padding:4px 11px; }
+  .crow { display:flex; gap:8px; padding:0 18px 9px; align-items:center; }
+  .crow .dest { font-size:11.5px; font-weight:600; color:var(--panel-quiet);
+                border-radius:var(--r-pill); padding:5px 12px; }
+  .crow .dest.on { background:rgb(255 255 255/.13); color:var(--panel-ink); }
+  .ctabs { display:flex; gap:18px; padding:0 18px; background:var(--surface);
+           border-bottom:1px solid var(--line); }
+  .ctabs.sk { background:var(--sk-2); border-bottom-color:var(--sk); }
+  .ctabs span { font-size:12.5px; padding:9px 0 8px; color:var(--ink-3); }
+  .ctabs span.on { color:var(--gold-deep); font-weight:600; box-shadow:inset 0 -2px 0 var(--gold); }
+
+  /* ── The skeleton's blocks ────────────────────────────── */
+  .bar { background:var(--sk); border-radius:var(--r-sm); display:block; }
+  .chrome.sk .bar { background:var(--sk-bar-2); }
+  .pulse { animation:sk 1.5s ease-in-out infinite; }
+  @keyframes sk { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  @media (prefers-reduced-motion:reduce) { .pulse { animation:none; opacity:.8; } }
+
+  .panel { padding:20px 18px; display:flex; flex-direction:column; gap:16px; }
+  .skhead { display:flex; flex-direction:column; gap:9px; }
+  .skrows { display:flex; flex-direction:column; gap:10px; }
+
+  /* ── The real page, for the after ─────────────────────── */
+  .bands { display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:10.5px;
+           color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r); padding:9px 16px; }
+  .bands b { font-size:9.5px; letter-spacing:.11em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; }
+  .bands span { display:flex; align-items:center; gap:6px; }
+  .bands i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .bands-act { margin-left:auto; display:inline-flex; gap:8px; }
+  .editbtn { font:inherit; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+             font-weight:700; color:var(--gold-deep); background:none;
+             border:1px solid var(--gold); border-radius:var(--r-pill); padding:5px 14px; }
+  .editbtn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .scores { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:13px 15px; display:flex; flex-direction:column; gap:9px; }
+  .card h4 { margin:0; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+             color:var(--ink-3); font-weight:700; }
+  .card .big { font-size:30px; font-weight:700; font-family:var(--mono); line-height:1; }
+
+  /* ── Commentary ───────────────────────────────────────── */
+  .why { display:flex; flex-direction:column; gap:8px; border-left:3px solid var(--rule);
+         padding-left:16px; }
+  .why p { margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-2); max-width:68ch; }
+  .why p strong { color:var(--ink); }
+  .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+  .step { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+  .step b { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--cta); }
+  .step p { margin:0; font-size:13px; line-height:1.55; color:var(--ink-2); }
+  .ask { background:var(--surface); border:1px solid var(--cta); border-radius:var(--r);
+         padding:16px 18px; display:flex; flex-direction:column; gap:8px; }
+  .ask h3 { margin:0; font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+            color:var(--cta); font-weight:700; }
+  .ask p { margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-2); }
+  @media (max-width:720px) { .scores { grid-template-columns:1fr; } }
+</style>
+
+<div class="sheet">
+
+  <header class="top">
+    <div class="kick">SMP &middot; mockup &middot; 25 Aug 2026</div>
+    <h1>Nothing wears a colour it will have to change</h1>
+    <p class="lede">What the platform shows in the moment between opening and the server
+      answering. Today it shows a whole page in the wrong colours &mdash; and, on a client
+      deployment, somebody else&rsquo;s data.</p>
+  </header>
+
+  <div class="block">
+    <div class="blabel"><h2>Today</h2><span class="tag bad">the glitch</span>
+      <p>Paints the file&rsquo;s baked colours and content, then repaints when the database answers.</p></div>
+    <div class="win"><div class="winbar"><i></i><i></i><i></i></div>
+      <div class="winbody">
+        <div class="chrome">
+          <div class="ctop"><span class="name">Strategy Management Platform</span>
+            <span class="org">&middot; Raya Trade</span>
+            <span class="sp"><span class="chip">Theme</span><span class="chip">Sign out</span></span></div>
+          <div class="crow"><span class="dest on">Group</span><span class="dest">Mobile</span>
+            <span class="dest">Retail Stores</span><span class="dest">B2B Ecomm</span></div>
+        </div>
+        <div class="ctabs"><span class="on">Strategy</span><span>Performance</span></div>
+        <div class="panel">
+          <div class="bands"><b>Reading the colours</b>
+            <span><i style="background:var(--good)"></i> On track</span>
+            <span><i style="background:var(--attn)"></i> Needs attention</span>
+            <span class="bands-act"><span class="editbtn cta">Report</span></span></div>
+          <div class="scores">
+            <div class="card"><h4>Key objectives</h4><span class="big" style="color:var(--attn)">78%</span></div>
+            <div class="card"><h4>Pillars</h4><span class="big" style="color:var(--attn)">74%</span></div>
+            <div class="card"><h4>Execution</h4><span class="big" style="color:var(--attn)">81%</span></div>
+          </div>
+        </div>
+      </div></div>
+    <div class="why">
+      <p><strong>Two things arrive late, not one.</strong> The colours are the visible half:
+        the tenant&rsquo;s accent and bar are set on <b>Setup &rarr; Branding</b> and live in
+        the database, so the page opens in the file&rsquo;s colours and swaps when the answer
+        lands.</p>
+      <p><strong>So does the content.</strong> The file has the worked example baked into it.
+        On a client deployment that means a flash of <em>Raya Trade&rsquo;s</em> units and
+        figures before their own appear &mdash; which is worse than a colour shift and is the
+        same fix.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel"><h2>Proposed</h2><span class="tag next">while loading</span>
+      <p>Neutral grey in the shape of the page. No accent, no tenant colour, no content.</p></div>
+    <div class="win"><div class="winbar"><i></i><i></i><i></i></div>
+      <div class="winbody">
+        <div class="chrome sk">
+          <div class="ctop">
+            <span class="bar pulse" style="width:210px;height:13px"></span>
+            <span class="sp"><span class="bar pulse" style="width:64px;height:20px;border-radius:99px"></span>
+              <span class="bar pulse" style="width:74px;height:20px;border-radius:99px"></span></span></div>
+          <div class="crow">
+            <span class="bar pulse" style="width:66px;height:20px;border-radius:99px"></span>
+            <span class="bar pulse" style="width:82px;height:20px;border-radius:99px"></span>
+            <span class="bar pulse" style="width:96px;height:20px;border-radius:99px"></span>
+            <span class="bar pulse" style="width:74px;height:20px;border-radius:99px"></span></div>
+        </div>
+        <div class="ctabs sk">
+          <span><span class="bar pulse" style="width:70px;height:11px"></span></span>
+          <span><span class="bar pulse" style="width:88px;height:11px"></span></span>
+        </div>
+        <div class="panel">
+          <div class="skhead">
+            <span class="bar pulse" style="width:min(46%,300px);height:19px"></span>
+            <span class="bar pulse" style="width:min(66%,470px);height:11px;background:var(--sk-2)"></span>
+          </div>
+          <div class="skrows">
+            <span class="bar pulse" style="height:62px"></span>
+            <span class="bar pulse" style="height:62px;opacity:.82"></span>
+            <span class="bar pulse" style="height:62px;opacity:.64"></span>
+          </div>
+        </div>
+      </div></div>
+    <div class="why">
+      <p><strong>Grey is the whole idea.</strong> Nothing on this screen has a colour it will
+        have to change &mdash; not the bar, not the tabs, not a scoring band. So there is
+        nothing left to shift when the answer lands: the real page simply replaces it, once.</p>
+      <p><strong>It does not pretend to be a particular page.</strong> Until the server says who
+        you are, the platform does not know whether you are opening a unit&rsquo;s plan or the
+        group&rsquo;s performance &mdash; a rail-and-pane skeleton would be right for one and
+        wrong for the other. A heading and three blocks is true of both.</p>
+      <p>The blocks fade gently rather than sitting still, because a static grey page reads as
+        broken. It holds still for anyone whose device asks for less motion.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel"><h2>The rules it follows</h2>
+      <p>A loading state that can get stuck is worse than the glitch it replaces.</p></div>
+    <div class="steps">
+      <div class="step"><b>Only where there is a server</b>
+        <p>Opened as a file there is nothing to wait for, so the skeleton never appears at all.</p></div>
+      <div class="step"><b>Never sticks</b>
+        <p>If the database cannot be reached, the page paints anyway &mdash; the same fallback
+          that runs today, just after the skeleton instead of before it.</p></div>
+      <div class="step"><b>A backstop</b>
+        <p>If the answer has not come in a few seconds, it stops waiting and paints. Nobody is
+          left looking at grey.</p></div>
+      <div class="step"><b>No blink</b>
+        <p>A fast answer would otherwise flash the skeleton on and off. It stays a moment once
+          shown, so it reads as one step rather than a stutter.</p></div>
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>What I need a yes on</h3>
+    <p>1 &middot; While the platform waits for the database, it shows this grey skeleton &mdash;
+      the bar included &mdash; instead of the page in the wrong colours.</p>
+    <p>2 &middot; The skeleton is shape-neutral: a heading and three blocks, not a copy of any
+      one page.</p>
+    <p>3 &middot; A soft fade while it waits, still for anyone whose device asks for less motion.</p>
+  </div>
+
+</div>

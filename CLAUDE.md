@@ -941,12 +941,43 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and JPEG with the smaller kept** — a screenshot is smaller as PNG, a
   photograph seven times smaller as JPEG, and the file's own type predicts
   neither. No migration: it lands in the `review` row's `extra`.
-- **Deliverables and outcomes (one table since v3.21, §53.4):** a project's two
-  kinds of evidence read as ONE table with a **Type** column, on all three
-  project panes — while the SCORE still keeps them apart, half per SIDE
-  (`projPerf`). Reading them together and scoring them together are different
-  questions. A deliverable has **no due and no owner**: it is delivered when the
-  project ends, and the project's owner owns it. `delivDue()` no longer exists —
+- **ONE TABLE, TWO HALVES (§96, amending §53.4):** a project's two kinds of
+  evidence are still ONE table on all three project panes, and the SCORE still
+  keeps them apart half per SIDE (`projPerf`) — reading them together and
+  scoring them together are different questions, and §96 changes neither
+  answer. What went is the single **header row**: `Measured as` named the
+  delivery kind on a deliverable and the **direction** on an outcome, and
+  `Target` (plus `Measured at` on the plan pane) stood empty for every
+  deliverable. **A dead cell is the table asking a row a question its kind
+  cannot answer.** `dxSplit()` is the ONE builder all three panes call: a band
+  opens each half on `--panel`, so a half opens the way a table opens (§41.10),
+  and a quiet strip declares that half's columns. **The `#` and the NAME hold
+  their position, and the column a score is read from is LAST on both halves**
+  (`Reads` on Performance, `Note` beside `Reported` on Reporting) — a score
+  column that moves between halves is one nobody can run their eye down. A
+  cell is `[label, class, colspan]`, and **the colspan is what lets a shorter
+  half end where the longer one does**. Three things go with the split: the
+  **Type** column (the band says it — `dxTag()` is deleted, not left unused,
+  §24), the **shared numbering** (§53.4 ran it across the table BECAUSE it was
+  one list and said so; with two lists, two rows called 1 is the truth), and
+  the **paired Add row** (each half's button says only its own name).
+  **`Finish` → `Due date` and `Measured at` → `Measure date`**, on the panes,
+  the deck and both workbooks — **stored fields keep their spelling**, and the
+  workbook writes the new label and READS EITHER (§58, §65). The `"Measured at
+  Q4 2026"` pills are left alone deliberately: a column heading is a noun, a
+  pill is a sentence. `src/checks/project-tables.py` asserts **the problem, not
+  the layout** (§94.8) — no dead cell, each half's colspans adding up to the
+  same grid, both halves ending at the same pixel, and the rename at BOTH ENDS
+  including both spellings through the real reader; it was proved able to fail
+  before it was trusted (§94.5). **A cell holding a CONTROL is answered even
+  when it reads empty**, or the check flags the reporting pane it helps most.
+  **STILL BROKEN AND DELIBERATELY NOT FIXED (§96.6):** `projPlanBody` defines
+  `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
+  bound to nothing — §63's fault on the capability side. Flagged, not fixed:
+  what a drop between the two halves means is a decision.
+- **A deliverable's due and owner (§53.4, unchanged):** a deliverable has **no
+  due and no owner** — it is delivered when the project ends, and the project's
+  owner owns it. `delivDue()` no longer exists —
   an outcome keeps `measureAt`, because a measurement time is a real thing
   somebody chose. The fields are gone from the panes, the deck, both `.xlsx`
   sheets, both CSV column lists, the seed and the database (migration 016) —
@@ -1151,7 +1182,44 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
+*Last Updated: 2026-08-25 &mdash; **&sect;96: one table, two halves.** It opened
+as a question about a column that was there &mdash; *"for the project plans the
+milestones has no due date? or am I confused?"* &mdash; and he was not confused
+about the screen: a milestone has carried `finish` since the capability model
+existed, on all three panes, the deck and both workbooks. It says **Finish**,
+and **55 of the 60 milestones in the demo read a bare quarter** (`Q3`), because
+only the one real project is timelined by date. *A column headed Finish holding
+the word Q3 does not look like a due date*, which is the whole of why he asked.
+Then the real ask: **the mixing of deliverables and outcomes.** &sect;53.4's
+argument survives intact &mdash; they are two kinds of evidence, they are read
+together, and the SCORE still keeps them apart half per side &mdash; but its
+single **header row** could not: `Measured as` named the delivery kind on one
+row and the **direction** on the next, and `Target` and `Measured at` stood
+empty for every deliverable. **A dead cell is the table asking a row a question
+its kind cannot answer**, and the em-dash is the shape a table makes when it has
+been asked to hold two things at once. Still ONE table, split by a band on
+`--panel` so a half **opens the way a table opens**; the `#` and the NAME hold
+their position across the split, and the column a score is read from is LAST on
+both halves. **THE COLSPAN IS THE WHOLE MECHANISM** &mdash; it is what lets a
+half with fewer facts end where the other one does. Three things go with the
+split, and each of them reverses a sentence &sect;53.4 wrote down: the **Type**
+column (the band says it), the **shared numbering** (it ran across the table
+BECAUSE it was one list &mdash; with two lists, two rows called 1 is the truth),
+and the **paired Add row**. **`Finish` becomes `Due date`** on every surface,
+with the stored field keeping its spelling and the workbook reading EITHER
+(&sect;58) &mdash; while the *"Measured at Q4 2026"* pills are deliberately left
+alone, because a column heading is a noun and a pill is a sentence. And the
+check **asserts the problem, not the layout** (&sect;94.8): no dead cell, each
+half's colspans adding up to the same grid, both halves ending at the same
+pixel &mdash; proved able to fail before it was trusted, and taught two things
+that would have made it lie (**a cell holding a CONTROL is answered even when it
+reads empty**, and **Reporting is a MODE**, so pressing for a section row landed
+on Performance twice). **Found and NOT fixed (&sect;96.6):** `projPlanBody`
+defines `sortAttr()` and applies it to neither table, so a project's drag grips
+are bound to nothing &mdash; and `qa.py` reports "14 handles" because it counts
+them.*
+
+*Earlier: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
 solid button** (&sect;94). Three asks in one message, two of them half built
 already, and finding out which half is most of the section. **"I TESTED AND THE
 CUSTODIAN FOUND THE PENS"** &mdash; &sect;31 closed the PLAN and nothing else,

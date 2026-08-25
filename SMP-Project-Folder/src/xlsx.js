@@ -865,7 +865,7 @@ function capPlanWorkbook(c){
       }, []) },
 
     { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measured at"],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measure date"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
@@ -880,7 +880,7 @@ function capPlanWorkbook(c){
       }, []) },
 
     { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "What it covers", "Owner", "Finish"],
+      head:["Project", "Milestone", "What it covers", "Owner", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
@@ -914,7 +914,7 @@ function capProgressWorkbook(c){
       }, []) },
 
     { name:"Outcomes", widths:[30, 40, 14, 14, 18, 18, 16], lockedCols:[6],
-      head:["Project", "Outcome", "Target", "Measured at", "Currently recorded", "New value", "ID"],
+      head:["Project", "Outcome", "Target", "Measure date", "Currently recorded", "New value", "ID"],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.outcomes || []).forEach(function(o){
           acc.push([p.name, o.name, o.target || "no target", o.measureAt || "",
@@ -924,7 +924,7 @@ function capProgressWorkbook(c){
       }, []) },
 
     { name:"Milestones", widths:[30, 40, 14, 16, 18, 16], lockedCols:[5],
-      head:["Project", "Milestone", "Finish", "Current status", "New status", "ID"],
+      head:["Project", "Milestone", "Due date", "Current status", "New status", "ID"],
       validations:[{ range:"E2:E400", list:MS_STATUSES }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
@@ -979,10 +979,18 @@ function capPlanFromWorkbook(c, sheets){
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
-    row.unit = r["Unit"]; row.measure_at = r["Measured at"];
+    row.unit = r["Unit"];
+    /* Measure date since §96, read as either — the same contract the milestone
+       column keeps below, and for the same reason. */
+    row.measure_at = r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
-    row.covers = r["What it covers"]; row.owner = r["Owner"]; row.finish = r["Finish"];
+    row.covers = r["What it covers"]; row.owner = r["Owner"];
+    /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
+       date from §96; somebody is holding a workbook downloaded before that,
+       and a header is a contract. The STORED field keeps its own spelling —
+       renaming `finish` would be a migration for a word nobody reads. */
+    row.finish = r["Due date"] != null ? r["Due date"] : r["Finish"];
   });
 
   return rows.map(function(r){

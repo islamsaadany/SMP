@@ -386,7 +386,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th class="num">Finish</th><th class="num">Status</th>' +
+        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });

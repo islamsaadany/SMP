@@ -11790,3 +11790,140 @@ genuinely used, so a cap replaced by a slightly larger cap fails.
 A zero-width row is skipped rather than failed: Setup has no tab row at all
 (§46.1), and asserting against it would be measuring a thing the page is right
 not to draw.
+
+
+## 96 · One table, two halves (v3.25)
+
+It began as a question about a column that was there: *"for the project plans
+the milestones has no due date? or am I confused?"* He was not confused about
+the screen and the column was not missing — a milestone has carried `finish`
+since the capability model existed, and it is on all three project panes, the
+review deck and both workbooks. What it says is **Finish**, and of the sixty
+milestones in the demo, **fifty-five read a bare quarter** (`Q3`) because their
+project is timelined by quarter; only the one real project — *Average debt
+utilisation report automation*, the Finance plan somebody actually authored —
+carries real dates. A column headed *Finish* holding the word `Q3` does not
+look like a due date, and that is the whole of why he asked.
+
+Then the real ask: *"for deliverables and outcomes the mixing of both caused
+confusion. we can have them in 1 table but we need a split as outcomes has
+target and measure date and deliverables has measured as."*
+
+### 96.1 §53.4's argument survives; its header row does not
+
+§53.4 put a deliverable and an outcome in one table with a **Type** column, and
+everything it argued is still true: they are two kinds of evidence that the
+project achieved what it set out to, they are read together, and the SCORE still
+keeps them apart half each per SIDE (`projPerf`). **Reading them together and
+scoring them together are different questions, and this section changes neither
+answer.**
+
+What did not survive is the single **header row**. One heading cannot name two
+different facts, and it was naming two:
+
+| | on a deliverable | on an outcome |
+|---|---|---|
+| `Measured as` | the delivery kind — *Delivered / not*, *% delivered* | the **direction**, `≥` or `≤` |
+| `Target` | an em-dash, always | the target |
+| `Measured at` | an em-dash, always | when it is measured |
+
+**A dead cell is the table asking a row a question its kind cannot answer**, and
+there were two per deliverable on the plan pane and one on each of the other
+two. The em-dash is the giveaway: it is the shape a table makes when it has been
+asked to hold two things at once.
+
+### 96.2 Still one table, split by a band
+
+He said *1 table*, and it is one `<table>`. A band opens each half — the same
+ground `--panel` gives every table header in the product (§41.10), so a half
+**opens the way a table opens** rather than looking like a row somebody
+shaded — and a quiet strip under it declares that half's columns.
+
+Two things hold across the split, and they are what make it one table rather
+than two stacked:
+
+- **The `#` and the NAME keep their position**, so the eye still runs down one
+  list.
+- **Where a half carries the figure a score is built from, that column is
+  LAST on both halves.** On Performance both halves end in `Reads`; on
+  Reporting both end in `Note`, next to `Reported`, which are the two columns
+  somebody is actually typing into. A score column that moves between halves is
+  a score column nobody can run their eye down.
+
+`dxSplit()` is the one builder all three panes call. Its cells are
+`[label, class, colspan]`, and **the colspan is what lets a half with fewer
+facts still end where the other one does** — a deliverable's *Measured as*
+spans the three columns an outcome uses for direction, target and date.
+
+### 96.3 Three things go with the split
+
+**THE TYPE COLUMN.** The band above the rows already says which kind they are; a
+pill repeating it is the same fact twice — §93's one chip too many, in a
+different table. `dxTag()` is deleted rather than left unused (§24).
+
+**THE SHARED NUMBERING.** §53.4 ran the row number across the whole table
+*because* it was one list, and said so in its comment: *two rows both called 1
+would say it was not*. With two lists, two rows called 1 is the truth. The
+comment is rewritten rather than removed, because the reason it changed is the
+part worth keeping.
+
+**ONE ADD ROW PER HALF.** §53.4 put both buttons under one table because a
+single *"add a row"* would have had to ask which kind — *a question the two
+buttons answer by existing*. The split answers it by where the button sits, so
+each says only its own name.
+
+### 96.4 Finish becomes Due date, on every surface and in both directions
+
+The three panes, the review deck and both workbooks. **The stored field keeps
+its spelling** — renaming `finish` would be a migration for a word nobody
+reads (§58, §65) — and the workbook **writes the new label and reads either**,
+because a header is a contract and somebody is holding a file downloaded last
+week. `Measured at` becomes `Measure date` on the outcome half and on both
+outcome sheets, under the same read-either rule.
+
+**The pills are left alone on purpose.** *"Measured at Q4 2026"* on a not-yet-due
+outcome stays as it is: a column heading is a noun and a pill is a sentence, and
+rewriting the sentence to match the noun would make it read worse.
+
+### 96.5 The check asserts the problem, not the layout
+
+`src/checks/project-tables.py`, and the shape is §94.8's lesson taken
+seriously — *a check written against the last instruction has to be rewritten
+every time somebody changes their mind; a check written against the PROBLEM
+survives it.* It never asks where a column sits or how wide it is. It asks
+whether a **dead cell** survives anywhere, whether each half's colspans **add up
+to the same grid** (two halves under one `<table>` share one column grid, so a
+header row that totals wrong staggers every cell under it — a counting fault
+that would look like a styling wobble), whether the last column of the two
+halves **ends at the same pixel**, and whether the milestone column says *Due
+date* — asserting **both ends** of the rename (§90) and, for the workbook,
+**both spellings** through the real reader.
+
+Two things it had to be taught, both of which would have made it lie:
+
+- **A cell holding a CONTROL is answered even when it reads empty.** The
+  reporting pane's Note is a box waiting to be typed into; counting that as a
+  dead cell flagged the one pane the split helps most.
+- **Reporting is a MODE, and Performance carries one section.** Written to press
+  for a section row on all three pages, it landed on Performance twice and
+  would have reported it under two names — §50.6's exact fault, which cost
+  twelve versions the first time.
+
+**And it was proved able to fail before it was trusted** (§94.5): an em-dash
+cell injected into a live row is caught, and a colspan broken by hand is caught.
+A suite printing *all passed* is worth what its assertions can detect.
+
+### 96.6 Found while restructuring, not fixed: the drag handles reorder nothing
+
+`projPlanBody` defines `sortAttr()` and **never applies it to either table**, so
+a project's deliverables, outcomes and milestones draw drag grips in arranging
+mode that are bound to nothing — §63's fault on the capability side, and §48's
+comparison-against-a-field-nobody-sets in a third guise: nothing throws, every
+check that asks whether the handle is in the document passes, and `qa.py`
+reports *"14 handles"* because it counts them.
+
+Left alone deliberately and flagged instead. It is a behaviour change on a page
+this section was asked to relabel, the fix has a real question inside it (the
+plan pane's rows now sit in two halves of one table, so what a drop between
+halves should mean is a decision, not a detail), and CLAUDE.md's rule is that
+touching something the user did not mention is asked first.

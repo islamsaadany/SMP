@@ -2334,71 +2334,22 @@ function splitOrPane(list, sel, rail, pane){
 function delivKindPill(d){
   return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
 }
-/* ── ONE TABLE, TWO HALVES (§96) ───────────────────────────────────────
-   §53.4 put a deliverable and an outcome in one table with a Type column,
-   and its argument survives: they are two kinds of evidence that the project
-   achieved what it set out to, they are read together, and the SCORE still
-   keeps them apart half each per SIDE (projPerf). What did not survive is the
-   single HEADER ROW. Islam: "the mixing of both caused confusion … we can
-   have them in 1 table but we need a split."
+/* ── ONE TABLE, TAGGED (§53.4) ─────────────────────────────────────────
+   A deliverable and an outcome were two tables, one after the other, on all
+   three project panes. Islam: they belong in the same table with a tag saying
+   which is which. They are two kinds of evidence that the project achieved
+   what it set out to — which is exactly why the SCORE still keeps them apart,
+   half each per SIDE (projPerf). Reading them together and scoring them
+   together are different questions, and only the first one was asked.
 
-   He is describing a table asking every row a question the other kind cannot
-   answer. `Measured as` meant the delivery kind on a deliverable and the
-   DIRECTION on an outcome — one heading over two different facts — while
-   `Target` and `Measured at` stood empty for every deliverable on the plan
-   pane and `Target` for every one on the other two.
-
-   So: still one table, split by a band, each half declaring its own columns.
-   The Type column goes with the split — the band above the rows already says
-   which kind they are, and a pill repeating it is the same fact twice (§93's
-   one chip too many). The `#` and the NAME hold their position across the
-   split so the eye still runs down one list, and where a half has a figure
-   the score is built from (`Reads`) it stays in the LAST column for both
-   halves, so that column still runs down one edge.
-
-   This is also the shape the product already had everywhere else: the plan
-   workbook has carried separate Deliverables and Outcomes sheets with exactly
-   these columns since §16.4, and the review deck a slide each since §15. The
-   screen was the last surface merging them. */
+   The tag is a column rather than a pill tucked beside the name: with two
+   values and two only, a column is the thing you can run your eye down. */
 var DX_HEADING = "Deliverables and outcomes";
-var DX_HALVES = {
-  d: { title: "Deliverables", sub: "what the project hands over", empty: "No deliverables yet" },
-  o: { title: "Outcomes",     sub: "what it is meant to change",  empty: "No outcomes yet" }
-};
-/* The band wears the ground every table header in the product wears (§41.10),
-   so each half OPENS the way a table opens; the column strip under it is the
-   quiet one. Both are `th` inside the tbody, deliberately: a table has one
-   `<thead>`, and the hover and last-row rules are written against `td`. */
-function dxBand(cols, kind){
-  var h = DX_HALVES[kind];
-  return '<tr class="dxband"><th colspan="' + cols + '">' + h.title +
-    '<em>' + h.sub + '</em></th></tr>';
+function dxTag(kind){
+  return '<span class="pill kind">' + (kind === "o" ? "Outcome" : "Deliverable") + '</span>';
 }
-/* A cell is [label, class, colspan] — the colspan is what lets a half with
-   fewer facts than the other still line its last column up with it. */
-function dxHead(cells){
-  return '<tr class="dxhead">' + cells.map(function(c){
-    return '<th' + (c[1] ? ' class="' + c[1] + '"' : '') +
-      (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
-  }).join("") + '</tr>';
-}
-/* AN EMPTY HALF SAYS SO. Dropping the band for a project with no outcomes
-   would hide the fact that it has none, which is the thing worth knowing
-   (§45.2: a feature that renders nothing looks like one that was not built).
-   Skipped where an add row follows, because the add row is the empty state. */
-function dxNone(cols, kind, skip){
-  return skip ? "" : '<tr class="notdue"><td class="idx">&mdash;</td><td colspan="' +
-    (cols - 1) + '">' + DX_HALVES[kind].empty + '</td></tr>';
-}
-function dxSplit(cols, d, o){
-  return '<div class="scroll"><table><tbody>' +
-    dxBand(cols, "d") + dxHead(d.head) + d.rows + dxNone(cols, "d", d.rows || d.add) + (d.add || "") +
-    dxBand(cols, "o") + dxHead(o.head) + o.rows + dxNone(cols, "o", o.rows || o.add) + (o.add || "") +
-    '</tbody></table></div>';
-}
-/* The row number restarts per half. §53.4 ran it across the whole table
-   BECAUSE it was one list, and said so; with two lists, two rows called 1 is
-   the truth rather than a mistake. */
+/* The row number runs across the whole table, not once per kind: it is one
+   table now, and two rows both called 1 would say it was not. */
 function dxIdx(i){ return '<td class="idx">' + (i + 1) + '</td>'; }
 function delivShown(d){
   var v = delivReads(d);
@@ -2472,32 +2423,28 @@ function capKOTable(c){
 }
 
 function projPerformanceBody(p, fk){
-  /* A DELIVERABLE HAS NO TARGET, so it no longer shows a dash under one
-     (§53.4 removed the field; the column outlived it by two versions).
-     `Reads` is the last column on BOTH halves — it is the figure projPerf is
-     built from, and a score column that moves between halves is a score
-     column nobody can run their eye down. */
-  var dRows = p.deliverables.map(function(d, i){
-    return '<tr>' + dxIdx(i) + '<td>' + esc(d.name) +
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
-      '<td colspan="2" class="cc">' + delivShown(d) + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      '<td class="num">&mdash;</td>' +
+      '<td class="cc">' + delivShown(d) + '</td>' +
       '<td class="num final">' + pct(delivReads(d)) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  }).join("") + p.outcomes.map(function(o){
     if (o.progress == null) {
-      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="cc">' + dxTag("o") + '</td>' +
         '<td class="num">' + esc(o.target) + '</td>' +
         '<td colspan="2" class="cc"><span class="pill kind">Measured at ' + esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) +
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) +
       (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
   }).join("");
-  var dxRows = dxSplit(5,
-    { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Reads", "num"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Reads", "num"]], rows: oRows });
   var mRows = p.milestones.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td>' +
@@ -2513,9 +2460,10 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' + dxRows +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Reads"], dxRows) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Due date","Progress"], mRows);
+    miniTable(["#","Milestone","Finish","Progress"], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -2627,47 +2575,35 @@ function projPlanBody(p, fk){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
-  /* MEASURED AS BELONGS TO A DELIVERABLE AND A DIRECTION TO AN OUTCOME, and
-     for two versions one heading carried both (§96). Each half declares its
-     own columns now; the deliverable's kind spans the three the outcome uses
-     for direction, target and date, because a half with fewer facts still has
-     to end where the other one does. */
-  var dRows = p.deliverables.map(function(d, i){
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
+      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (++n) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", d.name, "", function(v){ d.name = v; }) : esc(d.name)) +
         xb("deliverables", d.id) + '</td>' +
-      '<td colspan="3">' + delivKindPill(d) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      '<td class="cc">' + delivKindPill(d) + '</td>' +
+      '<td class="num">&mdash;</td>' +
+      '<td class="cc">&mdash;</td></tr>';
+  }).join("") + p.outcomes.map(function(o, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
+      (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (++n) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
         xb("outcomes", o.id) + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="cc">' + esc(o.dir) + '</td>' +
       '<td class="num">' + f(o.target, function(v){ o.target = v; }) + '</td>' +
       '<td class="cc">' + (ed
         ? inputOr("plan", o.measureAt || "", "", function(v){ o.measureAt = v; })
         : esc(o.measureAt || "\u2014")) + '</td></tr>';
-  }).join("");
-  /* ONE ADD ROW PER HALF. §53.4 put both buttons under one table because a
-     single "add a row" would have had to ask which kind; the split answers
-     that by where the button sits, so each says only its own name. */
-  /* dxAdd, not addRow: there is a GLOBAL addRow used by the unit's plan pane,
-     and a `var` of the same name in a function that later wants the global is
-     exactly the collision §56.7 records — one binding, no textual conflict,
-     silent until the day somebody reaches for the other one. */
-  var dxAdd = function(what, label){
-    return ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
-      '<button class="linkbu" data-rowadd="' + what + '|' + esc(p.id) + '">' + label +
-      '</button></td></tr>' : '';
-  };
-  var dxRows = dxSplit(5,
-    { head: [["#", "idx"], ["Deliverable"], ["Measured as", "", 3]], rows: dRows,
-      add: dxAdd("deliverable", "Add a deliverable") },
-    { head: [["#", "idx"], ["Outcome"], ["Direction", "cc"], ["Target", "num"],
-             ["Measure date", "cc"]], rows: oRows,
-      add: dxAdd("outcome", "Add an outcome") });
+  }).join("") +
+  /* TWO ADD ROWS UNDER ONE TABLE, because §53.4 made it one table of two KINDS
+     and a single "add a row" would have to ask which — a question the two
+     buttons answer by existing. */
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
+      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
+      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
+    '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
@@ -2720,9 +2656,9 @@ function projPlanBody(p, fk){
             return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
-    dxRows +
+    miniTable(["#","Deliverable or outcome","Type","Measured as","Target","Measured at"], dxRows) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
-    miniTable(["#","Milestone","What it covers","Owner","Due date"], mRows) +
+    miniTable(["#","Milestone","What it covers","Owner","Finish"], mRows) +
     overrunNote(p);
 }
 
@@ -2731,11 +2667,15 @@ function renderFnProjects(fnKey){
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
-  /* Gone here for the same reason and in the same breath (§94.15, §53.5):
-     a unit and a function are the same product, and a button removed from one
-     side of the navigation switch and left on the other is exactly the drift
-     that rule exists to stop. */
-  return caps.map(function(c){
+  /* THE ARRANGE BUTTON, for somebody who may reorder but has no pen — §63.3's
+     rule, and the reason it is a rule: tying the handles to the pen alone
+     takes reordering away from the people who use it most, silently. Hidden
+     while the pen is on, because the pen already turned the handles on and a
+     button reading "Done" for a mode it did not start lies about what pressing
+     it will do. */
+  var arr = (canArrange("unit", "fn:" + fk) && !ed)
+    ? '<div class="pageact">' + arrangeBtn("unit", "fn:" + fk) + '</div>' : '';
+  return arr + caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -2805,36 +2745,32 @@ function projReportBody(p, may, fk){
   /* EVERY DELIVERABLE IS ASKED. The dimmed "Not asked — due Q4" row went with
      the due date itself (§53.4); an OUTCOME still has one, because a
      measurement time is a real thing somebody chose. */
-  /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, so a dead column is worse
-     here than anywhere: every deliverable carried a dash under `Target`,
-     because a deliverable has no target (§53.4). Split, the deliverable's
-     name takes back that width, and `Reported` and `Note` — the two columns a
-     person is actually typing into — hold the same place on both halves. */
-  var dRows = p.deliverables.map(function(d, i){
-    /* Still no kind pill beside the box: the box itself already says whether
-       it is delivered-or-not or a percentage, and the half's heading says the
-       rest. */
-    return '<tr>' + dxIdx(i) + '<td colspan="2">' + esc(d.name) + '</td>' +
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      /* A deliverable has no target: the box beside it already says whether
+         it is delivered-or-not or a percentage, so the kind pill that used to
+         sit here would only be saying it twice, under a heading that is not
+         its own. */
+      '<td class="num">&mdash;</td>' +
       '<td class="cc">' + (d.kind === "pct"
         ? capEntryBox(d, "%", may, d.name)
         : capPickBox(d, may, [["","\u2014"],["yes","Delivered"],["no","Not yet"]], d.actual)) + '</td>' +
       '<td class="notecol">' + capNoteBox(d, may) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  }).join("") + p.outcomes.map(function(o){
     if (!outcomeDue(o)) {
-      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="cc">' + dxTag("o") + '</td>' +
         '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 measured at ' +
         esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
-  var dxRows = dxSplit(5,
-    { head: [["#", "idx"], ["Deliverable", "", 2], ["Reported", "cc"], ["Note"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Reported", "cc"], ["Note"]],
-      rows: oRows });
   var mRows = p.milestones.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td>' +
@@ -2844,9 +2780,10 @@ function projReportBody(p, may, fk){
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' + dxRows +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Note"], dxRows) +
     '<h4 class="mini">Milestones</h4>' +
-    miniTable(["#","Milestone","Due date","Progress","Note"], mRows);
+    miniTable(["#","Milestone","Finish","Progress","Note"], mRows);
 }
 
 function capReportBody(c){
@@ -3156,38 +3093,14 @@ function renderUnitPlan(u){
      where you already knew you were - the same redundancy the chrome shed in
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
-  /* ── THE ARRANGE BUTTON IS GONE FROM HERE (§94.15) ───────────────
-     Islam: "remove the arrange button from the units and functions as it's
-     already embedded in the edit button — when I press the pencil I can
-     arrange, so the button is not needed."
-
-     IT IS §94.3 CATCHING UP WITH ITSELF. §63.3 kept an explicit button for a
-     precise reason: "a BU head has no pen — mayEditPlan() is the SMO's — and
-     could arrange before this, so they keep an explicit button; tying the
-     handles to the pen alone would have taken reordering away from the people
-     who use it most, silently." §94.3 then closed reordering to the office,
-     which is the only group of people who DO have the pen — so the sentence
-     that justified the button had stopped being true, and what was left was a
-     second control doing what the pen beside it already does.
-
-     A CONTROL WITH NO AUDIENCE OF ITS OWN IS NOT A CHOICE, IT IS A DUPLICATE.
-     It also had to be hidden while the pen was on (a button reading "Done" for
-     a mode it did not start lies about what pressing it will do), so the two
-     were already an either/or dressed as two things.
-
-     THE GROUP KEEPS ITS OWN, and that is not an inconsistency: the group's
-     Performance page has no pen at all, so `arrangeBtn("group")` is the only
-     way to reorder units, themes and capabilities. The button is redundant
-     exactly where a pen sits beside it.
-
-     `return` STAYS ON THE SAME LINE AS ITS EXPRESSION. Deleting the leading
-     `arr +` left it alone on a line, and automatic semicolon insertion ends
-     the statement there — the function returns undefined and every line below
-     becomes dead code. This file already carries that scar on
-     renderGroupFoundation(), which rendered the literal word "undefined" for
-     versions; the note is here so the next deletion of a leading term does not
-     re-earn it. */
-  return (arranging("unit", u.ukey)
+  /* The Arrange control, for somebody who may reorder but has no pen (§63.3).
+     Hidden while the pen is on, because the pen already turned the handles on
+     and a button reading "Done" for a mode it did not start is a lie about
+     what pressing it will do. */
+  var arr = (canArrange("unit", u.ukey) && !(EDIT_PAGE.plan && mayEditPlan()))
+    ? '<div class="pageact">' + arrangeBtn("unit", u.ukey) + '</div>' : '';
+  return arr +
+    (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +

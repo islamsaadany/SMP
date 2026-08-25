@@ -1868,6 +1868,29 @@ The fix is the `-tx` twins applied to `num.final`, `rnum`, `.appear b` and the
 `SMALL` suffix on that page. It is small; it is a visual change to a page Islam
 looks at, so it waits for his word (rule 1c).
 
+### 16.17 Every secondary button's HOVER fails contrast in light mode
+
+*Found 2026-08-25 while building §95, and NOT fixed there — it is one token pair
+governing every `.editbtn` in the platform, and §95 was asked for a page, not a
+palette (rule 1c, and §16.15's precedent one line above).*
+
+`.editbtn:hover` paints `--gold-deep` (`#8A6B22`) on `--over-bg` (`#F7EFD6`):
+**4.34:1 against a needed 4.5.** Dark mode is clear. It is §38.5's family for
+the sixth time — an accent that reads as a mark and fails as type — and §38.5
+already records the answer that works: **move the GROUND, not the mark**, so
+the hover would go to `--surface-2` and the accent would stay what it is.
+
+**Why nothing has ever seen it.** `scripts/contrast-sweep.py` walks pages and
+states, and **a hover is neither** — nothing in the suite has ever moved a
+mouse onto a control and measured what it becomes. This surfaced by accident:
+Chromium keeps `:hover` after a click, `checks/send-message.py` presses *Send me
+a copy* a few lines before it measures, and the button was still lit. **The
+accident is the finding worth keeping** — every `:hover`, `:focus` and
+`:disabled` colour in this product is unmeasured, and this is the first one
+anybody has looked at.
+
+The fix is small and the sweep extension is not. Both wait for Islam's word.
+
 ### 16.12 Images in review mode — BUILT in v3.18
 
 Review mode should accommodate **images**: a screenshot of a platform or an
@@ -11791,6 +11814,263 @@ A zero-width row is skipped rather than failed: Setup has no tab row at all
 (§46.1), and asserting against it would be measuring a thing the page is right
 not to draw.
 
+### 94.15 The Arrange button goes, because §94.3 took away its reason
+
+> *"Remove the arrange button from the units and functions as it's already
+> embedded in the edit button — when I press the pencil I can arrange, so the
+> button is not needed."*
+
+He is right, and the interesting part is *why* it was there. §63.3 kept it for a
+precise, stated reason:
+
+> *"A BU head has no pen — `mayEditPlan()` is the SMO's (§31) — and could
+> arrange before this, so they keep an explicit button: tying the handles to the
+> pen alone would have taken reordering away from the people who use it most,
+> silently."*
+
+**§94.3 closed reordering to the office**, who are exactly the people who *do*
+have the pen. So the sentence that justified the button stopped being true the
+same day, and what was left was a second control doing what the pen beside it
+already does. **A control with no audience of its own is not a choice, it is a
+duplicate** — and the two were already an either/or dressed as two things,
+because the button had to be hidden whenever the pen was on (a button reading
+"Done" for a mode it did not start lies about what pressing it will do).
+
+**THE GROUP KEEPS ITS OWN, AND THAT IS THE POINT RATHER THAN AN EXCEPTION.** The
+group's Performance page has no pen at all, so `arrangeBtn("group")` is the only
+way to reorder units, themes and capabilities. The button is redundant precisely
+where a pen sits beside it, and nowhere else — which is why "remove the Arrange
+button", read one page too widely, would have taken away the one that still
+does something.
+
+Gone from both sides in the same breath (§53.5): a button removed from a unit
+and left on a function is exactly the drift that rule exists to stop.
+
+**AND IT NEARLY SHIPPED RETURNING `undefined`.** The unit's Plan ended
+`return arr + (…)`; deleting the leading term left `return` alone on a line, and
+automatic semicolon insertion ends the statement there — the function returns
+undefined and everything below it becomes dead code. This file already carries
+that scar on `renderGroupFoundation()`, which rendered the literal word
+"undefined" for versions. Caught by reading the diff before building; the check
+now reads `#panel` for the word, because **the page renders it rather than
+throwing**, so nothing else would have said so.
+
+The check asserts **both ends**: that the button is absent, and that pressing
+the pen still produces handles — 13 on a unit, 14 on a capability. Proving the
+button is gone proves nothing on its own, because a build that had lost the
+handles too would pass it.
+
+*(A note on the check that found nothing: the first run reported the function's
+pen giving zero handles. The product was fine — the test navigated by setting
+`current` directly, which does not drop modes, so the page arrived with the pen
+already on and the click turned it OFF. §51.11's shape, in a scratch script: the
+measurement was true and it was measuring the wrong state.)*
+---
+
+### 94.16 The cache name collided a second time, so the rule moved
+
+§94.12 said: check `git show origin/main:sw.js` before choosing a `SHELL` name,
+because two sessions can pick the same one and **a merge will not tell you** —
+the same string on both sides merges cleanly while the bytes behind it differ,
+and a returning browser then serves the other session's build out of its own
+disk for ever.
+
+That was done. Main said `v3.25e`, so this took `v3.25f` — and by the time the
+merge was ready to push, another session had taken `v3.25f` too.
+
+**THE WINDOW BETWEEN READING MAIN AND PUSHING IS AS LONG AS RUNNING THE
+CHECKS**, which is twenty minutes on this repo, and a name chosen at the start
+of it is a name chosen from stale information. So the check moves to where it
+cannot go stale: **the name is confirmed against `origin/main` after the last
+fetch and immediately before the push** — the final step of a merge rather than
+the first.
+
+Twice in one day is a pattern rather than bad luck. It is the same shape as
+§91's original fault (a returning browser served the old platform out of its own
+disk) reached from a third direction, and the reason it keeps arriving is that
+every symptom of it is invisible from inside git.
+
+## 95 · The composer stays one screen (v3.25)
+
+Islam: *"the send message needs a reform for a better user experience. evaluate
+the page and come back to me with your proposal and mockup of how this page
+should be interacted with what's missing and the page design and flow."*
+
+Evaluated, drawn, signed off, built. Six changes, and the argument under five of
+them is the same one: **the page had exactly one part whose size was not fixed,
+and everything else was below it.**
+
+### 95.1 The audience is a summary, not a list
+
+Every resolved recipient rendered as a chip. On this tenant a group-wide send
+comes to seventy-six people, so ticking one box put roughly nine hundred pixels
+of names between the message and the button that sends it — and the fault is not
+that the names are long, it is that **the one thing on the page that grows with
+the tenant sat above everything the person came to do.** Add a unit, and the
+Send button moves.
+
+So the block is a **bounded summary**: how many will get it, how many will not,
+why not in one phrase where they share one, and *Show the names* for the rest.
+It measures under 140px at seventy-six recipients and does not grow.
+
+**THE SKIPPED COUNT IS NEVER BEHIND THE DISCLOSURE.** It is the fault that
+started this whole thread — three people silently missed (§87, §93.15) — so it
+reads on the line whether or not anybody opens the names, and the names when
+opened put the skipped **first**, because "3 skipped" tells nobody which three
+and each one is a different edit on a different row.
+
+§75.3's three different "nobody" answers are kept whole: nothing matched ·
+everything that matched has no address · the server does not hold the register
+you are looking at. A summary that collapsed those into one line would be
+undoing the section that separated them.
+
+`SENDNAMES` is a **screen preference that is not even remembered** — it lives in
+a page variable and nowhere else. Who you are sending to is not a thing to carry
+between sessions (§25, §47.1, and this is the case where even `localStorage` is
+too much memory).
+
+### 95.2 The bar does not move, and the button says what it will do
+
+*Send* sat at the end of the scroll, which is why the audience pushed it away.
+It is a **sticky bar at the foot of the window** now, carrying Send, Save draft,
+*Send me a copy* and whatever the page last said. It is pressable at scroll 0
+and at the end of the page, and the check measures that with
+`elementFromPoint` at the button's own centre rather than asking whether the
+element exists — §90 and §93.4 are both controls that were present, styled and
+enabled while hitting `BODY`, and neither would have failed a query.
+
+**THE COUNT IS ON THE CONTROL THAT ACTS.** *Send to 76 people* rather than
+*Send*: the number that cannot be taken back belongs on the button, not a scroll
+away in a summary.
+
+**ONE SOLID FILL** — §94.8's budget, on the next page along. Send is the CTA;
+Save draft and the test are quiet beside it, and the check asserts the **order
+of loudness** rather than any particular colour.
+
+### 95.3 Send me a copy
+
+The missing safeguard, and the cheapest one there is: a message to seventy-six
+people cannot be recalled, and until now the only way to see the real thing was
+to send the real thing. This builds **the same message with the same builder**
+(§72.3) and sends one copy — the subject unprefixed, or the preview is a preview
+of something else.
+
+**IT GOES TO THE PERSON SIGNED IN, NEVER THE PERSON BEING VIEWED AS.**
+`viewer()` is the simulation (§45.1) and the SMO uses it constantly; a test that
+followed it would put a real message in a real colleague's inbox, sent from a
+screen the sender was only looking through. `SYNC.person()` is the session,
+which is the one thing the viewer switcher cannot move.
+
+**The address comes off the register**, because the session carries a key, a
+name and a role and no address (`api/auth.js`) — and where the register holds
+none for them the page says so and names the screen to fix it, rather than
+failing at the API with somebody else's error message.
+
+### 95.4 The confirmation is the platform's own
+
+It was `confirm()` — the browser dialog, which a person can silence permanently
+with a checkbox on some other site, after which **the most irreversible act in
+this product happens on one press with nothing shown.** §69.22 removed exactly
+this from the register's password reset for exactly this reason, and this is the
+more dangerous of the two.
+
+And it gets to say more. A native dialog is one line of text; this one names the
+subject, the count, that nobody sees who else got it, that there is no undo —
+and, the part that matters, **who will not receive it**, which is the fault this
+whole thread is about.
+
+### 95.5 Drafts and Sent leave the scroll
+
+§90's move, on the page that needed it next. Both sat **below** the Send button,
+each loading lazily, so somebody arriving to pick up a draft scrolled past the
+whole composer to find it, and somebody arriving to check what was sent did the
+same. They are header dropdowns now, carrying their counts, so *is there a draft
+waiting* is answered without opening anything.
+
+`renderDraftList()` and `renderSentList()` are **unchanged** and are what the
+panels show: one renderer, so the list cannot say two different things depending
+on where it is drawn.
+
+### 95.6 The button is part of the message
+
+*A button, if you want one* was a top-level section between the message and
+Send, with a heading as loud as *Who gets it* — for two optional fields. It is a
+row under the composer now: same controls, same rules, no longer a step of its
+own.
+
+### 95.7 The one control a partial repaint did not update
+
+Found by the new check, in the assertion that looked too obvious to write.
+
+`paintAudience()` writes the server's answer into `#audout` and the header chip
+and **deliberately does not call `paint()`** — the composer beside it may have a
+half-typed sentence in it, and a repaint arriving mid-thought is the fault §71.2
+was about. That was right while the count lived in those two places. §95.2 put
+it on the **Send button**, which `paint()` draws and this never touched.
+
+So the button said *Send* for the entire life of every message: tick a box, the
+page repaints with no answer yet, the answer arrives here a moment later, and
+the one control that had to carry the number is the one thing not updated.
+**THE RULE IS §29.5's, one level down: whoever rewrites part of a screen owns
+everything that part decides, not just the element they were thinking about.**
+
+The same replacement killed the disclosure. `[data-audnames]` was bound in
+`wire()` like everything else, and `paintAudience()` replaces the innerHTML that
+button lives in — **at the only moment there is ever anything to disclose.** It
+is bound on `#audout` instead, which survives, because that element is only ever
+replaced by `paint()`, and `paint()` runs `wire()` after it. And it redraws the
+block rather than the page, for the same reason `paintAudience()` exists at all.
+
+### 95.8 The check that could not live in `qa.py`
+
+`src/checks/send-message.py`. Every other screen check opens the built file over
+`file://`, where `SYNC.isLive()` is false — and **this whole page is gated on a
+server**: the audience is resolved by one (§74.2), the drafts and the sent list
+are its records. Opened from a file the page says *there is no server here to
+send from* and every measurement is of an empty screen — §45.2's fault, which
+becomes §51.11's the moment nobody notices.
+
+So it serves the built file with a stub answering the four calls this page
+makes, and it deliberately **does not measure the resolver**: who a set of
+criteria comes to is `lib/audience.js`'s answer, tested against a real register
+elsewhere, and a stub that reproduced it would be a second copy of a rule (§42).
+What is measured is what the page does with the answer.
+
+Two of its assertions are about the shape of the measurement rather than the
+product, and both are old lessons:
+
+- **Shown, not merely present.** `closeModal()` drops a class and leaves the
+  markup where it is (§3.2, §48.3), so asking whether `.sendconfirm` exists
+  calls an open dialog closed and a closed one open.
+- **`elementFromPoint` answers about the viewport.** The first run reported the
+  header's Drafts button as unreachable because the page had been scrolled to
+  the end a moment earlier — §68.10's fault in miniature, a correct build called
+  broken.
+
+### 95.9 And the contrast sweep had never seen any of this
+
+`scripts/contrast-sweep.py` walks every Setup page, this one included, over
+`file://` — where `SYNC.isLive()` is false. So what it has been measuring here
+for as long as the page has existed is the **empty state**: no counts, no
+capsules, no dropdown panels, no confirmation dialog. §45.2's fault, reported as
+a clean page every time.
+
+So the surfaces this version added are measured in `send-message.py`, in both
+themes, each as **its own subtree** — a modal scanned with the page behind it
+counts that page's failures again under a second name (§50.6) — and with the
+sweep's **own** function, pulled out of its source rather than copied, the way
+`test-clean-parity.js` reads `clearedGraph()` out of the platform (§67). Two
+contrast rules would drift, and the one that drifts is the one nobody is
+looking at.
+
+All clear in both themes. And it found something else on the way, which is
+§16.17: **every `:hover` colour in this product is unmeasured**, because a
+sweep that walks pages and states never touches a control. Chromium keeps
+`:hover` after a click, the check presses *Send me a copy* a few lines earlier,
+and the still-lit button measured 4.34:1 — `.editbtn:hover`, the product's
+standard secondary button, on every page, since long before this version.
+Recorded rather than quietly changed: it is one token pair governing every
+button in the platform, and §95 was asked for a page.
 
 ## 96 · One table, two halves (v3.25)
 

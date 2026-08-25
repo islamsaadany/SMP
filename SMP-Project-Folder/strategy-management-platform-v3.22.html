@@ -2599,6 +2599,101 @@
   .warnchip { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
   .warnchip i { font-style:normal; opacity:.85; padding-left:4px; }
 
+  /* ══ SEND A MESSAGE (§95) ══════════════════════════════════════════
+     THE AUDIENCE IS A SUMMARY, NOT A LIST. Every resolved recipient used to
+     render as a chip, so seventy-six people put the Send button most of a
+     screen below the message it belongs to — the count is on the line and the
+     names are one press away.
+
+     THE SKIPPED COUNT IS NEVER BEHIND THE DISCLOSURE, which is why it is a
+     capsule beside the good one rather than a line inside the names box: it is
+     the fault that started this whole thread (§93.15). */
+  .audsum { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .audsum .audn { font:700 15px/1 var(--sans); color:var(--ink);
+                  margin-right:4px; }
+  .audsum.bad b { color:var(--bad-tx); font-weight:700; }
+  .audsum .audmore { margin-left:auto; white-space:nowrap; }
+  .audnamebox { border-top:1px dashed var(--line); margin-top:11px; }
+
+  /* A ROW UNDER THE COMPOSER, not a section of its own: two optional fields
+     had a heading as loud as "Who gets it" (§95). */
+  .ctarow { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;
+            border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
+  .ctarow .why { grid-column:1 / -1; }
+
+  /* THE BAR DOES NOT MOVE. Pinned to the foot of the window rather than
+     sitting at the end of the scroll, so the count and the button stay
+     together whether the audience is three people or seventy-six.
+
+     IT NEEDS AN OPAQUE GROUND OF ITS OWN, or the page scrolls through it —
+     `--ground` is the page's, so the bar reads as the page rather than as a
+     panel laid over it. */
+  .sendbar { position:sticky; bottom:0; z-index:20;
+             display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+             margin:16px 0 0; padding:12px 0 14px;
+             background:var(--ground); border-top:1px solid var(--line); }
+  .sendbar #msgsaid { flex:1 1 200px; }
+
+  /* THE COUNT ON THE BUTTON THAT OPENS THE LIST (§95) — "is there a draft
+     waiting" is answered without opening anything. */
+  .hcount { display:inline-block; min-width:16px; padding:1px 5px; margin-left:2px;
+            border-radius:999px; background:var(--over-bg);
+            font:700 11px/1.45 var(--sans); color:var(--gold-deep);
+            text-align:center; }
+  .hmenu.open .hcount { background:var(--surface); }
+  /* Wide enough for a table of headings and dates, and capped so a long list
+     scrolls inside the panel instead of running off the window. */
+  .hmenu-panel.wide { width:min(600px, 76vw); max-height:64vh; overflow:auto;
+                      padding:4px 13px 13px; }
+  .hmenu-panel.wide .section { margin:0; }
+  /* §88's 150px cap exists so ONE long value cannot hold a whole table open.
+     It cannot happen here: these two tables are `table-layout:fixed` with an
+     explicit share on every column (§95.5), so a cell's content has no say in
+     the column's width at all — and with the cap left on, a 332px Heading
+     column still clipped its heading at 150px, which is the one thing telling
+     one draft from another. The clip and the hover stay; only the cap goes. */
+  .hmenu-panel.wide { --cell-cap:none; }
+  .hmenu-panel.wide .section-h { margin-top:9px; }
+  .hmenu-panel.wide h2 { font-size:14px; }
+  .hmenu-panel.wide .sec-note { font-size:11.5px; }
+
+  /* THE CONFIRMATION NAMES WHO WILL NOT GET IT. A native `confirm()` is one
+     line of text and can be silenced permanently on some other site; this is
+     the most irreversible act in the product (§95). */
+  .sendconfirm .kv { display:grid; grid-template-columns:92px 1fr; gap:4px 12px; margin:0;
+                     align-items:baseline; padding:7px 0;
+                     border-bottom:1px solid var(--line-soft);
+                     font:400 12.5px/1.55 var(--sans); color:var(--ink-2); }
+  .sendconfirm .kv .k { font:600 10.5px/1.6 var(--sans); letter-spacing:.06em;
+                        text-transform:uppercase; color:var(--ink-3); }
+  .sendconfirm .kv b { color:var(--ink); }
+  /* ── THE THIRD COPY IS THE ONE THAT GETS EXTRACTED ───────────────
+     `.kconfirm .cbtns button` and `.pwset .cbtns button` say the same six
+     declarations twice, and this would have been the third — the project's own
+     rule is flag at two, extract at three. The BASE is added and neither
+     existing block is touched: both are `0,2,1` and keep winning over this
+     `0,1,1`, so nothing already on screen moves, and the next confirmation
+     dialog gets the product's buttons without a fourth copy. */
+  .cbtns { display:flex; gap:6px; justify-content:flex-end; }
+  .cbtns button { display:inline-block; width:auto; white-space:nowrap;
+                  border:1px solid var(--line); border-radius:var(--r-sm);
+                  padding:6px 12px; background:none; cursor:pointer;
+                  font:500 12.5px/1.4 var(--sans); color:var(--ink-2); }
+  .cbtns button:hover { background:var(--surface-2); color:var(--ink); }
+  .cbtns button.danger { border-color:var(--bad); color:var(--bad-tx); }
+  .cbtns button.danger:hover { background:var(--bad-bg); color:var(--bad-tx); }
+
+  .sendconfirm .cbtns { margin-top:16px; }
+  /* AND IT IS AN OUTLINE, LIKE EVERY OTHER CONFIRMATION IN THE PRODUCT. A
+     solid red half was written first and taken out: `--bad` is `#DC2626`
+     light and `#F87171` DARK, and white on the dark one is 2.4:1 — §38.4's
+     rule for the seventh time, that a colour which works as a fill usually
+     fails as type and the reverse. There is no `--bad-ink` token, and adding
+     one to four palettes to fill one button in one dialog is a language change
+     made for a single control (§38's layer rule). The danger here is carried
+     by the words — the dialog says "No undo" in its own row — which is what
+     §95.4 built it to be able to say. */
+
   /* ══ TABLEKIT (spec 012) ═══════════════════════════════════════════
      Prefixed from the first line rather than tidied later (Constitution XIV):
      a component seven tables share is exactly where the next `pname` collision
@@ -7239,6 +7334,9 @@ var PROLES = null;
 var NEWCYCLE = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
+/* Send a message's two header dropdowns (§95). One at a time, like every
+   other header menu: two open panels on one row cover each other. */
+var DRAFTMENU = false, SENTMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────
@@ -18107,15 +18205,11 @@ function renderFnProjects(fnKey){
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
-  /* THE ARRANGE BUTTON, for somebody who may reorder but has no pen — §63.3's
-     rule, and the reason it is a rule: tying the handles to the pen alone
-     takes reordering away from the people who use it most, silently. Hidden
-     while the pen is on, because the pen already turned the handles on and a
-     button reading "Done" for a mode it did not start lies about what pressing
-     it will do. */
-  var arr = (canArrange("unit", "fn:" + fk) && !ed)
-    ? '<div class="pageact">' + arrangeBtn("unit", "fn:" + fk) + '</div>' : '';
-  return arr + caps.map(function(c){
+  /* Gone here for the same reason and in the same breath (§94.15, §53.5):
+     a unit and a function are the same product, and a button removed from one
+     side of the navigation switch and left on the other is exactly the drift
+     that rule exists to stop. */
+  return caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -18536,14 +18630,38 @@ function renderUnitPlan(u){
      where you already knew you were - the same redundancy the chrome shed in
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
-  /* The Arrange control, for somebody who may reorder but has no pen (§63.3).
-     Hidden while the pen is on, because the pen already turned the handles on
-     and a button reading "Done" for a mode it did not start is a lie about
-     what pressing it will do. */
-  var arr = (canArrange("unit", u.ukey) && !(EDIT_PAGE.plan && mayEditPlan()))
-    ? '<div class="pageact">' + arrangeBtn("unit", u.ukey) + '</div>' : '';
-  return arr +
-    (arranging("unit", u.ukey)
+  /* ── THE ARRANGE BUTTON IS GONE FROM HERE (§94.15) ───────────────
+     Islam: "remove the arrange button from the units and functions as it's
+     already embedded in the edit button — when I press the pencil I can
+     arrange, so the button is not needed."
+
+     IT IS §94.3 CATCHING UP WITH ITSELF. §63.3 kept an explicit button for a
+     precise reason: "a BU head has no pen — mayEditPlan() is the SMO's — and
+     could arrange before this, so they keep an explicit button; tying the
+     handles to the pen alone would have taken reordering away from the people
+     who use it most, silently." §94.3 then closed reordering to the office,
+     which is the only group of people who DO have the pen — so the sentence
+     that justified the button had stopped being true, and what was left was a
+     second control doing what the pen beside it already does.
+
+     A CONTROL WITH NO AUDIENCE OF ITS OWN IS NOT A CHOICE, IT IS A DUPLICATE.
+     It also had to be hidden while the pen was on (a button reading "Done" for
+     a mode it did not start lies about what pressing it will do), so the two
+     were already an either/or dressed as two things.
+
+     THE GROUP KEEPS ITS OWN, and that is not an inconsistency: the group's
+     Performance page has no pen at all, so `arrangeBtn("group")` is the only
+     way to reorder units, themes and capabilities. The button is redundant
+     exactly where a pen sits beside it.
+
+     `return` STAYS ON THE SAME LINE AS ITS EXPRESSION. Deleting the leading
+     `arr +` left it alone on a line, and automatic semicolon insertion ends
+     the statement there — the function returns undefined and every line below
+     becomes dead code. This file already carries that scar on
+     renderGroupFoundation(), which rendered the literal word "undefined" for
+     versions; the note is here so the next deletion of a leading term does not
+     re-earn it. */
+  return (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +
@@ -23464,59 +23582,107 @@ function sendmsgTargets(){
 
 /* What the resolved list says, drawn on its own so it can be replaced without
    touching the composer around it. */
+/* ── THE AUDIENCE IS A SUMMARY, NOT A LIST OF EVERYBODY (§95) ─────────
+   Islam, on the page as a whole: "the send message needs a reform for a better
+   user experience."
+
+   THE PRIMARY ACTION USED TO RUN AWAY FROM YOU. Every recipient drew a named
+   chip, so the more carefully somebody chose who a message went to, the
+   further Send moved down the page — 299px of chips for 33 people, and this
+   register holds 76. Measured, not guessed: Send sat 1122px down an EMPTY
+   page and further with every tick.
+
+   So the counts are the answer and the names are one press away. Two numbers,
+   because they are two different facts and only one of them is a problem:
+   how many will get it, and how many will not.
+
+   THE SKIPPED COUNT IS NEVER BEHIND THE DISCLOSURE. It is the thing that
+   started all of this — three people silently missed — so it reads on the line
+   whether or not anybody opens the names.
+
+   `SENDNAMES` is a screen preference and lives nowhere but this page's state:
+   who you are sending to is not a thing to remember between sessions. */
+var SENDNAMES = false;
+
 function sendmsgAudienceHtml(){
   var st = sendmsg();
   if (!sendmsgHasAny())
-    return '<span class="why" style="margin:0">Nobody chosen yet — tick something above.</span>';
+    return '<span class="why" style="margin:0">Nobody chosen yet \u2014 tick something above.</span>';
   if (st.asking || !st.aud)
-    return '<span class="why" style="margin:0">Working out who that is…</span>';
+    return '<span class="why" style="margin:0">Working out who that is\u2026</span>';
   if (st.aud.error)
     return '<span class="why" style="margin:0">Could not ask the server: ' + esc(st.aud.error) + '</span>';
 
   var to = st.aud.to || [], sk = st.aud.skipped || [];
 
-  /* ── NOBODY IS THREE DIFFERENT ANSWERS (§75.3) ──────────────────────
-     "That comes to nobody with an address" was said for all of them, and it is
-     only true of one. The three are: nothing matched · everything that matched
-     has no address · the server does not hold the register you are looking at.
-     The third is the one somebody cannot work out from the screen, so the
-     count the server actually holds is named. */
+  /* ── NOBODY IS THREE DIFFERENT ANSWERS (§75.3, kept whole) ──────────
+     "That comes to nobody with an address" was said for all of them and is
+     true of one. The three are: nothing matched · everything that matched has
+     no address · the server does not hold the register you are looking at. */
   if (!to.length) {
     if (sk.length) {
-      return '<b>Nobody will get this.</b> <span class="why" style="margin:0">' +
-        'The ' + plural(sk.length, "person", "people") +
-        (sk.length === 1 ? ' who matches has' : ' who match have') +
-        ' no usable address:</span>' +
-        '<div class="audnames">' + sk.map(function(r){
-          return '<span class="chip warnchip">' + esc(r.name) + ' <i>' + esc(r.why) + '</i></span>';
-        }).join("") + '</div>';
+      return '<div class="audsum bad">' +
+        '<b>Nobody will get this.</b>' +
+        '<span class="why" style="margin:0">The ' +
+          plural(sk.length, "person", "people") +
+          (sk.length === 1 ? ' who matches has' : ' who match have') +
+          ' no usable address.</span>' +
+        '<button class="linkbu audmore" data-audnames="1">' +
+          (SENDNAMES ? "Hide the names" : "Show the names") + '</button>' +
+        '</div>' + (SENDNAMES ? sendmsgNamesHtml([], sk) : '');
     }
     var known = (st.aud.active == null) ? null : st.aud.active;
-    return '<b>Nobody on the register matches that.</b>' +
+    return '<div class="audsum bad"><b>Nobody on the register matches that.</b>' +
       (known === null ? '' :
-        '<span class="why" style="margin:0"> The server holds ' +
-        plural(known, "active person", "active people") + ', ' +
+        '<span class="why" style="margin:0">The server holds ' + known + ', ' +
         (st.aud.withAddress || 0) + ' of them with an address. ' +
         (known === 0
           ? 'Nothing has been saved to it yet.'
-          : 'If somebody you just added is missing, their row had not been saved when this was asked — ' +
-            'change a tick and it will ask again.') + '</span>');
+          : 'If somebody you just added is missing, their row had not been saved ' +
+            'when this was asked \u2014 change a tick and it will ask again.') +
+        '</span>') + '</div>';
   }
 
-  var head = '<b>' + plural(to.length, "person", "people") + ' will get this</b>';
-  var names = to.length
-    ? '<div class="audnames">' + to.map(function(r){
-        return '<span class="chip">' + esc(r.name) + '</span>'; }).join("") + '</div>'
-    : '';
-  /* SKIPPED PEOPLE ARE NAMED. "3 skipped" tells nobody which three, and every
-     one of them is a different edit on a different row of the register. */
-  var skip = sk.length
-    ? '<div class="audskip"><b>' + plural(sk.length, "person", "people") + ' skipped</b>' +
-      '<div class="audnames">' + sk.map(function(r){
-        return '<span class="chip warnchip" title="' + esc(r.why) + '">' + esc(r.name) +
-               ' <i>' + esc(r.why) + '</i></span>'; }).join("") + '</div></div>'
-    : '';
-  return head + names + skip;
+  return '<div class="audsum">' +
+      '<span class="pill good">Will get it</span><span class="audn">' + to.length + '</span>' +
+      (sk.length
+        ? '<span class="pill warn">Skipped</span><span class="audn">' + sk.length + '</span>' +
+          '<span class="why" style="margin:0">' + esc(sendmsgSkipWhy(sk)) + '</span>'
+        : '<span class="why" style="margin:0">Nobody is being skipped.</span>') +
+      '<button class="linkbu audmore" data-audnames="1">' +
+        (SENDNAMES ? "Hide the names" : "Show the names") + '</button>' +
+    '</div>' +
+    (SENDNAMES ? sendmsgNamesHtml(to, sk) : '');
+}
+
+/* WHY, IN ONE PHRASE, WHEN THEY ALL SHARE ONE. Every skipped person carries a
+   reason and they are usually the same reason; saying it once on the line is
+   what makes the count actionable without opening anything. Where they differ
+   it says so and the names carry the detail. */
+function sendmsgSkipWhy(sk){
+  var seen = {}, n = 0, first = "";
+  sk.forEach(function(r){
+    var w = String(r.why || "");
+    if (!seen[w]) { seen[w] = 1; n++; if (!first) first = w; }
+  });
+  return n === 1 ? "\u2014 " + first : "\u2014 for several different reasons";
+}
+
+/* SKIPPED FIRST AND NAMED (§75.3). "3 skipped" tells nobody which three, and
+   the fix for every one of them is a different edit on a different row. */
+function sendmsgNamesHtml(to, sk){
+  return '<div class="audnamebox">' +
+    (sk.length
+      ? '<div class="audskip"><b>' + plural(sk.length, "person", "people") + ' skipped</b>' +
+        '<div class="audnames">' + sk.map(function(r){
+          return '<span class="chip warnchip" title="' + esc(r.why) + '">' + esc(r.name) +
+                 ' <i>' + esc(r.why) + '</i></span>'; }).join("") + '</div></div>'
+      : '') +
+    (to.length
+      ? '<div class="audnames">' + to.map(function(r){
+          return '<span class="chip">' + esc(r.name) + '</span>'; }).join("") + '</div>'
+      : '') +
+    '</div>';
 }
 
 function renderSendMessage(){
@@ -23625,52 +23791,99 @@ function renderSendMessage(){
      entitled to know that what they type at the top is what lands in an inbox
      list, since those are two different places and only one of them is on
      screen. */
-  var what = section("", "A button", null,
-    '<div class="cfg"><table><tbody>' +
-      '<tr><td style="width:26%"><b>Optional</b><span class="why">Both halves or ' +
-        'neither — a button with no link does nothing and a link with no words is ' +
-        'invisible.</span></td>' +
-        '<td><span class="brandpick">' +
-          '<input class="fld" id="msgctalabel" value="' + esc(st.ctaLabel) +
-            '" placeholder="Open the platform" style="max-width:200px">' +
-          '<input class="fld" id="msgctahref" value="' + esc(st.ctaHref) +
-            '" placeholder="' + esc(sh.href || "https://…") + '" style="max-width:260px">' +
-        '</span></td></tr>' +
-    '</tbody></table></div>');
+  /* ── THE BUTTON IS PART OF THE MESSAGE (§95) ────────────────────
+     It was a top-level section between the message and Send, with a heading as
+     loud as "Who gets it" — for two optional fields. It is a row under the
+     composer now: same controls, same rules, no longer a step of its own. */
+  var ctarow =
+    '<div class="ctarow">' +
+      '<span class="why" style="margin:0"><b>A button, if you want one.</b> ' +
+        'Both halves or neither \u2014 a button with no link does nothing and a ' +
+        'link with no words is invisible.</span>' +
+      '<input class="fld" id="msgctalabel" value="' + esc(st.ctaLabel) +
+        '" placeholder="Open the platform">' +
+      '<input class="fld" id="msgctahref" value="' + esc(st.ctaHref) +
+        '" placeholder="' + esc(sh.href || "https://\u2026") + '">' +
+    '</div>';
 
   var look = section("", "Write it",
     "Type straight into the message. The heading is also the subject line people see " +
-    "in their inbox before they open it. Nothing here scrolls — it grows as you write.",
-    '<div class="mailprev grows" id="msgprev"></div>');
+    "in their inbox before they open it. Nothing here scrolls \u2014 it grows as you write.",
+    '<div class="mailprev grows" id="msgprev"></div>' + ctarow);
 
-  /* ── DRAFTS (§76.1) ─────────────────────────────────────────────
-     Beside Send rather than in a section of its own: saving a draft is the
-     other thing you do when you have finished writing, and putting it three
-     screens away is how a message gets lost instead. */
+  /* ── THE BAR DOES NOT MOVE (§95) ────────────────────────────────
+     Pinned to the foot of the pane rather than sitting at the end of the
+     scroll, so it stays put whether the audience is three people or
+     seventy-six — which is the whole complaint, since every recipient used to
+     push it further away.
+
+     THE BUTTON SAYS WHAT IT WILL DO. "Send to 47" is the count that cannot be
+     taken back, on the control that does it; a bare "Send" makes somebody scroll
+     up to check what they are about to do.
+
+     ONE SOLID BUTTON (§94.8's budget). Send is the CTA; Save draft and the test
+     are quiet beside it. */
   var r = st.result;
-  var go = section("", "Send it",
-    "One message each, never a shared address list — nobody sees who else got it, " +
-    "and a failure names the person it failed for.",
-    '<div class="cfg"><div class="audrow" style="align-items:center">' +
-      '<button class="editbtn apply" id="msgsend"' + (live ? '' : ' disabled') + '>Send</button>' +
+  var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
+  var ready = live && sendmsgHasAny() && st.subject.trim() && st.body.trim() && n;
+  var bar =
+    '<div class="sendbar">' +
+      '<button class="editbtn cta" id="msgsend"' + (live ? '' : ' disabled') + '>' +
+        (n ? 'Send to ' + plural(n, "person", "people") : 'Send') + '</button>' +
       '<button class="editbtn" id="msgdraft"' + (live ? '' : ' disabled') + '>' +
         (st.draftId ? 'Save the draft' : 'Save as a draft') + '</button>' +
+      /* ── SEND ME A COPY FIRST (§95) ────────────────────────────
+         The missing safeguard, and the cheapest one: a message to
+         seventy-six people cannot be recalled, and until now there was no way
+         to see the real thing in your own inbox before it went. It sends THIS
+         message, built by the same builder (§72.3), to the person pressing it
+         — so what they read is what everybody else will read. */
+      '<button class="editbtn" id="msgtestme"' +
+        (live && st.subject.trim() && st.body.trim() ? '' : ' disabled') +
+        ' title="One copy, to you, before it goes to anybody else">' +
+        'Send me a copy</button>' +
       '<span class="why" id="msgsaid" style="margin:0">' +
         (r ? esc(r.msg) : (live ? '' : 'There is no server here to send from.')) + '</span>' +
-    '</div>' +
-    (r && r.rows ? '<div class="audskip"><b>What happened</b><div class="audnames">' +
-        r.rows.map(function(x){
-          return '<span class="chip' + (x.ok ? '' : ' warnchip') + '">' + esc(x.name) +
-            (x.ok ? '' : ' <i>' + esc(x.why) + '</i>') + '</span>'; }).join("") +
-      '</div></div>' : '') +
-    '</div>');
+    '</div>';
+
+  /* WHAT HAPPENED, after a send. It belongs with the record rather than the
+     composer, so it sits above the bar and goes when the next one starts. */
+  var said = (r && r.rows)
+    ? section("", "What happened", null,
+        '<div class="cfg"><div class="audnames">' +
+          r.rows.map(function(x){
+            return '<span class="chip' + (x.ok ? '' : ' warnchip') + '">' + esc(x.name) +
+              (x.ok ? '' : ' <i>' + esc(x.why) + '</i>') + '</span>'; }).join("") +
+        '</div></div>')
+    : "";
+
+  /* ── DRAFTS AND SENT LEAVE THE SCROLL (§95) ─────────────────────
+     §90's move, on the page that needed it next: a thing done occasionally
+     belongs in the header, and the page is for the thing you came to do. Both
+     sat BELOW the Send button, each loading lazily — so somebody arriving to
+     pick up a draft scrolled past the whole composer to find it, and somebody
+     arriving to check what was sent did the same.
+
+     They are dropdowns now, and they carry their counts, so "is there a draft
+     waiting" is answered without opening anything. */
+  var draftMenu = renderDraftMenu();
+  var sentMenu  = renderSentMenu();
 
   return cfgHead("Send a message",
       ['<span class="pill kind">SMO</span>',
-       sendmsgHasAny() && st.aud && st.aud.to
-         ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen'],
-      null, false) +
-    who + look + what + go + renderDraftList() + renderSentList();
+       /* ── THE COUNT CARRIES ITS OWN HOOK (§95.7) ─────────────────
+          `paintAudience()` used to find this by `.chip:last-of-type`, and
+          `:last-of-type` counts TAGS rather than classes — so the moment §95.5
+          put two `<span>` dropdowns after the chips in this same header, the
+          selector matched nothing and the header sat on "nobody chosen" while
+          the page had resolved seventy-six. §51.11's fault in the PRODUCT
+          rather than in a check, which is how §93 hit it too: silent, and in
+          the safe-looking direction. */
+       '<span data-audcount>' + (sendmsgHasAny() && st.aud && st.aud.to
+         ? plural(st.aud.to.length, "recipient", "recipients") : 'nobody chosen') +
+       '</span>'],
+      null, false, null, null, draftMenu + sentMenu) +
+    who + look + said + bar + renderSentOne();
 }
 
 /* WHAT IS HALF-WRITTEN. Listed above what was sent, because a draft is
@@ -23686,8 +23899,15 @@ function renderDraftList(){
       : !rows.length
         ? '<span class="why" style="margin:0">No drafts. Write something and press ' +
           '<b>Save as a draft</b>.</span>'
-        : '<div class="cfg"><table><thead><tr><th>Heading</th><th>Last saved</th>' +
-          '<th class="cc" style="width:150px">&nbsp;</th></tr></thead><tbody>' +
+        /* THE WIDTHS ARE ON THE HEADER ROW, because `.cfg table` is
+           `table-layout:fixed` and fixed layout takes every column width from
+           the header and ignores a body cell's (§46). In a 600px panel the
+           heading was clipped to "Half-wri…" while a 150px actions column sat
+           half empty — and the heading is the ONLY thing that tells one draft
+           from another. */
+        : '<div class="cfg"><table><thead><tr><th style="width:52%">Heading</th>' +
+          '<th style="width:27%">Last saved</th>' +
+          '<th class="cc" style="width:21%">&nbsp;</th></tr></thead><tbody>' +
           rows.map(function(d){
             var open = String(st.draftId || "") === String(d.id);
             return '<tr' + (open ? ' class="focusrow"' : '') + '><td><b>' +
@@ -23702,6 +23922,35 @@ function renderDraftList(){
   return section("", "Drafts",
     "A message you have started. Saved on the server, so it is there on any machine you sign " +
     "in from — and it stops being a draft the moment it is sent.", body);
+}
+
+/* ── THE SAME LIST, IN THE HEADER (§95) ───────────────────────────────
+   `renderDraftList()` above is unchanged and is what the panel shows: one
+   renderer, so the list cannot say two different things depending on where it
+   is drawn. This wraps it in the header dropdown and puts the count on the
+   button, which is the part that answers "is there anything waiting" without
+   opening anything. */
+function renderDraftMenu(){
+  var rows = (DRAFTLIST && DRAFTLIST.drafts) || [];
+  var n = rows.length;
+  return '<span class="hmenu' + (DRAFTMENU ? " open" : "") + '">' +
+    '<button class="hmenu-btn" data-draftmenu="1" aria-haspopup="true" ' +
+      'aria-expanded="' + DRAFTMENU + '">Drafts' +
+      (n ? ' <span class="hcount">' + n + '</span>' : '') +
+      ' <span class="hcar">&#9662;</span></button>' +
+    (DRAFTMENU ? '<div class="hmenu-panel wide">' + renderDraftList() + '</div>' : '') +
+    '</span>';
+}
+
+function renderSentMenu(){
+  var rows = (SENTLIST && SENTLIST.messages) || [];
+  return '<span class="hmenu' + (SENTMENU ? " open" : "") + '">' +
+    '<button class="hmenu-btn" data-sentmenu="1" aria-haspopup="true" ' +
+      'aria-expanded="' + SENTMENU + '">Sent' +
+      (rows.length ? ' <span class="hcount">' + rows.length + '</span>' : '') +
+      ' <span class="hcar">&#9662;</span></button>' +
+    (SENTMENU ? '<div class="hmenu-panel wide">' + renderSentList() + '</div>' : '') +
+    '</span>';
 }
 
 /* WHAT WAS SENT. Its own section rather than its own page: the thing you want
@@ -23791,8 +24040,18 @@ function renderSentList(){
       ? '<span class="why" style="margin:0">' + esc(SENTLIST.error) + '</span>'
       : !rows.length
         ? '<span class="why" style="margin:0">Nothing has been sent from here yet.</span>'
-        : '<div class="cfg"><table><thead><tr><th>Subject</th><th>Sent</th>' +
-          '<th class="cc">To</th><th class="cc">Failed</th><th>By</th></tr></thead><tbody>' +
+        /* EVERY COLUMN GETS A SHARE, adding to 100 (§95.5). Under
+           `table-layout:fixed` a column left to itself does NOT get the
+           leftover — Chrome hands the excess to the columns that asked, so a
+           118px "Last saved" came out at 243px and the Heading, which is the
+           only thing telling one draft from another, was clipped to
+           "Half-wri…" in a 600px panel. Percentages, because the panel's width
+           is a `min()` of the window. */
+        : '<div class="cfg"><table><thead><tr><th style="width:36%">Subject</th>' +
+          '<th style="width:24%">Sent</th>' +
+          '<th class="cc" style="width:11%">To</th>' +
+          '<th class="cc" style="width:12%">Failed</th>' +
+          '<th style="width:17%">By</th></tr></thead><tbody>' +
           rows.map(function(m){
             /* THE ROW OPENS (§93.15). The subject is the control, because it is
                the thing somebody is already looking for when they come here to
@@ -26706,15 +26965,30 @@ var SYNC = (function () {
       });
     }, 180);
   }
+  /* ── EVERYTHING THE ANSWER CHANGES, IN ONE PLACE (§95) ──────────────
+     This used to write the audience block and the header chip and stop there,
+     which was right while the count lived in exactly those two places. §95 put
+     it on the SEND BUTTON — the whole point of "Send to 76 people" is that the
+     number you are about to act on is on the control that acts — and the
+     button is drawn by `paint()`, which this deliberately does not call.
+
+     So it said "Send" for the entire life of every message: tick a box, the
+     page repaints with no answer yet, the answer arrives here a moment later,
+     and the one control that had to carry the count was the one thing not
+     updated. THE RULE IS §29.5's, one level down: whoever rewrites part of a
+     screen owns everything that part decides, not just the element they were
+     thinking about. */
   function paintAudience(){
     var el = document.getElementById("audout");
     if (el) el.innerHTML = sendmsgAudienceHtml();
-    var chip = document.querySelector('.phead2 .hright .chip:last-of-type');
-    if (chip && document.getElementById("msgsend")) {
-      var st = sendmsg();
-      chip.textContent = (sendmsgHasAny() && st.aud && st.aud.to)
-        ? plural(st.aud.to.length, "recipient", "recipients") : "nobody chosen";
-    }
+    var st = sendmsg();
+    var n = (sendmsgHasAny() && st.aud && st.aud.to) ? st.aud.to.length : 0;
+    var chip = document.querySelector("[data-audcount]");
+    if (chip) chip.textContent = n ? plural(n, "recipient", "recipients")
+                                   : "nobody chosen";
+    var send = document.getElementById("msgsend");
+    if (send && !st.busy)
+      send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
   }
 
   function leaveModes(){
@@ -29968,6 +30242,40 @@ var SYNC = (function () {
     var sentClose = document.querySelector("[data-sentclose]");
     if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
+    /* ── SEND A MESSAGE'S HEADER MENUS AND DISCLOSURE (§95) ──────────
+       The same shape as the register's, and one open at a time. */
+    document.querySelectorAll("[data-draftmenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        DRAFTMENU = !DRAFTMENU; SENTMENU = false; paint();
+      });
+    });
+    document.querySelectorAll("[data-sentmenu]").forEach(function(b){
+      b.addEventListener("click", function(e){
+        e.stopPropagation();
+        SENTMENU = !SENTMENU; DRAFTMENU = false; paint();
+      });
+    });
+    /* THE NAMES ARE A DISCLOSURE, not a repaint of the composer — but the
+       audience block is its own element and paint() is what redraws it, so
+       this is one of the few things on this page that may repaint (§35: what
+       must not repaint is the TYPING, and this is not it). */
+    /* ── BOUND ON THE CONTAINER, NOT ON THE BUTTON (§95) ───────────
+       `paintAudience()` replaces `#audout`'s innerHTML, so a handler bound to
+       the button inside it dies the moment the server answers — which is the
+       only moment there is ever anything to disclose. Bound here it survives,
+       because `#audout` itself is only ever replaced by `paint()`, which runs
+       `wire()` after it (§29.5).
+
+       AND IT REDRAWS THE BLOCK RATHER THAN THE PAGE. A full repaint would
+       replace the composer, and the composer may have a half-typed sentence in
+       it that has not reached SENDMSG yet (§35, §71.2). */
+    var audout = document.getElementById("audout");
+    if (audout) audout.addEventListener("click", function(e){
+      if (!e.target.closest("[data-audnames]")) return;
+      SENDNAMES = !SENDNAMES; paintAudience();
+    });
+
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){
       var st = sendmsg(), out = document.getElementById("msgsaid");
@@ -29982,11 +30290,58 @@ var SYNC = (function () {
       if (!st.body.trim()) return say("It needs something in it.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
-      /* THE CONFIRMATION NAMES THE NUMBER, because the number is the thing
-         that cannot be taken back. */
-      if (!confirm("Send \u201c" + st.subject.trim() + "\u201d to " +
-                   plural(n, "person", "people") + "? This cannot be undone."))
-        return;
+      /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
+         It was `confirm()` — the browser dialog, which a person can silence
+         permanently with a checkbox on some other site, after which the most
+         irreversible act in this product happens on one press with nothing
+         shown. §69.22 removed exactly this from the register's password reset
+         for exactly this reason, and this is the more dangerous of the two.
+
+         AND IT GETS TO SAY MORE. A native dialog is one line of text; this one
+         names the subject, the count, and — the part that matters — WHO WILL
+         NOT RECEIVE IT, which is the fault that started this whole thread. */
+      var sk = (st.aud && st.aud.skipped) || [];
+      openModalHtml("Send to " + plural(n, "person", "people") + "?", "",
+        '<div class="sendconfirm">' +
+          '<div class="kv"><span class="k">Subject</span><span>' +
+            esc(st.subject.trim()) + '</span></div>' +
+          '<div class="kv"><span class="k">Goes to</span><span><b>' +
+            plural(n, "person", "people") + '</b>, one message each \u2014 nobody ' +
+            'sees who else got it.</span></div>' +
+          (sk.length
+            ? '<div class="kv"><span class="k">Skipped</span><span><b>' + sk.length +
+              '</b> with no usable address: ' +
+              esc(sk.slice(0, 6).map(function(x){ return x.name; }).join(", ")) +
+              (sk.length > 6 ? ", and " + (sk.length - 6) + " more" : "") + '</span></div>'
+            : '') +
+          '<div class="kv"><span class="k">No undo</span><span>A message that has ' +
+            'gone cannot be recalled.</span></div>' +
+          '<div class="cbtns"><button data-sendno="1">Cancel</button>' +
+          '<button class="danger" data-sendyes="1">Yes, send it</button></div>' +
+        '</div>');
+      var box = document.getElementById("modal-b");
+      if (box) {
+        var no = box.querySelector("[data-sendno]");
+        if (no) no.addEventListener("click", function(){ closeModal(); });
+        var yes = box.querySelector("[data-sendyes]");
+        if (yes) yes.addEventListener("click", function(){ closeModal(); reallySend(); });
+      }
+      return;
+    });
+
+    /* The send itself, lifted out so the confirmation can call it. Everything
+       below this line is what the button used to do after `confirm()` said
+       yes, unchanged. */
+    function reallySend(){
+      var st = sendmsg(), out = document.getElementById("msgsaid");
+      function say(msg, ok){
+        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
+        if (!out) return;
+        out.textContent = msg;
+        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+      }
+      var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
+      var msgsend = document.getElementById("msgsend");
       var sh = commsShape();
       say("Sending to " + plural(n, "person", "people") + "\u2026", null);
       msgsend.disabled = true;
@@ -30020,6 +30375,65 @@ var SYNC = (function () {
         st.draftId = null; DRAFTLIST = null;
         paint();
       });
+      });
+    }
+
+    /* ── SEND ME A COPY (§95) ───────────────────────────────────────
+       The cheapest safeguard there is, and it was missing: a message to
+       seventy-six people cannot be recalled, and until now the only way to see
+       the real thing was to send the real thing. This builds THE SAME message
+       with THE SAME builder (§72.3) and sends one copy, so what the sender
+       reads in their own inbox is what the recipients will read — the subject
+       included, unprefixed, or the preview would be a preview of something
+       else.
+
+       IT GOES TO THE PERSON SIGNED IN, NEVER THE PERSON BEING VIEWED AS.
+       `viewer()` is the simulation (§45.1) and the SMO uses it constantly; a
+       test that followed it would put a real message in a real colleague's
+       inbox, addressed from a screen the sender was only looking through.
+       `SYNC.person()` is the session, which is the one thing the switcher
+       cannot move.
+
+       THE ADDRESS COMES OFF THE REGISTER, because the session carries a key, a
+       name and a role and no address (api/auth.js) — and if the register has
+       none for them it says so and names the row to fix, rather than failing
+       at the API with somebody else's error message. */
+    var msgtestme = document.getElementById("msgtestme");
+    if (msgtestme) msgtestme.addEventListener("click", function(){
+      var st = sendmsg(), out = document.getElementById("msgsaid");
+      function say(msg, ok){
+        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
+        if (!out) return;
+        out.textContent = msg;
+        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
+      }
+      if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
+      if (!st.body.trim()) return say("It needs something in it.", false);
+      var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
+      var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
+      var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
+      if (!addr)
+        return say("There is no address on your own row on the register, so there is " +
+                   "nowhere to send the copy. Add one on People.", false);
+      var sh = commsShape();
+      say("Sending you a copy…", null);
+      msgtestme.disabled = true;
+      SYNC.mailTest({
+        to: addr,
+        subject: st.subject.trim(),
+        html: MAIL.html({
+          org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
+          eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
+          body: st.body.trim(),
+          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
+                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
+        }),
+        fromName: sh.fromName,
+        replyTo: sh.replyTo
+      }, function(err){
+        msgtestme.disabled = false;
+        say(err ? err : ("One copy sent to " + addr + ". Nobody else has had it. " +
+                         "If it is not there, look in the junk folder."), !err);
       });
     });
 
@@ -30949,17 +31363,21 @@ var SYNC = (function () {
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PCOLMENU !== "undefined" &&
+        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+      DRAFTMENU = false; SENTMENU = false; paint();
     }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
+    if (typeof PCOLMENU !== "undefined" &&
+        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU)) {
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
+      DRAFTMENU = false; SENTMENU = false; paint();
     }
   });
 

@@ -181,7 +181,11 @@ A drift between specs and code is a documentation bug — report it before silen
   browser holding the other session's copy would never fetch this one. §91's
   fault by a route §91 did not predict. **`git show origin/main:sw.js` before
   choosing**, in the same breath as the fetch-and-look that precedes every
-  merge: a merge will not tell you.
+  merge: a merge will not tell you. **AND CONFIRM IT AGAIN IMMEDIATELY BEFORE
+  THE PUSH (§94.16)** — it collided a SECOND time the same day, because the
+  window between reading main and pushing is as long as running the checks, and
+  a name chosen at the start of it is chosen from stale information. The
+  confirmation is the LAST step of a merge, not the first.
 - **BUMP `SHELL` IN `sw.js` ON EVERY MERGE THAT CHANGES THE BUILT FILE (§91).**
   Not on a version bump — on a CONTENT change. It sat at `v3.22` through §80 to
   §90 because the built file kept the same filename the whole time, and the
@@ -478,6 +482,23 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Who enters** — behind a tenant switch that is off by default, so turning it on
   is the office deliberately handing naming to the custodian (spec 008 §3B), and
   **a rule cannot close a door somebody has to open on purpose.**
+- **THE ARRANGE BUTTON GOES, BECAUSE §94.3 TOOK AWAY ITS REASON (§94.15):**
+  §63.3 kept an explicit Arrange beside the pen for a stated reason — *"a BU
+  head has no pen and could arrange before this, so they keep an explicit
+  button"* — and §94.3 closed reordering to the office, who all have one. The
+  sentence that justified it stopped being true the same day. **A control with
+  no audience of its own is not a choice, it is a duplicate**, and the two were
+  already an either/or dressed as two things (the button had to hide whenever
+  the pen was on). **THE GROUP KEEPS ITS OWN and that is the point, not an
+  exception**: its Performance page has no pen, so that button is the only way
+  to reorder units, themes and capabilities — "remove the Arrange button" read
+  one page too widely would have taken away the one that still does something.
+  **AND IT NEARLY SHIPPED RETURNING `undefined`**: deleting the leading term of
+  `return arr + (…)` left `return` alone on a line, where automatic semicolon
+  insertion ends the statement — the same scar `renderGroupFoundation()` already
+  carries. The page RENDERS the word rather than throwing, so the check reads
+  `#panel` for it. Assert **both ends** — the button absent AND the pen still
+  producing handles — or a build that lost the handles too would pass.
 - **EVERY PAGE GETS THE WHOLE WINDOW, AND THE FAULT WAS AN ALIGNMENT (§94.13):**
   the complaint reads as "the page is too narrow" and is not quite that — the
   destination row had been let past the cap (`.units-in.folded{max-width:none}`,
@@ -1219,6 +1240,47 @@ defines `sortAttr()` and applies it to neither table, so a project's drag grips
 are bound to nothing &mdash; and `qa.py` reports "14 handles" because it counts
 them.*
 
+*Earlier: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
+(&sect;95, spec 014). Six changes to Send a message, and the argument under five
+of them is the same one: **the page had exactly one part whose size was not
+fixed, and everything else was below it.** Every recipient rendered as a chip,
+so a group-wide send put nine hundred pixels of names between the message and
+the button &mdash; add a unit to the business and Send moves further away. It is
+a **bounded summary** now, and **THE SKIPPED COUNT IS NEVER BEHIND THE
+DISCLOSURE**: it is the fault that started this whole thread (&sect;87), so it
+reads on the line whether or not anybody opens the names, and the names put the
+skipped FIRST, because "3 skipped" tells nobody which three. **THE COUNT IS ON
+THE CONTROL THAT ACTS** &mdash; *Send to 76 people*, on a bar pinned to the foot
+of the window. **SEND ME A COPY** is the missing safeguard and the cheapest one:
+the same message, the same builder, one copy, **to the person SIGNED IN and
+never the person being viewed as** &mdash; `viewer()` is the simulation and a
+test that followed it would put a real message in a real colleague's inbox.
+`confirm()` is gone: a browser dialog can be silenced permanently on some other
+site, and this is the most irreversible act in the product &mdash; the
+platform's own modal names the subject, the count, **who will not receive it**,
+and that there is no undo. Drafts and Sent leave the scroll for header
+dropdowns carrying their counts (&sect;90's move, on the page that needed it
+next). **AND THE PARTIAL REPAINT OWNED MORE THAN IT KNEW** (&sect;95.7):
+`paintAudience()` deliberately does not call `paint()` &mdash; the composer
+beside it may have a half-typed sentence in it &mdash; which was right until the
+count went onto the Send button, the one control it then had to update and did
+not; the same replacement killed *Show the names*, bound in `wire()` inside the
+element being replaced, **at the only moment there is ever anything to
+disclose**. And the header's count was found by `.chip:last-of-type`, which
+counts TAGS &mdash; two dropdown spans went in after the chips and it silently
+matched nothing, so the header read "nobody chosen" over a resolved seventy-six.
+**THE CHECK COULD NOT LIVE IN `qa.py`**: every other screen check opens the
+built file over `file://`, where this whole page is the empty state &mdash; and
+so is what the CONTRAST SWEEP has been calling clean for as long as the page has
+existed. `src/checks/send-message.py` serves the built file with a stub, and
+measures contrast with the sweep's OWN function read out of its source rather
+than copied (&sect;67). Which found &sect;16.17 by accident: Chromium keeps
+`:hover` after a click, so a still-lit button measured 4.34:1 &mdash;
+`.editbtn:hover`, on every page, since long before this version. **Every
+`:hover`, `:focus` and `:disabled` colour in this product is unmeasured**,
+because a sweep that walks pages and states never touches a control. Recorded,
+not quietly changed.*
+
 *Earlier: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
 solid button** (&sect;94). Three asks in one message, two of them half built
 already, and finding out which half is most of the section. **"I TESTED AND THE
@@ -1281,7 +1343,13 @@ had been let past the 1180 cap and the content had not, so at 1670px the row ran
 edge to edge above a page sitting centred with 238px of nothing down each side.
 Two containers that used to agree stopped agreeing. &sect;93.9 finished: the cap
 comes off everywhere, the 1600 ceiling goes with it, and the check asserts the
-AGREEMENT rather than the number, so a later change to the gutters stays green.*
+AGREEMENT rather than the number, so a later change to the gutters stays green.
+**AND THE ARRANGE BUTTON GOES** (&sect;94.15): &sect;63.3 kept it beside the pen
+for people who had no pen, and &sect;94.3 closed reordering to the office, who
+all have one &mdash; so its reason expired the same day it was written down. The
+group keeps its own, because that page has no pen at all. It nearly shipped
+returning `undefined`: deleting the leading term of `return arr + (…)` left
+`return` alone on a line, and the page RENDERS that word rather than throwing.*
 
 *Earlier: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the

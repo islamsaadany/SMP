@@ -1104,11 +1104,19 @@ function peopleWorkbook(){
                    soft:true });
   }
 
+  /* Built ONCE for the whole file, not per row (§93.8) — and the file has to
+     carry the same value the register shows, or a download-edit-upload round
+     trip would report the two people it separated as a change. */
+  var dnames = displayNames();
   var rows = PEOPLE.map(function(p){
     var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
     return [
-      p.empId || "", p.name, p.title || "", p.email || "", p.phone || "",
-      p.mainbu || "",
+      /* FULL NAME THEN NAME, in PEOPLE_FILE_COLS' order (§93.8). The short one
+         is written as what the register SHOWS — the guess when nobody has
+         corrected it — so the file is a picture of the page, and the reader
+         stores nothing when it comes back unchanged. */
+      p.empId || "", p.name, knownName(p, dnames), p.title || "", p.email || "",
+      p.phone || "", p.mainbu || "",
       /* Where they actually sit, in the words the register shows and the
          reader takes back (§65). Blank for somebody attached to nothing —
          which is a real state, and writing a guess into it would be the file

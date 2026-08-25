@@ -10930,3 +10930,286 @@ timed out for thirty seconds waiting for a ⋮ that the register is **right** no
 to draw: the row was still open from the first grant, and an open row shows Save
 and Cancel where the menu was (spec 012 §2.1). The check now asserts that too,
 rather than working around it.
+
+---
+
+## §93 — Employee stops being a role, and the password column stops lying
+
+Two of Islam's four, and they are the same fault seen twice: **a screen showing
+something true about the platform's internals and false about the client's
+world.**
+
+### 93.1 The floor is not a role
+
+> *"I don't get the employee role. Anyone with no role is employee — if that's a
+> glitch let's fix it. Employee doesn't give the person anything, and if so then
+> let's remove this strange role."*
+
+He is right, and the giveaway is that it could not be taken off anybody. It was
+never granted: §55 derived it for whoever held nothing else, so the register drew
+a chip nobody could remove, on a row that in fact held nothing.
+
+**The floor stays; the role goes.** What somebody on the register with no role
+may open is still a real question, and still the client's to answer — so it is
+still a row on the access matrix, titled **Everyone else** and marked as not a
+role. What changed is that nobody *holds* it: `personRoles()` returns `[]`, the
+chip is gone, and the role picker no longer offers it.
+
+**Stored under the key it always had.** Every deployed tenant's saved access map
+has an `employee` row in it, and a saved map is merged with the defaults rather
+than replacing them (§30.2). Renaming the key would have made the change a
+migration for a word nobody reads (§58's rule) — and worse, would have silently
+reset every tenant that had tightened it.
+
+**THE FLOOR IS READ THE SAME WAY A ROLE IS, or it is wider than a Contributor.**
+The first cut put the fallback inside `grantIn()` alone, and the authoriser test
+found the hole within a minute: `editingRoles()` walks `personRoles()`, which for
+a floor person is empty, so `onlyOwnLines()` answered **false** — and a client
+who set Everyone else to *edit* on their own unit would have given every unroled
+person on the register the right to rewrite their unit's whole plan, which is
+more than a Contributor gets. `rolesOrFloor()` is the one list both read now, and
+`OWN_LINES_ONLY` carries the floor beside `contrib`.
+
+### 93.2 A dash meant "we never asked"
+
+> *"The password status is all dash now, what is that status?"* … *"Some people
+> already changed the passwords, the all -s are not actual, plus I set a temp
+> password already — is that missing now?"*
+
+Nothing is missing. `credentials` is its own table, deliberately outside the
+state graph that a save TRUNCATEs (§69), so every real password and every
+temporary one is exactly where it was.
+
+The column was never asked. The fetch was gated on
+`document.querySelector('[data-edit="people"]')` — **the page's old edit pen**,
+which spec 012 removed when the register went to per-row editing. The gate was
+looking for a control that no longer exists, so `PWSTATES` stayed `null`, and
+`null` renders as the dash that means *not asked yet* (§35). It is gated on the
+register itself now (`.peoplecfg`).
+
+**And a failed ask is not an answer.** The old code returned on error and left
+`PWSTATES` null — so a server that refused, or was unreachable, produced the same
+all-dashes screen as one that was never asked. It stores `{__error}` now, the
+column says **unreadable** with the reason in its title, and the "N with no
+password" count refuses to count over it: counting an error as absence would have
+reported everybody as having no password, which is the same quiet-wrong-answer in
+a different place.
+
+**The lesson is §51.11 from the other side.** That rule says: when a control
+changes shape, grep the *checks* for the old selector. This was the *product*
+holding a selector for a control that had been removed — and it fails the same
+way, silently and in the safe-looking direction.
+
+### 93.3 One chip too many
+
+> *"The unit selected should be a normal selection, not a pill."*
+
+The register's Unit cell drew a `.uchip`. That chip is right where several sit
+side by side and the boundary between them is the point — the BU list's mapping
+cell, which is what it was built for. Here there is exactly one value, in a
+column whose heading already says what it is, so the border drew a box around the
+only thing in the cell. It reads as an ordinary value now, like the row's others.
+
+Left alone, on his own instruction: the role chip's place label. *"Keep it then —
+when I fixed the unit it disappears"* — it is already suppressed where a role has
+one possible place (§92), which is the case that looked wrong.
+
+### 93.4 A note about the units nobody is keeping
+
+> *"I want as well to leave a note somewhere by how many units that doesn't have
+> custodians."*
+
+**On the register**, beside the counts that are already there, because the
+register is where the gap is *closed*: a custodian is given from a row on this
+page, so a count anywhere else would name a problem and point at a different
+screen. Amber, like the two beside it — a unit between custodians is a normal
+state on a Tuesday and a permanent one is a problem. The unit names are on
+hover, because a count with nothing behind it sends somebody looking.
+
+**A retired person is not a custodian.** The seat is a key written on the unit,
+and retiring somebody revokes their roles (§35) without clearing that pointer —
+so asking whether the field is empty would report a unit as covered by somebody
+who cannot sign in. It asks whether a person is there **and** active.
+
+**AND THE PILL PUSHED A BUTTON OFF THE PAGE.** `.phead2` has wrapped since it
+was written; `.hright` inside it never did, so it stayed one row and simply
+overflowed the pane — and *Register file*, the header dropdown §90 had just
+built, went out of reach the moment a sixth chip joined the row. **§90's fault a
+third time**: present in the document, styled, enabled, and hitting `BODY`.
+Every check that asks whether it exists passed; a screenshot showed it in a
+second. The check presses the point now — `elementFromPoint` at the button's own
+centre has to come back as the button — and `.hright` wraps.
+
+### 93.5 A table page is not a notification area
+
+> *"Screenshot — don't bring this again. Here this page is a table page, not for
+> other notifications."*
+
+After a merge the wizard closed and left a **Merge two rows** panel standing
+under the register saying what had happened. That is the same argument §90 made
+when it moved steps 1 and 2 *into* the dialog: what is said about an act belongs
+where the act was.
+
+So the receipt is the wizard's **last step**. The dialog stays open, says what
+it did, and **Close** is what ends it. The register behind is repainted — which
+is where the change becomes a save — and it is a table again.
+
+The order matters and is written down: `mergeReset()` first (it clears every
+field of `PMERGE`, `done` among them), then `done`, then `paint()`, then
+`mergePaint()`. `paint()` is safe here because the overlay lives outside the
+wrap it rewrites.
+
+**And the page-level wiring went with the panel** (§24). Leaving it would have
+been worse than dead code: it was a `document`-wide query for
+`[data-pmerge-close]`, and the dialog's own Close and Cancel carry that
+attribute — so with `paint()` now running while the wizard is open, it would
+have bound a second handler to them, one that resets the merge without closing
+the dialog.
+
+### 93.6 The name column fits the name, and two values copy themselves
+
+> *"The first column with the name needs to fit the name, and make the email and
+> the phone to be copied on clicking on them."*
+
+**The first half reverses §69.21 and §81.1 together.** Three names was the
+column's budget, and §81.1 lengthened it only for the pair it could not
+otherwise tell apart — *Ahmed Mostafa Mohamed El Gebely* and *Ahmed Mostafa
+Mohamed Abou El Einen*. Both were answers to a column that had to stay narrow,
+and the reason it had to has not held since §69.19 made it the **frozen**
+column: it is the one column a wide table never scrolls away from, so it is the
+wrong place to save pixels, and a name cut off in the only place it is written
+is what put one human on this register twice (§87).
+
+Still **one line** — §88 is unchanged; the column grows sideways, never
+downward, and it is exempted from the 150px cap rather than the cap being
+loosened for every cell.
+
+**The cost, measured and recorded rather than glossed:** with the client's
+longest real name — *Abd El Moniem Mohamed Abd El Moniem Mahmoud* — the Person
+column renders at **392px** and the table at **1489px in a 920px pane**. That is
+a wide horizontal scroll with 392px of it permanently spent, and it is the price
+of the ask. `shortName()` is untouched and still what the merge wizard, the
+picker and the audience list use: those are sentences, not a column.
+
+**The second half is small and has one trap in it.** The address and the number
+are the two values on this register that always leave it, and selecting text
+inside a horizontally scrolling table with a frozen column is a drag that starts
+a scroll instead. They are buttons now — real controls, keyboard-reachable,
+announced — that look like the value and copy it on click.
+
+- **The word is written into the element, not painted.** `paint()` would replace
+  the button that was just pressed (§63, learned on Save draft), so the tick is
+  set on the node and put back on a timer, with the original text kept on the
+  node so a second click during the tick does not copy the word *Copied*.
+- **The `execCommand` fallback is not decoration.** `navigator.clipboard` needs
+  a secure context and this product is opened from `file://` every day of its
+  life — so the hidden-textarea path is the one that actually runs here and the
+  promise path is the one that runs in production. A failure says *Press ⌘C*
+  rather than ticking anyway.
+- **The value goes in the `title` beside the hint.** §88's `clipTitles()` only
+  fills a title that is empty, so a bare *"Click to copy"* would have taken the
+  hover away from exactly the values too long to read — the one case the hover
+  exists for.
+
+### 93.7 The Performance page went unmeasured for the third time
+
+Found while reading the contrast sweep's own output rather than its total: it
+printed `(picture sweep skipped: …)` and carried on.
+
+**§50.6 already fixed this once.** It found `unit/perf` measuring the *Plan*
+page twice and the Performance page never — for twelve versions, silently and in
+the safe direction — and fixed it by clicking the tab explicitly, with a comment
+saying so. Then **§69 made the tab read "Performance — not submitted yet"** when
+a submission is owed, the exact-string match `=== 'Performance'` stopped
+matching, the click stopped happening, and the sweep went back to measuring the
+landing page under the name of a page it never opened.
+
+It took two more states with it. `[data-picedit]` only exists on Performance, so
+the picture-slide editor and the deck's picture slide — both opened on purpose by
+§50 precisely because *a state nothing navigates to is a state nothing measures*
+— were never reached, and the sweep said "skipped" in a line nobody read.
+
+Two changes, and the second is the one that matters:
+
+1. **Match the PREFIX.** The suffix is a status, not the name.
+2. **Assert that it worked.** A helper that returns quietly when it found no tab
+   is the same fault with a nicer face. It raises now.
+
+And the assertion is asked of **`currentSub`, not of a `.on` class** — these
+buttons carry no such class, so an assertion written against one would have
+failed always, which is the same lie pointing the other way.
+
+**The total went from 6 to 44 the moment it started measuring**, and not one of
+the 38 is new. They are `71%`, `88%`, `58%` and the `%` beside them at 3.19–3.77
+— **§16.15's list, value for value**: scoring colours used as TYPE on a page
+that never got the `-tx` twins §38.5 gave the rest. One more (`num.final.attn`
+at 2.99 on the slide editor) is the same family on a state that has never been
+measured at all.
+
+They stay recorded and unfixed, on §16.15's own precedent and §25's before it: a
+palette decision does not get made inside a change about the people register.
+What has changed is that they are **in the total** rather than behind a check
+that was quietly looking elsewhere — which is the entire value of the fix.
+
+**43 pages and states before, 44 after.**
+
+### 93.8 Name and Full Name
+
+> *"For the people names, don't you want to have a column for the full name and
+> the user name which might be 2 names only for daily use?"* … *"We can have it
+> Name and Full Name. For the identifiers keep it for the ID and email only."*
+
+**It reverses half of §93.6, a day later, and it is the better answer.** That
+section widened the frozen first column to hold *Abd El Moniem Mohamed Abd El
+Moniem Mahmoud* — 392px of a 920px pane, permanently, on every screen. Splitting
+the two facts gives most of it back: **216px**, with the whole legal name one
+column to the right.
+
+The register was carrying two different facts about what somebody is called in
+one column, and every previous answer was an attempt to make one column serve
+both. §69.21 cut it to two names; §81.1 lengthened it for the pair that clashed;
+§93.6 widened it to fit everything. Two columns is what all three were reaching
+for.
+
+**Not "user name."** Islam's own phrase, and it had to be turned down: the
+register already has a **Sign-in name** column, and two columns whose names both
+suggest a login is exactly how two rows for one human get made (§87). *Name* and
+*Full Name*.
+
+**Stored, not derived, and that is the whole reason it is a field.** The first
+two names are a good guess and a bad rule — plenty of people go by their third
+name, by a shortening, or by something the file never says. A derived-only
+column is one nobody can correct, and correcting it is the point.
+
+- `knownName()` reads (typed, else the guess) and `setKnownName()` writes;
+  clearing it back to the guess **deletes** the key rather than storing it, or a
+  later correction to the full name would leave a stale short one beside it.
+  §50.6's rule: a reader must never create the field it was looking for.
+- **§81.1 moves rather than dies.** It no longer disambiguates a *column* — it
+  disambiguates the **guess**, for anybody who has never corrected theirs, so
+  two people whose first two names match still read as two rows for somebody who
+  has hidden Full Name. A typed value always wins and is never lengthened.
+- The map is built **once** by the three callers that walk the whole register
+  (render, export, file plan), never per row.
+
+**AND THE OLD FILES STILL READ.** Every people workbook downloaded before today
+has a `Name` column holding the *full* name, so the new pair could not simply
+take those headers — read blindly, an old file would put a five-part legal name
+into the short column and leave the full one empty. §58's rule a third time —
+*write the new label, read either* — with the twist that the old header's
+meaning is decided by what sits beside it: **`Full Name` present means `Name` is
+the short one; `Full Name` absent means the file predates the split and its
+`Name` is the full one.** Decidable from the row itself, which is what makes it
+safe.
+
+**`known` IS A LABEL AND NEVER AN IDENTIFIER**, on Islam's explicit instruction:
+*"for the identifiers keep it for the ID and email only."* §87's ladder is Emp ID
+then email and stops; this adds no rung, and nothing — not the upload, not the
+merge, not the door — resolves on it. Two people really can be "Ahmed Mostafa".
+It is a **pick** on an upload like any other field, and the register wins by
+default: it is the column most likely to have been typed by the SMO and left
+alone in an export, so it is exactly the one a file must not overwrite quietly.
+
+No migration: `people.extra` is jsonb and `lib/state-io.js` files every
+unrecognised key there and reads it back — the same mechanism `email`, `phone`
+and `empId` already ride on (§52, on units).

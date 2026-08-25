@@ -169,10 +169,14 @@ with sync_playwright() as p:
     pg.goto(URL)
     pg.wait_for_timeout(1500)
     setup(pg, "people")
+    # THE FLOOR IS NOT A ROLE ANY MORE (§93). Islam: "anyone with no role is
+    # employee — if that's a glitch let's fix it, employee doesn't give the
+    # person anything." So this row holds NOTHING, or a Contributor, which is
+    # the one floor role that is still derived (from being named on a plan).
     floor = pg.evaluate("""() => PEOPLE.filter(x => personActive(x) &&
         personRoles(x).every(r => SMPRules.isOwnLinesRole(r.role)))[0].key""")
     was = pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor)
-    ck("the row starts on the floor role only", was in ("employee", "contrib"), was)
+    ck("the row starts with no role of its own", was in ("", "contrib"), was)
     pg.click('.kebab[data-pmenu="%s"]' % floor)
     pg.wait_for_timeout(250)
     pg.click('[data-pedit="%s"]' % floor)
@@ -183,7 +187,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(600)
     now = pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor)
     ck("picking SMO team gives it, with no second question", now == "smoteam", now)
-    ck("...and the floor role is gone with it", "employee" not in now, now)
+    ck("...and no floor role is left beside it", "employee" not in now, now)
     ck("...and no where control was left waiting",
        pg.query_selector('[data-prole-where="%s"]' % floor) is None)
 

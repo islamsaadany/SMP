@@ -2646,6 +2646,38 @@
   .hmenu-panel input[type=file].vh:focus-visible + .hmenu-item,
   .hmenu-panel label.hmenu-item:focus-within { outline:2px solid var(--focus); outline-offset:-2px; }
 
+  /* The matrix's last row is a STATE, not a role (§93) — quieter, and set off
+     from the eight above it so it does not read as a ninth. */
+  .acgrid tr.floorrow td { border-top:2px solid var(--line); background:var(--surface-2); }
+  .acgrid tr.floorrow .rolecell b { font-weight:600; color:var(--ink-2); }
+
+  /* ── THE NAME COLUMN FITS THE NAME (§93.6, narrowed by §93.8) ─────
+     Islam: "the first column with the name needs to fit the name" — and then
+     "we can have it Name and Full Name", which is the better answer and gives
+     most of the width back. The column holds two names now, not five, so the
+     exemption from §88's 150px cap stays but the cap it replaces is a
+     generous one rather than none at all: the frozen column can never again
+     be widened past a third of the pane by one long legal name.
+
+     Still ONE LINE (§88): it grows sideways, never downward, and the whole
+     value is on the row's hover, which this cell has always carried. */
+  .peoplecfg td.namecell, .peoplecfg thead th.namecell {
+    max-width:260px; white-space:nowrap; }
+
+  /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
+     It has to look like the value, not like a control, or every row grows a
+     button — so it inherits the cell's type and only the underline on hover
+     says it does something. The tick is written into the element by the
+     handler, because paint() would replace the thing just pressed (§63). */
+  .copyval { font:inherit; font-size:13px; color:var(--ink); padding:0; border:0;
+             background:none; text-align:left; display:block; width:100%;
+             max-width:100%; overflow:hidden; text-overflow:ellipsis;
+             white-space:nowrap; cursor:pointer; }
+  .copyval.mono { font-family:var(--mono); font-size:12.5px; }
+  .copyval:hover { text-decoration:underline; text-underline-offset:2px; }
+  .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  .copyval.copied { color:var(--good-tx); text-decoration:none; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -3612,7 +3644,15 @@
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
   .phead2 .secttl{font:400 24px/1.2 var(--serif);margin:0}
-  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px}
+  /* IT WRAPS, or a chip added later pushes the buttons off the page (§93.4).
+     `.phead2` has always wrapped; `.hright` did not, so it stayed one row and
+     simply overflowed its pane — and the register's Register file button went
+     out of reach the moment the units-with-no-custodian count joined five other
+     chips. §90's fault a third time: the control was in the document, styled,
+     enabled and unclickable, and only a screenshot showed it. `min-width:0` is
+     what lets the row shrink at all inside a flex parent. */
+  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px;
+                  flex-wrap:wrap;justify-content:flex-end;min-width:0}
   .phead2 .chip{font-size:11.5px;color:var(--ink-3);background:var(--surface-2);
     border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap}
   .iconwrap{position:relative;display:flex;gap:6px;margin-left:6px}
@@ -4532,19 +4572,22 @@ THEME.apply();
       note:"Runs a supporting function and the capabilities it owns." },
     { key:"contrib", name:"Contributor", scope:"unit",
       note:"Named on a measure or a tactic. Reports against their own work and reads their unit." },
-    /* EMPLOYEE IS THE FLOOR (Islam, 2026-08-23). A normal team member: on the
-       register, attached to a part of the business, carrying none of the
-       strategy. It exists because the register was calling them Contributors —
-       and in the worked example BOTH people the fallback reached were named on
-       nothing at all, so the word described no one it was applied to.
+    /* EMPLOYEE WAS HERE, AND IT WAS NEVER A ROLE (§93, Islam 2026-08-24):
+       "anyone with no role is employee … employee doesn't give the person
+       anything and if so then let's remove this strange role."
 
-       Derived like Contributor and granted like it: never. The difference
-       between the two is a fact the platform already computes — whether
-       anybody typed this person's name onto a measure or a tactic — so it is
-       read rather than stored, and a person becomes a Contributor the moment
-       a plan names them and stops being one the moment it stops. */
-    { key:"employee", name:"Employee", scope:"unit",
-      note:"A normal team member. On the register and attached to a part of the business, named on nothing." }
+       Half right, and the half that was wrong is why it is going. It DID give
+       something — view of the group and of their own unit, which is what let
+       an ordinary person sign in and read anything at all. What it never was
+       is a role: nobody granted it, the × could not take it off, and drawing
+       it as a chip beside Business unit owner claimed somebody held something
+       they did not.
+
+       So the WORD goes and the ACCESS stays, as `NO_ROLE` below: not a role
+       anybody holds, but the floor anybody with no role stands on. The key is
+       still `employee` in ACCESS_DEFAULTS and in every tenant's stored map,
+       because renaming a stored key would silently reset the one thing this
+       change is trying not to move (§30.2). */
   ];
   var ROLE_KEYS = ROLES.map(function (r) { return r.key; });
 
@@ -4761,8 +4804,12 @@ THEME.apply();
 
        Only reached when the person holds no other role, so the scan is
        bounded to the people who have nothing else to be. */
-    if (!out.length && p.unit)
-      out.push({ role: namedInUnit(w, p, p.unit) ? "contrib" : "employee", at:p.unit });
+    /* A plan that names somebody makes them a Contributor of that unit, and one
+       that stops naming them stops. Somebody attached and named on nothing now
+       holds NOTHING — what they may see is NO_ROLE's floor, applied in
+       grantIn() rather than dressed up as a role they never got (§93). */
+    if (!out.length && p.unit && namedInUnit(w, p, p.unit))
+      out.push({ role:"contrib", at:p.unit });
     return out;
   }
   function personRoleKeys(w, p) {
@@ -4817,9 +4864,40 @@ THEME.apply();
 
   /* The most generous answer across the roles somebody holds, each role
      resolving its own OWN. */
+  /* ── WHAT SOMEBODY WITH NO ROLE MAY SEE (§93) ─────────────────────
+     The floor. It is not a role and nobody holds it: it is the answer for a
+     person who is on the register, attached to a part of the business, and
+     holding nothing — which is most of a five-hundred-row register.
+
+     STORED UNDER THE KEY IT ALWAYS HAD. Every tenant's saved access map has an
+     `employee` row in it, and a map is merged with the defaults rather than
+     replacing them (§30.2) — so keeping the key is what makes this change move
+     the word and not the permissions.
+
+     IT IS STILL A ROW ON THE MATRIX, because it has to be somebody's to
+     decide: a client who wants people with no role to see nothing sets it to
+     none there, and sees that they have. A floor nobody can reach is a rule
+     hiding as a default. */
+  var NO_ROLE = "employee";
+  /* THE FLOOR IS READ THE SAME WAY A ROLE IS, so every function that walks
+     somebody's roles walks it too. Written as a separate list rather than
+     inline in grantIn because grantIn is not the only reader: editingRoles
+     asks the same question to decide whether an edit reaches anybody else's
+     lines, and a floor invisible to it would let a person holding NOTHING,
+     given edit on the matrix, edit their whole unit's plan — wider than a
+     Contributor, which is the opposite of a floor. */
+  function rolesOrFloor(w, person) {
+    var rs = personRoles(w, person);
+    if (rs.length) return rs;
+    /* Read at the person's own attachment, so "own unit" still means theirs. */
+    var at = person && (person.fn ? "fn:" + person.fn
+                      : person.company ? "co:" + person.company : person.unit);
+    return at ? [{ role: NO_ROLE, at: at }] : [];
+  }
+
   function grantIn(w, person, area, target) {
     if (area === "always") return "view";
-    var rs = personRoles(w, person), best = "none";
+    var rs = rolesOrFloor(w, person), best = "none";
     for (var i = 0; i < rs.length; i++) {
       if (!companyAllows(w, rs[i], target)) continue;
       var g = grantFor(w, rs[i].role, areaFor(area, w, rs[i], target));
@@ -5127,12 +5205,18 @@ THEME.apply();
      a picture slide to the review and decide who enters a figure — none of
      which anybody would have chosen, and all of which would have passed every
      test, because the tests name the role too. */
-  var OWN_LINES_ONLY = ["contrib", "employee"];
+  /* STILL TWO, and the second is no longer a role (§93). Employee stopped
+     being something anybody holds, but `rolesOrFloor()` hands the floor to
+     `editingRoles()` exactly as if it were — so it has to be named here, or a
+     tenant that sets *Everyone else* to edit gives every unroled person on the
+     register the run of their unit's whole plan. Wider than a Contributor,
+     which is the opposite of a floor. */
+  var OWN_LINES_ONLY = ["contrib", NO_ROLE];
 
   /* Which of a person's roles is what lets them edit here. The floor rule
      applies when the floor is ALL they have. */
   function editingRoles(w, person, area, target) {
-    return personRoles(w, person).filter(function (r) {
+    return rolesOrFloor(w, person).filter(function (r) {
       if (!companyAllows(w, r, target)) return false;
       return grantFor(w, r.role, areaFor(area, w, r, target)) === "edit";
     }).map(function (r) { return r.role; });
@@ -5161,12 +5245,12 @@ THEME.apply();
     personActive: personActive, personRoles: personRoles, personRoleKeys: personRoleKeys,
     unitsOfCompany: unitsOfCompany, grantFor: grantFor,
     roleOwns: roleOwns, companyAllows: companyAllows, areaFor: areaFor,
-    grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO,
+    grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     isOffice: isOffice, isOfficeRole: isOfficeRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     namedOn: namedOn, namedInUnit: namedInUnit,
-    editingRoles: editingRoles, onlyVia: onlyVia,
+    editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
     isOwnLinesRole: isOwnLinesRole,
     isSourced: isSourced, sourceRows: sourceRows, sourcesFor: sourcesFor,
@@ -7202,6 +7286,56 @@ function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
 
+/* ── NAME AND FULL NAME (§93.8) ───────────────────────────────────────
+   Islam: *"we can have it Name and Full Name."*
+
+   The register carries two facts about what somebody is called and they were
+   being asked to share one column. **Name** is what the office says out loud —
+   two names, most days — and **Full Name** is what the employee file holds,
+   which on this register runs to *Abd El Moniem Mohamed Abd El Moniem
+   Mahmoud*. §93.6 widened the one column to fit the second; this splits them,
+   which is the better answer and gives the 392px back: Name is the frozen
+   column and Full Name is an ordinary hideable one.
+
+   STORED, NOT DERIVED, and this is the whole reason it is a field. The first
+   two names are a good GUESS and a bad rule — plenty of people go by their
+   third name, by a shortening of it, or by something the file never says. A
+   derived-only column is one nobody can correct, and correcting it is the
+   entire point of having it.
+
+   `known` IS A LABEL AND NEVER AN IDENTIFIER (Islam, same message: "for the
+   identifiers keep it for the ID and email only"). Nothing resolves on it —
+   not the upload, not the merge, not the door. §87's ladder is Emp ID then
+   email and stops, and this adds no rung. Two people really can be "Ahmed
+   Mostafa", which is exactly how the twins were made. */
+var KNOWN_NAME_WORDS = 2;
+/* The guess, used when nobody has said otherwise. Kept separate from the
+   reader below so the seeded value and a typed one are never confused. */
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
+/* What the Name column shows: what was typed, or the guess. Never stores as a
+   side effect of being read (§50.6's rule — a reader that creates the field it
+   was looking for makes every save carry a phantom change). */
+/* `dnames` is displayNames()'s map, passed by the two callers that render or
+   export the whole register so it is built once rather than per row. Without
+   it the guess is the flat two names — right for 31 rows of 33, and the two it
+   is wrong for are exactly the pair the map exists to separate, which is why
+   the register never omits it. */
+function knownName(p, dnames){
+  if (!p) return "";
+  var k = String(p.known || "").trim();
+  if (k) return k;
+  var d = dnames && dnames[p.key];
+  return (d && d.label) || knownGuess(p.name || "");
+}
+/* And the writing half, separate for the same reason. Clearing it back to the
+   guess DELETES the key rather than storing the guess, or a later correction
+   to the full name would leave a stale short one behind. */
+function setKnownName(p, v){
+  var t = String(v == null ? "" : v).trim();
+  if (!t || t === knownGuess(p.name || "")) delete p.known;
+  else p.known = t;
+}
+
 /* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
    Three names is the column's budget (§69.21) and it is right for 31 of 33
    rows — but Raya's register carries *Ahmed Mostafa Mohamed El Gebely* and
@@ -7216,10 +7350,19 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    Computed over the WHOLE register including retired rows: a retired person is
    still on screen when the Retired filter is on, and a display that changes
    depending on a filter is worse than a long one. */
+/* §93.8: IT DISAMBIGUATES THE GUESS, NOT THE COLUMN. The register no longer
+   renders a truncation — Name is a stored field and Full Name is its own
+   column — so what this lengthens is the GUESS shown for anybody who has never
+   corrected theirs. The argument is unchanged and so is the need: two people
+   whose first two names match would otherwise read as one row for anybody who
+   has hidden Full Name. A TYPED value always wins and is never lengthened; the
+   SMO wrote exactly what they meant. */
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
-    var n = SHORT_NAME_WORDS;
+    var n = KNOWN_NAME_WORDS;
+    var typed = String(p.known || "").trim();
+    if (typed) { out[p.key] = { full:p.name, at:n, label:typed, typed:true }; return; }
     var label = nameWords(p.name, n);
     (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
     out[p.key] = { full: p.name, at: n, label: label };
@@ -7229,7 +7372,7 @@ function displayNames(){
     /* Lengthen every member of the clash together, one name at a time, until
        they differ — or until there is nothing left to add, which is the real
        case of two people with the same full name and needs the flag instead. */
-    var keys = seen[k], n = SHORT_NAME_WORDS, same = true;
+    var keys = seen[k], n = KNOWN_NAME_WORDS, same = true;
     while (same && n < 8) {
       n++;
       var got = {};
@@ -7842,7 +7985,8 @@ function deletePerson(key){
    (§87.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
-  { k:"name",   label:"Name" },
+  { k:"name",   label:"Full Name" },
+  { k:"known",  label:"Name" },
   { k:"empId",  label:"Emp ID" },
   { k:"email",  label:"Email" },
   { k:"title",  label:"Job title" },
@@ -8268,8 +8412,33 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    we don't need to get them from the audience." Which is right, and it is the
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
-var PEOPLE_FILE_COLS = ["Emp ID", "Name", "Job title", "Email", "Mobile",
-                        "Official BU", "Unit", "Role", "Status"];
+var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
+                        "Mobile", "Official BU", "Unit", "Role", "Status"];
+/* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
+   Every file downloaded before today has a "Name" column holding the FULL
+   name, so the new pair cannot simply take those headers: read blindly, an old
+   file would put a five-part legal name into the short column and leave the
+   full one empty.
+
+   The rule is §58's, applied a third time — WRITE THE NEW LABEL, READ EITHER —
+   with the twist that here the OLD header's meaning depends on what sits
+   beside it. "Full Name" present means the file distinguishes the two and
+   "Name" is the short one; "Full Name" absent means the file predates the
+   split and its "Name" is the full one. That is decidable from the row itself,
+   which is what makes it safe. */
+function fileFullName(r){
+  var full = r["Full Name"];
+  if (full != null && String(full).trim() !== "") return full;
+  return r["Name"];
+}
+function fileKnownName(r){
+  var full = r["Full Name"];
+  /* No "Full Name" column: the file says nothing about what somebody is
+     CALLED, and guessing from the full name here would overwrite a short name
+     the SMO had typed with the first two words of the legal one. */
+  if (full == null || String(full).trim() === "") return "";
+  return r["Name"];
+}
 /* "Unit" is the header the register shows and this file writes. "BU" is read
    as well, and always will be: it was the header for exactly one build of this
    column, and a header is a contract with every file already downloaded — the
@@ -8371,6 +8540,10 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
 function planPeopleFile(rows){
   var plan = { rows:[], problems:[], notices:[], newBus:[] };
   var seenId = {};
+  /* The disambiguated guesses, once for the whole file (§93.8), so a row whose
+     Name column repeats what the register already shows is not offered as a
+     change to take. */
+  var dnames = displayNames();
 
   /* ── AN ADDRESS MAY ONLY EVER REACH ONE ROW (§83, kept whole) ─────
      Sign-in takes the address on the register, so two people holding one turns
@@ -8456,7 +8629,8 @@ function planPeopleFile(rows){
        no line at all. */
     var at = "Row " + (i + 2);
     var id     = fileTxt(r["Emp ID"]);
-    var name   = fileTxt(r["Name"]);
+    var name   = fileTxt(fileFullName(r));
+    var known  = fileTxt(fileKnownName(r));
     var email  = fileTxt(r["Email"]);
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
@@ -8696,6 +8870,11 @@ function planPeopleFile(rows){
     var row = { at:at, id:id, key:existing ? existing.key : null,
                 matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
+                /* Never falls back to the existing value the way `name` does:
+                   blank means the file has nothing to say about it, and a
+                   pick is only offered where the file actually says something
+                   different (§54's rule, unchanged). */
+                known:known,
                 title:fileTxt(r["Job title"]), email:email,
                 phone:fileTxt(r["Mobile"]), mainbu:buName, where:where,
                 role:roleKey, wantActive:wantActive,
@@ -8705,7 +8884,7 @@ function planPeopleFile(rows){
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
-    peopleRowPicks(row, conflict ? null : existing);
+    peopleRowPicks(row, conflict ? null : existing, dnames);
     plan.rows.push(row);
   });
   return plan;
@@ -8728,19 +8907,31 @@ function planPeopleFile(rows){
    A BLANK CELL IS STILL "NOTHING TO SAY" and never appears here at all — it is
    the rule the whole file is read under (§54) and it did not change. */
 var PEOPLE_FILE_PICKS = [
-  { k:"name",   label:"Name" },
+  { k:"name",   label:"Full Name" },
+  /* A PICK LIKE ANY OTHER (§93.8). What somebody is CALLED is the field most
+     likely to have been typed here by the SMO and left alone in the export, so
+     it is exactly the field a file must not overwrite quietly — §87's ruling
+     that the register wins by default, applied to the one column that exists
+     because a person corrected it. */
+  { k:"known",  label:"Name" },
   { k:"title",  label:"Job title" },
   { k:"email",  label:"Email" },
   { k:"phone",  label:"Mobile" },
   { k:"mainbu", label:"Official BU" }
 ];
-function peopleRowPicks(row, existing){
+function peopleRowPicks(row, existing, dnames){
   row.picks = [];
   if (!existing) return row;
   PEOPLE_FILE_PICKS.forEach(function(f){
     var now = fileTxt(row[f.k]);
     if (!now) return;
-    var was = fileTxt(existing[f.k]);
+    /* WHAT IS ON THE REGISTER, not what is stored under that key (§93.8).
+       `known` is absent for anybody who never corrected it, and the register
+       shows the GUESS in its place — so comparing against the raw field would
+       report a file repeating that guess as a difference, and offer 33 picks
+       that change nothing anybody can see. */
+    var was = f.k === "known" ? fileTxt(knownName(existing, dnames))
+                              : fileTxt(existing[f.k]);
     var same = f.k === "mainbu" ? mainbuKey(was) === mainbuKey(now)
                                 : was === now;
     if (same) return;
@@ -8812,7 +9003,7 @@ function peopleRowEffective(row){
 function peopleRowChoose(row, choice){
   row.choice = choice;
   var eff = peopleRowEffective(row);
-  peopleRowPicks(row, eff.key ? personBy(eff.key) : null);
+  peopleRowPicks(row, eff.key ? personBy(eff.key) : null, displayNames());
   return row;
 }
 
@@ -8834,6 +9025,10 @@ function applyPeopleFile(plan){
                             where:row.where });
       p = personBy(key);
       if (!p) return;
+      /* Through the setter, so a file that repeats the guess stores nothing
+         (§93.8) — otherwise every uploaded row would carry a `known` that
+         freezes at whatever the full name was on the day of the upload. */
+      if (row.known) setKnownName(p, row.known);
     } else {
       /* ONLY WHAT WAS TICKED (§87.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
@@ -8841,7 +9036,12 @@ function applyPeopleFile(plan){
          is there anything to write. The employee number is the exception and
          is not a pick: it is the identity the row was matched ON, or the
          number a conflict was answered by accepting. */
-      row.picks.forEach(function(f){ if (f.take) p[f.k] = f.now; });
+      /* Through setKnownName() for `known`, so taking a value that happens to
+         equal the guess stores nothing rather than freezing it (§93.8). */
+      row.picks.forEach(function(f){
+        if (!f.take) return;
+        if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
+      });
       if (row.id) p.empId = row.id;
       /* Only when there is somewhere to put them. A person whose department
          maps to nothing keeps whatever attachment they already had — moving
@@ -11254,6 +11454,27 @@ function themeStats(ab){
    weighting all ask it, so a retired unit cannot linger in one of them. */
 function activeKeys(){
   return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
+}
+
+/* ── THE UNITS NOBODY IS KEEPING (§93.4) ──────────────────────────────
+   Islam: "I want as well to leave a note somewhere by how many units that
+   doesn't have custodians."
+
+   It belongs on the register, because the register is where the gap is CLOSED:
+   a custodian is given from a row here, so a count anywhere else would name a
+   problem and point at a different page.
+
+   A RETIRED PERSON IS NOT A CUSTODIAN. The seat is a key on the unit and
+   retiring somebody revokes their roles (§35) — but the pointer is still
+   written, so asking whether the field is empty would report a unit as covered
+   by somebody who cannot sign in. It asks whether a person is there AND
+   active, which is the same test `personRoles()` applies from the other end. */
+function unitsWithoutCustodian(){
+  return activeKeys().filter(function(k){
+    var c = ((UNIT_ROLES[k] || {}).custodian) || null;
+    var p = c ? personBy(c) : null;
+    return !p || !personActive(p);
+  });
 }
 
 /* ── COMPILING A SET OF UNITS (§68) ───────────────────────────────────
@@ -14348,11 +14569,19 @@ function peopleWorkbook(){
                    soft:true });
   }
 
+  /* Built ONCE for the whole file, not per row (§93.8) — and the file has to
+     carry the same value the register shows, or a download-edit-upload round
+     trip would report the two people it separated as a change. */
+  var dnames = displayNames();
   var rows = PEOPLE.map(function(p){
     var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
     return [
-      p.empId || "", p.name, p.title || "", p.email || "", p.phone || "",
-      p.mainbu || "",
+      /* FULL NAME THEN NAME, in PEOPLE_FILE_COLS' order (§93.8). The short one
+         is written as what the register SHOWS — the guess when nobody has
+         corrected it — so the file is a picture of the page, and the reader
+         stores nothing when it comes back unchanged. */
+      p.empId || "", p.name, knownName(p, dnames), p.title || "", p.email || "",
+      p.phone || "", p.mainbu || "",
       /* Where they actually sit, in the words the register shows and the
          reader takes back (§65). Blank for somebody attached to nothing —
          which is a real state, and writing a guess into it would be the file
@@ -17951,13 +18180,32 @@ function renderAccess(){
     return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
   }).join("") + '</tr>';
 
-  var body = ROLES.map(function(r){
-    var n = PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+  /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
+     Employee stopped being one: nobody grants it, the × could never take it
+     off, and it was drawn as a chip beside Business unit owner claiming
+     somebody held something they did not. What it decided is still a real
+     question — what somebody on the register with NO role may open — so it is
+     still a row here, labelled as the state it is.
+
+     It has to stay editable. A client who wants people with no role to see
+     nothing sets this row to none and can see that they have; a floor nobody
+     can reach is a rule hiding as a default. */
+  var MATRIX_ROWS = ROLES.concat([{
+    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
+    note: "Not a role — what somebody on the register who holds no role may " +
+          "open. Most of the register, on a tenant of any size." }]);
+
+  var body = MATRIX_ROWS.map(function(r){
+    var n = r.floor
+      ? PEOPLE.filter(function(p){
+          return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
+      : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
     /* Two lines, never more. The role's description is a sentence, and a
        sentence in a 19% column wraps to eight lines and makes every row of a
        49-cell table a hundred pixels tall — the exact fault this page was
        rebuilt to remove. It is on hover instead. */
-    return '<tr><td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' +
+      '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
         '<span class="why">' +
         (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
         '</span></td>' +
@@ -17967,7 +18215,8 @@ function renderAccess(){
   }).join("");
 
   return section("", "Who may see what",
-      "Seven roles, and the kinds of page each may reach. Edit includes view. " +
+      "Eight roles and the floor beneath them, against the kinds of page each may " +
+      "reach. Edit includes view. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -18670,6 +18919,16 @@ var PCOLS_KEY = "smp.people.columns";
    back to the shipped default (§30.2), and both default to shown, so the worst
    case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
+  /* FULL NAME IS A COLUMN OF ITS OWN (§93.8, Islam: "we can have it Name and
+     Full Name"). The frozen first column is what somebody is CALLED — two
+     names — and this is what the employee file holds. Shown by default,
+     because on a register being reconciled against a file it is the value the
+     file is written in; hideable, because on an ordinary day nobody reads it.
+
+     It sits immediately after the name rather than with the identifiers: it is
+     the same fact at a different length, and putting it beside Emp ID would
+     imply it identifies somebody, which is exactly what it must not do. */
+  { k:"fullname", label:"Full Name" },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the
@@ -18791,7 +19050,13 @@ function renderPeople(){
      office's — so a count taken over the whole register would promise them a
      number the server is going to shrink (§35: the server picks the set). */
   var reach = live ? passwordReach() : [];
-  var noPw = live && PWSTATES
+  var noCust = unitsWithoutCustodian();
+  /* A FAILED ASK IS NOT AN ANSWER (§93). PWSTATES holds {__error} when the
+     server refused or could not be reached, and counting over it would read
+     every key as absent and report nobody as missing a password — the same
+     shape of quiet-wrong-answer the dash itself was. */
+  var pwOk = !!PWSTATES && !PWSTATES.__error;
+  var noPw = live && pwOk
     ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
     : 0;
 
@@ -18952,10 +19217,44 @@ function renderPeople(){
      for the row's kebab; what is left is one word in one pill, so the column
      is 76px instead of 150. "Temporary" becomes "Temp" for the same reason —
      three states that have to be told apart at a glance, not read. */
+  /* ── AN ADDRESS AND A NUMBER ARE THERE TO BE USED (§93.6) ─────────
+     Islam: "make the email and the phone to be copied on clicking on them."
+     They are the two values on this register that always leave it — into a
+     mail client, into a phone — and selecting text inside a horizontally
+     scrolling table with a frozen column is a drag that starts a scroll.
+
+     A BUTTON, NOT A SPAN WITH A HANDLER. It is a real action, so it takes a
+     real control: keyboard-reachable, announced, and carrying its own hint.
+     It is styled to LOOK like the value rather than like a control, though —
+     `linkbu` was the first go and put an accent underline on every row of the
+     register, which reads as a table of links to somewhere.
+
+     Empty stays a dash — there is nothing to copy, and a button that copies
+     "" would report success for doing nothing. */
+  function copyable(v, cls){
+    if (!v) return '<span class="why" style="margin:0">&mdash;</span>';
+    /* THE VALUE IS IN THE TITLE, not just the hint. §88's clipTitles() only
+       fills a title that is empty, so a bare "Click to copy" would have taken
+       the hover away from exactly the values too long to read — which is the
+       one case the hover exists for. Both, in one string. */
+    return '<button class="copyval ' + cls + '" data-copy="' + esc(v) +
+      '" title="' + esc(v) + ' \u00b7 click to copy">' + esc(v) + '</button>';
+  }
+
   function pwCell(p){
     if (!live) return '';
     if (!personActive(p)) {
       return '<td class="cc"><span class="why" style="margin:0">&mdash;</span></td>';
+    }
+    /* AND A DASH IS NOT AN ERROR EITHER (§93). Islam, on a column that had
+       gone all dashes: "some people already changed the passwords, the all -s
+       are not actual." They were not: the ask never happened. When it happens
+       and FAILS, the column says so — a dash that means "we could not find
+       out" is indistinguishable from one that means "not asked yet", and both
+       read as "no password" to whoever is looking. */
+    if (PWSTATES && PWSTATES.__error) {
+      return '<td class="cc"><span class="pill bad" title="' +
+        esc(PWSTATES.__error) + '">unreadable</span></td>';
     }
     var st = PWSTATES ? PWSTATES[p.key] : null;
     /* Absent is not "none" (§35): a person the server has not been asked about
@@ -19209,26 +19508,39 @@ function renderPeople(){
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it, and the whole point of the class is that
          the column chooser can reorder everything to its right. */
-      /* ── THE FIRST FEW NAMES, THE WHOLE ONE ON THE ROW (§69.21) ──────
-         Islam: "let's make them only the first 2 names so the first column
-         wraps better" — then three, having seen two. The file carries full
-         legal names ("Mohamed Hamed Ahmed Hamed Ahmed") and the column they
-         sit in is now FROZEN (§69.19), so every character it takes is taken
-         from every other column at every scroll position. How many words is
-         SHORT_NAME_WORDS in config-data.js.
+      /* ── NAME, AND FULL NAME BESIDE IT (§93.8) ──────────────────────
+         Islam: "we can have it Name and Full Name."
 
-         DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME. This is the
-         trap and it is worth the words: the input's value is what
-         `fieldWire("pname")` writes back to `p.name`, so shortening the value
-         would have overwritten the register's real names with two words each —
-         silently, on the first keystroke in any row, with the file's own copy
-         gone. The short form is a rendering; the stored fact is untouched, and
-         the whole name is on the row's hover and in every other surface that
-         names a person. */
+         This is the frozen column (§69.19), so every character it takes is
+         taken from every other column at every scroll position — which is what
+         made §69.21 cut it to two names, §81.1 lengthen it for the pair that
+         clashed, and §93.6 widen it to hold the whole thing at 392px. Splitting
+         the two facts is the answer all three were reaching for: what somebody
+         is CALLED lives here, and what the employee file HOLDS lives in its own
+         hideable column next door.
+
+         WHAT IS EDITED HERE IS `known`, NOT `name`. §69.21's trap, met from the
+         other side: back then the input carried the whole name because
+         shortening the VALUE would have overwritten the register's real names
+         on the first keystroke. Now the short form is a field of its own, so
+         the input writes to that field and the full name is edited in the
+         column that shows it. Neither can quietly become the other.
+
+         The placeholder is the guess, so somebody who has never touched this
+         sees what it will fall back to rather than an empty box. */
       '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
-        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc((DNAMES[p.key] || {}).label || shortName(p.name)) + '</b>' +
+        ? '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
+          '" placeholder="' + esc(knownName(p, DNAMES)) + '">'
+        : '<b>' + esc(knownName(p, DNAMES)) + '</b>' +
           dupeMark(dupes)) + '</td>' +
+      /* THE FULL NAME, AND IT IS STILL WHAT THE FILE IS MATCHED AGAINST — but
+         never what somebody is IDENTIFIED by (Islam: "for the identifiers keep
+         it for the ID and email only"). It is back under §88's clip standard,
+         because it is an ordinary column again: one line, capped, the whole
+         value one hover away. */
+      (showCol("fullname") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
+        : '<span class="val">' + esc(p.name) + '</span>') + '</td>' : '') +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -19296,8 +19608,15 @@ function renderPeople(){
             }).join("") + '</select>' +
           (drift && drift !== belongsKey(p)
             ? '<span class="why">the list says ' + esc(whereLabel(drift)) + '</span>' : '')
+        /* A VALUE, NOT A CHIP (§93). Islam: "the unit selected should be a
+           normal selection not a pill." A chip is what the BU list's mapping
+           cell draws, where several sit side by side and the boundary between
+           them is the whole point; here there is exactly one, in a column
+           whose heading already says what it is, so the border was drawing a
+           box around the only thing in the cell. It reads as the other
+           read-mode values on the row now. */
         : (home
-            ? '<span class="uchip">' + esc(home) + '</span>' + (drift
+            ? '<span class="val">' + esc(home) + '</span>' + (drift
                 ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
                   esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
                   esc(whereLabel(drift)) + '</span>'
@@ -19319,13 +19638,11 @@ function renderPeople(){
       (showCol("email") ? '<td class="wrapany">' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
-        : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+        : copyable(p.email, "val")) + '</td>' : '') +
       (showCol("phone") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
           '" placeholder="Mobile">'
-        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+        : copyable(p.phone, "mono")) + '</td>' : '') +
       (showCol("roles")
         ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
       /* Standing before Password, at Islam's direction — whether somebody can
@@ -19602,6 +19919,15 @@ function renderPeople(){
             var a = personBy(l.key), b = personBy(l.other);
             return (a ? a.name : l.key) + " / " + (b ? b.name : l.other);
           }).join(" \u00b7 ")) + '">' + plural(likely, "possible duplicate") + '</span>'] : []).concat(
+        /* THE UNITS NOBODY IS KEEPING (§93.4). Amber for the same reason the
+           two above are: a unit between custodians is a normal state on a
+           Tuesday, and a permanent one is a problem. The names are on hover,
+           because a count with nothing behind it sends somebody looking. */
+        noCust.length ? ['<span class="pill warn" title="' + esc(noCust.map(function(k){
+            return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
+          (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody ' +
+          'the Strategy custodian role from their row here.">' +
+          plural(noCust.length, "unit") + ' with no custodian</span>'] : []).concat(
         noIdent ? ['<span class="pill warn" title="A row with no employee number and no email ' +
           'cannot be matched by an upload, so the next file adds them a second time. It is what ' +
           'put three people on this register twice.">' + noIdent +
@@ -19653,7 +19979,11 @@ function renderPeople(){
       return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
         'data-tktable="people"><thead><tr>' +
         th("#", "idx", false) +
-        th("Person", "namecell") +
+        /* "Name", not "Person" (§93.8): the column beside it is Full Name, and
+           two columns about what somebody is called have to say which is
+           which. */
+        th("Name", "namecell") +
+        (showCol("fullname") ? th("Full Name") : '') +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
@@ -19676,7 +20006,6 @@ function renderPeople(){
 
       "") +
 
-    renderPeopleMerge(mayEdit) +
     renderPeopleFile(mayEdit);
 }
 
@@ -19743,6 +20072,21 @@ function mergeDropKey(){
    rows survives, and what to do where they disagree. One panel asking all
    three is the panel that was there before. */
 function mergeStepHtml(){
+  /* ── THE RECEIPT IS THE LAST STEP, NOT A SECTION ON THE PAGE (§93.5) ─
+     Islam, on a "Merge two rows" panel left standing under the register after
+     the dialog had closed: "this page is a table page, not for other
+     notifications."
+
+     Right, and it is the same argument as §90's — the one that moved steps 1
+     and 2 into this dialog in the first place. What is said about an act
+     belongs where the act was: the wizard stays open and shows what it did,
+     and Close is what ends it. The register behind is repainted (which is
+     where the change becomes a save) and it is a table again. */
+  if (PMERGE.done) {
+    return '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
+      '<div class="cbtns" style="margin-top:14px">' +
+        '<button class="danger" data-pmerge-close="1">Close</button></div>';
+  }
   var a = PMERGE.a ? personBy(PMERGE.a) : null;
   if (!a) return '<div class="note">That row is no longer on the register.</div>';
   var b = PMERGE.b ? personBy(PMERGE.b) : null;
@@ -19879,14 +20223,6 @@ function mergeStepHtml(){
    and a merge is the one act on this register with no row left to point at —
    so what happened is said where the register is (§62's rule about a
    confirmation being where the act was). */
-function renderPeopleMerge(mayEdit){
-  if (!mayEdit || !PMERGE.done) return "";
-  return section("", "Merge two rows", null,
-    '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
-    '<div class="imp-row" style="margin-top:12px">' +
-      '<button class="linkbu" data-pmerge-close="1">Close</button></div>');
-}
-
 /* ══════════════════════════════════════════════════════════════════
    THE REGISTER'S FILE (§54.3, spec 011)
 
@@ -27684,6 +28020,10 @@ var SYNC = (function () {
       });
     }
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
+    /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
+       matches the guess, rather than storing the guess — otherwise correcting
+       the full name later would leave a stale short one standing beside it. */
+    fieldWire("pknown", function(p, v){ setKnownName(p, v); });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
     /* The two the employee file brings (§54.2). Cleared when emptied rather
@@ -28208,9 +28548,60 @@ var SYNC = (function () {
         mergeOpen();
       });
     });
-    /* The receipt's Close is on the PAGE, not in the dialog. */
-    document.querySelectorAll("[data-pmerge-close]").forEach(function(b){
-      b.addEventListener("click", function(){ mergeReset(); paint(); });
+    /* THE RECEIPT'S CLOSE WAS WIRED HERE, and it went with the section it
+       belonged to (§93.5, §24). Leaving it would have been worse than dead
+       code: this is a DOCUMENT-wide query and the dialog's own Close and
+       Cancel carry the same attribute, so with paint() now running while the
+       wizard is open it would have bound a second handler to them — one that
+       resets the merge without closing the dialog. wireMerge() owns them. */
+
+    /* ── CLICK TO COPY AN ADDRESS OR A NUMBER (§93.6) ────────────────
+       Islam: "make the email and the phone to be copied on clicking on them."
+
+       THE WORD IS WRITTEN INTO THE ELEMENT, NOT PAINTED. paint() would replace
+       the button that was just pressed — §63's rule, learned on Save draft —
+       so the tick is set on the node and put back on a timer. The original
+       text is kept on the node too, or a second click during the tick would
+       copy the word "Copied".
+
+       AND THE FALLBACK IS NOT DECORATION. `navigator.clipboard` needs a secure
+       context, and this product is opened from `file://` every day of its
+       life — so a hidden textarea and `execCommand("copy")` is the path that
+       actually runs here, and the promise path is the one that runs in
+       production. Both end at the same tick, and a failure says so rather
+       than tick-ing anyway. */
+    document.querySelectorAll("[data-copy]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var self = this, v = self.dataset.copy;
+        var was = self.dataset.copyWas || self.textContent;
+        self.dataset.copyWas = was;
+        function done(ok){
+          /* NOT "Press Cmd-C" — this runs on Windows too, and naming the
+             wrong key is worse than naming none. */
+          self.textContent = ok ? "Copied" : "Could not copy";
+          self.classList.toggle("copied", ok);
+          clearTimeout(self.__copyT);
+          self.__copyT = setTimeout(function(){
+            self.textContent = was;
+            self.classList.remove("copied");
+          }, 1200);
+        }
+        function legacy(){
+          var t = document.createElement("textarea");
+          t.value = v;
+          t.setAttribute("readonly", "");
+          t.style.cssText = "position:fixed;top:-1000px;opacity:0";
+          document.body.appendChild(t);
+          t.select();
+          var ok = false;
+          try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+          document.body.removeChild(t);
+          done(ok);
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(v).then(function(){ done(true); }, legacy);
+        } else { legacy(); }
+      });
     });
 
     /* The row's action menu (§46.4). Opening one closes any other, because
@@ -28563,18 +28954,41 @@ var SYNC = (function () {
 
     wirePicker();
 
-    if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
+    /* ── ASKED WHEN THE REGISTER IS ON SCREEN (§93.2) ────────────────
+       Islam: "the password status is all dash now — what is that status?"
+
+       It was not a status. It is what the column shows when the server has
+       said nothing about anybody, and the server had not been asked: this
+       waited for `[data-edit="people"]`, the register's whole-table PEN, which
+       spec 012 removed when rows became individually editable. The selector
+       stopped matching, the request stopped firing, and 33 rows showed a dash
+       that looks exactly like data.
+
+       §51.11, in wiring rather than in a check: a condition keyed on markup
+       that no longer exists does not fail, it quietly does nothing. Nothing
+       threw, nothing was logged, and the passwords themselves were never
+       touched — `credentials` is its own table outside the state graph (§19).
+
+       KEYED ON THE TABLE NOW, which is the thing that is actually there when
+       this is worth asking. */
+    var onRegister = !!document.querySelector(".peoplecfg");
+    if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
       SYNC.passwordStates(function(err, st){
-        if (err) return;
+        /* AND A REFUSAL IS SAID, not swallowed into the same dash. `return`
+           left PWSTATES as {} — indistinguishable from "asked, and nobody has
+           a password" — so a 403 and a healthy empty tenant looked identical.
+           A column that cannot answer says so. */
+        if (err) { PWSTATES = { __error: String(err.message || err) }; paint(); return; }
         PWSTATES = st;
         paint();
       });
     }
     /* The same shape and the same moment as the password states: asked once
        per visit to the page, and absent rather than empty from file:// (§56). */
-    if (SAIDWHERE === null && document.querySelector('[data-edit="people"]') &&
+    /* The same selector, and it had gone the same way (§93.2). */
+    if (SAIDWHERE === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
@@ -29378,10 +29792,20 @@ var SYNC = (function () {
            which refuses if anything still points at the row (§87.4) — that is
            the check, and its sentence has to be read where the button was. */
         if (!r.ok) { PMERGE.err = r.why; PMERGE.step = 3; mergePaint(); return; }
+        /* THE DIALOG STAYS OPEN TO SAY WHAT IT DID (§93.5). It used to close
+           and leave a "Merge two rows" section standing under the register —
+           a notification on a table page, which is what §90 moved the other
+           two steps in here to stop.
+
+           mergeReset() FIRST and `done` after it, because the reset clears
+           every field of PMERGE including that one. paint() repaints the
+           register BEHIND the overlay — safe, and necessary, because the
+           overlay is outside the wrap paint() rewrites and paint() is where a
+           change becomes a save. mergePaint() then draws the receipt. */
         mergeReset();
         PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
-        closeModal();
-        paint();   /* which is where a change becomes a save */
+        paint();
+        mergePaint();
       });
     });
   }

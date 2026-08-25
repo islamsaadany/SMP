@@ -19,26 +19,6 @@
 var SYNC = (function () {
   var enabled = typeof location !== "undefined" &&
     (location.protocol === "http:" || location.protocol === "https:");
-  /* ── THE BOOT SKELETON'S TWO NUMBERS (§94.10) ────────────────────
-     FLOOR: how long the skeleton stays once it is up, so an answer that
-     arrives in 40ms does not flash it on and off. Chosen under the threshold
-     at which a delay is noticed, and it is a floor rather than a duration —
-     a slow answer waits no longer for it.
-
-     GIVEUP: when to stop waiting and show the baked data anyway. Long enough
-     for a cold serverless function and a sleeping Neon branch, short enough
-     that nobody is left looking at grey wondering whether it is broken. */
-  var BOOT_FLOOR = 180, BOOT_GIVEUP = 8000;
-  function bootNow() { return Date.now(); }
-  /* Takes the skeleton down. Idempotent, and the ONLY thing that does it —
-     theme.js puts the class on and never removes it, so there is one place to
-     look when a page is stuck grey. */
-  function bootLand() {
-    try {
-      document.documentElement.classList.remove("booting");
-      document.documentElement.removeAttribute("aria-busy");
-    } catch (e) {}
-  }
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
@@ -260,15 +240,7 @@ var SYNC = (function () {
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
-    /* AND IT PAINTS ON THE WAY OUT (§94.10). This was a bare `return`, which
-       was harmless while boot() had already painted before hydrating — the
-       page was on screen and this only decorated the chrome. It is not
-       harmless now: this function IS the first paint, so returning without
-       one leaves the skeleton down and nothing behind it. Defensive either
-       way (both elements are in the static markup), and "it cannot happen" is
-       not a reason to leave a blank page when it does — the same sentence the
-       note below this one already makes. */
-    if (!box || !sel) { paint(); return; }
+    if (!box || !sel) return;
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
     if (known) {
       window.VIEWER = person.key;
@@ -530,12 +502,6 @@ var SYNC = (function () {
     mailHistory: function (done) {
       mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });
     },
-    /* ONE MESSAGE, AND WHAT HAPPENED TO EACH PERSON (§93.15). The endpoint has
-       existed since §77 and nothing has ever called it — the record was written
-       on every send and could not be read back from any screen. */
-    mailHistoryOne: function (id, done) {
-      mailPost({ action: "historyOne", id: id }, function (err, j) { done(err, err ? null : j); });
-    },
     mailTest: function (o, done) {
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
                  fromName: o.fromName, replyTo: o.replyTo },
@@ -543,45 +509,11 @@ var SYNC = (function () {
     },
     boot: function (paint) {
       repaint = paint;
-      /* ── OPENED AS A FILE, THERE IS NOTHING TO WAIT FOR (§94.10) ──
-         No fetch, so nothing arrives late and there is nothing for a
-         skeleton to cover. theme.js does not stamp `booting` here either;
-         bootLand() is called anyway so the two can never disagree. */
-      if (!enabled) { bootLand(); paint(); return; }
+      paint();
+      if (!enabled) return;
       /* Taken before hydration, while the globals still hold the baked-in
          example — after hydration it is gone from memory. */
       DEMO = clone(graph());
-      /* ── THE PAINT THAT USED TO BE HERE (§94.10) ─────────────────
-         `paint()` ran first, unconditionally, and that single line was the
-         whole of the fault: it drew the page from the BAKED file — the wrong
-         colours, and on a client's deployment Raya Trade's units and figures
-         — and the real one replaced it a moment later. The skeleton is on
-         screen instead, and the first paint now happens when there is
-         something true to paint.
-
-         WHICH MAKES EVERY EXIT FROM HERE LOAD-BEARING. Nothing else will
-         paint this page: not hydration, not a refusal, not a network that
-         never answers. `land()` is the one door and it is idempotent, so the
-         backstop and the answer racing each other is harmless. */
-      var landed = false, t0 = bootNow();
-      function land(then) {
-        if (landed) return;
-        landed = true;
-        clearTimeout(backstop);
-        /* A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF. Held to a floor
-           so it reads as one step rather than a stutter — below the threshold
-           anybody perceives as a delay, and only ever the remainder. */
-        var wait = Math.max(0, BOOT_FLOOR - (bootNow() - t0));
-        setTimeout(function () { bootLand(); (then || paint)(); }, wait);
-      }
-      /* NOBODY IS LEFT LOOKING AT GREY. If the answer has not come, the baked
-         data is still better than a loading state with no end — and it is
-         exactly what this line used to show immediately. */
-      var backstop = setTimeout(function () {
-        console.info("SMP: the database has not answered in " +
-                     (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
-        land();
-      }, BOOT_GIVEUP);
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
@@ -593,16 +525,12 @@ var SYNC = (function () {
         })
         .then(function (data) {
           if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
-          /* LEAVING, NOT LANDING. The backstop is dropped so it cannot
-             paint a page the browser is already navigating away from, and
-             the skeleton stays up until it does — which is right: the gate
-             is where this person is going. */
-          if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace("/"); return; }
+          if (data.person && data.person.mustChange) { location.replace("/"); return; }
           hydrate(data.state);
           LIVE = clone(data.state);
           live = true;
           person = data.person || null;
-          land(function () { if (person) chromeFor(paint); else paint(); });
+          if (person) chromeFor(paint); else paint();
           lastSaved = serialize();
           setInterval(save, 5000);
 
@@ -629,12 +557,8 @@ var SYNC = (function () {
           markMode();
         })
         .catch(function (e) {
-          /* "sign in" is the 401/403 above, which has already sent the
-             browser to the gate — painting now would draw a page nobody is
-             going to see, over data this person is not entitled to. */
-          if (e.message === "sign in") { clearTimeout(backstop); return; }
-          console.info("SMP: running on the baked-in data (" + e.message + ")");
-          land();
+          if (e.message !== "sign in")
+            console.info("SMP: running on the baked-in data (" + e.message + ")");
         });
     },
     afterPaint: function () {

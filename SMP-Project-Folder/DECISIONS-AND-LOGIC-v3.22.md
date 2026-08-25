@@ -11337,6 +11337,57 @@ here (§58.3), so a row carrying only that is still a row nobody has placed.
 **Decided on the server**, like the short list beside it and for the same reason:
 a page that decides whether to ask has decided nothing, because it still had the
 question.
+### 93.15 The platform knew, and had no screen that could say so
+
+> *"A very strange thing. I sent a message, everyone received it but not the SMO
+> team."* … *"I added them by function and by people selection directly, and
+> still they didn't receive the email."*
+
+**I guessed twice and was wrong twice**, which is the part of this worth keeping.
+The first guess was that the SMO team sit at the group and a units-only
+selection would miss them — true of the resolver, and irrelevant here, because a
+direct People pick matches unconditionally. The second was the shape of the
+audience criteria. Both were reasoning where a measurement was available.
+
+**The measurement was available.** Every send writes a `message_recipients` row
+per person: the address it used, whether the provider accepted it, the provider's
+error, and the provider's own id. `historyOne` has returned all of it since the
+table existed. **Nothing in the client has ever called it** — the record was
+written on every send and could not be read back from any screen, so the single
+question a record exists to answer had to be guessed at.
+
+**The three outcomes are three different problems**, and separating them is the
+whole value of the screen:
+
+| | | |
+|---|---|---|
+| **absent** | never resolved into the audience | fix is on the register |
+| **failed** | the provider refused it, and said why | fix is the address |
+| **sent** | handed over, id returned | delivery — a filter, a rule, a full mailbox |
+
+The last one is the one nothing on this side can fix, and **knowing that is the
+point**. "44 of 47" tells you a number and none of the three.
+
+Failures sort first and are named, the same rule the audience summary already
+follows: *3 failed* tells nobody which three, and each is a different fix.
+
+### 93.15a Two CSS lessons, one of them mine from the same day
+
+**A `table-layout:fixed` table takes every width from the header row (§46), and
+four attempts were spent refusing to believe it.** `.cfg table` is fixed;
+`table-layout:auto` was written at three increasing specificities and stayed
+computed as `fixed`, while a `width` from the *very next line* applied. Setting
+the four header widths instead worked first time. When a layout mode will not
+turn off, build with it rather than against it.
+
+**And §93.11 happened again, hours after being written down.** Editing a comment
+left a paragraph after the `*/` that closed it, so the parser met prose where a
+selector belonged and discarded the block. It is the same fix and the same
+check: ask `document.styleSheets` what the browser actually holds — though note
+that query is not decisive on its own, because a rule missing from the dump can
+still be applying. **The element is the authority**: `matches()` for whether the
+selector hits, and `getComputedStyle` for whether the declaration won.
+
 ---
 
 ## 94 · The strategy tab is the office's, people open where they work, and Report goes solid (v3.25)
@@ -11566,53 +11617,113 @@ once**. Presentation is a `<details>`, so the element carrying that attribute is
 a menu ITEM inside the closed popup — it has a box, at a position that means
 nothing. What is on the row is the `<summary>`.
 
-### 93.15 The platform knew, and had no screen that could say so
+### 94.10 Nothing wears a colour it will have to change
 
-> *"A very strange thing. I sent a message, everyone received it but not the SMO
-> team."* … *"I added them by function and by people selection directly, and
-> still they didn't receive the email."*
+> *"When I open the platform it opens on a color scheme and then it glitches
+> and shifts to the current color. Can this doesn't happen?"*
 
-**I guessed twice and was wrong twice**, which is the part of this worth keeping.
-The first guess was that the SMO team sit at the group and a units-only
-selection would miss them — true of the resolver, and irrelevant here, because a
-direct People pick matches unconditionally. The second was the shape of the
-audience criteria. Both were reasoning where a measurement was available.
+**TWO THINGS ARRIVE LATE, NOT ONE**, and only the visible one was reported. The
+tenant's accent and bar are set on **Setup › Branding** and live in the
+database, so `boot()` painted from the baked file and repainted when
+`/api/state` answered — that is the colour shift. But the worked example is
+baked into the file too, so on a client's deployment that same moment is a
+flash of **Raya Trade's units and figures** before their own arrive. Same
+cause, and worse.
 
-**The measurement was available.** Every send writes a `message_recipients` row
-per person: the address it used, whether the provider accepted it, the provider's
-error, and the provider's own id. `historyOne` has returned all of it since the
-table existed. **Nothing in the client has ever called it** — the record was
-written on every send and could not be read back from any screen, so the single
-question a record exists to answer had to be guessed at.
+The first answer put to Islam was to remember the applied branding in
+`localStorage` and paint it from the head — the trick `theme.js` already uses
+for light and dark. He asked for a **skeleton** instead, and it is the better
+answer for a reason worth keeping: **remembering the colours would have fixed
+the colours and left the content flashing.** One mechanism, not two, and no
+cache to go stale.
 
-**The three outcomes are three different problems**, and separating them is the
-whole value of the screen:
+**THE PALETTE IS THE WHOLE IDEA.** Everything the skeleton wears —
+`--surface-2`, `--line`, `--ground` — is the page's own neutral, and none of it
+is brandable: `brandTokens()` writes only the `--gold*`, `--on-accent`,
+`--accent-glow` and `--panel*` families. So nothing on that screen can change
+when the branding arrives. **A skeleton that kept the navy bar would still swap
+it a moment later**, which is why the real chrome is *hidden* rather than
+dimmed. Both themes come free, because those tokens are already redefined per
+palette and per theme — somebody who chose dark waits in a dark skeleton.
 
-| | | |
-|---|---|---|
-| **absent** | never resolved into the audience | fix is on the register |
-| **failed** | the provider refused it, and said why | fix is the address |
-| **sent** | handed over, id returned | delivery — a filter, a rule, a full mailbox |
+**AND IT DOES NOT PRETEND TO BE A PARTICULAR PAGE.** Until the server says who
+this is, the platform does not know whether it is opening a unit's Plan (a rail
+and a pane) or the group's Performance (cards). A heading and three blocks is
+true of both; a rail would be right for one and wrong for the other.
 
-The last one is the one nothing on this side can fix, and **knowing that is the
-point**. "44 of 47" tells you a number and none of the three.
+**THE SWITCH IS IN THE HEAD, WITH `theme.js`'s ARGUMENT.** That file exists so
+the page never paints light and then flips; this is the same sentence about the
+tenant's colours, which cannot be answered the same way because they are not in
+the browser. The page *cannot* open in the right colours. It can open in **no**
+colours — §32's rule at the gate ("before the answer is known there is exactly
+one honest thing to show, and it is nothing"), one surface further in. It is
+deliberately not `SYNC`'s check moved earlier: this has to run before `sync.js`
+exists, and a boot state waiting on a script further down the page is one frame
+too late, which is the whole fault.
 
-Failures sort first and are named, the same rule the audience summary already
-follows: *3 failed* tells nobody which three, and each is a different fix.
+**EVERY EXIT FROM `boot()` IS NOW LOAD-BEARING.** The line that was removed —
+an unconditional `paint()` before the fetch — was also the safety net: whatever
+happened next, something was on screen. Nothing else paints this page now, so
+`land()` is one idempotent door and four things go through it: the answer, a
+failure, a backstop at 8s, and `file://` (where the class is never stamped and
+`bootLand()` is called anyway, so the two can never disagree). A **401** is the
+one case that deliberately does *not* paint — the browser is already going to
+the gate, and painting would draw a page nobody sees over data this person is
+not entitled to.
 
-### 93.15a Two CSS lessons, one of them mine from the same day
+`chromeFor()` gained a `paint()` on its one early return for the same reason:
+harmless while `boot()` had already painted, and a blank page now.
 
-**A `table-layout:fixed` table takes every width from the header row (§46), and
-four attempts were spent refusing to believe it.** `.cfg table` is fixed;
-`table-layout:auto` was written at three increasing specificities and stayed
-computed as `fixed`, while a `width` from the *very next line* applied. Setting
-the four header widths instead worked first time. When a layout mode will not
-turn off, build with it rather than against it.
+**A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF**, so it is held to a
+180ms floor — under the threshold at which a delay is noticed, and a floor
+rather than a duration, so a slow answer waits no longer for it.
 
-**And §93.11 happened again, hours after being written down.** Editing a comment
-left a paragraph after the `*/` that closed it, so the parser met prose where a
-selector belonged and discarded the block. It is the same fix and the same
-check: ask `document.styleSheets` what the browser actually holds — though note
-that query is not decisive on its own, because a rule missing from the dump can
-still be applying. **The element is the authority**: `matches()` for whether the
-selector hits, and `getComputedStyle` for whether the declaration won.
+### 94.11 The check had to build a deployment, because `qa.py` cannot see this
+
+Every other check opens the built file over `file://`, where there is no
+server, nothing arrives late, and the class is deliberately never stamped —
+**so the entire feature is invisible to the whole suite, and a build that had
+lost it would go green every time** (§51.11, walked into knowingly). So
+`src/checks/boot-skeleton.py` serves the built file over HTTP with a
+deliberately slow `/api/state`, which is the only condition the fault was ever
+visible under. The stub answers with a **purple bar the baked file does not
+hold**, so *"the tenant's colours arrived"* and *"the baked colours were never
+shown"* are two measurements rather than one hopeful one.
+
+Two things it got wrong first, both instructive.
+
+**SERVING THE PLATFORM AT `/` MADE THE REFUSAL CASE AN INFINITE LOOP** — a 401
+sends the browser to `/`, which was the platform again, which asked again. The
+stub has to model the DEPLOYMENT (the gate at `/`, the platform at
+`/raya-trade`, §35.6) and not just the one file under test; getting that wrong
+hid the fifth case behind a crash.
+
+**AND `getComputedStyle` ON A HIDDEN ELEMENT STILL RETURNS ITS BACKGROUND.**
+Reading `nav.units` reported the navy bar as being on screen while the skeleton
+was correctly covering the whole chrome — §68.10's fault in the other
+direction, calling a correct build broken. It is measured two ways that cannot
+make that mistake: whether the bar has a **box** at all (`getClientRects()`),
+and what is actually under a point at the top of the page
+(`elementFromPoint`) — asserted in **both** states, so a build where the chrome
+never comes back fails too.
+
+
+### 94.12 Two sessions chose the same cache name, and git said nothing
+
+The second merge of the day brought §93.9–§93.13 in, cleanly — and **`sw.js`
+did not conflict, because both sessions had independently written
+`smp-shell-v3.25b`.** Same string on both sides, so git merged it silently,
+while the built file's bytes behind that name were different on each side.
+
+A service worker caches by NAME. A browser already holding the other session's
+`v3.25b` would go on serving it and never fetch this one — §91's fault
+(*"every returning browser would be served the old platform out of its own
+disk"*) reached by a route §91 did not predict, because §91 is about
+remembering to bump it and this is about bumping it to a value somebody else
+already used.
+
+**The trigger is unchanged and is what saves it:** the built file's bytes
+changed, so the name changes. What this adds is that the name has to be one
+**nobody has served** — so `git show origin/main:sw.js` before choosing, in the
+same breath as the fetch-and-look that precedes every merge. A merge will not
+tell you.

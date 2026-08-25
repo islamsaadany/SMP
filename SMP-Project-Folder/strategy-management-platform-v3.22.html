@@ -304,6 +304,55 @@
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
 
+  /* ── THE BOOT SKELETON (§94.10) ───────────────────────────────────
+     What is on screen between opening the platform and the database
+     answering. Islam: "it opens on a color scheme and then it glitches and
+     shifts to the current color."
+
+     THE PALETTE HERE IS THE POINT. Every token below — `--surface-2`,
+     `--line`, `--ground` — is the page's own neutral, and NONE of them is
+     brandable: `brandTokens()` writes only `--gold*`, `--on-accent`,
+     `--accent-glow` and the `--panel*` family, so nothing on this screen can
+     change when the tenant's branding arrives. The real chrome IS `--panel`,
+     which is exactly why it has to be replaced rather than dimmed.
+
+     Both themes come free for the same reason: these tokens are already
+     redefined per palette and per theme, so a person who chose dark waits in
+     a dark skeleton. */
+  .bootsk, .bootpg { display:none; }
+  html.booting .bootsk { display:block; background:var(--surface-2);
+                         border-bottom:1px solid var(--line); }
+  /* THE REAL CHROME IS HIDDEN, NOT COVERED. Left in the flow it would paint
+     the tenant's bar colour behind this for the whole wait, which is the
+     thing being removed. */
+  html.booting #banner, html.booting .chrome { display:none; }
+  .bootsk-in { max-width:1180px; margin:0 auto; padding:0 24px; }
+  .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
+  .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }
+  .bootsk-tabs { display:flex; gap:22px; padding:0 0 11px;
+                 border-top:1px solid var(--line); margin-top:2px; padding-top:12px; }
+  .bk-far { margin-left:auto; }
+  .bk { display:block; background:var(--line); border-radius:var(--r-sm);
+        height:13px; flex:none; }
+  .bk-pill { height:22px; border-radius:var(--r-pill); }
+  /* The quieter second line, and the three blocks that stand for the page. */
+  .bk-q { background:var(--surface-2); }
+  .bk-blk { height:64px; }
+  html.booting .bootpg { display:flex; flex-direction:column; gap:12px;
+                         padding:26px 0 0; }
+  .bootpg .bk { width:100%; }
+  .bootpg .bk-blk:nth-of-type(4) { opacity:.78; }
+  .bootpg .bk-blk:nth-of-type(5) { opacity:.56; }
+  /* A STATIC GREY PAGE READS AS BROKEN, so it breathes. Slow and shallow —
+     this is a strategy platform waiting for a database, not a spinner. The
+     bars hold still where the device asks for less motion, which is the rule
+     every animation in the product follows. */
+  html.booting .bk { animation:bootpulse 1.5s ease-in-out infinite; }
+  @keyframes bootpulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  @media (prefers-reduced-motion:reduce) {
+    html.booting .bk { animation:none; opacity:.75; }
+  }
+
   header.top { border-bottom:1px solid var(--line); background:var(--surface); }
   .top-in { max-width:1180px; margin:0 auto; padding:18px 24px; display:flex;
             align-items:flex-end; gap:20px; flex-wrap:wrap; }
@@ -4594,7 +4643,80 @@ var THEME = (function () {
 })();
 THEME.apply();
 
+/* ── THE BOOT SKELETON'S SWITCH (§94.10) ──────────────────────────────────
+   Islam: "when I open the platform it opens on a color scheme and then it
+   glitches and shifts to the current color."
+
+   IT IS HERE BECAUSE THE ARGUMENT IS THIS FILE'S ARGUMENT. Everything above
+   exists so the page never paints light and then flips; this is the same
+   sentence about the TENANT's colours, which cannot be answered the same way
+   because they are not in the browser — they are in the database, on
+   Setup › Branding, and they arrive with `/api/state`. So the page CANNOT
+   open in the right colours. It can open in NO colours, which is what this
+   does, and before the answer is known that is the only honest thing to show
+   (§32, at the gate, one surface further in).
+
+   AND THE COLOURS ARE THE SMALLER HALF. The worked example is baked into the
+   file, so today a client's deployment flashes RAYA TRADE's units and figures
+   before their own arrive. Same moment, same fix, and worse.
+
+   ONLY WHERE THERE IS A SERVER TO WAIT FOR. Opened from a file nothing
+   arrives late, so the skeleton would appear and vanish for no reason. `SYNC`
+   decides the same thing the same way, and this is deliberately NOT that
+   check moved here: this has to run in the HEAD, before sync.js exists, and a
+   boot state that waited for a script further down the page would be exactly
+   one frame too late — which is the whole fault being fixed.
+
+   IT IS TAKEN OFF BY sync.js, ON EVERY PATH IT HAS — hydrated, refused,
+   unreachable, or timed out. A loading state that can get stuck is worse than
+   the glitch it replaces. */
+(function () {
+  try {
+    if (location.protocol !== "http:" && location.protocol !== "https:") return;
+    document.documentElement.classList.add("booting");
+    document.documentElement.setAttribute("aria-busy", "true");
+  } catch (e) {}
+})();
+
 </script>
+
+<!-- ── WHAT THE PLATFORM SHOWS WHILE IT WAITS (§94.10) ──────────────────
+     STATIC MARKUP, not drawn by paint(), because the whole point is that it
+     is on screen before any of the platform's own script has run. `booting`
+     is stamped on <html> in the head (theme.js) and taken off by sync.js on
+     every path it has.
+
+     NOTHING HERE WEARS A COLOUR IT WILL HAVE TO CHANGE. The real chrome is
+     `--panel`, which is the TENANT's bar colour and arrives with the data;
+     this is `--surface-2`, which is the page's own neutral and is not
+     brandable. That is the entire idea — a skeleton that kept the navy bar
+     would still swap it a moment later.
+
+     AND IT DOES NOT PRETEND TO BE A PARTICULAR PAGE. Until the server says
+     who this is, the platform does not know whether it is opening a unit's
+     Plan (a rail and a pane) or the group's Performance (cards). A heading
+     and three blocks is true of both; a rail would be right for one and wrong
+     for the other. -->
+<div class="bootsk" id="bootsk">
+  <span class="vh" role="status">Loading the platform&#8230;</span>
+  <div class="bootsk-in" aria-hidden="true">
+    <div class="bootsk-top">
+      <span class="bk" style="width:220px;height:15px"></span>
+      <span class="bk bk-pill bk-far" style="width:64px"></span>
+      <span class="bk bk-pill" style="width:80px"></span>
+    </div>
+    <div class="bootsk-nav">
+      <span class="bk bk-pill" style="width:68px"></span>
+      <span class="bk bk-pill" style="width:88px"></span>
+      <span class="bk bk-pill" style="width:104px"></span>
+      <span class="bk bk-pill" style="width:76px"></span>
+    </div>
+    <div class="bootsk-tabs">
+      <span class="bk" style="width:72px;height:11px"></span>
+      <span class="bk" style="width:94px;height:11px"></span>
+    </div>
+  </div>
+</div>
 
 <div class="banner" id="banner">
   <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
@@ -4726,7 +4848,16 @@ THEME.apply();
   </div>
 </div>
 
-<main class="wrap" id="mainwrap"><div class="view" id="panel"></div>
+<!-- The page's own half of the skeleton. It lives INSIDE #panel, which
+     paint() replaces wholesale — so nothing has to remove it and it cannot
+     outlive the first real paint. -->
+<main class="wrap" id="mainwrap"><div class="view" id="panel"><div class="bootpg" aria-hidden="true">
+  <span class="bk" style="height:20px;max-width:300px"></span>
+  <span class="bk bk-q" style="height:11px;max-width:470px"></span>
+  <span class="bk bk-blk"></span>
+  <span class="bk bk-blk"></span>
+  <span class="bk bk-blk"></span>
+</div></div>
 
 <!-- No footer. It carried one sentence - the product's name, a spec number
      and a shape - none of which anyone was reading and all of which the chrome
@@ -25557,6 +25688,26 @@ var SEARCHSEL = (function(){
 var SYNC = (function () {
   var enabled = typeof location !== "undefined" &&
     (location.protocol === "http:" || location.protocol === "https:");
+  /* ── THE BOOT SKELETON'S TWO NUMBERS (§94.10) ────────────────────
+     FLOOR: how long the skeleton stays once it is up, so an answer that
+     arrives in 40ms does not flash it on and off. Chosen under the threshold
+     at which a delay is noticed, and it is a floor rather than a duration —
+     a slow answer waits no longer for it.
+
+     GIVEUP: when to stop waiting and show the baked data anyway. Long enough
+     for a cold serverless function and a sleeping Neon branch, short enough
+     that nobody is left looking at grey wondering whether it is broken. */
+  var BOOT_FLOOR = 180, BOOT_GIVEUP = 8000;
+  function bootNow() { return Date.now(); }
+  /* Takes the skeleton down. Idempotent, and the ONLY thing that does it —
+     theme.js puts the class on and never removes it, so there is one place to
+     look when a page is stuck grey. */
+  function bootLand() {
+    try {
+      document.documentElement.classList.remove("booting");
+      document.documentElement.removeAttribute("aria-busy");
+    } catch (e) {}
+  }
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
   var timer = null;
@@ -25778,7 +25929,15 @@ var SYNC = (function () {
   function chromeFor(paint) {
     var box = document.querySelector(".viewer");
     var sel = document.getElementById("asWho");
-    if (!box || !sel) return;
+    /* AND IT PAINTS ON THE WAY OUT (§94.10). This was a bare `return`, which
+       was harmless while boot() had already painted before hydrating — the
+       page was on screen and this only decorated the chrome. It is not
+       harmless now: this function IS the first paint, so returning without
+       one leaves the skeleton down and nothing behind it. Defensive either
+       way (both elements are in the static markup), and "it cannot happen" is
+       not a reason to leave a blank page when it does — the same sentence the
+       note below this one already makes. */
+    if (!box || !sel) { paint(); return; }
     var known = PEOPLE.some(function (p) { return p.key === person.key; });
     if (known) {
       window.VIEWER = person.key;
@@ -26053,11 +26212,45 @@ var SYNC = (function () {
     },
     boot: function (paint) {
       repaint = paint;
-      paint();
-      if (!enabled) return;
+      /* ── OPENED AS A FILE, THERE IS NOTHING TO WAIT FOR (§94.10) ──
+         No fetch, so nothing arrives late and there is nothing for a
+         skeleton to cover. theme.js does not stamp `booting` here either;
+         bootLand() is called anyway so the two can never disagree. */
+      if (!enabled) { bootLand(); paint(); return; }
       /* Taken before hydration, while the globals still hold the baked-in
          example — after hydration it is gone from memory. */
       DEMO = clone(graph());
+      /* ── THE PAINT THAT USED TO BE HERE (§94.10) ─────────────────
+         `paint()` ran first, unconditionally, and that single line was the
+         whole of the fault: it drew the page from the BAKED file — the wrong
+         colours, and on a client's deployment Raya Trade's units and figures
+         — and the real one replaced it a moment later. The skeleton is on
+         screen instead, and the first paint now happens when there is
+         something true to paint.
+
+         WHICH MAKES EVERY EXIT FROM HERE LOAD-BEARING. Nothing else will
+         paint this page: not hydration, not a refusal, not a network that
+         never answers. `land()` is the one door and it is idempotent, so the
+         backstop and the answer racing each other is harmless. */
+      var landed = false, t0 = bootNow();
+      function land(then) {
+        if (landed) return;
+        landed = true;
+        clearTimeout(backstop);
+        /* A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF. Held to a floor
+           so it reads as one step rather than a stutter — below the threshold
+           anybody perceives as a delay, and only ever the remainder. */
+        var wait = Math.max(0, BOOT_FLOOR - (bootNow() - t0));
+        setTimeout(function () { bootLand(); (then || paint)(); }, wait);
+      }
+      /* NOBODY IS LEFT LOOKING AT GREY. If the answer has not come, the baked
+         data is still better than a loading state with no end — and it is
+         exactly what this line used to show immediately. */
+      var backstop = setTimeout(function () {
+        console.info("SMP: the database has not answered in " +
+                     (BOOT_GIVEUP / 1000) + "s — showing the baked-in data");
+        land();
+      }, BOOT_GIVEUP);
       fetch("/api/state", { cache: "no-store" })
         .then(function (r) {
           /* Deployed and not signed in: the gate is the way in. A TEMPORARY
@@ -26069,12 +26262,16 @@ var SYNC = (function () {
         })
         .then(function (data) {
           if (!data.ok || !data.state) throw new Error(data.error || "bad payload");
-          if (data.person && data.person.mustChange) { location.replace("/"); return; }
+          /* LEAVING, NOT LANDING. The backstop is dropped so it cannot
+             paint a page the browser is already navigating away from, and
+             the skeleton stays up until it does — which is right: the gate
+             is where this person is going. */
+          if (data.person && data.person.mustChange) { clearTimeout(backstop); location.replace("/"); return; }
           hydrate(data.state);
           LIVE = clone(data.state);
           live = true;
           person = data.person || null;
-          if (person) chromeFor(paint); else paint();
+          land(function () { if (person) chromeFor(paint); else paint(); });
           lastSaved = serialize();
           setInterval(save, 5000);
 
@@ -26101,8 +26298,12 @@ var SYNC = (function () {
           markMode();
         })
         .catch(function (e) {
-          if (e.message !== "sign in")
-            console.info("SMP: running on the baked-in data (" + e.message + ")");
+          /* "sign in" is the 401/403 above, which has already sent the
+             browser to the gate — painting now would draw a page nobody is
+             going to see, over data this person is not entitled to. */
+          if (e.message === "sign in") { clearTimeout(backstop); return; }
+          console.info("SMP: running on the baked-in data (" + e.message + ")");
+          land();
         });
     },
     afterPaint: function () {
@@ -30768,15 +30969,21 @@ var SYNC = (function () {
     });
   }
 
-  /* Paint immediately from the baked data, then hydrate from the database
-     where one is reachable and repaint. On file:// this is just paint(). */
+  /* ── THE FIRST PAINT IS THE HYDRATED ONE NOW (§94.10) ──────────────
+     It used to say "paint immediately from the baked data, then hydrate and
+     repaint", and that immediate paint was the glitch: the wrong colours, and
+     on a client's deployment another company's units. Where there is a server
+     the skeleton holds the screen and SYNC.boot paints once, with the truth.
+     On file:// there is nothing to wait for and this is still just paint(). */
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
-  /* Before the first paint, so the tenant's own colours are on screen from the
-     start rather than arriving a frame later. SYNC.boot repaints after
-     hydration and applyBrand runs again there, because the branding that
-     matters is the one in the DATABASE, not the one baked into the file. */
+  /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
+     It no longer has anything to do with the first paint — the skeleton wears
+     none of these tokens, deliberately, and where there is a server the only
+     branding ever seen is the one that arrives with the data. This is here for
+     the file:// case, where nothing arrives and the baked branding IS the
+     tenant's. */
   applyBrand();
   SYNC.boot(function(){ applyBrand(); paint(); });
 </script>

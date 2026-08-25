@@ -281,17 +281,26 @@ with sync_playwright() as p:
     pg.click('.setuprail [data-setupgo="fns"]'); pg.wait_for_timeout(300)
     pg.evaluate("() => { EDITING.fns = true; paint(); }"); pg.wait_for_timeout(250)
     n0 = len(pg.query_selector_all(".cfg tbody tr"))
-    pg.click('[data-fndel="qaspare"]'); pg.wait_for_timeout(200)
-    pg.click('[data-fndelyes="qaspare"]'); pg.wait_for_timeout(300)
+    # DELETE LIVES IN THE ROW MENU NOW (§93.14), so the ⋮ is opened first.
+    # Two presses, which is what somebody actually does — and the menu is
+    # what makes the row one line instead of 155px.
+    def fnmenu(k):
+        pg.click('[data-fnmenu="%s"]' % k); pg.wait_for_timeout(250)
+    fnmenu("qaspare")
+    pg.click('[data-fndel="qaspare"]'); pg.wait_for_timeout(250)
+    pg.click('[data-fndelyes="qaspare"]'); pg.wait_for_timeout(400)
     n1 = len(pg.query_selector_all(".cfg tbody tr"))
     still = pg.evaluate("() => !!FUNCTIONS.qaspare")
     if still or n1 != n0 - 1:
         errs.append("DELETE: the button did not remove the row (%d -> %d, still %r)"
                     % (n0, n1, still))
     # And the one that is refused says so where the confirmation would be.
-    pg.click('[data-fndel="merchandising"]'); pg.wait_for_timeout(250)
-    refusal = pg.eval_on_selector(".confirm.wide", "e => e.innerText") \
-        if pg.query_selector(".confirm.wide") else ""
+    fnmenu("merchandising")
+    pg.click('[data-fndel="merchandising"]'); pg.wait_for_timeout(300)
+    # The refusal is a panel in the actions cell now, not a `.confirm.wide`
+    # inline in a 201px column — it moved with the button (§93.14).
+    refusal = pg.eval_on_selector(".kmenu.kconfirm", "e => e.innerText") \
+        if pg.query_selector(".kmenu.kconfirm") else ""
     if "cannot be deleted" not in refusal or "Retire" not in refusal:
         errs.append("DELETE: the refusal does not say why, or does not offer "
                     "Retire (%r)" % refusal[:120])

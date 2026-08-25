@@ -1,41 +1,3 @@
-<!-- ── WHAT THE PLATFORM SHOWS WHILE IT WAITS (§94.10) ──────────────────
-     STATIC MARKUP, not drawn by paint(), because the whole point is that it
-     is on screen before any of the platform's own script has run. `booting`
-     is stamped on <html> in the head (theme.js) and taken off by sync.js on
-     every path it has.
-
-     NOTHING HERE WEARS A COLOUR IT WILL HAVE TO CHANGE. The real chrome is
-     `--panel`, which is the TENANT's bar colour and arrives with the data;
-     this is `--surface-2`, which is the page's own neutral and is not
-     brandable. That is the entire idea — a skeleton that kept the navy bar
-     would still swap it a moment later.
-
-     AND IT DOES NOT PRETEND TO BE A PARTICULAR PAGE. Until the server says
-     who this is, the platform does not know whether it is opening a unit's
-     Plan (a rail and a pane) or the group's Performance (cards). A heading
-     and three blocks is true of both; a rail would be right for one and wrong
-     for the other. -->
-<div class="bootsk" id="bootsk">
-  <span class="vh" role="status">Loading the platform&#8230;</span>
-  <div class="bootsk-in" aria-hidden="true">
-    <div class="bootsk-top">
-      <span class="bk" style="width:220px;height:15px"></span>
-      <span class="bk bk-pill bk-far" style="width:64px"></span>
-      <span class="bk bk-pill" style="width:80px"></span>
-    </div>
-    <div class="bootsk-nav">
-      <span class="bk bk-pill" style="width:68px"></span>
-      <span class="bk bk-pill" style="width:88px"></span>
-      <span class="bk bk-pill" style="width:104px"></span>
-      <span class="bk bk-pill" style="width:76px"></span>
-    </div>
-    <div class="bootsk-tabs">
-      <span class="bk" style="width:72px;height:11px"></span>
-      <span class="bk" style="width:94px;height:11px"></span>
-    </div>
-  </div>
-</div>
-
 <div class="banner" id="banner">
   <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
   <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
@@ -166,16 +128,7 @@
   </div>
 </div>
 
-<!-- The page's own half of the skeleton. It lives INSIDE #panel, which
-     paint() replaces wholesale — so nothing has to remove it and it cannot
-     outlive the first real paint. -->
-<main class="wrap" id="mainwrap"><div class="view" id="panel"><div class="bootpg" aria-hidden="true">
-  <span class="bk" style="height:20px;max-width:300px"></span>
-  <span class="bk bk-q" style="height:11px;max-width:470px"></span>
-  <span class="bk bk-blk"></span>
-  <span class="bk bk-blk"></span>
-  <span class="bk bk-blk"></span>
-</div></div>
+<main class="wrap" id="mainwrap"><div class="view" id="panel"></div>
 
 <!-- No footer. It carried one sentence - the product's name, a spec number
      and a shape - none of which anyone was reading and all of which the chrome
@@ -473,10 +426,6 @@
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
-    /* The open sent-message panel goes with the page (§93.15). It is asked
-       fresh next time, because "what happened" can change while you are away —
-       a send is still finishing when the list first draws. */
-    if (typeof SENTONE !== "undefined") SENTONE = null;
     REPORTING = null;
     CLEARING = null;
     /* AN EDIT YOU CANNOT SEE IS NOT AN EDIT YOU AGREED TO (spec 012 §2.1).
@@ -1270,23 +1219,6 @@
        the fault the chrome shed in 2.9. The row is emptied AND hidden: an
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
-    /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
-       Islam, on a 1670px screen showing an eleven-column register inside a
-       1180px column: "the page is wide, however the rail on the left and the
-       tables are stuck in a confined space with a lot of buffer on right and
-       left."
-
-       1180 is a READING measure and it is right for the pages it was chosen
-       for — a unit's plan, the knowledge base, a group's foundation are prose
-       and prose has an optimum line length. A Setup page is a rail and a table,
-       and a table has the opposite need: every pixel it is denied becomes a
-       horizontal scroll inside a box.
-
-       So it is a state on the ROOT rather than a rule on `.wrap`, because the
-       chrome's three rows are capped at the same 1180 and widening the content
-       alone would leave the navigation indented from the page under it. One
-       attribute, four containers, and every other page is untouched. */
-    document.documentElement.toggleAttribute("data-wide", railed);
     document.getElementById("tabrow").hidden = railed;
     /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
        `.primary`, which is the LANDING PAGE and nothing else — so it was
@@ -1521,15 +1453,7 @@
   function positionRowMenu(){
     var m = document.querySelector(".kmenu");
     if (!m) return;
-    /* EVERY BUTTON THAT OPENS ONE OF THESE (§93.14). This read `[data-pmenu]`
-       alone and RETURNED QUIETLY when it found none — so the Functions table's
-       menu and its three confirmation panels were never positioned at all and
-       rendered 89px and 155px past the right edge of the window, with Close
-       entirely outside it. §51.11's fault in a helper rather than in a check:
-       a selector that no longer covers everything it is asked about does not
-       fail, it silently does nothing. A menu added to a third table is
-       positioned the day it is added by being given an attribute here. */
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu]");
     if (!btn) return;
     var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
     var below = window.innerHeight - r.bottom - 8;
@@ -1867,11 +1791,6 @@
       b.addEventListener("click", function(){
         var f = FUNCTIONS[b.dataset.fnretire];
         f.active = f.active === false;
-        /* THE MENU THIS CAME OUT OF HAS TO CLOSE (§47.2, §93.14). The action
-           fires before the menu does anything, and paint() re-renders from
-           FNMENU — so leaving it set would repaint the menu straight back over
-           a row that had just changed. */
-        FNMENU = null;
         paint();
       });
     });
@@ -1881,10 +1800,7 @@
        it, and the check that matters is the one nearest the write (§48.2). */
     document.querySelectorAll("[data-fndel]").forEach(function(b){
       b.addEventListener("click", function(){
-        /* The question replaces the menu in the same corner (§46.2), so the
-           menu closes as the question opens or both would draw in one cell. */
-        CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; FNMENU = null;
-        paint();
+        CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; paint();
       });
     });
     document.querySelectorAll("[data-fndelyes]").forEach(function(b){
@@ -2263,16 +2179,11 @@
     });
     /* Choosing from the menu closes it and raises the confirmation, so the
        destructive act is still two deliberate presses. */
-    /* FNMENU goes with CLEARMENU at all three (§93.14): Clear progress and
-       Clear plan are entries in the Functions row menu now, so the menu has to
-       close as the question opens — and reopen for neither answer. */
     document.querySelectorAll("[data-clear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        CLEARING = b.dataset.clear; CLEARMENU = null; FNMENU = null; paint(); });
+      b.addEventListener("click", function(){ CLEARING = b.dataset.clear; CLEARMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
-      b.addEventListener("click", function(){
-        CLEARING = null; CLEARMENU = null; FNMENU = null; paint(); });
+      b.addEventListener("click", function(){ CLEARING = null; CLEARMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearyes]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -3410,38 +3321,6 @@
         paint();
       });
     });
-    /* ── THE FUNCTIONS TABLE'S ROW MENU (§93.14) ──────────────────────
-       The same shape, and it CLOSES ANY OPEN QUESTION as it opens: the delete
-       refusal and the two clear confirmations render in the same corner, so a
-       menu opened over one of them would stack two panels in one cell. */
-    document.querySelectorAll("[data-fnmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNMENU = FNMENU === b.dataset.fnmenu ? null : b.dataset.fnmenu;
-        CLEARING = null;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNCOLMENU = !FNCOLMENU; PCOLMENU = false; PWMENU = false; PFILEMENU = false;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncol]").forEach(function(b){
-      b.addEventListener("change", function(){ setFnCol(this.dataset.fncol, this.checked); paint(); });
-    });
-    /* stopPropagation, or the document click-away above closes the panel
-       before the paint that would show the boxes changing (§47.2). */
-    document.querySelectorAll("[data-fncolall],[data-fncolnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-fncolall");
-        FN_COLS.forEach(function(c){ setFnCol(c.k, on); });
-        paint();
-      });
-    });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
        REACH. "none" can lock nobody out — it only reaches people who could not
        sign in anyway. "all" overwrites live passwords and ends sessions, so the
@@ -3698,37 +3577,6 @@
         paint();
       });
     }
-
-    /* ── OPENING A SENT MESSAGE (§93.15) ──────────────────────────────
-       Asked once per message and kept, so closing and reopening the same one
-       does not go back to the server. The state carries the id, so a paint
-       that happens while it is loading redraws "Asking…" rather than losing
-       the panel (§35's rule for the password states). */
-    document.querySelectorAll("[data-sentone]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = Number(this.dataset.sentone);
-        if (SENTONE && SENTONE.id === id) { SENTONE = null; paint(); return; }
-        SENTONE = { id: id, asking: true, data: null, error: null };
-        paint();
-        if (typeof SYNC === "undefined" || !SYNC.isLive()) {
-          SENTONE = { id: id, asking: false, data: null,
-                      error: "There is no server here to ask." };
-          paint(); return;
-        }
-        SYNC.mailHistoryOne(id, function(err, j){
-          /* Only if this is still the message being asked about — two quick
-             clicks would otherwise land the first answer on the second panel. */
-          if (!SENTONE || SENTONE.id !== id) return;
-          SENTONE = err || !j || !j.ok
-            ? { id: id, asking: false, data: null,
-                error: (err && err.message) || (j && j.error) || "Could not ask the server." }
-            : { id: id, asking: false, data: j, error: null };
-          paint();
-        });
-      });
-    });
-    var sentClose = document.querySelector("[data-sentclose]");
-    if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){
@@ -4701,27 +4549,18 @@
         !(e.target.closest && e.target.closest(".kmenu, [data-pmenu]"))) {
       PMENU = null; paint();
     }
-    /* The Functions table's row menu, the same way (§93.14). Its own selector,
-       because a click on THIS table's kebab must not be read as "outside" the
-       register's — the two are never on screen together, and a shared test
-       would be a rule that happens to work rather than one that is right. */
-    if (typeof FNMENU !== "undefined" && FNMENU !== null &&
-        !(e.target.closest && e.target.closest(".kmenu, [data-fnmenu]"))) {
-      FNMENU = null; paint();
-    }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; paint();
     }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
-    if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU)) {
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; paint();
     }
   });
 
@@ -4852,21 +4691,15 @@
     });
   }
 
-  /* ── THE FIRST PAINT IS THE HYDRATED ONE NOW (§94.10) ──────────────
-     It used to say "paint immediately from the baked data, then hydrate and
-     repaint", and that immediate paint was the glitch: the wrong colours, and
-     on a client's deployment another company's units. Where there is a server
-     the skeleton holds the screen and SYNC.boot paints once, with the truth.
-     On file:// there is nothing to wait for and this is still just paint(). */
+  /* Paint immediately from the baked data, then hydrate from the database
+     where one is reachable and repaint. On file:// this is just paint(). */
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
-  /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
-     It no longer has anything to do with the first paint — the skeleton wears
-     none of these tokens, deliberately, and where there is a server the only
-     branding ever seen is the one that arrives with the data. This is here for
-     the file:// case, where nothing arrives and the baked branding IS the
-     tenant's. */
+  /* Before the first paint, so the tenant's own colours are on screen from the
+     start rather than arriving a frame later. SYNC.boot repaints after
+     hydration and applyBrand runs again there, because the branding that
+     matters is the one in the DATABASE, not the one baked into the file. */
   applyBrand();
   SYNC.boot(function(){ applyBrand(); paint(); });
 </script>

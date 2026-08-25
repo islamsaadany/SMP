@@ -258,16 +258,6 @@
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
   .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
 
-  /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
-     All four containers together, or the chrome sits indented from the page
-     beneath it. 1600px rather than none at all: a table stretched across a
-     32-inch monitor puts its first and last column a head-turn apart, and the
-     register's frozen columns exist precisely so the eye has an anchor. */
-  :root[data-wide] .wrap,
-  :root[data-wide] .top-in,
-  :root[data-wide] .units-in,
-  :root[data-wide] .tabs-in { max-width:1600px; }
-
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
   .banner strong { color:var(--panel-accent); font-weight:700; }
@@ -288,55 +278,6 @@
   .refused-undo:focus-visible { outline:2px solid currentColor; outline-offset:2px; }
   .banner.refused ul { margin:4px 0 0; padding-left:18px; }
   .banner.refused li { margin:2px 0; }
-
-  /* ── THE BOOT SKELETON (§94.10) ───────────────────────────────────
-     What is on screen between opening the platform and the database
-     answering. Islam: "it opens on a color scheme and then it glitches and
-     shifts to the current color."
-
-     THE PALETTE HERE IS THE POINT. Every token below — `--surface-2`,
-     `--line`, `--ground` — is the page's own neutral, and NONE of them is
-     brandable: `brandTokens()` writes only `--gold*`, `--on-accent`,
-     `--accent-glow` and the `--panel*` family, so nothing on this screen can
-     change when the tenant's branding arrives. The real chrome IS `--panel`,
-     which is exactly why it has to be replaced rather than dimmed.
-
-     Both themes come free for the same reason: these tokens are already
-     redefined per palette and per theme, so a person who chose dark waits in
-     a dark skeleton. */
-  .bootsk, .bootpg { display:none; }
-  html.booting .bootsk { display:block; background:var(--surface-2);
-                         border-bottom:1px solid var(--line); }
-  /* THE REAL CHROME IS HIDDEN, NOT COVERED. Left in the flow it would paint
-     the tenant's bar colour behind this for the whole wait, which is the
-     thing being removed. */
-  html.booting #banner, html.booting .chrome { display:none; }
-  .bootsk-in { max-width:1180px; margin:0 auto; padding:0 24px; }
-  .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
-  .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }
-  .bootsk-tabs { display:flex; gap:22px; padding:0 0 11px;
-                 border-top:1px solid var(--line); margin-top:2px; padding-top:12px; }
-  .bk-far { margin-left:auto; }
-  .bk { display:block; background:var(--line); border-radius:var(--r-sm);
-        height:13px; flex:none; }
-  .bk-pill { height:22px; border-radius:var(--r-pill); }
-  /* The quieter second line, and the three blocks that stand for the page. */
-  .bk-q { background:var(--surface-2); }
-  .bk-blk { height:64px; }
-  html.booting .bootpg { display:flex; flex-direction:column; gap:12px;
-                         padding:26px 0 0; }
-  .bootpg .bk { width:100%; }
-  .bootpg .bk-blk:nth-of-type(4) { opacity:.78; }
-  .bootpg .bk-blk:nth-of-type(5) { opacity:.56; }
-  /* A STATIC GREY PAGE READS AS BROKEN, so it breathes. Slow and shallow —
-     this is a strategy platform waiting for a database, not a spinner. The
-     bars hold still where the device asks for less motion, which is the rule
-     every animation in the product follows. */
-  html.booting .bk { animation:bootpulse 1.5s ease-in-out infinite; }
-  @keyframes bootpulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
-  @media (prefers-reduced-motion:reduce) {
-    html.booting .bk { animation:none; opacity:.75; }
-  }
 
   header.top { border-bottom:1px solid var(--line); background:var(--surface); }
   .top-in { max-width:1180px; margin:0 auto; padding:18px 24px; display:flex;

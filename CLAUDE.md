@@ -174,6 +174,14 @@ A drift between specs and code is a documentation bug — report it before silen
   "merged to main" were true and not deployed, and no amount of looking at git
   would have shown it. The deployment is part of the merge, and the only thing
   that proves it is the bytes the client's browser would receive.
+- **AND BUMP IT TO A NAME NOBODY ELSE HAS SERVED (§94.12).** Two sessions
+  merged on the same day and both independently wrote `smp-shell-v3.25b`. Same
+  string on both sides, so **git merged `sw.js` with no conflict at all** while
+  the bytes behind that name differed — and a worker caches by NAME, so a
+  browser holding the other session's copy would never fetch this one. §91's
+  fault by a route §91 did not predict. **`git show origin/main:sw.js` before
+  choosing**, in the same breath as the fetch-and-look that precedes every
+  merge: a merge will not tell you.
 - **BUMP `SHELL` IN `sw.js` ON EVERY MERGE THAT CHANGES THE BUILT FILE (§91).**
   Not on a version bump — on a CONTENT change. It sat at `v3.22` through §80 to
   §90 because the built file kept the same filename the whole time, and the
@@ -470,6 +478,42 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Who enters** — behind a tenant switch that is off by default, so turning it on
   is the office deliberately handing naming to the custodian (spec 008 §3B), and
   **a rule cannot close a door somebody has to open on purpose.**
+- **NOTHING WEARS A COLOUR IT WILL HAVE TO CHANGE (§94.10):** the platform
+  painted from the BAKED file and repainted when `/api/state` answered — so it
+  opened in the wrong colours and, on a client's deployment, in **Raya Trade's
+  units and figures**. Two things arriving late, and only the first was
+  reported. The answer is a **grey skeleton** (Islam's, over remembering the
+  branding in `localStorage`: that would have fixed the colours and left the
+  content flashing). **THE PALETTE IS THE WHOLE IDEA** — `--surface-2`,
+  `--line` and `--ground` are the page's own neutrals and none of them is
+  brandable (`brandTokens()` writes only the `--gold*`, `--on-accent`,
+  `--accent-glow` and `--panel*` families), so nothing on that screen can
+  change when the branding lands; the real chrome is HIDDEN, not dimmed,
+  because a skeleton keeping the navy bar would still swap it. **Shape-neutral
+  on purpose**: until the server says who this is, the platform does not know
+  whether it is opening a unit's Plan (a rail and a pane) or the group's
+  Performance (cards). **THE SWITCH IS IN THE HEAD, WITH `theme.js`'s
+  ARGUMENT** — the page cannot open in the right colours, so it opens in NO
+  colours (§32's rule at the gate, one surface in); deliberately not `SYNC`'s
+  check moved earlier, because a boot state waiting on a script further down
+  the page is one frame too late. **EVERY EXIT FROM `boot()` IS NOW
+  LOAD-BEARING**: the removed `paint()` was also the safety net, so `land()` is
+  one idempotent door with four ways in (the answer, a failure, an 8s backstop,
+  `file://`) and one deliberate non-paint (a 401 is already going to the gate).
+  A 180ms floor holds the skeleton so a fast answer cannot blink it.
+- **A FEATURE ONLY VISIBLE OVER HTTP IS INVISIBLE TO THE WHOLE SUITE (§94.11):**
+  every check opens the built file over `file://`, where nothing arrives late
+  and the boot class is never stamped — **a build that had lost the skeleton
+  would go green every time.** `src/checks/boot-skeleton.py` serves the built
+  file with a slow `/api/state` answering with a **bar colour the baked file
+  does not hold**, so "the tenant's colours arrived" and "the baked colours
+  were never shown" are two measurements. Two traps on the way: **serving the
+  platform at `/` made the 401 case an infinite loop** (the stub must model the
+  DEPLOYMENT — gate at `/`, platform at `/raya-trade`), and
+  **`getComputedStyle` on a `display:none` element still returns its
+  background**, which reported the navy bar as on screen while the skeleton
+  correctly covered it (§68.10 in reverse). Measure a BOX (`getClientRects`)
+  and `elementFromPoint`, in both states.
 - **PEOPLE OPEN WHERE THEY WORK, AND THE GROUP IS A PLACE (§94.6):** a unit has
   opened on Strategy › Plan since §28; what never happened is WHICH destination
   opens — `var current = "group"` was a literal, and `paintUnits()` only corrects
@@ -1129,7 +1173,18 @@ it means "we never asked", and the register's Name column splits into Name and
 Full Name. **Numbered &sect;94 because &sect;93 reached `main` first** &mdash;
 and the two sections found the SAME no-op assertion in `test-authorize.js`
 independently, which is the part worth keeping: a check that could not fail was
-invisible to two people reading the same file for two unrelated reasons.*
+invisible to two people reading the same file for two unrelated reasons.
+**AND THE BOOT GLITCH** (&sect;94.10): the platform painted from the BAKED file
+and repainted when the database answered, so it opened in the wrong colours
+and, on a client's deployment, in **Raya Trade's units and figures** &mdash; two
+things arriving late, and only the first was reported. A grey **skeleton**
+holds the screen instead, wearing only tokens no branding can touch, because a
+skeleton keeping the navy bar would still swap it. Islam chose it over
+remembering the colours in the browser, and he was right: that would have fixed
+the colours and left the content flashing. **The check had to build a
+deployment** &mdash; every other check opens the file over `file://`, where the
+whole feature does not exist, so a build that had lost it would go green every
+time.*
 
 *Earlier: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the

@@ -258,38 +258,3 @@ var THEME = (function () {
   };
 })();
 THEME.apply();
-
-/* ── THE BOOT SKELETON'S SWITCH (§94.10) ──────────────────────────────────
-   Islam: "when I open the platform it opens on a color scheme and then it
-   glitches and shifts to the current color."
-
-   IT IS HERE BECAUSE THE ARGUMENT IS THIS FILE'S ARGUMENT. Everything above
-   exists so the page never paints light and then flips; this is the same
-   sentence about the TENANT's colours, which cannot be answered the same way
-   because they are not in the browser — they are in the database, on
-   Setup › Branding, and they arrive with `/api/state`. So the page CANNOT
-   open in the right colours. It can open in NO colours, which is what this
-   does, and before the answer is known that is the only honest thing to show
-   (§32, at the gate, one surface further in).
-
-   AND THE COLOURS ARE THE SMALLER HALF. The worked example is baked into the
-   file, so today a client's deployment flashes RAYA TRADE's units and figures
-   before their own arrive. Same moment, same fix, and worse.
-
-   ONLY WHERE THERE IS A SERVER TO WAIT FOR. Opened from a file nothing
-   arrives late, so the skeleton would appear and vanish for no reason. `SYNC`
-   decides the same thing the same way, and this is deliberately NOT that
-   check moved here: this has to run in the HEAD, before sync.js exists, and a
-   boot state that waited for a script further down the page would be exactly
-   one frame too late — which is the whole fault being fixed.
-
-   IT IS TAKEN OFF BY sync.js, ON EVERY PATH IT HAS — hydrated, refused,
-   unreachable, or timed out. A loading state that can get stuck is worse than
-   the glitch it replaces. */
-(function () {
-  try {
-    if (location.protocol !== "http:" && location.protocol !== "https:") return;
-    document.documentElement.classList.add("booting");
-    document.documentElement.setAttribute("aria-busy", "true");
-  } catch (e) {}
-})();

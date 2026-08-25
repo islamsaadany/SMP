@@ -75,10 +75,11 @@
    when they do, git merges the bare line with no conflict at all while the
    bytes behind the name differ, which is the one failure a cache name exists
    to prevent. A name taken from what the branch DID cannot be arrived at by
-   coincidence. Checked at merge time -- twice, because main moved again
-   while this branch ran and is now serving v3.25h. This repository has
-   carried v3.21, v3.22, v3.24, b, c, d, v3.25, b, c, d, e, f, g and h; none
-   of them is this one, which is the point of not being a letter.
+   coincidence. Checked at merge time -- three times, because main moved
+   again on each check and is now serving v3.26. This repository has carried
+   v3.21, v3.22, v3.24, b, c, d, v3.25, b, c, d, e, f, g, h and v3.26; none
+   of them is this one, which is the point of not being a letter. The version
+   in it tracks the platform (§98 took it to v3.27), the suffix says whose.
 
    AND THE SAME FAULT HAS A THIRD FACE: the SECTION NUMBER in the decisions
    document. This branch was written as §95 and renumbered three times -- to
@@ -90,7 +91,7 @@
    number -- is chosen in the same breath as the fetch-and-look that precedes
    every merge, and never before. */
 
-const SHELL = "smp-shell-v3.25-tables";
+const SHELL = "smp-shell-v3.27-tables";
 const ASSETS = [
   "/",
   "/index.html",

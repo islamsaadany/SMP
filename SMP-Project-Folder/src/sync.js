@@ -38,6 +38,13 @@ var SYNC = (function () {
       document.documentElement.classList.remove("booting");
       document.documentElement.removeAttribute("aria-busy");
     } catch (e) {}
+    /* THE CORNER ARRIVES WITH THE PAGE, NOT BEFORE IT (§97.1). This is the one
+       place the skeleton comes down, with four ways in (the answer, a failure,
+       the 8s backstop, file://) — so hanging the chat off it means the bubble
+       can never be drawn on top of the grey, and can never be forgotten by one
+       of the four. mount() is idempotent and refuses on file://, where there
+       is no server to carry a message. */
+    try { CHAT.mount(); } catch (e) {}
   }
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */

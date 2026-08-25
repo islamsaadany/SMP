@@ -1061,8 +1061,73 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `DATABASE_URL=... node scripts/test-roundtrip.js` (clean slate PASS, round trip PASS,
   fixed point PASS) and `DATABASE_URL=... node scripts/dev-server.js` + drive the platform
   in a browser, in **both** live and demo mode.
-- **Email (since v3.23, §72):** `api/mail.js` is the only place `RESEND_API_KEY`
-  is read, and nothing it returns contains it. **The ADDRESS is `SMP_MAIL_FROM`
+- **TALKING TO THE STRATEGY OFFICE (since v3.26, §97; spec 015):** a bubble in
+  the bottom-right corner of every page opens **one running conversation with
+  the office**; the office answers from **Setup › Running the cycle ›
+  Messages**. It is **§71 finished, not a second feature** — that section built
+  the feedback endpoint, the tables, the thread and the rules, and *the box was
+  never drawn*; this is that box, reshaped from a form into a conversation, and
+  `022-office-chat.sql` drops `feedback`/`feedback_replies` because no human
+  could ever reach them (§24). **ONE CONVERSATION PER PERSON IS AN INVARIANT** —
+  `chat_threads.person_key` is the primary key — because the moment somebody
+  has to decide whether what they are typing is a new item or the same one, it
+  has stopped being a chat; the cost is §71's per-item statuses, and **flagging
+  is the office's, per-message**, deliberately weaker. *Waiting* and *answered*
+  move by themselves (§71: the status you must remember to set is the one
+  nobody sets). **WHO READS IT IS A RULE, NOT A MATRIX CELL** (§37, §89):
+  `c_chat` is `area:"always"` and the gate is `inOffice()` on the page def
+  **and again on the server**; dropping a conversation is the Super user's
+  alone. `isSuperRole()` / `isOfficeRole()` in `lib/rules.js` answer of a role
+  KEY, so the endpoint never reads thirty tables to ask — and the refusal never
+  names the missing role. **NOTHING IN `src/chat.js` EVER CALLS `paint()`**: it
+  would throw away the half-typed message four seconds after somebody started
+  typing (§35, §71.2, §30.1), so every update writes into the node it is about
+  and the composer sits outside the rewritten region — and the outcome sentence
+  lives in `box.note`, because the refresh that reports a send would otherwise
+  wipe it (§63). **WHERE THEY WERE IS CAPTURED, IN THE NAVIGATION'S OWN WORDS**
+  — read off `[aria-selected]`, never off `currentSub`, which is a key; the
+  group sits in a DROPDOWN whose `<summary>` carries the selection (§94.6
+  again), and a tab's `.vh` half is a status, not its name. `BUILD_ID` is
+  stamped by `build.py` out of **`sw.js`'s `SHELL`**, the one string guaranteed
+  to change when the built file's bytes do (§91). **THE CORNER IS NOT DRAWN**
+  on a projector (CSS, off `present.js`'s own class), from `file://`, or for
+  somebody the server refused — and `post()` refuses when there is no server,
+  at the one place every request goes through (found by `qa.py`). Proved by
+  `src/checks/office-chat.py` (the client half, over HTTP against a stub — the
+  feature is invisible over `file://`, §94.11) and `scripts/test-chat.js`
+  (the server half, against a real Postgres, signing in as somebody with no
+  role because a check that only looks for something PRESENT cannot see a shut
+  door, §94.2).
+- **THE CHAT HAS A SWITCH, AND POLLING WAS THE REAL COST (since v3.27, §98):**
+  five controls in a **Settings dropdown on the Messages page header** (§90's
+  shape, never a second Setup page — §32) — on/off, Live/Relaxed, the promise
+  the panel shows, screenshots, and email-when-away. Stored in `GROUP.chat` →
+  `org.extra`, so **no migration**; `SMPRules.chatCfg()` is the ONE thing that
+  decides what an absent key means and `chatBeat()` the one that turns
+  Live/Relaxed into milliseconds. **A value put back to its default DELETES
+  its key** and the last key leaving deletes `GROUP.chat` (§50.6 — a reader
+  that creates what it looked for made every save carry a phantom change).
+  **THE SERVER REFUSES `say` AND `reply` WHEN IT IS OFF**: with the corner not
+  drawn, nothing in the product can reach them, which is exactly why they are
+  guarded — a switch that only hides a control is decoration (§42, §44).
+  **OFF NEVER DELETES A CONVERSATION** (§44) and **the Messages page stays in
+  the rail**, or the only way to turn it back on would be to turn it on first
+  (§61's trap). **Replying goes off with the chat** — a reply nobody can open
+  is written into a room with no door. **AND MESSAGES ARE NOT WHAT COSTS**: one
+  poll was **14 database round trips**, ten of them `ensureReady()` re-running
+  the schema and both migration phases on *every request*. It is memoised per
+  process now (**14 → 5**), the client **stops polling entirely while the tab
+  is hidden**, and the idle beat is 180s. The two real limits are a licence and
+  a database, not a quota: **Vercel Hobby is not licensed for commercial use**,
+  and **Neon's free compute never autosuspends while anything polls**. Proved
+  by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
+  pressed the bubble to open a panel that was already open, closing it) and by
+  `scripts/test-chat.js`.
+- **Email (since v3.23, §72; the credential moved in §97.5):** **`lib/mailer.js`
+  is the only place `RESEND_API_KEY` is read**, and nothing it returns contains
+  it — `api/mail.js` and `api/chat.js` both call it. §72's rule is unchanged;
+  the address it points at moved, because the alternative was a second copy of
+  the credential handling. **The ADDRESS is `SMP_MAIL_FROM`
   in the environment** (tied to the domain verified with Resend — a deployment
   decision); the **display name, reply-to, kicker and footer are `GROUP.comms`**,
   which rides in `org.extra` and needs no migration. `SMP-Project-Folder/src/mail.js`
@@ -1212,7 +1277,14 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
+                                # because the whole feature is invisible over file:// (§97.9)
 ```
+In this cloud image, run any sweep through the wrapper so Playwright finds the
+Chromium that is already here:
+`SMP_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome python3 qa-run.py <file>`.
+The chat's **server** half needs a database and a running dev-server:
+`DATABASE_URL=… node scripts/test-chat.js <smo-password>` (§97.9).
 
 ---
 
@@ -1293,6 +1365,82 @@ way to write the first row of either half, so a half hidden for being empty
 behind the pen is a half nobody can ever fill &mdash; &sect;61 exactly. And
 **0 of 19 demo projects have an empty half**, so the check MAKES the state
 rather than waiting for a client to find it.*
+
+*Earlier: 2026-08-25 &mdash; **v3.27: the chat gets a switch, and a poll
+gets cheaper** (&sect;98). Two asks that turned out to be one subject. *"How much
+can vercel handle as messages per day?"* &mdash; and the answer is that
+**messages are not the unit**: a message costs one request and an open tab costs
+900 an hour. Measured against the real endpoint rather than estimated, one poll
+was **14 database round trips**, and **ten of them were `ensureReady()`
+re-running the whole schema and both migration phases on every single
+request** &mdash; invisible while a request meant a page load, and not invisible
+once a corner asks every four seconds. Memoised per process (**14 &rarr; 5**),
+the client now **stops polling entirely while the tab is hidden**, and the idle
+beat goes from 60s to 180s. **THE TWO REAL LIMITS ARE A LICENCE AND A DATABASE,
+NOT A QUOTA**: Vercel's Hobby plan is not licensed for commercial use, and
+Neon's free compute never autosuspends while anything is polling &mdash; one
+signed-in tab keeps it awake whether or not a word is written, which is what
+makes the hidden-tab stop a correctness change and not only a saving. Then the
+switch: *"I will need in the setup page to enable or disable the chat with some
+settings maybe."* Five controls in a **dropdown on the Messages page header**
+(&sect;90's shape; five switches behind their own rail entry is a door behind a
+door), and **the cost is stated in the row where the choice is made** &mdash;
+which is the whole reason the cadence is a setting rather than a number in the
+source. **THE SERVER REFUSES, WHICH IS THE HALF THAT IS NOT ON SCREEN**: with
+the chat off the corner is not drawn, so nothing in the product can reach `say`
+or `reply`, and that is exactly why both are guarded (&sect;42, &sect;44 &mdash;
+a switch that only hides a control is decoration). **Off never deletes a
+conversation and the page stays reachable**, or the only way to turn it back on
+would be to turn it on first (&sect;61's trap). Three things were found by
+running it rather than by reading: the office pressed Off and **watched nothing
+happen for three minutes**, because their own corner was on the new idle beat;
+the panel's second line **hid the promise at the one moment somebody wants
+it**, while they are waiting; and the new check **passed for the wrong reason**
+&mdash; it pressed the bubble to open a panel that was already open, closing it,
+and then read stale values while the cadence assertion passed with zero polls.
+Ask, then act.*
+
+*Earlier: 2026-08-25 &mdash; **v3.26: talking to the Strategy Office**
+(&sect;97, spec 015). A bubble in the bottom-right corner, one running
+conversation with the office, and a Setup page the office answers from. **AND
+HE HAD ASKED FOR IT ONCE ALREADY**: &sect;71 built the endpoint, the tables, the
+reply thread, the screenshot handling and the access rules under a commit whose
+own message says what happened &mdash; *"Feedback: the server half"* &mdash; and
+**the box was never drawn**. Searching the built platform for the word finds
+three hits and all three are the phrase *"feedback loop"* in unrelated comments.
+So this is not a second feature beside that one; it is the missing half of it,
+reshaped from a form into a conversation, and &sect;71's two tables are dropped
+because no human could ever reach them. **ONE CONVERSATION PER PERSON, AND THE
+QUEUE IS PEOPLE** &mdash; Islam's own sentence, *picks the people and replies to
+them*: the moment somebody has to decide whether what they are typing is a new
+item or the same one, it has stopped being a chat, so they never decide it and
+the office sorts on its own side by flagging. The cost is recorded rather than
+glossed: &sect;71's per-item statuses go, and flagging is deliberately weaker.
+**WHO MAY READ IT IS A RULE, NOT A MATRIX CELL** &mdash; reading what everybody
+wrote in confidence is not a tick somebody could set on a bad afternoon
+(&sect;37 settled three cells that way, &sect;89 three more). **NOTHING IN THE
+CLIENT FILE EVER CALLS `paint()`**, which is the rule the whole thing is built
+around: it would throw away the half-typed message four seconds after somebody
+started typing. Three old lessons arrived in new places &mdash; the outcome
+sentence had to survive the refresh that REPORTS it (&sect;63 from the other
+side), a flag had to refresh the queue as well as the thread, and `post()` had
+to refuse when there is no server, **found by `qa.py`** walking every Setup page
+over `file://` where the whole feature does not exist. **EMAIL ONLY WHEN THEY
+ARE AWAY, AND THE EDGE IS STATED**: presence is the person's own polling and
+nothing else &mdash; the first build stamped it on a SEND as well, and its own
+comment said it should not &mdash; and with no scheduler on Vercel the decision
+is made at the moment of replying, so somebody who shut their laptop thirty
+seconds ago gets no email. That is why the office is shown which way it will go
+*before* pressing Send, rather than the rule being silent. **THE CAPTURED PAGE
+SPEAKS THE NAVIGATION'S LANGUAGE** &mdash; read off `[aria-selected]`, never off
+`currentSub`, which is a key: the first build put "the group &rsaquo;
+performance" on a message where the screen said "Group &rsaquo; Performance",
+and asking only for BUTTONS left every group page with no destination at all,
+because the group sits in a dropdown (&sect;94.6's trap, nine sections later).
+And two of the first test run's failures were **the check being wrong rather
+than the product** &mdash; a rendered uppercase compared against mixed case, and
+an "she is away" that the test's own poll had made false &mdash; both fixed in
+the check rather than loosened.*
 
 *Earlier: 2026-08-25 &mdash; **v3.25: the objectives editor was drawn and
 connected to nothing** (&sect;96). Islam, on a unit's Foundation with the pen

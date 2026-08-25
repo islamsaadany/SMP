@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.22 shipped · v3.24 in progress on the branch
+**Latest version:** v3.22 shipped · **v3.27 in progress on the branch**
 **Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -53,6 +53,88 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.27 — the chat gets a switch, and a poll gets cheaper (§98)
+
+Two asks, one subject.
+
+**What a poll was costing.** Measured, not estimated: one poll was **14
+database round trips**, of which **ten were `ensureReady()`** re-running the
+whole schema and both migration phases on every request. Memoised per process:
+**14 → 5**, and that helps `/api/state` as much as the chat. The client also
+**stops polling entirely while the tab is hidden**, and the idle beat goes from
+60s to 180s.
+
+The two real limits are worth knowing and neither is a request quota:
+**Vercel's Hobby plan is not licensed for commercial use** (a licence term, so
+a client deployment wants Pro whatever the volume), and **Neon's free compute
+never autosuspends while anything polls** — one signed-in tab keeps the
+database awake whether or not a word is written.
+
+**Five settings**, in a dropdown on the Messages page header: on/off,
+Live/Relaxed, the promise the panel shows, screenshots, email-when-away. Off
+removes the corner everywhere, stops all polling, and turns the office's reply
+box off with it — nothing is deleted, and the page stays in the rail so it can
+be turned back on.
+
+**Verified, and how:**
+
+- `scripts/test-chat.js` — **52 checks, all clear** against a real Postgres,
+  including every setting enforced **on the server** with the corner not drawn.
+- `SMP-Project-Folder/src/checks/office-chat.py` — **29 checks, all clear.**
+- Browser drive of the settings — **21 checks**: the menu, each control, the
+  corner going and coming back, and the tenant storing **nothing at all** once
+  everything is back at its default.
+- `scripts/test-roundtrip.js` on a **virgin** database — clean slate PASS,
+  round trip PASS, fixed point PASS. (It first read FAIL on a database I had
+  already run it against; the assertion only holds on a first deployment.)
+- `qa.py` — **ERRORS: none**. `test-authorize.js` — 165 passed.
+
+### v3.26 — talking to the Strategy Office (§97, spec 015)
+
+A bubble in the bottom-right corner of every page opens **one running
+conversation with the office**. The office answers from **Setup › Running the
+cycle › Messages**: who is waiting on the left, the conversation on the right.
+
+**It is §71 finished, not a second feature.** That section built the endpoint,
+two tables, the reply thread, the screenshot handling and the access rules —
+and the box that was meant to sit in that corner was never drawn. This is that
+box, reshaped from a form into a conversation, so `022-office-chat.sql` drops
+`feedback`/`feedback_replies` (no human could ever reach them) and
+`api/feedback.js` goes with them.
+
+What was settled with Islam before anything was drawn:
+
+| | |
+|---|---|
+| one box, or two? | **one** — the chat absorbs §71's feedback |
+| who is written to? | **the office**; replies are signed by a name |
+| does it leave the platform? | **only when the person is away** |
+| where does the office answer? | **Setup › Running the cycle › Messages** |
+| what is the unit of work? | **the person**, not the ticket |
+
+**Verified, and how:**
+
+- `SMP-Project-Folder/src/checks/office-chat.py` — **20 checks, all clear.**
+  Serves the built file over HTTP with a stub `/api/chat`, because the whole
+  feature is invisible over `file://`. Covers the corner being *pressable* (not
+  merely present), the captured page reading in the navigation's own words, a
+  poll not eating a half-typed message, and the three states where **no bubble
+  is the pass** — a projector, `file://`, and a refused session.
+- `scripts/test-chat.js` — **36 checks, all clear**, against a real Postgres
+  with the dev-server running. Signs in as a second person holding **no role**
+  and has all seven of the office's actions refused, checks the refusal does not
+  name a role, and asserts **both sides** of the presence rule.
+- `qa.py` — **ERRORS: none** across the whole product. It is also what caught
+  the office's Setup page fetching `/api/chat` over `file://`.
+- Driven end to end in a browser against Postgres: sign in, write from the
+  corner, answer from Setup, watch it come back to the corner — **25 checks**.
+
+**Waiting on nothing.** One thing is recorded rather than fixed: with no
+scheduler on Vercel, "are they away?" is decided at the moment of replying, so
+somebody who shut their laptop thirty seconds ago gets no email. The office is
+shown which way it will go before pressing Send. A proper sweep needs a cron
+entry in `vercel.json`.
 
 ### v3.24 — the floor stops being a role, and the password column stops lying
 

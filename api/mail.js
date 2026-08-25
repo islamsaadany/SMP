@@ -4,9 +4,10 @@
    all the relevant details."
 
    THE KEY NEVER LEAVES THE SERVER. The platform ships as one HTML file, so it
-   is worth being explicit: `RESEND_API_KEY` is read here and nowhere else, it
-   is not in the repo, and nothing this endpoint returns contains it — `status`
-   reports whether a key is PRESENT, never what it is.
+   is worth being explicit: `RESEND_API_KEY` is read in exactly ONE place —
+   `lib/mailer.js`, which this endpoint and api/chat.js both call (§97.5) — it
+   is not in the repo, and nothing either endpoint returns contains it:
+   `status` reports whether a key is PRESENT, never what it is.
 
    TWO HALVES OF THE FROM-ADDRESS, and the split is deliberate:
      SMP_MAIL_FROM   the ADDRESS, in the environment, because it is tied to the
@@ -23,10 +24,15 @@ const io = require("../lib/state-io.js");
 const auth = require("../lib/auth.js");
 const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
+/* THE CREDENTIAL AND THE PROVIDER CALLS MOVED OUT (§97.5). §72's rule —
+   RESEND_API_KEY is read in exactly one place — is unchanged; the place is
+   lib/mailer.js now, because api/chat.js has to send too and the alternative
+   was a second copy of it. */
+const mailer = require("../lib/mailer.js");
 const { ensureReady, readState } = io;
 function getPool() { return io.getPool(pg); }
 
-const RESEND = "https://api.resend.com";
+const RESEND = mailer.RESEND;
 
 function send(res, code, obj) {
   res.statusCode = code;
@@ -46,18 +52,8 @@ function readBody(req) {
   });
 }
 
-/* The address only, as configured. Split off the display name if somebody has
-   put a whole `Name <addr>` in the variable — which they will, because that is
-   what every mail tool shows you. */
-function fromAddress() {
-  const raw = String(process.env.SMP_MAIL_FROM || "").trim();
-  const m = raw.match(/<([^>]+)>/);
-  return (m ? m[1] : raw).trim();
-}
-function domainOf(addr) {
-  const i = String(addr || "").lastIndexOf("@");
-  return i < 0 ? "" : addr.slice(i + 1).toLowerCase();
-}
+const fromAddress = mailer.fromAddress;
+const domainOf = mailer.domainOf;
 
 /* WHAT RESEND SAYS ABOUT THE DOMAIN, not what we assume. Until a domain is
    verified, Resend delivers only to the address the account was opened with —
@@ -111,40 +107,8 @@ async function domainStatus(key, domain) {
    of where it stopped. */
 const BATCH_MAX = 100;
 
-async function resendBatch(key, emails) {
-  const r = await fetch(RESEND + "/emails/batch", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-    body: JSON.stringify(emails)
-  });
-  const j = await r.json().catch(function () { return null; });
-  if (!r.ok) {
-    const why = (j && (j.message || (j.error && j.error.message))) || ("Resend said " + r.status + ".");
-    const e = new Error(why); e.resend = true; throw e;
-  }
-  /* Resend answers with the ids in the order they were sent, so a result is
-     matched to a recipient by POSITION. Anything short of a full answer is
-     treated as unknown rather than as success. */
-  return (j && (j.data || j)) || [];
-}
-
-async function resendSend(key, payload) {
-  const r = await fetch(RESEND + "/emails", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  const j = await r.json().catch(function () { return null; });
-  if (!r.ok) {
-    /* Resend's own sentence, which names the real cause (an unverified domain,
-       a bad address, a rate limit) far better than anything generic here
-       could — §69.22's rule about the policy sentence, one service further
-       out. */
-    const why = (j && (j.message || (j.error && j.error.message))) || ("Resend said " + r.status + ".");
-    const e = new Error(why); e.resend = true; throw e;
-  }
-  return j;
-}
+const resendBatch = mailer.resendBatch;
+const resendSend  = mailer.resendSend;
 
 module.exports = async function handler(req, res) {
   let client;
@@ -159,7 +123,7 @@ module.exports = async function handler(req, res) {
     if (me.role !== "super") {
       return send(res, 403, { ok: false, error: "Communication is the SMO's." });
     }
-    const key = process.env.RESEND_API_KEY || "";
+    const key = mailer.apiKey();
     const addr = fromAddress();
 
     if (action === "status") {

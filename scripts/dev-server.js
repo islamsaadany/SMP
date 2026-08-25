@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 const stateHandler = require("../api/state.js");
 const authHandler = require("../api/auth.js");
-const feedbackHandler = require("../api/feedback.js");
+const chatHandler = require("../api/chat.js");
 const mailHandler = require("../api/mail.js");
 
 const ROOT = path.join(__dirname, "..");
@@ -42,7 +42,7 @@ http.createServer(function (req, res) {
   const url = new URL(req.url, "http://localhost");
   if (url.pathname === "/api/state") return stateHandler(req, res);
   if (url.pathname === "/api/auth") return authHandler(req, res);
-  if (url.pathname === "/api/feedback") return feedbackHandler(req, res);
+  if (url.pathname === "/api/chat") return chatHandler(req, res);
   if (url.pathname === "/api/mail") return mailHandler(req, res);
   if (url.pathname === "/favicon.ico") { res.statusCode = 204; return res.end(); }
   let p = path.normalize(path.join(ROOT, decodeURIComponent(url.pathname)));

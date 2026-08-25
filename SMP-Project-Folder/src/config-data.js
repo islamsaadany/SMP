@@ -556,6 +556,39 @@ function commsSet(key, value){
   if (!Object.keys(c).length) delete GROUP.comms;
 }
 
+/* ── THE OFFICE'S CHAT SETTINGS (§98) ─────────────────────────────────────
+   Islam: "I will need in the setup page to enable or disable the chat with
+   some settings maybe."
+
+   READ THROUGH THE SHARED RULE, never here: `SMPRules.chatCfg` is what the
+   server also asks, so what an absent key means is decided once (§42). This
+   half only WRITES.
+
+   AND IT NEVER CREATES THE CONTAINER IT WAS LOOKING FOR. §50.6: `branding()`
+   invented a four-null object the database never held, so every save carried a
+   phantom group change and every non-SMO save would have been refused for
+   ever. So a value set back to its default DELETES its key, and the last key
+   leaving deletes `GROUP.chat` — a tenant that has never opened the menu, or
+   has put everything back, writes nothing at all. */
+function chatCfg(){ return SMPRules.chatCfg(GROUP.chat); }
+function chatWritable(){
+  if (!GROUP.chat || typeof GROUP.chat !== "object") GROUP.chat = {};
+  return GROUP.chat;
+}
+function chatSet(key, value){
+  if (!Object.prototype.hasOwnProperty.call(SMPRules.CHAT_DEFAULTS, key)) return;
+  var dflt = SMPRules.CHAT_DEFAULTS[key];
+  var v = (key === "promise") ? String(value == null ? "" : value).trim() : !!value;
+  var c = chatWritable();
+  /* The promise is stored only when it differs from the shipped sentence, so
+     improving that sentence later reaches every tenant that never wrote one. */
+  var isDefault = (key === "promise")
+    ? (!v || v === SMPRules.CHAT_PROMISE)
+    : (v === dflt);
+  if (isDefault) delete c[key]; else c[key] = v;
+  if (!Object.keys(c).length) delete GROUP.chat;
+}
+
 /* WHAT AN EMAIL ACTUALLY CARRIES, resolved once. The preview on the setup
    page, the test send and every message the platform will send later all read
    THIS — a preview drawn from anywhere else is a picture of an email nobody

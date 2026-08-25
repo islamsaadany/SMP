@@ -139,10 +139,15 @@ with sync_playwright() as p:
        "survives" in pg.eval_on_selector("#modal-b", "e=>e.textContent"))
     pg.click("#modal-b [data-pmerge-go]")
     pg.wait_for_timeout(900)
-    ck("the dialog closed itself",
-       not pg.eval_on_selector("#overlay", "e=>e.classList.contains('on')"))
-    ck("...and gave the page back",
-       pg.eval_on_selector(".wrap", "e=>e.inert !== true"))
+    # THE RECEIPT IS THE LAST STEP, NOT A SECTION ON THE PAGE (§93.5).
+    # Islam, on a "Merge two rows" panel left standing under the register:
+    # "this page is a table page, not for other notifications." Both ends are
+    # asserted, because a removal is the easiest thing to half-do (§90).
+    ck("the dialog stayed open and said what it did",
+       pg.eval_on_selector("#overlay", "e=>e.classList.contains('on')") and
+       "merged into" in pg.eval_on_selector("#modal-b", "e=>e.textContent"))
+    ck("...and the register behind it carries no notification",
+       "Merge two rows" not in pg.eval_on_selector(".wrap", "e=>e.textContent"))
 
     out = pg.evaluate("""() => {
       const k = personBy(window.__keep);
@@ -157,9 +162,43 @@ with sync_playwright() as p:
     ck("the surviving row kept its address", out["email"] == "testcase@example.com", out["email"])
     # AND THE WHOLE POINT: the role now reaches somebody a message can go to.
     ck("a message aimed at that role now reaches them", out["reached"] == 1, out["reached"])
-    ck("the receipt says what happened",
-       "merged into" in (pg.eval_on_selector(".applied", "e=>e.textContent")
-                         if pg.query_selector(".applied") else ""))
+    # AND CLOSE IS WHAT ENDS IT — the page comes back and the wizard is gone.
+    pg.click("#modal-b [data-pmerge-close]")
+    pg.wait_for_timeout(500)
+    ck("Close ends the wizard",
+       not pg.eval_on_selector("#overlay", "e=>e.classList.contains('on')"))
+    ck("...and gives the page back",
+       pg.eval_on_selector(".wrap", "e=>e.inert !== true"))
+    ck("...leaving nothing behind on it",
+       "merged into" not in pg.eval_on_selector(".wrap", "e=>e.textContent"))
+
+    # ── THE UNITS NOBODY IS KEEPING (§93.4) ──────────────────────────
+    # Islam: "I want as well to leave a note somewhere by how many units that
+    # doesn't have custodians." Both directions, because a count that is always
+    # there and a count that is never there both pass a check that only looks
+    # once — and the RETIRED case is the one worth the file: the seat is still
+    # written on the unit, so asking whether the field is empty would report a
+    # unit as covered by somebody who cannot sign in.
+    print("── the units with no custodian")
+    def custPill():
+        return [x for x in pg.eval_on_selector_all(
+            ".phead2 .chip .pill", "e=>e.map(x=>[x.textContent, x.title])")
+            if "custodian" in x[0]]
+    ck("nothing is said while every unit has one",
+       pg.evaluate("()=>unitsWithoutCustodian().length") == 0 and not custPill(),
+       custPill())
+    pg.evaluate("""() => {
+      UNIT_ROLES[UNIT_KEYS[0]].custodian = null;                 /* the seat emptied */
+      personBy(UNIT_ROLES[UNIT_KEYS[1]].custodian).active = false; /* and the seat retired */
+      paint(); }""")
+    pg.wait_for_timeout(600)
+    pill = custPill()
+    ck("an empty seat and a retired one both count",
+       pill and pill[0][0].startswith("2 units"), pill)
+    first = pg.evaluate("()=>UNITS[UNIT_KEYS[0]].name")
+    ck("...and it names which units, and where to fix it",
+       pill and first in pill[0][1] and "custodian role" in pill[0][1],
+       pill[0][1] if pill else "")
 
     # ── THE PICKER OFFERS THE PERSON BEFORE OFFERING TO CREATE ONE ───
     # This is where the real twins were made: a name typed a little differently
@@ -205,6 +244,52 @@ with sync_playwright() as p:
        pg.eval_on_selector_all(".pickrow:not([hidden])", "e=>e.length") == 1,
        pg.eval_on_selector_all(".pickrow:not([hidden])", "e=>e.length"))
 
+    # ── THE NAME FITS, AND TWO VALUES COPY THEMSELVES (§93.6) ────────
+    # Islam: "the first column with the name needs to fit the name, and make
+    # the email and the phone to be copied on clicking on them."
+    #
+    # THE LONGEST NAME IS PUT IN ON PURPOSE. The demo's longest is 25
+    # characters and the client's register holds 43 — measuring the demo would
+    # have proved nothing about the case the change exists for (§45.2).
+    print("── the name column, and copying an address")
+    people_page(pg)
+    LONG = "Abd El Moniem Mohamed Abd El Moniem Mahmoud"
+    pg.evaluate("""(n) => { PEOPLE[0].name = n;
+      PEOPLE[1].email = "someone.with.a.long.address@rayatrade.example";
+      PEOPLE[1].phone = "+20 100 555 0101";
+      PCOLS.phone = true; paint(); }""", LONG)
+    pg.wait_for_timeout(600)
+    m = pg.evaluate("""() => {
+      const cells = Array.from(document.querySelectorAll('.peoplecfg td.namecell'));
+      return {
+        full: cells[0].textContent.indexOf("Mahmoud") > -1,
+        /* ONE LINE STILL (§88): distinct rounded tops among rects with width,
+           never getClientRects().length, which counts zero-width extras. */
+        lines: Math.max.apply(null, cells.map(function(c){
+          const r = Array.from(c.getClientRects()).filter(x => x.width > 0);
+          return new Set(r.map(x => Math.round(x.top))).size; })),
+        clipped: cells.filter(function(c){ const b = c.querySelector('b');
+          return b && b.scrollWidth > b.clientWidth + 1; }).length }; }""")
+    ck("the whole name is on the row", m["full"], m)
+    ck("...on one line, and not clipped",
+       m["lines"] == 1 and m["clipped"] == 0, m)
+
+    cp = pg.query_selector(".peoplecfg [data-copy]")
+    ck("the address is a control, not text", cp is not None)
+    ck("...and its hover carries the value as well as the hint",
+       "click to copy" in (cp.get_attribute("title") or "") and
+       "@" in (cp.get_attribute("title") or ""), cp.get_attribute("title") if cp else "")
+    was = cp.text_content()
+    cp.click()
+    pg.wait_for_timeout(300)
+    # FROM file:// THERE IS NO SECURE CONTEXT, so this exercises the
+    # execCommand fallback — which is the path that actually runs here.
+    ck("clicking it says it copied", cp.text_content() == "Copied", cp.text_content())
+    pg.wait_for_timeout(1400)
+    ck("...and the value comes back", cp.text_content() == was, cp.text_content())
+    ck("the phone copies too",
+       pg.eval_on_selector_all(".peoplecfg [data-copy]", "e=>e.length") >= 2)
+
     # ── THE PAGE'S FURNITURE (§90) ───────────────────────────────────
     # The file moved into the header and the notes moved to the knowledge base.
     # Both are REMOVALS, and a removal is the easiest thing in the world to
@@ -218,6 +303,25 @@ with sync_playwright() as p:
     ck("the three notes are gone from under the table",
        "People sign in with the email address" not in body)
     ck("Register file is in the header", pg.query_selector("[data-filemenu]") is not None)
+    # AND IT IS STILL HIT-TESTABLE WITH SIX CHIPS BESIDE IT (§93.4). This is
+    # how the wrapping fault was found, and asserting "is not None" above is
+    # exactly what missed it for a run: `.hright` did not wrap, so adding the
+    # units-with-no-custodian count pushed this button clean off the pane —
+    # present, styled, enabled, and hitting BODY. §90's fault a third time.
+    #
+    # THE POINT IS PRESSED, not asked about: elementFromPoint at the button's
+    # own centre has to come back as the button.
+    pg.evaluate("()=>scrollTo(0,0)")
+    pg.wait_for_timeout(250)
+    # EVERY header menu, not just this one: the next chip would have taken
+    # Columns and Passwords the same way.
+    unreachable = pg.evaluate("""() =>
+      Array.from(document.querySelectorAll('.setuppane .phead2 .hmenu-btn'))
+        .filter(function(b){ const r = b.getBoundingClientRect();
+          return document.elementFromPoint(r.left + r.width/2, r.top + r.height/2) !== b; })
+        .map(function(b){ return b.textContent.trim(); })""")
+    ck("...and the header's chips have pushed no menu off the page",
+       not unreachable, unreachable)
     pg.click("[data-filemenu]")
     pg.wait_for_timeout(400)
     ck("...and holds Download", pg.query_selector("[data-dlppl]") is not None)

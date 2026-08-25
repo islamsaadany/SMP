@@ -3196,9 +3196,60 @@
         mergeOpen();
       });
     });
-    /* The receipt's Close is on the PAGE, not in the dialog. */
-    document.querySelectorAll("[data-pmerge-close]").forEach(function(b){
-      b.addEventListener("click", function(){ mergeReset(); paint(); });
+    /* THE RECEIPT'S CLOSE WAS WIRED HERE, and it went with the section it
+       belonged to (§93.5, §24). Leaving it would have been worse than dead
+       code: this is a DOCUMENT-wide query and the dialog's own Close and
+       Cancel carry the same attribute, so with paint() now running while the
+       wizard is open it would have bound a second handler to them — one that
+       resets the merge without closing the dialog. wireMerge() owns them. */
+
+    /* ── CLICK TO COPY AN ADDRESS OR A NUMBER (§93.6) ────────────────
+       Islam: "make the email and the phone to be copied on clicking on them."
+
+       THE WORD IS WRITTEN INTO THE ELEMENT, NOT PAINTED. paint() would replace
+       the button that was just pressed — §63's rule, learned on Save draft —
+       so the tick is set on the node and put back on a timer. The original
+       text is kept on the node too, or a second click during the tick would
+       copy the word "Copied".
+
+       AND THE FALLBACK IS NOT DECORATION. `navigator.clipboard` needs a secure
+       context, and this product is opened from `file://` every day of its
+       life — so a hidden textarea and `execCommand("copy")` is the path that
+       actually runs here, and the promise path is the one that runs in
+       production. Both end at the same tick, and a failure says so rather
+       than tick-ing anyway. */
+    document.querySelectorAll("[data-copy]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var self = this, v = self.dataset.copy;
+        var was = self.dataset.copyWas || self.textContent;
+        self.dataset.copyWas = was;
+        function done(ok){
+          /* NOT "Press Cmd-C" — this runs on Windows too, and naming the
+             wrong key is worse than naming none. */
+          self.textContent = ok ? "Copied" : "Could not copy";
+          self.classList.toggle("copied", ok);
+          clearTimeout(self.__copyT);
+          self.__copyT = setTimeout(function(){
+            self.textContent = was;
+            self.classList.remove("copied");
+          }, 1200);
+        }
+        function legacy(){
+          var t = document.createElement("textarea");
+          t.value = v;
+          t.setAttribute("readonly", "");
+          t.style.cssText = "position:fixed;top:-1000px;opacity:0";
+          document.body.appendChild(t);
+          t.select();
+          var ok = false;
+          try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+          document.body.removeChild(t);
+          done(ok);
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(v).then(function(){ done(true); }, legacy);
+        } else { legacy(); }
+      });
     });
 
     /* The row's action menu (§46.4). Opening one closes any other, because
@@ -3551,18 +3602,41 @@
 
     wirePicker();
 
-    if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
+    /* ── ASKED WHEN THE REGISTER IS ON SCREEN (§93.2) ────────────────
+       Islam: "the password status is all dash now — what is that status?"
+
+       It was not a status. It is what the column shows when the server has
+       said nothing about anybody, and the server had not been asked: this
+       waited for `[data-edit="people"]`, the register's whole-table PEN, which
+       spec 012 removed when rows became individually editable. The selector
+       stopped matching, the request stopped firing, and 33 rows showed a dash
+       that looks exactly like data.
+
+       §51.11, in wiring rather than in a check: a condition keyed on markup
+       that no longer exists does not fail, it quietly does nothing. Nothing
+       threw, nothing was logged, and the passwords themselves were never
+       touched — `credentials` is its own table outside the state graph (§19).
+
+       KEYED ON THE TABLE NOW, which is the thing that is actually there when
+       this is worth asking. */
+    var onRegister = !!document.querySelector(".peoplecfg");
+    if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
       SYNC.passwordStates(function(err, st){
-        if (err) return;
+        /* AND A REFUSAL IS SAID, not swallowed into the same dash. `return`
+           left PWSTATES as {} — indistinguishable from "asked, and nobody has
+           a password" — so a 403 and a healthy empty tenant looked identical.
+           A column that cannot answer says so. */
+        if (err) { PWSTATES = { __error: String(err.message || err) }; paint(); return; }
         PWSTATES = st;
         paint();
       });
     }
     /* The same shape and the same moment as the password states: asked once
        per visit to the page, and absent rather than empty from file:// (§56). */
-    if (SAIDWHERE === null && document.querySelector('[data-edit="people"]') &&
+    /* The same selector, and it had gone the same way (§93.2). */
+    if (SAIDWHERE === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
@@ -4366,10 +4440,20 @@
            which refuses if anything still points at the row (§87.4) — that is
            the check, and its sentence has to be read where the button was. */
         if (!r.ok) { PMERGE.err = r.why; PMERGE.step = 3; mergePaint(); return; }
+        /* THE DIALOG STAYS OPEN TO SAY WHAT IT DID (§93.5). It used to close
+           and leave a "Merge two rows" section standing under the register —
+           a notification on a table page, which is what §90 moved the other
+           two steps in here to stop.
+
+           mergeReset() FIRST and `done` after it, because the reset clears
+           every field of PMERGE including that one. paint() repaints the
+           register BEHIND the overlay — safe, and necessary, because the
+           overlay is outside the wrap paint() rewrites and paint() is where a
+           change becomes a save. mergePaint() then draws the receipt. */
         mergeReset();
         PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
-        closeModal();
-        paint();   /* which is where a change becomes a save */
+        paint();
+        mergePaint();
       });
     });
   }

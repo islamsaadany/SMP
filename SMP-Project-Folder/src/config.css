@@ -1392,3 +1392,33 @@
     overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
   .hmenu-panel input[type=file].vh:focus-visible + .hmenu-item,
   .hmenu-panel label.hmenu-item:focus-within { outline:2px solid var(--focus); outline-offset:-2px; }
+
+  /* The matrix's last row is a STATE, not a role (§93) — quieter, and set off
+     from the eight above it so it does not read as a ninth. */
+  .acgrid tr.floorrow td { border-top:2px solid var(--line); background:var(--surface-2); }
+  .acgrid tr.floorrow .rolecell b { font-weight:600; color:var(--ink-2); }
+
+  /* ── THE NAME COLUMN FITS THE NAME (§93.6) ────────────────────────
+     Islam: "the first column with the name needs to fit the name." The §88
+     cap is 150px on every cell in a Setup table; this one column is exempt,
+     because it is the FROZEN column (§69.19) — the one a wide table never
+     scrolls away — and a name clipped in the only place it is written is the
+     wrong pixel to save. Still ONE LINE (§88): it grows sideways, never
+     downward, and `min-width:0` on nothing here because the table lays out
+     auto and the widest name is what it takes. */
+  .peoplecfg td.namecell, .peoplecfg thead th.namecell {
+    max-width:none; white-space:nowrap; }
+
+  /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
+     It has to look like the value, not like a control, or every row grows a
+     button — so it inherits the cell's type and only the underline on hover
+     says it does something. The tick is written into the element by the
+     handler, because paint() would replace the thing just pressed (§63). */
+  .copyval { font:inherit; font-size:13px; color:var(--ink); padding:0; border:0;
+             background:none; text-align:left; display:block; width:100%;
+             max-width:100%; overflow:hidden; text-overflow:ellipsis;
+             white-space:nowrap; cursor:pointer; }
+  .copyval.mono { font-family:var(--mono); font-size:12.5px; }
+  .copyval:hover { text-decoration:underline; text-underline-offset:2px; }
+  .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  .copyval.copied { color:var(--good-tx); text-decoration:none; }

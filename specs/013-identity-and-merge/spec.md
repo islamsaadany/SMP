@@ -79,7 +79,11 @@ export somebody edited two cells of. A blank cell still means *nothing to say*.
 
 ## 5 · Merging two rows
 
-A section under the register, opened from the row's ⋮ menu.
+A three-step **wizard in the platform's own modal**, opened from the row's ⋮
+menu (§90) — and it stays open at the end to say what it did (§93.5). It used
+to close and leave a *Merge two rows* panel standing under the register; Islam:
+*"this page is a table page, not for other notifications."* **Close** is what
+ends it.
 
 - **The survivor is chosen**, defaulting to the row that can be matched later.
   The row that goes takes its sign-in name, password and sessions with it.

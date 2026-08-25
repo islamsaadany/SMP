@@ -964,7 +964,15 @@
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
   .phead2 .secttl{font:400 24px/1.2 var(--serif);margin:0}
-  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px}
+  /* IT WRAPS, or a chip added later pushes the buttons off the page (§93.4).
+     `.phead2` has always wrapped; `.hright` did not, so it stayed one row and
+     simply overflowed its pane — and the register's Register file button went
+     out of reach the moment the units-with-no-custodian count joined five other
+     chips. §90's fault a third time: the control was in the document, styled,
+     enabled and unclickable, and only a screenshot showed it. `min-width:0` is
+     what lets the row shrink at all inside a flex parent. */
+  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px;
+                  flex-wrap:wrap;justify-content:flex-end;min-width:0}
   .phead2 .chip{font-size:11.5px;color:var(--ink-3);background:var(--surface-2);
     border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap}
   .iconwrap{position:relative;display:flex;gap:6px;margin-left:6px}

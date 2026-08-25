@@ -673,9 +673,21 @@ console.log("\n9 · employee and contributor");
   };
 
   let base = withPerson(false);
-  check("named on nothing, they are an Employee",
-        R.personRoleKeys(R.worldOf(base), personOf(base, key)).join() === "employee",
+  /* NAMED ON NOTHING, THEY HOLD NOTHING (§93). Islam: "anyone with no role is
+     employee — employee doesn't give the person anything, so let's remove this
+     strange role." It was a role on the register and a chip on their row, and
+     it granted exactly what the floor grants. The floor stayed; the role went. */
+  check("named on nothing, they hold no role at all",
+        R.personRoleKeys(R.worldOf(base), personOf(base, key)).length === 0,
         R.personRoleKeys(R.worldOf(base), personOf(base, key)).join());
+  check("...and it is not offered as a role either",
+        R.ROLE_KEYS.indexOf(R.NO_ROLE) === -1, R.ROLE_KEYS.join());
+  check("...but they still see their own unit",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT) === "view",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT));
+  check("...and not somebody else's",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit",
+                  Object.keys(SEED.units)[1]) === "none");
 
   base = withPerson(true);
   check("named on a tactic, the same person is a Contributor",
@@ -687,13 +699,13 @@ console.log("\n9 · employee and contributor");
   base.access = Object.assign({}, base.access,
     { employee: Object.assign({}, (base.access || {}).employee, { a_unit_own: "edit" }) });
   const w = R.worldOf(base), person = personOf(base, key);
-  check("an employee given edit still speaks only for themselves",
+  check("the floor given edit still speaks only for themselves",
         R.onlyOwnLines(w, person, "unit", UNIT),
         "editing roles: " + R.editingRoles(w, person, "unit", UNIT).join());
   check("...so they may not decide who enters a figure",
         !R.mayName(Object.assign({}, w, { naming: true }), person, UNIT));
-  check("neither floor role can be granted from a file",
-        R.isOwnLinesRole("employee") && R.isOwnLinesRole("contrib") &&
+  check("neither floor can be granted from a file",
+        R.isOwnLinesRole(R.NO_ROLE) && R.isOwnLinesRole("contrib") &&
         !R.isOwnLinesRole("owner"));
 })();
 
@@ -808,9 +820,14 @@ console.log("\n12 · the SMO team, and the three it does not get");
   }, "...and may add somebody to the register", true);
 
   /* And the three it does not. */
+  /* A REAL MOVE, not a value the cell already held: the seed stores the team's
+     own row at edit throughout, so writing `edit` back produced an identical
+     object, `same()` saw no change, and the check passed on a save that had
+     asked for nothing (§50.6, in a test). Narrowing their own row is the move
+     that cannot be a no-op. */
   asTeam(function (s) {
     s.access = Object.assign({}, s.access);
-    s.access.smoteam = Object.assign({}, s.access.smoteam || {}, { a_setup:"edit" });
+    s.access.smoteam = Object.assign({}, s.access.smoteam || {}, { a_setup:"view" });
   }, "1 · may not touch the access matrix", false);
   asTeam(function (s) {
     s.access = Object.assign({}, s.access);

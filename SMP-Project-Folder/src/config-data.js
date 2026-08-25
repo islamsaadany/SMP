@@ -4771,6 +4771,27 @@ function activeKeys(){
   return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
 }
 
+/* ── THE UNITS NOBODY IS KEEPING (§93.4) ──────────────────────────────
+   Islam: "I want as well to leave a note somewhere by how many units that
+   doesn't have custodians."
+
+   It belongs on the register, because the register is where the gap is CLOSED:
+   a custodian is given from a row here, so a count anywhere else would name a
+   problem and point at a different page.
+
+   A RETIRED PERSON IS NOT A CUSTODIAN. The seat is a key on the unit and
+   retiring somebody revokes their roles (§35) — but the pointer is still
+   written, so asking whether the field is empty would report a unit as covered
+   by somebody who cannot sign in. It asks whether a person is there AND
+   active, which is the same test `personRoles()` applies from the other end. */
+function unitsWithoutCustodian(){
+  return activeKeys().filter(function(k){
+    var c = ((UNIT_ROLES[k] || {}).custodian) || null;
+    var p = c ? personBy(c) : null;
+    return !p || !personActive(p);
+  });
+}
+
 /* ── COMPILING A SET OF UNITS (§68) ───────────────────────────────────
    The four functions below hard-coded UNIT_KEYS, which was right while the
    group was the only thing compiled from units. A company is the same maths

@@ -4326,6 +4326,214 @@
            border-top:1px solid var(--line-soft); }
   .dfootmark { display:block; width:150px; height:auto; opacity:.75; }
 
+/* ══ TALKING TO THE STRATEGY OFFICE (§95) ═══════════════════════════════════
+   The corner, the panel it opens, and the office's own inbox on Setup.
+
+   CONCATENATED LAST, like arrange.css, and for the same reason: everything in
+   here is new furniture that has to sit on top of the page it floats over, and
+   a rule that loses to `.cfg table` on source order is a rule that silently
+   does nothing (§93.11, §29.2, §51.5 — four times in this project already).
+
+   THE BUBBLE WEARS --panel, NOT THE ACCENT. It is chrome, not content: --panel
+   is the colour Setup › Branding sets for the navigation bar, so the corner
+   follows the tenant's brand the way the bar does and never has to be decided
+   again per client (§41.10). The only accent on it is the unread COUNT — one
+   small solid mark, which is what the accent budget is for (§41).
+   ────────────────────────────────────────────────────────────────────────── */
+
+.chatdock { position:fixed; right:18px; bottom:18px; z-index:45;
+            display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.chatdock[hidden] { display:none; }
+
+/* A DECK IS NOT A PLACE FOR A CHAT BUBBLE. Presentation puts the platform on a
+   projector in front of the board, and a floating control in the corner of a
+   slide is the wrong kind of surprise. Done in CSS off the class present.js
+   already sets, so there is no second piece of state to keep in step. */
+body.presenting .chatdock { display:none; }
+
+.chatbtn { width:50px; height:50px; border-radius:50%; border:none; cursor:pointer;
+           background:var(--panel); color:var(--panel-ink); position:relative;
+           box-shadow:0 3px 14px rgba(0,0,0,.22);
+           display:grid; place-items:center; padding:0; }
+.chatbtn:hover { background:var(--panel-hover); }
+.chatbtn:focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
+.chatbtn svg { width:23px; height:23px; }
+.chatbtn .chn { position:absolute; top:-3px; right:-3px; min-width:20px; height:20px;
+                border-radius:var(--r-pill); background:var(--gold); color:var(--on-accent,#1B1400);
+                font-size:var(--fs-micro); font-weight:800; display:grid; place-items:center;
+                padding:0 5px; border:2px solid var(--ground);
+                font-variant-numeric:tabular-nums; }
+
+/* ── THE PANEL ─────────────────────────────────────────────────────────── */
+.chatpanel { width:376px; max-width:calc(100vw - 32px);
+             background:var(--surface); border:1px solid var(--line); border-radius:12px;
+             overflow:hidden; box-shadow:0 6px 26px rgba(0,0,0,.18);
+             display:flex; flex-direction:column; }
+.chatpanel[hidden] { display:none; }
+
+.chathead { background:var(--panel); color:var(--panel-ink); padding:11px 13px;
+            display:flex; align-items:center; gap:10px; }
+.chathead .cht { font-size:var(--fs-body); font-weight:650; line-height:1.25; }
+.chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
+                 display:flex; align-items:center; gap:5px; }
+.chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
+                 font-size:18px; cursor:pointer; line-height:1; padding:2px 4px; }
+.chathead .chx:hover { color:var(--panel-ink); }
+.chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
+
+.chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
+            background:var(--ground); height:340px; overflow-y:auto; }
+.chatday { text-align:center; font-size:var(--fs-micro); color:var(--ink-3);
+           letter-spacing:.09em; text-transform:uppercase; font-weight:700; }
+
+.chmsg { max-width:84%; display:flex; flex-direction:column; gap:4px; }
+.chmsg .chwho { font-size:var(--fs-micro); color:var(--ink-3); font-weight:600;
+                display:flex; gap:6px; align-items:baseline; }
+.chmsg .chbod { font-size:var(--fs-note); line-height:1.55; padding:9px 11px;
+                border-radius:10px; white-space:pre-wrap; overflow-wrap:anywhere; }
+/* THE OFFICE'S SIDE CARRIES THE ACCENT EDGE, and it is the one thing that
+   distinguishes the two — never a filled bubble on either side, because a
+   colour block per line is a lot of colour for a page this quiet (§41). */
+.chmsg.chthem { align-self:flex-start; }
+.chmsg.chthem .chbod { background:var(--surface); border:1px solid var(--line);
+                       border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }
+.chmsg.chme { align-self:flex-end; align-items:flex-end; }
+.chmsg.chme .chbod { background:var(--surface-2); border:1px solid var(--line-soft); }
+
+.chctx { font-size:var(--fs-micro); color:var(--ink-3); display:flex; align-items:center;
+         gap:5px; padding-left:2px; }
+.chctx svg { width:11px; height:11px; flex:none; opacity:.75; }
+
+.chshot { display:inline-flex; align-items:center; gap:7px; margin-top:7px;
+          border:1px solid var(--line); border-radius:6px; padding:5px 8px;
+          font-size:var(--fs-micro); color:var(--ink-2); background:var(--ground);
+          cursor:pointer; }
+.chshot:hover { border-color:var(--gold-deep); }
+.chshot .chthumb { width:26px; height:18px; border-radius:2px; flex:none;
+                   background:linear-gradient(135deg,var(--line),var(--surface-2));
+                   border:1px solid var(--line); }
+.chshotfull { max-width:100%; border:1px solid var(--line); border-radius:6px;
+              margin-top:7px; display:block; }
+
+.chatfoot { border-top:1px solid var(--line); background:var(--surface); padding:9px 10px;
+            display:flex; flex-direction:column; gap:8px; }
+.chcomp { display:flex; align-items:flex-end; gap:8px; }
+.chcomp textarea { flex:1; border:1px solid var(--line); border-radius:8px;
+                   background:var(--ground); color:var(--ink); padding:8px 10px;
+                   font-family:inherit; font-size:var(--fs-note); line-height:1.45;
+                   min-height:38px; max-height:120px; resize:none; }
+.chcomp textarea:focus-visible { outline:2px solid var(--focus); outline-offset:-1px; }
+.chicon { border:1px solid var(--line); background:var(--surface); border-radius:8px;
+          width:34px; height:34px; display:grid; place-items:center; cursor:pointer;
+          color:var(--ink-2); flex:none; padding:0; }
+.chicon:hover { border-color:var(--gold-deep); color:var(--ink); }
+.chicon svg { width:15px; height:15px; }
+.chsend { background:var(--panel); color:var(--panel-ink); border:none; border-radius:8px;
+          height:34px; padding:0 13px; font-size:var(--fs-small); font-weight:650;
+          cursor:pointer; flex:none; }
+.chsend:hover { background:var(--panel-hover); }
+.chsend[disabled] { opacity:.5; cursor:default; }
+.chnote { font-size:var(--fs-micro); color:var(--ink-3); padding:0 2px 1px; }
+.chnote.bad { color:var(--bad-tx); }
+
+.chempty { display:flex; flex-direction:column; gap:9px; align-items:center;
+           text-align:center; margin:auto; padding:10px 16px; }
+.chempty .chbig { font-size:var(--fs-body); font-weight:650; }
+.chempty p { margin:0; font-size:var(--fs-note); color:var(--ink-3); line-height:1.55;
+             max-width:30ch; }
+
+/* ── THE OFFICE'S INBOX (a Setup page) ─────────────────────────────────── */
+.chinbox { display:grid; grid-template-columns:272px 1fr; min-height:440px;
+           border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
+           background:var(--surface); }
+.chq { border-right:1px solid var(--line); background:var(--ground);
+       display:flex; flex-direction:column; max-height:620px; }
+.chqtop { padding:9px 10px; border-bottom:1px solid var(--line); display:flex; gap:7px; }
+.chqtop input { flex:1; border:1px solid var(--line); border-radius:6px;
+                background:var(--surface); color:var(--ink); padding:6px 9px;
+                font-family:inherit; font-size:var(--fs-small); min-width:0; }
+/* One segmented box divided by a hairline, not three capsules — §41.8's
+   control, and the same argument: these are three views of one list, and a
+   container that says so is what makes them read as one control. */
+.chqtabs { display:flex; margin:9px 10px 0; border:1px solid var(--line);
+           border-radius:6px; overflow:hidden; background:var(--surface); }
+.chqtab { flex:1; background:transparent; border:none; cursor:pointer;
+          font-family:inherit; font-size:var(--fs-micro); font-weight:700;
+          letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3);
+          padding:6px 4px; white-space:nowrap; }
+.chqtab + .chqtab { box-shadow:inset 1px 0 0 var(--line); }
+.chqtab:hover { color:var(--ink); }
+.chqtab.on { background:var(--surface-2); color:var(--ink); }
+.chqtab span { font-variant-numeric:tabular-nums; opacity:.75; }
+.chqtab:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+
+.chqlist { overflow-y:auto; flex:1; }
+.chqsep { font-size:var(--fs-micro); letter-spacing:.1em; text-transform:uppercase;
+          font-weight:800; color:var(--ink-3); padding:10px 11px 5px; }
+
+/* ONE LINE PER CELL, CLIPPED (§88). A message is the one thing on this screen
+   that is arbitrarily long — if these rows wrapped, the height of the queue
+   would depend on how much somebody typed. */
+.chqrow { display:grid; grid-template-columns:1fr auto; gap:3px 8px; padding:9px 11px;
+          border-bottom:1px solid var(--line-soft); cursor:pointer; align-items:baseline;
+          width:100%; text-align:left; background:none; border-left:none;
+          border-right:none; border-top:none; font-family:inherit; color:inherit; }
+.chqrow:hover { background:var(--surface-2); }
+.chqrow.on { background:var(--surface); box-shadow:inset 2px 0 0 var(--gold); }
+.chqrow:focus-visible { outline:2px solid var(--focus); outline-offset:-2px; }
+.chqrow .chnm { font-size:var(--fs-note); font-weight:650; white-space:nowrap;
+                overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.chqrow .chtm { font-size:var(--fs-micro); color:var(--ink-3);
+                font-variant-numeric:tabular-nums; white-space:nowrap; }
+.chqrow .chsn { grid-column:1; font-size:var(--fs-small); color:var(--ink-3);
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.chqrow .chun { grid-column:2; font-size:var(--fs-micro); font-weight:800;
+                background:var(--gold); color:var(--on-accent,#1B1400);
+                border-radius:var(--r-pill); min-width:17px; height:17px;
+                display:grid; place-items:center; padding:0 4px; }
+.chqrow .chwh { grid-column:1/-1; font-size:var(--fs-micro); color:var(--ink-3);
+                white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.chthread { display:flex; flex-direction:column; background:var(--surface); min-width:0; }
+.chthead { padding:10px 14px; border-bottom:1px solid var(--line);
+           display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.chthead .chnm { font-size:var(--fs-body); font-weight:650; }
+.chthead .chmeta { font-size:var(--fs-small); color:var(--ink-3); }
+.chthead .chacts { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
+.chmini { border:1px solid var(--line); background:var(--surface); color:var(--ink-2);
+          border-radius:6px; font-size:var(--fs-small); padding:4px 9px; cursor:pointer;
+          font-family:inherit; }
+.chmini:hover { border-color:var(--gold-deep); color:var(--ink); }
+.chmini.on { color:var(--attn-tx); border-color:var(--attn); background:var(--attn-bg); }
+.chtbody { padding:14px; display:flex; flex-direction:column; gap:14px;
+           background:var(--ground); flex:1; overflow-y:auto; max-height:430px; }
+.chtfoot { border-top:1px solid var(--line); background:var(--surface); padding:10px 12px;
+           display:flex; flex-direction:column; gap:8px; }
+
+/* WHAT WILL HAPPEN WHEN SEND IS PRESSED, said before it is pressed (§95.5).
+   Semantic colours, not the accent: this is a state, not an emphasis. */
+.chpres { display:flex; align-items:center; gap:7px; font-size:var(--fs-small);
+          color:var(--ink-2); background:var(--good-bg); border:1px solid var(--good);
+          border-radius:6px; padding:6px 9px; }
+.chpres.away { background:var(--attn-bg); border-color:var(--attn); }
+.chpres.none { background:var(--surface-2); border-color:var(--line); }
+.chpres svg { width:13px; height:13px; flex:none; }
+
+.chnothing { margin:auto; text-align:center; color:var(--ink-3);
+             font-size:var(--fs-note); padding:30px 20px; max-width:34ch; line-height:1.55; }
+
+@media (max-width:820px) {
+  .chinbox { grid-template-columns:1fr; }
+  .chq { border-right:none; border-bottom:1px solid var(--line); max-height:280px; }
+}
+/* A 376px panel does not fit a phone beside its own margins, and a bubble that
+   opens something clipped is worse than one that opens nothing. */
+@media (max-width:460px) {
+  .chatdock { left:12px; right:12px; bottom:12px; align-items:stretch; }
+  .chatpanel { width:auto; }
+  .chatbtn { align-self:flex-end; }
+}
+
 </style>
 <script>
 /* THEME — light or dark, and which PALETTE (§38).
@@ -5015,6 +5223,11 @@ THEME.apply();
        the whole register in the organisation's name is not "running a cycle",
        and a_cycle edit is held by more people than that. */
     { key:"c_send",   area:"always", scope:"manage", label:"Send a message",   note:"Write to the register, or part of it" },
+    /* THE OFFICE'S INBOX (§95.2). `area:"always"` with the real gate done by
+       inOffice() on the page def and again on the server — the same shape
+       c_send has, and for the same reason: who may read what everybody wrote
+       in confidence is not a matrix cell somebody could tick. */
+    { key:"c_chat",   area:"always", scope:"manage", label:"Messages",         note:"Answer what people write from the corner of the page" },
     { key:"c_import", area:"a_cycle", scope:"manage", label:"Import",          note:"Plan and progress templates" },
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
@@ -5251,6 +5464,13 @@ THEME.apply();
 
      A Super user may still reset anybody, including themselves; that is what
      makes them the way back in when the office locks itself out. */
+  /* THE SEAT-ROLE TESTS, asked of a role KEY rather than of a person, because
+     the server often holds the seat and not a world: getSession() returns
+     `people.role`, and both of these roles are seat roles, so an endpoint can
+     answer "is this the office" without reading thirty tables to build one
+     (§95.1). A responsibility role could never make somebody the office or the
+     Super user, so nothing is missed by not looking for one. */
+  function isSuperRole(k) { return k === "super"; }
   function isOfficeRole(k) { return k === "super" || k === "smoteam"; }
   function isOffice(w, person) {
     return personRoleKeys(w, person).some(isOfficeRole);
@@ -5602,7 +5822,7 @@ THEME.apply();
     roleOwns: roleOwns, companyAllows: companyAllows, areaFor: areaFor,
     grantIn: grantIn, grantAtPage: grantAtPage, isSMO: isSMO, NO_ROLE: NO_ROLE,
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
-    isOffice: isOffice, isOfficeRole: isOfficeRole,
+    isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     mayAuthorPage: mayAuthorPage,
@@ -25415,6 +25635,734 @@ var SEARCHSEL = (function(){
 
 </script>
 <script>
+/* ══ TALKING TO THE STRATEGY OFFICE (§95) ═══════════════════════════════════
+   Islam: "can we have some sort of a chat but on the platform where on the
+   bottom right they have this … so it sounds like a chat, people chatting,
+   sending messages, and picks the people and replies to them."
+
+   TWO SURFACES, ONE ENDPOINT. The bubble in the corner is everybody's; the
+   inbox on Setup › Running the cycle › Messages is the office's. Both are in
+   this file because they are two views of the same three tables, and the
+   thing that goes wrong when they are apart is that one of them starts
+   describing a conversation differently from the other.
+
+   ── THE RULE THIS WHOLE FILE IS BUILT AROUND ──────────────────────────────
+   NOTHING IN HERE EVER CALLS paint(). Not the poll, not a send, not the
+   office's reply. paint() rebuilds the entire panel — it would throw away the
+   half-typed message, the focus, the scroll position and the file somebody had
+   just attached, four seconds after they started typing (§35, §71.2, §30.1,
+   §63). Every update writes into the node it is about and nothing else, and
+   the composer is DELIBERATELY outside the region that gets rewritten, so a
+   message arriving while you type cannot touch what you have written.
+
+   THE BUBBLE IS NOT DRAWN WHERE IT WOULD BE A LIE. From `file://` there is no
+   server to carry a message, and a control that cannot work is worse than no
+   control (§16.7). In Presentation the platform is on a projector in front of
+   the board — that one is CSS, off the class present.js already sets, so there
+   is no second piece of state to keep in step.
+   ────────────────────────────────────────────────────────────────────────── */
+var CHAT = (function(){
+  "use strict";
+
+  /* Two cadences, and the difference is what somebody is doing. Open, they are
+     waiting for an answer and four seconds is a conversation; closed, the only
+     thing that can change is a number on a badge. Both stamp `here_at`, which
+     is the whole of the presence test the email rule reads (§95.5) — so the
+     slow one also has to be fast enough that "away" means away. */
+  var POLL_OPEN = 4000, POLL_SHUT = 60000;
+  var PIC_EDGE = 1600;
+
+  var open = false, mounted = false, timer = null;
+  var state = { messages: [], unread: 0, thread: null, office: false };
+  var loaded = false, sending = false, shot = null, lastErr = "";
+  /* The office inbox's own state, kept apart: the two surfaces poll on
+     different clocks and a person in the office has both open at once. */
+  /* `note` is what the LAST send actually did, and it lives out here rather
+     than in the DOM for the reason §63 records: the refresh that follows a
+     send rebuilds the pane and would wipe the sentence the send just wrote —
+     the word has to survive the redraw that reports it. Cleared when the
+     conversation changes, because it is news about this one. */
+  var box = { person: null, threads: [], data: null, timer: null, q: "",
+              tab: "waiting", note: null };
+
+  function servable(){ return location.protocol !== "file:"; }
+  function el(id){ return document.getElementById(id); }
+  function esc2(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function post(body, done){
+    /* REFUSED HERE, NOT AT EACH CALLER (§24). Opened from `file://` there is
+       no server to ask, and a fetch to `/api/chat` from `origin: null` is a
+       CORS failure in the console rather than an error anything can catch.
+       `mount()` already refuses, but the office's Setup page is drawn by
+       paint() and its clock runs on its own — so the ONE place every request
+       goes through is the only place this cannot be forgotten. Found by
+       qa.py, which walks every Setup page over file:// as the SMO. */
+    if (!servable()) { done("There is no server behind this file.", null); return; }
+    fetch("/api/chat", { method:"POST", cache:"no-store",
+                         headers:{ "Content-Type":"application/json" },
+                         body: JSON.stringify(body) })
+      .then(function(r){ return r.json().then(function(j){ j.__status = r.status; return j; }); })
+      .then(function(j){ done(j && j.ok ? null : ((j && j.error) || "failed"), j); })
+      .catch(function(e){ done(String((e && e.message) || e), null); });
+  }
+
+  /* ── WHERE SOMEBODY IS, CAPTURED AND NOT TYPED (§71's rule) ─────────────
+     The page, the subject and the cycle are things the screen already knows.
+     Asking for them is asking a person to do the computer's job, and they get
+     it wrong more often than the machine does.
+
+     Read defensively from the shell's globals: this file is inlined before
+     them and a boot that failed half way must not take the chat down with it —
+     "I cannot open anything" is exactly when somebody needs to write in. */
+  /* READ OFF THE NAVIGATION ITSELF, in the words it is wearing. Not from
+     `currentSub`, which is a KEY — that put "the group › performance" on a
+     message where the screen said "Group › Performance". The register learned
+     this one already (§93.12): what somebody is told they were looking at has
+     to be what the navigation called it, and the only way that cannot drift is
+     to take the string from the navigation. */
+  function navWord(sel){
+    var b = document.querySelector(sel);
+    if (!b) return "";
+    var c = b.cloneNode(true);
+    /* Three things inside a navigation control that are not its NAME: the
+       visually-hidden status on a tab ("— not submitted yet"), the caret on a
+       dropdown, and the count under a menu item. */
+    Array.prototype.forEach.call(c.querySelectorAll(".vh, .dlcar, .dlsub"),
+                                 function(n){ n.remove(); });
+    return c.textContent.replace(/\s+/g, " ").trim();
+  }
+  function whereNow(){
+    var out = { page:"", target:"", cycle:"", build:"" };
+    try {
+      if (typeof current !== "undefined") out.target = String(current || "");
+      out.page = [
+        /* NOT `#units button` — the group and the companies sit in a DROPDOWN
+           whose <summary> carries the selection, so asking only for buttons
+           leaves every group page with no destination on it and slides the
+           tab's name into first position. §94.6's trap, which cost that
+           section a wrong landing page for the same reason. */
+        navWord('#units [aria-selected="true"]'),
+        navWord('#subtabs button[aria-selected="true"]') || navWord(".setuprail .ritem.on"),
+        navWord('#secrow-in button[aria-selected="true"]')
+      ].filter(Boolean).join(" › ");
+      if (typeof REVIEW !== "undefined" && REVIEW && REVIEW.name) out.cycle = String(REVIEW.name);
+      if (typeof BUILD_ID !== "undefined" && BUILD_ID) out.build = String(BUILD_ID);
+    } catch (e) {}
+    return out;
+  }
+
+  function when(at){
+    var d = new Date(at), now = new Date();
+    if (isNaN(d)) return "";
+    var hm = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+    var sameDay = d.toDateString() === now.toDateString();
+    if (sameDay) return hm;
+    var y = new Date(now.getTime() - 864e5);
+    if (d.toDateString() === y.toDateString()) return "Yesterday " + hm;
+    return d.toLocaleDateString(undefined, { day:"numeric", month:"short" }) + " " + hm;
+  }
+  function dayOf(at){
+    var d = new Date(at), now = new Date();
+    if (isNaN(d)) return "";
+    if (d.toDateString() === now.toDateString()) return "Today";
+    var y = new Date(now.getTime() - 864e5);
+    if (d.toDateString() === y.toDateString()) return "Yesterday";
+    return d.toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+  }
+  function ago(at){
+    if (!at) return "";
+    var m = Math.round((Date.now() - new Date(at).getTime()) / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return m + (m === 1 ? " minute ago" : " minutes ago");
+    var h = Math.round(m / 60);
+    if (h < 24) return h + (h === 1 ? " hour ago" : " hours ago");
+    var d = Math.round(h / 24);
+    return d + (d === 1 ? " day ago" : " days ago");
+  }
+
+  var ICON_PAGE =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>';
+  var ICON_CLOCK =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+
+  /* ── ONE MESSAGE, DRAWN THE SAME WAY ON BOTH SURFACES ───────────────────
+     `mineSide` says which side of the panel counts as "me", because the same
+     message is on the right in the person's panel and on the left in the
+     office's inbox. One function, so the two can never start disagreeing
+     about what a message looks like. */
+  function msgHtml(m, mineIsOffice, showFlag){
+    var mine = mineIsOffice ? m.from_office : !m.from_office;
+    var who = m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
+                            : (mineIsOffice ? (m.by_name || "") : "You");
+    var ctx = "";
+    if (!m.from_office && (m.page || m.cycle)) {
+      ctx = '<div class="chctx">' + ICON_PAGE + " " +
+            esc2([m.page, m.cycle, m.build].filter(Boolean).join(" · ")) + "</div>";
+    }
+    var pic = m.has_shot
+      ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
+        '<span class="chthumb"></span> Screenshot — open</button>'
+      : "";
+    var flag = "";
+    /* NEVER ON THE OFFICE'S OWN REPLY. A flag is the office marking something
+       to come back to out of thirty conversations, and there is nothing to
+       come back to in an answer it wrote itself — a control that can be
+       pressed and means nothing is worse than no control. */
+    if (showFlag && !m.from_office) {
+      flag = '<button class="chmini' + (m.flag ? " on" : "") + '" type="button" ' +
+             'data-chflag="' + m.id + '" data-chflagged="' + esc2(m.flag || "") + '">' +
+             (m.flag ? esc2(m.flag) : "Flag") + "</button>";
+    }
+    return '<div class="chmsg ' + (mine ? "chme" : "chthem") + '">' +
+      '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
+      flag + "</div>" +
+      '<div class="chbod">' + esc2(m.body) + pic + "</div>" + ctx + "</div>";
+  }
+
+  function threadHtml(msgs, mineIsOffice, showFlag){
+    if (!msgs.length) return "";
+    var out = [], day = "";
+    msgs.forEach(function(m){
+      var d = dayOf(m.at);
+      if (d !== day) { day = d; out.push('<div class="chatday">' + esc2(d) + "</div>"); }
+      out.push(msgHtml(m, mineIsOffice, showFlag));
+    });
+    return out.join("");
+  }
+
+  /* ══ THE CORNER ═════════════════════════════════════════════════════════ */
+
+  function dockHtml(){
+    return '' +
+      '<div class="chatpanel" id="chatpanel" hidden role="dialog" aria-label="Strategy Office">' +
+        '<div class="chathead">' +
+          "<div><div class=\"cht\">Strategy Office</div>" +
+          '<div class="chs" id="chatsub"></div></div>' +
+          '<button class="chx" id="chatclose" type="button" aria-label="Close">&times;</button>' +
+        "</div>" +
+        '<div class="chatbody" id="chatbody"></div>' +
+        '<div class="chatfoot">' +
+          '<div class="chcomp">' +
+            '<button class="chicon" id="chatpic" type="button" title="Attach a screenshot" ' +
+              'aria-label="Attach a screenshot">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+              'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+              '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/>' +
+              '<path d="m21 16-5-5L5 19"/></svg></button>' +
+            '<input type="file" id="chatfile" accept="image/*" hidden>' +
+            '<textarea id="chatsay" rows="1" placeholder="Write to the office…" ' +
+              'aria-label="Your message"></textarea>' +
+            '<button class="chsend" id="chatsend" type="button">Send</button>' +
+          "</div>" +
+          '<div class="chnote" id="chatnote">The page you are on is sent with your message.</div>' +
+        "</div>" +
+      "</div>" +
+      '<button class="chatbtn" id="chatbtn" type="button" aria-label="Message the Strategy Office">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.7 9.7 0 0 1-2.7-.4L3 21l1.6-4.6A8.2 8.2 0 0 1 ' +
+        '3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>' +
+        '<span class="chn" id="chatn" hidden>0</span>' +
+      "</button>";
+  }
+
+  /* Only the BODY and the badge, never the composer — see the rule at the top
+     of this file. Called on every poll, so it must be safe mid-typing. */
+  function drawPanel(){
+    var body = el("chatbody"); if (!body) return;
+    /* KEEP THE PLACE UNLESS THEY WERE AT THE BOTTOM. Somebody reading back
+       through a conversation must not be dragged to the end because an answer
+       arrived — but somebody at the end wants to follow it. */
+    var atEnd = body.scrollHeight - body.scrollTop - body.clientHeight < 40;
+    if (!loaded) {
+      body.innerHTML = '<div class="chempty"><p>One moment…</p></div>';
+    } else if (!state.messages.length) {
+      body.innerHTML = '<div class="chempty"><div class="chbig">Ask us anything</div>' +
+        "<p>A number that looks wrong, a page you cannot reach, a deadline you need " +
+        "moved. One of us will come back to you.</p></div>";
+    } else {
+      body.innerHTML = threadHtml(state.messages, false, false);
+    }
+    if (atEnd) body.scrollTop = body.scrollHeight;
+
+    var sub = el("chatsub");
+    if (sub) {
+      sub.innerHTML = state.messages.length && state.thread && state.thread.waiting
+        ? '<span class="chatdot" style="background:var(--attn)"></span> With the office'
+        : '<span class="chatdot"></span> Usually answers the same day';
+    }
+    var n = el("chatn");
+    if (n) {
+      if (state.unread > 0 && !open) { n.hidden = false; n.textContent = String(state.unread); }
+      else n.hidden = true;
+    }
+    var note = el("chatnote");
+    if (note) {
+      note.className = "chnote" + (lastErr ? " bad" : "");
+      note.textContent = lastErr ? lastErr
+        : shot ? "A screenshot is attached. It is sent with your next message."
+        : "The page you are on is sent with your message.";
+    }
+  }
+
+  function poll(){
+    if (!servable()) return;
+    post({ action:"mine" }, function(err, j){
+      if (!err && j) {
+        state.messages = j.messages || [];
+        state.unread = j.unread || 0;
+        state.thread = j.thread || null;
+        state.office = !!j.office;
+        loaded = true;
+        var dock = el("chatdock"); if (dock) dock.hidden = false;
+        drawPanel();
+        /* Opened, and something new arrived while it was open — read it. */
+        if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
+      } else if (j && (j.__status === 401 || j.__status === 403)) {
+        /* NOT SIGNED IN, OR NOT PAST THE PASSWORD YET. Take the corner away
+           rather than leaving a control that answers every press with a
+           refusal, and stop asking. */
+        var d = el("chatdock"); if (d) d.hidden = true;
+        stop();
+      }
+    });
+  }
+
+  function stop(){ if (timer) { clearInterval(timer); timer = null; } }
+  function beat(){
+    stop();
+    timer = setInterval(poll, open ? POLL_OPEN : POLL_SHUT);
+  }
+
+  function setOpen(v){
+    open = !!v;
+    var p = el("chatpanel"); if (p) p.hidden = !open;
+    if (open) {
+      drawPanel();
+      var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
+      var t = el("chatsay"); if (t) t.focus();
+      if (state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; drawPanel(); });
+      poll();
+    }
+    beat();
+    drawPanel();
+  }
+
+  function send(){
+    var t = el("chatsay"); if (!t || sending) return;
+    var text = t.value.trim();
+    if (!text && !shot) return;
+    sending = true; lastErr = "";
+    var btn = el("chatsend"); if (btn) btn.disabled = true;
+    var w = whereNow();
+    post({ action:"say", body:text, shot:shot, page:w.page, target:w.target,
+           cycle:w.cycle, build:w.build }, function(err, j){
+      sending = false;
+      if (btn) btn.disabled = false;
+      if (err) {
+        /* THE TYPED MESSAGE IS NOT THROWN AWAY ON A FAILURE. It is the one
+           thing here nobody can get back, and a chat that eats what you wrote
+           because the network blinked is a chat nobody uses twice. */
+        lastErr = err === "failed" ? "That did not send. Try again." : err;
+        drawPanel();
+        return;
+      }
+      t.value = ""; t.style.height = "";
+      shot = null;
+      var f = el("chatfile"); if (f) f.value = "";
+      state.messages = (j && j.messages) || state.messages;
+      state.thread = (j && j.thread) || state.thread;
+      state.unread = 0;
+      drawPanel();
+      var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
+    });
+  }
+
+  function takePicture(file){
+    if (!file) return;
+    lastErr = "";
+    /* §50's intake exactly: shrunk to 1600px and encoded both ways with the
+       smaller kept, because a screenshot and a photograph want opposite
+       formats and the file's own type predicts neither. */
+    picIntake(file).then(function(data){
+      shot = data; drawPanel();
+    }, function(e){
+      lastErr = (e && e.message) ? ("That picture could not be used — " + e.message + ".")
+                                 : "That picture could not be used.";
+      drawPanel();
+    });
+  }
+
+  function mount(){
+    if (mounted || !servable()) return;
+    if (!document.body) return;
+    mounted = true;
+    var dock = document.createElement("div");
+    dock.className = "chatdock";
+    dock.id = "chatdock";
+    dock.hidden = true;           /* until the server says there is somebody here */
+    dock.innerHTML = dockHtml();
+    document.body.appendChild(dock);
+
+    el("chatbtn").addEventListener("click", function(){ setOpen(!open); });
+    el("chatclose").addEventListener("click", function(){ setOpen(false); });
+    el("chatsend").addEventListener("click", send);
+    el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
+    el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });
+    var say = el("chatsay");
+    say.addEventListener("keydown", function(e){
+      /* Enter sends, Shift+Enter makes a line — what every chat does, and the
+         composer is a textarea precisely so the second one is possible. */
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+      if (e.key === "Escape") setOpen(false);
+    });
+    say.addEventListener("input", function(){
+      this.style.height = "auto";
+      this.style.height = Math.min(120, this.scrollHeight) + "px";
+    });
+    /* Coming back to the tab is the moment a badge is most likely to be
+       wrong, and the cheapest time to ask. */
+    window.addEventListener("focus", function(){ if (mounted) poll(); });
+    poll();
+    beat();
+  }
+
+  /* ══ THE OFFICE'S INBOX ═════════════════════════════════════════════════
+     A Setup page, so it is drawn by paint() like every other — but ONLY the
+     empty frame is. Everything inside it is filled by this file, on its own
+     clock, writing into two nodes. That is what lets the reply box survive a
+     message arriving while somebody is typing into it. */
+
+  function renderInbox(){
+    return '' +
+      '<div class="chinbox" id="chinbox">' +
+        '<div class="chq">' +
+          '<div class="chqtop">' +
+            '<input type="search" id="chqfind" placeholder="Search a name or a word…" ' +
+              'aria-label="Search the conversations">' +
+          "</div>" +
+          /* THREE FILTERS OVER ONE LIST, never three kinds of list. Flagged is
+             a conversation carrying a flagged message, so the row a person
+             clicks is the same row wherever they found it. */
+          '<div class="chqtabs" id="chqtabs" role="tablist">' +
+            '<button class="chqtab on" type="button" data-chtab="waiting" role="tab">' +
+              'Waiting <span data-chn="waiting">0</span></button>' +
+            '<button class="chqtab" type="button" data-chtab="all" role="tab">All</button>' +
+            '<button class="chqtab" type="button" data-chtab="flagged" role="tab">' +
+              'Flagged <span data-chn="flagged">0</span></button>' +
+          "</div>" +
+          '<div class="chqlist" id="chqlist"></div>' +
+        "</div>" +
+        '<div class="chthread" id="chthread"></div>' +
+      "</div>";
+  }
+
+  function boxRows(){
+    var q = box.q.toLowerCase();
+    return (box.threads || []).filter(function(t){
+      if (box.tab === "waiting" && !t.waiting) return false;
+      if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
+      if (!q) return true;
+      return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
+             String(t.last_body || "").toLowerCase().indexOf(q) > -1;
+    });
+  }
+
+  function placeOf(t){
+    var bits = [];
+    if (t.unit_key && typeof placeLabel === "function") bits.push(placeLabel(t.unit_key));
+    else if (t.fn_key && typeof placeLabel === "function") bits.push(placeLabel("fn:" + t.fn_key));
+    if (t.title) bits.push(t.title);
+    if (t.gone) bits.push("no longer on the register");
+    return bits.filter(Boolean).join(" · ");
+  }
+
+  function drawQueue(){
+    var list = el("chqlist"); if (!list) return;
+    var rows = boxRows();
+    if (!rows.length) {
+      list.innerHTML = '<div class="chnothing">' +
+        (box.q ? "Nothing matches that."
+               : box.tab === "waiting" ? "Nobody is waiting. That is the good state."
+               : "No conversations yet.") + "</div>";
+      return;
+    }
+    var out = [], group = null;
+    rows.forEach(function(t){
+      var g = t.waiting ? "Waiting on us" : "Answered";
+      if (g !== group) { group = g; out.push('<div class="chqsep">' + g + "</div>"); }
+      var last = (t.last_from_office ? ((t.last_by || "Office") + ": ") : "") + (t.last_body || "");
+      out.push('<button class="chqrow' + (box.person === t.person_key ? " on" : "") + '" ' +
+        'type="button" data-chpick="' + esc2(t.person_key) + '">' +
+        '<span class="chnm">' + esc2(t.live_name || t.person_name || t.person_key) + "</span>" +
+        '<span class="chtm">' + esc2(when(t.last_at)) + "</span>" +
+        '<span class="chsn">' + esc2(last) + "</span>" +
+        (+t.unread > 0 ? '<span class="chun">' + (+t.unread) + "</span>" : "") +
+        '<span class="chwh">' + esc2(placeOf(t)) + "</span>" +
+      "</button>");
+    });
+    list.innerHTML = out.join("");
+  }
+
+  /* WHAT WILL HAPPEN WHEN SEND IS PRESSED, SAID BEFORE IT IS PRESSED. The
+     server makes the same call again when the reply lands (§95.5) — this line
+     is the office being shown the rule, never the rule itself. */
+  function presenceHtml(d){
+    var name = String(d.name || "They").split(/\s+/)[0];
+    if (d.here) {
+      return '<div class="chpres">' + ICON_CLOCK + " " + esc2(name) +
+        " has the platform open — they will see this straight away, so no email will be sent.</div>";
+    }
+    if (!d.address) {
+      return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
+        " is away and has no address on the register, so this waits in the platform for them.</div>";
+    }
+    if (!d.mail) {
+      return '<div class="chpres none">' + ICON_CLOCK + " " + esc2(name) +
+        " is away, and no mail is configured on this deployment — this waits in the platform.</div>";
+    }
+    return '<div class="chpres away">' + ICON_CLOCK + " " + esc2(name) + " was last here " +
+      esc2(d.hereAt ? ago(d.hereAt) : "a while ago") +
+      " — this will also go to " + esc2(d.address) + ".</div>";
+  }
+
+  function drawThread(){
+    var pane = el("chthread"); if (!pane) return;
+    var d = box.data;
+    if (!d) {
+      pane.innerHTML = '<div class="chnothing">Pick somebody on the left to read what they ' +
+        "wrote and answer them.</div>";
+      return;
+    }
+    /* THE REPLY BOX IS ONLY REBUILT WHEN THE PERSON CHANGES. Redrawing it on
+       every four-second poll would wipe a half-written answer — the exact
+       fault §71.2 was raised about, one surface further out. */
+    var existing = pane.querySelector("[data-chreply]");
+    var keep = existing && existing.dataset.chreply === d.person ? existing.value : null;
+
+    var body = pane.querySelector("#chtbody");
+    var atEnd = body ? (body.scrollHeight - body.scrollTop - body.clientHeight < 40) : true;
+
+    pane.innerHTML =
+      '<div class="chthead">' +
+        "<div><div class=\"chnm\">" + esc2(d.name || d.person) + "</div>" +
+        '<div class="chmeta">' + esc2([placeOf(d), d.address].filter(Boolean).join(" · ")) + "</div></div>" +
+        '<div class="chacts">' +
+          '<button class="chmini" type="button" data-chdone="' + esc2(d.person) + '">' +
+            (d.waiting ? "Mark answered" : "Put back on the list") + "</button>" +
+        "</div>" +
+      "</div>" +
+      '<div class="chtbody" id="chtbody">' + threadHtml(d.messages || [], true, true) + "</div>" +
+      '<div class="chtfoot">' + presenceHtml(d) +
+        '<div class="chcomp">' +
+          '<textarea rows="1" data-chreply="' + esc2(d.person) + '" ' +
+            'placeholder="Reply to ' + esc2(String(d.name || "them").split(/\s+/)[0]) + '…" ' +
+            'aria-label="Your reply"></textarea>' +
+          '<button class="chsend" data-chreplysend="' + esc2(d.person) + '" type="button">Send</button>' +
+        "</div>" +
+        '<div class="chnote' + (box.note && box.note.bad ? " bad" : "") + '" id="chreplynote">' +
+          esc2(box.note ? box.note.text : "") + "</div>" +
+      "</div>";
+
+    var ta = pane.querySelector("[data-chreply]");
+    if (ta && keep != null) ta.value = keep;
+    var nb = el("chtbody");
+    if (nb && atEnd) nb.scrollTop = nb.scrollHeight;
+  }
+
+  function boxLoadQueue(then){
+    post({ action:"queue" }, function(err, j){
+      if (err || !j) return;
+      box.threads = j.threads || [];
+      drawQueue();
+      ["waiting", "flagged"].forEach(function(k){
+        var n = document.querySelector('[data-chn="' + k + '"]');
+        if (n) n.textContent = String(j[k] || 0);
+      });
+      if (then) then();
+    });
+  }
+  function boxLoadThread(who, then){
+    post({ action:"thread", person:who }, function(err, j){
+      if (err || !j) return;
+      box.data = j; drawThread();
+      if (then) then();
+    });
+  }
+
+  function boxBeat(){
+    if (box.timer) clearInterval(box.timer);
+    box.timer = setInterval(function(){
+      /* THE PAGE IS GONE, SO THE CLOCK STOPS. Nothing tells this file that
+         somebody navigated away — asking the document whether its own node is
+         still there is the one test that cannot go stale (§24). */
+      if (!el("chinbox")) { clearInterval(box.timer); box.timer = null; return; }
+      boxLoadQueue();
+      if (box.person) boxLoadThread(box.person);
+    }, 10000);
+  }
+
+  function replySend(who){
+    var pane = el("chthread"); if (!pane) return;
+    var ta = pane.querySelector("[data-chreply]");
+    var note = el("chreplynote");
+    var text = ta ? ta.value.trim() : "";
+    if (!text) return;
+    var btn = pane.querySelector("[data-chreplysend]");
+    if (btn) btn.disabled = true;
+    box.note = { text: "Sending…" };
+    if (note) { note.className = "chnote"; note.textContent = box.note.text; }
+
+    /* THE HTML IS BUILT HERE, BY THE ONE BUILDER (§72.3), and the server
+       decides whether to actually send it and to WHOM — the browser sends
+       content, never a recipient (§74.2). */
+    var body = { action:"reply", person:who, body:text };
+    try {
+      var sh = commsShape(), c = comms();
+      body.fromName = c.fromName || sh.org;
+      body.replyTo = c.replyTo || "";
+      body.subject = "A reply from the Strategy Office";
+      body.html = MAIL.html({
+        org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer, eyebrow: sh.eyebrow,
+        title: "The Strategy Office replied",
+        preheader: text.slice(0, 140),
+        body: text + "\n\nOpen the platform to answer.",
+        cta: { label: "Open the platform", href: location.origin + location.pathname }
+      });
+    } catch (e) { /* No mail builder here is not a reason to refuse the reply. */ }
+
+    post(body, function(err, j){
+      if (btn) btn.disabled = false;
+      if (err) {
+        box.note = { text: err, bad: true };
+        if (note) { note.className = "chnote bad"; note.textContent = err; }
+        return;
+      }
+      if (ta) { ta.value = ""; ta.style.height = ""; }
+      /* THE FOUR REAL OUTCOMES, SAID PLAINLY (§63's rule for Save draft). A
+         reply that landed and an email that did not are two different pieces
+         of news and the office needs both. Written to `box.note` FIRST: the
+         two loads below redraw this pane, and a sentence that only exists in
+         the DOM is a sentence the refresh destroys. */
+      box.note = { text:
+        j && j.here ? "Sent. They are on the platform and will see it now."
+        : j && j.mailed && j.mailed.sent ? "Sent, and emailed to " + j.mailed.to + "."
+        : j && j.mailed && j.mailed.why ? "Sent. No email went out — " + j.mailed.why + "."
+        : "Sent." };
+      boxLoadQueue();
+      boxLoadThread(who);
+    });
+  }
+
+  /* Called at the end of paint(), beside SEARCHSEL.wire(). Everything is bound
+     on the CONTAINER rather than on each row, because the rows are rewritten
+     every ten seconds and a handler bound to one would go with it (§24). */
+  function wireInbox(){
+    var root = el("chinbox");
+    if (!root) { if (box.timer) { clearInterval(box.timer); box.timer = null; } return; }
+    if (root.dataset.chwired) return;
+    root.dataset.chwired = "1";
+
+    root.addEventListener("click", function(e){
+      var pick = e.target.closest("[data-chpick]");
+      if (pick) {
+        box.person = pick.dataset.chpick; box.note = null;
+        drawQueue(); boxLoadThread(box.person); return;
+      }
+
+      var done = e.target.closest("[data-chdone]");
+      if (done) {
+        var was = box.data && box.data.waiting;
+        post({ action:"answered", person:done.dataset.chdone, waiting: !was }, function(){
+          boxLoadQueue(); boxLoadThread(done.dataset.chdone);
+        });
+        return;
+      }
+      var sendb = e.target.closest("[data-chreplysend]");
+      if (sendb) { replySend(sendb.dataset.chreplysend); return; }
+
+      var fl = e.target.closest("[data-chflag]");
+      if (fl) {
+        /* Three flags and off, cycled from one button: this is a shelf the
+           office sorts its own work on, not a taxonomy anybody has to learn. */
+        var order = ["", "issue", "idea", "question"];
+        var next = order[(order.indexOf(fl.dataset.chflagged || "") + 1) % order.length];
+        post({ action:"flag", id:+fl.dataset.chflag, flag: next || null }, function(){
+          /* THE QUEUE IS RELOADED TOO, not only the thread. Flagged is a
+             filter over the SAME list and it counts flags per conversation —
+             refreshing one side leaves the other showing a count that was
+             true a moment ago, which is the quietest kind of wrong. */
+          boxLoadQueue();
+          if (box.person) boxLoadThread(box.person);
+        });
+        return;
+      }
+      var tab = e.target.closest("[data-chtab]");
+      if (tab) {
+        box.tab = tab.dataset.chtab;
+        Array.prototype.forEach.call(root.querySelectorAll("[data-chtab]"), function(b){
+          b.classList.toggle("on", b === tab);
+          b.setAttribute("aria-selected", b === tab ? "true" : "false");
+        });
+        drawQueue();
+        return;
+      }
+      var sh = e.target.closest("[data-chshot]");
+      if (sh) {
+        post({ action:"shot", id:+sh.dataset.chshot }, function(err, j){
+          if (err || !j || !j.shot) return;
+          openModalHtml("Screenshot", "", '<img class="chshotfull" alt="Screenshot" src="' +
+            esc2(j.shot) + '">');
+        });
+        return;
+      }
+    });
+
+    root.addEventListener("keydown", function(e){
+      var ta = e.target.closest("[data-chreply]");
+      if (ta && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); replySend(ta.dataset.chreply); }
+    });
+    /* TYPING NEVER REPAINTS (§35). The search hides rows in place by rebuilding
+       the LIST, never the page, and the box being typed into is outside it. */
+    var find = el("chqfind");
+    if (find) find.addEventListener("input", function(){ box.q = this.value; drawQueue(); });
+
+    drawQueue();
+    drawThread();
+    boxLoadQueue(function(){
+      if (!box.person) {
+        var first = boxRows()[0];
+        if (first) { box.person = first.person_key; drawQueue(); boxLoadThread(box.person); }
+      } else boxLoadThread(box.person);
+    });
+    boxBeat();
+  }
+
+  /* The person's own panel, opened from anywhere — the office uses it too, so
+     somebody in the office writing to the office is not a special case. */
+  return {
+    /* Whether there is a server behind this page at all — asked by the Setup
+       page's `when`, so the office is never offered an inbox it could not
+       answer anybody from (§16.7: a control that cannot work is worse than no
+       control). Same test mount() uses, named once. */
+    servable: servable,
+    mount: mount,
+    renderInbox: renderInbox,
+    wireInbox: wireInbox,
+    open: function(){ setOpen(true); },
+    unread: function(){ return state.unread; }
+  };
+})();
+
+</script>
+<script>
 /* ── Persistence ──────────────────────────────────────────────────────────
    Served over http(s), the platform loads its state from /api/state and
    writes every change back, so edits survive reloads and every viewer shares
@@ -25455,6 +26403,13 @@ var SYNC = (function () {
       document.documentElement.classList.remove("booting");
       document.documentElement.removeAttribute("aria-busy");
     } catch (e) {}
+    /* THE CORNER ARRIVES WITH THE PAGE, NOT BEFORE IT (§95.1). This is the one
+       place the skeleton comes down, with four ways in (the answer, a failure,
+       the 8s backstop, file://) — so hanging the chat off it means the bubble
+       can never be drawn on top of the grey, and can never be forgotten by one
+       of the four. mount() is idempotent and refuses on file://, where there
+       is no server to carry a message. */
+    try { CHAT.mount(); } catch (e) {}
   }
   var live = false;        /* hydrated from the API; saves flow only then */
   var lastSaved = null;    /* the serialized graph the server last accepted */
@@ -26058,6 +27013,12 @@ var SYNC = (function () {
 
 </script>
 <script>
+/* WHICH BUILD THIS IS, stamped by build.py out of sw.js's SHELL constant —
+   the one string that is guaranteed to change whenever the built file's bytes
+   do (§91). A chat message carries it, so "it showed 4.2 on my screen" can be
+   answered without asking anybody which version they were looking at. */
+var BUILD_ID = "smp-shell-v3.26";
+
 /* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
    a stacked list for Manage. They were replaced in 2.9 by one worded button
    with a menu: the same ten destinations, but named rather than guessed at. */
@@ -26228,6 +27189,20 @@ var SYNC = (function () {
       /* FIRST, because it is the page you open before the others — and now
          also because the gear lands on whichever def is `primary`. */
       { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
+      /* ── WHERE THE OFFICE ANSWERS THE CORNER (§95.2) ──────────────────
+         Second in the group, immediately under the cycle it is mostly about.
+
+         GATED BY A RULE, NOT BY A MATRIX CELL, and deliberately: reading what
+         everybody in the tenant wrote in confidence is not a thing to leave to
+         a tick somebody could set on a bad afternoon. §37 already settled three
+         cells that way and §89 three more — this is the same argument, and
+         `c_send` beside it is the same shape (area "always", the office test
+         done here). `inOffice()` is the SMO team as well as the Super user, or
+         the office would be one person deep on the one page that has to be
+         answered the day somebody is on leave. */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Messages",
+        when: function(){ return inOffice() && CHAT.servable(); },
+        render:function(){ return CHAT.renderInbox(); } },
       /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
          `view` for every role, so gating the row on "not none" put Import in
          the rail of a contributor, a unit owner, a custodian and a company
@@ -27235,6 +28210,12 @@ var SYNC = (function () {
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* The office's inbox, if this paint drew it. It binds ONCE per rendered
+       frame and then fills and refreshes itself on its own clock — nothing in
+       it ever calls paint(), or a reply being typed would be thrown away every
+       ten seconds (§35, §71.2). Called here so it is also the place the clock
+       is STOPPED when a paint navigates away from the page. */
+    CHAT.wireInbox();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and

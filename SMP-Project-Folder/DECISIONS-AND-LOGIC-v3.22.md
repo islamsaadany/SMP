@@ -11739,3 +11739,228 @@ genuinely used, so a cap replaced by a slightly larger cap fails.
 A zero-width row is skipped rather than failed: Setup has no tab row at all
 (§46.1), and asserting against it would be measuring a thing the page is right
 not to draw.
+
+---
+
+## 95 · Talking to the Strategy Office (v3.26)
+
+Islam: *"Regarding any questions that the team might have or might need to
+communicate with us as the Strategy Management Office, can we have some sort of
+a chat but on the platform where on the bottom right they have this? … they open
+the chat and they send a message there and they have a conversation with one of
+our team, so we set up a back end in the Admin page where that receives messages
+from different people — so it sounds like a chat, people chatting, sending
+messages, and picks the people and replies to them."*
+
+**HE HAD ASKED FOR THIS ONCE ALREADY, AND HALF OF IT WAS BUILT.** §71: *"some
+sort of feedback box in the bottom right of the page … and this feedback should
+land in the admin page."* The endpoint, two tables, the reply thread, the
+screenshot handling, the access rules and a test script all shipped, under a
+commit whose own message says what happened — *"Feedback: the server half
+(§71)."* **The box was never drawn.** Searching the built platform for the word
+finds three hits and all three are the phrase *"feedback loop"* in unrelated
+comments. So this is not a second feature beside that one; it is the missing
+half of it, reshaped from a **form** into a **conversation**.
+
+Five things were settled before anything was drawn, then drawn as a mockup and
+signed off before a single source was touched
+(`design-mockups/office-chat/2026-08-25_talking-to-the-office.html`).
+
+### 95.1 One conversation per person, and the queue is people
+
+`chat_threads.person_key` is the PRIMARY KEY, so **one person, one
+conversation** is an invariant rather than a rule somebody remembers to check —
+§44's *one figure, one set*, the same shape one table over.
+
+The argument is Islam's own sentence: *picks the people and replies to them*.
+**The moment a person has to decide whether what they are about to type is a
+new item or the same one, it has stopped being a chat.** So they never decide
+it, and the office does its sorting on its own side.
+
+**THE COST IS REAL AND IS RECORDED RATHER THAN GLOSSED.** §71's per-item
+statuses — *new / open / done / parked* — stop being something the product
+tracks, because the unit is the person now. A conversation is only ever
+*waiting on us* or *answered*. **Flagging** is what is left of the
+classification: the office's, per-message, and deliberately weaker. If an issue
+tracker is wanted it is a different feature, and it must not be smuggled in
+behind a chat bubble.
+
+**AND THE TWO GROUPS MOVE BY THEMSELVES.** `waiting` goes true when the person
+writes and false when the office replies, because **a status you have to
+remember to set is the status nobody sets** (§71, unchanged). *Mark answered*
+exists for the conversation that needs no reply, and toggles back.
+
+### 95.2 Who may read it is a rule, not a matrix cell
+
+Reading what everybody in the tenant wrote in confidence is not a thing to
+leave to a tick somebody could set on a bad afternoon. §37 settled three cells
+that way and §89 three more; this is the same argument. `c_chat` is
+`area:"always"` with the office test done on the page def **and again on the
+server** — the shape `c_send` already has.
+
+**The office is both roles** (`isOfficeRole`, §89), or the office would be one
+person deep on the one page that has to be answered the day somebody is on
+leave. **Dropping a conversation is the Super user's alone**, which is
+`mayDestroy`'s argument applied to the one thing here with a real storage cost.
+
+**THE SEAT ROLE IS ENOUGH ON THE SERVER, AND THAT IS WORTH SAYING.** `super`
+and `smoteam` are both seat roles on `people.role` and come back from
+`getSession()`, so `/api/chat` answers "is this the office" without reading
+thirty tables to build a world. `isSuperRole()` joins `isOfficeRole()` in
+`lib/rules.js` as the pair asked of a role KEY — never spelled out in the
+endpoint, which is the drift that file exists to prevent.
+
+**AND THE REFUSAL NEVER NAMES THE MISSING ROLE.** Saying which of the two
+somebody lacks tells an outsider the shape of the office.
+
+### 95.3 The office is the addressee; the reply is signed
+
+You write to *the office*, so nobody is a dead end when somebody is on leave
+and nobody has to guess which of them owns the question — and the answer comes
+back with a name on it, because a reply from an institution is not a reply.
+`by_name` is stored **as it was at the time**: a name read back through the
+register would change under a rename and vanish under a delete, and the person
+who answered still answered.
+
+### 95.4 Where they were is captured, and it speaks the navigation's language
+
+§71's rule, unchanged: the page, the subject, the cycle and the build are
+things the screen already knows, and asking somebody to describe them is asking
+them to do the computer's job.
+
+**READ OFF THE NAVIGATION ITSELF, NOT OFF `currentSub`.** The first build put
+*"the group › performance"* on a message where the screen said *"Group ›
+Performance"* — `currentSub` is a KEY. §93.12's rule (the register speaks the
+navigation's language) one surface further out, and the only way it cannot
+drift is to take the string from the navigation. Two traps inside that, both
+found by looking at the output: a tab's visually-hidden half is a **status**
+(*"— not submitted yet"*), not part of its name; and **the group and the
+companies sit in a DROPDOWN** whose `<summary>` carries the selection, so
+asking only for `button[aria-selected]` leaves every group page with no
+destination and slides the tab's name into first position. That is §94.6's
+trap exactly, and it was walked into again nine sections later.
+
+**THE BUILD ID COMES OUT OF `sw.js`.** `build.py` reads the `SHELL` constant —
+the one string this project already guarantees changes whenever the built
+file's bytes do (§91) — and refuses to build if it cannot find it. A version
+literal in a source goes stale, and one that lies about which build somebody
+was looking at is worse than none.
+
+### 95.5 Email only when they are away, and the edge is stated
+
+The reply is emailed only if the person is not on the platform, and **the
+office is told which way it will go before pressing Send**, on the line above
+the reply box. The server makes the same call again when the reply lands, from
+the same field — a screen that predicts and a server that decides separately is
+§42's drift one endpoint further out.
+
+**PRESENCE IS THE PERSON'S OWN POLLING, AND NOTHING ELSE.** Their panel stamps
+`here_at` every time it asks for new messages (4 seconds open, 60 shut), and
+the window is 3 minutes. The first build stamped it on a **send** as well — and
+its own comment said it should not, which is how it was caught: a person who
+writes without ever looking is exactly the case the rule is supposed to call
+away, and a second place setting it is a second rule to keep true.
+
+**THE EDGE IS REAL AND IS NOT HIDDEN.** There is no scheduler here — no cron in
+`vercel.json` — so the decision is made at the moment of replying, and somebody
+who was reading a page thirty seconds ago and then shut their laptop gets no
+email. The mitigation is that the office can *see the call being made*, which
+is the reason that line exists rather than the rule being silent. A proper
+sweep needs a cron entry and is a later decision, not a blocker.
+
+**AND THE CREDENTIAL MOVED WITHOUT THE RULE CHANGING.** §72's rule was
+*"api/mail.js is the only place `RESEND_API_KEY` is read"*, and the moment a
+second endpoint had to send something that rule had two futures: a second copy
+of the credential handling, or one module both call. `lib/mailer.js` is that
+module. The rule is unchanged; the address it points at moved. The **HTML** is
+still built by the one builder in the browser (§72.3) and the **address is
+still resolved on the server** from the stored register (§74.2) — the browser
+sends content, never a recipient.
+
+### 95.6 Nothing in the client file ever calls `paint()`
+
+The rule the whole file is built around. `paint()` rebuilds the entire panel: it
+would throw away the half-typed message, the focus, the scroll position and the
+attached file, four seconds after somebody started typing (§35, §71.2, §30.1,
+§63). Every update writes into the node it is about and nothing else, and **the
+composer sits outside the region that gets rewritten**, so a message arriving
+mid-sentence cannot touch what has been written. `src/checks/office-chat.py`
+asserts it by typing, waiting longer than the poll, checking the poll really
+happened, and then reading the box back.
+
+Three things fell out of building it, and all three are old lessons arriving in
+a new place:
+
+- **THE OUTCOME SENTENCE HAS TO SURVIVE THE REFRESH THAT REPORTS IT.** The
+  first build wrote *"Sent, and emailed to…"* into the DOM and then reloaded the
+  thread, which wiped it — the check read an empty string. It lives in
+  `box.note` now. §63's rule (the word is written where the redraw cannot reach)
+  from the other side: there, the button being replaced; here, the sentence.
+- **A FLAG REFRESHES THE QUEUE AS WELL AS THE THREAD.** *Flagged* is a filter
+  over the same list and counts flags per conversation, so refreshing one side
+  leaves the other showing a count that was true a moment ago — the quietest
+  kind of wrong.
+- **`post()` REFUSES WHEN THERE IS NO SERVER, AT THE ONE PLACE EVERY REQUEST
+  GOES THROUGH.** `mount()` already refused on `file://`, but the office's Setup
+  page is drawn by `paint()` and runs its own clock — so it fetched
+  `/api/chat` from `origin: null`, which is a CORS failure in the console that
+  nothing can catch. **Found by `qa.py`**, which walks every Setup page over
+  `file://` as the SMO, and which is the reason the sweep is run against a
+  change that "obviously" only touches a new file.
+
+### 95.7 Where the corner is not drawn
+
+Three absences, and each is a state in which *no bubble* is the pass — §94.2's
+lesson, that a check which only looks for something PRESENT cannot see a
+control that should not be there:
+
+- **On a projector.** Done in CSS off the class `present.js` already sets, so
+  there is no second piece of state to keep in step.
+- **From `file://`**, where there is no server to carry a message.
+- **For somebody the server turned away** — a control that answers every press
+  with a refusal is worse than no control (§16.7).
+
+**THE BUBBLE WEARS `--panel`, NOT THE ACCENT.** It is chrome, not content: the
+navigation bar's colour is what Setup › Branding sets, so the corner follows the
+tenant's brand the way the bar does and never has to be decided again per client
+(§41.10). The only accent on it is the unread **count** — one small solid mark,
+which is what the accent budget is for (§41). The check asks a **probe** wearing
+`background:var(--panel)` rather than naming an element: `.chrome` computes to
+`--surface` and only the rows inside it are navy, so naming one would be
+asserting the layout while claiming to assert the colour.
+
+### 95.8 §71's tables go, and 019 stays
+
+`022-office-chat.sql` DROPs `feedback` and `feedback_replies`. **No human has
+ever been able to raise a feedback item**, because the client half was never
+built — so those two tables cannot hold a row in any deployment, and dropping
+them is not the destruction `mayDestroy()` guards. Two unreachable tables behind
+an unreachable endpoint are exactly what the next person reads as load-bearing
+(§24), and `api/feedback.js` and `scripts/test-feedback.js` go with them.
+
+**`019-feedback.sql` itself stays where it is.** A fresh database creates those
+tables and drops them a moment later, which costs nothing and is the honest
+record: every deployment already in the world ran 019, and a migration
+directory that disagrees with `_sql_migrations` about what was applied is a
+confusion this project keeps writing rules about.
+
+### 95.9 Three suites, because no one of them can see the whole thing
+
+`src/checks/office-chat.py` serves the built file over HTTP with a stub
+`/api/chat` — **the entire feature is invisible over `file://`**, so a build
+that had lost the corner would go green every time (§94.11, walked into
+knowingly for the second time). `scripts/test-chat.js` runs against a real
+Postgres and is where the refusals live: **driving the product as the SMO
+proves the office's own path and proves nothing about the person who may hold
+no role at all**, so it signs in as a second, ordinary person and tries every
+one of the office's actions with their session — all seven refused, and the
+sentence checked for not naming a role.
+
+**AND BOTH SIDES OF THE PRESENCE RULE ARE ASSERTED, ONE OF THEM STAGED.** The
+away case ages the row deliberately, because the test itself polls a moment
+earlier — asserting only the *here* half would have left the whole email rule
+untested by a check that can only see the state it happens to be in. Two of the
+first run's failures were the check being wrong rather than the product
+(a rendered `text-transform:uppercase` compared against mixed case; a "she is
+away" that the test's own poll had made false), and both were worth fixing in
+the check rather than loosening.

@@ -86,6 +86,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/performance-actions/2026-08-25_report-button-and-row.html` | Report and Presentation leave the band legend for a row of their own, and Report goes solid orange. Today beside the proposal, both themes, with the fill and ink measured for all four palettes. **Built in 3.25** (&sect;93.8) |
 | `../../design-mockups/loading-skeleton/2026-08-25_skeleton-on-boot.html` | What the platform shows between opening and the database answering. Today's boot beside the proposal, both themes. **Built in 3.25** (&sect;94.10) |
 | `../../design-mockups/full-width/2026-08-25_page-fills-the-window.html` | The 1180px content cap comes off every page. Not a drawing &mdash; screenshots of the REAL platform at 1670px with the cap on and off, four pages, with the widths measured. **Built in 3.25** (&sect;94.13) |
+| `../../design-mockups/office-chat/2026-08-25_talking-to-the-office.html` | The corner, the conversation it opens, and the Setup page the office answers from. Both themes, with the five decisions and their costs stated under each screen. **Built in 3.26** (&sect;95, spec 014) |
 
 ### Drawn, awaiting a decision
 

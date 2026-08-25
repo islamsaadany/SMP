@@ -197,8 +197,15 @@
 <script src="PRESENT"></script>
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
+<script src="CHAT"></script>
 <script src="SYNC"></script>
 <script>
+/* WHICH BUILD THIS IS, stamped by build.py out of sw.js's SHELL constant —
+   the one string that is guaranteed to change whenever the built file's bytes
+   do (§91). A chat message carries it, so "it showed 4.2 on my screen" can be
+   answered without asking anybody which version they were looking at. */
+var BUILD_ID = "BUILDID";
+
 /* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
    a stacked list for Manage. They were replaced in 2.9 by one worded button
    with a menu: the same ten destinations, but named rather than guessed at. */
@@ -369,6 +376,20 @@
       /* FIRST, because it is the page you open before the others — and now
          also because the gear lands on whichever def is `primary`. */
       { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
+      /* ── WHERE THE OFFICE ANSWERS THE CORNER (§95.2) ──────────────────
+         Second in the group, immediately under the cycle it is mostly about.
+
+         GATED BY A RULE, NOT BY A MATRIX CELL, and deliberately: reading what
+         everybody in the tenant wrote in confidence is not a thing to leave to
+         a tick somebody could set on a bad afternoon. §37 already settled three
+         cells that way and §89 three more — this is the same argument, and
+         `c_send` beside it is the same shape (area "always", the office test
+         done here). `inOffice()` is the SMO team as well as the Super user, or
+         the office would be one person deep on the one page that has to be
+         answered the day somebody is on leave. */
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Messages",
+        when: function(){ return inOffice() && CHAT.servable(); },
+        render:function(){ return CHAT.renderInbox(); } },
       /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
          `view` for every role, so gating the row on "not none" put Import in
          the rail of a contributor, a unit owner, a custodian and a company
@@ -1376,6 +1397,12 @@
        (searchsel.js) — the native control stays where it is, so nothing wire()
        just attached is disturbed. */
     SEARCHSEL.wire();
+    /* The office's inbox, if this paint drew it. It binds ONCE per rendered
+       frame and then fills and refreshes itself on its own clock — nothing in
+       it ever calls paint(), or a reply being typed would be thrown away every
+       ten seconds (§35, §71.2). Called here so it is also the place the clock
+       is STOPPED when a paint navigates away from the page. */
+    CHAT.wireInbox();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and

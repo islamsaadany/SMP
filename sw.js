@@ -40,7 +40,12 @@
    changed, so the name changes. What this adds is that the name has to be one
    NOBODY has served — check `git show origin/main:sw.js` before choosing,
    because a merge will not tell you. */
-const SHELL = "smp-shell-v3.25d";
+/* v3.26 — the corner, and the office's inbox (§95). NOT "v3.25e": origin/main
+   is already serving that name from another session, and a worker caches by
+   NAME, so a browser holding main's copy would never fetch this one (§94.12).
+   Checked with `git show origin/main:sw.js` before choosing, which is the only
+   thing that can tell you — a merge will not. */
+const SHELL = "smp-shell-v3.26";
 const ASSETS = [
   "/",
   "/index.html",

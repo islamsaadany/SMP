@@ -27,6 +27,21 @@
    Bump SHELL when anything in the shell list changes — the name IS the
    cache-busting mechanism, and the activate handler deletes every cache that
    is not the current one. */
+/* IT COLLIDED A SECOND TIME, SO THE RULE CHANGED (§94.16).
+   §94.12 said: check `git show origin/main:sw.js` before choosing a name,
+   because a merge will not tell you two sessions picked the same one. That was
+   done — main said v3.25e, so this took v3.25f — and by the time the merge was
+   pushed ANOTHER session had taken v3.25f too. The window between reading main
+   and pushing is exactly as long as running the checks, which is twenty
+   minutes, and a name chosen at the start of it is a name chosen from stale
+   information.
+
+   So the check moves to where it cannot go stale: the name is confirmed
+   against `origin/main` AFTER the last fetch and IMMEDIATELY BEFORE the push,
+   as the final step of a merge rather than the first. Twice in one day is a
+   pattern, not bad luck — and the cost is silent, because the same string on
+   both sides merges cleanly while the bytes behind it differ, so a returning
+   browser serves the other session's build out of its own disk for ever. */
 /* v3.25c, NOT v3.25b — AND THE COLLISION WAS SILENT (§94.12).
    Two sessions merged on the same day and both chose `v3.25b` independently.
    git saw the same string on both sides and merged it without a conflict, so
@@ -54,7 +69,7 @@
    moment it is read. Checked here against origin/main and against every
    name this repository has ever carried: v3.25, b, c, d are used. */
 
-const SHELL = "smp-shell-v3.25f";
+const SHELL = "smp-shell-v3.25g";
 const ASSETS = [
   "/",
   "/index.html",

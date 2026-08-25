@@ -203,6 +203,9 @@ var PROLES = null;
 var NEWCYCLE = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
 var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
+/* Send a message's two header dropdowns (§95). One at a time, like every
+   other header menu: two open panels on one row cover each other. */
+var DRAFTMENU = false, SENTMENU = false;
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────

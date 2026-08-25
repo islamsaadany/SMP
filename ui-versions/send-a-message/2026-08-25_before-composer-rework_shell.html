@@ -458,30 +458,15 @@
       });
     }, 180);
   }
-  /* ── EVERYTHING THE ANSWER CHANGES, IN ONE PLACE (§95) ──────────────
-     This used to write the audience block and the header chip and stop there,
-     which was right while the count lived in exactly those two places. §95 put
-     it on the SEND BUTTON — the whole point of "Send to 76 people" is that the
-     number you are about to act on is on the control that acts — and the
-     button is drawn by `paint()`, which this deliberately does not call.
-
-     So it said "Send" for the entire life of every message: tick a box, the
-     page repaints with no answer yet, the answer arrives here a moment later,
-     and the one control that had to carry the count was the one thing not
-     updated. THE RULE IS §29.5's, one level down: whoever rewrites part of a
-     screen owns everything that part decides, not just the element they were
-     thinking about. */
   function paintAudience(){
     var el = document.getElementById("audout");
     if (el) el.innerHTML = sendmsgAudienceHtml();
-    var st = sendmsg();
-    var n = (sendmsgHasAny() && st.aud && st.aud.to) ? st.aud.to.length : 0;
-    var chip = document.querySelector("[data-audcount]");
-    if (chip) chip.textContent = n ? plural(n, "recipient", "recipients")
-                                   : "nobody chosen";
-    var send = document.getElementById("msgsend");
-    if (send && !st.busy)
-      send.textContent = n ? "Send to " + plural(n, "person", "people") : "Send";
+    var chip = document.querySelector('.phead2 .hright .chip:last-of-type');
+    if (chip && document.getElementById("msgsend")) {
+      var st = sendmsg();
+      chip.textContent = (sendmsgHasAny() && st.aud && st.aud.to)
+        ? plural(st.aud.to.length, "recipient", "recipients") : "nobody chosen";
+    }
   }
 
   function leaveModes(){
@@ -3735,40 +3720,6 @@
     var sentClose = document.querySelector("[data-sentclose]");
     if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
-    /* ── SEND A MESSAGE'S HEADER MENUS AND DISCLOSURE (§95) ──────────
-       The same shape as the register's, and one open at a time. */
-    document.querySelectorAll("[data-draftmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        DRAFTMENU = !DRAFTMENU; SENTMENU = false; paint();
-      });
-    });
-    document.querySelectorAll("[data-sentmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        SENTMENU = !SENTMENU; DRAFTMENU = false; paint();
-      });
-    });
-    /* THE NAMES ARE A DISCLOSURE, not a repaint of the composer — but the
-       audience block is its own element and paint() is what redraws it, so
-       this is one of the few things on this page that may repaint (§35: what
-       must not repaint is the TYPING, and this is not it). */
-    /* ── BOUND ON THE CONTAINER, NOT ON THE BUTTON (§95) ───────────
-       `paintAudience()` replaces `#audout`'s innerHTML, so a handler bound to
-       the button inside it dies the moment the server answers — which is the
-       only moment there is ever anything to disclose. Bound here it survives,
-       because `#audout` itself is only ever replaced by `paint()`, which runs
-       `wire()` after it (§29.5).
-
-       AND IT REDRAWS THE BLOCK RATHER THAN THE PAGE. A full repaint would
-       replace the composer, and the composer may have a half-typed sentence in
-       it that has not reached SENDMSG yet (§35, §71.2). */
-    var audout = document.getElementById("audout");
-    if (audout) audout.addEventListener("click", function(e){
-      if (!e.target.closest("[data-audnames]")) return;
-      SENDNAMES = !SENDNAMES; paintAudience();
-    });
-
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){
       var st = sendmsg(), out = document.getElementById("msgsaid");
@@ -3783,58 +3734,11 @@
       if (!st.body.trim()) return say("It needs something in it.", false);
       var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
       if (!n) return say("That comes to nobody with an address.", false);
-      /* ── THE CONFIRMATION IS THE PLATFORM'S OWN (§95) ──────────────
-         It was `confirm()` — the browser dialog, which a person can silence
-         permanently with a checkbox on some other site, after which the most
-         irreversible act in this product happens on one press with nothing
-         shown. §69.22 removed exactly this from the register's password reset
-         for exactly this reason, and this is the more dangerous of the two.
-
-         AND IT GETS TO SAY MORE. A native dialog is one line of text; this one
-         names the subject, the count, and — the part that matters — WHO WILL
-         NOT RECEIVE IT, which is the fault that started this whole thread. */
-      var sk = (st.aud && st.aud.skipped) || [];
-      openModalHtml("Send to " + plural(n, "person", "people") + "?", "",
-        '<div class="sendconfirm">' +
-          '<div class="kv"><span class="k">Subject</span><span>' +
-            esc(st.subject.trim()) + '</span></div>' +
-          '<div class="kv"><span class="k">Goes to</span><span><b>' +
-            plural(n, "person", "people") + '</b>, one message each \u2014 nobody ' +
-            'sees who else got it.</span></div>' +
-          (sk.length
-            ? '<div class="kv"><span class="k">Skipped</span><span><b>' + sk.length +
-              '</b> with no usable address: ' +
-              esc(sk.slice(0, 6).map(function(x){ return x.name; }).join(", ")) +
-              (sk.length > 6 ? ", and " + (sk.length - 6) + " more" : "") + '</span></div>'
-            : '') +
-          '<div class="kv"><span class="k">No undo</span><span>A message that has ' +
-            'gone cannot be recalled.</span></div>' +
-          '<div class="cbtns"><button data-sendno="1">Cancel</button>' +
-          '<button class="danger" data-sendyes="1">Yes, send it</button></div>' +
-        '</div>');
-      var box = document.getElementById("modal-b");
-      if (box) {
-        var no = box.querySelector("[data-sendno]");
-        if (no) no.addEventListener("click", function(){ closeModal(); });
-        var yes = box.querySelector("[data-sendyes]");
-        if (yes) yes.addEventListener("click", function(){ closeModal(); reallySend(); });
-      }
-      return;
-    });
-
-    /* The send itself, lifted out so the confirmation can call it. Everything
-       below this line is what the button used to do after `confirm()` said
-       yes, unchanged. */
-    function reallySend(){
-      var st = sendmsg(), out = document.getElementById("msgsaid");
-      function say(msg, ok){
-        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
-        if (!out) return;
-        out.textContent = msg;
-        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
-      }
-      var n = (st.aud && st.aud.to) ? st.aud.to.length : 0;
-      var msgsend = document.getElementById("msgsend");
+      /* THE CONFIRMATION NAMES THE NUMBER, because the number is the thing
+         that cannot be taken back. */
+      if (!confirm("Send \u201c" + st.subject.trim() + "\u201d to " +
+                   plural(n, "person", "people") + "? This cannot be undone."))
+        return;
       var sh = commsShape();
       say("Sending to " + plural(n, "person", "people") + "\u2026", null);
       msgsend.disabled = true;
@@ -3868,65 +3772,6 @@
         st.draftId = null; DRAFTLIST = null;
         paint();
       });
-      });
-    }
-
-    /* ── SEND ME A COPY (§95) ───────────────────────────────────────
-       The cheapest safeguard there is, and it was missing: a message to
-       seventy-six people cannot be recalled, and until now the only way to see
-       the real thing was to send the real thing. This builds THE SAME message
-       with THE SAME builder (§72.3) and sends one copy, so what the sender
-       reads in their own inbox is what the recipients will read — the subject
-       included, unprefixed, or the preview would be a preview of something
-       else.
-
-       IT GOES TO THE PERSON SIGNED IN, NEVER THE PERSON BEING VIEWED AS.
-       `viewer()` is the simulation (§45.1) and the SMO uses it constantly; a
-       test that followed it would put a real message in a real colleague's
-       inbox, addressed from a screen the sender was only looking through.
-       `SYNC.person()` is the session, which is the one thing the switcher
-       cannot move.
-
-       THE ADDRESS COMES OFF THE REGISTER, because the session carries a key, a
-       name and a role and no address (api/auth.js) — and if the register has
-       none for them it says so and names the row to fix, rather than failing
-       at the API with somebody else's error message. */
-    var msgtestme = document.getElementById("msgtestme");
-    if (msgtestme) msgtestme.addEventListener("click", function(){
-      var st = sendmsg(), out = document.getElementById("msgsaid");
-      function say(msg, ok){
-        st.result = { msg: msg, ok: ok, rows: (st.result && st.result.rows) || null };
-        if (!out) return;
-        out.textContent = msg;
-        out.style.color = ok === null ? "" : ("var(--" + (ok ? "good" : "bad") + "-tx)");
-      }
-      if (!st.subject.trim()) return say("It needs a subject before it can be previewed.", false);
-      if (!st.body.trim()) return say("It needs something in it.", false);
-      var me = (typeof SYNC !== "undefined" && SYNC.person && SYNC.person()) || null;
-      var row = me ? PEOPLE.filter(function(p){ return p.key === me.key; })[0] : null;
-      var addr = row ? String(row.email == null ? "" : row.email).trim() : "";
-      if (!addr)
-        return say("There is no address on your own row on the register, so there is " +
-                   "nowhere to send the copy. Add one on People.", false);
-      var sh = commsShape();
-      say("Sending you a copy…", null);
-      msgtestme.disabled = true;
-      SYNC.mailTest({
-        to: addr,
-        subject: st.subject.trim(),
-        html: MAIL.html({
-          org: sh.org, accent: sh.accent, panel: sh.panel, footer: sh.footer,
-          eyebrow: sh.eyebrow, title: st.subject.trim(), preheader: st.subject.trim(),
-          body: st.body.trim(),
-          cta: (st.ctaLabel.trim() && st.ctaHref.trim())
-                 ? { label: st.ctaLabel.trim(), href: st.ctaHref.trim() } : null
-        }),
-        fromName: sh.fromName,
-        replyTo: sh.replyTo
-      }, function(err){
-        msgtestme.disabled = false;
-        say(err ? err : ("One copy sent to " + addr + ". Nobody else has had it. " +
-                         "If it is not there, look in the junk folder."), !err);
       });
     });
 
@@ -4856,21 +4701,17 @@
     }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU) &&
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
     }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
     if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" &&
-        (PCOLMENU || PWMENU || FNCOLMENU || DRAFTMENU || SENTMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false;
-      DRAFTMENU = false; SENTMENU = false; paint();
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU)) {
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
     }
   });
 

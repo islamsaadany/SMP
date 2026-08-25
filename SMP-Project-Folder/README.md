@@ -86,6 +86,8 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/performance-actions/2026-08-25_report-button-and-row.html` | Report and Presentation leave the band legend for a row of their own, and Report goes solid orange. Today beside the proposal, both themes, with the fill and ink measured for all four palettes. **Built in 3.25** (&sect;93.8) |
 | `../../design-mockups/loading-skeleton/2026-08-25_skeleton-on-boot.html` | What the platform shows between opening and the database answering. Today's boot beside the proposal, both themes. **Built in 3.25** (&sect;94.10) |
 | `../../design-mockups/full-width/2026-08-25_page-fills-the-window.html` | The 1180px content cap comes off every page. Not a drawing &mdash; screenshots of the REAL platform at 1670px with the cap on and off, four pages, with the widths measured. **Built in 3.25** (&sect;94.13) |
+| `../../design-mockups/functions-table/2026-08-25_functions-table-rework.html` | The Functions table takes the register's shape &mdash; a row menu, a column chooser, one line per row. Today beside the proposal. **Built in 3.25** (&sect;94.11) |
+| `../../design-mockups/send-a-message/2026-08-25_send-a-message-rework.html` | The composer stays one screen: the audience becomes a bounded summary, the send bar is pinned and carries the count, drafts and sent move into the header, and a copy can be sent to yourself first. Today beside the proposal. **Built in 3.25** (&sect;95) |
 
 ### Drawn, awaiting a decision
 

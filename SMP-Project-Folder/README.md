@@ -84,6 +84,7 @@ of it was rejected — which is the point of keeping it.
 | `2026-08-21_fold-six_SETTLED.html` | Six treatments, closed AND open, redrawn without the phantom `.foldhere`. Settled **4**, one shared segmented container (&sect;41.8) |
 | `2026-08-23_login-client-logo.html` | The tenant's mark on the gate. Not a drawing of the gate &mdash; **the gate itself**, with the mark in it, which is why it is byte-for-byte `index.html`. **Built** (&sect;52) |
 | `../../design-mockups/performance-actions/2026-08-25_report-button-and-row.html` | Report and Presentation leave the band legend for a row of their own, and Report goes solid orange. Today beside the proposal, both themes, with the fill and ink measured for all four palettes. **Built in 3.25** (&sect;93.8) |
+| `../../design-mockups/loading-skeleton/2026-08-25_skeleton-on-boot.html` | What the platform shows between opening and the database answering. Today's boot beside the proposal, both themes. **Built in 3.25** (&sect;94.10) |
 
 ### Drawn, awaiting a decision
 

@@ -11442,3 +11442,93 @@ One trap on the way, and it is §50.6's: the first version measured
 once**. Presentation is a `<details>`, so the element carrying that attribute is
 a menu ITEM inside the closed popup — it has a box, at a position that means
 nothing. What is on the row is the `<summary>`.
+
+### 94.10 Nothing wears a colour it will have to change
+
+> *"When I open the platform it opens on a color scheme and then it glitches
+> and shifts to the current color. Can this doesn't happen?"*
+
+**TWO THINGS ARRIVE LATE, NOT ONE**, and only the visible one was reported. The
+tenant's accent and bar are set on **Setup › Branding** and live in the
+database, so `boot()` painted from the baked file and repainted when
+`/api/state` answered — that is the colour shift. But the worked example is
+baked into the file too, so on a client's deployment that same moment is a
+flash of **Raya Trade's units and figures** before their own arrive. Same
+cause, and worse.
+
+The first answer put to Islam was to remember the applied branding in
+`localStorage` and paint it from the head — the trick `theme.js` already uses
+for light and dark. He asked for a **skeleton** instead, and it is the better
+answer for a reason worth keeping: **remembering the colours would have fixed
+the colours and left the content flashing.** One mechanism, not two, and no
+cache to go stale.
+
+**THE PALETTE IS THE WHOLE IDEA.** Everything the skeleton wears —
+`--surface-2`, `--line`, `--ground` — is the page's own neutral, and none of it
+is brandable: `brandTokens()` writes only the `--gold*`, `--on-accent`,
+`--accent-glow` and `--panel*` families. So nothing on that screen can change
+when the branding arrives. **A skeleton that kept the navy bar would still swap
+it a moment later**, which is why the real chrome is *hidden* rather than
+dimmed. Both themes come free, because those tokens are already redefined per
+palette and per theme — somebody who chose dark waits in a dark skeleton.
+
+**AND IT DOES NOT PRETEND TO BE A PARTICULAR PAGE.** Until the server says who
+this is, the platform does not know whether it is opening a unit's Plan (a rail
+and a pane) or the group's Performance (cards). A heading and three blocks is
+true of both; a rail would be right for one and wrong for the other.
+
+**THE SWITCH IS IN THE HEAD, WITH `theme.js`'s ARGUMENT.** That file exists so
+the page never paints light and then flips; this is the same sentence about the
+tenant's colours, which cannot be answered the same way because they are not in
+the browser. The page *cannot* open in the right colours. It can open in **no**
+colours — §32's rule at the gate ("before the answer is known there is exactly
+one honest thing to show, and it is nothing"), one surface further in. It is
+deliberately not `SYNC`'s check moved earlier: this has to run before `sync.js`
+exists, and a boot state waiting on a script further down the page is one frame
+too late, which is the whole fault.
+
+**EVERY EXIT FROM `boot()` IS NOW LOAD-BEARING.** The line that was removed —
+an unconditional `paint()` before the fetch — was also the safety net: whatever
+happened next, something was on screen. Nothing else paints this page now, so
+`land()` is one idempotent door and four things go through it: the answer, a
+failure, a backstop at 8s, and `file://` (where the class is never stamped and
+`bootLand()` is called anyway, so the two can never disagree). A **401** is the
+one case that deliberately does *not* paint — the browser is already going to
+the gate, and painting would draw a page nobody sees over data this person is
+not entitled to.
+
+`chromeFor()` gained a `paint()` on its one early return for the same reason:
+harmless while `boot()` had already painted, and a blank page now.
+
+**A FAST ANSWER WOULD FLASH THE SKELETON ON AND OFF**, so it is held to a
+180ms floor — under the threshold at which a delay is noticed, and a floor
+rather than a duration, so a slow answer waits no longer for it.
+
+### 94.11 The check had to build a deployment, because `qa.py` cannot see this
+
+Every other check opens the built file over `file://`, where there is no
+server, nothing arrives late, and the class is deliberately never stamped —
+**so the entire feature is invisible to the whole suite, and a build that had
+lost it would go green every time** (§51.11, walked into knowingly). So
+`src/checks/boot-skeleton.py` serves the built file over HTTP with a
+deliberately slow `/api/state`, which is the only condition the fault was ever
+visible under. The stub answers with a **purple bar the baked file does not
+hold**, so *"the tenant's colours arrived"* and *"the baked colours were never
+shown"* are two measurements rather than one hopeful one.
+
+Two things it got wrong first, both instructive.
+
+**SERVING THE PLATFORM AT `/` MADE THE REFUSAL CASE AN INFINITE LOOP** — a 401
+sends the browser to `/`, which was the platform again, which asked again. The
+stub has to model the DEPLOYMENT (the gate at `/`, the platform at
+`/raya-trade`, §35.6) and not just the one file under test; getting that wrong
+hid the fifth case behind a crash.
+
+**AND `getComputedStyle` ON A HIDDEN ELEMENT STILL RETURNS ITS BACKGROUND.**
+Reading `nav.units` reported the navy bar as being on screen while the skeleton
+was correctly covering the whole chrome — §68.10's fault in the other
+direction, calling a correct build broken. It is measured two ways that cannot
+make that mistake: whether the bar has a **box** at all (`getClientRects()`),
+and what is actually under a point at the top of the page
+(`elementFromPoint`) — asserted in **both** states, so a build where the chrome
+never comes back fails too.

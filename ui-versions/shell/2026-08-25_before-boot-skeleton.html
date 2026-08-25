@@ -1,41 +1,3 @@
-<!-- ── WHAT THE PLATFORM SHOWS WHILE IT WAITS (§94.10) ──────────────────
-     STATIC MARKUP, not drawn by paint(), because the whole point is that it
-     is on screen before any of the platform's own script has run. `booting`
-     is stamped on <html> in the head (theme.js) and taken off by sync.js on
-     every path it has.
-
-     NOTHING HERE WEARS A COLOUR IT WILL HAVE TO CHANGE. The real chrome is
-     `--panel`, which is the TENANT's bar colour and arrives with the data;
-     this is `--surface-2`, which is the page's own neutral and is not
-     brandable. That is the entire idea — a skeleton that kept the navy bar
-     would still swap it a moment later.
-
-     AND IT DOES NOT PRETEND TO BE A PARTICULAR PAGE. Until the server says
-     who this is, the platform does not know whether it is opening a unit's
-     Plan (a rail and a pane) or the group's Performance (cards). A heading
-     and three blocks is true of both; a rail would be right for one and wrong
-     for the other. -->
-<div class="bootsk" id="bootsk">
-  <span class="vh" role="status">Loading the platform&#8230;</span>
-  <div class="bootsk-in" aria-hidden="true">
-    <div class="bootsk-top">
-      <span class="bk" style="width:220px;height:15px"></span>
-      <span class="bk bk-pill bk-far" style="width:64px"></span>
-      <span class="bk bk-pill" style="width:80px"></span>
-    </div>
-    <div class="bootsk-nav">
-      <span class="bk bk-pill" style="width:68px"></span>
-      <span class="bk bk-pill" style="width:88px"></span>
-      <span class="bk bk-pill" style="width:104px"></span>
-      <span class="bk bk-pill" style="width:76px"></span>
-    </div>
-    <div class="bootsk-tabs">
-      <span class="bk" style="width:72px;height:11px"></span>
-      <span class="bk" style="width:94px;height:11px"></span>
-    </div>
-  </div>
-</div>
-
 <div class="banner" id="banner">
   <span><strong>Prototype &middot; group shape.</strong> Mobile's plan is transcribed from the Raya 2026 decks.</span>
   <span><strong>Every other unit and every reported actual are invented</strong> so the structure can be judged.</span>
@@ -166,16 +128,7 @@
   </div>
 </div>
 
-<!-- The page's own half of the skeleton. It lives INSIDE #panel, which
-     paint() replaces wholesale — so nothing has to remove it and it cannot
-     outlive the first real paint. -->
-<main class="wrap" id="mainwrap"><div class="view" id="panel"><div class="bootpg" aria-hidden="true">
-  <span class="bk" style="height:20px;max-width:300px"></span>
-  <span class="bk bk-q" style="height:11px;max-width:470px"></span>
-  <span class="bk bk-blk"></span>
-  <span class="bk bk-blk"></span>
-  <span class="bk bk-blk"></span>
-</div></div>
+<main class="wrap" id="mainwrap"><div class="view" id="panel"></div>
 
 <!-- No footer. It carried one sentence - the product's name, a spec number
      and a shape - none of which anyone was reading and all of which the chrome
@@ -4738,21 +4691,15 @@
     });
   }
 
-  /* ── THE FIRST PAINT IS THE HYDRATED ONE NOW (§94.10) ──────────────
-     It used to say "paint immediately from the baked data, then hydrate and
-     repaint", and that immediate paint was the glitch: the wrong colours, and
-     on a client's deployment another company's units. Where there is a server
-     the skeleton holds the screen and SYNC.boot paints once, with the truth.
-     On file:// there is nothing to wait for and this is still just paint(). */
+  /* Paint immediately from the baked data, then hydrate from the database
+     where one is reachable and repaint. On file:// this is just paint(). */
   /* The colours are already applied - THEME.apply() ran in the head. This
      only hangs the control on the chrome, which has to exist first. */
   THEME.wire();
-  /* THE BAKED BRANDING, WHICH IS THE ONLY ONE THAT EXISTS ON file:// (§94.10).
-     It no longer has anything to do with the first paint — the skeleton wears
-     none of these tokens, deliberately, and where there is a server the only
-     branding ever seen is the one that arrives with the data. This is here for
-     the file:// case, where nothing arrives and the baked branding IS the
-     tenant's. */
+  /* Before the first paint, so the tenant's own colours are on screen from the
+     start rather than arriving a frame later. SYNC.boot repaints after
+     hydration and applyBrand runs again there, because the branding that
+     matters is the one in the DATABASE, not the one baked into the file. */
   applyBrand();
   SYNC.boot(function(){ applyBrand(); paint(); });
 </script>

@@ -310,6 +310,49 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   that rule watches for CHECKS holding a removed selector; this was the PRODUCT
   holding one, and it fails the same way — silently, in the safe-looking
   direction.
+- **THE RAILED PAGES GET THE WHOLE WINDOW (§93.9):** *"the page is wide,
+  however the rail and the tables are stuck in a confined space."* 1180px is a
+  READING measure, right for prose and wrong for a rail and a table — every
+  pixel denied becomes horizontal scroll. `data-wide` on the ROOT, set from
+  `railed`, widening all FOUR containers to 1600px: the chrome's rows carry the
+  same cap, so widening the content alone would indent the navigation from the
+  page under it. The register goes from **1354px in a 920px box to 1354px in a
+  1340px box** — no scroll at all.
+- **A ROW YOU COULD NOT FINISH EDITING (§93.10):** *"that's how the editing
+  cells look like."* `max-width:none` on `tr.tk-open td` — read cells are capped
+  at 150px (§88) and open ones were not, so every field took its intrinsic
+  width and the table went 1354 → **1608px** the moment a pen was pressed,
+  putting Email, Roles and Status under the frozen Save/Cancel column. **Two
+  suspects were chased and found innocent, both worth keeping**: a `<select>`
+  computing to the whole box's width is §69's feedback loop and is HARMLESS
+  (`.ss-native` is absolute, `opacity:0`, clipped); and a px cap on the open
+  row's text fields computed correctly and changed nothing on screen, so it was
+  REMOVED rather than left (§37).
+- **A COMMENT ATE THE RULE (§93.11):** §88's one-line standard had silently
+  overridden the access matrix's own wrap rule. Four attempts, and only the last
+  is the lesson. `.cfg .acgrid` matched NOTHING (both classes are on the SAME
+  element — `.cfg.acgrid`); then the corrected selector still did nothing
+  because **a paragraph I had written sat after the `*/` that closed the comment
+  above it**, so the parser met prose where a selector belonged and discarded
+  the block. **WHEN A DECLARATION THAT PROVABLY MATCHES PROVABLY DOES NOTHING,
+  SUSPECT THE PARSER, NOT THE CASCADE** — ask `document.styleSheets` for the
+  rules the browser actually holds (1593 of them, and not that one). It lives in
+  `arrange.css` now, concatenated last, beside this table's two other
+  exceptions (§69). Third time.
+- **THE REGISTER SPEAKS THE NAVIGATION'S LANGUAGE (§93.12):** `placeLabel()` is
+  the register's vocabulary; `roleWhereLabel()` is UNCHANGED because the people
+  workbook is written from it and read back against it (§65). The `(function)`
+  suffix is dropped from seven of eight and **kept for Care**, which is a unit
+  AND a function with the same navigation name — §65's reason is still live for
+  exactly one row. IT loses it (the unit is *IT Dist.*).
+- **A QUESTION THE REGISTER HAS ALREADY ANSWERED (§93.13):** *"his unit is
+  already set in the registry, he shouldn't get the dropdown."* §56's
+  declaration GRANTS NOTHING — the SMO decides — so where the SMO has already
+  placed somebody the question offers a choice that changes nothing. **The test
+  is the attachment** (`unit_key`/`fn_key`/`company`), never the Official BU,
+  which may point at nothing here (§58.3); "group" does not count. **Decided on
+  the SERVER**, like the short list beside it: a page that decides whether to
+  ask has decided nothing, because it still had the question.
 - **NAME AND FULL NAME (§93.8, reversing half of §93.6 a day later):** Islam:
   *"we can have it Name and Full Name … for the identifiers keep it for the ID
   and email only."* Two facts about what somebody is called had been sharing one

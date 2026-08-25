@@ -981,6 +981,12 @@
     var sel = document.getElementById("whereSel");
     api({ action: "whereList" }).then(function (j) {
       if (!j || !j.ok) return;
+      /* THE REGISTER HAS ALREADY ANSWERED IT (§93.13). `settled` is the
+         server's word, not a test done here — see api/auth.js. The wrapper
+         stays hidden, and because the submit handler reads the answer as
+         `wrap.hidden ? "" : value`, nothing is declared and nothing else needs
+         to know. */
+      if (j.settled) return;
       /* BUILT WITH THE DOM, not with a string. Every one of these names came
          out of the database, and the gate has no esc() to borrow — an
          `option` created this way cannot carry markup whatever it is called. */

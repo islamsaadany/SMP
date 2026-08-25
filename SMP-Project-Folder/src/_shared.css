@@ -241,6 +241,16 @@
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
   .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
 
+  /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
+     All four containers together, or the chrome sits indented from the page
+     beneath it. 1600px rather than none at all: a table stretched across a
+     32-inch monitor puts its first and last column a head-turn apart, and the
+     register's frozen columns exist precisely so the eye has an anchor. */
+  :root[data-wide] .wrap,
+  :root[data-wide] .top-in,
+  :root[data-wide] .units-in,
+  :root[data-wide] .tabs-in { max-width:1600px; }
+
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
   .banner strong { color:var(--panel-accent); font-weight:700; }

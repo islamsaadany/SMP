@@ -33,7 +33,13 @@
      one-word header and wrong for a column that explains what it covers: the
      note did not wrap, it ran straight across its neighbours. Seven headers
      that each say what is inside them have to be allowed to wrap. */
-  .acgrid thead th { white-space:normal; overflow-wrap:anywhere; }
+  /* §88 TOOK THIS AWAY AGAIN AND THE FIX LIVES IN arrange.css (§93.11).
+     The one-line standard is `.cfg table thead th` in this same file, and a
+     more specific rule written ABOVE it here did not win — the browser never
+     parsed it at all, which no amount of reasoning about the cascade would
+     have explained. It is in arrange.css now, which build.py concatenates
+     after this file, beside the other two exceptions this table has had to
+     keep there (§69). Same reason, third time. */
   .acgrid td.rolecell b { display:block; font-size:13px; line-height:1.3; }
   .acgrid td.rolecell .why { margin-top:2px; }
   /* .factor-h is gone from this table with the header notes it laid out, and
@@ -616,6 +622,11 @@
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
+  /* AND EVERY OTHER FIELD IN AN OPEN ROW, for the same reason (§93.10): bounded
+     BY the cell rather than by a number of its own, so the two can never
+     disagree about where the column ends. It is what kept the name column
+     honest since §69 and was never extended to the rest of the row. */
+  .peoplecfg tr.tk-open input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -735,10 +746,29 @@
   /* A sub-line under a value is a line of its own and clips as one. */
   .cfg table td .why, .cfg table td .val, .cfg table td b {
     display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  /* Cells that hold a control, a panel or an open row size themselves. */
+  /* Cells that hold a control or a panel size themselves. */
   .cfg table td.kebcell, .cfg table td.cc, .cfg table td.idx, .cfg table td.roles,
-  .cfg table tr.tk-open td, .cfg table td .mbcell, .cfg table td .rolebox {
+  .cfg table td .mbcell, .cfg table td .rolebox {
     max-width:none; overflow:visible; text-overflow:clip; }
+  /* ── AN OPEN ROW KEEPS THE COLUMN WIDTHS (§93.10) ─────────────────
+     Islam, with a screenshot of a row being edited: "a quick bug — that's how
+     the editing cells look like." The row was running past the right edge of
+     its box with the frozen Save/Cancel column painted over Email, Roles and
+     Status: the fields were there and unreachable.
+
+     `max-width:none` was the cause. A read row's cells are capped at 150px
+     (§88); an open row's were not, so every input took its intrinsic preferred
+     width, every column it sat in grew, and the table went from 1127px to
+     1516px the moment a pen was pressed — inside a box that had not changed.
+     A table that changes width when you start editing is a table that moves
+     the thing you were about to click.
+
+     `overflow:visible` STAYS, and that is the half worth keeping: a capped
+     cell that also clipped would cut the controls off instead of the table.
+     The cap is a little wider than a read row's, because a field needs more
+     room than the value it holds. */
+  .cfg table tr.tk-open td { max-width:var(--cell-cap-edit, 158px);
+                             overflow:visible; text-overflow:clip; }
   .cfg table tr.tk-open td .why, .cfg table tr.tk-open td .val {
     overflow:visible; text-overflow:clip; }
 
@@ -1424,3 +1454,10 @@
   .copyval:hover { text-decoration:underline; text-underline-offset:2px; }
   .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
   .copyval.copied { color:var(--good-tx); text-decoration:none; }
+
+  /* The two columns a row's edit controls live in (§93.10). A width on the
+     HEADER is what auto layout reads — a width on the body cells does nothing
+     (§37's lesson, in the other layout mode) — and it has to be enough for the
+     select the open row puts there, or the control overflows into the column
+     beside it. Read rows are unaffected: they hold a short name. */
+  .peoplecfg th.wcol { width:176px; }

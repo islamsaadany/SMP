@@ -1147,6 +1147,49 @@ function roleWhereLabel(at){
   return UNITS[at] ? UNITS[at].name : at;
 }
 
+/* ── WHAT THE REGISTER CALLS A PLACE (§93.12) ─────────────────────────
+   Islam: "for the units name in the people register let's use the navigation
+   names, and for the units remove the word function that comes between
+   brackets."
+
+   Two changes, and only on the REGISTER. `roleWhereLabel()` is unchanged
+   because it is also the people workbook's vocabulary — the Unit column is
+   written from it and read back against it (§65), so renaming it would leave
+   every file downloaded before today failing to match.
+
+   1 · THE NAVIGATION'S NAME. `navName()` is what the tabs say, and the tabs are
+       where somebody learned the word: this tenant's `it` unit is "IT Dist." in
+       the navigation and "IT Dist." is what the register should say too.
+
+   2 · "(function)" GOES — EXCEPT WHERE IT IS THE ONLY THING TELLING TWO PLACES
+       APART. §65 added that suffix for a reason and the reason is still live:
+       this tenant has a unit called **Care** and a supporting function called
+       **Care**, with the same navigation name. Dropping it from that one would
+       put two different places on the register under one word.
+
+       So it is dropped from the seven that are unambiguous and kept for the one
+       that is not — the same shape as §81.1's names and §65's own near-miss
+       rule: disambiguate the pair that clashes, leave everybody else alone. */
+function placeLabel(at){
+  if (!at || at === "group") return "the group";
+  if (String(at).indexOf("co:") === 0) {
+    var c = COMPANIES[String(at).slice(3)];
+    return c ? navName(c) : String(at).slice(3);
+  }
+  if (String(at).indexOf("fn:") === 0) {
+    var fk = String(at).slice(3), f = FUNCTIONS[fk];
+    var nm = f ? navName(f) : fk;
+    /* Asked of the units by their NAVIGATION name, because that is the name
+       being shown — comparing against `.name` would keep the suffix on a
+       function whose clash is invisible here, and drop it from one whose
+       clash is real. */
+    var clash = UNIT_KEYS.some(function(k){
+      return UNITS[k] && navName(UNITS[k]) === nm; });
+    return clash ? nm + " (function)" : nm;
+  }
+  return UNITS[at] ? navName(UNITS[at]) : at;
+}
+
 function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
   return UNIT_ROLES[k];

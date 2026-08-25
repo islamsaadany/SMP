@@ -1505,3 +1505,39 @@
   .fnscfg tbody tr:nth-child(even) > td { background:var(--zebra); }
   .fnscfg tbody tr.tk-open > td { background:var(--over-bg); }
   .fnscfg tbody tr.tk-open > td:first-child { box-shadow:inset 3px 0 0 var(--gold); }
+
+  /* ── WHAT HAPPENED TO EACH PERSON (§93.15) ────────────────────────
+     THE PROVIDER'S OWN WORDS ARE WHY THIS SCREEN EXISTS, so the column they
+     land in gets room. §88's cap clipped a Resend error to "Invalid `to` field.
+     The recipient d…" — reachable on hover, which is right as a backstop and
+     wrong as the normal way to read the one value somebody came for. Still ONE
+     LINE and still capped, or this would be the only Setup table whose rows are
+     different heights.
+
+     THE CAP IS SET THROUGH §88's OWN HOOK rather than against it: that rule
+     reads `max-width:var(--cell-cap, 150px)` from a `.cfg table td` selector,
+     and a plain `.msgerr { max-width }` loses to it on specificity. Setting the
+     VARIABLE needs no specificity at all.
+
+     AND THE TABLE OPTS OUT OF FIXED LAYOUT the way the register had to (§69):
+     `.cfg table` is `table-layout:fixed` with first and last columns at 15%, so
+     under it a cap cannot apply at all and the column sat at 201px whatever it
+     was told.
+
+     WRITTEN TWICE, AND THE FIRST ONE NEVER PARSED. Correcting the comment left
+     a paragraph after the `*/` that closed it, so the parser met prose where a
+     selector belonged and discarded everything following — §93.11's fault,
+     committed hours after writing §93.11 down. The check is the same: ask
+     `document.styleSheets` what the browser actually holds, because a rule that
+     is absent from it looks exactly like a rule that is losing. */
+  /* THE WIDTHS ARE ON THE HEADER ROW, which is where a fixed-layout table
+     takes every one of them (§46). Trying to turn the layout off instead cost
+     four attempts and never worked — `.cfg table { table-layout:fixed }` stayed
+     computed however specific the override, while a `width` from the very next
+     line applied. Rather than keep arguing with it, this works WITH it: four
+     headers, four numbers, and the error column gets the room. */
+  .cfg table.msgtable th.msgperson { width:190px; }
+  .cfg table.msgtable th.msgaddr   { width:auto; }
+  .cfg table.msgtable th.msgstat   { width:96px; }
+  .cfg table.msgtable th.msgerr    { width:380px; }
+  .msgerr { --cell-cap:380px; }

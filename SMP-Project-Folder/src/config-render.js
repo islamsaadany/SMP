@@ -5029,6 +5029,81 @@ function renderDraftList(){
    after pressing Send is to see it in the list, and a second destination puts
    a navigation between the act and its record. */
 var SENTLIST = null;   /* null = not asked */
+/* ── WHAT HAPPENED TO EACH PERSON (§93.15) ────────────────────────────
+   Islam: "I sent a message everyone received but not the SMO team."
+
+   The platform already knew. Every send writes a `message_recipients` row per
+   person — the address it used, whether the provider accepted it, the error if
+   it did not, and the provider's own id — and `historyOne` has returned all of
+   that since the table existed. NOTHING HAS EVER CALLED IT. The record was
+   written on every send and could not be read back from any screen, so the one
+   question a record exists to answer had to be guessed at instead.
+
+   THE THREE OUTCOMES ARE THREE DIFFERENT PROBLEMS, and separating them is the
+   whole value of this screen:
+
+     absent   — they never resolved into the audience. Retired, no address, or
+                sharing one with another row. The fix is on the register.
+     failed   — the provider refused it, and said why. The fix is the address.
+     sent     — the platform handed it over and got an id back. Anything after
+                that is delivery: a filter, a rule, a full mailbox. Nothing on
+                this side will fix it, and knowing that is the point.
+
+   A summary that says "44 of 47" tells you a number and not one of those. */
+var SENTONE = null;   /* { id, asking, data, error } */
+
+function renderSentOne(){
+  if (!SENTONE) return "";
+  var body;
+  if (SENTONE.asking) body = '<span class="why" style="margin:0">Asking\u2026</span>';
+  else if (SENTONE.error) body = '<span class="why" style="margin:0">' + esc(SENTONE.error) + '</span>';
+  else {
+    var to = (SENTONE.data && SENTONE.data.recipients) || [];
+    var ok = to.filter(function(r){ return r.ok; });
+    var no = to.filter(function(r){ return !r.ok; });
+    /* Failures first and named, the same rule the audience already follows:
+       "3 failed" tells nobody which three, and each one is a different fix. */
+    var row = function(r){
+      return '<tr><td><b>' + esc(r.person_name || "\u2014") + '</b></td>' +
+        '<td><span class="mono">' + esc(r.address || "") + '</span></td>' +
+        '<td class="cc"><span class="pill ' + (r.ok ? "good" : "bad") + '">' +
+          (r.ok ? "Sent" : "Failed") + '</span></td>' +
+        '<td class="msgerr">' + (r.ok
+          ? '<span class="why" style="margin:0">handed to the mail provider</span>'
+          : '<span class="why" style="margin:0">' + esc(r.error || "no reason given") + '</span>') +
+        '</td></tr>';
+    };
+    body =
+      '<div class="audrow" style="align-items:center;margin-bottom:10px">' +
+        '<span class="pill good">' + ok.length + ' sent</span>' +
+        (no.length ? '<span class="pill bad">' + no.length + ' failed</span>' : '') +
+        '<span class="why" style="margin:0">Sent means the mail provider accepted it and ' +
+          'gave us an id. What happens after that \u2014 a filter, a rule, a full mailbox ' +
+          '\u2014 is not something this platform can see.</span>' +
+      '</div>' +
+      (to.length
+        /* NOT `unitcfg` (§93.15). That class is `table-layout:fixed`, which
+           takes every column width from the header row and makes a body-cell
+           cap do nothing at all — §46's lesson, and the reason the provider's
+           error sat clipped at 201px however wide it was told to be. This
+           table is read-only and wants content-sized columns. */
+        ? '<div class="cfg"><table class="msgtable"><thead><tr>' +
+            '<th class="msgperson">Person</th><th class="msgaddr">Address</th>' +
+            '<th class="cc msgstat">Status</th>' +
+            '<th class="msgerr">What the provider said</th>' +
+          '</tr></thead><tbody>' + no.map(row).join("") + ok.map(row).join("") +
+          '</tbody></table></div>'
+        : '<span class="why" style="margin:0">This message has no recipients recorded ' +
+          '\u2014 nobody resolved into the audience at all.</span>');
+  }
+  var m = (SENTONE.data && SENTONE.data.message) || {};
+  return section("", "Who got \u201c" + esc(m.subject || "this message") + "\u201d",
+    "Written when it was sent, so it is what actually happened rather than what the " +
+    "screen worked out beforehand.",
+    body + '<div class="imp-row" style="margin-top:12px">' +
+      '<button class="linkbu" data-sentclose="1">Close</button></div>');
+}
+
 function renderSentList(){
   var rows = (SENTLIST && SENTLIST.messages) || [];
   var body = !SENTLIST
@@ -5040,15 +5115,21 @@ function renderSentList(){
         : '<div class="cfg"><table><thead><tr><th>Subject</th><th>Sent</th>' +
           '<th class="cc">To</th><th class="cc">Failed</th><th>By</th></tr></thead><tbody>' +
           rows.map(function(m){
-            return '<tr><td><b>' + esc(m.subject) + '</b></td>' +
+            /* THE ROW OPENS (§93.15). The subject is the control, because it is
+               the thing somebody is already looking for when they come here to
+               ask what happened to a particular message. */
+            return '<tr' + (SENTONE && SENTONE.id === m.id ? ' class="tk-open"' : '') + '>' +
+              '<td><button class="linkbu" data-sentone="' + esc(String(m.id)) + '"><b>' +
+                esc(m.subject) + '</b></button></td>' +
               '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
               '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) + '</td>' +
               '<td class="cc">' + (m.failed
-                  ? '<span class="pill bad">' + m.failed + '</span>' : '—') + '</td>' +
+                  ? '<span class="pill bad">' + m.failed + '</span>' : '\u2014') + '</td>' +
               '<td>' + esc(m.by_name || "") + '</td></tr>';
           }).join("") + '</tbody></table></div>';
   return section("", "What has been sent",
-    "The record lives outside the saved data, so a save cannot erase it.", body);
+    "The record lives outside the saved data, so a save cannot erase it. " +
+    "Open one to see what happened to each person.", body) + renderSentOne();
 }
 
 /* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────

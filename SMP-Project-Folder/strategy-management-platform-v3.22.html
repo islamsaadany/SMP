@@ -2820,6 +2820,42 @@
   .fnscfg tbody tr.tk-open > td { background:var(--over-bg); }
   .fnscfg tbody tr.tk-open > td:first-child { box-shadow:inset 3px 0 0 var(--gold); }
 
+  /* ── WHAT HAPPENED TO EACH PERSON (§93.15) ────────────────────────
+     THE PROVIDER'S OWN WORDS ARE WHY THIS SCREEN EXISTS, so the column they
+     land in gets room. §88's cap clipped a Resend error to "Invalid `to` field.
+     The recipient d…" — reachable on hover, which is right as a backstop and
+     wrong as the normal way to read the one value somebody came for. Still ONE
+     LINE and still capped, or this would be the only Setup table whose rows are
+     different heights.
+
+     THE CAP IS SET THROUGH §88's OWN HOOK rather than against it: that rule
+     reads `max-width:var(--cell-cap, 150px)` from a `.cfg table td` selector,
+     and a plain `.msgerr { max-width }` loses to it on specificity. Setting the
+     VARIABLE needs no specificity at all.
+
+     AND THE TABLE OPTS OUT OF FIXED LAYOUT the way the register had to (§69):
+     `.cfg table` is `table-layout:fixed` with first and last columns at 15%, so
+     under it a cap cannot apply at all and the column sat at 201px whatever it
+     was told.
+
+     WRITTEN TWICE, AND THE FIRST ONE NEVER PARSED. Correcting the comment left
+     a paragraph after the `*/` that closed it, so the parser met prose where a
+     selector belonged and discarded everything following — §93.11's fault,
+     committed hours after writing §93.11 down. The check is the same: ask
+     `document.styleSheets` what the browser actually holds, because a rule that
+     is absent from it looks exactly like a rule that is losing. */
+  /* THE WIDTHS ARE ON THE HEADER ROW, which is where a fixed-layout table
+     takes every one of them (§46). Trying to turn the layout off instead cost
+     four attempts and never worked — `.cfg table { table-layout:fixed }` stayed
+     computed however specific the override, while a `width` from the very next
+     line applied. Rather than keep arguing with it, this works WITH it: four
+     headers, four numbers, and the error column gets the room. */
+  .cfg table.msgtable th.msgperson { width:190px; }
+  .cfg table.msgtable th.msgaddr   { width:auto; }
+  .cfg table.msgtable th.msgstat   { width:96px; }
+  .cfg table.msgtable th.msgerr    { width:380px; }
+  .msgerr { --cell-cap:380px; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -23410,6 +23446,81 @@ function renderDraftList(){
    after pressing Send is to see it in the list, and a second destination puts
    a navigation between the act and its record. */
 var SENTLIST = null;   /* null = not asked */
+/* ── WHAT HAPPENED TO EACH PERSON (§93.15) ────────────────────────────
+   Islam: "I sent a message everyone received but not the SMO team."
+
+   The platform already knew. Every send writes a `message_recipients` row per
+   person — the address it used, whether the provider accepted it, the error if
+   it did not, and the provider's own id — and `historyOne` has returned all of
+   that since the table existed. NOTHING HAS EVER CALLED IT. The record was
+   written on every send and could not be read back from any screen, so the one
+   question a record exists to answer had to be guessed at instead.
+
+   THE THREE OUTCOMES ARE THREE DIFFERENT PROBLEMS, and separating them is the
+   whole value of this screen:
+
+     absent   — they never resolved into the audience. Retired, no address, or
+                sharing one with another row. The fix is on the register.
+     failed   — the provider refused it, and said why. The fix is the address.
+     sent     — the platform handed it over and got an id back. Anything after
+                that is delivery: a filter, a rule, a full mailbox. Nothing on
+                this side will fix it, and knowing that is the point.
+
+   A summary that says "44 of 47" tells you a number and not one of those. */
+var SENTONE = null;   /* { id, asking, data, error } */
+
+function renderSentOne(){
+  if (!SENTONE) return "";
+  var body;
+  if (SENTONE.asking) body = '<span class="why" style="margin:0">Asking\u2026</span>';
+  else if (SENTONE.error) body = '<span class="why" style="margin:0">' + esc(SENTONE.error) + '</span>';
+  else {
+    var to = (SENTONE.data && SENTONE.data.recipients) || [];
+    var ok = to.filter(function(r){ return r.ok; });
+    var no = to.filter(function(r){ return !r.ok; });
+    /* Failures first and named, the same rule the audience already follows:
+       "3 failed" tells nobody which three, and each one is a different fix. */
+    var row = function(r){
+      return '<tr><td><b>' + esc(r.person_name || "\u2014") + '</b></td>' +
+        '<td><span class="mono">' + esc(r.address || "") + '</span></td>' +
+        '<td class="cc"><span class="pill ' + (r.ok ? "good" : "bad") + '">' +
+          (r.ok ? "Sent" : "Failed") + '</span></td>' +
+        '<td class="msgerr">' + (r.ok
+          ? '<span class="why" style="margin:0">handed to the mail provider</span>'
+          : '<span class="why" style="margin:0">' + esc(r.error || "no reason given") + '</span>') +
+        '</td></tr>';
+    };
+    body =
+      '<div class="audrow" style="align-items:center;margin-bottom:10px">' +
+        '<span class="pill good">' + ok.length + ' sent</span>' +
+        (no.length ? '<span class="pill bad">' + no.length + ' failed</span>' : '') +
+        '<span class="why" style="margin:0">Sent means the mail provider accepted it and ' +
+          'gave us an id. What happens after that \u2014 a filter, a rule, a full mailbox ' +
+          '\u2014 is not something this platform can see.</span>' +
+      '</div>' +
+      (to.length
+        /* NOT `unitcfg` (§93.15). That class is `table-layout:fixed`, which
+           takes every column width from the header row and makes a body-cell
+           cap do nothing at all — §46's lesson, and the reason the provider's
+           error sat clipped at 201px however wide it was told to be. This
+           table is read-only and wants content-sized columns. */
+        ? '<div class="cfg"><table class="msgtable"><thead><tr>' +
+            '<th class="msgperson">Person</th><th class="msgaddr">Address</th>' +
+            '<th class="cc msgstat">Status</th>' +
+            '<th class="msgerr">What the provider said</th>' +
+          '</tr></thead><tbody>' + no.map(row).join("") + ok.map(row).join("") +
+          '</tbody></table></div>'
+        : '<span class="why" style="margin:0">This message has no recipients recorded ' +
+          '\u2014 nobody resolved into the audience at all.</span>');
+  }
+  var m = (SENTONE.data && SENTONE.data.message) || {};
+  return section("", "Who got \u201c" + esc(m.subject || "this message") + "\u201d",
+    "Written when it was sent, so it is what actually happened rather than what the " +
+    "screen worked out beforehand.",
+    body + '<div class="imp-row" style="margin-top:12px">' +
+      '<button class="linkbu" data-sentclose="1">Close</button></div>');
+}
+
 function renderSentList(){
   var rows = (SENTLIST && SENTLIST.messages) || [];
   var body = !SENTLIST
@@ -23421,15 +23532,21 @@ function renderSentList(){
         : '<div class="cfg"><table><thead><tr><th>Subject</th><th>Sent</th>' +
           '<th class="cc">To</th><th class="cc">Failed</th><th>By</th></tr></thead><tbody>' +
           rows.map(function(m){
-            return '<tr><td><b>' + esc(m.subject) + '</b></td>' +
+            /* THE ROW OPENS (§93.15). The subject is the control, because it is
+               the thing somebody is already looking for when they come here to
+               ask what happened to a particular message. */
+            return '<tr' + (SENTONE && SENTONE.id === m.id ? ' class="tk-open"' : '') + '>' +
+              '<td><button class="linkbu" data-sentone="' + esc(String(m.id)) + '"><b>' +
+                esc(m.subject) + '</b></button></td>' +
               '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
               '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) + '</td>' +
               '<td class="cc">' + (m.failed
-                  ? '<span class="pill bad">' + m.failed + '</span>' : '—') + '</td>' +
+                  ? '<span class="pill bad">' + m.failed + '</span>' : '\u2014') + '</td>' +
               '<td>' + esc(m.by_name || "") + '</td></tr>';
           }).join("") + '</tbody></table></div>';
   return section("", "What has been sent",
-    "The record lives outside the saved data, so a save cannot erase it.", body);
+    "The record lives outside the saved data, so a save cannot erase it. " +
+    "Open one to see what happened to each person.", body) + renderSentOne();
 }
 
 /* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────
@@ -25923,6 +26040,12 @@ var SYNC = (function () {
     mailHistory: function (done) {
       mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });
     },
+    /* ONE MESSAGE, AND WHAT HAPPENED TO EACH PERSON (§93.15). The endpoint has
+       existed since §77 and nothing has ever called it — the record was written
+       on every send and could not be read back from any screen. */
+    mailHistoryOne: function (id, done) {
+      mailPost({ action: "historyOne", id: id }, function (err, j) { done(err, err ? null : j); });
+    },
     mailTest: function (o, done) {
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
                  fromName: o.fromName, replyTo: o.replyTo },
@@ -26266,6 +26389,10 @@ var SYNC = (function () {
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
+    /* The open sent-message panel goes with the page (§93.15). It is asked
+       fresh next time, because "what happened" can change while you are away —
+       a send is still finishing when the list first draws. */
+    if (typeof SENTONE !== "undefined") SENTONE = null;
     REPORTING = null;
     CLEARING = null;
     /* AN EDIT YOU CANNOT SEE IS NOT AN EDIT YOU AGREED TO (spec 012 §2.1).
@@ -29487,6 +29614,37 @@ var SYNC = (function () {
         paint();
       });
     }
+
+    /* ── OPENING A SENT MESSAGE (§93.15) ──────────────────────────────
+       Asked once per message and kept, so closing and reopening the same one
+       does not go back to the server. The state carries the id, so a paint
+       that happens while it is loading redraws "Asking…" rather than losing
+       the panel (§35's rule for the password states). */
+    document.querySelectorAll("[data-sentone]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = Number(this.dataset.sentone);
+        if (SENTONE && SENTONE.id === id) { SENTONE = null; paint(); return; }
+        SENTONE = { id: id, asking: true, data: null, error: null };
+        paint();
+        if (typeof SYNC === "undefined" || !SYNC.isLive()) {
+          SENTONE = { id: id, asking: false, data: null,
+                      error: "There is no server here to ask." };
+          paint(); return;
+        }
+        SYNC.mailHistoryOne(id, function(err, j){
+          /* Only if this is still the message being asked about — two quick
+             clicks would otherwise land the first answer on the second panel. */
+          if (!SENTONE || SENTONE.id !== id) return;
+          SENTONE = err || !j || !j.ok
+            ? { id: id, asking: false, data: null,
+                error: (err && err.message) || (j && j.error) || "Could not ask the server." }
+            : { id: id, asking: false, data: j, error: null };
+          paint();
+        });
+      });
+    });
+    var sentClose = document.querySelector("[data-sentclose]");
+    if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){

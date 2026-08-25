@@ -1,12 +1,39 @@
 """EDITING A ROW ON THE ROW (spec 012 §2.1, §85)."""
 from playwright.sync_api import sync_playwright
 URL="file:///home/user/SMP/SMP-Project-Folder/src/strategy-management-platform.html"
-TABLES=[("units","Business units"),("companies","Companies"),("fns","Functions"),("caps","Capabilities"),("mainbu","Official BU list"),("sets","Figure sets")]
+# `menu` = the row's pen lives in the kebab rather than on the row (§93.14).
+# The register settled that shape and Functions took it: a closed row carries
+# no `data-rowedit` at all, so the menu is opened first. Written as a property
+# of the table rather than a special case inside the loop, so the next table
+# to move its actions into a menu is one word here.
+TABLES=[("units","Business units",False),("companies","Companies",False),
+        ("fns","Functions",True),("caps","Capabilities",False),
+        ("mainbu","Official BU list",False),("sets","Figure sets",False)]
 bad=0; errs=[]
 def ck(w, ok, x=""):
     global bad
     if not ok: bad+=1
     print(("    ok   " if ok else "    FAIL ")+w+(("  — "+str(x)) if not ok and x else ""))
+def open_row(pg, target, menu):
+    """Press the row's pen, wherever the table keeps it (§93.14).
+
+    On a menu table it is two presses: the kebab, then the pen inside it.
+    Extracted because three call sites reopen a row and all three broke the
+    same way when Functions moved its pen into the menu -- the project's own
+    rule, extract at three.
+    """
+    if menu:
+        # ONLY IF IT IS NOT ALREADY OPEN. The kebab TOGGLES, so clicking it
+        # over an open menu closes it and takes the pen away -- which is the
+        # product behaving correctly and the helper being written as though
+        # it were the only thing on the page.
+        pg.evaluate("(t)=>{ if (document.querySelector('[data-rowedit=\"'+t+'\"]')) return;"
+                    "const b=document.querySelector('[data-fnmenu=\"'+t.split('|')[1]+'\"]');"
+                    "if (b) b.click(); }", target)
+        pg.wait_for_timeout(350)
+    pg.evaluate("""(t)=>document.querySelector('[data-rowedit="'+t+'"]').click()""", target)
+    pg.wait_for_timeout(500)
+
 with sync_playwright() as p:
     b=p.chromium.launch(executable_path="/opt/pw-browsers/chromium",args=["--no-sandbox","--disable-dev-shm-usage"])
     pg=b.new_page(viewport={"width":1440,"height":950})
@@ -15,10 +42,23 @@ with sync_playwright() as p:
     pg.click('#units [data-md="setup"]'); pg.wait_for_timeout(400)
     for g in pg.eval_on_selector_all(".setuprail .rgroup.shut","e=>e.map(x=>x.dataset.railgrp)"):
         pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(70)
-    for key,label in TABLES:
+    for key,label,menu in TABLES:
         pg.click('.setuprail [data-setupgo="%s"]'%key); pg.wait_for_timeout(900)
         print("──", label)
+        kebabs = 0
+        if menu:
+            # One kebab per row, with the pen inside it. Opened on the same
+            # row the rest of this block goes on to edit.
+            kebabs = pg.eval_on_selector_all("[data-fnmenu]", "e=>e.length")
+            pg.evaluate("()=>{const b=document.querySelectorAll('[data-fnmenu]');"
+                        "b[Math.min(1, b.length-1)].click();}")
+            pg.wait_for_timeout(400)
         pens = pg.eval_on_selector_all('[data-rowedit^="%s|"]'%key, "e=>e.length")
+        if menu:
+            # The open menu offers exactly one pen, so what is compared
+            # against the row count is the number of MENUS.
+            ck("the open menu offers one pen", pens == 1, pens)
+            pens = kebabs
         rows = pg.evaluate("""(k)=>{const t=document.querySelector('[data-tktable="'+k+'"]');
           return [].slice.call(t.tBodies[0].rows).filter(r=>!r.classList.contains('newrow')).length;}""", key)
         # ONE PEN PER ROW — not "more than one", which fails on the one-row
@@ -32,8 +72,8 @@ with sync_playwright() as p:
         # first", and the first where there is not.
         target = pg.evaluate("""(k)=>{const ps=document.querySelectorAll('[data-rowedit^="'+k+'|"]');
           return ps[Math.min(1, ps.length-1)].dataset.rowedit;}""", key)
-        pg.evaluate("""(t)=>document.querySelector('[data-rowedit="'+t+'"]').click()""", target)
-        pg.wait_for_timeout(700)
+        open_row(pg, target, menu)
+        pg.wait_for_timeout(200)
         st = pg.evaluate("""(k)=>{const t=document.querySelector('[data-tktable="'+k+'"]');
           const open=t.querySelectorAll('tbody tr.tk-open');
           return { openRows:open.length,
@@ -63,9 +103,11 @@ with sync_playwright() as p:
            pg.evaluate("""(t)=>{const x=t.split('|'); return ROWFIND[x[0]](x[1]).name;}""", target))
         ck("...and closes the row", pg.evaluate("""(k)=>!document
              .querySelector('[data-tktable="'+k+'"]').querySelector('tr.tk-open')""", key))
-        # reopen, edit, save — it must stick
-        pg.evaluate("""(t)=>document.querySelector('[data-rowedit="'+t+'"]').click()""", target)
-        pg.wait_for_timeout(500)
+        # reopen, edit, save — it must stick.
+        # ON A MENU TABLE THE PEN IS BEHIND THE KEBAB AGAIN, because Cancel
+        # closed the row and the menu with it. Reopening is two presses,
+        # which is exactly what somebody does.
+        open_row(pg, target, menu)
         pg.evaluate("""()=>{const f=document.querySelector('.tk-firstfield');
           f.value='Kept Name'; f.dispatchEvent(new Event('change',{bubbles:true}));}""")
         pg.wait_for_timeout(400)
@@ -76,8 +118,7 @@ with sync_playwright() as p:
         ck("...and closes the row", pg.evaluate("""(k)=>!document
              .querySelector('[data-tktable="'+k+'"]').querySelector('tr.tk-open')""", key))
         # leaving the page cancels
-        pg.evaluate("""(t)=>document.querySelector('[data-rowedit="'+t+'"]').click()""", target)
-        pg.wait_for_timeout(400)
+        open_row(pg, target, menu)
         pg.click('.setuprail [data-setupgo="labels"]'); pg.wait_for_timeout(600)
         pg.click('.setuprail [data-setupgo="%s"]'%key); pg.wait_for_timeout(700)
         ck("leaving the page closes the open row",

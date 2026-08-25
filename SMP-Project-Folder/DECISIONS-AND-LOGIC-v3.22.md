@@ -11565,3 +11565,54 @@ One trap on the way, and it is §50.6's: the first version measured
 once**. Presentation is a `<details>`, so the element carrying that attribute is
 a menu ITEM inside the closed popup — it has a box, at a position that means
 nothing. What is on the row is the `<summary>`.
+
+### 93.15 The platform knew, and had no screen that could say so
+
+> *"A very strange thing. I sent a message, everyone received it but not the SMO
+> team."* … *"I added them by function and by people selection directly, and
+> still they didn't receive the email."*
+
+**I guessed twice and was wrong twice**, which is the part of this worth keeping.
+The first guess was that the SMO team sit at the group and a units-only
+selection would miss them — true of the resolver, and irrelevant here, because a
+direct People pick matches unconditionally. The second was the shape of the
+audience criteria. Both were reasoning where a measurement was available.
+
+**The measurement was available.** Every send writes a `message_recipients` row
+per person: the address it used, whether the provider accepted it, the provider's
+error, and the provider's own id. `historyOne` has returned all of it since the
+table existed. **Nothing in the client has ever called it** — the record was
+written on every send and could not be read back from any screen, so the single
+question a record exists to answer had to be guessed at.
+
+**The three outcomes are three different problems**, and separating them is the
+whole value of the screen:
+
+| | | |
+|---|---|---|
+| **absent** | never resolved into the audience | fix is on the register |
+| **failed** | the provider refused it, and said why | fix is the address |
+| **sent** | handed over, id returned | delivery — a filter, a rule, a full mailbox |
+
+The last one is the one nothing on this side can fix, and **knowing that is the
+point**. "44 of 47" tells you a number and none of the three.
+
+Failures sort first and are named, the same rule the audience summary already
+follows: *3 failed* tells nobody which three, and each is a different fix.
+
+### 93.15a Two CSS lessons, one of them mine from the same day
+
+**A `table-layout:fixed` table takes every width from the header row (§46), and
+four attempts were spent refusing to believe it.** `.cfg table` is fixed;
+`table-layout:auto` was written at three increasing specificities and stayed
+computed as `fixed`, while a `width` from the *very next line* applied. Setting
+the four header widths instead worked first time. When a layout mode will not
+turn off, build with it rather than against it.
+
+**And §93.11 happened again, hours after being written down.** Editing a comment
+left a paragraph after the `*/` that closed it, so the parser met prose where a
+selector belonged and discarded the block. It is the same fix and the same
+check: ask `document.styleSheets` what the browser actually holds — though note
+that query is not decisive on its own, because a rule missing from the dump can
+still be applying. **The element is the authority**: `matches()` for whether the
+selector hits, and `getComputedStyle` for whether the declaration won.

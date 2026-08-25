@@ -426,6 +426,10 @@
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
+    /* The open sent-message panel goes with the page (§93.15). It is asked
+       fresh next time, because "what happened" can change while you are away —
+       a send is still finishing when the list first draws. */
+    if (typeof SENTONE !== "undefined") SENTONE = null;
     REPORTING = null;
     CLEARING = null;
     /* AN EDIT YOU CANNOT SEE IS NOT AN EDIT YOU AGREED TO (spec 012 §2.1).
@@ -3647,6 +3651,37 @@
         paint();
       });
     }
+
+    /* ── OPENING A SENT MESSAGE (§93.15) ──────────────────────────────
+       Asked once per message and kept, so closing and reopening the same one
+       does not go back to the server. The state carries the id, so a paint
+       that happens while it is loading redraws "Asking…" rather than losing
+       the panel (§35's rule for the password states). */
+    document.querySelectorAll("[data-sentone]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var id = Number(this.dataset.sentone);
+        if (SENTONE && SENTONE.id === id) { SENTONE = null; paint(); return; }
+        SENTONE = { id: id, asking: true, data: null, error: null };
+        paint();
+        if (typeof SYNC === "undefined" || !SYNC.isLive()) {
+          SENTONE = { id: id, asking: false, data: null,
+                      error: "There is no server here to ask." };
+          paint(); return;
+        }
+        SYNC.mailHistoryOne(id, function(err, j){
+          /* Only if this is still the message being asked about — two quick
+             clicks would otherwise land the first answer on the second panel. */
+          if (!SENTONE || SENTONE.id !== id) return;
+          SENTONE = err || !j || !j.ok
+            ? { id: id, asking: false, data: null,
+                error: (err && err.message) || (j && j.error) || "Could not ask the server." }
+            : { id: id, asking: false, data: j, error: null };
+          paint();
+        });
+      });
+    });
+    var sentClose = document.querySelector("[data-sentclose]");
+    if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){

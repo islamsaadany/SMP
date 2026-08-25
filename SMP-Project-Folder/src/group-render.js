@@ -2910,7 +2910,13 @@ function projPlanBody(p, fk){
             return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
     (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh, true) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
-    miniTable(["#","Milestone","What it covers","Owner","Due date"], mRows) +
+    /* NAME, THEN DESCRIPTION (§100). Islam: "we need the milestone name before
+       the description." So the pair stays -- a milestone is identified by a
+       short name and explained by a line under it -- and only the LABEL
+       changes: "What it covers" was a question, "Description" is the word the
+       tactics sheet has always used for the same thing. The stored field keeps
+       its spelling (§58, §65): `covers` is an identifier, this is a label. */
+    miniTable(["#","Milestone","Description","Owner","Due date"], mRows) +
     overrunNote(p);
 }
 

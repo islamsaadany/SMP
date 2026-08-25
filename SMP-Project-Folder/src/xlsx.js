@@ -833,6 +833,7 @@ function capReadme(kind, capNames, picked){
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
+       ["Due dates", "Match the project's Timeline: a project by Quarters wants Q1 2026, one by Dates wants 20 Mar 2026. A STATUS is not a due date \u2014 Done and Pending belong in the reporting cycle, not here. Anything else is still saved, and said out loud on upload."],
        ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
@@ -921,7 +922,7 @@ function capPlanWorkbook(c){
       }, []) },
 
     { name:"Milestones", widths:[34, 38, 52, 16, 14],
-      head:["Project", "Milestone", "What it covers", "Owner", "Due date"],
+      head:["Project", "Milestone", "Description", "Owner", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." }],
       rows:(c.projects || []).reduce(function(acc, p){
@@ -1026,7 +1027,10 @@ function capPlanFromWorkbook(c, sheets){
     row.measure_at = r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
-    row.covers = r["What it covers"]; row.owner = r["Owner"];
+    /* Description since §100, read as either (§58). The STORED field keeps its
+       spelling -- `covers` is an identifier, "Description" is a label. */
+    row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
+    row.owner = r["Owner"];
     /* WRITE THE NEW LABEL, READ EITHER (§58, §65). The column is called Due
        date from §99; somebody is holding a workbook downloaded before that,
        and a header is a contract. The STORED field keeps its own spelling —

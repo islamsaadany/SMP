@@ -606,6 +606,40 @@ function applyProgress(u, d){
   });
 }
 
+/* ── WHAT COUNTS AS A DUE DATE (§100) ─────────────────────────────────────
+   A milestone's due date is written in its PROJECT'S units: a project run by
+   quarters says "Q1 2026", one run by dates says "20 Mar 2026". The field has
+   always taken any text and always will -- see the notice in validateCapPlan for
+   why -- so this decides only whether the platform SAYS something, never
+   whether it accepts something.
+
+   `Date.parse` is the same reader `projOverruns` and the overrun notice
+   already use, so a date this calls good is a date the platform can compare;
+   anything else would be a second definition of "a date" (§42's rule, in the
+   small). A bare quarter with no year passes, because 55 of the 60 milestones
+   in the worked example are written that way and they are not wrong -- the
+   project's own start and end carry the year.
+
+   With NO timeline on the project, either shape passes: the platform does not
+   know which units were meant, and inventing an answer to complain about is
+   worse than staying quiet. */
+var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started",
+                       "in progress", "wip", "ongoing", "todo", "open", "closed",
+                       "n/a", "na", "tbd", "planned", "delayed"];
+function looksLikeQuarter(v){
+  return /^q[1-4](\s*[-\/]?\s*(fy)?\s*\d{2,4})?$/i.test(String(v).trim());
+}
+function looksLikeDate(v){
+  return !isNaN(Date.parse(String(v).trim()));
+}
+function dueFits(v, timeline){
+  var s = String(v == null ? "" : v).trim();
+  if (!s) return false;
+  if (timeline === "quarter") return looksLikeQuarter(s);
+  if (timeline === "date") return looksLikeDate(s);
+  return looksLikeQuarter(s) || looksLikeDate(s);
+}
+
 /* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
    Capability projects arrive the way a unit's plan does: Manage → Import,
    with the capability as the scope. Same parser, same validation shape, same
@@ -823,6 +857,23 @@ function validateCapPlan(c, rows){
   rows.forEach(function(r){
     if (r.type === "PROJECT" && timelineKey(r.timeline) === "date" && r.end) projEnd[r.id] = r.end;
   });
+  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§100). A live plan
+     arrived with "Done" and "Pending" in the Due date column -- statuses,
+     which belong to the reporting cycle -- and the platform said nothing,
+     because the field takes any text. It still takes any text: refusing the
+     file would block work over a column nobody can fix without the file, and
+     §22's whole contract is that an upload AUTHORS a plan rather than
+     arguing with it. So it is a NOTICE, which is the same weight the overrun
+     rule carries, and for the same reason -- both are "we saved what you
+     typed, and here is what we noticed". */
+  var projTl = {};
+  (c.projects || []).forEach(function(p){ if (p.timeline) projTl[p.id] = p.timeline; });
+  rows.forEach(function(r){
+    if (r.type === "PROJECT") {
+      var t = timelineKey(r.timeline);
+      if (t) projTl[r.id] = t;
+    }
+  });
 
   rows.forEach(function(r, n){
     var at = "row " + (n + 2) + (r.name ? " — " + r.name : "");
@@ -853,6 +904,22 @@ function validateCapPlan(c, rows){
     if (r.type === "OUTCOME") {
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
       if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });
+    }
+    if (r.type === "MILESTONE") {
+      var due = String(r.finish == null ? "" : r.finish).trim();
+      var tl = projTl[r.parent_id] || "";
+      if (!due) {
+        notices.push({ at:at, msg:"no due date" });
+      } else if (!dueFits(due, tl)) {
+        /* NAMED AS WHAT IT IS, never as "invalid". The two words this exists
+           for are Done and Pending, and telling somebody their status is
+           invalid does not tell them where it goes. */
+        notices.push({ at:at, msg:'due date "' + due + '" is not ' +
+          (tl === "date" ? "a date" : tl === "quarter" ? "a quarter" : "a date or a quarter") +
+          (MS_STATUS_WORDS.indexOf(due.toLowerCase()) > -1
+            ? " \u2014 that is a status, and a status is reported each cycle rather than planned"
+            : "") + " \u2014 saved exactly as entered" });
+      }
     }
     if (r.type === "MILESTONE" && r.finish && r.parent_id && projEnd[r.parent_id]) {
       var f = Date.parse(r.finish), e = Date.parse(projEnd[r.parent_id]);

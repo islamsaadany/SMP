@@ -266,6 +266,56 @@ with sync_playwright() as p:
     ck("a workbook written before the rename still reads",
        old_new["then"] == ["20 Mar 2026"], old_new["then"])
 
+    # ── THE MILESTONE'S DESCRIPTION, AND WHAT A DUE DATE IS (§100) ───────
+    print("── the milestone template")
+    ms = pg.evaluate("""() => {
+      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+      const head = (ws, n) => (ws.filter(s => s.name === n)[0] || {}).head || [];
+      const one = h => capPlanFromWorkbook(c, { Milestones: [h,
+          ["p", "Solution design", "Treasury requirements", "Finance", "20 Mar 2026"]] })
+        .filter(r => r.type === "MILESTONE").map(r => r.covers);
+      return { sheet: head(capPlanWorkbook(c), "Milestones"),
+               now: one(["Project","Milestone","Description","Owner","Due date"]),
+               then: one(["Project","Milestone","What it covers","Owner","Due date"]) };
+    }""")
+    ck("the sheet asks for a Milestone and a Description, in that order",
+       ms["sheet"][1:3] == ["Milestone", "Description"], ms["sheet"])
+    ck("...and no longer asks What it covers", "What it covers" not in ms["sheet"], ms["sheet"])
+    ck("a file written today reads its description", ms["now"] == ["Treasury requirements"], ms["now"])
+    ck("a file written before the rename still reads it",
+       ms["then"] == ["Treasury requirements"], ms["then"])
+
+    # THE NOTICE IS THE WHOLE POINT AND IT MUST NOT BE A REFUSAL. Asked of the
+    # real checker, with a project of each timeline, because what counts as a
+    # due date is decided by the project it hangs off (§100).
+    due = pg.evaluate("""() => {
+      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+      const run = (timeline, val) => {
+        const rows = capPlanFromWorkbook(c, {
+          Projects: [["Project","Brief","Owner","Stakeholders","Timeline","Start","End"],
+                     ["P", "b", "o", "", timeline, "", ""]],
+          Milestones: [["Project","Milestone","Description","Owner","Due date"],
+                       ["P", "M", "d", "own", val]] });
+        const r = validateCapPlan(c, rows);
+        return { problems: r.problems.length,
+                 notices: r.notices.map(n => n.msg).filter(m => m.indexOf("due date") > -1) };
+      };
+      return { quarterOk: run("Quarters", "Q3 2026"), dateOk: run("Dates", "20 Mar 2026"),
+               status: run("Dates", "Done"), wrongUnits: run("Quarters", "20 Mar 2026"),
+               blank: run("Dates", "") };
+    }""")
+    ck("a quarter on a by-quarter project says nothing", not due["quarterOk"]["notices"], due["quarterOk"])
+    ck("a date on a by-date project says nothing", not due["dateOk"]["notices"], due["dateOk"])
+    ck("a STATUS in the due date is noticed", len(due["status"]["notices"]) == 1, due["status"])
+    ck("...and it says where a status belongs",
+       "reported each cycle" in (due["status"]["notices"] or [""])[0], due["status"]["notices"])
+    ck("the wrong units are noticed", len(due["wrongUnits"]["notices"]) == 1, due["wrongUnits"])
+    ck("a missing due date is noticed", len(due["blank"]["notices"]) == 1, due["blank"])
+    # NEVER A REFUSAL. §22: an upload authors a plan rather than arguing with
+    # it, and a file refused over this column is a file nobody can fix.
+    ck("none of it refuses the file",
+       all(due[k]["problems"] == 0 for k in due), {k: due[k]["problems"] for k in due})
+
     # ── THE REVIEW DECK ──────────────────────────────────────────────────
     # The deck already gave a deliverables slide and an outcomes slide of its
     # own (§15), so the split needed nothing there — but BOTH renames reach

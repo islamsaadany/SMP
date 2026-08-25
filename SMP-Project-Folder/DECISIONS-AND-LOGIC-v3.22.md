@@ -12844,3 +12844,90 @@ reads the last column's label off the page and compares the two halves to each
 other rather than to a literal (§53.5). A check written against the problem
 survives somebody changing their mind about the wording; one written against
 the wording does not.
+
+
+## 100 · The plan's own shape, and a due date that is read (v3.27)
+
+Islam, stepping back from the client's data: *"let's consider that if we don't
+really have a current template and we need to refine the template regardless of
+the data that we have … let's build together how the plan should look and then
+we will adjust the templates and upload templates and everything accordingly."*
+
+So the shape was drawn before anything was built —
+`design-mockups/plan-shape/2026-08-25_project-plan-anatomy.html` — showing what
+a project, a deliverable, an outcome and a milestone each carry **today**, read
+out of the platform rather than wished for, every field against the sheet and
+column it lives in, with four questions carrying a recommendation each.
+
+**Two rules were stated first, because everything below them follows from
+them**: a plan says what was committed to and never holds a result (actuals,
+statuses and notes arrive through a cycle), and the project's Timeline decides
+how every date under it reads.
+
+### 100.1 The milestone keeps its name — the LABEL was the fault
+
+I recommended collapsing `Milestone` and `What it covers` into one Description,
+on the argument that two free-text columns side by side is how a field ends up
+holding the wrong thing. Islam: *"we need the milestone name before the
+description."*
+
+**He is right and my recommendation was solving the wrong half.** A milestone
+IS identified by a short name and explained by a line under it — the rail, the
+deck's sub-line and every plan in the demo use exactly that pair. What was
+wrong was never the second column; it was that it asked a QUESTION (*What it
+covers*) where every other table in the product says **Description** — the word
+the tactics sheet has used since the import template existed. So the pair
+stays, in his order, and only the label changes.
+
+`covers` keeps its spelling (§58, §65): a stored field is an identifier, a
+column heading is a label, and the workbook writes *Description* and reads
+either.
+
+### 100.2 A due date is read against its project's timeline, and never refused
+
+A live plan arrived with **`Done` and `Pending` in the Due date column** —
+statuses, which belong to the reporting cycle — and the platform said nothing,
+because the field takes any text. `dueFits()` now asks whether what arrived
+matches the project's own units: a project run by quarters wants `Q1 2026`, one
+run by dates wants `20 Mar 2026`, and a project with no timeline accepts either
+because the platform does not know which was meant and **inventing an answer to
+complain about is worse than staying quiet**.
+
+**IT IS A NOTICE, NEVER A PROBLEM**, which is the same weight the overrun rule
+carries and for the same reason: §22's contract is that an upload AUTHORS a
+plan rather than arguing with it, and a file refused over this column is a file
+nobody can fix without the file. The message **names what the value is rather
+than calling it invalid** — telling somebody their status is invalid does not
+tell them where a status goes — so `Done` gets *"that is a status, and a status
+is reported each cycle rather than planned"*.
+
+`Date.parse` is the reader, deliberately: it is the same one `projOverruns()`
+and the overrun notice already use, so a date this calls good is a date the
+platform can compare. **A bare quarter with no year passes**, because 55 of the
+60 milestones in the worked example are written that way and they are not
+wrong — the project's own start and end carry the year.
+
+### 100.3 The Excel date format was agreed and then found impossible
+
+The recommendation Islam approved included *"the template gets a real date
+format on the cell"*. **It cannot, and the reason is worth recording rather
+than quietly dropping**: one column holds `Q3 2026` for a project run by
+quarters and `20 Mar 2026` for one run by dates, and a cell format applies to
+the COLUMN. Formatting it as a date would make every legitimate quarter look
+broken in Excel, and Excel needs a serial number rather than text for a real
+date cell in any case.
+
+What replaces it is the half that actually catches `Done`: the **Read me** says
+what belongs in the column in the sheet the person is filling in, and the
+**upload says what it noticed**. Recorded as a reversal of a recommendation I
+made, not of a decision he made.
+
+### 100.4 Two questions were not understood, and that is a finding
+
+Islam answered *"What do you mean?"* to the deliverable-indicator question and
+*"Not sure what you mean"* to the missing-project-field one. **Both were
+written in the platform's vocabulary rather than in his** — "does a deliverable
+need an indicator of its own" is a sentence that only means something to
+somebody holding the data model. They are re-asked in the next round in terms
+of a real project on a real screen, which is the whole of CLAUDE-RULES' "explain
+in simple, non-technical words" and is easy to fail while sounding precise.

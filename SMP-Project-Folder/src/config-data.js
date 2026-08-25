@@ -164,6 +164,12 @@ var NEWMAINBU = "";
    per row: two menus open at once is a state nobody wants and one that has to
    be closed twice. */
 var PMENU = null;
+/* THE SAME STATE, FOR THE FUNCTIONS TABLE (§93.14). A single key rather than a
+   flag per row, for the reason §46.4 gives: two menus open at once is a state
+   nobody wants and one that has to be closed twice. Separate from PMENU because
+   the two tables are never on screen together and sharing one would make
+   "which table" a third thing to check. */
+var FNMENU = null;
 /* Which person the delete confirmation is open for (§69). Its own key rather
    than a mode on PMENU: the confirmation REPLACES the menu in the same place,
    so the second press lands where the first one did — the same shape the
@@ -196,6 +202,7 @@ var PROLES = null;
    was going to succeed. */
 var NEWCYCLE = null;
 var PCOLMENU = false, PWMENU = false, PFILEMENU = false;
+var FNCOLMENU = false;   /* the Functions table's own (§93.14) */
 var PICKING = null, PICKQ = "";
 
 /* ── ACCESS, by ROLE and by AREA ────────────────────────────────────

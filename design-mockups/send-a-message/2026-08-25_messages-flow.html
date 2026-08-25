@@ -1,0 +1,393 @@
+<title>Messages Flow</title>
+<style>
+  :root {
+    --cta:#A4512C; --cta-ink:#FFFFFF;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-accent:#E6C65C;
+    --zebra:#F5F7FA; --over-bg:#FBF6E9;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    --r-sm:6px; --r:8px; --r-md:12px; --r-pill:999px; --track:.12em;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --cta:#E1935F; --cta-ink:#14161A;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --zebra:#212630; --over-bg:#332C16; } }
+  :root[data-theme="dark"] {
+    --cta:#E1935F; --cta-ink:#14161A;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A; --bad-bg:#33201E;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --zebra:#212630; --over-bg:#332C16; }
+
+  body { background:var(--ground); color:var(--ink); font:400 14px/1.55 var(--sans);
+         margin:0; padding:28px 24px 80px; }
+  .page { max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:34px; }
+  h1 { font:400 20px/1.25 var(--sans); margin:0; }
+  h2 { font:400 17px/1.3 var(--sans); margin:0; }
+  .kicker { font:700 10.5px/1 var(--sans); text-transform:uppercase;
+            letter-spacing:var(--track); color:var(--ink-3); }
+  .lede { color:var(--ink-2); font-size:13px; margin:6px 0 0; max-width:78ch; }
+  .why { color:var(--ink-3); font-size:12.5px; margin:0; max-width:82ch; }
+  .why b { color:var(--ink-2); }
+  .block { display:flex; flex-direction:column; gap:12px; }
+  .hd { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .tag { font:700 10px/1 var(--sans); letter-spacing:var(--track); text-transform:uppercase;
+         padding:4px 9px; border-radius:var(--r-pill); display:inline-block;
+         background:var(--good-bg); color:var(--good-tx); }
+  .tag.n { background:var(--surface-2); color:var(--ink-3); }
+  hr.rule { border:0; border-top:1px solid var(--line); margin:0; }
+
+  /* ── flow strip ────────────────────────────────────────────── */
+  .flow { display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); }
+  .fstep { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+           padding:12px 14px; position:relative; }
+  .fstep .n { font:700 9.5px/1 var(--mono); color:var(--panel-ink); background:var(--panel);
+              border-radius:var(--r-pill); padding:4px 7px; display:inline-block;
+              margin-bottom:8px; }
+  .fstep b { display:block; font-size:13px; margin-bottom:3px; }
+  .fstep span { font-size:12px; color:var(--ink-3); }
+
+  /* ── the mock pane ─────────────────────────────────────────── */
+  .pane { background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r); overflow:hidden; }
+  .phead { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+           padding:14px 16px; border-bottom:1px solid var(--line-soft); }
+  .phead .t { font:400 18px/1.2 var(--sans); margin-right:auto; }
+  .chip { display:inline-flex; align-items:center; gap:5px; font:600 11.5px/1 var(--sans);
+          color:var(--ink-2); background:var(--surface-2); border:1px solid var(--line);
+          border-radius:var(--r-pill); padding:5px 10px; white-space:nowrap; }
+  .chip.kind { font-weight:700; letter-spacing:var(--track); text-transform:uppercase;
+               font-size:10px; }
+  .chip.count { background:var(--over-bg); border-color:var(--gold); color:var(--ink); }
+  .btn { font:700 11px/1 var(--sans); letter-spacing:var(--track); text-transform:uppercase;
+         border-radius:var(--r-pill); padding:11px 17px; border:1px solid var(--line);
+         background:var(--surface); color:var(--ink-2); cursor:pointer; }
+  .btn.solid { background:var(--cta); color:var(--cta-ink); border-color:var(--cta); }
+  .btn.quiet { border-color:transparent; color:var(--gold-deep); text-decoration:underline;
+               text-underline-offset:2px; }
+  .btn.sm { padding:8px 13px; }
+
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft);
+          vertical-align:middle; }
+  th+th, td+td { border-left:1px solid var(--line-soft); }
+  thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+             color:var(--panel-ink); font-weight:700; background:var(--panel);
+             white-space:nowrap; }
+  tbody tr:nth-child(even) > td { background:var(--zebra); }
+  tbody tr:last-child td { border-bottom:0; }
+  td.cc { text-align:center; }
+  .pill { display:inline-block; font:700 10.5px/1 var(--sans); letter-spacing:.04em;
+          border-radius:var(--r-pill); padding:4px 9px; white-space:nowrap; }
+  .pill.draft { background:var(--attn-bg); color:var(--attn-tx); }
+  .pill.sent  { background:var(--good-bg); color:var(--good-tx); }
+  .pill.part  { background:var(--warn-bg); color:var(--warn-tx); }
+  .kebab { background:none; border:1px solid transparent; border-radius:var(--r-sm);
+           color:var(--ink-2); cursor:pointer; font-size:15px; line-height:1; padding:3px 7px; }
+  .num { font-variant-numeric:tabular-nums; }
+  .sub b { display:block; }
+  .sub span { font-size:12px; color:var(--ink-3); }
+
+  .body { padding:16px; display:flex; flex-direction:column; gap:20px; }
+  .back { font:600 12px/1 var(--sans); color:var(--gold-deep); text-decoration:underline;
+          text-underline-offset:2px; }
+  .step { display:flex; flex-direction:column; gap:9px; }
+  .steph { display:flex; align-items:baseline; gap:9px; }
+  .stepn { font:700 10px/1 var(--mono); color:var(--panel-ink); background:var(--panel);
+           border-radius:var(--r-pill); padding:5px 8px; }
+  .steph b { font:700 13px/1 var(--sans); }
+  .steph .why { margin-left:auto; }
+  .ddbar { display:flex; gap:8px; flex-wrap:wrap; }
+  .dd { font:600 12px/1 var(--sans); color:var(--ink-2); background:var(--surface);
+        border:1px solid var(--line); border-radius:var(--r-pill); padding:8px 12px; }
+  .dd::after { content:" \25BE"; color:var(--ink-3); }
+  .dd.on { background:var(--over-bg); border-color:var(--gold); color:var(--ink); }
+  .audsum { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+            background:var(--surface-2); border:1px solid var(--line);
+            border-radius:var(--r); padding:11px 13px; }
+  .audsum .n { font:700 15px/1 var(--sans); font-variant-numeric:tabular-nums; }
+  .disc { font:600 12px/1 var(--sans); color:var(--gold-deep); background:none; border:0;
+          padding:0; text-decoration:underline; text-underline-offset:2px; margin-left:auto; }
+  .mailbox { background:var(--surface-2); border:1px solid var(--line);
+             border-radius:var(--r); padding:18px; display:flex; justify-content:center; }
+  .mail { width:min(440px,100%); background:var(--surface); border:1px solid var(--line);
+          border-radius:var(--r-sm); overflow:hidden; }
+  .mail .bar { background:var(--panel); color:var(--panel-ink); padding:12px 15px;
+               border-bottom:3px solid var(--panel-accent); }
+  .mail .bar b { display:block; font-size:13.5px; }
+  .mail .bar span { font:700 9.5px/1 var(--sans); letter-spacing:var(--track);
+                    text-transform:uppercase; opacity:.85; }
+  .mail .in { padding:15px; display:flex; flex-direction:column; gap:10px; }
+  .mail h3 { font:400 18px/1.25 var(--sans); margin:0; }
+  .mail p { margin:0; font-size:13px; color:var(--ink-2); }
+  .mail .mbtn { align-self:flex-start; background:var(--cta); color:var(--cta-ink);
+                font:700 10.5px/1 var(--sans); letter-spacing:var(--track);
+                text-transform:uppercase; border-radius:var(--r-sm); padding:10px 15px; }
+  .ctarow { display:flex; gap:9px; flex-wrap:wrap; align-items:center;
+            border-top:1px dashed var(--line); padding-top:12px; }
+  .fld { font:400 13px/1 var(--sans); color:var(--ink); background:var(--surface);
+         border:1px solid var(--line); border-radius:var(--r-sm); padding:8px 10px; }
+  .fld.ghost { color:var(--ink-3); }
+  .sendbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+             background:var(--surface); border-top:1px solid var(--line); padding:13px 16px; }
+
+  ul { margin:0; padding-left:18px; color:var(--ink-2); font-size:13px; }
+  li { margin:6px 0; } li b { color:var(--ink); }
+  .grid2 { display:grid; gap:20px; }
+  @media (min-width:900px) { .grid2 { grid-template-columns:1fr 1fr; } }
+  code { font:400 12px var(--mono); background:var(--surface-2); padding:1px 5px;
+         border-radius:4px; }
+  .foot { color:var(--ink-3); font-size:12px; border-top:1px solid var(--line);
+          padding-top:14px; }
+</style>
+
+<div class="page">
+
+  <div>
+    <span class="kicker">Setup &middot; Running the cycle</span>
+    <h1 style="margin-top:6px">Messages &mdash; how the page should work</h1>
+    <p class="lede">Islam: <i>&ldquo;when I open Send a message what I see is the drafts
+    and what has been sent &mdash; maybe a button to create a new message that opens the
+    whole message creation thing.&rdquo;</i> Right, and it changes what the page IS:
+    a list of messages, with composing as something you start from it.</p>
+  </div>
+
+  <div class="block">
+    <h2>The flow</h2>
+    <div class="flow">
+      <div class="fstep"><span class="n">1</span><b>Messages</b>
+        <span>Drafts and sent in one list, newest first. This is what opening the page shows.</span></div>
+      <div class="fstep"><span class="n">2</span><b>+ New message</b>
+        <span>Creates the draft and opens it. There is no unsaved state to lose.</span></div>
+      <div class="fstep"><span class="n">3</span><b>The draft</b>
+        <span>Who &middot; write &middot; preview &middot; send. Its own screen, reachable again from the list.</span></div>
+      <div class="fstep"><span class="n">4</span><b>Confirm</b>
+        <span>Names the number &mdash; and the server refuses if it has changed since.</span></div>
+      <div class="fstep"><span class="n">5</span><b>The record</b>
+        <span>A sent message is not an editor. It shows who got it, at which address, and what failed.</span></div>
+    </div>
+    <p class="why"><b>Taken from HR_ERP's Communications, which already solved this.</b> The
+    two ideas worth copying outright are that <b>New message creates the draft immediately
+    and navigates into it</b> &mdash; so nothing is ever half-written and unsaved &mdash;
+    and that <b>a sent message is a RECORD rather than a locked editor.</b></p>
+    <p class="why"><b>SMP already stores everything that record needs and shows none of
+    it.</b> <code>message_recipients</code> holds the person, the address it went to,
+    whether it was accepted and the provider&rsquo;s error; <code>messages.audience</code>
+    holds the criteria as they were ticked. Today the page shows &ldquo;45 of 47&rdquo;
+    and nothing else, so &ldquo;which two, and why&rdquo; is unanswerable from the screen.</p>
+  </div>
+
+  <hr class="rule">
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">1 &middot; What opening the page shows</h2>
+      <span class="tag">the landing state</span></div>
+    <div class="pane">
+      <div class="phead">
+        <span class="t">Messages</span>
+        <span class="chip kind">SMO</span>
+        <span class="chip">2 drafts</span>
+        <span class="chip">14 sent</span>
+        <button class="btn solid sm">+ New message</button>
+      </div>
+      <table>
+        <thead><tr><th>Message</th><th class="cc">Status</th><th class="cc">Went to</th>
+          <th>When</th><th>By</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="sub"><b>Q3 reporting opens on Monday</b>
+              <span>47 chosen &middot; 3 without an address</span></td>
+            <td class="cc"><span class="pill draft">Draft</span></td>
+            <td class="cc why">&mdash;</td>
+            <td>Saved 11 minutes ago</td><td>Mohamed Essam</td>
+            <td class="cc"><button class="kebab">&#8942;</button></td></tr>
+          <tr><td class="sub"><b>(no heading yet)</b><span>nobody chosen</span></td>
+            <td class="cc"><span class="pill draft">Draft</span></td>
+            <td class="cc why">&mdash;</td>
+            <td>Saved yesterday 16:20</td><td>Mohamed Essam</td>
+            <td class="cc"><button class="kebab">&#8942;</button></td></tr>
+          <tr><td class="sub"><b>Cycle closes Thursday &mdash; last call</b></td>
+            <td class="cc"><span class="pill part">2 failed</span></td>
+            <td class="cc num">45 of 47</td>
+            <td>24 Aug 09:14</td><td>Mohamed Essam</td>
+            <td class="cc"><button class="kebab">&#8942;</button></td></tr>
+          <tr><td class="sub"><b>Welcome to the platform</b></td>
+            <td class="cc"><span class="pill sent">Sent</span></td>
+            <td class="cc num">76 of 76</td>
+            <td>18 Aug 11:02</td><td>Mohamed Essam</td>
+            <td class="cc"><button class="kebab">&#8942;</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="why"><b>One list, not two.</b> A draft and a sent message are the same thing
+    at two stages, and Status is what says which &mdash; the register's own lesson, applied
+    (&sect;93.14). It means &ldquo;what happened to the Q3 one&rdquo; is one search rather
+    than a decision about which table to look in. The row menu offers what that row can
+    do: a draft gets <b>Open</b> and <b>Delete</b>; a sent one gets <b>Read it</b>,
+    <b>See who got it</b> and <b>Duplicate</b>.</p>
+    <p class="why"><b>&ldquo;2 failed&rdquo; is a status, not a footnote.</b> Today a
+    failure is a number in a column you have to go looking for; here it wears the same
+    amber the register uses for something that needs a person.</p>
+  </div>
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">2 &middot; New message opens the composer</h2>
+      <span class="tag">a mode, not a destination</span></div>
+    <div class="pane">
+      <div class="phead">
+        <span class="back">&larr; Messages</span>
+        <span class="t" style="margin-left:12px">New message</span>
+        <span class="chip count">47 recipients &middot; 3 skipped</span>
+        <span class="chip">Saved as a draft</span>
+      </div>
+      <div class="body">
+        <div class="step">
+          <div class="steph"><span class="stepn">1</span><b>Who gets it</b>
+            <span class="why">They add up rather than narrow each other.</span></div>
+          <div class="ddbar">
+            <span class="dd on">Roles&nbsp;1</span><span class="dd">Group &amp; companies</span>
+            <span class="dd on">Business units&nbsp;3</span><span class="dd">Functions</span>
+            <span class="dd on">People&nbsp;2</span>
+          </div>
+          <div class="audsum">
+            <span class="pill sent">Will get it</span><span class="n">47</span>
+            <span class="pill part">Skipped</span><span class="n">3</span>
+            <span class="why">&mdash; no address on the register</span>
+            <button class="disc">Show the names</button>
+          </div>
+        </div>
+        <div class="step">
+          <div class="steph"><span class="stepn">2</span><b>Write it</b>
+            <span class="why">The heading is the subject line people see before they open it.</span></div>
+          <div class="mailbox">
+            <div class="mail">
+              <div class="bar"><b>Raya Trade</b><span>Strategy Management Platform</span></div>
+              <div class="in">
+                <h3>Q3 reporting opens on Monday</h3>
+                <p>Your unit&rsquo;s figures are due by the 12th. Everything you need is on
+                your Performance page.</p>
+                <div class="mbtn">Open the platform</div>
+              </div>
+            </div>
+          </div>
+          <div class="ctarow">
+            <span class="why"><b>A button, if you want one.</b> Both halves or neither.</span>
+            <span class="fld">Open the platform</span>
+            <span class="fld ghost">https://&hellip;</span>
+          </div>
+        </div>
+      </div>
+      <div class="sendbar">
+        <button class="btn solid">Send to 47</button>
+        <button class="btn">Save &amp; close</button>
+        <button class="btn quiet">Send me a copy first</button>
+        <span class="why" style="margin-left:auto">Saved a moment ago</span>
+      </div>
+    </div>
+    <p class="why"><b>The bar is pinned to the foot of the pane</b>, so Send stops moving
+    as the audience grows &mdash; today every recipient draws a named chip, which is
+    299px for 33 people and roughly double on your register. The names are still one press
+    away; they are just no longer between you and the button.</p>
+  </div>
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">3 &middot; A sent message is a record, not an editor</h2>
+      <span class="tag">data SMP already stores</span></div>
+    <div class="pane">
+      <div class="phead">
+        <span class="back">&larr; Messages</span>
+        <span class="t" style="margin-left:12px">Cycle closes Thursday &mdash; last call</span>
+        <span class="chip"><span class="pill part">2 failed</span></span>
+        <span class="chip">45 of 47 &middot; 24 Aug 09:14 &middot; Mohamed Essam</span>
+        <button class="btn sm">Duplicate</button>
+      </div>
+      <table>
+        <thead><tr><th>Person</th><th>Address it went to</th><th class="cc">Delivery</th>
+          <th>What the provider said</th></tr></thead>
+        <tbody>
+          <tr><td>Mennah Farouk</td><td class="why">mennah.farouk@rayatrade.example</td>
+            <td class="cc"><span class="pill sent">Accepted</span></td><td class="why">&mdash;</td></tr>
+          <tr><td>Dalia Sabry</td><td class="why">dalia.sabry@rayatrade.example</td>
+            <td class="cc"><span class="pill sent">Accepted</span></td><td class="why">&mdash;</td></tr>
+          <tr><td>Kareem Hafez</td><td class="why">k.hafez@rayatrade.example</td>
+            <td class="cc"><span class="pill part">Failed</span></td>
+            <td class="why">Recipient address rejected &mdash; domain not found</td></tr>
+          <tr><td>Tarek Nour</td><td class="why">tarek.nour@rayatrade.example</td>
+            <td class="cc"><span class="pill part">Failed</span></td>
+            <td class="why">Mailbox full</td></tr>
+        </tbody>
+      </table>
+      <div class="sendbar">
+        <span class="why"><b>&ldquo;Accepted&rdquo; means the mail provider took it.</b>
+        What happens after that &mdash; a full mailbox, a spam folder &mdash; is outside
+        what this platform can know.</span>
+      </div>
+    </div>
+    <p class="why">Every column here is already in the database and has never been on a
+    screen. &ldquo;45 of 47&rdquo; tells you two people missed it; this tells you
+    <b>which two, at which address, and why</b> &mdash; which is the difference between a
+    number and something you can act on. It is the same argument as naming the skipped
+    people rather than counting them (&sect;87).</p>
+  </div>
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">And the confirmation binds the number</h2>
+      <span class="tag">a correctness fix, not a design one</span></div>
+    <p class="why">HR_ERP's rule, worth copying word for word: <i>&ldquo;the send is behind
+    a dialog that NAMES the number of people &mdash; and that number is passed to the
+    server, which refuses if it has changed since. A confirmation that can silently cover
+    more people than it named is not a confirmation.&rdquo;</i></p>
+    <p class="why"><b>SMP does not do this today.</b> The browser's <code>confirm()</code>
+    names a count the page worked out, then the server <b>re-resolves the audience from
+    the stored register</b> and sends to whatever it finds. Add somebody to a unit in
+    another tab between reading the number and pressing Yes, and the message goes to more
+    people than the confirmation named &mdash; silently, and it cannot be recalled. The
+    count travels with the send and the server refuses a mismatch.</p>
+  </div>
+
+  <div class="block">
+    <h2>The changes, in order of what they are worth</h2>
+    <div class="grid2">
+      <ul>
+        <li><b>The page opens on the list.</b> Two of the three jobs were buried under the
+        third.</li>
+        <li><b>New message creates the draft and opens it</b> &mdash; nothing is ever
+        unsaved.</li>
+        <li><b>A sent message opens as a record</b>, with the per-person delivery table
+        SMP already stores.</li>
+        <li><b>The confirmation binds the count</b>, and the server refuses if it moved.</li>
+      </ul>
+      <ul>
+        <li><b>One list with a Status column</b>, not two sections &mdash; the register's
+        own lesson.</li>
+        <li><b>The audience becomes two counts</b> and a disclosure, so Send holds still.</li>
+        <li><b>The button folds into the message.</b></li>
+        <li><b>Duplicate</b> a sent message &mdash; the quarterly reminder is the same
+        message with two words changed.</li>
+        <li><b>Send me a copy first.</b></li>
+      </ul>
+    </div>
+    <p class="why"><b>Not copied from HR_ERP, deliberately:</b> its Communications page is
+    a door to three things &mdash; noticeboard, email, congratulations. SMP has one of
+    those, so a chooser in front of a single destination is a door behind a door
+    (&sect;32). And its &ldquo;preview as a business unit&rdquo; exists because HR_ERP
+    brands each copy by the recipient&rsquo;s unit; SMP brands per tenant, so there is
+    one thing to preview and it is already on screen.</p>
+  </div>
+
+  <p class="foot">Mockup for sign-off before any source is touched. Colours, type and
+  controls are the product's own tokens from <code>src/_shared.css</code>.</p>
+</div>

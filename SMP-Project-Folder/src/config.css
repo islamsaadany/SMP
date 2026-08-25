@@ -1461,3 +1461,47 @@
      select the open row puts there, or the control overflows into the column
      beside it. Read rows are unaffected: they hold a short name. */
   .peoplecfg th.wcol { width:176px; }
+
+  /* ══════════════════════════════════════════════════════════════════
+     THE FUNCTIONS TABLE, TO THE REGISTER'S STANDARD (§93.14)
+     Islam: "learn from what we have done in the people table." Everything
+     here is that table's rule applied to this one; the numbers are its
+     numbers, so the two cannot drift into looking like different products.
+     ══════════════════════════════════════════════════════════════════ */
+  /* CONTENT-SIZED, NOT EQUAL SHARES. This table laid out fixed, which gives
+     every column the same width whatever it holds — 201px for the `#` column
+     to show one digit, and 134px for a name. §46's lesson, on the table that
+     did not get it: auto layout and content-sized columns are what made the
+     register's rows 39px. */
+  .fnscfg { table-layout:auto; }
+  .fnscfg th.idx, .fnscfg td.idx { width:38px; min-width:38px; max-width:38px; }
+  /* The two frozen columns (§69.19). A function's name is what tells you which
+     row you are on, and this table is wider than its box — so it is the one
+     column that must never scroll away. The offset must equal the first
+     column's rendered BORDER-BOX width or the two overlap. */
+  .fnscfg td.idx, .fnscfg td.fnamecell { position:sticky; z-index:2;
+                                         background:inherit; overflow:hidden; }
+  .fnscfg td.idx { left:0; }
+  .fnscfg td.fnamecell { left:38px; max-width:260px; white-space:nowrap; }
+  .fnscfg thead th.idx { position:sticky; left:0; z-index:4; }
+  .fnscfg thead th.fnamecell { position:sticky; left:38px; z-index:4; }
+  .fnscfg td.fnamecell, .fnscfg thead th.fnamecell { box-shadow:1px 0 0 var(--line-soft); }
+  .fnscfg td.fnamecell input.fld { max-width:100%; box-sizing:border-box; }
+  /* And the actions column frozen at the other end (§69.20), so the ⋮ is
+     reachable at every scroll position rather than only at the far right. */
+  .fnscfg td.kebcell, .fnscfg thead th.kebcell {
+    position:sticky; right:0; z-index:2; background:inherit;
+    width:49px; min-width:49px; }
+  .fnscfg thead th.kebcell { z-index:4; }
+  .fnscfg td.kebcell.lifted { z-index:30; }
+  /* A retired row is quiet, but its NAME and its actions are not — the same
+     exception the register makes, because a retired row is still one you act
+     on (§69.19). */
+  .fnscfg tr.retired td.idx, .fnscfg tr.retired td.fnamecell { opacity:1; color:var(--ink-3); }
+  .fnscfg tr.retired td.kebcell { opacity:1; }
+  /* The row's ground has to be real for `background:inherit` to work on the
+     frozen cells — a background is not inherited from a colour nobody set. */
+  .fnscfg tbody tr > td { background:var(--surface); }
+  .fnscfg tbody tr:nth-child(even) > td { background:var(--zebra); }
+  .fnscfg tbody tr.tk-open > td { background:var(--over-bg); }
+  .fnscfg tbody tr.tk-open > td:first-child { box-shadow:inset 3px 0 0 var(--gold); }

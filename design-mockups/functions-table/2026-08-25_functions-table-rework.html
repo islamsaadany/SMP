@@ -1,0 +1,257 @@
+<title>Functions Table Rework</title>
+<style>
+  /* THE PRODUCT'S OWN TOKENS, copied from src/_shared.css (forefront palette).
+     A mockup drawn from the STYLESHEET is drawn from what the product could
+     look like, not from what it does (§41.9) — so these are the values the
+     built file actually ships, light and dark. */
+  :root {
+    --cta:#A4512C; --good-tx:#1F6248; --attn-tx:#7A5D1C; --bad-tx:#8C3327;
+    --gold:#C9A24D; --gold-deep:#8A6B22; --focus:#8A6B22;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --none:#676C73;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --bad-bg:#F7E3E0;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --zebra:#F5F7FA; --over-bg:#FBF6E9;
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+    --r-sm:6px; --r:8px; --r-pill:999px; --track:.12em;
+  }
+  :root:not([data-theme="light"]) { }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --cta:#E1935F; --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+      --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --none:#8E97A3;
+      --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+      --panel:#0E1014; --panel-ink:#EAF0FA;
+      --zebra:#212630; --over-bg:#332C16;
+    }
+  }
+  :root[data-theme="dark"] {
+    --cta:#E1935F; --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --bad-tx:#E79A93;
+    --gold:#D9B665; --gold-deep:#C9A24D; --focus:#E6C65C;
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --none:#8E97A3;
+    --good-bg:#1B3129; --attn-bg:#332C16; --bad-bg:#33201E;
+    --panel:#0E1014; --panel-ink:#EAF0FA;
+    --zebra:#212630; --over-bg:#332C16;
+  }
+
+  body { background:var(--ground); color:var(--ink); font:400 14px/1.55 var(--sans);
+         margin:0; padding:28px 24px 72px; }
+  .page { max-width:1180px; margin:0 auto; display:flex; flex-direction:column; gap:30px; }
+  h1 { font:400 20px/1.25 var(--sans); margin:0; }
+  h2 { font:700 11px/1 var(--sans); text-transform:uppercase; letter-spacing:var(--track);
+       color:var(--ink-3); margin:0 0 10px; }
+  .lede { color:var(--ink-2); font-size:13px; margin:6px 0 0; max-width:74ch; }
+  .block { display:flex; flex-direction:column; gap:10px; }
+  .why { color:var(--ink-3); font-size:12.5px; margin:0; max-width:78ch; }
+  .why b { color:var(--ink-2); }
+
+  /* The register's own table, reproduced. */
+  .cfg { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+         overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  th,td { text-align:left; padding:10px 13px; border-bottom:1px solid var(--line-soft);
+          vertical-align:top; }
+  th+th, td+td { border-left:1px solid var(--line-soft); }
+  thead th { font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+             color:var(--panel-ink); font-weight:700; background:var(--panel);
+             white-space:nowrap; border-bottom:1px solid var(--line); }
+  tbody tr:nth-child(even) > td { background:var(--zebra); }
+  tbody tr:last-child td { border-bottom:0; }
+  td.idx { color:var(--ink-3); font-size:12px; width:38px; }
+  td.nm b { font-weight:700; }
+  .keyline { display:block; font:400 11px/1.4 var(--mono); color:var(--ink-3); }
+  .pill { display:inline-block; font:700 10.5px/1 var(--sans); letter-spacing:.04em;
+          border-radius:var(--r-pill); padding:4px 9px; white-space:nowrap; }
+  .pill.good { background:var(--good-bg); color:var(--good-tx); }
+  .pill.none { background:var(--surface-2); color:var(--ink-3); }
+  .chip { display:inline-block; font:600 11px/1 var(--sans); color:var(--ink-2);
+          background:var(--surface-2); border:1px solid var(--line);
+          border-radius:var(--r-pill); padding:3px 8px; }
+  .linkbu { background:none; border:0; padding:0; font:inherit; font-size:12.5px;
+            color:var(--gold-deep); text-decoration:underline; text-underline-offset:2px;
+            cursor:pointer; display:block; margin:5px 0; }
+  .quiet { color:var(--ink-3); }
+  .kebab { background:none; border:1px solid transparent; border-radius:var(--r-sm);
+           color:var(--ink-2); cursor:pointer; font-size:15px; line-height:1;
+           padding:3px 7px; }
+  .kebab:hover { border-color:var(--line); background:var(--surface-2); }
+  td.cc { text-align:center; }
+  .pen { display:inline-flex; width:26px; height:24px; align-items:center;
+         justify-content:center; border:1px solid var(--line); border-radius:var(--r-sm);
+         background:var(--surface); color:var(--ink-2); }
+
+  .rowh { font:700 10.5px/1 var(--mono); color:var(--bad-tx); background:var(--bad-bg);
+          border-radius:var(--r-pill); padding:4px 9px; display:inline-block; }
+  .rowh.ok { color:var(--good-tx); background:var(--good-bg); }
+  .tag { font:700 10px/1 var(--sans); letter-spacing:var(--track); text-transform:uppercase;
+         padding:4px 9px; border-radius:var(--r-pill); display:inline-block; }
+  .tag.before { background:var(--bad-bg); color:var(--bad-tx); }
+  .tag.after { background:var(--good-bg); color:var(--good-tx); }
+  .hd { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+  /* The menu, drawn open so the four actions can be seen in their new home. */
+  .menuwrap { position:relative; }
+  .kmenu { position:absolute; right:0; top:30px; z-index:2; min-width:172px;
+           background:var(--surface); border:1px solid var(--line);
+           border-radius:var(--r); box-shadow:0 4px 6px -1px rgb(15 23 42/.10);
+           padding:5px; text-align:left; }
+  .kmenu button { display:block; width:100%; text-align:left; background:none;
+                  border:0; padding:7px 9px; border-radius:var(--r-sm);
+                  font:400 13px/1.3 var(--sans); color:var(--ink); cursor:pointer; }
+  .kmenu button:hover { background:var(--surface-2); }
+  .kmenu button.danger { color:var(--bad-tx); }
+  .kmenu .sep { height:1px; background:var(--line-soft); margin:5px 3px; }
+
+  .grid2 { display:grid; gap:18px; }
+  @media (min-width:900px) { .grid2 { grid-template-columns:1fr 1fr; } }
+  .note { border-left:2px solid var(--gold); padding:2px 0 2px 12px; }
+  ul { margin:0; padding-left:18px; color:var(--ink-2); font-size:13px; }
+  li { margin:5px 0; }
+  li b { color:var(--ink); }
+  code { font:400 12px var(--mono); background:var(--surface-2); padding:1px 5px;
+         border-radius:4px; }
+  .foot { color:var(--ink-3); font-size:12px; border-top:1px solid var(--line);
+          padding-top:14px; }
+</style>
+
+<div class="page">
+
+  <div>
+    <h1>Supporting functions &mdash; the table, reworked</h1>
+    <p class="lede">The register learned six things between &sect;69 and &sect;93. None of
+    them reached this page. Every number below is measured off the built file at
+    1670&thinsp;px, not estimated.</p>
+  </div>
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">1 &middot; The row today</h2>
+      <span class="tag before">155px per row</span>
+      <span class="rowh">32 action links on one page</span></div>
+    <div class="cfg">
+      <table>
+        <thead><tr><th>#</th><th>Function</th><th>Nav name</th><th>Code</th>
+          <th>Plans in</th><th>Caps</th><th>Head</th><th>Custodian</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx">1</td>
+            <td class="nm"><b>Finance</b><span class="keyline">key finance</span></td>
+            <td class="quiet">Finance</td>
+            <td><span class="keyline" style="display:inline">FIN</span></td>
+            <td><span class="chip">Projects</span></td>
+            <td>1</td>
+            <td>Hossam Abuelenien</td>
+            <td class="quiet">unassigned</td>
+            <td class="cc">
+              <span class="pen">&#9998;</span>
+              <button class="linkbu">Retire</button>
+              <button class="linkbu">Delete</button>
+              <button class="linkbu">Clear progress</button>
+              <button class="linkbu">Clear plan</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="why">Four actions stacked in a column headed <b>Status</b>, which shows no
+    status. The pen sits above them. The employee-key line under the name is on every
+    row. Nothing is frozen, so at 1340&thinsp;px wide you lose the function's name as
+    soon as you scroll right.</p>
+  </div>
+
+  <div class="block">
+    <div class="hd"><h2 style="margin:0">2 &middot; The row proposed</h2>
+      <span class="tag after">~40px per row</span>
+      <span class="rowh ok">one line, like every other setup table</span></div>
+    <div class="cfg">
+      <table>
+        <thead><tr><th>#</th><th>Function</th><th>Plans in</th><th>Head</th>
+          <th>Custodian</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="idx">1</td>
+            <td class="nm"><b>Finance</b></td>
+            <td><span class="chip">Projects</span></td>
+            <td>Hossam Abuelenien</td>
+            <td class="quiet">&mdash;</td>
+            <td><span class="pill good">Active</span></td>
+            <td class="cc menuwrap"><button class="kebab">&#8942;</button></td>
+          </tr>
+          <tr>
+            <td class="idx">2</td>
+            <td class="nm"><b>Merchandising</b></td>
+            <td><span class="chip">Pillars &middot; under Retail Stores</span></td>
+            <td>Sara Helmy</td>
+            <td>Tamer Fouad</td>
+            <td><span class="pill none">Retired</span></td>
+            <td class="cc menuwrap">
+              <button class="kebab">&#8942;</button>
+              <div class="kmenu">
+                <button>Edit this row</button>
+                <button>Clear progress</button>
+                <button>Clear plan</button>
+                <div class="sep"></div>
+                <button>Retire</button>
+                <button class="danger">Delete permanently</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="why">The four actions move into the row's own menu &mdash; the register's
+    &#8942; (&sect;69.22), where the <b>next</b> action goes too. <b>Status</b> holds a
+    status again. <b>#</b> and <b>Function</b> freeze, so the name stays put while you
+    scroll (&sect;69.19). Nav name, Code and Caps move behind a <b>Columns</b> chooser,
+    off by default &mdash; Nav name repeats Function on seven of eight rows.</p>
+  </div>
+
+  <div class="grid2">
+    <div class="block">
+      <h2>What changes</h2>
+      <ul>
+        <li><b>Four stacked links &rarr; one &#8942; menu.</b> This is the whole
+        155&thinsp;px. Delete is renamed <b>Delete permanently</b> and sits below a
+        divider, away from Retire.</li>
+        <li><b>Status shows Active / Retired.</b> It is a status column that has never
+        held one.</li>
+        <li><b>#&nbsp;and Function freeze</b> at 38&thinsp;px and ~216&thinsp;px.</li>
+        <li><b>The <code>key finance</code> line goes</b> to an off-by-default column,
+        as the register's sign-in name did (&sect;69.11).</li>
+        <li><b>A Columns chooser</b> in the header, beside the search.</li>
+        <li><b>The Official BU list gets the same</b> &mdash; it measures
+        <b>131&thinsp;px</b> rows today, from the same cause.</li>
+      </ul>
+    </div>
+    <div class="block">
+      <h2>What does not change</h2>
+      <ul>
+        <li><b>Delete still refuses</b> while anything points at the function, and still
+        names what &mdash; the capability, the pillar scored from here, the people
+        attached, the Official BU mapping, anything ever reported (&sect;62). Your
+        answer: keep it.</li>
+        <li><b>Retire stays the default.</b> Deleting is for a function nothing holds.</li>
+        <li><b>Plans in</b> keeps its chip and its <i>under</i> line &mdash; it is the
+        one cell that genuinely says two things (&sect;59).</li>
+        <li><b>No column is removed</b>, only hidden by default and recoverable from
+        Columns.</li>
+      </ul>
+      <p class="why note">Today <b>IT</b>, <b>Care</b> and <b>Strategy Management
+      Office</b> can be deleted outright. The other five each name what is holding
+      them &mdash; Finance, for one: a capability and a person.</p>
+    </div>
+  </div>
+
+  <p class="foot">Mockup for sign-off before any source is touched. Colours, type and
+  table rules are the product's own tokens from <code>src/_shared.css</code>, so what is
+  drawn here is what would be built.</p>
+</div>

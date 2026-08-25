@@ -69,7 +69,7 @@
    moment it is read. Checked here against origin/main and against every
    name this repository has ever carried: v3.25, b, c, d are used. */
 
-const SHELL = "smp-shell-v3.25g";
+const SHELL = "smp-shell-v3.25h";
 const ASSETS = [
   "/",
   "/index.html",

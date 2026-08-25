@@ -1172,7 +1172,49 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
+*Last Updated: 2026-08-25 &mdash; **v3.25: the objectives editor was drawn and
+connected to nothing** (&sect;96). Islam, on a unit's Foundation with the pen
+open: *"I can't remove objectives."* Measured before touching anything: **20
+input fields, 0 wired; 4 Remove buttons, 0 wired; the Add button, 0 wired.**
+Every control in that table was decoration &mdash; typing a name, changing a
+direction, correcting a target, removing a row and adding one all looked
+accepted and were discarded on the next repaint. **IT IS THE FAULT THE `FIELDS`
+REGISTRY EXISTS TO PREVENT**, and the comment three lines above the broken
+function says so in the PAST TENSE: that fix went to `fieldOr` and `inputOr` and
+`koEdit` was left behind, because it builds its own `<input>` tags rather than
+calling them. **A helper that exists is not a helper that was used**, and
+nothing catches the difference &mdash; a bound field and an unbound one differ
+by one absent attribute, the page renders, nothing throws, and every keystroke
+is accepted before being thrown away. It survived because `renderTempleEdit` has
+the SAME table, fully wired, editing the SAME `GROUP.keyObjectives`: one of the
+two surfaces onto that list worked, so the list never looked broken, and the
+unit's Foundation &mdash; which has no second surface &mdash; had nothing at
+all. `selectOr` joins the family, because **a `<select>` is not an `<input>`**
+and building its own is exactly how `koEdit` came to build unbound ones.
+**MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT** (&sect;96.2): remove the
+middle of KO1&middot;KO2&middot;KO3 and Add, and the count says 3 while KO3 is
+still on screen &mdash; the authoriser compares plans BY ID (&sect;59) and a
+snapshot is keyed by id and never by position (&sect;48), so a collision is not
+cosmetic; the Temple's own handler carried it too and is corrected through the
+same function. **AND THE GROUP'S SIX OBJECTIVES CARRY NO IDS AT ALL**
+(&sect;96.4) &mdash; `null` in the seed and in the database, because only rows
+ADDED have ever been given one; survivable until this editor mints them, because
+a list where one row is identified and six are not is worse than either state.
+Filled in, never rewritten, and **from Add and Remove rather than from paint**,
+or a reader that writes what it reads puts a phantom change into every save
+(&sect;42). **AND `9.6999999999999993%` CAME FROM EXCEL VERBATIM** (&sect;96.3):
+not the platform's arithmetic &mdash; JavaScript prints that number as `9.7`
+&mdash; but the RAW TEXT of the cell, which Excel writes at full precision
+whenever a value came from a calculation. Numeric cells go through the shortest
+string that reads back as the same double, and the two guards are the fix: never
+into exponential notation, and **anything that does not round-trip is left
+exactly as it arrived**. **THE CHECK ASKS THE ONLY QUESTION THAT SEPARATES
+THEM** &mdash; every existing check asks whether the pen is there and whether
+fields appear, and all of that was TRUE the whole time; `foundation-objectives.py`
+asks whether pressing the control CHANGES THE DATA, on both callers of the one
+table, because they had drifted apart in silence and only asking both found it.*
+
+*Earlier: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
 (&sect;95, spec 014). Six changes to Send a message, and the argument under five
 of them is the same one: **the page had exactly one part whose size was not
 fixed, and everything else was below it.** Every recipient rendered as a chip,

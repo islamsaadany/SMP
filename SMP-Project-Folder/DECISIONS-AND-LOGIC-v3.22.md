@@ -12071,3 +12071,122 @@ and the still-lit button measured 4.34:1 — `.editbtn:hover`, the product's
 standard secondary button, on every page, since long before this version.
 Recorded rather than quietly changed: it is one token pair governing every
 button in the platform, and §95 was asked for a page.
+
+---
+
+## 96 · The objectives editor was drawn and connected to nothing (v3.25)
+
+Islam, on a unit's Foundation with the pen open: *"I'm trying to edit the
+foundation page. I can't remove objectives."*
+
+Measured before touching anything: **20 input fields, 0 of them wired; 4 Remove
+buttons, 0 wired; the Add button, 0 wired.** Every control in that table was
+decoration. Typing an objective's name, changing its direction, correcting a
+target, removing a row and adding one all looked accepted and were discarded on
+the next repaint.
+
+### 96.1 The helper existed; it was not used
+
+This is the fault the `FIELDS` registry exists to prevent, and the comment
+three lines above the broken function says so **in the past tense**:
+
+> *"Before this the foundation rendered inputs that were bound to nothing, so
+> every edit looked accepted and was silently discarded on the next repaint."*
+
+That fix went to `fieldOr` and `inputOr` — the prose fields in the same card —
+and `koEdit` was left behind, because it builds its own `<input>` tags rather
+than calling them. **A helper that exists is not a helper that was used**, and
+nothing catches the difference: a bound field and an unbound one differ by one
+absent attribute, the page renders, no error is thrown, and every keystroke is
+accepted before being thrown away.
+
+**Why it survived so long**: `renderTempleEdit` — the group's Strategy › Temple
+— has the same table, fully wired since it was written, editing **the same
+`GROUP.keyObjectives`**. One of the two surfaces onto one list worked, so the
+list was never obviously broken; it was the unit's Foundation, where there is no
+second surface, that had nothing at all.
+
+Every cell goes through `fieldOr` / `inputOr` / `selectOr` now, so there is no
+second way to draw one of these fields and no second place to forget.
+`selectOr` is new and is the third member of that family: a `<select>` is not an
+`<input>`, `koEdit` was building its own, and that is exactly how it ended up
+building unbound ones. `data-fld` already worked for a select — the shell's
+handler reads `el.value` and asks nothing about the tag.
+
+### 96.2 Minted from the maximum, never from the count
+
+Remove the middle of KO1 · KO2 · KO3 and press Add: the count says 3, and KO3 is
+still on screen. Two rows, one id.
+
+That is not cosmetic. The authoriser compares plans **by id** (§59), a reporting
+snapshot is keyed **by id and never by position** (§48), and the rail selects on
+it. `koMint()` reads the highest number actually present and adds one. The
+group's own Temple handler had minted from the count since it was written and
+carried the same latent collision — corrected there too, through the same
+function, rather than left as the one place that still does it.
+
+### 96.3 A number Excel wrote at full precision
+
+Same message, second screenshot: a key objective reading
+**`9.6999999999999993%`**.
+
+It is not the platform's arithmetic. JavaScript prints that number as `9.7` —
+`String(9.7)` cannot produce those characters — and there is no sum, ratio or
+conversion anywhere near a target. It is the **raw text of the cell**: Excel
+writes a value's full 17-digit form whenever it came from a calculation rather
+than from somebody typing it, and `readXlsx` took `vn.textContent` and stored
+the characters.
+
+`shortestNum()` puts a numeric cell through the shortest string that parses back
+to the **same double**. Three rules, and the second two are what make it safe:
+
+- Anything already short is returned untouched.
+- **Never into exponential notation.** `-0.0000001` shortens to `-1e-7`, which
+  is the same number and the wrong thing to put in a plan target — shorter is
+  only better while it is still the spelling a person would write.
+- **Anything that does not round-trip is left exactly as it arrived.** A
+  twenty-digit identifier beyond a double's precision must never be quietly
+  rewritten by a reader — §50.6's rule, in its narrowest form that still fixes
+  the bug.
+
+It fixes what arrives from now on. The value already stored has to be retyped
+once, which needed §96.1 to be possible at all.
+
+### 96.4 The group's own objectives carry no ids
+
+Found by the check, in the moment it asked the group the same questions it asks
+a unit: all six read `null` — in the seed and in the database — because only
+rows **added** through the Temple's button have ever been given one.
+
+That was survivable while nothing minted ids into that list. It stops being
+survivable the moment this editor does, because **a list where one row is
+identified and six are not is worse than either state**. So `koSettle()` fills
+in the missing ones and never rewrites an existing one — the same rule
+`renumberUnit` already applies to a pillar's code, for the same reason: a code
+already quoted somewhere else is not ours to change.
+
+**It runs from Add and Remove, not from paint.** A reader that writes what it
+reads puts a phantom change into every save and would have every non-SMO save
+refused for ever (§42, §50.6). This only ever runs inside an edit that is
+already the group's to make.
+
+And it runs **before** the new row is minted as well as after, or the six
+id-less rows are filled in as KO1..KO6 a moment after the new row has already
+taken KO1.
+
+### 96.5 The check asks the only question that separates them
+
+`src/checks/foundation-objectives.py`. Every existing check of this page asks
+whether the pen is there and whether fields appear — `strategy-office.py` counts
+controls, `qa.py` walks the page — and **all of that was true the whole time.**
+
+So this asks the one thing that tells a wired field from an unwired one:
+**does pressing the control change the data?** Rename, both dropdowns, Add,
+Remove, the remove-then-add id collision, and that closing the pen leaves no
+editor behind — on a unit's Foundation *and* on the group's, because the two
+callers of one table had drifted apart in silence and only asking both found it.
+
+It also drove out a trap of its own: the group's tab key is `foundation` and a
+unit's is `found`. A sub key that does not exist renders the landing page, and
+every measurement below would then have been of a screen the check never opened
+(§50.6, again).

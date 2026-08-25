@@ -93,6 +93,7 @@ of it was rejected — which is the point of keeping it.
 
 | File | What it asks |
 |---|---|
+| `../../design-mockups/foundation-edit/2026-08-25_objectives-table-width.html` | Should the Foundation's objectives table leave the aspiration card and become a full-width band while the pen is open? Real screenshots at 1600px, today beside the proposal, both themes, with the width measured (696px &rarr; 1493px) and the cost stated. **Not built** &mdash; the proposal was produced by moving the block in the browser and no source was changed (&sect;96) |
 | `2026-08-23_deck-unit-logo/` | The unit lockup on the review deck &mdash; large on the cover, small in the footer of every other slide. Screenshots from the REAL deck, plus the patch that produces them. **Not built**; the sources are reverted and the build is byte-identical to the shipped file (&sect;52.8) |
 
 ### Settled — build status noted

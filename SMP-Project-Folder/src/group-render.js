@@ -1385,6 +1385,7 @@ function renderGroupFoundation(){
           true, GROUP) +
       '</div>' +
     '</div>' +
+    koBand(GROUP.keyObjectives, "foundation", "g_found", GROUP, true) +
 
     '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
@@ -1906,15 +1907,50 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
       ? '<div class="endin"><span class="boxlab">End in mind</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
-    '<div class="divide"></div>' +
-    '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
+    /* ── WHILE THE PEN IS OPEN THE TABLE IS NOT IN HERE (§96.6) ────
+       Islam: *"when I edit the objectives table the table is very tight and
+       crammed."* The Foundation is a two-column grid, so this card gets about
+       45% of the page — and it was being asked to hold a six-column table with
+       a text field in every cell. Measured at a 1537px page: the table had
+       **696px**, the objective name clipped at about twelve characters, and the
+       direction dropdown was too narrow to show its own value.
+
+       READING MODE IS UNTOUCHED. The objectives belong inside the aspiration
+       when you are reading it — the aspiration says where the unit is going and
+       the objectives say how you would know it got there — and it is only
+       AUTHORING that needs the room. So the block stays here when it is being
+       read and moves out to `koBand()` when it is being written.
+
+       DELIBERATELY NOT THE WHOLE PAGE STACKING, which is the other thing that
+       was asked about: "Who we are" and the aspiration statement are short
+       prose and read BETTER side by side. Stacking everything would push the
+       table further down the page to solve a problem it does not have. */
+    (editing ? '' : '<div class="divide"></div>' +
+      koBlock(objectives, page, acKey, owner, isGroup, false)) +
+  '</div>';
+}
+
+/* The objectives, wherever they are being drawn. One function, so the card and
+   the band cannot come to say different things about the same list. */
+function koBlock(objectives, page, acKey, owner, isGroup, editing){
+  return '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
       /* THE UNIT'S ONLY, because the group's objectives have always shown both
          and there is nothing there to toggle (§51.16). Hidden in edit for the
          same reason the layout switch is: authoring shows every field there is,
          so a control that hides one would be lying about what is stored. */
       (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
-    (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup)) +
-  '</div>';
+    (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup));
+}
+
+/* THE BAND ASKS THE SAME QUESTION THE CARD ASKS (§94). `authoring()` and not a
+   flag passed down from the caller: the viewer switcher repaints without
+   leaving modes, so the band has to be able to decide for itself that this page
+   is no longer open to whoever is now looking at it. Nothing is drawn at all
+   when it is not — the band exists only while the pen is on. */
+function koBand(objectives, page, acKey, owner, isGroup){
+  if (!authoring(page, acKey)) return '';
+  return '<div class="card koband">' +
+    koBlock(objectives, page, acKey, owner, isGroup, true) + '</div>';
 }
 
 function renderUnitFoundation(u){
@@ -1928,7 +1964,8 @@ function renderUnitFoundation(u){
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
-    '</div>';
+    '</div>' +
+    koBand(u.keyObjectives, "foundation", "u_found", u, false);
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────

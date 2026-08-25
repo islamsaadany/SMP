@@ -519,6 +519,11 @@
   .qs i.on { background:var(--gold); border-color:var(--gold); color:var(--on-fill); }
 
   .fgrid { display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start; }
+  /* THE OBJECTIVES TABLE GETS THE WINDOW WHILE IT IS BEING WRITTEN (§96.6).
+     A band beneath both columns rather than a sixth of the page inside one of
+     them: 696px to 1493px at a 1537px page. It exists only in edit mode, so
+     there is no reading-mode rule to keep in step with it. */
+  .koband { margin-top:20px; }
   @media (max-width:820px) { .fgrid { grid-template-columns:1fr; } }
   .clause { display:grid; grid-template-columns:120px 1fr; gap:10px 14px; padding:9px 0; border-bottom:1px solid var(--line-soft); }
   .clause:last-child { border-bottom:0; }

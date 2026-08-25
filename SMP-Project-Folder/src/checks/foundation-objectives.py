@@ -52,6 +52,23 @@ READ = """(where) => {
   };
 }"""
 
+BAND = """() => {
+  const t = [...document.querySelectorAll("table")].find(
+    (x) => x.textContent.includes("Compile"));
+  const grid = document.querySelector(".fgrid");
+  const band = t.closest(".koband");
+  return { inGrid: !!grid && grid.contains(t), band: !!band,
+           table: Math.round(t.getBoundingClientRect().width),
+           page: Math.round(grid.getBoundingClientRect().width) };
+}"""
+
+READBACK = """() => {
+  const g = document.querySelector(".fgrid");
+  const h = [...document.querySelectorAll(".boxlab")].find(
+    (x) => /objective/i.test(x.textContent));
+  return !!h && !!g && g.contains(h) && !!h.closest(".card");
+}"""
+
 SET_FIRST_NAME = """(v) => {
   const t = [...document.querySelectorAll("table")].find(
     (x) => x.textContent.includes("Compile"));
@@ -129,12 +146,26 @@ def side(pg, where, label):
     ck("removing the middle then adding does not mint a duplicate id",
        len(set(r5["ids"])) == len(r5["ids"]), r5["ids"])
 
+    # ── THE TABLE GETS THE WINDOW WHILE IT IS BEING WRITTEN (§96.6) ──
+    # Asserted as a RELATIONSHIP, never as a number: the table is out of the
+    # two-column grid and as wide as the page it sits on. A later change to the
+    # gutters or the grid ratio keeps this green; putting the table back inside
+    # a column does not (§53.5, §94.14).
+    w = pg.evaluate(BAND)
+    ck("editing takes the table out of the two-column grid", not w["inGrid"], w)
+    ck("into a band of its own", w["band"], w)
+    ck("as wide as the page it sits on", w["table"] > w["page"] * 0.9, w)
+
     # AND READING MODE IS UNCHANGED — a fix to an editor that alters the page
     # everybody else looks at is a different change from the one asked for.
     pg.evaluate("() => { EDIT_PAGE['foundation']=false; paint(); }")
     pg.wait_for_timeout(350)
     ck("with the pen closed there is no editor left",
        pg.evaluate("() => !document.querySelector('[data-korm],[data-koadd]')"))
+    ck("and no band either", pg.evaluate("() => !document.querySelector('.koband')"))
+    # BOTH ENDS: the objectives go back inside the aspiration, which is where
+    # they belong when somebody is reading rather than writing.
+    ck("the objectives read inside the aspiration card", pg.evaluate(READBACK))
 
 
 with sync_playwright() as pw:

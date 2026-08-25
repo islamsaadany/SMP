@@ -1212,7 +1212,25 @@ exactly as it arrived**. **THE CHECK ASKS THE ONLY QUESTION THAT SEPARATES
 THEM** &mdash; every existing check asks whether the pen is there and whether
 fields appear, and all of that was TRUE the whole time; `foundation-objectives.py`
 asks whether pressing the control CHANGES THE DATA, on both callers of the one
-table, because they had drifted apart in silence and only asking both found it.*
+table, because they had drifted apart in silence and only asking both found it.
+**AND THE TABLE GETS THE WINDOW WHILE IT IS BEING WRITTEN** (&sect;96.6):
+*"when I edit the objectives table the table is very tight and crammed."* The
+Foundation is a two-column grid, so the aspiration card gets 45% of the page and
+was holding a six-column table with a text field in every cell &mdash; **696px,
+the name clipped at twelve characters and the direction dropdown too narrow to
+show its own value**; as a band beneath both columns it has **1493px**.
+**READING MODE IS UNTOUCHED**, because the objectives belong inside the
+aspiration when you are READING it and it is only authoring that needs the room
+&mdash; `koBlock()` is the one renderer and the card and the band both call it.
+**DELIBERATELY NOT THE WHOLE PAGE STACKING**, which was the other half of the
+question: the two prose columns read BETTER side by side, and stacking them
+would push the table further down to solve a problem it does not have. Settled
+from a mockup made of the REAL platform (both sides the same build, the proposal
+produced by moving the block in the browser), with the cost &mdash; a short
+aspiration card and a gap beside "Who we are" while editing &mdash; in its own
+panel before it was agreed. The check asserts the **relationship** and never the
+number: out of the grid, in a band, as wide as the page, and back inside the
+card the moment the pen closes.*
 
 *Earlier: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
 (&sect;95, spec 014). Six changes to Send a message, and the argument under five

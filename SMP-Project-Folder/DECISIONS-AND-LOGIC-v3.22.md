@@ -12190,3 +12190,49 @@ It also drove out a trap of its own: the group's tab key is `foundation` and a
 unit's is `found`. A sub key that does not exist renders the landing page, and
 every measurement below would then have been of a screen the check never opened
 (§50.6, again).
+
+### 96.6 The table gets the window while it is being written
+
+Islam, in the same session: *"when I edit the objectives table the table is very
+tight and crammed. Do you suggest that when I edit the foundation to have the
+sections over each other, or at least split the table to be below the other
+sections to take the full page width?"*
+
+Settled from a **mockup made of the real platform** rather than a drawing
+(`design-mockups/foundation-edit/`): screenshots at 1600px, today beside the
+proposal, both themes, with the proposal produced by moving the block in the
+browser so that both sides are the same build.
+
+The Foundation is a two-column grid, so the aspiration card gets about 45% of
+the page — and it was being asked to hold a six-column table with a text field
+in every cell. Measured at a 1537px page: the table had **696px**, the objective
+name clipped at about twelve characters, and the direction dropdown was too
+narrow to show its own value. As a band it has **1493px**.
+
+**READING MODE IS UNTOUCHED.** The objectives belong inside the aspiration when
+you are reading it — the aspiration says where the unit is going and the
+objectives say how you would know it got there (§1.7's argument, unchanged) —
+and it is only authoring that needs the room. `koBlock()` is the one renderer
+and the card and the band both call it, so the two can never come to say
+different things about the same list.
+
+**DELIBERATELY NOT THE WHOLE PAGE STACKING**, which was the other half of the
+question. "Who we are" and the aspiration statement are short prose and read
+*better* side by side; stacking everything would push the table further down the
+page to solve a problem it does not have.
+
+**The cost is recorded rather than glossed**: with the table gone from it the
+Winning Aspiration card becomes short, so there is empty space beside "Who we
+are" while editing. That was on the mockup, in its own panel, before it was
+agreed.
+
+`koBand()` asks `authoring()` for itself rather than taking a flag from its
+caller (§94): the viewer switcher repaints without leaving modes, so the band
+has to be able to decide that this page is no longer open to whoever is now
+looking at it.
+
+**The check asserts the RELATIONSHIP, not the number** (§53.5, §94.14): that the
+table is out of the two-column grid, in a band, and as wide as the page it sits
+on — and, at the other end, that closing the pen leaves no band and puts the
+objectives back inside the card. A later change to the gutters or the grid ratio
+keeps it green; putting the table back inside a column does not.

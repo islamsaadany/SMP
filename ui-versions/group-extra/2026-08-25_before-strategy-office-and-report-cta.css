@@ -236,34 +236,14 @@
   .ns-group-in { grid-template-columns:repeat(3,1fr); gap:16px 26px; }
   @media (max-width:760px) { .ns-group-in { grid-template-columns:repeat(2,1fr); } }
 
-  /* Health band legend.
-
-     SMALLER THAN THE BUTTONS THAT RIDE IN IT (§93.9). Islam, having seen the
-     buttons moved out of it and asked for them back: "shrink the reading
-     colours a bit in font size so the buttons are more obvious."
-
-     It was 12.5px beside 12px uppercase controls — near enough identical, so
-     the row had no order to read it in. At 10.5px the legend is plainly the
-     quietest thing in its own row, which is what a reference strip should be:
-     Report shouts, Presentation speaks, the legend explains. THE DOT COMES
-     DOWN WITH THE TEXT — a 13px circle beside 10.5px type stops being a swatch
-     and becomes a bullet.
-
-     10.5px IS THE FLOOR, AND IT IS THE PRODUCT'S OWN. Islam asked for one more
-     step down after seeing 11px, and this is where it stops: 10.5px is
-     `--fs-label`-adjacent and the size every uppercase key in the platform
-     already wears, so the legend is now as quiet as anything the product says
-     rather than quieter than everything. Its label rides at 9.5px — the
-     smallest type in the design language (`--fs-micro`) — and there is nothing
-     below that to take. The row loses a little more height with the padding,
-     which is the point: a legend should cost the page as little as it can. */
-  .bands { display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:10.5px;
+  /* Health band legend */
+  .bands { display:flex; gap:20px; flex-wrap:wrap; align-items:center; font-size:12.5px;
            color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
-           border-radius:var(--r); padding:9px 16px; margin:0 0 24px; }
-  .bands b { font-size:9.5px; letter-spacing:.11em; text-transform:uppercase;
+           border-radius:var(--r); padding:11px 16px; margin:0 0 24px; }
+  .bands b { font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
              color:var(--ink-3); font-weight:700; margin-right:2px; }
-  .bands span { display:flex; align-items:center; gap:6px; }
-  .bands i { width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .bands span { display:flex; align-items:center; gap:7px; }
+  .bands i { width:13px; height:13px; border-radius:50%; display:inline-block; }
   .bands i.dash { border:1px dashed var(--none); background:none; }
 
   /* ── Section separation ───────────────────────────────── */
@@ -484,20 +464,6 @@
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
   .editbtn:hover { background:var(--attn-bg); }
-  /* THE ONE SOLID BUTTON (§93). Its ink comes from the same pair as its fill,
-     so neither theme can end up with white on white — see the note beside the
-     tokens in _shared.css. The hover moves the FILL rather than adding one,
-     because there is already a fill to move. */
-  .editbtn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
-  .editbtn.cta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
-  /* The badge that rides inside it — "Submitted" — sits on the accent rather
-     than on the page, so it takes the button's own ink.
-     A WASH OF WHITE WOULD LIGHTEN THE GROUND UNDER ITS OWN TEXT — white on
-     the lightened orange measures about 4.2:1, under the line. An outline
-     keeps the measured pair (5.54 light, 7.26 dark) and still reads as a
-     chip. */
-  .editbtn.cta .pill { background:none; color:var(--cta-ink);
-                       border:1px solid var(--cta-ink); }
   details.cfgwrap[open] .editbtn::after { content:" \2014 close"; }
   .cfg-body { padding:0 20px 20px; border-top:1px solid var(--line-soft); }
 

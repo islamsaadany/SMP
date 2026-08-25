@@ -56,29 +56,13 @@ function arranging(scope, unitKey){
    OLD name across every source, including the ones the change was not about.
 
    Who may reorder, restated in roles: the SMO anywhere; and within one unit,
-   whoever may edit that unit's plan — which since §93 is the office and
-   nobody else. Asked through mayAuthor() so the shared rule stays the single
-   answer.
-
-   ── REORDERING IS AUTHORING (§93) ────────────────────────────────
-   This used to end at `grantAt("u_plan", unitKey) === "edit"`, which a unit
-   owner and a strategy custodian both hold on their own unit — so the pen was
-   closed to them and the DRAG HANDLES were not, and the order of a plan is as
-   much a part of what was agreed as its words. It was not even a working
-   grant: `lib/authorize.js` compares the row ids IN ORDER, so every one of
-   those drags was classified as a plan change and REFUSED on save. The rows
-   moved on screen, the save came back refused, and §63.3's explicit Arrange
-   button — kept so a BU head who has no pen could still reorder — had been
-   handing that to people the server would never accept it from.
-
-   AND `hasRole("super")` WAS THE TENTH PLACE MEANING "the office" (§89). The
-   SMO team could not arrange anything at group level: not a bug anybody would
-   report, because the only sign is a control that is not there. */
+   whoever may edit that unit's plan — its owner or its custodian — which is
+   the same question `mayEditPlan`-style gates already ask elsewhere. Asked
+   through grantAt() so the access matrix stays the single answer. */
 function canArrange(scope, unitKey){
-  /* Units, capabilities and themes at group level: the office's, with no
-     page behind it to ask a grant of. */
-  if (scope === "group") return inOffice();
-  return !!unitKey && mayAuthor("u_plan", unitKey);
+  if (hasRole("super")) return true;
+  if (scope === "group") return false;          /* units, capabilities, themes */
+  return !!unitKey && grantAt("u_plan", unitKey) === "edit";
 }
 
 function handle(label){

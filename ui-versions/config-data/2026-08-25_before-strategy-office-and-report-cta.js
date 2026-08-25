@@ -3490,17 +3490,10 @@ function reaches(unitKey){
 /* A plan ARRIVES by upload and is corrected by the SMO alone (§22, §31). A
    unit owner holding edit on their own unit still cannot rewrite the plan they
    are measured against — that is the point of the rule, and it does not depend
-   on a grant.
-
-   §93 WIDENED IT TO THE WHOLE STRATEGY TAB, so the sentence above is now one
-   case of a general one and this function is that one asked about the plan.
-   `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
-   answer is the shared file's so the screen and the server cannot drift. */
-function mayAuthor(acKey, target){
-  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+   on a grant. */
+function mayEditPlan(){
+  return inOffice() && grant("u_plan") === "edit";
 }
-function mayEditPlan(){ return mayAuthor("u_plan"); }
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person

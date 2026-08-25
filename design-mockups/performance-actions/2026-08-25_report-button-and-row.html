@@ -139,6 +139,15 @@
             color:var(--cta); font-weight:700; }
   .ask p { margin:0; font-size:13.5px; line-height:1.65; color:var(--ink-2); }
 
+  .blabel .tag.gone { border-color:var(--rule); color:var(--pen);
+                     text-decoration:line-through; }
+  .screen.dim { opacity:.55; }
+  /* The built legend: smaller than the buttons riding in it. */
+  .bands.small { font-size:10.5px; gap:14px; padding:9px 16px; }
+  .bands.small b { font-size:9.5px; }
+  .bands.small span { gap:6px; }
+  .bands.small i { width:10px; height:10px; }
+
   @media (max-width:720px) { .scores { grid-template-columns:1fr; } }
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
 </style>
@@ -147,10 +156,11 @@
 
   <header class="top">
     <div class="kick">SMP &middot; mockup &middot; 25 Aug 2026</div>
-    <h1>The two buttons come out of the legend, and Report goes solid</h1>
+    <h1>Report goes solid, and the legend gets out of its way</h1>
     <p class="lede">A unit&rsquo;s <b>Performance</b> page, top of the panel, during an open
-      cycle. Only the action row changes &mdash; the legend, the score cards and everything
-      below them are untouched.</p>
+      cycle. Three states: what it was, the row that was tried and reversed, and what is
+      built. Only that one row changes &mdash; the score cards and everything below them are
+      untouched.</p>
   </header>
 
   <div class="block">
@@ -193,10 +203,10 @@
 
   <div class="block">
     <div class="blabel">
-      <h2>Proposed</h2><span class="tag next">v3.25</span>
-      <p>Their own row above the strip, right-aligned. Report is a solid orange call to action.</p>
+      <h2>Tried, and put back</h2><span class="tag gone">rejected</span>
+      <p>Their own row above the strip. Drawn, built, looked at &mdash; and reversed the same day.</p>
     </div>
-    <div class="screen"><div class="inner">
+    <div class="screen dim"><div class="inner">
       <div class="pageact">
         <button class="editbtn cta" type="button">Report</button>
         <button class="editbtn" type="button">Presentation <span class="dlcar" aria-hidden="true">&#9662;</span></button>
@@ -221,13 +231,58 @@
       </div>
     </div></div>
     <div class="why">
-      <p><strong>The row already exists in the product.</strong> A supporting function&rsquo;s
-        Performance page has carried its Report and Presentation buttons in exactly this row
-        (<code>.pageact</code>) since &sect;63. So this is the unit catching up with the
-        function rather than a new component &mdash; &sect;53.5, the two halves being made the
-        same product again.</p>
-      <p><strong>The legend goes back to being only a legend</strong>, full width, and stops
-        deciding where the actions sit when it wraps.</p>
+      <p>Islam, after looking at it: <em>&ldquo;I think we can leave the 2 buttons in the same
+        line with the reading colours and we can even shrink the reading colours a bit in font
+        size so the buttons are more obvious.&rdquo;</em></p>
+      <p><strong>He is right, and the reason is worth keeping.</strong> The problem was never
+        WHERE the buttons were &mdash; it was that they read as quietly as the legend beside
+        them: two 12px uppercase controls against a 12.5px reference strip, all the same weight
+        of grey. Moving them spent a whole row of vertical space to solve a contrast problem.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel">
+      <h2>Built</h2><span class="tag next">v3.25</span>
+      <p>Same line as before. The legend drops to 10.5px so the buttons are the loudest thing
+        in their own row.</p>
+    </div>
+    <div class="screen"><div class="inner">
+      <div class="bands small">
+        <b>Reading the colours</b>
+        <span><i style="background:var(--good)"></i> On track &mdash; 85%+</span>
+        <span><i style="background:var(--attn)"></i> Needs attention &mdash; 70&ndash;84%</span>
+        <span><i style="background:var(--warn)"></i> At risk &mdash; 50&ndash;69%</span>
+        <span><i style="background:var(--bad)"></i> Off track &mdash; below 50%</span>
+        <span class="bands-act">
+          <button class="editbtn cta" type="button">Report</button>
+          <button class="editbtn" type="button">Presentation <span class="dlcar" aria-hidden="true">&#9662;</span></button>
+        </span>
+      </div>
+      <div class="scores">
+        <div class="card"><div class="score-h"><h4>Key objectives performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">78%</span></div>
+        <div class="card"><div class="score-h"><h4>Pillars performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">74%</span></div>
+        <div class="card"><div class="score-h"><h4>Execution performance</h4>
+          <span class="pill attn">Needs attention</span></div>
+          <span class="big" style="color:var(--attn)">81%</span></div>
+      </div>
+    </div></div>
+    <div class="why">
+      <p><strong>One row, three volumes.</strong> Report shouts, Presentation speaks, the legend
+        explains &mdash; 12px, 12px outlined, 10.5px quiet grey, with the label at 9.5px. The
+        colour dots come down to 10px with the text; a 13px circle beside 10.5px type stops
+        being a swatch and becomes a bullet.</p>
+      <p><strong>10.5px is the floor.</strong> It is the size every uppercase key in the
+        platform already wears, and the label at 9.5px is the smallest type in the design
+        language &mdash; so the legend is now as quiet as anything the product says, rather
+        than quieter than everything.</p>
+      <p>The check asserts the <strong>order of loudness</strong> rather than a position &mdash;
+        the legend must measure smaller than the buttons beside it. That is what was actually
+        wrong, and it is what a later stylesheet edit could silently undo.</p>
     </div>
   </div>
 
@@ -270,13 +325,14 @@
   </div>
 
   <div class="ask">
-    <h3>What I need a yes on</h3>
-    <p>1 &middot; The buttons move to their own right-aligned row above the legend, on a
-      unit&rsquo;s Performance page. The function&rsquo;s page already looks like this.</p>
-    <p>2 &middot; Report becomes a solid orange fill; Presentation stays the outlined button
-      it is, so the two do not compete.</p>
-    <p>3 &middot; The orange is the palette&rsquo;s own, per the table above &mdash; it changes
-      with the tenant&rsquo;s branding rather than being fixed at this hex.</p>
+    <h3>What was built</h3>
+    <p>1 &middot; Report and Presentation stay on the legend&rsquo;s line, where they were.</p>
+    <p>2 &middot; Report is a solid orange fill; Presentation stays outlined, so the two do not
+      compete.</p>
+    <p>3 &middot; The legend drops from 12.5px to 10.5px, its label to 9.5px, and its colour
+      dots to 10px &mdash; so the buttons are the loudest thing in the row.</p>
+    <p>4 &middot; The orange is the palette&rsquo;s own, per the table above: it changes with
+      the tenant&rsquo;s branding rather than being fixed at this hex.</p>
   </div>
 
 </div>

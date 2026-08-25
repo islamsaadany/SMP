@@ -63,7 +63,7 @@ the line that changes — not the code.
 | Labels, bands, capabilities | Setup |
 | Weighting — the factors and each unit's values | A group decision, not a unit's |
 | The group's aspiration, end in mind, mission, clauses, key objectives, themes, horizon | The group's own strategy |
-| **A unit's plan** — its pillars, measures, tactics, targets, directions, SWOT, key objectives | §31: a plan is authored by upload and corrected by the SMO alone. A plan correctable by the person measured against it is a different product. |
+| **The whole Strategy tab of a unit or a function** — pillars, measures, tactics, targets, directions, key objectives; the aspiration, end in mind and clauses; the SWOT; a capability's definition and its projects | §31, widened by §93 (Islam, 2026-08-25). A plan correctable by the person measured against it is a different product — and so is an *aspiration* correctable by them. The five pages are `STRATEGY_PAGES` in `lib/rules.js`; `mayAuthorPage()` is the one question the screen and the server both ask. |
 | Opening, chasing and closing a cycle; imports; archived plans | The cycle is run from the SMO's side |
 
 ### A unit's own people may change
@@ -71,10 +71,13 @@ the line that changes — not the code.
 | | Who exactly |
 |---|---|
 | **The reporting** — a measure's actual, its progress and its note; a tactic's status, its actual and its note | The unit's owner, its strategy custodian, and any contributor attached to that unit — plus the SMO |
-| The unit's own foundation words, where the platform lets them be typed | Owner and custodian |
+| ~~The unit's own foundation words~~ | **Reversed by §93** — the aspiration, the end in mind and the clauses moved to the SMO's list above. Kept here struck through rather than deleted: what changed is the answer, and the question was a real one. |
 
 A supporting function's reporting works the same way, for its head and its
-custodian.
+custodian. **Reporting is deliberately untouched by §93**: the unit of that
+decision is the PAGE and not the area, because `a_unit_own` also carries
+Performance and My reporting — closing the area would have taken reporting away
+in order to withhold authoring.
 
 ### Rules that override the table
 

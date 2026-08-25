@@ -349,13 +349,7 @@
     ]
   };
 
-  /* NULL, NOT "group" (§93). A literal here was the whole of "everyone opens
-     on the group's Performance page": paintUnits() only corrects `current`
-     when it names somewhere this viewer cannot reach, and the group is
-     reachable by nearly everybody, so the correction never ran. Starting at
-     null makes the first paint ask entryDest() the same way every later one
-     does. */
-  var current = null, currentSub = null;
+  var current = "group", currentSub = "performance";
   /* WHOSE report is open, or null. A target rather than a boolean: the page is
      per unit or per function, and a flag would follow you onto the next one
      (§63.1). Dropped by every navigation, exactly as the edit modes are. */
@@ -746,15 +740,7 @@
      in §28, the function did not. The tab and section keys are the only
      difference, so they are two variables rather than two branches. */
   function entrySub(k){
-    /* THE TARGET IS THE DESTINATION BEING ASKED ABOUT, NOT THE ONE ON SCREEN.
-       `allowed()` falls back to the global TARGET, and both callers ask BEFORE
-       paint() has moved it — the nav handler sets `current` and calls straight
-       in, and paintUnits() runs ahead of the line that derives TARGET. So a
-       unit head walking from the group to their own unit had their unit's tabs
-       judged against "group". Exactly the fault the note beside TARGET in
-       paint() records, in the one place that had not been corrected. */
-    var t = (!k || k === "setup" || k === "manage") ? "group" : k;
-    var d = allowed(defsFor(k), t);
+    var d = allowed(defsFor(k));
     if (!d.length) return null;
     /* A COMPANY OPENS ON PERFORMANCE, and there is nothing else to open.
        §28's rule — a unit opens on what was AGREED, not on the score — is about
@@ -764,49 +750,12 @@
       var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
       var strat = d.filter(function(x){ return x.k === tab; })[0];
       if (strat) {
-        var secs = allowed(strat.sections(fn ? k : UNITS[k]), t);
+        var secs = allowed(strat.sections(fn ? k : UNITS[k]));
         if (secs.some(function(x){ return x.k === want; })) CURSEC[tab] = want;
         if (secs.length) return tab;
       }
     }
     return d[0].k;
-  }
-
-  /* ── WHERE A PERSON OPENS (§93, Islam 2026-08-25) ─────────────────
-     "the default opening page for the users is on the plan in the strategy."
-
-     Half of that has been true since §28: a unit opens on Strategy › Plan and
-     a function on Strategy › Projects. What was not true is WHICH DESTINATION
-     opens — the platform started every session on the GROUP's Performance
-     page, so a unit head signed in, read a group score they do not own, and
-     had to find their own unit before reaching the plan. `entrySub()` decides
-     the page; this decides the door.
-
-     IT IS WHERE THEY SIT, WHICH THE PLATFORM ALREADY KNOWS. `personAt()` is
-     the one pair that answers "where does this person sit" (§54) — the same
-     answer the register shows and the file importer writes, so a person moved
-     to another unit opens on that unit with nothing else to change.
-
-     ATTACHED TO THE GROUP MEANS THE GROUP — and "group" is a destination key
-     like any other, so it needs no special case. The SMO and the group CEO
-     both sit there and the group's Performance page IS their own place; they
-     are not sent into a business unit they do not run.
-
-     THAT LAST LINE IS NOT DECORATION. Written with `at !== "group"` excluded
-     as a special case, the SMO fell through to "the first door in the
-     navigation" — and for a tenant with two companies the first entry of that
-     row is the group/company DROPDOWN, which carries no key of its own, so
-     the first keyed door is the first business unit. The SMO opened on Mobile.
-     Found by the check, in the one line that looked too obvious to assert.
-
-     AND IT IS CHECKED, NEVER ASSUMED. `reach` is the list paintUnits has just
-     built of every destination this viewer can actually open; somebody
-     attached to a unit their roles no longer reach falls back to the first
-     door in the navigation, which is what happened before this existed. */
-  function entryDest(reach, dests){
-    var at = personAt(viewer());
-    if (at && reach.indexOf(at) > -1) return at;
-    return dests.length ? dests[0].k : null;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
@@ -838,12 +787,7 @@
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
-      current = entryDest(everything, dests);
-      /* The PAGE as well as the door, and by the same call the navigation
-         makes — otherwise the first paint lands on whichever tab happens to
-         be first (Strategy) and whichever section happens to be first inside
-         it (Foundation), which is not the plan. */
-      currentSub = current ? entrySub(current) : null;
+      current = dests.length ? dests[0].k : null;
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
       if (t.folds) {
@@ -4497,13 +4441,6 @@
   }
   fillViewers();
   sel.addEventListener("change", function(){
-    /* leaveModes() — a viewer switch is a navigation, and every other one in
-       the platform drops its modes (§63.1). This did not, so an open Foundation
-       pen followed the SMO into a custodian's view and the fields stayed
-       editable for somebody the rule closes them to (§93). The same fault the
-       unit-to-unit handler fixed for edit modes, on the one path that skipped
-       it. */
-    leaveModes();
     VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
   });
 

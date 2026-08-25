@@ -130,6 +130,17 @@
      palette the layer proves itself against — but it is NO LONGER the bare
      :root default: see FOREFRONT below. */
   :root[data-palette="slate"], :root[data-palette="slate"][data-theme="light"] {
+    /* ── THE CALL TO ACTION (§93) ─────────────────────────────────
+       ONE solid fill in the product, worn by Report during an open cycle.
+       Two tokens, because §38.4 cuts both ways: the bright orange that works
+       as a FILL on a card cannot carry white type (2.5:1), and the deep
+       orange that works as TYPE is too dark to read the page's own ink off.
+       So light themes take the deep orange with white on it and dark themes
+       take the bright one with the page's near-black — measured, not guessed.
+       Both values are already in this palette; nothing new is invented, so a
+       tenant's branding recolours the button with everything else. */
+    --cta:#C2410C; --cta-ink:#FFFFFF; --cta-hover:#9A3412;
+
     --good-tx:#047857; --attn-tx:#B45309; --warn-tx:#C2410C; --bad-tx:#B91C1C;
     --on-accent:#FFFFFF; --panel-accent:#A5B4FC;
     --panel-quiet:#94A3B8; --panel-hover:#1E293B;
@@ -151,6 +162,8 @@
     --on-fill:#FFFFFF;
   }
   :root[data-palette="slate"][data-theme="dark"] {
+    --cta:#FB923C; --cta-ink:#0B1120; --cta-hover:#FDBA74;
+
     --good-tx:#6EE7B7; --attn-tx:#FCD34D; --warn-tx:#FDBA74; --bad-tx:#FCA5A5;
     --on-accent:#0B1120; --panel-accent:#A5B4FC;
     --panel-quiet:#8B97A9; --panel-hover:#16203A;
@@ -179,6 +192,8 @@
      when nothing has decided must be what the product actually is. */
   :root,
   :root[data-palette="forefront"], :root[data-palette="forefront"][data-theme="light"] {
+    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
+
     --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
     --on-accent:#16325C; --panel-accent:#E6C65C;
     --panel-quiet:#B7C4D8; --panel-hover:#24487A;
@@ -199,6 +214,8 @@
     --on-fill:#FFFFFF;
   }
   :root[data-palette="forefront"][data-theme="dark"] {
+    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
+
     --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
     --on-accent:#14161A; --panel-accent:#E6C65C;
     --panel-quiet:#9AA6B8; --panel-hover:#1A2030;
@@ -710,14 +727,34 @@
   .ns-group-in { grid-template-columns:repeat(3,1fr); gap:16px 26px; }
   @media (max-width:760px) { .ns-group-in { grid-template-columns:repeat(2,1fr); } }
 
-  /* Health band legend */
-  .bands { display:flex; gap:20px; flex-wrap:wrap; align-items:center; font-size:12.5px;
+  /* Health band legend.
+
+     SMALLER THAN THE BUTTONS THAT RIDE IN IT (§93.9). Islam, having seen the
+     buttons moved out of it and asked for them back: "shrink the reading
+     colours a bit in font size so the buttons are more obvious."
+
+     It was 12.5px beside 12px uppercase controls — near enough identical, so
+     the row had no order to read it in. At 10.5px the legend is plainly the
+     quietest thing in its own row, which is what a reference strip should be:
+     Report shouts, Presentation speaks, the legend explains. THE DOT COMES
+     DOWN WITH THE TEXT — a 13px circle beside 10.5px type stops being a swatch
+     and becomes a bullet.
+
+     10.5px IS THE FLOOR, AND IT IS THE PRODUCT'S OWN. Islam asked for one more
+     step down after seeing 11px, and this is where it stops: 10.5px is
+     `--fs-label`-adjacent and the size every uppercase key in the platform
+     already wears, so the legend is now as quiet as anything the product says
+     rather than quieter than everything. Its label rides at 9.5px — the
+     smallest type in the design language (`--fs-micro`) — and there is nothing
+     below that to take. The row loses a little more height with the padding,
+     which is the point: a legend should cost the page as little as it can. */
+  .bands { display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-size:10.5px;
            color:var(--ink-2); background:var(--surface); border:1px solid var(--line);
-           border-radius:var(--r); padding:11px 16px; margin:0 0 24px; }
-  .bands b { font-size:10.5px; letter-spacing:.11em; text-transform:uppercase;
+           border-radius:var(--r); padding:9px 16px; margin:0 0 24px; }
+  .bands b { font-size:9.5px; letter-spacing:.11em; text-transform:uppercase;
              color:var(--ink-3); font-weight:700; margin-right:2px; }
-  .bands span { display:flex; align-items:center; gap:7px; }
-  .bands i { width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .bands span { display:flex; align-items:center; gap:6px; }
+  .bands i { width:10px; height:10px; border-radius:50%; display:inline-block; }
   .bands i.dash { border:1px dashed var(--none); background:none; }
 
   /* ── Section separation ───────────────────────────────── */
@@ -938,6 +975,20 @@
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
   .editbtn:hover { background:var(--attn-bg); }
+  /* THE ONE SOLID BUTTON (§93). Its ink comes from the same pair as its fill,
+     so neither theme can end up with white on white — see the note beside the
+     tokens in _shared.css. The hover moves the FILL rather than adding one,
+     because there is already a fill to move. */
+  .editbtn.cta { background:var(--cta); border-color:var(--cta); color:var(--cta-ink); }
+  .editbtn.cta:hover { background:var(--cta-hover); border-color:var(--cta-hover); }
+  /* The badge that rides inside it — "Submitted" — sits on the accent rather
+     than on the page, so it takes the button's own ink.
+     A WASH OF WHITE WOULD LIGHTEN THE GROUND UNDER ITS OWN TEXT — white on
+     the lightened orange measures about 4.2:1, under the line. An outline
+     keeps the measured pair (5.54 light, 7.26 dark) and still reads as a
+     chip. */
+  .editbtn.cta .pill { background:none; color:var(--cta-ink);
+                       border:1px solid var(--cta-ink); }
   details.cfgwrap[open] .editbtn::after { content:" \2014 close"; }
   .cfg-body { padding:0 20px 20px; border-top:1px solid var(--line-soft); }
 
@@ -2841,7 +2892,11 @@
 
   /* Arrange rides in the legend row rather than a row of its own. */
   .bands { justify-content:flex-start; }
-  .bands-act { margin-left:auto; display:inline-flex; }
+  /* TWO CONTROLS NOW, NOT ONE (§93.9). Report and Presentation share this
+     slot on a unit's Performance page, so it needs a gap of its own — without
+     one they touch, and a solid button touching an outlined one reads as a
+     single split control. */
+  .bands-act { margin-left:auto; display:inline-flex; gap:8px; align-items:center; }
   .bands-act .editbtn { padding:5px 14px; }
 
   /* The two buttons that leave hold the far right of the first line, grouped
@@ -4882,6 +4937,54 @@ THEME.apply();
     return !isOffice(w, target);
   }
 
+  /* ── 4 · THE STRATEGY TAB IS AUTHORED BY THE OFFICE (§93) ─────────
+     Islam, 2026-08-25: "for user access don't allow anyone else other than
+     the SMO and super user to edit the strategy tab of the units or the
+     functions." Asked whether he meant the plan alone or the whole tab, he
+     answered by saying he had signed in as a strategy custodian and FOUND
+     THE PENS — so it is the tab.
+
+     THIS EXTENDS §31 RATHER THAN INVENTING A RULE. A plan arrives by upload
+     and is corrected by the SMO alone; that argument — a plan correctable by
+     the person measured against it is a different decision from one
+     correctable by its custodian — is exactly as true of the aspiration the
+     objectives hang off, the SWOT the pillars were reasoned from, and the
+     definition of a capability. Only the Plan had ever been closed, so a
+     custodian could not touch the measures and could rewrite the aspiration
+     above them. That is not a smaller grant, it is a stranger one.
+
+     WHY A LIST AND NOT A TEST ON THE AREA. `a_unit_own` also carries
+     Performance and My reporting, which the unit's own people must keep —
+     closing the area would take reporting away to withhold authoring. So the
+     unit of the decision is the PAGE, and the pages are named here once.
+
+     IT FAILS CLOSED FOR EVERY PEN. `penBtn()` and `editBar()` in the platform
+     both ask this rather than the raw grant, so a pen added to a strategy
+     page later is gated on the day it is added and not on the day somebody
+     remembers (§42's rule, on the screen instead of the server).
+
+     NOT ON THIS LIST, DELIBERATELY:
+     · `g_found`, `g_temple`, `g_weight` — the GROUP's own pages. Islam said
+       "of the units or the functions", and `a_group` edit is already the
+       office's by default.
+     · `u_report`, `k_report`, `u_perf`, `k_perf` — reporting IS the unit's
+       job, and this must take nothing away from the people entering figures.
+     · `u_src` (Strategy › Who enters) — it is a section of the tab, but it is
+       hidden behind a tenant switch that is OFF by default, and turning it on
+       is the office deliberately handing naming to the custodian (spec 008
+       §3B). A rule cannot close a door somebody has to open on purpose. */
+  var STRATEGY_PAGES = ["u_found", "u_anal", "u_plan", "k_found", "k_proj"];
+  function isStrategyPage(k) { return STRATEGY_PAGES.indexOf(k) > -1; }
+
+  /* May this person AUTHOR this page — write what was agreed, as opposed to
+     reporting against it? The grant still has to say edit: this narrows, it
+     never widens, so a tenant that has closed a page to the office keeps it
+     closed. */
+  function mayAuthorPage(w, person, pageKey, target) {
+    if (isStrategyPage(pageKey) && !isOffice(w, person)) return false;
+    return grantAtPage(w, person, pageKey, target) === "edit";
+  }
+
   /* ── 5 · Figure sets (§16.7, spec 008) ───────────────────────────
      Many figures are not the business unit's number. Revenue and margin exist
      in Finance before a unit is asked for them, and asking the unit to type
@@ -5165,6 +5268,8 @@ THEME.apply();
     mayEditAccess: mayEditAccess, mayDestroy: mayDestroy,
     isOffice: isOffice, isOfficeRole: isOfficeRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
+    STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
+    mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
     editingRoles: editingRoles, onlyVia: onlyVia,
     OWN_LINES_ONLY: OWN_LINES_ONLY, onlyOwnLines: onlyOwnLines,
@@ -9975,10 +10080,17 @@ function reaches(unitKey){
 /* A plan ARRIVES by upload and is corrected by the SMO alone (§22, §31). A
    unit owner holding edit on their own unit still cannot rewrite the plan they
    are measured against — that is the point of the rule, and it does not depend
-   on a grant. */
-function mayEditPlan(){
-  return inOffice() && grant("u_plan") === "edit";
+   on a grant.
+
+   §93 WIDENED IT TO THE WHOLE STRATEGY TAB, so the sentence above is now one
+   case of a general one and this function is that one asked about the plan.
+   `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
+   answer is the shared file's so the screen and the server cannot drift. */
+function mayAuthor(acKey, target){
+  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
+    target === undefined ? TARGET : target);
 }
+function mayEditPlan(){ return mayAuthor("u_plan"); }
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person
@@ -11387,13 +11499,29 @@ function arranging(scope, unitKey){
    OLD name across every source, including the ones the change was not about.
 
    Who may reorder, restated in roles: the SMO anywhere; and within one unit,
-   whoever may edit that unit's plan — its owner or its custodian — which is
-   the same question `mayEditPlan`-style gates already ask elsewhere. Asked
-   through grantAt() so the access matrix stays the single answer. */
+   whoever may edit that unit's plan — which since §93 is the office and
+   nobody else. Asked through mayAuthor() so the shared rule stays the single
+   answer.
+
+   ── REORDERING IS AUTHORING (§93) ────────────────────────────────
+   This used to end at `grantAt("u_plan", unitKey) === "edit"`, which a unit
+   owner and a strategy custodian both hold on their own unit — so the pen was
+   closed to them and the DRAG HANDLES were not, and the order of a plan is as
+   much a part of what was agreed as its words. It was not even a working
+   grant: `lib/authorize.js` compares the row ids IN ORDER, so every one of
+   those drags was classified as a plan change and REFUSED on save. The rows
+   moved on screen, the save came back refused, and §63.3's explicit Arrange
+   button — kept so a BU head who has no pen could still reorder — had been
+   handing that to people the server would never accept it from.
+
+   AND `hasRole("super")` WAS THE TENTH PLACE MEANING "the office" (§89). The
+   SMO team could not arrange anything at group level: not a bug anybody would
+   report, because the only sign is a control that is not there. */
 function canArrange(scope, unitKey){
-  if (hasRole("super")) return true;
-  if (scope === "group") return false;          /* units, capabilities, themes */
-  return !!unitKey && grantAt("u_plan", unitKey) === "edit";
+  /* Units, capabilities and themes at group level: the office's, with no
+     page behind it to ask a grant of. */
+  if (scope === "group") return inOffice();
+  return !!unitKey && mayAuthor("u_plan", unitKey);
 }
 
 function handle(label){
@@ -15094,7 +15222,17 @@ function reportBtn(target){
   if (!r) return "";
   var ac = String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
   if (grantAt(ac, target) === "none") return "";
-  return '<button class="editbtn" data-report="' + esc(target) + '"' +
+  /* ── SOLID, NOT OUTLINED (§93, Islam 2026-08-25) ────────────────
+     "the report button in performance make it all orange to obvious for the
+     user." It is the one thing somebody came to this page to DO during a
+     cycle, and it was wearing the same quiet outline as Presentation, Arrange
+     and every other secondary control in the product.
+
+     THE ACCENT BUDGET IS NOT BROKEN BY THIS (§41). It is one solid fill, on
+     one button, drawn only while a cycle is OPEN and only for somebody who
+     may report — so the page is back to its quiet register for the rest of
+     the quarter, which is what a budget means. */
+  return '<button class="editbtn cta" data-report="' + esc(target) + '"' +
     ' title="Enter this cycle\u2019s figures">Report' + r.badge + '</button>';
 }
 
@@ -15947,6 +16085,8 @@ function renderTemple(){
 }
 
 function renderGroupFoundation(){
+  /* One question for every field on the page, asked once (§93). */
+  var gpg = authoring("foundation", "g_found") ? "foundation" : null;
   /* `return` ON ITS OWN LINE RETURNED UNDEFINED. Automatic semicolon insertion
      ended the statement there and left everything below as dead code, so the
      group's Foundation page has rendered the literal word "undefined" since
@@ -15961,11 +16101,11 @@ function renderGroupFoundation(){
       '<dl style="margin:0">' +
       GROUP.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
-          fieldOr("foundation", c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       '<div class="fcol">' +
         '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
-        '<p class="statement">' + fieldOr("foundation", GROUP.mission, "big-field",
+        '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
           function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
@@ -15977,7 +16117,7 @@ function renderGroupFoundation(){
     '<div class="valgrid">' +
       (GROUP.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
-          '<div class="valcard-body">' + fieldOr("foundation", v.def, "",
+          '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
     '</div></div>';
@@ -16134,6 +16274,25 @@ function renderUnitPerformance(u){
     "What each " + plWord.toLowerCase().replace(/s$/, "") + "'s own measures average to", plDrill);
   var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
 
+  /* ── THE ACTIONS STAY IN THE LEGEND, AND THE LEGEND GETS QUIETER
+     (§93.9, REVERSING §93.8's first half the same day) ───────────────
+     Asked for a row of their own — "bring the 2 buttons above the reading
+     colours rectangle" — and then, having looked at it: "I think we can leave
+     the 2 buttons in the same line with the reading colours and we can even
+     shrink the reading colours a bit in font size so the buttons are more
+     obvious."
+
+     WHICH IS THE BETTER ANSWER TO THE SAME COMPLAINT, and it is worth saying
+     why rather than just doing it. The problem was never WHERE the buttons
+     were, it was that they read as quietly as the legend they sat beside —
+     two 12px uppercase controls against a 12.5px reference strip, all of it
+     the same weight of grey. Moving them bought a whole row of vertical space
+     to solve a CONTRAST problem. Making the legend smaller than the buttons
+     solves it where it is: the row now has one thing that shouts, one thing
+     that speaks and one thing that whispers, in that order.
+
+     So `.bands` drops to 11px / 9.5px and the dot with it, Report keeps its
+     solid fill, and the page keeps the row. See `group-extra.css`. */
   return bands(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
@@ -16195,8 +16354,22 @@ function renderUnitPerformance(u){
 
 /* A bare button, right-aligned above the columns. The labelled bar it replaced
    announced a section that did not need announcing. */
+/* IS THIS PAGE ACTUALLY OPEN FOR AUTHORING RIGHT NOW (§93)?
+   `EDIT_PAGE` is a switch, and a switch survives things a grant does not —
+   the viewer switcher repaints without leaving modes, and a person's roles
+   can change under an open pane. So the fields ask the same question the pen
+   asked rather than trusting the flag the pen set, which is §48.2 applied to
+   a mode instead of a button. It takes the ACCESS KEY and not just the page
+   name, because the group's Foundation and a unit's share one page key and
+   only one of them is a strategy page. */
+function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
+
+/* mayAuthor(), NOT the raw grant (§93). Every "Edit" bar and every pen in
+   the platform asks this one question, so a strategy page cannot acquire a
+   pen that is open to somebody the rule closes it to — the gate is on the
+   control, not on each of the eleven call sites that draw one. */
 function editBar(page, acKey){
-  if (grant(acKey || "u_found") !== "edit") return '';
+  if (!mayAuthor(acKey || "u_found")) return '';
   return '<div class="pageact"><button class="editbtn" data-page="' + page + '">' +
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
@@ -16216,7 +16389,7 @@ function editBar(page, acKey){
 
    Same data-page contract as editBar, so the shell's wiring is untouched. */
 function penBtn(page, acKey){
-  if (grant(acKey || "u_found") !== "edit") return '';
+  if (!mayAuthor(acKey || "u_found")) return '';
   var on = EDIT_PAGE[page];
   return '<button class="penbtn' + (on ? " on" : "") + '" data-page="' + page + '"' +
     ' title="' + (on ? "Done editing" : "Edit") + '" aria-label="' + (on ? "Done editing" : "Edit") + '">' +
@@ -16339,22 +16512,22 @@ function koEdit(list){
    objectives are measured against and reading it there is the point. Only the
    input is the group's (§48.1). */
 function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup){
-  var editing = EDIT_PAGE[page];
+  var editing = authoring(page, acKey), pg = editing ? page : null;
   return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
     penBtn(page, acKey) +
       (editing && isGroup
         ? '<label class="horizon-f">Horizon ' +
-          inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
+          inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
         : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
-    '<p class="statement">' + fieldOr(page, statement, "big-field", setAsp) + '</p>' +
+    '<p class="statement">' + fieldOr(pg, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears
        \u2014 an empty labelled block asserts that something is missing when the
        plan simply does not work that way. In edit the field is always there,
        so one can be added. */
     (endInMind || editing
       ? '<div class="endin"><span class="boxlab">End in mind</span>' +
-        '<p class="statement">' + fieldOr(page, endInMind, "big-field", setEnd) + '</p></div>'
+        '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
     '<div class="divide"></div>' +
     '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
@@ -16368,11 +16541,12 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
 }
 
 function renderUnitFoundation(u){
+  var upg = authoring("foundation", "u_found") ? "foundation" : null;
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
-          fieldOr("foundation", c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found") +
@@ -16388,7 +16562,7 @@ function renderUnitAnalysis(u){
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
-          (EDIT_PAGE.analysis
+          (authoring("analysis", "u_anal")
             ? fieldOr("analysis", x, "", function(v){ list[i] = v; })
             : '<span>' + esc(x) + '</span>') + '</li>';
       }).join("") + '</ol></section>';
@@ -17342,7 +17516,12 @@ function projReportBody(p, may, fk){
 function capReportBody(c){
   /* Same two gates as a unit's reporting: the cycle has to be open AND
      unlocked, or the server refuses the figures the page is inviting. */
-  var may = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
+  /* inOffice(), not hasRole("super") — the TENTH place meaning "the office"
+     (§89, found in §93). A unit's Reporting page has asked it this way since
+     §89; a function's had not, so an SMO team member could report past a
+     locked cycle on one side of the navigation switch and not the other
+     (§53.5). The server was on `super` for both and refused either way. */
+  var may = REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
             grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
@@ -17697,7 +17876,8 @@ function renderFnFoundation(fnKey){
           esc(f ? f.name : "\u2014") +
           (f && f.head ? " \u2014 " + esc(personName(f.head)) : "") + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
-          fieldOr("capfoundation", c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
+          fieldOr(authoring("capfoundation", "k_found") ? "capfoundation" : null,
+                  c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
@@ -25361,7 +25541,13 @@ var SYNC = (function () {
     ]
   };
 
-  var current = "group", currentSub = "performance";
+  /* NULL, NOT "group" (§93). A literal here was the whole of "everyone opens
+     on the group's Performance page": paintUnits() only corrects `current`
+     when it names somewhere this viewer cannot reach, and the group is
+     reachable by nearly everybody, so the correction never ran. Starting at
+     null makes the first paint ask entryDest() the same way every later one
+     does. */
+  var current = null, currentSub = null;
   /* WHOSE report is open, or null. A target rather than a boolean: the page is
      per unit or per function, and a flag would follow you onto the next one
      (§63.1). Dropped by every navigation, exactly as the edit modes are. */
@@ -25752,7 +25938,15 @@ var SYNC = (function () {
      in §28, the function did not. The tab and section keys are the only
      difference, so they are two variables rather than two branches. */
   function entrySub(k){
-    var d = allowed(defsFor(k));
+    /* THE TARGET IS THE DESTINATION BEING ASKED ABOUT, NOT THE ONE ON SCREEN.
+       `allowed()` falls back to the global TARGET, and both callers ask BEFORE
+       paint() has moved it — the nav handler sets `current` and calls straight
+       in, and paintUnits() runs ahead of the line that derives TARGET. So a
+       unit head walking from the group to their own unit had their unit's tabs
+       judged against "group". Exactly the fault the note beside TARGET in
+       paint() records, in the one place that had not been corrected. */
+    var t = (!k || k === "setup" || k === "manage") ? "group" : k;
+    var d = allowed(defsFor(k), t);
     if (!d.length) return null;
     /* A COMPANY OPENS ON PERFORMANCE, and there is nothing else to open.
        §28's rule — a unit opens on what was AGREED, not on the score — is about
@@ -25762,12 +25956,49 @@ var SYNC = (function () {
       var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
       var strat = d.filter(function(x){ return x.k === tab; })[0];
       if (strat) {
-        var secs = allowed(strat.sections(fn ? k : UNITS[k]));
+        var secs = allowed(strat.sections(fn ? k : UNITS[k]), t);
         if (secs.some(function(x){ return x.k === want; })) CURSEC[tab] = want;
         if (secs.length) return tab;
       }
     }
     return d[0].k;
+  }
+
+  /* ── WHERE A PERSON OPENS (§93, Islam 2026-08-25) ─────────────────
+     "the default opening page for the users is on the plan in the strategy."
+
+     Half of that has been true since §28: a unit opens on Strategy › Plan and
+     a function on Strategy › Projects. What was not true is WHICH DESTINATION
+     opens — the platform started every session on the GROUP's Performance
+     page, so a unit head signed in, read a group score they do not own, and
+     had to find their own unit before reaching the plan. `entrySub()` decides
+     the page; this decides the door.
+
+     IT IS WHERE THEY SIT, WHICH THE PLATFORM ALREADY KNOWS. `personAt()` is
+     the one pair that answers "where does this person sit" (§54) — the same
+     answer the register shows and the file importer writes, so a person moved
+     to another unit opens on that unit with nothing else to change.
+
+     ATTACHED TO THE GROUP MEANS THE GROUP — and "group" is a destination key
+     like any other, so it needs no special case. The SMO and the group CEO
+     both sit there and the group's Performance page IS their own place; they
+     are not sent into a business unit they do not run.
+
+     THAT LAST LINE IS NOT DECORATION. Written with `at !== "group"` excluded
+     as a special case, the SMO fell through to "the first door in the
+     navigation" — and for a tenant with two companies the first entry of that
+     row is the group/company DROPDOWN, which carries no key of its own, so
+     the first keyed door is the first business unit. The SMO opened on Mobile.
+     Found by the check, in the one line that looked too obvious to assert.
+
+     AND IT IS CHECKED, NEVER ASSUMED. `reach` is the list paintUnits has just
+     built of every destination this viewer can actually open; somebody
+     attached to a unit their roles no longer reach falls back to the first
+     door in the navigation, which is what happened before this existed. */
+  function entryDest(reach, dests){
+    var at = personAt(viewer());
+    if (at && reach.indexOf(at) > -1) return at;
+    return dests.length ? dests[0].k : null;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
@@ -25799,7 +26030,12 @@ var SYNC = (function () {
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
-      current = dests.length ? dests[0].k : null;
+      current = entryDest(everything, dests);
+      /* The PAGE as well as the door, and by the same call the navigation
+         makes — otherwise the first paint lands on whichever tab happens to
+         be first (Strategy) and whichever section happens to be first inside
+         it (Foundation), which is not the plan. */
+      currentSub = current ? entrySub(current) : null;
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
       if (t.folds) {
@@ -29453,6 +29689,13 @@ var SYNC = (function () {
   }
   fillViewers();
   sel.addEventListener("change", function(){
+    /* leaveModes() — a viewer switch is a navigation, and every other one in
+       the platform drops its modes (§63.1). This did not, so an open Foundation
+       pen followed the SMO into a custodian's view and the fields stayed
+       editable for somebody the rule closes them to (§93). The same fault the
+       unit-to-unit handler fixed for edit modes, on the one path that skipped
+       it. */
+    leaveModes();
     VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
   });
 

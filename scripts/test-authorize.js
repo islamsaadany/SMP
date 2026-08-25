@@ -130,16 +130,58 @@ allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
         !v.ok, "classifier saw: " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
 })();
 
+/* ── 2c · THE STRATEGY TAB IS THE OFFICE'S (§93) ──────────────────
+   These two were in section 3 as work a unit head MUST be able to do — the
+   aspiration and the SWOT were open to whoever held their own unit at edit
+   while the plan beneath them was the SMO's. Islam closed the whole tab on
+   2026-08-25 after signing in as a custodian and finding the pens, so they
+   move here rather than being deleted: what changed is the answer, and a
+   deleted test would leave nothing saying the answer used to be the other
+   one. */
+console.log("\n2c · a unit's own words and its SWOT are the SMO's");
+refuses(headKey, function (s) { s.units[UNIT].aspiration = "A new aspiration"; },
+  "a unit head may not rewrite their own aspiration");
+refuses(headKey, function (s) { s.units[UNIT].swot.s = ["Something"]; },
+  "a unit head may not rewrite their own SWOT");
+refuses(headKey, function (s) { s.units[UNIT].clauses = [["Who we are", "Rewritten"]]; },
+  "...nor the clauses beside it");
+
+/* ── 2d · AND THE FUNCTION'S HALF OF THE SAME TAB (§93, §53.5) ────
+   A capability's definition, key objectives and projects ARE a supporting
+   function's Strategy tab. The pen has been the office's since §69.13 and the
+   server had never been told, so a function head could write with the API
+   what the screen would not draw for them. Tested on both sides of the
+   navigation switch, because that is what §53.5 is for. */
+console.log("\n2d · a capability's plan is the SMO's");
+(function () {
+  const cap = (SEED.group.capabilities || [])[0];
+  const fnHead = cap && (SEED.functions[cap.fn] || {}).head;
+  if (!cap || !fnHead || !personOf(SEED, fnHead)) {
+    check("a capability with a function head exists to test", false,
+          "seed has no capability whose function has a head");
+    return;
+  }
+  refuses(fnHead, function (s) {
+    s.group.capabilities[0] = Object.assign({}, s.group.capabilities[0],
+                                            { def: "Rewritten by the function" });
+  }, "the head of " + cap.fn + " may not rewrite their capability's definition");
+  refuses(fnHead, function (s) {
+    const c = s.group.capabilities[0];
+    if (c.keyObjectives && c.keyObjectives[0]) c.keyObjectives[0].target = "999";
+    else c.keyObjectives = [{ id:"zz", name:"Invented", target:"1" }];
+  }, "...nor a key objective's target");
+  allows("smo", function (s) {
+    s.group.capabilities[0] = Object.assign({}, s.group.capabilities[0],
+                                            { def: "Rewritten by the office" });
+  }, "the SMO can");
+})();
+
 /* ── 3 · The work each role must still be able to do ────────────── */
 console.log("\n3 · legitimate work is not refused");
 allows(headKey, function (s) { s.units[UNIT].items[0].measures[0].actual = 42; },
   "a unit head reports their own figure");
 allows(headKey, function (s) { s.units[UNIT].items[0].tactics[0].status = "On track"; },
   "a unit head sets their own tactic's status");
-allows(headKey, function (s) { s.units[UNIT].aspiration = "A new aspiration"; },
-  "a unit head writes their own foundation");
-allows(headKey, function (s) { s.units[UNIT].swot.s = ["Something"]; },
-  "a unit head writes their own SWOT");
 allows(headKey, function (s) { s.review.submitted[UNIT] = true; },
   "a unit head submits their own report");
 allows(headKey, function (s) { s.review.note[UNIT] = "Why we are behind."; },
@@ -806,11 +848,27 @@ console.log("\n12 · the SMO team, and the three it does not get");
   asTeam(function (s) {
     s.people = s.people.concat([{ key:"newperson", name:"New Person", unit:"mobile" }]);
   }, "...and may add somebody to the register", true);
+  /* ── THE DRIFT §93 FOUND (§89, §42) ─────────────────────────────
+     This case asked `isSMO` — the Super user — while the platform's pen asked
+     `inOffice()`. So the SMO team was OFFERED the plan pen on every unit and
+     every save came back refused: the exact screen-says-yes / server-says-no
+     drift `lib/rules.js` exists to prevent, sitting inside the file that
+     enforces it. Both sides call `mayAuthorPage()` now. */
+  asTeam(function (s) { s.units[UNIT].items[0].measures[0].target = 999; },
+         "...and may correct a plan, which it could not before §93", true);
+  asTeam(function (s) { s.units[UNIT].aspiration = "The office rewrote this"; },
+         "...and the aspiration above it", true);
 
   /* And the three it does not. */
+  /* IT USED TO SET `smoteam.a_setup` TO "edit" — WHICH IT ALREADY WAS (§93).
+     The mutation produced an identical map, `same()` saw no change, and the
+     save was allowed with an EMPTY change list. So the most important of
+     §89's three rules had never once been exercised, and the suite said 155
+     passed while saying so. §54's lesson in its purest form: a check that
+     cannot fail is not a check. It moves a row that is genuinely different. */
   asTeam(function (s) {
     s.access = Object.assign({}, s.access);
-    s.access.smoteam = Object.assign({}, s.access.smoteam || {}, { a_setup:"edit" });
+    s.access.contrib = Object.assign({}, s.access.contrib || {}, { a_setup:"edit" });
   }, "1 · may not touch the access matrix", false);
   asTeam(function (s) {
     s.access = Object.assign({}, s.access);

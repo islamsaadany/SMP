@@ -193,11 +193,7 @@
 
   /* Arrange rides in the legend row rather than a row of its own. */
   .bands { justify-content:flex-start; }
-  /* TWO CONTROLS NOW, NOT ONE (§93.9). Report and Presentation share this
-     slot on a unit's Performance page, so it needs a gap of its own — without
-     one they touch, and a solid button touching an outlined one reads as a
-     single split control. */
-  .bands-act { margin-left:auto; display:inline-flex; gap:8px; align-items:center; }
+  .bands-act { margin-left:auto; display:inline-flex; }
   .bands-act .editbtn { padding:5px 14px; }
 
   /* The two buttons that leave hold the far right of the first line, grouped

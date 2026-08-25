@@ -363,6 +363,14 @@ var CHAT = (function(){
   function setOpen(v){
     open = !!v;
     var p = el("chatpanel"); if (p) p.hidden = !open;
+    /* THE BUBBLE IS NOT DRAWN WHILE THE PANEL IS OPEN (§100.4). It used to sit
+       underneath, which pushed the panel 60px off the bottom of the window and
+       left a control on screen whose only job is to open what is already open.
+       Hiding it puts the panel where the bubble was — at the bottom, which is
+       where somebody just clicked. A class, so the rule is one line of CSS and
+       the mobile layout inherits it. */
+    var dock = el("chatdock");
+    if (dock) dock.classList.toggle("chopen", open);
     if (open) {
       drawPanel();
       var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
@@ -449,6 +457,32 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
+    /* ── CLICKING AWAY MINIMISES IT (§100.4) ────────────────────────
+       Islam: "if I click outside the box minimize it please." Nothing is lost
+       by it — the panel is hidden rather than rebuilt, so a half-typed message
+       is still in the box when it comes back, which is what makes dismissing
+       it this cheaply safe.
+
+       CAPTURE PHASE, so a control that stops propagation cannot leave the
+       panel open behind whatever it just did; `pointerdown` rather than
+       `click`, so it goes away as the press lands rather than on release.
+
+       TWO THINGS ARE NOT "OUTSIDE": the dock itself, and an open modal — a
+       screenshot opened FROM the panel renders into the platform's own overlay,
+       and closing the panel behind it would be dismissing the thing you are
+       standing in. */
+    document.addEventListener("pointerdown", function(e){
+      if (!open) return;
+      var t = e.target;
+      if (t && t.closest && t.closest("#chatdock")) return;
+      if (document.querySelector(".overlay.on")) return;
+      setOpen(false);
+    }, true);
+    /* Escape, from anywhere — it was only wired inside the composer, so it did
+       nothing once the focus had moved to the attach button or a message. */
+    document.addEventListener("keydown", function(e){
+      if (open && e.key === "Escape") setOpen(false);
+    });
     window.addEventListener("focus", function(){ if (mounted && !document.hidden) poll(); });
     document.addEventListener("visibilitychange", function(){
       if (!mounted) return;
@@ -843,6 +877,19 @@ var CHAT = (function(){
     });
   }
 
+  /* WHERE THE BOX STARTS, so CSS can make it end at the bottom of the window
+     (§100.5). Its DOCUMENT offset, not its position on screen — that one moves
+     with every scroll and would resize the box as you scrolled it. Nothing
+     above the box moves when the box changes height, so there is no loop here:
+     §28.3's warning is about a max-height fed by a measurement the height
+     itself changes, and this is not one. */
+  function fitInbox(){
+    var root = el("chinbox");
+    if (!root) return;
+    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    root.style.setProperty("--chin-top", Math.round(top) + "px");
+  }
+
   function wireInbox(){
     wireSettings();
     var root = el("chinbox");
@@ -914,6 +961,12 @@ var CHAT = (function(){
     var find = el("chqfind");
     if (find) find.addEventListener("input", function(){ box.q = this.value; drawQueue(); });
 
+    fitInbox();
+    /* Re-measured on resize, because the chrome's rows wrap at narrow widths
+       and the box's top moves with them. Bound once, on the container that is
+       torn down with the page — `boxBeat()` already stops when #chinbox is
+       gone, and this asks the same question. */
+    window.addEventListener("resize", function(){ if (el("chinbox")) fitInbox(); });
     drawQueue();
     drawThread();
     boxLoadQueue(function(){

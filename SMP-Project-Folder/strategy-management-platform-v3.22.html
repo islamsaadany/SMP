@@ -4554,6 +4554,11 @@
 .chatdock { position:fixed; right:18px; bottom:18px; z-index:45;
             display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
 .chatdock[hidden] { display:none; }
+/* OPEN, THE BUBBLE IS GONE (§100.4). It sat under the panel, pushing it 60px
+   up from the bottom of the window and offering to open what was already
+   open. With it gone the panel's bottom edge is the dock's, which is where
+   the bubble was — so the panel opens exactly where it was pressed. */
+.chatdock.chopen .chatbtn { display:none; }
 
 /* A DECK IS NOT A PLACE FOR A CHAT BUBBLE. Presentation puts the platform on a
    projector in front of the board, and a floating control in the corner of a
@@ -4677,11 +4682,33 @@ body.presenting .chatdock { display:none; }
              max-width:30ch; }
 
 /* ── THE OFFICE'S INBOX (a Setup page) ─────────────────────────────────── */
-.chinbox { display:grid; grid-template-columns:272px 1fr; min-height:440px;
+/* ── THE INBOX FITS THE SCREEN (§100.5) ────────────────────────────────
+   Islam: "the chat box requires a scroll up — this shouldn't happen. The chat
+   box stays fit to the screen to show the chat box and send, and what can be
+   scrolled is the left pane with the chats."
+
+   The thread body was already capped and scrolling; what was not was the BOX,
+   which stood at a fixed 593px however tall the window was — so on a 700px
+   screen the reply box and Send fell below the fold and the page had to be
+   scrolled to answer anybody. Measured before touching it: at 900px the page
+   scrolled 306px, at 700px it scrolled 506px and the composer was off-screen.
+
+   `--chin-top` is the box's own distance from the top of the DOCUMENT, set by
+   the one line of JS that can know it. §28.3's rule is about sizing against a
+   measured value THE SIZE ITSELF CAN CHANGE — the feedback loop that cost v2.8
+   an infinite oscillation. There is no loop here: what sits above this box does
+   not move when the box gets taller or shorter, so the measurement is stable
+   in a way a max-height fed by a height never was. */
+.chinbox { display:grid; grid-template-columns:272px 1fr;
+           height:calc(100dvh - var(--chin-top, 190px) - 20px);
+           /* Below this it stops shrinking and the page scrolls instead — a
+              thread squeezed into 150px is not a usable screen, and a window
+              that short is somebody's split view rather than their laptop. */
+           min-height:340px;
            border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
            background:var(--surface); }
 .chq { border-right:1px solid var(--line); background:var(--ground);
-       display:flex; flex-direction:column; max-height:620px; }
+       display:flex; flex-direction:column; min-height:0; }
 .chqtop { padding:9px 10px; border-bottom:1px solid var(--line); display:flex; gap:7px; }
 .chqtop input { flex:1; border:1px solid var(--line); border-radius:6px;
                 background:var(--surface); color:var(--ink); padding:6px 9px;
@@ -4728,7 +4755,8 @@ body.presenting .chatdock { display:none; }
 .chqrow .chwh { grid-column:1/-1; font-size:var(--fs-micro); color:var(--ink-3);
                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.chthread { display:flex; flex-direction:column; background:var(--surface); min-width:0; }
+.chthread { display:flex; flex-direction:column; background:var(--surface);
+             min-width:0; min-height:0; }
 .chthead { padding:10px 14px; border-bottom:1px solid var(--line);
            display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .chthead .chnm { font-size:var(--fs-body); font-weight:650; }
@@ -4739,8 +4767,12 @@ body.presenting .chatdock { display:none; }
           font-family:inherit; }
 .chmini:hover { border-color:var(--gold-deep); color:var(--ink); }
 .chmini.on { color:var(--attn-tx); border-color:var(--attn); background:var(--attn-bg); }
+/* NO max-height ANY MORE. It takes what the box has left after the header and
+   the composer, and scrolls inside that — which is what keeps Send on screen
+   at every window height rather than at one. `min-height:0` is what lets a
+   flex child shrink below its content at all. */
 .chtbody { padding:14px; display:flex; flex-direction:column; gap:14px;
-           background:var(--ground); flex:1; overflow-y:auto; max-height:430px; }
+           background:var(--ground); flex:1; min-height:0; overflow-y:auto; }
 .chtfoot { border-top:1px solid var(--line); background:var(--surface); padding:10px 12px;
            display:flex; flex-direction:column; gap:8px; }
 
@@ -27027,6 +27059,14 @@ var CHAT = (function(){
   function setOpen(v){
     open = !!v;
     var p = el("chatpanel"); if (p) p.hidden = !open;
+    /* THE BUBBLE IS NOT DRAWN WHILE THE PANEL IS OPEN (§100.4). It used to sit
+       underneath, which pushed the panel 60px off the bottom of the window and
+       left a control on screen whose only job is to open what is already open.
+       Hiding it puts the panel where the bubble was — at the bottom, which is
+       where somebody just clicked. A class, so the rule is one line of CSS and
+       the mobile layout inherits it. */
+    var dock = el("chatdock");
+    if (dock) dock.classList.toggle("chopen", open);
     if (open) {
       drawPanel();
       var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
@@ -27113,6 +27153,32 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
+    /* ── CLICKING AWAY MINIMISES IT (§100.4) ────────────────────────
+       Islam: "if I click outside the box minimize it please." Nothing is lost
+       by it — the panel is hidden rather than rebuilt, so a half-typed message
+       is still in the box when it comes back, which is what makes dismissing
+       it this cheaply safe.
+
+       CAPTURE PHASE, so a control that stops propagation cannot leave the
+       panel open behind whatever it just did; `pointerdown` rather than
+       `click`, so it goes away as the press lands rather than on release.
+
+       TWO THINGS ARE NOT "OUTSIDE": the dock itself, and an open modal — a
+       screenshot opened FROM the panel renders into the platform's own overlay,
+       and closing the panel behind it would be dismissing the thing you are
+       standing in. */
+    document.addEventListener("pointerdown", function(e){
+      if (!open) return;
+      var t = e.target;
+      if (t && t.closest && t.closest("#chatdock")) return;
+      if (document.querySelector(".overlay.on")) return;
+      setOpen(false);
+    }, true);
+    /* Escape, from anywhere — it was only wired inside the composer, so it did
+       nothing once the focus had moved to the attach button or a message. */
+    document.addEventListener("keydown", function(e){
+      if (open && e.key === "Escape") setOpen(false);
+    });
     window.addEventListener("focus", function(){ if (mounted && !document.hidden) poll(); });
     document.addEventListener("visibilitychange", function(){
       if (!mounted) return;
@@ -27507,6 +27573,19 @@ var CHAT = (function(){
     });
   }
 
+  /* WHERE THE BOX STARTS, so CSS can make it end at the bottom of the window
+     (§100.5). Its DOCUMENT offset, not its position on screen — that one moves
+     with every scroll and would resize the box as you scrolled it. Nothing
+     above the box moves when the box changes height, so there is no loop here:
+     §28.3's warning is about a max-height fed by a measurement the height
+     itself changes, and this is not one. */
+  function fitInbox(){
+    var root = el("chinbox");
+    if (!root) return;
+    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    root.style.setProperty("--chin-top", Math.round(top) + "px");
+  }
+
   function wireInbox(){
     wireSettings();
     var root = el("chinbox");
@@ -27578,6 +27657,12 @@ var CHAT = (function(){
     var find = el("chqfind");
     if (find) find.addEventListener("input", function(){ box.q = this.value; drawQueue(); });
 
+    fitInbox();
+    /* Re-measured on resize, because the chrome's rows wrap at narrow widths
+       and the box's top moves with them. Bound once, on the container that is
+       torn down with the page — `boxBeat()` already stops when #chinbox is
+       gone, and this asks the same question. */
+    window.addEventListener("resize", function(){ if (el("chinbox")) fitInbox(); });
     drawQueue();
     drawThread();
     boxLoadQueue(function(){

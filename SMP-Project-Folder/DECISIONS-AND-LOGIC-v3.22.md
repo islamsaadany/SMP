@@ -12938,3 +12938,107 @@ The check found it; nothing else would have.
 so the client correctly stayed on the slow beat and the check read that as
 broken. A stub has to MODEL the server, not merely answer it; §94.11's argument
 about serving a real deployment, one layer further in.
+
+### 100.4 Clicking outside puts it away, and the bubble gets out from under it
+
+> *"If I click outside the box minimise it please, and when I open the chat box
+> make it at the bottom and hide the chat icon as if it comes above it — you get
+> me?"*
+
+Three asks in one sentence and they are one fault seen from three sides.
+
+**THE BUBBLE WAS STILL DRAWN UNDER THE OPEN PANEL.** The dock is a column at the
+bottom-right corner, so with both in it the panel sat a bubble's height — 60px
+plus the gap — off the bottom of the window, which is exactly what "make it at
+the bottom" describes. `.chatdock.chopen .chatbtn { display:none }` is the whole
+fix, and it is CSS off a class the opener already sets rather than a second
+piece of state: a bubble that opens a panel has nothing to say while the panel
+is open, and a control that would only ever re-do what is already done is
+furniture. Measured after: the panel's bottom edge is 18px from the window's,
+which is the dock's own inset.
+
+**CLICKING OUTSIDE MINIMISES IT**, on `pointerdown` rather than `click`, so it
+goes away as the press lands rather than on release — a panel that lingers until
+the mouse comes up reads as having missed the press. **Two things are not
+"outside"**: the dock itself, and an open modal — a screenshot opened *from* the
+panel renders into the platform's own overlay, which is not inside `#chatdock`,
+so without that second exception looking at the picture you just attached would
+put the panel away behind it.
+
+**AND ESCAPE NOW WORKS FROM ANYWHERE.** It had been wired on the composer alone,
+so it did nothing the moment focus moved to the attach button or a message —
+present, plausible and silent, which is the shape of fault this file keeps
+recording. It is on the document now, guarded on the panel being open so it
+cannot swallow an Escape meant for something else.
+
+**THE HALF-TYPED MESSAGE SURVIVES ALL THREE**, and that is asserted rather than
+assumed: minimising is not discarding (§100.2), so the check types half a
+sentence, clicks the page, reopens and reads it back.
+
+### 100.5 The office's box fits the screen — §100.5
+
+> *"The chat box requires a scroll up. This shouldn't happen — the chat box
+> stays fit to the screen to show the chat box and Send, and what can be
+> scrolled is the left pane with the chats."*
+
+`.chinbox` stood at a **fixed 593px** however tall the window was, with the
+thread capped at 430px inside it. On a tall screen that leaves dead space; on a
+short one the reply box and Send fall below the fold, so answering somebody
+begins with scrolling to find the control. Measured before touching it: at 900px
+the page scrolled **306px**, at 700px it scrolled **506px** and the composer was
+off-screen entirely.
+
+The box is `calc(100dvh - var(--chin-top) - 20px)` now, where `--chin-top` is
+its own distance from the top of the document, set by the one line of JS that
+can know it and re-measured on resize.
+
+**THIS IS NOT §28.3's TRAP, AND THE DIFFERENCE IS WORTH STATING.** That rule —
+never size anything against a JS-measured value that the size itself can change
+— cost v2.8 an infinite oscillation: measured height fed page height fed the
+scroll clamp fed the header's condense fed the measured height. There is no loop
+here. What sits **above** this box does not move when the box gets taller or
+shorter, so the measurement is stable in a way a max-height fed by a height
+never was. The old condense-on-scroll, which was the thing that made the top
+move, was removed in v3.3.
+
+`min-height: 340px` is the floor: below it the box stops shrinking and the page
+scrolls instead, because a thread squeezed into 150px is not a usable screen and
+a window that short is somebody's split view rather than their laptop.
+
+**THE SCROLLING MOVES INSIDE.** `min-height: 0` on the queue, the thread and the
+thread's body — without it a grid or flex child refuses to shrink below its
+content and pushes the box open again, which is the same fixed height arriving
+by a different road. Each of the two panes now has a scroller of its own, which
+is precisely what was asked for.
+
+**AND THE CHECK ASSERTS THE RELATIONSHIP, NEVER THE NUMBER** (§53.5, §94.14,
+§100.3's stub lesson pointing the same way). Section 8 of
+`src/checks/office-chat.py` sweeps 1000 / 860 / 760 / 660px and asserts that
+Send is inside the window, that the thread scrolls inside its own box, that the
+queue has a scroller — and that the box's height **moved with the window**. That
+last one is the assertion that matters: every other one of them passes on a tall
+window with the fixed height back in place, which is how this shipped. Proved by
+putting `height: 593px` back and watching it fail at 660px and on the sweep of
+heights, then restoring it.
+
+**THE STUB HAD TO GROW A CONVERSATION.** The office's page had never been
+measured with a thread open, because the stub answered `queue` and `thread` with
+the person's own payload — so the inbox drew "Pick somebody on the left" and
+every assertion about a thread would have had nothing to look at. It carries
+twenty alternating messages now, deliberately more than fit the tallest window
+swept: a thread of three fits every screen and would report a box that *cannot*
+scroll as one that *need not*. §100.3's lesson a second time, in the same file —
+a stub has to model the server, and modelling it includes carrying enough data
+for the thing under test to be under any strain at all.
+
+**WHAT IS LEFT IS NAMED RATHER THAN GLOSSED.** The page can still scroll, and
+measuring it says why: at a 1000px window the inbox runs from document 140 to
+980 and the page is 1206 tall — the extra is **Setup's own rail**, sixteen
+entries at 1029px, plus `main.wrap`'s 80px foot. That is not this box and not
+this page; it is every Setup page, and §28.3's rule is explicit that a
+navigation rail must never be capped, because a list that says "it ends here"
+when it does not is worse than a page that scrolls. So the assertion is the one
+that was actually asked for — **Send is on screen at scroll 0, at every height
+swept** — and not "the page cannot scroll", which would be a different and
+worse product. Measured on the real server at 1000 / 860 / 760 / 660px: Send on
+screen every time, the box at 840 / 700 / 600 / 500px.

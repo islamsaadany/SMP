@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.26 shipped (live) · **v3.28 in progress on the branch**
+**Latest version:** v3.28 shipped (live) · **v3.29 in progress on the branch**
 **Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -54,7 +54,36 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.28 — the corner, corrected by using it (§99)
+### v3.29 — the corner, corrected again (§100.4, §100.5)
+
+Three more notes from using it, and one of them turned out to be three.
+
+- **Clicking outside minimises the panel**, on `pointerdown`, with the dock and
+  an open modal deliberately not counting as "outside" (a screenshot opened
+  *from* the panel renders into the platform's overlay). **Escape now works from
+  anywhere** — it had been wired on the composer alone, so it did nothing once
+  focus moved. A half-typed message survives all of it.
+- **The bubble is not drawn while the panel is open**, which is what puts the
+  panel's bottom edge 18px from the window's instead of a bubble's height above
+  it. CSS off the class the opener already sets, not a second piece of state.
+- **The office's inbox follows the window.** It stood at a fixed 593px, so on a
+  short screen the reply box and Send fell below the fold — 506px of page scroll
+  at 700px tall, measured before touching it. Now `calc(100dvh - --chin-top -
+  20px)` with a 340px floor, and the scrolling moved inside the two panes.
+
+**Verified:** office-chat.py **ALL CLEAR** with a new section 8 sweeping four
+window heights · the fix proved by putting `height:593px` back and watching
+section 8 fail at 660px and on the sweep · qa.py clean.
+
+**The assertion that matters is that the box MOVED with the window.** Every
+other one of section 8's — Send on screen, the thread scrolling in its own box —
+passes on a tall window with the fixed height back in place, which is exactly
+how this shipped. And the stub had to grow a conversation of twenty messages
+before any of it could be measured: the office's page had never once been
+opened with a thread in it, so the inbox drew "Pick somebody on the left" and
+there was nothing to look at.
+
+### v3.28 — the corner, corrected by using it (§100.1–§100.3)
 
 Three notes from Islam within minutes of v3.26 reaching production, all from
 having it open rather than reading about it.

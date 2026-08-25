@@ -1135,6 +1135,32 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE CORNER MINIMISES, AND THE INBOX FOLLOWS THE WINDOW (since v3.29,
+  §100.4, §100.5):** **the bubble is not drawn while the panel is open** —
+  it sat underneath in the same dock column, pushing the panel a bubble's height
+  off the bottom of the window, and the fix is CSS off the class the opener
+  already sets, never a second piece of state. **Clicking outside minimises**,
+  on `pointerdown` (a panel that lingers until the mouse comes up reads as
+  having missed the press), and **TWO THINGS ARE NOT "OUTSIDE"**: the dock, and
+  an open modal — a screenshot opened FROM the panel renders into the
+  platform's own overlay, so without that exception looking at the picture you
+  just attached puts the panel away behind it. **Escape is on the DOCUMENT** —
+  it had been wired on the composer alone and did nothing once focus moved to
+  the attach button (present, plausible and silent). **Minimising is never
+  discarding** (§100.2), so the check types half a sentence and reads it back.
+  **`.chinbox` IS `calc(100dvh - --chin-top - 20px)`**, floor 340px, with
+  `min-height:0` on the queue, the thread and the thread's body or a grid/flex
+  child refuses to shrink below its content and pushes the fixed height back in
+  by another road. **NOT §28.3's LOOP, and the difference is the point**:
+  nothing ABOVE the box moves when the box resizes, so the measurement is
+  stable in a way a max-height fed by a height never was (the condense-on-scroll
+  that made the top move went in v3.3). **THE ASSERTION IS THAT IT MOVED**, not
+  that it fitted — every other assertion in `checks/office-chat.py` §8 passes on
+  a tall window with the fixed 593px back in place, which is how this shipped;
+  proved by putting it back and watching §8 fail. **AND THE STUB HAD TO GROW A
+  CONVERSATION**: the office's page had never once been measured with a thread
+  open, and twenty messages rather than three, or a box that CANNOT scroll
+  reports as one that NEED not.
 - **Email (since v3.23, §72; the credential moved in §97.5):** **`lib/mailer.js`
   is the only place `RESEND_API_KEY` is read**, and nothing it returns contains
   it — `api/mail.js` and `api/chat.js` both call it. §72's rule is unchanged;
@@ -1325,7 +1351,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.28: the corner, corrected by using it**
+*Last Updated: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
+follows the window** (&sect;100.4, &sect;100.5). Two more messages from having
+the thing open, and the first was three asks in one sentence that turned out to
+be one fault seen from three sides. *"If I click outside the box minimise it
+please, and when I open the chat box make it at the bottom and hide the chat
+icon as if it comes above it."* **THE BUBBLE WAS STILL DRAWN UNDER THE OPEN
+PANEL** &mdash; the dock is a column, so with both in it the panel sat 60px plus
+a gap off the bottom of the window, which is exactly what *"make it at the
+bottom"* describes; one CSS rule off the class the opener already sets, because
+a bubble that opens a panel has nothing to say while the panel is open. Clicking
+outside minimises on `pointerdown` rather than `click`, and **two things are not
+"outside"** &mdash; the dock, and an open modal, or looking at the screenshot you
+just attached would put the panel away behind it. **AND ESCAPE HAD NEVER WORKED
+FROM ANYWHERE BUT THE COMPOSER**: present, plausible and silent, which is the
+shape this file keeps recording. Then: *"the chat box requires a scroll up, this
+shouldn't happen."* The office's inbox stood at a **fixed 593px** however tall
+the window was &mdash; 506px of page scroll at 700px, with the reply box and Send
+off the fold, so answering somebody began with hunting for the control. It
+follows the window now, and **this is deliberately not &sect;28.3's feedback
+loop**: nothing ABOVE the box moves when the box resizes, which is what made
+v2.8's max-height oscillate for ever and does not apply here. **THE ASSERTION IS
+THAT THE BOX MOVED, NOT THAT IT FITTED** &mdash; every other assertion in the new
+section 8 passes on a tall window with the fixed height back in place, which is
+precisely how this shipped, so it was proved by putting `height:593px` back and
+watching the check fail. **And the stub had to grow a conversation**: the
+office's page had never once been measured with a thread open, so the inbox drew
+*"Pick somebody on the left"* and there was nothing to look at &mdash;
+&sect;100.3's lesson a second time in the same file, and modelling the server
+includes carrying enough data for the thing under test to be under any strain at
+all.*
+
+*Earlier: 2026-08-25 &mdash; **v3.28: the corner, corrected by using it**
 (&sect;100). Three notes within minutes of the merge going live, each of them
 from having the thing open rather than from reading about it. **&sect;97.4 IS
 REVERSED**: *"the line in front of the chat shouldn't be there"*, and asked

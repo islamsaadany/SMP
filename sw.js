@@ -91,13 +91,16 @@
    number -- is chosen in the same breath as the fetch-and-look that precedes
    every merge, and never before. */
 
-/* v3.28 — the corner corrected by using it (§100). main is serving
-   "smp-shell-v3.27-tables" from another session, so this takes v3.28 rather
-   than any v3.27 name: a worker caches by NAME, and the same string on both
-   sides of a merge conflicts on nothing while the bytes behind it differ
-   (§94.12, §94.16). Confirmed against origin/main at the moment of the merge,
-   which is where that check has to live. */
-const SHELL = "smp-shell-v3.28";
+/* v3.29 — the second round of corrections from using it (§100.4, §100.5): the
+   panel minimises on a click outside and sits on the bottom of the window with
+   the bubble out from under it, and the office's inbox follows the window's
+   height instead of standing at 593px. THE TRIGGER IS THE BYTES, NOT THE
+   VERSION (§91) — the built file changed, so the name changes, whatever the
+   platform's filename says. Confirmed against origin/main, which is serving
+   "smp-shell-v3.28", at the moment of the merge: a worker caches by NAME, and
+   the same string on both sides conflicts on nothing while the bytes behind it
+   differ (§94.12, §94.16). */
+const SHELL = "smp-shell-v3.29";
 const ASSETS = [
   "/",
   "/index.html",

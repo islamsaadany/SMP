@@ -168,13 +168,32 @@ function renderAccess(){
     return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
   }).join("") + '</tr>';
 
-  var body = ROLES.map(function(r){
-    var n = PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
+  /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
+     Employee stopped being one: nobody grants it, the × could never take it
+     off, and it was drawn as a chip beside Business unit owner claiming
+     somebody held something they did not. What it decided is still a real
+     question — what somebody on the register with NO role may open — so it is
+     still a row here, labelled as the state it is.
+
+     It has to stay editable. A client who wants people with no role to see
+     nothing sets this row to none and can see that they have; a floor nobody
+     can reach is a rule hiding as a default. */
+  var MATRIX_ROWS = ROLES.concat([{
+    key: SMPRules.NO_ROLE, name: "Everyone else", scope: "unit", floor: true,
+    note: "Not a role — what somebody on the register who holds no role may " +
+          "open. Most of the register, on a tenant of any size." }]);
+
+  var body = MATRIX_ROWS.map(function(r){
+    var n = r.floor
+      ? PEOPLE.filter(function(p){
+          return personActive(p) && personAt(p) && !personRoleKeys(p).length; }).length
+      : PEOPLE.filter(function(p){ return personRoleKeys(p).indexOf(r.key) > -1; }).length;
     /* Two lines, never more. The role's description is a sentence, and a
        sentence in a 19% column wraps to eight lines and makes every row of a
        49-cell table a hundred pixels tall — the exact fault this page was
        rebuilt to remove. It is on hover instead. */
-    return '<tr><td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
+    return '<tr' + (r.floor ? ' class="floorrow"' : '') + '>' +
+      '<td class="rolecell" title="' + esc(r.note) + '"><b>' + esc(r.name) + '</b>' +
         '<span class="why">' +
         (n ? plural(n, "person").replace("persons", "people") : "nobody yet") +
         '</span></td>' +
@@ -184,7 +203,8 @@ function renderAccess(){
   }).join("");
 
   return section("", "Who may see what",
-      "Seven roles, and the kinds of page each may reach. Edit includes view. " +
+      "Eight roles and the floor beneath them, against the kinds of page each may " +
+      "reach. Edit includes view. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -887,6 +907,16 @@ var PCOLS_KEY = "smp.people.columns";
    back to the shipped default (§30.2), and both default to shown, so the worst
    case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
+  /* FULL NAME IS A COLUMN OF ITS OWN (§93.8, Islam: "we can have it Name and
+     Full Name"). The frozen first column is what somebody is CALLED — two
+     names — and this is what the employee file holds. Shown by default,
+     because on a register being reconciled against a file it is the value the
+     file is written in; hideable, because on an ordinary day nobody reads it.
+
+     It sits immediately after the name rather than with the identifiers: it is
+     the same fact at a different length, and putting it beside Emp ID would
+     imply it identifies somebody, which is exactly what it must not do. */
+  { k:"fullname", label:"Full Name" },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the
@@ -1008,7 +1038,13 @@ function renderPeople(){
      office's — so a count taken over the whole register would promise them a
      number the server is going to shrink (§35: the server picks the set). */
   var reach = live ? passwordReach() : [];
-  var noPw = live && PWSTATES
+  var noCust = unitsWithoutCustodian();
+  /* A FAILED ASK IS NOT AN ANSWER (§93). PWSTATES holds {__error} when the
+     server refused or could not be reached, and counting over it would read
+     every key as absent and report nobody as missing a password — the same
+     shape of quiet-wrong-answer the dash itself was. */
+  var pwOk = !!PWSTATES && !PWSTATES.__error;
+  var noPw = live && pwOk
     ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
     : 0;
 
@@ -1169,10 +1205,44 @@ function renderPeople(){
      for the row's kebab; what is left is one word in one pill, so the column
      is 76px instead of 150. "Temporary" becomes "Temp" for the same reason —
      three states that have to be told apart at a glance, not read. */
+  /* ── AN ADDRESS AND A NUMBER ARE THERE TO BE USED (§93.6) ─────────
+     Islam: "make the email and the phone to be copied on clicking on them."
+     They are the two values on this register that always leave it — into a
+     mail client, into a phone — and selecting text inside a horizontally
+     scrolling table with a frozen column is a drag that starts a scroll.
+
+     A BUTTON, NOT A SPAN WITH A HANDLER. It is a real action, so it takes a
+     real control: keyboard-reachable, announced, and carrying its own hint.
+     It is styled to LOOK like the value rather than like a control, though —
+     `linkbu` was the first go and put an accent underline on every row of the
+     register, which reads as a table of links to somewhere.
+
+     Empty stays a dash — there is nothing to copy, and a button that copies
+     "" would report success for doing nothing. */
+  function copyable(v, cls){
+    if (!v) return '<span class="why" style="margin:0">&mdash;</span>';
+    /* THE VALUE IS IN THE TITLE, not just the hint. §88's clipTitles() only
+       fills a title that is empty, so a bare "Click to copy" would have taken
+       the hover away from exactly the values too long to read — which is the
+       one case the hover exists for. Both, in one string. */
+    return '<button class="copyval ' + cls + '" data-copy="' + esc(v) +
+      '" title="' + esc(v) + ' \u00b7 click to copy">' + esc(v) + '</button>';
+  }
+
   function pwCell(p){
     if (!live) return '';
     if (!personActive(p)) {
       return '<td class="cc"><span class="why" style="margin:0">&mdash;</span></td>';
+    }
+    /* AND A DASH IS NOT AN ERROR EITHER (§93). Islam, on a column that had
+       gone all dashes: "some people already changed the passwords, the all -s
+       are not actual." They were not: the ask never happened. When it happens
+       and FAILS, the column says so — a dash that means "we could not find
+       out" is indistinguishable from one that means "not asked yet", and both
+       read as "no password" to whoever is looking. */
+    if (PWSTATES && PWSTATES.__error) {
+      return '<td class="cc"><span class="pill bad" title="' +
+        esc(PWSTATES.__error) + '">unreadable</span></td>';
     }
     var st = PWSTATES ? PWSTATES[p.key] : null;
     /* Absent is not "none" (§35): a person the server has not been asked about
@@ -1426,26 +1496,39 @@ function renderPeople(){
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it, and the whole point of the class is that
          the column chooser can reorder everything to its right. */
-      /* ── THE FIRST FEW NAMES, THE WHOLE ONE ON THE ROW (§69.21) ──────
-         Islam: "let's make them only the first 2 names so the first column
-         wraps better" — then three, having seen two. The file carries full
-         legal names ("Mohamed Hamed Ahmed Hamed Ahmed") and the column they
-         sit in is now FROZEN (§69.19), so every character it takes is taken
-         from every other column at every scroll position. How many words is
-         SHORT_NAME_WORDS in config-data.js.
+      /* ── NAME, AND FULL NAME BESIDE IT (§93.8) ──────────────────────
+         Islam: "we can have it Name and Full Name."
 
-         DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME. This is the
-         trap and it is worth the words: the input's value is what
-         `fieldWire("pname")` writes back to `p.name`, so shortening the value
-         would have overwritten the register's real names with two words each —
-         silently, on the first keystroke in any row, with the file's own copy
-         gone. The short form is a rendering; the stored fact is untouched, and
-         the whole name is on the row's hover and in every other surface that
-         names a person. */
+         This is the frozen column (§69.19), so every character it takes is
+         taken from every other column at every scroll position — which is what
+         made §69.21 cut it to two names, §81.1 lengthen it for the pair that
+         clashed, and §93.6 widen it to hold the whole thing at 392px. Splitting
+         the two facts is the answer all three were reaching for: what somebody
+         is CALLED lives here, and what the employee file HOLDS lives in its own
+         hideable column next door.
+
+         WHAT IS EDITED HERE IS `known`, NOT `name`. §69.21's trap, met from the
+         other side: back then the input carried the whole name because
+         shortening the VALUE would have overwritten the register's real names
+         on the first keystroke. Now the short form is a field of its own, so
+         the input writes to that field and the full name is edited in the
+         column that shows it. Neither can quietly become the other.
+
+         The placeholder is the guess, so somebody who has never touched this
+         sees what it will fall back to rather than an empty box. */
       '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
-        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        : '<b>' + esc((DNAMES[p.key] || {}).label || shortName(p.name)) + '</b>' +
+        ? '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
+          '" placeholder="' + esc(knownName(p, DNAMES)) + '">'
+        : '<b>' + esc(knownName(p, DNAMES)) + '</b>' +
           dupeMark(dupes)) + '</td>' +
+      /* THE FULL NAME, AND IT IS STILL WHAT THE FILE IS MATCHED AGAINST — but
+         never what somebody is IDENTIFIED by (Islam: "for the identifiers keep
+         it for the ID and email only"). It is back under §88's clip standard,
+         because it is an ordinary column again: one line, capped, the whole
+         value one hover away. */
+      (showCol("fullname") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
+        : '<span class="val">' + esc(p.name) + '</span>') + '</td>' : '') +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -1513,8 +1596,15 @@ function renderPeople(){
             }).join("") + '</select>' +
           (drift && drift !== belongsKey(p)
             ? '<span class="why">the list says ' + esc(whereLabel(drift)) + '</span>' : '')
+        /* A VALUE, NOT A CHIP (§93). Islam: "the unit selected should be a
+           normal selection not a pill." A chip is what the BU list's mapping
+           cell draws, where several sit side by side and the boundary between
+           them is the whole point; here there is exactly one, in a column
+           whose heading already says what it is, so the border was drawing a
+           box around the only thing in the cell. It reads as the other
+           read-mode values on the row now. */
         : (home
-            ? '<span class="uchip">' + esc(home) + '</span>' + (drift
+            ? '<span class="val">' + esc(home) + '</span>' + (drift
                 ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
                   esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
                   esc(whereLabel(drift)) + '</span>'
@@ -1536,13 +1626,11 @@ function renderPeople(){
       (showCol("email") ? '<td class="wrapany">' + (ed
         ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
           '" placeholder="Email">'
-        : (p.email ? '<span class="val">' + esc(p.email) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+        : copyable(p.email, "val")) + '</td>' : '') +
       (showCol("phone") ? '<td>' + (ed
         ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
           '" placeholder="Mobile">'
-        : (p.phone ? '<span class="mono">' + esc(p.phone) + '</span>'
-                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+        : copyable(p.phone, "mono")) + '</td>' : '') +
       (showCol("roles")
         ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
       /* Standing before Password, at Islam's direction — whether somebody can
@@ -1819,6 +1907,15 @@ function renderPeople(){
             var a = personBy(l.key), b = personBy(l.other);
             return (a ? a.name : l.key) + " / " + (b ? b.name : l.other);
           }).join(" \u00b7 ")) + '">' + plural(likely, "possible duplicate") + '</span>'] : []).concat(
+        /* THE UNITS NOBODY IS KEEPING (§93.4). Amber for the same reason the
+           two above are: a unit between custodians is a normal state on a
+           Tuesday, and a permanent one is a problem. The names are on hover,
+           because a count with nothing behind it sends somebody looking. */
+        noCust.length ? ['<span class="pill warn" title="' + esc(noCust.map(function(k){
+            return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
+          (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody ' +
+          'the Strategy custodian role from their row here.">' +
+          plural(noCust.length, "unit") + ' with no custodian</span>'] : []).concat(
         noIdent ? ['<span class="pill warn" title="A row with no employee number and no email ' +
           'cannot be matched by an upload, so the next file adds them a second time. It is what ' +
           'put three people on this register twice.">' + noIdent +
@@ -1870,7 +1967,11 @@ function renderPeople(){
       return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
         'data-tktable="people"><thead><tr>' +
         th("#", "idx", false) +
-        th("Person", "namecell") +
+        /* "Name", not "Person" (§93.8): the column beside it is Full Name, and
+           two columns about what somebody is called have to say which is
+           which. */
+        th("Name", "namecell") +
+        (showCol("fullname") ? th("Full Name") : '') +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
@@ -1893,7 +1994,6 @@ function renderPeople(){
 
       "") +
 
-    renderPeopleMerge(mayEdit) +
     renderPeopleFile(mayEdit);
 }
 
@@ -1960,6 +2060,21 @@ function mergeDropKey(){
    rows survives, and what to do where they disagree. One panel asking all
    three is the panel that was there before. */
 function mergeStepHtml(){
+  /* ── THE RECEIPT IS THE LAST STEP, NOT A SECTION ON THE PAGE (§93.5) ─
+     Islam, on a "Merge two rows" panel left standing under the register after
+     the dialog had closed: "this page is a table page, not for other
+     notifications."
+
+     Right, and it is the same argument as §90's — the one that moved steps 1
+     and 2 into this dialog in the first place. What is said about an act
+     belongs where the act was: the wizard stays open and shows what it did,
+     and Close is what ends it. The register behind is repainted (which is
+     where the change becomes a save) and it is a table again. */
+  if (PMERGE.done) {
+    return '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
+      '<div class="cbtns" style="margin-top:14px">' +
+        '<button class="danger" data-pmerge-close="1">Close</button></div>';
+  }
   var a = PMERGE.a ? personBy(PMERGE.a) : null;
   if (!a) return '<div class="note">That row is no longer on the register.</div>';
   var b = PMERGE.b ? personBy(PMERGE.b) : null;
@@ -2096,14 +2211,6 @@ function mergeStepHtml(){
    and a merge is the one act on this register with no row left to point at —
    so what happened is said where the register is (§62's rule about a
    confirmation being where the act was). */
-function renderPeopleMerge(mayEdit){
-  if (!mayEdit || !PMERGE.done) return "";
-  return section("", "Merge two rows", null,
-    '<div class="applied"><b>' + esc(PMERGE.done) + '</b></div>' +
-    '<div class="imp-row" style="margin-top:12px">' +
-      '<button class="linkbu" data-pmerge-close="1">Close</button></div>');
-}
-
 /* ══════════════════════════════════════════════════════════════════
    THE REGISTER'S FILE (§54.3, spec 011)
 

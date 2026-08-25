@@ -79,7 +79,11 @@ export somebody edited two cells of. A blank cell still means *nothing to say*.
 
 ## 5 · Merging two rows
 
-A section under the register, opened from the row's ⋮ menu.
+A three-step **wizard in the platform's own modal**, opened from the row's ⋮
+menu (§90) — and it stays open at the end to say what it did (§93.5). It used
+to close and leave a *Merge two rows* panel standing under the register; Islam:
+*"this page is a table page, not for other notifications."* **Close** is what
+ends it.
 
 - **The survivor is chosen**, defaulting to the row that can be matched later.
   The row that goes takes its sign-in name, password and sessions with it.
@@ -88,6 +92,25 @@ A section under the register, opened from the row's ⋮ menu.
 - Blanks are filled without asking; genuine disagreements are picked.
 - The last act is `deletePerson()`, so **anything the merge forgot to hand over
   refuses the delete and fails the merge loudly**.
+
+## 5a · Name and Full Name (§93.8)
+
+The register carries two facts about what somebody is called, in two columns.
+
+- **Name** — what the office says out loud. Two names by default, **stored and
+  correctable**; the guess is only a guess, and §81.1's lengthening applies to
+  it so two people whose first two names match still read as two rows.
+- **Full Name** — what the employee file holds. Its own hideable column, shown
+  by default.
+
+**Name is a label and never an identifier.** The ladder in §3 is unchanged — Emp
+ID, then email, and no third rung. Nothing resolves on either name column, and a
+file changing *Name* is a pick like any other, with the register winning by
+default.
+
+**Old files still read.** A workbook written before the split has one `Name`
+column holding the full name; the presence of a `Full Name` column is what says
+which meaning applies, decided per row.
 
 ## 6 · What it does not do
 

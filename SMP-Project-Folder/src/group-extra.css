@@ -238,7 +238,7 @@
 
   /* Health band legend.
 
-     SMALLER THAN THE BUTTONS THAT RIDE IN IT (§93.9). Islam, having seen the
+     SMALLER THAN THE BUTTONS THAT RIDE IN IT (§94.9). Islam, having seen the
      buttons moved out of it and asked for them back: "shrink the reading
      colours a bit in font size so the buttons are more obvious."
 
@@ -484,7 +484,7 @@
              font-weight:700; color:var(--gold-deep); background:none;
              border:1px solid var(--gold); border-radius:99px; padding:6px 15px; cursor:pointer; }
   .editbtn:hover { background:var(--attn-bg); }
-  /* THE ONE SOLID BUTTON (§93). Its ink comes from the same pair as its fill,
+  /* THE ONE SOLID BUTTON (§94). Its ink comes from the same pair as its fill,
      so neither theme can end up with white on white — see the note beside the
      tokens in _shared.css. The hover moves the FILL rather than adding one,
      because there is already a fill to move. */

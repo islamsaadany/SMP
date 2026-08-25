@@ -130,7 +130,7 @@ allows("smo", function (s) { s.group.comms = { fromName: "Raya Trade" }; },
         !v.ok, "classifier saw: " + JSON.stringify(v.changes.map(function (c) { return c.kind; })));
 })();
 
-/* ── 2c · THE STRATEGY TAB IS THE OFFICE'S (§93) ──────────────────
+/* ── 2c · THE STRATEGY TAB IS THE OFFICE'S (§94) ──────────────────
    These two were in section 3 as work a unit head MUST be able to do — the
    aspiration and the SWOT were open to whoever held their own unit at edit
    while the plan beneath them was the SMO's. Islam closed the whole tab on
@@ -146,7 +146,7 @@ refuses(headKey, function (s) { s.units[UNIT].swot.s = ["Something"]; },
 refuses(headKey, function (s) { s.units[UNIT].clauses = [["Who we are", "Rewritten"]]; },
   "...nor the clauses beside it");
 
-/* ── 2d · AND THE FUNCTION'S HALF OF THE SAME TAB (§93, §53.5) ────
+/* ── 2d · AND THE FUNCTION'S HALF OF THE SAME TAB (§94, §53.5) ────
    A capability's definition, key objectives and projects ARE a supporting
    function's Strategy tab. The pen has been the office's since §69.13 and the
    server had never been told, so a function head could write with the API
@@ -715,9 +715,21 @@ console.log("\n9 · employee and contributor");
   };
 
   let base = withPerson(false);
-  check("named on nothing, they are an Employee",
-        R.personRoleKeys(R.worldOf(base), personOf(base, key)).join() === "employee",
+  /* NAMED ON NOTHING, THEY HOLD NOTHING (§93). Islam: "anyone with no role is
+     employee — employee doesn't give the person anything, so let's remove this
+     strange role." It was a role on the register and a chip on their row, and
+     it granted exactly what the floor grants. The floor stayed; the role went. */
+  check("named on nothing, they hold no role at all",
+        R.personRoleKeys(R.worldOf(base), personOf(base, key)).length === 0,
         R.personRoleKeys(R.worldOf(base), personOf(base, key)).join());
+  check("...and it is not offered as a role either",
+        R.ROLE_KEYS.indexOf(R.NO_ROLE) === -1, R.ROLE_KEYS.join());
+  check("...but they still see their own unit",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT) === "view",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit", UNIT));
+  check("...and not somebody else's",
+        R.grantIn(R.worldOf(base), personOf(base, key), "unit",
+                  Object.keys(SEED.units)[1]) === "none");
 
   base = withPerson(true);
   check("named on a tactic, the same person is a Contributor",
@@ -729,13 +741,13 @@ console.log("\n9 · employee and contributor");
   base.access = Object.assign({}, base.access,
     { employee: Object.assign({}, (base.access || {}).employee, { a_unit_own: "edit" }) });
   const w = R.worldOf(base), person = personOf(base, key);
-  check("an employee given edit still speaks only for themselves",
+  check("the floor given edit still speaks only for themselves",
         R.onlyOwnLines(w, person, "unit", UNIT),
         "editing roles: " + R.editingRoles(w, person, "unit", UNIT).join());
   check("...so they may not decide who enters a figure",
         !R.mayName(Object.assign({}, w, { naming: true }), person, UNIT));
-  check("neither floor role can be granted from a file",
-        R.isOwnLinesRole("employee") && R.isOwnLinesRole("contrib") &&
+  check("neither floor can be granted from a file",
+        R.isOwnLinesRole(R.NO_ROLE) && R.isOwnLinesRole("contrib") &&
         !R.isOwnLinesRole("owner"));
 })();
 
@@ -848,27 +860,34 @@ console.log("\n12 · the SMO team, and the three it does not get");
   asTeam(function (s) {
     s.people = s.people.concat([{ key:"newperson", name:"New Person", unit:"mobile" }]);
   }, "...and may add somebody to the register", true);
-  /* ── THE DRIFT §93 FOUND (§89, §42) ─────────────────────────────
+  /* ── THE DRIFT §94 FOUND (§89, §42) ─────────────────────────────
      This case asked `isSMO` — the Super user — while the platform's pen asked
      `inOffice()`. So the SMO team was OFFERED the plan pen on every unit and
      every save came back refused: the exact screen-says-yes / server-says-no
      drift `lib/rules.js` exists to prevent, sitting inside the file that
      enforces it. Both sides call `mayAuthorPage()` now. */
   asTeam(function (s) { s.units[UNIT].items[0].measures[0].target = 999; },
-         "...and may correct a plan, which it could not before §93", true);
+         "...and may correct a plan, which it could not before §94", true);
   asTeam(function (s) { s.units[UNIT].aspiration = "The office rewrote this"; },
          "...and the aspiration above it", true);
 
   /* And the three it does not. */
-  /* IT USED TO SET `smoteam.a_setup` TO "edit" — WHICH IT ALREADY WAS (§93).
-     The mutation produced an identical map, `same()` saw no change, and the
-     save was allowed with an EMPTY change list. So the most important of
-     §89's three rules had never once been exercised, and the suite said 155
-     passed while saying so. §54's lesson in its purest form: a check that
-     cannot fail is not a check. It moves a row that is genuinely different. */
+  /* A REAL MOVE, not a value the cell already held: the seed stores the team's
+     own row at edit throughout, so writing `edit` back produced an identical
+     object, `same()` saw no change, and the check passed on a save that had
+     asked for nothing (§50.6, in a test). Narrowing their own row is the move
+     that cannot be a no-op.
+
+     FOUND TWICE, IN TWO BRANCHES, ON THE SAME DAY — §93 on main and §94 here
+     — and the two fixes were different: narrow the team's own row, or widen
+     somebody else's. THIS ONE IS KEPT, because narrowing their own row is the
+     escalation the rule actually guards against, and the line below already
+     covers the other direction. Worth recording rather than quietly resolving:
+     the same no-op assertion was invisible to two people reading the same file
+     for two unrelated reasons, which is how long it had been passing. */
   asTeam(function (s) {
     s.access = Object.assign({}, s.access);
-    s.access.contrib = Object.assign({}, s.access.contrib || {}, { a_setup:"edit" });
+    s.access.smoteam = Object.assign({}, s.access.smoteam || {}, { a_setup:"view" });
   }, "1 · may not touch the access matrix", false);
   asTeam(function (s) {
     s.access = Object.assign({}, s.access);

@@ -284,6 +284,109 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `node scripts/test-door.js <smo-password>` against a running dev-server
   after touching `api/auth.js` or `lib/auth.js` (it ends by rate-limiting the
   SMO on purpose — `DELETE FROM login_attempts;` clears it).
+- **THE FLOOR IS NOT A ROLE, AND IT MUST BE READ AS ONE (§93):** Islam:
+  *"anyone with no role is employee — employee doesn't give the person anything,
+  so let's remove this strange role."* It was never granted; §55 DERIVED it, so
+  the register drew a chip nobody could take off a row that held nothing.
+  `personRoles()` returns `[]` now and the picker does not offer it — but **what
+  somebody with no role may open is still the client's to answer**, so it is
+  still a matrix row, titled *Everyone else* and marked as not a role, **stored
+  under the key `employee` it always had** (a saved map is merged with the
+  defaults, §30.2 — renaming the key is a migration for a word nobody reads, and
+  would reset every tenant that had tightened it). **`rolesOrFloor()` IS THE ONE
+  LIST**: putting the fallback in `grantIn()` alone left `editingRoles()` walking
+  an empty array, so `onlyOwnLines()` answered false and a floor person given
+  edit could rewrite their unit's WHOLE plan — wider than a Contributor, which is
+  the opposite of a floor. `OWN_LINES_ONLY` carries the floor beside `contrib`.
+- **A DASH MEANT "WE NEVER ASKED" (§93):** *"the password status is all dash now
+  … some people already changed the passwords."* Nothing was lost —
+  `credentials` is its own table outside the TRUNCATE (§69). The fetch was gated
+  on `[data-edit="people"]`, **the page's old edit pen, removed by spec 012**, so
+  `PWSTATES` stayed null and null renders as the dash meaning *not asked yet*
+  (§35). It is gated on the register itself now. **And a failed ask is not an
+  answer**: it stores `{__error}`, the column says *unreadable* with the reason,
+  and the "N with no password" count refuses to count over it — counting an error
+  as absence reports everybody as having none. **§51.11 from the other side**:
+  that rule watches for CHECKS holding a removed selector; this was the PRODUCT
+  holding one, and it fails the same way — silently, in the safe-looking
+  direction.
+- **NAME AND FULL NAME (§93.8, reversing half of §93.6 a day later):** Islam:
+  *"we can have it Name and Full Name … for the identifiers keep it for the ID
+  and email only."* Two facts about what somebody is called had been sharing one
+  column, and every previous answer tried to make one column serve both (§69.21
+  cut it to two names, §81.1 lengthened it for the clashing pair, §93.6 widened
+  it to 392px). **Two columns is what all three were reaching for** — the frozen
+  one is back to 216px. **NOT "user name"**, his own phrase, turned down: the
+  register already has a *Sign-in name* column and two login-sounding names is
+  how §87's twins get made. **STORED, NOT DERIVED** — the first two names are a
+  good guess and a bad rule — with `setKnownName()` DELETING the key when it
+  matches the guess, or correcting the full name later leaves a stale short one
+  (§50.6). **§81.1 MOVES RATHER THAN DIES**: it disambiguates the GUESS now, so
+  two people whose first two names match still read as two rows for somebody who
+  has hidden Full Name; a typed value always wins. **AND THE OLD FILES STILL
+  READ** — §58 a third time, with the twist that the old header's meaning is
+  decided by what sits beside it: `Full Name` present means `Name` is the short
+  one, absent means the file predates the split and its `Name` is the full one.
+  **`known` is a LABEL, never an identifier**: §87's ladder adds no rung, and it
+  is a pick on upload like any other field. No migration — `people.extra`.
+- **THE NAME COLUMN FITS THE NAME, AND TWO VALUES COPY THEMSELVES (§93.6, its
+  first half since narrowed by §93.8):**
+  *"the first column with the name needs to fit the name, and make the email and
+  the phone to be copied on clicking on them."* The first half **reverses
+  §69.21 and §81.1 together** — three names, lengthened only for the pair they
+  could not tell apart — because both answered a column that had to stay narrow,
+  and since §69.19 it is the FROZEN column: the one a wide table never scrolls
+  away, so the wrong place to save pixels, and a name cut off where it is the
+  only thing written is what put one human on this register twice (§87). Still
+  ONE LINE (§88 unchanged): the column is exempted from the 150px cap, not the
+  cap loosened for every cell. **The cost is measured, not glossed**: at *Abd El
+  Moniem Mohamed Abd El Moniem Mahmoud* the column is 392px and the table 1489px
+  in a 920px pane. `shortName()` is untouched — the wizard, the picker and the
+  audience list are sentences, not a column. The copy control has three notes
+  worth keeping: **the word is written into the element** (paint() would replace
+  the button just pressed, §63), **the `execCommand` fallback is the path that
+  actually runs** (`navigator.clipboard` needs a secure context and this is
+  opened from `file://` every day), and **the value goes in the `title` beside
+  the hint**, because `clipTitles()` only fills an EMPTY title — a bare "Click
+  to copy" would take the hover from exactly the values too long to read.
+- **THE PERFORMANCE PAGE WENT UNMEASURED FOR THE THIRD TIME (§93.7):** §50.6
+  fixed `unit/perf` scanning the Plan page for twelve versions by clicking the
+  tab explicitly — then §69 made the tab read *"Performance — not submitted
+  yet"*, the exact-string match stopped matching, and the sweep quietly went
+  back to measuring the landing page under a name it never opened. It took the
+  two PICTURE states with it (`[data-picedit]` only exists on Performance), and
+  the sweep printed `(picture sweep skipped: …)` and carried on. **Match the
+  PREFIX — a suffix is a status, not the name — and ASSERT IT WORKED**: a helper
+  that returns quietly when it found no tab is the same fault with a nicer face.
+  Asked of `currentSub`, not of a `.on` class these buttons do not have, or the
+  assertion would fail always — the same lie pointing the other way.
+- **A COUNT BELONGS WHERE THE GAP IS CLOSED, AND IT PUSHED A BUTTON OFF THE
+  PAGE (§93.4):** *"leave a note somewhere by how many units that doesn't have
+  custodians."* On the REGISTER, because a custodian is given from a row there —
+  a count anywhere else names a problem and points at another screen. **A
+  retired person is not a custodian**: retiring revokes the roles and leaves the
+  unit's pointer written, so asking whether the field is empty reports a unit as
+  covered by somebody who cannot sign in. And the new chip made `.hright`
+  overflow its pane — it never wrapped, though `.phead2` always has — putting
+  §90's own *Register file* dropdown out of reach: **present, styled, enabled,
+  hitting `BODY`**. Third time. The check PRESSES THE POINT now
+  (`elementFromPoint` at the button's centre must return the button); "is not
+  None" is what missed it.
+- **A TABLE PAGE IS NOT A NOTIFICATION AREA (§93.5):** *"this page is a table
+  page, not for other notifications."* The merge left a *Merge two rows* receipt
+  standing under the register. It is the wizard's LAST STEP now — the dialog
+  stays open, says what it did, and Close ends it; §90's argument, applied to
+  the one piece it had left outside. Order is load-bearing: `mergeReset()` (it
+  clears `done` too), then `done`, then `paint()`, then `mergePaint()`. **And
+  the page-level wiring went with the panel** — a `document`-wide query for
+  `[data-pmerge-close]`, which the dialog's own Close and Cancel also carry, so
+  with `paint()` now running while the wizard is open it would have bound a
+  second handler that resets the merge without closing it (§24, §47.2).
+- **ONE CHIP TOO MANY (§93):** the register's Unit cell drew a `.uchip`. That
+  chip is right where several sit side by side and the boundary is the point (the
+  BU list's mapping cell, which it was built for); here there is one value in a
+  column whose heading already names it, so the border boxed the only thing in
+  the cell. An ordinary value now.
 - **ONE DESTINATION IS NOT A QUESTION (§92):** the register's role picker
   commits when its SECOND half is answered, and a seat held over the group
   offers a list of ONE — so picking "SMO team" and stopping looked exactly like
@@ -293,7 +396,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
 - **THE STRATEGY TAB IS AUTHORED BY THE OFFICE, AND ONLY THE PLAN EVER WAS
-  (§93):** Islam, asked whether he meant the plan or the tab — *"I tested and
+  (§94):** Islam, asked whether he meant the plan or the tab — *"I tested and
   the custodian found the pens."* §31's argument (a plan correctable by the
   person measured against it is a different decision from one correctable by
   its custodian) is exactly as true of the **aspiration** the objectives hang
@@ -324,7 +427,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Who enters** — behind a tenant switch that is off by default, so turning it on
   is the office deliberately handing naming to the custodian (spec 008 §3B), and
   **a rule cannot close a door somebody has to open on purpose.**
-- **PEOPLE OPEN WHERE THEY WORK, AND THE GROUP IS A PLACE (§93.6):** a unit has
+- **PEOPLE OPEN WHERE THEY WORK, AND THE GROUP IS A PLACE (§94.6):** a unit has
   opened on Strategy › Plan since §28; what never happened is WHICH destination
   opens — `var current = "group"` was a literal, and `paintUnits()` only corrects
   `current` when it names somewhere unreachable, which the group never is. So
@@ -339,8 +442,8 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   target, which falls back to the global `TARGET`, and both callers ask before
   `paint()` has moved it — so a unit head walking from the group to their own
   unit had their unit's tabs judged against `"group"`.
-- **REPORT IS THE ONE SOLID BUTTON, AND THE LEGEND GETS OUT OF ITS WAY (§93.8,
-  REVERSED IN PART BY §93.9 THE SAME DAY):** asked for a row of its own —
+- **REPORT IS THE ONE SOLID BUTTON, AND THE LEGEND GETS OUT OF ITS WAY (§94.8,
+  REVERSED IN PART BY §94.9 THE SAME DAY):** asked for a row of its own —
   *"bring the 2 buttons above the reading colours rectangle"* — built, looked
   at, and then: *"we can leave the 2 buttons in the same line with the reading
   colours and we can even shrink the reading colours a bit in font size so the
@@ -367,7 +470,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   may report, so §41's budget holds. The *Submitted* badge inside it is an
   OUTLINE — a white wash lightens the ground under its own text to about 4.2:1.
 - **A CHECK THAT ONLY LOOKS FOR SOMETHING PRESENT CANNOT SEE A CONTROL THAT
-  SHOULD NOT BE DRAWN (§93.2, §93.5):** every plan-edit check counted fields and
+  SHOULD NOT BE DRAWN (§94.2, §94.5):** every plan-edit check counted fields and
   handles behind the pen and every one ran as the SMO, so none would ever have
   noticed the custodian's. `src/checks/strategy-office.py` asks each closed door
   TWICE — of the screen and of the shared rule — and asserts BOTH ENDS, or a
@@ -939,7 +1042,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
-solid button** (&sect;93). Three asks in one message, two of them half built
+solid button** (&sect;94). Three asks in one message, two of them half built
 already, and finding out which half is most of the section. **"I TESTED AND THE
 CUSTODIAN FOUND THE PENS"** &mdash; &sect;31 closed the PLAN and nothing else,
 so a strategy custodian could not touch the measures and could rewrite the
@@ -975,7 +1078,15 @@ check that only looks for something PRESENT cannot see a control that should not
 be drawn** &mdash; every plan-edit check ran as the SMO &mdash; while
 `test-authorize.js`'s most important assertion **set a value to what it already
 was**, so &sect;89's gravest rule had never once run and the suite printed 155
-passed while saying so.*
+passed while saying so. **MERGED WITH &sect;93 FROM ANOTHER BRANCH**, built the
+same day: Employee stops being a role (the floor stays, as *Everyone else* on the
+matrix &mdash; nobody HOLDS it, so `personRoles()` returns `[]` and the chip that
+could never be taken off is gone), the password column stops saying "none" when
+it means "we never asked", and the register's Name column splits into Name and
+Full Name. **Numbered &sect;94 because &sect;93 reached `main` first** &mdash;
+and the two sections found the SAME no-op assertion in `test-authorize.js`
+independently, which is the part worth keeping: a check that could not fail was
+invisible to two people reading the same file for two unrelated reasons.*
 
 *Earlier: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the

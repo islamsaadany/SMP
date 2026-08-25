@@ -56,11 +56,11 @@ function arranging(scope, unitKey){
    OLD name across every source, including the ones the change was not about.
 
    Who may reorder, restated in roles: the SMO anywhere; and within one unit,
-   whoever may edit that unit's plan — which since §93 is the office and
+   whoever may edit that unit's plan — which since §94 is the office and
    nobody else. Asked through mayAuthor() so the shared rule stays the single
    answer.
 
-   ── REORDERING IS AUTHORING (§93) ────────────────────────────────
+   ── REORDERING IS AUTHORING (§94) ────────────────────────────────
    This used to end at `grantAt("u_plan", unitKey) === "edit"`, which a unit
    owner and a strategy custodian both hold on their own unit — so the pen was
    closed to them and the DRAG HANDLES were not, and the order of a plan is as

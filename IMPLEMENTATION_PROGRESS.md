@@ -7,7 +7,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
 **Latest version:** v3.22 shipped · v3.24 in progress on the branch
-**Last updated:** 2026-08-24
+**Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -53,6 +53,38 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.24 — the floor stops being a role, and the password column stops lying
+
+Four of Islam's, from using the register (§93).
+
+- **Employee is no longer a role.** *"Anyone with no role is employee — it
+  doesn't give the person anything, so let's remove this strange role."* It was
+  never granted, only derived, so the chip could not be taken off. The floor
+  itself stays and is still the client's to set: **Everyone else** on the access
+  matrix, marked as not a role, under the key it always had.
+- **The password column was never asked.** Nothing was lost — `credentials` is
+  its own table outside the state graph. The fetch was gated on the page's old
+  edit pen, which spec 012 removed, so the column showed the dash that means
+  *not asked yet*. It asks on the register now, and says **unreadable** with the
+  reason when the ask fails, rather than showing the same dash.
+- **The Unit cell is an ordinary value**, not a chip.
+- The role chip's place label stays, on his instruction — it is already
+  suppressed where a role has one possible place (§92).
+- **A note about the units nobody is keeping**, on the register beside the
+  other counts, because that is where a custodian is given. A retired person
+  does not count as one. Adding it pushed *Register file* off the pane —
+  `.hright` never wrapped — which is now fixed and asserted by pressing the
+  point rather than asking whether the button exists.
+- **The merge receipt is the wizard's last step**, not a panel left standing
+  under the table: *"this page is a table page, not for other notifications."*
+- **Name and Full Name are two columns.** *Name* is what somebody is called —
+  two names, stored and correctable — and *Full Name* is what the employee file
+  holds, in its own hideable column. It reverses half of the previous day's
+  answer and gives most of the width back: the frozen column is 216px, not 392.
+  Files written before today still read correctly.
+- **Email and mobile copy on click.**
+
 
 ### v3.24 — who a row is, and merging two rows that are one person
 

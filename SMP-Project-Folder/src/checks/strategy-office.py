@@ -1,4 +1,4 @@
-"""THE STRATEGY TAB IS THE OFFICE'S, AND REPORT IS THE ONE SOLID BUTTON (§93).
+"""THE STRATEGY TAB IS THE OFFICE'S, AND REPORT IS THE ONE SOLID BUTTON (§94).
 
 Islam, 2026-08-25, having signed in as a strategy custodian and gone looking:
 "I tested and the custodian found the pens."
@@ -13,11 +13,11 @@ control that should not be drawn.
 Each closed door is asked TWICE, the way §89's three are: once of the SCREEN,
 by switching to that person and looking, and once of the RULE, which is the
 same function `api/state.js` calls. Where the two disagree the server wins and
-the product is broken — and §93 found three places where they already did.
+the product is broken — and §94 found three places where they already did.
 
 The last two sections are the other two asks in the same message: where a
 person lands, and how the Performance page's two buttons read. That second one
-was reversed the same day (§93.9) — asked out of the band legend, then asked
+was reversed the same day (§94.9) — asked out of the band legend, then asked
 back into it with the legend shrunk instead — so what section 4 measures is the
 ORDER OF LOUDNESS rather than a position. That is the thing that was actually
 wrong, and the thing a later stylesheet edit could silently undo.
@@ -187,7 +187,7 @@ with sync_playwright() as p:
        pg.evaluate("() => current") == "group", pg.evaluate("() => current"))
 
     # ── 4 · THE PERFORMANCE PAGE'S TWO BUTTONS ───────────────────────
-    # §93.9 REVERSED §93.8: they were moved out of the legend and then asked
+    # §94.9 REVERSED §94.8: they were moved out of the legend and then asked
     # back into it, with the legend made smaller instead. So what is asserted
     # is not a position but the ORDER OF LOUDNESS — the legend must be plainly
     # quieter than the controls beside it, which is the thing that was wrong

@@ -495,7 +495,7 @@ function reportBtn(target){
   if (!r) return "";
   var ac = String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
   if (grantAt(ac, target) === "none") return "";
-  /* ── SOLID, NOT OUTLINED (§93, Islam 2026-08-25) ────────────────
+  /* ── SOLID, NOT OUTLINED (§94, Islam 2026-08-25) ────────────────
      "the report button in performance make it all orange to obvious for the
      user." It is the one thing somebody came to this page to DO during a
      cycle, and it was wearing the same quiet outline as Presentation, Arrange
@@ -1358,7 +1358,7 @@ function renderTemple(){
 }
 
 function renderGroupFoundation(){
-  /* One question for every field on the page, asked once (§93). */
+  /* One question for every field on the page, asked once (§94). */
   var gpg = authoring("foundation", "g_found") ? "foundation" : null;
   /* `return` ON ITS OWN LINE RETURNED UNDEFINED. Automatic semicolon insertion
      ended the statement there and left everything below as dead code, so the
@@ -1548,7 +1548,7 @@ function renderUnitPerformance(u){
   var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
 
   /* ── THE ACTIONS STAY IN THE LEGEND, AND THE LEGEND GETS QUIETER
-     (§93.9, REVERSING §93.8's first half the same day) ───────────────
+     (§94.9, REVERSING §94.8's first half the same day) ───────────────
      Asked for a row of their own — "bring the 2 buttons above the reading
      colours rectangle" — and then, having looked at it: "I think we can leave
      the 2 buttons in the same line with the reading colours and we can even
@@ -1627,7 +1627,7 @@ function renderUnitPerformance(u){
 
 /* A bare button, right-aligned above the columns. The labelled bar it replaced
    announced a section that did not need announcing. */
-/* IS THIS PAGE ACTUALLY OPEN FOR AUTHORING RIGHT NOW (§93)?
+/* IS THIS PAGE ACTUALLY OPEN FOR AUTHORING RIGHT NOW (§94)?
    `EDIT_PAGE` is a switch, and a switch survives things a grant does not —
    the viewer switcher repaints without leaving modes, and a person's roles
    can change under an open pane. So the fields ask the same question the pen
@@ -1637,7 +1637,7 @@ function renderUnitPerformance(u){
    only one of them is a strategy page. */
 function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
 
-/* mayAuthor(), NOT the raw grant (§93). Every "Edit" bar and every pen in
+/* mayAuthor(), NOT the raw grant (§94). Every "Edit" bar and every pen in
    the platform asks this one question, so a strategy page cannot acquire a
    pen that is open to somebody the rule closes it to — the gate is on the
    control, not on each of the eleven call sites that draw one. */
@@ -2790,7 +2790,7 @@ function capReportBody(c){
   /* Same two gates as a unit's reporting: the cycle has to be open AND
      unlocked, or the server refuses the figures the page is inviting. */
   /* inOffice(), not hasRole("super") — the TENTH place meaning "the office"
-     (§89, found in §93). A unit's Reporting page has asked it this way since
+     (§89, found in §94). A unit's Reporting page has asked it this way since
      §89; a function's had not, so an SMO team member could report past a
      locked cycle on one side of the navigation switch and not the other
      (§53.5). The server was on `super` for both and refused either way. */

@@ -530,6 +530,12 @@ var SYNC = (function () {
     mailHistory: function (done) {
       mailPost({ action: "history" }, function (err, j) { done(err, err ? null : j); });
     },
+    /* ONE MESSAGE, AND WHAT HAPPENED TO EACH PERSON (§93.15). The endpoint has
+       existed since §77 and nothing has ever called it — the record was written
+       on every send and could not be read back from any screen. */
+    mailHistoryOne: function (id, done) {
+      mailPost({ action: "historyOne", id: id }, function (err, j) { done(err, err ? null : j); });
+    },
     mailTest: function (o, done) {
       mailPost({ action: "test", to: o.to, subject: o.subject, html: o.html,
                  fromName: o.fromName, replyTo: o.replyTo },

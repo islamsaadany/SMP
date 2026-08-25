@@ -4121,6 +4121,136 @@ function planUnderCell(fk, f, editable){
     }).join("") + '</select>';
 }
 
+/* ── A FUNCTION'S COLUMNS (§93.14) ────────────────────────────────────
+   The register's chooser, on the table that needed it next. One key is hidden
+   by default and the rest are shown, MERGED with the defaults rather than
+   substituted — a column added later is absent from a map written before it
+   existed, and reading absent as `false` would hide every new column from
+   everybody who had ever opened the control (§30.2). */
+var FNCOLS_KEY = "smp.fns.columns";
+var FN_COLS = [
+  { k:"key",     label:"Key", off:true },
+  { k:"nav",     label:"Nav name" },
+  { k:"code",    label:"Code" },
+  { k:"plansin", label:"Plans in" },
+  { k:"caps",    label:"Caps" },
+  { k:"head",    label:"Head" },
+  { k:"cust",    label:"Custodian" }
+];
+var FNCOLS = null;
+function fnCols(){
+  if (FNCOLS) return FNCOLS;
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(FNCOLS_KEY) || "null"); } catch (e) { saved = null; }
+  FNCOLS = {};
+  FN_COLS.forEach(function(c){
+    FNCOLS[c.k] = (saved && typeof saved[c.k] === "boolean") ? saved[c.k] : !c.off;
+  });
+  return FNCOLS;
+}
+function setFnCol(k, on){
+  fnCols()[k] = on;
+  try { localStorage.setItem(FNCOLS_KEY, JSON.stringify(FNCOLS)); } catch (e) {}
+}
+function fnShowCol(k){ return fnCols()[k] !== false; }
+
+/* ── THE ROW'S ACTIONS, IN ONE MENU (§93.14) ──────────────────────────
+   The register's kebab, on the table §69.22's argument had not reached. The
+   entries and their ORDER are written down rather than spliced by index, for
+   the reason the register records: a list whose order depends on which items
+   happened to qualify is a list that reorders itself for some viewers.
+
+   DELETE IS "DELETE PERMANENTLY" AND SITS BELOW THE RULE, beside Retire's
+   opposite. §62's refusal is unchanged and is still the feature — the entry is
+   always LIVE rather than disabled, and pressing it either asks the question
+   or names what is holding the function and where to go and clear it. A
+   disabled item has nowhere to put a reason that is a sentence. */
+function fnKebab(fk, f, ed, mayEdit){
+  /* THE OPEN ROW SHOWS SAVE AND CANCEL, NOT A MENU (spec 012 §2.1, §92.1).
+     While the row is open the only two acts are finishing and abandoning;
+     leaving the ⋮ there would offer Retire and Delete on a row with unsaved
+     edits in it. */
+  if (ed) {
+    return '<td class="cc kebcell tk-editcell">' +
+      '<button class="linkbu tk-save" data-rowsave="fns|' + esc(fk) + '">Save</button>' +
+      '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+  }
+  if (!mayEdit) return '<td class="cc kebcell"></td>';
+
+  var open = FNMENU === fk;
+  var acts = [];
+  acts.push('<button data-rowedit="fns|' + esc(fk) + '">Edit this row</button>');
+  acts.push('<button data-clear="fn|' + esc(fk) + '|nums">Clear progress</button>');
+  if (mayDestroy())
+    acts.push('<button data-clear="fn|' + esc(fk) + '|plan">Clear plan</button>');
+  acts.push('<hr>');
+  acts.push('<button class="danger" data-fnretire="' + esc(fk) + '">' +
+    (f.active === false ? "Reinstate this function" : "Retire this function") + '</button>');
+  if (mayDestroy())
+    acts.push('<button class="danger" data-fndel="' + esc(fk) + '">Delete permanently</button>');
+
+  /* The cell with a panel open has to outrank the cells below it (§69.22):
+     this column is frozen, so every actions cell is sticky with a z-index and
+     therefore its own stacking context — a panel's z-index cannot escape a
+     context its parent created. */
+  var lifted = open || String(CLEARING || "").indexOf("|" + fk) > -1 ||
+               CLEARING === "fndel|" + fk;
+  return '<td class="cc kebcell' + (lifted ? " lifted" : "") + '">' +
+    '<button class="kebab' + (open ? " open" : "") + '" data-fnmenu="' + esc(fk) + '" ' +
+    'aria-haspopup="true" aria-expanded="' + open + '" ' +
+    'title="Actions" aria-label="Actions for ' + esc(f.name) + '">' +
+    '<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">' +
+    '<circle cx="10" cy="4.6" r="1.5"/><circle cx="10" cy="10" r="1.5"/>' +
+    '<circle cx="10" cy="15.4" r="1.5"/></svg></button>' +
+    (open ? '<div class="kmenu">' + acts.join("") + '</div>' : '') +
+    fnPanels(fk, f) + '</td>';
+}
+
+/* The three questions, each replacing the menu in the same corner so the
+   second press lands where the first one did (§46.2). They were inline in the
+   actions cell; the cell is 49px now, so they are panels like the register's
+   delete question. */
+function fnPanels(fk, f){
+  if (CLEARING === "fndel|" + fk) {
+    var why = fnDeleteBlockers(fk);
+    if (why.length) return '<div class="kmenu kconfirm"><div class="cq">' +
+      '<b>' + esc(f.name) + ' cannot be deleted.</b> ' +
+      /* Each reason is a sentence in a paragraph of them, so it starts with a
+         capital. Written where they are JOINED, not baked into the strings,
+         because the same text is spoken mid-sentence by the server's refusal. */
+      why.map(function(w){
+        return esc(w.full.charAt(0).toUpperCase() + w.full.slice(1)) + ".";
+      }).join(" ") +
+      ' <b>Retire</b> takes it out of the navigation and keeps all of that.' +
+      '</div><div class="cbtns"><button data-clearno="1">Close</button></div></div>';
+    var takes = fnDeleteTakes(fk);
+    return '<div class="kmenu kconfirm"><div class="cq"><b>Delete ' + esc(f.name) + '?</b> ' +
+      (takes.length
+        ? "This removes the function and " + takes.join(" and ") + " with it. Nothing " +
+          "points at it and nothing has been reported against it, so nothing else changes."
+        : "Nothing points at it and nothing has been reported against it. There is no " +
+          "undo \u2014 Retire is the reversible one.") +
+      '</div><div class="cbtns"><button data-clearno="1">Cancel</button>' +
+      '<button class="danger" data-fndelyes="' + esc(fk) + '">Yes, delete it</button></div></div>';
+  }
+  var n = functionCapCount(fk);
+  var caps = n + " " + (n === 1 ? "capability" : "capabilities");
+  if (CLEARING === "fn|" + fk + "|plan")
+    return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the whole plan?</b> ' +
+      'Key objectives and projects across ' + caps + '. The definitions stand, and each ' +
+      'plan is archived first.</div><div class="cbtns">' +
+      '<button data-clearno="1">Cancel</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|plan">Yes, clear the plan</button>' +
+      '</div></div>';
+  if (CLEARING === "fn|" + fk + "|nums")
+    return '<div class="kmenu kconfirm"><div class="cq"><b>Clear the reported progress?</b> ' +
+      'Actuals and notes across ' + caps + '. The plan stands.</div><div class="cbtns">' +
+      '<button data-clearno="1">Cancel</button>' +
+      '<button class="danger" data-clearyes="fn|' + esc(fk) + '|nums">Yes, clear the progress</button>' +
+      '</div></div>';
+  return "";
+}
+
 function renderFunctions(){
   /* §85: a pen per row. Retire and Delete keep their own controls — they are
      decisions about the function, not corrections to its fields (§62). */
@@ -4148,18 +4278,25 @@ function renderFunctions(){
     return '<tr data-tkrow="' + (f.active === false ? "retired" : "active") + '"' +
       (editable ? ' class="tk-open"' : (f.active === false ? ' class="retired"' : '')) + '>' +
       '<td class="idx">' + (i + 1) + '</td>' +
-      '<td>' + (editable
+      /* THE KEY LINE IS A COLUMN NOW (§93.14). It sat under every name as a
+         second line; the register moved exactly this to an off-by-default
+         column (§69.11), because a function key is a DIAGNOSTIC — wanted when
+         something is wrong and never when you are reading who runs Marketing.
+         It is the ONLY column hidden by default here. Nav name and Code stay
+         visible: they are SET on this page, and a hidden column renders
+         nothing at all, edit field included. */
+      '<td class="fnamecell">' + (editable
         ? '<input class="fld tk-firstfield" value="' + esc(f.name) + '" data-fname="' + fk + '">'
-        : '<b>' + esc(f.name) + '</b>') +
-        '<span class="why mono">key ' + fk + '</span></td>' +
-      '<td>' + (editable
+        : '<b>' + esc(f.name) + '</b>') + '</td>' +
+      (fnShowCol("key") ? '<td><span class="mono">' + esc(fk) + '</span></td>' : '') +
+      (fnShowCol("nav") ? '<td>' + (editable
         ? '<input class="fld" value="' + esc(f.navName || "") + '" data-fnav="' + fk +
           '" placeholder="' + esc(f.name) + '">'
         : (f.navName ? '<span class="val">' + esc(f.navName) + '</span>'
-                     : '<span class="why" style="margin:0">' + esc(f.name) + '</span>')) + '</td>' +
-      '<td class="cc">' + (editable
+                     : '<span class="why" style="margin:0">' + esc(f.name) + '</span>')) + '</td>' : '') +
+      (fnShowCol("code") ? '<td class="cc">' + (editable
         ? '<input class="fld mono" value="' + esc(f.codePrefix || "") + '" data-fpx="' + fk + '">'
-        : '<span class="mono">' + esc(f.codePrefix || "\u2014") + '</span>') + '</td>' +
+        : '<span class="mono">' + esc(f.codePrefix || "\u2014") + '</span>') + '</td>' : '') +
       /* ── PLANS IN, AND UNDER (§59) ─────────────────────────────────
          Spec 010 built both and gave neither a control: `format` and `under`
          could only be set by editing the source, so a second Merchandising was
@@ -4168,86 +4305,25 @@ function renderFunctions(){
          SWITCHING IS REFUSED WHILE THE OTHER SIDE HOLDS SOMETHING, and it says
          what is in the way rather than hiding a plan that still exists — the
          same contract as retiring a company that still holds units (§49.3). */
-      '<td class="cc">' + planCell(fk, f, editable) + '</td>' +
-      '<td class="cc"><span class="mono">' + caps.length + '</span></td>' +
-      '<td class="cc">' + pick("head", f.head, fk, editable) + '</td>' +
-      '<td class="cc">' + pick("custodian", f.custodian, fk, editable) + '</td>' +
-      '<td class="cc">' + (mayEdit
-        ? '<div class="rowacts">' +
-            (editable
-              ? '<button class="linkbu tk-save" data-rowsave="fns|' + fk + '">Save</button>' +
-                '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button>'
-              : '<button class="ico tk-pen" data-rowedit="fns|' + fk + '" ' +
-                  'title="Edit this row" aria-label="Edit this row">' + ICO_EDIT + '</button>') +
-            '<button class="linkbu" data-fnretire="' + fk + '">' +
-              (f.active === false ? "Reinstate" : "Retire") + '</button>' +
-            /* DELETE, AND THE REFUSAL IS THE FEATURE (§62).
-               §59 shows a blocked control DISABLED with its reason beside it,
-               and that is right for a one-line reason in a cell with room.
-               This cell has neither: the reasons are sentences that name what
-               is in the way AND where to go and clear it, and the actions
-               column is 83px wide with four things already wrapping in it.
-               Measured before it was written — the alternative put six lines
-               of grey text under every row.
+      (fnShowCol("plansin") ? '<td class="cc">' + planCell(fk, f, editable) + '</td>' : '') +
+      (fnShowCol("caps") ? '<td class="cc"><span class="mono">' + caps.length + '</span></td>' : '') +
+      (fnShowCol("head") ? '<td class="cc">' + pick("head", f.head, fk, editable) + '</td>' : '') +
+      (fnShowCol("cust") ? '<td class="cc">' + pick("custodian", f.custodian, fk, editable) + '</td>' : '') +
+      /* ── STATUS HOLDS A STATUS, AND THE ACTS HOLD A MENU (§93.14) ────
+         Islam, on rows measuring 155px beside the register's 39: "learn from
+         what we have done in the people table."
 
-               So the button is always live and the REFUSAL IS WHERE THE
-               CONFIRMATION WOULD BE. Pressing Delete always answers, and the
-               answer arrives at the moment somebody asked the question rather
-               than in a tooltip they have to find. A disabled button says
-               "no"; this one says why, and what to do about it. */
-            (function(){
-              if (CLEARING !== "fndel|" + fk)
-                return mayDestroy()
-                  ? '<button class="linkbu" data-fndel="' + fk + '">Delete</button>' : '';
-              var why = fnDeleteBlockers(fk);
-              if (why.length) return '<span class="confirm wide">' +
-                '<b>' + esc(f.name) + ' cannot be deleted</b>' +
-                '<span class="why" style="margin:0">' +
-                  /* Each reason is a sentence in a paragraph of them, so it
-                     starts with a capital. Written where they are JOINED, not
-                     baked into the strings, because the same text is spoken
-                     mid-sentence by the refusal on the server side. */
-                  why.map(function(w){
-                    return esc(w.full.charAt(0).toUpperCase() + w.full.slice(1)) + ".";
-                  }).join(" ") +
-                  ' <b>Retire</b> takes it out of the navigation and keeps all of that.' +
-                '</span>' +
-                '<button class="linkbu" data-clearno="1">Close</button></span>';
-              var takes = fnDeleteTakes(fk);
-              return '<span class="confirm"><b>Delete ' + esc(f.name) + '?</b>' +
-                '<span class="why" style="margin:0">' +
-                  (takes.length
-                    ? "This removes the function and " + takes.join(" and ") +
-                      " with it. Nothing points at it and nothing has been " +
-                      "reported against it, so nothing else changes."
-                    : "Nothing points at it and nothing has been reported " +
-                      "against it. There is no undo \u2014 Retire is the " +
-                      "reversible one.") + '</span>' +
-                '<button class="rmbtn" data-fndelyes="' + fk + '">Yes, delete it</button>' +
-                '<button class="linkbu" data-clearno="1">Cancel</button></span>';
-            })() +
-            (CLEARING === "fn|" + fk + "|plan"
-              ? '<span class="confirm"><b>Clear the whole plan?</b>' +
-                  '<span class="why" style="margin:0">Key objectives and projects across ' +
-                    functionCapCount(fk) + ' ' +
-                    (functionCapCount(fk) === 1 ? "capability" : "capabilities") +
-                    '. The definitions stand, and each plan is archived first.</span>' +
-                  '<button class="rmbtn" data-clearyes="fn|' + fk + '|plan">Yes, clear the plan</button>' +
-                  '<button class="linkbu" data-clearno="1">Cancel</button></span>'
-              : CLEARING === "fn|" + fk + "|nums"
-              ? '<span class="confirm"><b>Clear the reported progress?</b>' +
-                  '<span class="why" style="margin:0">Actuals and notes across ' +
-                    functionCapCount(fk) + ' ' +
-                    (functionCapCount(fk) === 1 ? "capability" : "capabilities") +
-                    '. The plan stands.</span>' +
-                  '<button class="rmbtn" data-clearyes="fn|' + fk + '|nums">Yes, clear the progress</button>' +
-                  '<button class="linkbu" data-clearno="1">Cancel</button></span>'
-              : '<button class="linkbu" data-clear="fn|' + fk + '|nums">Clear progress</button>' +
-                (mayDestroy()
-                  ? '<button class="linkbu" data-clear="fn|' + fk + '|plan">Clear plan</button>' : '')) +
-          '</div>'
-        : '<span class="pill ' + (f.active === false ? "none" : "good") + '">' +
-            (f.active === false ? "Retired" : "Active") + '</span>') + '</td></tr>';
+         This column was headed Status and showed no status. It carried a pen
+         and four stacked links — Retire, Delete, Clear progress, Clear plan —
+         and those four lines ARE the 155px. §69.22's argument, already settled
+         on the register: every per-row action used to want a line of its own,
+         and a menu is where the NEXT one goes too.
+
+         So Status says Active or Retired, which is what its heading has always
+         promised, and the acts move into the row's kebab. */
+      '<td class="cc"><span class="pill ' + (f.active === false ? "none" : "good") + '">' +
+        (f.active === false ? "Retired" : "Active") + '</span></td>' +
+      fnKebab(fk, f, editable, mayEdit) + '</tr>';
   }).join("");
 
   /* "Functions" in the rail and on the page (Islam, 2026-08-23). The page has
@@ -4255,11 +4331,36 @@ function renderFunctions(){
      list where nothing else is a function — it only made the rail's longest
      entry longer. The ROLE keeps its full name: "Supporting function head" is
      what somebody holds, and that is a different word doing a different job. */
+  /* THE REGISTER'S CHOOSER, SAME SHAPE AND SAME CLASSES (§93.14). Written out
+     rather than extracted into a shared helper: the two differ in what they
+     say at the foot and in which column can never be hidden, and a helper
+     taking two lists and two sentences is longer than the thing it replaces.
+     If a third table wants one, that is when it becomes a function. */
+  var fnColMenu = !mayEdit ? "" :
+    '<span class="hmenu' + (FNCOLMENU ? " open" : "") + '">' +
+      '<button class="hmenu-btn" data-fncolmenu="1" aria-haspopup="true" ' +
+        'aria-expanded="' + FNCOLMENU + '">Columns <span class="hcar">&#9662;</span></button>' +
+      (FNCOLMENU
+        ? '<div class="hmenu-panel cols">' +
+            '<div class="hmenu-h"><span>Show columns</span>' +
+              '<span><button class="linkbu" data-fncolall="1">All</button> &middot; ' +
+              '<button class="linkbu" data-fncolnone="1">None</button></span></div>' +
+            FN_COLS.map(function(c){
+              return '<label class="colrow"><input type="checkbox" data-fncol="' + c.k + '"' +
+                (fnShowCol(c.k) ? " checked" : "") + '><span>' + esc(c.label) + '</span></label>';
+            }).join("") +
+            '<div class="hmenu-note">Function and Status are always shown. ' +
+            '<b>Key</b> is the identifier written into a project code and a person\u2019s ' +
+            'row \u2014 turn it on when something does not line up.</div>' +
+          '</div>'
+        : '') +
+    '</span>';
+
   return cfgHead("Functions",
       ['<span class="pill kind">SMO</span>', activeFunctionKeys().length + ' active',
        GROUP.capabilities.length + ' capabilities'],
       "fns", grant("c_fns") === "edit", "fnall",
-      ["Clear all progress", "Clear all plans"]) +
+      ["Clear all progress", "Clear all plans"], fnColMenu) +
     section("", "", null,
       /* §84. Eight rows and nine columns — over the search threshold, and its
          order is a plain list rather than something arranged, so it sorts. */
@@ -4275,11 +4376,20 @@ function renderFunctions(){
          The widths went with the conversion to sortable heads (§84): they were
          declared as percentages summing to the whole, which auto layout treats
          as a suggestion anyway, and wrapping (§87) is what decides these now. */
-      '<div class="cfg"><table data-tktable="fns"><thead><tr>' +
+      '<div class="cfg fnsbox"><table class="unitcfg fnscfg" data-tktable="fns"><thead><tr>' +
         (function(){ var h = tkHead("fns");
-          return h("#", "idx", false) + h("Function") + h("Nav name") +
-                 h("Code", "cc") + h("Plans in", "cc") + h("Caps", "cc") +
-                 h("Head", "cc") + h("Custodian", "cc") + h("Status", "cc"); })() +
+          return h("#", "idx", false) + h("Function", "fnamecell") +
+                 (fnShowCol("key")     ? h("Key")               : '') +
+                 (fnShowCol("nav")     ? h("Nav name")          : '') +
+                 (fnShowCol("code")    ? h("Code", "cc")        : '') +
+                 (fnShowCol("plansin") ? h("Plans in", "cc")    : '') +
+                 (fnShowCol("caps")    ? h("Caps", "cc")        : '') +
+                 (fnShowCol("head")    ? h("Head", "cc")        : '') +
+                 (fnShowCol("cust")    ? h("Custodian", "cc")   : '') +
+                 h("Status", "cc") +
+                 /* Not sortable and never was: it holds one control (§69.22's
+                    rule, which the register applies to Roles and Password). */
+                 h("", "cc kebcell", false); })() +
         '</tr></thead>' +
         '<tbody>' + rows + '</tbody></table></div>' +
       /* The three notes that sat here are in the knowledge base now (§30). A
@@ -4919,6 +5029,81 @@ function renderDraftList(){
    after pressing Send is to see it in the list, and a second destination puts
    a navigation between the act and its record. */
 var SENTLIST = null;   /* null = not asked */
+/* ── WHAT HAPPENED TO EACH PERSON (§93.15) ────────────────────────────
+   Islam: "I sent a message everyone received but not the SMO team."
+
+   The platform already knew. Every send writes a `message_recipients` row per
+   person — the address it used, whether the provider accepted it, the error if
+   it did not, and the provider's own id — and `historyOne` has returned all of
+   that since the table existed. NOTHING HAS EVER CALLED IT. The record was
+   written on every send and could not be read back from any screen, so the one
+   question a record exists to answer had to be guessed at instead.
+
+   THE THREE OUTCOMES ARE THREE DIFFERENT PROBLEMS, and separating them is the
+   whole value of this screen:
+
+     absent   — they never resolved into the audience. Retired, no address, or
+                sharing one with another row. The fix is on the register.
+     failed   — the provider refused it, and said why. The fix is the address.
+     sent     — the platform handed it over and got an id back. Anything after
+                that is delivery: a filter, a rule, a full mailbox. Nothing on
+                this side will fix it, and knowing that is the point.
+
+   A summary that says "44 of 47" tells you a number and not one of those. */
+var SENTONE = null;   /* { id, asking, data, error } */
+
+function renderSentOne(){
+  if (!SENTONE) return "";
+  var body;
+  if (SENTONE.asking) body = '<span class="why" style="margin:0">Asking\u2026</span>';
+  else if (SENTONE.error) body = '<span class="why" style="margin:0">' + esc(SENTONE.error) + '</span>';
+  else {
+    var to = (SENTONE.data && SENTONE.data.recipients) || [];
+    var ok = to.filter(function(r){ return r.ok; });
+    var no = to.filter(function(r){ return !r.ok; });
+    /* Failures first and named, the same rule the audience already follows:
+       "3 failed" tells nobody which three, and each one is a different fix. */
+    var row = function(r){
+      return '<tr><td><b>' + esc(r.person_name || "\u2014") + '</b></td>' +
+        '<td><span class="mono">' + esc(r.address || "") + '</span></td>' +
+        '<td class="cc"><span class="pill ' + (r.ok ? "good" : "bad") + '">' +
+          (r.ok ? "Sent" : "Failed") + '</span></td>' +
+        '<td class="msgerr">' + (r.ok
+          ? '<span class="why" style="margin:0">handed to the mail provider</span>'
+          : '<span class="why" style="margin:0">' + esc(r.error || "no reason given") + '</span>') +
+        '</td></tr>';
+    };
+    body =
+      '<div class="audrow" style="align-items:center;margin-bottom:10px">' +
+        '<span class="pill good">' + ok.length + ' sent</span>' +
+        (no.length ? '<span class="pill bad">' + no.length + ' failed</span>' : '') +
+        '<span class="why" style="margin:0">Sent means the mail provider accepted it and ' +
+          'gave us an id. What happens after that \u2014 a filter, a rule, a full mailbox ' +
+          '\u2014 is not something this platform can see.</span>' +
+      '</div>' +
+      (to.length
+        /* NOT `unitcfg` (§93.15). That class is `table-layout:fixed`, which
+           takes every column width from the header row and makes a body-cell
+           cap do nothing at all — §46's lesson, and the reason the provider's
+           error sat clipped at 201px however wide it was told to be. This
+           table is read-only and wants content-sized columns. */
+        ? '<div class="cfg"><table class="msgtable"><thead><tr>' +
+            '<th class="msgperson">Person</th><th class="msgaddr">Address</th>' +
+            '<th class="cc msgstat">Status</th>' +
+            '<th class="msgerr">What the provider said</th>' +
+          '</tr></thead><tbody>' + no.map(row).join("") + ok.map(row).join("") +
+          '</tbody></table></div>'
+        : '<span class="why" style="margin:0">This message has no recipients recorded ' +
+          '\u2014 nobody resolved into the audience at all.</span>');
+  }
+  var m = (SENTONE.data && SENTONE.data.message) || {};
+  return section("", "Who got \u201c" + esc(m.subject || "this message") + "\u201d",
+    "Written when it was sent, so it is what actually happened rather than what the " +
+    "screen worked out beforehand.",
+    body + '<div class="imp-row" style="margin-top:12px">' +
+      '<button class="linkbu" data-sentclose="1">Close</button></div>');
+}
+
 function renderSentList(){
   var rows = (SENTLIST && SENTLIST.messages) || [];
   var body = !SENTLIST
@@ -4930,15 +5115,21 @@ function renderSentList(){
         : '<div class="cfg"><table><thead><tr><th>Subject</th><th>Sent</th>' +
           '<th class="cc">To</th><th class="cc">Failed</th><th>By</th></tr></thead><tbody>' +
           rows.map(function(m){
-            return '<tr><td><b>' + esc(m.subject) + '</b></td>' +
+            /* THE ROW OPENS (§93.15). The subject is the control, because it is
+               the thing somebody is already looking for when they come here to
+               ask what happened to a particular message. */
+            return '<tr' + (SENTONE && SENTONE.id === m.id ? ' class="tk-open"' : '') + '>' +
+              '<td><button class="linkbu" data-sentone="' + esc(String(m.id)) + '"><b>' +
+                esc(m.subject) + '</b></button></td>' +
               '<td>' + esc(String(m.sent_at || "").slice(0, 16).replace("T", " ")) + '</td>' +
               '<td class="cc">' + (m.sent || 0) + ' of ' + (m.total || 0) + '</td>' +
               '<td class="cc">' + (m.failed
-                  ? '<span class="pill bad">' + m.failed + '</span>' : '—') + '</td>' +
+                  ? '<span class="pill bad">' + m.failed + '</span>' : '\u2014') + '</td>' +
               '<td>' + esc(m.by_name || "") + '</td></tr>';
           }).join("") + '</tbody></table></div>';
   return section("", "What has been sent",
-    "The record lives outside the saved data, so a save cannot erase it.", body);
+    "The record lives outside the saved data, so a save cannot erase it. " +
+    "Open one to see what happened to each person.", body) + renderSentOne();
 }
 
 /* ── THE PREVIEW IS THE EDITOR (§76.3) ────────────────────────────────────

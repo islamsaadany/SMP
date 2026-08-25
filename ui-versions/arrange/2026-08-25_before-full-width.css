@@ -895,18 +895,13 @@
      ignores you. It also carried `.capmeta`, whose element the product no
      longer has (§24). */
 
-  /* The folded row carries more entries than the flat one ever did, so its
-     spacing tightens. Only when the folds are present; everyone else keeps the
-     roomier row.
-
-     `max-width:none` WAS HERE AND IS GONE (\u00a794.13). It let this row past the
-     1180 content column \u2014 "a navigation bar is chrome, not content" \u2014 and that
-     is the line that made the narrow page look BROKEN rather than merely
-     narrow: the row ran edge to edge while the page under it sat centred with
-     238px of nothing down each side. Nothing is capped now, so the override
-     has nothing to override, and a rule that no longer does anything is a rule
-     somebody will one day read as load-bearing (\u00a724). */
-  .units-in.folded{padding-left:16px;padding-right:16px}
+  /* The folded row carries more entries than the flat one ever did, and the
+     content column is 1180px. Tightened only when the folds are present, so
+     everyone else keeps the roomier spacing they have today. */
+  /* Two changes, only when the folds are present. The row is allowed past the
+     content column's width \u2014 a navigation bar is chrome, not content \u2014 and the
+     spacing tightens. Everyone else keeps today's roomier row. */
+  .units-in.folded{max-width:none;padding-left:16px;padding-right:16px}
   .units-in.folded button[data-u]{padding-left:9px;padding-right:9px;font-size:13.5px}
 
   .units-in.folded .sep{margin:0 3px}

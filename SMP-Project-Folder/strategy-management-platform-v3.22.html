@@ -271,17 +271,36 @@
           text-decoration:none; }
   .skip:focus { left:0; }
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
-  .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
+  /* ── EVERY PAGE GETS THE WHOLE WINDOW (§94.13) ────────────────────
+     Islam: "the page is wide but the section below the navigation part is
+     compact with a lot of padding on the right and left not utilizing the
+     screen width — let's make it fit always."
 
-  /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
-     All four containers together, or the chrome sits indented from the page
-     beneath it. 1600px rather than none at all: a table stretched across a
-     32-inch monitor puts its first and last column a head-turn apart, and the
-     register's frozen columns exist precisely so the eye has an anchor. */
-  :root[data-wide] .wrap,
-  :root[data-wide] .top-in,
-  :root[data-wide] .units-in,
-  :root[data-wide] .tabs-in { max-width:1600px; }
+     THIS IS §93.9 FINISHED, NOT A NEW IDEA. That section answered the same
+     complaint for the RAILED pages and left every other page at 1180 — and
+     what made the difference visible rather than merely narrow is that the
+     destination row had already been let past the cap (`.units-in.folded`,
+     "a navigation bar is chrome, not content"). So at 1670px the row ran edge
+     to edge at 1655px while the page under it sat at 1132px, centred, with
+     238px of nothing down each side. The two stopped lining up, which is
+     exactly what §93.9 said it was avoiding when it widened all four
+     containers together.
+
+     THE CEILING GOES WITH THE CAP, so there is ONE behaviour and not two.
+     §93.9 chose 1600 over none because a table stretched across a 32-inch
+     monitor puts its first and last column a head-turn apart; that is true and
+     it is not what anybody is looking at — the register's frozen first and
+     last columns (§69.19, §69.20) exist for exactly that, and a second
+     threshold is a second thing to explain.
+
+     WHAT 1180 WAS FOR, AND WHAT REPLACES IT: it is a READING MEASURE, and
+     prose has an optimum line length. Measured at 1670px, a unit's Foundation
+     goes from 483 to 732px on its longest line — comfortable. At 2560px it
+     reaches 1166px, which is not. Recorded rather than pre-solved: the fix is
+     a measure on the few prose BLOCKS (the Knowledge base already carries one
+     and is unaffected), and it is not worth adding before somebody runs the
+     platform on a monitor that wide. */
+  .wrap { margin:0 auto; padding:0 24px 80px; }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
@@ -326,7 +345,7 @@
      the tenant's bar colour behind this for the whole wait, which is the
      thing being removed. */
   html.booting #banner, html.booting .chrome { display:none; }
-  .bootsk-in { max-width:1180px; margin:0 auto; padding:0 24px; }
+  .bootsk-in { margin:0 auto; padding:0 24px; }
   .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
   .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }
   .bootsk-tabs { display:flex; gap:22px; padding:0 0 11px;
@@ -354,7 +373,7 @@
   }
 
   header.top { border-bottom:1px solid var(--line); background:var(--surface); }
-  .top-in { max-width:1180px; margin:0 auto; padding:18px 24px; display:flex;
+  .top-in { margin:0 auto; padding:18px 24px; display:flex;
             align-items:flex-end; gap:20px; flex-wrap:wrap; }
   .brand { display:flex; flex-direction:column; gap:2px; margin-right:auto; }
   .eyebrow { font-size:var(--fs-micro); letter-spacing:.15em; text-transform:uppercase;
@@ -362,7 +381,7 @@
   .brand h1 { font-size:17px; font-weight:700; letter-spacing:-.01em; }
 
   nav.units { background:var(--panel); }
-  .units-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
+  .units-in { margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
   /* AN UNDERLINED TAB ROW, not a pill row (§41).
 
      The retheme made this a filled accent pill with a pulsing dot, following
@@ -395,7 +414,7 @@
   .units .sep { width:1px; background:var(--panel-ink); opacity:.22; margin:12px 8px; flex:0 0 1px; }
 
   nav.tabs { border-bottom:1px solid var(--line); background:var(--surface); }
-  .tabs-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
+  .tabs-in { margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
   .tabs-in { padding:8px 24px; gap:4px; }
   .tabs button { font:inherit; font-size:var(--fs-small); font-weight:500; padding:6px 12px; border:0;
                  border-radius:var(--r); background:none; color:var(--ink-2); cursor:pointer;
@@ -1366,7 +1385,9 @@
   .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
                   color:var(--ink-3); font-weight:700; }
   /* Capped, because the select sizes itself to its LONGEST option and the
-     first line is a fixed 1180px column. "Strategy Management Office - all
+     first line has to stay one line. (It used to say "a fixed 1180px column";
+     the column is the window now, \u00a794.13, and the cap matters for the same
+     reason \u2014 a long name still pushes the buttons beside it along.) "Strategy Management Office - all
      units" reached the old 250px cap, which pushed the two buttons past the end of the
      row and wrapped them onto a second line - so the one-line chrome asked
      for in 2.9 was never actually one line for anyone signed in. The name
@@ -3802,13 +3823,18 @@
      ignores you. It also carried `.capmeta`, whose element the product no
      longer has (§24). */
 
-  /* The folded row carries more entries than the flat one ever did, and the
-     content column is 1180px. Tightened only when the folds are present, so
-     everyone else keeps the roomier spacing they have today. */
-  /* Two changes, only when the folds are present. The row is allowed past the
-     content column's width \u2014 a navigation bar is chrome, not content \u2014 and the
-     spacing tightens. Everyone else keeps today's roomier row. */
-  .units-in.folded{max-width:none;padding-left:16px;padding-right:16px}
+  /* The folded row carries more entries than the flat one ever did, so its
+     spacing tightens. Only when the folds are present; everyone else keeps the
+     roomier row.
+
+     `max-width:none` WAS HERE AND IS GONE (\u00a794.13). It let this row past the
+     1180 content column \u2014 "a navigation bar is chrome, not content" \u2014 and that
+     is the line that made the narrow page look BROKEN rather than merely
+     narrow: the row ran edge to edge while the page under it sat centred with
+     238px of nothing down each side. Nothing is capped now, so the override
+     has nothing to override, and a rule that no longer does anything is a rule
+     somebody will one day read as load-bearing (\u00a724). */
+  .units-in.folded{padding-left:16px;padding-right:16px}
   .units-in.folded button[data-u]{padding-left:9px;padding-right:9px;font-size:13.5px}
 
   .units-in.folded .sep{margin:0 3px}
@@ -27387,23 +27413,13 @@ var SYNC = (function () {
        the fault the chrome shed in 2.9. The row is emptied AND hidden: an
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
-    /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
-       Islam, on a 1670px screen showing an eleven-column register inside a
-       1180px column: "the page is wide, however the rail on the left and the
-       tables are stuck in a confined space with a lot of buffer on right and
-       left."
-
-       1180 is a READING measure and it is right for the pages it was chosen
-       for — a unit's plan, the knowledge base, a group's foundation are prose
-       and prose has an optimum line length. A Setup page is a rail and a table,
-       and a table has the opposite need: every pixel it is denied becomes a
-       horizontal scroll inside a box.
-
-       So it is a state on the ROOT rather than a rule on `.wrap`, because the
-       chrome's three rows are capped at the same 1180 and widening the content
-       alone would leave the navigation indented from the page under it. One
-       attribute, four containers, and every other page is untouched. */
-    document.documentElement.toggleAttribute("data-wide", railed);
+    /* ── AND EVERY PAGE GETS IT NOW, SO THERE IS NOTHING TO SWITCH (§94.13)
+       §93.9's `data-wide` lived here, turned on for railed pages only, and
+       Islam asked for the whole platform: "let's make it fit always." The cap
+       and the 1600 ceiling are both gone from `_shared.css`, so the attribute
+       had nothing left to say and went with them — §24's rule, applied to the
+       JS half as well as the CSS half. `railed` is still read two lines below;
+       it is the rail's own switch and always was. */
     document.getElementById("tabrow").hidden = railed;
     /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
        `.primary`, which is the LANDING PAGE and nothing else — so it was

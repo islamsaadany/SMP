@@ -473,10 +473,6 @@
     Object.keys(EDIT_PAGE).forEach(function(k){ EDIT_PAGE[k] = false; });
     Object.keys(EDITING).forEach(function(k){ EDITING[k] = false; });
     if (typeof ARRANGE !== "undefined") ARRANGE = false;
-    /* The open sent-message panel goes with the page (§93.15). It is asked
-       fresh next time, because "what happened" can change while you are away —
-       a send is still finishing when the list first draws. */
-    if (typeof SENTONE !== "undefined") SENTONE = null;
     REPORTING = null;
     CLEARING = null;
     /* AN EDIT YOU CANNOT SEE IS NOT AN EDIT YOU AGREED TO (spec 012 §2.1).
@@ -1270,13 +1266,23 @@
        the fault the chrome shed in 2.9. The row is emptied AND hidden: an
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
-    /* ── AND EVERY PAGE GETS IT NOW, SO THERE IS NOTHING TO SWITCH (§94.13)
-       §93.9's `data-wide` lived here, turned on for railed pages only, and
-       Islam asked for the whole platform: "let's make it fit always." The cap
-       and the 1600 ceiling are both gone from `_shared.css`, so the attribute
-       had nothing left to say and went with them — §24's rule, applied to the
-       JS half as well as the CSS half. `railed` is still read two lines below;
-       it is the rail's own switch and always was. */
+    /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
+       Islam, on a 1670px screen showing an eleven-column register inside a
+       1180px column: "the page is wide, however the rail on the left and the
+       tables are stuck in a confined space with a lot of buffer on right and
+       left."
+
+       1180 is a READING measure and it is right for the pages it was chosen
+       for — a unit's plan, the knowledge base, a group's foundation are prose
+       and prose has an optimum line length. A Setup page is a rail and a table,
+       and a table has the opposite need: every pixel it is denied becomes a
+       horizontal scroll inside a box.
+
+       So it is a state on the ROOT rather than a rule on `.wrap`, because the
+       chrome's three rows are capped at the same 1180 and widening the content
+       alone would leave the navigation indented from the page under it. One
+       attribute, four containers, and every other page is untouched. */
+    document.documentElement.toggleAttribute("data-wide", railed);
     document.getElementById("tabrow").hidden = railed;
     /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
        `.primary`, which is the LANDING PAGE and nothing else — so it was
@@ -1511,15 +1517,7 @@
   function positionRowMenu(){
     var m = document.querySelector(".kmenu");
     if (!m) return;
-    /* EVERY BUTTON THAT OPENS ONE OF THESE (§93.14). This read `[data-pmenu]`
-       alone and RETURNED QUIETLY when it found none — so the Functions table's
-       menu and its three confirmation panels were never positioned at all and
-       rendered 89px and 155px past the right edge of the window, with Close
-       entirely outside it. §51.11's fault in a helper rather than in a check:
-       a selector that no longer covers everything it is asked about does not
-       fail, it silently does nothing. A menu added to a third table is
-       positioned the day it is added by being given an attribute here. */
-    var btn = m.parentNode.querySelector("[data-pmenu],[data-fnmenu]");
+    var btn = m.parentNode.querySelector("[data-pmenu]");
     if (!btn) return;
     var r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
     var below = window.innerHeight - r.bottom - 8;
@@ -1857,11 +1855,6 @@
       b.addEventListener("click", function(){
         var f = FUNCTIONS[b.dataset.fnretire];
         f.active = f.active === false;
-        /* THE MENU THIS CAME OUT OF HAS TO CLOSE (§47.2, §93.14). The action
-           fires before the menu does anything, and paint() re-renders from
-           FNMENU — so leaving it set would repaint the menu straight back over
-           a row that had just changed. */
-        FNMENU = null;
         paint();
       });
     });
@@ -1871,10 +1864,7 @@
        it, and the check that matters is the one nearest the write (§48.2). */
     document.querySelectorAll("[data-fndel]").forEach(function(b){
       b.addEventListener("click", function(){
-        /* The question replaces the menu in the same corner (§46.2), so the
-           menu closes as the question opens or both would draw in one cell. */
-        CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; FNMENU = null;
-        paint();
+        CLEARING = "fndel|" + this.dataset.fndel; CLEARMENU = null; paint();
       });
     });
     document.querySelectorAll("[data-fndelyes]").forEach(function(b){
@@ -2253,16 +2243,11 @@
     });
     /* Choosing from the menu closes it and raises the confirmation, so the
        destructive act is still two deliberate presses. */
-    /* FNMENU goes with CLEARMENU at all three (§93.14): Clear progress and
-       Clear plan are entries in the Functions row menu now, so the menu has to
-       close as the question opens — and reopen for neither answer. */
     document.querySelectorAll("[data-clear]").forEach(function(b){
-      b.addEventListener("click", function(){
-        CLEARING = b.dataset.clear; CLEARMENU = null; FNMENU = null; paint(); });
+      b.addEventListener("click", function(){ CLEARING = b.dataset.clear; CLEARMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearno]").forEach(function(b){
-      b.addEventListener("click", function(){
-        CLEARING = null; CLEARMENU = null; FNMENU = null; paint(); });
+      b.addEventListener("click", function(){ CLEARING = null; CLEARMENU = null; paint(); });
     });
     document.querySelectorAll("[data-clearyes]").forEach(function(b){
       b.addEventListener("click", function(){
@@ -3400,38 +3385,6 @@
         paint();
       });
     });
-    /* ── THE FUNCTIONS TABLE'S ROW MENU (§93.14) ──────────────────────
-       The same shape, and it CLOSES ANY OPEN QUESTION as it opens: the delete
-       refusal and the two clear confirmations render in the same corner, so a
-       menu opened over one of them would stack two panels in one cell. */
-    document.querySelectorAll("[data-fnmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNMENU = FNMENU === b.dataset.fnmenu ? null : b.dataset.fnmenu;
-        CLEARING = null;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncolmenu]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        FNCOLMENU = !FNCOLMENU; PCOLMENU = false; PWMENU = false; PFILEMENU = false;
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-fncol]").forEach(function(b){
-      b.addEventListener("change", function(){ setFnCol(this.dataset.fncol, this.checked); paint(); });
-    });
-    /* stopPropagation, or the document click-away above closes the panel
-       before the paint that would show the boxes changing (§47.2). */
-    document.querySelectorAll("[data-fncolall],[data-fncolnone]").forEach(function(b){
-      b.addEventListener("click", function(e){
-        e.stopPropagation();
-        var on = b.hasAttribute("data-fncolall");
-        FN_COLS.forEach(function(c){ setFnCol(c.k, on); });
-        paint();
-      });
-    });
     /* TWO COLLECTIVE ACTIONS, AND THE SECOND IS NOT THE FIRST WITH A WIDER
        REACH. "none" can lock nobody out — it only reaches people who could not
        sign in anyway. "all" overwrites live passwords and ends sessions, so the
@@ -3688,37 +3641,6 @@
         paint();
       });
     }
-
-    /* ── OPENING A SENT MESSAGE (§93.15) ──────────────────────────────
-       Asked once per message and kept, so closing and reopening the same one
-       does not go back to the server. The state carries the id, so a paint
-       that happens while it is loading redraws "Asking…" rather than losing
-       the panel (§35's rule for the password states). */
-    document.querySelectorAll("[data-sentone]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var id = Number(this.dataset.sentone);
-        if (SENTONE && SENTONE.id === id) { SENTONE = null; paint(); return; }
-        SENTONE = { id: id, asking: true, data: null, error: null };
-        paint();
-        if (typeof SYNC === "undefined" || !SYNC.isLive()) {
-          SENTONE = { id: id, asking: false, data: null,
-                      error: "There is no server here to ask." };
-          paint(); return;
-        }
-        SYNC.mailHistoryOne(id, function(err, j){
-          /* Only if this is still the message being asked about — two quick
-             clicks would otherwise land the first answer on the second panel. */
-          if (!SENTONE || SENTONE.id !== id) return;
-          SENTONE = err || !j || !j.ok
-            ? { id: id, asking: false, data: null,
-                error: (err && err.message) || (j && j.error) || "Could not ask the server." }
-            : { id: id, asking: false, data: j, error: null };
-          paint();
-        });
-      });
-    });
-    var sentClose = document.querySelector("[data-sentclose]");
-    if (sentClose) sentClose.addEventListener("click", function(){ SENTONE = null; paint(); });
 
     var msgsend = document.getElementById("msgsend");
     if (msgsend) msgsend.addEventListener("click", function(){
@@ -4691,27 +4613,18 @@
         !(e.target.closest && e.target.closest(".kmenu, [data-pmenu]"))) {
       PMENU = null; paint();
     }
-    /* The Functions table's row menu, the same way (§93.14). Its own selector,
-       because a click on THIS table's kebab must not be read as "outside" the
-       register's — the two are never on screen together, and a shared test
-       would be a rule that happens to work rather than one that is right. */
-    if (typeof FNMENU !== "undefined" && FNMENU !== null &&
-        !(e.target.closest && e.target.closest(".kmenu, [data-fnmenu]"))) {
-      FNMENU = null; paint();
-    }
     /* The header menus close the same way, and on a click anywhere that is not
        inside them. `.hmenu` covers both the button and its panel. */
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU) &&
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU) &&
         !(e.target.closest && e.target.closest(".hmenu"))) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; paint();
     }
   });
   document.addEventListener("keydown", function(e){
     if (e.key !== "Escape") return;
     if (typeof PMENU !== "undefined" && PMENU !== null) { PMENU = null; paint(); }
-    if (typeof FNMENU !== "undefined" && FNMENU !== null) { FNMENU = null; paint(); }
-    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU || FNCOLMENU)) {
-      PCOLMENU = false; PWMENU = false; PFILEMENU = false; FNCOLMENU = false; paint();
+    if (typeof PCOLMENU !== "undefined" && (PCOLMENU || PWMENU)) {
+      PCOLMENU = false; PWMENU = false; PFILEMENU = false; paint();
     }
   });
 

@@ -40,11 +40,21 @@
    changed, so the name changes. What this adds is that the name has to be one
    NOBODY has served — check `git show origin/main:sw.js` before choosing,
    because a merge will not tell you. */
-/* v3.25d: v3.25c is what production is serving right now, so this build --
-   whose bytes differ again -- needs its own. Checked the way the paragraph
-   above says to, against `git show origin/main:sw.js` and against every name
-   this repository has ever used. */
-const SHELL = "smp-shell-v3.25d";
+/* v3.25e, AND v3.25d COLLIDED TOO (§94.12, a second time). That rule says
+   to check `git show origin/main:sw.js` before choosing, and I did -- main
+   was serving v3.25c, so v3.25d was free. Main then moved again while this
+   branch was running its sweep, and the other session picked v3.25d as
+   well. git conflicted only because the comments above it differed; had
+   both sides written the bare line, it would have merged silently for the
+   second time in a day.
+
+   SO THE CHECK IS NOT ONCE, IT IS AT THE MOMENT OF THE MERGE -- the same
+   discipline as the fetch-and-compare it rides beside, and for the same
+   reason: main is a moving target and anything read from it goes stale the
+   moment it is read. Checked here against origin/main and against every
+   name this repository has ever carried: v3.25, b, c, d are used. */
+
+const SHELL = "smp-shell-v3.25e";
 const ASSETS = [
   "/",
   "/index.html",

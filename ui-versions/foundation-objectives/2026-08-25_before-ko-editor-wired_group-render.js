@@ -1382,10 +1382,9 @@ function renderGroupFoundation(){
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
           function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
-          true, GROUP) +
+          true) +
       '</div>' +
     '</div>' +
-    koBand(GROUP.keyObjectives, "foundation", "g_found", GROUP, true) +
 
     '<div class="card valbox"><h2 class="sec first">' + L("values","group") + '</h2>' +
     '<div class="valgrid">' +
@@ -1702,21 +1701,6 @@ function inputOr(page, value, cls, setter){
   return '<input class="fld ' + (cls || '') + '" data-fld="' + i + '" value="' + esc(value) + '">';
 }
 
-/* THE THIRD WAY TO DRAW A BOUND FIELD, because a `<select>` is not an
-   `<input>` and `koEdit` was building its own — which is exactly how it ended
-   up building unbound ones (§96). `data-fld` already works for a select: the
-   shell's handler reads `el.value` and asks nothing about the tag. */
-function selectOr(page, value, opts, cls, setter){
-  if (!EDIT_PAGE[page] || !setter)
-    return '<span class="' + (cls || '') + '">' + esc(value) + '</span>';
-  var i = FIELDS.push(setter) - 1;
-  return '<select class="fld ' + (cls || '') + '" data-fld="' + i + '">' +
-    opts.map(function(o){
-      return '<option' + (String(value) === String(o) ? " selected" : "") + '>' +
-        esc(o) + '</option>';
-    }).join("") + '</select>';
-}
-
 /* Two readings of the same targets. Columns compares them down a line; chips
    read this year as a figure. A toggle rather than a decision, because which
    one is better depends on how many objectives a unit has written. */
@@ -1768,108 +1752,23 @@ function horizonColLabel(){
   return horizonSet() ? "By " + esc(GROUP.horizon) : "3-year";
 }
 
-/* ── THE OBJECTIVES EDITOR WAS DRAWN AND CONNECTED TO NOTHING (§96) ──
-   Islam, on a unit's Foundation with the pen open: *"I can't remove
-   objectives."* Measured: **20 inputs, 0 wired; 4 Remove buttons, 0 wired; the
-   Add button, 0 wired.** Every control in this table was decoration — typing a
-   name, changing a direction, correcting a target, removing a row and adding
-   one all looked accepted and were discarded on the next repaint.
-
-   IT IS THE FAULT THE `FIELDS` REGISTRY EXISTS TO PREVENT, three lines above
-   this, in the comment that says so in the past tense: *"Before this the
-   foundation rendered inputs that were bound to nothing, so every edit looked
-   accepted and was silently discarded."* That fix went to `fieldOr` and
-   `inputOr` — the prose fields in the same card — and this table was left
-   behind, because it builds its own `<input>` tags rather than calling them.
-   **A helper that exists is not a helper that was used**, and nothing catches
-   the difference: the markup is identical apart from one absent attribute.
-
-   The group's own Temple edit (`renderTempleEdit`) has the same table and has
-   been fully wired the whole time, which is why this never came up — the two
-   surfaces edit THE SAME `GROUP.keyObjectives` and only one of them worked.
-
-   Every field goes through `fieldOr`/`inputOr`/`selectOr` now, so there is no
-   second way to draw one of these cells and no second place to forget. */
-function koEdit(list, page, acKey, owner){
-  var editing = authoring(page, acKey), pg = editing ? page : null;
-  /* WHICH LIST THIS IS. Add and Remove act on an array, and the two callers
-     hand in two different arrays (the group's and a unit's) — so the table
-     registers its own, exactly as a field registers its own setter. */
-  var li = KOLISTS.push({ list: list, owner: owner }) - 1;
+/* Edit is where the detail lives — direction and compile never appear in the
+   view, because reading a foundation is not the same act as authoring one. */
+function koEdit(list){
   return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
     '<th class="cc">3-year</th><th class="cc">This year</th><th class="cc">Compile</th><th></th></tr></thead><tbody>' +
-    list.map(function(m, i){
-      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.dir, ["\u2265", "\u2264"], "",
-          function(v){ m.dir = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.target3y || "", "mono",
-          function(v){ m.target3y = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
-          function(v){ m.target = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.compile, ["Sum", "Latest", "Average"], "",
-          function(v){ m.compile = v; }) + '</td>' +
-        '<td class="cc">' + (editing
-          ? '<button class="rmbtn" data-korm="' + li + '|' + i + '">Remove</button>' : '') +
-        '</td></tr>';
+    list.map(function(m){
+      return '<tr><td><input class="fld" value="' + esc(m.name) + '"></td>' +
+        '<td class="cc"><select class="fld"><option' + (m.dir === "\u2265" ? " selected" : "") + '>\u2265</option>' +
+        '<option' + (m.dir === "\u2264" ? " selected" : "") + '>\u2264</option></select></td>' +
+        '<td class="cc"><input class="fld mono" value="' + esc(m.target3y || "") + '"></td>' +
+        '<td class="cc"><input class="fld mono" value="' + esc(m.target) + '"></td>' +
+        '<td class="cc"><select class="fld"><option' + (m.compile === "Sum" ? " selected" : "") + '>Sum</option>' +
+        '<option' + (m.compile === "Latest" ? " selected" : "") + '>Latest</option>' +
+        '<option' + (m.compile === "Average" ? " selected" : "") + '>Average</option></select></td>' +
+        '<td><button class="rmbtn">Remove</button></td></tr>';
     }).join("") + '</tbody></table></div>' +
-    (editing ? '<div class="addrow"><button class="editbtn" data-koadd="' + li +
-      '">+ Add an objective</button></div>' : '');
-}
-
-/* WHERE ADD AND REMOVE WRITE. Registered during render and emptied on every
-   repaint beside `FIELDS`, or stale arrays accumulate and an index from the
-   last paint acts on the paint before it. */
-var KOLISTS = [];
-
-/* MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT (§96.2). Removing the middle
-   of KO1·KO2·KO3 and adding leaves two rows and mints "KO3" — the id the
-   surviving third row already holds. Two rows with one id is not cosmetic: the
-   authoriser compares plans BY ID (§59), a reporting snapshot is keyed by id
-   and never by position (§48), and the rail selects on it. The group's own
-   Temple handler has minted from the count since it was written and carries
-   the same latent collision; it is corrected there too rather than left as the
-   one place that still does it. */
-function koMint(list, prefix){
-  var top = 0;
-  list.forEach(function(m){
-    var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
-    if (n && +n[1] > top) top = +n[1];
-  });
-  return { id: prefix + "-KO" + (top + 1), name: "New objective", dir: "\u2265",
-           target3y: "", target: "", compile: "Latest", actual: "", progress: null };
-}
-
-/* A unit numbers its whole plan positionally at load (`renumberUnit`), so a
-   row added or removed here is brought back into that sequence at once rather
-   than waiting for the next load to disagree with what is on screen.
-
-   THE GROUP'S OWN OBJECTIVES CARRY NO IDS AT ALL (§96.4), found by the check
-   the moment it asked the group the same questions it asks a unit: all six
-   read `null`, in the seed and in the database, because only rows ADDED
-   through the Temple's button have ever been given one. That was survivable
-   while nothing minted ids into that list; it stops being survivable the
-   moment this editor does, because a list where one row is identified and six
-   are not is worse than either state — the authoriser compares plans by id
-   (§59) and a reporting snapshot is keyed by id and never by position (§48).
-
-   So the missing ones are FILLED IN, and an existing one is never rewritten —
-   the same rule `renumberUnit` already applies to a pillar's code, and for the
-   same reason: a code already quoted somewhere else is not ours to change.
-
-   IT RUNS FROM ADD AND REMOVE, NOT FROM PAINT. A reader that writes what it
-   reads puts a phantom change into every save and would have every non-SMO
-   save refused for ever (§42, §50.6) — this only ever runs inside an edit that
-   is already the group's to make. */
-function koSettle(entry){
-  var o = entry && entry.owner;
-  if (o && o.ukey && typeof renumberUnit === "function") { renumberUnit(o); return; }
-  if (!o || !o.keyObjectives) return;
-  var top = 0;
-  o.keyObjectives.forEach(function(m){
-    var n = /-KO(\d+)$/.exec(String(m && m.id || ""));
-    if (n && +n[1] > top) top = +n[1];
-  });
-  o.keyObjectives.forEach(function(m){ if (m && !m.id) m.id = "group-KO" + (++top); });
+    '<div class="addrow"><button class="editbtn">+ Add an objective</button></div>';
 }
 
 /* Two statements, not one. An earlier reading treated Winning Aspiration and
@@ -1885,11 +1784,7 @@ function koSettle(entry){
    The horizon is still SHOWN on a unit, as a pill: it is the horizon the unit's
    objectives are measured against and reading it there is the point. Only the
    input is the group's (§48.1). */
-/* `owner` is what Add and Remove act ON — the group or the unit whose list
-   this is. It is passed rather than inferred from `isGroup`, because a unit
-   also has to be renumbered afterwards and a boolean cannot say which unit
-   (§96). */
-function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup, owner){
+function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup){
   var editing = authoring(page, acKey), pg = editing ? page : null;
   return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
     penBtn(page, acKey) +
@@ -1907,50 +1802,15 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
       ? '<div class="endin"><span class="boxlab">End in mind</span>' +
         '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
-    /* ── WHILE THE PEN IS OPEN THE TABLE IS NOT IN HERE (§96.6) ────
-       Islam: *"when I edit the objectives table the table is very tight and
-       crammed."* The Foundation is a two-column grid, so this card gets about
-       45% of the page — and it was being asked to hold a six-column table with
-       a text field in every cell. Measured at a 1537px page: the table had
-       **696px**, the objective name clipped at about twelve characters, and the
-       direction dropdown was too narrow to show its own value.
-
-       READING MODE IS UNTOUCHED. The objectives belong inside the aspiration
-       when you are reading it — the aspiration says where the unit is going and
-       the objectives say how you would know it got there — and it is only
-       AUTHORING that needs the room. So the block stays here when it is being
-       read and moves out to `koBand()` when it is being written.
-
-       DELIBERATELY NOT THE WHOLE PAGE STACKING, which is the other thing that
-       was asked about: "Who we are" and the aspiration statement are short
-       prose and read BETTER side by side. Stacking everything would push the
-       table further down the page to solve a problem it does not have. */
-    (editing ? '' : '<div class="divide"></div>' +
-      koBlock(objectives, page, acKey, owner, isGroup, false)) +
-  '</div>';
-}
-
-/* The objectives, wherever they are being drawn. One function, so the card and
-   the band cannot come to say different things about the same list. */
-function koBlock(objectives, page, acKey, owner, isGroup, editing){
-  return '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
+    '<div class="divide"></div>' +
+    '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
       /* THE UNIT'S ONLY, because the group's objectives have always shown both
          and there is nothing there to toggle (§51.16). Hidden in edit for the
          same reason the layout switch is: authoring shows every field there is,
          so a control that hides one would be lying about what is stored. */
       (editing ? '' : (isGroup ? '' : koYearToggle()) + koToggle()) + '</div>' +
-    (editing ? koEdit(objectives, page, acKey, owner) : koView(objectives, isGroup));
-}
-
-/* THE BAND ASKS THE SAME QUESTION THE CARD ASKS (§94). `authoring()` and not a
-   flag passed down from the caller: the viewer switcher repaints without
-   leaving modes, so the band has to be able to decide for itself that this page
-   is no longer open to whoever is now looking at it. Nothing is drawn at all
-   when it is not — the band exists only while the pen is on. */
-function koBand(objectives, page, acKey, owner, isGroup){
-  if (!authoring(page, acKey)) return '';
-  return '<div class="card koband">' +
-    koBlock(objectives, page, acKey, owner, isGroup, true) + '</div>';
+    (editing ? koEdit(objectives) : koView(objectives, isGroup)) +
+  '</div>';
 }
 
 function renderUnitFoundation(u){
@@ -1962,10 +1822,8 @@ function renderUnitFoundation(u){
           fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
-        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
-        false, u) +
-    '</div>' +
-    koBand(u.keyObjectives, "foundation", "u_found", u, false);
+        function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found") +
+    '</div>';
 }
 
 /* ── UNIT · Analysis ───────────────────────────────────────────────
@@ -2476,104 +2334,22 @@ function splitOrPane(list, sel, rail, pane){
 function delivKindPill(d){
   return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
 }
-/* ── ONE TABLE, TWO HALVES (§97) ───────────────────────────────────────
-   §53.4 put a deliverable and an outcome in one table with a Type column,
-   and its argument survives: they are two kinds of evidence that the project
-   achieved what it set out to, they are read together, and the SCORE still
-   keeps them apart half each per SIDE (projPerf). What did not survive is the
-   single HEADER ROW. Islam: "the mixing of both caused confusion … we can
-   have them in 1 table but we need a split."
+/* ── ONE TABLE, TAGGED (§53.4) ─────────────────────────────────────────
+   A deliverable and an outcome were two tables, one after the other, on all
+   three project panes. Islam: they belong in the same table with a tag saying
+   which is which. They are two kinds of evidence that the project achieved
+   what it set out to — which is exactly why the SCORE still keeps them apart,
+   half each per SIDE (projPerf). Reading them together and scoring them
+   together are different questions, and only the first one was asked.
 
-   He is describing a table asking every row a question the other kind cannot
-   answer. `Measured as` meant the delivery kind on a deliverable and the
-   DIRECTION on an outcome — one heading over two different facts — while
-   `Target` and `Measured at` stood empty for every deliverable on the plan
-   pane and `Target` for every one on the other two.
-
-   So: still one table, split by a band, each half declaring its own columns.
-   The Type column goes with the split — the band above the rows already says
-   which kind they are, and a pill repeating it is the same fact twice (§93's
-   one chip too many). The `#` and the NAME hold their position across the
-   split so the eye still runs down one list, and where a half has a figure
-   the score is built from (`Performance`, §97.8) it stays in the LAST column for both
-   halves, so that column still runs down one edge.
-
-   This is also the shape the product already had everywhere else: the plan
-   workbook has carried separate Deliverables and Outcomes sheets with exactly
-   these columns since §16.4, and the review deck a slide each since §15. The
-   screen was the last surface merging them. */
-var DX_HALVES = {
-  d: { title: "Deliverables", sub: "what the project hands over" },
-  o: { title: "Outcomes",     sub: "what it is meant to change" }
-};
-/* The band wears the ground every table header in the product wears (§41.10),
-   so each half OPENS the way a table opens; the column strip under it is the
-   quiet one. Both are `th` inside the tbody, deliberately: a table has one
-   `<thead>`, and the hover and last-row rules are written against `td`. */
-function dxBand(cols, kind){
-  var h = DX_HALVES[kind];
-  return '<tr class="dxband"><th colspan="' + cols + '">' + h.title +
-    '<em>' + h.sub + '</em></th></tr>';
+   The tag is a column rather than a pill tucked beside the name: with two
+   values and two only, a column is the thing you can run your eye down. */
+var DX_HEADING = "Deliverables and outcomes";
+function dxTag(kind){
+  return '<span class="pill kind">' + (kind === "o" ? "Outcome" : "Deliverable") + '</span>';
 }
-/* A cell is [label, class, colspan] — the colspan is what lets a half with
-   fewer facts than the other still line its last column up with it. */
-function dxHead(cells){
-  return '<tr class="dxhead">' + cells.map(function(c){
-    return '<th' + (c[1] ? ' class="' + c[1] + '"' : '') +
-      (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
-  }).join("") + '</tr>';
-}
-/* WHAT IS NOT THERE IS NOT DRAWN (§97.7). The split first shipped with an
-   empty half saying "No outcomes yet" over its own band and column strip —
-   §45.2's rule, that a feature rendering nothing looks like one that was
-   never built. Islam: *"the presence of outcomes or deliverables that would
-   make the sub table appear or not, not to keep tables in place with no
-   need."* His reading is the right one HERE, and the reason is that §45.2 is
-   about a FEATURE and this is about a PROJECT: a project with no outcomes is
-   not a broken screen, it is a project that committed to no measurable
-   change, and three rows of furniture saying so is the empty state shouting.
-
-   The one thing the empty half was carrying is carried already: `projPerf()`
-   returns the other side whole when a side is empty, so a project with no
-   outcomes is scored on its deliverables alone — and the Performance card
-   above the pane prints `Outcomes —` for exactly that. The fact stays on the
-   page; only the furniture goes.
-
-   AUTHORING IS THE EXCEPTION, and it is not a detail: the add row is the only
-   way to write the first deliverable or the first outcome, so a half hidden
-   for being empty in EDIT mode is a half that can never be filled — §61's
-   fault exactly, where a function with no plan could only be reached by
-   giving it a plan first. Both halves always draw behind the pen.
-
-   ONE ANSWER, READ BY BOTH: `dxShown()` decides, `dxHeading()` reads the same
-   answer, so a section can never name a half it is not drawing. */
-function dxShown(p, authoring){
-  return { d: !!authoring || (p.deliverables || []).length > 0,
-           o: !!authoring || (p.outcomes || []).length > 0 };
-}
-function dxAny(sh){ return sh.d || sh.o; }
-/* `sub` is the plan pane's trailing phrase, which pairs one clause to each
-   half — so it has to be built from the same flags rather than written out,
-   or a pane showing one half promises two things in its own heading. */
-function dxHeading(sh, sub){
-  var t = [], s = [];
-  ["d", "o"].forEach(function(k){
-    if (!sh[k]) return;
-    t.push(t.length ? DX_HALVES[k].title.toLowerCase() : DX_HALVES[k].title);
-    s.push(DX_HALVES[k].sub);
-  });
-  return t.join(" and ") + (sub && s.length
-    ? ' <em>\u2014 ' + s.join(", and ") + '</em>' : '');
-}
-function dxSplit(cols, sh, d, o){
-  return '<div class="scroll"><table><tbody>' +
-    (sh.d ? dxBand(cols, "d") + dxHead(d.head) + d.rows + (d.add || "") : "") +
-    (sh.o ? dxBand(cols, "o") + dxHead(o.head) + o.rows + (o.add || "") : "") +
-    '</tbody></table></div>';
-}
-/* The row number restarts per half. §53.4 ran it across the whole table
-   BECAUSE it was one list, and said so; with two lists, two rows called 1 is
-   the truth rather than a mistake. */
+/* The row number runs across the whole table, not once per kind: it is one
+   table now, and two rows both called 1 would say it was not. */
 function dxIdx(i){ return '<td class="idx">' + (i + 1) + '</td>'; }
 function delivShown(d){
   var v = delivReads(d);
@@ -2647,44 +2423,28 @@ function capKOTable(c){
 }
 
 function projPerformanceBody(p, fk){
-  /* A DELIVERABLE HAS NO TARGET, so it no longer shows a dash under one
-     (§53.4 removed the field; the column outlived it by two versions).
-     The score column is the last on BOTH halves — it is the figure projPerf
-     is built from, and one that moves between halves is one nobody can run
-     their eye down. Named in the dxSplit call below, not here (§97.8). */
-  var dRows = p.deliverables.map(function(d, i){
-    return '<tr>' + dxIdx(i) + '<td>' + esc(d.name) +
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
-      '<td colspan="2" class="cc">' + delivShown(d) + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      '<td class="num">&mdash;</td>' +
+      '<td class="cc">' + delivShown(d) + '</td>' +
       '<td class="num final">' + pct(delivReads(d)) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  }).join("") + p.outcomes.map(function(o){
     if (o.progress == null) {
-      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="cc">' + dxTag("o") + '</td>' +
         '<td class="num">' + esc(o.target) + '</td>' +
         '<td colspan="2" class="cc"><span class="pill kind">Measured at ' + esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) +
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) +
       (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
   }).join("");
-  /* PERFORMANCE, not Reads (§97.8). Islam: *"Reads is a strange title, we need
-     something else."* It was the platform's own word for how a figure resolves
-     into a score, and it was the only place using it — every other table
-     naming this same 0-100 says Score, Progress or Performance. His pick was
-     Performance, over Score, which is what the Key objectives table two blocks
-     up this same page says. Recorded because the cost is real and was stated
-     before he chose: the pane now carries THREE words for one kind of number —
-     the card's *Project performance*, the objectives table's *Score*, and this.
-     Progress was never a candidate here: the milestone table directly below
-     uses it for a STATUS, and one word for a status and a percentage two
-     tables apart is how §87's twins get made. */
-  var sh = dxShown(p);
-  var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Performance", "num"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Performance", "num"]], rows: oRows });
   var mRows = p.milestones.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td>' +
@@ -2700,9 +2460,10 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Reads"], dxRows) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Due date","Progress"], mRows);
+    miniTable(["#","Milestone","Finish","Progress"], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -2814,50 +2575,35 @@ function projPlanBody(p, fk){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
-  /* MEASURED AS BELONGS TO A DELIVERABLE AND A DIRECTION TO AN OUTCOME, and
-     for two versions one heading carried both (§97). Each half declares its
-     own columns now; the deliverable's kind spans the three the outcome uses
-     for direction, target and date, because a half with fewer facts still has
-     to end where the other one does. */
-  var dRows = p.deliverables.map(function(d, i){
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
+      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (++n) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", d.name, "", function(v){ d.name = v; }) : esc(d.name)) +
         xb("deliverables", d.id) + '</td>' +
-      '<td colspan="3">' + delivKindPill(d) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      '<td class="cc">' + delivKindPill(d) + '</td>' +
+      '<td class="num">&mdash;</td>' +
+      '<td class="cc">&mdash;</td></tr>';
+  }).join("") + p.outcomes.map(function(o, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
+      (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (++n) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
         xb("outcomes", o.id) + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="cc">' + esc(o.dir) + '</td>' +
       '<td class="num">' + f(o.target, function(v){ o.target = v; }) + '</td>' +
       '<td class="cc">' + (ed
         ? inputOr("plan", o.measureAt || "", "", function(v){ o.measureAt = v; })
         : esc(o.measureAt || "\u2014")) + '</td></tr>';
-  }).join("");
-  /* ONE ADD ROW PER HALF. §53.4 put both buttons under one table because a
-     single "add a row" would have had to ask which kind; the split answers
-     that by where the button sits, so each says only its own name. */
-  /* dxAdd, not addRow: there is a GLOBAL addRow used by the unit's plan pane,
-     and a `var` of the same name in a function that later wants the global is
-     exactly the collision §56.7 records — one binding, no textual conflict,
-     silent until the day somebody reaches for the other one. */
-  var dxAdd = function(what, label){
-    return ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
-      '<button class="linkbu" data-rowadd="' + what + '|' + esc(p.id) + '">' + label +
-      '</button></td></tr>' : '';
-  };
-  /* `ed`, not a hard true: behind the pen both halves draw so the first row
-     of either can be written; read, only what is there is drawn. */
-  var sh = dxShown(p, ed);
-  var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable"], ["Measured as", "", 3]], rows: dRows,
-      add: dxAdd("deliverable", "Add a deliverable") },
-    { head: [["#", "idx"], ["Outcome"], ["Direction", "cc"], ["Target", "num"],
-             ["Measure date", "cc"]], rows: oRows,
-      add: dxAdd("outcome", "Add an outcome") });
+  }).join("") +
+  /* TWO ADD ROWS UNDER ONE TABLE, because §53.4 made it one table of two KINDS
+     and a single "add a row" would have to ask which — a question the two
+     buttons answer by existing. */
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
+      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
+      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
+    '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
@@ -2908,9 +2654,11 @@ function projPlanBody(p, fk){
             function(v){ p.stakeholders = collabParse(v); })
         : (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
-    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh, true) + '</h4>' + dxRows : "") +
+    '<h4 class="mini">' + DX_HEADING +
+      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Measured as","Target","Measured at"], dxRows) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
-    miniTable(["#","Milestone","What it covers","Owner","Due date"], mRows) +
+    miniTable(["#","Milestone","What it covers","Owner","Finish"], mRows) +
     overrunNote(p);
 }
 
@@ -2993,37 +2741,32 @@ function projReportBody(p, may, fk){
   /* EVERY DELIVERABLE IS ASKED. The dimmed "Not asked — due Q4" row went with
      the due date itself (§53.4); an OUTCOME still has one, because a
      measurement time is a real thing somebody chose. */
-  /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, so a dead column is worse
-     here than anywhere: every deliverable carried a dash under `Target`,
-     because a deliverable has no target (§53.4). Split, the deliverable's
-     name takes back that width, and `Reported` and `Note` — the two columns a
-     person is actually typing into — hold the same place on both halves. */
-  var dRows = p.deliverables.map(function(d, i){
-    /* Still no kind pill beside the box: the box itself already says whether
-       it is delivered-or-not or a percentage, and the half's heading says the
-       rest. */
-    return '<tr>' + dxIdx(i) + '<td colspan="2">' + esc(d.name) + '</td>' +
+  var n = 0;
+  var dxRows = p.deliverables.map(function(d){
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(d.name) + '</td>' +
+      '<td class="cc">' + dxTag("d") + '</td>' +
+      /* A deliverable has no target: the box beside it already says whether
+         it is delivered-or-not or a percentage, so the kind pill that used to
+         sit here would only be saying it twice, under a heading that is not
+         its own. */
+      '<td class="num">&mdash;</td>' +
       '<td class="cc">' + (d.kind === "pct"
         ? capEntryBox(d, "%", may, d.name)
         : capPickBox(d, may, [["","\u2014"],["yes","Delivered"],["no","Not yet"]], d.actual)) + '</td>' +
       '<td class="notecol">' + capNoteBox(d, may) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  }).join("") + p.outcomes.map(function(o){
     if (!outcomeDue(o)) {
-      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+      return '<tr class="notdue">' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="cc">' + dxTag("o") + '</td>' +
         '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 measured at ' +
         esc(o.measureAt) + '</span></td></tr>';
     }
-    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+    return '<tr>' + dxIdx(n++) + '<td>' + esc(o.name) + '</td>' +
+      '<td class="cc">' + dxTag("o") + '</td>' +
       '<td class="num">' + esc(o.target) + '</td>' +
       '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
-  var sh = dxShown(p);
-  var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable", "", 2], ["Reported", "cc"], ["Note"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Reported", "cc"], ["Note"]],
-      rows: oRows });
   var mRows = p.milestones.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.finish) + '</td>' +
@@ -3033,9 +2776,10 @@ function projReportBody(p, may, fk){
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverable or outcome","Type","Target","Reported","Note"], dxRows) +
     '<h4 class="mini">Milestones</h4>' +
-    miniTable(["#","Milestone","Due date","Progress","Note"], mRows);
+    miniTable(["#","Milestone","Finish","Progress","Note"], mRows);
 }
 
 function capReportBody(c){

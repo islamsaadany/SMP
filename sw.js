@@ -75,9 +75,10 @@
    when they do, git merges the bare line with no conflict at all while the
    bytes behind the name differ, which is the one failure a cache name exists
    to prevent. A name taken from what the branch DID cannot be arrived at by
-   coincidence. Checked at merge time: main was serving v3.25g, and this
-   repository has carried v3.21, v3.22, v3.24, b, c, d, v3.25, b, c, d, e, f
-   and g.
+   coincidence. Checked at merge time -- twice, because main moved again
+   while this branch ran and is now serving v3.25h. This repository has
+   carried v3.21, v3.22, v3.24, b, c, d, v3.25, b, c, d, e, f, g and h; none
+   of them is this one, which is the point of not being a letter.
 
    AND THE SAME FAULT HAS A THIRD FACE: the SECTION NUMBER in the decisions
    document. This branch was written as §95, renumbered to §96 when main took

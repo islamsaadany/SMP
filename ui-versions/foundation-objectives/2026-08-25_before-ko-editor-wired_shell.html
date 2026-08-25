@@ -1207,10 +1207,6 @@
     /* Field setters are registered during render, so the list is emptied first
        or stale closures accumulate on every repaint. */
     FIELDS.length = 0;
-    /* Same reason, same line (§96): the objectives editor registers the array
-       its Add and Remove act on, and an index from the last paint would act on
-       the paint before it. */
-    if (typeof KOLISTS !== "undefined") KOLISTS.length = 0;
     fillViewers();
     paintUnits();
     /* ── TARGET IS DERIVED FROM `current`, SO IT IS SET AFTER IT SETTLES ──
@@ -2317,14 +2313,9 @@
     document.querySelectorAll("[data-tadd]").forEach(function(b){
       b.addEventListener("click", function(){
         var k = b.dataset.tadd;
-        /* MINTED FROM THE MAXIMUM, NEVER FROM THE COUNT (§96.2). Remove the
-           middle of KO1·KO2·KO3 and add: the count says 3 and KO3 is still on
-           screen, so two rows share an id. The authoriser compares plans BY ID
-           (§59) and a reporting snapshot is keyed by id and never by position
-           (§48), so a collision is not cosmetic. `koMint` is the one place
-           that answers it, shared with the Foundation's own editor. */
-        if (k === "ko")    GROUP.keyObjectives.push(
-                             Object.assign(koMint(GROUP.keyObjectives, "group"), { group:null }));
+        if (k === "ko")    GROUP.keyObjectives.push({ id:"group-KO" + (GROUP.keyObjectives.length + 1),
+                             name:"New objective", group:null, dir:"\u2265", target3y:"", target:"",
+                             compile:"Latest", actual:"", progress:null });
         if (k === "theme") GROUP.themes.push({ ab:"NEW", name:"New theme", note:"" });
         /* THE PRE-§15 SHAPE IS GONE (§51.11). This pushed a capability with
            `measures` and `tactics` — fields §15 removed — so the row had no
@@ -2357,50 +2348,6 @@
         if (p[0] === "ko")    GROUP.keyObjectives.splice(i, 1);
         if (p[0] === "theme") GROUP.themes.splice(i, 1);
         if (p[0] === "cap")   GROUP.capabilities.splice(i, 1);
-        paint();
-      });
-    });
-    /* ── ADD AND REMOVE AN OBJECTIVE, ON A FOUNDATION (§96) ─────────
-       These two buttons have existed on this page for as long as the page has,
-       with nothing bound to them. The group's Temple edit has had working ones
-       the whole time, editing THE SAME list — which is why nobody noticed.
-
-       Removal ASKS ONCE when the row carries anything, and goes without
-       ceremony when it does not: a reported objective is history and a row
-       added a moment ago is not. The same sentence the Temple's handler uses,
-       because they are the same act on the same data. */
-    document.querySelectorAll("[data-korm]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var p = b.dataset.korm.split("|"), e = KOLISTS[+p[0]], i = +p[1];
-        if (!e) return;
-        var m = e.list[i];
-        if (!m) return;
-        var what = (m.actual || m.target)
-          ? 'the objective "' + (m.name || "") + '"' +
-            (m.actual ? " and its reported " + m.actual : "")
-          : null;
-        if (what && !confirm("Remove " + what + "? This cannot be undone here.")) return;
-        e.list.splice(i, 1);
-        koSettle(e);
-        fieldSaved();
-        paint();
-      });
-    });
-    document.querySelectorAll("[data-koadd]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var e = KOLISTS[+b.dataset.koadd];
-        if (!e) return;
-        /* SETTLED BEFORE THE NEW ROW IS MINTED, or the group's six id-less
-           objectives are filled in as KO1..KO6 a moment after the new row has
-           already taken KO1 (§96.4). Once before, so the maximum is true; once
-           after, because a unit renumbers positionally. */
-        koSettle(e);
-        /* The prefix a unit's ids already use, and "group" for the group's —
-           read off the owner rather than passed in, so the two cannot be given
-           different answers at two call sites. */
-        e.list.push(koMint(e.list, (e.owner && e.owner.ukey) || "group"));
-        koSettle(e);
-        fieldSaved();
         paint();
       });
     });

@@ -962,12 +962,81 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and JPEG with the smaller kept** — a screenshot is smaller as PNG, a
   photograph seven times smaller as JPEG, and the file's own type predicts
   neither. No migration: it lands in the `review` row's `extra`.
-- **Deliverables and outcomes (one table since v3.21, §53.4):** a project's two
-  kinds of evidence read as ONE table with a **Type** column, on all three
-  project panes — while the SCORE still keeps them apart, half per SIDE
-  (`projPerf`). Reading them together and scoring them together are different
-  questions. A deliverable has **no due and no owner**: it is delivered when the
-  project ends, and the project's owner owns it. `delivDue()` no longer exists —
+- **ONE TABLE, TWO HALVES (§99, amending §53.4):** a project's two kinds of
+  evidence are still ONE table on all three project panes, and the SCORE still
+  keeps them apart half per SIDE (`projPerf`) — reading them together and
+  scoring them together are different questions, and §99 changes neither
+  answer. What went is the single **header row**: `Measured as` named the
+  delivery kind on a deliverable and the **direction** on an outcome, and
+  `Target` (plus `Measured at` on the plan pane) stood empty for every
+  deliverable. **A dead cell is the table asking a row a question its kind
+  cannot answer.** `dxSplit()` is the ONE builder all three panes call: a band
+  opens each half on `--panel`, so a half opens the way a table opens (§41.10),
+  and a quiet strip declares that half's columns. **The `#` and the NAME hold
+  their position, and the column a score is read from is LAST on both halves**
+  (`Reads` on Performance, `Note` beside `Reported` on Reporting) — a score
+  column that moves between halves is one nobody can run their eye down. A
+  cell is `[label, class, colspan]`, and **the colspan is what lets a shorter
+  half end where the longer one does**. Three things go with the split: the
+  **Type** column (the band says it — `dxTag()` is deleted, not left unused,
+  §24), the **shared numbering** (§53.4 ran it across the table BECAUSE it was
+  one list and said so; with two lists, two rows called 1 is the truth), and
+  the **paired Add row** (each half's button says only its own name).
+  **`Finish` → `Due date` and `Measured at` → `Measure date`**, on the panes,
+  the deck and both workbooks — **stored fields keep their spelling**, and the
+  workbook writes the new label and READS EITHER (§58, §65). The `"Measured at
+  Q4 2026"` pills are left alone deliberately: a column heading is a noun, a
+  pill is a sentence. `src/checks/project-tables.py` asserts **the problem, not
+  the layout** (§94.8) — no dead cell, each half's colspans adding up to the
+  same grid, both halves ending at the same pixel, and the rename at BOTH ENDS
+  including both spellings through the real reader; it was proved able to fail
+  before it was trusted (§94.5). **A cell holding a CONTROL is answered even
+  when it reads empty**, or the check flags the reporting pane it helps most.
+  **A HALF THAT IS NOT THERE IS NOT DRAWN (§99.7, reversing the first build the
+  same hour):** an empty half first drew its band, its column strip and a
+  dimmed *"No outcomes yet"*, on §45.2's rule. Islam: *"the presence of
+  outcomes or deliverables that would make the sub table appear or not, not to
+  keep tables in place with no need."* **§45.2 is about a FEATURE and this is
+  about a PROJECT** — a project with no outcomes is not a broken screen, it is
+  a plan that committed to no measurable change. **And the fact I was
+  defending was already on the page**: `projPerf()` returns the other side
+  whole when a side is empty (63% → 75% with FIN01's outcomes removed), and
+  the Performance card already prints `Outcomes —`. **AUTHORING IS THE
+  EXCEPTION** — the add row is the only way to write the first row of either
+  half, so `dxShown()` takes `ed` and both halves always draw behind the pen
+  (§61's fault otherwise). **ONE ANSWER, READ BY BOTH**: `dxHeading()` is built
+  from `dxShown()`'s flags, so a section can never name a half it is not
+  drawing; `DX_HEADING` is deleted (§24). With neither half the section is
+  absent and the milestones table stands alone. **0 of 19 demo projects have an
+  empty half**, so the check MAKES the state and asserts against an exact list
+  including an empty one (§94.2).
+  **READS BECOMES PERFORMANCE, AND A DELIVERABLE'S KIND STAYS IN THE PLAN
+  (§99.8):** *"should the user submit % of progress? And Reads is a strange
+  title."* The first was **already answered by the plan** — `kind` decides how
+  a deliverable is reported (`binary` → a 100-or-0 dropdown, `pct` → a
+  percentage box), so a % is available by setting *Measured as*. Nothing built,
+  for two reasons worth keeping: **how a thing is measured is a plan decision,
+  not a reporting one** (letting the reporter pick lets a unit change how it is
+  measured while being measured — §42), and **an *In progress* state with no
+  number forces the score to invent one** (§47). The rename is real: `Reads`
+  was printed in these two tables and nowhere else, while the SAME 0–100 is
+  **Score** on the Key objectives table two blocks up the same page,
+  **Progress** on a unit's, and **Performance** on the group's projects table.
+  I recommended Score; Islam picked **Performance**, and the cost is recorded
+  not re-argued — the pane now carries three words for one number. **Progress
+  was never a candidate**: the milestone table below uses it for a STATUS
+  (§87's twins). The rename reaches the pane and the **deck**, and
+  **the pane's check needed no editing** because it reads the last column's
+  label off the page and compares the two halves to each other (§53.5) —
+  *a check written against the problem survives somebody changing their mind
+  about the wording.*
+  **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
+  `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
+  bound to nothing — §63's fault on the capability side. Flagged, not fixed:
+  what a drop between the two halves means is a decision.
+- **A deliverable's due and owner (§53.4, unchanged):** a deliverable has **no
+  due and no owner** — it is delivered when the project ends, and the project's
+  owner owns it. `delivDue()` no longer exists —
   an outcome keeps `measureAt`, because a measurement time is a real thing
   somebody chose. The fields are gone from the panes, the deck, both `.xlsx`
   sheets, both CSV column lists, the seed and the database (migration 016) —
@@ -1257,7 +1326,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-25 &mdash; **v3.28: the corner, corrected by using it**
-(&sect;99). Three notes within minutes of the merge going live, each of them
+(&sect;100). Three notes within minutes of the merge going live, each of them
 from having the thing open rather than from reading about it. **&sect;97.4 IS
 REVERSED**: *"the line in front of the chat shouldn't be there"*, and asked
 whether it should be hidden from the sender or gone entirely, Islam chose gone.
@@ -1286,6 +1355,59 @@ could not fire. **And the stub was lying about the server** &mdash; it answered
 `thread: null` where the real endpoint returns `{waiting:true}`, so the client
 behaved correctly and the check called it broken. A stub has to MODEL the
 server, not merely answer it.*
+
+*Earlier: 2026-08-25 &mdash; **&sect;99: one table, two halves.** It opened
+as a question about a column that was there &mdash; *"for the project plans the
+milestones has no due date? or am I confused?"* &mdash; and he was not confused
+about the screen: a milestone has carried `finish` since the capability model
+existed, on all three panes, the deck and both workbooks. It says **Finish**,
+and **55 of the 60 milestones in the demo read a bare quarter** (`Q3`), because
+only the one real project is timelined by date. *A column headed Finish holding
+the word Q3 does not look like a due date*, which is the whole of why he asked.
+Then the real ask: **the mixing of deliverables and outcomes.** &sect;53.4's
+argument survives intact &mdash; they are two kinds of evidence, they are read
+together, and the SCORE still keeps them apart half per side &mdash; but its
+single **header row** could not: `Measured as` named the delivery kind on one
+row and the **direction** on the next, and `Target` and `Measured at` stood
+empty for every deliverable. **A dead cell is the table asking a row a question
+its kind cannot answer**, and the em-dash is the shape a table makes when it has
+been asked to hold two things at once. Still ONE table, split by a band on
+`--panel` so a half **opens the way a table opens**; the `#` and the NAME hold
+their position across the split, and the column a score is read from is LAST on
+both halves. **THE COLSPAN IS THE WHOLE MECHANISM** &mdash; it is what lets a
+half with fewer facts end where the other one does. Three things go with the
+split, and each of them reverses a sentence &sect;53.4 wrote down: the **Type**
+column (the band says it), the **shared numbering** (it ran across the table
+BECAUSE it was one list &mdash; with two lists, two rows called 1 is the truth),
+and the **paired Add row**. **`Finish` becomes `Due date`** on every surface,
+with the stored field keeping its spelling and the workbook reading EITHER
+(&sect;58) &mdash; while the *"Measured at Q4 2026"* pills are deliberately left
+alone, because a column heading is a noun and a pill is a sentence. And the
+check **asserts the problem, not the layout** (&sect;94.8): no dead cell, each
+half's colspans adding up to the same grid, both halves ending at the same
+pixel &mdash; proved able to fail before it was trusted, and taught two things
+that would have made it lie (**a cell holding a CONTROL is answered even when it
+reads empty**, and **Reporting is a MODE**, so pressing for a section row landed
+on Performance twice). **Found and NOT fixed (&sect;99.6):** `projPlanBody`
+defines `sortAttr()` and applies it to neither table, so a project's drag grips
+are bound to nothing &mdash; and `qa.py` reports "14 handles" because it counts
+them.* **AND THE EMPTY HALF WENT, AN HOUR AFTER IT SHIPPED** (&sect;99.7):
+asked *"if the project has no outcomes should the table appear?"* I said yes,
+on &sect;45.2's rule that a feature rendering nothing looks like one that was
+never built, and gave the strongest reason I had &mdash; `projPerf()` returns
+the other side WHOLE when a side is empty, so a project with no outcomes is
+scored on its deliverables alone (63% &rarr; 75% with FIN01's removed). Islam:
+*"not to keep tables in place with no need."* **&sect;45.2 is about a FEATURE
+and this is about a PROJECT** &mdash; a project with no outcomes is not a broken
+screen, it is a plan that committed to no measurable change &mdash; **and the
+fact I was defending was already on the page**, because the Performance card
+prints `Outcomes &mdash;` without any help from the table. *The argument for
+keeping something is worth checking against what the page already says.*
+**AUTHORING IS THE EXCEPTION AND IT IS NOT A DETAIL**: the add row is the only
+way to write the first row of either half, so a half hidden for being empty
+behind the pen is a half nobody can ever fill &mdash; &sect;61 exactly. And
+**0 of 19 demo projects have an empty half**, so the check MAKES the state
+rather than waiting for a client to find it.*
 
 *Earlier: 2026-08-25 &mdash; **v3.27: the chat gets a switch, and a poll
 gets cheaper** (&sect;98). Two asks that turned out to be one subject. *"How much

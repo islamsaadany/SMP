@@ -67,14 +67,37 @@
    discipline as the fetch-and-compare it rides beside, and for the same
    reason: main is a moving target and anything read from it goes stale the
    moment it is read. Checked here against origin/main and against every
-   name this repository has ever carried: v3.25, b, c, d are used. */
+   name this repository has ever carried: v3.25, b, c, d are used.
 
-/* v3.27 — the corner corrected by using it (§99). The trigger is unchanged and
-   is the only one that matters: the built file's BYTES changed, so the name
-   changes. Confirmed against origin/main immediately before the push (§94.16),
-   not now — main is a moving target and anything read from it goes stale the
-   moment it is read. */
-const SHELL = "smp-shell-v3.27";
+   §99 STOPS TAKING THE NEXT LETTER. Twice in one day two sessions reached
+   for the same one, because "the next letter after the one main is serving"
+   is a rule both of them can follow correctly and still collide on -- and
+   when they do, git merges the bare line with no conflict at all while the
+   bytes behind the name differ, which is the one failure a cache name exists
+   to prevent. A name taken from what the branch DID cannot be arrived at by
+   coincidence. Checked at merge time -- three times, because main moved
+   again on each check and is now serving v3.26. This repository has carried
+   v3.21, v3.22, v3.24, b, c, d, v3.25, b, c, d, e, f, g, h and v3.26; none
+   of them is this one, which is the point of not being a letter. The version
+   in it tracks the platform (§98 took it to v3.27), the suffix says whose.
+
+   AND THE SAME FAULT HAS A THIRD FACE: the SECTION NUMBER in the decisions
+   document. This branch was written as §95 and renumbered three times -- to
+   §96, to §97, and to §99 -- as main took §95, then §96, then §97 AND §98 in
+   one go. Four sessions on one day, each correctly taking "the next number"
+   from a main that had moved since they read it. A sequential name claimed at AUTHORING time is
+   claimed against a snapshot; it is only real at MERGE time. Anything
+   sequential and shared -- a cache name, a section number, a migration
+   number -- is chosen in the same breath as the fetch-and-look that precedes
+   every merge, and never before. */
+
+/* v3.28 — the corner corrected by using it (§100). main is serving
+   "smp-shell-v3.27-tables" from another session, so this takes v3.28 rather
+   than any v3.27 name: a worker caches by NAME, and the same string on both
+   sides of a merge conflicts on nothing while the bytes behind it differ
+   (§94.12, §94.16). Confirmed against origin/main at the moment of the merge,
+   which is where that check has to live. */
+const SHELL = "smp-shell-v3.28";
 const ASSETS = [
   "/",
   "/index.html",

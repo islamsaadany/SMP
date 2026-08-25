@@ -539,36 +539,6 @@
   .qs i.on.past { background:var(--over-bg); border-color:var(--over-line);
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
-
-  /* ── ONE TABLE, TWO HALVES (§99) ─────────────────────────────────
-     The band that splits a project's deliverables from its outcomes. It
-     wears `--panel`, which is what Setup › Branding sets for the navigation
-     bar and what every table header in the product wears (§41.10), so each
-     half OPENS the way a table opens rather than looking like a row somebody
-     shaded. The quiet strip under it declares that half's columns.
-
-     Both rows are `th` inside the tbody — a table has exactly one `<thead>` —
-     which is why `thead th`'s !important navy (below in this file) does not
-     reach them and these rules do not have to fight it. The hover and
-     last-row rules are written against `td`, so neither touches these.
-
-     IN arrange.css AND NOT config.css, deliberately: that file has now held
-     the same rule block twice on four separate occasions (§29.2, §51.5,
-     §53.6, §88), and this is concatenated last of the four stylesheets. */
-  tr.dxband th { background:var(--panel); color:var(--panel-ink); text-align:left;
-                 font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
-                 padding:10px 13px; white-space:nowrap; }
-  /* --panel-quiet, never --ink-3: a surface with its own ground needs its own
-     ink, and --ink-3 on the panel is 2.5:1 (§38.5). */
-  tr.dxband th em { font-style:normal; text-transform:none; letter-spacing:0; font-weight:500;
-                    font-size:11px; color:var(--panel-quiet); margin-left:10px; }
-  /* The gap before the second half, painted in the card's own ground so it
-     reads as a break rather than as a rule. Never on the first, which opens
-     the table. */
-  tr.dxband:not(:first-child) th { border-top:14px solid var(--surface); }
-  tr.dxhead th { background:var(--surface-2); color:var(--ink-2); font-weight:700;
-                 font-size:10px; letter-spacing:.09em; text-transform:uppercase;
-                 padding:7px 13px; border-bottom:1px solid var(--line); white-space:nowrap; }
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }

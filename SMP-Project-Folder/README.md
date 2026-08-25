@@ -92,6 +92,7 @@ of it was rejected — which is the point of keeping it.
 | `../../design-mockups/office-chat/2026-08-25_talking-to-the-office.html` | The corner, the conversation it opens, and the Setup page the office answers from. Both themes, with the five decisions and their costs stated under each screen. **Built in 3.26** (&sect;97, spec 015) |
 | `../../design-mockups/office-chat/2026-08-25_chat-settings.html` | The chat's on/off switch and its four settings, in a dropdown on the Messages page header, and what "off" actually does. Both themes. **Built in 3.27** (&sect;98) |
 | `../../design-mockups/office-chat/2026-08-25_what-was-built.html` | Not a proposal &mdash; the outcome report for &sect;97, with screenshots of the running product, the decisions and their costs, and what the three suites assert. |
+| `../../design-mockups/project-tables/2026-08-25_deliverables-outcomes-split.html` | A project's deliverables and outcomes stay in one table and split into two halves, each declaring its own columns; `Finish` becomes `Due date`. Today beside the proposal, all three panes, drawn with the platform's own stylesheet and the real FIN01 plan. **Built in 3.25** (&sect;99) |
 
 ### Drawn, awaiting a decision
 

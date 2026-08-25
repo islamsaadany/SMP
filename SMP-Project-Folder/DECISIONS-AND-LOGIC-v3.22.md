@@ -12620,10 +12620,238 @@ and wait for the client to actually poll rather than guessing a duration:
 argues for: with the chat off, **nothing in the product can reach the refused
 actions**, so the only way to know they are refused is to ask the endpoint
 directly with a session the product would never give that state to.
+## 99 · One table, two halves (v3.27)
+
+It began as a question about a column that was there: *"for the project plans
+the milestones has no due date? or am I confused?"* He was not confused about
+the screen and the column was not missing — a milestone has carried `finish`
+since the capability model existed, and it is on all three project panes, the
+review deck and both workbooks. What it says is **Finish**, and of the sixty
+milestones in the demo, **fifty-five read a bare quarter** (`Q3`) because their
+project is timelined by quarter; only the one real project — *Average debt
+utilisation report automation*, the Finance plan somebody actually authored —
+carries real dates. A column headed *Finish* holding the word `Q3` does not
+look like a due date, and that is the whole of why he asked.
+
+Then the real ask: *"for deliverables and outcomes the mixing of both caused
+confusion. we can have them in 1 table but we need a split as outcomes has
+target and measure date and deliverables has measured as."*
+
+### 99.1 §53.4's argument survives; its header row does not
+
+§53.4 put a deliverable and an outcome in one table with a **Type** column, and
+everything it argued is still true: they are two kinds of evidence that the
+project achieved what it set out to, they are read together, and the SCORE still
+keeps them apart half each per SIDE (`projPerf`). **Reading them together and
+scoring them together are different questions, and this section changes neither
+answer.**
+
+What did not survive is the single **header row**. One heading cannot name two
+different facts, and it was naming two:
+
+| | on a deliverable | on an outcome |
+|---|---|---|
+| `Measured as` | the delivery kind — *Delivered / not*, *% delivered* | the **direction**, `≥` or `≤` |
+| `Target` | an em-dash, always | the target |
+| `Measured at` | an em-dash, always | when it is measured |
+
+**A dead cell is the table asking a row a question its kind cannot answer**, and
+there were two per deliverable on the plan pane and one on each of the other
+two. The em-dash is the giveaway: it is the shape a table makes when it has been
+asked to hold two things at once.
+
+### 99.2 Still one table, split by a band
+
+He said *1 table*, and it is one `<table>`. A band opens each half — the same
+ground `--panel` gives every table header in the product (§41.10), so a half
+**opens the way a table opens** rather than looking like a row somebody
+shaded — and a quiet strip under it declares that half's columns.
+
+Two things hold across the split, and they are what make it one table rather
+than two stacked:
+
+- **The `#` and the NAME keep their position**, so the eye still runs down one
+  list.
+- **Where a half carries the figure a score is built from, that column is
+  LAST on both halves.** On Performance both halves end in `Reads`; on
+  Reporting both end in `Note`, next to `Reported`, which are the two columns
+  somebody is actually typing into. A score column that moves between halves is
+  a score column nobody can run their eye down.
+
+`dxSplit()` is the one builder all three panes call. Its cells are
+`[label, class, colspan]`, and **the colspan is what lets a half with fewer
+facts still end where the other one does** — a deliverable's *Measured as*
+spans the three columns an outcome uses for direction, target and date.
+
+### 99.3 Three things go with the split
+
+**THE TYPE COLUMN.** The band above the rows already says which kind they are; a
+pill repeating it is the same fact twice — §93's one chip too many, in a
+different table. `dxTag()` is deleted rather than left unused (§24).
+
+**THE SHARED NUMBERING.** §53.4 ran the row number across the whole table
+*because* it was one list, and said so in its comment: *two rows both called 1
+would say it was not*. With two lists, two rows called 1 is the truth. The
+comment is rewritten rather than removed, because the reason it changed is the
+part worth keeping.
+
+**ONE ADD ROW PER HALF.** §53.4 put both buttons under one table because a
+single *"add a row"* would have had to ask which kind — *a question the two
+buttons answer by existing*. The split answers it by where the button sits, so
+each says only its own name.
+
+### 99.4 Finish becomes Due date, on every surface and in both directions
+
+The three panes, the review deck and both workbooks. **The stored field keeps
+its spelling** — renaming `finish` would be a migration for a word nobody
+reads (§58, §65) — and the workbook **writes the new label and reads either**,
+because a header is a contract and somebody is holding a file downloaded last
+week. `Measured at` becomes `Measure date` on the outcome half and on both
+outcome sheets, under the same read-either rule.
+
+**The pills are left alone on purpose.** *"Measured at Q4 2026"* on a not-yet-due
+outcome stays as it is: a column heading is a noun and a pill is a sentence, and
+rewriting the sentence to match the noun would make it read worse.
+
+### 99.5 The check asserts the problem, not the layout
+
+`src/checks/project-tables.py`, and the shape is §94.8's lesson taken
+seriously — *a check written against the last instruction has to be rewritten
+every time somebody changes their mind; a check written against the PROBLEM
+survives it.* It never asks where a column sits or how wide it is. It asks
+whether a **dead cell** survives anywhere, whether each half's colspans **add up
+to the same grid** (two halves under one `<table>` share one column grid, so a
+header row that totals wrong staggers every cell under it — a counting fault
+that would look like a styling wobble), whether the last column of the two
+halves **ends at the same pixel**, and whether the milestone column says *Due
+date* — asserting **both ends** of the rename (§90) and, for the workbook,
+**both spellings** through the real reader.
+
+Two things it had to be taught, both of which would have made it lie:
+
+- **A cell holding a CONTROL is answered even when it reads empty.** The
+  reporting pane's Note is a box waiting to be typed into; counting that as a
+  dead cell flagged the one pane the split helps most.
+- **Reporting is a MODE, and Performance carries one section.** Written to press
+  for a section row on all three pages, it landed on Performance twice and
+  would have reported it under two names — §50.6's exact fault, which cost
+  twelve versions the first time.
+
+**And it was proved able to fail before it was trusted** (§94.5): an em-dash
+cell injected into a live row is caught, and a colspan broken by hand is caught.
+A suite printing *all passed* is worth what its assertions can detect.
+
+### 99.6 Found while restructuring, not fixed: the drag handles reorder nothing
+
+`projPlanBody` defines `sortAttr()` and **never applies it to either table**, so
+a project's deliverables, outcomes and milestones draw drag grips in arranging
+mode that are bound to nothing — §63's fault on the capability side, and §48's
+comparison-against-a-field-nobody-sets in a third guise: nothing throws, every
+check that asks whether the handle is in the document passes, and `qa.py`
+reports *"14 handles"* because it counts them.
+
+Left alone deliberately and flagged instead. It is a behaviour change on a page
+this section was asked to relabel, the fix has a real question inside it (the
+plan pane's rows now sit in two halves of one table, so what a drop between
+halves should mean is a decision, not a detail), and CLAUDE.md's rule is that
+touching something the user did not mention is asked first.
+
+### 99.7 A half that is not there is not drawn — reversed the same hour
+
+The split first shipped with an empty half drawing its band, its column strip
+and a dimmed *"No outcomes yet"*, on §45.2's rule: **a feature that renders
+nothing looks like one that was never built.** Asked *"if the project has no
+outcomes should the table appear?"*, I said yes and gave the strongest reason I
+had — `projPerf()` returns the other side whole when a side is empty, so a
+project with no outcomes is scored on its deliverables alone, and I argued the
+empty half was the only thing on the page saying so. Measured: FIN01 with its
+outcomes removed goes **63% → 75%**.
+
+Islam: *"I believe the presence of outcomes or deliverables that would make the
+sub table appear or not, not to keep tables in place with no need."*
+
+**He is right, and the reason my argument failed is worth keeping: §45.2 is
+about a FEATURE and this is about a PROJECT.** A capability with no figure sets
+is a screen that looks broken; a project with no outcomes is a project that
+committed to no measurable change, which is an ordinary thing for a plan to
+say. Three rows of furniture saying it is the empty state shouting.
+
+**And the fact I was defending was already on the page without it.** The
+Performance card above the pane prints `Outcomes —` when a project has none —
+existing behaviour, not something added here — so the reason the number is
+deliverables-only survives the furniture going. *The argument for keeping
+something is worth checking against what the page already says.*
+
+**AUTHORING IS THE EXCEPTION, AND IT IS NOT A DETAIL.** The add row is the only
+way to write the first deliverable or the first outcome, so a half hidden for
+being empty **in edit mode is a half that can never be filled** — §61 exactly,
+where a function with no plan could only be reached by giving it a plan first.
+Behind the pen both halves always draw. `dxShown()` takes `ed`, never a
+hard-coded true.
+
+**ONE ANSWER, READ BY BOTH.** `dxShown()` decides which halves show and
+`dxHeading()` is built from the same flags, so a section can never name a half
+it is not drawing: the plan pane reads *"Deliverables — what the project hands
+over"* with no outcomes, *"Outcomes — what it is meant to change"* with no
+deliverables, and the full pair behind the pen. `DX_HEADING` is deleted rather
+than left as a constant nothing reads (§24). With neither half, the section is
+absent entirely and the milestones table stands alone.
+
+**No project in the demo has an empty half — 0 of 19** — which is why the check
+had to MAKE the state: `checks/project-tables.py` empties one half of one
+project, the other half of the next and both halves of a third, then asserts
+what is drawn against an exact list, including an EMPTY one. §94.2's rule, and
+the only kind of assertion that can see a control that should not be there.
+
+### 99.8 Reads becomes Performance, and a deliverable's kind stays in the plan
+
+Two asks in one message. *"On reporting, the in-progress for the deliverables —
+should the user submit % of progress? And Reads is a strange title, we need
+something else."*
+
+**THE FIRST ONE WAS ALREADY ANSWERED BY THE PLAN, WHICH IS WHERE IT BELONGS.** A
+deliverable's `kind` decides how it is reported: `binary` gives the reporter a
+dropdown that scores 100 or 0, `pct` gives them a percentage box. So a
+deliverable CAN be reported as a percentage — the SMO sets *Measured as* to
+*% delivered* when authoring. Nothing built, and the reason is the interesting
+part: **how a thing is measured is a plan decision, not a reporting one.**
+Letting the reporter pick would let a unit change how it is measured while
+being measured, which is what §42 exists to prevent; and a third *In progress*
+state with no number would force the score to invent one, which is §47's
+hard-coded guess with a friendlier face. Recorded so the question is not
+re-opened without those two costs in front of it.
+
+**THE SECOND IS A RENAME, AND THE VOCABULARY WAS ALREADY DRIFTING.** `Reads`
+was the platform's own word for how a figure resolves into a score, and these
+two tables were the only place it was ever printed. The same 0–100 is called
+**Score** by the capability's Key objectives table *two blocks up the same
+page*, **Progress** on a unit's objectives and measures, and **Performance** by
+the group's projects table.
+
+I recommended **Score**, on the same-page argument. Islam picked
+**Performance**. **The cost was stated before he chose and is recorded rather
+than argued again**: the Performance pane now carries three words for one kind
+of number — the card's *Project performance*, the objectives table's *Score*,
+and this column. **Progress was never a candidate here**, and that part is not
+taste: the milestone table directly below uses *Progress* for a STATUS
+(Completed / In progress / Not started), and one word for a status and a
+percentage two tables apart is exactly how §87's twins get made.
+
+The rename reaches the pane and the **review deck**, which had the word in two
+of its own headers. `src/checks/project-tables.py` asserts both ends on both
+surfaces — and **the pane assertion needed no editing at all**, because it
+reads the last column's label off the page and compares the two halves to each
+other rather than to a literal (§53.5). A check written against the problem
+survives somebody changing their mind about the wording; one written against
+the wording does not.
+
+*(§99 is another session's — one table, two halves — and it reached `main`
+first, so it keeps the number. This was written as §99 on its branch. Third
+renumber in a day; the rule is unchanged and is simply whoever lands first.)*
 
 ---
 
-## 99 · The corner, corrected by using it (v3.28)
+## 100 · The corner, corrected by using it (v3.28)
 
 Three notes from Islam within minutes of the merge going live, all of them from
 having the thing open rather than from reading about it. Each reverses or
@@ -12631,7 +12859,7 @@ completes something §97 decided, and each is recorded here rather than edited
 into §97, because the argument §97 made was a good one and it is worth knowing
 which arguments lose.
 
-### 99.1 Where they were is not captured any more — §97.4 reversed
+### 100.1 Where they were is not captured any more — §97.4 reversed
 
 > *"The line in front of the chat shouldn't be there."*
 
@@ -12666,7 +12894,7 @@ now asserts the absence — §94.2's rule, that only a check looking for an
 absence can see something that should not be drawn. The easiest way to bring a
 removed feature back by accident is to stop asserting it is gone.
 
-### 99.2 It minimises; there was never anything to close
+### 100.2 It minimises; there was never anything to close
 
 > *"The user closed the chat box — it needs to be a minimize button as there
 > is no closing actually."*
@@ -12677,7 +12905,7 @@ away and changes nothing else. A × promises an end to something that has none,
 and on a chat panel it reads as *discard this*, which is the one thing it
 cannot do. A minus, and the label says *Minimise*.
 
-### 99.3 A reply has to announce itself, and the badge was arriving late
+### 100.3 A reply has to announce itself, and the badge was arriving late
 
 > *"When the admin replied the chat should show a notification on the callout
 > for the user to know he got an answer."*

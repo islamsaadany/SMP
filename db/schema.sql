@@ -97,15 +97,15 @@ CREATE TABLE IF NOT EXISTS deliverables (
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   idx        int NOT NULL,
   name       text NOT NULL DEFAULT '',
-  kind       text NOT NULL DEFAULT 'binary',
-  -- `actual` IS NOT MAPPED, DELIBERATELY, and this column stays empty: a
-  -- deliverable's actual is "yes"/"no" for a binary one and a NUMBER for a
-  -- percentage one, and a text column returns both as text — which breaks the
-  -- write(read()) fixed point the round-trip test asserts. It rides in `extra`,
-  -- which is jsonb and keeps 77 a 77. An outcome's actual IS a column because
-  -- an outcome's actual is always text ("15 d"). Do not "fix" this by mapping
-  -- it without changing the column's type.
-  actual     text,
+  -- §101. `kind` and `actual` are GONE. A deliverable is reported the way a
+  -- milestone is -- Not started / In progress / Delivered, with a per-cent
+  -- when it is in progress -- so the plan has nothing left to choose about
+  -- how it is measured, and the awkward "yes"/"no"-or-a-number `actual` that
+  -- had to ride in `extra` has nothing left to hold. Migration 023 moves what
+  -- was in them into `status` and `pct` and drops both.
+  due        text,
+  status     text,
+  pct        numeric,
   note       text,
   extra      jsonb NOT NULL DEFAULT '{}'
 );
@@ -133,6 +133,9 @@ CREATE TABLE IF NOT EXISTS milestones (
   owner      text,
   finish     text,
   status     text,
+  -- §101: a milestone in progress carries how far, exactly as a deliverable
+  -- does. Execution reads the mean of these rather than counting the done.
+  pct        numeric,
   note       text,
   extra      jsonb NOT NULL DEFAULT '{}'
 );

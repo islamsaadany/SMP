@@ -334,34 +334,42 @@ function deckSlidesFn(fk){
 
       /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
          a deliverable was carrying a second, quieter answer to both. */
-      /* ONE SLIDE, ONE ROW SHAPE (§101). Two slides made sense while a
-         deliverable and an outcome answered different questions; they answer
-         the same ones now, so a projector showing them apart would be showing
-         a distinction the product no longer draws. */
-      var dxRow = function(row, i){
-        var o = row.obj, d = row.kind === "d";
-        var reads = d ? statusReads(o) : o.progress;
-        var got = d ? (o.status === "done" ? "Delivered" : o.status === "wip" ? "In progress"
-                       : o.status === "todo" ? "Not started" : "\u2014")
-                    : (o.actual == null || o.actual === "" ? "\u2014" : esc(String(o.actual)));
-        var notDue = !dueThisCycle(dxWhen(row));
-        return '<tr' + (notDue ? ' class="dim"' : '') + '><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(o.name) + '</td>' +
-          '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
-          '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
-          '<td class="num">' + (d ? "Y/N" : esc(o.target || "\u2014")) + '</td>' +
-          '<td class="num">' + got + '</td>' +
-          '<td class="num final ' + dBand(reads) + '">' + (notDue ? "not due" : dPct(reads)) + '</td>' +
-          (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
-          '</tr>';
-      };
-      var dxRowsHtml = dxRows(p).map(dxRow).join("");
+      var dRows = p.deliverables.map(function(d, i){
+        var v = delivReads(d);
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(d.name) + '</td>' +
+          '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
+            : d.kind === "pct" ? esc(String(d.actual)) + "%"
+            : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
+          '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
+          (d.note ? '<td class="dnote">' + esc(d.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
-        '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
-        '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
-        '<th>Deliverables &amp; outcomes</th><th>Type</th><th class="num">Due date</th>' +
-        '<th class="num">Target</th><th class="num">Status</th><th class="num">%</th>' +
-        '<th>Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
+        '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
+        '<th class="num">Reported</th><th class="num">Performance</th>' +
+        '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
+
+      var oRows = p.outcomes.map(function(o, i){
+        if (o.progress == null) {
+          return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
+            '<td class="lead">' + esc(o.name) + '</td>' +
+            '<td class="num">' + esc(o.target) + '</td>' +
+            '<td colspan="2" class="cc">Measured at ' + esc(o.measureAt || "—") + '</td>' +
+            '<td class="dnote empty">&mdash;</td></tr>';
+        }
+        return '<tr><td class="idx">' + (i+1) + '</td>' +
+          '<td class="lead">' + esc(o.name) + '</td>' +
+          '<td class="num">' + esc(o.target) + '</td>' +
+          '<td class="num">' + esc(o.actual) + '</td>' +
+          '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
+          (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
+      }).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'O">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Outcomes</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Outcome</th>' +
+        '<th class="num">Target</th><th class="num">Actual</th><th class="num">Performance</th>' +
+        '<th>Note</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
       var mRows = p.milestones.map(function(m, i){
@@ -373,13 +381,12 @@ function deckSlidesFn(fk){
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
           (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
-          '<td class="num">' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">%</th>' +
+        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });

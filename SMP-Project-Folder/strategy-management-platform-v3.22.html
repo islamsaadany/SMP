@@ -3568,6 +3568,22 @@
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
 
+  /* ── ONE ROW SHAPE (§101) ────────────────────────────────────────
+     The Type pill takes a fixed box: "Deliverable" and "Outcome" are seven
+     characters apart, and left to themselves the column reads as two
+     different marks rather than one question answered two ways. */
+  td .pill.tk { min-width:92px; justify-content:center; }
+  /* A value the plan writes rather than asks for. Quiet, because a field
+     nobody can change should not look like a field. */
+  .fixedval { color:var(--ink-3); }
+  /* Three readings of a due date, and they must not look alike. Overdue is
+     the bad-news colour -- past its date, unfinished, and being asked for.
+     Not due is quiet -- its cycle has not come, so nothing is asked and
+     nothing is scored. On time is just a date. */
+  .lateval { color:var(--bad); font-weight:650; }
+  .lateval .latenote { display:block; font-size:11px; font-weight:400; margin-top:2px; }
+  .soonval { color:var(--ink-3); }
+
   /* ── ONE TABLE, TWO HALVES (§99) ─────────────────────────────────
      The band that splits a project's deliverables from its outcomes. It
      wears `--panel`, which is what Setup › Branding sets for the navigation
@@ -6399,9 +6415,9 @@ var GROUP = {
           brief: "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
           stakeholders: ["Operations", "IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Single documented order process", kind: "binary", actual: "yes" },
-            { name: "Unit-by-unit gap assessment", kind: "binary", actual: "yes" },
-            { name: "Process rolled out across the three units", kind: "pct", actual: 55 }
+            { name: "Single documented order process", due: "Sep 26", status: "done" },
+            { name: "Unit-by-unit gap assessment", due: "Oct 26", status: "done" },
+            { name: "Process rolled out across the three units", due: "Sep 26", status: "wip", pct: 55 }
           ],
           outcomes: [
             { name: "Order cycle time", dir: "≤", target: "12 d", measureAt: "Q3 2026", actual: "15 d", progress: 80,
@@ -6409,40 +6425,40 @@ var GROUP = {
             { name: "First-time-right rate", dir: "≥", target: "95%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Process design and sign-off", covers: "The target process agreed with all three unit heads", owner: "Ashraf Abdelaty", finish: "Q1", status: "done" },
-            { name: "Gap assessment per unit", covers: "What each unit has to change to reach it", owner: "Hala", finish: "Q2", status: "done" },
-            { name: "Retail and Mazaya cutover", covers: "Both units running the standard process", owner: "Hala", finish: "Q3", status: "wip" },
-            { name: "Mobile cutover", covers: "The last unit, gated on the ERP work", owner: "Ashraf Abdelaty", finish: "Q4", status: "todo" }
+            { name: "Process design and sign-off", covers: "The target process agreed with all three unit heads", owner: "Ashraf Abdelaty", finish: "W1 Mar 26", status: "done" },
+            { name: "Gap assessment per unit", covers: "What each unit has to change to reach it", owner: "Hala", finish: "W3 May 26", status: "done" },
+            { name: "Retail and Mazaya cutover", covers: "Both units running the standard process", owner: "Hala", finish: "W3 Jul 26", status: "wip", pct: 60 },
+            { name: "Mobile cutover", covers: "The last unit, gated on the ERP work", owner: "Ashraf Abdelaty", finish: "W1 Nov 26", status: "todo" }
           ] },
         { name: "Cost-to-serve model and monthly review", owner: "Fayad Sobhy",
           brief: "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
           stakeholders: ["Finance", "Operations"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Cost-to-serve model built and validated", kind: "binary", actual: "yes" },
-            { name: "Monthly review running with all units", kind: "pct", actual: 60 }
+            { name: "Cost-to-serve model built and validated", due: "Sep 26", status: "done" },
+            { name: "Monthly review running with all units", due: "Oct 26", status: "wip", pct: 60 }
           ],
           outcomes: [
             { name: "Cost-to-serve", dir: "≤", target: "4.2%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Cost driver mapping", covers: "Which activities carry the cost, by unit", owner: "Fayad Sobhy", finish: "Q1", status: "done" },
-            { name: "Model build and validation", covers: "Model reconciled against two closed months", owner: "Fayad Sobhy", finish: "Q2", status: "done" },
-            { name: "Review cadence embedded", covers: "A standing monthly session with each unit", owner: "Hala", finish: "Q3", status: "wip" }
+            { name: "Cost driver mapping", covers: "Which activities carry the cost, by unit", owner: "Fayad Sobhy", finish: "W1 Jan 26", status: "done" },
+            { name: "Model build and validation", covers: "Model reconciled against two closed months", owner: "Fayad Sobhy", finish: "W2 May 26", status: "done" },
+            { name: "Review cadence embedded", covers: "A standing monthly session with each unit", owner: "Hala", finish: "W1 Aug 26", status: "wip", pct: 60 }
           ] },
         { name: "First-time-right programme in distribution", owner: "Hala",
           brief: "Cut the rework in distribution by fixing the two failure points that produce most of it.",
           stakeholders: ["Operations"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Failure analysis on twelve months of orders", kind: "binary", actual: "yes" },
-            { name: "Corrective standard operating procedures", kind: "pct", actual: 40 }
+            { name: "Failure analysis on twelve months of orders", due: "Dec 26", status: "done" },
+            { name: "Corrective standard operating procedures", due: "May 26", status: "wip", pct: 40 }
           ],
           outcomes: [
             { name: "First-time-right rate", dir: "≥", target: "95%", measureAt: "Q4 2026", actual: "82%", progress: 86 }
           ],
           milestones: [
-            { name: "Failure analysis", covers: "Where rework originates and what it costs", owner: "Hala", finish: "Q2", status: "done" },
-            { name: "Procedure rewrite", covers: "New procedures for the two main failure points", owner: "Hala", finish: "Q3", status: "wip" },
-            { name: "Team retraining", covers: "Distribution teams trained on the new procedures", owner: "Hala", finish: "Q4", status: "todo" }
+            { name: "Failure analysis", covers: "Where rework originates and what it costs", owner: "Hala", finish: "W4 May 26", status: "done" },
+            { name: "Procedure rewrite", covers: "New procedures for the two main failure points", owner: "Hala", finish: "W2 Sep 26", status: "wip", pct: 60 },
+            { name: "Team retraining", covers: "Distribution teams trained on the new procedures", owner: "Hala", finish: "W2 Oct 26", status: "todo" }
           ] }
       ] },
 
@@ -6457,50 +6473,50 @@ var GROUP = {
           brief: "Name a successor for every key role in every unit, and know which ones have nobody.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Key-role definition agreed group-wide", kind: "binary", actual: "yes" },
-            { name: "Succession map per unit", kind: "pct", actual: 70 }
+            { name: "Key-role definition agreed group-wide", due: "Apr 26", status: "done" },
+            { name: "Succession map per unit", due: "Oct 26", status: "wip", pct: 70 }
           ],
           outcomes: [
             { name: "Key-role coverage", dir: "≥", target: "90%", measureAt: "Q3 2026", actual: "62%", progress: 69,
               note: "Six roles across Retail and Mazaya still have no named successor." }
           ],
           milestones: [
-            { name: "Key-role definition", covers: "What counts as a key role, agreed with the units", owner: "Noran Adel", finish: "Q1", status: "done" },
-            { name: "Unit-by-unit mapping", covers: "Successors named, gaps recorded", owner: "Noran Adel", finish: "Q2", status: "done" },
-            { name: "Gap closure plans", covers: "A plan for every role with no successor", owner: "Noran Adel", finish: "Q3", status: "wip" }
+            { name: "Key-role definition", covers: "What counts as a key role, agreed with the units", owner: "Noran Adel", finish: "W4 Feb 26", status: "done" },
+            { name: "Unit-by-unit mapping", covers: "Successors named, gaps recorded", owner: "Noran Adel", finish: "W2 Jun 26", status: "done" },
+            { name: "Gap closure plans", covers: "A plan for every role with no successor", owner: "Noran Adel", finish: "W4 Sep 26", status: "wip", pct: 50 }
           ] },
         { name: "Retention plan for the top two attrition roles", owner: "Noran Adel",
           brief: "Two roles produce most of the voluntary attrition. Find out why, and change it.",
           stakeholders: ["HR"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Exit interview analysis", kind: "binary", actual: "yes" },
-            { name: "Revised package and progression for both roles", kind: "binary", actual: "no",
+            { name: "Exit interview analysis", due: "Sep 26", status: "done" },
+            { name: "Revised package and progression for both roles", due: "Dec 26", status: "todo",
               note: "Held pending the compensation review." }
           ],
           outcomes: [
             { name: "Voluntary attrition in the two roles", dir: "≤", target: "12%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Attrition analysis", covers: "Which roles, which reasons, which managers", owner: "Noran Adel", finish: "Q2", status: "done" },
-            { name: "Package redesign", covers: "Pay and progression reworked for both roles", owner: "Noran Adel", finish: "Q3", status: "wip" },
-            { name: "Rollout and communication", covers: "Both roles moved onto the new terms", owner: "Noran Adel", finish: "Q4", status: "todo" }
+            { name: "Attrition analysis", covers: "Which roles, which reasons, which managers", owner: "Noran Adel", finish: "W2 May 26", status: "done" },
+            { name: "Package redesign", covers: "Pay and progression reworked for both roles", owner: "Noran Adel", finish: "W4 Aug 26", status: "wip", pct: 75 },
+            { name: "Rollout and communication", covers: "Both roles moved onto the new terms", owner: "Noran Adel", finish: "W3 Oct 26", status: "todo" }
           ] },
         { name: "Group training calendar and delivery", owner: "Hala",
           brief: "One training calendar for the group, published ahead of the year and actually delivered.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Annual training calendar published", kind: "binary", actual: "yes" },
-            { name: "Calendar delivered", kind: "pct", actual: 44 }
+            { name: "Annual training calendar published", due: "Apr 26", status: "done" },
+            { name: "Calendar delivered", due: "Mar 26", status: "wip", pct: 44 }
           ],
           outcomes: [
             { name: "Training hours per head", dir: "≥", target: "24", measureAt: "Q4 2026", actual: "5", progress: 21,
               note: "Two of nine planned sessions delivered. Q3 and Q4 carry the rest." }
           ],
           milestones: [
-            { name: "Needs assessment", covers: "What each unit actually needs, not what it asks for", owner: "Hala", finish: "Q1", status: "done" },
-            { name: "Calendar published", covers: "Dates, trainers and places confirmed for the year", owner: "Hala", finish: "Q1", status: "done" },
-            { name: "First-half delivery", covers: "Sessions scheduled to Q2 delivered", owner: "Hala", finish: "Q2", status: "wip" },
-            { name: "Second-half delivery", covers: "The remaining sessions", owner: "Hala", finish: "Q4", status: "todo" }
+            { name: "Needs assessment", covers: "What each unit actually needs, not what it asks for", owner: "Hala", finish: "W4 Feb 26", status: "done" },
+            { name: "Calendar published", covers: "Dates, trainers and places confirmed for the year", owner: "Hala", finish: "W1 Feb 26", status: "done" },
+            { name: "First-half delivery", covers: "Sessions scheduled to Q2 delivered", owner: "Hala", finish: "W3 Jun 26", status: "wip", pct: 40 },
+            { name: "Second-half delivery", covers: "The remaining sessions", owner: "Hala", finish: "W2 Nov 26", status: "todo" }
           ] }
       ] },
 
@@ -6514,8 +6530,8 @@ var GROUP = {
           brief: "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
           stakeholders: ["IT", "Finance", "Unit heads"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Target instance design", kind: "binary", actual: "yes" },
-            { name: "Instances migrated", kind: "pct", actual: 33,
+            { name: "Target instance design", due: "Sep 26", status: "done" },
+            { name: "Instances migrated", due: "Jun 26", status: "wip", pct: 33,
               note: "Two of six migrated. Mobile's cutover moved to Q3 with the principal." }
           ],
           outcomes: [
@@ -6523,41 +6539,41 @@ var GROUP = {
             { name: "Days to close month-end", dir: "≤", target: "5 d", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Instance audit", covers: "What is running where, and what depends on it", owner: "Abdelhamid", finish: "Q2", status: "done" },
-            { name: "Target design and sequencing", covers: "One target instance, and the order units move in", owner: "Abdelhamid", finish: "Q2", status: "done" },
-            { name: "First two migrations", covers: "Treasury and Care moved across", owner: "Abdelhamid", finish: "Q3", status: "wip" },
-            { name: "Remaining migrations", covers: "Mobile, Retail, Mazaya and B2B", owner: "Abdelhamid", finish: "Q4", status: "todo" }
+            { name: "Instance audit", covers: "What is running where, and what depends on it", owner: "Abdelhamid", finish: "W3 Jun 26", status: "done" },
+            { name: "Target design and sequencing", covers: "One target instance, and the order units move in", owner: "Abdelhamid", finish: "W4 Apr 26", status: "done" },
+            { name: "First two migrations", covers: "Treasury and Care moved across", owner: "Abdelhamid", finish: "W4 Jul 26", status: "wip", pct: 60 },
+            { name: "Remaining migrations", covers: "Mobile, Retail, Mazaya and B2B", owner: "Abdelhamid", finish: "W3 Nov 26", status: "todo" }
           ] },
         { name: "Group data warehouse and single reporting layer", owner: "Ramy Behairy",
           brief: "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
           stakeholders: ["IT", "Finance"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Warehouse built and loading nightly", kind: "binary", actual: "no" },
-            { name: "Reporting layer live for sales and finance", kind: "pct", actual: 36 }
+            { name: "Warehouse built and loading nightly", due: "Apr 26", status: "todo" },
+            { name: "Reporting layer live for sales and finance", due: "Mar 26", status: "wip", pct: 36 }
           ],
           outcomes: [
             { name: "Dependency on automated reports", dir: "≥", target: "90%", measureAt: "Q4 2026", actual: "58%", progress: 64,
               note: "Power BI live for sales; finance stays manual until the warehouse lands." }
           ],
           milestones: [
-            { name: "Model and source mapping", covers: "What the warehouse holds and where it comes from", owner: "Ramy Behairy", finish: "Q2", status: "done" },
-            { name: "Warehouse build", covers: "Built, loading nightly, reconciled", owner: "Ramy Behairy", finish: "Q3", status: "wip" },
-            { name: "Reporting layer rollout", covers: "Sales and finance reporting moved onto it", owner: "Ramy Behairy", finish: "Q4", status: "todo" }
+            { name: "Model and source mapping", covers: "What the warehouse holds and where it comes from", owner: "Ramy Behairy", finish: "W2 Jun 26", status: "done" },
+            { name: "Warehouse build", covers: "Built, loading nightly, reconciled", owner: "Ramy Behairy", finish: "W2 Aug 26", status: "wip", pct: 50 },
+            { name: "Reporting layer rollout", covers: "Sales and finance reporting moved onto it", owner: "Ramy Behairy", finish: "W1 Oct 26", status: "todo" }
           ] },
         { name: "Automation backlog and delivery cadence", owner: "Ramy Behairy",
           brief: "A standing backlog of automation candidates, and a cadence that actually clears it.",
           stakeholders: ["IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Backlog built and prioritised", kind: "binary", actual: "yes" },
-            { name: "Backlog delivered", kind: "pct", actual: 52 }
+            { name: "Backlog built and prioritised", due: "Oct 26", status: "done" },
+            { name: "Backlog delivered", due: "Feb 26", status: "wip", pct: 52 }
           ],
           outcomes: [
             { name: "Manual hours removed per month", dir: "≥", target: "300", measureAt: "Q4 2026", actual: "140", progress: 47 }
           ],
           milestones: [
-            { name: "Candidate assessment", covers: "Every manual process worth automating, sized", owner: "Ramy Behairy", finish: "Q1", status: "done" },
-            { name: "Cadence established", covers: "A fortnightly release running", owner: "Ramy Behairy", finish: "Q2", status: "done" },
-            { name: "Half the backlog delivered", covers: "The top half by hours removed", owner: "Ramy Behairy", finish: "Q3", status: "wip" }
+            { name: "Candidate assessment", covers: "Every manual process worth automating, sized", owner: "Ramy Behairy", finish: "W4 Feb 26", status: "done" },
+            { name: "Cadence established", covers: "A fortnightly release running", owner: "Ramy Behairy", finish: "W2 Jun 26", status: "done" },
+            { name: "Half the backlog delivered", covers: "The top half by hours removed", owner: "Ramy Behairy", finish: "W2 Aug 26", status: "wip", pct: 50 }
           ] }
       ] },
 
@@ -6569,30 +6585,30 @@ var GROUP = {
           brief: "Establish what the market currently believes about us, and agree what we want it to believe instead.",
           stakeholders: ["Marketing"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Market perception study", kind: "binary", actual: "yes" },
-            { name: "Positioning statement agreed by the board", kind: "binary", actual: "no" }
+            { name: "Market perception study", due: "Dec 26", status: "done" },
+            { name: "Positioning statement agreed by the board", due: "Jul 26", status: "todo" }
           ],
           outcomes: [
             { name: "Unaided brand awareness", dir: "≥", target: "45%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Perception study fielded", covers: "Study run with trade and end customers", owner: "Yara Kamal", finish: "Q2", status: "done" },
-            { name: "Positioning workshop", covers: "Options developed and tested with the board", owner: "Yara Kamal", finish: "Q3", status: "wip" }
+            { name: "Perception study fielded", covers: "Study run with trade and end customers", owner: "Yara Kamal", finish: "W1 Apr 26", status: "done" },
+            { name: "Positioning workshop", covers: "Options developed and tested with the board", owner: "Yara Kamal", finish: "W1 Sep 26", status: "wip", pct: 50 }
           ] },
         { name: "Trade communication programme", owner: "Tarek Nour",
           brief: "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
           stakeholders: ["Marketing", "Sales"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Twelve-month communication calendar", kind: "binary", actual: "yes" },
-            { name: "Calendar executed", kind: "pct", actual: 35 }
+            { name: "Twelve-month communication calendar", due: "Sep 26", status: "done" },
+            { name: "Calendar executed", due: "Dec 26", status: "wip", pct: 35 }
           ],
           outcomes: [
             { name: "Trade partner recall", dir: "≥", target: "70%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Calendar built", covers: "Twelve months of trade communication planned", owner: "Tarek Nour", finish: "Q2", status: "done" },
-            { name: "First-half execution", covers: "Q2 and Q3 communication delivered", owner: "Tarek Nour", finish: "Q3", status: "wip" },
-            { name: "Second-half execution", covers: "Q4 communication delivered", owner: "Tarek Nour", finish: "Q4", status: "todo" }
+            { name: "Calendar built", covers: "Twelve months of trade communication planned", owner: "Tarek Nour", finish: "W1 Apr 26", status: "done" },
+            { name: "First-half execution", covers: "Q2 and Q3 communication delivered", owner: "Tarek Nour", finish: "W1 Sep 26", status: "wip", pct: 25 },
+            { name: "Second-half execution", covers: "Q4 communication delivered", owner: "Tarek Nour", finish: "W1 Dec 26", status: "todo" }
           ] }
       ] },
 
@@ -6606,31 +6622,31 @@ var GROUP = {
           brief: "One feedback loop, running continuously, whose output reaches the people who can act on it.",
           stakeholders: ["Care", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Feedback instrument agreed across units", kind: "binary", actual: "yes" },
-            { name: "Loop running in all units", kind: "pct", actual: 50 }
+            { name: "Feedback instrument agreed across units", due: "Apr 26", status: "done" },
+            { name: "Loop running in all units", due: "Dec 26", status: "wip", pct: 50 }
           ],
           outcomes: [
             { name: "Net promoter score", dir: "≥", target: "40", measureAt: "Q4 2026", actual: "26", progress: 65 },
             { name: "Issues closed within SLA", dir: "≥", target: "90%", measureAt: "Q4 2026", actual: "71%", progress: 79 }
           ],
           milestones: [
-            { name: "Instrument design", covers: "One question set used by every unit", owner: "Mennah Farouk", finish: "Q1", status: "done" },
-            { name: "Pilot in two units", covers: "Retail and Care running the loop", owner: "Mennah Farouk", finish: "Q2", status: "done" },
-            { name: "Rollout to remaining units", covers: "Mobile, Mazaya and B2B", owner: "Mennah Farouk", finish: "Q4", status: "wip" }
+            { name: "Instrument design", covers: "One question set used by every unit", owner: "Mennah Farouk", finish: "W2 Jan 26", status: "done" },
+            { name: "Pilot in two units", covers: "Retail and Care running the loop", owner: "Mennah Farouk", finish: "W4 Jun 26", status: "done" },
+            { name: "Rollout to remaining units", covers: "Mobile, Mazaya and B2B", owner: "Mennah Farouk", finish: "W2 Nov 26", status: "wip", pct: 25 }
           ] },
         { name: "Service recovery standard", owner: "Dalia Sabry",
           brief: "A single standard for what happens when we get it wrong, and how quickly.",
           stakeholders: ["Care"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Recovery standard published", kind: "binary", actual: "no" },
-            { name: "Care teams trained", kind: "pct", actual: 20 }
+            { name: "Recovery standard published", due: "Feb 26", status: "todo" },
+            { name: "Care teams trained", due: "Oct 26", status: "wip", pct: 20 }
           ],
           outcomes: [
             { name: "Repeat complaints", dir: "≤", target: "8%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Standard drafted", covers: "What we owe a customer when we fail, by failure type", owner: "Dalia Sabry", finish: "Q3", status: "wip" },
-            { name: "Training and rollout", covers: "Every care team working to the standard", owner: "Dalia Sabry", finish: "Q4", status: "todo" }
+            { name: "Standard drafted", covers: "What we owe a customer when we fail, by failure type", owner: "Dalia Sabry", finish: "W2 Jul 26", status: "wip", pct: 50 },
+            { name: "Training and rollout", covers: "Every care team working to the standard", owner: "Dalia Sabry", finish: "W1 Nov 26", status: "todo" }
           ] }
       ] },
 
@@ -6642,16 +6658,16 @@ var GROUP = {
           brief: "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
           stakeholders: ["Marketing", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review framework and evidence pack", kind: "binary", actual: "yes" },
-            { name: "Quarterly reviews held", kind: "pct", actual: 50 }
+            { name: "Review framework and evidence pack", due: "Mar 26", status: "done" },
+            { name: "Quarterly reviews held", due: "Feb 26", status: "wip", pct: 50 }
           ],
           outcomes: [
             { name: "Revenue from lines added in the last two years", dir: "≥", target: "25%", measureAt: "Q4 2026", actual: "11%", progress: 44 }
           ],
           milestones: [
-            { name: "Framework agreed", covers: "What evidence a line is judged on", owner: "Tarek Nour", finish: "Q2", status: "done" },
-            { name: "First two reviews", covers: "Q2 and Q3 reviews held with decisions recorded", owner: "Tarek Nour", finish: "Q3", status: "wip" },
-            { name: "Second-half reviews", covers: "Q4 review held", owner: "Tarek Nour", finish: "Q4", status: "todo" }
+            { name: "Framework agreed", covers: "What evidence a line is judged on", owner: "Tarek Nour", finish: "W2 Apr 26", status: "done" },
+            { name: "First two reviews", covers: "Q2 and Q3 reviews held with decisions recorded", owner: "Tarek Nour", finish: "W2 Jul 26", status: "wip", pct: 25 },
+            { name: "Second-half reviews", covers: "Q4 review held", owner: "Tarek Nour", finish: "W4 Dec 26", status: "todo" }
           ] }
       ] },
 
@@ -6673,11 +6689,11 @@ var GROUP = {
           stakeholders: ["Finance Department", "IT Department"], timeline: "date",
           start: "1 Jan 2026", end: "30 Apr 2026",
           deliverables: [
-            { name: "Oracle-based interest utilisation form", kind: "binary", actual: "yes" },
-            { name: "Tracking interest expense on a daily basis", kind: "binary", actual: "yes" },
-            { name: "Real-time data recalculation for corridor interest and pricing", kind: "binary", actual: "no",
+            { name: "Oracle-based interest utilisation form", due: "Feb 26", status: "done" },
+            { name: "Tracking interest expense on a daily basis", due: "May 26", status: "done" },
+            { name: "Real-time data recalculation for corridor interest and pricing", due: "May 26", status: "todo",
               note: "Pricing corridor logic reopened with Treasury." },
-            { name: "Daily treasury monitoring of debt balances", kind: "pct", actual: 100 }
+            { name: "Daily treasury monitoring of debt balances", due: "Dec 26", status: "done" }
           ],
           outcomes: [
             { name: "Reduction of manual work", dir: "≥", target: "40 h", measureAt: "Q2 2026", actual: "20 h", progress: 50,
@@ -6685,35 +6701,35 @@ var GROUP = {
             { name: "Improving financial accuracy", dir: "≥", target: "99%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Solution design", covers: "Treasury requirements and the calculation approach", owner: "Finance", finish: "20 Mar 2026", status: "done" },
-            { name: "Oracle form development", covers: "Retrieval and calculation screens built", owner: "IT", finish: "12 Apr 2026", status: "done" },
-            { name: "Interest utilisation automation", covers: "Calculation methodology and finance approval", owner: "Finance", finish: "20 Apr 2026", status: "done" },
-            { name: "Stakeholder validation", covers: "Treasury validation of the outputs", owner: "Treasury", finish: "10 May 2026", status: "done" },
-            { name: "Reporting and analysis embedment", covers: "BI integration of the utilisation report", owner: "IT", finish: "31 May 2026", status: "wip" }
+            { name: "Solution design", covers: "Treasury requirements and the calculation approach", owner: "Finance", finish: "W3 Mar 26", status: "done" },
+            { name: "Oracle form development", covers: "Retrieval and calculation screens built", owner: "IT", finish: "W2 Apr 26", status: "done" },
+            { name: "Interest utilisation automation", covers: "Calculation methodology and finance approval", owner: "Finance", finish: "W3 Apr 26", status: "done" },
+            { name: "Stakeholder validation", covers: "Treasury validation of the outputs", owner: "Treasury", finish: "W2 May 26", status: "done" },
+            { name: "Reporting and analysis embedment", covers: "BI integration of the utilisation report", owner: "IT", finish: "W4 May 26", status: "wip", pct: 40 }
           ] },
         { name: "Credit facility consolidation", owner: "Fayad Sobhy",
           brief: "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
           stakeholders: ["Finance Department", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Facility term sheet agreed with lead bank", kind: "binary", actual: null },
-            { name: "Covenant reporting pack rebuilt", kind: "pct", actual: null },
-            { name: "Legacy facilities closed", kind: "binary", actual: null }
+            { name: "Facility term sheet agreed with lead bank", due: "Feb 26", status: null },
+            { name: "Covenant reporting pack rebuilt", due: "Sep 26", status: null },
+            { name: "Legacy facilities closed", due: "Jun 26", status: null }
           ],
           outcomes: [
             { name: "Arrangement and commitment fees", dir: "≤", target: "-18%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Facility review and bank shortlist", covers: "Every facility held across the four banks, and a shortlist of candidate leads", owner: "Treasury", finish: "Q1", status: "done" },
-            { name: "Term sheet negotiation", covers: "Commercial terms agreed with the appointed lead", owner: "Treasury", finish: "Q2", status: "wip" },
-            { name: "Legal documentation", covers: "Facility agreement and security package drafted and signed", owner: "Finance", finish: "Q3", status: "todo" },
-            { name: "Drawdown and legacy closure", covers: "First drawdown, and the four legacy facilities closed", owner: "Treasury", finish: "Q4", status: "todo" }
+            { name: "Facility review and bank shortlist", covers: "Every facility held across the four banks, and a shortlist of candidate leads", owner: "Treasury", finish: "W2 Jan 26", status: "done" },
+            { name: "Term sheet negotiation", covers: "Commercial terms agreed with the appointed lead", owner: "Treasury", finish: "W2 Jun 26", status: "wip", pct: 50 },
+            { name: "Legal documentation", covers: "Facility agreement and security package drafted and signed", owner: "Finance", finish: "W1 Jul 26", status: "todo" },
+            { name: "Drawdown and legacy closure", covers: "First drawdown, and the four legacy facilities closed", owner: "Treasury", finish: "W1 Dec 26", status: "todo" }
           ] },
         { name: "Working capital programme across units", owner: "Hossam Abuelenien",
           brief: "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
           stakeholders: ["Finance Department"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Working capital baseline per unit", kind: "binary", actual: null },
-            { name: "Unit-level release plans agreed", kind: "pct", actual: null }
+            { name: "Working capital baseline per unit", due: "Sep 26", status: null },
+            { name: "Unit-level release plans agreed", due: "Dec 26", status: null }
           ],
           outcomes: [
             { name: "Days sales outstanding", dir: "≤", target: "65", measureAt: "Q4 2026", actual: null, progress: null },
@@ -6721,9 +6737,9 @@ var GROUP = {
             { name: "Stock cover", dir: "≤", target: "45 d", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Baseline per unit", covers: "Receivables and stock position established for each unit", owner: "Finance", finish: "Q3", status: "todo" },
-            { name: "Release plans agreed", covers: "A target and a plan agreed with every unit head", owner: "Finance", finish: "Q4", status: "todo" },
-            { name: "First review", covers: "Progress against plan reviewed with the CFO", owner: "Finance", finish: "Q4", status: "todo" }
+            { name: "Baseline per unit", covers: "Receivables and stock position established for each unit", owner: "Finance", finish: "W3 Sep 26", status: "todo" },
+            { name: "Release plans agreed", covers: "A target and a plan agreed with every unit head", owner: "Finance", finish: "W2 Nov 26", status: "todo" },
+            { name: "First review", covers: "Progress against plan reviewed with the CFO", owner: "Finance", finish: "W4 Dec 26", status: "todo" }
           ] }
       ] },
 
@@ -6739,30 +6755,30 @@ var GROUP = {
           stakeholders: ["Strategy Management Office", "Unit heads"], timeline: "quarter",
           start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review format and evidence pack", kind: "binary", actual: "yes" },
-            { name: "Reviews held with every unit", kind: "pct", actual: 66 }
+            { name: "Review format and evidence pack", due: "May 26", status: "done" },
+            { name: "Reviews held with every unit", due: "Oct 26", status: "wip", pct: 66 }
           ],
           outcomes: [
             { name: "Cycles reviewed on time", dir: "≥", target: "4", measureAt: "Q4 2026", actual: "2", progress: 50 }
           ],
           milestones: [
-            { name: "Format agreed", covers: "One review shape used with every unit", owner: "Islam Saadany", finish: "Q1", status: "done" },
-            { name: "First-half reviews", covers: "Q1 and Q2 reviews held with all units", owner: "Islam Saadany", finish: "Q2", status: "done" },
-            { name: "Second-half reviews", covers: "Q3 and Q4 reviews", owner: "Islam Saadany", finish: "Q4", status: "wip" }
+            { name: "Format agreed", covers: "One review shape used with every unit", owner: "Islam Saadany", finish: "W3 Jan 26", status: "done" },
+            { name: "First-half reviews", covers: "Q1 and Q2 reviews held with all units", owner: "Islam Saadany", finish: "W3 May 26", status: "done" },
+            { name: "Second-half reviews", covers: "Q3 and Q4 reviews", owner: "Islam Saadany", finish: "W2 Dec 26", status: "wip", pct: 50 }
           ] },
         { name: "Plan and progress on the platform for all units", owner: "Islam Saadany",
           brief: "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
           stakeholders: ["Strategy Management Office"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "All units' plans loaded", kind: "pct", actual: 70 },
-            { name: "All units reporting through the platform", kind: "pct", actual: 40 }
+            { name: "All units' plans loaded", due: "May 26", status: "wip", pct: 70 },
+            { name: "All units reporting through the platform", due: "Jun 26", status: "wip", pct: 40 }
           ],
           outcomes: [
             { name: "Plan adherence", dir: "≥", target: "80%", measureAt: "Q4 2026", actual: "51%", progress: 64 }
           ],
           milestones: [
-            { name: "Plans loaded", covers: "Every unit's plan entered and checked", owner: "Islam Saadany", finish: "Q3", status: "wip" },
-            { name: "First reporting cycle on the platform", covers: "A full cycle run without spreadsheets", owner: "Islam Saadany", finish: "Q4", status: "todo" }
+            { name: "Plans loaded", covers: "Every unit's plan entered and checked", owner: "Islam Saadany", finish: "W1 Aug 26", status: "wip", pct: 60 },
+            { name: "First reporting cycle on the platform", covers: "A full cycle run without spreadsheets", owner: "Islam Saadany", finish: "W4 Oct 26", status: "todo" }
           ] }
       ] }
   ],
@@ -10367,10 +10383,34 @@ function capKOScore(c){
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
    percentage when it is a percentage. Nothing reported is absent, not zero. */
-function delivReads(d){
-  if (d.actual == null || d.actual === "") return null;
-  if (d.kind === "pct") return Math.max(0, Math.min(100, Number(d.actual)));
-  return String(d.actual).toLowerCase() === "yes" ? 100 : 0;
+/* ── WHAT A STATUS READS AS (§101) ────────────────────────────────────────
+   A deliverable and a milestone are reported the same way now: Not started,
+   In progress with a per-cent, Delivered (or Completed). The figure follows
+   the word at both ends and only the middle is typed, which is why `kind` --
+   the plan's old choice between "delivered or not" and "a percentage" -- has
+   nothing left to decide and is gone (§24).
+
+   AN IN-PROGRESS ROW WITH NO PER-CENT READS 0, not null. The reporting page
+   asks for the number and the tally does not count the row until it has one,
+   so this case only arises in data that arrived another way -- and every
+   milestone in every tenant is in exactly that state on the day this ships.
+   Reading it as 0 is what makes the Execution figure identical to the count
+   it replaces; excluding it would raise every tenant's score overnight. */
+function statusReads(x){
+  if (!x || !x.status) return null;
+  if (x.status === "done") return 100;
+  if (x.status === "todo") return 0;
+  var p = Number(x.pct);
+  return isNaN(p) ? 0 : Math.max(0, Math.min(100, p));
+}
+function delivReads(d){ return statusReads(d); }
+function msReads(m){ return statusReads(m); }
+/* Reported means ANSWERED, and In progress is not answered without its
+   number -- which is the whole of "in progress requires a % of completion". */
+function statusGiven(x){
+  if (!x || !x.status) return false;
+  if (x.status !== "wip") return true;
+  return x.pct != null && x.pct !== "" && !isNaN(Number(x.pct));
 }
 function sideAvg(vals){
   var v = vals.filter(function(x){ return x != null && !isNaN(x); });
@@ -10414,14 +10454,25 @@ function projOverruns(p){
 function capPerf(c){
   return sideAvg((c.projects || []).map(projPerf));
 }
+/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§101). It was
+   `done / total`: a milestone in progress counted as nothing. With a per-cent
+   on the milestone it is the mean of what each one reads -- 100 done, 0 not
+   started, its own figure in between -- and those are identical arithmetic
+   while no per-cent has been entered, which is every tenant on day one.
+   Measured across all eight capabilities in the worked example before it was
+   built: 50/50, 50/50, 50/50, 40/40, 40/40, 33/33, 42/42, 40/40.
+
+   The counts stay beside it. "5 of 12 completed" and "42%" answer two
+   different questions and both are worth having. */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
+    (p.milestones || []).forEach(function(x){ sum += msReads(x) || 0; });
   });
   return { done: done, wip: wip, todo: todo, total: total,
-           pct: total ? Math.round(done / total * 100) : null };
+           pct: total ? Math.round(sum / total) : null };
 }
 function capDeliverySide(c){ return sideAvg((c.projects || []).map(projDeliverySide)); }
 function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSide)); }
@@ -10429,16 +10480,121 @@ function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSid
 /* What a capability asks for this cycle: its key objectives, plus everything in
    its projects whose time has come. An outcome measured at Q4 is not an empty
    box somebody forgot in Q2 \u2014 it is not asked. */
-function outcomeDue(o){
-  if (!o.measureAt) return true;
-  var q = String(o.measureAt).match(/Q([1-4])\s*(\d{4})?/);
-  if (!q) return true;
-  var cq = String(REVIEW.name || "").match(/Q([1-4])\s*(\d{4})?/);
-  if (!cq) return true;
-  var oy = q[2] ? +q[2] : 0, cy = cq[2] ? +cq[2] : 0;
-  if (oy && cy && oy !== cy) return oy < cy;
-  return +q[1] <= +cq[1];
+/* ── WHEN A ROW IS DUE (§101) ──────────────────────────────────────────────
+   One reader, four written shapes, because the plan is written by people and
+   people write dates four ways:
+
+       July 26            a deliverable's or an outcome's due date
+       W3 Mar 26          a milestone's, one step finer
+       Q3 2026 / Q3       every plan authored before this version
+       31 May 2026        the one real project, and every date-timelined plan
+
+   Everything resolves to a MONTH NUMBER since year zero, which is the coarsest
+   unit any of them share -- a week inside March is still March, and comparing
+   a week to a cycle that runs six months would be precision nobody asked for.
+
+   `Date.parse` is deliberately the LAST resort rather than the first: it reads
+   "Q3 2026" as nothing and "W3 Mar 26" as nothing, but it also reads bare
+   numbers and stray words as dates in ways that would quietly turn a typo into
+   a deadline. The named shapes are matched first and explicitly.
+
+   THE CYCLE IS READ BY THE SAME FUNCTION, which is the part that was broken:
+   the old test compared quarter to quarter and answered "due" for EVERYTHING
+   when the cycle was called "H1 2026" -- which is what the demo cycle is
+   called and what a half-yearly review is always called. A cycle resolves to
+   its LAST month, because a cycle asks for everything due by the time it
+   closes. */
+/* MONTH_KEYS, NOT MONTHS -- there is already a `var MONTHS` in this file
+   1,400 lines below, holding the same twelve words CAPITALISED for
+   formatting a date. Two `var`s of one name in one scope is one binding, the
+   later wins, and this read every month as unknown: `indexOf("jul")` against
+   ["Jan",...] is -1. NOTHING THREW. `monthsOf` returned null, `dueThisCycle`
+   reads null as "always asked", and every row on every pane quietly read as
+   due -- which is the EXACT fault the old quarter-only reader had, restored
+   by accident on the day it was removed. §56.7 in a third place, and it
+   failed the way that rule says it always does: silently, in the safe
+   direction. */
+var MONTH_KEYS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+function monthIndex(w){
+  var t = String(w || "").slice(0, 3).toLowerCase();
+  return MONTH_KEYS.indexOf(t);
 }
+function fullYear(y){
+  var n = +y;
+  if (!n && n !== 0) return null;
+  /* "26" is 2026, not 26 AD. Two digits are a century short, and a plan is
+     never written about the year 26. */
+  return n < 100 ? 2000 + n : n;
+}
+/* Months since year zero, so two dates in different years compare with one
+   subtraction. Null when the text is not a time at all -- which is what the
+   upload notice reports and what "Done" in a due-date column produces. */
+function monthsOf(v, last){
+  var s = String(v == null ? "" : v).trim();
+  if (!s) return null;
+  var m;
+  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
+     the comparison is monthly. It is kept in the TEXT for the person. */
+  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
+  /* July 26 / Jul 2026 / Dec 26 */
+  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
+    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
+  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
+     is asked for, which is how a cycle named Q2 covers April to June. */
+  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
+    var qy = m[2] ? fullYear(m[2]) : cycleYear();
+    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
+  }
+  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
+     and what the old reader could not see at all. */
+  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
+    var hy = m[2] ? fullYear(m[2]) : cycleYear();
+    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
+  }
+  /* FY26 / 2026 -- a whole year. */
+  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
+    return fullYear(m[1]) * 12 + (last ? 11 : 0);
+  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
+  var t = Date.parse(s);
+  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
+  return null;
+}
+/* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
+   "Jun 2026" since the review model existed -- rather than parsed out of its
+   NAME. The name is a label somebody types ("H1 2026", "Half 1", "First
+   half"); `to` is the field that means it. The name is the fallback, not the
+   source.
+
+   55 of the 60 milestones in the worked example are a bare quarter with no
+   year, so a year has to come from somewhere: it comes from the cycle, which
+   is the only year the platform actually knows. */
+function cycleYear(){
+  var m = /(\d{4})/.exec(String(REVIEW.to || "") + " " + String(REVIEW.name || "") +
+                         " " + String(REVIEW.due || ""));
+  return m ? +m[1] : null;
+}
+function cycleMonth(){
+  var t = monthsOf(REVIEW.to);
+  return t != null ? t : monthsOf(REVIEW.name, true);
+}
+/* IS THIS ROW ASKED FOR THIS CYCLE? A row with no date is always asked: the
+   plan did not say when, so the platform does not get to decide it is early.
+   A row whose date cannot be read is also asked, for the same reason -- the
+   upload said so at the time, and silently not asking would hide it. */
+function dueThisCycle(v){
+  var m = monthsOf(v), c = cycleMonth();
+  if (m == null || c == null) return true;
+  return m <= c;
+}
+/* A row past its date and not finished. Distinct from not-due and drawn
+   differently, because "late" and "not yet" are opposite readings. */
+function overdue(v, done){
+  if (done) return false;
+  var m = monthsOf(v), c = cycleMonth();
+  return m != null && c != null && m < c;
+}
+function outcomeDue(o){ return dueThisCycle(o.measureAt); }
 /* THERE IS NO delivDue(). A deliverable used to carry a quarter of its own,
    and one later than the cycle meant "not asked": a row the reporting page
    dimmed and the tally left out. Islam, 2026-08-23: a deliverable belongs to
@@ -10447,11 +10603,20 @@ function outcomeDue(o){
    the predicate went too, at all four of its call sites, rather than being
    left behind always answering true (§24). An OUTCOME still has one, because
    a measurement time is a real thing somebody chose. */
+/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§101), not "everything in the
+   plan". A deliverable due next December is not an empty box somebody forgot
+   in June -- it is not asked, exactly as an outcome measured in Q4 has never
+   been asked in Q2. It leaves the count and it leaves the submit gate.
+
+   Submitting therefore gets easier early in a project and no easier late,
+   which is the right way round: a unit is chased for what is late, never for
+   what has not started. */
 function projReported(p){
   var n = 0, total = 0;
   (p.deliverables || []).forEach(function(d){
+    if (!dueThisCycle(d.due)) return;
     total++;
-    if (d.actual != null && d.actual !== "") n++;
+    if (statusGiven(d)) n++;
   });
   (p.outcomes || []).forEach(function(o){
     if (!outcomeDue(o)) return;
@@ -10459,8 +10624,9 @@ function projReported(p){
     if (o.actual != null && o.actual !== "") n++;
   });
   (p.milestones || []).forEach(function(m){
+    if (!dueThisCycle(m.finish)) return;
     total++;
-    if (m.status) n++;
+    if (statusGiven(m)) n++;
   });
   return { done: n, total: total };
 }
@@ -10686,9 +10852,9 @@ function clearCapability(cap, what, why){
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
   (cap.projects || []).forEach(function(p){
-    (p.deliverables || []).forEach(function(d){ d.actual = null; d.note = ""; });
+    (p.deliverables || []).forEach(function(d){ d.status = null; d.pct = null; d.note = ""; });
     (p.outcomes || []).forEach(function(o){ o.actual = null; o.progress = null; o.note = ""; });
-    (p.milestones || []).forEach(function(m){ m.status = null; m.note = ""; });
+    (p.milestones || []).forEach(function(m){ m.status = null; m.pct = null; m.note = ""; });
   });
 }
 /* One function may carry several capabilities \u2014 Marketing carries two \u2014 so
@@ -14025,18 +14191,17 @@ function applyProgress(u, d){
 var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started",
                        "in progress", "wip", "ongoing", "todo", "open", "closed",
                        "n/a", "na", "tbd", "planned", "delayed"];
-function looksLikeQuarter(v){
-  return /^q[1-4](\s*[-\/]?\s*(fy)?\s*\d{2,4})?$/i.test(String(v).trim());
-}
-function looksLikeDate(v){
-  return !isNaN(Date.parse(String(v).trim()));
-}
-function dueFits(v, timeline){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return false;
-  if (timeline === "quarter") return looksLikeQuarter(s);
-  if (timeline === "date") return looksLikeDate(s);
-  return looksLikeQuarter(s) || looksLikeDate(s);
+/* §101: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
+   timeline. A workshop lands on a day and a report lands in a month, and one
+   project has both -- the platform's job is to notice what is not a time at
+   all, which is still exactly the case that started this: "Done" and
+   "Pending" sitting in a due-date column.
+
+   `monthsOf` is the reader the PRODUCT uses to decide whether a row is due,
+   so anything it can read is a date the platform can compare. Asking a second
+   question here would be a second definition of "a date" (§42, in the small). */
+function dueFits(v){
+  return monthsOf(v) != null;
 }
 
 /* ── Capability templates (§16.4, §15.12) ─────────────────────────────────
@@ -14097,7 +14262,7 @@ function capPlanTemplate(c){
       timeline:p.timeline || "quarter", start:p.start, end:p.end, notes:p.notes }));
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPP_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id, name:d.name,
-        kind:d.kind }));
+        finish:d.due }));
     });
     (p.outcomes || []).forEach(function(o){
       var a = splitTarget(o.target);
@@ -14115,6 +14280,15 @@ function capPlanTemplate(c){
 /* Progress statuses are written as words and read back as either the words or
    the stored keys — a sheet filled by hand should not need to know that "In
    progress" is spelled "wip" inside the platform. */
+/* A deliverable says Delivered where a milestone says Completed; the stored
+   key is the same in both (§101), so one pair of functions with the word
+   passed in rather than two pairs that can drift. */
+function delivStatusWord(s){ return s === "done" ? "Delivered" : msStatusWord(s); }
+function delivStatusKey(v){
+  var t = String(v == null ? "" : v).trim().toLowerCase();
+  if (t === "delivered") return "done";
+  return msStatusKey(v);
+}
 function msStatusWord(s){
   return s === "done" ? "Completed" : s === "wip" ? "In progress" : s === "todo" ? "Not started" : "";
 }
@@ -14125,12 +14299,6 @@ function msStatusKey(v){
   if (s === "wip" || s === "in progress") return "wip";
   if (s === "todo" || s === "not started") return "todo";
   return null;
-}
-function delivKindKey(v){
-  var s = String(v == null ? "" : v).trim().toLowerCase();
-  if (s === "binary" || s.indexOf("delivered") === 0) return "binary";
-  if (s === "pct" || s.indexOf("%") > -1) return "pct";
-  return s ? null : "";
 }
 function timelineKey(v){
   var s = String(v == null ? "" : v).trim().toLowerCase();
@@ -14152,7 +14320,7 @@ function capProgressTemplate(c){
     (p.deliverables || []).forEach(function(d){
       rows.push(csvRow(CAPPROG_COLS, { id:d.id, type:"DELIVERABLE", parent_id:p.id,
         parent_name:p.name, name:d.name,
-        kind:d.kind === "pct" ? "% delivered" : "Delivered / not",
+        finish:d.due,
         current:(d.actual == null ? "" : d.actual), new_value:"" }));
     });
     (p.outcomes || []).forEach(function(o){
@@ -14265,14 +14433,7 @@ function validateCapPlan(c, rows){
      arguing with it. So it is a NOTICE, which is the same weight the overrun
      rule carries, and for the same reason -- both are "we saved what you
      typed, and here is what we noticed". */
-  var projTl = {};
-  (c.projects || []).forEach(function(p){ if (p.timeline) projTl[p.id] = p.timeline; });
-  rows.forEach(function(r){
-    if (r.type === "PROJECT") {
-      var t = timelineKey(r.timeline);
-      if (t) projTl[r.id] = t;
-    }
-  });
+
 
   rows.forEach(function(r, n){
     var at = "row " + (n + 2) + (r.name ? " — " + r.name : "");
@@ -14298,23 +14459,20 @@ function validateCapPlan(c, rows){
     }
     if (r.type === "PROJECT" && r.timeline && timelineKey(r.timeline) == null)
       problems.push({ at:at, msg:'timeline "' + r.timeline + '" is not Quarters or Dates' });
-    if (r.type === "DELIVERABLE" && delivKindKey(r.kind) == null)
-      problems.push({ at:at, msg:'kind "' + r.kind + '" is not "Delivered / not" or "% delivered"' });
+
     if (r.type === "OUTCOME") {
       if (!r.value) notices.push({ at:at, msg:"no target — recorded, not scored" });
       if (!r.measure_at) notices.push({ at:at, msg:"no measurement time — will be asked every cycle" });
     }
-    if (r.type === "MILESTONE") {
+    if (r.type === "MILESTONE" || r.type === "DELIVERABLE") {
       var due = String(r.finish == null ? "" : r.finish).trim();
-      var tl = projTl[r.parent_id] || "";
       if (!due) {
         notices.push({ at:at, msg:"no due date" });
-      } else if (!dueFits(due, tl)) {
+      } else if (!dueFits(due)) {
         /* NAMED AS WHAT IT IS, never as "invalid". The two words this exists
            for are Done and Pending, and telling somebody their status is
            invalid does not tell them where it goes. */
-        notices.push({ at:at, msg:'due date "' + due + '" is not ' +
-          (tl === "date" ? "a date" : tl === "quarter" ? "a quarter" : "a date or a quarter") +
+        notices.push({ at:at, msg:'due date "' + due + '" is not a date, a month or a quarter' +
           (MS_STATUS_WORDS.indexOf(due.toLowerCase()) > -1
             ? " \u2014 that is a status, and a status is reported each cycle rather than planned"
             : "") + " \u2014 saved exactly as entered" });
@@ -14361,7 +14519,7 @@ function diffCapPlan(c, rows){
       cmp("end", hit.obj.end, r.end);
     } else if (hit.kind === "DELIVERABLE") {
       cmp("name", hit.obj.name, r.name);
-      cmp("kind", hit.obj.kind, delivKindKey(r.kind) || "");
+      cmp("due", hit.obj.due, r.finish || "");
     } else if (hit.kind === "OUTCOME") {
       cmp("name", hit.obj.name, r.name); cmp("direction", hit.obj.dir, r.direction);
       if (r.value !== "" && targetChanged(hit.obj.target, r.value, r.unit))
@@ -14417,7 +14575,7 @@ function createFromCapPlan(c, d){
       made++;
     } else if (x.type === "DELIVERABLE") {
       var p = projectById(x.parent_id); if (!p) return;
-      p.deliverables.push({ id:x.id, name:x.name, kind:delivKindKey(x.kind) || "binary",
+      p.deliverables.push({ id:x.id, name:x.name, due:x.finish || "",
         actual:null });
       made++;
     } else if (x.type === "OUTCOME") {
@@ -14454,7 +14612,7 @@ function applyCapPlan(c, d){
       if (ch.f === "timeline")       o.timeline = timelineKey(ch.now) || o.timeline;
       if (ch.f === "start")          o.start = ch.now;
       if (ch.f === "end")            o.end = ch.now;
-      if (ch.f === "kind")           o.kind = delivKindKey(ch.now) || o.kind;
+      if (ch.f === "due")            o.due = ch.now;
       if (ch.f === "measured at")    o.measureAt = ch.now;
       if (ch.f === "what it covers") o.covers = ch.now;
       if (ch.f === "finish")         o.finish = ch.now;
@@ -15326,6 +15484,9 @@ function progressFromWorkbook(u, sheets){
 var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
+/* The same three states, one word apart: a deliverable is DELIVERED where a
+   milestone is COMPLETED, and that difference is right (§101). */
+var MS_STATUSES_D = ["Not started", "In progress", "Delivered"];
 
 /* ONE NAMING IN THE FILE (§51.19, Islam: "I don't think we should have the
    capability file with 2 namings capability and function. we can just upload
@@ -15415,20 +15576,22 @@ function capPlanWorkbook(c){
        deliverable is delivered when the project ends, and the project's owner
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 52, 18],
-      head:["Project", "Deliverable", "Kind"],
+    { name:"Deliverables", widths:[34, 54, 16],
+      /* §101: no Kind. A deliverable is measured one way now -- delivered or
+         not, with a per-cent while it is under way -- so the plan has nothing
+         to choose here. Its direction is "=" and its target "Y/N", written by
+         the platform rather than asked of the person. */
+      head:["Project", "Deliverable", "Due date"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
-        (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not"]);
-        });
+        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name, d.due || ""]); });
         return acc;
       }, []) },
 
     { name:"Outcomes", widths:[34, 44, 11, 12, 12, 14],
-      head:["Project", "Outcome", "Direction", "Target", "Unit", "Measure date"],
+      head:["Project", "Outcome", "Direction", "Target", "Unit", "Due date"],
       numCols:[3],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
@@ -15466,12 +15629,16 @@ function capProgressWorkbook(c){
                 m.actual == null ? "" : String(m.actual), "", m.id];
       }) },
 
-    { name:"Deliverables", widths:[30, 44, 18, 18, 18, 16], lockedCols:[5],
-      head:["Project", "Deliverable", "Kind", "Currently recorded", "New value", "ID"],
+    /* §101: a status and a per-cent, the pair the Milestones sheet has always
+       had. "New %" is read only for In progress -- the word decides the
+       figure at both ends, and a per-cent behind "Delivered" is a number
+       nobody can see. */
+    { name:"Deliverables", widths:[30, 44, 14, 18, 18, 12, 16], lockedCols:[6],
+      head:["Project", "Deliverable", "Due date", "Current status", "New status", "New %", "ID"],
+      validations:[{ range:"E2:E400", list:MS_STATUSES_D }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.kind === "pct" ? "% delivered" : "Delivered / not",
-                    d.actual == null ? "" : String(d.actual), "", d.id]);
+          acc.push([p.name, d.name, d.due || "", delivStatusWord(d.status), "", "", d.id]);
         });
         return acc;
       }, []) },
@@ -15486,12 +15653,13 @@ function capProgressWorkbook(c){
         return acc;
       }, []) },
 
-    { name:"Milestones", widths:[30, 40, 14, 16, 18, 16], lockedCols:[5],
-      head:["Project", "Milestone", "Due date", "Current status", "New status", "ID"],
+    { name:"Milestones", widths:[30, 40, 14, 16, 18, 12, 16], lockedCols:[6],
+      head:["Project", "Milestone", "Due date", "Current status", "New status", "New %", "ID"],
       validations:[{ range:"E2:E400", list:MS_STATUSES }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.milestones || []).forEach(function(m){
-          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "", m.id]);
+          acc.push([p.name, m.name, m.finish || "", msStatusWord(m.status), "",
+                    m.pct == null ? "" : String(m.pct), m.id]);
         });
         return acc;
       }, []) }
@@ -15538,14 +15706,18 @@ function capPlanFromWorkbook(c, sheets){
     });
   }
   child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
-    row.kind = delivKindKey(r["Kind"]) || r["Kind"];
+    /* Due date since §101; a workbook written before it has a Kind column
+       instead, which is read and ignored (§58: write the new label, read
+       whatever arrives). */
+    row.finish = r["Due date"] != null ? r["Due date"] : "";
   });
   child("Outcomes", "OUTCOME", "Outcome", "O", function(row, r){
     row.direction = r["Direction"]; row.value = r["Target"];
     row.unit = r["Unit"];
     /* Measure date since §99, read as either — the same contract the milestone
        column keeps below, and for the same reason. */
-    row.measure_at = r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
+    row.measure_at = r["Due date"] != null ? r["Due date"]
+                   : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
     /* Description since §100, read as either (§58). The STORED field keeps its
@@ -18410,119 +18582,86 @@ function splitOrPane(list, sel, rail, pane){
    unit's. The dates are on the project's own cover line, which is where a
    date belongs; a function left holding a helper nothing calls is how a
    stylesheet ends up describing a control the product does not have (§24). */
-function delivKindPill(d){
-  return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
-}
-/* ── ONE TABLE, TWO HALVES (§99) ───────────────────────────────────────
-   §53.4 put a deliverable and an outcome in one table with a Type column,
-   and its argument survives: they are two kinds of evidence that the project
-   achieved what it set out to, they are read together, and the SCORE still
-   keeps them apart half each per SIDE (projPerf). What did not survive is the
-   single HEADER ROW. Islam: "the mixing of both caused confusion … we can
-   have them in 1 table but we need a split."
+/* ── ONE TABLE, ONE ROW SHAPE (§101, undoing §99's split) ────────────────
+   §99 cut the table in two because Direction, Target and Due date had nothing
+   to say for a deliverable -- the em-dash was the table asking a row a
+   question its kind could not answer. Islam: *"wait, I over complicated
+   things … make them 1 table … for the deliverables the direction is always
+   bigger than and the target is 100%"*, later *"change it from 100% to Y/N"*.
 
-   He is describing a table asking every row a question the other kind cannot
-   answer. `Measured as` meant the delivery kind on a deliverable and the
-   DIRECTION on an outcome — one heading over two different facts — while
-   `Target` and `Measured at` stood empty for every deliverable on the plan
-   pane and `Target` for every one on the other two.
+   GIVING A DELIVERABLE A REAL DIRECTION AND A REAL TARGET IS THE BETTER FIX.
+   The cells now have ANSWERS, so the dead cells go because the questions
+   became answerable rather than because the table was cut in two. Fewer
+   parts, same problem solved -- and the band, the per-half column strip and
+   the colspan arithmetic that kept two halves aligned all go with it (§24).
 
-   So: still one table, split by a band, each half declaring its own columns.
-   The Type column goes with the split — the band above the rows already says
-   which kind they are, and a pill repeating it is the same fact twice (§93's
-   one chip too many). The `#` and the NAME hold their position across the
-   split so the eye still runs down one list, and where a half has a figure
-   the score is built from (`Performance`, §99.8) it stays in the LAST column for both
-   halves, so that column still runs down one edge.
+   THE TYPE COLUMN COMES BACK, and that is coherent rather than a reversal of
+   a reversal: §99 removed it because the BAND said which kind a row was, and
+   with no band something has to.
 
-   This is also the shape the product already had everywhere else: the plan
-   workbook has carried separate Deliverables and Outcomes sheets with exactly
-   these columns since §16.4, and the review deck a slide each since §15. The
-   screen was the last surface merging them. */
-var DX_HALVES = {
-  d: { title: "Deliverables", sub: "what the project hands over" },
-  o: { title: "Outcomes",     sub: "what it is meant to change" }
-};
-/* The band wears the ground every table header in the product wears (§41.10),
-   so each half OPENS the way a table opens; the column strip under it is the
-   quiet one. Both are `th` inside the tbody, deliberately: a table has one
-   `<thead>`, and the hover and last-row rules are written against `td`. */
-function dxBand(cols, kind){
-  var h = DX_HALVES[kind];
-  return '<tr class="dxband"><th colspan="' + cols + '">' + h.title +
-    '<em>' + h.sub + '</em></th></tr>';
+   THE DIRECTION IS "=", NOT ">=". With a target of Y/N there is nothing to be
+   greater than, and a blank cell would put back the one thing this merge
+   removed. "= Y/N" is what the row actually says. */
+var DX_HEADING = "Deliverables and outcomes";
+function dxIsDeliv(row){ return row.kind === "d"; }
+function dxType(row){
+  /* One box for both words: "Deliverable" and "Outcome" are seven characters
+     apart, so left to themselves the column reads as two different marks
+     rather than one question answered two ways. The width is in the CSS. */
+  return '<span class="pill kind tk">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
 }
-/* A cell is [label, class, colspan] — the colspan is what lets a half with
-   fewer facts than the other still line its last column up with it. */
-function dxHead(cells){
-  return '<tr class="dxhead">' + cells.map(function(c){
-    return '<th' + (c[1] ? ' class="' + c[1] + '"' : '') +
-      (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
-  }).join("") + '</tr>';
+/* A deliverable's direction and target are written FOR it rather than asked
+   OF it, and shown quietly, because a value nobody can change should not look
+   like a field. */
+function dxDir(row){ return dxIsDeliv(row) ? '<span class="fixedval">=</span>' : esc(row.obj.dir || ""); }
+function dxTarget(row){
+  return dxIsDeliv(row) ? '<span class="fixedval">Y/N</span>'
+                        : (row.obj.target ? esc(row.obj.target) : '<span class="missing">Missing</span>');
 }
-/* WHAT IS NOT THERE IS NOT DRAWN (§99.7). The split first shipped with an
-   empty half saying "No outcomes yet" over its own band and column strip —
-   §45.2's rule, that a feature rendering nothing looks like one that was
-   never built. Islam: *"the presence of outcomes or deliverables that would
-   make the sub table appear or not, not to keep tables in place with no
-   need."* His reading is the right one HERE, and the reason is that §45.2 is
-   about a FEATURE and this is about a PROJECT: a project with no outcomes is
-   not a broken screen, it is a project that committed to no measurable
-   change, and three rows of furniture saying so is the empty state shouting.
-
-   The one thing the empty half was carrying is carried already: `projPerf()`
-   returns the other side whole when a side is empty, so a project with no
-   outcomes is scored on its deliverables alone — and the Performance card
-   above the pane prints `Outcomes —` for exactly that. The fact stays on the
-   page; only the furniture goes.
-
-   AUTHORING IS THE EXCEPTION, and it is not a detail: the add row is the only
-   way to write the first deliverable or the first outcome, so a half hidden
-   for being empty in EDIT mode is a half that can never be filled — §61's
-   fault exactly, where a function with no plan could only be reached by
-   giving it a plan first. Both halves always draw behind the pen.
-
-   ONE ANSWER, READ BY BOTH: `dxShown()` decides, `dxHeading()` reads the same
-   answer, so a section can never name a half it is not drawing. */
-function dxShown(p, authoring){
-  return { d: !!authoring || (p.deliverables || []).length > 0,
-           o: !!authoring || (p.outcomes || []).length > 0 };
+/* ONE WORD FOR WHEN. A deliverable stores `due`, an outcome `measureAt` and a
+   milestone `finish` -- three spellings for one question, kept because a
+   stored field is an identifier and renaming one is a migration for a word
+   nobody reads (§58, §65). `dxWhen` is the one place that knows which. */
+function dxWhen(row){ return dxIsDeliv(row) ? row.obj.due : row.obj.measureAt; }
+function dxSetWhen(row, v){ if (dxIsDeliv(row)) row.obj.due = v; else row.obj.measureAt = v; }
+/* THE DUE-DATE CELL SAYS WHICH OF THREE THINGS IS TRUE. Overdue is red and
+   loud -- past its date, unfinished, and being asked for. Not due is quiet --
+   its cycle has not come, so nothing is asked and nothing is scored. On time
+   is just a date. */
+function dxDate(v, done){
+  var t = v ? esc(v) : '<span class="missing">Missing</span>';
+  if (!dueThisCycle(v)) return '<span class="soonval">' + t + '</span>';
+  if (overdue(v, done)) return '<span class="lateval">' + t +
+    '<span class="latenote">overdue</span></span>';
+  return t;
 }
-function dxAny(sh){ return sh.d || sh.o; }
-/* `sub` is the plan pane's trailing phrase, which pairs one clause to each
-   half — so it has to be built from the same flags rather than written out,
-   or a pane showing one half promises two things in its own heading. */
-function dxHeading(sh, sub){
-  var t = [], s = [];
-  ["d", "o"].forEach(function(k){
-    if (!sh[k]) return;
-    t.push(t.length ? DX_HALVES[k].title.toLowerCase() : DX_HALVES[k].title);
-    s.push(DX_HALVES[k].sub);
-  });
-  return t.join(" and ") + (sub && s.length
-    ? ' <em>\u2014 ' + s.join(", and ") + '</em>' : '');
+/* Deliverables then outcomes, as ONE list -- numbered straight through,
+   because with one table and one row shape it IS one list again. */
+function dxRows(p){
+  return (p.deliverables || []).map(function(d){ return { kind:"d", obj:d }; })
+    .concat((p.outcomes || []).map(function(o){ return { kind:"o", obj:o }; }));
 }
-function dxSplit(cols, sh, d, o){
-  return '<div class="scroll"><table><tbody>' +
-    (sh.d ? dxBand(cols, "d") + dxHead(d.head) + d.rows + (d.add || "") : "") +
-    (sh.o ? dxBand(cols, "o") + dxHead(o.head) + o.rows + (o.add || "") : "") +
-    '</tbody></table></div>';
-}
-/* The row number restarts per half. §53.4 ran it across the whole table
-   BECAUSE it was one list, and said so; with two lists, two rows called 1 is
-   the truth rather than a mistake. */
-function dxIdx(i){ return '<td class="idx">' + (i + 1) + '</td>'; }
-function delivShown(d){
-  var v = delivReads(d);
-  if (v == null) return '<span class="pill kind">&mdash;</span>';
-  if (d.kind === "pct") return '<span class="pill ' + band(v) + '">' + v + '%</span>';
-  return v === 100 ? '<span class="pill good">Delivered</span>' : '<span class="pill warn">Not yet</span>';
-}
-function msPill(m){
-  if (m.status === "done") return '<span class="pill good">Completed</span>';
-  if (m.status === "wip") return '<span class="pill attn">In progress</span>';
+/* ONE PILL FOR BOTH, because a deliverable and a milestone are now reported
+   the same way. The last word differs and should: a deliverable is
+   DELIVERED, a milestone is COMPLETED. */
+function statusPill(x, doneWord){
+  if (!x.status) return '<span class="pill kind">&mdash;</span>';
+  if (x.status === "done") return '<span class="pill good">' + doneWord + '</span>';
+  if (x.status === "wip") return '<span class="pill attn">In progress</span>';
   return '<span class="pill kind">Not started</span>';
 }
+function delivShown(d){ return statusPill(d, "Delivered"); }
+function msPill(m){ return statusPill(m, "Completed"); }
+/* The per-cent follows the word at both ends and is typed only in the middle
+   -- a box that can contradict the word beside it is a box that eventually
+   will. A row nobody is being asked for shows what it is instead. */
+function pctRead(x, when){
+  if (when != null && !dueThisCycle(when)) return '<span class="pill kind">Not due</span>';
+  var v = statusReads(x);
+  return v == null ? "&mdash;" : v + "%";
+}
+var MS_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Completed"]];
+var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Delivered"]];
 /* A milestone finishing after the project's end date is saved as entered and
    said out loud. Two things might be true and the platform picks neither. */
 function overrunNote(p){
@@ -18584,48 +18723,40 @@ function capKOTable(c){
 }
 
 function projPerformanceBody(p, fk){
-  /* A DELIVERABLE HAS NO TARGET, so it no longer shows a dash under one
-     (§53.4 removed the field; the column outlived it by two versions).
-     The score column is the last on BOTH halves — it is the figure projPerf
-     is built from, and one that moves between halves is one nobody can run
-     their eye down. Named in the dxSplit call below, not here (§99.8). */
-  var dRows = p.deliverables.map(function(d, i){
-    return '<tr>' + dxIdx(i) + '<td>' + esc(d.name) +
-      (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
-      '<td colspan="2" class="cc">' + delivShown(d) + '</td>' +
-      '<td class="num final">' + pct(delivReads(d)) + '</td></tr>';
+  /* Status holds the WORD for a deliverable and the FIGURE for an outcome --
+     both are "what was reported" -- and % holds the number the score is built
+     from, for both, so the score column runs down one edge (§101). */
+  var dxr = dxRows(p).map(function(row, i){
+    var o = row.obj, when = dxWhen(row), d = dxIsDeliv(row);
+    var notDue = !dueThisCycle(when);
+    var got = d ? statusPill(o, "Delivered")
+                : (o.progress == null ? '<span class="pill kind">Not due</span>' : esc(o.actual));
+    var reads = d ? statusReads(o) : o.progress;
+    /* "Finished" is a status for a deliverable and a REPORTED FIGURE for an
+       outcome. Asking statusReads() of an outcome answers null, which read
+       every measured outcome as overdue. */
+    var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
+    return '<tr' + (notDue || (!d && o.progress == null) ? ' class="notdue"' : '') + '>' +
+      '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) +
+        (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
+      '<td class="cc">' + dxType(row) + '</td>' +
+      '<td class="cc">' + dxDate(when, done) + '</td>' +
+      '<td class="num">' + dxTarget(row) + '</td>' +
+      '<td class="cc">' + got + '</td>' +
+      '<td class="num final"' + (reads == null ? '' :
+        ' style="color:var(--' + band(reads) + ')"') + '>' +
+        (notDue ? "&mdash;" : pct(reads)) + '</td></tr>';
   }).join("");
-  var oRows = p.outcomes.map(function(o, i){
-    if (o.progress == null) {
-      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
-        '<td class="num">' + esc(o.target) + '</td>' +
-        '<td colspan="2" class="cc"><span class="pill kind">Measured at ' + esc(o.measureAt) + '</span></td></tr>';
-    }
-    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) +
-      (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
-      '<td class="num">' + esc(o.target) + '</td>' +
-      '<td class="num">' + esc(o.actual) + '</td>' +
-      '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
-  }).join("");
-  /* PERFORMANCE, not Reads (§99.8). Islam: *"Reads is a strange title, we need
-     something else."* It was the platform's own word for how a figure resolves
-     into a score, and it was the only place using it — every other table
-     naming this same 0-100 says Score, Progress or Performance. His pick was
-     Performance, over Score, which is what the Key objectives table two blocks
-     up this same page says. Recorded because the cost is real and was stated
-     before he chose: the pane now carries THREE words for one kind of number —
-     the card's *Project performance*, the objectives table's *Score*, and this.
-     Progress was never a candidate here: the milestone table directly below
-     uses it for a STATUS, and one word for a status and a percentage two
-     tables apart is how §87's twins get made. */
-  var sh = dxShown(p);
-  var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Performance", "num"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Performance", "num"]], rows: oRows });
   var mRows = p.milestones.map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + esc(m.finish) + '</td>' +
-      '<td class="cc">' + msPill(m) + '</td></tr>';
+    var v = msReads(m);
+    return '<tr' + (dueThisCycle(m.finish) ? '' : ' class="notdue"') + '>' +
+      '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
+      '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
+      '<td class="cc">' + (dueThisCycle(m.finish) ? msPill(m)
+        : '<span class="pill kind">Not due</span>') + '</td>' +
+      '<td class="num final">' + (dueThisCycle(m.finish) && v != null ? v + "%" : "&mdash;") +
+      '</td></tr>';
   }).join("");
   var mst = projMilestones(p);
   /* THE SAME BAND THE PILLAR PANE WEARS (§51.3). It was an `.ptitle` with a
@@ -18637,9 +18768,10 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Due date","Target","Status","%"], dxr) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Due date","Progress"], mRows);
+    miniTable(["#","Milestone","Owner","Due date","Status","%"], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -18751,50 +18883,30 @@ function projPlanBody(p, fk){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
-  /* MEASURED AS BELONGS TO A DELIVERABLE AND A DIRECTION TO AN OUTCOME, and
-     for two versions one heading carried both (§99). Each half declares its
-     own columns now; the deliverable's kind spans the three the outcome uses
-     for direction, target and date, because a half with fewer facts still has
-     to end where the other one does. */
-  var dRows = p.deliverables.map(function(d, i){
-    return '<tr data-oi="' + i + '"><td class="idx">' +
-      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
-      '<td>' + (ed ? inputOr("plan", d.name, "", function(v){ d.name = v; }) : esc(d.name)) +
-        xb("deliverables", d.id) + '</td>' +
-      '<td colspan="3">' + delivKindPill(d) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
+  /* ONE ROW SHAPE (§101). A deliverable's direction and target are written
+     for it; only its due date is its own to choose. An outcome carries all
+     three. Every cell answered, and no band to keep two halves aligned. */
+  var dxr = dxRows(p).map(function(row, i){
+    var o = row.obj, d = dxIsDeliv(row);
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
-        xb("outcomes", o.id) + '</td>' +
-      '<td class="cc">' + esc(o.dir) + '</td>' +
-      '<td class="num">' + f(o.target, function(v){ o.target = v; }) + '</td>' +
+        xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
+      '<td class="cc">' + dxType(row) + '</td>' +
+      '<td class="cc">' + dxDir(row) + '</td>' +
+      '<td class="num">' + (d ? dxTarget(row) : f(o.target, function(v){ o.target = v; })) + '</td>' +
       '<td class="cc">' + (ed
-        ? inputOr("plan", o.measureAt || "", "", function(v){ o.measureAt = v; })
-        : esc(o.measureAt || "\u2014")) + '</td></tr>';
-  }).join("");
-  /* ONE ADD ROW PER HALF. §53.4 put both buttons under one table because a
-     single "add a row" would have had to ask which kind; the split answers
-     that by where the button sits, so each says only its own name. */
-  /* dxAdd, not addRow: there is a GLOBAL addRow used by the unit's plan pane,
-     and a `var` of the same name in a function that later wants the global is
-     exactly the collision §56.7 records — one binding, no textual conflict,
-     silent until the day somebody reaches for the other one. */
-  var dxAdd = function(what, label){
-    return ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
-      '<button class="linkbu" data-rowadd="' + what + '|' + esc(p.id) + '">' + label +
-      '</button></td></tr>' : '';
-  };
-  /* `ed`, not a hard true: behind the pen both halves draw so the first row
-     of either can be written; read, only what is there is drawn. */
-  var sh = dxShown(p, ed);
-  var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable"], ["Measured as", "", 3]], rows: dRows,
-      add: dxAdd("deliverable", "Add a deliverable") },
-    { head: [["#", "idx"], ["Outcome"], ["Direction", "cc"], ["Target", "num"],
-             ["Measure date", "cc"]], rows: oRows,
-      add: dxAdd("outcome", "Add an outcome") });
+        ? inputOr("plan", dxWhen(row) || "", "", function(v){ dxSetWhen(row, v); })
+        : (dxWhen(row) ? esc(dxWhen(row)) : '<span class="missing">Missing</span>')) +
+      '</td></tr>';
+  }).join("") +
+  /* TWO ADD BUTTONS UNDER ONE TABLE, as §53.4 had them: one table of two
+     kinds, and a single "add a row" would have to ask which -- a question
+     the two buttons answer by existing. */
+  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
+      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
+      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
+    '</td></tr>' : '');
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
@@ -18845,7 +18957,9 @@ function projPlanBody(p, fk){
             function(v){ p.stakeholders = collabParse(v); })
         : (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
-    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh, true) + '</h4>' + dxRows : "") +
+    '<h4 class="mini">' + DX_HEADING +
+      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target","Due date"], dxr) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     /* NAME, THEN DESCRIPTION (§100). Islam: "we need the milestone name before
        the description." So the pair stays -- a milestone is identified by a
@@ -18916,6 +19030,18 @@ function capEntryBox(x, unit, may, label){
     '" placeholder="\u2014" aria-label="Report ' + esc(label) + '">' +
     (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
 }
+/* THE PER-CENT AN IN-PROGRESS ROW REQUIRES (§101). Its own field rather than
+   capEntryBox's, because that one writes `actual` -- the outcome's figure --
+   and this writes `pct`. One box, two meanings, would be exactly the fault
+   this whole section removed from the tables. */
+function capPctBox(x, may, label){
+  var has = x.pct != null && x.pct !== "";
+  if (!may) return '<span class="mono">' + (has ? esc(String(x.pct)) + "%" : "\u2014") + '</span>';
+  return '<span class="entry' + (has ? " filled" : "") + '">' +
+    '<input class="field" data-cpct="' + x.id + '" value="' + esc(has ? String(x.pct) : "") +
+    '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
+    '<span class="unitsuf">%</span></span>';
+}
 function capNoteBox(x, may){
   return may
     ? '<input class="fld notefld" data-cnote="' + x.id + '" value="' + esc(x.note || "") +
@@ -18933,52 +19059,63 @@ function capPickBox(x, may, opts, val){
 
 function projReportBody(p, may, fk){
   var r = projReported(p);
-  /* EVERY DELIVERABLE IS ASKED. The dimmed "Not asked — due Q4" row went with
-     the due date itself (§53.4); an OUTCOME still has one, because a
-     measurement time is a real thing somebody chose. */
-  /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, so a dead column is worse
-     here than anywhere: every deliverable carried a dash under `Target`,
-     because a deliverable has no target (§53.4). Split, the deliverable's
-     name takes back that width, and `Reported` and `Note` — the two columns a
-     person is actually typing into — hold the same place on both halves. */
-  var dRows = p.deliverables.map(function(d, i){
-    /* Still no kind pill beside the box: the box itself already says whether
-       it is delivered-or-not or a percentage, and the half's heading says the
-       rest. */
-    return '<tr>' + dxIdx(i) + '<td colspan="2">' + esc(d.name) + '</td>' +
-      '<td class="cc">' + (d.kind === "pct"
-        ? capEntryBox(d, "%", may, d.name)
-        : capPickBox(d, may, [["","\u2014"],["yes","Delivered"],["no","Not yet"]], d.actual)) + '</td>' +
-      '<td class="notecol">' + capNoteBox(d, may) + '</td></tr>';
-  }).join("");
-  var oRows = p.outcomes.map(function(o, i){
-    if (!outcomeDue(o)) {
-      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
-        '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 measured at ' +
-        esc(o.measureAt) + '</span></td></tr>';
+  /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
+     the product at eight columns -- the honest cost of one row shape carrying
+     Type, Due date, Target, Status, % and Note (§101).
+
+     A deliverable PICKS a status and the per-cent follows: 100 for Delivered,
+     0 for Not started, a box only for In progress, which is the whole of "in
+     progress requires a % of completion". An outcome TYPES a figure and its
+     per-cent is computed against the target -- shown, never typed.
+
+     A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting
+     there as an empty box somebody forgot. The control is still live: anyone
+     who wants to report early can, which is why this is a label and not a
+     lock. */
+  var dxr = dxRows(p).map(function(row, i){
+    var o = row.obj, d = dxIsDeliv(row), when = dxWhen(row);
+    var notDue = d ? !dueThisCycle(when) : !outcomeDue(o);
+    var ent, pcell;
+    if (notDue) {
+      ent = '<span class="pill kind">Not asked</span>';
+      pcell = '<span class="pill kind">Not due</span>';
+    } else if (d) {
+      ent = capPickBox(o, may, DX_WORDS, o.status);
+      pcell = o.status === "wip"
+        ? capPctBox(o, may, o.name)
+        : '<b>' + (statusReads(o) == null ? "&mdash;" : statusReads(o) + "%") + '</b>';
+    } else {
+      ent = capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name);
+      pcell = '<span class="fixedval">' + (o.progress == null ? "&mdash;" : o.progress + "%") + '</span>';
     }
-    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
-      '<td class="num">' + esc(o.target) + '</td>' +
-      '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
+    var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
+    return '<tr' + (notDue ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
+      '<td>' + esc(o.name) + '</td>' +
+      '<td class="cc">' + dxType(row) + '</td>' +
+      '<td class="cc">' + dxDate(when, done) + '</td>' +
+      '<td class="num">' + dxTarget(row) + '</td>' +
+      '<td class="cc">' + ent + '</td>' +
+      '<td class="cc">' + pcell + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
-  var sh = dxShown(p);
-  var dxRows = dxSplit(5, sh,
-    { head: [["#", "idx"], ["Deliverable", "", 2], ["Reported", "cc"], ["Note"]], rows: dRows },
-    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Reported", "cc"], ["Note"]],
-      rows: oRows });
   var mRows = p.milestones.map(function(m, i){
-    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + esc(m.finish) + '</td>' +
-      '<td class="cc">' + capPickBox(m, may,
-        [["","\u2014"],["todo","Not started"],["wip","In progress"],["done","Completed"]], m.status) + '</td>' +
+    var notDue = !dueThisCycle(m.finish);
+    return '<tr' + (notDue ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
+      '<td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
+      '<td class="cc">' + (notDue ? '<span class="pill kind">Not asked</span>'
+        : capPickBox(m, may, MS_WORDS, m.status)) + '</td>' +
+      '<td class="cc">' + (notDue ? '<span class="pill kind">Not due</span>'
+        : (m.status === "wip" ? capPctBox(m, may, m.name)
+           : '<b>' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</b>')) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
+    '<h4 class="mini">' + DX_HEADING + '</h4>' +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Due date","Target","Status","%","Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
-    miniTable(["#","Milestone","Due date","Progress","Note"], mRows);
+    miniTable(["#","Milestone","Due date","Status","%","Note"], mRows);
 }
 
 function capReportBody(c){
@@ -25252,42 +25389,34 @@ function deckSlidesFn(fk){
 
       /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
          a deliverable was carrying a second, quieter answer to both. */
-      var dRows = p.deliverables.map(function(d, i){
-        var v = delivReads(d);
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
-          '<td class="lead">' + esc(d.name) + '</td>' +
-          '<td class="num">' + (d.actual == null || d.actual === "" ? "&mdash;"
-            : d.kind === "pct" ? esc(String(d.actual)) + "%"
-            : (String(d.actual).toLowerCase() === "yes" ? "Delivered" : "Not yet")) + '</td>' +
-          '<td class="num final ' + dBand(v) + '">' + dPct(v) + '</td>' +
-          (d.note ? '<td class="dnote">' + esc(d.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
-      }).join("");
-      S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
-        '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables</span></h2>' +
-        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Deliverable</th>' +
-        '<th class="num">Reported</th><th class="num">Performance</th>' +
-        '<th>Note</th></tr></thead><tbody>' + dRows + '</tbody></table></section>');
-
-      var oRows = p.outcomes.map(function(o, i){
-        if (o.progress == null) {
-          return '<tr class="dim"><td class="idx">' + (i+1) + '</td>' +
-            '<td class="lead">' + esc(o.name) + '</td>' +
-            '<td class="num">' + esc(o.target) + '</td>' +
-            '<td colspan="2" class="cc">Measured at ' + esc(o.measureAt || "—") + '</td>' +
-            '<td class="dnote empty">&mdash;</td></tr>';
-        }
-        return '<tr><td class="idx">' + (i+1) + '</td>' +
+      /* ONE SLIDE, ONE ROW SHAPE (§101). Two slides made sense while a
+         deliverable and an outcome answered different questions; they answer
+         the same ones now, so a projector showing them apart would be showing
+         a distinction the product no longer draws. */
+      var dxRow = function(row, i){
+        var o = row.obj, d = row.kind === "d";
+        var reads = d ? statusReads(o) : o.progress;
+        var got = d ? (o.status === "done" ? "Delivered" : o.status === "wip" ? "In progress"
+                       : o.status === "todo" ? "Not started" : "\u2014")
+                    : (o.actual == null || o.actual === "" ? "\u2014" : esc(String(o.actual)));
+        var notDue = !dueThisCycle(dxWhen(row));
+        return '<tr' + (notDue ? ' class="dim"' : '') + '><td class="idx">' + (i+1) + '</td>' +
           '<td class="lead">' + esc(o.name) + '</td>' +
-          '<td class="num">' + esc(o.target) + '</td>' +
-          '<td class="num">' + esc(o.actual) + '</td>' +
-          '<td class="num final ' + dBand(o.progress) + '">' + dPct(o.progress) + '</td>' +
-          (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
-      }).join("");
-      S.push('<section class="dslide" data-split="' + esc(p.id) + 'O">' +
-        '<h2>' + esc(p.name) + '<span class="dwhich">Outcomes</span></h2>' +
-        '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Outcome</th>' +
-        '<th class="num">Target</th><th class="num">Actual</th><th class="num">Performance</th>' +
-        '<th>Note</th></tr></thead><tbody>' + oRows + '</tbody></table></section>');
+          '<td>' + (d ? "Deliverable" : "Outcome") + '</td>' +
+          '<td class="num">' + esc(dxWhen(row) || "\u2014") + '</td>' +
+          '<td class="num">' + (d ? "Y/N" : esc(o.target || "\u2014")) + '</td>' +
+          '<td class="num">' + got + '</td>' +
+          '<td class="num final ' + dBand(reads) + '">' + (notDue ? "not due" : dPct(reads)) + '</td>' +
+          (o.note ? '<td class="dnote">' + esc(o.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') +
+          '</tr>';
+      };
+      var dxRowsHtml = dxRows(p).map(dxRow).join("");
+      S.push('<section class="dslide" data-split="' + esc(p.id) + 'D">' +
+        '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
+        '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
+        '<th>Deliverables &amp; outcomes</th><th>Type</th><th class="num">Due date</th>' +
+        '<th class="num">Target</th><th class="num">Status</th><th class="num">%</th>' +
+        '<th>Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
       var mRows = p.milestones.map(function(m, i){
@@ -25299,12 +25428,13 @@ function deckSlidesFn(fk){
           '<td class="num' + (over.indexOf(m.id) > -1 ? ' warn' : '') + '">' + esc(m.finish) +
           (over.indexOf(m.id) > -1 ? ' <span class="dsub">after the project ends</span>' : '') + '</td>' +
           '<td class="num final ' + (m.status === "done" ? "good" : m.status === "wip" ? "attn" : "") + '">' + word + '</td>' +
+          '<td class="num">' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</td>' +
           (m.note ? '<td class="dnote">' + esc(m.note) + '</td>' : '<td class="dnote empty">&mdash;</td>') + '</tr>';
       }).join("");
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th>' +
+        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">%</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });
@@ -29904,12 +30034,32 @@ var BUILD_ID = "smp-shell-v3.27-tables";
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§101): both
+       write `status`, and leaving In progress CLEARS the per-cent rather than
+       leaving it stranded under a word that no longer wants one. A stale 35%
+       sitting behind "Delivered" is a number nobody can see and the score
+       would not read -- but it would come back the moment somebody picked In
+       progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        if (hit.kind === "milestone") hit.obj.status = el.value || null;
-        else hit.obj.actual = el.value || null;
+        hit.obj.status = el.value || null;
+        if (hit.obj.status !== "wip") hit.obj.pct = null;
+        paint();
+      });
+    });
+    /* The per-cent, which only an In progress row has. Out of range is
+       clamped rather than refused: somebody typing 120 means "done", and an
+       error message in a table of thirty rows is a worse answer than a
+       number. */
+    document.querySelectorAll("[data-cpct]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.cpct);
+        if (!hit) return;
+        var v = el.value.trim();
+        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
+        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
         paint();
       });
     });

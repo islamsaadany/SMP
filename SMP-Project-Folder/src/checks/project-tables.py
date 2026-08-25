@@ -1,42 +1,39 @@
-"""ONE TABLE, TWO HALVES (§99).
+"""ONE TABLE, ONE ROW SHAPE (§101).
 
-A deliverable and an outcome shared one header row on all three of a
-capability project's panes, so `Measured as` meant the delivery kind on one
-row and the DIRECTION on the next, and `Target` (and, on the plan pane,
-`Measured at`) stood empty for every deliverable.
+§99 split a project's table in two because Direction, Target and the date had
+nothing to say for a deliverable. §101 gives a deliverable a real direction
+(`=`) and a real target (`Y/N`) instead, so the cells have ANSWERS and the
+split is undone — fewer parts, same problem solved.
 
-WHAT THIS ASSERTS IS THE PROBLEM, NOT THE LAYOUT (§94.8's lesson, earned the
-day a check asserted a POSITION and a reversal made it false the same
-afternoon). It never asks where a column sits or how wide it is. It asks:
+WHAT THIS ASSERTS IS THE PROBLEM, NOT THE LAYOUT (§94.8, earned the day a
+check asserted a POSITION and a reversal made it false the same afternoon).
+It never asks where a column sits or how wide it is. It asks:
 
-  * is every cell in the table answering a question its row can answer —
-    i.e. is there a dead em-dash cell left anywhere;
-  * does each half declare its own columns, and do those declarations add up
-    to the same grid, so the two halves line up rather than stagger;
-  * does the column a score is read from end in the same place on both
-    halves, measured in pixels rather than counted in cells;
-  * and does the milestone column say Due date, on every surface — INCLUDING
-    the two workbooks, whose reader must still take a file written before the
-    rename (§58).
+  * is every cell answering a question its row can answer — no dead em-dash
+    left anywhere, on any of the three panes;
+  * does the date reader understand all four shapes people write, and the
+    two a CYCLE is named, including the half-year that made the old reader
+    answer "due" for everything;
+  * does a row that is not due leave the score AND the tally, and does a row
+    that is late look different from one that is early;
+  * does the per-cent type itself at both ends and open only in the middle;
+  * and — the claim that made this safe to ship — does Execution read the
+    SAME figure it read before, while no per-cent has been entered.
 
-The last one asserts BOTH ENDS (§90): gone from where it was, present where
-it went. A rename is the easiest thing to half-do.
+That last one is the reason this file exists rather than a screenshot. The
+whole change was sold on "nobody's score moves", and a claim like that is
+either measured or it is a hope.
 """
 from playwright.sync_api import sync_playwright
 import pathlib
 
 URL = "file://" + str(pathlib.Path(__file__).resolve().parent.parent /
                      "strategy-management-platform.html")
-# A function with capabilities, and its three project pages. Finance is the
-# one carrying a real plan with real dates (§52.10), so a wrong reading here
-# is a wrong reading of something somebody actually authored.
 DEST = "fn:finance"
 # (label, tab, section, is-report-mode). Performance carries ONE section since
-# §63 folded reporting out of it, so there is no section row to press there —
-# and Reporting is a MODE reached from a button on that page, not a tab. A
-# check that pressed for a section row would land on Performance twice and
-# report it under two names (§50.6, the exact fault that cost twelve
-# versions), so what each page IS gets stated here rather than assumed.
+# §63 folded reporting out of it, and Reporting is a MODE reached from a
+# button there — pressing for a section row lands on Performance twice and
+# reports it under two names (§50.6, which cost twelve versions).
 PAGES = [("Strategy / Projects", "Strategy", "Projects", False),
          ("Performance", "Performance", None, False),
          ("Performance / Report", "Performance", None, True)]
@@ -53,14 +50,7 @@ def ck(what, ok, x=""):
 
 
 def goto(pg, key, tab, sec, report):
-    """Open a destination, its tab and its section — and CHECK IT LANDED.
-
-    §50.6 and §93.7, both of which cost twelve versions: a probe that clicks
-    and does not look reports the page behind under the name of the one it
-    meant to open. Matched on the PREFIX, because §69 gave these tabs status
-    suffixes ("Performance — not submitted yet") and an exact match silently
-    stopped matching.
-    """
+    """Open a destination, its tab and its section — and CHECK IT LANDED."""
     want = "Functions" if key.startswith("fn:") else "Units"
     for _ in range(3):
         on = pg.eval_on_selector_all("#units .navswitch .nsw.on", "e=>e.map(x=>x.textContent.trim())")
@@ -77,60 +67,37 @@ def goto(pg, key, tab, sec, report):
             .find(x=>x.textContent.trim().indexOf(t)===0); if(b)b.click()}""", [sel, t])
         pg.wait_for_timeout(250)
     if report:
-        # ASSERT THE PRESS WORKED. A helper that returns quietly when it found
-        # no button is the same lie with a nicer face (§93.7).
         r = pg.query_selector("[data-report]")
         if not r:
             return "no Report button"
         r.click()
         pg.wait_for_timeout(350)
-    # Named from what the page IS, not from what was asked for: the tab, then
-    # the section where there is one, then the mode where one is open.
     return pg.evaluate("""()=>{const a=document.querySelector('#subtabs [aria-selected="true"]'),
         b=document.querySelector('#secrow [aria-selected="true"]');
-        return (a?a.textContent.trim().split(" \u2014 ")[0]:'?')
+        return (a?a.textContent.trim().split(" \\u2014 ")[0]:'?')
              + (b?' / '+b.textContent.trim():'')
              + (document.querySelector('[data-repcancel]')?' / Report':'')}""")
 
 
-# Everything the page can tell us about the split, read in one pass.
+# Every table on the page that carries the project's row shape, read in one
+# pass. A cell holding a CONTROL is answered even when it reads empty — the
+# Note is a box waiting to be typed into, and counting that as a dead cell
+# would flag the one pane the merge helps most.
 READ = """
 () => {
-  const panes = [...document.querySelectorAll(".pane, .capbody")];
   const out = [];
-  document.querySelectorAll("table").forEach(t => {
-    const bands = [...t.querySelectorAll("tr.dxband")];
-    if (!bands.length) return;
-    const halves = bands.map(b => {
-      const head = b.nextElementSibling;
-      const cells = head && head.classList.contains("dxhead")
-        ? [...head.children] : [];
-      // A row is one of this half's if it sits between this band and the
-      // next: the walk is what proves the halves are actually separate
-      // rather than two headers over one list.
-      const rows = [];
-      let n = head ? head.nextElementSibling : null;
-      while (n && !n.classList.contains("dxband")) {
-        if (n.tagName === "TR" && !n.classList.contains("newrow")) rows.push(n);
-        n = n.nextElementSibling;
-      }
-      return {
-        title: b.querySelector("th").firstChild.textContent.trim(),
-        sub: (b.querySelector("th em") || {}).textContent || "",
-        span: +b.querySelector("th").colSpan,
-        head: cells.map(c => ({ label: c.textContent.trim(), span: +c.colSpan,
-                                right: Math.round(c.getBoundingClientRect().right) })),
-        rows: rows.map(r => [...r.children].map(c => ({
-          text: c.textContent.trim(), span: +c.colSpan,
-          // A cell holding a control is ANSWERED even when it reads empty:
-          // the reporting pane's Note is a box waiting to be typed into, and
-          // counting that as a dead cell would flag the one pane the split
-          // helps most.
-          box: !!c.querySelector("input,select,textarea,button"),
-          right: Math.round(c.getBoundingClientRect().right) })))
-      };
-    });
-    out.push({ halves: halves });
+  document.querySelectorAll(".pane table, .capbody table").forEach(t => {
+    const head = [...t.querySelectorAll("thead th")].map(e => e.textContent.trim());
+    if (!head.length) return;
+    out.push({ head: head,
+      rows: [...t.querySelectorAll("tbody tr")]
+        .filter(r => !r.classList.contains("newrow"))
+        .map(r => ({ notDue: r.classList.contains("notdue"),
+          cells: [...r.children].map(c => ({
+            text: c.textContent.trim(), span: +c.colSpan,
+            box: !!c.querySelector("input,select,textarea,button"),
+            late: !!c.querySelector(".lateval"),
+            soon: !!c.querySelector(".soonval") })) })) });
   });
   return out;
 }
@@ -144,14 +111,59 @@ with sync_playwright() as p:
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.goto(URL)
     pg.wait_for_timeout(1200)
-    # The SMO: the only viewer who sees every one of the three panes with its
-    # controls on, and the pen the plan pane's add rows live behind (§94.2 —
-    # a check that only runs as one person cannot see a control that should
-    # not be drawn, and this one deliberately runs as the person who sees the
-    # most, because what is being measured is the SHAPE of the table).
     pg.select_option("#asWho", "smo")
     pg.wait_for_timeout(300)
 
+    # ── THE DATE READER ──────────────────────────────────────────────────
+    # Asked of the product's own function, not of a copy. Four shapes people
+    # write and two a cycle is named, against a cycle closing Jun 2026.
+    print("── the date reader")
+    dates = pg.evaluate("""() => {
+      const t = (v, want) => ({ v: v, got: dueThisCycle(v), want: want });
+      return { cycle: cycleMonth(), year: cycleYear(),
+        cases: [t("July 26", false), t("Mar 26", true), t("Dec 26", false),
+                t("W3 Mar 26", true), t("W4 July 26", false), t("W1 May 26", true),
+                t("Q1 2026", true), t("Q3 2026", false), t("Q2", true), t("Q3", false),
+                t("31 May 2026", true), t("31 Jul 2026", false),
+                t("Done", true), t("", true), t(null, true)],
+        overdue: [overdue("Mar 26", false), overdue("Mar 26", true), overdue("Dec 26", false)] };
+    }""")
+    ck("the cycle's closing month is read", dates["cycle"] is not None, dates)
+    for c in dates["cases"]:
+        if c["got"] != c["want"]:
+            ck("due(%r) is %s" % (c["v"], c["want"]), False, c["got"])
+    ck("all %d written shapes read correctly" % len(dates["cases"]),
+       all(c["got"] == c["want"] for c in dates["cases"]))
+    # OVERDUE AND NOT DUE ARE OPPOSITE READINGS and must not collapse into
+    # one: past-and-unfinished is late, and finished is not.
+    ck("overdue is past its date AND unfinished", dates["overdue"] == [True, False, False],
+       dates["overdue"])
+
+    # ── EXECUTION DOES NOT MOVE (the claim this was sold on) ─────────────
+    print("── the Execution figure")
+    ex = pg.evaluate("""() => {
+      // Strip every per-cent, which is what a tenant looks like on the day
+      // this ships, and compare the average against the count it replaces.
+      const rows = GROUP.capabilities.map(c => {
+        const keep = [];
+        (c.projects||[]).forEach(p => (p.milestones||[]).forEach(m => {
+          keep.push([m, m.pct]); m.pct = null; }));
+        let done = 0, n = 0;
+        (c.projects||[]).forEach(p => (p.milestones||[]).forEach(m => {
+          n++; if (m.status === "done") done++; }));
+        const avg = capExec(c).pct, count = n ? Math.round(done / n * 100) : null;
+        keep.forEach(([m, v]) => { m.pct = v; });
+        return { cap: c.name, milestones: n, count: count, avg: avg, same: count === avg };
+      });
+      return { rows: rows, allSame: rows.every(r => r.same) };
+    }""")
+    for r in ex["rows"]:
+        if not r["same"]:
+            ck("%s: average matches the count" % r["cap"], False, r)
+    ck("with no per-cent entered, Execution is the SAME figure it was — all %d capabilities"
+       % len(ex["rows"]), ex["allSame"])
+
+    # ── THE THREE PANES ─────────────────────────────────────────────────
     for label, tab, sec, report in PAGES:
         where = goto(pg, DEST, tab, sec, report)
         print("──", where)
@@ -159,254 +171,102 @@ with sync_playwright() as p:
             errs.append("meant to scan %s, landed on %r" % (label, where))
             continue
         tables = pg.evaluate(READ)
-        ck("the page has split tables at all", len(tables) > 0, len(tables))
+        dx = [t for t in tables if "Type" in t["head"]]
+        ms = [t for t in tables if "Milestone" in t["head"]]
+        ck("the deliverables-and-outcomes table is one table", len(dx) == 1, len(dx))
+        ck("...with a Type column and no band", dx and "Type" in dx[0]["head"], dx and dx[0]["head"])
+        ck("the milestone table is there too", len(ms) == 1, len(ms))
 
-        for t in tables:
-            hs = t["halves"]
-            if len(hs) != 2:
-                ck("every table has exactly two halves", False, [h["title"] for h in hs])
-                continue
-            d, o = hs
-            ck("the halves are Deliverables then Outcomes",
-               (d["title"], o["title"]) == ("Deliverables", "Outcomes"),
-               (d["title"], o["title"]))
-            ck("each half says what it is for", bool(d["sub"]) and bool(o["sub"]))
+        for t in dx + ms:
+            n = len(t["head"])
+            ragged = [r for r in t["rows"] if sum(c["span"] for c in r["cells"]) != n]
+            ck("%s: every row fills the grid" % t["head"][1], not ragged,
+               [[c["text"] for c in r["cells"]] for r in ragged][:1])
+            # NO DEAD CELL. This is the complaint §99 was built for and §101
+            # answers differently: a cell holding nothing but an em-dash is
+            # the table asking a row a question its kind cannot answer.
+            dead = [c["text"] for r in t["rows"] if not r["notDue"]
+                    for c in r["cells"] if c["text"] in ("—", "-", "") and not c["box"]]
+            ck("%s: no cell blank or dashed on a row being asked for" % t["head"][1],
+               not dead, len(dead))
 
-            # THE GRID HAS TO ADD UP. Two halves under one <table> share one
-            # column grid, so a header row whose colspans total something
-            # other than the band's span staggers every cell under it — the
-            # fault would look like a styling wobble and be a counting one.
-            for h in (d, o):
-                tot = sum(c["span"] for c in h["head"])
-                ck("%s: its header row fills the grid" % h["title"], tot == h["span"],
-                   "%d of %d" % (tot, h["span"]))
-                for r in h["rows"]:
-                    rt = sum(c["span"] for c in r)
-                    if rt != h["span"]:
-                        ck("%s: a row fills the grid" % h["title"], False,
-                           "%d of %d: %s" % (rt, h["span"], [c["text"] for c in r]))
-                        break
-                else:
-                    ck("%s: every row fills the grid" % h["title"], True)
+        # THE DATE STATES ARE VISIBLY DIFFERENT, which is the whole reason a
+        # deliverable got its date back.
+        if not report and tab == "Performance":
+            late = sum(1 for t in dx + ms for r in t["rows"] for c in r["cells"] if c["late"])
+            soon = sum(1 for t in dx + ms for r in t["rows"] for c in r["cells"] if c["soon"])
+            ck("overdue rows are marked", late > 0, late)
+            ck("not-due rows are marked, and differently", soon > 0, soon)
 
-            # NO DEAD CELL. This is the complaint itself, in one assertion: a
-            # cell holding nothing but an em-dash is the table asking a row a
-            # question its kind cannot answer. An outcome not yet due is not
-            # one — it says "Measured at Q4 2026", which is an answer.
-            for h in (d, o):
-                dead = [c["text"] for r in h["rows"] for c in r
-                        if c["text"] in ("—", "-", "") and not c["box"]]
-                ck("%s: no cell left blank or dashed" % h["title"], not dead, len(dead))
+    # ── THE PER-CENT TYPES ITSELF ────────────────────────────────────────
+    # §94.2: a check that only looks for something PRESENT cannot see a
+    # control that should not be drawn. The box must appear for In progress
+    # and NOT for the other two.
+    print("── the per-cent")
+    goto(pg, DEST, "Performance", None, True)
+    boxes = pg.evaluate("""() => {
+      const out = {};
+      document.querySelectorAll("[data-cpick]").forEach(sel => {
+        const row = sel.closest("tr"), pctCell = sel.closest("td").nextElementSibling;
+        const word = sel.options[sel.selectedIndex].textContent.trim();
+        out[word] = out[word] || { box: 0, read: 0 };
+        if (pctCell.querySelector("[data-cpct]")) out[word].box++;
+        else out[word].read++;
+      });
+      return out;
+    }""")
+    ck("In progress opens a box", boxes.get("In progress", {}).get("box", 0) > 0, boxes)
+    for w in ("Delivered", "Completed", "Not started"):
+        if w in boxes:
+            ck("%s writes its own figure, with no box" % w, boxes[w]["box"] == 0, boxes[w])
 
-            # THE SCORE COLUMN ENDS IN THE SAME PLACE ON BOTH HALVES, measured
-            # in PIXELS. §53.5's rule: assert the agreement, never the number,
-            # so moving both stays green and moving one does not.
-            last = [h["head"][-1]["label"] for h in (d, o)]
-            if last[0] == last[1]:
-                ck("both halves end in %s, at the same edge" % last[0],
-                   d["head"][-1]["right"] == o["head"][-1]["right"],
-                   "%d vs %d" % (d["head"][-1]["right"], o["head"][-1]["right"]))
-
-            # THE TYPE COLUMN IS GONE. The band says which kind these are; a
-            # pill repeating it is the same fact twice.
-            heads = [c["label"] for h in (d, o) for c in h["head"]]
-            ck("no Type column survives the split", "Type" not in heads, heads)
-
-        # THE MILESTONE COLUMN, both ends of the rename.
-        ms = pg.evaluate("""() => [...document.querySelectorAll("thead th")]
-            .map(e => e.textContent.trim())""")
-        # Leaving the mode before the next page, or the one after it opens
-        # behind an overlay and gets measured under its own name (§63's
-        # leaveModes, from the checking side).
-        ck("the milestone column says Due date", "Due date" in ms, ms)
-        ck("nothing on the page still says Finish", "Finish" not in ms, ms)
-
-        if report:
-            c = pg.query_selector("[data-repcancel]")
-            if c:
-                c.click()
-                pg.wait_for_timeout(250)
-
-    # ── THE WORKBOOKS ────────────────────────────────────────────────────
-    # Written with the new label; read with either, because a header is a
-    # contract and somebody is holding a file downloaded before the rename
-    # (§58, §65). Asked of the real builders, not of a copy of them.
+    # ── THE WORKBOOKS, BOTH ENDS OF EVERY RENAME (§90) ───────────────────
     print("── the workbooks")
     wb = pg.evaluate("""() => {
       const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
-      const nm = ws => ws.map(s => s.name);
       const head = (ws, n) => (ws.filter(s => s.name === n)[0] || {}).head || [];
       const plan = capPlanWorkbook(c), prog = capProgressWorkbook(c);
-      return { planMs: head(plan, "Milestones"), progMs: head(prog, "Milestones"),
-               planOut: head(plan, "Outcomes"), progOut: head(prog, "Outcomes"),
-               sheets: nm(plan) };
+      // A workbook written BEFORE this version still uploads: its Kind column
+      // is read and ignored, and its deliverables simply have no date.
+      const old = capPlanFromWorkbook(c, { Deliverables: [
+        ["Project","Deliverable","Kind"], ["P","D","Delivered / not"]] })
+        .filter(r => r.type === "DELIVERABLE");
+      const now = capPlanFromWorkbook(c, { Deliverables: [
+        ["Project","Deliverable","Due date"], ["P","D","July 26"]] })
+        .filter(r => r.type === "DELIVERABLE");
+      return { planDeliv: head(plan, "Deliverables"), planOut: head(plan, "Outcomes"),
+               planMs: head(plan, "Milestones"), progDeliv: head(prog, "Deliverables"),
+               progMs: head(prog, "Milestones"),
+               oldReads: old.length === 1 && !old[0].finish,
+               nowReads: now.length === 1 && now[0].finish === "July 26" };
     }""")
-    ck("the plan workbook's milestone column says Due date",
-       "Due date" in wb["planMs"] and "Finish" not in wb["planMs"], wb["planMs"])
-    ck("the progress workbook's milestone column says Due date",
-       "Due date" in wb["progMs"] and "Finish" not in wb["progMs"], wb["progMs"])
-    ck("the outcome sheets say Measure date",
-       "Measure date" in wb["planOut"] and "Measure date" in wb["progOut"],
-       [wb["planOut"], wb["progOut"]])
-    ck("the workbook still keeps deliverables and outcomes on their own sheets",
-       "Deliverables" in wb["sheets"] and "Outcomes" in wb["sheets"], wb["sheets"])
+    ck("the plan's Deliverables sheet asks for a Due date and not a Kind",
+       wb["planDeliv"] == ["Project", "Deliverable", "Due date"], wb["planDeliv"])
+    ck("the outcome sheet says Due date too", "Due date" in wb["planOut"], wb["planOut"])
+    ck("the milestone sheet asks for a Description", "Description" in wb["planMs"], wb["planMs"])
+    ck("the progress sheet asks for a status and a per-cent",
+       "New status" in wb["progDeliv"] and "New %" in wb["progDeliv"], wb["progDeliv"])
+    ck("...and the milestone sheet does too",
+       "New status" in wb["progMs"] and "New %" in wb["progMs"], wb["progMs"])
+    ck("a workbook written today reads its due date", wb["nowReads"], wb)
+    ck("a workbook written before this version still uploads", wb["oldReads"], wb)
 
-    # A FILE WRITTEN BEFORE THE RENAME STILL UPLOADS. Both spellings, through
-    # the real reader, with everything else held identical.
-    old_new = pg.evaluate("""() => {
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
-      const one = h => capPlanFromWorkbook(c, { Milestones: [h,
-          ["Average debt utilisation report automation", "Solution design",
-           "Treasury requirements", "Finance", "20 Mar 2026"]] })
-        .filter(r => r.type === "MILESTONE").map(r => r.finish);
-      return { now: one(["Project","Milestone","What it covers","Owner","Due date"]),
-               then: one(["Project","Milestone","What it covers","Owner","Finish"]) };
-    }""")
-    ck("a workbook written today reads", old_new["now"] == ["20 Mar 2026"], old_new["now"])
-    ck("a workbook written before the rename still reads",
-       old_new["then"] == ["20 Mar 2026"], old_new["then"])
-
-    # ── THE MILESTONE'S DESCRIPTION, AND WHAT A DUE DATE IS (§100) ───────
-    print("── the milestone template")
-    ms = pg.evaluate("""() => {
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
-      const head = (ws, n) => (ws.filter(s => s.name === n)[0] || {}).head || [];
-      const one = h => capPlanFromWorkbook(c, { Milestones: [h,
-          ["p", "Solution design", "Treasury requirements", "Finance", "20 Mar 2026"]] })
-        .filter(r => r.type === "MILESTONE").map(r => r.covers);
-      return { sheet: head(capPlanWorkbook(c), "Milestones"),
-               now: one(["Project","Milestone","Description","Owner","Due date"]),
-               then: one(["Project","Milestone","What it covers","Owner","Due date"]) };
-    }""")
-    ck("the sheet asks for a Milestone and a Description, in that order",
-       ms["sheet"][1:3] == ["Milestone", "Description"], ms["sheet"])
-    ck("...and no longer asks What it covers", "What it covers" not in ms["sheet"], ms["sheet"])
-    ck("a file written today reads its description", ms["now"] == ["Treasury requirements"], ms["now"])
-    ck("a file written before the rename still reads it",
-       ms["then"] == ["Treasury requirements"], ms["then"])
-
-    # THE NOTICE IS THE WHOLE POINT AND IT MUST NOT BE A REFUSAL. Asked of the
-    # real checker, with a project of each timeline, because what counts as a
-    # due date is decided by the project it hangs off (§100).
-    due = pg.evaluate("""() => {
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
-      const run = (timeline, val) => {
-        const rows = capPlanFromWorkbook(c, {
-          Projects: [["Project","Brief","Owner","Stakeholders","Timeline","Start","End"],
-                     ["P", "b", "o", "", timeline, "", ""]],
-          Milestones: [["Project","Milestone","Description","Owner","Due date"],
-                       ["P", "M", "d", "own", val]] });
-        const r = validateCapPlan(c, rows);
-        return { problems: r.problems.length,
-                 notices: r.notices.map(n => n.msg).filter(m => m.indexOf("due date") > -1) };
-      };
-      return { quarterOk: run("Quarters", "Q3 2026"), dateOk: run("Dates", "20 Mar 2026"),
-               status: run("Dates", "Done"), wrongUnits: run("Quarters", "20 Mar 2026"),
-               blank: run("Dates", "") };
-    }""")
-    ck("a quarter on a by-quarter project says nothing", not due["quarterOk"]["notices"], due["quarterOk"])
-    ck("a date on a by-date project says nothing", not due["dateOk"]["notices"], due["dateOk"])
-    ck("a STATUS in the due date is noticed", len(due["status"]["notices"]) == 1, due["status"])
-    ck("...and it says where a status belongs",
-       "reported each cycle" in (due["status"]["notices"] or [""])[0], due["status"]["notices"])
-    ck("the wrong units are noticed", len(due["wrongUnits"]["notices"]) == 1, due["wrongUnits"])
-    ck("a missing due date is noticed", len(due["blank"]["notices"]) == 1, due["blank"])
-    # NEVER A REFUSAL. §22: an upload authors a plan rather than arguing with
-    # it, and a file refused over this column is a file nobody can fix.
-    ck("none of it refuses the file",
-       all(due[k]["problems"] == 0 for k in due), {k: due[k]["problems"] for k in due})
-
-    # ── THE REVIEW DECK ──────────────────────────────────────────────────
-    # The deck already gave a deliverables slide and an outcomes slide of its
-    # own (§15), so the split needed nothing there — but BOTH renames reach
-    # it, and a rename is the easiest thing to half-do (§90). Asked of the
-    # real builder rather than of a page, because the deck is assembled fresh
-    # every time it opens and never stored (§50).
+    # ── THE DECK ─────────────────────────────────────────────────────────
     print("── the review deck")
     deck = pg.evaluate("""() => {
       const box = document.createElement("div");
       box.innerHTML = deckSlidesFn("finance");
-      const h = [...box.querySelectorAll("thead th")].map(e => e.textContent.trim());
+      const h = [...box.querySelectorAll("thead th")].map(x => x.textContent.trim());
       return { slides: box.querySelectorAll(".dslide").length,
-               reads: h.filter(x => x === "Reads").length,
-               finish: h.filter(x => x === "Finish").length,
-               perf: h.filter(x => x === "Performance").length,
-               due: h.filter(x => x === "Due date").length };
+               type: h.filter(x => x === "Type").length,
+               due: h.filter(x => x === "Due date").length,
+               pct: h.filter(x => x === "%").length,
+               stale: h.filter(x => ["Reads","Finish","Measured as","Reported"].indexOf(x) > -1) };
     }""")
     ck("the deck still builds", deck["slides"] > 0, deck["slides"])
-    ck("no slide still says Reads", deck["reads"] == 0, deck["reads"])
-    ck("no slide still says Finish", deck["finish"] == 0, deck["finish"])
-    ck("the deck's score column says Performance", deck["perf"] > 0, deck["perf"])
-    ck("the deck's milestone column says Due date", deck["due"] > 0, deck["due"])
-
-    # ── A HALF THAT IS NOT THERE IS NOT DRAWN (§99.7) ────────────────────
-    # THE POINT OF THIS BLOCK IS A CONTROL THAT SHOULD NOT BE DRAWN, which is
-    # the one thing a check looking for something PRESENT can never see
-    # (§94.2). No demo project has an empty half — 0 of 19 — so the state has
-    # to be made, or this behaviour is untested for ever and the first client
-    # to author a project with no outcomes is the one who finds out.
-    print("── empty halves")
-    pg.evaluate("""() => {
-      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
-      c.projects[0].outcomes = [];                                  // no outcomes
-      c.projects[1].deliverables = [];                              // no deliverables
-      c.projects[2].outcomes = []; c.projects[2].deliverables = []; // neither
-    }""")
-    goto(pg, DEST, "Strategy", "Projects", False)
-
-    def halves(pg):
-        return pg.evaluate("""() => {
-          const t = [...document.querySelectorAll("table")].filter(x => x.querySelector("tr.dxband"));
-          return { bands: t.flatMap(x => [...x.querySelectorAll("tr.dxband th")]
-                     .map(b => b.firstChild.textContent.trim())),
-                   heads: [...document.querySelectorAll("h4.mini")]
-                     .map(e => e.textContent.trim())
-                     .filter(h => /Deliverab|Outcome/.test(h)) };
-        }""")
-
-    WANT = [("no outcomes", ["Deliverables"]),
-            ("no deliverables", ["Outcomes"]),
-            ("neither", [])]
-    for i, (what, want) in enumerate(WANT):
-        items = pg.query_selector_all(".rail .ritem")
-        if i >= len(items):
-            ck("the rail offers project %d" % (i + 1), False, len(items))
-            continue
-        items[i].click()
-        pg.wait_for_timeout(400)
-        got = halves(pg)
-        ck("%s: only the half that has rows is drawn" % what, got["bands"] == want, got["bands"])
-        # THE HEADING IS READ OFF THE SAME ANSWER, or a section names a half it
-        # is not drawing — which is the failure this assertion exists for and
-        # is invisible to anything that only counts bands.
-        if want:
-            ck("%s: the heading names only that half" % what,
-               len(got["heads"]) == 1 and got["heads"][0].split(" \u2014 ")[0]
-                 .replace(" and outcomes", "") == want[0], got["heads"])
-        else:
-            ck("%s: the section is absent entirely" % what, not got["heads"], got["heads"])
-
-    # AND BEHIND THE PEN, BOTH HALVES ARE BACK. A half hidden for being empty
-    # in EDIT mode is a half nobody can ever fill, because the add row is the
-    # only way to write its first line — §61's fault exactly.
-    pg.query_selector_all(".rail .ritem")[2].click()
-    pg.wait_for_timeout(300)
-    pen = pg.query_selector(".paneact button")
-    if not pen:
-        ck("the plan pane offers a pen", False)
-    else:
-        pen.click()
-        pg.wait_for_timeout(600)
-        got = halves(pg)
-        ck("authoring draws both halves even when both are empty",
-           got["bands"] == ["Deliverables", "Outcomes"], got["bands"])
-        adds = pg.eval_on_selector_all("[data-rowadd]", "e=>e.map(x=>x.dataset.rowadd.split('|')[0])")
-        ck("...so the first deliverable and the first outcome can be written",
-           "deliverable" in adds and "outcome" in adds, adds)
-        d = pg.query_selector(".paneact button")
-        if d:
-            d.click()
-            pg.wait_for_timeout(300)
+    ck("its project table carries the Type column", deck["type"] > 0, deck)
+    ck("...and Due date and %", deck["due"] > 0 and deck["pct"] > 0, deck)
+    ck("no slide carries a heading this version removed", not deck["stale"], deck["stale"])
 
     b.close()
 

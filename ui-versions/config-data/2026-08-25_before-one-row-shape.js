@@ -2918,34 +2918,10 @@ function capKOScore(c){
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
    percentage when it is a percentage. Nothing reported is absent, not zero. */
-/* ── WHAT A STATUS READS AS (§101) ────────────────────────────────────────
-   A deliverable and a milestone are reported the same way now: Not started,
-   In progress with a per-cent, Delivered (or Completed). The figure follows
-   the word at both ends and only the middle is typed, which is why `kind` --
-   the plan's old choice between "delivered or not" and "a percentage" -- has
-   nothing left to decide and is gone (§24).
-
-   AN IN-PROGRESS ROW WITH NO PER-CENT READS 0, not null. The reporting page
-   asks for the number and the tally does not count the row until it has one,
-   so this case only arises in data that arrived another way -- and every
-   milestone in every tenant is in exactly that state on the day this ships.
-   Reading it as 0 is what makes the Execution figure identical to the count
-   it replaces; excluding it would raise every tenant's score overnight. */
-function statusReads(x){
-  if (!x || !x.status) return null;
-  if (x.status === "done") return 100;
-  if (x.status === "todo") return 0;
-  var p = Number(x.pct);
-  return isNaN(p) ? 0 : Math.max(0, Math.min(100, p));
-}
-function delivReads(d){ return statusReads(d); }
-function msReads(m){ return statusReads(m); }
-/* Reported means ANSWERED, and In progress is not answered without its
-   number -- which is the whole of "in progress requires a % of completion". */
-function statusGiven(x){
-  if (!x || !x.status) return false;
-  if (x.status !== "wip") return true;
-  return x.pct != null && x.pct !== "" && !isNaN(Number(x.pct));
+function delivReads(d){
+  if (d.actual == null || d.actual === "") return null;
+  if (d.kind === "pct") return Math.max(0, Math.min(100, Number(d.actual)));
+  return String(d.actual).toLowerCase() === "yes" ? 100 : 0;
 }
 function sideAvg(vals){
   var v = vals.filter(function(x){ return x != null && !isNaN(x); });
@@ -2989,25 +2965,14 @@ function projOverruns(p){
 function capPerf(c){
   return sideAvg((c.projects || []).map(projPerf));
 }
-/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§101). It was
-   `done / total`: a milestone in progress counted as nothing. With a per-cent
-   on the milestone it is the mean of what each one reads -- 100 done, 0 not
-   started, its own figure in between -- and those are identical arithmetic
-   while no per-cent has been entered, which is every tenant on day one.
-   Measured across all eight capabilities in the worked example before it was
-   built: 50/50, 50/50, 50/50, 40/40, 40/40, 33/33, 42/42, 40/40.
-
-   The counts stay beside it. "5 of 12 completed" and "42%" answer two
-   different questions and both are worth having. */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0, sum = 0;
+  var done = 0, total = 0, wip = 0, todo = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
-    (p.milestones || []).forEach(function(x){ sum += msReads(x) || 0; });
   });
   return { done: done, wip: wip, todo: todo, total: total,
-           pct: total ? Math.round(sum / total) : null };
+           pct: total ? Math.round(done / total * 100) : null };
 }
 function capDeliverySide(c){ return sideAvg((c.projects || []).map(projDeliverySide)); }
 function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSide)); }
@@ -3015,121 +2980,16 @@ function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSid
 /* What a capability asks for this cycle: its key objectives, plus everything in
    its projects whose time has come. An outcome measured at Q4 is not an empty
    box somebody forgot in Q2 \u2014 it is not asked. */
-/* ── WHEN A ROW IS DUE (§101) ──────────────────────────────────────────────
-   One reader, four written shapes, because the plan is written by people and
-   people write dates four ways:
-
-       July 26            a deliverable's or an outcome's due date
-       W3 Mar 26          a milestone's, one step finer
-       Q3 2026 / Q3       every plan authored before this version
-       31 May 2026        the one real project, and every date-timelined plan
-
-   Everything resolves to a MONTH NUMBER since year zero, which is the coarsest
-   unit any of them share -- a week inside March is still March, and comparing
-   a week to a cycle that runs six months would be precision nobody asked for.
-
-   `Date.parse` is deliberately the LAST resort rather than the first: it reads
-   "Q3 2026" as nothing and "W3 Mar 26" as nothing, but it also reads bare
-   numbers and stray words as dates in ways that would quietly turn a typo into
-   a deadline. The named shapes are matched first and explicitly.
-
-   THE CYCLE IS READ BY THE SAME FUNCTION, which is the part that was broken:
-   the old test compared quarter to quarter and answered "due" for EVERYTHING
-   when the cycle was called "H1 2026" -- which is what the demo cycle is
-   called and what a half-yearly review is always called. A cycle resolves to
-   its LAST month, because a cycle asks for everything due by the time it
-   closes. */
-/* MONTH_KEYS, NOT MONTHS -- there is already a `var MONTHS` in this file
-   1,400 lines below, holding the same twelve words CAPITALISED for
-   formatting a date. Two `var`s of one name in one scope is one binding, the
-   later wins, and this read every month as unknown: `indexOf("jul")` against
-   ["Jan",...] is -1. NOTHING THREW. `monthsOf` returned null, `dueThisCycle`
-   reads null as "always asked", and every row on every pane quietly read as
-   due -- which is the EXACT fault the old quarter-only reader had, restored
-   by accident on the day it was removed. §56.7 in a third place, and it
-   failed the way that rule says it always does: silently, in the safe
-   direction. */
-var MONTH_KEYS = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
-function monthIndex(w){
-  var t = String(w || "").slice(0, 3).toLowerCase();
-  return MONTH_KEYS.indexOf(t);
+function outcomeDue(o){
+  if (!o.measureAt) return true;
+  var q = String(o.measureAt).match(/Q([1-4])\s*(\d{4})?/);
+  if (!q) return true;
+  var cq = String(REVIEW.name || "").match(/Q([1-4])\s*(\d{4})?/);
+  if (!cq) return true;
+  var oy = q[2] ? +q[2] : 0, cy = cq[2] ? +cq[2] : 0;
+  if (oy && cy && oy !== cy) return oy < cy;
+  return +q[1] <= +cq[1];
 }
-function fullYear(y){
-  var n = +y;
-  if (!n && n !== 0) return null;
-  /* "26" is 2026, not 26 AD. Two digits are a century short, and a plan is
-     never written about the year 26. */
-  return n < 100 ? 2000 + n : n;
-}
-/* Months since year zero, so two dates in different years compare with one
-   subtraction. Null when the text is not a time at all -- which is what the
-   upload notice reports and what "Done" in a due-date column produces. */
-function monthsOf(v, last){
-  var s = String(v == null ? "" : v).trim();
-  if (!s) return null;
-  var m;
-  /* W3 Mar 26 / Week 3 March 2026 -- the week is read and discarded, because
-     the comparison is monthly. It is kept in the TEXT for the person. */
-  if ((m = /^w(?:eek)?\s*[1-5]\s+([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* July 26 / Jul 2026 / Dec 26 */
-  if ((m = /^([a-z]+)\.?\s*'?(\d{2,4})$/i.exec(s)))
-    return monthIndex(m[1]) < 0 ? null : fullYear(m[2]) * 12 + monthIndex(m[1]);
-  /* Q3 2026 / Q3 -- a quarter is its FIRST month, or its last when `last`
-     is asked for, which is how a cycle named Q2 covers April to June. */
-  if ((m = /^q([1-4])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var qy = m[2] ? fullYear(m[2]) : cycleYear();
-    return qy == null ? null : qy * 12 + (+m[1] - 1) * 3 + (last ? 2 : 0);
-  }
-  /* H1 2026 / H2 26 -- a half year, which is what a review is usually called
-     and what the old reader could not see at all. */
-  if ((m = /^h([12])\s*'?(\d{2,4})?$/i.exec(s))) {
-    var hy = m[2] ? fullYear(m[2]) : cycleYear();
-    return hy == null ? null : hy * 12 + (+m[1] - 1) * 6 + (last ? 5 : 0);
-  }
-  /* FY26 / 2026 -- a whole year. */
-  if ((m = /^(?:fy)?\s*'?(\d{4})$/i.exec(s)))
-    return fullYear(m[1]) * 12 + (last ? 11 : 0);
-  /* 31 May 2026, and anything else a browser genuinely reads as a date. */
-  var t = Date.parse(s);
-  if (!isNaN(t)) { var d = new Date(t); return d.getFullYear() * 12 + d.getMonth(); }
-  return null;
-}
-/* THE CYCLE'S OWN CLOSING MONTH, taken from `REVIEW.to` -- which has said
-   "Jun 2026" since the review model existed -- rather than parsed out of its
-   NAME. The name is a label somebody types ("H1 2026", "Half 1", "First
-   half"); `to` is the field that means it. The name is the fallback, not the
-   source.
-
-   55 of the 60 milestones in the worked example are a bare quarter with no
-   year, so a year has to come from somewhere: it comes from the cycle, which
-   is the only year the platform actually knows. */
-function cycleYear(){
-  var m = /(\d{4})/.exec(String(REVIEW.to || "") + " " + String(REVIEW.name || "") +
-                         " " + String(REVIEW.due || ""));
-  return m ? +m[1] : null;
-}
-function cycleMonth(){
-  var t = monthsOf(REVIEW.to);
-  return t != null ? t : monthsOf(REVIEW.name, true);
-}
-/* IS THIS ROW ASKED FOR THIS CYCLE? A row with no date is always asked: the
-   plan did not say when, so the platform does not get to decide it is early.
-   A row whose date cannot be read is also asked, for the same reason -- the
-   upload said so at the time, and silently not asking would hide it. */
-function dueThisCycle(v){
-  var m = monthsOf(v), c = cycleMonth();
-  if (m == null || c == null) return true;
-  return m <= c;
-}
-/* A row past its date and not finished. Distinct from not-due and drawn
-   differently, because "late" and "not yet" are opposite readings. */
-function overdue(v, done){
-  if (done) return false;
-  var m = monthsOf(v), c = cycleMonth();
-  return m != null && c != null && m < c;
-}
-function outcomeDue(o){ return dueThisCycle(o.measureAt); }
 /* THERE IS NO delivDue(). A deliverable used to carry a quarter of its own,
    and one later than the cycle meant "not asked": a row the reporting page
    dimmed and the tally left out. Islam, 2026-08-23: a deliverable belongs to
@@ -3138,20 +2998,11 @@ function outcomeDue(o){ return dueThisCycle(o.measureAt); }
    the predicate went too, at all four of its call sites, rather than being
    left behind always answering true (§24). An OUTCOME still has one, because
    a measurement time is a real thing somebody chose. */
-/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§101), not "everything in the
-   plan". A deliverable due next December is not an empty box somebody forgot
-   in June -- it is not asked, exactly as an outcome measured in Q4 has never
-   been asked in Q2. It leaves the count and it leaves the submit gate.
-
-   Submitting therefore gets easier early in a project and no easier late,
-   which is the right way round: a unit is chased for what is late, never for
-   what has not started. */
 function projReported(p){
   var n = 0, total = 0;
   (p.deliverables || []).forEach(function(d){
-    if (!dueThisCycle(d.due)) return;
     total++;
-    if (statusGiven(d)) n++;
+    if (d.actual != null && d.actual !== "") n++;
   });
   (p.outcomes || []).forEach(function(o){
     if (!outcomeDue(o)) return;
@@ -3159,9 +3010,8 @@ function projReported(p){
     if (o.actual != null && o.actual !== "") n++;
   });
   (p.milestones || []).forEach(function(m){
-    if (!dueThisCycle(m.finish)) return;
     total++;
-    if (statusGiven(m)) n++;
+    if (m.status) n++;
   });
   return { done: n, total: total };
 }
@@ -3387,9 +3237,9 @@ function clearCapability(cap, what, why){
   }
   (cap.keyObjectives || []).forEach(function(m){ m.actual = ""; m.progress = null; m.note = ""; });
   (cap.projects || []).forEach(function(p){
-    (p.deliverables || []).forEach(function(d){ d.status = null; d.pct = null; d.note = ""; });
+    (p.deliverables || []).forEach(function(d){ d.actual = null; d.note = ""; });
     (p.outcomes || []).forEach(function(o){ o.actual = null; o.progress = null; o.note = ""; });
-    (p.milestones || []).forEach(function(m){ m.status = null; m.pct = null; m.note = ""; });
+    (p.milestones || []).forEach(function(m){ m.status = null; m.note = ""; });
   });
 }
 /* One function may carry several capabilities \u2014 Marketing carries two \u2014 so

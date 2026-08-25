@@ -1800,12 +1800,32 @@ var BUILD_ID = "BUILDID";
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§101): both
+       write `status`, and leaving In progress CLEARS the per-cent rather than
+       leaving it stranded under a word that no longer wants one. A stale 35%
+       sitting behind "Delivered" is a number nobody can see and the score
+       would not read -- but it would come back the moment somebody picked In
+       progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        if (hit.kind === "milestone") hit.obj.status = el.value || null;
-        else hit.obj.actual = el.value || null;
+        hit.obj.status = el.value || null;
+        if (hit.obj.status !== "wip") hit.obj.pct = null;
+        paint();
+      });
+    });
+    /* The per-cent, which only an In progress row has. Out of range is
+       clamped rather than refused: somebody typing 120 means "done", and an
+       error message in a table of thirty rows is a worse answer than a
+       number. */
+    document.querySelectorAll("[data-cpct]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.cpct);
+        if (!hit) return;
+        var v = el.value.trim();
+        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
+        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
         paint();
       });
     });

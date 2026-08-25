@@ -142,9 +142,9 @@ var GROUP = {
           brief: "One order process across Mobile, Retail and Mazaya, so a unit's cycle time stops depending on which system it grew up on.",
           stakeholders: ["Operations", "IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Single documented order process", kind: "binary", actual: "yes" },
-            { name: "Unit-by-unit gap assessment", kind: "binary", actual: "yes" },
-            { name: "Process rolled out across the three units", kind: "pct", actual: 55 }
+            { name: "Single documented order process", due: "Sep 26", status: "done" },
+            { name: "Unit-by-unit gap assessment", due: "Oct 26", status: "done" },
+            { name: "Process rolled out across the three units", due: "Sep 26", status: "wip", pct: 55 }
           ],
           outcomes: [
             { name: "Order cycle time", dir: "≤", target: "12 d", measureAt: "Q3 2026", actual: "15 d", progress: 80,
@@ -152,40 +152,40 @@ var GROUP = {
             { name: "First-time-right rate", dir: "≥", target: "95%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Process design and sign-off", covers: "The target process agreed with all three unit heads", owner: "Ashraf Abdelaty", finish: "Q1", status: "done" },
-            { name: "Gap assessment per unit", covers: "What each unit has to change to reach it", owner: "Hala", finish: "Q2", status: "done" },
-            { name: "Retail and Mazaya cutover", covers: "Both units running the standard process", owner: "Hala", finish: "Q3", status: "wip" },
-            { name: "Mobile cutover", covers: "The last unit, gated on the ERP work", owner: "Ashraf Abdelaty", finish: "Q4", status: "todo" }
+            { name: "Process design and sign-off", covers: "The target process agreed with all three unit heads", owner: "Ashraf Abdelaty", finish: "W1 Mar 26", status: "done" },
+            { name: "Gap assessment per unit", covers: "What each unit has to change to reach it", owner: "Hala", finish: "W3 May 26", status: "done" },
+            { name: "Retail and Mazaya cutover", covers: "Both units running the standard process", owner: "Hala", finish: "W3 Jul 26", status: "wip", pct: 60 },
+            { name: "Mobile cutover", covers: "The last unit, gated on the ERP work", owner: "Ashraf Abdelaty", finish: "W1 Nov 26", status: "todo" }
           ] },
         { name: "Cost-to-serve model and monthly review", owner: "Fayad Sobhy",
           brief: "A cost-to-serve model that survives contact with a real month, and a standing review that uses it.",
           stakeholders: ["Finance", "Operations"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Cost-to-serve model built and validated", kind: "binary", actual: "yes" },
-            { name: "Monthly review running with all units", kind: "pct", actual: 60 }
+            { name: "Cost-to-serve model built and validated", due: "Sep 26", status: "done" },
+            { name: "Monthly review running with all units", due: "Oct 26", status: "wip", pct: 60 }
           ],
           outcomes: [
             { name: "Cost-to-serve", dir: "≤", target: "4.2%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Cost driver mapping", covers: "Which activities carry the cost, by unit", owner: "Fayad Sobhy", finish: "Q1", status: "done" },
-            { name: "Model build and validation", covers: "Model reconciled against two closed months", owner: "Fayad Sobhy", finish: "Q2", status: "done" },
-            { name: "Review cadence embedded", covers: "A standing monthly session with each unit", owner: "Hala", finish: "Q3", status: "wip" }
+            { name: "Cost driver mapping", covers: "Which activities carry the cost, by unit", owner: "Fayad Sobhy", finish: "W1 Jan 26", status: "done" },
+            { name: "Model build and validation", covers: "Model reconciled against two closed months", owner: "Fayad Sobhy", finish: "W2 May 26", status: "done" },
+            { name: "Review cadence embedded", covers: "A standing monthly session with each unit", owner: "Hala", finish: "W1 Aug 26", status: "wip", pct: 60 }
           ] },
         { name: "First-time-right programme in distribution", owner: "Hala",
           brief: "Cut the rework in distribution by fixing the two failure points that produce most of it.",
           stakeholders: ["Operations"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Failure analysis on twelve months of orders", kind: "binary", actual: "yes" },
-            { name: "Corrective standard operating procedures", kind: "pct", actual: 40 }
+            { name: "Failure analysis on twelve months of orders", due: "Dec 26", status: "done" },
+            { name: "Corrective standard operating procedures", due: "May 26", status: "wip", pct: 40 }
           ],
           outcomes: [
             { name: "First-time-right rate", dir: "≥", target: "95%", measureAt: "Q4 2026", actual: "82%", progress: 86 }
           ],
           milestones: [
-            { name: "Failure analysis", covers: "Where rework originates and what it costs", owner: "Hala", finish: "Q2", status: "done" },
-            { name: "Procedure rewrite", covers: "New procedures for the two main failure points", owner: "Hala", finish: "Q3", status: "wip" },
-            { name: "Team retraining", covers: "Distribution teams trained on the new procedures", owner: "Hala", finish: "Q4", status: "todo" }
+            { name: "Failure analysis", covers: "Where rework originates and what it costs", owner: "Hala", finish: "W4 May 26", status: "done" },
+            { name: "Procedure rewrite", covers: "New procedures for the two main failure points", owner: "Hala", finish: "W2 Sep 26", status: "wip", pct: 60 },
+            { name: "Team retraining", covers: "Distribution teams trained on the new procedures", owner: "Hala", finish: "W2 Oct 26", status: "todo" }
           ] }
       ] },
 
@@ -200,50 +200,50 @@ var GROUP = {
           brief: "Name a successor for every key role in every unit, and know which ones have nobody.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Key-role definition agreed group-wide", kind: "binary", actual: "yes" },
-            { name: "Succession map per unit", kind: "pct", actual: 70 }
+            { name: "Key-role definition agreed group-wide", due: "Apr 26", status: "done" },
+            { name: "Succession map per unit", due: "Oct 26", status: "wip", pct: 70 }
           ],
           outcomes: [
             { name: "Key-role coverage", dir: "≥", target: "90%", measureAt: "Q3 2026", actual: "62%", progress: 69,
               note: "Six roles across Retail and Mazaya still have no named successor." }
           ],
           milestones: [
-            { name: "Key-role definition", covers: "What counts as a key role, agreed with the units", owner: "Noran Adel", finish: "Q1", status: "done" },
-            { name: "Unit-by-unit mapping", covers: "Successors named, gaps recorded", owner: "Noran Adel", finish: "Q2", status: "done" },
-            { name: "Gap closure plans", covers: "A plan for every role with no successor", owner: "Noran Adel", finish: "Q3", status: "wip" }
+            { name: "Key-role definition", covers: "What counts as a key role, agreed with the units", owner: "Noran Adel", finish: "W4 Feb 26", status: "done" },
+            { name: "Unit-by-unit mapping", covers: "Successors named, gaps recorded", owner: "Noran Adel", finish: "W2 Jun 26", status: "done" },
+            { name: "Gap closure plans", covers: "A plan for every role with no successor", owner: "Noran Adel", finish: "W4 Sep 26", status: "wip", pct: 50 }
           ] },
         { name: "Retention plan for the top two attrition roles", owner: "Noran Adel",
           brief: "Two roles produce most of the voluntary attrition. Find out why, and change it.",
           stakeholders: ["HR"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Exit interview analysis", kind: "binary", actual: "yes" },
-            { name: "Revised package and progression for both roles", kind: "binary", actual: "no",
+            { name: "Exit interview analysis", due: "Sep 26", status: "done" },
+            { name: "Revised package and progression for both roles", due: "Dec 26", status: "todo",
               note: "Held pending the compensation review." }
           ],
           outcomes: [
             { name: "Voluntary attrition in the two roles", dir: "≤", target: "12%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Attrition analysis", covers: "Which roles, which reasons, which managers", owner: "Noran Adel", finish: "Q2", status: "done" },
-            { name: "Package redesign", covers: "Pay and progression reworked for both roles", owner: "Noran Adel", finish: "Q3", status: "wip" },
-            { name: "Rollout and communication", covers: "Both roles moved onto the new terms", owner: "Noran Adel", finish: "Q4", status: "todo" }
+            { name: "Attrition analysis", covers: "Which roles, which reasons, which managers", owner: "Noran Adel", finish: "W2 May 26", status: "done" },
+            { name: "Package redesign", covers: "Pay and progression reworked for both roles", owner: "Noran Adel", finish: "W4 Aug 26", status: "wip", pct: 75 },
+            { name: "Rollout and communication", covers: "Both roles moved onto the new terms", owner: "Noran Adel", finish: "W3 Oct 26", status: "todo" }
           ] },
         { name: "Group training calendar and delivery", owner: "Hala",
           brief: "One training calendar for the group, published ahead of the year and actually delivered.",
           stakeholders: ["HR", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Annual training calendar published", kind: "binary", actual: "yes" },
-            { name: "Calendar delivered", kind: "pct", actual: 44 }
+            { name: "Annual training calendar published", due: "Apr 26", status: "done" },
+            { name: "Calendar delivered", due: "Mar 26", status: "wip", pct: 44 }
           ],
           outcomes: [
             { name: "Training hours per head", dir: "≥", target: "24", measureAt: "Q4 2026", actual: "5", progress: 21,
               note: "Two of nine planned sessions delivered. Q3 and Q4 carry the rest." }
           ],
           milestones: [
-            { name: "Needs assessment", covers: "What each unit actually needs, not what it asks for", owner: "Hala", finish: "Q1", status: "done" },
-            { name: "Calendar published", covers: "Dates, trainers and places confirmed for the year", owner: "Hala", finish: "Q1", status: "done" },
-            { name: "First-half delivery", covers: "Sessions scheduled to Q2 delivered", owner: "Hala", finish: "Q2", status: "wip" },
-            { name: "Second-half delivery", covers: "The remaining sessions", owner: "Hala", finish: "Q4", status: "todo" }
+            { name: "Needs assessment", covers: "What each unit actually needs, not what it asks for", owner: "Hala", finish: "W4 Feb 26", status: "done" },
+            { name: "Calendar published", covers: "Dates, trainers and places confirmed for the year", owner: "Hala", finish: "W1 Feb 26", status: "done" },
+            { name: "First-half delivery", covers: "Sessions scheduled to Q2 delivered", owner: "Hala", finish: "W3 Jun 26", status: "wip", pct: 40 },
+            { name: "Second-half delivery", covers: "The remaining sessions", owner: "Hala", finish: "W2 Nov 26", status: "todo" }
           ] }
       ] },
 
@@ -257,8 +257,8 @@ var GROUP = {
           brief: "Six ERP instances become one, so a group number does not have to be assembled by hand every month.",
           stakeholders: ["IT", "Finance", "Unit heads"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Target instance design", kind: "binary", actual: "yes" },
-            { name: "Instances migrated", kind: "pct", actual: 33,
+            { name: "Target instance design", due: "Sep 26", status: "done" },
+            { name: "Instances migrated", due: "Jun 26", status: "wip", pct: 33,
               note: "Two of six migrated. Mobile's cutover moved to Q3 with the principal." }
           ],
           outcomes: [
@@ -266,41 +266,41 @@ var GROUP = {
             { name: "Days to close month-end", dir: "≤", target: "5 d", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Instance audit", covers: "What is running where, and what depends on it", owner: "Abdelhamid", finish: "Q2", status: "done" },
-            { name: "Target design and sequencing", covers: "One target instance, and the order units move in", owner: "Abdelhamid", finish: "Q2", status: "done" },
-            { name: "First two migrations", covers: "Treasury and Care moved across", owner: "Abdelhamid", finish: "Q3", status: "wip" },
-            { name: "Remaining migrations", covers: "Mobile, Retail, Mazaya and B2B", owner: "Abdelhamid", finish: "Q4", status: "todo" }
+            { name: "Instance audit", covers: "What is running where, and what depends on it", owner: "Abdelhamid", finish: "W3 Jun 26", status: "done" },
+            { name: "Target design and sequencing", covers: "One target instance, and the order units move in", owner: "Abdelhamid", finish: "W4 Apr 26", status: "done" },
+            { name: "First two migrations", covers: "Treasury and Care moved across", owner: "Abdelhamid", finish: "W4 Jul 26", status: "wip", pct: 60 },
+            { name: "Remaining migrations", covers: "Mobile, Retail, Mazaya and B2B", owner: "Abdelhamid", finish: "W3 Nov 26", status: "todo" }
           ] },
         { name: "Group data warehouse and single reporting layer", owner: "Ramy Behairy",
           brief: "One warehouse and one reporting layer, so the same question gets the same answer in every room.",
           stakeholders: ["IT", "Finance"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Warehouse built and loading nightly", kind: "binary", actual: "no" },
-            { name: "Reporting layer live for sales and finance", kind: "pct", actual: 36 }
+            { name: "Warehouse built and loading nightly", due: "Apr 26", status: "todo" },
+            { name: "Reporting layer live for sales and finance", due: "Mar 26", status: "wip", pct: 36 }
           ],
           outcomes: [
             { name: "Dependency on automated reports", dir: "≥", target: "90%", measureAt: "Q4 2026", actual: "58%", progress: 64,
               note: "Power BI live for sales; finance stays manual until the warehouse lands." }
           ],
           milestones: [
-            { name: "Model and source mapping", covers: "What the warehouse holds and where it comes from", owner: "Ramy Behairy", finish: "Q2", status: "done" },
-            { name: "Warehouse build", covers: "Built, loading nightly, reconciled", owner: "Ramy Behairy", finish: "Q3", status: "wip" },
-            { name: "Reporting layer rollout", covers: "Sales and finance reporting moved onto it", owner: "Ramy Behairy", finish: "Q4", status: "todo" }
+            { name: "Model and source mapping", covers: "What the warehouse holds and where it comes from", owner: "Ramy Behairy", finish: "W2 Jun 26", status: "done" },
+            { name: "Warehouse build", covers: "Built, loading nightly, reconciled", owner: "Ramy Behairy", finish: "W2 Aug 26", status: "wip", pct: 50 },
+            { name: "Reporting layer rollout", covers: "Sales and finance reporting moved onto it", owner: "Ramy Behairy", finish: "W1 Oct 26", status: "todo" }
           ] },
         { name: "Automation backlog and delivery cadence", owner: "Ramy Behairy",
           brief: "A standing backlog of automation candidates, and a cadence that actually clears it.",
           stakeholders: ["IT"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Backlog built and prioritised", kind: "binary", actual: "yes" },
-            { name: "Backlog delivered", kind: "pct", actual: 52 }
+            { name: "Backlog built and prioritised", due: "Oct 26", status: "done" },
+            { name: "Backlog delivered", due: "Feb 26", status: "wip", pct: 52 }
           ],
           outcomes: [
             { name: "Manual hours removed per month", dir: "≥", target: "300", measureAt: "Q4 2026", actual: "140", progress: 47 }
           ],
           milestones: [
-            { name: "Candidate assessment", covers: "Every manual process worth automating, sized", owner: "Ramy Behairy", finish: "Q1", status: "done" },
-            { name: "Cadence established", covers: "A fortnightly release running", owner: "Ramy Behairy", finish: "Q2", status: "done" },
-            { name: "Half the backlog delivered", covers: "The top half by hours removed", owner: "Ramy Behairy", finish: "Q3", status: "wip" }
+            { name: "Candidate assessment", covers: "Every manual process worth automating, sized", owner: "Ramy Behairy", finish: "W4 Feb 26", status: "done" },
+            { name: "Cadence established", covers: "A fortnightly release running", owner: "Ramy Behairy", finish: "W2 Jun 26", status: "done" },
+            { name: "Half the backlog delivered", covers: "The top half by hours removed", owner: "Ramy Behairy", finish: "W2 Aug 26", status: "wip", pct: 50 }
           ] }
       ] },
 
@@ -312,30 +312,30 @@ var GROUP = {
           brief: "Establish what the market currently believes about us, and agree what we want it to believe instead.",
           stakeholders: ["Marketing"], timeline: "quarter", start: "Q1 2026", end: "Q3 2026",
           deliverables: [
-            { name: "Market perception study", kind: "binary", actual: "yes" },
-            { name: "Positioning statement agreed by the board", kind: "binary", actual: "no" }
+            { name: "Market perception study", due: "Dec 26", status: "done" },
+            { name: "Positioning statement agreed by the board", due: "Jul 26", status: "todo" }
           ],
           outcomes: [
             { name: "Unaided brand awareness", dir: "≥", target: "45%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Perception study fielded", covers: "Study run with trade and end customers", owner: "Yara Kamal", finish: "Q2", status: "done" },
-            { name: "Positioning workshop", covers: "Options developed and tested with the board", owner: "Yara Kamal", finish: "Q3", status: "wip" }
+            { name: "Perception study fielded", covers: "Study run with trade and end customers", owner: "Yara Kamal", finish: "W1 Apr 26", status: "done" },
+            { name: "Positioning workshop", covers: "Options developed and tested with the board", owner: "Yara Kamal", finish: "W1 Sep 26", status: "wip", pct: 50 }
           ] },
         { name: "Trade communication programme", owner: "Tarek Nour",
           brief: "A standing communication programme aimed at the trade, replacing campaign-by-campaign improvisation.",
           stakeholders: ["Marketing", "Sales"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Twelve-month communication calendar", kind: "binary", actual: "yes" },
-            { name: "Calendar executed", kind: "pct", actual: 35 }
+            { name: "Twelve-month communication calendar", due: "Sep 26", status: "done" },
+            { name: "Calendar executed", due: "Dec 26", status: "wip", pct: 35 }
           ],
           outcomes: [
             { name: "Trade partner recall", dir: "≥", target: "70%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Calendar built", covers: "Twelve months of trade communication planned", owner: "Tarek Nour", finish: "Q2", status: "done" },
-            { name: "First-half execution", covers: "Q2 and Q3 communication delivered", owner: "Tarek Nour", finish: "Q3", status: "wip" },
-            { name: "Second-half execution", covers: "Q4 communication delivered", owner: "Tarek Nour", finish: "Q4", status: "todo" }
+            { name: "Calendar built", covers: "Twelve months of trade communication planned", owner: "Tarek Nour", finish: "W1 Apr 26", status: "done" },
+            { name: "First-half execution", covers: "Q2 and Q3 communication delivered", owner: "Tarek Nour", finish: "W1 Sep 26", status: "wip", pct: 25 },
+            { name: "Second-half execution", covers: "Q4 communication delivered", owner: "Tarek Nour", finish: "W1 Dec 26", status: "todo" }
           ] }
       ] },
 
@@ -349,31 +349,31 @@ var GROUP = {
           brief: "One feedback loop, running continuously, whose output reaches the people who can act on it.",
           stakeholders: ["Care", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Feedback instrument agreed across units", kind: "binary", actual: "yes" },
-            { name: "Loop running in all units", kind: "pct", actual: 50 }
+            { name: "Feedback instrument agreed across units", due: "Apr 26", status: "done" },
+            { name: "Loop running in all units", due: "Dec 26", status: "wip", pct: 50 }
           ],
           outcomes: [
             { name: "Net promoter score", dir: "≥", target: "40", measureAt: "Q4 2026", actual: "26", progress: 65 },
             { name: "Issues closed within SLA", dir: "≥", target: "90%", measureAt: "Q4 2026", actual: "71%", progress: 79 }
           ],
           milestones: [
-            { name: "Instrument design", covers: "One question set used by every unit", owner: "Mennah Farouk", finish: "Q1", status: "done" },
-            { name: "Pilot in two units", covers: "Retail and Care running the loop", owner: "Mennah Farouk", finish: "Q2", status: "done" },
-            { name: "Rollout to remaining units", covers: "Mobile, Mazaya and B2B", owner: "Mennah Farouk", finish: "Q4", status: "wip" }
+            { name: "Instrument design", covers: "One question set used by every unit", owner: "Mennah Farouk", finish: "W2 Jan 26", status: "done" },
+            { name: "Pilot in two units", covers: "Retail and Care running the loop", owner: "Mennah Farouk", finish: "W4 Jun 26", status: "done" },
+            { name: "Rollout to remaining units", covers: "Mobile, Mazaya and B2B", owner: "Mennah Farouk", finish: "W2 Nov 26", status: "wip", pct: 25 }
           ] },
         { name: "Service recovery standard", owner: "Dalia Sabry",
           brief: "A single standard for what happens when we get it wrong, and how quickly.",
           stakeholders: ["Care"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Recovery standard published", kind: "binary", actual: "no" },
-            { name: "Care teams trained", kind: "pct", actual: 20 }
+            { name: "Recovery standard published", due: "Feb 26", status: "todo" },
+            { name: "Care teams trained", due: "Oct 26", status: "wip", pct: 20 }
           ],
           outcomes: [
             { name: "Repeat complaints", dir: "≤", target: "8%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Standard drafted", covers: "What we owe a customer when we fail, by failure type", owner: "Dalia Sabry", finish: "Q3", status: "wip" },
-            { name: "Training and rollout", covers: "Every care team working to the standard", owner: "Dalia Sabry", finish: "Q4", status: "todo" }
+            { name: "Standard drafted", covers: "What we owe a customer when we fail, by failure type", owner: "Dalia Sabry", finish: "W2 Jul 26", status: "wip", pct: 50 },
+            { name: "Training and rollout", covers: "Every care team working to the standard", owner: "Dalia Sabry", finish: "W1 Nov 26", status: "todo" }
           ] }
       ] },
 
@@ -385,16 +385,16 @@ var GROUP = {
           brief: "A quarterly review that decides what to add, hold and drop, on evidence rather than relationships.",
           stakeholders: ["Marketing", "Unit heads"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review framework and evidence pack", kind: "binary", actual: "yes" },
-            { name: "Quarterly reviews held", kind: "pct", actual: 50 }
+            { name: "Review framework and evidence pack", due: "Mar 26", status: "done" },
+            { name: "Quarterly reviews held", due: "Feb 26", status: "wip", pct: 50 }
           ],
           outcomes: [
             { name: "Revenue from lines added in the last two years", dir: "≥", target: "25%", measureAt: "Q4 2026", actual: "11%", progress: 44 }
           ],
           milestones: [
-            { name: "Framework agreed", covers: "What evidence a line is judged on", owner: "Tarek Nour", finish: "Q2", status: "done" },
-            { name: "First two reviews", covers: "Q2 and Q3 reviews held with decisions recorded", owner: "Tarek Nour", finish: "Q3", status: "wip" },
-            { name: "Second-half reviews", covers: "Q4 review held", owner: "Tarek Nour", finish: "Q4", status: "todo" }
+            { name: "Framework agreed", covers: "What evidence a line is judged on", owner: "Tarek Nour", finish: "W2 Apr 26", status: "done" },
+            { name: "First two reviews", covers: "Q2 and Q3 reviews held with decisions recorded", owner: "Tarek Nour", finish: "W2 Jul 26", status: "wip", pct: 25 },
+            { name: "Second-half reviews", covers: "Q4 review held", owner: "Tarek Nour", finish: "W4 Dec 26", status: "todo" }
           ] }
       ] },
 
@@ -416,11 +416,11 @@ var GROUP = {
           stakeholders: ["Finance Department", "IT Department"], timeline: "date",
           start: "1 Jan 2026", end: "30 Apr 2026",
           deliverables: [
-            { name: "Oracle-based interest utilisation form", kind: "binary", actual: "yes" },
-            { name: "Tracking interest expense on a daily basis", kind: "binary", actual: "yes" },
-            { name: "Real-time data recalculation for corridor interest and pricing", kind: "binary", actual: "no",
+            { name: "Oracle-based interest utilisation form", due: "Feb 26", status: "done" },
+            { name: "Tracking interest expense on a daily basis", due: "May 26", status: "done" },
+            { name: "Real-time data recalculation for corridor interest and pricing", due: "May 26", status: "todo",
               note: "Pricing corridor logic reopened with Treasury." },
-            { name: "Daily treasury monitoring of debt balances", kind: "pct", actual: 100 }
+            { name: "Daily treasury monitoring of debt balances", due: "Dec 26", status: "done" }
           ],
           outcomes: [
             { name: "Reduction of manual work", dir: "≥", target: "40 h", measureAt: "Q2 2026", actual: "20 h", progress: 50,
@@ -428,35 +428,35 @@ var GROUP = {
             { name: "Improving financial accuracy", dir: "≥", target: "99%", measureAt: "Q4 2026", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Solution design", covers: "Treasury requirements and the calculation approach", owner: "Finance", finish: "20 Mar 2026", status: "done" },
-            { name: "Oracle form development", covers: "Retrieval and calculation screens built", owner: "IT", finish: "12 Apr 2026", status: "done" },
-            { name: "Interest utilisation automation", covers: "Calculation methodology and finance approval", owner: "Finance", finish: "20 Apr 2026", status: "done" },
-            { name: "Stakeholder validation", covers: "Treasury validation of the outputs", owner: "Treasury", finish: "10 May 2026", status: "done" },
-            { name: "Reporting and analysis embedment", covers: "BI integration of the utilisation report", owner: "IT", finish: "31 May 2026", status: "wip" }
+            { name: "Solution design", covers: "Treasury requirements and the calculation approach", owner: "Finance", finish: "W3 Mar 26", status: "done" },
+            { name: "Oracle form development", covers: "Retrieval and calculation screens built", owner: "IT", finish: "W2 Apr 26", status: "done" },
+            { name: "Interest utilisation automation", covers: "Calculation methodology and finance approval", owner: "Finance", finish: "W3 Apr 26", status: "done" },
+            { name: "Stakeholder validation", covers: "Treasury validation of the outputs", owner: "Treasury", finish: "W2 May 26", status: "done" },
+            { name: "Reporting and analysis embedment", covers: "BI integration of the utilisation report", owner: "IT", finish: "W4 May 26", status: "wip", pct: 40 }
           ] },
         { name: "Credit facility consolidation", owner: "Fayad Sobhy",
           brief: "Consolidation of facilities held across four banks into a single revolving arrangement, to cut arrangement fees and simplify covenant reporting.",
           stakeholders: ["Finance Department", "Treasury"], timeline: "quarter", start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Facility term sheet agreed with lead bank", kind: "binary", actual: null },
-            { name: "Covenant reporting pack rebuilt", kind: "pct", actual: null },
-            { name: "Legacy facilities closed", kind: "binary", actual: null }
+            { name: "Facility term sheet agreed with lead bank", due: "Feb 26", status: null },
+            { name: "Covenant reporting pack rebuilt", due: "Sep 26", status: null },
+            { name: "Legacy facilities closed", due: "Jun 26", status: null }
           ],
           outcomes: [
             { name: "Arrangement and commitment fees", dir: "≤", target: "-18%", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Facility review and bank shortlist", covers: "Every facility held across the four banks, and a shortlist of candidate leads", owner: "Treasury", finish: "Q1", status: "done" },
-            { name: "Term sheet negotiation", covers: "Commercial terms agreed with the appointed lead", owner: "Treasury", finish: "Q2", status: "wip" },
-            { name: "Legal documentation", covers: "Facility agreement and security package drafted and signed", owner: "Finance", finish: "Q3", status: "todo" },
-            { name: "Drawdown and legacy closure", covers: "First drawdown, and the four legacy facilities closed", owner: "Treasury", finish: "Q4", status: "todo" }
+            { name: "Facility review and bank shortlist", covers: "Every facility held across the four banks, and a shortlist of candidate leads", owner: "Treasury", finish: "W2 Jan 26", status: "done" },
+            { name: "Term sheet negotiation", covers: "Commercial terms agreed with the appointed lead", owner: "Treasury", finish: "W2 Jun 26", status: "wip", pct: 50 },
+            { name: "Legal documentation", covers: "Facility agreement and security package drafted and signed", owner: "Finance", finish: "W1 Jul 26", status: "todo" },
+            { name: "Drawdown and legacy closure", covers: "First drawdown, and the four legacy facilities closed", owner: "Treasury", finish: "W1 Dec 26", status: "todo" }
           ] },
         { name: "Working capital programme across units", owner: "Hossam Abuelenien",
           brief: "Release cash tied up in receivables and stock, unit by unit, against a target agreed with each.",
           stakeholders: ["Finance Department"], timeline: "quarter", start: "Q3 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Working capital baseline per unit", kind: "binary", actual: null },
-            { name: "Unit-level release plans agreed", kind: "pct", actual: null }
+            { name: "Working capital baseline per unit", due: "Sep 26", status: null },
+            { name: "Unit-level release plans agreed", due: "Dec 26", status: null }
           ],
           outcomes: [
             { name: "Days sales outstanding", dir: "≤", target: "65", measureAt: "Q4 2026", actual: null, progress: null },
@@ -464,9 +464,9 @@ var GROUP = {
             { name: "Stock cover", dir: "≤", target: "45 d", measureAt: "Q1 2027", actual: null, progress: null }
           ],
           milestones: [
-            { name: "Baseline per unit", covers: "Receivables and stock position established for each unit", owner: "Finance", finish: "Q3", status: "todo" },
-            { name: "Release plans agreed", covers: "A target and a plan agreed with every unit head", owner: "Finance", finish: "Q4", status: "todo" },
-            { name: "First review", covers: "Progress against plan reviewed with the CFO", owner: "Finance", finish: "Q4", status: "todo" }
+            { name: "Baseline per unit", covers: "Receivables and stock position established for each unit", owner: "Finance", finish: "W3 Sep 26", status: "todo" },
+            { name: "Release plans agreed", covers: "A target and a plan agreed with every unit head", owner: "Finance", finish: "W2 Nov 26", status: "todo" },
+            { name: "First review", covers: "Progress against plan reviewed with the CFO", owner: "Finance", finish: "W4 Dec 26", status: "todo" }
           ] }
       ] },
 
@@ -482,30 +482,30 @@ var GROUP = {
           stakeholders: ["Strategy Management Office", "Unit heads"], timeline: "quarter",
           start: "Q1 2026", end: "Q4 2026",
           deliverables: [
-            { name: "Review format and evidence pack", kind: "binary", actual: "yes" },
-            { name: "Reviews held with every unit", kind: "pct", actual: 66 }
+            { name: "Review format and evidence pack", due: "May 26", status: "done" },
+            { name: "Reviews held with every unit", due: "Oct 26", status: "wip", pct: 66 }
           ],
           outcomes: [
             { name: "Cycles reviewed on time", dir: "≥", target: "4", measureAt: "Q4 2026", actual: "2", progress: 50 }
           ],
           milestones: [
-            { name: "Format agreed", covers: "One review shape used with every unit", owner: "Islam Saadany", finish: "Q1", status: "done" },
-            { name: "First-half reviews", covers: "Q1 and Q2 reviews held with all units", owner: "Islam Saadany", finish: "Q2", status: "done" },
-            { name: "Second-half reviews", covers: "Q3 and Q4 reviews", owner: "Islam Saadany", finish: "Q4", status: "wip" }
+            { name: "Format agreed", covers: "One review shape used with every unit", owner: "Islam Saadany", finish: "W3 Jan 26", status: "done" },
+            { name: "First-half reviews", covers: "Q1 and Q2 reviews held with all units", owner: "Islam Saadany", finish: "W3 May 26", status: "done" },
+            { name: "Second-half reviews", covers: "Q3 and Q4 reviews", owner: "Islam Saadany", finish: "W2 Dec 26", status: "wip", pct: 50 }
           ] },
         { name: "Plan and progress on the platform for all units", owner: "Islam Saadany",
           brief: "Every unit's plan and every unit's reporting on the platform, so the cycle stops running on spreadsheets.",
           stakeholders: ["Strategy Management Office"], timeline: "quarter", start: "Q2 2026", end: "Q4 2026",
           deliverables: [
-            { name: "All units' plans loaded", kind: "pct", actual: 70 },
-            { name: "All units reporting through the platform", kind: "pct", actual: 40 }
+            { name: "All units' plans loaded", due: "May 26", status: "wip", pct: 70 },
+            { name: "All units reporting through the platform", due: "Jun 26", status: "wip", pct: 40 }
           ],
           outcomes: [
             { name: "Plan adherence", dir: "≥", target: "80%", measureAt: "Q4 2026", actual: "51%", progress: 64 }
           ],
           milestones: [
-            { name: "Plans loaded", covers: "Every unit's plan entered and checked", owner: "Islam Saadany", finish: "Q3", status: "wip" },
-            { name: "First reporting cycle on the platform", covers: "A full cycle run without spreadsheets", owner: "Islam Saadany", finish: "Q4", status: "todo" }
+            { name: "Plans loaded", covers: "Every unit's plan entered and checked", owner: "Islam Saadany", finish: "W1 Aug 26", status: "wip", pct: 60 },
+            { name: "First reporting cycle on the platform", covers: "A full cycle run without spreadsheets", owner: "Islam Saadany", finish: "W4 Oct 26", status: "todo" }
           ] }
       ] }
   ],

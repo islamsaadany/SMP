@@ -2473,86 +2473,119 @@ function splitOrPane(list, sel, rail, pane){
    unit's. The dates are on the project's own cover line, which is where a
    date belongs; a function left holding a helper nothing calls is how a
    stylesheet ends up describing a control the product does not have (§24). */
-/* ── ONE TABLE, ONE ROW SHAPE (§101, undoing §99's split) ────────────────
-   §99 cut the table in two because Direction, Target and Due date had nothing
-   to say for a deliverable -- the em-dash was the table asking a row a
-   question its kind could not answer. Islam: *"wait, I over complicated
-   things … make them 1 table … for the deliverables the direction is always
-   bigger than and the target is 100%"*, later *"change it from 100% to Y/N"*.
+function delivKindPill(d){
+  return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
+}
+/* ── ONE TABLE, TWO HALVES (§99) ───────────────────────────────────────
+   §53.4 put a deliverable and an outcome in one table with a Type column,
+   and its argument survives: they are two kinds of evidence that the project
+   achieved what it set out to, they are read together, and the SCORE still
+   keeps them apart half each per SIDE (projPerf). What did not survive is the
+   single HEADER ROW. Islam: "the mixing of both caused confusion … we can
+   have them in 1 table but we need a split."
 
-   GIVING A DELIVERABLE A REAL DIRECTION AND A REAL TARGET IS THE BETTER FIX.
-   The cells now have ANSWERS, so the dead cells go because the questions
-   became answerable rather than because the table was cut in two. Fewer
-   parts, same problem solved -- and the band, the per-half column strip and
-   the colspan arithmetic that kept two halves aligned all go with it (§24).
+   He is describing a table asking every row a question the other kind cannot
+   answer. `Measured as` meant the delivery kind on a deliverable and the
+   DIRECTION on an outcome — one heading over two different facts — while
+   `Target` and `Measured at` stood empty for every deliverable on the plan
+   pane and `Target` for every one on the other two.
 
-   THE TYPE COLUMN COMES BACK, and that is coherent rather than a reversal of
-   a reversal: §99 removed it because the BAND said which kind a row was, and
-   with no band something has to.
+   So: still one table, split by a band, each half declaring its own columns.
+   The Type column goes with the split — the band above the rows already says
+   which kind they are, and a pill repeating it is the same fact twice (§93's
+   one chip too many). The `#` and the NAME hold their position across the
+   split so the eye still runs down one list, and where a half has a figure
+   the score is built from (`Performance`, §99.8) it stays in the LAST column for both
+   halves, so that column still runs down one edge.
 
-   THE DIRECTION IS "=", NOT ">=". With a target of Y/N there is nothing to be
-   greater than, and a blank cell would put back the one thing this merge
-   removed. "= Y/N" is what the row actually says. */
-var DX_HEADING = "Deliverables and outcomes";
-function dxIsDeliv(row){ return row.kind === "d"; }
-function dxType(row){
-  /* One box for both words: "Deliverable" and "Outcome" are seven characters
-     apart, so left to themselves the column reads as two different marks
-     rather than one question answered two ways. The width is in the CSS. */
-  return '<span class="pill kind tk">' + (dxIsDeliv(row) ? "Deliverable" : "Outcome") + '</span>';
+   This is also the shape the product already had everywhere else: the plan
+   workbook has carried separate Deliverables and Outcomes sheets with exactly
+   these columns since §16.4, and the review deck a slide each since §15. The
+   screen was the last surface merging them. */
+var DX_HALVES = {
+  d: { title: "Deliverables", sub: "what the project hands over" },
+  o: { title: "Outcomes",     sub: "what it is meant to change" }
+};
+/* The band wears the ground every table header in the product wears (§41.10),
+   so each half OPENS the way a table opens; the column strip under it is the
+   quiet one. Both are `th` inside the tbody, deliberately: a table has one
+   `<thead>`, and the hover and last-row rules are written against `td`. */
+function dxBand(cols, kind){
+  var h = DX_HALVES[kind];
+  return '<tr class="dxband"><th colspan="' + cols + '">' + h.title +
+    '<em>' + h.sub + '</em></th></tr>';
 }
-/* A deliverable's direction and target are written FOR it rather than asked
-   OF it, and shown quietly, because a value nobody can change should not look
-   like a field. */
-function dxDir(row){ return dxIsDeliv(row) ? '<span class="fixedval">=</span>' : esc(row.obj.dir || ""); }
-function dxTarget(row){
-  return dxIsDeliv(row) ? '<span class="fixedval">Y/N</span>'
-                        : (row.obj.target ? esc(row.obj.target) : '<span class="missing">Missing</span>');
+/* A cell is [label, class, colspan] — the colspan is what lets a half with
+   fewer facts than the other still line its last column up with it. */
+function dxHead(cells){
+  return '<tr class="dxhead">' + cells.map(function(c){
+    return '<th' + (c[1] ? ' class="' + c[1] + '"' : '') +
+      (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
+  }).join("") + '</tr>';
 }
-/* ONE WORD FOR WHEN. A deliverable stores `due`, an outcome `measureAt` and a
-   milestone `finish` -- three spellings for one question, kept because a
-   stored field is an identifier and renaming one is a migration for a word
-   nobody reads (§58, §65). `dxWhen` is the one place that knows which. */
-function dxWhen(row){ return dxIsDeliv(row) ? row.obj.due : row.obj.measureAt; }
-function dxSetWhen(row, v){ if (dxIsDeliv(row)) row.obj.due = v; else row.obj.measureAt = v; }
-/* THE DUE-DATE CELL SAYS WHICH OF THREE THINGS IS TRUE. Overdue is red and
-   loud -- past its date, unfinished, and being asked for. Not due is quiet --
-   its cycle has not come, so nothing is asked and nothing is scored. On time
-   is just a date. */
-function dxDate(v, done){
-  var t = v ? esc(v) : '<span class="missing">Missing</span>';
-  if (!dueThisCycle(v)) return '<span class="soonval">' + t + '</span>';
-  if (overdue(v, done)) return '<span class="lateval">' + t +
-    '<span class="latenote">overdue</span></span>';
-  return t;
+/* WHAT IS NOT THERE IS NOT DRAWN (§99.7). The split first shipped with an
+   empty half saying "No outcomes yet" over its own band and column strip —
+   §45.2's rule, that a feature rendering nothing looks like one that was
+   never built. Islam: *"the presence of outcomes or deliverables that would
+   make the sub table appear or not, not to keep tables in place with no
+   need."* His reading is the right one HERE, and the reason is that §45.2 is
+   about a FEATURE and this is about a PROJECT: a project with no outcomes is
+   not a broken screen, it is a project that committed to no measurable
+   change, and three rows of furniture saying so is the empty state shouting.
+
+   The one thing the empty half was carrying is carried already: `projPerf()`
+   returns the other side whole when a side is empty, so a project with no
+   outcomes is scored on its deliverables alone — and the Performance card
+   above the pane prints `Outcomes —` for exactly that. The fact stays on the
+   page; only the furniture goes.
+
+   AUTHORING IS THE EXCEPTION, and it is not a detail: the add row is the only
+   way to write the first deliverable or the first outcome, so a half hidden
+   for being empty in EDIT mode is a half that can never be filled — §61's
+   fault exactly, where a function with no plan could only be reached by
+   giving it a plan first. Both halves always draw behind the pen.
+
+   ONE ANSWER, READ BY BOTH: `dxShown()` decides, `dxHeading()` reads the same
+   answer, so a section can never name a half it is not drawing. */
+function dxShown(p, authoring){
+  return { d: !!authoring || (p.deliverables || []).length > 0,
+           o: !!authoring || (p.outcomes || []).length > 0 };
 }
-/* Deliverables then outcomes, as ONE list -- numbered straight through,
-   because with one table and one row shape it IS one list again. */
-function dxRows(p){
-  return (p.deliverables || []).map(function(d){ return { kind:"d", obj:d }; })
-    .concat((p.outcomes || []).map(function(o){ return { kind:"o", obj:o }; }));
+function dxAny(sh){ return sh.d || sh.o; }
+/* `sub` is the plan pane's trailing phrase, which pairs one clause to each
+   half — so it has to be built from the same flags rather than written out,
+   or a pane showing one half promises two things in its own heading. */
+function dxHeading(sh, sub){
+  var t = [], s = [];
+  ["d", "o"].forEach(function(k){
+    if (!sh[k]) return;
+    t.push(t.length ? DX_HALVES[k].title.toLowerCase() : DX_HALVES[k].title);
+    s.push(DX_HALVES[k].sub);
+  });
+  return t.join(" and ") + (sub && s.length
+    ? ' <em>\u2014 ' + s.join(", and ") + '</em>' : '');
 }
-/* ONE PILL FOR BOTH, because a deliverable and a milestone are now reported
-   the same way. The last word differs and should: a deliverable is
-   DELIVERED, a milestone is COMPLETED. */
-function statusPill(x, doneWord){
-  if (!x.status) return '<span class="pill kind">&mdash;</span>';
-  if (x.status === "done") return '<span class="pill good">' + doneWord + '</span>';
-  if (x.status === "wip") return '<span class="pill attn">In progress</span>';
+function dxSplit(cols, sh, d, o){
+  return '<div class="scroll"><table><tbody>' +
+    (sh.d ? dxBand(cols, "d") + dxHead(d.head) + d.rows + (d.add || "") : "") +
+    (sh.o ? dxBand(cols, "o") + dxHead(o.head) + o.rows + (o.add || "") : "") +
+    '</tbody></table></div>';
+}
+/* The row number restarts per half. §53.4 ran it across the whole table
+   BECAUSE it was one list, and said so; with two lists, two rows called 1 is
+   the truth rather than a mistake. */
+function dxIdx(i){ return '<td class="idx">' + (i + 1) + '</td>'; }
+function delivShown(d){
+  var v = delivReads(d);
+  if (v == null) return '<span class="pill kind">&mdash;</span>';
+  if (d.kind === "pct") return '<span class="pill ' + band(v) + '">' + v + '%</span>';
+  return v === 100 ? '<span class="pill good">Delivered</span>' : '<span class="pill warn">Not yet</span>';
+}
+function msPill(m){
+  if (m.status === "done") return '<span class="pill good">Completed</span>';
+  if (m.status === "wip") return '<span class="pill attn">In progress</span>';
   return '<span class="pill kind">Not started</span>';
 }
-function delivShown(d){ return statusPill(d, "Delivered"); }
-function msPill(m){ return statusPill(m, "Completed"); }
-/* The per-cent follows the word at both ends and is typed only in the middle
-   -- a box that can contradict the word beside it is a box that eventually
-   will. A row nobody is being asked for shows what it is instead. */
-function pctRead(x, when){
-  if (when != null && !dueThisCycle(when)) return '<span class="pill kind">Not due</span>';
-  var v = statusReads(x);
-  return v == null ? "&mdash;" : v + "%";
-}
-var MS_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Completed"]];
-var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Delivered"]];
 /* A milestone finishing after the project's end date is saved as entered and
    said out loud. Two things might be true and the platform picks neither. */
 function overrunNote(p){
@@ -2614,40 +2647,48 @@ function capKOTable(c){
 }
 
 function projPerformanceBody(p, fk){
-  /* Status holds the WORD for a deliverable and the FIGURE for an outcome --
-     both are "what was reported" -- and % holds the number the score is built
-     from, for both, so the score column runs down one edge (§101). */
-  var dxr = dxRows(p).map(function(row, i){
-    var o = row.obj, when = dxWhen(row), d = dxIsDeliv(row);
-    var notDue = !dueThisCycle(when);
-    var got = d ? statusPill(o, "Delivered")
-                : (o.progress == null ? '<span class="pill kind">Not due</span>' : esc(o.actual));
-    var reads = d ? statusReads(o) : o.progress;
-    /* "Finished" is a status for a deliverable and a REPORTED FIGURE for an
-       outcome. Asking statusReads() of an outcome answers null, which read
-       every measured outcome as overdue. */
-    var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
-    return '<tr' + (notDue || (!d && o.progress == null) ? ' class="notdue"' : '') + '>' +
-      '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) +
-        (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
-      '<td class="cc">' + dxType(row) + '</td>' +
-      '<td class="cc">' + dxDate(when, done) + '</td>' +
-      '<td class="num">' + dxTarget(row) + '</td>' +
-      '<td class="cc">' + got + '</td>' +
-      '<td class="num final"' + (reads == null ? '' :
-        ' style="color:var(--' + band(reads) + ')"') + '>' +
-        (notDue ? "&mdash;" : pct(reads)) + '</td></tr>';
+  /* A DELIVERABLE HAS NO TARGET, so it no longer shows a dash under one
+     (§53.4 removed the field; the column outlived it by two versions).
+     The score column is the last on BOTH halves — it is the figure projPerf
+     is built from, and one that moves between halves is one nobody can run
+     their eye down. Named in the dxSplit call below, not here (§99.8). */
+  var dRows = p.deliverables.map(function(d, i){
+    return '<tr>' + dxIdx(i) + '<td>' + esc(d.name) +
+      (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
+      '<td colspan="2" class="cc">' + delivShown(d) + '</td>' +
+      '<td class="num final">' + pct(delivReads(d)) + '</td></tr>';
   }).join("");
+  var oRows = p.outcomes.map(function(o, i){
+    if (o.progress == null) {
+      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+        '<td class="num">' + esc(o.target) + '</td>' +
+        '<td colspan="2" class="cc"><span class="pill kind">Measured at ' + esc(o.measureAt) + '</span></td></tr>';
+    }
+    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) +
+      (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
+      '<td class="num">' + esc(o.target) + '</td>' +
+      '<td class="num">' + esc(o.actual) + '</td>' +
+      '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
+  }).join("");
+  /* PERFORMANCE, not Reads (§99.8). Islam: *"Reads is a strange title, we need
+     something else."* It was the platform's own word for how a figure resolves
+     into a score, and it was the only place using it — every other table
+     naming this same 0-100 says Score, Progress or Performance. His pick was
+     Performance, over Score, which is what the Key objectives table two blocks
+     up this same page says. Recorded because the cost is real and was stated
+     before he chose: the pane now carries THREE words for one kind of number —
+     the card's *Project performance*, the objectives table's *Score*, and this.
+     Progress was never a candidate here: the milestone table directly below
+     uses it for a STATUS, and one word for a status and a percentage two
+     tables apart is how §87's twins get made. */
+  var sh = dxShown(p);
+  var dxRows = dxSplit(5, sh,
+    { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Performance", "num"]], rows: dRows },
+    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Performance", "num"]], rows: oRows });
   var mRows = p.milestones.map(function(m, i){
-    var v = msReads(m);
-    return '<tr' + (dueThisCycle(m.finish) ? '' : ' class="notdue"') + '>' +
-      '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
-      '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
-      '<td class="cc">' + (dueThisCycle(m.finish) ? msPill(m)
-        : '<span class="pill kind">Not due</span>') + '</td>' +
-      '<td class="num final">' + (dueThisCycle(m.finish) && v != null ? v + "%" : "&mdash;") +
-      '</td></tr>';
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + esc(m.finish) + '</td>' +
+      '<td class="cc">' + msPill(m) + '</td></tr>';
   }).join("");
   var mst = projMilestones(p);
   /* THE SAME BAND THE PILLAR PANE WEARS (§51.3). It was an `.ptitle` with a
@@ -2659,10 +2700,9 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Due date","Target","Status","%"], dxr) +
+    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Owner","Due date","Status","%"], mRows);
+    miniTable(["#","Milestone","Due date","Progress"], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -2774,30 +2814,50 @@ function projPlanBody(p, fk){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
-  /* ONE ROW SHAPE (§101). A deliverable's direction and target are written
-     for it; only its due date is its own to choose. An outcome carries all
-     three. Every cell answered, and no band to keep two halves aligned. */
-  var dxr = dxRows(p).map(function(row, i){
-    var o = row.obj, d = dxIsDeliv(row);
+  /* MEASURED AS BELONGS TO A DELIVERABLE AND A DIRECTION TO AN OUTCOME, and
+     for two versions one heading carried both (§99). Each half declares its
+     own columns now; the deliverable's kind spans the three the outcome uses
+     for direction, target and date, because a half with fewer facts still has
+     to end where the other one does. */
+  var dRows = p.deliverables.map(function(d, i){
+    return '<tr data-oi="' + i + '"><td class="idx">' +
+      (on ? handle("Reorder " + d.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
+      '<td>' + (ed ? inputOr("plan", d.name, "", function(v){ d.name = v; }) : esc(d.name)) +
+        xb("deliverables", d.id) + '</td>' +
+      '<td colspan="3">' + delivKindPill(d) + '</td></tr>';
+  }).join("");
+  var oRows = p.outcomes.map(function(o, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + o.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", o.name, "", function(v){ o.name = v; }) : esc(o.name)) +
-        xb(d ? "deliverables" : "outcomes", o.id) + '</td>' +
-      '<td class="cc">' + dxType(row) + '</td>' +
-      '<td class="cc">' + dxDir(row) + '</td>' +
-      '<td class="num">' + (d ? dxTarget(row) : f(o.target, function(v){ o.target = v; })) + '</td>' +
+        xb("outcomes", o.id) + '</td>' +
+      '<td class="cc">' + esc(o.dir) + '</td>' +
+      '<td class="num">' + f(o.target, function(v){ o.target = v; }) + '</td>' +
       '<td class="cc">' + (ed
-        ? inputOr("plan", dxWhen(row) || "", "", function(v){ dxSetWhen(row, v); })
-        : (dxWhen(row) ? esc(dxWhen(row)) : '<span class="missing">Missing</span>')) +
-      '</td></tr>';
-  }).join("") +
-  /* TWO ADD BUTTONS UNDER ONE TABLE, as §53.4 had them: one table of two
-     kinds, and a single "add a row" would have to ask which -- a question
-     the two buttons answer by existing. */
-  (ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="5">' +
-      '<button class="linkbu" data-rowadd="deliverable|' + esc(p.id) + '">Add a deliverable</button>' +
-      '<button class="linkbu" data-rowadd="outcome|' + esc(p.id) + '">Add an outcome</button>' +
-    '</td></tr>' : '');
+        ? inputOr("plan", o.measureAt || "", "", function(v){ o.measureAt = v; })
+        : esc(o.measureAt || "\u2014")) + '</td></tr>';
+  }).join("");
+  /* ONE ADD ROW PER HALF. §53.4 put both buttons under one table because a
+     single "add a row" would have had to ask which kind; the split answers
+     that by where the button sits, so each says only its own name. */
+  /* dxAdd, not addRow: there is a GLOBAL addRow used by the unit's plan pane,
+     and a `var` of the same name in a function that later wants the global is
+     exactly the collision §56.7 records — one binding, no textual conflict,
+     silent until the day somebody reaches for the other one. */
+  var dxAdd = function(what, label){
+    return ed ? '<tr class="newrow"><td class="idx">+</td><td colspan="4">' +
+      '<button class="linkbu" data-rowadd="' + what + '|' + esc(p.id) + '">' + label +
+      '</button></td></tr>' : '';
+  };
+  /* `ed`, not a hard true: behind the pen both halves draw so the first row
+     of either can be written; read, only what is there is drawn. */
+  var sh = dxShown(p, ed);
+  var dxRows = dxSplit(5, sh,
+    { head: [["#", "idx"], ["Deliverable"], ["Measured as", "", 3]], rows: dRows,
+      add: dxAdd("deliverable", "Add a deliverable") },
+    { head: [["#", "idx"], ["Outcome"], ["Direction", "cc"], ["Target", "num"],
+             ["Measure date", "cc"]], rows: oRows,
+      add: dxAdd("outcome", "Add an outcome") });
   var mRows = p.milestones.map(function(m, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
       (on ? handle("Reorder " + m.name) : '') + '<span class="idx-n">' + (i+1) + '</span></td>' +
@@ -2848,9 +2908,7 @@ function projPlanBody(p, fk){
             function(v){ p.stakeholders = collabParse(v); })
         : (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
-    '<h4 class="mini">' + DX_HEADING +
-      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target","Due date"], dxr) +
+    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh, true) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     /* NAME, THEN DESCRIPTION (§100). Islam: "we need the milestone name before
        the description." So the pair stays -- a milestone is identified by a
@@ -2921,18 +2979,6 @@ function capEntryBox(x, unit, may, label){
     '" placeholder="\u2014" aria-label="Report ' + esc(label) + '">' +
     (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
 }
-/* THE PER-CENT AN IN-PROGRESS ROW REQUIRES (§101). Its own field rather than
-   capEntryBox's, because that one writes `actual` -- the outcome's figure --
-   and this writes `pct`. One box, two meanings, would be exactly the fault
-   this whole section removed from the tables. */
-function capPctBox(x, may, label){
-  var has = x.pct != null && x.pct !== "";
-  if (!may) return '<span class="mono">' + (has ? esc(String(x.pct)) + "%" : "\u2014") + '</span>';
-  return '<span class="entry' + (has ? " filled" : "") + '">' +
-    '<input class="field" data-cpct="' + x.id + '" value="' + esc(has ? String(x.pct) : "") +
-    '" placeholder="\u2014" aria-label="Per cent complete for ' + esc(label) + '">' +
-    '<span class="unitsuf">%</span></span>';
-}
 function capNoteBox(x, may){
   return may
     ? '<input class="fld notefld" data-cnote="' + x.id + '" value="' + esc(x.note || "") +
@@ -2950,63 +2996,52 @@ function capPickBox(x, may, opts, val){
 
 function projReportBody(p, may, fk){
   var r = projReported(p);
-  /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
-     the product at eight columns -- the honest cost of one row shape carrying
-     Type, Due date, Target, Status, % and Note (§101).
-
-     A deliverable PICKS a status and the per-cent follows: 100 for Delivered,
-     0 for Not started, a box only for In progress, which is the whole of "in
-     progress requires a % of completion". An outcome TYPES a figure and its
-     per-cent is computed against the target -- shown, never typed.
-
-     A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting
-     there as an empty box somebody forgot. The control is still live: anyone
-     who wants to report early can, which is why this is a label and not a
-     lock. */
-  var dxr = dxRows(p).map(function(row, i){
-    var o = row.obj, d = dxIsDeliv(row), when = dxWhen(row);
-    var notDue = d ? !dueThisCycle(when) : !outcomeDue(o);
-    var ent, pcell;
-    if (notDue) {
-      ent = '<span class="pill kind">Not asked</span>';
-      pcell = '<span class="pill kind">Not due</span>';
-    } else if (d) {
-      ent = capPickBox(o, may, DX_WORDS, o.status);
-      pcell = o.status === "wip"
-        ? capPctBox(o, may, o.name)
-        : '<b>' + (statusReads(o) == null ? "&mdash;" : statusReads(o) + "%") + '</b>';
-    } else {
-      ent = capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name);
-      pcell = '<span class="fixedval">' + (o.progress == null ? "&mdash;" : o.progress + "%") + '</span>';
+  /* EVERY DELIVERABLE IS ASKED. The dimmed "Not asked — due Q4" row went with
+     the due date itself (§53.4); an OUTCOME still has one, because a
+     measurement time is a real thing somebody chose. */
+  /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, so a dead column is worse
+     here than anywhere: every deliverable carried a dash under `Target`,
+     because a deliverable has no target (§53.4). Split, the deliverable's
+     name takes back that width, and `Reported` and `Note` — the two columns a
+     person is actually typing into — hold the same place on both halves. */
+  var dRows = p.deliverables.map(function(d, i){
+    /* Still no kind pill beside the box: the box itself already says whether
+       it is delivered-or-not or a percentage, and the half's heading says the
+       rest. */
+    return '<tr>' + dxIdx(i) + '<td colspan="2">' + esc(d.name) + '</td>' +
+      '<td class="cc">' + (d.kind === "pct"
+        ? capEntryBox(d, "%", may, d.name)
+        : capPickBox(d, may, [["","\u2014"],["yes","Delivered"],["no","Not yet"]], d.actual)) + '</td>' +
+      '<td class="notecol">' + capNoteBox(d, may) + '</td></tr>';
+  }).join("");
+  var oRows = p.outcomes.map(function(o, i){
+    if (!outcomeDue(o)) {
+      return '<tr class="notdue">' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+        '<td colspan="3" class="cc"><span class="pill kind">Not asked \u2014 measured at ' +
+        esc(o.measureAt) + '</span></td></tr>';
     }
-    var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
-    return '<tr' + (notDue ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
-      '<td>' + esc(o.name) + '</td>' +
-      '<td class="cc">' + dxType(row) + '</td>' +
-      '<td class="cc">' + dxDate(when, done) + '</td>' +
-      '<td class="num">' + dxTarget(row) + '</td>' +
-      '<td class="cc">' + ent + '</td>' +
-      '<td class="cc">' + pcell + '</td>' +
+    return '<tr>' + dxIdx(i) + '<td>' + esc(o.name) + '</td>' +
+      '<td class="num">' + esc(o.target) + '</td>' +
+      '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
+  var sh = dxShown(p);
+  var dxRows = dxSplit(5, sh,
+    { head: [["#", "idx"], ["Deliverable", "", 2], ["Reported", "cc"], ["Note"]], rows: dRows },
+    { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Reported", "cc"], ["Note"]],
+      rows: oRows });
   var mRows = p.milestones.map(function(m, i){
-    var notDue = !dueThisCycle(m.finish);
-    return '<tr' + (notDue ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
-      '<td>' + esc(m.name) + '</td>' +
-      '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
-      '<td class="cc">' + (notDue ? '<span class="pill kind">Not asked</span>'
-        : capPickBox(m, may, MS_WORDS, m.status)) + '</td>' +
-      '<td class="cc">' + (notDue ? '<span class="pill kind">Not due</span>'
-        : (m.status === "wip" ? capPctBox(m, may, m.name)
-           : '<b>' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</b>')) + '</td>' +
+    return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
+      '<td class="cc">' + esc(m.finish) + '</td>' +
+      '<td class="cc">' + capPickBox(m, may,
+        [["","\u2014"],["todo","Not started"],["wip","In progress"],["done","Completed"]], m.status) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Due date","Target","Status","%","Note"], dxr) +
+    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones</h4>' +
-    miniTable(["#","Milestone","Due date","Status","%","Note"], mRows);
+    miniTable(["#","Milestone","Due date","Progress","Note"], mRows);
 }
 
 function capReportBody(c){

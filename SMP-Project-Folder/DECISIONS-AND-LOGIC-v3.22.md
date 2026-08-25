@@ -12931,3 +12931,124 @@ need an indicator of its own" is a sentence that only means something to
 somebody holding the data model. They are re-asked in the next round in terms
 of a real project on a real screen, which is the whole of CLAUDE-RULES' "explain
 in simple, non-technical words" and is easy to fail while sounding precise.
+
+
+
+## 101 · One table, one row shape (v3.27)
+
+The section that reversed itself twice in a day and came out simpler than
+either version. It ran through eight rounds of refinement, and the argument
+that decided it was Islam's: *"wait, I over complicated things."*
+
+### 101.1 The split is undone, and undone for a better reason
+
+§99 cut the deliverables-and-outcomes table in two because `Direction`,
+`Target` and the date had **nothing to say for a deliverable** — the em-dash
+was the table asking a row a question its kind could not answer.
+
+Islam's fix is better than mine: **give a deliverable a real direction and a
+real target.** Its direction is `=` and its target `Y/N`, written by the
+platform rather than asked of the person, so those cells now have ANSWERS. The
+dead cells go because the questions became answerable rather than because the
+table was cut in two. **Fewer parts, same problem solved** — the band, the
+per-half column strip and the colspan arithmetic that kept two halves aligned
+all go with it (§24).
+
+**The Type column comes back**, and that is coherent rather than a reversal of
+a reversal: §99 removed it because the BAND said which kind a row was, and with
+no band something has to.
+
+**The direction is `=` and not `≥`**, which is the one thing he asked for that
+grew a second half. He asked to change the target from `100%` to `Y/N`; with a
+`Y/N` target there is nothing to be greater than, and a blank cell would have
+put back the one thing this merge removed.
+
+### 101.2 A deliverable and a milestone are reported the same way
+
+Not started · In progress · Delivered (Completed, on a milestone), **with a
+per-cent that types itself at both ends**: 100 for the finished word, 0 for the
+unstarted one, and a box only in the middle — which is the whole of *"in
+progress requires a % of completion"*. A box that can contradict the word
+beside it is a box that eventually will.
+
+**I argued against a third state** in §99.8, on the grounds that a state with
+no number forces the score to invent one. **Requiring the per-cent is what
+answers that**, so the objection is gone rather than overruled — a distinction
+worth keeping, because the argument was right and its premise stopped holding.
+
+`kind` is deleted. With one way to report, the plan has nothing left to choose
+about how a deliverable is measured, and a column offering a choice that
+changes nothing is worse than no column.
+
+### 101.3 A due date comes back, and reverses §53.4 on its author's own reason
+
+§53.4 dropped `deliverables.due` on Islam's argument: *"it's not mandatory as
+it's a full project due — it's delivered when the project ends."* His argument
+now is that **some deliverables land before the project ends**, which is simply
+more true of real plans. Migration 023 puts the column back that 016 dropped.
+
+**The owner does not come back.** §53.4's other half — *"there is no owner on
+the deliverables, the department is responsible"* — is untouched.
+
+### 101.4 One reader, four written shapes, and the cycle read the same way
+
+`monthsOf()` resolves `July 26`, `W3 Mar 26`, `Q3 2026`, `31 May 2026`, `H1
+2026` and `FY26` to **months since year zero** — the coarsest unit any of them
+share, because a week inside March is still March.
+
+**The old reader could not see a date at all.** `outcomeDue()` compared quarter
+to quarter, so it read `31 Mar 2026` as nothing — and when the cycle was called
+`H1 2026`, which is what the demo cycle is called and what a half-yearly review
+is always called, it answered **"due" for everything**.
+
+**The cycle's month comes from `REVIEW.to`**, which has said "Jun 2026" since
+the review model existed, rather than from parsing its NAME. The name is a
+label somebody types; `to` is the field that means it.
+
+`Date.parse` is deliberately the LAST resort rather than the first: it reads
+"Q3 2026" as nothing, but it also reads bare numbers and stray words as dates
+in ways that would quietly turn a typo into a deadline.
+
+### 101.5 A row is asked for only once it is due, and the tally changes meaning
+
+Not due is quiet, leaves the `reported` tally and the submit gate, and counts
+toward no score. Overdue is loud. **They are opposite readings and must not
+look alike.** The control stays live either way — anyone who wants to report
+early can, which is why this is a label and not a lock.
+
+The tally becomes **"what you owe this cycle"** rather than "everything in the
+plan". Submitting gets easier early in a project and no easier late, which is
+the right way round: a unit is chased for what is late, never for what has not
+started.
+
+### 101.6 Nobody's score moves, and it is asserted rather than promised
+
+Every deliverable already recorded maps onto the three states at exactly the
+figure it scores today — `yes`→Delivered 100, `no`→Not started 0, `100`→100,
+`0`→0, `57`→In progress 57. Migration 023 is score-preserving by construction.
+
+**Execution changed shape and not value.** It was `done ÷ total`; it is the
+mean of what each milestone reads. Those are the same arithmetic while no
+per-cent has been entered, which is every tenant on day one — and
+`checks/project-tables.py` **strips every per-cent and compares the two
+formulas across all eight capabilities** rather than taking my word for it. The
+counts stay beside the figure: "5 of 12 completed" and "42%" answer two
+different questions.
+
+### 101.7 Two `var MONTHS`, and it failed in the safe direction
+
+`monthIndex("July")` returned **−1**, so `monthsOf` read every month as
+unknown, so `dueThisCycle` read null as *always asked*, so **every row on every
+pane quietly read as due** — the exact fault the old quarter-only reader had,
+restored by accident on the day it was removed.
+
+The cause is §56.7 in a third place: **there is already a `var MONTHS` in
+`config-data.js`**, 1,400 lines below, holding the same twelve words
+CAPITALISED for formatting a date. Two `var`s of one name in one scope is one
+binding, the later wins, and `indexOf("jul")` against `["Jan",…]` is −1.
+
+**Nothing threw.** The page rendered, the sweep was green, and only a check
+that asked the reader fifteen specific questions found it. *A name collision in
+one global scope fails silently and in the direction that looks correct* —
+which is the third time this file has recorded that sentence, and the second
+time this week.

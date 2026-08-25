@@ -349,13 +349,7 @@
     ]
   };
 
-  /* NULL, NOT "group" (§94). A literal here was the whole of "everyone opens
-     on the group's Performance page": paintUnits() only corrects `current`
-     when it names somewhere this viewer cannot reach, and the group is
-     reachable by nearly everybody, so the correction never ran. Starting at
-     null makes the first paint ask entryDest() the same way every later one
-     does. */
-  var current = null, currentSub = null;
+  var current = "group", currentSub = "performance";
   /* WHOSE report is open, or null. A target rather than a boolean: the page is
      per unit or per function, and a flag would follow you onto the next one
      (§63.1). Dropped by every navigation, exactly as the edit modes are. */
@@ -746,15 +740,7 @@
      in §28, the function did not. The tab and section keys are the only
      difference, so they are two variables rather than two branches. */
   function entrySub(k){
-    /* THE TARGET IS THE DESTINATION BEING ASKED ABOUT, NOT THE ONE ON SCREEN.
-       `allowed()` falls back to the global TARGET, and both callers ask BEFORE
-       paint() has moved it — the nav handler sets `current` and calls straight
-       in, and paintUnits() runs ahead of the line that derives TARGET. So a
-       unit head walking from the group to their own unit had their unit's tabs
-       judged against "group". Exactly the fault the note beside TARGET in
-       paint() records, in the one place that had not been corrected. */
-    var t = (!k || k === "setup" || k === "manage") ? "group" : k;
-    var d = allowed(defsFor(k), t);
+    var d = allowed(defsFor(k));
     if (!d.length) return null;
     /* A COMPANY OPENS ON PERFORMANCE, and there is nothing else to open.
        §28's rule — a unit opens on what was AGREED, not on the score — is about
@@ -764,49 +750,12 @@
       var tab = fn ? "fnstrat" : "strategy", want = fn ? "proj" : "plan";
       var strat = d.filter(function(x){ return x.k === tab; })[0];
       if (strat) {
-        var secs = allowed(strat.sections(fn ? k : UNITS[k]), t);
+        var secs = allowed(strat.sections(fn ? k : UNITS[k]));
         if (secs.some(function(x){ return x.k === want; })) CURSEC[tab] = want;
         if (secs.length) return tab;
       }
     }
     return d[0].k;
-  }
-
-  /* ── WHERE A PERSON OPENS (§94, Islam 2026-08-25) ─────────────────
-     "the default opening page for the users is on the plan in the strategy."
-
-     Half of that has been true since §28: a unit opens on Strategy › Plan and
-     a function on Strategy › Projects. What was not true is WHICH DESTINATION
-     opens — the platform started every session on the GROUP's Performance
-     page, so a unit head signed in, read a group score they do not own, and
-     had to find their own unit before reaching the plan. `entrySub()` decides
-     the page; this decides the door.
-
-     IT IS WHERE THEY SIT, WHICH THE PLATFORM ALREADY KNOWS. `personAt()` is
-     the one pair that answers "where does this person sit" (§54) — the same
-     answer the register shows and the file importer writes, so a person moved
-     to another unit opens on that unit with nothing else to change.
-
-     ATTACHED TO THE GROUP MEANS THE GROUP — and "group" is a destination key
-     like any other, so it needs no special case. The SMO and the group CEO
-     both sit there and the group's Performance page IS their own place; they
-     are not sent into a business unit they do not run.
-
-     THAT LAST LINE IS NOT DECORATION. Written with `at !== "group"` excluded
-     as a special case, the SMO fell through to "the first door in the
-     navigation" — and for a tenant with two companies the first entry of that
-     row is the group/company DROPDOWN, which carries no key of its own, so
-     the first keyed door is the first business unit. The SMO opened on Mobile.
-     Found by the check, in the one line that looked too obvious to assert.
-
-     AND IT IS CHECKED, NEVER ASSUMED. `reach` is the list paintUnits has just
-     built of every destination this viewer can actually open; somebody
-     attached to a unit their roles no longer reach falls back to the first
-     door in the navigation, which is what happened before this existed. */
-  function entryDest(reach, dests){
-    var at = personAt(viewer());
-    if (at && reach.indexOf(at) > -1) return at;
-    return dests.length ? dests[0].k : null;
   }
 
   function isFn(k){ return typeof k === "string" && k.indexOf("fn:") === 0 && !!fnOf(k); }
@@ -838,12 +787,7 @@
     if (allowed(SUBS.manage, "group").length) everything.push("manage");
     if (everything.indexOf(current) === -1) {
       var dests = tabs.filter(function(t){ return t.k; });
-      current = entryDest(everything, dests);
-      /* The PAGE as well as the door, and by the same call the navigation
-         makes — otherwise the first paint lands on whichever tab happens to
-         be first (Strategy) and whichever section happens to be first inside
-         it (Foundation), which is not the plan. */
-      currentSub = current ? entrySub(current) : null;
+      current = dests.length ? dests[0].k : null;
     }
     document.getElementById("units").innerHTML = tabs.map(function(t, i){
       if (t.folds) {
@@ -1219,23 +1163,6 @@
        the fault the chrome shed in 2.9. The row is emptied AND hidden: an
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
-    /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
-       Islam, on a 1670px screen showing an eleven-column register inside a
-       1180px column: "the page is wide, however the rail on the left and the
-       tables are stuck in a confined space with a lot of buffer on right and
-       left."
-
-       1180 is a READING measure and it is right for the pages it was chosen
-       for — a unit's plan, the knowledge base, a group's foundation are prose
-       and prose has an optimum line length. A Setup page is a rail and a table,
-       and a table has the opposite need: every pixel it is denied becomes a
-       horizontal scroll inside a box.
-
-       So it is a state on the ROOT rather than a rule on `.wrap`, because the
-       chrome's three rows are capped at the same 1180 and widening the content
-       alone would leave the navigation indented from the page under it. One
-       attribute, four containers, and every other page is untouched. */
-    document.documentElement.toggleAttribute("data-wide", railed);
     document.getElementById("tabrow").hidden = railed;
     /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
        `.primary`, which is the LANDING PAGE and nothing else — so it was
@@ -2745,10 +2672,6 @@
       });
     }
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
-    /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
-       matches the guess, rather than storing the guess — otherwise correcting
-       the full name later would leave a stale short one standing beside it. */
-    fieldWire("pknown", function(p, v){ setKnownName(p, v); });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
     /* The two the employee file brings (§54.2). Cleared when emptied rather
@@ -3273,60 +3196,9 @@
         mergeOpen();
       });
     });
-    /* THE RECEIPT'S CLOSE WAS WIRED HERE, and it went with the section it
-       belonged to (§93.5, §24). Leaving it would have been worse than dead
-       code: this is a DOCUMENT-wide query and the dialog's own Close and
-       Cancel carry the same attribute, so with paint() now running while the
-       wizard is open it would have bound a second handler to them — one that
-       resets the merge without closing the dialog. wireMerge() owns them. */
-
-    /* ── CLICK TO COPY AN ADDRESS OR A NUMBER (§93.6) ────────────────
-       Islam: "make the email and the phone to be copied on clicking on them."
-
-       THE WORD IS WRITTEN INTO THE ELEMENT, NOT PAINTED. paint() would replace
-       the button that was just pressed — §63's rule, learned on Save draft —
-       so the tick is set on the node and put back on a timer. The original
-       text is kept on the node too, or a second click during the tick would
-       copy the word "Copied".
-
-       AND THE FALLBACK IS NOT DECORATION. `navigator.clipboard` needs a secure
-       context, and this product is opened from `file://` every day of its
-       life — so a hidden textarea and `execCommand("copy")` is the path that
-       actually runs here, and the promise path is the one that runs in
-       production. Both end at the same tick, and a failure says so rather
-       than tick-ing anyway. */
-    document.querySelectorAll("[data-copy]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var self = this, v = self.dataset.copy;
-        var was = self.dataset.copyWas || self.textContent;
-        self.dataset.copyWas = was;
-        function done(ok){
-          /* NOT "Press Cmd-C" — this runs on Windows too, and naming the
-             wrong key is worse than naming none. */
-          self.textContent = ok ? "Copied" : "Could not copy";
-          self.classList.toggle("copied", ok);
-          clearTimeout(self.__copyT);
-          self.__copyT = setTimeout(function(){
-            self.textContent = was;
-            self.classList.remove("copied");
-          }, 1200);
-        }
-        function legacy(){
-          var t = document.createElement("textarea");
-          t.value = v;
-          t.setAttribute("readonly", "");
-          t.style.cssText = "position:fixed;top:-1000px;opacity:0";
-          document.body.appendChild(t);
-          t.select();
-          var ok = false;
-          try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
-          document.body.removeChild(t);
-          done(ok);
-        }
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(v).then(function(){ done(true); }, legacy);
-        } else { legacy(); }
-      });
+    /* The receipt's Close is on the PAGE, not in the dialog. */
+    document.querySelectorAll("[data-pmerge-close]").forEach(function(b){
+      b.addEventListener("click", function(){ mergeReset(); paint(); });
     });
 
     /* The row's action menu (§46.4). Opening one closes any other, because
@@ -3679,41 +3551,18 @@
 
     wirePicker();
 
-    /* ── ASKED WHEN THE REGISTER IS ON SCREEN (§93.2) ────────────────
-       Islam: "the password status is all dash now — what is that status?"
-
-       It was not a status. It is what the column shows when the server has
-       said nothing about anybody, and the server had not been asked: this
-       waited for `[data-edit="people"]`, the register's whole-table PEN, which
-       spec 012 removed when rows became individually editable. The selector
-       stopped matching, the request stopped firing, and 33 rows showed a dash
-       that looks exactly like data.
-
-       §51.11, in wiring rather than in a check: a condition keyed on markup
-       that no longer exists does not fail, it quietly does nothing. Nothing
-       threw, nothing was logged, and the passwords themselves were never
-       touched — `credentials` is its own table outside the state graph (§19).
-
-       KEYED ON THE TABLE NOW, which is the thing that is actually there when
-       this is worth asking. */
-    var onRegister = !!document.querySelector(".peoplecfg");
-    if (PWSTATES === null && onRegister &&
+    if (PWSTATES === null && document.querySelector('[data-edit="people"]') &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
       SYNC.passwordStates(function(err, st){
-        /* AND A REFUSAL IS SAID, not swallowed into the same dash. `return`
-           left PWSTATES as {} — indistinguishable from "asked, and nobody has
-           a password" — so a 403 and a healthy empty tenant looked identical.
-           A column that cannot answer says so. */
-        if (err) { PWSTATES = { __error: String(err.message || err) }; paint(); return; }
+        if (err) return;
         PWSTATES = st;
         paint();
       });
     }
     /* The same shape and the same moment as the password states: asked once
        per visit to the page, and absent rather than empty from file:// (§56). */
-    /* The same selector, and it had gone the same way (§93.2). */
-    if (SAIDWHERE === null && onRegister &&
+    if (SAIDWHERE === null && document.querySelector('[data-edit="people"]') &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
@@ -4517,20 +4366,10 @@
            which refuses if anything still points at the row (§87.4) — that is
            the check, and its sentence has to be read where the button was. */
         if (!r.ok) { PMERGE.err = r.why; PMERGE.step = 3; mergePaint(); return; }
-        /* THE DIALOG STAYS OPEN TO SAY WHAT IT DID (§93.5). It used to close
-           and leave a "Merge two rows" section standing under the register —
-           a notification on a table page, which is what §90 moved the other
-           two steps in here to stop.
-
-           mergeReset() FIRST and `done` after it, because the reset clears
-           every field of PMERGE including that one. paint() repaints the
-           register BEHIND the overlay — safe, and necessary, because the
-           overlay is outside the wrap paint() rewrites and paint() is where a
-           change becomes a save. mergePaint() then draws the receipt. */
         mergeReset();
         PMERGE.done = dropName + "\u2019s row was merged into " + keepName + ".";
-        paint();
-        mergePaint();
+        closeModal();
+        paint();   /* which is where a change becomes a save */
       });
     });
   }
@@ -4602,13 +4441,6 @@
   }
   fillViewers();
   sel.addEventListener("change", function(){
-    /* leaveModes() — a viewer switch is a navigation, and every other one in
-       the platform drops its modes (§63.1). This did not, so an open Foundation
-       pen followed the SMO into a custodian's view and the fields stayed
-       editable for somebody the rule closes them to (§94). The same fault the
-       unit-to-unit handler fixed for edit modes, on the one path that skipped
-       it. */
-    leaveModes();
     VIEWER = sel.value; current = null; currentSub = null; paint(); window.scrollTo(0,0);
   });
 

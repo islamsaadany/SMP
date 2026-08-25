@@ -495,17 +495,7 @@ function reportBtn(target){
   if (!r) return "";
   var ac = String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
   if (grantAt(ac, target) === "none") return "";
-  /* ── SOLID, NOT OUTLINED (§94, Islam 2026-08-25) ────────────────
-     "the report button in performance make it all orange to obvious for the
-     user." It is the one thing somebody came to this page to DO during a
-     cycle, and it was wearing the same quiet outline as Presentation, Arrange
-     and every other secondary control in the product.
-
-     THE ACCENT BUDGET IS NOT BROKEN BY THIS (§41). It is one solid fill, on
-     one button, drawn only while a cycle is OPEN and only for somebody who
-     may report — so the page is back to its quiet register for the rest of
-     the quarter, which is what a budget means. */
-  return '<button class="editbtn cta" data-report="' + esc(target) + '"' +
+  return '<button class="editbtn" data-report="' + esc(target) + '"' +
     ' title="Enter this cycle\u2019s figures">Report' + r.badge + '</button>';
 }
 
@@ -1358,8 +1348,6 @@ function renderTemple(){
 }
 
 function renderGroupFoundation(){
-  /* One question for every field on the page, asked once (§94). */
-  var gpg = authoring("foundation", "g_found") ? "foundation" : null;
   /* `return` ON ITS OWN LINE RETURNED UNDEFINED. Automatic semicolon insertion
      ended the statement there and left everything below as dead code, so the
      group's Foundation page has rendered the literal word "undefined" since
@@ -1374,11 +1362,11 @@ function renderGroupFoundation(){
       '<dl style="margin:0">' +
       GROUP.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+          fieldOr("foundation", c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       '<div class="fcol">' +
         '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
-        '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
+        '<p class="statement">' + fieldOr("foundation", GROUP.mission, "big-field",
           function(v){ GROUP.mission = v; }) + '</p></div>' +
         aspirationCard(L("aspiration","group"), GROUP.aspiration, GROUP.endInMind, GROUP.keyObjectives, "foundation",
           function(v){ GROUP.aspiration = v; }, function(v){ GROUP.endInMind = v; }, "g_found",
@@ -1390,7 +1378,7 @@ function renderGroupFoundation(){
     '<div class="valgrid">' +
       (GROUP.values || []).map(function(v){
         return '<details class="valcard"><summary>' + esc(v.name) + '</summary>' +
-          '<div class="valcard-body">' + fieldOr(gpg, v.def, "",
+          '<div class="valcard-body">' + fieldOr("foundation", v.def, "",
             function(x){ v.def = x; }) + '</div></details>';
       }).join("") +
     '</div></div>';
@@ -1547,25 +1535,6 @@ function renderUnitPerformance(u){
     "What each " + plWord.toLowerCase().replace(/s$/, "") + "'s own measures average to", plDrill);
   var exId = modalFor(esc(u.name) + " &mdash; execution performance", "Tactic delivery across the unit's pillars", exDrill);
 
-  /* ── THE ACTIONS STAY IN THE LEGEND, AND THE LEGEND GETS QUIETER
-     (§94.9, REVERSING §94.8's first half the same day) ───────────────
-     Asked for a row of their own — "bring the 2 buttons above the reading
-     colours rectangle" — and then, having looked at it: "I think we can leave
-     the 2 buttons in the same line with the reading colours and we can even
-     shrink the reading colours a bit in font size so the buttons are more
-     obvious."
-
-     WHICH IS THE BETTER ANSWER TO THE SAME COMPLAINT, and it is worth saying
-     why rather than just doing it. The problem was never WHERE the buttons
-     were, it was that they read as quietly as the legend they sat beside —
-     two 12px uppercase controls against a 12.5px reference strip, all of it
-     the same weight of grey. Moving them bought a whole row of vertical space
-     to solve a CONTRAST problem. Making the legend smaller than the buttons
-     solves it where it is: the row now has one thing that shouts, one thing
-     that speaks and one thing that whispers, in that order.
-
-     So `.bands` drops to 11px / 9.5px and the dot with it, Report keeps its
-     solid fill, and the page keeps the row. See `group-extra.css`. */
   return bands(reportBtn(u.ukey) + presentMenu("unit", u.ukey)) +
 
     '<div class="scores">' +
@@ -1627,22 +1596,8 @@ function renderUnitPerformance(u){
 
 /* A bare button, right-aligned above the columns. The labelled bar it replaced
    announced a section that did not need announcing. */
-/* IS THIS PAGE ACTUALLY OPEN FOR AUTHORING RIGHT NOW (§94)?
-   `EDIT_PAGE` is a switch, and a switch survives things a grant does not —
-   the viewer switcher repaints without leaving modes, and a person's roles
-   can change under an open pane. So the fields ask the same question the pen
-   asked rather than trusting the flag the pen set, which is §48.2 applied to
-   a mode instead of a button. It takes the ACCESS KEY and not just the page
-   name, because the group's Foundation and a unit's share one page key and
-   only one of them is a strategy page. */
-function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
-
-/* mayAuthor(), NOT the raw grant (§94). Every "Edit" bar and every pen in
-   the platform asks this one question, so a strategy page cannot acquire a
-   pen that is open to somebody the rule closes it to — the gate is on the
-   control, not on each of the eleven call sites that draw one. */
 function editBar(page, acKey){
-  if (!mayAuthor(acKey || "u_found")) return '';
+  if (grant(acKey || "u_found") !== "edit") return '';
   return '<div class="pageact"><button class="editbtn" data-page="' + page + '">' +
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
@@ -1662,7 +1617,7 @@ function editBar(page, acKey){
 
    Same data-page contract as editBar, so the shell's wiring is untouched. */
 function penBtn(page, acKey){
-  if (!mayAuthor(acKey || "u_found")) return '';
+  if (grant(acKey || "u_found") !== "edit") return '';
   var on = EDIT_PAGE[page];
   return '<button class="penbtn' + (on ? " on" : "") + '" data-page="' + page + '"' +
     ' title="' + (on ? "Done editing" : "Edit") + '" aria-label="' + (on ? "Done editing" : "Edit") + '">' +
@@ -1785,22 +1740,22 @@ function koEdit(list){
    objectives are measured against and reading it there is the point. Only the
    input is the group's (§48.1). */
 function aspirationCard(label, statement, endInMind, objectives, page, setAsp, setEnd, acKey, isGroup){
-  var editing = authoring(page, acKey), pg = editing ? page : null;
+  var editing = EDIT_PAGE[page];
   return '<div class="card hoverpen"><div class="cardhead"><h2 class="sec first">' + label + '</h2>' +
     penBtn(page, acKey) +
       (editing && isGroup
         ? '<label class="horizon-f">Horizon ' +
-          inputOr(pg, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
+          inputOr(page, GROUP.horizon, "mono yr", function(v){ GROUP.horizon = v; }) + '</label>'
         : '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span>') +
     '</div>' +
-    '<p class="statement">' + fieldOr(pg, statement, "big-field", setAsp) + '</p>' +
+    '<p class="statement">' + fieldOr(page, statement, "big-field", setAsp) + '</p>' +
     /* End in mind is optional. Where a unit does not have one, nothing appears
        \u2014 an empty labelled block asserts that something is missing when the
        plan simply does not work that way. In edit the field is always there,
        so one can be added. */
     (endInMind || editing
       ? '<div class="endin"><span class="boxlab">End in mind</span>' +
-        '<p class="statement">' + fieldOr(pg, endInMind, "big-field", setEnd) + '</p></div>'
+        '<p class="statement">' + fieldOr(page, endInMind, "big-field", setEnd) + '</p></div>'
       : '') +
     '<div class="divide"></div>' +
     '<div class="boxhead"><span class="boxlab">' + L("keyobj","bu") + '</span>' +
@@ -1814,12 +1769,11 @@ function aspirationCard(label, statement, endInMind, objectives, page, setAsp, s
 }
 
 function renderUnitFoundation(u){
-  var upg = authoring("foundation", "u_found") ? "foundation" : null;
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
       u.clauses.map(function(c){
         return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+          fieldOr("foundation", c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
       }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found") +
@@ -1835,7 +1789,7 @@ function renderUnitAnalysis(u){
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
-          (authoring("analysis", "u_anal")
+          (EDIT_PAGE.analysis
             ? fieldOr("analysis", x, "", function(v){ list[i] = v; })
             : '<span>' + esc(x) + '</span>') + '</li>';
       }).join("") + '</ol></section>';
@@ -2789,12 +2743,7 @@ function projReportBody(p, may, fk){
 function capReportBody(c){
   /* Same two gates as a unit's reporting: the cycle has to be open AND
      unlocked, or the server refuses the figures the page is inviting. */
-  /* inOffice(), not hasRole("super") — the TENTH place meaning "the office"
-     (§89, found in §94). A unit's Reporting page has asked it this way since
-     §89; a function's had not, so an SMO team member could report past a
-     locked cycle on one side of the navigation switch and not the other
-     (§53.5). The server was on `super` for both and refused either way. */
-  var may = REVIEW.state === "open" && !(CYCLE.locked && !inOffice()) &&
+  var may = REVIEW.state === "open" && !(CYCLE.locked && !hasRole("super")) &&
             grant("k_report") === "edit";
   var kRows = c.keyObjectives.map(function(m, i){
     return '<tr><td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
@@ -3149,8 +3098,7 @@ function renderFnFoundation(fnKey){
           esc(f ? f.name : "\u2014") +
           (f && f.head ? " \u2014 " + esc(personName(f.head)) : "") + '</dd></div>' +
         '<div class="clause"><dt>Definition</dt><dd>' +
-          fieldOr(authoring("capfoundation", "k_found") ? "capfoundation" : null,
-                  c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
+          fieldOr("capfoundation", c.def, "", function(v){ c.def = v; }) + '</dd></div>' +
       '</dl></div>' +
       '<div class="card"><div class="cardhead"><h2 class="sec first">' + L("keyobj","bu") + '</h2>' +
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +

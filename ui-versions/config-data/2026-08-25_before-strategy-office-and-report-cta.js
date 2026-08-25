@@ -717,56 +717,6 @@ function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
 
-/* ── NAME AND FULL NAME (§93.8) ───────────────────────────────────────
-   Islam: *"we can have it Name and Full Name."*
-
-   The register carries two facts about what somebody is called and they were
-   being asked to share one column. **Name** is what the office says out loud —
-   two names, most days — and **Full Name** is what the employee file holds,
-   which on this register runs to *Abd El Moniem Mohamed Abd El Moniem
-   Mahmoud*. §93.6 widened the one column to fit the second; this splits them,
-   which is the better answer and gives the 392px back: Name is the frozen
-   column and Full Name is an ordinary hideable one.
-
-   STORED, NOT DERIVED, and this is the whole reason it is a field. The first
-   two names are a good GUESS and a bad rule — plenty of people go by their
-   third name, by a shortening of it, or by something the file never says. A
-   derived-only column is one nobody can correct, and correcting it is the
-   entire point of having it.
-
-   `known` IS A LABEL AND NEVER AN IDENTIFIER (Islam, same message: "for the
-   identifiers keep it for the ID and email only"). Nothing resolves on it —
-   not the upload, not the merge, not the door. §87's ladder is Emp ID then
-   email and stops, and this adds no rung. Two people really can be "Ahmed
-   Mostafa", which is exactly how the twins were made. */
-var KNOWN_NAME_WORDS = 2;
-/* The guess, used when nobody has said otherwise. Kept separate from the
-   reader below so the seeded value and a typed one are never confused. */
-function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
-/* What the Name column shows: what was typed, or the guess. Never stores as a
-   side effect of being read (§50.6's rule — a reader that creates the field it
-   was looking for makes every save carry a phantom change). */
-/* `dnames` is displayNames()'s map, passed by the two callers that render or
-   export the whole register so it is built once rather than per row. Without
-   it the guess is the flat two names — right for 31 rows of 33, and the two it
-   is wrong for are exactly the pair the map exists to separate, which is why
-   the register never omits it. */
-function knownName(p, dnames){
-  if (!p) return "";
-  var k = String(p.known || "").trim();
-  if (k) return k;
-  var d = dnames && dnames[p.key];
-  return (d && d.label) || knownGuess(p.name || "");
-}
-/* And the writing half, separate for the same reason. Clearing it back to the
-   guess DELETES the key rather than storing the guess, or a later correction
-   to the full name would leave a stale short one behind. */
-function setKnownName(p, v){
-  var t = String(v == null ? "" : v).trim();
-  if (!t || t === knownGuess(p.name || "")) delete p.known;
-  else p.known = t;
-}
-
 /* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
    Three names is the column's budget (§69.21) and it is right for 31 of 33
    rows — but Raya's register carries *Ahmed Mostafa Mohamed El Gebely* and
@@ -781,19 +731,10 @@ function setKnownName(p, v){
    Computed over the WHOLE register including retired rows: a retired person is
    still on screen when the Retired filter is on, and a display that changes
    depending on a filter is worse than a long one. */
-/* §93.8: IT DISAMBIGUATES THE GUESS, NOT THE COLUMN. The register no longer
-   renders a truncation — Name is a stored field and Full Name is its own
-   column — so what this lengthens is the GUESS shown for anybody who has never
-   corrected theirs. The argument is unchanged and so is the need: two people
-   whose first two names match would otherwise read as one row for anybody who
-   has hidden Full Name. A TYPED value always wins and is never lengthened; the
-   SMO wrote exactly what they meant. */
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
-    var n = KNOWN_NAME_WORDS;
-    var typed = String(p.known || "").trim();
-    if (typed) { out[p.key] = { full:p.name, at:n, label:typed, typed:true }; return; }
+    var n = SHORT_NAME_WORDS;
     var label = nameWords(p.name, n);
     (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
     out[p.key] = { full: p.name, at: n, label: label };
@@ -803,7 +744,7 @@ function displayNames(){
     /* Lengthen every member of the clash together, one name at a time, until
        they differ — or until there is nothing left to add, which is the real
        case of two people with the same full name and needs the flag instead. */
-    var keys = seen[k], n = KNOWN_NAME_WORDS, same = true;
+    var keys = seen[k], n = SHORT_NAME_WORDS, same = true;
     while (same && n < 8) {
       n++;
       var got = {};
@@ -1147,49 +1088,6 @@ function roleWhereLabel(at){
   return UNITS[at] ? UNITS[at].name : at;
 }
 
-/* ── WHAT THE REGISTER CALLS A PLACE (§93.12) ─────────────────────────
-   Islam: "for the units name in the people register let's use the navigation
-   names, and for the units remove the word function that comes between
-   brackets."
-
-   Two changes, and only on the REGISTER. `roleWhereLabel()` is unchanged
-   because it is also the people workbook's vocabulary — the Unit column is
-   written from it and read back against it (§65), so renaming it would leave
-   every file downloaded before today failing to match.
-
-   1 · THE NAVIGATION'S NAME. `navName()` is what the tabs say, and the tabs are
-       where somebody learned the word: this tenant's `it` unit is "IT Dist." in
-       the navigation and "IT Dist." is what the register should say too.
-
-   2 · "(function)" GOES — EXCEPT WHERE IT IS THE ONLY THING TELLING TWO PLACES
-       APART. §65 added that suffix for a reason and the reason is still live:
-       this tenant has a unit called **Care** and a supporting function called
-       **Care**, with the same navigation name. Dropping it from that one would
-       put two different places on the register under one word.
-
-       So it is dropped from the seven that are unambiguous and kept for the one
-       that is not — the same shape as §81.1's names and §65's own near-miss
-       rule: disambiguate the pair that clashes, leave everybody else alone. */
-function placeLabel(at){
-  if (!at || at === "group") return "the group";
-  if (String(at).indexOf("co:") === 0) {
-    var c = COMPANIES[String(at).slice(3)];
-    return c ? navName(c) : String(at).slice(3);
-  }
-  if (String(at).indexOf("fn:") === 0) {
-    var fk = String(at).slice(3), f = FUNCTIONS[fk];
-    var nm = f ? navName(f) : fk;
-    /* Asked of the units by their NAVIGATION name, because that is the name
-       being shown — comparing against `.name` would keep the suffix on a
-       function whose clash is invisible here, and drop it from one whose
-       clash is real. */
-    var clash = UNIT_KEYS.some(function(k){
-      return UNITS[k] && navName(UNITS[k]) === nm; });
-    return clash ? nm + " (function)" : nm;
-  }
-  return UNITS[at] ? navName(UNITS[at]) : at;
-}
-
 function unitRolesFor(k){
   if (!UNIT_ROLES[k]) UNIT_ROLES[k] = { head:null, custodian:null };
   return UNIT_ROLES[k];
@@ -1459,8 +1357,7 @@ function deletePerson(key){
    (§87.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
-  { k:"name",   label:"Full Name" },
-  { k:"known",  label:"Name" },
+  { k:"name",   label:"Name" },
   { k:"empId",  label:"Emp ID" },
   { k:"email",  label:"Email" },
   { k:"title",  label:"Job title" },
@@ -1886,33 +1783,8 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    we don't need to get them from the audience." Which is right, and it is the
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
-var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
-                        "Mobile", "Official BU", "Unit", "Role", "Status"];
-/* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
-   Every file downloaded before today has a "Name" column holding the FULL
-   name, so the new pair cannot simply take those headers: read blindly, an old
-   file would put a five-part legal name into the short column and leave the
-   full one empty.
-
-   The rule is §58's, applied a third time — WRITE THE NEW LABEL, READ EITHER —
-   with the twist that here the OLD header's meaning depends on what sits
-   beside it. "Full Name" present means the file distinguishes the two and
-   "Name" is the short one; "Full Name" absent means the file predates the
-   split and its "Name" is the full one. That is decidable from the row itself,
-   which is what makes it safe. */
-function fileFullName(r){
-  var full = r["Full Name"];
-  if (full != null && String(full).trim() !== "") return full;
-  return r["Name"];
-}
-function fileKnownName(r){
-  var full = r["Full Name"];
-  /* No "Full Name" column: the file says nothing about what somebody is
-     CALLED, and guessing from the full name here would overwrite a short name
-     the SMO had typed with the first two words of the legal one. */
-  if (full == null || String(full).trim() === "") return "";
-  return r["Name"];
-}
+var PEOPLE_FILE_COLS = ["Emp ID", "Name", "Job title", "Email", "Mobile",
+                        "Official BU", "Unit", "Role", "Status"];
 /* "Unit" is the header the register shows and this file writes. "BU" is read
    as well, and always will be: it was the header for exactly one build of this
    column, and a header is a contract with every file already downloaded — the
@@ -2014,10 +1886,6 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
 function planPeopleFile(rows){
   var plan = { rows:[], problems:[], notices:[], newBus:[] };
   var seenId = {};
-  /* The disambiguated guesses, once for the whole file (§93.8), so a row whose
-     Name column repeats what the register already shows is not offered as a
-     change to take. */
-  var dnames = displayNames();
 
   /* ── AN ADDRESS MAY ONLY EVER REACH ONE ROW (§83, kept whole) ─────
      Sign-in takes the address on the register, so two people holding one turns
@@ -2103,8 +1971,7 @@ function planPeopleFile(rows){
        no line at all. */
     var at = "Row " + (i + 2);
     var id     = fileTxt(r["Emp ID"]);
-    var name   = fileTxt(fileFullName(r));
-    var known  = fileTxt(fileKnownName(r));
+    var name   = fileTxt(r["Name"]);
     var email  = fileTxt(r["Email"]);
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
@@ -2344,11 +2211,6 @@ function planPeopleFile(rows){
     var row = { at:at, id:id, key:existing ? existing.key : null,
                 matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
-                /* Never falls back to the existing value the way `name` does:
-                   blank means the file has nothing to say about it, and a
-                   pick is only offered where the file actually says something
-                   different (§54's rule, unchanged). */
-                known:known,
                 title:fileTxt(r["Job title"]), email:email,
                 phone:fileTxt(r["Mobile"]), mainbu:buName, where:where,
                 role:roleKey, wantActive:wantActive,
@@ -2358,7 +2220,7 @@ function planPeopleFile(rows){
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
-    peopleRowPicks(row, conflict ? null : existing, dnames);
+    peopleRowPicks(row, conflict ? null : existing);
     plan.rows.push(row);
   });
   return plan;
@@ -2381,31 +2243,19 @@ function planPeopleFile(rows){
    A BLANK CELL IS STILL "NOTHING TO SAY" and never appears here at all — it is
    the rule the whole file is read under (§54) and it did not change. */
 var PEOPLE_FILE_PICKS = [
-  { k:"name",   label:"Full Name" },
-  /* A PICK LIKE ANY OTHER (§93.8). What somebody is CALLED is the field most
-     likely to have been typed here by the SMO and left alone in the export, so
-     it is exactly the field a file must not overwrite quietly — §87's ruling
-     that the register wins by default, applied to the one column that exists
-     because a person corrected it. */
-  { k:"known",  label:"Name" },
+  { k:"name",   label:"Name" },
   { k:"title",  label:"Job title" },
   { k:"email",  label:"Email" },
   { k:"phone",  label:"Mobile" },
   { k:"mainbu", label:"Official BU" }
 ];
-function peopleRowPicks(row, existing, dnames){
+function peopleRowPicks(row, existing){
   row.picks = [];
   if (!existing) return row;
   PEOPLE_FILE_PICKS.forEach(function(f){
     var now = fileTxt(row[f.k]);
     if (!now) return;
-    /* WHAT IS ON THE REGISTER, not what is stored under that key (§93.8).
-       `known` is absent for anybody who never corrected it, and the register
-       shows the GUESS in its place — so comparing against the raw field would
-       report a file repeating that guess as a difference, and offer 33 picks
-       that change nothing anybody can see. */
-    var was = f.k === "known" ? fileTxt(knownName(existing, dnames))
-                              : fileTxt(existing[f.k]);
+    var was = fileTxt(existing[f.k]);
     var same = f.k === "mainbu" ? mainbuKey(was) === mainbuKey(now)
                                 : was === now;
     if (same) return;
@@ -2477,7 +2327,7 @@ function peopleRowEffective(row){
 function peopleRowChoose(row, choice){
   row.choice = choice;
   var eff = peopleRowEffective(row);
-  peopleRowPicks(row, eff.key ? personBy(eff.key) : null, displayNames());
+  peopleRowPicks(row, eff.key ? personBy(eff.key) : null);
   return row;
 }
 
@@ -2499,10 +2349,6 @@ function applyPeopleFile(plan){
                             where:row.where });
       p = personBy(key);
       if (!p) return;
-      /* Through the setter, so a file that repeats the guess stores nothing
-         (§93.8) — otherwise every uploaded row would carry a `known` that
-         freezes at whatever the full name was on the day of the upload. */
-      if (row.known) setKnownName(p, row.known);
     } else {
       /* ONLY WHAT WAS TICKED (§87.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
@@ -2510,12 +2356,7 @@ function applyPeopleFile(plan){
          is there anything to write. The employee number is the exception and
          is not a pick: it is the identity the row was matched ON, or the
          number a conflict was answered by accepting. */
-      /* Through setKnownName() for `known`, so taking a value that happens to
-         equal the guess stores nothing rather than freezing it (§93.8). */
-      row.picks.forEach(function(f){
-        if (!f.take) return;
-        if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
-      });
+      row.picks.forEach(function(f){ if (f.take) p[f.k] = f.now; });
       if (row.id) p.empId = row.id;
       /* Only when there is somewhere to put them. A person whose department
          maps to nothing keeps whatever attachment they already had — moving
@@ -3649,17 +3490,10 @@ function reaches(unitKey){
 /* A plan ARRIVES by upload and is corrected by the SMO alone (§22, §31). A
    unit owner holding edit on their own unit still cannot rewrite the plan they
    are measured against — that is the point of the rule, and it does not depend
-   on a grant.
-
-   §94 WIDENED IT TO THE WHOLE STRATEGY TAB, so the sentence above is now one
-   case of a general one and this function is that one asked about the plan.
-   `SMPRules.mayAuthorPage()` holds the list of pages and the reasoning; the
-   answer is the shared file's so the screen and the server cannot drift. */
-function mayAuthor(acKey, target){
-  return SMPRules.mayAuthorPage(world(), viewer(), acKey,
-    target === undefined ? TARGET : target);
+   on a grant. */
+function mayEditPlan(){
+  return inOffice() && grant("u_plan") === "edit";
 }
-function mayEditPlan(){ return mayAuthor("u_plan"); }
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person
@@ -4935,27 +4769,6 @@ function themeStats(ab){
    weighting all ask it, so a retired unit cannot linger in one of them. */
 function activeKeys(){
   return UNIT_KEYS.filter(function(k){ return UNITS[k].active !== false; });
-}
-
-/* ── THE UNITS NOBODY IS KEEPING (§93.4) ──────────────────────────────
-   Islam: "I want as well to leave a note somewhere by how many units that
-   doesn't have custodians."
-
-   It belongs on the register, because the register is where the gap is CLOSED:
-   a custodian is given from a row here, so a count anywhere else would name a
-   problem and point at a different page.
-
-   A RETIRED PERSON IS NOT A CUSTODIAN. The seat is a key on the unit and
-   retiring somebody revokes their roles (§35) — but the pointer is still
-   written, so asking whether the field is empty would report a unit as covered
-   by somebody who cannot sign in. It asks whether a person is there AND
-   active, which is the same test `personRoles()` applies from the other end. */
-function unitsWithoutCustodian(){
-  return activeKeys().filter(function(k){
-    var c = ((UNIT_ROLES[k] || {}).custodian) || null;
-    var p = c ? personBy(c) : null;
-    return !p || !personActive(p);
-  });
 }
 
 /* ── COMPILING A SET OF UNITS (§68) ───────────────────────────────────

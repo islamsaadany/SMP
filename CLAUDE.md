@@ -438,6 +438,90 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **THE STRATEGY TAB IS AUTHORED BY THE OFFICE, AND ONLY THE PLAN EVER WAS
+  (§94):** Islam, asked whether he meant the plan or the tab — *"I tested and
+  the custodian found the pens."* §31's argument (a plan correctable by the
+  person measured against it is a different decision from one correctable by
+  its custodian) is exactly as true of the **aspiration** the objectives hang
+  off, the **SWOT** the pillars were reasoned from and a **capability's
+  definition** — and only the plan had ever been asked, so a custodian could
+  not touch the measures and could rewrite the aspiration above them.
+  `STRATEGY_PAGES` in `lib/rules.js` names the five once (`u_found`, `u_anal`,
+  `u_plan`, `k_found`, `k_proj`) and `mayAuthorPage()` is the ONE question both
+  sides ask. **THE UNIT OF THE DECISION IS THE PAGE, NOT THE AREA**: `a_unit_own`
+  also carries Performance and My reporting, so closing the area would take
+  **reporting** away in order to withhold authoring. **THE GATE IS ON THE
+  CONTROL** — `penBtn()` and `editBar()` draw every pen in the platform and both
+  ask `mayAuthor()`, so a pen added to a strategy page later is gated the day it
+  is added (§42, on the screen). **AND THE FIELDS ASK AGAIN**, because
+  `EDIT_PAGE` is a switch and the viewer switcher repainted **without leaving
+  modes** — `authoring(page, acKey)` takes the ACCESS KEY, since the group's
+  Foundation and a unit's share one page key and only one is a strategy page.
+  **REORDERING IS AUTHORING**: `canArrange()` ended at the raw grant, so the pen
+  was closed to a unit owner and the drag handles were not — and
+  `lib/authorize.js` compares row ids IN ORDER, so every one of those drags was
+  already being refused on save. **THREE DRIFTS, ALL SCREEN-SAYS-YES /
+  SERVER-SAYS-NO**: `unitPlan` asked `isSMO` while the pen asked `inOffice()`
+  (an SMO team member was offered the plan pen on every unit and refused every
+  time); `capPlan` asked only the function's grant, so a function head could
+  write with the API what the screen would not draw; and `hasRole("super")` was
+  the TENTH place meaning the office (§89 named nine). **NOT on the list,
+  deliberately**: the group's own pages, every reporting page, and **Strategy ›
+  Who enters** — behind a tenant switch that is off by default, so turning it on
+  is the office deliberately handing naming to the custodian (spec 008 §3B), and
+  **a rule cannot close a door somebody has to open on purpose.**
+- **PEOPLE OPEN WHERE THEY WORK, AND THE GROUP IS A PLACE (§94.6):** a unit has
+  opened on Strategy › Plan since §28; what never happened is WHICH destination
+  opens — `var current = "group"` was a literal, and `paintUnits()` only corrects
+  `current` when it names somewhere unreachable, which the group never is. So
+  every session started on a group score the viewer often does not own.
+  `entryDest()` answers the door, `entrySub()` the page, and where somebody sits
+  is **`personAt()`** — the one pair that answers that (§54). **"group" needs no
+  special case and excluding it broke the SMO**: the first entry in the
+  navigation row is the group/company DROPDOWN, which carries no key, so "the
+  first door" is the first BUSINESS UNIT and the SMO opened on Mobile. Found by
+  the check, in the line that looked too obvious to assert. And **the target is
+  the destination being asked about**: `entrySub()` called `allowed()` with no
+  target, which falls back to the global `TARGET`, and both callers ask before
+  `paint()` has moved it — so a unit head walking from the group to their own
+  unit had their unit's tabs judged against `"group"`.
+- **REPORT IS THE ONE SOLID BUTTON, AND THE LEGEND GETS OUT OF ITS WAY (§94.8,
+  REVERSED IN PART BY §94.9 THE SAME DAY):** asked for a row of its own —
+  *"bring the 2 buttons above the reading colours rectangle"* — built, looked
+  at, and then: *"we can leave the 2 buttons in the same line with the reading
+  colours and we can even shrink the reading colours a bit in font size so the
+  buttons are more obvious."* **THE PROBLEM WAS NEVER WHERE THE BUTTONS WERE**
+  — it was that two 12px uppercase controls sat against a 12.5px legend in the
+  same weight of grey, so **moving them spent a whole row of vertical space to
+  solve a CONTRAST problem.** The legend drops to 10.5px (label 9.5px, dots 10px,
+  because a 13px circle beside 10.5px type is a bullet not a swatch) and the row
+  now reads in three volumes. **10.5px IS THE FLOOR AND IT IS THE PRODUCT'S
+  OWN** — the size every uppercase key already wears, with the label at
+  `--fs-micro` beneath it, so the legend is as quiet as anything the product
+  says rather than quieter than everything: Report shouts, Presentation speaks, the legend
+  explains. `.pageact` stays what it was — the function's page's row.
+  **AND THE CHECK CHANGED INTO A BETTER CHECK**: it had asserted a POSITION,
+  which a reversal makes false and which was never the point; it asserts the
+  **order of loudness** now. *A check written against the last instruction has
+  to be rewritten every time somebody changes their mind; a check written
+  against the PROBLEM survives it.* **THE ORANGE IS TWO TOKENS, BECAUSE
+  §38.4 CUTS BOTH WAYS**: the bright orange that works as a FILL cannot carry
+  white type (2.46:1) and the deep orange that works as TYPE cannot carry the
+  page's ink — so `--cta` / `--cta-ink` are declared together, one line per
+  palette, both values already in it (5.54 / 5.18 light, 7.26 / 7.89 dark).
+  **One fill, once**: drawn only while a cycle is OPEN and only for somebody who
+  may report, so §41's budget holds. The *Submitted* badge inside it is an
+  OUTLINE — a white wash lightens the ground under its own text to about 4.2:1.
+- **A CHECK THAT ONLY LOOKS FOR SOMETHING PRESENT CANNOT SEE A CONTROL THAT
+  SHOULD NOT BE DRAWN (§94.2, §94.5):** every plan-edit check counted fields and
+  handles behind the pen and every one ran as the SMO, so none would ever have
+  noticed the custodian's. `src/checks/strategy-office.py` asks each closed door
+  TWICE — of the screen and of the shared rule — and asserts BOTH ENDS, or a
+  build with the pen removed for everyone would pass. Same day, the same fault
+  in the suite: **`test-authorize.js`'s "may not touch the access matrix" set a
+  value to what it already was**, so `same()` saw no change, the save was allowed
+  with an EMPTY change list, and §89's gravest rule had never once run while the
+  suite printed *155 passed*.
 - **THE OFFICE IS TWO ROLES (§89):** **SMO team** sits under Super user with the
   SAME grants in every area — the difference could not be a cell, because
   narrower areas would take away whole pages to withhold three acts. It is
@@ -1000,7 +1084,54 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
+*Last Updated: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
+solid button** (&sect;94). Three asks in one message, two of them half built
+already, and finding out which half is most of the section. **"I TESTED AND THE
+CUSTODIAN FOUND THE PENS"** &mdash; &sect;31 closed the PLAN and nothing else,
+so a strategy custodian could not touch the measures and could rewrite the
+**aspiration above them**, which is not a smaller grant but a stranger one. The
+whole tab is the office's now, named once in `lib/rules.js` as five PAGES and
+not as an area, because the area also carries Performance and My reporting and
+closing it would take reporting away to withhold authoring. **THE GATE IS ON THE
+CONTROL**, so a pen added later is gated the day it is added; and **the fields
+ask again**, because the viewer switcher repainted without leaving modes and an
+open pen followed the SMO into a custodian's view. **REORDERING IS AUTHORING**
+&mdash; and it was already being refused on save, so &sect;63.3's explicit
+Arrange button had been handing a BU head something the server would never
+accept. Three drifts found, all screen-says-yes / server-says-no and two of them
+inside the file that exists to prevent it: `unitPlan` asked for a **Super user**
+while the pen asked for the **office**, so an SMO team member was offered the
+plan pen everywhere and refused every time. **PEOPLE OPEN WHERE THEY WORK**:
+`var current = "group"` was a literal and the correction only runs for an
+unreachable destination, so every session started on a group score the viewer
+often does not own &mdash; and excluding "group" as a special case put the SMO on
+Mobile, because the first entry in the navigation row is a DROPDOWN with no key
+of its own. **REPORT GOES SOLID, AND THE LEGEND GETS OUT
+OF ITS WAY**: asked out of the band legend into a row of its own, built, looked
+at, and asked back &mdash; **the problem was never where the buttons were**, it
+was that two 12px controls sat against a 12.5px legend in the same grey, so the
+move spent a row of vertical space to solve a CONTRAST problem. The legend drops
+to 10.5px instead &mdash; the size every uppercase key in the platform already
+wears &mdash; and the row reads in three volumes. The orange is **two tokens**,
+because &sect;38.4 cuts both ways &mdash; the bright orange that works as a fill
+cannot carry white type, the deep one that works as type cannot carry the page's
+ink. And the check changed into a better check: it had asserted a POSITION, which
+a reversal makes false; it asserts the **order of loudness** now. And the day's lesson twice over: **a
+check that only looks for something PRESENT cannot see a control that should not
+be drawn** &mdash; every plan-edit check ran as the SMO &mdash; while
+`test-authorize.js`'s most important assertion **set a value to what it already
+was**, so &sect;89's gravest rule had never once run and the suite printed 155
+passed while saying so. **MERGED WITH &sect;93 FROM ANOTHER BRANCH**, built the
+same day: Employee stops being a role (the floor stays, as *Everyone else* on the
+matrix &mdash; nobody HOLDS it, so `personRoles()` returns `[]` and the chip that
+could never be taken off is gone), the password column stops saying "none" when
+it means "we never asked", and the register's Name column splits into Name and
+Full Name. **Numbered &sect;94 because &sect;93 reached `main` first** &mdash;
+and the two sections found the SAME no-op assertion in `test-authorize.js`
+independently, which is the part worth keeping: a check that could not fail was
+invisible to two people reading the same file for two unrelated reasons.*
+
+*Earlier: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the
 registry"* &mdash; and nothing in the resolver was wrong: **the three people were
 on the register twice.** Once from the employee file with an address and a long

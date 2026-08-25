@@ -115,17 +115,6 @@
      palette the layer proves itself against — but it is NO LONGER the bare
      :root default: see FOREFRONT below. */
   :root[data-palette="slate"], :root[data-palette="slate"][data-theme="light"] {
-    /* ── THE CALL TO ACTION (§93) ─────────────────────────────────
-       ONE solid fill in the product, worn by Report during an open cycle.
-       Two tokens, because §38.4 cuts both ways: the bright orange that works
-       as a FILL on a card cannot carry white type (2.5:1), and the deep
-       orange that works as TYPE is too dark to read the page's own ink off.
-       So light themes take the deep orange with white on it and dark themes
-       take the bright one with the page's near-black — measured, not guessed.
-       Both values are already in this palette; nothing new is invented, so a
-       tenant's branding recolours the button with everything else. */
-    --cta:#C2410C; --cta-ink:#FFFFFF; --cta-hover:#9A3412;
-
     --good-tx:#047857; --attn-tx:#B45309; --warn-tx:#C2410C; --bad-tx:#B91C1C;
     --on-accent:#FFFFFF; --panel-accent:#A5B4FC;
     --panel-quiet:#94A3B8; --panel-hover:#1E293B;
@@ -147,8 +136,6 @@
     --on-fill:#FFFFFF;
   }
   :root[data-palette="slate"][data-theme="dark"] {
-    --cta:#FB923C; --cta-ink:#0B1120; --cta-hover:#FDBA74;
-
     --good-tx:#6EE7B7; --attn-tx:#FCD34D; --warn-tx:#FDBA74; --bad-tx:#FCA5A5;
     --on-accent:#0B1120; --panel-accent:#A5B4FC;
     --panel-quiet:#8B97A9; --panel-hover:#16203A;
@@ -177,8 +164,6 @@
      when nothing has decided must be what the product actually is. */
   :root,
   :root[data-palette="forefront"], :root[data-palette="forefront"][data-theme="light"] {
-    --cta:#A4512C; --cta-ink:#FFFFFF; --cta-hover:#8F4423;
-
     --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
     --on-accent:#16325C; --panel-accent:#E6C65C;
     --panel-quiet:#B7C4D8; --panel-hover:#24487A;
@@ -199,8 +184,6 @@
     --on-fill:#FFFFFF;
   }
   :root[data-palette="forefront"][data-theme="dark"] {
-    --cta:#E1935F; --cta-ink:#14161A; --cta-hover:#EDAF83;
-
     --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
     --on-accent:#14161A; --panel-accent:#E6C65C;
     --panel-quiet:#9AA6B8; --panel-hover:#1A2030;
@@ -257,16 +240,6 @@
   .skip:focus { left:0; }
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
   .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
-
-  /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
-     All four containers together, or the chrome sits indented from the page
-     beneath it. 1600px rather than none at all: a table stretched across a
-     32-inch monitor puts its first and last column a head-turn apart, and the
-     register's frozen columns exist precisely so the eye has an anchor. */
-  :root[data-wide] .wrap,
-  :root[data-wide] .top-in,
-  :root[data-wide] .units-in,
-  :root[data-wide] .tabs-in { max-width:1600px; }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }

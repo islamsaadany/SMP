@@ -11337,3 +11337,231 @@ here (§58.3), so a row carrying only that is still a row nobody has placed.
 **Decided on the server**, like the short list beside it and for the same reason:
 a page that decides whether to ask has decided nothing, because it still had the
 question.
+---
+
+## 94 · The strategy tab is the office's, people open where they work, and Report goes solid (v3.25)
+
+> **Numbered §94, not §93.** This work and the register's were built in two
+> sessions on the same day; §93 reached `main` first, so it keeps the number
+> and this took the next one. Recorded rather than silently renumbered,
+> because the two sections found the SAME broken assertion in
+> `test-authorize.js` independently — see §94.5 and §93's own note — and that
+> coincidence is the useful part: a check that could not fail was invisible to
+> two people reading the same file for two unrelated reasons.
+
+
+Three asks in one message, on 2026-08-25. Two of them turned out to be half
+built already, and finding out which half is most of what this section is.
+
+### 94.1 "Don't allow anyone else other than the SMO and super user to edit the strategy tab"
+
+Islam added *"these are already set"*, which was true of exactly one page of
+four. Asked whether he meant the plan alone or the whole tab, he answered:
+*"I tested and the custodian found the pens."*
+
+**§31 CLOSED THE PLAN AND NOTHING ELSE.** A plan arrives by upload and is
+corrected by the SMO alone — *a plan correctable by the person measured against
+it is a different decision from one correctable by its custodian.* That argument
+is exactly as true of the **aspiration** the objectives hang off, the **SWOT**
+the pillars were reasoned from, and the **definition** of a capability. Only the
+plan had ever been asked, so a strategy custodian could not touch the measures
+and could rewrite the aspiration above them. **That is not a smaller grant, it
+is a stranger one.**
+
+`STRATEGY_PAGES` in `lib/rules.js` names the five pages once — `u_found`,
+`u_anal`, `u_plan`, `k_found`, `k_proj` — and `mayAuthorPage()` is the one
+question both sides ask.
+
+**THE UNIT OF THE DECISION IS THE PAGE, NOT THE AREA.** `a_unit_own` also
+carries Performance and My reporting, which the unit's own people must keep, so
+closing the area would have taken **reporting** away in order to withhold
+authoring. Three things are deliberately NOT on the list: the group's own pages
+(Islam said *units or functions*, and `a_group` edit is the office's already),
+every reporting page, and **Strategy › Who enters** — which is a section of the
+tab, but sits behind a tenant switch that is off by default, and turning it on
+is the office deliberately handing naming to the custodian (spec 008 §3B). **A
+rule cannot close a door somebody has to open on purpose.**
+
+That third one was raised as an open question at handover rather than decided
+quietly, because it is the one place where §94.1 read literally and §94.1 read
+for its reason disagree. **Islam, asked directly: "leave it."** So it is his
+ruling and not a judgement call left inside the code — which matters, because
+the next person to read `STRATEGY_PAGES` will find one page of the tab missing
+from it and should find out why here rather than guessing.
+
+The switch is `Setup › Figure sets → Edit`, *"Unit custodians may name who
+enters a figure"*, and it ships **Off** — so today the section does not exist
+for anybody, the SMO included. If it is ever turned on, this is the decision to
+revisit: at that moment a unit owner and a strategy custodian gain a section of
+the Strategy tab, and that will be on purpose.
+
+### 94.2 The gate is on the control, not on the eleven call sites
+
+`penBtn()` and `editBar()` both began `if (grant(acKey) !== "edit") return ''`,
+and every pen in the platform is drawn by one of them. They ask `mayAuthor()`
+now, so **a pen added to a strategy page later is gated on the day it is added**
+and not on the day somebody remembers — §42's fall-through rule, on the screen
+instead of the server.
+
+**AND THE FIELDS ASK AGAIN.** `EDIT_PAGE` is a switch, and a switch survives
+things a grant does not: the viewer switcher repaints **without leaving modes**,
+so an open Foundation pen followed the SMO into a custodian's view and the
+fields stayed editable for somebody the rule closes them to. `authoring(page,
+acKey)` is the pair asked together — and it takes the **access key** and not
+just the page name, because the group's Foundation and a unit's share one page
+key and only one of them is a strategy page. The viewer switch calls
+`leaveModes()` now, which every other navigation in the platform has done since
+§63.1.
+
+### 94.3 Reordering is authoring, and it was already being refused
+
+`canArrange()` ended at `grantAt("u_plan", unitKey) === "edit"` — held by a unit
+owner and a strategy custodian on their own unit. **So the pen was closed to
+them and the drag handles were not**, and the order of a plan is as much a part
+of what was agreed as its words.
+
+It was not even a working grant. `lib/authorize.js` compares the row ids **in
+order**, so every one of those drags was classified as a plan change and
+**refused on save**: the rows moved on screen and the save came back rejected.
+§63.3 had kept an explicit Arrange button *precisely* so a BU head with no pen
+could still reorder, and it had been handing them something the server would
+never accept. That button no longer draws for them.
+
+### 94.4 Three drifts, all in the direction the screen says yes and the server says no
+
+The rule `lib/rules.js` exists to prevent, found three times in one afternoon —
+twice inside the file that enforces it.
+
+- **`unitPlan` asked `isSMO`** — the Super user — while the pen asked
+  `inOffice()`. **An SMO team member was offered the plan pen on every unit and
+  every save came back refused**, for as long as §89's role has existed.
+- **`capPlan` asked only `edits(…, "fn", …)`** — so a function head could write
+  with the API what the screen would not draw for them. A capability's
+  definition, key objectives and projects **are** a supporting function's
+  Strategy tab.
+- **`hasRole("super")` was the tenth place meaning "the office"** (§89 named
+  nine). A function's Reporting page let a Super user report past a locked cycle
+  and a unit's asked `inOffice()`, so the two sides of the navigation switch
+  disagreed (§53.5) — and the server refused both. All four `locked && !smo`
+  gates are `!office` now.
+
+### 94.5 And the most important test in the suite could not fail
+
+*"1 · may not touch the access matrix"* set `access.smoteam.a_setup` to
+`"edit"` — **which it already was**. The mutation produced an identical map,
+`same()` saw no change, and the save was allowed with an **empty** change list.
+So §89's first and gravest rule had never once been exercised, and the suite
+printed *155 passed* while saying so. §54's lesson in its purest form: **a check
+that cannot fail is not a check.** It moves a row that is genuinely different
+now, and the suite gained the two halves §94 needed on both sides of the switch.
+
+The two tests asserting that a unit head **may** write their own foundation and
+SWOT were **moved, not deleted**: what changed is the answer, and a deleted test
+would leave nothing saying the answer used to be the other one.
+
+### 94.6 "The default opening page for the users is on the plan in the strategy"
+
+Half true since §28: a unit opens on Strategy › Plan and a function on Strategy
+› Projects. What was never true is **which destination opens** — `var current =
+"group"` was a literal, and `paintUnits()` only corrects `current` when it names
+somewhere the viewer cannot reach. The group is reachable by nearly everybody,
+**so the correction never ran**: a unit head signed in, read a group score they
+do not own, and had to find their own unit before reaching the plan.
+
+`entryDest()` answers the door and `entrySub()` answers the page. Where somebody
+sits is **`personAt()`** — the one pair that answers that question (§54), the
+same answer the register shows and the people file writes, so moving somebody to
+another unit moves where they open with nothing else to change. **Attached to
+the group means the group**: the SMO and the group CEO both sit there, and for
+them the group's Performance page *is* their own place.
+
+**AND IT IS CHECKED, NEVER ASSUMED** — against the list `paintUnits()` has just
+built of every destination this viewer can open, so somebody attached to a unit
+their roles no longer reach lands where they landed before this existed.
+
+### 94.7 The target was the one on screen, not the one being asked about
+
+`entrySub()` called `allowed(defsFor(k))` with no target, and `allowed()` falls
+back to the global `TARGET` — which **both** callers ask before `paint()` has
+moved it. So a unit head walking from the group to their own unit had their
+unit's tabs judged against `"group"`. It is the exact fault the long note beside
+`TARGET` in `paint()` records, sitting in the one place that had not been
+corrected; found only because §94.6 made that path the FIRST thing that runs.
+
+### 94.8 Report is the one solid button in the product
+
+Islam: *"the report button in performance make it all orange to obvious for the
+user and bring the 2 buttons above the reading colours rectangle."*
+
+**A REFERENCE STRIP IS NOT A PLACE FOR ACTIONS.** Report and Presentation rode
+in `.bands-act`, at the right-hand end of the band legend — a strip whose whole
+job is explaining what the colours below it mean — and on a narrow window they
+**wrapped with it and moved**. They take `.pageact` now, which is **not a new
+component**: a supporting function's Performance page has carried exactly that
+row since §63, so this is the unit catching up with the function (§53.5). The
+group's page still puts Arrange in the legend, which is where a control that
+rearranges the thing being explained belongs.
+
+**THE ORANGE IS TWO TOKENS, BECAUSE §38.4 CUTS BOTH WAYS.** The bright orange
+that works as a FILL on a card cannot carry white type (2.46:1); the deep orange
+that works as TYPE is too dark to read the page's own ink off. So `--cta` /
+`--cta-ink` are declared together, one line per palette, both values already in
+the palette — light takes the deep orange with white (5.54, 5.18), dark takes
+the bright one with the page's near-black (7.26, 7.89). Nothing is invented, so
+a tenant's branding recolours the button with everything else.
+
+**IT IS ONE FILL, ONCE.** §41's accent budget is not broken by this: the button
+is drawn only while a cycle is OPEN and only for somebody who may report, so the
+page is back to its quiet register for the rest of the quarter. And the
+*Submitted* badge inside it is an **outline**, not a wash — a white wash lightens
+the ground under its own text to about 4.2:1, which is the fill/type trap again,
+one element in.
+
+### 94.9 And the move was reversed the same day, for a better reason
+
+Islam, having looked at the built row: *"I think we can leave the 2 buttons in
+the same line with the reading colours and we can even shrink the reading
+colours a bit in font size so the buttons are more obvious."*
+
+Recorded as a reversal rather than overwritten, because the second answer is
+right and it explains the first one's mistake. **THE PROBLEM WAS NEVER WHERE THE
+BUTTONS WERE.** It was that they read as quietly as the strip beside them: two
+12px uppercase controls against a 12.5px reference legend, all of it the same
+weight of grey. **Moving them spent a whole row of vertical space to solve a
+contrast problem** — and it worked, which is exactly why it was worth stopping
+to ask whether it was the right instrument.
+
+Making the legend smaller solves it where it is. The row now has one thing that
+shouts, one that speaks and one that whispers, in that order: Report solid at
+12px, Presentation outlined at 12px, the legend at 10.5px with its label at
+9.5px. **The colour dots come down with the text** — a 13px circle beside
+10.5px type stops being a swatch and becomes a bullet.
+
+**10.5px IS THE FLOOR, AND IT IS THE PRODUCT'S OWN.** Islam asked for one more
+step after seeing 11px, and this is where it stops: 10.5px is the size every
+uppercase key in the platform already wears, and the label at 9.5px is
+`--fs-micro`, the smallest type in the design language. So the legend is now as
+quiet as anything the product says rather than quieter than everything — which
+is a floor with a reason behind it, not a number that happened to look right. `.bands-act` gained a gap, because it
+now holds two controls where it held one and a solid button touching an outlined
+one reads as a single split control.
+
+§94.8's first half is therefore **not built**: the unit's Performance page keeps
+its legend row, and `.pageact` stays what it was — the function's page's row, and
+the group's Arrange still rides in the legend. The solid orange, the two tokens
+and the outlined badge all stand.
+
+**AND THE CHECK CHANGED WITH IT, INTO A BETTER CHECK.** It had asserted a
+POSITION — *Report has left the legend* — which a reversal makes false and which
+was never the thing that mattered. It asserts the **order of loudness** now: the
+legend must measure smaller than the buttons beside it, and its label smaller
+still. That is what was actually wrong, and it is what a later stylesheet edit
+could silently undo. **A check written against the last instruction is a check
+that has to be rewritten every time somebody changes their mind; a check written
+against the PROBLEM survives the change.**
+
+One trap on the way, and it is §50.6's: the first version measured
+`[data-present]` and reported the two buttons 127px apart **and overlapping at
+once**. Presentation is a `<details>`, so the element carrying that attribute is
+a menu ITEM inside the closed popup — it has a box, at a position that means
+nothing. What is on the row is the `<summary>`.

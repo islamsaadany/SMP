@@ -193,11 +193,7 @@
 
   /* Arrange rides in the legend row rather than a row of its own. */
   .bands { justify-content:flex-start; }
-  /* TWO CONTROLS NOW, NOT ONE (§94.9). Report and Presentation share this
-     slot on a unit's Performance page, so it needs a gap of its own — without
-     one they touch, and a solid button touching an outlined one reads as a
-     single split control. */
-  .bands-act { margin-left:auto; display:inline-flex; gap:8px; align-items:center; }
+  .bands-act { margin-left:auto; display:inline-flex; }
   .bands-act .editbtn { padding:5px 14px; }
 
   /* The two buttons that leave hold the far right of the first line, grouped
@@ -366,27 +362,6 @@
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
   .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
-  /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
-     and exactly the same 920px: the role picker's pair were bounded and the
-     pair that appear when a ROW is opened for editing were not, because they
-     are plain `select.fld` and nothing named them. Opening any row therefore
-     blew the table to 1516px inside a 920px box and pushed Email, Roles and
-     Status past the edge — a row you cannot finish editing.
-
-     Converting some members of a family and leaving the others is how the
-     second one gets forgotten (§40); this is that, a version later, in the
-     file that records the rule. Named by their data attributes so the next
-     select added to this row is bounded by being given one. */
-  .cfg .peoplecfg select[data-pmainbu]:not(.ss-native),
-  .cfg .peoplecfg select[data-pat]:not(.ss-native) { min-width:0; width:auto; max-width:164px; }
-  /* THE OPEN ROW'S TEXT FIELDS WERE CAPPED HERE AND THE RULE WAS REMOVED
-     (§93.10). It computed — `max-width` read back as the value written — and
-     the field still measured 170px, at every value tried. Whatever the browser
-     is resolving it against under this auto layout, it is not the cap, so the
-     rule changed nothing and a rule that changes nothing is worse than no rule
-     (§37). The 12px of overlap it was aimed at is cosmetic and recorded rather
-     than papered over; what actually closed the gap was capping the CELLS
-     (config.css, §93.10), which took the open table from 1608px to 1452px. */
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
   /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
@@ -989,15 +964,7 @@
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
   .phead2 .secttl{font:400 24px/1.2 var(--serif);margin:0}
-  /* IT WRAPS, or a chip added later pushes the buttons off the page (§93.4).
-     `.phead2` has always wrapped; `.hright` did not, so it stayed one row and
-     simply overflowed its pane — and the register's Register file button went
-     out of reach the moment the units-with-no-custodian count joined five other
-     chips. §90's fault a third time: the control was in the document, styled,
-     enabled and unclickable, and only a screenshot showed it. `min-width:0` is
-     what lets the row shrink at all inside a flex parent. */
-  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px;
-                  flex-wrap:wrap;justify-content:flex-end;min-width:0}
+  .phead2 .hright{margin-left:auto;display:flex;align-items:center;gap:8px}
   .phead2 .chip{font-size:11.5px;color:var(--ink-3);background:var(--surface-2);
     border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap}
   .iconwrap{position:relative;display:flex;gap:6px;margin-left:6px}
@@ -1023,26 +990,3 @@
   .iconwrap .menu .cq{padding:11px 14px 8px;border-bottom:1px solid var(--line-soft)}
   .iconwrap .menu .cq b{font-size:13.5px}
   .iconwrap .menu button.danger{color:var(--bad);font-weight:600}
-
-  /* ── THE ACCESS MATRIX'S HEADERS WRAP (§93.11) ────────────────────
-     Islam: "roles and access headers needs to be wrapped."
-
-     Seven of the eight headers are a phrase that says what the column covers —
-     "Other supporting functions", "Own business unit" — and §88's one-line
-     standard (`.cfg table thead th { white-space:nowrap }`) turned every one of
-     them into a line running straight across its neighbour. config.css had
-     said `white-space:normal` for this table since the table existed; §88 was
-     written later in the same file, broader, and won.
-
-     IT IS HERE BECAUSE THIS FILE IS CONCATENATED LAST. A more specific rule
-     placed beside the standard in config.css did not take effect — and not
-     because of the cascade: `matches()` confirmed the selector hit the
-     element, `!important` changed nothing, and the browser's own stylesheet
-     did not contain the rule at all. Whatever swallowed it, arrange.css is
-     where this table's exceptions already live for the same reason (§69), and
-     putting it here is a two-line fix rather than an afternoon.
-
-     `.cfg.acgrid`, not `.cfg .acgrid`: both classes sit on the same element. */
-  .cfg.acgrid table thead th { white-space:normal; overflow-wrap:break-word;
-                               max-width:none; overflow:visible;
-                               text-overflow:clip; vertical-align:bottom; }

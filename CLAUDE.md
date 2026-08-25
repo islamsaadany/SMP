@@ -962,10 +962,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   and JPEG with the smaller kept** — a screenshot is smaller as PNG, a
   photograph seven times smaller as JPEG, and the file's own type predicts
   neither. No migration: it lands in the `review` row's `extra`.
-- **ONE TABLE, TWO HALVES (§97, amending §53.4):** a project's two kinds of
+- **ONE TABLE, TWO HALVES (§99, amending §53.4):** a project's two kinds of
   evidence are still ONE table on all three project panes, and the SCORE still
   keeps them apart half per SIDE (`projPerf`) — reading them together and
-  scoring them together are different questions, and §97 changes neither
+  scoring them together are different questions, and §99 changes neither
   answer. What went is the single **header row**: `Measured as` named the
   delivery kind on a deliverable and the **direction** on an outcome, and
   `Target` (plus `Measured at` on the plan pane) stood empty for every
@@ -992,7 +992,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   including both spellings through the real reader; it was proved able to fail
   before it was trusted (§94.5). **A cell holding a CONTROL is answered even
   when it reads empty**, or the check flags the reporting pane it helps most.
-  **A HALF THAT IS NOT THERE IS NOT DRAWN (§97.7, reversing the first build the
+  **A HALF THAT IS NOT THERE IS NOT DRAWN (§99.7, reversing the first build the
   same hour):** an empty half first drew its band, its column strip and a
   dimmed *"No outcomes yet"*, on §45.2's rule. Islam: *"the presence of
   outcomes or deliverables that would make the sub table appear or not, not to
@@ -1011,7 +1011,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   empty half**, so the check MAKES the state and asserts against an exact list
   including an empty one (§94.2).
   **READS BECOMES PERFORMANCE, AND A DELIVERABLE'S KIND STAYS IN THE PLAN
-  (§97.8):** *"should the user submit % of progress? And Reads is a strange
+  (§99.8):** *"should the user submit % of progress? And Reads is a strange
   title."* The first was **already answered by the plan** — `kind` decides how
   a deliverable is reported (`binary` → a 100-or-0 dropdown, `pct` → a
   percentage box), so a % is available by setting *Measured as*. Nothing built,
@@ -1030,7 +1030,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   label off the page and compares the two halves to each other (§53.5) —
   *a check written against the problem survives somebody changing their mind
   about the wording.*
-  **STILL BROKEN AND DELIBERATELY NOT FIXED (§97.6):** `projPlanBody` defines
+  **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:
   what a drop between the two halves means is a decision.
@@ -1241,7 +1241,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **&sect;97: one table, two halves.** It opened
+*Last Updated: 2026-08-25 &mdash; **&sect;99: one table, two halves.** It opened
 as a question about a column that was there &mdash; *"for the project plans the
 milestones has no due date? or am I confused?"* &mdash; and he was not confused
 about the screen: a milestone has carried `finish` since the capability model
@@ -1273,10 +1273,10 @@ half's colspans adding up to the same grid, both halves ending at the same
 pixel &mdash; proved able to fail before it was trusted, and taught two things
 that would have made it lie (**a cell holding a CONTROL is answered even when it
 reads empty**, and **Reporting is a MODE**, so pressing for a section row landed
-on Performance twice). **Found and NOT fixed (&sect;97.6):** `projPlanBody`
+on Performance twice). **Found and NOT fixed (&sect;99.6):** `projPlanBody`
 defines `sortAttr()` and applies it to neither table, so a project's drag grips
 are bound to nothing &mdash; and `qa.py` reports "14 handles" because it counts
-them.* **AND THE EMPTY HALF WENT, AN HOUR AFTER IT SHIPPED** (&sect;97.7):
+them.* **AND THE EMPTY HALF WENT, AN HOUR AFTER IT SHIPPED** (&sect;99.7):
 asked *"if the project has no outcomes should the table appear?"* I said yes,
 on &sect;45.2's rule that a feature rendering nothing looks like one that was
 never built, and gave the strongest reason I had &mdash; `projPerf()` returns

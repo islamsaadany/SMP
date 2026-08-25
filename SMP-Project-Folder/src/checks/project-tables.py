@@ -1,4 +1,4 @@
-"""ONE TABLE, TWO HALVES (§97).
+"""ONE TABLE, TWO HALVES (§99).
 
 A deliverable and an outcome shared one header row on all three of a
 capability project's panes, so `Measured as` meant the delivery kind on one
@@ -289,7 +289,7 @@ with sync_playwright() as p:
     ck("the deck's score column says Performance", deck["perf"] > 0, deck["perf"])
     ck("the deck's milestone column says Due date", deck["due"] > 0, deck["due"])
 
-    # ── A HALF THAT IS NOT THERE IS NOT DRAWN (§97.7) ────────────────────
+    # ── A HALF THAT IS NOT THERE IS NOT DRAWN (§99.7) ────────────────────
     # THE POINT OF THIS BLOCK IS A CONTROL THAT SHOULD NOT BE DRAWN, which is
     # the one thing a check looking for something PRESENT can never see
     # (§94.2). No demo project has an empty half — 0 of 19 — so the state has

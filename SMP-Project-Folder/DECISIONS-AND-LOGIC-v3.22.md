@@ -12236,7 +12236,7 @@ table is out of the two-column grid, in a band, and as wide as the page it sits
 on — and, at the other end, that closing the pen leaves no band and puts the
 objectives back inside the card. A later change to the gutters or the grid ratio
 keeps it green; putting the table back inside a column does not.
-## 97 · One table, two halves (v3.25)
+## 99 · One table, two halves (v3.25)
 
 It began as a question about a column that was there: *"for the project plans
 the milestones has no due date? or am I confused?"* He was not confused about
@@ -12253,7 +12253,7 @@ Then the real ask: *"for deliverables and outcomes the mixing of both caused
 confusion. we can have them in 1 table but we need a split as outcomes has
 target and measure date and deliverables has measured as."*
 
-### 97.1 §53.4's argument survives; its header row does not
+### 99.1 §53.4's argument survives; its header row does not
 
 §53.4 put a deliverable and an outcome in one table with a **Type** column, and
 everything it argued is still true: they are two kinds of evidence that the
@@ -12276,7 +12276,7 @@ there were two per deliverable on the plan pane and one on each of the other
 two. The em-dash is the giveaway: it is the shape a table makes when it has been
 asked to hold two things at once.
 
-### 97.2 Still one table, split by a band
+### 99.2 Still one table, split by a band
 
 He said *1 table*, and it is one `<table>`. A band opens each half — the same
 ground `--panel` gives every table header in the product (§41.10), so a half
@@ -12299,7 +12299,7 @@ than two stacked:
 facts still end where the other one does** — a deliverable's *Measured as*
 spans the three columns an outcome uses for direction, target and date.
 
-### 97.3 Three things go with the split
+### 99.3 Three things go with the split
 
 **THE TYPE COLUMN.** The band above the rows already says which kind they are; a
 pill repeating it is the same fact twice — §93's one chip too many, in a
@@ -12316,7 +12316,7 @@ single *"add a row"* would have had to ask which kind — *a question the two
 buttons answer by existing*. The split answers it by where the button sits, so
 each says only its own name.
 
-### 97.4 Finish becomes Due date, on every surface and in both directions
+### 99.4 Finish becomes Due date, on every surface and in both directions
 
 The three panes, the review deck and both workbooks. **The stored field keeps
 its spelling** — renaming `finish` would be a migration for a word nobody
@@ -12329,7 +12329,7 @@ outcome sheets, under the same read-either rule.
 outcome stays as it is: a column heading is a noun and a pill is a sentence, and
 rewriting the sentence to match the noun would make it read worse.
 
-### 97.5 The check asserts the problem, not the layout
+### 99.5 The check asserts the problem, not the layout
 
 `src/checks/project-tables.py`, and the shape is §94.8's lesson taken
 seriously — *a check written against the last instruction has to be rewritten
@@ -12357,7 +12357,7 @@ Two things it had to be taught, both of which would have made it lie:
 cell injected into a live row is caught, and a colspan broken by hand is caught.
 A suite printing *all passed* is worth what its assertions can detect.
 
-### 97.6 Found while restructuring, not fixed: the drag handles reorder nothing
+### 99.6 Found while restructuring, not fixed: the drag handles reorder nothing
 
 `projPlanBody` defines `sortAttr()` and **never applies it to either table**, so
 a project's deliverables, outcomes and milestones draw drag grips in arranging
@@ -12372,7 +12372,7 @@ plan pane's rows now sit in two halves of one table, so what a drop between
 halves should mean is a decision, not a detail), and CLAUDE.md's rule is that
 touching something the user did not mention is asked first.
 
-### 97.7 A half that is not there is not drawn — reversed the same hour
+### 99.7 A half that is not there is not drawn — reversed the same hour
 
 The split first shipped with an empty half drawing its band, its column strip
 and a dimmed *"No outcomes yet"*, on §45.2's rule: **a feature that renders
@@ -12419,7 +12419,7 @@ project, the other half of the next and both halves of a third, then asserts
 what is drawn against an exact list, including an EMPTY one. §94.2's rule, and
 the only kind of assertion that can see a control that should not be there.
 
-### 97.8 Reads becomes Performance, and a deliverable's kind stays in the plan
+### 99.8 Reads becomes Performance, and a deliverable's kind stays in the plan
 
 Two asks in one message. *"On reporting, the in-progress for the deliverables —
 should the user submit % of progress? And Reads is a strange title, we need

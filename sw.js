@@ -69,7 +69,7 @@
    moment it is read. Checked here against origin/main and against every
    name this repository has ever carried: v3.25, b, c, d are used.
 
-   §97 STOPS TAKING THE NEXT LETTER. Twice in one day two sessions reached
+   §99 STOPS TAKING THE NEXT LETTER. Twice in one day two sessions reached
    for the same one, because "the next letter after the one main is serving"
    is a rule both of them can follow correctly and still collide on -- and
    when they do, git merges the bare line with no conflict at all while the
@@ -81,10 +81,10 @@
    of them is this one, which is the point of not being a letter.
 
    AND THE SAME FAULT HAS A THIRD FACE: the SECTION NUMBER in the decisions
-   document. This branch was written as §95, renumbered to §96 when main took
-   §95, and renumbered again to §97 when main took §96 -- three sessions on
-   one day, each correctly taking "the next number" from a main that had
-   moved since they read it. A sequential name claimed at AUTHORING time is
+   document. This branch was written as §95 and renumbered three times -- to
+   §96, to §97, and to §99 -- as main took §95, then §96, then §97 AND §98 in
+   one go. Four sessions on one day, each correctly taking "the next number"
+   from a main that had moved since they read it. A sequential name claimed at AUTHORING time is
    claimed against a snapshot; it is only real at MERGE time. Anything
    sequential and shared -- a cache name, a section number, a migration
    number -- is chosen in the same breath as the fetch-and-look that precedes

@@ -2476,7 +2476,7 @@ function splitOrPane(list, sel, rail, pane){
 function delivKindPill(d){
   return '<span class="pill kind">' + (d.kind === "pct" ? "% delivered" : "Delivered / not") + '</span>';
 }
-/* ── ONE TABLE, TWO HALVES (§97) ───────────────────────────────────────
+/* ── ONE TABLE, TWO HALVES (§99) ───────────────────────────────────────
    §53.4 put a deliverable and an outcome in one table with a Type column,
    and its argument survives: they are two kinds of evidence that the project
    achieved what it set out to, they are read together, and the SCORE still
@@ -2495,7 +2495,7 @@ function delivKindPill(d){
    which kind they are, and a pill repeating it is the same fact twice (§93's
    one chip too many). The `#` and the NAME hold their position across the
    split so the eye still runs down one list, and where a half has a figure
-   the score is built from (`Performance`, §97.8) it stays in the LAST column for both
+   the score is built from (`Performance`, §99.8) it stays in the LAST column for both
    halves, so that column still runs down one edge.
 
    This is also the shape the product already had everywhere else: the plan
@@ -2523,7 +2523,7 @@ function dxHead(cells){
       (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
   }).join("") + '</tr>';
 }
-/* WHAT IS NOT THERE IS NOT DRAWN (§97.7). The split first shipped with an
+/* WHAT IS NOT THERE IS NOT DRAWN (§99.7). The split first shipped with an
    empty half saying "No outcomes yet" over its own band and column strip —
    §45.2's rule, that a feature rendering nothing looks like one that was
    never built. Islam: *"the presence of outcomes or deliverables that would
@@ -2651,7 +2651,7 @@ function projPerformanceBody(p, fk){
      (§53.4 removed the field; the column outlived it by two versions).
      The score column is the last on BOTH halves — it is the figure projPerf
      is built from, and one that moves between halves is one nobody can run
-     their eye down. Named in the dxSplit call below, not here (§97.8). */
+     their eye down. Named in the dxSplit call below, not here (§99.8). */
   var dRows = p.deliverables.map(function(d, i){
     return '<tr>' + dxIdx(i) + '<td>' + esc(d.name) +
       (d.note ? '<span class="why">' + esc(d.note) + '</span>' : '') + '</td>' +
@@ -2670,7 +2670,7 @@ function projPerformanceBody(p, fk){
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
   }).join("");
-  /* PERFORMANCE, not Reads (§97.8). Islam: *"Reads is a strange title, we need
+  /* PERFORMANCE, not Reads (§99.8). Islam: *"Reads is a strange title, we need
      something else."* It was the platform's own word for how a figure resolves
      into a score, and it was the only place using it — every other table
      naming this same 0-100 says Score, Progress or Performance. His pick was
@@ -2815,7 +2815,7 @@ function projPlanBody(p, fk){
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
   /* MEASURED AS BELONGS TO A DELIVERABLE AND A DIRECTION TO AN OUTCOME, and
-     for two versions one heading carried both (§97). Each half declares its
+     for two versions one heading carried both (§99). Each half declares its
      own columns now; the deliverable's kind spans the three the outcome uses
      for direction, target and date, because a half with fewer facts still has
      to end where the other one does. */

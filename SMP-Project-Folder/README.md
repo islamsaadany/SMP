@@ -85,6 +85,7 @@ of it was rejected — which is the point of keeping it.
 | `2026-08-23_login-client-logo.html` | The tenant's mark on the gate. Not a drawing of the gate &mdash; **the gate itself**, with the mark in it, which is why it is byte-for-byte `index.html`. **Built** (&sect;52) |
 | `../../design-mockups/performance-actions/2026-08-25_report-button-and-row.html` | Report and Presentation leave the band legend for a row of their own, and Report goes solid orange. Today beside the proposal, both themes, with the fill and ink measured for all four palettes. **Built in 3.25** (&sect;93.8) |
 | `../../design-mockups/loading-skeleton/2026-08-25_skeleton-on-boot.html` | What the platform shows between opening and the database answering. Today's boot beside the proposal, both themes. **Built in 3.25** (&sect;94.10) |
+| `../../design-mockups/full-width/2026-08-25_page-fills-the-window.html` | The 1180px content cap comes off every page. Not a drawing &mdash; screenshots of the REAL platform at 1670px with the cap on and off, four pages, with the widths measured. **Built in 3.25** (&sect;94.13) |
 
 ### Drawn, awaiting a decision
 

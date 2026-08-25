@@ -256,36 +256,17 @@
           text-decoration:none; }
   .skip:focus { left:0; }
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
-  /* ── EVERY PAGE GETS THE WHOLE WINDOW (§94.13) ────────────────────
-     Islam: "the page is wide but the section below the navigation part is
-     compact with a lot of padding on the right and left not utilizing the
-     screen width — let's make it fit always."
+  .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
 
-     THIS IS §93.9 FINISHED, NOT A NEW IDEA. That section answered the same
-     complaint for the RAILED pages and left every other page at 1180 — and
-     what made the difference visible rather than merely narrow is that the
-     destination row had already been let past the cap (`.units-in.folded`,
-     "a navigation bar is chrome, not content"). So at 1670px the row ran edge
-     to edge at 1655px while the page under it sat at 1132px, centred, with
-     238px of nothing down each side. The two stopped lining up, which is
-     exactly what §93.9 said it was avoiding when it widened all four
-     containers together.
-
-     THE CEILING GOES WITH THE CAP, so there is ONE behaviour and not two.
-     §93.9 chose 1600 over none because a table stretched across a 32-inch
-     monitor puts its first and last column a head-turn apart; that is true and
-     it is not what anybody is looking at — the register's frozen first and
-     last columns (§69.19, §69.20) exist for exactly that, and a second
-     threshold is a second thing to explain.
-
-     WHAT 1180 WAS FOR, AND WHAT REPLACES IT: it is a READING MEASURE, and
-     prose has an optimum line length. Measured at 1670px, a unit's Foundation
-     goes from 483 to 732px on its longest line — comfortable. At 2560px it
-     reaches 1166px, which is not. Recorded rather than pre-solved: the fix is
-     a measure on the few prose BLOCKS (the Knowledge base already carries one
-     and is unaffected), and it is not worth adding before somebody runs the
-     platform on a monitor that wide. */
-  .wrap { margin:0 auto; padding:0 24px 80px; }
+  /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
+     All four containers together, or the chrome sits indented from the page
+     beneath it. 1600px rather than none at all: a table stretched across a
+     32-inch monitor puts its first and last column a head-turn apart, and the
+     register's frozen columns exist precisely so the eye has an anchor. */
+  :root[data-wide] .wrap,
+  :root[data-wide] .top-in,
+  :root[data-wide] .units-in,
+  :root[data-wide] .tabs-in { max-width:1600px; }
 
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
@@ -330,7 +311,7 @@
      the tenant's bar colour behind this for the whole wait, which is the
      thing being removed. */
   html.booting #banner, html.booting .chrome { display:none; }
-  .bootsk-in { margin:0 auto; padding:0 24px; }
+  .bootsk-in { max-width:1180px; margin:0 auto; padding:0 24px; }
   .bootsk-top { display:flex; align-items:center; gap:10px; padding:18px 0 16px; }
   .bootsk-nav { display:flex; gap:8px; padding:0 0 12px; }
   .bootsk-tabs { display:flex; gap:22px; padding:0 0 11px;
@@ -358,7 +339,7 @@
   }
 
   header.top { border-bottom:1px solid var(--line); background:var(--surface); }
-  .top-in { margin:0 auto; padding:18px 24px; display:flex;
+  .top-in { max-width:1180px; margin:0 auto; padding:18px 24px; display:flex;
             align-items:flex-end; gap:20px; flex-wrap:wrap; }
   .brand { display:flex; flex-direction:column; gap:2px; margin-right:auto; }
   .eyebrow { font-size:var(--fs-micro); letter-spacing:.15em; text-transform:uppercase;
@@ -366,7 +347,7 @@
   .brand h1 { font-size:17px; font-weight:700; letter-spacing:-.01em; }
 
   nav.units { background:var(--panel); }
-  .units-in { margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
+  .units-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:0; overflow-x:auto; }
   /* AN UNDERLINED TAB ROW, not a pill row (§41).
 
      The retheme made this a filled accent pill with a pulsing dot, following
@@ -399,7 +380,7 @@
   .units .sep { width:1px; background:var(--panel-ink); opacity:.22; margin:12px 8px; flex:0 0 1px; }
 
   nav.tabs { border-bottom:1px solid var(--line); background:var(--surface); }
-  .tabs-in { margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
+  .tabs-in { max-width:1180px; margin:0 auto; padding:0 24px; display:flex; gap:2px; overflow-x:auto; }
   .tabs-in { padding:8px 24px; gap:4px; }
   .tabs button { font:inherit; font-size:var(--fs-small); font-weight:500; padding:6px 12px; border:0;
                  border-radius:var(--r); background:none; color:var(--ink-2); cursor:pointer;

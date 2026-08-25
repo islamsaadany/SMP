@@ -1266,13 +1266,23 @@
        the fault the chrome shed in 2.9. The row is emptied AND hidden: an
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
-    /* ── AND EVERY PAGE GETS IT NOW, SO THERE IS NOTHING TO SWITCH (§94.13)
-       §93.9's `data-wide` lived here, turned on for railed pages only, and
-       Islam asked for the whole platform: "let's make it fit always." The cap
-       and the 1600 ceiling are both gone from `_shared.css`, so the attribute
-       had nothing left to say and went with them — §24's rule, applied to the
-       JS half as well as the CSS half. `railed` is still read two lines below;
-       it is the rail's own switch and always was. */
+    /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
+       Islam, on a 1670px screen showing an eleven-column register inside a
+       1180px column: "the page is wide, however the rail on the left and the
+       tables are stuck in a confined space with a lot of buffer on right and
+       left."
+
+       1180 is a READING measure and it is right for the pages it was chosen
+       for — a unit's plan, the knowledge base, a group's foundation are prose
+       and prose has an optimum line length. A Setup page is a rail and a table,
+       and a table has the opposite need: every pixel it is denied becomes a
+       horizontal scroll inside a box.
+
+       So it is a state on the ROOT rather than a rule on `.wrap`, because the
+       chrome's three rows are capped at the same 1180 and widening the content
+       alone would leave the navigation indented from the page under it. One
+       attribute, four containers, and every other page is untouched. */
+    document.documentElement.toggleAttribute("data-wide", railed);
     document.getElementById("tabrow").hidden = railed;
     /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
        `.primary`, which is the LANDING PAGE and nothing else — so it was

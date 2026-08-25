@@ -11676,3 +11676,66 @@ changed, so the name changes. What this adds is that the name has to be one
 **nobody has served** — so `git show origin/main:sw.js` before choosing, in the
 same breath as the fetch-and-look that precedes every merge. A merge will not
 tell you.
+
+### 94.13 The page stops being narrower than the bar above it
+
+> *"The page is wide but the section below the navigation part is compact with a
+> lot of padding on the right and left, not utilizing the screen width — let's
+> make it fit always."*
+
+**MEASURED BEFORE DRAWING, AND THE MEASUREMENT FOUND THE REAL FAULT.** The
+complaint reads as *"the page is too narrow"*, and it is not quite that. At
+1670px the destination row runs **edge to edge at 1655px** while the page under
+it sits at **1132px, centred**, with 238px of nothing down each side. The row
+had been let past the cap deliberately — `.units-in.folded { max-width:none }`,
+*"a navigation bar is chrome, not content"* — and the content had not. **Two
+containers that used to agree stopped agreeing**, which is why it reads as
+broken rather than merely narrow, and it is precisely what §93.9 said it was
+avoiding when it widened all four together for the railed pages.
+
+So this is **§93.9 finished, not a new idea**. The mechanism already existed
+(`data-wide` on the root, four containers) and was switched on for Setup only.
+The cap comes off everywhere and **the 1600px ceiling goes with it**, so there
+is one behaviour and not two: §93.9 chose 1600 because a table stretched across
+a 32-inch monitor puts its first and last column a head-turn apart, which is
+true and is what the register's frozen first and last columns already exist for
+(§69.19, §69.20). A second threshold is a second thing to explain.
+
+`data-wide` itself is **gone** — the attribute had nothing left to switch, and
+so is the `max-width:none` override on the folded row, because a rule that no
+longer does anything is a rule somebody will one day read as load-bearing (§24).
+
+**Measured at 1670px:** every page except Setup goes **1132 → 1607px**, and a
+unit's Plan pane **920 → 1395px**. The function's Projects table stops wrapping
+its third row onto two lines and fits one more row on screen; the People
+register loses its horizontal scroll entirely.
+
+**AND THE ONE REAL COST IS RECORDED RATHER THAN HIDDEN.** 1180 was a **reading
+measure** and prose has an optimum line length. At 1670px a unit's Foundation
+goes from 483 to **732px** on its longest line, which is comfortable; at 2560px
+it reaches **1166px**, which is not. The Knowledge base is unaffected — it
+already carries its own measure. The fix, when somebody runs the platform on a
+monitor that wide, is a measure on the few prose BLOCKS rather than on the page.
+Not built, deliberately: it is not worth adding before it is needed, and adding
+it now would put a second width rule back in the file this section just took one
+out of.
+
+### 94.14 The check asserts the agreement, not the number
+
+`src/checks/page-width.py`. The fault was two containers that stopped agreeing,
+so what is asserted is that the navigation row, the tab row and the page
+**start and end at the same x** — and deliberately not what that x is. A later
+change to the gutters keeps it green; a cap reintroduced on any one of the three
+does not. §53.5's rule, which is the same reason `qa.py` compares a unit's pane
+with a function's rather than checking either against a figure.
+
+Swept at 1920 / 1670 / 1280 / 1000 across five kinds of page, because §27.1's
+lesson is that a layout verified at the width that passes is not verified. It
+also asserts **no sideways scroll** — removing a cap is exactly the change that
+pushes something past the window, and §27.2 records what that costs: a
+horizontal scroll drags every sticky element with it — and that the window is
+genuinely used, so a cap replaced by a slightly larger cap fails.
+
+A zero-width row is skipped rather than failed: Setup has no tab row at all
+(§46.1), and asserting against it would be measuring a thing the page is right
+not to draw.

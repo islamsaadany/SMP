@@ -3,9 +3,7 @@
   .viewer label { font-size:10px; letter-spacing:.13em; text-transform:uppercase;
                   color:var(--ink-3); font-weight:700; }
   /* Capped, because the select sizes itself to its LONGEST option and the
-     first line has to stay one line. (It used to say "a fixed 1180px column";
-     the column is the window now, \u00a794.13, and the cap matters for the same
-     reason \u2014 a long name still pushes the buttons beside it along.) "Strategy Management Office - all
+     first line is a fixed 1180px column. "Strategy Management Office - all
      units" reached the old 250px cap, which pushed the two buttons past the end of the
      row and wrapped them onto a second line - so the one-line chrome asked
      for in 2.9 was never actually one line for anyone signed in. The name

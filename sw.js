@@ -40,7 +40,7 @@
    changed, so the name changes. What this adds is that the name has to be one
    NOBODY has served — check `git show origin/main:sw.js` before choosing,
    because a merge will not tell you. */
-const SHELL = "smp-shell-v3.25c";
+const SHELL = "smp-shell-v3.25d";
 const ASSETS = [
   "/",
   "/index.html",

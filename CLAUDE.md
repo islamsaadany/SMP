@@ -478,6 +478,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Who enters** — behind a tenant switch that is off by default, so turning it on
   is the office deliberately handing naming to the custodian (spec 008 §3B), and
   **a rule cannot close a door somebody has to open on purpose.**
+- **EVERY PAGE GETS THE WHOLE WINDOW, AND THE FAULT WAS AN ALIGNMENT (§94.13):**
+  the complaint reads as "the page is too narrow" and is not quite that — the
+  destination row had been let past the cap (`.units-in.folded{max-width:none}`,
+  *"a navigation bar is chrome, not content"*) and the content had not, so at
+  1670px the row ran edge to edge at 1655px above a page sitting at 1132px,
+  centred. **Two containers that used to agree stopped agreeing**, which is why
+  it reads as broken rather than merely narrow. §93.9 FINISHED, not a new idea:
+  the cap comes off everywhere and **the 1600 ceiling goes with it**, so there is
+  one behaviour and not two — the register's frozen first and last columns
+  already answer the head-turn the ceiling was for. `data-wide` and the
+  `max-width:none` override are both DELETED, because a rule that no longer does
+  anything is one somebody reads as load-bearing (§24). Measured: 1132 → 1607px,
+  and a unit's Plan pane 920 → 1395px. **The one real cost is recorded, not
+  hidden**: 1180 was a READING measure, and at 2560px a unit's Foundation reaches
+  1166px on its longest line — the fix then is a measure on the prose BLOCKS, and
+  it is not worth adding before somebody has a monitor that wide.
+- **ASSERT THE AGREEMENT, NOT THE NUMBER (§94.14):** `src/checks/page-width.py`
+  measures that the navigation, the tab row and the page start and end at the
+  same x — never what that x is — so a later change to the gutters stays green
+  and a cap reintroduced on any one of the three does not. §53.5's rule, applied
+  to width. Swept at 1920 / 1670 / 1280 / 1000 (§27.1), asserting **no sideways
+  scroll** (§27.2: it drags every sticky element with it) and that the window is
+  genuinely used, so a cap replaced by a bigger cap fails.
 - **NOTHING WEARS A COLOUR IT WILL HAVE TO CHANGE (§94.10):** the platform
   painted from the BAKED file and repainted when `/api/state` answered — so it
   opened in the wrong colours and, on a client's deployment, in **Raya Trade's
@@ -1184,7 +1207,13 @@ remembering the colours in the browser, and he was right: that would have fixed
 the colours and left the content flashing. **The check had to build a
 deployment** &mdash; every other check opens the file over `file://`, where the
 whole feature does not exist, so a build that had lost it would go green every
-time.*
+time. **AND EVERY PAGE GETS THE WHOLE WINDOW** (&sect;94.13): the complaint reads
+as *"the page is too narrow"* and is not quite that &mdash; the navigation row
+had been let past the 1180 cap and the content had not, so at 1670px the row ran
+edge to edge above a page sitting centred with 238px of nothing down each side.
+Two containers that used to agree stopped agreeing. &sect;93.9 finished: the cap
+comes off everywhere, the 1600 ceiling goes with it, and the check asserts the
+AGREEMENT rather than the number, so a later change to the gutters stays green.*
 
 *Earlier: 2026-08-24 &mdash; **v3.24: who a row is** (&sect;87, spec 013).
 One screenshot &mdash; *"I got 3 people skipped but they have an email in the

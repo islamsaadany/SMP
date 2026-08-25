@@ -310,7 +310,27 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   that rule watches for CHECKS holding a removed selector; this was the PRODUCT
   holding one, and it fails the same way — silently, in the safe-looking
   direction.
-- **THE NAME COLUMN FITS THE NAME, AND TWO VALUES COPY THEMSELVES (§93.6):**
+- **NAME AND FULL NAME (§93.8, reversing half of §93.6 a day later):** Islam:
+  *"we can have it Name and Full Name … for the identifiers keep it for the ID
+  and email only."* Two facts about what somebody is called had been sharing one
+  column, and every previous answer tried to make one column serve both (§69.21
+  cut it to two names, §81.1 lengthened it for the clashing pair, §93.6 widened
+  it to 392px). **Two columns is what all three were reaching for** — the frozen
+  one is back to 216px. **NOT "user name"**, his own phrase, turned down: the
+  register already has a *Sign-in name* column and two login-sounding names is
+  how §87's twins get made. **STORED, NOT DERIVED** — the first two names are a
+  good guess and a bad rule — with `setKnownName()` DELETING the key when it
+  matches the guess, or correcting the full name later leaves a stale short one
+  (§50.6). **§81.1 MOVES RATHER THAN DIES**: it disambiguates the GUESS now, so
+  two people whose first two names match still read as two rows for somebody who
+  has hidden Full Name; a typed value always wins. **AND THE OLD FILES STILL
+  READ** — §58 a third time, with the twist that the old header's meaning is
+  decided by what sits beside it: `Full Name` present means `Name` is the short
+  one, absent means the file predates the split and its `Name` is the full one.
+  **`known` is a LABEL, never an identifier**: §87's ladder adds no rung, and it
+  is a pick on upload like any other field. No migration — `people.extra`.
+- **THE NAME COLUMN FITS THE NAME, AND TWO VALUES COPY THEMSELVES (§93.6, its
+  first half since narrowed by §93.8):**
   *"the first column with the name needs to fit the name, and make the email and
   the phone to be copied on clicking on them."* The first half **reverses
   §69.21 and §81.1 together** — three names, lengthened only for the pair they

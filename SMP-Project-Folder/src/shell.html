@@ -2672,6 +2672,10 @@
       });
     }
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
+    /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
+       matches the guess, rather than storing the guess — otherwise correcting
+       the full name later would leave a stale short one standing beside it. */
+    fieldWire("pknown", function(p, v){ setKnownName(p, v); });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
     /* The two the employee file brings (§54.2). Cleared when emptied rather

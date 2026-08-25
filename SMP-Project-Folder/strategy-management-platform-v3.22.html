@@ -2651,16 +2651,18 @@
   .acgrid tr.floorrow td { border-top:2px solid var(--line); background:var(--surface-2); }
   .acgrid tr.floorrow .rolecell b { font-weight:600; color:var(--ink-2); }
 
-  /* ── THE NAME COLUMN FITS THE NAME (§93.6) ────────────────────────
-     Islam: "the first column with the name needs to fit the name." The §88
-     cap is 150px on every cell in a Setup table; this one column is exempt,
-     because it is the FROZEN column (§69.19) — the one a wide table never
-     scrolls away — and a name clipped in the only place it is written is the
-     wrong pixel to save. Still ONE LINE (§88): it grows sideways, never
-     downward, and `min-width:0` on nothing here because the table lays out
-     auto and the widest name is what it takes. */
+  /* ── THE NAME COLUMN FITS THE NAME (§93.6, narrowed by §93.8) ─────
+     Islam: "the first column with the name needs to fit the name" — and then
+     "we can have it Name and Full Name", which is the better answer and gives
+     most of the width back. The column holds two names now, not five, so the
+     exemption from §88's 150px cap stays but the cap it replaces is a
+     generous one rather than none at all: the frozen column can never again
+     be widened past a third of the pane by one long legal name.
+
+     Still ONE LINE (§88): it grows sideways, never downward, and the whole
+     value is on the row's hover, which this cell has always carried. */
   .peoplecfg td.namecell, .peoplecfg thead th.namecell {
-    max-width:none; white-space:nowrap; }
+    max-width:260px; white-space:nowrap; }
 
   /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
      It has to look like the value, not like a control, or every row grows a
@@ -7284,6 +7286,56 @@ function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
 
+/* ── NAME AND FULL NAME (§93.8) ───────────────────────────────────────
+   Islam: *"we can have it Name and Full Name."*
+
+   The register carries two facts about what somebody is called and they were
+   being asked to share one column. **Name** is what the office says out loud —
+   two names, most days — and **Full Name** is what the employee file holds,
+   which on this register runs to *Abd El Moniem Mohamed Abd El Moniem
+   Mahmoud*. §93.6 widened the one column to fit the second; this splits them,
+   which is the better answer and gives the 392px back: Name is the frozen
+   column and Full Name is an ordinary hideable one.
+
+   STORED, NOT DERIVED, and this is the whole reason it is a field. The first
+   two names are a good GUESS and a bad rule — plenty of people go by their
+   third name, by a shortening of it, or by something the file never says. A
+   derived-only column is one nobody can correct, and correcting it is the
+   entire point of having it.
+
+   `known` IS A LABEL AND NEVER AN IDENTIFIER (Islam, same message: "for the
+   identifiers keep it for the ID and email only"). Nothing resolves on it —
+   not the upload, not the merge, not the door. §87's ladder is Emp ID then
+   email and stops, and this adds no rung. Two people really can be "Ahmed
+   Mostafa", which is exactly how the twins were made. */
+var KNOWN_NAME_WORDS = 2;
+/* The guess, used when nobody has said otherwise. Kept separate from the
+   reader below so the seeded value and a typed one are never confused. */
+function knownGuess(name){ return nameWords(name, KNOWN_NAME_WORDS); }
+/* What the Name column shows: what was typed, or the guess. Never stores as a
+   side effect of being read (§50.6's rule — a reader that creates the field it
+   was looking for makes every save carry a phantom change). */
+/* `dnames` is displayNames()'s map, passed by the two callers that render or
+   export the whole register so it is built once rather than per row. Without
+   it the guess is the flat two names — right for 31 rows of 33, and the two it
+   is wrong for are exactly the pair the map exists to separate, which is why
+   the register never omits it. */
+function knownName(p, dnames){
+  if (!p) return "";
+  var k = String(p.known || "").trim();
+  if (k) return k;
+  var d = dnames && dnames[p.key];
+  return (d && d.label) || knownGuess(p.name || "");
+}
+/* And the writing half, separate for the same reason. Clearing it back to the
+   guess DELETES the key rather than storing the guess, or a later correction
+   to the full name would leave a stale short one behind. */
+function setKnownName(p, v){
+  var t = String(v == null ? "" : v).trim();
+  if (!t || t === knownGuess(p.name || "")) delete p.known;
+  else p.known = t;
+}
+
 /* ── ENOUGH NAMES TO TELL TWO PEOPLE APART (§81.1) ────────────────────
    Three names is the column's budget (§69.21) and it is right for 31 of 33
    rows — but Raya's register carries *Ahmed Mostafa Mohamed El Gebely* and
@@ -7298,10 +7350,19 @@ function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
    Computed over the WHOLE register including retired rows: a retired person is
    still on screen when the Retired filter is on, and a display that changes
    depending on a filter is worse than a long one. */
+/* §93.8: IT DISAMBIGUATES THE GUESS, NOT THE COLUMN. The register no longer
+   renders a truncation — Name is a stored field and Full Name is its own
+   column — so what this lengthens is the GUESS shown for anybody who has never
+   corrected theirs. The argument is unchanged and so is the need: two people
+   whose first two names match would otherwise read as one row for anybody who
+   has hidden Full Name. A TYPED value always wins and is never lengthened; the
+   SMO wrote exactly what they meant. */
 function displayNames(){
   var seen = {}, out = {};
   PEOPLE.forEach(function(p){
-    var n = SHORT_NAME_WORDS;
+    var n = KNOWN_NAME_WORDS;
+    var typed = String(p.known || "").trim();
+    if (typed) { out[p.key] = { full:p.name, at:n, label:typed, typed:true }; return; }
     var label = nameWords(p.name, n);
     (seen[label.toLowerCase()] = seen[label.toLowerCase()] || []).push(p.key);
     out[p.key] = { full: p.name, at: n, label: label };
@@ -7311,7 +7372,7 @@ function displayNames(){
     /* Lengthen every member of the clash together, one name at a time, until
        they differ — or until there is nothing left to add, which is the real
        case of two people with the same full name and needs the flag instead. */
-    var keys = seen[k], n = SHORT_NAME_WORDS, same = true;
+    var keys = seen[k], n = KNOWN_NAME_WORDS, same = true;
     while (same && n < 8) {
       n++;
       var got = {};
@@ -7924,7 +7985,8 @@ function deletePerson(key){
    (§87.5's rule, in the other direction: what is already recorded wins unless
    somebody says otherwise). */
 var MERGE_FIELDS = [
-  { k:"name",   label:"Name" },
+  { k:"name",   label:"Full Name" },
+  { k:"known",  label:"Name" },
   { k:"empId",  label:"Emp ID" },
   { k:"email",  label:"Email" },
   { k:"title",  label:"Job title" },
@@ -8350,8 +8412,33 @@ function mainbuChoices(name){ return mainbuAts(mainbuBy(name)); }
    we don't need to get them from the audience." Which is right, and it is the
    register's own vocabulary: the page shows both columns side by side, so the
    file it exports should carry both. */
-var PEOPLE_FILE_COLS = ["Emp ID", "Name", "Job title", "Email", "Mobile",
-                        "Official BU", "Unit", "Role", "Status"];
+var PEOPLE_FILE_COLS = ["Emp ID", "Full Name", "Name", "Job title", "Email",
+                        "Mobile", "Official BU", "Unit", "Role", "Status"];
+/* ── THE FILE CARRIES BOTH, AND THE OLD ONE STILL READS (§93.8) ───────
+   Every file downloaded before today has a "Name" column holding the FULL
+   name, so the new pair cannot simply take those headers: read blindly, an old
+   file would put a five-part legal name into the short column and leave the
+   full one empty.
+
+   The rule is §58's, applied a third time — WRITE THE NEW LABEL, READ EITHER —
+   with the twist that here the OLD header's meaning depends on what sits
+   beside it. "Full Name" present means the file distinguishes the two and
+   "Name" is the short one; "Full Name" absent means the file predates the
+   split and its "Name" is the full one. That is decidable from the row itself,
+   which is what makes it safe. */
+function fileFullName(r){
+  var full = r["Full Name"];
+  if (full != null && String(full).trim() !== "") return full;
+  return r["Name"];
+}
+function fileKnownName(r){
+  var full = r["Full Name"];
+  /* No "Full Name" column: the file says nothing about what somebody is
+     CALLED, and guessing from the full name here would overwrite a short name
+     the SMO had typed with the first two words of the legal one. */
+  if (full == null || String(full).trim() === "") return "";
+  return r["Name"];
+}
 /* "Unit" is the header the register shows and this file writes. "BU" is read
    as well, and always will be: it was the header for exactly one build of this
    column, and a header is a contract with every file already downloaded — the
@@ -8453,6 +8540,10 @@ function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
 function planPeopleFile(rows){
   var plan = { rows:[], problems:[], notices:[], newBus:[] };
   var seenId = {};
+  /* The disambiguated guesses, once for the whole file (§93.8), so a row whose
+     Name column repeats what the register already shows is not offered as a
+     change to take. */
+  var dnames = displayNames();
 
   /* ── AN ADDRESS MAY ONLY EVER REACH ONE ROW (§83, kept whole) ─────
      Sign-in takes the address on the register, so two people holding one turns
@@ -8538,7 +8629,8 @@ function planPeopleFile(rows){
        no line at all. */
     var at = "Row " + (i + 2);
     var id     = fileTxt(r["Emp ID"]);
-    var name   = fileTxt(r["Name"]);
+    var name   = fileTxt(fileFullName(r));
+    var known  = fileTxt(fileKnownName(r));
     var email  = fileTxt(r["Email"]);
     var mainbu = fileTxt(fileBu(r));
     var role   = fileTxt(r["Role"]);
@@ -8778,6 +8870,11 @@ function planPeopleFile(rows){
     var row = { at:at, id:id, key:existing ? existing.key : null,
                 matchedBy:matchedBy,
                 name:name || (existing ? existing.name : ""),
+                /* Never falls back to the existing value the way `name` does:
+                   blank means the file has nothing to say about it, and a
+                   pick is only offered where the file actually says something
+                   different (§54's rule, unchanged). */
+                known:known,
                 title:fileTxt(r["Job title"]), email:email,
                 phone:fileTxt(r["Mobile"]), mainbu:buName, where:where,
                 role:roleKey, wantActive:wantActive,
@@ -8787,7 +8884,7 @@ function planPeopleFile(rows){
     /* A conflict is matched to NOBODY until it is answered, so there is
        nothing to compare against and no picks to show. They are built by
        peopleRowChoose() the moment the reading is chosen. */
-    peopleRowPicks(row, conflict ? null : existing);
+    peopleRowPicks(row, conflict ? null : existing, dnames);
     plan.rows.push(row);
   });
   return plan;
@@ -8810,19 +8907,31 @@ function planPeopleFile(rows){
    A BLANK CELL IS STILL "NOTHING TO SAY" and never appears here at all — it is
    the rule the whole file is read under (§54) and it did not change. */
 var PEOPLE_FILE_PICKS = [
-  { k:"name",   label:"Name" },
+  { k:"name",   label:"Full Name" },
+  /* A PICK LIKE ANY OTHER (§93.8). What somebody is CALLED is the field most
+     likely to have been typed here by the SMO and left alone in the export, so
+     it is exactly the field a file must not overwrite quietly — §87's ruling
+     that the register wins by default, applied to the one column that exists
+     because a person corrected it. */
+  { k:"known",  label:"Name" },
   { k:"title",  label:"Job title" },
   { k:"email",  label:"Email" },
   { k:"phone",  label:"Mobile" },
   { k:"mainbu", label:"Official BU" }
 ];
-function peopleRowPicks(row, existing){
+function peopleRowPicks(row, existing, dnames){
   row.picks = [];
   if (!existing) return row;
   PEOPLE_FILE_PICKS.forEach(function(f){
     var now = fileTxt(row[f.k]);
     if (!now) return;
-    var was = fileTxt(existing[f.k]);
+    /* WHAT IS ON THE REGISTER, not what is stored under that key (§93.8).
+       `known` is absent for anybody who never corrected it, and the register
+       shows the GUESS in its place — so comparing against the raw field would
+       report a file repeating that guess as a difference, and offer 33 picks
+       that change nothing anybody can see. */
+    var was = f.k === "known" ? fileTxt(knownName(existing, dnames))
+                              : fileTxt(existing[f.k]);
     var same = f.k === "mainbu" ? mainbuKey(was) === mainbuKey(now)
                                 : was === now;
     if (same) return;
@@ -8894,7 +9003,7 @@ function peopleRowEffective(row){
 function peopleRowChoose(row, choice){
   row.choice = choice;
   var eff = peopleRowEffective(row);
-  peopleRowPicks(row, eff.key ? personBy(eff.key) : null);
+  peopleRowPicks(row, eff.key ? personBy(eff.key) : null, displayNames());
   return row;
 }
 
@@ -8916,6 +9025,10 @@ function applyPeopleFile(plan){
                             where:row.where });
       p = personBy(key);
       if (!p) return;
+      /* Through the setter, so a file that repeats the guess stores nothing
+         (§93.8) — otherwise every uploaded row would carry a `known` that
+         freezes at whatever the full name was on the day of the upload. */
+      if (row.known) setKnownName(p, row.known);
     } else {
       /* ONLY WHAT WAS TICKED (§87.6). Every field the file would change is on
          `row.picks` with its own answer, and a field that is not there is
@@ -8923,7 +9036,12 @@ function applyPeopleFile(plan){
          is there anything to write. The employee number is the exception and
          is not a pick: it is the identity the row was matched ON, or the
          number a conflict was answered by accepting. */
-      row.picks.forEach(function(f){ if (f.take) p[f.k] = f.now; });
+      /* Through setKnownName() for `known`, so taking a value that happens to
+         equal the guess stores nothing rather than freezing it (§93.8). */
+      row.picks.forEach(function(f){
+        if (!f.take) return;
+        if (f.k === "known") setKnownName(p, f.now); else p[f.k] = f.now;
+      });
       if (row.id) p.empId = row.id;
       /* Only when there is somewhere to put them. A person whose department
          maps to nothing keeps whatever attachment they already had — moving
@@ -14451,11 +14569,19 @@ function peopleWorkbook(){
                    soft:true });
   }
 
+  /* Built ONCE for the whole file, not per row (§93.8) — and the file has to
+     carry the same value the register shows, or a download-edit-upload round
+     trip would report the two people it separated as a change. */
+  var dnames = displayNames();
   var rows = PEOPLE.map(function(p){
     var held = personRoles(p).filter(function(r){ return !SMPRules.isOwnLinesRole(r.role); });
     return [
-      p.empId || "", p.name, p.title || "", p.email || "", p.phone || "",
-      p.mainbu || "",
+      /* FULL NAME THEN NAME, in PEOPLE_FILE_COLS' order (§93.8). The short one
+         is written as what the register SHOWS — the guess when nobody has
+         corrected it — so the file is a picture of the page, and the reader
+         stores nothing when it comes back unchanged. */
+      p.empId || "", p.name, knownName(p, dnames), p.title || "", p.email || "",
+      p.phone || "", p.mainbu || "",
       /* Where they actually sit, in the words the register shows and the
          reader takes back (§65). Blank for somebody attached to nothing —
          which is a real state, and writing a guess into it would be the file
@@ -18793,6 +18919,16 @@ var PCOLS_KEY = "smp.people.columns";
    back to the shipped default (§30.2), and both default to shown, so the worst
    case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
+  /* FULL NAME IS A COLUMN OF ITS OWN (§93.8, Islam: "we can have it Name and
+     Full Name"). The frozen first column is what somebody is CALLED — two
+     names — and this is what the employee file holds. Shown by default,
+     because on a register being reconciled against a file it is the value the
+     file is written in; hideable, because on an ordinary day nobody reads it.
+
+     It sits immediately after the name rather than with the identifiers: it is
+     the same fact at a different length, and putting it beside Emp ID would
+     imply it identifies somebody, which is exactly what it must not do. */
+  { k:"fullname", label:"Full Name" },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the
@@ -19372,38 +19508,39 @@ function renderPeople(){
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it, and the whole point of the class is that
          the column chooser can reorder everything to its right. */
-      /* ── THE FIRST FEW NAMES, THE WHOLE ONE ON THE ROW (§69.21) ──────
-         Islam: "let's make them only the first 2 names so the first column
-         wraps better" — then three, having seen two. The file carries full
-         legal names ("Mohamed Hamed Ahmed Hamed Ahmed") and the column they
-         sit in is now FROZEN (§69.19), so every character it takes is taken
-         from every other column at every scroll position. How many words is
-         SHORT_NAME_WORDS in config-data.js.
+      /* ── NAME, AND FULL NAME BESIDE IT (§93.8) ──────────────────────
+         Islam: "we can have it Name and Full Name."
 
-         DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME. This is the
-         trap and it is worth the words: the input's value is what
-         `fieldWire("pname")` writes back to `p.name`, so shortening the value
-         would have overwritten the register's real names with two words each —
-         silently, on the first keystroke in any row, with the file's own copy
-         gone. The short form is a rendering; the stored fact is untouched, and
-         the whole name is on the row's hover and in every other surface that
-         names a person. */
+         This is the frozen column (§69.19), so every character it takes is
+         taken from every other column at every scroll position — which is what
+         made §69.21 cut it to two names, §81.1 lengthen it for the pair that
+         clashed, and §93.6 widen it to hold the whole thing at 392px. Splitting
+         the two facts is the answer all three were reaching for: what somebody
+         is CALLED lives here, and what the employee file HOLDS lives in its own
+         hideable column next door.
+
+         WHAT IS EDITED HERE IS `known`, NOT `name`. §69.21's trap, met from the
+         other side: back then the input carried the whole name because
+         shortening the VALUE would have overwritten the register's real names
+         on the first keystroke. Now the short form is a field of its own, so
+         the input writes to that field and the full name is edited in the
+         column that shows it. Neither can quietly become the other.
+
+         The placeholder is the guess, so somebody who has never touched this
+         sees what it will fall back to rather than an empty box. */
       '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
-        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        /* THE WHOLE NAME (§93.6). Islam: "the first column with the name needs
-           to fit the name." It REVERSES §69.21's budget and §81.1 with it —
-           three names, lengthened only for the pair they could not tell apart.
-           Both were answers to a column that had to stay narrow, and the
-           reason it had to is gone: it is the FROZEN column (§69.19), so it is
-           the one column a wide table never scrolls away, and a name that is
-           cut off in the only place it is written is the wrong thing to save
-           pixels on.
-
-           `displayNames()` stays where it is: shortName() is still what the
-           merge wizard, the picker and the audience list use, and those are
-           sentences rather than a column. */
-        : '<b>' + esc(p.name) + '</b>' +
+        ? '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
+          '" placeholder="' + esc(knownName(p, DNAMES)) + '">'
+        : '<b>' + esc(knownName(p, DNAMES)) + '</b>' +
           dupeMark(dupes)) + '</td>' +
+      /* THE FULL NAME, AND IT IS STILL WHAT THE FILE IS MATCHED AGAINST — but
+         never what somebody is IDENTIFIED by (Islam: "for the identifiers keep
+         it for the ID and email only"). It is back under §88's clip standard,
+         because it is an ordinary column again: one line, capped, the whole
+         value one hover away. */
+      (showCol("fullname") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
+        : '<span class="val">' + esc(p.name) + '</span>') + '</td>' : '') +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -19842,7 +19979,11 @@ function renderPeople(){
       return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
         'data-tktable="people"><thead><tr>' +
         th("#", "idx", false) +
-        th("Person", "namecell") +
+        /* "Name", not "Person" (§93.8): the column beside it is Full Name, and
+           two columns about what somebody is called have to say which is
+           which. */
+        th("Name", "namecell") +
+        (showCol("fullname") ? th("Full Name") : '') +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */
@@ -27879,6 +28020,10 @@ var SYNC = (function () {
       });
     }
     fieldWire("pname",  function(p, v){ if (v) p.name = v; });
+    /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
+       matches the guess, rather than storing the guess — otherwise correcting
+       the full name later would leave a stale short one standing beside it. */
+    fieldWire("pknown", function(p, v){ setKnownName(p, v); });
     fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
     fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
     /* The two the employee file brings (§54.2). Cleared when emptied rather

@@ -78,9 +78,12 @@ Four of Islam's, from using the register (§93).
   point rather than asking whether the button exists.
 - **The merge receipt is the wizard's last step**, not a panel left standing
   under the table: *"this page is a table page, not for other notifications."*
-- **The name column fits the whole name** (one line, still), and the email and
-  mobile copy on click. The cost is a wider register: at the longest real name
-  the Person column is 392px and the table 1489px in a 920px pane.
+- **Name and Full Name are two columns.** *Name* is what somebody is called —
+  two names, stored and correctable — and *Full Name* is what the employee file
+  holds, in its own hideable column. It reverses half of the previous day's
+  answer and gives most of the width back: the frozen column is 216px, not 392.
+  Files written before today still read correctly.
+- **Email and mobile copy on click.**
 
 
 ### v3.24 — who a row is, and merging two rows that are one person

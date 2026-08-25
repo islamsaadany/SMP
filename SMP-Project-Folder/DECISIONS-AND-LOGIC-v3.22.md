@@ -11138,3 +11138,78 @@ Two changes, and the second is the one that matters:
 And the assertion is asked of **`currentSub`, not of a `.on` class** — these
 buttons carry no such class, so an assertion written against one would have
 failed always, which is the same lie pointing the other way.
+
+**The total went from 6 to 44 the moment it started measuring**, and not one of
+the 38 is new. They are `71%`, `88%`, `58%` and the `%` beside them at 3.19–3.77
+— **§16.15's list, value for value**: scoring colours used as TYPE on a page
+that never got the `-tx` twins §38.5 gave the rest. One more (`num.final.attn`
+at 2.99 on the slide editor) is the same family on a state that has never been
+measured at all.
+
+They stay recorded and unfixed, on §16.15's own precedent and §25's before it: a
+palette decision does not get made inside a change about the people register.
+What has changed is that they are **in the total** rather than behind a check
+that was quietly looking elsewhere — which is the entire value of the fix.
+
+**43 pages and states before, 44 after.**
+
+### 93.8 Name and Full Name
+
+> *"For the people names, don't you want to have a column for the full name and
+> the user name which might be 2 names only for daily use?"* … *"We can have it
+> Name and Full Name. For the identifiers keep it for the ID and email only."*
+
+**It reverses half of §93.6, a day later, and it is the better answer.** That
+section widened the frozen first column to hold *Abd El Moniem Mohamed Abd El
+Moniem Mahmoud* — 392px of a 920px pane, permanently, on every screen. Splitting
+the two facts gives most of it back: **216px**, with the whole legal name one
+column to the right.
+
+The register was carrying two different facts about what somebody is called in
+one column, and every previous answer was an attempt to make one column serve
+both. §69.21 cut it to two names; §81.1 lengthened it for the pair that clashed;
+§93.6 widened it to fit everything. Two columns is what all three were reaching
+for.
+
+**Not "user name."** Islam's own phrase, and it had to be turned down: the
+register already has a **Sign-in name** column, and two columns whose names both
+suggest a login is exactly how two rows for one human get made (§87). *Name* and
+*Full Name*.
+
+**Stored, not derived, and that is the whole reason it is a field.** The first
+two names are a good guess and a bad rule — plenty of people go by their third
+name, by a shortening, or by something the file never says. A derived-only
+column is one nobody can correct, and correcting it is the point.
+
+- `knownName()` reads (typed, else the guess) and `setKnownName()` writes;
+  clearing it back to the guess **deletes** the key rather than storing it, or a
+  later correction to the full name would leave a stale short one beside it.
+  §50.6's rule: a reader must never create the field it was looking for.
+- **§81.1 moves rather than dies.** It no longer disambiguates a *column* — it
+  disambiguates the **guess**, for anybody who has never corrected theirs, so
+  two people whose first two names match still read as two rows for somebody who
+  has hidden Full Name. A typed value always wins and is never lengthened.
+- The map is built **once** by the three callers that walk the whole register
+  (render, export, file plan), never per row.
+
+**AND THE OLD FILES STILL READ.** Every people workbook downloaded before today
+has a `Name` column holding the *full* name, so the new pair could not simply
+take those headers — read blindly, an old file would put a five-part legal name
+into the short column and leave the full one empty. §58's rule a third time —
+*write the new label, read either* — with the twist that the old header's
+meaning is decided by what sits beside it: **`Full Name` present means `Name` is
+the short one; `Full Name` absent means the file predates the split and its
+`Name` is the full one.** Decidable from the row itself, which is what makes it
+safe.
+
+**`known` IS A LABEL AND NEVER AN IDENTIFIER**, on Islam's explicit instruction:
+*"for the identifiers keep it for the ID and email only."* §87's ladder is Emp ID
+then email and stops; this adds no rung, and nothing — not the upload, not the
+merge, not the door — resolves on it. Two people really can be "Ahmed Mostafa".
+It is a **pick** on an upload like any other field, and the register wins by
+default: it is the column most likely to have been typed by the SMO and left
+alone in an export, so it is exactly the one a file must not overwrite quietly.
+
+No migration: `people.extra` is jsonb and `lib/state-io.js` files every
+unrecognised key there and reads it back — the same mechanism `email`, `phone`
+and `empId` already ride on (§52, on units).

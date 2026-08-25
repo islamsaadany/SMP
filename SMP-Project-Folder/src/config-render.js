@@ -907,6 +907,16 @@ var PCOLS_KEY = "smp.people.columns";
    back to the shipped default (§30.2), and both default to shown, so the worst
    case is a column reappearing rather than one silently gone. */
 var PEOPLE_COLS = [
+  /* FULL NAME IS A COLUMN OF ITS OWN (§93.8, Islam: "we can have it Name and
+     Full Name"). The frozen first column is what somebody is CALLED — two
+     names — and this is what the employee file holds. Shown by default,
+     because on a register being reconciled against a file it is the value the
+     file is written in; hideable, because on an ordinary day nobody reads it.
+
+     It sits immediately after the name rather than with the identifiers: it is
+     the same fact at a different length, and putting it beside Emp ID would
+     imply it identifies somebody, which is exactly what it must not do. */
+  { k:"fullname", label:"Full Name" },
   { k:"empid",    label:"Emp. ID", off:true },
   /* THE SIGN-IN NAME, OFF BY DEFAULT (§69.11). §35 took it out from under the
      name and it was right to: it cost 31 rows a line each to say what the
@@ -1486,38 +1496,39 @@ function renderPeople(){
          `td:nth-child(2)` would be right today and wrong the first time a
          column is added before it, and the whole point of the class is that
          the column chooser can reorder everything to its right. */
-      /* ── THE FIRST FEW NAMES, THE WHOLE ONE ON THE ROW (§69.21) ──────
-         Islam: "let's make them only the first 2 names so the first column
-         wraps better" — then three, having seen two. The file carries full
-         legal names ("Mohamed Hamed Ahmed Hamed Ahmed") and the column they
-         sit in is now FROZEN (§69.19), so every character it takes is taken
-         from every other column at every scroll position. How many words is
-         SHORT_NAME_WORDS in config-data.js.
+      /* ── NAME, AND FULL NAME BESIDE IT (§93.8) ──────────────────────
+         Islam: "we can have it Name and Full Name."
 
-         DISPLAY ONLY, AND THE EDIT FIELD KEEPS THE WHOLE NAME. This is the
-         trap and it is worth the words: the input's value is what
-         `fieldWire("pname")` writes back to `p.name`, so shortening the value
-         would have overwritten the register's real names with two words each —
-         silently, on the first keystroke in any row, with the file's own copy
-         gone. The short form is a rendering; the stored fact is untouched, and
-         the whole name is on the row's hover and in every other surface that
-         names a person. */
+         This is the frozen column (§69.19), so every character it takes is
+         taken from every other column at every scroll position — which is what
+         made §69.21 cut it to two names, §81.1 lengthen it for the pair that
+         clashed, and §93.6 widen it to hold the whole thing at 392px. Splitting
+         the two facts is the answer all three were reaching for: what somebody
+         is CALLED lives here, and what the employee file HOLDS lives in its own
+         hideable column next door.
+
+         WHAT IS EDITED HERE IS `known`, NOT `name`. §69.21's trap, met from the
+         other side: back then the input carried the whole name because
+         shortening the VALUE would have overwritten the register's real names
+         on the first keystroke. Now the short form is a field of its own, so
+         the input writes to that field and the full name is edited in the
+         column that shows it. Neither can quietly become the other.
+
+         The placeholder is the guess, so somebody who has never touched this
+         sees what it will fall back to rather than an empty box. */
       '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
-        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
-        /* THE WHOLE NAME (§93.6). Islam: "the first column with the name needs
-           to fit the name." It REVERSES §69.21's budget and §81.1 with it —
-           three names, lengthened only for the pair they could not tell apart.
-           Both were answers to a column that had to stay narrow, and the
-           reason it had to is gone: it is the FROZEN column (§69.19), so it is
-           the one column a wide table never scrolls away, and a name that is
-           cut off in the only place it is written is the wrong thing to save
-           pixels on.
-
-           `displayNames()` stays where it is: shortName() is still what the
-           merge wizard, the picker and the audience list use, and those are
-           sentences rather than a column. */
-        : '<b>' + esc(p.name) + '</b>' +
+        ? '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
+          '" placeholder="' + esc(knownName(p, DNAMES)) + '">'
+        : '<b>' + esc(knownName(p, DNAMES)) + '</b>' +
           dupeMark(dupes)) + '</td>' +
+      /* THE FULL NAME, AND IT IS STILL WHAT THE FILE IS MATCHED AGAINST — but
+         never what somebody is IDENTIFIED by (Islam: "for the identifiers keep
+         it for the ID and email only"). It is back under §88's clip standard,
+         because it is an ordinary column again: one line, capped, the whole
+         value one hover away. */
+      (showCol("fullname") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
+        : '<span class="val">' + esc(p.name) + '</span>') + '</td>' : '') +
       /* The employee number. Off by default — it is the client's own
          identifier and matters when a file is being reconciled, not when
          somebody is looking up who runs Retail. */
@@ -1956,7 +1967,11 @@ function renderPeople(){
       return '<div class="cfg peoplebox"><table class="unitcfg peoplecfg" ' +
         'data-tktable="people"><thead><tr>' +
         th("#", "idx", false) +
-        th("Person", "namecell") +
+        /* "Name", not "Person" (§93.8): the column beside it is Full Name, and
+           two columns about what somebody is called have to say which is
+           which. */
+        th("Name", "namecell") +
+        (showCol("fullname") ? th("Full Name") : '') +
         /* "Never decides access" is gone at Islam's direction. It was a note
            about the MODEL sitting on a column header, and the knowledge base
            is where the model is explained (§30) — `c_access` says it there. */

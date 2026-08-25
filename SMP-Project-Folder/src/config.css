@@ -1398,16 +1398,18 @@
   .acgrid tr.floorrow td { border-top:2px solid var(--line); background:var(--surface-2); }
   .acgrid tr.floorrow .rolecell b { font-weight:600; color:var(--ink-2); }
 
-  /* ── THE NAME COLUMN FITS THE NAME (§93.6) ────────────────────────
-     Islam: "the first column with the name needs to fit the name." The §88
-     cap is 150px on every cell in a Setup table; this one column is exempt,
-     because it is the FROZEN column (§69.19) — the one a wide table never
-     scrolls away — and a name clipped in the only place it is written is the
-     wrong pixel to save. Still ONE LINE (§88): it grows sideways, never
-     downward, and `min-width:0` on nothing here because the table lays out
-     auto and the widest name is what it takes. */
+  /* ── THE NAME COLUMN FITS THE NAME (§93.6, narrowed by §93.8) ─────
+     Islam: "the first column with the name needs to fit the name" — and then
+     "we can have it Name and Full Name", which is the better answer and gives
+     most of the width back. The column holds two names now, not five, so the
+     exemption from §88's 150px cap stays but the cap it replaces is a
+     generous one rather than none at all: the frozen column can never again
+     be widened past a third of the pane by one long legal name.
+
+     Still ONE LINE (§88): it grows sideways, never downward, and the whole
+     value is on the row's hover, which this cell has always carried. */
   .peoplecfg td.namecell, .peoplecfg thead th.namecell {
-    max-width:none; white-space:nowrap; }
+    max-width:260px; white-space:nowrap; }
 
   /* ── AN ADDRESS AND A NUMBER ARE CLICK-TO-COPY (§93.6) ────────────
      It has to look like the value, not like a control, or every row grows a

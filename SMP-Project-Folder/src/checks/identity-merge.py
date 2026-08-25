@@ -244,35 +244,67 @@ with sync_playwright() as p:
        pg.eval_on_selector_all(".pickrow:not([hidden])", "e=>e.length") == 1,
        pg.eval_on_selector_all(".pickrow:not([hidden])", "e=>e.length"))
 
-    # ── THE NAME FITS, AND TWO VALUES COPY THEMSELVES (§93.6) ────────
-    # Islam: "the first column with the name needs to fit the name, and make
-    # the email and the phone to be copied on clicking on them."
+    # ── NAME AND FULL NAME (§93.8), AND TWO VALUES THAT COPY (§93.6) ─
+    # Islam: "we can have it Name and Full Name" — which reverses half of
+    # §93.6's own answer a day later, and gives the 392px back.
     #
     # THE LONGEST NAME IS PUT IN ON PURPOSE. The demo's longest is 25
     # characters and the client's register holds 43 — measuring the demo would
     # have proved nothing about the case the change exists for (§45.2).
-    print("── the name column, and copying an address")
+    print("── name, full name, and copying an address")
     people_page(pg)
     LONG = "Abd El Moniem Mohamed Abd El Moniem Mahmoud"
-    pg.evaluate("""(n) => { PEOPLE[0].name = n;
+    pg.evaluate("""(n) => { PEOPLE[0].name = n; delete PEOPLE[0].known;
       PEOPLE[1].email = "someone.with.a.long.address@rayatrade.example";
       PEOPLE[1].phone = "+20 100 555 0101";
       PCOLS.phone = true; paint(); }""", LONG)
     pg.wait_for_timeout(600)
+    heads = pg.eval_on_selector_all(".peoplecfg thead th", "e=>e.map(x=>x.textContent.trim())")
+    ck("the register has both columns", heads[1:3] == ["Name", "Full Name"], heads)
     m = pg.evaluate("""() => {
+      const row = document.querySelectorAll('.peoplecfg tbody tr')[0];
       const cells = Array.from(document.querySelectorAll('.peoplecfg td.namecell'));
       return {
-        full: cells[0].textContent.indexOf("Mahmoud") > -1,
+        known: row.children[1].textContent.trim(),
+        full:  row.children[2].textContent.trim(),
         /* ONE LINE STILL (§88): distinct rounded tops among rects with width,
            never getClientRects().length, which counts zero-width extras. */
         lines: Math.max.apply(null, cells.map(function(c){
           const r = Array.from(c.getClientRects()).filter(x => x.width > 0);
           return new Set(r.map(x => Math.round(x.top))).size; })),
-        clipped: cells.filter(function(c){ const b = c.querySelector('b');
-          return b && b.scrollWidth > b.clientWidth + 1; }).length }; }""")
-    ck("the whole name is on the row", m["full"], m)
-    ck("...on one line, and not clipped",
-       m["lines"] == 1 and m["clipped"] == 0, m)
+        w: Math.round(cells[0].getBoundingClientRect().width) }; }""")
+    ck("Name is what somebody is called, not the legal name",
+       m["known"] == "Abd El Moniem Mohamed", m)
+    ck("...and the whole legal name is in Full Name beside it",
+       m["full"] == LONG, m)
+    ck("...on one line, in a frozen column that stayed narrow",
+       m["lines"] == 1 and m["w"] <= 260, m)
+
+    # TYPED WINS, AND CLEARING IT DOES NOT STORE THE GUESS. The second half is
+    # what stops a correction to the full name leaving a stale short one.
+    st = pg.evaluate("""() => {
+      const p = PEOPLE[0]; setKnownName(p, "Moniem Mahmoud");
+      const typed = knownName(p);
+      setKnownName(p, knownGuess(p.name));
+      return { typed: typed, stored: ("known" in p) }; }""")
+    ck("a typed Name wins over the guess", st["typed"] == "Moniem Mahmoud", st)
+    ck("...and clearing it back to the guess stores nothing", not st["stored"], st)
+
+    # THE FILE READS AN OLD ONE AND A NEW ONE (§93.8). Every file downloaded
+    # before today has "Name" holding the FULL name — read blindly, it would
+    # put a legal name in the short column and leave the full one empty.
+    f = pg.evaluate("""() => ({
+      cols: PEOPLE_FILE_COLS,
+      old: [fileFullName({"Name":"Ahmed Mostafa Mohamed El Gebely"}),
+            fileKnownName({"Name":"Ahmed Mostafa Mohamed El Gebely"})],
+      now: [fileFullName({"Full Name":"Ahmed Mostafa Mohamed El Gebely","Name":"Ahmed Mostafa"}),
+            fileKnownName({"Full Name":"Ahmed Mostafa Mohamed El Gebely","Name":"Ahmed Mostafa"})] })""")
+    ck("the file writes both columns",
+       f["cols"][1:3] == ["Full Name", "Name"], f["cols"])
+    ck("a file written before today still means the full name",
+       f["old"] == ["Ahmed Mostafa Mohamed El Gebely", ""], f["old"])
+    ck("...and one written after keeps them apart",
+       f["now"] == ["Ahmed Mostafa Mohamed El Gebely", "Ahmed Mostafa"], f["now"])
 
     cp = pg.query_selector(".peoplecfg [data-copy]")
     ck("the address is a control, not text", cp is not None)

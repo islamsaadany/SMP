@@ -65,6 +65,34 @@ JS = r"""(root) => {
   return out;
 }"""
 bad=collections.Counter(); samp={}; scanned=set()
+def perf_tab(pg):
+    """Open a unit's Performance tab, and FAIL if it did not open (§93.7).
+
+    THE THIRD TIME THIS EXACT FAULT. §50.6 found `unit/perf` scanning the Plan
+    page for twelve versions and fixed it by clicking the tab explicitly; §69
+    then made the tab read "Performance — not submitted yet" when a submission
+    is owed, so the exact-string match stopped matching, the click stopped
+    happening, and the sweep went back to measuring the landing page under the
+    name of a page it never opened. Nothing threw. It also silently skipped the
+    two PICTURE states downstream of it, which is why the whole picture sweep
+    reported "skipped" and nobody looked.
+
+    So: match on the PREFIX (the suffix is a status, not the name), and then
+    ASSERT it worked. A helper that returns quietly when it found no tab is the
+    same fault with a nicer face.
+    """
+    pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')]"
+                ".find(b=>b.textContent.trim().indexOf('Performance')===0);if(x)x.click()}")
+    pg.wait_for_timeout(400)
+    # ASKED OF THE STATE, NOT OF A CLASS. There is no `.on` on these buttons —
+    # the current tab is `currentSub`, and writing the assertion against a
+    # class that does not exist would have made it fail always, which is the
+    # same lie in the other direction.
+    on = pg.evaluate("()=>typeof currentSub!=='undefined'?String(currentSub):'(n/a)'")
+    if on != "performance":
+        raise SystemExit("contrast sweep: Performance tab did not open (currentSub: %r)" % on)
+
+
 with sync_playwright() as p:
     b=p.chromium.launch(executable_path=EXE)
     for pal in ("slate","forefront"):
@@ -148,7 +176,7 @@ with sync_playwright() as p:
             # and the label says which page it actually scanned.
             pg.locator('#units button[data-u="mobile"]').click(); pg.wait_for_timeout(500)
             scan("unit/landing")
-            pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()==='Performance');if(x)x.click()}")
+            perf_tab(pg)
             pg.wait_for_timeout(600); scan("unit/perf")
             pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.indexOf('Strategy')>-1);if(x)x.click()}")
             pg.wait_for_timeout(500); scan("unit/strategy")
@@ -177,7 +205,7 @@ with sync_playwright() as p:
                         cap:"Mall of Egypt, opened 12 June", z:1.4, x:40, y:60 }] }];
               paint(); }''')
             pg.wait_for_timeout(300)
-            pg.evaluate("()=>{var x=[...document.querySelectorAll('nav.tabs button')].find(b=>b.textContent.trim()==='Performance');if(x)x.click()}")
+            perf_tab(pg)
             pg.wait_for_timeout(400)
             pg.evaluate("()=>{var x=document.querySelector('[data-picedit]');if(x)x.click()}")
             # MANAGE SLIDES IS A MODE, NOT A MODAL, since 51.8 — so it is

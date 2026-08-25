@@ -329,6 +329,17 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   opened from `file://` every day), and **the value goes in the `title` beside
   the hint**, because `clipTitles()` only fills an EMPTY title — a bare "Click
   to copy" would take the hover from exactly the values too long to read.
+- **THE PERFORMANCE PAGE WENT UNMEASURED FOR THE THIRD TIME (§93.7):** §50.6
+  fixed `unit/perf` scanning the Plan page for twelve versions by clicking the
+  tab explicitly — then §69 made the tab read *"Performance — not submitted
+  yet"*, the exact-string match stopped matching, and the sweep quietly went
+  back to measuring the landing page under a name it never opened. It took the
+  two PICTURE states with it (`[data-picedit]` only exists on Performance), and
+  the sweep printed `(picture sweep skipped: …)` and carried on. **Match the
+  PREFIX — a suffix is a status, not the name — and ASSERT IT WORKED**: a helper
+  that returns quietly when it found no tab is the same fault with a nicer face.
+  Asked of `currentSub`, not of a `.on` class these buttons do not have, or the
+  assertion would fail always — the same lie pointing the other way.
 - **A COUNT BELONGS WHERE THE GAP IS CLOSED, AND IT PUSHED A BUTTON OFF THE
   PAGE (§93.4):** *"leave a note somewhere by how many units that doesn't have
   custodians."* On the REGISTER, because a custodian is given from a row there —

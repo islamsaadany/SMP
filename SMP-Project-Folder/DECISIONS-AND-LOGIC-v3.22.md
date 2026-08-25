@@ -11110,3 +11110,31 @@ announced — that look like the value and copy it on click.
   fills a title that is empty, so a bare *"Click to copy"* would have taken the
   hover away from exactly the values too long to read — the one case the hover
   exists for.
+
+### 93.7 The Performance page went unmeasured for the third time
+
+Found while reading the contrast sweep's own output rather than its total: it
+printed `(picture sweep skipped: …)` and carried on.
+
+**§50.6 already fixed this once.** It found `unit/perf` measuring the *Plan*
+page twice and the Performance page never — for twelve versions, silently and in
+the safe direction — and fixed it by clicking the tab explicitly, with a comment
+saying so. Then **§69 made the tab read "Performance — not submitted yet"** when
+a submission is owed, the exact-string match `=== 'Performance'` stopped
+matching, the click stopped happening, and the sweep went back to measuring the
+landing page under the name of a page it never opened.
+
+It took two more states with it. `[data-picedit]` only exists on Performance, so
+the picture-slide editor and the deck's picture slide — both opened on purpose by
+§50 precisely because *a state nothing navigates to is a state nothing measures*
+— were never reached, and the sweep said "skipped" in a line nobody read.
+
+Two changes, and the second is the one that matters:
+
+1. **Match the PREFIX.** The suffix is a status, not the name.
+2. **Assert that it worked.** A helper that returns quietly when it found no tab
+   is the same fault with a nicer face. It raises now.
+
+And the assertion is asked of **`currentSub`, not of a `.on` class** — these
+buttons carry no such class, so an assertion written against one would have
+failed always, which is the same lie pointing the other way.

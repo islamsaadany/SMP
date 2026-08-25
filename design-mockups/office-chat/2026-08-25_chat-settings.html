@@ -1,0 +1,433 @@
+<title>Turning the Chat Off</title>
+<style>
+  /* ── SMP tokens, forefront palette, copied from src/_shared.css ──
+     The mockup wears the product's own values so what is being judged is the
+     PROPOSAL and not a second design language. */
+  :root {
+    --sans:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono',monospace;
+    --r:8px; --r-pill:999px;
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --good:#2E7D5B; --attn:#B8860B; --warn:#CC6B3D; --bad:#B04434;
+    --good-tx:#1F6248; --attn-tx:#7A5D1C; --warn-tx:#A4512C; --bad-tx:#8C3327;
+    --good-bg:#E4F0EA; --attn-bg:#F7EFD6; --warn-bg:#FBEBE0;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --panel:#16325C; --panel-ink:#FFFFFF; --panel-quiet:#B7C4D8;
+    --fs-micro:10px; --fs-label:11px; --fs-small:12px; --fs-note:13px; --fs-body:14px;
+    /* The mockup's own chrome — deliberately NOT the product's. */
+    --page:#EDEEF1; --pen:#5A6270; --rule:#D6DAE1; --pen-soft:#8A919C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+      --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+      --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+      --page:#0B0C0F; --pen:#8A93A0; --rule:#262B33; --pen-soft:#6B727D;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --good:#5FB68C; --attn:#D9B23C; --warn:#E1935F; --bad:#D97066;
+    --good-tx:#8FD3B0; --attn-tx:#E8CA6A; --warn-tx:#EDAF83; --bad-tx:#E79A93;
+    --good-bg:#1B3129; --attn-bg:#332C16; --warn-bg:#33241A;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --panel:#0E1014; --panel-ink:#EAF0FA; --panel-quiet:#9AA6B8;
+    --page:#0B0C0F; --pen:#8A93A0; --rule:#262B33; --pen-soft:#6B727D;
+  }
+
+  * { box-sizing:border-box; }
+  body { background:var(--page); color:var(--ink); font-family:var(--sans);
+         margin:0; padding:36px 22px 90px; -webkit-font-smoothing:antialiased; }
+  .sheet { max-width:1120px; margin:0 auto; display:flex; flex-direction:column; gap:46px; }
+
+  header.top { display:flex; flex-direction:column; gap:12px; }
+  .kick { font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+          font-weight:700; color:var(--pen); }
+  h1 { font-size:27px; line-height:1.18; margin:0; letter-spacing:-.01em;
+       text-wrap:balance; font-weight:700; }
+  .lede { margin:0; max-width:64ch; font-size:15px; line-height:1.6; color:var(--ink-2); }
+  .lede b { font-weight:650; color:var(--ink); }
+
+  .block { display:flex; flex-direction:column; gap:14px; }
+  .blabel { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px; }
+  .blabel h2 { font-size:17px; margin:0; font-weight:650; letter-spacing:-.005em; }
+  .blabel p { margin:0; flex:1 1 340px; font-size:var(--fs-note); color:var(--pen);
+              line-height:1.5; }
+  .tag { font-size:9.5px; letter-spacing:.12em; text-transform:uppercase; font-weight:800;
+         padding:3px 7px; border-radius:var(--r-pill); border:1px solid; }
+  .tag.new { color:var(--good-tx); border-color:var(--good); background:var(--good-bg); }
+  .tag.rule{ color:var(--pen); border-color:var(--rule); background:transparent; }
+
+  .screen { background:var(--ground); border:1px solid var(--rule); border-radius:12px;
+            padding:22px; overflow-x:auto; }
+  .why { border-left:2px solid var(--rule); padding-left:14px;
+         display:flex; flex-direction:column; gap:9px; max-width:72ch; }
+  .why p { margin:0; font-size:var(--fs-note); line-height:1.62; color:var(--pen); }
+  .why strong { color:var(--ink); font-weight:650; }
+  .why em { color:var(--ink-2); font-style:italic; }
+  code { font-family:var(--mono); font-size:.88em; background:var(--surface-2);
+         border:1px solid var(--line-soft); border-radius:4px; padding:1px 5px; color:var(--ink); }
+
+  /* ── the Setup pane, as the product draws it ─────────────────────── */
+  .pane { background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+          overflow:visible; min-width:820px; }
+  .phead { background:var(--panel); color:var(--panel-ink); padding:10px 14px;
+           display:flex; align-items:center; gap:10px; border-radius:var(--r) var(--r) 0 0; }
+  .phead h3 { margin:0; font-size:var(--fs-body); font-weight:650; }
+  .phead .hright { margin-left:auto; display:flex; gap:8px; align-items:center; }
+  .hbtn { background:rgb(255 255 255/.10); border:1px solid rgb(255 255 255/.24);
+          color:var(--panel-ink); border-radius:6px; font-size:var(--fs-small);
+          padding:5px 10px; cursor:pointer; font-family:inherit; }
+  .hbtn.open { background:var(--surface); color:var(--ink); border-color:var(--surface); }
+  .hwrap { position:relative; }
+
+  /* the dropdown panel — People's "Register file" shape (§90) */
+  .hmenu { position:absolute; right:0; top:calc(100% + 6px); z-index:20; width:392px;
+           background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+           box-shadow:0 8px 28px rgba(0,0,0,.16); overflow:hidden; }
+  .hmenu .grp { font-size:var(--fs-micro); letter-spacing:.11em; text-transform:uppercase;
+                font-weight:800; color:var(--ink-3); background:var(--surface-2);
+                padding:8px 14px; border-bottom:1px solid var(--line); }
+  .srow { padding:12px 14px; border-bottom:1px solid var(--line-soft);
+          display:flex; flex-direction:column; gap:7px; }
+  .srow:last-child { border-bottom:none; }
+  .srow .lab { font-size:var(--fs-note); font-weight:650; color:var(--ink);
+               display:flex; align-items:center; gap:8px; }
+  .srow .hint { font-size:var(--fs-micro); color:var(--ink-3); line-height:1.5; }
+  .srow .ctl { margin-left:auto; }
+
+  /* the off/on pair, exactly as §44's naming switch draws it */
+  .seg { display:inline-flex; border:1px solid var(--line); border-radius:6px;
+         overflow:hidden; flex:none; }
+  .seg button { background:var(--surface); border:none; cursor:pointer; font-family:inherit;
+                font-size:var(--fs-micro); font-weight:700; letter-spacing:.06em;
+                text-transform:uppercase; color:var(--ink-3); padding:5px 11px; }
+  .seg button + button { box-shadow:inset 1px 0 0 var(--line); }
+  .seg button[aria-pressed="true"] { background:var(--surface-2); color:var(--ink); }
+  .seg.lit button[aria-pressed="true"] { background:var(--gold); color:#1B1400; }
+
+  .tin { width:100%; border:1px solid var(--line); border-radius:6px; background:var(--ground);
+         color:var(--ink); padding:7px 9px; font-family:inherit; font-size:var(--fs-note); }
+
+  .cost { font-size:var(--fs-micro); color:var(--attn-tx); background:var(--attn-bg);
+          border:1px solid var(--attn); border-radius:5px; padding:5px 8px; line-height:1.45; }
+
+  /* ── the inbox behind it, drawn small ───────────────────────────── */
+  .inbox { display:grid; grid-template-columns:250px 1fr; min-height:220px; }
+  /* The pane is drawn tall enough to hold the open menu, because the frame
+     around it scrolls horizontally — and an overflow on one axis clips the
+     other. The real page is taller than this anyway. */
+  .inbox.tall { min-height:545px; }
+  .q { border-right:1px solid var(--line); background:var(--ground); padding:9px; }
+  .qrow { padding:8px 9px; border-bottom:1px solid var(--line-soft); }
+  .qrow .nm { font-size:var(--fs-note); font-weight:650; }
+  .qrow .sn { font-size:var(--fs-small); color:var(--ink-3); white-space:nowrap;
+              overflow:hidden; text-overflow:ellipsis; }
+  .thr { padding:16px; display:flex; flex-direction:column; gap:12px; }
+  .msg { max-width:78%; font-size:var(--fs-note); line-height:1.5; padding:9px 11px;
+         border-radius:10px; background:var(--surface); border:1px solid var(--line);
+         border-left:2px solid var(--gold); border-radius:4px 10px 10px 4px; }
+  .composer { display:flex; gap:8px; align-items:center; margin-top:auto;
+              border-top:1px solid var(--line); padding-top:12px; }
+  .composer .box { flex:1; border:1px solid var(--line); border-radius:8px;
+                   background:var(--ground); padding:8px 10px; font-size:var(--fs-note);
+                   color:var(--ink-3); }
+  .sendbtn { background:var(--panel); color:var(--panel-ink); border:none; border-radius:8px;
+             height:34px; padding:0 13px; font-size:var(--fs-small); font-weight:650; }
+
+  .offbar { display:flex; gap:10px; align-items:flex-start; padding:12px 14px;
+            background:var(--attn-bg); border-bottom:1px solid var(--attn);
+            font-size:var(--fs-note); color:var(--ink-2); line-height:1.5; }
+  .offbar b { color:var(--ink); }
+
+  /* ── the corner, drawn twice ────────────────────────────────────── */
+  .cornerrow { display:flex; gap:44px; flex-wrap:wrap; }
+  .cdemo { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .cdemo .cap { font-size:var(--fs-micro); letter-spacing:.1em; text-transform:uppercase;
+                font-weight:700; color:var(--pen-soft); }
+  .cpad { background:var(--ground); border:1px dashed var(--rule); border-radius:12px;
+          width:186px; height:126px; display:grid; place-items:center; position:relative; }
+  .bubble { width:50px; height:50px; border-radius:50%; border:none;
+            background:var(--panel); color:var(--panel-ink);
+            box-shadow:0 3px 14px rgb(0 0 0/.22); display:grid; place-items:center; }
+  .bubble svg { width:23px; height:23px; }
+  .nobubble { font-size:var(--fs-micro); color:var(--pen-soft); font-style:italic; }
+
+  .panelmini { width:300px; background:var(--surface); border:1px solid var(--line);
+               border-radius:12px; overflow:hidden; box-shadow:0 6px 22px rgb(0 0 0/.14); }
+  .pmhead { background:var(--panel); color:var(--panel-ink); padding:10px 12px; }
+  .pmhead .t { font-size:var(--fs-body); font-weight:650; }
+  .pmhead .s { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:3px;
+               display:flex; align-items:center; gap:5px; }
+  .dot { width:6px; height:6px; border-radius:50%; background:var(--good); }
+  .pmbody { padding:26px 16px; text-align:center; color:var(--ink-3);
+            font-size:var(--fs-note); }
+  .pmfoot { border-top:1px solid var(--line); padding:9px 10px; display:flex; gap:8px; }
+  .pmfoot .box { flex:1; border:1px solid var(--line); border-radius:8px; background:var(--ground);
+                 padding:7px 9px; font-size:var(--fs-small); color:var(--ink-3); }
+
+  .ask { border:1px solid var(--rule); border-radius:12px; padding:20px 22px;
+         display:flex; flex-direction:column; gap:11px; background:var(--ground); }
+  .ask h3 { margin:0; font-size:15px; font-weight:700; }
+  .ask ol { margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px; }
+  .ask li { font-size:var(--fs-note); line-height:1.6; color:var(--ink-2); }
+  .ask li b { color:var(--ink); font-weight:650; }
+</style>
+
+<div class="sheet">
+
+  <header class="top">
+    <div class="kick">SMP &middot; mockup &middot; 25 Aug 2026 &middot; proposed</div>
+    <h1>Turning the chat off, and the four things worth setting</h1>
+    <p class="lede">Islam: <em>&ldquo;I will need in the setup page to enable or disable the chat
+      with some settings maybe.&rdquo;</em> Five controls, in a dropdown on the header of the
+      Messages page the office already has &mdash; not a second Setup page, which for five
+      switches would be a door behind a door (&sect;32).</p>
+  </header>
+
+  <div class="block">
+    <div class="blabel">
+      <h2>1 &middot; Where they live</h2><span class="tag new">new</span>
+      <p>Setup &rsaquo; Running the cycle &rsaquo; Messages, in the header beside nothing else
+        &mdash; the same shape the People register&rsquo;s <em>Register file</em> menu has
+        (&sect;90).</p>
+    </div>
+    <div class="screen">
+      <div class="pane">
+        <div class="phead">
+          <h3>Messages</h3>
+          <div class="hright">
+            <div class="hwrap">
+              <button class="hbtn open" type="button">Settings &#9662;</button>
+              <div class="hmenu">
+                <div class="grp">The chat</div>
+
+                <div class="srow">
+                  <div class="lab">People can write to the office
+                    <span class="ctl"><span class="seg lit">
+                      <button type="button" aria-pressed="false">Off</button>
+                      <button type="button" aria-pressed="true">On</button>
+                    </span></span>
+                  </div>
+                  <div class="hint">Off removes the bubble from every page. Nothing is deleted
+                    &mdash; every conversation stays here and stays readable.</div>
+                </div>
+
+                <div class="srow">
+                  <div class="lab">Checking for replies
+                    <span class="ctl"><span class="seg">
+                      <button type="button" aria-pressed="true">Live</button>
+                      <button type="button" aria-pressed="false">Relaxed</button>
+                    </span></span>
+                  </div>
+                  <div class="hint">How often an open chat asks whether anything has arrived
+                    &mdash; every 4 seconds, or every 15.</div>
+                  <div class="cost"><b>Relaxed cuts the busiest case by about three quarters.</b>
+                    A reply takes up to 15 seconds to appear instead of 4.</div>
+                </div>
+
+                <div class="srow">
+                  <div class="lab">What the panel promises</div>
+                  <input class="tin" type="text" value="Usually answers the same day">
+                  <div class="hint">Shown under &ldquo;Strategy Office&rdquo; on every open chat.
+                    It is a promise the office is making to the whole tenant, so it should be the
+                    office&rsquo;s words.</div>
+                </div>
+
+                <div class="srow">
+                  <div class="lab">People can attach a screenshot
+                    <span class="ctl"><span class="seg lit">
+                      <button type="button" aria-pressed="false">Off</button>
+                      <button type="button" aria-pressed="true">On</button>
+                    </span></span>
+                  </div>
+                  <div class="hint">The only thing here with real storage cost &mdash; up to 3 MB
+                    a picture, shrunk before it is sent.</div>
+                </div>
+
+                <div class="srow">
+                  <div class="lab">Email a reply to somebody who is away
+                    <span class="ctl"><span class="seg lit">
+                      <button type="button" aria-pressed="false">Off</button>
+                      <button type="button" aria-pressed="true">On</button>
+                    </span></span>
+                  </div>
+                  <div class="hint">When they have not had the platform open for three minutes.
+                    Off keeps every conversation inside the platform.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="inbox tall">
+          <div class="q">
+            <div class="qrow"><div class="nm">Ahmed Mostafa El Gebely</div>
+              <div class="sn">Still showing 4.2 on my Performance page.</div></div>
+            <div class="qrow"><div class="nm">Yara Abdel Rahman</div>
+              <div class="sn">Can I get an extra day on the Care submission?</div></div>
+          </div>
+          <div class="thr">
+            <div class="msg">The Q3 target on Active Base reads 4.2M here but our signed plan
+              says 4.5M. Which counts?</div>
+            <div class="composer"><div class="box">Reply to Ahmed&hellip;</div>
+              <button class="sendbtn" type="button">Send</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why">
+      <p><strong>A dropdown, not a section above the table.</strong> These are settings somebody
+        touches twice a year; the queue is what the page is for. &sect;93.5 settled the same
+        argument on the register &mdash; <em>&ldquo;this page is a table page, not for other
+        notifications&rdquo;</em> &mdash; and &sect;90 put the register&rsquo;s own twice-a-year
+        controls into exactly this menu.</p>
+      <p><strong>The Off/On pair is &sect;44&rsquo;s naming switch, unchanged.</strong> Two named
+        sides, the live one lit, and nothing invented: a tenant switch already looks like this in
+        this product, and a second shape for the same idea is how a design language comes apart.</p>
+      <p><strong>The cadence setting says what it costs, in the row.</strong> That is the whole
+        reason it is a setting rather than a number in the source &mdash; a client on a small
+        deployment can trade four seconds for three quarters of the traffic, and should be able to
+        see the trade while making it.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel">
+      <h2>2 &middot; What &ldquo;off&rdquo; looks like</h2><span class="tag rule">the rules</span>
+      <p>The corner goes. The page stays. Nothing is deleted.</p>
+    </div>
+    <div class="screen">
+      <div class="cornerrow">
+        <div class="cdemo">
+          <div class="cpad">
+            <button class="bubble" type="button" aria-label="Message the Strategy Office">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.7 9.7 0 0 1-2.7-.4L3 21l1.6-4.6A8.2 8.2 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="cap">On</div>
+        </div>
+        <div class="cdemo">
+          <div class="cpad"><span class="nobubble">nothing at all</span></div>
+          <div class="cap">Off &mdash; and no polling</div>
+        </div>
+        <div class="cdemo">
+          <div class="panelmini">
+            <div class="pmhead">
+              <div class="t">Strategy Office</div>
+              <div class="s"><span class="dot"></span> We answer 9&ndash;5, within two working days</div>
+            </div>
+            <div class="pmbody">Ask us anything</div>
+            <div class="pmfoot"><div class="box">Write to the office&hellip;</div></div>
+          </div>
+          <div class="cap">The promise, in the office's own words</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" style="margin-top:14px">
+      <div class="pane">
+        <div class="phead"><h3>Messages</h3>
+          <div class="hright"><button class="hbtn" type="button">Settings &#9662;</button></div>
+        </div>
+        <div class="offbar">
+          <div><b>The chat is off.</b> Nobody can write to the office and the bubble is not drawn
+            on any page. Everything below is still here, and turning it back on changes nothing
+            about it.</div>
+        </div>
+        <div class="inbox">
+          <div class="q">
+            <div class="qrow"><div class="nm">Ahmed Mostafa El Gebely</div>
+              <div class="sn">Still showing 4.2 on my Performance page.</div></div>
+            <div class="qrow"><div class="nm">Yara Abdel Rahman</div>
+              <div class="sn">Can I get an extra day on the Care submission?</div></div>
+          </div>
+          <div class="thr">
+            <div class="msg">The Q3 target on Active Base reads 4.2M here but our signed plan
+              says 4.5M. Which counts?</div>
+            <div class="composer" style="opacity:.5">
+              <div class="box">Replying is off while the chat is off</div>
+              <button class="sendbtn" type="button" disabled>Send</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="why">
+      <p><strong>The page has to stay reachable, and that is not a detail.</strong> If the
+        Messages page disappeared with the chat, the only way to turn it back on would be to turn
+        it on first. &sect;61 hit exactly that: a supporting function with no plan could not be
+        opened, so the only way to reach it was to give it a plan &mdash; which hid every function
+        on a fresh tenant.</p>
+      <p><strong>Turning it off never deletes a conversation.</strong> &sect;44 settled this for
+        the naming switch in one line: <em>a switch that destroys data is not a switch</em>. The
+        history stays, the office can still read all of it, and turning it back on finds everything
+        where it was.</p>
+      <p><strong>Replying goes off with it, deliberately.</strong> If the bubble is gone, nobody
+        can see an answer &mdash; so a live reply box would be a control that writes into the
+        void. The alternative, letting the office reply into a chat nobody can open, is worse: the
+        person gets an email pointing at a platform with no way to answer back.</p>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="blabel">
+      <h2>3 &middot; The half that is not on screen</h2><span class="tag rule">must be built</span>
+      <p>A switch that only hides a control is decoration &mdash; this project has learned that
+        one more than once.</p>
+    </div>
+    <div class="why" style="max-width:none">
+      <p><strong>THE SERVER HAS TO REFUSE, NOT JUST THE SCREEN.</strong> &sect;42's whole
+        argument: <em>everything &sect;37 built decided what a screen OFFERED; nothing decided what
+        the server ACCEPTED.</em> With the chat off, <code>/api/chat</code> must turn down
+        <code>say</code> and <code>reply</code> outright &mdash; otherwise the feature is off for
+        anybody using the product and on for anybody with a browser console. &sect;44 hit the same
+        thing and recorded it: <em>a switch that only hides a control is decoration</em>.</p>
+      <p><strong>Which costs the endpoint one query it does not make today.</strong>
+        <code>api/chat.js</code> has never read the strategy graph &mdash; it answers from the two
+        chat tables and the session, which is why it is cheap. Reading five settings means one
+        small <code>SELECT extra FROM org</code>, and it belongs behind the same
+        once-per-instance guard as everything else, or the settings check undoes the saving it
+        exists to make.</p>
+      <p><strong>The settings ride in <code>org.extra</code>, so there is no migration</strong>
+        &mdash; the same place the naming switch, the BU list and the communication settings
+        already live. They arrive with the state graph, and the SMO's save carries them like any
+        other setup change.</p>
+      <p><strong>And the whole office may flip it, which was your call.</strong> Worth writing
+        down beside the rule rather than only in the code: this one is operational, like opening
+        and closing a cycle &mdash; whoever is staffing the desk can turn it off over a holiday
+        without going through you.</p>
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>What I need signed off before touching any source</h3>
+    <ol>
+      <li><b>A Settings dropdown on the Messages page header</b>, holding all five controls.
+        Not a second Setup page, not a block above the queue.</li>
+      <li><b>Off removes the bubble everywhere and stops all polling</b> &mdash; and turns the
+        office's reply box off with it.</li>
+      <li><b>The Messages page stays in the rail while it is off</b>, showing the history and a
+        line saying the chat is off.</li>
+      <li><b>Live / Relaxed</b> for the cadence, with the cost stated in the row.</li>
+      <li><b>Anyone in the office may change these</b> &mdash; Super user or SMO team.</li>
+    </ol>
+    <p style="margin:6px 0 0; font-size:var(--fs-note); color:var(--pen); line-height:1.6">
+      Still outstanding from before, and unrelated to this: the three performance fixes &mdash;
+      guarding <code>ensureReady</code>, stopping the poll on a hidden tab, and backing the idle
+      bubble off to a few minutes. The first one is worth doing whatever you decide here, and it
+      is the thing that makes the settings check above free.</p>
+  </div>
+
+</div>

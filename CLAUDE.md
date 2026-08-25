@@ -1151,7 +1151,48 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
+*Last Updated: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
+(&sect;95, spec 014). Six changes to Send a message, and the argument under five
+of them is the same one: **the page had exactly one part whose size was not
+fixed, and everything else was below it.** Every recipient rendered as a chip,
+so a group-wide send put nine hundred pixels of names between the message and
+the button &mdash; add a unit to the business and Send moves further away. It is
+a **bounded summary** now, and **THE SKIPPED COUNT IS NEVER BEHIND THE
+DISCLOSURE**: it is the fault that started this whole thread (&sect;87), so it
+reads on the line whether or not anybody opens the names, and the names put the
+skipped FIRST, because "3 skipped" tells nobody which three. **THE COUNT IS ON
+THE CONTROL THAT ACTS** &mdash; *Send to 76 people*, on a bar pinned to the foot
+of the window. **SEND ME A COPY** is the missing safeguard and the cheapest one:
+the same message, the same builder, one copy, **to the person SIGNED IN and
+never the person being viewed as** &mdash; `viewer()` is the simulation and a
+test that followed it would put a real message in a real colleague's inbox.
+`confirm()` is gone: a browser dialog can be silenced permanently on some other
+site, and this is the most irreversible act in the product &mdash; the
+platform's own modal names the subject, the count, **who will not receive it**,
+and that there is no undo. Drafts and Sent leave the scroll for header
+dropdowns carrying their counts (&sect;90's move, on the page that needed it
+next). **AND THE PARTIAL REPAINT OWNED MORE THAN IT KNEW** (&sect;95.7):
+`paintAudience()` deliberately does not call `paint()` &mdash; the composer
+beside it may have a half-typed sentence in it &mdash; which was right until the
+count went onto the Send button, the one control it then had to update and did
+not; the same replacement killed *Show the names*, bound in `wire()` inside the
+element being replaced, **at the only moment there is ever anything to
+disclose**. And the header's count was found by `.chip:last-of-type`, which
+counts TAGS &mdash; two dropdown spans went in after the chips and it silently
+matched nothing, so the header read "nobody chosen" over a resolved seventy-six.
+**THE CHECK COULD NOT LIVE IN `qa.py`**: every other screen check opens the
+built file over `file://`, where this whole page is the empty state &mdash; and
+so is what the CONTRAST SWEEP has been calling clean for as long as the page has
+existed. `src/checks/send-message.py` serves the built file with a stub, and
+measures contrast with the sweep's OWN function read out of its source rather
+than copied (&sect;67). Which found &sect;16.17 by accident: Chromium keeps
+`:hover` after a click, so a still-lit button measured 4.34:1 &mdash;
+`.editbtn:hover`, on every page, since long before this version. **Every
+`:hover`, `:focus` and `:disabled` colour in this product is unmeasured**,
+because a sweep that walks pages and states never touches a control. Recorded,
+not quietly changed.*
+
+*Earlier: 2026-08-25 &mdash; **v3.25: the strategy tab, the door, and one
 solid button** (&sect;94). Three asks in one message, two of them half built
 already, and finding out which half is most of the section. **"I TESTED AND THE
 CUSTODIAN FOUND THE PENS"** &mdash; &sect;31 closed the PLAN and nothing else,

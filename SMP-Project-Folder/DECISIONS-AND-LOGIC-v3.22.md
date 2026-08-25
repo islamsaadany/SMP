@@ -11790,3 +11790,55 @@ genuinely used, so a cap replaced by a slightly larger cap fails.
 A zero-width row is skipped rather than failed: Setup has no tab row at all
 (§46.1), and asserting against it would be measuring a thing the page is right
 not to draw.
+
+### 94.15 The Arrange button goes, because §94.3 took away its reason
+
+> *"Remove the arrange button from the units and functions as it's already
+> embedded in the edit button — when I press the pencil I can arrange, so the
+> button is not needed."*
+
+He is right, and the interesting part is *why* it was there. §63.3 kept it for a
+precise, stated reason:
+
+> *"A BU head has no pen — `mayEditPlan()` is the SMO's (§31) — and could
+> arrange before this, so they keep an explicit button: tying the handles to the
+> pen alone would have taken reordering away from the people who use it most,
+> silently."*
+
+**§94.3 closed reordering to the office**, who are exactly the people who *do*
+have the pen. So the sentence that justified the button stopped being true the
+same day, and what was left was a second control doing what the pen beside it
+already does. **A control with no audience of its own is not a choice, it is a
+duplicate** — and the two were already an either/or dressed as two things,
+because the button had to be hidden whenever the pen was on (a button reading
+"Done" for a mode it did not start lies about what pressing it will do).
+
+**THE GROUP KEEPS ITS OWN, AND THAT IS THE POINT RATHER THAN AN EXCEPTION.** The
+group's Performance page has no pen at all, so `arrangeBtn("group")` is the only
+way to reorder units, themes and capabilities. The button is redundant precisely
+where a pen sits beside it, and nowhere else — which is why "remove the Arrange
+button", read one page too widely, would have taken away the one that still
+does something.
+
+Gone from both sides in the same breath (§53.5): a button removed from a unit
+and left on a function is exactly the drift that rule exists to stop.
+
+**AND IT NEARLY SHIPPED RETURNING `undefined`.** The unit's Plan ended
+`return arr + (…)`; deleting the leading term left `return` alone on a line, and
+automatic semicolon insertion ends the statement there — the function returns
+undefined and everything below it becomes dead code. This file already carries
+that scar on `renderGroupFoundation()`, which rendered the literal word
+"undefined" for versions. Caught by reading the diff before building; the check
+now reads `#panel` for the word, because **the page renders it rather than
+throwing**, so nothing else would have said so.
+
+The check asserts **both ends**: that the button is absent, and that pressing
+the pen still produces handles — 13 on a unit, 14 on a capability. Proving the
+button is gone proves nothing on its own, because a build that had lost the
+handles too would pass it.
+
+*(A note on the check that found nothing: the first run reported the function's
+pen giving zero handles. The product was fine — the test navigated by setting
+`current` directly, which does not drop modes, so the page arrived with the pen
+already on and the click turned it OFF. §51.11's shape, in a scratch script: the
+measurement was true and it was measuring the wrong state.)*

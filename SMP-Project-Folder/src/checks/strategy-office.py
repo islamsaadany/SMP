@@ -137,8 +137,14 @@ with sync_playwright() as p:
         v = pens(pg, key, who["unit"], "strategy", "plan")
         ck("%s %s a pen on the unit's Plan" % (label, "has" if want else "has NO"),
            (v["anyPen"] > 0) is want, v)
-        ck("...and %s an Arrange button" % ("has" if want else "has NO"),
-           (v["arrange"] > 0) is want, v)
+        # THE ARRANGE BUTTON IS GONE FOR EVERYBODY NOW (§94.15), so asserting
+        # its absence here would be a check that cannot fail (§54). What is
+        # still a real rule is that somebody outside the office gets NO WAY IN
+        # AT ALL — no button and no handles — while the office's way in is the
+        # pen, which section 2c presses and counts.
+        if not want:
+            ck("...and no way to reorder at all — no button, no handles",
+               v["arrange"] == 0 and v["grips"] == 0, v)
         v = pens(pg, key, who["unit"], "strategy", "found")
         ck("...%s a pen on Foundation" % ("has" if want else "has NO"),
            (v["anyPen"] > 0) is want, v)
@@ -170,6 +176,51 @@ with sync_playwright() as p:
     ck("...and the custodian gets no fields even with the mode still set",
        pg.evaluate("""() => document.querySelectorAll("textarea[data-f], input[data-f]").length""") == 0,
        pg.evaluate("""() => document.querySelectorAll("textarea[data-f], input[data-f]").length"""))
+
+    # ── 2c · THE PEN IS THE ONLY WAY IN NOW (§94.15) ─────────────────
+    # §63.3 kept an explicit Arrange button beside the pen for people who had
+    # no pen; §94.3 closed reordering to the office, who all have one, so the
+    # button became a duplicate and Islam asked for it to go.
+    #
+    # BOTH ENDS, and the second is the one that matters: proving the button is
+    # absent proves nothing on its own — a build that had lost the HANDLES too
+    # would pass it. So the pen is pressed and the handles counted, on both
+    # sides of the navigation switch (§53.5).
+    print("\n2c · reordering lives on the pen, and nowhere else")
+
+    def arrange_state(pg):
+        return pg.evaluate("""() => ({
+          arrange: document.querySelectorAll("[data-arrange]").length,
+          pen: document.querySelectorAll("[data-page]").length,
+          grips: document.querySelectorAll(".grip").length,
+          /* Deleting the leading term of a `return a + b` expression is how a
+             function comes to return undefined (ASI), and the page renders the
+             word rather than throwing — so it is read, not assumed. */
+          undef: document.querySelector("#panel").innerHTML.indexOf("undefined")
+        })""")
+
+    for label, dest, tab, sec in [("a unit's Plan", who["unit"], "strategy", "plan"),
+                                  ("a function's Projects", "fn:" + who["fn"], "fnstrat", "proj")]:
+        be(pg, who["smo"], dest, tab, sec)
+        v = arrange_state(pg)
+        ck("%s has no Arrange button" % label, v["arrange"] == 0, v)
+        ck("...and no handles until the pen is pressed", v["grips"] == 0, v)
+        ck("...and renders (no `undefined` from a stripped return)", v["undef"] == -1, v)
+        pg.click("[data-page='plan']")
+        pg.wait_for_timeout(500)
+        v = arrange_state(pg)
+        ck("...the pen turns the handles on (%d)" % v["grips"], v["grips"] > 0, v)
+        ck("...and still offers no second control", v["arrange"] == 0, v)
+        pg.click("[data-page='plan']")
+        pg.wait_for_timeout(300)
+
+    # THE GROUP KEEPS ITS OWN, and that is the point rather than an exception:
+    # its Performance page has no pen, so the button is the only way to reorder
+    # units, themes and capabilities. Asserted, or "remove the Arrange button"
+    # read one page too widely would pass silently.
+    be(pg, who["smo"], "group", "performance")
+    v = arrange_state(pg)
+    ck("the group keeps its Arrange button, having no pen", v["arrange"] == 1 and v["pen"] == 0, v)
 
     # ── 3 · WHERE A PERSON OPENS ─────────────────────────────────────
     print("\n3 · people open where they work, on the plan")

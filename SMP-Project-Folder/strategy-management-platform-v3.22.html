@@ -18005,15 +18005,11 @@ function renderFnProjects(fnKey){
   if (fnPlansInPillars(FUNCTIONS[fk])) return renderUnitPlan(fnAsUnit(fk));
   if (!caps.length) return fnNothingBehind(fk);
   var ed = projEditing(), on = projArranging(fk);
-  /* THE ARRANGE BUTTON, for somebody who may reorder but has no pen — §63.3's
-     rule, and the reason it is a rule: tying the handles to the pen alone
-     takes reordering away from the people who use it most, silently. Hidden
-     while the pen is on, because the pen already turned the handles on and a
-     button reading "Done" for a mode it did not start lies about what pressing
-     it will do. */
-  var arr = (canArrange("unit", "fn:" + fk) && !ed)
-    ? '<div class="pageact">' + arrangeBtn("unit", "fn:" + fk) + '</div>' : '';
-  return arr + caps.map(function(c){
+  /* Gone here for the same reason and in the same breath (§94.15, §53.5):
+     a unit and a function are the same product, and a button removed from one
+     side of the navigation switch and left on the other is exactly the drift
+     that rule exists to stop. */
+  return caps.map(function(c){
     var sel = railPick(c);
     /* AN EMPTY CAPABILITY IS WHERE THE FIRST PROJECT GOES (§61's lesson, the
        same shape): the note said "No projects yet" and offered nothing, so the
@@ -18431,14 +18427,38 @@ function renderUnitPlan(u){
      where you already knew you were - the same redundancy the chrome shed in
      2.9 - and the PILLARS heading below them repeated the rail's own header
      word for word. The page opens straight onto the rail and the pillar. */
-  /* The Arrange control, for somebody who may reorder but has no pen (§63.3).
-     Hidden while the pen is on, because the pen already turned the handles on
-     and a button reading "Done" for a mode it did not start is a lie about
-     what pressing it will do. */
-  var arr = (canArrange("unit", u.ukey) && !(EDIT_PAGE.plan && mayEditPlan()))
-    ? '<div class="pageact">' + arrangeBtn("unit", u.ukey) + '</div>' : '';
-  return arr +
-    (arranging("unit", u.ukey)
+  /* ── THE ARRANGE BUTTON IS GONE FROM HERE (§94.15) ───────────────
+     Islam: "remove the arrange button from the units and functions as it's
+     already embedded in the edit button — when I press the pencil I can
+     arrange, so the button is not needed."
+
+     IT IS §94.3 CATCHING UP WITH ITSELF. §63.3 kept an explicit button for a
+     precise reason: "a BU head has no pen — mayEditPlan() is the SMO's — and
+     could arrange before this, so they keep an explicit button; tying the
+     handles to the pen alone would have taken reordering away from the people
+     who use it most, silently." §94.3 then closed reordering to the office,
+     which is the only group of people who DO have the pen — so the sentence
+     that justified the button had stopped being true, and what was left was a
+     second control doing what the pen beside it already does.
+
+     A CONTROL WITH NO AUDIENCE OF ITS OWN IS NOT A CHOICE, IT IS A DUPLICATE.
+     It also had to be hidden while the pen was on (a button reading "Done" for
+     a mode it did not start lies about what pressing it will do), so the two
+     were already an either/or dressed as two things.
+
+     THE GROUP KEEPS ITS OWN, and that is not an inconsistency: the group's
+     Performance page has no pen at all, so `arrangeBtn("group")` is the only
+     way to reorder units, themes and capabilities. The button is redundant
+     exactly where a pen sits beside it.
+
+     `return` STAYS ON THE SAME LINE AS ITS EXPRESSION. Deleting the leading
+     `arr +` left it alone on a line, and automatic semicolon insertion ends
+     the statement there — the function returns undefined and every line below
+     becomes dead code. This file already carries that scar on
+     renderGroupFoundation(), which rendered the literal word "undefined" for
+     versions; the note is here so the next deletion of a leading term does not
+     re-earn it. */
+  return (arranging("unit", u.ukey)
       ? '<p class="sec-hint">' + u.items.length + ' ' + L("pillar","bu").toLowerCase() +
         ' &middot; drag by the handle to reorder, here and inside each ' +
         L("pillar","bu").toLowerCase().replace(/s$/, "") + '</p>' : '') +

@@ -81,6 +81,12 @@ class H(http.server.BaseHTTPRequestHandler):
             return
         if body.get("action") == "say":
             CHAT["said"].append(body)
+            # THE STUB HAS TO MODEL THE SERVER, not merely answer. A real `say`
+            # comes back with the conversation WAITING, and that is what puts
+            # the shut panel on the 15s beat instead of 180s (§99) — a stub
+            # that returned `thread: null` made the client behave correctly and
+            # the check read it as broken.
+            CHAT["thread"] = {"waiting": True}
             CHAT["messages"].append({
                 "id": len(CHAT["messages"]) + 1, "at": "2026-08-25T09:00:00Z",
                 "from_office": False, "by_key": "smo", "by_name": "Mohamed Essam",
@@ -151,15 +157,25 @@ with sync_playwright() as p:
     pg.click("#chatsend")
     pg.wait_for_timeout(900)
     ck("the message is in the conversation", "does not match" in pg.inner_text("#chatbody"))
+    # ── NOTHING ABOUT WHERE THEY WERE TRAVELS WITH IT (§99) ──────────
+    # This used to assert the opposite — that the page, the cycle and the build
+    # were captured and sent. Islam asked for that gone everywhere, so the
+    # check is inverted rather than deleted: §94.2's rule, that only a check
+    # looking for an ABSENCE can see something that should not be drawn, and
+    # the easiest way to bring a removed feature back by accident is to stop
+    # asserting it is gone.
     said = CHAT["said"][-1] if CHAT["said"] else {}
-    # CAPTURED, NOT TYPED (§71) — and in the NAVIGATION'S OWN WORDS, never the
-    # tab key, which put "the group › performance" on a message where the
-    # screen said "Group › Performance" (§93.12, §94.6).
-    ck("where they were was sent with it", bool(said.get("page")), said.get("page"))
-    ck("and it is the navigation's own words, not a key",
-       said.get("page", "").split(" › ")[0][:1].isupper(), said.get("page"))
-    ck("the build went with it", bool(said.get("build")), said.get("build"))
-    ck("and the cycle", bool(said.get("cycle")), said.get("cycle"))
+    for k in ("page", "target", "cycle", "build"):
+        ck("nothing is sent about where they were: %s" % k, not said.get(k), said.get(k))
+    ck("and the message itself still arrives whole",
+       said.get("body", "").startswith("The Q3 target"))
+    ck("no context line is drawn under it",
+       pg.eval_on_selector_all(".chctx", "n => n.length") == 0)
+    # AND THE FOOTER STOPS PROMISING IT. A sentence that is merely stale is
+    # worse than no sentence, because somebody believes it.
+    ck("the composer no longer says the page is sent",
+       "page you are on" not in pg.inner_text("#chatnote"),
+       pg.inner_text("#chatnote"))
 
     # ── 3 · A POLL MUST NOT EAT WHAT SOMEBODY IS TYPING ──────────────────
     # The rule this whole file is built around (§35, §71.2, §30.1). The panel
@@ -174,6 +190,39 @@ with sync_playwright() as p:
        pg.input_value("#chatsay") == "half a sentence I have not finished",
        pg.input_value("#chatsay"))
     pg.fill("#chatsay", "")
+
+    # ── 3b · IT MINIMISES, AND A REPLY ANNOUNCES ITSELF (§99) ────────────
+    print("\n3b · the corner's two corrections")
+    def poll_once(within=8000):
+        was, waited = CHAT["polls"], 0
+        while CHAT["polls"] == was and waited < within:
+            pg.wait_for_timeout(250); waited += 250
+        return CHAT["polls"] > was
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    lab = pg.eval_on_selector("#chatclose", "e => e.getAttribute('aria-label') || ''")
+    ck("the control says minimise, not close", "inimis" in lab or "inimiz" in lab, lab)
+    ck("and it is not a cross", "×" not in pg.inner_text("#chatclose"))
+    pg.click("#chatclose")
+    ck("pressing it puts the panel away", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    ck("and the conversation is still there afterwards", len(CHAT["messages"]) > 0)
+
+    # A REPLY THAT LANDS WHILE THE PANEL IS SHUT HAS TO SAY SO.
+    CHAT["messages"].append({
+        "id": 99, "at": "2026-08-25T09:30:00Z", "from_office": True,
+        "by_key": "smo", "by_name": "Nada Kamal", "body": "Looking at it now.",
+        "flag": None, "has_shot": False})
+    CHAT["unread"] = 1
+    ck("the client asks again while waiting", poll_once(25000))
+    pg.wait_for_timeout(400)
+    ck("the count appears on the bubble",
+       not pg.eval_on_selector("#chatn", "e => e.hidden") and
+       pg.inner_text("#chatn").strip() == "1", pg.inner_text("#chatn"))
+    ck("and the bubble announces it rather than changing in silence",
+       pg.eval_on_selector("#chatbtn", "e => e.classList.contains('chring')"))
+    CHAT["unread"] = 0
+
 
     # ── 4 · THE THREE ABSENCES ───────────────────────────────────────────
     print("\n4 · where the corner must NOT be")

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.22 shipped · **v3.27 in progress on the branch**
+**Latest version:** v3.26 shipped (live) · **v3.28 in progress on the branch**
 **Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -53,6 +53,30 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.28 — the corner, corrected by using it (§99)
+
+Three notes from Islam within minutes of v3.26 reaching production, all from
+having it open rather than reading about it.
+
+- **The captured context line is gone everywhere** — §97.4 reversed. Not hidden
+  from the sender: the helpers, the icon, `BUILD_ID` and the build stamp are
+  deleted, and **migration 023 drops the four columns**. The composer's
+  "the page you are on is sent with your message" went with it.
+- **The × is a minus labelled Minimise.** Nothing was ever closed — one
+  conversation per person, permanent.
+- **A reply announces itself.** A third cadence (15s) while the conversation is
+  waiting, back to 180s once answered, and a one-shot ring on the bubble.
+
+**Verified:** office-chat.py **37 checks ALL CLEAR** (the context assertions
+inverted to assert absence) · test-chat.js 52/52 · settings drive 21/21 · chat
+drive 25/25 · test-authorize 165/165 · test-roundtrip on a virgin database all
+PASS · migration 023 applied and the columns confirmed gone.
+
+Two things the checks caught that reading would not have: the announcement
+compared the arriving count against a value it had already overwritten, so it
+could never fire; and the check's stub answered `thread: null` where the real
+server returns `{waiting:true}`, so correct client behaviour read as broken.
 
 ### v3.27 — the chat gets a switch, and a poll gets cheaper (§98)
 

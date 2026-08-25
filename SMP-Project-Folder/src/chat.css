@@ -30,6 +30,26 @@ body.presenting .chatdock { display:none; }
 .chatbtn:hover { background:var(--panel-hover); }
 .chatbtn:focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
 .chatbtn svg { width:23px; height:23px; }
+/* ── A REPLY ANNOUNCES ITSELF (§99) ───────────────────────────────────
+   Islam: "when the admin replied the chat should show a notification on the
+   callout for the user to know he got an answer." The count was already
+   there; what was missing is that it ARRIVED silently, and up to three
+   minutes late. This is the arriving.
+
+   A ring that expands out of the bubble and fades, twice — not a bounce and
+   not a colour change: the corner sits over somebody's work and the job is to
+   be noticed, not to interrupt. `prefers-reduced-motion` gets the badge and
+   nothing else, which is the whole point of asking. */
+@keyframes chring {
+  0%   { box-shadow:0 0 0 0 var(--accent-glow, rgb(201 162 77/.5)); }
+  70%  { box-shadow:0 0 0 14px rgb(201 162 77/0); }
+  100% { box-shadow:0 0 0 0 rgb(201 162 77/0); }
+}
+.chatbtn.chring { animation:chring 1.3s ease-out 2; }
+@media (prefers-reduced-motion: reduce) {
+  .chatbtn.chring { animation:none; }
+}
+
 .chatbtn .chn { position:absolute; top:-3px; right:-3px; min-width:20px; height:20px;
                 border-radius:var(--r-pill); background:var(--gold); color:var(--on-accent,#1B1400);
                 font-size:var(--fs-micro); font-weight:800; display:grid; place-items:center;
@@ -49,8 +69,11 @@ body.presenting .chatdock { display:none; }
 .chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
                  display:flex; align-items:center; gap:5px; }
 .chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
-                 font-size:18px; cursor:pointer; line-height:1; padding:2px 4px; }
-.chathead .chx:hover { color:var(--panel-ink); }
+                 cursor:pointer; line-height:0; padding:4px; border-radius:5px;
+                 display:grid; place-items:center; }
+.chathead .chx svg { width:16px; height:16px; }
+.chathead .chx:hover { color:var(--panel-ink); background:rgb(255 255 255/.12); }
+.chathead .chx:focus-visible { outline:2px solid var(--panel-ink); outline-offset:1px; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
@@ -72,9 +95,6 @@ body.presenting .chatdock { display:none; }
 .chmsg.chme { align-self:flex-end; align-items:flex-end; }
 .chmsg.chme .chbod { background:var(--surface-2); border:1px solid var(--line-soft); }
 
-.chctx { font-size:var(--fs-micro); color:var(--ink-3); display:flex; align-items:center;
-         gap:5px; padding-left:2px; }
-.chctx svg { width:11px; height:11px; flex:none; opacity:.75; }
 
 .chshot { display:inline-flex; align-items:center; gap:7px; margin-top:7px;
           border:1px solid var(--line); border-radius:6px; padding:5px 8px;
@@ -106,6 +126,10 @@ body.presenting .chatdock { display:none; }
 .chsend:hover { background:var(--panel-hover); }
 .chsend[disabled] { opacity:.5; cursor:default; }
 .chnote { font-size:var(--fs-micro); color:var(--ink-3); padding:0 2px 1px; }
+/* It is empty most of the time now that nothing is promised about the page
+   (§99), and an empty line still spends its height — so it takes no room
+   until it has something to say. */
+.chnote:empty { display:none; }
 .chnote.bad { color:var(--bad-tx); }
 
 .chempty { display:flex; flex-direction:column; gap:9px; align-items:center;

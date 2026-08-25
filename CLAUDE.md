@@ -1029,6 +1029,18 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (the server half, against a real Postgres, signing in as somebody with no
   role because a check that only looks for something PRESENT cannot see a shut
   door, §94.2).
+- **THE CORNER MINIMISES, AND A REPLY ANNOUNCES ITSELF (since v3.28, §99):**
+  the panel's control is a **minus labelled Minimise**, not a × — one
+  conversation per person, permanent, so nothing is ever closed. A reply that
+  lands while it is shut gets a **third cadence** (`POLL_WAIT`, 15s) used only
+  while the conversation is waiting or holds an unread, back to 180s the moment
+  it is answered — plus a one-shot ring on the bubble, and nothing under
+  `prefers-reduced-motion`. **§97.4 IS REVERSED**: nothing about where somebody
+  was is captured, sent, stored or drawn — `whereNow()`, `navWord()`,
+  `ICON_PAGE`, `BUILD_ID` and the `sw.js` build stamp are all gone, and
+  **migration 023 drops `page`/`target`/`cycle`/`build`** (§53.4). The
+  composer's footer sentence went with it, because a sentence that is merely
+  stale is worse than none.
 - **THE CHAT HAS A SWITCH, AND POLLING WAS THE REAL COST (since v3.27, §98):**
   five controls in a **Settings dropdown on the Messages page header** (§90's
   shape, never a second Setup page — §32) — on/off, Live/Relaxed, the promise
@@ -1244,7 +1256,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.27: the chat gets a switch, and a poll
+*Last Updated: 2026-08-25 &mdash; **v3.28: the corner, corrected by using it**
+(&sect;99). Three notes within minutes of the merge going live, each of them
+from having the thing open rather than from reading about it. **&sect;97.4 IS
+REVERSED**: *"the line in front of the chat shouldn't be there"*, and asked
+whether it should be hidden from the sender or gone entirely, Islam chose gone.
+The argument for capturing the page was &sect;71's and it is still a good
+argument in the abstract &mdash; the screen knows where somebody is, so asking
+them is asking them to do the computer's job &mdash; and it did not survive
+being LOOKED AT: on a real message the line is longer than the message and
+repeats under every single thing you send. It is not merely hidden: the two
+helpers, the icon, `BUILD_ID` and the build-time stamp all go, and **migration
+023 drops the four columns** (&sect;53.4 &mdash; a column the platform no longer
+reads is worse than no column). **And the sentence under the composer went with
+it**, because *"the page you are on is sent with your message"* stopped being
+true the moment that stopped happening, and a sentence that is merely stale is
+worse than no sentence. **THE &times; WAS A SMALL LIE**: there is one
+conversation per person and it is permanent, so nothing is ever closed &mdash;
+it is a minus now, labelled Minimise. **AND A REPLY HAS TO ANNOUNCE ITSELF**:
+the count existed but arrived silently and up to three minutes late, because
+&sect;98.1 took the shut panel to 180s. A **third cadence** rather than a
+slower saving &mdash; 15s while the conversation is waiting on the office, back
+to 180s the moment it is answered &mdash; plus a ring that expands out of the
+bubble twice, and nothing at all under `prefers-reduced-motion`. **The bug in
+that could not have been found by reading**: the arriving count was compared
+against `state.unread` three lines AFTER being assigned to it, so the two were
+always equal and a reply could never announce itself. It read correctly and
+could not fire. **And the stub was lying about the server** &mdash; it answered
+`thread: null` where the real endpoint returns `{waiting:true}`, so the client
+behaved correctly and the check called it broken. A stub has to MODEL the
+server, not merely answer it.*
+
+*Earlier: 2026-08-25 &mdash; **v3.27: the chat gets a switch, and a poll
 gets cheaper** (&sect;98). Two asks that turned out to be one subject. *"How much
 can vercel handle as messages per day?"* &mdash; and the answer is that
 **messages are not the unit**: a message costs one request and an open tab costs

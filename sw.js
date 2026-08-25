@@ -69,12 +69,12 @@
    moment it is read. Checked here against origin/main and against every
    name this repository has ever carried: v3.25, b, c, d are used. */
 
-/* v3.26 — the corner, the office's inbox and its switch (§97, §98). NOT any
-   v3.25 name: this merge brings in main's v3.25h, and §94.16's rule is that the
-   name is confirmed against origin/main AFTER the last fetch and IMMEDIATELY
-   BEFORE the push, because the window between reading main and pushing is as
-   long as running the checks. Done in that order here. */
-const SHELL = "smp-shell-v3.26";
+/* v3.27 — the corner corrected by using it (§99). The trigger is unchanged and
+   is the only one that matters: the built file's BYTES changed, so the name
+   changes. Confirmed against origin/main immediately before the push (§94.16),
+   not now — main is a moving target and anything read from it goes stale the
+   moment it is read. */
+const SHELL = "smp-shell-v3.27";
 const ASSETS = [
   "/",
   "/index.html",

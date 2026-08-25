@@ -71,12 +71,9 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   by_key      TEXT NOT NULL,
   by_name     TEXT,
   body        TEXT NOT NULL,
-  -- WHERE THEY WERE, CAPTURED AND NOT TYPED (§71's rule, unchanged). The page,
-  -- the subject, the cycle and the build are things the screen already knew.
-  page        TEXT,
-  target      TEXT,
-  cycle       TEXT,
-  build       TEXT,
+  -- WHERE THEY WERE was captured here (§97.4) and is gone (§99). Not left as
+  -- four empty columns: 023 drops them on a database that already has them,
+  -- and they are absent here so a fresh one never grows them at all.
   -- One shrunk screenshot, as a data URI. §71's handling exactly.
   shot        TEXT,
   -- THE OFFICE'S OWN CLASSIFICATION, and only the office's — this is where

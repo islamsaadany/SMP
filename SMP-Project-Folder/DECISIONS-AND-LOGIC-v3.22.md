@@ -12620,3 +12620,93 @@ and wait for the client to actually poll rather than guessing a duration:
 argues for: with the chat off, **nothing in the product can reach the refused
 actions**, so the only way to know they are refused is to ask the endpoint
 directly with a session the product would never give that state to.
+
+---
+
+## 99 · The corner, corrected by using it (v3.28)
+
+Three notes from Islam within minutes of the merge going live, all of them from
+having the thing open rather than from reading about it. Each reverses or
+completes something §97 decided, and each is recorded here rather than edited
+into §97, because the argument §97 made was a good one and it is worth knowing
+which arguments lose.
+
+### 99.1 Where they were is not captured any more — §97.4 reversed
+
+> *"The line in front of the chat shouldn't be there."*
+
+Asked how far it should go — hidden from the sender, or gone entirely — he
+chose **gone everywhere**.
+
+§97.4 captured the page, the subject, the cycle and the build with every
+message and drew them under the sender's own words. The reasoning was §71's,
+and it is still a good argument in the abstract: *the screen already knows
+where somebody is, and asking them to describe it is asking them to do the
+computer's job*. What it did not survive is being **looked at**. On a real
+message the line is longer than the message, more technical than anything else
+in the panel, and it repeats under every single thing you send.
+
+**IT IS NOT MERELY HIDDEN.** `whereNow()` and `navWord()` are gone,
+`ICON_PAGE` is gone, `BUILD_ID` and the build-time stamp that produced it out
+of `sw.js` are gone, and **migration 023 drops the four columns** — §53.4's
+rule, the same act migration 016 performed when a deliverable lost its due date
+and its owner: *a column the platform no longer reads is worse than no column*,
+because the next person to open the table reads it as something that ought to
+be filled in. 022 stops creating them too, so a fresh database never grows
+them.
+
+**AND THE SENTENCE UNDER THE COMPOSER WENT WITH IT.** It read *"the page you
+are on is sent with your message"*, which stopped being true the moment that
+stopped happening. **A sentence that is merely stale is worse than no
+sentence, because somebody believes it.** The line is empty now, and
+`.chnote:empty` takes its height back.
+
+**The check was INVERTED rather than deleted**: it asserted the capture, and it
+now asserts the absence — §94.2's rule, that only a check looking for an
+absence can see something that should not be drawn. The easiest way to bring a
+removed feature back by accident is to stop asserting it is gone.
+
+### 99.2 It minimises; there was never anything to close
+
+> *"The user closed the chat box — it needs to be a minimize button as there
+> is no closing actually."*
+
+Exactly right, and the × was a small lie. There is **one conversation per
+person and it is permanent** (§97.1) — pressing that control puts the panel
+away and changes nothing else. A × promises an end to something that has none,
+and on a chat panel it reads as *discard this*, which is the one thing it
+cannot do. A minus, and the label says *Minimise*.
+
+### 99.3 A reply has to announce itself, and the badge was arriving late
+
+> *"When the admin replied the chat should show a notification on the callout
+> for the user to know he got an answer."*
+
+The count existed. What was missing was that it **arrived silently and up to
+three minutes late** — §98.1 took the shut panel's beat to 180s to stop a
+forgotten tab keeping the database awake, and that is right for a corner nobody
+is expecting anything from and wrong for the one person who has just asked a
+question.
+
+So there is a **third cadence** rather than a slower saving: `POLL_WAIT` at 15s,
+used only while the conversation is *waiting on the office* or holding an
+unread reply. It costs nothing in the ordinary case, which is the whole point —
+it is on only between asking and being answered, and it goes back to 180s the
+moment the office replies.
+
+And the arrival is now visible: a ring that expands out of the bubble and fades,
+twice. Not a bounce and not a colour change — the corner sits over somebody's
+work and the job is to be noticed, not to interrupt. `prefers-reduced-motion`
+gets the badge and nothing else, which is the point of asking.
+
+**THE BUG IN IT COULD NOT HAVE BEEN FOUND BY READING.** The first version
+compared the arriving count against `state.unread` three lines *after*
+assigning the arriving count to `state.unread`, so the two were always equal
+and a reply could never announce itself. It read correctly and could not fire.
+The check found it; nothing else would have.
+
+**AND THE STUB WAS LYING ABOUT THE SERVER.** `checks/office-chat.py` answered
+`thread: null` where the real endpoint returns `{waiting: true}` after a send —
+so the client correctly stayed on the slow beat and the check read that as
+broken. A stub has to MODEL the server, not merely answer it; §94.11's argument
+about serving a real deployment, one layer further in.

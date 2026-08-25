@@ -10967,6 +10967,19 @@ tab, but sits behind a tenant switch that is off by default, and turning it on
 is the office deliberately handing naming to the custodian (spec 008 §3B). **A
 rule cannot close a door somebody has to open on purpose.**
 
+That third one was raised as an open question at handover rather than decided
+quietly, because it is the one place where §93.1 read literally and §93.1 read
+for its reason disagree. **Islam, asked directly: "leave it."** So it is his
+ruling and not a judgement call left inside the code — which matters, because
+the next person to read `STRATEGY_PAGES` will find one page of the tab missing
+from it and should find out why here rather than guessing.
+
+The switch is `Setup › Figure sets → Edit`, *"Unit custodians may name who
+enters a figure"*, and it ships **Off** — so today the section does not exist
+for anybody, the SMO included. If it is ever turned on, this is the decision to
+revisit: at that moment a unit owner and a strategy custodian gain a section of
+the Strategy tab, and that will be on purpose.
+
 ### 93.2 The gate is on the control, not on the eleven call sites
 
 `penBtn()` and `editBar()` both began `if (grant(acKey) !== "edit") return ''`,

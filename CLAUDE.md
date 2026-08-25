@@ -992,6 +992,24 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   including both spellings through the real reader; it was proved able to fail
   before it was trusted (§94.5). **A cell holding a CONTROL is answered even
   when it reads empty**, or the check flags the reporting pane it helps most.
+  **A HALF THAT IS NOT THERE IS NOT DRAWN (§96.7, reversing the first build the
+  same hour):** an empty half first drew its band, its column strip and a
+  dimmed *"No outcomes yet"*, on §45.2's rule. Islam: *"the presence of
+  outcomes or deliverables that would make the sub table appear or not, not to
+  keep tables in place with no need."* **§45.2 is about a FEATURE and this is
+  about a PROJECT** — a project with no outcomes is not a broken screen, it is
+  a plan that committed to no measurable change. **And the fact I was
+  defending was already on the page**: `projPerf()` returns the other side
+  whole when a side is empty (63% → 75% with FIN01's outcomes removed), and
+  the Performance card already prints `Outcomes —`. **AUTHORING IS THE
+  EXCEPTION** — the add row is the only way to write the first row of either
+  half, so `dxShown()` takes `ed` and both halves always draw behind the pen
+  (§61's fault otherwise). **ONE ANSWER, READ BY BOTH**: `dxHeading()` is built
+  from `dxShown()`'s flags, so a section can never name a half it is not
+  drawing; `DX_HEADING` is deleted (§24). With neither half the section is
+  absent and the milestones table stands alone. **0 of 19 demo projects have an
+  empty half**, so the check MAKES the state and asserts against an exact list
+  including an empty one (§94.2).
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§96.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:
@@ -1238,7 +1256,23 @@ reads empty**, and **Reporting is a MODE**, so pressing for a section row landed
 on Performance twice). **Found and NOT fixed (&sect;96.6):** `projPlanBody`
 defines `sortAttr()` and applies it to neither table, so a project's drag grips
 are bound to nothing &mdash; and `qa.py` reports "14 handles" because it counts
-them.*
+them.* **AND THE EMPTY HALF WENT, AN HOUR AFTER IT SHIPPED** (&sect;96.7):
+asked *"if the project has no outcomes should the table appear?"* I said yes,
+on &sect;45.2's rule that a feature rendering nothing looks like one that was
+never built, and gave the strongest reason I had &mdash; `projPerf()` returns
+the other side WHOLE when a side is empty, so a project with no outcomes is
+scored on its deliverables alone (63% &rarr; 75% with FIN01's removed). Islam:
+*"not to keep tables in place with no need."* **&sect;45.2 is about a FEATURE
+and this is about a PROJECT** &mdash; a project with no outcomes is not a broken
+screen, it is a plan that committed to no measurable change &mdash; **and the
+fact I was defending was already on the page**, because the Performance card
+prints `Outcomes &mdash;` without any help from the table. *The argument for
+keeping something is worth checking against what the page already says.*
+**AUTHORING IS THE EXCEPTION AND IT IS NOT A DETAIL**: the add row is the only
+way to write the first row of either half, so a half hidden for being empty
+behind the pen is a half nobody can ever fill &mdash; &sect;61 exactly. And
+**0 of 19 demo projects have an empty half**, so the check MAKES the state
+rather than waiting for a client to find it.*
 
 *Earlier: 2026-08-25 &mdash; **v3.25: the composer stays one screen**
 (&sect;95, spec 014). Six changes to Send a message, and the argument under five

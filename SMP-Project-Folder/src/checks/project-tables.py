@@ -266,6 +266,75 @@ with sync_playwright() as p:
     ck("a workbook written before the rename still reads",
        old_new["then"] == ["20 Mar 2026"], old_new["then"])
 
+    # ── A HALF THAT IS NOT THERE IS NOT DRAWN (§96.7) ────────────────────
+    # THE POINT OF THIS BLOCK IS A CONTROL THAT SHOULD NOT BE DRAWN, which is
+    # the one thing a check looking for something PRESENT can never see
+    # (§94.2). No demo project has an empty half — 0 of 19 — so the state has
+    # to be made, or this behaviour is untested for ever and the first client
+    # to author a project with no outcomes is the one who finds out.
+    print("── empty halves")
+    pg.evaluate("""() => {
+      const c = GROUP.capabilities.filter(x => x.fn === "finance")[0];
+      c.projects[0].outcomes = [];                                  // no outcomes
+      c.projects[1].deliverables = [];                              // no deliverables
+      c.projects[2].outcomes = []; c.projects[2].deliverables = []; // neither
+    }""")
+    goto(pg, DEST, "Strategy", "Projects", False)
+
+    def halves(pg):
+        return pg.evaluate("""() => {
+          const t = [...document.querySelectorAll("table")].filter(x => x.querySelector("tr.dxband"));
+          return { bands: t.flatMap(x => [...x.querySelectorAll("tr.dxband th")]
+                     .map(b => b.firstChild.textContent.trim())),
+                   heads: [...document.querySelectorAll("h4.mini")]
+                     .map(e => e.textContent.trim())
+                     .filter(h => /Deliverab|Outcome/.test(h)) };
+        }""")
+
+    WANT = [("no outcomes", ["Deliverables"]),
+            ("no deliverables", ["Outcomes"]),
+            ("neither", [])]
+    for i, (what, want) in enumerate(WANT):
+        items = pg.query_selector_all(".rail .ritem")
+        if i >= len(items):
+            ck("the rail offers project %d" % (i + 1), False, len(items))
+            continue
+        items[i].click()
+        pg.wait_for_timeout(400)
+        got = halves(pg)
+        ck("%s: only the half that has rows is drawn" % what, got["bands"] == want, got["bands"])
+        # THE HEADING IS READ OFF THE SAME ANSWER, or a section names a half it
+        # is not drawing — which is the failure this assertion exists for and
+        # is invisible to anything that only counts bands.
+        if want:
+            ck("%s: the heading names only that half" % what,
+               len(got["heads"]) == 1 and got["heads"][0].split(" \u2014 ")[0]
+                 .replace(" and outcomes", "") == want[0], got["heads"])
+        else:
+            ck("%s: the section is absent entirely" % what, not got["heads"], got["heads"])
+
+    # AND BEHIND THE PEN, BOTH HALVES ARE BACK. A half hidden for being empty
+    # in EDIT mode is a half nobody can ever fill, because the add row is the
+    # only way to write its first line — §61's fault exactly.
+    pg.query_selector_all(".rail .ritem")[2].click()
+    pg.wait_for_timeout(300)
+    pen = pg.query_selector(".paneact button")
+    if not pen:
+        ck("the plan pane offers a pen", False)
+    else:
+        pen.click()
+        pg.wait_for_timeout(600)
+        got = halves(pg)
+        ck("authoring draws both halves even when both are empty",
+           got["bands"] == ["Deliverables", "Outcomes"], got["bands"])
+        adds = pg.eval_on_selector_all("[data-rowadd]", "e=>e.map(x=>x.dataset.rowadd.split('|')[0])")
+        ck("...so the first deliverable and the first outcome can be written",
+           "deliverable" in adds and "outcome" in adds, adds)
+        d = pg.query_selector(".paneact button")
+        if d:
+            d.click()
+            pg.wait_for_timeout(300)
+
     b.close()
 
 for e in errs:

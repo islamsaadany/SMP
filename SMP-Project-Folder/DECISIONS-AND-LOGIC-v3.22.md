@@ -12207,3 +12207,50 @@ this section was asked to relabel, the fix has a real question inside it (the
 plan pane's rows now sit in two halves of one table, so what a drop between
 halves should mean is a decision, not a detail), and CLAUDE.md's rule is that
 touching something the user did not mention is asked first.
+
+### 96.7 A half that is not there is not drawn — reversed the same hour
+
+The split first shipped with an empty half drawing its band, its column strip
+and a dimmed *"No outcomes yet"*, on §45.2's rule: **a feature that renders
+nothing looks like one that was never built.** Asked *"if the project has no
+outcomes should the table appear?"*, I said yes and gave the strongest reason I
+had — `projPerf()` returns the other side whole when a side is empty, so a
+project with no outcomes is scored on its deliverables alone, and I argued the
+empty half was the only thing on the page saying so. Measured: FIN01 with its
+outcomes removed goes **63% → 75%**.
+
+Islam: *"I believe the presence of outcomes or deliverables that would make the
+sub table appear or not, not to keep tables in place with no need."*
+
+**He is right, and the reason my argument failed is worth keeping: §45.2 is
+about a FEATURE and this is about a PROJECT.** A capability with no figure sets
+is a screen that looks broken; a project with no outcomes is a project that
+committed to no measurable change, which is an ordinary thing for a plan to
+say. Three rows of furniture saying it is the empty state shouting.
+
+**And the fact I was defending was already on the page without it.** The
+Performance card above the pane prints `Outcomes —` when a project has none —
+existing behaviour, not something added here — so the reason the number is
+deliverables-only survives the furniture going. *The argument for keeping
+something is worth checking against what the page already says.*
+
+**AUTHORING IS THE EXCEPTION, AND IT IS NOT A DETAIL.** The add row is the only
+way to write the first deliverable or the first outcome, so a half hidden for
+being empty **in edit mode is a half that can never be filled** — §61 exactly,
+where a function with no plan could only be reached by giving it a plan first.
+Behind the pen both halves always draw. `dxShown()` takes `ed`, never a
+hard-coded true.
+
+**ONE ANSWER, READ BY BOTH.** `dxShown()` decides which halves show and
+`dxHeading()` is built from the same flags, so a section can never name a half
+it is not drawing: the plan pane reads *"Deliverables — what the project hands
+over"* with no outcomes, *"Outcomes — what it is meant to change"* with no
+deliverables, and the full pair behind the pen. `DX_HEADING` is deleted rather
+than left as a constant nothing reads (§24). With neither half, the section is
+absent entirely and the milestones table stands alone.
+
+**No project in the demo has an empty half — 0 of 19** — which is why the check
+had to MAKE the state: `checks/project-tables.py` empties one half of one
+project, the other half of the next and both halves of a third, then asserts
+what is drawn against an exact list, including an EMPTY one. §94.2's rule, and
+the only kind of assertion that can see a control that should not be there.

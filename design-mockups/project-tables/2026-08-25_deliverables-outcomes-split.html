@@ -2586,6 +2586,101 @@
   .warnchip { background:var(--attn-bg); border-color:var(--attn); color:var(--attn-tx); }
   .warnchip i { font-style:normal; opacity:.85; padding-left:4px; }
 
+  /* ══ SEND A MESSAGE (§95) ══════════════════════════════════════════
+     THE AUDIENCE IS A SUMMARY, NOT A LIST. Every resolved recipient used to
+     render as a chip, so seventy-six people put the Send button most of a
+     screen below the message it belongs to — the count is on the line and the
+     names are one press away.
+
+     THE SKIPPED COUNT IS NEVER BEHIND THE DISCLOSURE, which is why it is a
+     capsule beside the good one rather than a line inside the names box: it is
+     the fault that started this whole thread (§93.15). */
+  .audsum { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .audsum .audn { font:700 15px/1 var(--sans); color:var(--ink);
+                  margin-right:4px; }
+  .audsum.bad b { color:var(--bad-tx); font-weight:700; }
+  .audsum .audmore { margin-left:auto; white-space:nowrap; }
+  .audnamebox { border-top:1px dashed var(--line); margin-top:11px; }
+
+  /* A ROW UNDER THE COMPOSER, not a section of its own: two optional fields
+     had a heading as loud as "Who gets it" (§95). */
+  .ctarow { display:grid; grid-template-columns:1fr 1fr; gap:8px 10px;
+            border-top:1px dashed var(--line); margin-top:12px; padding-top:11px; }
+  .ctarow .why { grid-column:1 / -1; }
+
+  /* THE BAR DOES NOT MOVE. Pinned to the foot of the window rather than
+     sitting at the end of the scroll, so the count and the button stay
+     together whether the audience is three people or seventy-six.
+
+     IT NEEDS AN OPAQUE GROUND OF ITS OWN, or the page scrolls through it —
+     `--ground` is the page's, so the bar reads as the page rather than as a
+     panel laid over it. */
+  .sendbar { position:sticky; bottom:0; z-index:20;
+             display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+             margin:16px 0 0; padding:12px 0 14px;
+             background:var(--ground); border-top:1px solid var(--line); }
+  .sendbar #msgsaid { flex:1 1 200px; }
+
+  /* THE COUNT ON THE BUTTON THAT OPENS THE LIST (§95) — "is there a draft
+     waiting" is answered without opening anything. */
+  .hcount { display:inline-block; min-width:16px; padding:1px 5px; margin-left:2px;
+            border-radius:999px; background:var(--over-bg);
+            font:700 11px/1.45 var(--sans); color:var(--gold-deep);
+            text-align:center; }
+  .hmenu.open .hcount { background:var(--surface); }
+  /* Wide enough for a table of headings and dates, and capped so a long list
+     scrolls inside the panel instead of running off the window. */
+  .hmenu-panel.wide { width:min(600px, 76vw); max-height:64vh; overflow:auto;
+                      padding:4px 13px 13px; }
+  .hmenu-panel.wide .section { margin:0; }
+  /* §88's 150px cap exists so ONE long value cannot hold a whole table open.
+     It cannot happen here: these two tables are `table-layout:fixed` with an
+     explicit share on every column (§95.5), so a cell's content has no say in
+     the column's width at all — and with the cap left on, a 332px Heading
+     column still clipped its heading at 150px, which is the one thing telling
+     one draft from another. The clip and the hover stay; only the cap goes. */
+  .hmenu-panel.wide { --cell-cap:none; }
+  .hmenu-panel.wide .section-h { margin-top:9px; }
+  .hmenu-panel.wide h2 { font-size:14px; }
+  .hmenu-panel.wide .sec-note { font-size:11.5px; }
+
+  /* THE CONFIRMATION NAMES WHO WILL NOT GET IT. A native `confirm()` is one
+     line of text and can be silenced permanently on some other site; this is
+     the most irreversible act in the product (§95). */
+  .sendconfirm .kv { display:grid; grid-template-columns:92px 1fr; gap:4px 12px; margin:0;
+                     align-items:baseline; padding:7px 0;
+                     border-bottom:1px solid var(--line-soft);
+                     font:400 12.5px/1.55 var(--sans); color:var(--ink-2); }
+  .sendconfirm .kv .k { font:600 10.5px/1.6 var(--sans); letter-spacing:.06em;
+                        text-transform:uppercase; color:var(--ink-3); }
+  .sendconfirm .kv b { color:var(--ink); }
+  /* ── THE THIRD COPY IS THE ONE THAT GETS EXTRACTED ───────────────
+     `.kconfirm .cbtns button` and `.pwset .cbtns button` say the same six
+     declarations twice, and this would have been the third — the project's own
+     rule is flag at two, extract at three. The BASE is added and neither
+     existing block is touched: both are `0,2,1` and keep winning over this
+     `0,1,1`, so nothing already on screen moves, and the next confirmation
+     dialog gets the product's buttons without a fourth copy. */
+  .cbtns { display:flex; gap:6px; justify-content:flex-end; }
+  .cbtns button { display:inline-block; width:auto; white-space:nowrap;
+                  border:1px solid var(--line); border-radius:var(--r-sm);
+                  padding:6px 12px; background:none; cursor:pointer;
+                  font:500 12.5px/1.4 var(--sans); color:var(--ink-2); }
+  .cbtns button:hover { background:var(--surface-2); color:var(--ink); }
+  .cbtns button.danger { border-color:var(--bad); color:var(--bad-tx); }
+  .cbtns button.danger:hover { background:var(--bad-bg); color:var(--bad-tx); }
+
+  .sendconfirm .cbtns { margin-top:16px; }
+  /* AND IT IS AN OUTLINE, LIKE EVERY OTHER CONFIRMATION IN THE PRODUCT. A
+     solid red half was written first and taken out: `--bad` is `#DC2626`
+     light and `#F87171` DARK, and white on the dark one is 2.4:1 — §38.4's
+     rule for the seventh time, that a colour which works as a fill usually
+     fails as type and the reverse. There is no `--bad-ink` token, and adding
+     one to four palettes to fill one button in one dialog is a language change
+     made for a single control (§38's layer rule). The danger here is carried
+     by the words — the dialog says "No undo" in its own row — which is what
+     §95.4 built it to be able to say. */
+
   /* ══ TABLEKIT (spec 012) ═══════════════════════════════════════════
      Prefixed from the first line rather than tidied later (Constitution XIV):
      a component seven tables share is exactly where the next `pname` collision
@@ -3454,6 +3549,36 @@
   .qs i.on.past { background:var(--over-bg); border-color:var(--over-line);
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
+
+  /* ── ONE TABLE, TWO HALVES (§96) ─────────────────────────────────
+     The band that splits a project's deliverables from its outcomes. It
+     wears `--panel`, which is what Setup › Branding sets for the navigation
+     bar and what every table header in the product wears (§41.10), so each
+     half OPENS the way a table opens rather than looking like a row somebody
+     shaded. The quiet strip under it declares that half's columns.
+
+     Both rows are `th` inside the tbody — a table has exactly one `<thead>` —
+     which is why `thead th`'s !important navy (below in this file) does not
+     reach them and these rules do not have to fight it. The hover and
+     last-row rules are written against `td`, so neither touches these.
+
+     IN arrange.css AND NOT config.css, deliberately: that file has now held
+     the same rule block twice on four separate occasions (§29.2, §51.5,
+     §53.6, §88), and this is concatenated last of the four stylesheets. */
+  tr.dxband th { background:var(--panel); color:var(--panel-ink); text-align:left;
+                 font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+                 padding:10px 13px; white-space:nowrap; }
+  /* --panel-quiet, never --ink-3: a surface with its own ground needs its own
+     ink, and --ink-3 on the panel is 2.5:1 (§38.5). */
+  tr.dxband th em { font-style:normal; text-transform:none; letter-spacing:0; font-weight:500;
+                    font-size:11px; color:var(--panel-quiet); margin-left:10px; }
+  /* The gap before the second half, painted in the card's own ground so it
+     reads as a break rather than as a rule. Never on the first, which opens
+     the table. */
+  tr.dxband:not(:first-child) th { border-top:14px solid var(--surface); }
+  tr.dxhead th { background:var(--surface-2); color:var(--ink-2); font-weight:700;
+                 font-size:10px; letter-spacing:.09em; text-transform:uppercase;
+                 padding:7px 13px; border-bottom:1px solid var(--line); white-space:nowrap; }
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
@@ -4041,7 +4166,19 @@
   <section class="mk-sec"><h2>Capability &rsaquo; Performance <span>&mdash; the scoreboard</span></h2><p class="mk-why">Same fault, one column worse: every deliverable shows a dash under <b>Target</b>, because a deliverable has no target. Splitting lets each half carry only what it has, and <b>Reads</b> &mdash; the number the score is built from &mdash; stays in the last column for both halves, so it still runs down one edge.</p><div class="mk-pair"><div class="mk-col mk-now"><div class="mk-tag"><b>Today</b><em>as built</em></div><div class="mk-card"><div class="pband"><span class="pband-code">FIN01</span><span class="pband-name">Average debt utilisation report automation</span><span class="pband-r"><span class="pill attn">78%</span></span></div><h4 class="mini">Deliverables and outcomes</h4><div class="scroll"><table><thead><tr><th class="idx">#</th><th>Deliverable or outcome</th><th class="cc">Type</th><th class="num">Target</th><th class="cc">Reported</th><th class="num">Reads</th></tr></thead><tbody><tr><td class="idx">1</td><td>Oracle-based interest utilisation form</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><span class="pill good">Delivered</span></td><td class="num final">100%</td></tr><tr><td class="idx">2</td><td>Tracking interest expense on a daily basis</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><span class="pill good">Delivered</span></td><td class="num final">100%</td></tr><tr><td class="idx">3</td><td>Real-time data recalculation for corridor interest and pricing</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><span class="pill warn">Not yet</span></td><td class="num final">0%</td></tr><tr><td class="idx">4</td><td>Daily treasury monitoring of debt balances</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><span class="pill good">100%</span></td><td class="num final">100%</td></tr><tr><td class="idx">5</td><td>Reduction of manual work<span class="why">Half the manual steps still run outside Oracle.</span></td><td class="cc"><span class="pill kind">Outcome</span></td><td class="num">40 h</td><td class="num">20 h</td><td class="num final" style="color:var(--bad)">50%</td></tr><tr class="notdue"><td class="idx">6</td><td>Improving financial accuracy</td><td class="cc"><span class="pill kind">Outcome</span></td><td class="num">99%</td><td colspan="2" class="cc"><span class="pill kind">Measured at Q4 2026</span></td></tr></tbody></table></div><h4 class="mini">Milestones <em>4 of 5 completed</em></h4><div class="scroll"><table><thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Finish</th><th class="cc">Progress</th></tr></thead><tbody><tr><td class="idx">1</td><td>Solution design</td><td class="cc">20 Mar 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">2</td><td>Oracle form development</td><td class="cc">12 Apr 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">3</td><td>Interest utilisation automation</td><td class="cc">20 Apr 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">4</td><td>Stakeholder validation</td><td class="cc">10 May 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">5</td><td>Reporting and analysis embedment</td><td class="cc">31 May 2026</td><td class="cc"><span class="pill attn">In progress</span></td></tr></tbody></table></div></div></div><div class="mk-col mk-new"><div class="mk-tag"><b>Proposed</b><em>the split</em></div><div class="mk-card"><div class="pband"><span class="pband-code">FIN01</span><span class="pband-name">Average debt utilisation report automation</span><span class="pband-r"><span class="pill attn">78%</span></span></div><h4 class="mini">Deliverables and outcomes</h4><div class="scroll"><table><tbody><tr class="dxband"><th colspan="5">Deliverables<em>what the project hands over</em></th></tr><tr class="dxhead"><th class="idx">#</th><th>Deliverable</th><th colspan="2" class="cc">Reported</th><th class="num">Reads</th></tr><tr><td class="idx">1</td><td>Oracle-based interest utilisation form</td><td colspan="2" class="cc"><span class="pill good">Delivered</span></td><td class="num final">100%</td></tr><tr><td class="idx">2</td><td>Tracking interest expense on a daily basis</td><td colspan="2" class="cc"><span class="pill good">Delivered</span></td><td class="num final">100%</td></tr><tr><td class="idx">3</td><td>Real-time data recalculation for corridor interest and pricing</td><td colspan="2" class="cc"><span class="pill warn">Not yet</span></td><td class="num final">0%</td></tr><tr><td class="idx">4</td><td>Daily treasury monitoring of debt balances</td><td colspan="2" class="cc"><span class="pill good">100%</span></td><td class="num final">100%</td></tr><tr class="dxband"><th colspan="5">Outcomes<em>what it is meant to change</em></th></tr><tr class="dxhead"><th class="idx">#</th><th>Outcome</th><th class="num">Target</th><th class="num">Actual</th><th class="num">Reads</th></tr><tr><td class="idx">1</td><td>Reduction of manual work<span class="why">Half the manual steps still run outside Oracle.</span></td><td class="num">40 h</td><td class="num">20 h</td><td class="num final" style="color:var(--bad)">50%</td></tr><tr class="notdue"><td class="idx">2</td><td>Improving financial accuracy</td><td class="num">99%</td><td colspan="2" class="cc"><span class="pill kind">Measured at Q4 2026</span></td></tr></tbody></table></div><h4 class="mini">Milestones <em>4 of 5 completed</em></h4><div class="scroll"><table><thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Due date</th><th class="cc">Progress</th></tr></thead><tbody><tr><td class="idx">1</td><td>Solution design</td><td class="cc">20 Mar 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">2</td><td>Oracle form development</td><td class="cc">12 Apr 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">3</td><td>Interest utilisation automation</td><td class="cc">20 Apr 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">4</td><td>Stakeholder validation</td><td class="cc">10 May 2026</td><td class="cc"><span class="pill good">Completed</span></td></tr><tr><td class="idx">5</td><td>Reporting and analysis embedment</td><td class="cc">31 May 2026</td><td class="cc"><span class="pill attn">In progress</span></td></tr></tbody></table></div></div></div></div></section>
   <section class="mk-sec"><h2>Capability &rsaquo; Reporting <span>&mdash; where the figures are entered</span></h2><p class="mk-why">This is the pane somebody fills in under time pressure, so a dead column is worse here than anywhere. <b>Reported</b> and <b>Note</b> hold the same two columns across the split &mdash; the two a person is actually typing into &mdash; and the deliverable's name takes back the width the empty Target column was holding.</p><div class="mk-pair"><div class="mk-col mk-now"><div class="mk-tag"><b>Today</b><em>as built</em></div><div class="mk-card"><div class="pband"><span class="pband-code">FIN01</span><span class="pband-name">Average debt utilisation report automation</span><span class="pband-r"><span class="pill attn">7 / 11</span></span></div><h4 class="mini">Deliverables and outcomes</h4><div class="scroll"><table><thead><tr><th class="idx">#</th><th>Deliverable or outcome</th><th class="cc">Type</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td>Oracle-based interest utilisation form</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><select class="fld"><option>Delivered</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">2</td><td>Tracking interest expense on a daily basis</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><select class="fld"><option>Delivered</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">3</td><td>Real-time data recalculation for corridor interest and pricing</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><select class="fld"><option>Not yet</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="Pricing corridor logic reopened with Treasury." style="width:100%"></td></tr><tr><td class="idx">4</td><td>Daily treasury monitoring of debt balances</td><td class="cc"><span class="pill kind">Deliverable</span></td><td class="num mk-dead">&mdash;</td><td class="cc"><input class="fld" value="100" style="width:86px;text-align:center"></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">5</td><td>Reduction of manual work</td><td class="cc"><span class="pill kind">Outcome</span></td><td class="num">40 h</td><td class="cc"><input class="fld" value="20 h" style="width:86px;text-align:center"></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr class="notdue"><td class="idx">6</td><td>Improving financial accuracy</td><td class="cc"><span class="pill kind">Outcome</span></td><td colspan="3" class="cc"><span class="pill kind">Not asked &mdash; measured at Q4 2026</span></td></tr></tbody></table></div><h4 class="mini">Milestones</h4><div class="scroll"><table><thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Finish</th><th class="cc">Progress</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td>Solution design</td><td class="cc">20 Mar 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">2</td><td>Oracle form development</td><td class="cc">12 Apr 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">3</td><td>Interest utilisation automation</td><td class="cc">20 Apr 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">4</td><td>Stakeholder validation</td><td class="cc">10 May 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">5</td><td>Reporting and analysis embedment</td><td class="cc">31 May 2026</td><td class="cc"><select class="fld"><option>In progress</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr></tbody></table></div></div></div><div class="mk-col mk-new"><div class="mk-tag"><b>Proposed</b><em>the split</em></div><div class="mk-card"><div class="pband"><span class="pband-code">FIN01</span><span class="pband-name">Average debt utilisation report automation</span><span class="pband-r"><span class="pill attn">7 / 11</span></span></div><h4 class="mini">Deliverables and outcomes</h4><div class="scroll"><table><tbody><tr class="dxband"><th colspan="5">Deliverables<em>what the project hands over</em></th></tr><tr class="dxhead"><th class="idx">#</th><th colspan="2">Deliverable</th><th class="cc">Reported</th><th>Note</th></tr><tr><td class="idx">1</td><td colspan="2">Oracle-based interest utilisation form</td><td class="cc"><select class="fld"><option>Delivered</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">2</td><td colspan="2">Tracking interest expense on a daily basis</td><td class="cc"><select class="fld"><option>Delivered</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">3</td><td colspan="2">Real-time data recalculation for corridor interest and pricing</td><td class="cc"><select class="fld"><option>Not yet</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="Pricing corridor logic reopened with Treasury." style="width:100%"></td></tr><tr><td class="idx">4</td><td colspan="2">Daily treasury monitoring of debt balances</td><td class="cc"><input class="fld" value="100" style="width:86px;text-align:center"></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr class="dxband"><th colspan="5">Outcomes<em>what it is meant to change</em></th></tr><tr class="dxhead"><th class="idx">#</th><th>Outcome</th><th class="num">Target</th><th class="cc">Reported</th><th>Note</th></tr><tr><td class="idx">1</td><td>Reduction of manual work</td><td class="num">40 h</td><td class="cc"><input class="fld" value="20 h" style="width:86px;text-align:center"></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr class="notdue"><td class="idx">2</td><td>Improving financial accuracy</td><td colspan="3" class="cc"><span class="pill kind">Not asked &mdash; measured at Q4 2026</span></td></tr></tbody></table></div><h4 class="mini">Milestones</h4><div class="scroll"><table><thead><tr><th class="idx">#</th><th>Milestone</th><th class="cc">Due date</th><th class="cc">Progress</th><th>Note</th></tr></thead><tbody><tr><td class="idx">1</td><td>Solution design</td><td class="cc">20 Mar 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">2</td><td>Oracle form development</td><td class="cc">12 Apr 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">3</td><td>Interest utilisation automation</td><td class="cc">20 Apr 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">4</td><td>Stakeholder validation</td><td class="cc">10 May 2026</td><td class="cc"><select class="fld"><option>Completed</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr><tr><td class="idx">5</td><td>Reporting and analysis embedment</td><td class="cc">31 May 2026</td><td class="cc"><select class="fld"><option>In progress</option></select></td><td class="notecol"><input class="fld" placeholder="Add a note" value="" style="width:100%"></td></tr></tbody></table></div></div></div></div></section>
   <section class="mk-foot">
-    <h2>What is not changing</h2>
+    <h2>Settled after this was signed off</h2>
+    <ul>
+      <li><b>An empty half is not drawn.</b> This page was built with a dimmed
+        <em>&ldquo;No outcomes yet&rdquo;</em> row holding an empty half open. Islam:
+        <em>&ldquo;not to keep tables in place with no need.&rdquo;</em> A project with no
+        outcomes now shows only its Deliverables half, and the heading says only
+        <em>Deliverables &mdash; what the project hands over</em>. With neither half, the
+        section is absent and the milestones table stands alone.</li>
+      <li><b>Except behind the pen</b>, where both halves always draw &mdash; the Add row is
+        the only way to write the first deliverable or the first outcome, and a half hidden
+        for being empty would be a half nobody could ever fill.</li>
+    </ul>
+    <h2 style="margin-top:22px">What is not changing</h2>
     <ul>
       <li><b>No data change and no migration.</b> <code>kind</code>, <code>dir</code>,
         <code>target</code>, <code>measureAt</code> and <code>finish</code> are stored exactly as

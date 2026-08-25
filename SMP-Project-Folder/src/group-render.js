@@ -2360,10 +2360,9 @@ function delivKindPill(d){
    workbook has carried separate Deliverables and Outcomes sheets with exactly
    these columns since §16.4, and the review deck a slide each since §15. The
    screen was the last surface merging them. */
-var DX_HEADING = "Deliverables and outcomes";
 var DX_HALVES = {
-  d: { title: "Deliverables", sub: "what the project hands over", empty: "No deliverables yet" },
-  o: { title: "Outcomes",     sub: "what it is meant to change",  empty: "No outcomes yet" }
+  d: { title: "Deliverables", sub: "what the project hands over" },
+  o: { title: "Outcomes",     sub: "what it is meant to change" }
 };
 /* The band wears the ground every table header in the product wears (§41.10),
    so each half OPENS the way a table opens; the column strip under it is the
@@ -2382,18 +2381,52 @@ function dxHead(cells){
       (c[2] ? ' colspan="' + c[2] + '"' : '') + '>' + c[0] + '</th>';
   }).join("") + '</tr>';
 }
-/* AN EMPTY HALF SAYS SO. Dropping the band for a project with no outcomes
-   would hide the fact that it has none, which is the thing worth knowing
-   (§45.2: a feature that renders nothing looks like one that was not built).
-   Skipped where an add row follows, because the add row is the empty state. */
-function dxNone(cols, kind, skip){
-  return skip ? "" : '<tr class="notdue"><td class="idx">&mdash;</td><td colspan="' +
-    (cols - 1) + '">' + DX_HALVES[kind].empty + '</td></tr>';
+/* WHAT IS NOT THERE IS NOT DRAWN (§96.7). The split first shipped with an
+   empty half saying "No outcomes yet" over its own band and column strip —
+   §45.2's rule, that a feature rendering nothing looks like one that was
+   never built. Islam: *"the presence of outcomes or deliverables that would
+   make the sub table appear or not, not to keep tables in place with no
+   need."* His reading is the right one HERE, and the reason is that §45.2 is
+   about a FEATURE and this is about a PROJECT: a project with no outcomes is
+   not a broken screen, it is a project that committed to no measurable
+   change, and three rows of furniture saying so is the empty state shouting.
+
+   The one thing the empty half was carrying is carried already: `projPerf()`
+   returns the other side whole when a side is empty, so a project with no
+   outcomes is scored on its deliverables alone — and the Performance card
+   above the pane prints `Outcomes —` for exactly that. The fact stays on the
+   page; only the furniture goes.
+
+   AUTHORING IS THE EXCEPTION, and it is not a detail: the add row is the only
+   way to write the first deliverable or the first outcome, so a half hidden
+   for being empty in EDIT mode is a half that can never be filled — §61's
+   fault exactly, where a function with no plan could only be reached by
+   giving it a plan first. Both halves always draw behind the pen.
+
+   ONE ANSWER, READ BY BOTH: `dxShown()` decides, `dxHeading()` reads the same
+   answer, so a section can never name a half it is not drawing. */
+function dxShown(p, authoring){
+  return { d: !!authoring || (p.deliverables || []).length > 0,
+           o: !!authoring || (p.outcomes || []).length > 0 };
 }
-function dxSplit(cols, d, o){
+function dxAny(sh){ return sh.d || sh.o; }
+/* `sub` is the plan pane's trailing phrase, which pairs one clause to each
+   half — so it has to be built from the same flags rather than written out,
+   or a pane showing one half promises two things in its own heading. */
+function dxHeading(sh, sub){
+  var t = [], s = [];
+  ["d", "o"].forEach(function(k){
+    if (!sh[k]) return;
+    t.push(t.length ? DX_HALVES[k].title.toLowerCase() : DX_HALVES[k].title);
+    s.push(DX_HALVES[k].sub);
+  });
+  return t.join(" and ") + (sub && s.length
+    ? ' <em>\u2014 ' + s.join(", and ") + '</em>' : '');
+}
+function dxSplit(cols, sh, d, o){
   return '<div class="scroll"><table><tbody>' +
-    dxBand(cols, "d") + dxHead(d.head) + d.rows + dxNone(cols, "d", d.rows || d.add) + (d.add || "") +
-    dxBand(cols, "o") + dxHead(o.head) + o.rows + dxNone(cols, "o", o.rows || o.add) + (o.add || "") +
+    (sh.d ? dxBand(cols, "d") + dxHead(d.head) + d.rows + (d.add || "") : "") +
+    (sh.o ? dxBand(cols, "o") + dxHead(o.head) + o.rows + (o.add || "") : "") +
     '</tbody></table></div>';
 }
 /* The row number restarts per half. §53.4 ran it across the whole table
@@ -2495,7 +2528,8 @@ function projPerformanceBody(p, fk){
       '<td class="num">' + esc(o.actual) + '</td>' +
       '<td class="num final" style="color:var(--' + band(o.progress) + ')">' + pct(o.progress) + '</td></tr>';
   }).join("");
-  var dxRows = dxSplit(5,
+  var sh = dxShown(p);
+  var dxRows = dxSplit(5, sh,
     { head: [["#", "idx"], ["Deliverable"], ["Reported", "cc", 2], ["Reads", "num"]], rows: dRows },
     { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Actual", "num"], ["Reads", "num"]], rows: oRows });
   var mRows = p.milestones.map(function(m, i){
@@ -2513,7 +2547,7 @@ function projPerformanceBody(p, fk){
      used carries the score. */
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' + dxRows +
+    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
     miniTable(["#","Milestone","Due date","Progress"], mRows);
 }
@@ -2662,7 +2696,10 @@ function projPlanBody(p, fk){
       '<button class="linkbu" data-rowadd="' + what + '|' + esc(p.id) + '">' + label +
       '</button></td></tr>' : '';
   };
-  var dxRows = dxSplit(5,
+  /* `ed`, not a hard true: behind the pen both halves draw so the first row
+     of either can be written; read, only what is there is drawn. */
+  var sh = dxShown(p, ed);
+  var dxRows = dxSplit(5, sh,
     { head: [["#", "idx"], ["Deliverable"], ["Measured as", "", 3]], rows: dRows,
       add: dxAdd("deliverable", "Add a deliverable") },
     { head: [["#", "idx"], ["Outcome"], ["Direction", "cc"], ["Target", "num"],
@@ -2718,9 +2755,7 @@ function projPlanBody(p, fk){
             function(v){ p.stakeholders = collabParse(v); })
         : (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
-    '<h4 class="mini">' + DX_HEADING +
-      ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
-    dxRows +
+    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh, true) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
     miniTable(["#","Milestone","What it covers","Owner","Due date"], mRows) +
     overrunNote(p);
@@ -2831,7 +2866,8 @@ function projReportBody(p, may, fk){
       '<td class="cc">' + capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name) + '</td>' +
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
-  var dxRows = dxSplit(5,
+  var sh = dxShown(p);
+  var dxRows = dxSplit(5, sh,
     { head: [["#", "idx"], ["Deliverable", "", 2], ["Reported", "cc"], ["Note"]], rows: dRows },
     { head: [["#", "idx"], ["Outcome"], ["Target", "num"], ["Reported", "cc"], ["Note"]],
       rows: oRows });
@@ -2844,7 +2880,7 @@ function projReportBody(p, may, fk){
   }).join("");
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
-    '<h4 class="mini">' + DX_HEADING + '</h4>' + dxRows +
+    (dxAny(sh) ? '<h4 class="mini">' + dxHeading(sh) + '</h4>' + dxRows : "") +
     '<h4 class="mini">Milestones</h4>' +
     miniTable(["#","Milestone","Due date","Progress","Note"], mRows);
 }

@@ -1052,7 +1052,12 @@ function renderPeople(){
      places their roles were held, and a second copy of this in the shell is
      exactly the drift lib/rules.js exists to prevent. It is roleWhereLabel()
      in config-data.js now, with the reasoning that belongs to it. */
-  var whereLabel = roleWhereLabel;
+  /* THE REGISTER SAYS IT THE NAVIGATION'S WAY (§93.12). `placeLabel` rather
+     than `roleWhereLabel`, and the swap is HERE rather than at each of the
+     five call sites below — the drift the alias was extracted to prevent
+     (§35) works in this direction too. `roleWhereLabel` stays what the people
+     workbook is written in and read against (§65). */
+  var whereLabel = placeLabel;
 
   /* The role cell. Read-only it is a list of what they hold and where; in edit
      it gains an X per role and one add control. Two selects rather than one
@@ -1978,8 +1983,16 @@ function renderPeople(){
         (showCol("empid")    ? th("Emp. ID")   : '') +
         (showCol("key")      ? th("Sign-in name") : '') +
         (showCol("title")    ? th("Job title")  : '') +
-        (showCol("mainbu")   ? th("Official BU") : '') +
-        (showCol("bu")       ? th("Unit")       : '') +
+        /* ── THE TWO EDITED COLUMNS NEED A FLOOR (§93.10) ──────────
+           Both hold a `<select>` when a row is open, and a select's width
+           cannot be expressed as a percentage here: the cell has no definite
+           width under auto layout, so `width:100%` resolves against the whole
+           box — 1340px inside a 117px cell, which is §69's feedback loop with
+           a different number. A px cap on the select alone just overflows the
+           column the read rows sized. So the COLUMN carries the floor, and the
+           select is capped to sit inside it. */
+        (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
+        (showCol("bu")       ? th("Unit", "wcol")        : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either

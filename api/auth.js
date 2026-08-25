@@ -369,11 +369,36 @@ module.exports = async function handler(req, res) {
         .concat(fs.map(function (f) { return "fn:" + f.key; }));
       const near = ats.filter(function (a) { return offered.indexOf(a) > -1; });
 
+      /* ── AND IF THE REGISTER ALREADY SAYS, DO NOT ASK (§93.13) ──────
+         Islam: "Ahmed Mostafa's unit is already set in the registry table, he
+         shouldn't get the dropdown of what unit he belongs to."
+
+         Right, and it follows from what a declaration IS. §56 built it as a
+         thing that grants nothing: the person says where they think they work
+         and the SMO — who decides — accepts it on the register. When the SMO
+         has ALREADY placed them, the question has already been answered by the
+         only person whose answer counts, and asking it again offers somebody a
+         choice that changes nothing.
+
+         THE TEST IS THE ATTACHMENT, NOT THE OFFICIAL BU. `unit_key` / `fn_key`
+         / `company` are what personAt() reads and what decides access (§54.1);
+         an Official BU is the client's own word for a department and may point
+         at nothing here (§58.3), so a row carrying only that is still a row
+         nobody has placed. And "group" is not a placement — the seat roles all
+         sit there — so it does not count either.
+
+         DECIDED ON THE SERVER, like the short list above it and for the same
+         reason: a page that decides whether to ask has decided nothing,
+         because it still had the question. */
+      const placed = !!(who && ((who.unit_key && who.unit_key !== "group") ||
+                                who.fn_key || who.company));
+
       return send(res, 200, { ok: true,
         units: us.map(function (r) { return { at: r.key, name: r.name }; }),
         functions: fs.map(function (r) { return { at: "fn:" + r.key, name: r.name }; }),
         mainbu: (row && row.name) || null,
         near: near,
+        settled: placed,
         mine: mine ? mine.at : null });
     }
 

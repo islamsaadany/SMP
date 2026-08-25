@@ -27,7 +27,20 @@
    Bump SHELL when anything in the shell list changes — the name IS the
    cache-busting mechanism, and the activate handler deletes every cache that
    is not the current one. */
-const SHELL = "smp-shell-v3.25b";
+/* v3.25c, NOT v3.25b — AND THE COLLISION WAS SILENT (§94.12).
+   Two sessions merged on the same day and both chose `v3.25b` independently.
+   git saw the same string on both sides and merged it without a conflict, so
+   nothing anywhere said the name had been used twice — while the bytes behind
+   it were different on each side of the merge. A worker caches by NAME, so a
+   browser holding the other session's v3.25b would go on serving it and never
+   fetch this one: §91's fault ("every returning browser would be served the
+   old platform out of its own disk") reached by a route §91 did not predict.
+
+   The trigger is unchanged and is what saves it: the built file's bytes
+   changed, so the name changes. What this adds is that the name has to be one
+   NOBODY has served — check `git show origin/main:sw.js` before choosing,
+   because a merge will not tell you. */
+const SHELL = "smp-shell-v3.25c";
 const ASSETS = [
   "/",
   "/index.html",

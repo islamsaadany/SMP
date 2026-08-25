@@ -273,6 +273,16 @@
   h1,h2,h3,h4 { margin:0; text-wrap:balance; }
   .wrap { max-width:1180px; margin:0 auto; padding:0 24px 80px; }
 
+  /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
+     All four containers together, or the chrome sits indented from the page
+     beneath it. 1600px rather than none at all: a table stretched across a
+     32-inch monitor puts its first and last column a head-turn apart, and the
+     register's frozen columns exist precisely so the eye has an anchor. */
+  :root[data-wide] .wrap,
+  :root[data-wide] .top-in,
+  :root[data-wide] .units-in,
+  :root[data-wide] .tabs-in { max-width:1600px; }
+
   .banner { background:var(--panel); color:var(--panel-ink); padding:9px 24px; font-size:var(--fs-small);
             display:flex; gap:10px; justify-content:center; flex-wrap:wrap; align-items:baseline; }
   .banner strong { color:var(--panel-accent); font-weight:700; }
@@ -1386,7 +1396,13 @@
      one-word header and wrong for a column that explains what it covers: the
      note did not wrap, it ran straight across its neighbours. Seven headers
      that each say what is inside them have to be allowed to wrap. */
-  .acgrid thead th { white-space:normal; overflow-wrap:anywhere; }
+  /* §88 TOOK THIS AWAY AGAIN AND THE FIX LIVES IN arrange.css (§93.11).
+     The one-line standard is `.cfg table thead th` in this same file, and a
+     more specific rule written ABOVE it here did not win — the browser never
+     parsed it at all, which no amount of reasoning about the cascade would
+     have explained. It is in arrange.css now, which build.py concatenates
+     after this file, beside the other two exceptions this table has had to
+     keep there (§69). Same reason, third time. */
   .acgrid td.rolecell b { display:block; font-size:13px; line-height:1.3; }
   .acgrid td.rolecell .why { margin-top:2px; }
   /* .factor-h is gone from this table with the header notes it laid out, and
@@ -1969,6 +1985,11 @@
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
+  /* AND EVERY OTHER FIELD IN AN OPEN ROW, for the same reason (§93.10): bounded
+     BY the cell rather than by a number of its own, so the two can never
+     disagree about where the column ends. It is what kept the name column
+     honest since §69 and was never extended to the rest of the row. */
+  .peoplecfg tr.tk-open input.fld { max-width:100%; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -2088,10 +2109,29 @@
   /* A sub-line under a value is a line of its own and clips as one. */
   .cfg table td .why, .cfg table td .val, .cfg table td b {
     display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  /* Cells that hold a control, a panel or an open row size themselves. */
+  /* Cells that hold a control or a panel size themselves. */
   .cfg table td.kebcell, .cfg table td.cc, .cfg table td.idx, .cfg table td.roles,
-  .cfg table tr.tk-open td, .cfg table td .mbcell, .cfg table td .rolebox {
+  .cfg table td .mbcell, .cfg table td .rolebox {
     max-width:none; overflow:visible; text-overflow:clip; }
+  /* ── AN OPEN ROW KEEPS THE COLUMN WIDTHS (§93.10) ─────────────────
+     Islam, with a screenshot of a row being edited: "a quick bug — that's how
+     the editing cells look like." The row was running past the right edge of
+     its box with the frozen Save/Cancel column painted over Email, Roles and
+     Status: the fields were there and unreachable.
+
+     `max-width:none` was the cause. A read row's cells are capped at 150px
+     (§88); an open row's were not, so every input took its intrinsic preferred
+     width, every column it sat in grew, and the table went from 1127px to
+     1516px the moment a pen was pressed — inside a box that had not changed.
+     A table that changes width when you start editing is a table that moves
+     the thing you were about to click.
+
+     `overflow:visible` STAYS, and that is the half worth keeping: a capped
+     cell that also clipped would cut the controls off instead of the table.
+     The cap is a little wider than a read row's, because a field needs more
+     room than the value it holds. */
+  .cfg table tr.tk-open td { max-width:var(--cell-cap-edit, 158px);
+                             overflow:visible; text-overflow:clip; }
   .cfg table tr.tk-open td .why, .cfg table tr.tk-open td .val {
     overflow:visible; text-overflow:clip; }
 
@@ -2778,6 +2818,13 @@
   .copyval:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
   .copyval.copied { color:var(--good-tx); text-decoration:none; }
 
+  /* The two columns a row's edit controls live in (§93.10). A width on the
+     HEADER is what auto layout reads — a width on the body cells does nothing
+     (§37's lesson, in the other layout mode) — and it has to be enough for the
+     select the open row puts there, or the control overflows into the column
+     beside it. Read rows are unaffected: they hold a short name. */
+  .peoplecfg th.wcol { width:176px; }
+
   /* ── Drag handle ────────────────────────────────────────────────────
      The handle is the only drag target, so opening a pillar and moving it are
      never confused with one another. */
@@ -3146,6 +3193,27 @@
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
   .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
+  /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
+     and exactly the same 920px: the role picker's pair were bounded and the
+     pair that appear when a ROW is opened for editing were not, because they
+     are plain `select.fld` and nothing named them. Opening any row therefore
+     blew the table to 1516px inside a 920px box and pushed Email, Roles and
+     Status past the edge — a row you cannot finish editing.
+
+     Converting some members of a family and leaving the others is how the
+     second one gets forgotten (§40); this is that, a version later, in the
+     file that records the rule. Named by their data attributes so the next
+     select added to this row is bounded by being given one. */
+  .cfg .peoplecfg select[data-pmainbu]:not(.ss-native),
+  .cfg .peoplecfg select[data-pat]:not(.ss-native) { min-width:0; width:auto; max-width:164px; }
+  /* THE OPEN ROW'S TEXT FIELDS WERE CAPPED HERE AND THE RULE WAS REMOVED
+     (§93.10). It computed — `max-width` read back as the value written — and
+     the field still measured 170px, at every value tried. Whatever the browser
+     is resolving it against under this auto layout, it is not the cap, so the
+     rule changed nothing and a rule that changes nothing is worse than no rule
+     (§37). The 12px of overlap it was aimed at is cosmetic and recorded rather
+     than papered over; what actually closed the gap was capping the CELLS
+     (config.css, §93.10), which took the open table from 1608px to 1452px. */
   .cfg .unitcfg td { vertical-align:middle; }
   .cfg .unitcfg input.fld { max-width:none; width:100%; }
   /* THE REGISTER'S TWO WRITTEN COLUMNS NEED A FLOOR (§69). `width:100%` gives
@@ -3782,6 +3850,29 @@
   .iconwrap .menu .cq{padding:11px 14px 8px;border-bottom:1px solid var(--line-soft)}
   .iconwrap .menu .cq b{font-size:13.5px}
   .iconwrap .menu button.danger{color:var(--bad);font-weight:600}
+
+  /* ── THE ACCESS MATRIX'S HEADERS WRAP (§93.11) ────────────────────
+     Islam: "roles and access headers needs to be wrapped."
+
+     Seven of the eight headers are a phrase that says what the column covers —
+     "Other supporting functions", "Own business unit" — and §88's one-line
+     standard (`.cfg table thead th { white-space:nowrap }`) turned every one of
+     them into a line running straight across its neighbour. config.css had
+     said `white-space:normal` for this table since the table existed; §88 was
+     written later in the same file, broader, and won.
+
+     IT IS HERE BECAUSE THIS FILE IS CONCATENATED LAST. A more specific rule
+     placed beside the standard in config.css did not take effect — and not
+     because of the cascade: `matches()` confirmed the selector hit the
+     element, `!important` changed nothing, and the browser's own stylesheet
+     did not contain the rule at all. Whatever swallowed it, arrange.css is
+     where this table's exceptions already live for the same reason (§69), and
+     putting it here is a two-line fix rather than an afternoon.
+
+     `.cfg.acgrid`, not `.cfg .acgrid`: both classes sit on the same element. */
+  .cfg.acgrid table thead th { white-space:normal; overflow-wrap:break-word;
+                               max-width:none; overflow:visible;
+                               text-overflow:clip; vertical-align:bottom; }
 
   /* ── Presentation mode ────────────────────────────────────────────
      A mode, not a page: it takes the whole window, the app chrome disappears,
@@ -7954,6 +8045,49 @@ function roleWhereLabel(at){
     return c ? c.name : String(at).slice(3);
   }
   return UNITS[at] ? UNITS[at].name : at;
+}
+
+/* ── WHAT THE REGISTER CALLS A PLACE (§93.12) ─────────────────────────
+   Islam: "for the units name in the people register let's use the navigation
+   names, and for the units remove the word function that comes between
+   brackets."
+
+   Two changes, and only on the REGISTER. `roleWhereLabel()` is unchanged
+   because it is also the people workbook's vocabulary — the Unit column is
+   written from it and read back against it (§65), so renaming it would leave
+   every file downloaded before today failing to match.
+
+   1 · THE NAVIGATION'S NAME. `navName()` is what the tabs say, and the tabs are
+       where somebody learned the word: this tenant's `it` unit is "IT Dist." in
+       the navigation and "IT Dist." is what the register should say too.
+
+   2 · "(function)" GOES — EXCEPT WHERE IT IS THE ONLY THING TELLING TWO PLACES
+       APART. §65 added that suffix for a reason and the reason is still live:
+       this tenant has a unit called **Care** and a supporting function called
+       **Care**, with the same navigation name. Dropping it from that one would
+       put two different places on the register under one word.
+
+       So it is dropped from the seven that are unambiguous and kept for the one
+       that is not — the same shape as §81.1's names and §65's own near-miss
+       rule: disambiguate the pair that clashes, leave everybody else alone. */
+function placeLabel(at){
+  if (!at || at === "group") return "the group";
+  if (String(at).indexOf("co:") === 0) {
+    var c = COMPANIES[String(at).slice(3)];
+    return c ? navName(c) : String(at).slice(3);
+  }
+  if (String(at).indexOf("fn:") === 0) {
+    var fk = String(at).slice(3), f = FUNCTIONS[fk];
+    var nm = f ? navName(f) : fk;
+    /* Asked of the units by their NAVIGATION name, because that is the name
+       being shown — comparing against `.name` would keep the suffix on a
+       function whose clash is invisible here, and drop it from one whose
+       clash is real. */
+    var clash = UNIT_KEYS.some(function(k){
+      return UNITS[k] && navName(UNITS[k]) === nm; });
+    return clash ? nm + " (function)" : nm;
+  }
+  return UNITS[at] ? navName(UNITS[at]) : at;
 }
 
 function unitRolesFor(k){
@@ -19379,7 +19513,12 @@ function renderPeople(){
      places their roles were held, and a second copy of this in the shell is
      exactly the drift lib/rules.js exists to prevent. It is roleWhereLabel()
      in config-data.js now, with the reasoning that belongs to it. */
-  var whereLabel = roleWhereLabel;
+  /* THE REGISTER SAYS IT THE NAVIGATION'S WAY (§93.12). `placeLabel` rather
+     than `roleWhereLabel`, and the swap is HERE rather than at each of the
+     five call sites below — the drift the alias was extracted to prevent
+     (§35) works in this direction too. `roleWhereLabel` stays what the people
+     workbook is written in and read against (§65). */
+  var whereLabel = placeLabel;
 
   /* The role cell. Read-only it is a list of what they hold and where; in edit
      it gains an X per role and one add control. Two selects rather than one
@@ -20305,8 +20444,16 @@ function renderPeople(){
         (showCol("empid")    ? th("Emp. ID")   : '') +
         (showCol("key")      ? th("Sign-in name") : '') +
         (showCol("title")    ? th("Job title")  : '') +
-        (showCol("mainbu")   ? th("Official BU") : '') +
-        (showCol("bu")       ? th("Unit")       : '') +
+        /* ── THE TWO EDITED COLUMNS NEED A FLOOR (§93.10) ──────────
+           Both hold a `<select>` when a row is open, and a select's width
+           cannot be expressed as a percentage here: the cell has no definite
+           width under auto layout, so `width:100%` resolves against the whole
+           box — 1340px inside a 117px cell, which is §69's feedback loop with
+           a different number. A px cap on the select alone just overflows the
+           column the read rows sized. So the COLUMN carries the floor, and the
+           select is capped to sit inside it. */
+        (showCol("mainbu")   ? th("Official BU", "wcol") : '') +
+        (showCol("bu")       ? th("Unit", "wcol")        : '') +
         (showCol("email")    ? th("Email", "wrapany")      : '') +
         (showCol("phone")    ? th("Mobile")     : '') +
         /* Roles is a stack of chips and Password is a pill: sorting either
@@ -26952,6 +27099,23 @@ var SYNC = (function () {
        the fault the chrome shed in 2.9. The row is emptied AND hidden: an
        empty <nav> still spends its border and its padding. */
     var railed = current === "setup";
+    /* ── THE RAILED PAGES GET THE WHOLE WINDOW (§93.9) ────────────────
+       Islam, on a 1670px screen showing an eleven-column register inside a
+       1180px column: "the page is wide, however the rail on the left and the
+       tables are stuck in a confined space with a lot of buffer on right and
+       left."
+
+       1180 is a READING measure and it is right for the pages it was chosen
+       for — a unit's plan, the knowledge base, a group's foundation are prose
+       and prose has an optimum line length. A Setup page is a rail and a table,
+       and a table has the opposite need: every pixel it is denied becomes a
+       horizontal scroll inside a box.
+
+       So it is a state on the ROOT rather than a rule on `.wrap`, because the
+       chrome's three rows are capped at the same 1180 and widening the content
+       alone would leave the navigation indented from the page under it. One
+       attribute, four containers, and every other page is untouched. */
+    document.documentElement.toggleAttribute("data-wide", railed);
     document.getElementById("tabrow").hidden = railed;
     /* THE DOT IS A STATE, NOT A DECORATION (§69.9). It used to hang off
        `.primary`, which is the LANDING PAGE and nothing else — so it was

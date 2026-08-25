@@ -11214,6 +11214,129 @@ No migration: `people.extra` is jsonb and `lib/state-io.js` files every
 unrecognised key there and reads it back — the same mechanism `email`, `phone`
 and `empId` already ride on (§52, on units).
 
+### 93.9 The railed pages get the whole window
+
+> *"The page is wide, however the rail on the left and the tables are stuck in a
+> confined space with a lot of buffer on right and left."*
+
+1180px is a **reading measure** and it is right for the pages it was chosen for:
+a unit's plan, the knowledge base, a group's foundation are prose, and prose has
+an optimum line length. A Setup page is a rail and a table, and a table has the
+opposite need — every pixel it is denied becomes a horizontal scroll inside a
+box.
+
+So it is an attribute on the root (`data-wide`, set from `railed`) rather than a
+rule on `.wrap`: the chrome's three rows are capped at the same 1180, and
+widening the content alone would leave the navigation indented from the page
+under it. Four containers, one state, every other page untouched.
+
+1600px rather than no cap at all — a table stretched across a 32-inch monitor
+puts its first and last column a head-turn apart, which is what the register's
+frozen columns exist to prevent.
+
+**Measured:** the People register goes from **1354px in a 920px box** — 434px of
+permanent horizontal scroll — to **1354px in a 1340px box**, which is no scroll
+at all.
+
+### 93.10 A row you could not finish editing
+
+> *"A quick bug — when I edit a row, that's how the editing cells look like."*
+
+The open row ran past the right edge of its box with the frozen Save/Cancel
+column painted over Email, Roles and Status. The fields were there and
+unreachable — §70's fault again, a control that is present and cannot be used.
+
+**The cause was `max-width:none` on `tr.tk-open td`.** A read row's cells are
+capped at 150px (§88); an open row's were not, so every field took its intrinsic
+preferred width, every column it sat in grew, and the table went from 1354px to
+**1608px** the moment a pen was pressed — inside a box that had not changed. A
+table that changes width when you start editing is a table that moves the thing
+you were about to click. Capped, it opens at 1435px, and the wider page (§93.9)
+absorbs the rest.
+
+`overflow:visible` stays: a capped cell that also clipped would cut the controls
+off instead of the table.
+
+**Two things were chased and found innocent, and both are worth the space.** A
+`<select>` in these cells computes to the width of the whole box — 920px, 1340px,
+whatever the box is — because the cell has no definite width under auto layout,
+so a percentage resolves against the box. That is §69's feedback loop and it
+looks alarming in a measurement; it is also harmless, because `.ss-native` is
+`position:absolute`, `opacity:0` and clipped. And a px cap on the open row's
+text fields computed correctly at every value tried and changed nothing on
+screen — so it was **removed rather than left in** (§37): a rule that changes
+nothing is worse than no rule. The 12px of overlap it was aimed at is recorded
+instead.
+
+### 93.11 A comment ate the rule
+
+> *"Roles and access headers needs to be wrapped."*
+
+§88's one-line standard (`.cfg table thead th { white-space:nowrap }`) had
+silently overridden the access matrix's own `white-space:normal`, and seven
+headers that each explain what a column covers went back to running straight
+across their neighbours. The paragraph above the original rule had predicted
+exactly this fault; §88 was written later in the same file, broader, and won.
+
+**The fix took four attempts and only the last one is the lesson.**
+
+1. `.cfg .acgrid thead th` — matched nothing: both classes are on the **same**
+   element (`<div class="cfg acgrid">`), so the descendant combinator was wrong.
+   It measured exactly like the bug.
+2. `.cfg.acgrid table thead th` — correct selector, and still nothing. `matches()`
+   confirmed it hit the element. `!important` changed nothing.
+3. The reason was that **a comment I had written swallowed it**: correcting the
+   selector left a paragraph sitting after the `*/` that closed the comment
+   above it, so the parser met prose where a selector belonged and discarded the
+   block that followed.
+4. With the comment repaired it *still* did not apply — and the decisive
+   measurement was asking the browser for its own parsed rules: the stylesheet
+   contained 1593 rules and not that one, while every neighbouring `.acgrid`
+   rule was present.
+
+**WHEN A DECLARATION THAT PROVABLY MATCHES PROVABLY DOES NOTHING, SUSPECT THE
+PARSER, NOT THE CASCADE** — and read the built stylesheet through
+`document.styleSheets`, not the source line. The rule now lives in `arrange.css`,
+which build.py concatenates last, beside the two exceptions this same table has
+already had to keep there for the same reason (§69). Third time.
+
+### 93.12 The register speaks the navigation's language
+
+> *"For the units name in the people register let's use the navigation names,
+> and for the units remove the word function that comes between brackets."*
+
+`placeLabel()` is the register's own vocabulary and `roleWhereLabel()` is
+unchanged — the latter is what the people workbook's Unit column is written from
+and read back against (§65), so renaming it would leave every file downloaded
+before today failing to match.
+
+**The suffix is dropped from seven of eight functions and kept for one**, and the
+exception is not a hedge. §65 added `(function)` because this tenant has a unit
+and a function that share a name, and that is still true: **Care** is both, with
+the same navigation name. IT is not — the unit is *IT Dist.* — so IT loses the
+suffix along with the rest. Same shape as §81.1's names and §65's own near-miss
+rule: disambiguate the pair that clashes, leave everybody else alone.
+
+### 93.13 A question the register has already answered
+
+> *"Ahmed Mostafa's unit is already set in the registry table, he shouldn't get
+> the dropdown of what unit he belongs to."*
+
+It follows from what the declaration *is*. §56 built it as a thing that **grants
+nothing**: the person says where they think they work, and the SMO — who decides
+— accepts it on the register. Where the SMO has already placed them, the question
+has been answered by the only person whose answer counts, and asking again offers
+a choice that changes nothing.
+
+**The test is the attachment, not the Official BU.** `unit_key` / `fn_key` /
+`company` are what `personAt()` reads and what decides access (§54.1); an
+Official BU is the client's own word for a department and may point at nothing
+here (§58.3), so a row carrying only that is still a row nobody has placed.
+"group" does not count either — every seat role sits there.
+
+**Decided on the server**, like the short list beside it and for the same reason:
+a page that decides whether to ask has decided nothing, because it still had the
+question.
 ---
 
 ## 94 · The strategy tab is the office's, people open where they work, and Report goes solid (v3.25)
@@ -11532,3 +11655,24 @@ make that mistake: whether the bar has a **box** at all (`getClientRects()`),
 and what is actually under a point at the top of the page
 (`elementFromPoint`) — asserted in **both** states, so a build where the chrome
 never comes back fails too.
+
+
+### 94.12 Two sessions chose the same cache name, and git said nothing
+
+The second merge of the day brought §93.9–§93.13 in, cleanly — and **`sw.js`
+did not conflict, because both sessions had independently written
+`smp-shell-v3.25b`.** Same string on both sides, so git merged it silently,
+while the built file's bytes behind that name were different on each side.
+
+A service worker caches by NAME. A browser already holding the other session's
+`v3.25b` would go on serving it and never fetch this one — §91's fault
+(*"every returning browser would be served the old platform out of its own
+disk"*) reached by a route §91 did not predict, because §91 is about
+remembering to bump it and this is about bumping it to a value somebody else
+already used.
+
+**The trigger is unchanged and is what saves it:** the built file's bytes
+changed, so the name changes. What this adds is that the name has to be one
+**nobody has served** — so `git show origin/main:sw.js` before choosing, in the
+same breath as the fetch-and-look that precedes every merge. A merge will not
+tell you.

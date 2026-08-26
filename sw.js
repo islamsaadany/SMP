@@ -114,13 +114,18 @@
    and pushing it, and main is now serving "smp-shell-v3.43-setup".
    Confirmed against origin/main, and to be confirmed once more
    immediately before any push to main (§94.16). */
-/* v3.45 — §123: the deck marks a tactic that names no quarter, closes on
-   Thank you, and the Function overview carries the download too. §94.12
-   for the ninth time and the sixth on this piece of work — v3.39 through
-   v3.44 were each taken by main inside the window between reading a name
-   and pushing it. Confirmed against origin/main serving "smp-shell-v3.44",
-   to be confirmed once more immediately before the push (§94.16). */
-const SHELL = "smp-shell-v3.45";
+/* v3.46-plandeck — §123: the deck marks a tactic that names no quarter,
+   closes on Thank you, and the Function overview carries the download too.
+
+   §94.12 FOR THE TENTH TIME, and the SEVENTH on this one piece of work:
+   v3.39, v3.40, v3.41, v3.43, v3.44 and v3.45 were each taken by main inside
+   the window between reading a name and pushing it. §99's answer is applied
+   properly this time — the bare next number is a rule two sessions follow
+   correctly and still collide on, so the SUFFIX says whose the change is and
+   cannot be arrived at by coincidence. Confirmed against origin/main serving
+   "smp-shell-v3.45"; confirm once more immediately before any push to main
+   (§94.16). */
+const SHELL = "smp-shell-v3.46-plandeck";
 const ASSETS = [
   "/",
   "/index.html",

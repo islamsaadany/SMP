@@ -2016,7 +2016,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.45: a tactic that names no quarter, a
+*Last Updated: 2026-08-26 &mdash; **v3.46: a tactic that names no quarter, a
 closing slide, and the overview's download (&sect;123)**. Three more from using
 the plan download on a plan still being filled in. **A tactic with NO quarter
 at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter

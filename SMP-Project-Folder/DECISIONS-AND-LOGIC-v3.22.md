@@ -16249,7 +16249,7 @@ capped by the rail's expression — that is the point of taking it — but what 
 asked for is that the table reaches the fold, so **the window is what is
 measured now**, at both ends: it must reach it and must never pass it.
 
-## 123 · A tactic that names no quarter, a closing slide, and the overview's download (v3.45)
+## 123 · A tactic that names no quarter, a closing slide, and the overview's download (v3.46)
 
 Three more from using the plan download, on a tenant whose plan is still
 being filled in — which is exactly the state the Missing marks were built for

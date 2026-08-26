@@ -74,7 +74,7 @@ From using it, the day it shipped:
 
 ---
 
-## 5 · Follow-ups, §123 (v3.45)
+## 5 · Follow-ups, §123 (v3.46)
 
 6. **A tactic with no quarter at all** is marked Missing, once, merged across
    the four columns; a tactic that names some quarters is untouched (§119.1

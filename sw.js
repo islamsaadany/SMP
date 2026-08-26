@@ -101,7 +101,7 @@
    the push (§94.16): a worker caches by NAME, so the same string on both sides
    conflicts on nothing while the bytes behind it differ, and a browser holding
    the other copy would never fetch this one (§94.12). */
-const SHELL = "smp-shell-v3.34";
+const SHELL = "smp-shell-v3.35";
 const ASSETS = [
   "/",
   "/index.html",

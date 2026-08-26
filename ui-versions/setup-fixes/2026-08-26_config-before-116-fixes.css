@@ -518,37 +518,11 @@
     background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
   /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
      so a row without a pill is the row it always was (§108.15). */
-  /* ── THIS ROW IS A GRID, AND IT IS NOT THIS FILE'S GRID (§116.2) ──
-     `group-extra.css` styles `.rail button.ritem` as a two-column grid for a
-     UNIT's plan rail, and the Setup rail is a `.rail` too — so that selector
-     (0,2,1) has been outranking `.setuprail .ritem` (0,2,0) since the rail was
-     built, whatever this file asked for. §56.7 and §65.9 in CSS a third time:
-     two components, one class name, valid on both sides, silent when they meet.
-     The `display:flex` that used to sit here NEVER APPLIED, which nothing
-     noticed because the old two-child row (label, pill) happens to land
-     correctly in a 1fr/auto grid.
-
-     Adding the glyph made a THIRD child and the accident stopped working: the
-     glyph took the 1fr column and every label was pushed right by its own
-     length, so shorter names sat further in. Measured: labels at x = 62…166
-     down one rail.
-
-     SO IT DECLARES THE COLUMNS RATHER THAN THE BOX — one property, at a
-     specificity that genuinely wins, leaving the padding, borders and type to
-     the rule that has been drawing this row all along. A cap on the glyph, 1fr
-     for the name, auto for the pill. */
-  .rail.setuprail button.ritem { grid-template-columns:15px 1fr auto; }
-  .setuprail .ritem { text-align:left; color:var(--ink-2);
-                      font:500 13px/1.35 var(--sans); }
-  /* THE ROW'S MARK (§116.2). A fixed box so every label starts on the same
-     x — a glyph column that jitters row to row is worse than none — and the
-     row's own quiet ink, so it lights and dims WITH the row rather than
-     competing with the pill at the other end (§41's accent budget: the pill is
-     the only thing on this rail allowed a fill). */
-  .setuprail .rigl { text-align:center; font-size:12px;
-                     color:var(--ink-3); line-height:1; }
-  .setuprail .ritem:hover .rigl,
-  .setuprail .ritem.on .rigl { color:var(--ink-2); }
+  .setuprail .ritem { display:flex; align-items:center; gap:8px;
+                      width:100%; text-align:left; background:none;
+                      border:0; border-bottom:1px solid var(--line-soft);
+                      padding:8px 13px; cursor:pointer;
+                      font:500 13px/1.35 var(--sans); color:var(--ink-2); }
   .setuprail .rilab { min-width:0; }
   /* ── THE PILLS (§108.15) ──────────────────────────────────────────
      THE ACCENT, AND ONE OF THE FEW SOLID FILLS IN THE PRODUCT (§41's budget).
@@ -614,7 +588,6 @@
      NOT borrow is the layout: `.fstrip` is a card with a titled head and a
      body, and this is one row that ends in a way through. */
   .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
-             justify-content:flex-end;
              background:var(--surface); border:1px solid var(--line);
              border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
   .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
@@ -622,46 +595,12 @@
   .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
   /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
      wants rather than the size the page it summarises wants. */
-  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif); }
+  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif);
+             margin-left:auto; }
   .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
   .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
   .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  /* THE BUTTON HOLDS ITS PLACE (§116.4). The strip is one wrapping row, so
-     below about 1280px the button dropped onto a line of its own and the strip
-     grew from 72px to 126px — not broken, but it reads as an accident rather
-     than a decision. The numbers and the chips are what should give way: they
-     are facts and wrap gracefully, while the way through is a control and
-     wants to stay where the eye last left it.
-
-     `order` rather than a media query, because the wrap point depends on the
-     tenant's own cycle name and dates, not on a width anybody can name. */
-  /* THE BUTTON HOLDS ITS PLACE (§116.4). The strip is one wrapping row, and
-     below about 1280px the button dropped to a line of its own, growing the
-     strip from 72px to 126px — not broken, but it reads as an accident.
-
-     THE FIRST ATTEMPT MADE IT WORSE, and the reason is worth the line: giving
-     the button `margin-left:auto` when `.ovcyc-n` already had one puts TWO
-     auto margins in the row, and they split the free space between them — so
-     the button was pushed out and wrapped at 1400px instead of 1280.
-
-     ONE auto margin, and the NAME takes the slack. The name and dates are the
-     only part that can afford to shrink (they wrap onto two lines gracefully);
-     the number, the chips and the way through are all fixed things. */
-  /* `flex-basis: 0`, NOT `auto`, and that is the whole mechanism: with
-     `flex-wrap:wrap` the browser fits items by their BASIS first and wraps
-     what will not fit — it only shrinks items already sharing a line. At
-     `auto` the name's basis is its full text, so the row overflowed and the
-     button wrapped; at `0` the name asks for nothing, everything fits on one
-     line, and the name then GROWS into whatever is left over. */
-  .ovcyc-l { flex:1 1 0; min-width:240px; }
-  /* THE ONE AUTO MARGIN, and it is on the button rather than the numbers:
-     the name grows now, so the numbers are pushed right without help — and
-     when the row DOES wrap at a genuinely narrow width, this keeps the button
-     at the right rather than letting it jump to the left of the second line,
-     which is what made a wrap read as a mistake rather than a decision. */
-  .ovcyc-go { white-space:nowrap; flex:0 0 auto; }
-  .ovcyc-n { flex:0 0 auto; }
-  .ovcyc-chips { flex:0 0 auto; }
+  .ovcyc-go { white-space:nowrap; }
 
   .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
          color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }

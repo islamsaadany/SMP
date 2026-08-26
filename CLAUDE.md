@@ -1798,7 +1798,10 @@ python3 checks/setup-overview-live.py # ...and its three server-backed rows, ove
                                       # they exist at all (§101.12)
 python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
                                 # the filter, and a match inside a FOLDED group is findable
-                                # (§101.13, §101.14 — all three fail silently)
+                                # (§108.13, §108.14 — all three fail silently)
+                                # setup-rail.py also measures every rail GLYPH against a
+                                # character guaranteed missing: a mark that is MAPPED and
+                                # not DRAWN ships as a blank box (§52, §116.2)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:

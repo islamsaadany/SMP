@@ -1905,11 +1905,37 @@
     background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
   /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
      so a row without a pill is the row it always was (§108.15). */
-  .setuprail .ritem { display:flex; align-items:center; gap:8px;
-                      width:100%; text-align:left; background:none;
-                      border:0; border-bottom:1px solid var(--line-soft);
-                      padding:8px 13px; cursor:pointer;
-                      font:500 13px/1.35 var(--sans); color:var(--ink-2); }
+  /* ── THIS ROW IS A GRID, AND IT IS NOT THIS FILE'S GRID (§116.2) ──
+     `group-extra.css` styles `.rail button.ritem` as a two-column grid for a
+     UNIT's plan rail, and the Setup rail is a `.rail` too — so that selector
+     (0,2,1) has been outranking `.setuprail .ritem` (0,2,0) since the rail was
+     built, whatever this file asked for. §56.7 and §65.9 in CSS a third time:
+     two components, one class name, valid on both sides, silent when they meet.
+     The `display:flex` that used to sit here NEVER APPLIED, which nothing
+     noticed because the old two-child row (label, pill) happens to land
+     correctly in a 1fr/auto grid.
+
+     Adding the glyph made a THIRD child and the accident stopped working: the
+     glyph took the 1fr column and every label was pushed right by its own
+     length, so shorter names sat further in. Measured: labels at x = 62…166
+     down one rail.
+
+     SO IT DECLARES THE COLUMNS RATHER THAN THE BOX — one property, at a
+     specificity that genuinely wins, leaving the padding, borders and type to
+     the rule that has been drawing this row all along. A cap on the glyph, 1fr
+     for the name, auto for the pill. */
+  .rail.setuprail button.ritem { grid-template-columns:15px 1fr auto; }
+  .setuprail .ritem { text-align:left; color:var(--ink-2);
+                      font:500 13px/1.35 var(--sans); }
+  /* THE ROW'S MARK (§116.2). A fixed box so every label starts on the same
+     x — a glyph column that jitters row to row is worse than none — and the
+     row's own quiet ink, so it lights and dims WITH the row rather than
+     competing with the pill at the other end (§41's accent budget: the pill is
+     the only thing on this rail allowed a fill). */
+  .setuprail .rigl { text-align:center; font-size:12px;
+                     color:var(--ink-3); line-height:1; }
+  .setuprail .ritem:hover .rigl,
+  .setuprail .ritem.on .rigl { color:var(--ink-2); }
   .setuprail .rilab { min-width:0; }
   /* ── THE PILLS (§108.15) ──────────────────────────────────────────
      THE ACCENT, AND ONE OF THE FEW SOLID FILLS IN THE PRODUCT (§41's budget).
@@ -1975,6 +2001,7 @@
      NOT borrow is the layout: `.fstrip` is a card with a titled head and a
      body, and this is one row that ends in a way through. */
   .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+             justify-content:flex-end;
              background:var(--surface); border:1px solid var(--line);
              border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
   .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
@@ -1982,12 +2009,46 @@
   .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
   /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
      wants rather than the size the page it summarises wants. */
-  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif);
-             margin-left:auto; }
+  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif); }
   .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
   .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
   .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  .ovcyc-go { white-space:nowrap; }
+  /* THE BUTTON HOLDS ITS PLACE (§116.4). The strip is one wrapping row, so
+     below about 1280px the button dropped onto a line of its own and the strip
+     grew from 72px to 126px — not broken, but it reads as an accident rather
+     than a decision. The numbers and the chips are what should give way: they
+     are facts and wrap gracefully, while the way through is a control and
+     wants to stay where the eye last left it.
+
+     `order` rather than a media query, because the wrap point depends on the
+     tenant's own cycle name and dates, not on a width anybody can name. */
+  /* THE BUTTON HOLDS ITS PLACE (§116.4). The strip is one wrapping row, and
+     below about 1280px the button dropped to a line of its own, growing the
+     strip from 72px to 126px — not broken, but it reads as an accident.
+
+     THE FIRST ATTEMPT MADE IT WORSE, and the reason is worth the line: giving
+     the button `margin-left:auto` when `.ovcyc-n` already had one puts TWO
+     auto margins in the row, and they split the free space between them — so
+     the button was pushed out and wrapped at 1400px instead of 1280.
+
+     ONE auto margin, and the NAME takes the slack. The name and dates are the
+     only part that can afford to shrink (they wrap onto two lines gracefully);
+     the number, the chips and the way through are all fixed things. */
+  /* `flex-basis: 0`, NOT `auto`, and that is the whole mechanism: with
+     `flex-wrap:wrap` the browser fits items by their BASIS first and wraps
+     what will not fit — it only shrinks items already sharing a line. At
+     `auto` the name's basis is its full text, so the row overflowed and the
+     button wrapped; at `0` the name asks for nothing, everything fits on one
+     line, and the name then GROWS into whatever is left over. */
+  .ovcyc-l { flex:1 1 0; min-width:240px; }
+  /* THE ONE AUTO MARGIN, and it is on the button rather than the numbers:
+     the name grows now, so the numbers are pushed right without help — and
+     when the row DOES wrap at a genuinely narrow width, this keeps the button
+     at the right rather than letting it jump to the left of the second line,
+     which is what made a wrap read as a mistake rather than a decision. */
+  .ovcyc-go { white-space:nowrap; flex:0 0 auto; }
+  .ovcyc-n { flex:0 0 auto; }
+  .ovcyc-chips { flex:0 0 auto; }
 
   .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
          color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
@@ -12080,6 +12141,41 @@ function boardFunctionKeys(){
   return Object.keys(FUNCTIONS).filter(function(fk){
     return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
   });
+}
+
+/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§116.1) ──────────────────────────
+   Islam, on a client tenant whose cycle has no dates: the strip read
+   **"to  ·  due  ·  as of Q4"** — three separators and nothing between them,
+   because the line was built by gluing the words around three values and the
+   punctuation survives when the values do not.
+
+   IT IS NOT THE OVERVIEW'S FAULT AND THAT IS WHY IT LIVES HERE. The identical
+   line renders on the Reporting cycle page and has since long before the
+   Overview existed; the Overview only made it the first thing anybody sees.
+   Two surfaces onto one sentence is exactly how the two come to say it
+   differently (§53.5), so the sentence is built ONCE and both read it.
+
+   AN ABSENT DATE IS SAID, NOT PUNCTUATED. A tenant that has not set its dates
+   has a real state, and "Dates not set" is what it is — the same argument as
+   §93's dash for a password nobody has been asked about, and §108.10's rule
+   that a page must be able to say NOTHING is here rather than draw an empty
+   shape. The quarter is always known (it is a number, not a date), so it is
+   always said. */
+function cycleMeta(){
+  var bits = [];
+  var from = String(REVIEW.from || "").trim();
+  var to   = String(REVIEW.to   || "").trim();
+  var due  = String(REVIEW.due  || "").trim();
+  /* BOTH ENDS OR NEITHER: "Jan 2026 to" is worse than saying nothing, and one
+     end alone is not a span. A single end is reported on its own terms. */
+  if (from && to) bits.push(from + " to " + to);
+  else if (from)  bits.push("from " + from);
+  else if (to)    bits.push("until " + to);
+  if (due) bits.push("due " + due);
+  if (!bits.length) bits.push("Dates not set");
+  if (REVIEW.endsQuarter != null && REVIEW.endsQuarter !== "")
+    bits.push("as of Q" + REVIEW.endsQuarter);
+  return bits.join(" \u00b7 ");
 }
 
 function cycleTotals(){
@@ -25258,9 +25354,9 @@ function renderOverview(){
         '<div class="ovcyc-name">' + esc(REVIEW.name) +
           ' <span class="badge b-' + (open ? "open" : "none") + '">' +
           (open ? "Open" : "Closed") + '</span></div>' +
-        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
-          ' &middot; due ' + esc(REVIEW.due) +
-          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
+        /* ONE SENTENCE, TWO SURFACES (§116.1) — and it says so when a tenant
+           has set no dates, rather than printing the separators alone. */
+        '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
       '</div>' +
       '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
         ' items reported</span></div>' +
@@ -25412,8 +25508,7 @@ function renderCycle(){
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
-        ' &middot; due ' + esc(REVIEW.due) + ' &middot; as of Q' + REVIEW.endsQuarter + '</span>' +
+      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open
@@ -31445,22 +31540,27 @@ var SYNC = (function () {
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
-      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", find:"departments official bu client names mapping",      render:renderMainbus },
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
+      /* AFTER Roles & access, which is the order the approved mockup drew
+         (§116.3). It had been left in its pre-existing position while the
+         group was renamed around it — a small drift from a signed-off
+         drawing, and the kind that is only ever caught by laying the two
+         side by side. */
+      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
 
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies", find:"company companies grouping layer",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", find:"capabilities projects enhancement deliverables",          render:renderCaps },
+      { k:"companies", ac:"c_units", grp:"run", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
+      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -31473,22 +31573,22 @@ var SYNC = (function () {
          who is not the SMO gets only Fill; anybody else gets no entry at all,
          because paint() drops a def whose every section is refused. Gate the
          parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", find:"figure sets owner claim source of figures numbers finance", sections: function(){
+      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", glyph:"Σ", find:"figure sets owner claim source of figures numbers finance", sections: function(){
           return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
+      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
          developer calls that; to everybody else it sounds like stickers on a
          chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
       /* §72. In *How it looks* rather than a group of its own, and that is the
          argument rather than the leftover: an email leaves wearing the tenant's
          accent, the tenant's name and the tenant's footer, so what it looks
@@ -31499,7 +31599,7 @@ var SYNC = (function () {
          it sets the display name, the reply-to, the kicker and the footer of
          what LEAVES the platform — an email, and nothing else. Naming it Email
          is what lets "Send a message" and "Inbox" each mean one thing too. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", glyph:"✉", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -31524,9 +31624,9 @@ var SYNC = (function () {
          across the whole tenant is not a tick somebody could set on a bad
          afternoon. A non-office viewer's gear falls through to `st[0]`, which
          is Reporting cycle — where it landed before this page existed. */
-      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", find:"waiting attention outstanding needs me summary home todo", primary:true,
+      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", glyph:"⌂", find:"waiting attention outstanding needs me summary home todo", primary:true,
         when: inOffice,                                                 render:renderOverview },
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -31548,21 +31648,21 @@ var SYNC = (function () {
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", find:"messages chat conversations questions replies feedback answer",
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", find:"broadcast announce notify everyone email the team",
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", glyph:"➤", find:"broadcast announce notify everyone email the team",
         when: function(){ return inOffice(); },                          render:renderSendMessage },
-      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", find:"focus watch highlight measures",                render:renderFocusSetup },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", find:"figures i report my numbers named",
+      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", glyph:"№", find:"figures i report my numbers named",
         when: ownsAnySource,                                render:renderMySources },
 
       /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
@@ -31584,7 +31684,7 @@ var SYNC = (function () {
          section is refused, so a view-only holder of c_import sees Archived
          plans alone and somebody with neither sees no entry — exactly what the
          two separate rows did, in one row. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
         sections: function(){
           return [{ k:"in",   ac:"c_import", label:"Import a plan",
                     when: function(){ return grant("c_import") === "edit"; },
@@ -31592,7 +31692,7 @@ var SYNC = (function () {
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
       /* Last in its group: it explains the rest, so it is not where you start. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",                render:renderKB }
     ]
   };
 
@@ -32083,7 +32183,17 @@ var SYNC = (function () {
             return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
               '" data-setupgo="' + d.k + '" data-find="' +
               esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
-              '"><span class="rilab">' + esc(d.label) + '</span>' +
+              '">' +
+              /* THE GLYPH THE MOCKUP DREW (§116.2). It was one of the five
+                 HR_ERP practices taken in §108 and the only one that did not
+                 get built — the Overview's own rows had theirs, which is why
+                 that page looked finished and the rail beside it did not.
+                 DRAWN CHARACTERS, NEVER EMOJI, so they inherit the row's own
+                 colour and go quiet with it (HR_ERP's own note, and §45.6's:
+                 a colour emoji cannot be coloured). Decorative to a screen
+                 reader — the label beside it is the name. */
+              '<span class="rigl" aria-hidden="true">' + esc(d.glyph || "\u00b7") + '</span>' +
+              '<span class="rilab">' + esc(d.label) + '</span>' +
               /* NEVER A ZERO (§108.10, and HR_ERP's own rule): a row with
                  nothing waiting carries no pill at all, so the pill means one
                  thing and reads at a glance. */

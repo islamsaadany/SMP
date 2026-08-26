@@ -314,27 +314,22 @@
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", glyph:"☰", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", label:"People register", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
-      /* AFTER Roles & access, which is the order the approved mockup drew
-         (§116.3). It had been left in its pre-existing position while the
-         group was renamed around it — a small drift from a signed-off
-         drawing, and the kind that is only ever caught by laying the two
-         side by side. */
-      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", glyph:"▦", find:"departments official bu client names mapping",      render:renderMainbus },
+      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", find:"departments official bu client names mapping",      render:renderMainbus },
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
 
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", glyph:"▤", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies", glyph:"◫", find:"company companies grouping layer",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", glyph:"◇", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", glyph:"◈", find:"capabilities projects enhancement deliverables",          render:renderCaps },
+      { k:"companies", ac:"c_units", grp:"run", label:"Companies", find:"company companies grouping layer",           render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
+      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", find:"capabilities projects enhancement deliverables",          render:renderCaps },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -347,22 +342,22 @@
          who is not the SMO gets only Fill; anybody else gets no entry at all,
          because paint() drops a def whose every section is refused. Gate the
          parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", glyph:"Σ", find:"figure sets owner claim source of figures numbers finance", sections: function(){
+      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", find:"figure sets owner claim source of figures numbers finance", sections: function(){
           return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", glyph:"▥", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
+      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
       /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
          developer calls that; to everybody else it sounds like stickers on a
          chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", glyph:"“", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", glyph:"◐", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
       /* §72. In *How it looks* rather than a group of its own, and that is the
          argument rather than the leftover: an email leaves wearing the tenant's
          accent, the tenant's name and the tenant's footer, so what it looks
@@ -373,7 +368,7 @@
          it sets the display name, the reply-to, the kicker and the footer of
          what LEAVES the platform — an email, and nothing else. Naming it Email
          is what lets "Send a message" and "Inbox" each mean one thing too. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", glyph:"✉", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -398,9 +393,9 @@
          across the whole tenant is not a tick somebody could set on a bad
          afternoon. A non-office viewer's gear falls through to `st[0]`, which
          is Reporting cycle — where it landed before this page existed. */
-      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", glyph:"⌂", find:"waiting attention outstanding needs me summary home todo", primary:true,
+      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", find:"waiting attention outstanding needs me summary home todo", primary:true,
         when: inOffice,                                                 render:renderOverview },
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", glyph:"◔", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -422,21 +417,21 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", glyph:"✉", find:"messages chat conversations questions replies feedback answer",
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", find:"messages chat conversations questions replies feedback answer",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", glyph:"➤", find:"broadcast announce notify everyone email the team",
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", find:"broadcast announce notify everyone email the team",
         when: function(){ return inOffice(); },                          render:renderSendMessage },
-      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", glyph:"◎", find:"focus watch highlight measures",                render:renderFocusSetup },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", find:"focus watch highlight measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", glyph:"№", find:"figures i report my numbers named",
+      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", find:"figures i report my numbers named",
         when: ownsAnySource,                                render:renderMySources },
 
       /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
@@ -458,7 +453,7 @@
          section is refused, so a view-only holder of c_import sees Archived
          plans alone and somebody with neither sees no entry — exactly what the
          two separate rows did, in one row. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
         sections: function(){
           return [{ k:"in",   ac:"c_import", label:"Import a plan",
                     when: function(){ return grant("c_import") === "edit"; },
@@ -466,7 +461,7 @@
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
       /* Last in its group: it explains the rest, so it is not where you start. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",                render:renderKB }
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
     ]
   };
 
@@ -957,17 +952,7 @@
             return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
               '" data-setupgo="' + d.k + '" data-find="' +
               esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
-              '">' +
-              /* THE GLYPH THE MOCKUP DREW (§116.2). It was one of the five
-                 HR_ERP practices taken in §108 and the only one that did not
-                 get built — the Overview's own rows had theirs, which is why
-                 that page looked finished and the rail beside it did not.
-                 DRAWN CHARACTERS, NEVER EMOJI, so they inherit the row's own
-                 colour and go quiet with it (HR_ERP's own note, and §45.6's:
-                 a colour emoji cannot be coloured). Decorative to a screen
-                 reader — the label beside it is the name. */
-              '<span class="rigl" aria-hidden="true">' + esc(d.glyph || "\u00b7") + '</span>' +
-              '<span class="rilab">' + esc(d.label) + '</span>' +
+              '"><span class="rilab">' + esc(d.label) + '</span>' +
               /* NEVER A ZERO (§108.10, and HR_ERP's own rule): a row with
                  nothing waiting carries no pill at all, so the pill means one
                  thing and reads at a glance. */

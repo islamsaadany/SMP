@@ -189,6 +189,50 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     ck("the tenant is put back", pg.eval_on_selector_all(".ovrow", "e=>e.length") == 0)
 
+    print("\n── 6b · a cycle with no dates SAYS so (§116.1) ──")
+    # Islam's own screenshot: a client tenant whose cycle carries no dates read
+    # "to  ·  due  ·  as of Q4" — three separators and nothing between them.
+    # ASSERTED ON BOTH SURFACES, because the sentence is built once and the
+    # whole point is that the Overview and the Reporting cycle cannot drift
+    # apart about it (§53.5).
+    full = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
+      REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;currentSub='overview';paint();
+      return document.querySelector('.ovcyc-meta').textContent.trim();}""")
+    ck("with dates, it reads as a span", full == "Jan 2026 to Jun 2026 \u00b7 due 15 Jul 2026 \u00b7 as of Q2", full)
+    bare = pg.evaluate("""()=>{REVIEW.from='';REVIEW.to='';REVIEW.due='';
+      REVIEW.endsQuarter=4;paint();
+      return document.querySelector('.ovcyc-meta').textContent.trim();}""")
+    ck("with none, it says the dates are not set", bare == "Dates not set \u00b7 as of Q4", bare)
+    ck("and never prints a bare separator",
+       " \u00b7  \u00b7 " not in bare and not bare.startswith("\u00b7"), bare)
+    onCycle = pg.evaluate("""()=>{currentSub='cycle';paint();
+      return document.querySelector('.fstrip-meta').textContent.trim();}""")
+    ck("the Reporting cycle page says exactly the same", onCycle == bare, (bare, onCycle))
+    # ONE END IS NOT A SPAN: "Jan 2026 to" is worse than saying nothing.
+    half = pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='';REVIEW.due='';
+      currentSub='overview';paint();
+      return document.querySelector('.ovcyc-meta').textContent.trim();}""")
+    ck("one end alone is reported on its own terms", half == "from Jan 2026 \u00b7 as of Q4", half)
+    pg.evaluate("""()=>{REVIEW.from='Jan 2026';REVIEW.to='Jun 2026';
+      REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;paint();}""")
+    pg.wait_for_timeout(200)
+
+    print("\n── 6c · the way through keeps its place (§116.4) ──")
+    # It used to drop to the LEFT of a second line below 1280px, which reads as
+    # an accident. The assertion is the PROBLEM, not a width: wherever it ends
+    # up, it ends up at the right-hand edge (§94.8).
+    for w in [1920, 1600, 1400, 1280, 1150, 1024]:
+        pg.set_viewport_size({"width": w, "height": 1000})
+        pg.wait_for_timeout(280)
+        r = pg.evaluate("""()=>{const s=document.querySelector('.ovcycle');
+          const g=document.querySelector('.ovcyc-go');
+          const sb=s.getBoundingClientRect(), gb=g.getBoundingClientRect();
+          return {gap:Math.round(sb.right-gb.right), h:Math.round(sb.height)};}""")
+        ck("at %dpx the button sits at the right edge" % w, r["gap"] < 30, r)
+        ck("at %dpx the strip has not ballooned" % w, r["h"] <= 200, r)
+    pg.set_viewport_size({"width": 1600, "height": 1000})
+    pg.wait_for_timeout(300)
+
     print("\n── 7 · somebody who is not the office ──")
     # The page is about the office's queue, so it is not offered to anybody
     # else — and their gear must still land somewhere real.

@@ -152,6 +152,64 @@ with sync_playwright() as p:
     ck("no cap below 900px", narrow["maxH"] == "none", narrow)
     ck("rows lay out in a row below 900px", narrow["dir"] == "row", narrow)
 
+    print("\n── 5 · every row carries its mark, and the labels line up (§116.2) ──")
+    pg.set_viewport_size({"width": 1600, "height": 1000})
+    pg.wait_for_timeout(400)
+    # UNFOLD EVERYTHING, or this measures whichever groups happen to be open —
+    # RE-QUERIED each time, because folding one repaints the whole rail and
+    # every handle taken before it is detached (the note in section 3 above).
+    for _ in range(12):
+        g = pg.query_selector(".setuprail .rgroup.shut")
+        if not g:
+            break
+        g.click()
+        pg.wait_for_timeout(90)
+    rows = pg.eval_on_selector_all(".setuprail .ritem", """
+        e=>e.map(x=>({k:x.dataset.setupgo,
+                      g:((x.querySelector('.rigl')||{}).textContent||'').trim(),
+                      lx:Math.round((x.querySelector('.rilab')||x)
+                                     .getBoundingClientRect().left)}))""")
+    ck("every rail row has a glyph", all(r["g"] and r["g"] != "\u00b7" for r in rows),
+       [r["k"] for r in rows if not r["g"] or r["g"] == "\u00b7"])
+    # THE POINT OF A GLYPH COLUMN IS THE COLUMN. A mark that shifts the name
+    # row by row is worse than no mark — and this is exactly what the first
+    # build did, because `group-extra.css` styles `.rail button.ritem` as a
+    # two-column grid and outranks this rail's own rule (§116.2). Measured,
+    # never assumed: the fault was invisible in the source and obvious here.
+    xs = sorted(set(r["lx"] for r in rows))
+    ck("every label starts at the same x", len(xs) == 1, xs)
+    ck("...and the glyph is not eating the name's column",
+       pg.eval_on_selector(".setuprail .ritem",
+           "e=>getComputedStyle(e).gridTemplateColumns").startswith("15px"),
+       pg.eval_on_selector(".setuprail .ritem", "e=>getComputedStyle(e).gridTemplateColumns"))
+
+    # A GLYPH THAT IS MAPPED AND NOT DRAWN IS A BLANK BOX (§52, §116.2). The
+    # first build used U+2317 for the Official BU list; it looked right in the
+    # mockup, whose font had it, and rendered as tofu in the product. Nothing
+    # complains — the character is "supported", it just has no outline — so it
+    # is measured against a character guaranteed to be missing.
+    tofu = pg.evaluate("""()=>{
+      const probe=document.createElement('span');
+      const s=getComputedStyle(document.querySelector('.setuprail .rigl'));
+      probe.style.cssText='position:absolute;visibility:hidden;white-space:pre;font:'+s.font;
+      document.body.appendChild(probe);
+      const w=c=>{probe.textContent=c;return probe.getBoundingClientRect().width;};
+      const none=w('\uFFFF');
+      const bad=[...document.querySelectorAll('.setuprail .ritem')]
+        .map(r=>({g:(r.querySelector('.rigl')||{}).textContent||'',
+                  l:((r.querySelector('.rilab')||{}).textContent||'').trim()}))
+        .filter(x=>Math.abs(w(x.g)-none)<0.5);
+      probe.remove(); return bad;}""")
+    ck("no glyph renders as an empty box", not tofu, tofu)
+
+    print("\n── 6 · People & access is in the order the mockup drew (§116.3) ──")
+    order = pg.evaluate("""()=>{
+      const h=[...document.querySelectorAll('.setuprail .rgroup')]
+                .find(x=>/People/.test(x.textContent));
+      return [...h.nextElementSibling.querySelectorAll('.rilab')].map(x=>x.textContent.trim());}""")
+    ck("register, then roles, then the BU list",
+       order == ["People register", "Roles & access", "Official BU list"], order)
+
     b.close()
 
 print("\nconsole errors:", errs or "none")

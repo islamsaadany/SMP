@@ -435,7 +435,20 @@ with sync_playwright() as p:
        len(heights) == 4 and all(heights[i] > heights[i + 1] for i in range(3)), heights)
     # AND THE THREAD IS WHAT SCROLLS, not the page.
     pg.set_viewport_size({"width": 1400, "height": 760})
-    pg.wait_for_timeout(400)
+    # WAIT FOR THE THREAD, NOT FOR A CLOCK. A fixed 400ms here raced the
+    # panel's own poll: `drawThread()` rewrites this body every few seconds,
+    # and a measurement that lands mid-rewrite reads an EMPTY box and calls a
+    # working build broken. Once settled the margin is enormous (1601px of
+    # content in a 437px box), so the flake was never about the assertion —
+    # it was about measuring before there was anything to measure. The
+    # assertion itself is untouched.
+    try:
+        pg.wait_for_function(
+            "() => { const e = document.querySelector('#chtbody');"
+            " return e && e.children.length > 1; }", timeout=5000)
+    except Exception:
+        pass
+    pg.wait_for_timeout(200)
     ck("the thread scrolls inside its own box",
        pg.eval_on_selector("#chtbody", "e => e.scrollHeight > e.clientHeight + 2"))
     ck("and the queue has a scroller of its own",

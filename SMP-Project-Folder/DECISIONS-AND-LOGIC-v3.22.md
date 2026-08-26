@@ -15359,3 +15359,100 @@ ones proven untouched.
 **Deliberately not built:** auto-detecting repetition, a template column, and
 any per-run history UI beyond what Archived plans already shows — a handful of
 projects, and the pen is the door.
+
+## 116 · The four corrections after the makeover shipped (v3.30)
+
+Islam, looking at the Overview on a real client tenant: *"some of what we did
+was merged and some not."* Assessed against the LIVE build rather than from
+memory — everything agreed in Option A was merged and deployed — and the four
+things below came out of laying the built product beside the signed-off mockup.
+*Assessment is in `design-mockups/setup-makeover/2026-08-26_merge-assessment.html`.*
+
+### 116.1 A cycle with no dates said nothing, in punctuation
+
+His strip read **"to  ·  due  ·  as of Q4"** — three separators with nothing
+between them, because the line glued the words around three values and the
+punctuation survives when the values do not.
+
+**IT WAS NOT THE OVERVIEW'S FAULT, WHICH IS WHY THE FIX IS NOT THERE.** The
+identical line renders on the Reporting cycle page and predates the Overview
+entirely; the Overview only made it the first thing anybody sees. Two surfaces
+onto one sentence is exactly how the two come to say it differently (§53.5), so
+`cycleMeta()` builds it ONCE in `config-data.js` and both read it.
+
+**AN ABSENT DATE IS SAID, NOT PUNCTUATED** — *"Dates not set"*, the same
+argument as §93's dash for a password nobody was asked about. **BOTH ENDS OR
+NEITHER**: *"Jan 2026 to"* is worse than saying nothing, so one end alone is
+reported on its own terms (*"from Jan 2026"*). The quarter is a number rather
+than a date and is always known, so it is always said.
+
+### 116.2 The rail's glyphs, and the grid that was never this file's
+
+The mockup drew a glyph on every rail row and **none was built** — the only one
+of the five HR_ERP practices §108 took that did not arrive. The Overview's own
+rows had theirs, which is precisely why that page looked finished and the rail
+beside it looked plainer than the drawing.
+
+**AND ADDING THEM EXPOSED A COLLISION THAT HAD BEEN THERE ALL ALONG.**
+`group-extra.css` styles `.rail button.ritem` as a two-column grid for a UNIT's
+plan rail, and the Setup rail is a `.rail` too — so that selector (0,2,1) has
+been outranking `.setuprail .ritem` (0,2,0) since the rail was built. **The
+`display:flex` in this file never applied.** Nothing noticed, because the old
+two-child row (label, pill) lands correctly in a `1fr auto` grid by accident.
+The glyph made a THIRD child and the accident stopped working: the glyph took
+the `1fr` column and every label was pushed right by its own length, so shorter
+names sat further in — **measured at x = 62…166 down one rail.** §56.7 and
+§65.9 in CSS for the third time: two components, one class name, valid on both
+sides, silent when they meet.
+
+**SO IT DECLARES THE COLUMNS RATHER THAN THE BOX** — one property at a
+specificity that genuinely wins (`.rail.setuprail button.ritem`), leaving the
+padding, borders and type to the rule that has been drawing this row all along.
+
+**AND ONE GLYPH WAS MAPPED BUT NOT DRAWN.** `⌗` for the Official BU list
+rendered as an empty box: it looked right in the mockup, whose font had it, and
+has no outline in the product's. **§52's rule, in a new place** — a character is
+"supported" and simply has no glyph, and nothing complains. `checks/setup-rail.py`
+now measures every mark against a character guaranteed to be missing, so the
+next one cannot ship blank. `▦` replaces it; `◫` restores Companies, which had
+been mistyped as the much fainter `▫`.
+
+### 116.3 People & access, in the order the mockup drew
+
+Register · roles · BU list, which is what was signed off; the group had been
+renamed around the pre-existing order without it being brought back. Small, and
+the kind of drift only caught by laying the drawing beside the build.
+
+### 116.4 The way through keeps its place
+
+Below about 1280px the strip's *Open the cycle page* dropped to the LEFT of a
+second line, growing the strip from 72px to 126px — not broken, but it read as
+an accident rather than a decision.
+
+**THE FIRST ATTEMPT MADE IT WORSE, and the reason is the lesson**: giving the
+button `margin-left:auto` when `.ovcyc-n` already had one puts TWO auto margins
+in the row, and they split the free space between them — so the button was
+pushed out and wrapped at **1400px instead of 1280**. The second attempt
+(`flex:1 1 0` on the name, so it asks for nothing and then grows into what is
+left) kept the button on one line further down, and let the name be squeezed so
+hard the strip **ballooned to 328px** at 1150px.
+
+The answer is all three together: the name takes the slack with a **floor** so
+it cannot be crushed, and `justify-content:flex-end` right-aligns a wrapped
+line — which costs nothing on the first line, where the growing name leaves no
+free space to distribute. Measured 1920→1024: the button is **19px from the
+right edge at every width**, and the strip never exceeds 145px.
+
+### 116.5 A check that raced a poll, and was not a flake to shrug at
+
+`checks/office-chat.py` failed twice in five runs on this branch and passed four
+times out of four on `origin/main`, which is exactly the shape that gets called
+a flake and waved through. It measured `#chtbody` on a fixed 400ms timer after a
+viewport resize — racing the panel's own poll, which rewrites that body every
+few seconds. **Instrumented rather than re-run**: once settled the margin is
+1601px of content in a 437px box, so the assertion was never marginal; it was
+measuring before there was anything to measure. It waits for the thread now
+instead of for a clock, and the assertion itself is untouched. 4/4 after.
+
+**`no-jump` is left failing, deliberately** — it fails identically on
+`origin/main` (verified in a worktree) and belongs to whoever owns that page.

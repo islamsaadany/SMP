@@ -141,7 +141,25 @@ at. Never a zero; never for somebody who cannot clear it (§69); and on a group
 heading only while that group is folded, because an open group's rows already
 speak for themselves.
 
-## 8 · Still open
+## 8 · Corrections after it shipped (§116)
+
+Assessed against the LIVE build once it reached a real client tenant. Everything
+in Option A was merged and deployed; four things came out of laying the built
+product beside the signed-off mockup:
+
+1. **A cycle with no dates printed its separators** — *"to · due · as of Q4"*.
+   Now one shared `cycleMeta()` both the Overview and the Reporting cycle read,
+   saying *"Dates not set"* rather than punctuating an absence. Not introduced
+   by the Overview: the same line predates it on the cycle page.
+2. **The rail's glyphs were drawn in the mockup and never built** — the only
+   one of the five HR_ERP practices that did not arrive. Adding them exposed
+   that `group-extra.css` had been styling this rail as a two-column grid all
+   along, and that one mark (`⌗`) renders as an empty box in the product's font.
+3. **People & access is back in the drawn order** — register, roles, BU list.
+4. **The strip's way through keeps its place** — 19px from the right edge at
+   every width from 1920 to 1024, and the strip never exceeds 145px.
+
+## 9 · Still open
 
 Nothing from this makeover. The two candidates deliberately NOT built:
 **data-search** (a typed person's name jumping to their register row) — a real

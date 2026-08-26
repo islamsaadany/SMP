@@ -4197,9 +4197,9 @@ function renderOverview(){
         '<div class="ovcyc-name">' + esc(REVIEW.name) +
           ' <span class="badge b-' + (open ? "open" : "none") + '">' +
           (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§116.1) — and it says so when a tenant
-           has set no dates, rather than printing the separators alone. */
-        '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
+        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+          ' &middot; due ' + esc(REVIEW.due) +
+          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
       '</div>' +
       '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
         ' items reported</span></div>' +
@@ -4351,7 +4351,8 @@ function renderCycle(){
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
+      '<span class="fstrip-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+        ' &middot; due ' + esc(REVIEW.due) + ' &middot; as of Q' + REVIEW.endsQuarter + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open

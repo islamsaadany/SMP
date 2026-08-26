@@ -513,47 +513,6 @@
     return grantAtPage(w, person, pageKey, target) === "edit";
   }
 
-  /* ── REORDERING COMES BACK, AND IT IS ITS OWN QUESTION (§101) ────
-     §94.3 folded reordering into authoring and closed it to the office, on the
-     argument that the order of a plan is as much a part of what was agreed as
-     its words. Islam is giving it back: "I will give it back — shall we align
-     where to visually have it?"
-
-     IT IS A SEPARATE RULE, NOT A HOLE IN mayAuthorPage(). Authoring means
-     changing WHAT the plan says; arranging means changing the order the same
-     rows are read in. Widening mayAuthorPage() to let these roles through
-     would have handed them the words as well — the exact fault §94 was fixing.
-
-     WHO: the roles that HOLD the thing. Islam: "no, only custodian and BU
-     owner", and, of a supporting function's Projects pane, "same". A function
-     has no BU owner, so the holder there is its head — and a custodian
-     attached to a function holds it the same way. A Contributor never, which
-     was asked and answered directly; a group or company CEO only if they also
-     hold one of these, because reaching a unit is not holding it (§37).
-
-     THE GRANT STILL HAS TO SAY EDIT. This narrows from the grant, it never
-     widens: a tenant that has closed a unit's plan to its own custodian keeps
-     it closed. The office is answered first and separately — they arrange
-     through the pen, and inOffice() is the tenth-place lesson of §89. */
-  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
-
-  function mayArrange(w, person, target) {
-    if (!person || !target) return false;
-    if (target === "group") return isOffice(w, person);
-    if (isOffice(w, person)) return grantAtPage(w, person, planPageOf(target), target) === "edit";
-    var holds = rolesOrFloor(w, person).some(function (r) {
-      return ARRANGE_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, target);
-    });
-    if (!holds) return false;
-    return grantAtPage(w, person, planPageOf(target), target) === "edit";
-  }
-
-  /* A unit arranges its Plan; a supporting function arranges its Projects.
-     One place, so the two panes cannot be asked different questions (§53.5). */
-  function planPageOf(target) {
-    return String(target).indexOf("fn:") === 0 ? "k_proj" : "u_plan";
-  }
-
   /* ── 5 · Figure sets (§16.7, spec 008) ───────────────────────────
      Many figures are not the business unit's number. Revenue and margin exist
      in Finance before a unit is asked for them, and asking the unit to type
@@ -886,7 +845,6 @@
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
-    ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,

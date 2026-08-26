@@ -1662,39 +1662,6 @@ function editBar(page, acKey){
    must not move anything when it appears.)
 
    Same data-page contract as editBar, so the shell's wiring is untouched. */
-/* THE ARRANGE CONTROL (§101). It shares the pen's SLOT and the pen's shape —
-   28px, same corner, gold when live — because whoever has one never has the
-   other: the office arranges through the pen, everybody else through this.
-
-   THE ICON IS THE UP-DOWN ARROWS, and it is Islam's pick over a grip mark that
-   would have matched the handles it turns on. Recorded rather than re-argued:
-   the cost of a generic glyph is that it matches nothing else on the page, so
-   the title and the aria-label carry the whole meaning and are not decoration.
-
-   NOT DRAWN FOR SOMEBODY WHO HAS THE PEN, or the corner holds two controls
-   that do the same thing — §94.15's argument, which is what removed the last
-   Arrange button, and it still holds in the one direction that matters. */
-/* ONE SLOT, ASKED ONCE. The unit's Plan pane and a capability's Projects pane
-   had the same line written twice; a third would have been written the day
-   somebody added a pane, and §53.5's whole rule is that a unit and a function
-   must not drift apart in silence. */
-function paneActs(page, acKey){
-  var inner = penBtn(page, acKey) + arrangePaneBtn();
-  return inner ? '<div class="paneact">' + inner + '</div>' : '';
-}
-
-function arrangePaneBtn(target){
-  if (mayEditPlan() || !mayArrangeHere(target)) return '';
-  var on = !!ARRANGE;
-  var label = on ? "Done arranging" : "Arrange";
-  return '<button class="penbtn arrpen' + (on ? " on" : "") + '" data-arrange="1"' +
-    ' title="' + label + '" aria-label="' + label + '">' +
-    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
-      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M7 7L10 4l3 3M13 13l-3 3-3-3M10 4.6v10.8"/></svg>' +
-    '</button>';
-}
-
 function penBtn(page, acKey){
   if (!mayAuthor(acKey || "u_found")) return '';
   var on = EDIT_PAGE[page];
@@ -2924,7 +2891,8 @@ function projPlanBody(p, fk){
     : pillarBand(projCode(fk, p), p.name,
         (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
         '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>');
-  return band + paneActs("plan", "u_plan") +
+  return band +
+    (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '') +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' +
       (ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; }) : esc(p.brief)) + '</p>' +
@@ -3331,7 +3299,8 @@ function unitPlanBody(it, u, railed){
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
+    : pillarBand(code, it.name) +
+      (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
   return head +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view

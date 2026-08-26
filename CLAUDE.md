@@ -1135,6 +1135,31 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **REORDERING IS THE UNIT'S, THE WORDS ARE THE OFFICE'S (since v3.30, §101,
+  reversing §94.3):** `mayArrange()` in `lib/rules.js` is **its own rule, never
+  a hole in `mayAuthorPage()`** — widening the authoring gate to let a custodian
+  reorder would have handed them the words too, which is the fault §94 existed
+  to fix. `ARRANGE_ROLES` is `owner · custodian · fnhead` — **the roles that
+  HOLD the thing** (Islam: *"only custodian and BU owner"*, and of a function's
+  Projects pane, *"same"*, which is its head). A Contributor never; a group or
+  company CEO only if they hold one of those, because **reaching a unit is not
+  holding it** (§37). The grant must still say edit, so this narrows and never
+  widens. **`same(idsOf(a), idsOf(b))` IS AN ORDERED COMPARISON** — that one
+  line is the whole of why §94.3's drags moved on screen and were refused on
+  save — so `reordered()` answers **by SET** (never by sorting, or one list
+  holding an id twice compares equal to another holding it twice in the other
+  order) and an **all-null pair is never a reorder** (§96.4's ID-less group
+  objectives). It classifies as `arrange`; anything else about the list is
+  still `unitPlan`. **THE CONTROL SHARES THE PEN'S SLOT AND NEVER SITS BESIDE
+  ONE** — §94.15's argument holds in the direction that still matters — and
+  `paneActs()` is the ONE builder, because that line was written twice (§53.5).
+  **Islam picked the up-down arrows over the grip mark** that would have matched
+  the handles it turns on: recorded, not re-argued, and the cost is that a
+  generic glyph puts the whole meaning in the `title` and `aria-label`.
+  **Nothing was needed for Performance or Reporting — the order IS the array.**
+  Proved by asking the screen AND the shared rule for five viewers and
+  asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
+  forcing each half false to watch the checks fail (§94.5).
 - **THE CORNER MINIMISES, AND THE INBOX FOLLOWS THE WINDOW (since v3.29,
   §100.4, §100.5):** **the bubble is not drawn while the panel is open** —
   it sat underneath in the same dock column, pushing the panel a bubble's height
@@ -1351,7 +1376,38 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
+*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back, as its own
+grant** (&sect;101, reversing &sect;94.3). *"I will give it back &mdash; shall we
+align where to visually have it?"* **EVERY WORD &sect;94.3 WROTE DOWN STAYED
+TRUE**, which is what makes this a reversal rather than a correction: that
+section closed reordering to the office because the order of a plan is as much
+a part of what was agreed as its words, and it found on the way that
+`lib/authorize.js` compares row ids **in order**, so every drag a unit head had
+ever made was already being refused on save &mdash; the rows moved and the save
+came back no. What changes is not that reordering stopped being a plan decision.
+It is that **the plan's ORDER is the unit's to decide while the plan's WORDS
+remain the office's**, and that is why `mayArrange()` is its own rule and not a
+hole in `mayAuthorPage()`: the cheap fix would have handed them the words too,
+which is the exact fault &sect;94 existed to fix. **THE AUTHORISER HAD TO LEARN
+A NEW SHAPE** &mdash; `reordered()` answers by SET, never by sorting, because one
+list holding an id twice would sort-compare equal to another holding it twice in
+the other order, and an all-null pair is never a reorder (&sect;96.4's ID-less
+group objectives). **Islam picked the up-down arrows over the grip mark** that
+would have matched the handles it turns on; recorded and not re-argued, with the
+cost stated: a generic glyph puts the whole meaning into the `title` and the
+`aria-label`. Settled from a mockup made of the REAL platform &mdash; the built
+file driven to a unit's Plan pane with each candidate injected into the live
+pane, both sides the same build (&sect;41.9) &mdash; and two faults on the way
+worth the comments they now carry: **Plan is a SECTION, not a tab**, so clicking
+a tab called "plan" captured Performance under Plan's name (&sect;50.6 again),
+and **`.paneact` does not exist for the people this is for**, so the first run
+produced six identical pictures of an empty corner &mdash; itself the finding,
+since giving them the control means rendering the slot and not merely filling
+it. **AND BOTH FAILURE MODES WERE PROVED TO FAIL BEFORE BEING TRUSTED**: with
+`mayArrange` forced false, 6 failures; with `reordered()` forced false &mdash;
+the &sect;94.3 state exactly &mdash; 5.*
+
+*Earlier: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
 follows the window** (&sect;100.4, &sect;100.5). Two more messages from having
 the thing open, and the first was three asks in one sentence that turned out to
 be one fault seen from three sides. *"If I click outside the box minimise it

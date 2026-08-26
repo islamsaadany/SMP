@@ -74,28 +74,11 @@ function arranging(scope, unitKey){
    AND `hasRole("super")` WAS THE TENTH PLACE MEANING "the office" (§89). The
    SMO team could not arrange anything at group level: not a bug anybody would
    report, because the only sign is a control that is not there. */
-/* ── AND IT COMES BACK, AS ITS OWN GRANT (§101, reversing §94.3) ──
-   Islam: "I will give it back." The paragraph above records why §94.3 took it
-   away, and every word of it stayed true — the drags really were being refused
-   on save. What changes is not that reordering stopped being a plan decision;
-   it is that the plan's ORDER is now the unit's to decide while the plan's
-   WORDS remain the office's.
-
-   SO IT IS A SEPARATE QUESTION, not a hole in mayAuthor(). Widening the
-   authoring rule to let a custodian reorder would have handed them the words
-   as well, which is the exact fault §94 was fixing.
-
-   WHO, in Islam's words: "no, only custodian and BU owner", and of a
-   supporting function's pane, "same" — so the holder there is its head. Never
-   a Contributor, asked and answered directly. The one answer lives in
-   lib/rules.js and BOTH SIDES ASK IT: the server classifies a reorder
-   separately and authorises it with the same function, so a handle this draws
-   can never be a save the server rejects. */
 function canArrange(scope, unitKey){
   /* Units, capabilities and themes at group level: the office's, with no
      page behind it to ask a grant of. */
   if (scope === "group") return inOffice();
-  return !!unitKey && mayArrangeHere(unitKey);
+  return !!unitKey && mayAuthor("u_plan", unitKey);
 }
 
 function handle(label){

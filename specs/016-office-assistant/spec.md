@@ -346,3 +346,29 @@ office" control is **pressable, not merely present** (§70, §93.4).
   automatic handoff after two declines is the obvious answer, and it is not
   worth building before it is seen.
 - **Reading the state graph is refused** (§3), not deferred with a plan.
+
+---
+
+## 10 · Built alongside: reordering comes back (§101)
+
+Not part of the assistant, and recorded here because it came out of reviewing
+the recipes: recipe 13 was *"why can't I reorder my pillars any more?"* and
+Islam's answer was to give the ability back rather than explain the refusal.
+
+**Shipped** (`DECISIONS-AND-LOGIC` §101, its own decision section):
+
+- `mayArrange()` in `lib/rules.js` — its own rule, never a widening of
+  `mayAuthorPage()`. The plan's **order** is the unit's; its **words** stay the
+  office's.
+- `ARRANGE_ROLES` = BU owner, strategy custodian, supporting function head.
+  Never a contributor.
+- `lib/authorize.js` learned to tell a reorder from a rewrite —
+  `same(idsOf(a), idsOf(b))` is an **ordered** comparison, which is why §94.3's
+  drags moved on screen and were refused on save.
+- The control is up-down arrows in the pen's slot, never beside a pen.
+
+**Recipe 13 is back in `recipes.md`**, rewritten as a how-to rather than a
+refusal — which is the small lesson worth keeping from it: *a recipe that
+explains a refusal is worth reading twice, because the second reading asks
+whether the refusal should exist.* Three of the thirteen refusal recipes
+prompted a product question this way.

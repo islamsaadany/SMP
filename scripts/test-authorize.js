@@ -907,5 +907,64 @@ console.log("\n12 · the SMO team, and the three it does not get");
   }, "3 · and may not promote itself to Super user", false);
 })();
 
+/* ── 13 · REORDERING IS THE UNIT'S AGAIN (§101, reversing §94.3) ──
+   The half that was silently broken for two versions: the drag handles were
+   drawn, the rows moved, and every save came back refused because the
+   authoriser compares row ids IN ORDER and could not tell a reorder from a
+   rewrite. So these assert BOTH SIDES of that line — a reorder goes through,
+   and the words are still the office's. Getting only the first would be a
+   feature that quietly handed the plan away. */
+console.log("\n13 · reordering, and the line it must not cross");
+function shuffleFirstToLast(list) { list.push(list.shift()); }
+
+[headKey, custKey, "smo"].forEach(function (who) {
+  allows(who, function (s) { shuffleFirstToLast(s.units[UNIT].items); },
+    who + " may reorder their own unit's pillars");
+  allows(who, function (s) { shuffleFirstToLast(s.units[UNIT].keyObjectives); },
+    who + " may reorder their own unit's key objectives");
+});
+
+/* THE WORDS ARE STILL THE OFFICE'S — this is the assertion that stops §101
+   from being a hole in §94 rather than a door beside it. */
+[headKey, custKey].forEach(function (who) {
+  refuses(who, function (s) { s.units[UNIT].items[0].name = "Renamed by a reorder test"; },
+    who + " still may not RENAME a pillar");
+  refuses(who, function (s) { s.units[UNIT].items.pop(); },
+    who + " still may not REMOVE a pillar");
+  refuses(who, function (s) { shuffleFirstToLast(s.units[OTHER].items); },
+    who + " may not reorder ANOTHER unit's pillars");
+});
+
+/* A contributor was asked about directly and answered no (Islam, 2026-08-26).
+   Found by role rather than by key, so a reseeded demo cannot quietly turn
+   this into an assertion about nobody (§54.5). */
+(function () {
+  const contribs = SEED.people.filter(function (p) {
+    const rs = R.personRoleKeys(w, p);
+    return rs.length > 0 && rs.every(R.isOwnLinesRole) && !!p.unit;
+  });
+  check("the seed still has a contributor to test with", contribs.length > 0,
+        "nobody holds only own-lines roles — this assertion is measuring nothing");
+  contribs.forEach(function (p) {
+    refuses(p.key, function (s) { shuffleFirstToLast(s.units[p.unit].items); },
+      "a contributor (" + p.key + ") may not reorder their unit's pillars");
+  });
+})();
+
+/* AND THE CLASSIFIER ITSELF, asked directly — because every assertion above
+   would also pass if `arrange` were being classified as something harmless
+   that nothing guards. §94.5's lesson: a check that cannot fail is invisible. */
+(function () {
+  const inc = clone(SEED); shuffleFirstToLast(inc.units[UNIT].items);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("a reorder is classified as `arrange`, and as nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED); inc2.units[UNIT].items.pop();
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but a removed row is still `unitPlan`",
+        kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

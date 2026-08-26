@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.28 shipped (live) · **v3.29 in progress on the branch**
+**Latest version:** v3.29 shipped (live) · **v3.30 in progress on the branch**
 **Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -53,6 +53,27 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.30 — reordering comes back, as its own grant (§101)
+
+Islam is giving arrangement back to unit people, reversing §94.3.
+
+- **`mayArrange()` is a separate rule**, not a widening of the authoring gate —
+  the order of a plan is the unit's; its words stay the office's.
+- **Who:** BU owner, strategy custodian, supporting function head. Never a
+  contributor; a group or company CEO only if they hold one of those.
+- **The authoriser learned a new shape.** `same(idsOf(a), idsOf(b))` is an
+  ordered comparison, which is why §94.3's drags were refused silently.
+  `reordered()` answers by set and classifies as `arrange`.
+- **The control** is up-down arrows in the pen's slot — Islam's pick over the
+  grip mark — and is never drawn beside a pen. Settled from a mockup made of
+  the real platform.
+- Performance and Reporting needed nothing: the order **is** the array.
+
+**Verified:** test-authorize 165 → **181, 0 failed** · new
+`src/checks/plan-arrange.py` **ALL CLEAR** (five viewers, both ends, the button
+pressed, 0 → 13 handles) · qa.py clean · both failure modes proved to fail
+before being trusted.
 
 ### v3.29 — the corner, corrected again (§100.4, §100.5)
 

@@ -3703,6 +3703,15 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
+/* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
+   second copy — the answer is lib/rules.js's, asked for the person being viewed
+   as, so the handle the screen draws and the save the server accepts cannot
+   disagree. That disagreement is precisely what §94.3 shipped for two versions:
+   the drags worked on screen and were refused every time. */
+function mayArrangeHere(target){
+  return SMPRules.mayArrange(world(), viewer(),
+    target === undefined ? TARGET : target);
+}
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person

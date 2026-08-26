@@ -5850,6 +5850,47 @@ THEME.apply();
     return grantAtPage(w, person, pageKey, target) === "edit";
   }
 
+  /* ── REORDERING COMES BACK, AND IT IS ITS OWN QUESTION (§101) ────
+     §94.3 folded reordering into authoring and closed it to the office, on the
+     argument that the order of a plan is as much a part of what was agreed as
+     its words. Islam is giving it back: "I will give it back — shall we align
+     where to visually have it?"
+
+     IT IS A SEPARATE RULE, NOT A HOLE IN mayAuthorPage(). Authoring means
+     changing WHAT the plan says; arranging means changing the order the same
+     rows are read in. Widening mayAuthorPage() to let these roles through
+     would have handed them the words as well — the exact fault §94 was fixing.
+
+     WHO: the roles that HOLD the thing. Islam: "no, only custodian and BU
+     owner", and, of a supporting function's Projects pane, "same". A function
+     has no BU owner, so the holder there is its head — and a custodian
+     attached to a function holds it the same way. A Contributor never, which
+     was asked and answered directly; a group or company CEO only if they also
+     hold one of these, because reaching a unit is not holding it (§37).
+
+     THE GRANT STILL HAS TO SAY EDIT. This narrows from the grant, it never
+     widens: a tenant that has closed a unit's plan to its own custodian keeps
+     it closed. The office is answered first and separately — they arrange
+     through the pen, and inOffice() is the tenth-place lesson of §89. */
+  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
+
+  function mayArrange(w, person, target) {
+    if (!person || !target) return false;
+    if (target === "group") return isOffice(w, person);
+    if (isOffice(w, person)) return grantAtPage(w, person, planPageOf(target), target) === "edit";
+    var holds = rolesOrFloor(w, person).some(function (r) {
+      return ARRANGE_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, target);
+    });
+    if (!holds) return false;
+    return grantAtPage(w, person, planPageOf(target), target) === "edit";
+  }
+
+  /* A unit arranges its Plan; a supporting function arranges its Projects.
+     One place, so the two panes cannot be asked different questions (§53.5). */
+  function planPageOf(target) {
+    return String(target).indexOf("fn:") === 0 ? "k_proj" : "u_plan";
+  }
+
   /* ── 5 · Figure sets (§16.7, spec 008) ───────────────────────────
      Many figures are not the business unit's number. Revenue and margin exist
      in Finance before a unit is asked for them, and asking the unit to type
@@ -6182,6 +6223,7 @@ THEME.apply();
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
+    ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
@@ -11208,6 +11250,15 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
+/* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
+   second copy — the answer is lib/rules.js's, asked for the person being viewed
+   as, so the handle the screen draws and the save the server accepts cannot
+   disagree. That disagreement is precisely what §94.3 shipped for two versions:
+   the drags worked on screen and were refused every time. */
+function mayArrangeHere(target){
+  return SMPRules.mayArrange(world(), viewer(),
+    target === undefined ? TARGET : target);
+}
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person
@@ -12655,11 +12706,28 @@ function arranging(scope, unitKey){
    AND `hasRole("super")` WAS THE TENTH PLACE MEANING "the office" (§89). The
    SMO team could not arrange anything at group level: not a bug anybody would
    report, because the only sign is a control that is not there. */
+/* ── AND IT COMES BACK, AS ITS OWN GRANT (§101, reversing §94.3) ──
+   Islam: "I will give it back." The paragraph above records why §94.3 took it
+   away, and every word of it stayed true — the drags really were being refused
+   on save. What changes is not that reordering stopped being a plan decision;
+   it is that the plan's ORDER is now the unit's to decide while the plan's
+   WORDS remain the office's.
+
+   SO IT IS A SEPARATE QUESTION, not a hole in mayAuthor(). Widening the
+   authoring rule to let a custodian reorder would have handed them the words
+   as well, which is the exact fault §94 was fixing.
+
+   WHO, in Islam's words: "no, only custodian and BU owner", and of a
+   supporting function's pane, "same" — so the holder there is its head. Never
+   a Contributor, asked and answered directly. The one answer lives in
+   lib/rules.js and BOTH SIDES ASK IT: the server classifies a reorder
+   separately and authorises it with the same function, so a handle this draws
+   can never be a save the server rejects. */
 function canArrange(scope, unitKey){
   /* Units, capabilities and themes at group level: the office's, with no
      page behind it to ask a grant of. */
   if (scope === "group") return inOffice();
-  return !!unitKey && mayAuthor("u_plan", unitKey);
+  return !!unitKey && mayArrangeHere(unitKey);
 }
 
 function handle(label){
@@ -17584,6 +17652,39 @@ function editBar(page, acKey){
    must not move anything when it appears.)
 
    Same data-page contract as editBar, so the shell's wiring is untouched. */
+/* THE ARRANGE CONTROL (§101). It shares the pen's SLOT and the pen's shape —
+   28px, same corner, gold when live — because whoever has one never has the
+   other: the office arranges through the pen, everybody else through this.
+
+   THE ICON IS THE UP-DOWN ARROWS, and it is Islam's pick over a grip mark that
+   would have matched the handles it turns on. Recorded rather than re-argued:
+   the cost of a generic glyph is that it matches nothing else on the page, so
+   the title and the aria-label carry the whole meaning and are not decoration.
+
+   NOT DRAWN FOR SOMEBODY WHO HAS THE PEN, or the corner holds two controls
+   that do the same thing — §94.15's argument, which is what removed the last
+   Arrange button, and it still holds in the one direction that matters. */
+/* ONE SLOT, ASKED ONCE. The unit's Plan pane and a capability's Projects pane
+   had the same line written twice; a third would have been written the day
+   somebody added a pane, and §53.5's whole rule is that a unit and a function
+   must not drift apart in silence. */
+function paneActs(page, acKey){
+  var inner = penBtn(page, acKey) + arrangePaneBtn();
+  return inner ? '<div class="paneact">' + inner + '</div>' : '';
+}
+
+function arrangePaneBtn(target){
+  if (mayEditPlan() || !mayArrangeHere(target)) return '';
+  var on = !!ARRANGE;
+  var label = on ? "Done arranging" : "Arrange";
+  return '<button class="penbtn arrpen' + (on ? " on" : "") + '" data-arrange="1"' +
+    ' title="' + label + '" aria-label="' + label + '">' +
+    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M7 7L10 4l3 3M13 13l-3 3-3-3M10 4.6v10.8"/></svg>' +
+    '</button>';
+}
+
 function penBtn(page, acKey){
   if (!mayAuthor(acKey || "u_found")) return '';
   var on = EDIT_PAGE[page];
@@ -18813,8 +18914,7 @@ function projPlanBody(p, fk){
     : pillarBand(projCode(fk, p), p.name,
         (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
         '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>');
-  return band +
-    (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '') +
+  return band + paneActs("plan", "u_plan") +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' +
       (ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; }) : esc(p.brief)) + '</p>' +
@@ -19221,8 +19321,7 @@ function unitPlanBody(it, u, railed){
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name) +
-      (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
+    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view

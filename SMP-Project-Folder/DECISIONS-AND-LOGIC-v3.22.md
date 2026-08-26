@@ -13042,3 +13042,116 @@ that was actually asked for — **Send is on screen at scroll 0, at every height
 swept** — and not "the page cannot scroll", which would be a different and
 worse product. Measured on the real server at 1000 / 860 / 760 / 660px: Send on
 screen every time, the box at 840 / 700 / 600 / 500px.
+
+---
+
+## 101 · Reordering comes back, as its own grant (v3.30)
+
+> *"I will give it back — shall we align where to visually have it? I was
+> thinking it can land in the same place of the pen for the non-SMO roles, and
+> it can be another shape that indicates arrangement, and it's only in the
+> strategy plan part which mirrors in the reporting and performance."*
+
+**This reverses §94.3, and every word §94.3 wrote down stayed true.** That
+section closed reordering to the office on the argument that the order of a
+plan is as much a part of what was agreed as its words — and it found, while
+doing so, that `lib/authorize.js` compares row ids **in order**, so every drag a
+unit head had ever made was already being refused on save. The rows moved on
+screen and the save came back refused. §94.15 then removed the explicit Arrange
+button, because its stated audience — *people who can arrange but have no pen* —
+had just been emptied.
+
+What changes is not that reordering stopped being a plan decision. It is that
+**the plan's ORDER is the unit's to decide, while the plan's WORDS remain the
+office's.**
+
+### 101.1 It is a separate rule, not a hole in `mayAuthorPage()`
+
+The cheap fix would have been to let these roles through the authoring gate.
+That would have handed them the words as well — the exact fault §94 existed to
+fix. So `mayArrange()` is its own function in `lib/rules.js`, and the two
+questions are asked separately on both sides:
+
+| | Authoring | Arranging |
+|---|---|---|
+| Rename, add or remove a row | the office | — |
+| Move a row | the office | **and whoever holds the thing** |
+
+**Who, in Islam's words:** *"no, only custodian and BU owner"*, and of a
+supporting function's Projects pane, *"same"*. A function has no BU owner, so
+the holder there is its **head**; a custodian attached to a function holds it
+the same way. `ARRANGE_ROLES` is `["owner", "custodian", "fnhead"]`.
+
+**A Contributor never** — asked directly and answered no. **A group or company
+CEO only if they also hold one of those**, because reaching a unit is not
+holding it (§37). Measured rather than assumed: `ceo` comes back false on every
+unit, and the one contributor in the seed comes back false on their own.
+
+**The grant still has to say edit.** This narrows from the matrix, it never
+widens: a tenant that has closed a unit's plan to its own custodian keeps it
+closed.
+
+### 101.2 The authoriser had to learn a new shape
+
+`same(idsOf(a), idsOf(b))` is an **ordered** comparison, so a reorder and a
+rewrite were indistinguishable — both simply "the ids are not the same". That
+one line is the whole of why §94.3's drags failed silently.
+
+`reordered()` answers **by set**, not by sorting and comparing: a list holding
+the same id twice would sort-compare equal to a list holding it twice in the
+other order, and a reorder is the one classification where a duplicate id must
+not be waved through. An all-null pair — the group's six objectives, which have
+never had ids (§96.4) — is never called a reorder, because it cannot be told
+apart from any other all-null pair.
+
+A reorder classifies as **`arrange`** and is authorised through `mayArrange()`.
+Anything else about the list is still `unitPlan`.
+
+### 101.3 The control: Islam picked the arrows
+
+Settled from a mockup made of the **real platform** — the built file driven to a
+unit's Plan pane, each candidate injected into the live pane, so both sides of
+the comparison were the same build (§41.9, §96.6). Three candidates:
+
+| | | |
+|---|---|---|
+| **A** | The grip mark | Recommended: it wears the same mark as the handles it turns on |
+| **B** | Up-down arrows | **Chosen** |
+| **C** | The word, in the corner | Ruled out by measurement — a 28px circle becomes a 74px pill in a band with 34px of clearance |
+
+**Recorded, not re-argued.** The cost of B is that it is a generic glyph
+matching nothing else on the page, so the `title` and `aria-label` carry the
+whole meaning and are not decoration. If it confuses anybody, A is a one-line
+change: the slot, the states and the wiring are identical.
+
+**It shares the pen's slot and never appears beside one.** §94.15's argument
+survives in the direction that still matters — the office arranges through the
+pen, so drawing both would put two controls that do the same thing in one
+corner. `paneActs()` is the one builder, because the unit's Plan pane and a
+capability's Projects pane had that line written twice and a third would have
+been written the day somebody added a pane (§53.5).
+
+**Nothing was needed for Performance or Reporting.** Islam: *"it's only in the
+strategy plan part which mirrors in the reporting and performance."* Exactly
+so — the order **is** the array, so both already follow.
+
+### 101.4 What proves it
+
+**The screen and the rule are asked separately and compared** — that mismatch is
+what shipped §94.3's silent refusals, so `src/checks/plan-arrange.py` asks
+`SMPRules.mayArrange()` alongside every assertion about a drawn control, and
+asserts **both ends** for five viewers: the control that should be there and the
+one that should not (§94.2). The button is **pressed**, not merely found
+(§70, §93.4), and pressing it must produce handles — 0 → 13 — because a control
+wired to nothing renders perfectly (§96).
+
+`scripts/test-authorize.js` gains section 13, and its most important
+assertions are the ones that would fail if this became a hole rather than a
+door: **a holder still may not rename or remove a pillar, and may not reorder
+another unit's.** It also asks the classifier directly, because every other
+assertion would pass if `arrange` were classified as something nothing guards
+(§94.5). 165 → 181.
+
+**Both failure modes were proved to fail before being trusted**: with
+`mayArrange` forced false, 6 failures; with `reordered()` forced false — the
+§94.3 state exactly — 5.

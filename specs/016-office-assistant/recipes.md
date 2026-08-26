@@ -100,6 +100,13 @@ only the measures.
 The office adds them, on your unit's **Plan** page. Ask here and say where it
 belongs and what it should be called.
 
+### 13 · How do I reorder my pillars?
+
+Press the arrange control in the top-right of the Plan pane, drag the rows by
+the handles that appear, and press it again when you are done.
+
+The order carries through to Performance and Reporting on its own.
+
 ### 14 · Who can edit my unit's plan, and why not me?
 
 The Strategy Office. A plan is the agreement you are measured against, so it

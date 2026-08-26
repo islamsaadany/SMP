@@ -352,7 +352,7 @@ var CLEARING = null;
 var ICO_EDIT = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M16 10.5V16a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 16V6a1.5 1.5 0 011.5-1.5H10"/>' +
   '<path d="M14 2.8l3.2 3.2L10 13.2l-3.6.4.4-3.6z"/></svg>';
-/* THE ATTENTION MARK IS A RING, NOT A WARNING TRIANGLE (§111). A triangle
+/* THE ATTENTION MARK IS A RING, NOT A WARNING TRIANGLE (§116). A triangle
    says something is broken; what this counts is a list of things WAITING —
    somebody's declaration to accept, a password never issued. A ring around a
    dot is the mark this product already uses for "look here" and it carries no
@@ -1043,14 +1043,14 @@ function dupeMark(dupes){
       return WORD[d.kind] + " " + d.value + " is on " +
              plural(d.rows.length, "row") + ": " + others;
     }).join(" \u00b7 ");
-    /* ── A MARK, NOT A SENTENCE IN THE NAME COLUMN (§111.4) ────────
+    /* ── A MARK, NOT A SENTENCE IN THE NAME COLUMN (§116.4) ────────
        It read "Emp ID twice" beside the name, in the frozen 216px column — so
        any row carrying one wrapped to a second line and stood at 52px against
        its neighbours' 39px. §88's own wrapping fault, in the one column that is
        never scrolled away, and the same shape the declaration note had.
 
        The words are not lost: the whole of `why` is the hover, and the queue
-       says it in full above the fields when it opens the person (§111.2). What
+       says it in full above the fields when it opens the person (§116.2). What
        is on the row is a mark you can see at a glance and run past. */
     out += '<span class="dupemark" title="' + esc(why) + '">&#8214;</span>';
   }
@@ -1140,7 +1140,7 @@ function renderPeople(){
     return k ? whereLabel(k) : null;
   }
 
-  /* ── THE CHIPS READ IN THE TABLE AND EDIT IN THE DIALOG (§111) ────
+  /* ── THE CHIPS READ IN THE TABLE AND EDIT IN THE DIALOG (§116) ────
      `editable` was computed here from `rowOpen(p)` for a good reason (a
      parameter the caller forgot would have put an × on a closed row), and the
      reason expired when the table stopped editing: there is no open row now, so
@@ -1272,7 +1272,7 @@ function renderPeople(){
     return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
   }
 
-  /* ── THE DECLARATION, AS A MARK (§111.4) ──────────────────────────
+  /* ── THE DECLARATION, AS A MARK (§116.4) ──────────────────────────
      One ring on the value's own line. `.val` is display:block under §88's clip
      rule, so a SIBLING would start a second line and grow the row — which is
      exactly the fault this replaces. Inside it, always. */
@@ -1284,7 +1284,7 @@ function renderPeople(){
       esc(roleWhereLabel(said)) + '. Open their row to accept it.">&#9678;</span>';
   }
 
-  /* ══ THE EDITING HALF, IN ONE PLACE (§111) ═══════════════════════════
+  /* ══ THE EDITING HALF, IN ONE PLACE (§116) ═══════════════════════════
      Every field the register can change, with its label — rendered into the
      dialog and nowhere else. The table above is values; this is the form.
 
@@ -1441,7 +1441,7 @@ function renderPeople(){
 
      Open state is a single key, not a flag per row: two menus open at once is
      a state nobody wants and one that has to be closed twice. */
-  /* ── ALWAYS THE MENU NOW (§111) ───────────────────────────────────
+  /* ── ALWAYS THE MENU NOW (§116) ───────────────────────────────────
      The Save/Cancel branch went with inline editing: those two acts live at the
      foot of the dialog, where the fields are. What is left is one shape for
      every row, which is also 84px of column the register gets back — the
@@ -1626,7 +1626,7 @@ function renderPeople(){
      first surface, not beside the last. */
   var DUPES = registerDupes();
   var DNAMES = displayNames();
-  /* ── THE DIALOG'S THREE ENTRY POINTS, PUBLISHED (§111) ─────────────
+  /* ── THE DIALOG'S THREE ENTRY POINTS, PUBLISHED (§116) ─────────────
      `personDialogHtml`, its foot and its title live inside this render because
      they use its helpers — `roleCell`, `belongsLabel`, `personFields` and this
      `DNAMES` — and lifting them out would mean lifting all four with them, or
@@ -1657,7 +1657,7 @@ function renderPeople(){
   var noIdent = !identified ? 0 : PEOPLE.filter(function(p){
     return personActive(p) && !personIdentified(p); }).length;
 
-  /* ── THE TABLE READS. THE DIALOG WRITES (§111) ────────────────────
+  /* ── THE TABLE READS. THE DIALOG WRITES (§116) ────────────────────
      Islam: "the edit button can open a pop up modal with the data rather than
      inline."
 
@@ -1714,7 +1714,7 @@ function renderPeople(){
       (showCol("title") ? '<td>' + (p.title
         ? '<span class="val">' + esc(p.title) + '</span>'
         : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      /* ── A DISAGREEMENT IS A MARK TOO (§111.4) ─────────────────────
+      /* ── A DISAGREEMENT IS A MARK TOO (§116.4) ─────────────────────
          Both notes this cell and the next could add — "not on the Official BU
          list", "the list says Retail Stores" — were a SECOND LINE under a
          value, so any row carrying one stood at 51px against its neighbours'
@@ -1730,7 +1730,7 @@ function renderPeople(){
           (mainbuBy(p.mainbu) ? '' : '<span class="driftmark" title="' + esc(p.mainbu) +
             ' is not on the Official BU list.">&ne;</span>') + '</span>'
         : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      /* ── THE DECLARATION IS A MARK, NOT A SENTENCE (§111.4) ─────────
+      /* ── THE DECLARATION IS A MARK, NOT A SENTENCE (§116.4) ─────────
          Islam: the note "appears glitched and grows the row size with the word
          use it." It did: "They said Retail Stores — Use it" is a second line in
          a 150px cell, so every row carrying one stood at 57px beside its
@@ -1775,7 +1775,7 @@ function renderPeople(){
      never "add them again": the line names them, offers their row, and keeps
      Add anyway for the case where it really is a coincidence somebody has
      checked. */
-  /* THE ADD ROW LEFT THE TABLE (§111.3). It was one cell spanning nine columns
+  /* THE ADD ROW LEFT THE TABLE (§116.3). It was one cell spanning nine columns
      with three boxes laid out inside it, so not one of them sat under its own
      heading: `Full name` ran across Name, Full Name, Job title and Official BU;
      `Emp ID` sat under a column headed UNIT; `Email` spanned six and ended
@@ -1783,12 +1783,12 @@ function renderPeople(){
      the heading above it, and every one of those mappings was wrong.
 
      `+ Add someone` is in the header and it opens the same dialog Edit opens,
-     with the fields empty (§111.3) — so the warning that somebody is already on
+     with the fields empty (§116.3) — so the warning that somebody is already on
      the register (§87.3) has room to be read, which in a table row it never
      did. */
   var addRow = "";
 
-  /* ══ THE PERSON DIALOG (§111) ════════════════════════════════════════
+  /* ══ THE PERSON DIALOG (§116) ════════════════════════════════════════
      Three ways in and one body: the ⋮'s Edit details, `+ Add someone`, and the
      attention queue. They differ in what is said ABOVE the fields and which two
      buttons sit below them — never in the fields themselves, because a form
@@ -2061,7 +2061,7 @@ function renderPeople(){
      "the register" in every sentence written about it since §35; the heading
      said something else, so the word people use and the word on the door were
      different words. */
-  /* ── THE HEADER IS ONE ROW, AND THE ALARMS ARE A QUEUE (§111) ─────
+  /* ── THE HEADER IS ONE ROW, AND THE ALARMS ARE A QUEUE (§116) ─────
      Islam: "remove the 76 rows text it's not needed and remove the quick
      filters", and "let's refine the design of the top panel to become more
      concise."
@@ -2073,7 +2073,7 @@ function renderPeople(){
 
      THE ALARM CHIPS ARE NOT DELETED, THEY ARE ANSWERED. Each named a number
      and pointed at rows you then had to find by eye; they are one button now,
-     and pressing it opens the first of them (§111.2). A count that cannot take
+     and pressing it opens the first of them (§116.2). A count that cannot take
      you to what it counts is a count that makes work.
 
      THE TWO COUNTS SAID THE SAME THING TWICE — "N people active" in the header
@@ -2862,6 +2862,52 @@ function kbSection(id, title, blocks){
     }).join("") + '</div>';
 }
 
+/* ── The task recipes on the page (§103) ─────────────────────────────
+   Rendered from `RECIPES`, which is DATA — so `scripts/extract-kb.js` reads
+   the same array into the assistant's corpus and the words a person reads and
+   the words it answers from cannot drift (§42, applied to prose).
+
+   `{pillar}` and `{pillars}` are substituted here rather than baked in, because
+   a tenant that calls a pillar something else must not be answered in Raya's
+   vocabulary (§65) — the same reason `L()` exists everywhere else.
+
+   A recipe's answer is one string with `|` between paragraphs. Not an array:
+   the file is long enough already, and a separator that cannot appear in prose
+   costs nothing to read and one line to split. */
+function recipeText(t){
+  return String(t)
+    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
+    .replace(/\{pillar\}/g, L("pillar","bu"));
+}
+
+function kbRecipes(){
+  return RECIPES.map(function(g){
+    var items = g.items.map(function(r){
+      /* TWO TRUE ANSWERS TO ONE QUESTION are two entries sharing a `q`
+         (spec 016 §5.2b). On the page BOTH are shown, because the knowledge
+         base is readable by everyone and the office's answer is not a secret —
+         it is merely useless to somebody who cannot do it.
+
+         SO THE MARK GOES ON THE AUDIENCE, NEVER ON THE DUPLICATE. Marking only
+         the second of a pair left the two-track question rendering as the same
+         heading twice with nothing between them, which reads as a bug; and
+         marking by position would leave a lone office recipe unmarked in a
+         group that is not the office's. Whoever it is for, it says so. */
+      var who = r.who || g.who;
+      return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
+          (who === "office"
+            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
+        recipeText(r.a).split("|").map(function(para){
+          return '<p class="kb-p">' + para + '</p>';
+        }).join("") +
+      '</div>';
+    }).join("");
+    return { id: "how-" + g.g.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, ""),
+             title: g.g, html: items };
+  });
+}
+
 function renderKB(){
   var L1 = L("pillar","bu");
   var secs = [
@@ -3067,12 +3113,20 @@ function renderKB(){
     ])
   ];
 
-  var toc = '<div class="kb-toc">' + [
-      ["scoring","Scoring"],["access","Access"],["labels","Labels"],
-      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"],
-      ["mail","Email"]
-    ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
+  /* THE RECIPES: how to DO things, as opposed to how things work. Their own
+     part of the page, because mixing a task into a paragraph of reasoning
+     serves neither — somebody reading the Access section wants the argument,
+     somebody asking "where do I press" wants four lines. */
+  var recs = kbRecipes();
+  recs.forEach(function(r){
+    secs.push('<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
+              '</h3>' + r.html + '</div>');
+  });
 
+  /* DERIVED, NEVER LISTED. This was a hand-written array beside the sections
+     and it was ALREADY WRONG — nine sections, eight links, with the people
+     register missing since the day it was added. A second copy of a list is a
+     list that goes stale on the first edit somebody forgets (§42). */
   /* ── THE TOUR'S ONE WAY BACK IN (spec 017) ───────────────────────
      Explanation lives here (v3.5), so the replay of the guided tour lives
      here too rather than growing furniture of its own on a page somebody
@@ -3092,13 +3146,41 @@ function renderKB(){
       '">Start the tour</button></p></div>'
     : '';
 
+  /* THE TOUR IS A SECTION, SO IT GOES IN THE ARRAY (merge, §113.8). It
+     arrived from the other session concatenated straight into the page — a
+     real `.kb-sec` with a title and an id, but not in `secs`, so the derived
+     contents listed sixteen of seventeen sections and the tour had no link.
+     Exactly the fault deriving the contents was meant to end, arriving from
+     the other side of a merge. First, because somebody who has just arrived
+     needs the tour before they need the reference.
+
+     AND IT HAS TO SIT BELOW `tourBlock`'s ASSIGNMENT, which is what the first
+     attempt got wrong: `var` hoists the declaration and not the value, so an
+     unshift written above it pushed `undefined`, the `if` was false, and the
+     tour silently left the page. */
+  if (tourBlock) secs.unshift(tourBlock);
+
+  var toc = '<div class="kb-toc">' +
+    secs.map(function(html){
+      var id = (html.match(/id="kb-([a-z-]+)"/) || [])[1];
+      var title = (html.match(/<h3>([^<]*)/) || [])[1] || "";
+      title = title.split(" \u2014 ")[0];
+      return id ? '<a href="#kb-' + id + '">' + title + '</a>' : '';
+    }).join("") + '</div>';
+
+
   return cfgHead("Knowledge base",
-      ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
+      ['<span class="pill kind">Everyone</span>',
+       secs.length + ' sections', recipeCount() + ' how-tos'],
       null, false) +
-    '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
-      'settle that a reader would need to know belongs here rather than in a note under ' +
-      'the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + tourBlock + secs.join("") + '</div>';
+    /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
+       exist now (§116); `tourBlock` is the other session's onboarding tour
+       (§107), and it opens the page because somebody who has just arrived
+       needs the tour before they need the reference. */
+    '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
+      'place. This grows: anything we settle that a reader would need to know belongs here ' +
+      'rather than in a note under the screen it happens to affect.</p>' +
+    toc + '<div class="kb">' + secs.join("") + '</div>';
 }
 
 
@@ -5807,7 +5889,7 @@ var TKSORT = {};    /* table id -> {col, dir} — the view's order, never the da
    a table crosses the threshold as the tenant grows rather than when somebody
    remembers the page (spec §2.2). */
 var TK_SEARCH_FROM = 9;
-/* ── THE SEARCH BOX ON ITS OWN (§111) ─────────────────────────────────
+/* ── THE SEARCH BOX ON ITS OWN (§116) ─────────────────────────────────
    The register's header carries the search and nothing else off this bar — no
    filter chips and no row count, both removed at Islam's word — so the field
    is its own function and `tkBar` calls it. One definition, or the register's

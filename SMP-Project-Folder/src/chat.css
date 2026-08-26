@@ -298,6 +298,14 @@ body.presenting .chatdock { display:none; }
 
 .chnothing { margin:auto; text-align:center; color:var(--ink-3);
              font-size:var(--fs-note); padding:30px 20px; max-width:34ch; line-height:1.55; }
+/* The way back, inside the empty state that would otherwise be a dead end
+   (§105). A button rather than a link: it changes what this list shows, it
+   does not go anywhere. */
+.chnothing .chlink { display:inline; background:none; border:0; padding:0;
+                     font:inherit; color:var(--gold-deep); cursor:pointer;
+                     text-decoration:underline; text-underline-offset:2px; }
+.chnothing .chlink:hover { color:var(--gold); }
+.chnothing .chlink:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
 @media (max-width:820px) {
   .chinbox { grid-template-columns:1fr; }

@@ -53,7 +53,7 @@ with sync_playwright() as p:
       paint();
       return { name: PEOPLE[2].name, n: PEOPLE.length }; }""")
     pg.wait_for_timeout(600)
-    # THE ADD ROW IS THE ADD DIALOG NOW (§111.3). What is asserted does not
+    # THE ADD ROW IS THE ADD DIALOG NOW (§116.3). What is asserted does not
     # change — §87's ladder still stops a second row for somebody already here —
     # only where the fields are. The dialog is where the warning finally has
     # room to be read, which is half of why it moved.
@@ -88,7 +88,7 @@ with sync_playwright() as p:
       window.__drop = addPerson({ name:"Testcase Gamal Sadek", where:UNIT_KEYS[0], role:"owner" });
       paint(); }""")
     pg.wait_for_timeout(900)
-    # THE WORDS ARE ON THE HOVER NOW (111.4). The mark was a phrase beside the
+    # THE WORDS ARE ON THE HOVER NOW (116.4). The mark was a phrase beside the
     # name -- "looks like Ahmed Mostafa" -- in the frozen column, so any row
     # carrying one wrapped and grew. What is asserted is unchanged: a
     # resemblance is marked DIFFERENTLY from a collision (87.2), because one is

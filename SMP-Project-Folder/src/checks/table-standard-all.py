@@ -62,7 +62,7 @@ with sync_playwright() as p:
         else:
             ck("sortable headers", st["sortables"] > 0, st)
 
-        # ── THE REGISTER'S SEARCH LEFT THE BAR (§111) ────────────────
+        # ── THE REGISTER'S SEARCH LEFT THE BAR (§116) ────────────────
         # Islam removed its quick filters and its row count, which left the bar
         # holding one box on a row of its own — so the box moved into the page
         # header and the bar went with the rest. The STANDARD is unchanged and

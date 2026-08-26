@@ -349,6 +349,51 @@ office" control is **pressable, not merely present** (§70, §93.4).
 
 ---
 
+## 9b · Step 1 is built (§103)
+
+`src/recipes.js` — **43 recipes as data**, rendered on the Knowledge base page
+and read by `scripts/extract-kb.js` into `db/kb.json`. One source, so the page
+and the assistant cannot drift (§5.3's rule, now real).
+
+**The corpus as generated:** 9 knowledge-base sections, 26 page explainers, 43
+recipes — **~9,800 words, about 13,200 tokens**. Still one prompt, which is the
+measurement §1 rests on. Up from the 9,500 estimated there, because the recipes
+are new writing rather than existing prose.
+
+`db/**` is already bundled into the serverless functions (`vercel.json`), so
+the corpus reaches `api/chat.js` with no configuration change.
+
+**Still to build, and the only part needing the API key:** `lib/assistant.js`,
+the settings, the `bot` flag, the representative email.
+
+## 9c · Step 2 is built, against a stub (§104)
+
+**Gemini, at Islam's choice** — `GEMINI_API_KEY`, read in exactly one place
+(`lib/assistant.js`), with **no SDK**: the repository carries `pg` and nothing
+else, and this is one POST. `GEMINI_MODEL` and `GEMINI_ENDPOINT` are
+environment variables — the first because provider model names are retired on
+somebody else's schedule, the second because a check must *model* the provider
+rather than branch around it.
+
+**Islam, mid-build:** *"I need a switch to turn off AI response and just keep
+it to the SMO inbox."* Already §6's design; now the **default**, and enforced
+on the server where the model is simply never called.
+
+| | |
+|---|---|
+| `lib/assistant.js` | the call, the corpus, the instruction, the schema |
+| `api/chat.js` | asks it *after* storing the message; emails the rep on a handoff |
+| migration 024 | `bot`, `source` |
+| `src/chat.js` | the assistant's mark, the way out, the settings |
+| `scripts/test-assistant.js` | 25 checks, against a stub that models Google |
+
+**Caching is not assumed.** Gemini's explicit context caching has a minimum
+token count the ~13,800-token corpus may sit under, so §7's cost case is the
+full input per question — cheaper than the Opus figures regardless.
+
+**Everything is exercised except the live call.** The only unexercised path is
+a real request to Google, which needs the key in Vercel.
+
 ## 10 · Built alongside: reordering comes back (§101)
 
 Not part of the assistant, and recorded here because it came out of reviewing

@@ -1,4 +1,4 @@
-"""THE REGISTER STOPS BEING A FORM (§111).
+"""THE REGISTER STOPS BEING A FORM (§116).
 
 Islam's six: keep my column choice and make all-on neat; edit in a dialog not
 inline; the declarations become a button at the top that opens the pending
@@ -102,7 +102,7 @@ ALL_ON = {"fullname": True, "empid": True, "key": True, "title": True, "mainbu":
           "password": True}
 # REAL-SHAPED VALUES. Over file:// the demo has no addresses at all, and an
 # empty column never overflows — which is how the Email column stayed 43% cut
-# for as long as it did without a check noticing (§111.5).
+# for as long as it did without a check noticing (§116.5).
 REAL = """()=>{PEOPLE.forEach((p,i)=>{
   p.email = p.name.toLowerCase().replace(/[^a-z ]/g,'').trim()
             .split(/ +/).slice(0,2).join('.') + '@rayatrade.com';
@@ -164,7 +164,7 @@ with sync_playwright() as p:
 
     # ── 2. THE TABLE WRITES NOTHING ──────────────────────────────────
     # Every collision this register has had was a control being clicked inside a
-    # cell (§110.1, §111.3). This is the assertion that makes all of them
+    # cell (§110.1, §116.3). This is the assertion that makes all of them
     # impossible, and it is asked at four widths because that is where they bit.
     print("\n2. the table reads, at every width")
     for w in (1600, 1440, 1280, 1100):
@@ -254,6 +254,28 @@ with sync_playwright() as p:
        pg.evaluate("!document.querySelector('[data-pdlg-next]')") and
        pg.evaluate("!!document.querySelector('[data-pdlg-close]')"))
     close_dialog(pg)
+
+    # A DECLARATION FROM SOMEBODY ALREADY PLACED (§116.9). The queue's
+    # "they said" sentence names TWO places, and the second half is only
+    # reached when the register has already put them somewhere — so the
+    # whole half went unexercised while the row read fine, and a
+    # ReferenceError in it waited over HTTP for a client to find (§94.11,
+    # §94.2). Both halves are asserted, and that nothing threw.
+    said_key = pg.evaluate("""()=>{const p=PEOPLE.filter(x=>personAt(x)
+        && personAt(x)!=='fn:finance' && !x.retired)[0]; return p ? p.key : null;}""")
+    ck("somebody on the register is already placed", said_key is not None, said_key)
+    pg.evaluate("(k)=>{ SAIDWHERE = {}; SAIDWHERE[k]='fn:finance'; paint(); }", said_key)
+    pg.wait_for_timeout(600)
+    say = pg.evaluate("""(k)=>{const e=attentionQueue().filter(q=>q.key===k)[0];
+        if(!e) return null;
+        const w=e.why.filter(x=>x.kind==='said')[0]; return w ? w.say : null;}""", said_key)
+    ck("a placed person's declaration names both places",
+       bool(say) and "They said they work in" in say and "the register says" in say, say)
+    ck("...in ONE vocabulary, so a match could not read as a difference",
+       bool(say) and say.split("the register says")[1].strip(" .") ==
+       pg.evaluate("(k)=>roleWhereLabel(personAt(personBy(k)))", said_key), say)
+    pg.evaluate("()=>{ SAIDWHERE = null; paint(); }")
+    pg.wait_for_timeout(400)
 
     # ── 6. ADD ───────────────────────────────────────────────────────
     print("\n6. adding somebody is the same dialog")

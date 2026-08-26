@@ -189,7 +189,6 @@
 <script src="CONFIGDATA"></script>
 <script src="ARRANGE"></script>
 <script src="PAGEINFO"></script>
-<script src="RECIPES"></script>
 <script src="TEMPLATES"></script>
 <script src="XLSX"></script>
 <script src="MAIL"></script>
@@ -1635,20 +1634,6 @@
     putFocus(_keep.focus);
     positionRowMenu();
     focusOpenMenu();
-    /* ── AND THE DIALOG, IF ONE IS OPEN (§116.6) ─────────────────────
-       The person dialog's own controls — the role picker, the Unit select,
-       "Use it" — are the register's, so they all end in `paint()`. That
-       repaints the page BEHIND the dialog and, before this line, left the
-       dialog itself showing the state it was built with: press "+ role" and
-       nothing appeared, because the select had been rendered into a body
-       nobody replaced.
-
-       Here rather than in each handler, for the reason §24 gives: a control
-       added to the dialog later would otherwise be silent until somebody
-       remembered. `personDialogPaint()` never calls paint(), so there is no
-       loop — and it REPLACES the body, so the bindings wire() has just made on
-       the old nodes die with them rather than doubling up (§47.2). */
-    if (PDLG && document.getElementById("modal-b")) personDialogPaint();
     /* Every mutation repaints, so this is where a change becomes a save. */
     SYNC.afterPaint();
   }
@@ -3162,14 +3147,8 @@
     function fieldSaved(){
       if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
     }
-    /* ── SCOPED, SO THE DIALOG CAN BE WIRED WITHOUT THE PAGE (§116) ──
-       `root` defaults to the document, which is every existing caller. The
-       person dialog passes its own body: its fields are built after paint() has
-       run, so they need wiring of their own — and re-running the whole of
-       wire() would bind a second handler to everything still on the page
-       behind (§24, §47.2). */
-    function fieldWire(attr, apply, root){
-      (root || document).querySelectorAll("[data-" + attr + "]").forEach(function(inp){
+    function fieldWire(attr, apply){
+      document.querySelectorAll("[data-" + attr + "]").forEach(function(inp){
         inp.addEventListener("change", function(){
           var p = personBy(inp.dataset[attr]);
           if (!p) return;
@@ -3178,29 +3157,20 @@
         });
       });
     }
-    /* ── THE PERSON'S OWN FIELDS, NAMED ONCE (§116) ──────────────────
-       Called with the document by wire(), and with the dialog's body by
-       wirePersonDialog(). The register draws these fields in the dialog now and
-       nowhere else, so without a root the form would be inert — which is §96's
-       fault exactly: an editor that looks identical and discards every
-       keystroke. */
-    window.wirePersonFields = function(root){
-    fieldWire("pname",  function(p, v){ if (v) p.name = v; }, root);
+    fieldWire("pname",  function(p, v){ if (v) p.name = v; });
     /* Name (§93.8). setKnownName() DELETES the field when it is cleared or
        matches the guess, rather than storing the guess — otherwise correcting
        the full name later would leave a stale short one standing beside it. */
-    fieldWire("pknown", function(p, v){ setKnownName(p, v); }, root);
-    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; }, root);
-    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; }, root);
+    fieldWire("pknown", function(p, v){ setKnownName(p, v); });
+    fieldWire("ptitle", function(p, v){ if (v) p.title = v; else delete p.title; });
+    fieldWire("pphone", function(p, v){ if (v) p.phone = v; else delete p.phone; });
     /* The two the employee file brings (§54.2). Cleared when emptied rather
        than kept as "", so absent and blank stay one word — the codebase reads
        every optional field with == null and a stored empty string would come
        back through the round trip as a field the data never had. */
-    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; }, root);
-    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; }, root);
+    fieldWire("pempid", function(p, v){ if (v) p.empId = v; else delete p.empId; });
+    fieldWire("pemail", function(p, v){ if (v) p.email = v; else delete p.email; });
 
-    };
-    wirePersonFields(document);
     document.querySelectorAll("[data-pact]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.pact;
@@ -3341,88 +3311,68 @@
       });
     });
 
-    /* ── THE REGISTER'S OWN CONTROLS, SCOPED (§116) ─────────────────
-       Everything the person dialog draws is wired here, and the dialog passes
-       its own body as the root. It was `document` throughout, which was right
-       while these controls were only ever on the page — the dialog builds them
-       after paint() has run, so without a root the picker, the Unit select and
-       "Use it" would all be decoration (§96). */
-    window.wirePersonDialogControls = function(root){
-      var R = root || document;
     /* ── THE ROLE PICKER, ONE HALF PER COLUMN (§69) ─────────────────
        It opens EMPTY. Before this it opened on "owner", so a picker somebody
        opened by mistake was already holding an answer — which was harmless
        while a Give button stood between it and the grant, and is not now that
        choosing both halves IS the grant. */
-    R.querySelectorAll("[data-prole-open]").forEach(function(b){
+    document.querySelectorAll("[data-prole-open]").forEach(function(b){
       b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; paint();
       });
     });
-    /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§110) ──────
-       There is no second dropdown any more. The picker's other half asked a
-       question the Unit cell had already answered and then wrote its own answer
-       into that same cell (see roleCell in config-render.js); one control is
-       what was left once the duplicate went.
+    /* Choosing the role repaints, because the SECOND select's options depend
+       on the first: a company CEO is attached to a company, a function head to
+       a function. One list of every role-times-place would offer Company CEO
+       of Mobile. Emptying it back to "Choose a role…" empties the other half
+       with it, rather than leaving a unit list standing under no role. */
+    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        ADDROLE_KIND = sel.value;
+        /* ── ONE DESTINATION IS NOT A QUESTION (§92, Islam) ────────────
+           "I added SMO to Mohamed Essam but the employee role persisted and
+           SMO wasn't added." It had not been: the pair commits when the SECOND
+           half is answered (§69.1), and for a seat held over the group the
+           second half is a list of one — so the register asked which of the
+           group to pick, and doing nothing looked exactly like the control
+           being broken.
 
-       `personAt(p)` is the ONE reader of "where does this person sit" (§54.1),
-       so the grant asks it rather than reading the `data-pat` select off the
-       screen: the select is a rendering of that fact, and reading the rendering
-       is how two answers to one question get started.
+           §32 settled this shape twice already (the gate's Starting page, the
+           Manage menu holding one item): a door behind a door. Where there is
+           one place a role can be held, it is granted here and the second half
+           never appears. Everything with a real choice — a unit owner, a
+           custodian, a company CEO — is unchanged.
 
-       WHAT A ROLE MAY BE HELD AT IS STILL `roleWheres()` AND NOTHING ELSE. This
-       does not carry a second opinion about it — it asks that list whether the
-       place the person is in is on it, which keeps one definition (§42) and
-       makes a role added later correct here on the day it is added. */
-    /* ── AND IT IS TRIED AGAIN WHEN THE UNIT CHANGES ────────────────
-       Found by a check, and it is the same family of fault as the one §110
-       started from. A refused pick leaves the picker open — which is right, so
-       the Unit can be set and the role taken again — but the role select is
-       still SHOWING that role, so picking it a second time fires no `change` at
-       all. Set the Unit, reach for the role, and the control does nothing:
-       exactly the silence this section exists to remove.
-
-       So the grant is one function and the ORDER stops mattering. Islam: "the
-       role and the unit shouldn't block each other but they only function
-       together." Whichever of the two is answered second is the one that
-       completes it. */
-    function tryGrantRole(key, role){
-        ADDROLE_KIND = role;
-        if (!roleIsGrantable(role)) { ROLESTOP = null; paint(); return; }
-        var p = personBy(key);
-        var at = personAt(p);
-        var wheres = roleWheres(role);
-        /* ── A SEAT HELD OVER THE GROUP IGNORES THE UNIT (§92) ─────────
-           Super user, SMO team and Group CEO have one destination, so the Unit
-           cell has nothing to say about them and must not be able to refuse
-           them: somebody sitting in Mobile can be the Super user. §92 granted
-           these on the role pick and that is unchanged — it is now the same
-           line as everything else rather than a special case beside it. */
-        if (wheres.length === 1) at = wheres[0].v;
-        else if (!wheres.some(function(w){ return w.v === at; })) {
-          /* NOT YET AND NEVER ARE DIFFERENT SENTENCES, because they have
-             different ways out: one wants a Unit set at all, the other wants a
-             different KIND of Unit. The old pair could say neither — it
-             committed on the second answer, so both looked like nothing
-             happening. */
-          ROLESTOP = { key:key, why: at
-            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the Unit."
-            : "Set the Unit first \u2014 " + roleName(role) + " is held at " +
-              roleAtWord(role) + "." };
-          paint();
-          return;
+           THE UNDO IS THE × ON THE CHIP, which is what let §69 drop Give and
+           Cancel in the first place: a grant that commits on one press is safe
+           precisely because taking it off is one press too. */
+        var wheres = ADDROLE_KIND ? roleWheres(ADDROLE_KIND) : [];
+        if (roleIsGrantable(ADDROLE_KIND) && wheres.length === 1) {
+          grantPersonRole(sel.dataset.prolePick, ADDROLE_KIND, wheres[0].v);
+          ADDROLE = null; ADDROLE_KIND = "";
         }
-        ROLESTOP = null;
-        grantPersonRole(key, role, at);
+        paint();
+      });
+    });
+    /* NO GIVE BUTTON. The pair commits itself the moment the second half is
+       answered — Islam: "without give or cancel … eventually it's a selection
+       that I can remove after with the x button you made."
+
+       Which is why it is guarded on BOTH halves rather than on this one: a
+       change event on the where select can only fire after a role was picked,
+       but ADDROLE_KIND is a global that a repaint between the two could have
+       cleared, and granting `undefined` at a unit writes a role nothing can
+       name and nothing can take off. */
+    document.querySelectorAll("[data-prole-where]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        var key = sel.dataset.proleWhere;
+        if (!sel.value || !roleIsGrantable(ADDROLE_KIND)) return;
+        grantPersonRole(key, ADDROLE_KIND, sel.value);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
-    }
-    R.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        tryGrantRole(sel.dataset.prolePick, sel.value);
       });
     });
-    R.querySelectorAll("[data-prole-off]").forEach(function(b){
+    document.querySelectorAll("[data-prole-off]").forEach(function(b){
       b.addEventListener("click", function(){
         var p = b.dataset.proleOff.split("|");
         revokePersonRole(p[0], p[1], p[2]);
@@ -3440,7 +3390,7 @@
        answer — but it is ADDED to the list unmapped, exactly as the file
        reader does, so the SMO can then point it somewhere. Two places writing
        the same fact differently is what mainbuList() exists to prevent. */
-    R.querySelectorAll("[data-pmainbu]").forEach(function(sel){
+    document.querySelectorAll("[data-pmainbu]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
         var p = personBy(sel.dataset.pmainbu);
@@ -3454,23 +3404,12 @@
         paint();
       });
     });
-    R.querySelectorAll("[data-pat]").forEach(function(sel){
+    document.querySelectorAll("[data-pat]").forEach(function(sel){
       sel.addEventListener("change", function(){
         if (grant("c_people") !== "edit") return;
         var p = personBy(sel.dataset.pat);
         if (!p) return;
         attachPersonAt(p, sel.value || null);
-        /* THE OTHER HALF OF "EITHER ORDER" (§110). If a role is picked and
-           standing refused on this row, moving the person is the answer it was
-           waiting for — so it is taken now, rather than leaving somebody to
-           re-pick a role the select is already showing. Only while a refusal is
-           standing: changing the Unit on a row nobody is granting a role on
-           stays what it has always been, a move and nothing else. */
-        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
-            roleIsGrantable(ADDROLE_KIND)) {
-          tryGrantRole(p.key, ADDROLE_KIND);
-          return;
-        }
         paint();
       });
     });
@@ -3482,7 +3421,7 @@
        server like every other. Nothing here touches the declaration itself: it
        stands until the person says something else, and the note stops showing
        the moment the two agree. */
-    R.querySelectorAll("[data-usesaid]").forEach(function(b){
+    document.querySelectorAll("[data-usesaid]").forEach(function(b){
       b.addEventListener("click", function(){
         var key = b.dataset.usesaid;
         var said = SAIDWHERE && SAIDWHERE[key];
@@ -3499,15 +3438,13 @@
     /* Unfolding a person's extra roles (§47.1). Not a hover: a hover cannot be
        reached on a touch screen, and this is the only place the second role
        appears on the page. */
-    R.querySelectorAll("[data-proles]").forEach(function(b){
+    document.querySelectorAll("[data-proles]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
         PROLES = b.dataset.proles || null;
         paint();
       });
     });
-    };
-    wirePersonDialogControls(document);
     /* The two header menus (§47.2). Opening one closes the other. */
     /* ONE OPEN AT A TIME (§90). Three menus in one cluster, and two of them
        overlapping is two things covering each other — the same rule the row
@@ -3682,68 +3619,20 @@
       });
     });
 
-    /* ── PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§110) ──
-       Islam: "once I open the edit of a line the line jumps to the first line,
-       that is the wrong behaviour."
-
-       It is the CURSOR, not the repaint. The register is its own scrolling box
-       (`.cfg`), and a plain focus() lets the browser scroll the focused field
-       into view — so opening row 20 of 33 scrolled that box from 0 to 533px and
-       hauled the row from y=638 to y=105, which is where the first line sits.
-       His words exactly, and measured.
-
-       `preventScroll` holds the row where it was pressed and still lands the
-       cursor in the right field: nothing needs scrolling, because the row is
-       already where the person just clicked.
-
-       AND `no-jump.py` HAS BEEN GREEN THROUGHOUT — it opens a row and then
-       measures repaints, so it never once measured the act of opening one
-       (§94.2). It does now.
-
-       `focusNoScroll` rather than the option written twice: the register's pen
-       and the six inline pens are the same act, and §85 already found out what
-       happens when that pair of lines is maintained in two places. */
-    window.focusNoScroll = function(f){
-      if (!f) return;
-      try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); }
-      if (f.select) f.select();
-    };
     /* ── EDIT THIS ROW (§79.2, spec 012 §2.1) ───────────────────────
        It used to turn the whole page's edit mode on and put the cursor in this
        person's name — 297 inputs to change one job title. It opens the ROW now.
        The snapshot is taken here, before anything is typed, because that is the
        only moment the original still exists. */
-    /* ── EDIT OPENS THE DIALOG (§116) ────────────────────────────────
-       Islam: "the edit button can open a pop up modal with the data rather
-       than inline."
-
-       `rowEditOpen` still runs and still takes the snapshot: the dialog's
-       Cancel restores from exactly the same `ROWWAS` and `ROWHELD` the inline
-       row used (§79.2, §110.6), so what changed is where the fields are drawn
-       and nothing about what abandoning them puts back. */
     document.querySelectorAll("[data-pedit]").forEach(function(b){
       b.addEventListener("click", function(e){
         e.stopPropagation();
-        openPersonDialog({ key:b.dataset.pedit, mode:"edit" });
-      });
-    });
-    /* ── ADD OPENS THE SAME ONE, EMPTY (§116.3) ──────────────────────── */
-    document.querySelectorAll("[data-padd-open]").forEach(function(b){
-      b.addEventListener("click", function(){
-        newPersonReset();
-        var d = newDraftStart();
-        openPersonDialog({ key:d.key, mode:"add" });
-      });
-    });
-    /* ── AND THE QUEUE OPENS IT ON THE FIRST PERSON WAITING (§116.2) ───
-       Islam: "a button at top showing pending requests … that opens the
-       profiles that needs attention in the pop up modal that fixes and save and
-       move to the next in the same place." */
-    document.querySelectorAll("[data-attn]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var q = attentionQueue();
-        if (!q.length) return;
-        openPersonDialog({ key:q[0].key, mode:"queue", queue:q, at:0 });
+        var key = b.dataset.pedit;
+        rowEditOpen("people", key, personBy(key));
+        PMENU = null;
+        paint();
+        var f = document.querySelector('[data-pname="' + key + '"]');
+        if (f) { f.focus(); f.select(); }
       });
     });
     /* Save writes nothing of its own: every field has already written itself
@@ -3761,18 +3650,13 @@
         var bits = b.dataset.rowedit.split("|"), table = bits[0], key = bits.slice(1).join("|");
         rowEditOpen(table, key, ROWFIND[table] ? ROWFIND[table](key) : null);
         paint();
-        focusNoScroll(document.querySelector(".tk-firstfield"));
+        var f = document.querySelector(".tk-firstfield");
+        if (f) { f.focus(); if (f.select) f.select(); }
       });
     });
-    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `ADDROLE` and
-       `ROLESTOP` are both properties of one open row, and neither was being
-       cleared when the row closed — so a refusal answered by pressing Cancel
-       came back the next time that row was opened, about a pick nobody had just
-       made. Screen state outliving the screen it belongs to (§25.2). */
     document.querySelectorAll("[data-rowsave]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditClose();
-        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -3780,7 +3664,6 @@
     document.querySelectorAll("[data-rowcancel]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditCancel();
-        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -4739,22 +4622,6 @@
         paint();
       });
     });
-    /* THE QUARTER TOGGLES (§114). By id through listById, the same resolver
-       every other row control uses — and §42 has classified a quarter change
-       as PLAN on the server since before the screen could make one, so the
-       guard here matches the refusal there. */
-    document.querySelectorAll("[data-qtog]").forEach(function(b){
-      b.addEventListener("click", function(){
-        if (!mayEditPlan()) return;
-        var a = this.dataset.qtog.split("|"), id = a[0], q = +a[1];
-        var list = listById("tactics", id);
-        var t = (list || []).filter(function(x){ return x && x.id === id; })[0];
-        if (!t) return;
-        t["q" + q] = !t["q" + q];
-        paint();
-      });
-    });
-
     document.querySelectorAll("[data-rowoff]").forEach(function(b){
       b.addEventListener("click", function(){
         if (!mayEditPlan()) return;
@@ -5245,178 +5112,6 @@
      would leave the dialog showing a step nobody chose — and the elements its
      handlers are bound to would be gone. This is §30.1's rule from the other
      side: whoever rewrites the DOM re-wires it, in the same function (§24). */
-  /* ══ THE PERSON DIALOG'S OWN PAINT (§116) ══════════════════════════
-     `mergePaint()`'s rule, and for the same reason (§90.4): this rewrites the
-     DIALOG's body and re-wires it rather than calling paint(), because paint()
-     rebuilds the register behind an inert overlay and would leave every handler
-     in here bound to elements that no longer exist.
-
-     THE REGISTER BEHIND IS REPAINTED ONLY WHEN THE DIALOG CLOSES. Islam, asked
-     whether covering it mattered: "no problem I care more about the edit
-     dialogue I don't need to see the full register." So nothing tries to keep
-     the two in step while it is open — which is what makes this safe. */
-  function personDialogPaint(){
-    var t = PEOPLEDLG.title();
-    var el = document.getElementById("modal-t");
-    if (!el) return;
-    el.textContent = t.t;
-    document.getElementById("modal-s").textContent = t.s;
-    document.getElementById("modal-b").innerHTML =
-      PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>';
-    wirePersonDialog();
-  }
-  function openPersonDialog(cfg){
-    PDLG = cfg;
-    PMENU = null;
-    ROLESTOP = null;
-    if (cfg.mode !== "add") rowEditOpen("people", cfg.key, personBy(cfg.key));
-    var t = PEOPLEDLG.title();
-    openModalHtml(esc(t.t), esc(t.s),
-      PEOPLEDLG.html() + '<div class="pdfoot">' + PEOPLEDLG.foot() + '</div>');
-    wirePersonDialog();
-    /* The cursor lands in the first field, and NEVER scrolls to get there
-       (§110.7) — the dialog is already in view, and letting the browser scroll
-       to a focused field is what threw the register's rows about. */
-    focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
-  }
-  /* CLOSING IS WHERE THE REGISTER CATCHES UP. One door for all four ways out,
-     so a mode that forgot to clear PDLG cannot leave the page believing a
-     dialog is open (§24). */
-  function closePersonDialog(cancel){
-    if (cancel) rowEditCancel(); else rowEditClose();
-    if (PDLG && PDLG.mode === "add") newDraftEnd();
-    PDLG = null;
-    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
-    closeModal();
-    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
-    paint();
-  }
-  function wirePersonDialog(){
-    var body = document.getElementById("modal-b");
-    if (!body) return;
-    /* THE FIELDS ARE THE PAGE'S OWN, so they are wired by the page's own
-       wiring. `wireFields` binds every `data-p*` on whatever it is given
-       (§71.2), which is why moving the form into a dialog needed no second set
-       of handlers — and SEARCHSEL is re-applied because these selects were
-       built a moment ago (§45.5). */
-    wirePersonFields(body);
-    if (typeof SEARCHSEL !== "undefined") SEARCHSEL.wire(body);
-    /* The Unit select, the Official BU select, the role picker and "Use it" are
-       the register's own controls and are wired by the same functions the page
-       uses — scoped to this body for the same reason the fields are. */
-    wirePersonDialogControls(body);
-    body.querySelectorAll("[data-pdlg-close]").forEach(function(b){
-      b.addEventListener("click", function(){ closePersonDialog(false); });
-    });
-    body.querySelectorAll("[data-pdlg-cancel]").forEach(function(b){
-      b.addEventListener("click", function(){ closePersonDialog(true); });
-    });
-    body.querySelectorAll("[data-pdlg-skip]").forEach(function(b){
-      b.addEventListener("click", function(){ personDialogStep(true); });
-    });
-    body.querySelectorAll("[data-pdlg-next]").forEach(function(b){
-      b.addEventListener("click", function(){ personDialogStep(false); });
-    });
-    body.querySelectorAll("[data-pdlg-add]").forEach(function(b){
-      b.addEventListener("click", personDialogAdd);
-    });
-    /* THE SECOND PRESS, and it is a different button rather than the same one
-       pressed twice (§87.3): "I have checked, they are two people" is a
-       different sentence from "Add", and a control that means one thing the
-       first time and another the second is one nobody can undo. */
-    body.querySelectorAll("[data-pdlg-anyway]").forEach(function(b){
-      b.addEventListener("click", function(){
-        NEWPERSON.forced = true;
-        personDialogAdd();
-      });
-    });
-    /* Opening the row they collided with abandons the draft — there is nothing
-       to add if the answer is "they are already here". */
-    body.querySelectorAll("[data-pgo]").forEach(function(b){
-      b.addEventListener("click", function(){
-        var k = b.dataset.pgo;
-        closePersonDialog(false);
-        openPersonDialog({ key:k, mode:"edit" });
-      });
-    });
-  }
-  /* ── SAVE AND MOVE TO THE NEXT, IN THE SAME PLACE (§116.2) ──────────
-     `skip` differs from `next` in one thing only — whether this person's edits
-     are kept — because leaving somebody for later must not also throw away what
-     was typed before deciding to leave them. Both walk the SAME stored list:
-     see PDLG's note on why the queue is not re-asked as it goes. */
-  function personDialogStep(skip){
-    if (!PDLG || !PDLG.queue) return;
-    if (skip) rowEditCancel(); else rowEditClose();
-    var at = PDLG.at + 1;
-    /* A ROW CAN LEAVE THE REGISTER WHILE THE QUEUE IS OPEN — a merge is one
-       press away from here — so each step checks the next person still exists
-       rather than trusting the list (§48.2). */
-    while (at < PDLG.queue.length && !personBy(PDLG.queue[at].key)) at++;
-    if (at >= PDLG.queue.length) { closePersonDialog(false); return; }
-    PDLG.at = at;
-    PDLG.key = PDLG.queue[at].key;
-    ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
-    rowEditOpen("people", PDLG.key, personBy(PDLG.key));
-    personDialogPaint();
-    focusNoScroll(document.querySelector('#modal-b .pdf input.fld'));
-  }
-  /* ── ADDING THEM IS THE SAME LADDER THE FILE CLIMBS (§87) ───────────
-     Emp ID, then email, and no third rung. A name stops nothing — two people
-     really can share one — so a clash on either identifier is REFUSED by
-     naming who, and a matching name is only ever a warning. */
-  function personDialogAdd(){
-    if (!NEWDRAFT) return;
-    /* ── COMMIT WHATEVER IS STILL BEING TYPED (§116.3) ────────────────
-       Every field writes itself on `change`, which for a text input means on
-       BLUR — so the last box somebody typed in has not been written yet at the
-       moment they reach for this button. A mouse click blurs it on the way
-       past and the keyboard usually has too, which is exactly the kind of
-       almost-always that hides a fault: found by a check whose `fill` fires
-       `input` and never blurs, and the address it had just typed was not on the
-       draft when the identity ladder asked (§87).
-
-       So the field is closed here rather than trusted to have closed itself. */
-    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    var nm = String(NEWDRAFT.name || "").trim();
-    if (!nm) {
-      NEWPERSON.hit = null; NEWPERSON.warn = null;
-      NEWPERSON.err = "A name is the one thing needed.";
-      personDialogPaint();
-      return;
-    }
-    /* TWO ARGUMENTS, NOT AN OBJECT (§87). `personByIdentity(id, email)` climbs
-       the ladder — employee number, then address, and no third rung — and
-       handing it an object made every rung miss, so the stop never fired and a
-       second row for somebody already here went straight in. Found by the
-       check that exists for exactly that. */
-    var chk = personByIdentity(NEWDRAFT.empId, NEWDRAFT.email);
-    if (chk && chk.person && !NEWPERSON.forced) {
-      NEWPERSON.hit = chk.person.key; NEWPERSON.hitBy = chk.by;
-      personDialogPaint();
-      return;
-    }
-    /* THROUGH THE ONE DOOR (§54.1). `addPerson` mints the key, attaches the
-       person and is what the file importer and the assignment picker both call
-       — so the dialog hands it the same shape they do rather than pushing onto
-       PEOPLE itself. It answers with the KEY, not the person. */
-    var key = addPerson({ name:nm, title:NEWDRAFT.title, phone:NEWDRAFT.phone,
-                          empId:NEWDRAFT.empId, email:NEWDRAFT.email,
-                          mainbu:NEWDRAFT.mainbu, where:personAt(NEWDRAFT) });
-    var made = personBy(key);
-    if (!made) { closePersonDialog(false); return; }
-    /* The one field addPerson does not take: what they are CALLED, as opposed
-       to their full name (§93.8). Written through setKnownName so it is deleted
-       rather than stored when it matches the guess (§50.6). */
-    if (NEWDRAFT.known) setKnownName(made, NEWDRAFT.known);
-    newPersonReset();
-    newDraftEnd();
-    PDLG = null;
-    closeModal();
-    if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
-    paint();
-  }
-
   function mergeOpen(){
     openModalHtml("Merge two rows", "", mergeStepHtml());
     wireMerge();
@@ -5514,38 +5209,11 @@
        dialog they have just dismissed. */
     if (modalReturn && document.contains(modalReturn)) modalReturn.focus();
     modalReturn = null;
-    /* ── AND THE BODY IS EMPTIED (§116.6) ──────────────────────────────
-       A closed dialog used to keep its markup, which was harmless while the
-       merge wizard was the only thing in here: a few buttons nobody could
-       reach. The person dialog is a FORM, and `wirePersonFields(document)` runs
-       on every paint — so a form left standing in the hidden overlay collected
-       a second handler on every repaint, for ever, each one writing the same
-       value again. §24 and §47.2's fault, arriving through a dialog rather than
-       a menu.
-
-       It also settles §3.2's older one: hidden is not gone, and a form nobody
-       can see is still in the tab order until something removes it. */
-    document.getElementById("modal-b").innerHTML = "";
-    document.getElementById("modal-t").textContent = "";
-    document.getElementById("modal-s").textContent = "";
   }
   overlay.setAttribute("aria-hidden", "true");   /* closed at boot */
-  /* ── EVERY WAY OUT IS THE SAME WAY OUT (§116.6) ────────────────────
-     The × and Escape closed the overlay directly, which for the merge wizard
-     was the whole of it. The person dialog has state behind it — `PDLG`, the
-     row snapshot `ROWEDIT` holds, and a draft person that belongs to nobody —
-     so a way out that skips `closePersonDialog` leaves the page believing a
-     dialog is open and the next Cancel restoring somebody who is no longer on
-     screen. Both go through the one door now, and it treats them as KEEPING
-     what was typed: every field has already written itself (§71.2), so throwing
-     it away on the × would discard edits the register has already shown. */
-  function modalDismiss(){
-    if (PDLG) { closePersonDialog(false); return; }
-    closeModal();
-  }
-  document.getElementById("modal-x").addEventListener("click", modalDismiss);
-  overlay.addEventListener("click", function(e){ if (e.target === overlay) modalDismiss(); });
-  document.addEventListener("keydown", function(e){ if (e.key === "Escape") modalDismiss(); });
+  document.getElementById("modal-x").addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){ if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") closeModal(); });
 
   /* A menu that stays open after you have looked away is a menu you have to
      dismiss. Bound once, at boot, rather than on every repaint. */

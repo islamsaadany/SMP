@@ -54,7 +54,7 @@ def people(pg):
 
 
 def open_row(pg, key):
-    """Opens the person DIALOG (§111): the register stopped editing inline, so
+    """Opens the person DIALOG (§116): the register stopped editing inline, so
     every field this file presses now lives in the platform's own modal.
 
     From script, never pg.click(): playwright scrolls a target into view before
@@ -67,7 +67,7 @@ def open_row(pg, key):
 
 def close_row(pg):
     """Save and let the register repaint — the row only shows what was typed
-    once the dialog is closed, which is the trade §111 took deliberately."""
+    once the dialog is closed, which is the trade §116 took deliberately."""
     pg.evaluate("()=>{const b=document.querySelector('[data-pdlg-close]'); if(b) b.click();}")
     pg.wait_for_timeout(500)
 
@@ -155,7 +155,7 @@ with sync_playwright() as p:
         # written and never drawn, which is the failure nobody can see.
         ck(role + ": nothing is refused", stop_text(pg) is None, stop_text(pg))
         # AND THE ROW SAYS SO, once the dialog is out of the way. The register
-        # repaints on close (§111.6), which is the one moment the two are
+        # repaints on close (§116.6), which is the one moment the two are
         # compared — a grant written and never drawn is what a retired row used
         # to do, and it is still the failure nobody can see.
         close_row(pg)
@@ -242,7 +242,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     pick_role(pg, "cfo", "BU owner")
     ck("refused", stop_text(pg) is not None)
-    # Cancel is the dialog's now (§111): `data-rowcancel` was the open row's,
+    # Cancel is the dialog's now (§116): `data-rowcancel` was the open row's,
     # and there is no open row.
     pg.evaluate("()=>document.querySelector('[data-pdlg-cancel]').click()")
     pg.wait_for_timeout(500)
@@ -315,7 +315,7 @@ with sync_playwright() as p:
                    "return !!(a && a.closest && a.closest('#modal-b .pdf'));}"))
     close_row(pg)
 
-    # ── 8. THE TABLE HAS NOTHING TO OVERFLOW WITH (§111) ────────────
+    # ── 8. THE TABLE HAS NOTHING TO OVERFLOW WITH (§116) ────────────
     # Section 8 used to measure an open row's fields against their cells, and
     # the answer now is that there are none: the register only reads. So the
     # assertion changes into the one that made all of those impossible — no

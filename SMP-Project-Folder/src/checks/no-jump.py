@@ -17,7 +17,7 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(70)
     pg.click('.setuprail [data-setupgo="people"]'); pg.wait_for_timeout(1100)
     # §79.2: the whole-table pen is gone. A row is opened from its own menu.
-    # ── THE REGISTER ONLY READS NOW (§111) ────────────────────────────
+    # ── THE REGISTER ONLY READS NOW (§116) ────────────────────────────
     # Every trial that used to live here typed into a field on an open ROW and
     # asked whether the box moved. There are no fields on a row: editing is a
     # dialog, and while it is open the register is inert and covered. So what is

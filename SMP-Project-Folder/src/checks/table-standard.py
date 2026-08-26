@@ -25,7 +25,7 @@ with sync_playwright() as p:
     # a fault, and the fix people reach for is to bump the number. The
     # conditional filters come and go with what the register holds, so what is
     # asserted is that the standard four are present.
-    # ── THE FILTERS AND THE COUNT ARE GONE, DELIBERATELY (§111) ──────
+    # ── THE FILTERS AND THE COUNT ARE GONE, DELIBERATELY (§116) ──────
     # Islam: "remove the 76 rows text it's not needed and remove the quick
     # filters." Asserted as an ABSENCE rather than deleted, because a check that
     # simply stops looking cannot tell a decision from a regression — and what
@@ -46,7 +46,7 @@ with sync_playwright() as p:
     ck("typing narrows the rows (%d -> %d)" % (n0, pg.evaluate(vis)), pg.evaluate(vis) < n0)
     ck("the box is still there and still focused-able", pg.evaluate("!!document.querySelector('[data-tksearch]')"))
     ck("what was typed is still in it", pg.input_value('[data-tksearch]')=="mennah")
-    # THE REGISTER HAS NO COUNT AND NO FILTERS (§111, Islam: "remove the 76 rows
+    # THE REGISTER HAS NO COUNT AND NO FILTERS (§116, Islam: "remove the 76 rows
     # text it's not needed and remove the quick filters"). Every OTHER table
     # still has both, and that is what this file is for — so the standard is
     # asserted where it still applies and the register's absence is asserted as
@@ -75,7 +75,7 @@ with sync_playwright() as p:
     ck("nothing was written to the data",
        pg.evaluate("PEOPLE[0].name")==a0.split("\n")[0] or True)
 
-    print("── one person, edited in the dialog (§111)")
+    print("── one person, edited in the dialog (§116)")
     k = pg.evaluate("PEOPLE[2].key")
     ck("no fields anywhere before", pg.eval_on_selector_all('[data-ptitle]',"e=>e.length")==0)
     def open_dlg():
@@ -109,14 +109,14 @@ with sync_playwright() as p:
     pg.evaluate("document.querySelector('[data-pdlg-close]').click()"); pg.wait_for_timeout(700)
     ck("Save keeps it", pg.evaluate("(k)=>personBy(k).title", k)=="Kept")
     ck("...and closes the dialog", pg.evaluate("!document.querySelector('#modal-b .pdlg')"))
-    # THE ROW SHOWS IT ONLY ONCE THE DIALOG HAS GONE, which is the trade §111
+    # THE ROW SHOWS IT ONLY ONCE THE DIALOG HAS GONE, which is the trade §116
     # took: the register repaints on close and not before.
     ck("...and the row now says so",
        pg.evaluate("""(k)=>{const tr=[...document.querySelectorAll('.peoplecfg tbody tr')]
           .find(t=>t.querySelector('[data-pmenu=\"'+k+'\"]'));
           return !!tr && tr.innerText.indexOf('Kept')>-1;}""", k))
 
-    # ── YOU CANNOT LEAVE THE PAGE WITH AN EDIT OPEN (§111.6) ─────────
+    # ── YOU CANNOT LEAVE THE PAGE WITH AN EDIT OPEN (§116.6) ─────────
     # The old assertion was that walking away CANCELLED an open row. That state
     # cannot be reached any more, and finding out is what taught it: the click
     # on the rail was refused for thirty seconds by the overlay itself. The

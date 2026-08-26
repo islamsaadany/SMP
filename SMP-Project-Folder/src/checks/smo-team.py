@@ -210,7 +210,7 @@ with sync_playwright() as p:
     # check was wrong, not the register.
     pg.evaluate("(k)=>{ revokePersonRole(k,'smoteam','group'); ADDROLE=null; ADDROLE_KIND=''; paint(); }", floor)
     pg.wait_for_timeout(500)
-    # THE DIALOG IS WHERE SAVE AND CANCEL ARE NOW (§111). The row keeps its ⋮
+    # THE DIALOG IS WHERE SAVE AND CANCEL ARE NOW (§116). The row keeps its ⋮
     # whatever is open, because the register no longer edits — so the question
     # is not "did the menu turn into two buttons" but "is the editor on screen".
     ck("the dialog is open, with its own Save and Cancel",

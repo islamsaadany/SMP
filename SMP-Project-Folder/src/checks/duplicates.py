@@ -15,7 +15,7 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(70)
     pg.click('.setuprail [data-setupgo="people"]'); pg.wait_for_timeout(1100)
     ck("a clean register shows no duplicate marks", pg.eval_on_selector_all('.dupemark',"e=>e.length")==0)
-    # THE QUICK FILTERS ARE GONE (§111, Islam: "remove the quick filters"), so a
+    # THE QUICK FILTERS ARE GONE (§116, Islam: "remove the quick filters"), so a
     # clean register is one with nobody in the attention queue for a duplicate.
     ck("...and nobody is queued for one",
        pg.evaluate("attentionQueue().filter(a=>a.why[0].kind==='dupe').length")==0)
@@ -32,7 +32,7 @@ with sync_playwright() as p:
       PEOPLE.push({key:'twin2', name:'Exactly The Same Person', empId:'B'});
       paint(); }""")
     pg.wait_for_timeout(900)
-    # THE MARK IS A GLYPH AND THE WORDS ARE ON ITS HOVER (§111.4). It used to
+    # THE MARK IS A GLYPH AND THE WORDS ARE ON ITS HOVER (§116.4). It used to
     # read "Emp ID twice" beside the name, in the frozen column — so any row
     # carrying one wrapped and stood 13px taller than its neighbours. What is
     # asserted is unchanged: that each kind of collision is marked and that the
@@ -75,7 +75,7 @@ with sync_playwright() as p:
        pg.evaluate("""() => [].slice.call(document.querySelectorAll('.peoplecfg tbody tr'))
           .filter(r=>/Ahmed Mostafa Mohamed/.test(r.innerText) && r.querySelector('.dupemark')).length""")==0)
 
-    # ── THE QUEUE, NOT A FILTER (§111.2) ─────────────────────────────
+    # ── THE QUEUE, NOT A FILTER (§116.2) ─────────────────────────────
     # Islam: "I don't know which lines I should go and check", and then: "remove
     # the quick filters". The Duplicates chip was how you found these rows; the
     # attention queue is how you find them now, and it does the thing the chip
@@ -89,7 +89,7 @@ with sync_playwright() as p:
     ck("the button carries the count",
        pg.evaluate("""()=>{const b=document.querySelector('.attnn');
           return !!b && parseInt(b.textContent,10) >= 6;}"""))
-    # ── AND THE HEADER SAYS IT ONCE, NOT SIX TIMES (§111) ────────────
+    # ── AND THE HEADER SAYS IT ONCE, NOT SIX TIMES (§116) ────────────
     # It carried a chip per KIND of collision — "1 employee number on more than
     # one row", "1 address…", "1 name…" — beside three more counts and five
     # filter chips, over two rows that ran off the right edge at 1280. They are

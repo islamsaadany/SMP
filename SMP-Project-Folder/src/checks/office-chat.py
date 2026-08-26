@@ -445,6 +445,59 @@ with sync_playwright() as p:
 
     ck("no console errors", not errs, errs[:4])
 
+    # ── 9 · REPLYING MUST NOT MAKE THE CONVERSATION VANISH (§105) ────────
+    # Islam: "the chat was a user he sent to me and I replied and the chat
+    # disappeared from all places." Nothing was deleted — replying marks a
+    # conversation ANSWERED, and the inbox opens on WAITING, which excludes
+    # answered ones. So the act of replying removed the row from the list the
+    # office was looking at, while its thread sat open beside it.
+    #
+    # BOTH HALVES ARE ASSERTED, because they fail at different moments: the row
+    # you have OPEN staying put (the reply itself), and an empty Waiting list
+    # naming where everything went (coming back later, nothing selected yet).
+    # A check for only the first would pass on a build where the second is
+    # still a dead end.
+    print("\n9 · a conversation that has been answered")
+    BOXQUEUE[0]["waiting"] = False          # the state a reply leaves behind
+    pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-setupgo]')]"
+                ".find(x=>x.dataset.setupgo==='chat'); if(r) r.click();}")
+    pg.wait_for_timeout(1500)
+
+    open_row = pg.evaluate("""()=>({
+        rows: document.querySelectorAll('.chqrow').length,
+        thread: !!document.getElementById('chtbody'),
+        litTabs: [...document.querySelectorAll('.chqtab')]
+                   .filter(t=>t.classList.contains('on')).map(t=>t.dataset.chtab) })""")
+    ck("the one you have open stays in the Waiting list once answered",
+       open_row["rows"] == 1, open_row)
+    ck("and its thread is still there beside it", open_row["thread"], open_row)
+    ck("the Waiting tab is still the one lit — the filter did not change",
+       open_row["litTabs"] == ["waiting"], open_row)
+
+    # THE FLAGGED TAB WAS SAYING SOMETHING FALSE — "No conversations yet" when
+    # there are conversations and none is flagged. Found while reproducing the
+    # other fault; the same shape of lie, and the same fix: an empty state
+    # describes THIS filter, never the whole product.
+    pg.evaluate("()=>{const b=[...document.querySelectorAll('.chqtab')]"
+                ".find(x=>x.dataset.chtab==='flagged'); if(b) b.click();}")
+    pg.wait_for_timeout(600)
+    flag = pg.evaluate("""()=>({
+        text: (document.getElementById('chqlist')||{}).innerText || "",
+        rows: document.querySelectorAll('.chqrow').length,
+        lit: [...document.querySelectorAll('.chqtab')].filter(x=>x.classList.contains('on'))
+               .map(x=>x.dataset.chtab) })""")
+    ck("an empty Flagged tab never claims there are no conversations",
+       "No conversations yet" not in flag["text"], flag)
+    # LIT BY VALUE, NOT BY IDENTITY: the empty state's shortcut also carries
+    # data-chtab, and the old handler compared nodes — so pressing it would
+    # have un-lit all three tabs and left the row with nothing selected.
+    ck("exactly one tab is lit, and it is the one pressed",
+       flag["lit"] == ["flagged"], flag)
+    BOXQUEUE[0]["waiting"] = True
+    pg.evaluate("()=>{const b=[...document.querySelectorAll('.chqtab')]"
+                ".find(x=>x.dataset.chtab==='waiting'); if(b) b.click();}")
+    pg.wait_for_timeout(400)
+
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control
     # that answers every press with a refusal. It runs AFTER the console

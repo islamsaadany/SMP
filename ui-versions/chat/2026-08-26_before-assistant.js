@@ -146,15 +146,7 @@ var CHAT = (function(){
      about what a message looks like. */
   function msgHtml(m, mineIsOffice, showFlag){
     var mine = mineIsOffice ? m.from_office : !m.from_office;
-    /* AN ASSISTANT'S ANSWER NEVER WEARS A COLLEAGUE'S NAME (§104). This
-       product spends a great deal of care on who is authorised to say what —
-       §31 closed a plan to the person measured against it, §94 closed the
-       strategy tab to the office — and an automated answer signed "Strategy
-       Office" is a ruling as far as the reader is concerned. It is from the
-       office (that is whose side of the conversation it is on) and it says
-       plainly that a machine wrote it. */
-    var who = m.bot ? "Assistant · answered from the knowledge base"
-            : m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
+    var who = m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
                             : (mineIsOffice ? (m.by_name || "") : "You");
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
@@ -170,34 +162,18 @@ var CHAT = (function(){
              'data-chflag="' + m.id + '" data-chflagged="' + esc2(m.flag || "") + '">' +
              (m.flag ? esc2(m.flag) : "Flag") + "</button>";
     }
-    /* THE WAY OUT (spec 016 §4.3). The assistant KNOWING it cannot answer is
-       handled on the server; this is for the harder case — it answered, and it
-       was wrong. Without it a confident wrong answer is a dead end, because an
-       answered conversation has already left the office's queue.
-
-       Only on the reader's own side, and only on the last thing said: an
-       escape hatch under every historical answer is clutter, and the office
-       does not need one at all. */
-    var out = "";
-    if (m.bot && !mineIsOffice && m.last) {
-      out = '<button class="chout" type="button" data-chhuman="1">' +
-            "This didn\u2019t answer it \u2014 send it to the office</button>";
-    }
-    return '<div class="chmsg ' + (mine ? "chme" : "chthem") + (m.bot ? " chbot" : "") + '">' +
+    return '<div class="chmsg ' + (mine ? "chme" : "chthem") + '">' +
       '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
       flag + "</div>" +
-      '<div class="chbod">' + esc2(m.body) + pic + "</div>" + out + "</div>";
+      '<div class="chbod">' + esc2(m.body) + pic + "</div></div>";
   }
 
   function threadHtml(msgs, mineIsOffice, showFlag){
     if (!msgs.length) return "";
     var out = [], day = "";
-    msgs.forEach(function(m, i){
+    msgs.forEach(function(m){
       var d = dayOf(m.at);
       if (d !== day) { day = d; out.push('<div class="chatday">' + esc2(d) + "</div>"); }
-      /* WHICH ONE IS LAST is decided here, where the list is, rather than by
-         msgHtml comparing ids it cannot see the rest of. */
-      m.last = (i === msgs.length - 1);
       out.push(msgHtml(m, mineIsOffice, showFlag));
     });
     return out.join("");
@@ -463,28 +439,6 @@ var CHAT = (function(){
     el("chatbtn").addEventListener("click", function(){ setOpen(!open); });
     el("chatclose").addEventListener("click", function(){ setOpen(false); });
     el("chatsend").addEventListener("click", send);
-    /* DELEGATED, because the message it sits on is redrawn by every poll — a
-       handler bound to the button itself would be destroyed four seconds after
-       it appeared (§24: whoever rewrites the DOM re-wires it, and the cheapest
-       way to obey that is not to bind to the thing being rewritten). */
-    el("chatbody").addEventListener("click", function(e){
-      var b = e.target.closest && e.target.closest("[data-chhuman]");
-      if (!b) return;
-      b.disabled = true;
-      /* IT IS AN ORDINARY MESSAGE, deliberately — not a new endpoint and not a
-         flag on the thread. Saying so in words is what puts the conversation
-         back in the office's queue, and it leaves the office reading WHY the
-         answer was wrong rather than a bare marker. The server's own rule
-         (spec 016 §4.3) sends a request for a person straight to a handoff, so
-         this cannot be answered by the assistant a second time. */
-      post({ action:"say", body:"That didn\u2019t answer it \u2014 could someone from " +
-             "the office look at this?" }, function(err, j){
-        if (err || !j) { b.disabled = false; lastErr = "That did not send. Try again."; drawPanel(); return; }
-        state.messages = j.messages || state.messages;
-        state.thread = j.thread || state.thread;
-        drawPanel();
-      });
-    });
     el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
     el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });
     var say = el("chatsay");
@@ -572,32 +526,6 @@ var CHAT = (function(){
         (!!val) + '">' + on + '</button></span>';
   }
 
-  /* WHO THE HANDOFF REACHES. Only people who are in the office are offered —
-     a representative outside it would be told a question is waiting on a page
-     they cannot open (§61's shape). Read from the register, so a retired
-     person stops being offered without anybody remembering to change it. */
-  function officePeople(){
-    return (typeof PEOPLE === "undefined" ? [] : PEOPLE).filter(function(p){
-      return p.active !== false && SMPRules.isOfficeRole(String(p.role || ""));
-    });
-  }
-  function repName(key){
-    var p = officePeople().filter(function(x){ return x.key === key; })[0];
-    return p ? (p.name || p.key) : key;
-  }
-  function repPicker(key){
-    /* NOBODY SET IS AN OPTION, AND IT IS THE FIRST ONE. §35's rule: absent is
-       not "none" — the row has to be able to say nobody was chosen, or the
-       first name in the register becomes the default by accident. */
-    var opts = ['<option value=""' + (key ? "" : " selected") + '>No one yet</option>'];
-    officePeople().forEach(function(p){
-      opts.push('<option value="' + esc2(p.key) + '"' + (p.key === key ? " selected" : "") +
-                ">" + esc2(p.name || p.key) + "</option>");
-    });
-    return '<select data-chrep="1" aria-label="Who is told when a question needs a person">' +
-           opts.join("") + "</select>";
-  }
-
   function settingsHtml(){
     var c = chatCfg();
     if (!SETMENU) {
@@ -610,36 +538,6 @@ var CHAT = (function(){
       '<span class="hcar">&#9662;</span></button>' +
       '<div class="hmenu-panel chset">' +
         '<div class="chset-h">The chat</div>' +
-
-        /* ── THE ASSISTANT, AND ITS SWITCH IS FIRST (§104) ────────────
-           Islam: "I need a switch to turn off AI response and just keep it to
-           the SMO inbox." It is OFF until somebody turns it on, and off is
-           enforced on the server, where the model is simply never called —
-           with the assistant off there is no control on screen to hide, so the
-           guard IS the feature (§42, §98.2). */
-        '<div class="chset-row"><div class="chset-lab">The assistant answers first' +
-          '<span class="chset-ctl">' + segHtml("assistant", "Off", "On", c.assistant, true) +
-          '</span></div>' +
-          '<div class="chset-hint">Off sends every question straight to this inbox, exactly ' +
-          'as it does today. On, it answers from the knowledge base first and hands over ' +
-          'anything it cannot answer.</div>' +
-          '<div class="chset-cost">It can only ever read the <b>knowledge base</b> &mdash; ' +
-          'the same pages everybody can already open. It cannot see a figure, a plan or a ' +
-          'score, and it says so rather than guessing.</div></div>' +
-
-        (c.assistant
-          ? '<div class="chset-row"><div class="chset-lab">Tell someone when a question ' +
-              'needs a person<span class="chset-ctl">' +
-              segHtml("notify", "Off", "On", c.notify, true) + '</span></div>' +
-              '<div class="chset-hint">' +
-              (c.notify
-                ? (c.rep ? 'Emailed to ' + esc2(repName(c.rep)) + ' the moment it happens.'
-                         : '<b>No one is set</b> &mdash; handoffs wait in this inbox until ' +
-                           'somebody is chosen below.')
-                : 'Handoffs wait here until somebody opens the page.') + '</div>' +
-              (c.notify ? '<div class="chset-ctl chset-who">' + repPicker(c.rep) + '</div>' : '') +
-            '</div>'
-          : '') +
 
         '<div class="chset-row"><div class="chset-lab">People can write to the office' +
           '<span class="chset-ctl">' + segHtml("on", "Off", "On", c.on, true) + '</span></div>' +
@@ -711,39 +609,15 @@ var CHAT = (function(){
       "</div>";
   }
 
-  /* ── THE ONE YOU HAVE OPEN NEVER LEAVES THE LIST (§105) ─────────
-     Islam: "the chat was a user he sent to me and I replied and the chat
-     disappeared from all places."
-
-     Nothing was deleted — replying marks a conversation ANSWERED (§71: the
-     status you must remember to set is the one nobody sets), and the inbox
-     opens on WAITING, which by definition excludes answered ones. So the act
-     of replying removed the row from the list the office was looking at, while
-     its thread sat open on the right. It reads as destruction, and coming back
-     to the page shows it gone again, because the page always opens on Waiting.
-
-     THE FILTER IS NOT WRONG AND IS NOT CHANGED. Waiting is the work queue and
-     it has to keep meaning what it means at thirty conversations. What is
-     wrong is that it applied to the conversation you are IN — so that one is
-     exempt, and only that one. A search still hides it, deliberately: typing
-     in the box is asking to see something else. */
   function boxRows(){
     var q = box.q.toLowerCase();
     return (box.threads || []).filter(function(t){
-      var open = t.person_key && t.person_key === box.person;
-      if (!q && open) return true;
       if (box.tab === "waiting" && !t.waiting) return false;
       if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
       if (!q) return true;
       return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
              String(t.last_body || "").toLowerCase().indexOf(q) > -1;
     });
-  }
-
-  /* How many conversations the current filter is HIDING, so an empty list can
-     say where everything went rather than only that there is nothing here. */
-  function boxHidden(){
-    return (box.threads || []).length - boxRows().length;
   }
 
   function placeOf(t){
@@ -759,27 +633,9 @@ var CHAT = (function(){
     var list = el("chqlist"); if (!list) return;
     var rows = boxRows();
     if (!rows.length) {
-      /* AN EMPTY LIST SAYS WHERE EVERYTHING WENT (§105). "Nobody is waiting"
-         is true and was a dead end: with an answered conversation hidden
-         behind a filter nothing on the screen mentioned, the only way back to
-         it was to already know about the All tab.
-
-         AND THE FLAGGED TAB WAS SAYING SOMETHING FALSE — "No conversations
-         yet" when there are conversations and none of them is flagged. Found
-         while reproducing the other one; the same shape of lie, and the same
-         fix: an empty state describes THIS filter, never the whole product. */
-      var hid = boxHidden();
-      var elsewhere = hid > 0
-        ? ' <button class="chlink" type="button" data-chtab="all">' +
-          hid + " " + (hid === 1 ? "conversation is" : "conversations are") +
-          " on All</button>"
-        : "";
       list.innerHTML = '<div class="chnothing">' +
         (box.q ? "Nothing matches that."
-               : box.tab === "waiting"
-                   ? "Nobody is waiting. That is the good state." + elsewhere
-               : box.tab === "flagged"
-                   ? "Nothing is flagged." + elsewhere
+               : box.tab === "waiting" ? "Nobody is waiting. That is the good state."
                : "No conversations yet.") + "</div>";
       return;
     }
@@ -1014,15 +870,6 @@ var CHAT = (function(){
     /* TYPING NEVER REPAINTS (§35). The promise is written on `change`, which
        fires on blur, so the box is never replaced under the cursor. */
     wrap.addEventListener("change", function(e){
-      var rep = e.target.closest("[data-chrep]");
-      if (rep) {
-        chatSet("rep", rep.value);
-        saved();
-        /* The hint above it names who was chosen, so the menu redraws — never
-           paint(), which would rebuild the page behind an open menu (§30.1). */
-        setMenuPaint();
-        return;
-      }
       var inp = e.target.closest("[data-chpromise]");
       if (!inp) return;
       chatSet("promise", inp.value);
@@ -1087,17 +934,9 @@ var CHAT = (function(){
       var tab = e.target.closest("[data-chtab]");
       if (tab) {
         box.tab = tab.dataset.chtab;
-        /* LIT BY VALUE, NEVER BY IDENTITY. This compared `b === tab` across
-           every `[data-chtab]` in the page, which was fine while the only ones
-           were the three tabs themselves — and the moment the empty state grew
-           a "N conversations are on All" link (§105), pressing THAT would have
-           lit the link and un-lit all three tabs, leaving the row with nothing
-           selected. Scoped to the tab row and matched on the value, so a
-           shortcut to a tab lights the tab. */
-        Array.prototype.forEach.call(root.querySelectorAll(".chqtab"), function(b){
-          var on = b.dataset.chtab === box.tab;
-          b.classList.toggle("on", on);
-          b.setAttribute("aria-selected", on ? "true" : "false");
+        Array.prototype.forEach.call(root.querySelectorAll("[data-chtab]"), function(b){
+          b.classList.toggle("on", b === tab);
+          b.setAttribute("aria-selected", b === tab ? "true" : "false");
         });
         drawQueue();
         return;
@@ -1151,27 +990,6 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
-    unread: function(){ return state.unread; },
-    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
-       The same `queue` action the inbox already calls, whose answer already
-       carries the two counts — so this is a second READER of one endpoint and
-       not a second endpoint, and the number the Overview prints is by
-       construction the number the Inbox's own tab prints.
-
-       IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
-       writing box.threads from here would leave a half-built queue behind for
-       whenever the inbox is next opened, and `drawQueue()` would be painting
-       into a document that does not have it. The Overview wants two integers.
-
-       `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
-       caller draws nothing for a null and "nothing is waiting" for a 0, and
-       those are different things to say (§108.10, §93). */
-    officeQueue: function(cb){
-      if (!servable()) return cb(null, null);
-      post({ action:"queue" }, function(err, j){
-        if (err || !j) return cb(err || new Error("no answer"), null);
-        cb(null, { waiting: j.waiting | 0, flagged: j.flagged | 0 });
-      });
-    }
+    unread: function(){ return state.unread; }
   };
 })();

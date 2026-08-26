@@ -1867,7 +1867,7 @@
   .cfg table.msgtable th.msgerr    { width:380px; }
   .msgerr { --cell-cap:380px; }
 
-  /* ══ THE PEOPLE REGISTER, AFTER §111 ═══════════════════════════════
+  /* ══ THE PEOPLE REGISTER, AFTER §116 ═══════════════════════════════
      The header is one row, the table only reads, and everything that writes is
      in the platform's own dialog. */
 
@@ -1896,7 +1896,7 @@
     border:1px solid var(--line); background:var(--surface); color:var(--ink);
     font:600 12.5px/1 var(--sans); padding:8px 12px; border-radius:var(--r-pill); }
   .addbtn:hover { border-color:var(--gold); }
-  /* ── THE DECLARATION MARK (§111.4) ──────────────────────────────────
+  /* ── THE DECLARATION MARK (§116.4) ──────────────────────────────────
      INSIDE the value's own line. `.val` is display:block under §88's clip rule,
      so a sibling would start a second line and take the row from 39px to 57px —
      which is the fault this replaces. */
@@ -1907,7 +1907,7 @@
   .vwhy { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
     font-size:var(--fs-micro); color:var(--ink-3); margin:0; }
 
-  /* ── THE EMAIL COLUMN HOLDS AN EMAIL (§111.5) ─────────────────────
+  /* ── THE EMAIL COLUMN HOLDS AN EMAIL (§116.5) ─────────────────────
      Islam, from the first round: "let the email take it's cell fully without
      cell cutting." Measured then: 133px shown of the 235px the longest address
      needs, on 33 of 33 rows — every address on the register ended in an
@@ -1947,7 +1947,7 @@
   .pdlg .rolebox-wide { display:flex; flex-wrap:wrap; align-items:center; gap:6px;
     max-width:none; overflow:visible; white-space:normal; }
   /* WHY THIS PERSON IS IN FRONT OF YOU, above the fields rather than found
-     among them (§111.2). */
+     among them (§116.2). */
   .pdband { display:flex; flex-direction:column; gap:5px; margin:0 0 16px;
     padding:10px 13px; border-radius:var(--r-sm);
     background:var(--warn-bg); color:var(--warn-tx); font-size:12.5px;
@@ -1964,7 +1964,7 @@
     .pdlg { grid-template-columns:1fr; }
   }
 
-  /* ── THE DUPLICATE MARK IS A GLYPH (§111.4) ────────────────────────
+  /* ── THE DUPLICATE MARK IS A GLYPH (§116.4) ────────────────────────
      `‖` for a collision, `≈` for a resemblance — the two say different things
      and §87 is the reason they must keep saying different things. Sized and
      spaced like the declaration mark beside it, because they are the same kind

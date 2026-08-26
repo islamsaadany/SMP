@@ -144,6 +144,14 @@ A drift between specs and code is a documentation bug — report it before silen
 - **`main`** — production/stable. Merge to main only when work is complete and verified.
 - **Commit with descriptive messages** — explain what and why.
 - **Push:** `git push -u origin <branch-name>`; retry on network errors with exponential backoff.
+- **NEVER MERGE TO `main` WITHOUT ISLAM SAYING SO, ON THAT MERGE (2026-08-26).**
+  Islam: *"don't merge without confirmation with me, not to damage things."*
+  **A go-ahead to BUILD is not a go-ahead to MERGE**, and neither is a line in
+  my own message saying the work could go to main on its own — that is me
+  describing an option, not him choosing it. This was written after I merged
+  the chat fix on exactly that inference. The word has to be about the merge,
+  and it has to be his. Building, checking and pushing the BRANCH need no
+  second ask; `main` is production, and production is his call every time.
 - **BEFORE MERGING, FETCH MAIN AND LOOK AT IT.** `git fetch origin main` and
   compare — another session may have pushed while this one was working, and it
   has: §70 landed on main mid-session on 2026-08-24 while §71 was being built.
@@ -1210,6 +1218,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   both rows stay aligned and the WORD is what clips, so that is asserted with a
   `Range` separately. Plan pane only; the other two panes still show no dates,
   flagged rather than assumed.
+  **THE PLAN PEN'S LAST THREE READ-ONLY FIELDS OPEN (§114):** a measure's
+  direction and compile rule, and a tactic's quarters — §31 closed them because
+  "they change what a figure MEANS", the right worry while the pen could fall
+  to the person measured, and §94 gave the pen to the office, so the reason
+  expired (§94.15's shape). The vocabulary is the Temple's own `selectOr`
+  options, never a second list (§53.5); **a stored value outside the list is
+  prepended rather than displayed wrong** (§96.2 from the display side); the
+  quarters are `qs()`'s own four marks as buttons, resolved by id (§48.2) —
+  and §42 had classified a quarter change as PLAN on the server four versions
+  before the screen could make one. `checks/plan-fields.py` presses all three
+  and reads the DATA back, both ends (§96, §94.2).
+  **A REPEATING PROJECT, AND THE CLEAR BECOMES A DECISION (§115):** Islam's CX
+  mystery shopping runs H1 and again H2 — same rows — and *"we don't want
+  things repeated in the same project."* The machinery existed POINTING THE
+  OTHER WAY: `clearCapability(c,"nums")` wiped EVERY project on every new
+  cycle (unseen — the live tenant is still in its first), so a DELIVERED
+  project's record would have been erased the day H2 opened. Now each project
+  decides: marked `repeats:"cycle"` → archived, cleared, **every date shifted
+  by the closed cycle's length** (`shiftWhen()`, `monthsOf()`'s mirror — one
+  writer, shape for shape, unreadable shapes returned UNCHANGED, 2-digit years
+  staying 2-digit, days clamping to the month they land in); unmarked →
+  **figures and notes kept, delivered is delivered**. The mark is a front
+  matter row behind the pen, drawn in read mode only when it says something;
+  No DELETES the key (§50.6); capPlan on the server, asserted both ends.
+  **AND THE ARCHIVE HAD BEEN QUIETLY INCOMPLETE SINCE MIGRATION 024** —
+  `figuresSnapshot` still stored a deliverable's deleted `actual` and never
+  took a milestone's `pct` (§51.10 in the archive). Fixed. 
+  `checks/repeat-project.py` FAILS ON THE PRE-§115 BUILD BY CONSTRUCTION and
+  was run against it to watch three failures before its green was believed;
+  it turns the cycle through the REAL close/open controls and their confirm
+  dialogs, and makes the state, because the demo has no repeating project.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:
@@ -1315,6 +1354,117 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **A CHECK THAT ASSERTS AGREEMENT PASSES WHEN BOTH SIDES VANISH (§113.8):**
+  the knowledge base's contents are derived, and the check asserts one link per
+  section — so when a fix pushed `undefined` into `secs` and the tour section
+  left the page entirely, the count was sixteen and sixteen and it went GREEN.
+  **Agreement is preserved by removing both sides**, which is the blind spot of
+  every *these two must match* assertion. `checks/tour.py` caught it because it
+  asserts PRESENCE. Neither alone was enough: **one check guards the
+  relationship, another guards that there is anything to relate.** (The bug was
+  `var` — the unshift sat twenty lines above the assignment, the declaration
+  hoists and the value does not, so it pushed `undefined` in silence.)
+- **A MIGRATION THAT READS A COLUMN `schema.sql` NO LONGER CREATES IS BROKEN ON
+  EVERY FRESH DEPLOYMENT AND PERFECT ON YOURS (§113.7):** `024-one-row-shape`
+  read `deliverables.actual` in four UPDATEs before dropping it, and
+  `schema.sql` had stopped creating it — so an empty database could not even
+  PARSE the statement (42703) while an existing tenant migrated flawlessly.
+  **Production was never at risk and no new client could have been set up**,
+  and nothing anybody was testing against would show it, because everybody
+  tests against a database that already exists. **THE MIRROR OF §33.5**, which
+  recorded the fault invisible to every fresh-deploy test; this one was
+  invisible to every existing-database test. Fix: `ADD COLUMN IF NOT EXISTS`
+  before the reads, so a fresh database gets NULL in a table still empty at
+  pre-phase and the DROP takes it away again — idempotent on both. **RUN THE
+  ROUND TRIP ON A VIRGIN DATABASE AFTER EVERY MERGE**, not only after touching
+  the schema yourself: this arrived from somebody else's branch.
+- **THE CONVERSATION YOU HAVE OPEN NEVER LEAVES THE LIST (since v3.31, §105):**
+  Islam — *"I replied and the chat disappeared from all places."* **Nothing was
+  deleted** (the only DELETE is the Super user's drop): replying marks a
+  conversation ANSWERED (§71) and the inbox opens on WAITING, which excludes
+  answered ones — **so the act of replying removed the row from the list the
+  office was looking at**, while its thread sat open beside it, and it stayed
+  gone because the page always opens on Waiting. **TWO CORRECT DECISIONS
+  MEETING**: neither is wrong alone, and what was never asked is what they do
+  to each other. **THE FILTER IS NOT CHANGED** — Waiting has to mean Waiting at
+  thirty conversations — the conversation you are IN is exempt, and only that
+  one; a search still hides it, because typing is asking to see something else.
+  **AN EMPTY LIST SAYS WHERE EVERYTHING WENT**: *"Nobody is waiting"* was true
+  and was a dead end, and the Flagged tab was saying something FALSE (*"No
+  conversations yet"* with conversations present) — **an empty state describes
+  THIS filter, never the whole product**. **AND A HANDLER THAT COMPARES
+  IDENTITY ASSUMES IT KNOWS EVERY ELEMENT IT WILL EVER SEE**: the tab row lit
+  by `b === tab` across every `[data-chtab]`, so the new way-back shortcut
+  would have lit itself and un-lit all three tabs. Lit by VALUE now, scoped to
+  the tab row.
+- **A FIX TESTED AGAINST THE WRONG BYTES LOOKS EXACTLY LIKE A FIX THAT DOES NOT
+  WORK (§105.6):** `build.py` writes `src/strategy-management-platform.html`
+  and `scripts/dev-server.js` serves the shipped
+  `strategy-management-platform-vX.Y.html`. The §105 reproduction was re-run
+  after the change and showed the identical failure; the next move would have
+  been to hunt a second cause that was not there. **Copy the built file before
+  driving the dev-server**, every time.
+- **THE ASSISTANT ANSWERS FIRST, AND OFF IS THE DEFAULT (since v3.31, §104;
+  spec 016):** Islam — *"I need a switch to turn off AI response and just keep
+  it to the SMO inbox."* `CHAT_DEFAULTS.assistant` is **false**, and
+  `chatCfg()` reads it and `notify` **the other way round from the other four**
+  — only an explicit `true` turns them on, so a stale value cannot switch it on
+  by accident. **OFF MEANS THE MODEL IS NEVER CALLED**, in `say`, on the
+  server: with the assistant off there is nothing on screen to hide, so the
+  guard IS the feature (§42, §98.2) — asserted as a CALL COUNT OF ZERO, never
+  as an absent button. **ORDER IS THE ROBUSTNESS ARGUMENT**: the message is
+  inserted and the thread is already waiting BEFORE the model is asked, so no
+  key, a refusal, a timeout, a malformed answer and the setting off all land on
+  exactly the chat as it worked before — four failure modes, injected
+  separately, because a build that lost the degradation passes every happy-path
+  assertion. **THE HANDOFF IS A FLAG, NEVER A SENTENCE** (`{answered, reply,
+  source}`), or the thread reads as answered and drops out of the queue with
+  nobody coming; an `answered` with an empty reply is treated as a handoff,
+  checked rather than trusted. **EVERY ANSWER CARRIES A WAY OUT**, because the
+  spec covers the assistant KNOWING it cannot answer and the harder case is it
+  being confidently wrong — and it sends an ORDINARY MESSAGE, so the office
+  reads why. **`bot` IS A COLUMN, NEVER A RESERVED `by_key`** (§87: a name is
+  never an identifier), and it is `from_office` TRUE + `bot` TRUE, because the
+  assistant answers on the office's behalf and the mark is about HOW that side
+  was written. **`GEMINI_API_KEY` IS READ IN ONE PLACE** and no SDK is added
+  (§72, §97.5 — this is one POST); **`GEMINI_MODEL` and `GEMINI_ENDPOINT` are
+  environment variables**, the first because provider names are retired on
+  somebody else's schedule and the second because a check must MODEL the
+  provider rather than branch around it (§100.3).
+- **A LIST OF EXCEPTIONS IS A LIST SOMEBODY FORGETS TO ADD TO (§104.7):**
+  `chatSet()` read `key === "promise" ? string : boolean`, so the second string
+  setting would have stored `true` for whoever was chosen — silently, with the
+  picker then showing nobody. **Take the type from the DEFAULT**, which cannot
+  be forgotten.
+- **THE KNOWLEDGE BASE'S MISSING HALF, AND IT IS DATA (since v3.31, §103):**
+  it explained how things WORK and barely how to DO them — four mentions of
+  pressing anything in 693 lines of `PAGE_INFO` — so **`src/recipes.js` holds
+  43 task recipes as an ARRAY, not another `kbSection()` call**, because
+  `scripts/extract-kb.js` reads the same array into **`db/kb.json`**: the words
+  a person reads and the words the assistant answers from are the same words
+  (§42, applied to prose). `{pillar}` is substituted at render time (§65).
+  **`who` IS RELEVANCE, NEVER PERMISSION** — a question with two true answers
+  is two entries sharing a `q`, and BOTH are shown, because the knowledge base
+  is everyone's (§37); **the mark goes on the AUDIENCE, never on the
+  duplicate**, or a two-track question renders as one heading twice.
+  **`--check` fails when the corpus is out of step**, the discipline `build.py`
+  already has; output is deterministic so an unchanged run is an empty diff.
+  **The TOC was a hand-kept second copy and was ALREADY WRONG** — nine
+  sections, eight links, the register missing since the day it was added — so
+  it is derived now (§42, found only because seven groups were being added).
+- **YOU CANNOT STUB A FUNCTION THE FILE DECLARES (§103.4):** a function
+  declaration **hoists over anything a `vm` sandbox supplies**, so a stub
+  passed in at construction is overwritten the moment the file is evaluated.
+  Three times in one hour — `L()` and `kbRecipes()` (the fix is to feed them
+  the DATA they read: `LABELS`, `RECIPES`) and `kbSection()` (no data to feed,
+  so **replace it AFTER evaluation**, which works because `renderKB` looks it
+  up at call time). The third **silently captured nothing** and would have
+  shipped a corpus missing a third of itself — caught only because the
+  extractor **throws when it captures nothing** rather than writing what it
+  has (§54.5, earning its place within minutes). And a file evaluated only for
+  something it declares early may be allowed to throw partway, provided **what
+  you came for is asserted instead** — the stronger check, since it fails if
+  the declaration ever moves below the throw.
 - **THE WORLD IS TWO ALLOW-LISTS, ONE BEHIND THE OTHER (§102.4):**
   `worldOf()` does not pass the group through — it **lifts named keys off it**
   (`sets`, `claims`, `naming`, `focusOff`) — and **`W()` behind it names the
@@ -1368,7 +1518,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
-- **THE REGISTER STOPS BEING A FORM (since v3.35, §111):** Islam's six —
+- **THE REGISTER STOPS BEING A FORM (since v3.39, §116):** Islam's six —
   keep my column choice and make all-on neat; edit in a dialog; *"they said"*
   becomes a button at the top that opens the pending people one after another;
   Add opens it too; drop the row count and the quick filters; make the top panel
@@ -1389,14 +1539,14 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the last box typed into has not been written when somebody reaches for the
   button — a mouse click blurs on the way past, which is the almost-always that
   hid it.
-- **A MARK BELONGS INSIDE THE BLOCK IT MARKS (§111.4):** the declaration note,
+- **A MARK BELONGS INSIDE THE BLOCK IT MARKS (§116.4):** the declaration note,
   the duplicate mark and the Official BU disagreement were each placed NEXT TO a
   value, and `.val` and `<b>` are `display:block` under §88's clip rule — so each
   put its row at 51px against its neighbours' 39px. Three times, in one section.
   One glyph inside the value's own line, the sentence on the hover, the full
   words in the queue: `◎` a declaration, `‖` a collision, `≈` a resemblance,
   `≠` a disagreement.
-- **THE COUNT AND THE QUEUE ARE ONE LIST (§111.2):** `attentionQueue()` is what
+- **THE COUNT AND THE QUEUE ARE ONE LIST (§116.2):** `attentionQueue()` is what
   the button counts AND what it opens — a count that cannot take you to what it
   counts is a count that makes work (§16.7's rule applied to a notice). **One
   entry per person, not per problem**; worst first then by name, so it is stable
@@ -1404,7 +1554,28 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   somebody removes them and a recomputed queue renumbers under whoever is
   working through it. **Units with no custodian cannot join it** — not a person,
   so there would be nobody to open; it keeps its own line (§93.4).
-- **EVERY WAY OUT OF A DIALOG IS THE SAME WAY OUT (§111.6):** the × and Escape
+- **A LOCAL ALIAS IS INVISIBLE FROM ANOTHER FILE, AND ONLY OVER HTTP (§116.9):**
+  `attentionOf()` in `config-data.js` spelt half its declaration sentence with
+  `whereLabel`, which is a **`var` inside `renderPeople()`** in
+  `config-render.js` (§93.12's swap, made once rather than at five call sites).
+  Every check was green: the crash needs a declaration AND a register placement
+  that disagree, so it is invisible over `file://` (`SAIDWHERE` only ever comes
+  from a server, §94.11) **and the ternary short-circuits for anybody the
+  register has not placed** — which was every person the queue's own check had
+  made (§94.2 from the inside). It is `roleWhereLabel` on **both** halves now:
+  **a sentence that names two places and compares them must spell them the same
+  way**, or a match reads as a difference; `placeLabel` stays right for the Unit
+  CELL, where there is nothing to compare against. **AND THE COUNT AND THE QUEUE
+  HAD DRIFTED THE OTHER WAY**: the Overview's password row counts
+  `passwordReach()` (§89 excludes the office) and the queue's `nopw` counted
+  everybody, so a Super user with no password put a row in the queue that
+  whoever works through it has **no control to clear** — §16.7's fault inside
+  §116.2's own list, asked through `mayIssuePasswordTo()` now. The check asserts
+  the **relationship** (the button carries its own queue's length; every person
+  the Overview counts is findable in that queue) rather than the chip string
+  §116 removed — §51.11, loud this time only because the chip row is **gone**
+  rather than merely renamed.
+- **EVERY WAY OUT OF A DIALOG IS THE SAME WAY OUT (§116.6):** the × and Escape
   closed the overlay directly, which was fine when it held a wizard and not when
   it holds a form with `PDLG`, a row snapshot and a draft behind it. **And the
   body is emptied on close** — a form left in the hidden overlay collected a
@@ -1675,7 +1846,7 @@ cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
-                                # Add, and neat with every column on (§111, over HTTP)
+                                # Add, and neat with every column on (§116, over HTTP)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
@@ -1726,8 +1897,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.35: the register stops being a form**
-(&sect;111). Six decisions from Islam after two rounds of mockups, and **one
+*Last Updated: 2026-08-26 &mdash; **v3.39: the register stops being a form**
+(&sect;116). Six decisions from Islam after two rounds of mockups, and **one
 thing follows from them that nobody asked for, which is why they hang
 together: with editing, adding and the queue all in a dialog, the table no
 longer edits anything.** Every collision this register has had &mdash;
@@ -1751,7 +1922,42 @@ identity ladder was being called with an object instead of two arguments, so
 &sect;87's stop never fired and a second row for somebody already here went
 straight in; and the dialog had no *Add anyway*, which &sect;87.3 requires. The
 new check was proved able to fail before its green run was believed &mdash;
-**17 failures** against the previous build.*
+**17 failures** against the previous build. **AND THE MERGE FOUND TWO MORE THAN
+THE BUILD COULD** (&sect;116.9): `attentionOf()` spelt half its declaration
+sentence with `whereLabel`, a **local `var` inside `renderPeople()` in another
+file** &mdash; green everywhere, because the crash needs a declaration AND a
+register placement that disagree, which is invisible over `file://` and
+short-circuits for anybody the register has not placed, and that was every
+person the queue's own check had made. Both halves say `roleWhereLabel` now: a
+sentence that compares two places must spell them the same way or a match reads
+as a difference. **And the count and the queue had drifted the other way** &mdash;
+the Overview counts people this viewer may issue a password TO (&sect;89) and
+the queue counted everybody, so a Super user with no password put a row in the
+list that whoever works through it has no control to clear.*
+*Earlier: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
+&sect;112), and a chat that vanished (&sect;113)**. The last one came from
+production and is the one worth reading: *"the chat was a user, he sent to me
+and I replied and the chat disappeared from all places."* **NOTHING WAS
+DELETED**, and establishing that first is most of the work &mdash; the only
+DELETE in the whole chat API is the Super user's deliberate drop. What happened
+is **two correct decisions meeting**: replying marks a conversation ANSWERED
+(&sect;71's rule, that the status you must remember to set is the one nobody
+sets) and the inbox opens on WAITING, which is the work queue and by definition
+excludes answered ones. Neither is wrong alone. **Together they mean the act of
+replying removes the row from the list you are looking at**, while its thread
+sits open beside it &mdash; and it stays gone, because the page always opens on
+Waiting and nothing on the screen mentions the All tab. *What was never asked is
+what the two do to each other.* **THE FILTER IS NOT CHANGED**: the conversation
+you are IN is exempt and only that one, because Waiting has to keep meaning
+Waiting at thirty conversations. **AND AN EMPTY STATE DESCRIBES THIS FILTER,
+NEVER THE WHOLE PRODUCT** &mdash; *"Nobody is waiting"* was true and was a dead
+end, and the Flagged tab was flatly false, saying *"No conversations yet"* with
+conversations present. **THE FIX MEASURED AS NOT WORKING FIRST**, and that is
+its own lesson: `build.py` writes into `src/` and the dev-server serves the
+shipped versioned file, so the reproduction re-ran against the OLD BYTES and
+showed the identical failure. A fix tested against the wrong bytes looks exactly
+like a fix that does not work, and the next move would have been to hunt a
+second cause that was not there.
 
 *Earlier: 2026-08-26 &mdash; **v3.34: giving somebody a role**
 (&sect;110). Islam: *"in the people registry I'm trying to set business unit
@@ -1941,6 +2147,7 @@ WRONG WHILE EVERY ASSERTION WAS TRUE** (&sect;107.8): `L("pillar","bu")` is
 would have done. A tenant's label is never inflected.*
 
 *Earlier: 2026-08-26 &mdash; **v3.30: reordering comes back
+
 (&sect;101), and focus measures get a switch (&sect;102)**. The second one
 carries the bug worth reading: the switch was wired, the rule was written, the
 writer worked &mdash; and flipping it changed nothing at all. **`worldOf()` does

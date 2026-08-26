@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.38 on `main` (§114–§115) · **§116 built on the CF branch, awaiting Islam’s confirm**
+**Latest version:** v3.40 on `main` · **§118 built on the CF branch, awaiting Islam’s confirm**
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -64,9 +64,9 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.38 (on the branch, awaiting Islam's confirm) — the CF tab (§116)
+### v3.41 (on the branch, awaiting Islam's confirm) — the CF tab (§118)
 
-**§116 — reported from production.** *"The CF tab is not showing anything
+**§118 — reported from production.** *"The CF tab is not showing anything
 while it was showing it a minute ago."* Reordering a measure or tactic with
 the pen on counted the "+ Add" row, appended one phantom entry per drag, and
 the autosave wrote it as a `null` into the pillars function's plan blob —
@@ -75,12 +75,37 @@ read as dead, with the error only in the console. Fixed at the commit
 (`makeSortable` counts data rows only), backstopped (`applyOrder` refuses a
 non-permutation), and healed for tenants that already saved the poison
 (`fnPruneNulls()` at the hydration door — CF comes back on its next visit,
-nothing was lost). The tour is no longer offered to the office (§116.5).
+nothing was lost). The tour is no longer offered to the office (§118.5).
 `checks/reorder-integrity.py` fails 16 ways against the previous build and
 is green on this one; qa.py and the full battery green on the merged build.
-Flagged, not fixed (§116.7): a dead render still says nothing on the page;
+Flagged, not fixed (§118.7): a dead render still says nothing on the page;
 the wrapped destination row eats clicks below ~1100px; no-jump.py's
 "sorting a column" trial fails on main's own build.
+
+### v3.39 — the register stops being a form (§116) — another session's
+
+- Merged from main during this release: the People register edits in a dialog,
+  the attention chips become one queue, the quick filters go. See §116 in the
+  decisions document; its checks (people-dialog and the reworked register
+  checks) ride in this repo and are green on the merged build.
+
+### v3.40 — the Strategy | Reporting split, and the plan as slides (§117, spec 019)
+
+- The Roles & access table's own columns are two halves each — **Strategy**
+  (Foundation · SWOT · Plan; a capability's definition and projects) and
+  **Reporting** (figures, drafts, submitting). Strategy edit ships with the
+  office alone; **the SMO can open it to a role deliberately** (Islam's
+  choice). A stored grant on the old key keeps meaning the Reporting half, so
+  nobody's rights move on upgrade and no migration runs.
+- §101's reorder arrows survive the split (they ride the Reporting grant), and
+  strategy-at-none hides the pane, the arrows and the download together.
+- **Download the plan as slides**: a button beside the pen on the Strategy
+  panel builds a real editable `.pptx` — plan content only, SWOT included, no
+  reported figures — for the office, the BU owner, the custodian, and a
+  function's head. Offline, no new dependency (the platform's own zip writer).
+- Proved by `checks/strategy-split.py` (both ends, both directions, the file
+  unzipped and read, proved able to fail three ways), `test-authorize.js` §15
+  (212 assertions), the full check suite and `qa.py`.
 
 ### v3.37 — the assistant (§111, §112), and a chat that vanished (§113)
 

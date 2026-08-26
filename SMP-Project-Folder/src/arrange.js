@@ -114,7 +114,7 @@ function handle(label){
 function makeSortable(container, itemSel, onCommit){
   var dragging = null;
 
-  /* DATA ROWS ONLY (§114). The plan pane's add row is a <tr> inside the same
+  /* DATA ROWS ONLY (§118). The plan pane's add row is a <tr> inside the same
      tbody — undraggable, because it has no grip, and that was mistaken for
      safe: it was still COUNTED on every commit. A row with no data-oi read as
      +undefined = NaN, applyOrder pushed arr[NaN] = undefined onto the list,
@@ -195,7 +195,7 @@ function makeSortable(container, itemSel, onCommit){
 
 /* Apply a committed order to the underlying array.
 
-   AND REFUSE ONE THAT DOES NOT ACCOUNT FOR EVERY ROW EXACTLY ONCE (§114).
+   AND REFUSE ONE THAT DOES NOT ACCOUNT FOR EVERY ROW EXACTLY ONCE (§118).
    A commit is a permutation of 0..n-1 or it is wrong: an index outside the
    array pushes undefined (which a save turns into null — the poison that
    broke the CF function), and a missing or doubled index silently drops or

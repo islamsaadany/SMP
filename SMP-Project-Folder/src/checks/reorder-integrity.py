@@ -1,4 +1,4 @@
-"""A REORDER COMMIT ACCOUNTS FOR EVERY ROW EXACTLY ONCE (§114).
+"""A REORDER COMMIT ACCOUNTS FOR EVERY ROW EXACTLY ONCE (§118).
 
 Islam: "the CF tab is not showing anything while it was showing it a minute
 ago." The tab was fine; the PAGE could no longer be drawn. Reordering a
@@ -23,7 +23,7 @@ poisons but also no longer reorders would pass every absence test):
      it: served over HTTP with a poisoned functions blob (the fault is
      invisible over file://, §94.11), the function's tab must open and its
      plan must draw.
-  4. The tour is never offered to the office (§114, Islam: "stop it to the
+  4. The tour is never offered to the office (§118, Islam: "stop it to the
      SMO") — and still offered to a custodian, or the fix would be
      indistinguishable from the tour being lost.
 

@@ -1694,27 +1694,8 @@ function editBar(page, acKey){
    somebody added a pane, and §53.5's whole rule is that a unit and a function
    must not drift apart in silence. */
 function paneActs(page, acKey){
-  var inner = penBtn(page, acKey) + arrangePaneBtn() + dlPlanBtn(page);
+  var inner = penBtn(page, acKey) + arrangePaneBtn();
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
-}
-
-/* ── THE PLAN LEAVES AS SLIDES (§117) ─────────────────────────────
-   Islam: "add the access of downloading a presentation for the plan for the
-   custodian and the business unit owner through a button in the strategy
-   panel." Drawn ONLY on the plan pane — the page the ask names — and gated by
-   the shared rule, so the office, the unit's owner and custodian and a
-   function's head see it and a CEO passing through does not (§37: reaching is
-   not holding). The press asks the rule AGAIN (§48.2, in pptx.js), because
-   the viewer switcher can change who this is between paint and click. */
-function dlPlanBtn(page){
-  if (page !== "plan") return '';
-  if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
-  return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
-    ' title="Download the plan as slides (.pptx)"' +
-    ' aria-label="Download the plan as slides (.pptx)">' +
-    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor"' +
-    ' stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
-    '<path d="M10 3.5v8M6.8 8.7L10 11.9l3.2-3.2M4.5 15h11"/></svg></button>';
 }
 
 function arrangePaneBtn(target){

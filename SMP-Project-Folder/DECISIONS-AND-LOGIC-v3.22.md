@@ -15360,13 +15360,310 @@ ones proven untouched.
 any per-run history UI beyond what Archived plans already shows — a handful of
 projects, and the pen is the door.
 
-## 116 · The CF tab, the add row, and a null that outlived its session (v3.38)
+---
+
+## 116 · The register stops being a form (v3.39)
+
+Islam, after two rounds of mockups on the People register, in six decisions:
+keep my column choice and make all-on neat; edit in a dialog rather than inline;
+*"they said"* becomes a button at the top showing pending requests, which opens
+those profiles in the dialog and moves to the next in the same place; adding
+somebody opens it too; remove the row count and the quick filters; make the top
+panel concise.
+
+**ONE THING FOLLOWS FROM THE SIX AND IS WHY THEY HANG TOGETHER: with 2, 3 and 4
+the table no longer edits anything.** Every collision this register has had —
+§110.1's *+ role* under the frozen Cancel, §110.8's fields painting over their
+neighbours, the Add row's three boxes under the wrong headings — was a control
+being clicked inside a 158px cell, and not one of them survives the move. A
+read-only table can be as wide as its columns need.
+
+### 116.1 The table reads, the dialog writes
+
+Every cell was `ed ? <field> : <value>`. The rows are values now: no inputs, no
+selects, no Save/Cancel column, no Add row. `personFields()` is the editing half,
+drawn once, in the platform's own dialog (§90's `openModalHtml` — inert page,
+Escape, focus returned).
+
+**THE SAME `data-` ATTRIBUTES, DELIBERATELY.** `data-pknown`, `data-pat`,
+`data-pemail` and the rest are what `fieldWire` binds and `fieldSaved` writes
+through (§71.2), so moving the form changed WHERE it is drawn and nothing about
+how it saves. What did have to change is that both wiring functions now take a
+ROOT: the dialog is built after `paint()` has run, and re-running the whole of
+`wire()` would bind a second handler to everything still on the page behind
+(§24, §47.2).
+
+**AND `paint()` REPAINTS THE DIALOG TOO.** Its controls are the register's, so
+they all end in `paint()` — which repainted the page behind and left the dialog
+showing the state it was built with. Press *+ role* and nothing appeared. One
+line at the end of `paint()`, not one per handler, or a control added to the
+dialog later is silent until somebody remembers.
+
+### 116.2 The button knows which lines
+
+`attentionQueue()` is the count and the queue at once. Six alarm chips used to
+sit across the header, each naming a number and pointing at rows to find by
+eye — which is exactly *"I don't know which lines I should go and check"*.
+
+**ONE ENTRY PER PERSON, NOT PER PROBLEM**: somebody with no password and no email
+is one stop with two things to fix, because the dialog shows their whole row.
+**WORST FIRST, THEN BY NAME**, so the queue is stable between two people looking
+at it. **THE LIST IT STARTED WITH IS THE LIST IT WALKS** — fix somebody and they
+leave the queue, so recomputing as it goes would renumber under the person
+working through it and *"3 of 7"* would count down twice as fast.
+
+**UNITS WITH NO CUSTODIAN CANNOT JOIN IT** and that is not an oversight: it is
+about units, not people, so it would be a stop with nobody to open. It keeps a
+line of its own under the title and still names the units (§93.4).
+
+### 116.3 Add is the same dialog, and the draft is a person
+
+`NEWDRAFT` is a person-shaped object that is not in PEOPLE — nothing counts it,
+no role can point at it — and `personBy()` answers for it, so every field handler
+writes to it unchanged. One form, one set of handlers. **Not minted into PEOPLE
+and deleted on Cancel**, which was the other way: a half-made person that a
+closed tab leaves behind is a row somebody has to clean up.
+
+The Add row it replaces was one cell spanning **nine columns**, so not one of its
+three boxes sat under its own heading — `Emp ID` sat under a column headed
+**Unit**, and `Email` ended under the frozen actions column, which clipped it.
+
+**AND THE FIELD BEING TYPED IS COMMITTED BEFORE THE PRESS.** Every field writes
+itself on `change`, which for a text input means on BLUR — so the last box
+somebody typed in has not been written when they reach for the button. A mouse
+click blurs it on the way past, which is the kind of almost-always that hides a
+fault: found by a check whose `fill` fires `input` and never blurs, and the
+address it had just typed was not on the draft when §87's ladder asked.
+
+### 116.4 Three things beside a value, all of them on a second line
+
+The declaration note, the duplicate mark and the Official BU disagreement were
+each a sentence or a phrase placed NEXT TO a value — and each put its row at
+51px against its neighbours' 39px. §88's own wrapping fault, three times, by a
+road §88 did not walk.
+
+**A MARK BELONGS INSIDE THE BLOCK IT MARKS.** `.val` and `<b>` are `display:block`
+under §88's clip rule, so a sibling starts a new line. All three are one glyph
+now, on the value's own line, with the whole sentence on the hover and the full
+words in the queue: `◎` for a declaration, `‖` for a collision, `≈` for a
+resemblance (§87.2 keeps those two apart), `≠` for a disagreement with the
+client's own list.
+
+### 116.5 The email column holds an email
+
+Measured in the first round: 133px shown of the 235px the longest address needs,
+on **33 of 33 rows**. It could not be given the room while the table still
+edited — widening it alone made the register *worse*, 514px past its box instead
+of 412, because the extra width pushed the controls further under the frozen
+columns. With the fields gone it costs scroll and nothing else. 270px, not
+`none`: a column with no cap is one address away from holding the table open.
+
+### 116.6 Every way out is the same way out
+
+The × and Escape closed the overlay directly, which for the merge wizard was the
+whole of it. The person dialog has state behind it — `PDLG`, the row snapshot
+`ROWEDIT` holds, a draft belonging to nobody — so a way out that skips
+`closePersonDialog` leaves the page believing a dialog is open and the next
+Cancel restoring somebody who is no longer on screen.
+
+**AND THE BODY IS EMPTIED ON CLOSE.** A closed dialog used to keep its markup,
+harmless while it held a few buttons; a FORM left standing in the hidden overlay
+collected a second handler on every repaint, for ever. §3.2's older rule too:
+hidden is not gone.
+
+**YOU CANNOT LEAVE THE PAGE WITH AN EDIT OPEN ANY MORE**, and finding that out is
+what taught it — a check's click on the rail was refused for thirty seconds by
+the overlay itself. Islam, asked whether covering the register mattered: *"no
+problem I care more about the edit dialogue I don't need to see the full
+register."*
+
+### 116.7 The names, and what a rename costs
+
+**BU owner** and **Function head**. Measured, the rename buys **18px** — the
+Roles column is held open by *Strategy custodian* and the picker's own minimum,
+not by the long names — so it is done because it reads better and recorded as
+not being the answer to the width.
+
+The role name is written into the people workbook as a validation list AND as an
+exported value, and the upload reads it back. `ROLE_NAMES_WERE` maps the two old
+spellings to their keys: the workbook writes the new label and reads either
+(§58, §65). Never the other way round — nothing is added to `ROLES`, so a file
+saying "BU owner" was not readable before the name existed.
+
+### 116.8 The checks, and the ones that had to be rewritten
+
+`src/checks/people-dialog.py` asks what the move was made to answer, over HTTP
+because two of the six only exist on a deployment (§94.11). Proved able to fail
+first: **17 failures** against the previous build.
+
+Six existing checks drove the inline row and were rewritten against the problem
+rather than deleted (§94.8) — and two of them found real faults doing it: the
+identity ladder was being called with an object instead of two arguments, so the
+stop never fired and a second row for somebody already here went straight in;
+and the dialog had no *Add anyway*, which §87.3 requires.
+
+`no-jump.py`'s register section is now about the presses that still repaint the
+register in place, since there is no row to open; `table-standard.py`'s
+"leaving the page cancels an open row" became "the page behind cannot be
+touched"; and `table-standard-all.py` asserts that a table of nine rows or more
+is SEARCHABLE rather than that it has a bar — the register's search box moved
+into the page header when the bar was left holding one control.
+### 116.9 Two surfaces, one fact — found by the merge, not by the build
+
+Merging §111–§115 from `main` brought `setup-overview-live.py` back into range
+of this register, and it went red on both halves of the same rule.
+
+**A LOCAL ALIAS IS INVISIBLE FROM ANOTHER FILE.** `attentionOf()` in
+`config-data.js` spelt one half of the declaration sentence with `whereLabel`,
+which is a `var` **inside `renderPeople()`** in `config-render.js` (§93.12's
+swap, made once at the top rather than at five call sites). Every check was
+green on it, because the crash needs a declaration **and** a register placement
+that disagree: `SAIDWHERE` only ever arrives from a server, so the whole branch
+is invisible over `file://` (§94.11) — and the ternary short-circuits for
+anybody the register has not placed, which was every person the queue's own
+check had made (§94.2, from the inside). It is `roleWhereLabel` on **both**
+halves now: a sentence that names two places and compares them must spell them
+the same way, or a match reads as a difference. `placeLabel` stays right for the
+Unit **cell**, where there is nothing to compare against.
+
+**AND THE COUNT AND THE QUEUE HAD DRIFTED IN THE OTHER DIRECTION.** The
+Overview's password row counts `passwordReach()` — §89 excludes the office,
+because first-issue and reset are the same power — and the queue's `nopw` reason
+counted **everybody**. So a Super user with no password put a row in the queue
+that the person working through it has no control to clear: §16.7's fault inside
+§111.2's own list. Asked through `mayIssuePasswordTo()`, never by re-testing the
+roles. The check asserts the **relationship** — the button carries its own
+queue's length, and every person the Overview counts is findable in that queue —
+rather than the chip string §116 removed (§51.11, loud this time only because
+the chip row is gone entirely rather than merely renamed).
+
+The queue's own check now **makes** the case it had not: a declaration from
+somebody the register has already placed, asserting both halves of the sentence
+and that they speak one vocabulary. Proved able to fail before it was believed
+(§94.5) — put back, it reproduces the exact `ReferenceError`.
+
+## 117 · Strategy and Reporting split, and the plan leaves as slides (v3.40)
+
+Islam, 2026-08-26: *"the accessibility should have an option that
+differentiate the strategy from the reporting — the strategy should be locked
+from the non SMO but the reporting should be editable by who we grant the
+access so they can submit. so we need this split in the roles and access
+table."* And: *"we can as well add the access of downloading a presentation
+for the plan for the custodian and the business unit owner through a button in
+the strategy panel — sometimes they need it in slides to update things and
+view it outside to come back with the SMO for refinement."*
+
+Settled from a mockup made of the real platform
+(`design-mockups/access-strategy-reporting-split/2026-08-26_…html` — the
+proposal injected into the live table and pane, both sides the same build,
+§41.9), confirmed whole. Four choices were put as questions and three came
+back as recommended; the fourth did not, and it is the decision that shapes
+the section: **the SMO can OPEN strategy edit to a non-office role.**
+
+### 117.1 The own columns are two questions
+
+One grant had covered a unit's strategy pages AND its reporting, so §94's
+office-only lock was invisible on the table — a custodian's gold pen under
+"Own business unit" looked like it opened the plan when it only opened
+reporting — and reporting could not be granted without the ambiguous whole.
+Each own column is now two halves, **Strategy** (Foundation · Analysis & SWOT
+· Plan; a capability's definition and projects) and **Reporting** (Performance
+· figures · drafts · submitting), each its own eye-and-pen cell.
+
+**THE NEW KEY IS THE STRATEGY HALF** (`a_unit_own_strat`, `a_fn_own_strat`),
+and that is the whole back-compat argument: a stored grant on the old key
+governed what the person could actually DO — reporting, because §94 refused
+authoring by rule — so the old key keeps meaning the Reporting half and
+nobody's rights move on upgrade. The strategy half is absent from every stored
+map and falls back to the shipped defaults (§30.2). No migration; the matrix
+rides in the state graph as it always did.
+
+**§94'S LOCK BECOMES THE DEFAULT, NOT A FLOOR — A PARTIAL REVERSAL, RECORDED
+AS ONE.** The five strategy pages resolve to the strategy half (`areaFor`),
+whose default is edit for the office and view for everyone else — the exact
+behaviour the hard rule enforced. What changes is that the rule
+`mayAuthorPage()` now asks the GRANT, so opening a role's Strategy cell is a
+deliberate, visible, logged act that hands them the words. I recommended
+capping it at view; **Islam chose to be able to open it**, and the cost is
+stated rather than argued away: a tenant is one cell away from giving a
+custodian the pen §94 took from them — by choice, on the page whose whole job
+is such choices. **One piece of §94 survives as a rule**: authoring somebody
+ELSE'S unit or function stays the office's, because the other columns are not
+split, and `a_unit_other: edit` must not hand a client role a neighbour's
+plan.
+
+**§101 IS PRESERVED, AND IT NEEDED A DECISION TO BE.** The plan page's grant
+moved to a half a holder reads at *view*, so `mayArrange()`'s "the grant still
+has to say edit" would silently have taken the arrows back — the exact kind of
+regression the split was most likely to ship. It rides the holder's WORKING
+grant now (the Reporting half — the same stored value §101 tested before the
+split, under its old name), with strategy-at-none still taking the pane and
+the arrows with it. Proved by forcing the resolution back and watching five
+assertions go red.
+
+**THE HEADER IS DERIVED FROM THE SAME LIST THE CELLS WALK**: `pair`/`col` on
+the AREAS entries build the two-row header, so a column cannot appear in one
+and not the other. Fixed table layout reads widths from the FIRST header row,
+and a colspan cell there divides its width over the columns it spans — the
+pair header carries twice a half's share (config.css, §37's lesson extended).
+
+### 117.2 The plan leaves as slides
+
+A download button beside the pen on the Strategy panel — the office, the BU
+owner, the custodian, and a function's head for their function (§53.5: a unit
+and a function are the same product; a function has no BU owner, so its
+holder is its head — the same reading §101 made). `mayDownloadPlan()` in
+`lib/rules.js` is the one rule, client-side deliberately: the download
+re-arranges what the page already shows this person, so there is no write for
+the server to refuse.
+
+**A REAL .PPTX, NOT THE DECK PRINTED** — the ask is editing it outside and
+bringing it back, and a picture cannot be edited. A .pptx is a zip of XML
+exactly as a .xlsx is, so `src/pptx.js` reuses `zipStore()` and adds no
+dependency; it builds offline, from `file://`, like everything else. **The
+content is the plan, never the cycle**: Foundation, the SWOT (asked for by
+name), key objectives, each pillar's measures and tactics — or a capability
+function's overviews and projects — with no actual and no progress anywhere,
+asserted as ABSENCES. The colours are the tenant's where Branding set them
+and the house navy/gold where it did not, read from the same `branding()` the
+pages read. The blob dance became `sendFileBytes()` — this was its third copy,
+and three is where the rule says extract.
+
+**A FALSE ALARM WORTH THE INK**: the file "failed" LibreOffice — which turned
+out to have no Impress component in this image at all, refusing a vanilla
+python-pptx file identically (§68.10's class: a correct build reported broken
+by a broken measuring tool). With Impress installed it loads and renders
+cleanly; python-pptx opens it; twelve slides for Mobile.
+
+### 117.3 What proves it
+
+`checks/strategy-split.py`: the two-row header from the DOM; the strategy cell
+pressed OPEN and pressed CLOSED through the real matrix, the pen asked of the
+screen AND the rule at both states (§94.2, §94.5 — both directions, because a
+check that only watches a door open passes when it is stuck open); §101's
+arrows before, during and after; the download pressed as five viewers, the
+file unzipped, every part parsed as XML, the plan's words found inside and the
+demo's reported figures proved absent. **Proved able to fail three ways**
+before its green was believed: button removed (8 failures), an actual leaked
+into a table (1), the §117 resolution reverted (5). `test-authorize.js` gained
+section 15 — the opened grant authors, the wide grant still cannot touch a
+neighbour's plan, strategy-at-none keeps reporting — run against the pre-§117
+rules to watch exactly its six new assertions fail. 212 node assertions, the
+full check suite and `qa.py` green.
+
+**Known and left alone**: `checks/no-jump.py` reports "sorting a column"
+moving the page (220 → 93) — it fails identically on the pre-§117 build, so
+it is not this section's, and it is recorded here rather than quietly fixed.
+`checks/plan-arrange.py` learned `SMP_CHROME` and to stop counting the new
+download button as a pen (§51.11, on the day the control changed shape).
+
+## 118 · The CF tab, the add row, and a null that outlived its session (v3.41)
 
 > *"the CF tab is not showing anything while it was showing it a minute ago"*
 > — and, asked what it looks like: *"tab there it doesn't move it stays with
 > the previous opened tab."*
 
-### 116.1 The symptom was navigation and the fault was paint
+### 118.1 The symptom was navigation and the fault was paint
 
 Clicking a destination runs `leaveModes()`, moves `current`, and calls
 `paint()`. A throw anywhere inside the panel's render abandons the redraw
@@ -15381,7 +15678,7 @@ hidden console:
 deleted and nothing was hidden; one row in one list was a shape the page
 cannot draw, and one bad row stops the whole page.
 
-### 116.2 The chain, each link proved on the exact bytes production serves
+### 118.2 The chain, each link proved on the exact bytes production serves
 
 The plan pane's **"+ Add a tactic" row is a `<tr>` inside the same sortable
 tbody**. Its own comment says why that felt safe: it has no grip, so it
@@ -15401,7 +15698,7 @@ entry as `null` — the save succeeds, the poison is now durable, and every
 hydration hands it back. It was showing "a minute ago" because the minute is
 exactly the save-and-rehydrate cycle.
 
-### 116.3 What it was NOT, established before the cause was known
+### 118.3 What it was NOT, established before the cause was known
 
 The import was innocent: every hostile file tried — orphan rows, duplicate
 and empty pillar names, junk quarters, full-precision Excel numbers, unknown
@@ -15412,7 +15709,7 @@ there is no file and no field that is supposed to produce this. A control
 that silently does nothing is the product's fault by its own rules, and
 "what mistake did I make?" has the answer *none*.**
 
-### 116.4 Three fixes, one class each
+### 118.4 Three fixes, one class each
 
 - **`makeSortable` counts data rows only** — `siblings()` keeps elements
   carrying `data-oi`, which every real sortable item in the product already
@@ -15430,7 +15727,7 @@ that silently does nothing is the product's fault by its own rules, and
   the clean lists. Units need none of this; a null cannot survive their
   road.
 
-### 116.5 The tour is never offered to the office
+### 118.5 The tour is never offered to the office
 
 Islam, told the tour fires for the SMO: *"yes stop it to the SMO."* The
 bootstrap SMO also HEADS the SMO function, so `storyFor()`'s `fnhead` rung
@@ -15441,7 +15738,7 @@ welcome card waited. The gate is in `storyFor()` itself, asked through
 never a second copy — so `offer()`, the Knowledge base replay list and
 checks/tour.py all answer the same way.
 
-### 116.6 The check presses the control and was proved able to fail
+### 118.6 The check presses the control and was proved able to fail
 
 `checks/reorder-integrity.py`, four sections, both ends throughout (§94.2):
 keyboard AND pointer reorders must still REORDER and must mint nothing; the
@@ -15453,7 +15750,7 @@ function's tab must open AND its plan must draw; the office gets no story
 while a custodian still does. Against the v3.36 build it fails **16 ways**,
 ending in the production error verbatim (§94.5).
 
-### 116.7 Found and deliberately not fixed
+### 118.7 Found and deliberately not fixed
 
 - **A paint that throws leaves the previous page on screen with no message
   anywhere** — §32 one level deeper: the refusal-says-so rule has no
@@ -15469,3 +15766,4 @@ ending in the production error verbatim (§94.5).
 - **checks/no-jump.py's "sorting a column" trial fails on main's own
   build** (page scroll 220 → 93), before this section's changes. Pre-existing,
   recorded here so the next green run is not trusted blind.
+

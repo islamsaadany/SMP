@@ -100,7 +100,7 @@ var TOUR = (function(){
   function storyFor(person){
     var rs = rolesOf(person), has = {};
     rs.forEach(function(r){ has[r.role] = r; });
-    /* THE OFFICE IS NEVER OFFERED THE TOUR (§114, Islam: "yes stop it to the
+    /* THE OFFICE IS NEVER OFFERED THE TOUR (§118, Islam: "yes stop it to the
        SMO"). The tour orients a first-time user; the office runs the
        platform. And the gate has to sit HERE rather than only on the seat
        role, because the bootstrap SMO also heads the SMO function — fnhead

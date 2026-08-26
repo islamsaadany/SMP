@@ -107,7 +107,7 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
-    /* Heal at the one door stored plans arrive through (§114): a function's
+    /* Heal at the one door stored plans arrive through (§118): a function's
        plan is a JSON blob, and a blob written while a list held an undefined
        entry holds a literal null for ever — every visit to that function's
        pages then dies mid-paint and the tab reads as dead. Remove-only. */

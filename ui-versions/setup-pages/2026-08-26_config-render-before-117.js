@@ -45,7 +45,7 @@ function renderLabels(){
        explanation - it is a state that blocks saving and has to be seen. */
     : '';
 
-  return section("", "Terminology", null,
+  return section("", "Labels", null,
       '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
       '<th style="width:33%">Display at group level</th>' +
@@ -148,12 +148,10 @@ function renderAccess(){
     if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
       return "Every unit and function is theirs, so there is no “other”.";
     }
-    /* The split halves collapse exactly as their whole did (§117): no unit
-       means neither half of the unit pair can come up. */
-    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+    if (roleKey === "fnhead" && areaKey === "a_unit_own") {
       return "A function head holds no business unit.";
     }
-    if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    if (roleKey === "cceo" && areaKey === "a_fn_own") {
       return "A company CEO holds no supporting function.";
     }
     return null;
@@ -166,32 +164,9 @@ function renderAccess(){
      stacked under seven labels made the HEAD of a 49-cell table taller than
      its body. The same answer the role column already reached in §37: the
      sentence is on hover, and the column keeps its name. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§117) ──────
-     The own pair split into Strategy | Reporting halves, and the pair's name
-     is written ONCE above them rather than twice into them. Built off the
-     `pair`/`col` fields the AREAS entries carry — the header is derived from
-     the same list the cells walk, so a column cannot appear in one and not
-     the other. Entries without a pair span both rows. Consecutive same-pair
-     entries group; the AREAS order is the column order, as it always was. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < AREAS.length) {
-    var ha = AREAS[hi];
-    if (!ha.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' + esc(ha.note) + '">' + esc(ha.label) + '</th>';
-      hi++;
-      continue;
-    }
-    var span = 0;
-    while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '">' + esc(ha.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = AREAS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.note) + '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  var head = headTop + "</tr>" + headSub + "</tr>";
+  var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
+    return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
+  }).join("") + '</tr>';
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
      Employee stopped being one: nobody grants it, the × could never take it
@@ -227,10 +202,9 @@ function renderAccess(){
       }).join("") + '</tr>';
   }).join("");
 
-  return section("", "Roles & access",
+  return section("", "Who may see what",
       "Eight roles and the floor beneath them, against the kinds of page each may " +
-      "reach. Edit includes view. The own columns answer in two halves — " +
-      "Strategy is the words as agreed, Reporting is the figures entered against them. " +
+      "reach. Edit includes view. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -378,14 +352,6 @@ var CLEARING = null;
 var ICO_EDIT = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M16 10.5V16a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 16V6a1.5 1.5 0 011.5-1.5H10"/>' +
   '<path d="M14 2.8l3.2 3.2L10 13.2l-3.6.4.4-3.6z"/></svg>';
-/* THE ATTENTION MARK IS A RING, NOT A WARNING TRIANGLE (§116). A triangle
-   says something is broken; what this counts is a list of things WAITING —
-   somebody's declaration to accept, a password never issued. A ring around a
-   dot is the mark this product already uses for "look here" and it carries no
-   alarm of its own; the button's fill is what makes it loud (§94.8's budget:
-   one solid fill on the page, and this is it while there is a queue). */
-var ICO_ATTN = '<svg viewBox="0 0 20 20" aria-hidden="true" class="attnico">' +
-  '<circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="2.4" fill="currentColor"/></svg>';
 var ICO_DONE = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>';
 var ICO_CLEAR = '<svg viewBox="0 0 20 20" aria-hidden="true">' +
   '<path d="M8.5 16.5H16"/>' +
@@ -399,31 +365,10 @@ var CLEARMENU = null;
    worded dropdown buttons beside the title — and Islam asked for the password
    actions to match, so the slot exists rather than each page inventing a place
    to put its own (§47.2). */
-/* ── THE PAGE IS NAMED ONCE (§121.1) ─────────────────────────────────────
-   Islam: *"there is some duplication in the titles like business unit business
-   unit"* — Business units and Companies each printed their name as the page
-   title and again as the first section's heading.
-
-   The Setup page's name is drawn by the shell now, from the RAIL'S OWN LABEL,
-   so the two can never disagree: five pages were calling themselves something
-   the rail did not (Terminology opened "Labels", Email opened "Communication"),
-   which is §108's rename reaching the navigation and stopping there.
-
-   SO A SECTION HEADING THAT REPEATS THE PAGE'S NAME IS NOT DRAWN — §28's rule
-   that a header saying nothing new still spends its line. It is compared
-   against the name the shell is showing, NOT suppressed by position: the
-   Reporting cycle's first section is "Who has reported", which is a real
-   section name and keeps its heading. The row itself survives either way,
-   because it also carries the page's controls. */
-var PAGE_TITLE = null;
-
 function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
   var editing = EDITING[editKey];
   var open = CLEARMENU === editKey;
-  var dup = PAGE_TITLE != null &&
-            String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
-  return '<div class="phead2' + (dup ? ' named' : '') + '">' +
-    (dup ? '' : '<h2 class="secttl">' + title + '</h2>') +
+  return '<div class="phead2"><h2 class="secttl">' + title + '</h2>' +
     '<div class="hright">' +
       chips.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
       (extra || "") +
@@ -1090,22 +1035,16 @@ function dupeMark(dupes){
       return WORD[d.kind] + " " + d.value + " is on " +
              plural(d.rows.length, "row") + ": " + others;
     }).join(" \u00b7 ");
-    /* ── A MARK, NOT A SENTENCE IN THE NAME COLUMN (§116.4) ────────
-       It read "Emp ID twice" beside the name, in the frozen 216px column — so
-       any row carrying one wrapped to a second line and stood at 52px against
-       its neighbours' 39px. §88's own wrapping fault, in the one column that is
-       never scrolled away, and the same shape the declaration note had.
-
-       The words are not lost: the whole of `why` is the hover, and the queue
-       says it in full above the fields when it opens the person (§116.2). What
-       is on the row is a mark you can see at a glance and run past. */
-    out += '<span class="dupemark" title="' + esc(why) + '">&#8214;</span>';
+    out += '<span class="dupemark" title="' + esc(why) + '">' +
+      hard.map(function(d){ return esc(WORD[d.kind]); }).join(" + ") +
+      ' twice</span>';
   }
   if (near.length) {
     var names = near[0].rows.map(function(x){ return x.name; });
     out += '<span class="dupemark soft" title="' + esc('This row has no employee number and no ' +
       'address, and the name reads like ' + names.join(", ") + '. If they are the same person, ' +
-      'merge the two rows from the \u22ee menu.') + '">&#8776;</span>';
+      'merge the two rows from the \u22ee menu.') + '">looks like ' +
+      esc(shortName(names[0])) + '</span>';
   }
   return out;
 }
@@ -1130,15 +1069,9 @@ function renderPeople(){
      ROWEDIT holds the key of the one row open. One at a time, because two open
      rows are two unsaved states and a question about which Save means which. */
   var mayEdit_ = mayEdit;
-  /* Whether THIS person is the one the dialog has open. The table no longer
-     asks — it never edits — but the dialog does, and `ROWEDIT` is still what
-     carries the snapshot Cancel restores from (§79.2, §110.6). */
   function rowOpen(p){ return mayEdit_ && rowEditIs("people", p.key); }
   var live = typeof SYNC !== "undefined" && SYNC.isLive() && inOffice();
-  /* `retired` was counted here for the header's count line, which §122
-     removed. Deleted rather than left standing: a variable nothing reads is
-     one the next person reads as load-bearing (§24). Retired is still a row
-     state, behind the search. */
+  var retired = PEOPLE.filter(function(p){ return !personActive(p); }).length;
   /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89). A Super user reaches
      everybody; an SMO team member reaches the client's people and not the
      office's — so a count taken over the whole register would promise them a
@@ -1190,14 +1123,11 @@ function renderPeople(){
     return k ? whereLabel(k) : null;
   }
 
-  /* ── THE CHIPS READ IN THE TABLE AND EDIT IN THE DIALOG (§116) ────
-     `editable` was computed here from `rowOpen(p)` for a good reason (a
-     parameter the caller forgot would have put an × on a closed row), and the
-     reason expired when the table stopped editing: there is no open row now, so
-     the answer would always be false and the picker would exist nowhere. It is
-     a parameter again — passed false by the row, true by the dialog — and there
-     are exactly two callers, both in this file, both named. */
-  function roleCell(p, editable){
+  function roleCell(p){
+    /* The role chips' × and the picker belong to the OPEN row, not to a page
+       mode (§79.2). Computed here rather than passed, because a parameter the
+       caller forgot would put an × on a closed row. */
+    var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
     /* ONE ROLE WIDE, AND THE REST BEHIND A "…" (Islam, 2026-08-22). Most people
@@ -1322,94 +1252,6 @@ function renderPeople(){
     return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
   }
 
-  /* ── THE DECLARATION, AS A MARK (§116.4) ──────────────────────────
-     One ring on the value's own line. `.val` is display:block under §88's clip
-     rule, so a SIBLING would start a second line and grow the row — which is
-     exactly the fault this replaces. Inside it, always. */
-  function saidMark(p){
-    if (!SAIDWHERE || SAIDWHERE.__error) return "";
-    var said = SAIDWHERE[p.key];
-    if (!said || said === personAt(p)) return "";
-    return '<span class="saidmark" title="They said they work in ' +
-      esc(roleWhereLabel(said)) + '. Open their row to accept it.">&#9678;</span>';
-  }
-
-  /* ══ THE EDITING HALF, IN ONE PLACE (§116) ═══════════════════════════
-     Every field the register can change, with its label — rendered into the
-     dialog and nowhere else. The table above is values; this is the form.
-
-     THE SAME `data-` ATTRIBUTES AS BEFORE, deliberately: `data-pknown`,
-     `data-pname`, `data-pat` and the rest are what `wire()` binds and what
-     `fieldSaved()` writes through (§71.2), so moving the fields into a dialog
-     changed WHERE they are drawn and nothing about how they save. A rename
-     here would have been a second wiring to keep in step.
-
-     TWO GROUPS, because the row answers two different questions and the second
-     one is the one with consequences: who this person is, and what they may do.
-     `add` drops the fields that cannot exist yet — a person with no key has no
-     roles, no password state and no declaration to accept. */
-  function personFields(p, add){
-    var out = [];
-    var F = function(label, html, wide){ out.push({ label:label, html:html, wide:!!wide }); };
-    F("Group", "who", false);
-    F("Name", '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
-        '" placeholder="' + esc(knownName(p, DNAMES)) + '">');
-    F("Full name", '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">');
-    F("Emp. ID", '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
-        '" placeholder="Emp. ID">');
-    F("Email", '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
-        '" type="email" autocomplete="off" spellcheck="false" placeholder="Email">');
-    F("Mobile", '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
-        '" placeholder="Mobile">');
-    /* THE REASON IS ON THE HOVER (§122). It was a two-line paragraph, the
-       tallest single thing in the dialog, saying the same sentence on every
-       person you open — and the dialog scrolled. It reads as not-editable
-       from its own look (`.pdro`, dashed and quiet) rather than from a
-       sentence explaining that it is. The words are UNCHANGED, and they are a
-       real `title` rather than a `.vwhy` the layout has to make room for. */
-    if (!add)
-      F("Sign-in name", '<span class="pdro mono" title="Minted from the name. ' +
-        'Their password and open sessions are keyed on it, so it cannot be ' +
-        'changed.">' + esc(p.key) + '</span>');
-    F("Group", "where", false);
-    F("Job title", '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
-        '" placeholder="Job title">');
-    /* THE CLIENT'S OWN WORD, and a name not on the list is KEPT rather than
-       refused — a fresh tenant could never read its first file otherwise
-       (§22's locked-dropdown trap, §54). */
-    F("Official BU", '<select class="fld" data-pmainbu="' + esc(p.key) + '">' +
-        '<option value="">&mdash; none &mdash;</option>' +
-        mainbuNamesFor(p).map(function(nm){
-          return '<option value="' + esc(nm) + '"' +
-            (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
-        }).join("") + '</select>' +
-      (p.mainbu && !mainbuBy(p.mainbu)
-        ? '<span class="vwhy">not on the Official BU list</span>' : ''));
-    var drift = mainbuDrift(p);
-    F("Unit", '<select class="fld" data-pat="' + esc(p.key) + '">' +
-        '<option value="">&mdash; nowhere yet &mdash;</option>' +
-        personAtChoices().map(function(o){
-          return '<option value="' + esc(o.v) + '"' +
-            (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
-        }).join("") + '</select>' +
-      (drift && drift !== belongsKey(p)
-        ? '<span class="vwhy">the Official BU list says ' + esc(whereLabel(drift)) + '</span>' : '') +
-      saidWhereNote(p, true));
-    if (!add) F("Roles", '<span class="rolebox rolebox-wide">' + roleCell(p, true) + '</span>', true);
-    return out;
-  }
-  /* The dialog's body. `groups` is a marker rather than a field, so the two
-     headings cannot drift out of step with what sits under them. */
-  function personFieldsHtml(p, add){
-    return '<div class="pdlg">' + personFields(p, add).map(function(f){
-      if (f.label === "Group")
-        return '<div class="pdsect">' + (f.html === "who"
-          ? "Who they are" : "Where they sit, and what they may do") + '</div>';
-      return '<div class="pdf' + (f.wide ? ' wide' : '') + '">' +
-        '<div class="pdfl">' + esc(f.label) + '</div>' + f.html + '</div>';
-    }).join("") + '</div>';
-  }
-
   /* roleWhereCell() was here. It drew the picker's second half — "Choose
      where\u2026" — in the Unit column, and §110 deleted it rather than renaming
      it: the cell's own dropdown already answers that question and the grant
@@ -1497,13 +1339,17 @@ function renderPeople(){
 
      Open state is a single key, not a flag per row: two menus open at once is
      a state nobody wants and one that has to be closed twice. */
-  /* ── ALWAYS THE MENU NOW (§116) ───────────────────────────────────
-     The Save/Cancel branch went with inline editing: those two acts live at the
-     foot of the dialog, where the fields are. What is left is one shape for
-     every row, which is also 84px of column the register gets back — the
-     actions cell used to widen from 49px to 133px the moment a pen was pressed
-     (§110.8), and now it never does. */
-  function kebab(p){
+  function kebab(p, ed){
+    /* ── THE OPEN ROW SHOWS SAVE AND CANCEL, NOT A MENU (spec 012 §2.1) ─
+       The actions cell is where you act on the row, and while the row is open
+       the only two acts are finishing and abandoning. Leaving the ⋮ there as
+       well would offer Retire and Delete on a row with unsaved edits in it —
+       three unrelated outcomes behind one 83px column. */
+    if (ed) {
+      return '<td class="cc kebcell tk-editcell">' +
+        '<button class="linkbu tk-save" data-rowsave="' + esc(p.key) + '">Save</button>' +
+        '<button class="linkbu tk-cancel" data-rowcancel="1">Cancel</button></td>';
+    }
     var open = PMENU === p.key;
     var st = PWSTATES ? PWSTATES[p.key] : null;
     /* THE ORDER IS WRITTEN DOWN, not produced by splicing into an index. The
@@ -1529,7 +1375,7 @@ function renderPeople(){
         (st === "none" || !st ? "Set a password" : "Reset password") + '</button>');
     }
     if (mayEdit) {
-      acts.push('<button data-pedit="' + p.key + '">Edit details</button>');
+      acts.push('<button data-pedit="' + p.key + '">Edit this row</button>');
     }
     if (personActive(p)) {
       acts.push('<button data-as="' + p.key + '">View the platform as them</button>');
@@ -1682,18 +1528,6 @@ function renderPeople(){
      first surface, not beside the last. */
   var DUPES = registerDupes();
   var DNAMES = displayNames();
-  /* ── THE DIALOG'S THREE ENTRY POINTS, PUBLISHED (§116) ─────────────
-     `personDialogHtml`, its foot and its title live inside this render because
-     they use its helpers — `roleCell`, `belongsLabel`, `personFields` and this
-     `DNAMES` — and lifting them out would mean lifting all four with them, or
-     passing a bag of functions to each call.
-
-     So the shell reaches them through one holder, assigned on every People
-     paint. Two things make that safe rather than fragile: the controls that
-     open the dialog exist ONLY on this page, so it cannot be opened before this
-     line has run; and the closures capture the variables rather than their
-     values, so a later paint hands the dialog the register as it now stands. */
-  PEOPLEDLG = { html:personDialogHtml, foot:personDialogFoot, title:personDialogTitle };
   var dupRows = PEOPLE.filter(function(p){
     return personActive(p) && personDupe(p, DUPES).length; }).length;
   var dupId = Object.keys(DUPES.empId).length;
@@ -1713,25 +1547,10 @@ function renderPeople(){
   var noIdent = !identified ? 0 : PEOPLE.filter(function(p){
     return personActive(p) && !personIdentified(p); }).length;
 
-  /* ── THE TABLE READS. THE DIALOG WRITES (§116) ────────────────────
-     Islam: "the edit button can open a pop up modal with the data rather than
-     inline."
-
-     Every cell below used to be `ed ? <field> : <value>`, and that one ternary
-     is where the whole of §110 came from: a field in a 158px cell, under a
-     frozen column, beside a picker whose second half had nowhere to go. The
-     rows are values now and nothing else — no inputs, no selects, no Save and
-     Cancel column, no Add row. `personFields()` is the editing half, drawn
-     once, in a dialog with room.
-
-     WHAT THIS BUYS BEYOND TIDINESS: a read-only table can be as wide as its
-     columns need. Every collision this register has had — §110's + role under
-     Cancel, the Add row's three boxes under the wrong headings, the fields
-     painting over their neighbours — was a control being clicked inside a
-     cell, and none of them survives the move. */
   var rows = PEOPLE.map(function(p, i){
     var home = belongsLabel(p);
     var drift = mainbuDrift(p);
+    var ed = rowOpen(p);
     /* THE FILTERS READ ATTRIBUTES, NOT THE RENDERED TEXT. "Active" is a fact
        about the person; the word "Active" may not be in the row at all, because
        the Status column can be turned off under Columns. A filter that searched
@@ -1744,76 +1563,151 @@ function renderPeople(){
       (personIdentified(p) ? "" : " noident") +
       (dupes.length ? " dupe" : "");
     return '<tr data-tkrow="' + esc(flags) + '" class="' +
-             (personActive(p) ? '' : 'retired') + '">' +
+             (personActive(p) ? '' : 'retired ') + (ed ? 'tk-open' : '') + '">' +
       '<td class="idx">' + (i + 1) + '</td>' +
       /* `pname` so the frozen column can be named rather than counted (§69.19).
          `td:nth-child(2)` would be right today and wrong the first time a
-         column is added before it. */
-      '<td class="namecell" title="' + esc(p.name) + ' · ' + esc(p.key) + '">' +
-        /* INSIDE THE <b>, NEVER BESIDE IT. §88 makes `b` in a setup cell
-           display:block, so a mark placed after it starts a second line and the
-           row grows — measured at 51px against its neighbours' 39px. It is the
-           third time in this section that a thing put NEXT TO a value landed
-           under it (the declaration note, the Official BU disagreement, this),
-           and the rule is the same each time: a mark belongs inside the block
-           it marks. */
-        '<b>' + esc(knownName(p, DNAMES)) + dupeMark(dupes) + '</b></td>' +
-      (showCol("fullname")
-        ? '<td><span class="val">' + esc(p.name) + '</span></td>' : '') +
-      (showCol("empid") ? '<td>' + (p.empId
-        ? '<span class="mono">' + esc(p.empId) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      /* READ-ONLY WHEREVER IT APPEARS. The key is minted (§35) and it is what
-         `credentials` and `sessions` are keyed on — it is shown so somebody can
-         be TOLD it, never so it can be changed. */
+         column is added before it, and the whole point of the class is that
+         the column chooser can reorder everything to its right. */
+      /* ── NAME, AND FULL NAME BESIDE IT (§93.8) ──────────────────────
+         Islam: "we can have it Name and Full Name."
+
+         This is the frozen column (§69.19), so every character it takes is
+         taken from every other column at every scroll position — which is what
+         made §69.21 cut it to two names, §81.1 lengthen it for the pair that
+         clashed, and §93.6 widen it to hold the whole thing at 392px. Splitting
+         the two facts is the answer all three were reaching for: what somebody
+         is CALLED lives here, and what the employee file HOLDS lives in its own
+         hideable column next door.
+
+         WHAT IS EDITED HERE IS `known`, NOT `name`. §69.21's trap, met from the
+         other side: back then the input carried the whole name because
+         shortening the VALUE would have overwritten the register's real names
+         on the first keystroke. Now the short form is a field of its own, so
+         the input writes to that field and the full name is edited in the
+         column that shows it. Neither can quietly become the other.
+
+         The placeholder is the guess, so somebody who has never touched this
+         sees what it will fall back to rather than an empty box. */
+      '<td class="namecell" title="' + esc(p.name) + ' \u00b7 ' + esc(p.key) + '">' + (ed
+        ? '<input class="fld" value="' + esc(p.known || "") + '" data-pknown="' + p.key +
+          '" placeholder="' + esc(knownName(p, DNAMES)) + '">'
+        : '<b>' + esc(knownName(p, DNAMES)) + '</b>' +
+          dupeMark(dupes)) + '</td>' +
+      /* THE FULL NAME, AND IT IS STILL WHAT THE FILE IS MATCHED AGAINST — but
+         never what somebody is IDENTIFIED by (Islam: "for the identifiers keep
+         it for the ID and email only"). It is back under §88's clip standard,
+         because it is an ordinary column again: one line, capped, the whole
+         value one hover away. */
+      (showCol("fullname") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.name) + '" data-pname="' + p.key + '">'
+        : '<span class="val">' + esc(p.name) + '</span>') + '</td>' : '') +
+      /* The employee number. Off by default — it is the client's own
+         identifier and matters when a file is being reconciled, not when
+         somebody is looking up who runs Retail. */
+      (showCol("empid") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.empId || "") + '" data-pempid="' + p.key +
+          '" placeholder="Emp. ID">'
+        : (p.empId ? '<span class="mono">' + esc(p.empId) + '</span>'
+                   : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      /* READ-ONLY WHEREVER IT APPEARS, including in edit mode. The key is
+         minted (§35) and it is what `credentials` and `sessions` are keyed on
+         — retyping it would leave a person whose password and open sessions
+         belong to a key nobody holds. It is shown so somebody can be TOLD it,
+         not so it can be changed. */
       (showCol("key") ? '<td><span class="mono">' + esc(p.key) + '</span></td>' : '') +
-      (showCol("title") ? '<td>' + (p.title
-        ? '<span class="val">' + esc(p.title) + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      /* ── A DISAGREEMENT IS A MARK TOO (§116.4) ─────────────────────
-         Both notes this cell and the next could add — "not on the Official BU
-         list", "the list says Retail Stores" — were a SECOND LINE under a
-         value, so any row carrying one stood at 51px against its neighbours'
-         39px. Exactly what the declaration note and the duplicate mark were
-         doing, and exactly the same answer: one glyph on the value's own line,
-         the whole sentence on the hover.
+      /* The job title is information and nothing else. It sits in the register
+         because "who is Mennah" is a fair question; it is never read when
+         deciding what anyone may see (§33). */
+      (showCol("title") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.title || "") + '" data-ptitle="' + p.key +
+          '" placeholder="Job title">'
+        : (p.title ? '<span class="val">' + esc(p.title) + '</span>'
+                   : '<span class="why" style="margin:0">not given</span>')) + '</td>' : '') +
+      /* MAIN BU IS THE CLIENT'S WORD, BU IS OURS (§54.1). The first is typed
+         (or arrives in the file) and is never interpreted; the second is read
+         through the BU list and is what decides which pages open.
 
-         `≠` rather than a warning colour: these two say the register and the
-         client's own list DISAGREE, which is a thing to know rather than a
-         thing that is broken. */
-      (showCol("mainbu") ? '<td>' + (p.mainbu
-        ? '<span class="val">' + esc(p.mainbu) +
-          (mainbuBy(p.mainbu) ? '' : '<span class="driftmark" title="' + esc(p.mainbu) +
-            ' is not on the Official BU list.">&ne;</span>') + '</span>'
-        : '<span class="why" style="margin:0">&mdash;</span>') + '</td>' : '') +
-      /* ── THE DECLARATION IS A MARK, NOT A SENTENCE (§116.4) ─────────
-         Islam: the note "appears glitched and grows the row size with the word
-         use it." It did: "They said Retail Stores — Use it" is a second line in
-         a 150px cell, so every row carrying one stood at 57px beside its
-         neighbours' 39px — §88's own wrapping fault, arriving by a road §88 did
-         not walk.
+         WHERE THEY DISAGREE, THE CELL SAYS SO rather than either being
+         quietly corrected. The list can be re-pointed after a file was loaded
+         and a person can be moved by hand afterwards — neither is a fault, and
+         a mapping that silently moved thirty people the next time a row
+         changed would be the worst kind of helpful. */
+      /* BOTH ARE EDITABLE NOW (Islam, 2026-08-24: "in the People register I need
+         to be able to edit the Official BU and the Unit"). They were the only
+         two facts on the register that could be READ and not corrected: the
+         Official BU arrives with the file and the Unit was writable only
+         through the "They said X — Use it" note, so a row the file placed
+         wrongly could be fixed nowhere at all.
 
-         A mark on the value's own line instead, with the whole sentence on the
-         hover — the shape §87 already uses for a duplicate. The ACT moves to
-         where acts now live: the dialog, reached from the attention queue,
-         which is also what makes it findable rather than something to spot. */
-      (showCol("bu") ? '<td>' + (function(){
-          var marks = saidMark(p) + (drift && drift !== belongsKey(p)
-            ? '<span class="driftmark" title="' + esc(p.mainbu || "") + ' points at ' +
-              esc(whereLabel(drift)) + ' on the Official BU list.">&ne;</span>' : '');
-          return home
-            ? '<span class="val">' + esc(home) + marks + '</span>'
-            : '<span class="why" style="margin:0">&mdash;' + marks + '</span>';
-        })() + '</td>' : '') +
-      (showCol("email") ? '<td class="wrapany">' + copyable(p.email, "val") + '</td>' : '') +
-      (showCol("phone") ? '<td>' + copyable(p.phone, "mono") + '</td>' : '') +
+         THE OFFICIAL BU IS A SELECT, NOT A FIELD, and the Unit is too, for
+         opposite reasons that are both §54's: the Official BU list is the
+         client's own vocabulary and is SOFT (a name not on it is added
+         unmapped by the file reader, because a fresh tenant could never read
+         its first file otherwise), so the select carries what the list holds
+         plus whatever this row already says. A UNIT IS NOT SOFT — it either
+         exists here or it does not, and typing a new one cannot conjure one. */
+      (showCol("mainbu") ? '<td>' + (ed
+        ? '<select class="fld" data-pmainbu="' + esc(p.key) + '">' +
+            '<option value="">&mdash; none &mdash;</option>' +
+            mainbuNamesFor(p).map(function(nm){
+              return '<option value="' + esc(nm) + '"' +
+                (mainbuKey(nm) === mainbuKey(p.mainbu) ? " selected" : "") + '>' + esc(nm) + '</option>';
+            }).join("") + '</select>' +
+          (p.mainbu && !mainbuBy(p.mainbu)
+            ? '<span class="why">not on the Official BU list</span>' : '')
+        : (p.mainbu
+            ? '<span class="val">' + esc(p.mainbu) + '</span>' +
+              (mainbuBy(p.mainbu) ? '' : '<span class="why">not on the Official BU list</span>')
+            : '<span class="why" style="margin:0">&mdash;</span>')) + '</td>' : '') +
+      (showCol("bu") ? '<td>' + (ed
+        ? '<select class="fld" data-pat="' + esc(p.key) + '">' +
+            '<option value="">&mdash; nowhere yet &mdash;</option>' +
+            personAtChoices().map(function(o){
+              return '<option value="' + esc(o.v) + '"' +
+                (o.v === belongsKey(p) ? " selected" : "") + '>' + esc(o.label) + '</option>';
+            }).join("") + '</select>' +
+          (drift && drift !== belongsKey(p)
+            ? '<span class="why">the list says ' + esc(whereLabel(drift)) + '</span>' : '')
+        /* A VALUE, NOT A CHIP (§93). Islam: "the unit selected should be a
+           normal selection not a pill." A chip is what the BU list's mapping
+           cell draws, where several sit side by side and the boundary between
+           them is the whole point; here there is exactly one, in a column
+           whose heading already says what it is, so the border was drawing a
+           box around the only thing in the cell. It reads as the other
+           read-mode values on the row now. */
+        : (home
+            ? '<span class="val">' + esc(home) + '</span>' + (drift
+                ? '<span class="why" title="' + esc(p.mainbu) + ' points at ' +
+                  esc(whereLabel(drift)) + ' on the Official BU list">the list says ' +
+                  esc(whereLabel(drift)) + '</span>'
+                : '')
+            : (drift
+                ? '<span class="why" style="margin:0">&mdash; the list says ' +
+                  esc(whereLabel(drift)) + '</span>'
+                : '<span class="why" style="margin:0">&mdash;</span>'))) +
+        saidWhereNote(p, ed) + '</td>' : '') +
+      /* Email above the number. Both are how you reach somebody, and giving
+         each a column of its own made an eleven-column register — the pair is
+         one answer to one question. */
+      (showCol("email") ? '<td class="wrapany">' + (ed
+        ? '<input class="fld" value="' + esc(p.email || "") + '" data-pemail="' + p.key +
+          '" placeholder="Email">'
+        : copyable(p.email, "val")) + '</td>' : '') +
+      (showCol("phone") ? '<td>' + (ed
+        ? '<input class="fld" value="' + esc(p.phone || "") + '" data-pphone="' + p.key +
+          '" placeholder="Mobile">'
+        : copyable(p.phone, "mono")) + '</td>' : '') +
       (showCol("roles")
-        ? '<td class="roles"><span class="rolebox">' + roleCell(p, false) + '</span></td>' : '') +
+        ? '<td class="roles"><span class="rolebox">' + roleCell(p) + '</span></td>' : '') +
+      /* Standing before Password, at Islam's direction — whether somebody can
+         sign in at all is the question you ask before what their password is
+         doing. */
       (showCol("status")
         ? '<td class="cc"><span class="pill ' + (personActive(p) ? "good" : "none") + '">' +
           (personActive(p) ? "Active" : "Retired") + '</span></td>' : '') +
       (showCol("password") ? pwCell(p) : '') +
-      kebab(p) + '</tr>';
+      kebab(p, ed) + '</tr>';
   }).join("");
 
   var cols = 3 + PEOPLE_COLS.filter(function(c){
@@ -1831,101 +1725,31 @@ function renderPeople(){
      never "add them again": the line names them, offers their row, and keeps
      Add anyway for the case where it really is a coincidence somebody has
      checked. */
-  /* THE ADD ROW LEFT THE TABLE (§116.3). It was one cell spanning nine columns
-     with three boxes laid out inside it, so not one of them sat under its own
-     heading: `Full name` ran across Name, Full Name, Job title and Official BU;
-     `Emp ID` sat under a column headed UNIT; `Email` spanned six and ended
-     under the frozen actions column, which clipped it. A reader maps a field to
-     the heading above it, and every one of those mappings was wrong.
-
-     `+ Add someone` is in the header and it opens the same dialog Edit opens,
-     with the fields empty (§116.3) — so the warning that somebody is already on
-     the register (§87.3) has room to be read, which in a table row it never
-     did. */
-  var addRow = "";
-
-  /* ══ THE PERSON DIALOG (§116) ════════════════════════════════════════
-     Three ways in and one body: the ⋮'s Edit details, `+ Add someone`, and the
-     attention queue. They differ in what is said ABOVE the fields and which two
-     buttons sit below them — never in the fields themselves, because a form
-     that is subtly different depending on how you reached it is two forms.
-
-     IT IS THE PLATFORM'S OWN DIALOG (§90): `openModalHtml` makes the page
-     behind inert, returns focus to whatever opened it, and closes on Escape.
-     Nothing new to design, and the queue's "Save & next" is the same mechanism
-     the merge wizard already uses to move between steps (§90.4).
-
-     PDLG holds which person is open and why. It is screen state and never the
-     tenant's (§25.2). */
-  function personDialogHtml(){
-    if (!PDLG) return "";
-    var p = personBy(PDLG.key);
-    if (!p) return "";
-    var add = PDLG.mode === "add";
-    var q = PDLG.mode === "queue" ? attentionOf(p) : null;
-    /* WHY THIS PERSON IS IN THE QUEUE, said above the fields rather than found
-       among them. It is re-asked here rather than carried in PDLG, so a thing
-       fixed a moment ago stops being said the moment it is fixed (§48.2: never
-       trust the render that drew the control). */
-    var band = q
-      ? '<div class="pdband">' + q.why.map(function(w){
-          return '<span>' + esc(w.say) + '</span>'; }).join("") + '</div>'
-      : "";
-    var stop = add && NEWPERSON.hit
-      /* ── THE STOP, AND THE ONE WAY PAST IT (§87.3) ────────────────
-         Never "add them again": it names who is already here, offers their row,
-         and keeps Add anyway for the case where it really is a coincidence
-         somebody has checked. A stop any further press gets through is a
-         message that goes away by itself. */
-      ? (function(){ var h = personBy(NEWPERSON.hit);
-          return '<div class="pdband bad"><span><b>' + esc(h ? h.name : NEWPERSON.hit) +
-            ' is already on the register</b> with that ' +
-            (NEWPERSON.hitBy === "empId" ? "employee number" : "address") + '.</span>' +
-            '<span class="pdways">' +
-            '<button class="linkbu" data-pgo="' + esc(NEWPERSON.hit) + '">Open their row</button>' +
-            '<button class="linkbu" data-pdlg-anyway="1">Add anyway as a new person</button>' +
-            '</span></div>'; })()
-      : add && NEWPERSON.warn
-      ? (function(){ var w = personBy(NEWPERSON.warn);
-          return '<div class="pdband"><span><b>' + esc(w ? w.name : NEWPERSON.warn) +
-            '</b> is already here and the name reads the same. Add if they are two ' +
-            'people; if not, give the role to them instead.</span></div>'; })()
-      : "";
-    return band + stop + personFieldsHtml(p, add);
-  }
-  function personDialogFoot(){
-    if (!PDLG) return "";
-    if (PDLG.mode === "add")
-      return '<span class="why" style="margin:0">Only a name is needed. Everything ' +
-        'else can wait.</span><span class="pdrt">' +
-        '<button class="linkbu" data-pdlg-close="1">Cancel</button>' +
-        '<button class="linkbu tk-save" data-pdlg-add="1">Add them</button></span>';
-    if (PDLG.mode === "queue") {
-      var left = PDLG.at + 1 < PDLG.queue.length;
-      return '<span class="why" style="margin:0">' +
-          (left ? plural(PDLG.queue.length - PDLG.at - 1, "more") + ' after this one'
-                : 'This is the last one.') + '</span><span class="pdrt">' +
-        '<button class="linkbu" data-pdlg-skip="1">' + (left ? "Skip" : "Close") + '</button>' +
-        (left ? '<button class="linkbu tk-save" data-pdlg-next="1">Save &amp; next</button>'
-              : '<button class="linkbu tk-save" data-pdlg-close="1">Save &amp; close</button>') +
-        '</span>';
-    }
-    return '<span class="pdrt">' +
-      '<button class="linkbu" data-pdlg-cancel="1">Cancel</button>' +
-      '<button class="linkbu tk-save" data-pdlg-close="1">Save</button></span>';
-  }
-  function personDialogTitle(){
-    if (!PDLG) return { t:"", s:"" };
-    if (PDLG.mode === "add") return { t:"Add someone", s:"They appear on the register at once." };
-    var p = personBy(PDLG.key);
-    var nm = p ? knownName(p, DNAMES) : "";
-    if (PDLG.mode === "queue")
-      return { t:nm, s:(PDLG.at + 1) + " of " + PDLG.queue.length + " needing attention" };
-    var held = p ? personRoles(p) : [];
-    return { t:nm, s:held.length
-      ? held.map(function(r){ return roleName(r.role) + " · " + whereLabel(r.at); }).join(" · ")
-      : "No role" };
-  }
+  var addHit = NEWPERSON.hit ? personBy(NEWPERSON.hit) : null;
+  var addWarn = NEWPERSON.warn ? personBy(NEWPERSON.warn) : null;
+  var addRow = mayEdit
+    ? '<tr class="newrow"><td class="idx">+</td><td colspan="' + (cols - 2) + '">' +
+        '<div class="addppl">' +
+          '<input class="fld" id="newPersonName" placeholder="Full name" ' +
+            'value="' + esc(NEWPERSON.name) + '">' +
+          '<input class="fld" id="newPersonId" placeholder="Emp ID" size="10" ' +
+            'value="' + esc(NEWPERSON.empId) + '">' +
+          '<input class="fld" id="newPersonEmail" placeholder="Email" type="email" ' +
+            'autocomplete="off" spellcheck="false" value="' + esc(NEWPERSON.email) + '">' +
+        '</div>' +
+        (addHit
+          ? '<div class="addstop"><b>' + esc(addHit.name) + ' is already on the register</b> ' +
+            'with that ' + (NEWPERSON.hitBy === "empId" ? 'employee number' : 'address') + '. ' +
+            '<button class="linkbu" data-pgo="' + esc(addHit.key) + '">Open their row</button>' +
+            ' \u00b7 <button class="linkbu" data-padd="anyway">Add anyway as a new person</button>' +
+            '</div>'
+          : addWarn
+          ? '<div class="addwarn"><b>' + esc(addWarn.name) + '</b> is already here and the name ' +
+            'reads the same. Add if they are two people; if not, give the role to them instead.' +
+            ' <button class="linkbu" data-pgo="' + esc(addWarn.key) + '">Open their row</button></div>'
+          : '') +
+      '</td><td class="cc"><button class="linkbu" data-padd="1">Add</button></td></tr>'
+    : '';
 
   /* ── THE COLLECTIVE ACTIONS (Islam, 2026-08-22) ────────────────────
      "we need the collective action list of password reset for all or for
@@ -2117,75 +1941,80 @@ function renderPeople(){
      "the register" in every sentence written about it since §35; the heading
      said something else, so the word people use and the word on the door were
      different words. */
-  /* ── THE HEADER IS ONE ROW, AND THE ALARMS ARE A QUEUE (§116) ─────
-     Islam: "remove the 76 rows text it's not needed and remove the quick
-     filters", and "let's refine the design of the top panel to become more
-     concise."
-
-     It carried NINE controls before the table began: a scope pill, two counts,
-     up to six alarm chips, three menus, a search box and five filter chips,
-     over two rows — and at 1280 the right-hand end ran off the page, so
-     "Register file" was the last thing readable.
-
-     THE ALARM CHIPS ARE NOT DELETED, THEY ARE ANSWERED. Each named a number
-     and pointed at rows you then had to find by eye; they are one button now,
-     and pressing it opens the first of them (§116.2). A count that cannot take
-     you to what it counts is a count that makes work.
-
-     THE TWO COUNTS SAID THE SAME THING TWICE — "N people active" in the header
-     and "N rows" at the end of the filter row. He asked for the second to go;
-     the first stays as a quiet word beside the title rather than a chip,
-     because a register with no size at all is a page that will not say how big
-     it is.
-
-     WHAT IS KEPT AND WHY: the search box. With the filters gone it is the only
-     way to find a row by hand, and it is the one control on the row that costs
-     nothing to leave in.
-
-     UNITS WITH NO CUSTODIAN KEEPS ITS OWN CHIP, and that is not an oversight
-     (§93.4): it is the one outstanding thing on this page that is not about a
-     PERSON, so it cannot be a stop in a queue of people — there would be
-     nobody to open. */
-  var queue = attentionQueue();
-  var attnBtn = !mayEdit || !queue.length ? "" :
-    '<button class="attnbtn" data-attn="1" ' +
-      'title="Open the first of them, fix it, and move to the next">' +
-      ICO_ATTN + 'Attention <span class="attnn">' + queue.length + '</span></button>';
-  var addBtn = !mayEdit ? "" :
-    '<button class="addbtn" data-padd-open="1">+ Add</button>';
-
-  /* THE ONE OUTSTANDING THING THAT IS NOT A PERSON (§93.4), and it is now a
-     CHIP ON THE ROW rather than a line under it (§122). It cannot join the
-     Attention queue — a unit is not somebody you can open — so removing the
-     count line would have taken it with it, which is why it moved rather than
-     went. DRAWN ONLY WHEN THERE IS ONE: a chip that is usually absent is a
-     mark, and one that is always there is furniture (§41's budget). */
-  var noCustChip = !noCust.length ? "" :
-    '<span class="pnocust" title="' + esc(noCust.map(function(k){
-        return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
-      (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody the ' +
-      'Strategy custodian role from their row here.">' +
-      plural(noCust.length, "unit") + ' with no custodian</span>';
-
-  /* NO BADGE AND NO COUNT LINE (§122). Islam: "the SMO badge remove it and
-     remove the 77 people active text ... and accordingly the whole table
-     should be just below the buttons line."
-
-     THE BADGE SAID WHO YOU ARE, which the chrome says already and says on
-     every page. THE COUNT SAID HOW BIG THE REGISTER IS, and the table under
-     it is that — §116 had already dropped the second copy of it from the
-     filter row for the same reason, and kept this one; keeping one copy of
-     something nobody asked for is still keeping it.
-
-     AND THE TABLE FOLLOWS IMMEDIATELY, which is the part of the ask that is
-     not a removal: with nothing between the row and the table, `section("")`
-     is what puts the table there, and the header's own 14px bottom margin is
-     the whole of the gap. */
   return cfgHead("People register",
-      [],
-      "people", false, null, null,
-      '<span class="hsearch">' + tkSearchOnly("people", "Search the register\u2026") + '</span>' +
-      attnBtn + noCustChip + addBtn + fileMenu + colMenu + pwMenu) +
+      ['<span class="pill kind">SMO</span>',
+       plural(PEOPLE.length - retired, "person").replace("persons", "people") + ' active'].concat(
+        retired ? [retired + ' retired'] : []).concat(
+        noPw ? ['<span class="pill warn">' + noPw + ' with no password</span>'] : []).concat(
+        /* A count with no title is a count somebody has to go looking for.
+           Both name the rows, because both are fixed by editing exactly those
+           rows and nothing else on the page points at them. */
+        noEmail ? ['<span class="pill warn" title="Sign-in takes the email address on ' +
+          'this register. Somebody with none can still sign in with the name in the ' +
+          'Sign-in name column — turn it on under Columns.">' + noEmail +
+          ' with no email</span>'] : []).concat(
+        dupId ? ['<span class="pill bad" title="' + esc(Object.keys(DUPES.empId).map(function(k){
+            return k + ": " + DUPES.empId[k].map(function(x){ return x.name; }).join(", ");
+          }).join(" \u00b7 ")) + '">' + plural(dupId, "employee number") +
+          ' on more than one row</span>'] : []).concat(
+        dupName ? ['<span class="pill bad" title="' + esc(Object.keys(DUPES.name).map(function(k){
+            return DUPES.name[k].map(function(x){ return x.name + " (" + (x.empId || x.key) + ")"; }).join(" / ");
+          }).join(" \u00b7 ")) + '">' + plural(dupName, "name") +
+          ' on more than one row</span>'] : []).concat(
+        dupAddr.length ? ['<span class="pill bad" title="' + esc(dupAddr.map(function(a){
+            return a + ": " + addrRows[a].join(", ");
+          }).join(" \u00b7 ")) + '">' + plural(dupAddr.length, "address") +
+          ' on more than one row</span>'] : []).concat(
+        /* AMBER, NOT RED (§87.2). The three above are collisions and are
+           always wrong. These two are a resemblance and a gap: a row that
+           looks like somebody else may be a second person with a similar
+           name, and a row with no identifier is a normal thing to have typed
+           five minutes ago. Both need looking at; neither is broken. */
+        likely ? ['<span class="pill warn" title="' + esc((DUPES.likely || []).map(function(l){
+            var a = personBy(l.key), b = personBy(l.other);
+            return (a ? a.name : l.key) + " / " + (b ? b.name : l.other);
+          }).join(" \u00b7 ")) + '">' + plural(likely, "possible duplicate") + '</span>'] : []).concat(
+        /* THE UNITS NOBODY IS KEEPING (§93.4). Amber for the same reason the
+           two above are: a unit between custodians is a normal state on a
+           Tuesday, and a permanent one is a problem. The names are on hover,
+           because a count with nothing behind it sends somebody looking. */
+        noCust.length ? ['<span class="pill warn" title="' + esc(noCust.map(function(k){
+            return UNITS[k].name; }).join(", ")) + ' \u2014 nobody is keeping ' +
+          (noCust.length === 1 ? "this plan" : "these plans") + ' up to date. Give somebody ' +
+          'the Strategy custodian role from their row here.">' +
+          plural(noCust.length, "unit") + ' with no custodian</span>'] : []).concat(
+        noIdent ? ['<span class="pill warn" title="A row with no employee number and no email ' +
+          'cannot be matched by an upload, so the next file adds them a second time. It is what ' +
+          'put three people on this register twice.">' + noIdent +
+          ' with nothing to identify them</span>'] : []),
+      /* NO PEN (spec 012 §2.1). It turned on a mode that no longer exists —
+         `editable` is per row now — so it would have been a control that
+         changes nothing, which this project holds is worse than no control
+         (§37, §72.10). Editing is on the row; Add is at the foot of the table
+         and gated on `mayEdit` rather than on a mode, so it is reachable
+         without opening a row first. */
+      "people", false, null, null, fileMenu + colMenu + pwMenu) +
+
+    /* NO HEADING AND NO NOTE OVER THE TABLE (Islam, 2026-08-24). The page's
+       own heading now reads "People register" two lines above, so a section
+       called "The register" restated it — §28's rule about an empty header
+       spending its line, with the header full of a word that was already
+       said. The sentence under it explained the MODEL (a role is one fact
+       with two editing surfaces), and the knowledge base is where the model
+       lives (§30). */
+    tkBar("people", {
+      placeholder: "Search the register\u2026",
+      filters: [{ k:"active",  label:"Active" },
+                { k:"retired", label:"Retired" },
+                { k:"nopw",    label:"No password",
+                  title:"People who have never had one issued" },
+                { k:"noemail", label:"No email",
+                  title:"They cannot sign in with an address until one is here" }]
+        .concat(noIdent ? [{ k:"noident", label:"No ID or email (" + noIdent + ")",
+          title:"An upload cannot match these rows, so the next file adds them again" }] : [])
+        .concat(dupRows ? [{ k:"dupe", label:"Duplicates (" + dupRows + ")",
+          title:"Rows sharing an employee number, an address or a full name, and rows with " +
+                "nothing to identify them that read like somebody already here" }] : []) }) +
 
     section("", "",
       "",
@@ -3033,19 +2862,12 @@ function renderKB(){
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
            'owner\u2019s answer for Mobile and the other-unit answer for Retail, from the ' +
            'same two roles, without either being asked about the wrong thing.' },
-      { h: "The own columns answer in two halves",
-        p: 'Strategy is the <b>words as agreed</b> — Foundation, the SWOT, the Plan, and on a ' +
-           'function a capability\u2019s definition and projects. Reporting is the <b>figures ' +
-           'entered against them</b>, drafts and submitting. Strategy edit ships with the ' +
-           'office alone, because a plan you are measured against is not yours to rewrite — ' +
-           'and opening it to a role is a deliberate act made on this table, not a side ' +
-           'effect of letting the same people report (§117).' },
-      { h: "Two things the table does not decide",
-        p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
-           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
-           'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
-           'by the group CEO and the SMO. These are rules; they do not change when the ' +
-           'table does.' },
+      { h: "Three things the table does not decide",
+        p: 'The <b>knowledge base</b> is readable by everyone, always. A <b>plan</b> is ' +
+           'corrected by the SMO alone, however much access the unit\u2019s people hold — a ' +
+           'plan you are measured against is not yours to rewrite. And <b>focus measures</b>, ' +
+           'what carries reward, are marked by the group CEO and the SMO. These are rules; ' +
+           'they do not change when the table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
@@ -3252,7 +3074,7 @@ function renderKB(){
        secs.length + ' sections', recipeCount() + ' how-tos'],
       null, false) +
     /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
-       exist now (§116); `tourBlock` is the other session's onboarding tour
+       exist now (§111); `tourBlock` is the other session's onboarding tour
        (§107), and it opens the page because somebody who has just arrived
        needs the tour before they need the reference. */
     '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
@@ -4375,7 +4197,7 @@ function renderOverview(){
         '<div class="ovcyc-name">' + esc(REVIEW.name) +
           ' <span class="badge b-' + (open ? "open" : "none") + '">' +
           (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant
+        /* ONE SENTENCE, TWO SURFACES (§116.1) — and it says so when a tenant
            has set no dates, rather than printing the separators alone. */
         '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
       '</div>' +
@@ -5252,7 +5074,7 @@ function renderComms(){
       '</span>' +
     '</span></td></tr></tbody></table></div>';
 
-  return cfgHead("Email",
+  return cfgHead("Communication",
       ['<span class="pill kind">SMO</span>',
        set ? 'set for this tenant' : 'using the defaults'],
       "comms", mayEdit, null) +
@@ -5966,17 +5788,6 @@ var TKSORT = {};    /* table id -> {col, dir} — the view's order, never the da
    a table crosses the threshold as the tenant grows rather than when somebody
    remembers the page (spec §2.2). */
 var TK_SEARCH_FROM = 9;
-/* ── THE SEARCH BOX ON ITS OWN (§116) ─────────────────────────────────
-   The register's header carries the search and nothing else off this bar — no
-   filter chips and no row count, both removed at Islam's word — so the field
-   is its own function and `tkBar` calls it. One definition, or the register's
-   box and every other table's would drift apart in placeholder, in type and in
-   the attribute the filter is keyed on (§53.5). */
-function tkSearchOnly(id, placeholder){
-  return '<input class="fld tk-search" data-tksearch="' + esc(id) + '" type="search" ' +
-    'placeholder="' + esc(placeholder) + '" autocomplete="off" ' +
-    'value="' + esc(TKQ[id] || "") + '">';
-}
 function tkBar(id, opts){
   opts = opts || {};
   if (typeof opts.rows === "number" && opts.rows < TK_SEARCH_FROM &&
@@ -5988,7 +5799,9 @@ function tkBar(id, opts){
       '>' + esc(x.label) + '</button>';
   }).join("");
   return '<div class="tk-bar" data-tkbar="' + esc(id) + '">' +
-    tkSearchOnly(id, opts.placeholder || "Search…") +
+    '<input class="fld tk-search" data-tksearch="' + esc(id) + '" type="search" ' +
+      'placeholder="' + esc(opts.placeholder || "Search…") + '" autocomplete="off" ' +
+      'value="' + esc(TKQ[id] || "") + '">' +
     (chips ? '<div class="tk-chips">' + chips + '</div>' : '') +
     '<span class="tk-count" data-tkcount="' + esc(id) + '"></span>' +
   '</div>';

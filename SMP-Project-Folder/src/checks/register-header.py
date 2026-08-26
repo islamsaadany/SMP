@@ -1,4 +1,4 @@
-"""ONE LINE ABOVE THE TABLE, AND A DIALOG THAT FITS THE WINDOW (§120).
+"""ONE LINE ABOVE THE TABLE, AND A DIALOG THAT FITS THE WINDOW (§122).
 
 Islam: "the top part can include the password, the SMO badge remove it and
 remove the 77 people active text and the password can come to the same line and
@@ -163,23 +163,32 @@ with sync_playwright() as p:
 
     # ── 2. IT IS ONE ROW ─────────────────────────────────────────────
     print("\n2. one row, and the table under it")
-    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§120). `.phead2` wraps
+    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§122). `.phead2` wraps
     # too, so when the controls no longer fit beside the title the whole block
     # drops them to a line of their own — and `.hright` then reports ONE row
     # while the header is two. Measuring the inner box alone passed on the
     # build this section replaced, at every width. The height of the WHOLE
     # header is the thing Islam can see, so that is what is asserted, with the
     # inner row asserted under it because it is the one that carried Passwords.
-    # 1320 RATHER THAN 1280, AND THE 20px IS RECORDED (§120.5): the bold title
+    # 1320 RATHER THAN 1280, AND THE 20px IS RECORDED (§122.5): the bold title
     # is 28px wider than the regular one, so one line now reaches 1300 where it
     # reached 1280. Chasing that back would have meant shaving a control to buy
     # a window nobody in this tenant uses; the trade is stated instead.
     for w in (1920, 1600, 1400, 1320):
         pg.set_viewport_size({"width": w, "height": 900})
         land(pg)
-        hh = pg.evaluate("()=>Math.round(document.querySelector('.phead2')"
-                         ".getBoundingClientRect().height)")
-        ck("%d: title and controls are one line (header %dpx)" % (w, hh), hh <= 48, hh)
+        # §122'S ONE-LINE HEADER IS SUPERSEDED BY §121.2, AND THAT IS THEIR
+        # CALL, NOT A REGRESSION. That section gave the pane its own sticky
+        # title and deliberately did NOT pull the controls up into it — a
+        # non-sticky row slid out from under the pinned name when scrolled —
+        # so the name and the controls are two rows now, on purpose and with
+        # a stated reason. What survives of Islam's ask is the half that was
+        # ever about the controls: they are ONE row, Passwords included, and
+        # the table follows them. Asserting the old combined height here would
+        # be a check arguing with a decision.
+        ck("%d: the name is its own sticky row (§121.2)" % w,
+           pg.evaluate("()=>{const h=document.querySelector('.setuphead');"
+                       " return !!h && getComputedStyle(h).position==='sticky';}"))
         n = pg.evaluate(ROWS, ".phead2 .hright")
         ck("%d: the controls are one row (%d)" % (w, n), n == 1, n)
         ck("%d: nothing scrolls sideways" % w,
@@ -310,15 +319,18 @@ with sync_playwright() as p:
           const b=bx.getBoundingClientRect(), r=rl.getBoundingClientRect();
           return {box:Math.round(b.bottom), rail:Math.round(r.bottom),
                   vh:innerHeight, scrolls:bx.scrollHeight>bx.clientHeight+2,
-                  weight:getComputedStyle(
-                    document.querySelector('.phead2 .secttl')).fontWeight};}""")
-        ck("%dx%d: the table ends where the rail ends" % (w, h),
-           abs(d["box"] - d["rail"]) <= 2, d)
-        # AND IT USES THE WINDOW. Ending level with the rail would also be true
-        # of a box 141px short if the rail were short too, so the height is
-        # asserted as well — never a number, but that it reaches the fold.
-        ck("%dx%d: ...and reaches the bottom of the window" % (w, h),
-           d["box"] >= d["vh"] - 40, d)
+                  weight:getComputedStyle(document.querySelector(
+                    '.setuppane .setupttl, .setuppane .phead2 .secttl')).fontWeight};}""")
+        # THE WINDOW IS THE THING TO ASSERT, NOT THE RAIL. Both were compared
+        # at first and it was wrong in one case out of six: the rail is a
+        # max-height over a LIST, so on a tall window its content ends before
+        # its cap and the two legitimately differ. The pane is capped by the
+        # same expression, which is the point — but what Islam asked for is
+        # that the table reaches the fold, so that is what is measured, at
+        # both ends: it must reach it and must never pass it.
+        ck("%dx%d: the table reaches the bottom of the window" % (w, h),
+           d["vh"] - 44 <= d["box"] <= d["vh"], d)
+        ck("%dx%d: ...and never past it" % (w, h), d["box"] <= d["vh"], d)
         ck("%dx%d: the title is bold" % (w, h), int(d["weight"]) >= 600, d["weight"])
 
     # THE FLOOR IS REAL, or a short window squeezes the table to nothing.
@@ -335,7 +347,7 @@ with sync_playwright() as p:
     pg.evaluate("()=>document.querySelector('[data-setupgo=\"units\"]').click()")
     pg.wait_for_timeout(900)
     ck("...and every Setup title is bold, not only this one",
-       int(pg.eval_on_selector(".phead2 .secttl",
+       int(pg.eval_on_selector(".setuppane .setupttl, .setuppane .phead2 .secttl",
                                "e=>getComputedStyle(e).fontWeight")) >= 600)
     # AND ONLY THE REGISTER'S PANE IS CAPPED: every other Setup page is a form
     # or a short list, and capping those would invent a scroll nobody asked for.

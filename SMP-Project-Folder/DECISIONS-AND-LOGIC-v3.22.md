@@ -15875,9 +15875,202 @@ collapsed on arrival, the detail back when the control is pressed. The KB gate
 is asked of the page def for five viewers. **Proved able to fail before it was
 believed** (§94.5): Missing back to an em-dash (2 failures), the rail default
 back to expanded (5), the KB open to everyone (5).
+
+## 120 · The four corrections after the makeover shipped (v3.30)
+
+Islam, looking at the Overview on a real client tenant: *"some of what we did
+was merged and some not."* Assessed against the LIVE build rather than from
+memory — everything agreed in Option A was merged and deployed — and the four
+things below came out of laying the built product beside the signed-off mockup.
+*Assessment is in `design-mockups/setup-makeover/2026-08-26_merge-assessment.html`.*
+
+### 120.1 A cycle with no dates said nothing, in punctuation
+
+His strip read **"to  ·  due  ·  as of Q4"** — three separators with nothing
+between them, because the line glued the words around three values and the
+punctuation survives when the values do not.
+
+**IT WAS NOT THE OVERVIEW'S FAULT, WHICH IS WHY THE FIX IS NOT THERE.** The
+identical line renders on the Reporting cycle page and predates the Overview
+entirely; the Overview only made it the first thing anybody sees. Two surfaces
+onto one sentence is exactly how the two come to say it differently (§53.5), so
+`cycleMeta()` builds it ONCE in `config-data.js` and both read it.
+
+**AN ABSENT DATE IS SAID, NOT PUNCTUATED** — *"Dates not set"*, the same
+argument as §93's dash for a password nobody was asked about. **BOTH ENDS OR
+NEITHER**: *"Jan 2026 to"* is worse than saying nothing, so one end alone is
+reported on its own terms (*"from Jan 2026"*). The quarter is a number rather
+than a date and is always known, so it is always said.
+
+### 120.2 The rail's glyphs, and the grid that was never this file's
+
+The mockup drew a glyph on every rail row and **none was built** — the only one
+of the five HR_ERP practices §108 took that did not arrive. The Overview's own
+rows had theirs, which is precisely why that page looked finished and the rail
+beside it looked plainer than the drawing.
+
+**AND ADDING THEM EXPOSED A COLLISION THAT HAD BEEN THERE ALL ALONG.**
+`group-extra.css` styles `.rail button.ritem` as a two-column grid for a UNIT's
+plan rail, and the Setup rail is a `.rail` too — so that selector (0,2,1) has
+been outranking `.setuprail .ritem` (0,2,0) since the rail was built. **The
+`display:flex` in this file never applied.** Nothing noticed, because the old
+two-child row (label, pill) lands correctly in a `1fr auto` grid by accident.
+The glyph made a THIRD child and the accident stopped working: the glyph took
+the `1fr` column and every label was pushed right by its own length, so shorter
+names sat further in — **measured at x = 62…166 down one rail.** §56.7 and
+§65.9 in CSS for the third time: two components, one class name, valid on both
+sides, silent when they meet.
+
+**SO IT DECLARES THE COLUMNS RATHER THAN THE BOX** — one property at a
+specificity that genuinely wins (`.rail.setuprail button.ritem`), leaving the
+padding, borders and type to the rule that has been drawing this row all along.
+
+**AND ONE GLYPH WAS MAPPED BUT NOT DRAWN.** `⌗` for the Official BU list
+rendered as an empty box: it looked right in the mockup, whose font had it, and
+has no outline in the product's. **§52's rule, in a new place** — a character is
+"supported" and simply has no glyph, and nothing complains. `checks/setup-rail.py`
+now measures every mark against a character guaranteed to be missing, so the
+next one cannot ship blank. `▦` replaces it; `◫` restores Companies, which had
+been mistyped as the much fainter `▫`.
+
+### 120.3 People & access, in the order the mockup drew
+
+Register · roles · BU list, which is what was signed off; the group had been
+renamed around the pre-existing order without it being brought back. Small, and
+the kind of drift only caught by laying the drawing beside the build.
+
+### 120.4 The way through keeps its place
+
+Below about 1280px the strip's *Open the cycle page* dropped to the LEFT of a
+second line, growing the strip from 72px to 126px — not broken, but it read as
+an accident rather than a decision.
+
+**THE FIRST ATTEMPT MADE IT WORSE, and the reason is the lesson**: giving the
+button `margin-left:auto` when `.ovcyc-n` already had one puts TWO auto margins
+in the row, and they split the free space between them — so the button was
+pushed out and wrapped at **1400px instead of 1280**. The second attempt
+(`flex:1 1 0` on the name, so it asks for nothing and then grows into what is
+left) kept the button on one line further down, and let the name be squeezed so
+hard the strip **ballooned to 328px** at 1150px.
+
+The answer is all three together: the name takes the slack with a **floor** so
+it cannot be crushed, and `justify-content:flex-end` right-aligns a wrapped
+line — which costs nothing on the first line, where the growing name leaves no
+free space to distribute. Measured 1920→1024: the button is **19px from the
+right edge at every width**, and the strip never exceeds 145px.
+
+### 120.5 A check that raced a poll, and was not a flake to shrug at
+
+`checks/office-chat.py` failed twice in five runs on this branch and passed four
+times out of four on `origin/main`, which is exactly the shape that gets called
+a flake and waved through. It measured `#chtbody` on a fixed 400ms timer after a
+viewport resize — racing the panel's own poll, which rewrites that body every
+few seconds. **Instrumented rather than re-run**: once settled the margin is
+1601px of content in a 437px box, so the assertion was never marginal; it was
+measuring before there was anything to measure. It waits for the thread now
+instead of for a clock, and the assertion itself is untouched. 4/4 after.
+
+**`no-jump` is left failing, deliberately** — it fails identically on
+`origin/main` (verified in a worktree) and belongs to whoever owns that page.
+
+## 121 · The Setup pages sit still (v3.30)
+
+Islam, five notes on the built product: *"make the title like overview with a
+better design … this page needs to be sticky for the title and the setup header
+and search bar … there is some duplication in the titles like business unit
+business unit … the rail options needs to be smaller in height and no title is
+double line … think of the overall design of the pages as well."*
+
+Settled from a measured mockup, and **two of the five were not what they looked
+like**. The rail's head and search bar ALREADY stick — measured, they move 33px
+and pin — so "make it sticky" was about the pane's title, which scrolled 600px
+away with everything else. And the title's design was not the problem: at 24px
+it is already the largest thing on the page. What it lacked was a CONTAINER, so
+it read as the page's first line rather than as its header.
+
+### 121.1 The page is named once, in the rail's own word
+
+Two pages printed their name twice (Business units, Companies) and **five called
+themselves something the rail did not** — Terminology opened *"Labels"*, Email
+opened *"Communication"*, Roles & access opened *"Who may see what"*, Import &
+archives opened *"Plan import"*, and Reporting cycle had no title at all. That
+is §108's rename reaching the navigation and stopping there: my own drift, and
+invisible on any single page, because a page looks wrong only when it is read
+beside the rail that points at it.
+
+**THE SHELL DRAWS THE NAME, FROM THE DEF'S LABEL** — the one list that already
+holds it, so the two can never disagree again. `PAGE_TITLE` is set before the
+page renders, and both `cfgHead()` and `section()` **drop a heading that repeats
+it** (§28's rule: a header saying nothing new still spends its line). Compared
+against the NAME, never by position — the Reporting cycle's first section is
+*"Who has reported"*, a real section, and it keeps its heading.
+
+**AND THE NAME IS TAKEN BEFORE `def` BECOMES A SECTION.** Twenty lines into
+`paint()` a page with sections reassigns `def` to whichever section is open, so
+reading the label after that gives the SECTION's: Figure sets titled itself
+*"Sets configuration"* and Import & archives *"Import a plan"* — the same fault
+the change was made to remove, reintroduced by reading the right field at the
+wrong moment.
+
+### 121.2 The header stays, and it needed §53.7's filler
+
+`.setuphead` pins at **the rail's own offset expression**, not a number of its
+own, so the two stay level as the chrome changes height (§29.4: one number, not
+two).
+
+**AND THE STRIP ABOVE IT HAD TO BE FILLED.** A sticky header pins BELOW the
+chrome by `--rail-gap`, and that gap is page rather than header — so table rows
+slid through it and a row was visible above the pinned title. §53.7's own
+pattern, already carried by the rail and the capability band: a `::before` that
+takes the ground up over the strip. Safe in the flow position here, which is
+what §53.7 warns about, because this header is the first thing in the pane.
+
+**THE CONTROLS ROW IS NOT PULLED INTO IT.** A `margin-top:-52px` did that first
+and the row is not sticky, so scrolling slid it out from under the pinned title
+and left a stray *"Clear plan"* floating above it. **A sticky box may only
+overlap something that pins with it.**
+
+### 121.3 Shorter rows, and a label shortened rather than clipped
+
+45px a row, and *"Plan import & archives"* wrapped to 66px — which is what made
+the list 961px and pushed the last entries below the fold. Rows are 36px now and
+the list is 816px.
+
+**THE LABEL WAS SHORTENED, NOT ELLIPSISED.** An ellipsis is right in a table
+cell (§88) and wrong in a navigation list, where the label IS the destination —
+half a name behind a hover is a door you cannot read. *Import & archives*, in
+the rail's own sentence case, which the other seventeen entries all use.
+`text-overflow` stays as a GUARD, so the next over-long label fails loudly in
+the check rather than quietly growing the rail again.
+
+### 121.4 The table head goes with it, and the headings are separated
+
+**NOT EVERY TABLE PINS TO THE PAGE.** `.cfg.peoplebox` and `.cfg.srctable` are
+their own scroll boxes with their own sticky heads at `top:0` INSIDE them, which
+is the right answer for a boxed table — applying a page offset there put the
+register's headings **293px down**, measured. They are excluded rather than
+overridden: two rules fighting over one thead is how a head ends up pinned to
+neither.
+
+The headings are uppercase, letter-spaced and 8px-padded with nothing between
+them, so at a narrow pane *"Shown in the nav"* and *"Code"* merged into one
+word — exactly what Islam's screenshot shows. A hairline between header cells
+costs no width and no height and is what makes a table read as columns.
+
+### 121.5 §51.11, in my own checks, twice in one change
+
+The rail row gained a glyph span, so `.ritem`'s `textContent` became
+*"People register2"*; then the page's name moved out of `.secttl` into
+`.setupttl`, and a heading that merely repeated the name stopped being drawn at
+all — so two checks reading `#panel .secttl` for the title **crashed on a
+missing element** rather than failing an assertion. Both were found by running
+the whole suite rather than the one file being worked on. *When a control
+changes shape, grep every check for the old selector — not the one that failed
+first.*
+
 ---
 
-## 120 · One line above the table, and a dialog that fits the window (v3.43)
+## 122 · One line above the table, and a dialog that fits the window (v3.44)
 
 Two asks, minutes apart, both from using the register on his own laptop.
 
@@ -15890,7 +16083,7 @@ Two asks, minutes apart, both from using the register on his own laptop.
 
 Settled from a mockup carrying the measurements, agreed as drawn.
 
-### 120.1 Three removals and one arrival, and only the arrival had a constraint
+### 122.1 Three removals and one arrival, and only the arrival had a constraint
 
 The badge said **who you are**, which the chrome says on every page. The count
 said **how big the register is**, and the table under it is that — §116 had
@@ -15911,7 +16104,7 @@ to **1280px** now. Below 1150 the title takes its own line, and the controls
 stay together to 1000. **The cost is recorded rather than glossed:** two labels
 are terser, bought for 140px.
 
-### 120.2 The mark that moved rather than went
+### 122.2 The mark that moved rather than went
 
 The count line also carried **"N units with no custodian"** — the one
 outstanding thing on this page that is not about a person, so it cannot join the
@@ -15924,7 +16117,7 @@ only when there is one**: a chip that is usually absent is a mark, one that is
 always there is furniture again (§41's budget). One line, like everything else
 on that row (§88).
 
-### 120.3 The dialog was not dense, it was wasteful
+### 122.3 The dialog was not dense, it was wasteful
 
 938px wide, two 434px columns, content **482px**, and a 720px-tall window cut it
 at 538px. What was spending that height was not content:
@@ -15950,7 +16143,7 @@ dropping straight to one column would put the scroll back.
 **The cost, stated before it was agreed:** a 264px field is tighter than a 434px
 one, so a long address fills its box instead of sitting inside it.
 
-### 120.4 The check measured the wrong box and passed on the build it was meant to reject
+### 122.4 The check measured the wrong box and passed on the build it was meant to reject
 
 `checks/register-header.py` first asked whether **`.hright`** was one row — and
 that assertion was **green on the previous build at every width**. `.phead2`
@@ -15973,7 +16166,7 @@ the element is gone entirely). `var retired` is deleted with the line that read
 it — a variable nothing reads is one the next person reads as load-bearing
 (§24).
 
-### 120.5 A bold title, and a table that stopped 141px short
+### 122.5 A bold title, and a table that stopped 141px short
 
 > "1. the people register title needs to be bold. 2. the registery table should
 > extend down till the end of the page."
@@ -16025,3 +16218,33 @@ true.
 `padding-bottom:80px`, so the page can still be scrolled about 60px past the
 table's foot. That is every railed page's behaviour, the rail does exactly the
 same thing, and it is not this section's to change.
+
+
+### 122.6 What §121 changed under this, and what that costs §122
+
+§121.2 gave every Setup pane its own **sticky page title**, arriving from
+another branch the same day. Three things in §122 met it, and following that
+decision rather than defending mine is the whole of this note.
+
+**THE BOLD MOVED.** `cfgHead()` now DROPS its `.secttl` where the pane's own
+name already says the same thing, so bolding `.phead2 .secttl` alone would have
+styled an element the register no longer renders — measured, the page draws
+exactly one title and it is `.setupttl`. Both carry 700 now, so a page whose
+section heading genuinely differs from its name does not read in two weights.
+
+**§122.1'S ONE-LINE HEADER IS SUPERSEDED, AND THAT IS THEIR CALL.** §121.2
+deliberately did NOT pull the controls into the sticky header — a non-sticky row
+slid out from under the pinned name when scrolled, which is a better reason than
+mine for wanting them together. The name and the controls are two rows now, on
+purpose. What survives of Islam's ask is the half that was ever about the
+controls: **they are one row, Passwords included, and the table follows them.**
+The check asserts that and no longer asserts the combined height — *a check that
+argues with a decision is a check that will be deleted by whoever made it.*
+
+**AND THE RAIL STOPPED BEING THE RIGHT THING TO COMPARE AGAINST.** §122.5
+asserted that the table ends where the rail ends, and that was true in five of
+six measurements: the rail is a max-height over a LIST, so on a tall window its
+content ends before its cap and the two legitimately differ. The pane is still
+capped by the rail's expression — that is the point of taking it — but what was
+asked for is that the table reaches the fold, so **the window is what is
+measured now**, at both ends: it must reach it and must never pass it.

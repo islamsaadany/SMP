@@ -1592,7 +1592,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   working through it. **Units with no custodian cannot join it** — not a person,
   so there would be nobody to open; it keeps its own line (§93.4).
 - **ONE LINE ABOVE THE TABLE, AND A DIALOG THAT WAS WASTEFUL RATHER THAN DENSE
-  (§120):** the badge said who you are (the chrome says it on every page) and
+  (§122):** the badge said who you are (the chrome says it on every page) and
   the count said how big the register is (**the table under it is that** — §116
   had already dropped the second copy of that count and kept this one, and
   *keeping one copy of something nobody asked for is still keeping it*). The
@@ -1614,9 +1614,24 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   marked on the **overlay**, never loosened on `.modal`, which every dialog
   shares, and comes off in `closeModal()` (§116.6's one door). Steps down are
   **3 → 2 → 1**, never 3 → 1, or the scroll comes back on a narrow laptop.
-- **A CAP MADE OF A GUESSED CONSTANT GOES STALE SILENTLY (§120.5):** the
+- **A CHECK THAT ARGUES WITH A DECISION IS ONE THAT GETS DELETED (§122.6):**
+  §121.2 gave every Setup pane a **sticky page title**, from another branch the
+  same day, and three things in §122 met it. **The bold had to MOVE**:
+  `cfgHead()` now drops `.secttl` where the pane's name already says it, so
+  bolding the old element alone would have styled something the register no
+  longer renders (both carry 700 now, or a page whose heading genuinely differs
+  reads in two weights). **§122's one-line header is SUPERSEDED** — §121.2
+  deliberately did not pull the controls into the sticky header, because a
+  non-sticky row slid out from under the pinned name, which is a better reason
+  than the one that put them together; what survives is the half that was ever
+  about the controls, that they are ONE row with Passwords on it and the table
+  follows them. **AND THE RAIL STOPPED BEING THE RIGHT COMPARISON**: it is a
+  max-height over a LIST, so on a tall window its content ends before its cap
+  and the two legitimately differ — the pane still takes the rail's expression,
+  but what is ASSERTED is the window, at both ends.
+- **A CAP MADE OF A GUESSED CONSTANT GOES STALE SILENTLY (§122.5):** the
   register's table was `calc(100vh - 300px)`, and the 300 was a guess at an
-  alarm-chip row, a filter row and a count line — §116 removed two and §120 the
+  alarm-chip row, a filter row and a count line — §116 removed two and §122 the
   third, so the table ended **141px above the fold at every height** while the
   rail beside it correctly ended 20px short. **It takes the RAIL'S OWN
   expression now** (`.panefill`), because the two halves of the split start at
@@ -1637,7 +1652,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   check's threshold moved — *a check left asserting a number that is no longer
   true is worse than the twenty pixels.*
 - **THE CHECK MEASURED THE INNER BOX AND PASSED ON THE BUILD IT WAS WRITTEN TO
-  REJECT (§120.4):** it asked whether **`.hright`** was one row — green on the
+  REJECT (§122.4):** it asked whether **`.hright`** was one row — green on the
   previous build at every width, because **`.phead2` wraps too**, so when the
   controls stop fitting beside the title the whole block drops them onto a line
   of their own and the inner box honestly reports one row while the header is
@@ -1942,7 +1957,7 @@ python3 qa.py        # walks every page as every viewer, reports console errors 
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP)
 python3 checks/register-header.py # one line above the table and a dialog that fits the
-                                # window — the HEADER's height, not .hright's (§120)
+                                # window — the HEADER's height, not .hright's (§122)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
@@ -1961,7 +1976,12 @@ python3 checks/setup-overview-live.py # ...and its three server-backed rows, ove
                                       # they exist at all (§101.12)
 python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
                                 # the filter, and a match inside a FOLDED group is findable
-                                # (§101.13, §101.14 — all three fail silently)
+                                # (§108.13, §108.14 — all three fail silently)
+                                # setup-rail.py also measures every rail GLYPH against a
+                                # character guaranteed missing: a mark that is MAPPED and
+                                # not DRAWN ships as a blank box (§52, §120.2)
+python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
+                                # and the name and the table head stay on screen (§121)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1996,7 +2016,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.43: one line above the table, and a
+*Last Updated: 2026-08-26 &mdash; **v3.44: one line above the table, and a
 dialog that fits the window** (&sect;120), **with a bold title and a table
 that reaches the fold** (&sect;120.5). Two asks minutes apart, both from
 using the register on his own laptop, and both turned out to be **waste rather

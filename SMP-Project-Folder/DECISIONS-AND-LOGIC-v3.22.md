@@ -14048,6 +14048,45 @@ destination is selected, the Knowledge base is gone from the screen, and
 there are tabs to tour — and each was watched failing on the reverted build
 before the green run was believed (§94.5).
 
+### 107.15 The same fault, from the other end: the branch had the SHA first
+
+§108.17, written from the other session, is right and this is the half it does
+not cover — because the two sessions walked into §91 by opposite roads and only
+one of them was a tidy-up.
+
+**THEIRS:** merge to `main`, wait, then fast-forward the branch to tidy up —
+handing a still-unbuilt deployment a second ref to be attributed to.
+
+**MINE:** the branch held the SHA **first**, and never stopped holding it.
+
+That is not carelessness, it is **the project's own procedure**. "Fetch main
+and look, merge main INTO the branch, resolve there, re-run the checks, then
+fast-forward" creates the merge commit **on the branch** — so the moment that
+branch is pushed, Vercel has the SHA on a non-production ref, and `main`
+arriving at the same SHA later is a no-op. The preview builds; production does
+not.
+
+**THE EVIDENCE IS THAT THE FIRST MERGE OF THE DAY WORKED AND THE SECOND DID
+NOT, BY THE SAME HANDS.** `3720491` was created on the branch too — and its
+branch push was held back until after §91.5's live check had confirmed
+production. `f6d6243` was pushed to the branch *before* `main` existed at that
+SHA, and never deployed. Same procedure, same author, opposite outcomes, and
+the only difference is **when the branch was pushed**.
+
+**WHAT PUSHED IT:** a stop hook asking for uncommitted work to be committed and
+pushed to the remote branch while the sweep was still running. That is a good
+rule — work in progress should not sit only on one machine — and it is in
+direct tension with §91, which needs the branch to stay behind until production
+has built. The tension is real and is named here rather than resolved by
+pretending one rule outranks the other: **push the branch freely for every
+commit that is not the merge commit; hold the merge commit's branch push until
+production says it built.**
+
+So the rule §91 has now been taught three times reads: **`main` must hold a SHA
+no other ref holds, from before the push until production has served it.** Not
+order (§91.4), not delay (§108.17), not tidiness — sole possession, until
+§91.5 says otherwise.
+
 ## 108 · The Setup makeover (v3.30)
 
 > *"Rethink the whole settings page. The design, the grouping, the arrangement,

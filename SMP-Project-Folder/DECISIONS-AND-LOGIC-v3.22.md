@@ -13145,3 +13145,73 @@ ask named the tables and the upload templates; the deck was not mentioned, and a
 column present on a projector and absent in the product is exactly the drift
 this file keeps recording. It is Islam's call, so it is written down rather than
 quietly aligned.
+
+### 101.10 An In progress with no number is not nought
+
+Islam: *"in the reporting in the deliverables or the milestones if someone
+enters in progress they need to set the % of the progress or performance. is
+that what's happening now?"*
+
+**Half of it was.** Driven rather than read, on FIN01:
+
+* the box **did** open — picking *In progress* replaces the read-out with an
+  empty per-cent box, on both tables;
+* nothing said it was owed. An empty box beside an empty Note box looks
+  optional, and the only signal was the tally quietly dropping 9/9 → 8/9;
+* **and the score did not wait.** `statusReads()` returned `0` for a wip with
+  no per-cent, so the average **counted** it: project performance 63 → 50 and
+  Execution 49 → 41 **the instant the dropdown changed**, before the person who
+  changed it had said anything at all.
+
+The third is the fault, and it is the one §99.8 had already ruled on from the
+other direction: *an In progress state with no number forces the score to
+invent one* was the reason a reporter is not allowed to pick how a deliverable
+is measured. The same sentence applies to the state itself.
+
+**It returns `null` now**, so `sideAvg()` leaves the row out the way it already
+leaves out an outcome nobody has measured. The row is not forgiven — it is
+**outstanding**: `statusPending()` names the state, the tally counts it as
+unanswered, and both panes mark it *Needs a %* in the same `.missing` the plan
+page uses for a target nobody set. One idiom for "this is owed", not a second.
+
+**`x.pct === ""` had to be named explicitly.** `Number("")` is **0**, not
+`NaN` — so an empty box would have gone on reading as a genuine nought through
+a fix aimed at exactly that. A typed `0` still reads 0, and the check asserts
+both.
+
+**`statusGiven()` is now `statusReads(x) != null`.** Two predicates that had to
+agree about the same row are how *given* and *reads* drift apart; there is one
+question, asked of the reading.
+
+**`capExec()` keeps its `|| 0`, on purpose.** A milestone **nobody has touched**
+is counted as nought, because `projMilestones()` calls it *Not started* — that
+is what it is, not what we assumed. Only a milestone halfway through a sentence
+leaves, and `pending` is returned beside the figure so the count is answerable.
+
+**THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED.** §101 was sold on
+*nobody's score moves*, proved by stripping every per-cent and comparing the
+average against the `done/total` it replaced. That fixture stopped modelling
+the old formula the moment this landed — a stripped wip now leaves the average
+instead of counting nought — so it went red on all eight capabilities and would
+have reported a deliberate decision as a regression for ever. It settles every
+*In progress* as well as stripping the per-cent, which is what a tenant
+actually looked like the day §101 shipped. **And the claim for today is asserted
+separately**: all 18 In progress milestones in the demo carry a number, so
+`pending` is **0** across every capability and this change moved no figure that
+exists.
+
+**WHAT WAS ASKED FOR AND IS NOT BUILT — the refusal.** Islam chose *"nothing,
+and refuse the submission"*: excluded from the average **and** Submit refuses
+while any row is In progress with no per-cent. **A capability's Reporting page
+has no Submit button.** Measured, not assumed — one `data-submit` exists in the
+whole platform and it is on a **unit**, and a function's reporting bar carries
+only the tally and *Save draft*. So there is nothing to attach the refusal to
+on the one page these rows live on.
+
+That is worth more than a note, because **`reportPending()` already returns
+true for an `fn:` target** — it puts the dot on a function's Performance tab
+saying *this subject owes a submission and you could make it*, and there is no
+control that would clear it. §69's own rule, broken by the thing that wrote it.
+Not built here, because a function's Submit is a feature and not a fix, and
+what it means for a function to submit — one function, or one per capability —
+is a decision.

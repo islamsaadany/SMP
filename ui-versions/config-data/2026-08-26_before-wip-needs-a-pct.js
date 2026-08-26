@@ -2931,38 +2931,22 @@ function capKOScore(c){
    milestone in every tenant is in exactly that state on the day this ships.
    Reading it as 0 is what makes the Execution figure identical to the count
    it replaces; excluding it would raise every tenant's score overnight. */
-/* ── AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§101.10) ───────────────
-   It returned 0, so the average COUNTED it -- and a project's figure fell the
-   instant a dropdown changed, before the person who changed it had said
-   anything at all. That is the platform putting a number in somebody's mouth,
-   which is precisely why an In progress state with no figure was refused in
-   the first place (§99.8): the score would have to invent one.
-
-   It returns NULL, so `sideAvg()` leaves it out the way it already leaves out
-   an outcome nobody has measured. The row is not forgiven -- it is
-   OUTSTANDING: the tally counts it as unanswered, the pane marks it, and the
-   figure beside it is honestly built on what has been said.
-
-   `x.pct === ""` is the case that has to be named: Number("") is 0, not NaN,
-   so an empty box would have read as a genuine nought. */
 function statusReads(x){
   if (!x || !x.status) return null;
   if (x.status === "done") return 100;
   if (x.status === "todo") return 0;
-  if (x.pct == null || x.pct === "") return null;
   var p = Number(x.pct);
-  return isNaN(p) ? null : Math.max(0, Math.min(100, p));
+  return isNaN(p) ? 0 : Math.max(0, Math.min(100, p));
 }
 function delivReads(d){ return statusReads(d); }
 function msReads(m){ return statusReads(m); }
 /* Reported means ANSWERED, and In progress is not answered without its
-   number -- which is the whole of "in progress requires a % of completion".
-   ONE QUESTION, asked of the reading: two predicates that had to agree about
-   the same row are how "given" and "reads" drift apart. */
-function statusGiven(x){ return statusReads(x) != null; }
-/* Said something, and did not finish saying it. Not the same as "unanswered":
-   a row nobody has touched is silent, this one is halfway through a sentence. */
-function statusPending(x){ return !!x && x.status === "wip" && statusReads(x) == null; }
+   number -- which is the whole of "in progress requires a % of completion". */
+function statusGiven(x){
+  if (!x || !x.status) return false;
+  if (x.status !== "wip") return true;
+  return x.pct != null && x.pct !== "" && !isNaN(Number(x.pct));
+}
 function sideAvg(vals){
   var v = vals.filter(function(x){ return x != null && !isNaN(x); });
   if (!v.length) return null;
@@ -3016,22 +3000,14 @@ function capPerf(c){
    The counts stay beside it. "5 of 12 completed" and "42%" answer two
    different questions and both are worth having. */
 function capExec(c){
-  var done = 0, total = 0, wip = 0, todo = 0, sum = 0, scored = 0;
+  var done = 0, total = 0, wip = 0, todo = 0, sum = 0;
   (c.projects || []).forEach(function(p){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
-    (p.milestones || []).forEach(function(x){
-      /* §101.10: a milestone halfway through a sentence leaves the average
-         rather than dragging it down. `|| 0` still stands for a milestone
-         NOBODY has touched -- projMilestones() counts that one as Not started,
-         so nought is what it is, not what we assumed. */
-      if (statusPending(x)) return;
-      scored++; sum += msReads(x) || 0;
-    });
+    (p.milestones || []).forEach(function(x){ sum += msReads(x) || 0; });
   });
   return { done: done, wip: wip, todo: todo, total: total,
-           pending: total - scored,
-           pct: scored ? Math.round(sum / scored) : null };
+           pct: total ? Math.round(sum / total) : null };
 }
 function capDeliverySide(c){ return sideAvg((c.projects || []).map(projDeliverySide)); }
 function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSide)); }

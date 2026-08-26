@@ -145,21 +145,42 @@ with sync_playwright() as p:
     # ── EXECUTION DOES NOT MOVE (the claim this was sold on) ─────────────
     print("── the Execution figure")
     ex = pg.evaluate("""() => {
-      // Strip every per-cent, which is what a tenant looks like on the day
-      // this ships, and compare the average against the count it replaces.
+      // §101 sold itself on "nobody's score moves", so the average is compared
+      // against the count it replaced -- with every per-cent stripped AND
+      // every In progress settled, which is what a tenant looked like the day
+      // that shipped. THE SETTLING IS §101.10's DOING: an In progress with no
+      // number now LEAVES the average rather than counting as nought, so a
+      // fixture that strips per-cents and leaves the statuses is no longer
+      // modelling the old formula at all -- it would report the deliberate
+      // change as a regression, every run, for ever.
       const rows = GROUP.capabilities.map(c => {
         const keep = [];
         (c.projects||[]).forEach(p => (p.milestones||[]).forEach(m => {
-          keep.push([m, m.pct]); m.pct = null; }));
+          keep.push([m, m.pct, m.status]);
+          m.pct = null; if (m.status === "wip") m.status = "todo"; }));
         let done = 0, n = 0;
         (c.projects||[]).forEach(p => (p.milestones||[]).forEach(m => {
           n++; if (m.status === "done") done++; }));
         const avg = capExec(c).pct, count = n ? Math.round(done / n * 100) : null;
-        keep.forEach(([m, v]) => { m.pct = v; });
+        keep.forEach(([m, v, st]) => { m.pct = v; m.status = st; });
         return { cap: c.name, milestones: n, count: count, avg: avg, same: count === avg };
       });
-      return { rows: rows, allSame: rows.every(r => r.same) };
+      // AND THE CLAIM FOR TODAY, which is the one somebody would ask about:
+      // not one row in the demo is halfway through a sentence, so §101.10 has
+      // moved no figure that exists. If a later edit leaves one blank, this
+      // says so rather than the parity above going quietly red.
+      let pend = 0, wip = 0;
+      GROUP.capabilities.forEach(c => {
+        pend += capExec(c).pending;
+        (c.projects||[]).forEach(p => {
+          (p.milestones||[]).forEach(m => { if (m.status === "wip") wip++; });
+          (p.deliverables||[]).forEach(d => { if (statusPending(d)) pend++; });
+        });
+      });
+      return { rows: rows, allSame: rows.every(r => r.same), pending: pend, wip: wip };
     }""")
+    ck("every In progress in the demo carries its number (%d of them)" % ex["wip"],
+       ex["pending"] == 0 and ex["wip"] > 0, ex["pending"])
     for r in ex["rows"]:
         if not r["same"]:
             ck("%s: average matches the count" % r["cap"], False, r)
@@ -362,6 +383,84 @@ with sync_playwright() as p:
 
     ck("a deliverable reported early still counts toward the score",
        early and early["reads"] is not None and early["side"] is not None, early)
+
+    # ── AN IN PROGRESS WITH NO NUMBER (§101.10) ──────────────────────────
+    # Measured, not reasoned about: the whole fault was that the score moved
+    # when nobody had said anything, so the assertion is the score.
+    print("── an In progress with no number")
+    sc = pg.evaluate("""() => {
+      const c = capsOfFunction("finance")[0], p = c.projects[0];
+      const d = p.deliverables[0], m = p.milestones[0];
+      const keep = { ds: d.status, dp: d.pct, ms: m.status, mp: m.pct };
+      const before = { side: projDeliverySide(p), exec: capExec(c).pct,
+                       rep: projReported(p) };
+      d.status = "wip"; d.pct = null; m.status = "wip"; m.pct = null;
+      const blank = { side: projDeliverySide(p), exec: capExec(c).pct,
+                      rep: projReported(p), pend: capExec(c).pending,
+                      dReads: statusReads(d), mReads: msReads(m),
+                      dGiven: statusGiven(d), dPending: statusPending(d) };
+      // an EMPTY STRING is the case Number() reads as nought
+      d.pct = ""; const empty = { reads: statusReads(d), pending: statusPending(d) };
+      d.pct = 0; const zero = { reads: statusReads(d), pending: statusPending(d) };
+      d.pct = 35; const said = { reads: statusReads(d), pending: statusPending(d),
+                                 side: projDeliverySide(p) };
+      Object.assign(d, { status: keep.ds, pct: keep.dp });
+      Object.assign(m, { status: keep.ms, pct: keep.mp });
+      return { before, blank, empty, zero, said };
+    }""")
+    ck("an In progress with no number reads as unanswered, not nought",
+       sc["blank"]["dReads"] is None and sc["blank"]["mReads"] is None, sc["blank"])
+    ck("...so it LEAVES the average rather than dragging it to zero",
+       sc["blank"]["side"] > 0 and sc["blank"]["exec"] > 0, (sc["before"], sc["blank"]))
+    ck("...and the tally counts it as still owed",
+       sc["blank"]["rep"]["done"] == sc["before"]["rep"]["done"] - 2
+       and sc["blank"]["pend"] == 1, (sc["before"]["rep"], sc["blank"]))
+    ck("an empty box is not a nought (Number('') is 0, and it must not be)",
+       sc["empty"]["reads"] is None and sc["empty"]["pending"], sc["empty"])
+    ck("a typed nought IS a nought",
+       sc["zero"]["reads"] == 0 and not sc["zero"]["pending"], sc["zero"])
+    ck("a number said clears it and is read",
+       sc["said"]["reads"] == 35 and not sc["said"]["pending"], sc["said"])
+
+    # and the SCREEN says so -- on both panes and both tables, which is four
+    # places one predicate is asked (§101.10).
+    for label, rep in (("Performance", False), ("Reporting", True)):
+        goto(pg, DEST, "Performance", None, rep)
+        pg.evaluate("""() => {
+          const p = capsOfFunction("finance")[0].projects[0];
+          p.deliverables[0].status = "wip"; p.deliverables[0].pct = null;
+          p.milestones[0].status = "wip"; p.milestones[0].pct = null;
+          paint();
+        }""")
+        pg.wait_for_timeout(250)
+        m = pg.evaluate("""() => {
+          const e = [...document.querySelectorAll(".pctneed")];
+          return { n: e.length, text: e.map(x => x.textContent.trim()),
+                   lines: e.map(x => new Set([...x.getClientRects()]
+                     .filter(r => r.width > 0).map(r => Math.round(r.top))).size),
+                   fits: e.every(x => x.getBoundingClientRect().width
+                     <= x.closest("td").getBoundingClientRect().width + 0.5),
+                   over: [...document.querySelectorAll(".pane table, .capbody table")]
+                     .filter(t => t.scrollWidth > t.clientWidth).length };
+        }""")
+        ck("%s: both tables mark the row that owes a number" % label,
+           m["n"] == 2 and set(m["text"]) == {"Needs a %"}, m)
+        ck("%s: the mark is one line and inside its cell" % label,
+           set(m["lines"]) == {1} and m["fits"] and m["over"] == 0, m)
+        # ...and goes when the number arrives
+        pg.evaluate("""() => {
+          const p = capsOfFunction("finance")[0].projects[0];
+          p.deliverables[0].pct = 40; p.milestones[0].pct = 40; paint();
+        }""")
+        pg.wait_for_timeout(250)
+        gone = pg.evaluate("() => document.querySelectorAll('.pctneed').length")
+        ck("%s: and the mark goes when the number arrives" % label, gone == 0, gone)
+        pg.evaluate("""() => {
+          const p = capsOfFunction("finance")[0].projects[0];
+          p.deliverables[0].status = "done"; p.deliverables[0].pct = null;
+          p.milestones[0].status = "done"; p.milestones[0].pct = null; paint();
+        }""")
+        pg.wait_for_timeout(200)
 
     # ── THE DECK ─────────────────────────────────────────────────────────
     print("── the review deck")

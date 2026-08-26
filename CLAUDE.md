@@ -1071,6 +1071,39 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   carries a **Due date** column the three panes lost in §101.8 — the ask named
   the tables and the templates, and a column on a projector that is absent in
   the product is a decision, not a tidy-up.
+  **AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§101.10):** the box opened and
+  nothing else did — nothing said the number was owed, and `statusReads()`
+  returned **0** for a wip with no per-cent, so the average COUNTED it: project
+  performance 63 → 50 and Execution 49 → 41 **the instant the dropdown
+  changed**, before the person who changed it had said anything. §99.8's own
+  ruling from the other direction — *an In progress state with no number forces
+  the score to invent one* — applied to the state itself. It returns **null**,
+  so `sideAvg()` leaves it out the way it already leaves out an unmeasured
+  outcome; the row is not forgiven but **outstanding** (`statusPending()`, the
+  tally, and *Needs a %* in the same `.missing` a plan uses for an unset
+  target). **`x.pct === ""` HAD TO BE NAMED**: `Number("")` is 0, not NaN, so
+  an empty box would have gone on reading as a genuine nought through a fix
+  aimed at exactly that — a typed `0` still reads 0, and both are asserted.
+  `statusGiven()` IS `statusReads(x) != null` now, because two predicates that
+  must agree about one row are how *given* and *reads* drift apart.
+  **`capExec()` KEEPS ITS `|| 0` ON PURPOSE** — a milestone nobody has TOUCHED
+  is Not started and nought is what it is; only one halfway through a sentence
+  leaves. **THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED**: §101's
+  "nobody's score moves" fixture stripped per-cents and left the statuses,
+  which stopped modelling the old formula the moment this landed — it went red
+  on all eight capabilities and would have called a deliberate decision a
+  regression for ever. It settles every In progress too, and **today's claim is
+  asserted separately** (all 18 In progress milestones in the demo carry a
+  number, so `pending` is 0 and no existing figure moved).
+  **ASKED FOR AND NOT BUILT — THE REFUSAL (§101.10):** *"refuse the
+  submission"* has nothing to attach to: **a capability's Reporting page has no
+  Submit button.** One `data-submit` exists in the whole platform and it is on
+  a UNIT; a function's reporting bar carries the tally and *Save draft* and
+  nothing else. Worse, **`reportPending()` already returns true for an `fn:`
+  target**, so a function head sees the dot saying they owe a submission and
+  there is no control that would clear it — §69's own rule broken by the thing
+  that wrote it. A function's Submit is a feature, not a fix, and what it means
+  (one per function, or one per capability) is a decision.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

@@ -1097,3 +1097,11 @@
   .cfg.acgrid table thead th { white-space:normal; overflow-wrap:break-word;
                                max-width:none; overflow:visible;
                                text-overflow:clip; vertical-align:bottom; }
+
+  /* ── §101.10: THE MARK SITS UNDER THE BOX IT IS ABOUT ──────────────────
+     Beside it there is no room -- the per-cent cell is a box and little else --
+     and a mark on its own line is what makes it read as a state of the row
+     rather than a label on the field. Its own class, not `td .missing`, so the
+     "Missing" a plan puts against an unset target keeps behaving as it does. */
+  .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
+             white-space:nowrap; }

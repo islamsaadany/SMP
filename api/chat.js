@@ -380,6 +380,78 @@ module.exports = async function handler(req, res) {
        an outsider the shape of the office. */
     if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
 
+    /* ── IS THE BOT WORKING? (§116) ───────────────────────────────────
+       Islam, having turned the assistant on and had nothing come back: "I need
+       to understand if the bot is working."
+
+       THE DEGRADATION WAS CORRECT AND SILENT, which is the fault. §112.2 made
+       every failure land on the chat as it worked before — the message is
+       stored and a person answers it — so no key, a rejected model, Google
+       unreachable, and the assistant legitimately declining all look
+       identical from the office's side: something arrives in the inbox and
+       nothing explains itself. Right for the person asking; useless to the
+       person who just turned it on.
+
+       SO IT WALKS THE CHAIN AND REPORTS WHERE IT STOPS, rather than answering
+       yes or no. "It is not working" sends somebody to look at everything;
+       "the key is missing" sends them to one page. Each step is checked in the
+       order the real path uses them, and the first failure ends the walk —
+       reporting a model error under a missing key would be noise.
+
+       IT MAKES A REAL CALL. Anything less tests the parts and not the thing:
+       a key can be present and refused, a model name can be valid and retired.
+       It is the office's own button, so the cost is one question's worth of
+       tokens when somebody presses it. */
+    if (action === "assistantTest") {
+      const steps = [];
+      const step = function (name, state, detail) {
+        steps.push({ name: name, state: state, detail: detail || null });
+      };
+
+      step("The switch", cfg.assistant ? "ok" : "off",
+           cfg.assistant ? "The assistant answers first"
+                         : "Everything goes straight to this inbox");
+
+      const kb = corpus();
+      step("The knowledge base", kb ? "ok" : "fail",
+           kb ? ((kb.recipes || []).length + " how-tos, " +
+                 (kb.sections || []).length + " sections, " +
+                 (kb.pages || []).length + " page explainers")
+              : "db/kb.json did not reach this deployment");
+
+      step("The API key", assistant.configured() ? "ok" : "fail",
+           assistant.configured()
+             ? "Set on this deployment"
+             : "No " + assistant.KEY_NAME + " here. Note that Vercel only " +
+               "gives a deployment the variables that existed when it was " +
+               "built — if it was added since, redeploy.");
+
+      /* THE CALL ITSELF, only once there is something to call with. */
+      if (kb && assistant.configured()) {
+        const q = "How is my unit's headline number worked out?";
+        const out = await assistant.ask({
+          kb: kb, question: q, history: [],
+          who: "a member of the Strategy Office", labels: {}
+        });
+        if (!out || !out.ok) {
+          step("The model (" + assistant.model() + ")", "fail",
+               (out && out.why) || "no answer");
+        } else {
+          step("The model (" + assistant.model() + ")", "ok", "Answered in full");
+          /* ANSWERING IS NOT THE SAME AS ANSWERING WELL, and this one question
+             has a right answer in the corpus — so a handover here means the
+             corpus reached it and it declined, which is a different problem
+             from the model being unreachable and is worth separating. */
+          step("A question it should know", out.answered ? "ok" : "warn",
+               out.answered
+                 ? out.reply + (out.source ? "   [" + out.source + "]" : "")
+                 : "It handed this one over. The model is reachable, so this is " +
+                   "about the knowledge base rather than the connection.");
+        }
+      }
+      return send(res, 200, { ok: true, steps: steps });
+    }
+
     /* THE QUEUE IS PEOPLE, NOT TICKETS (§97.2). Two groups, and the last line
        of each conversation so a name has something under it. */
     if (action === "queue") {

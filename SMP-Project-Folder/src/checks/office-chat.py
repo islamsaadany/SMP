@@ -44,6 +44,7 @@ PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
 # What the stub /api/chat answers with, and whether it answers at all.
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
+        "test": None,
         "cfg": {"on": True, "shots": True, "promise": "Usually answers the same day",
                 "beat": 4000}}
 
@@ -122,6 +123,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 "body": body.get("body") or "", "page": body.get("page"),
                 "target": body.get("target"), "cycle": body.get("cycle"),
                 "build": body.get("build"), "flag": None, "has_shot": False})
+        if body.get("action") == "assistantTest":
+            self._send(200, json.dumps({"ok": True, "steps": CHAT.get("test") or []}).encode(),
+                       "application/json")
+            return
         if body.get("action") == "queue":
             self._send(200, json.dumps({
                 "ok": True, "office": True, "threads": BOXQUEUE, "chat": CHAT["cfg"],
@@ -497,6 +502,72 @@ with sync_playwright() as p:
     pg.evaluate("()=>{const b=[...document.querySelectorAll('.chqtab')]"
                 ".find(x=>x.dataset.chtab==='waiting'); if(b) b.click();}")
     pg.wait_for_timeout(400)
+
+    # ── 10 · IS THE BOT WORKING? (§116) ──────────────────────────────────
+    # Islam, having turned the assistant on and had nothing come back: "I need
+    # to understand if the bot is working."
+    #
+    # THE DEGRADATION WAS CORRECT AND SILENT. §112.2 made every failure land on
+    # the chat as it worked before, so no key, a rejected model and a genuine
+    # decline all look the same from the office's side. What is asserted is
+    # that the diagnostic SEPARATES them — a check of the happy path alone
+    # would be the same silence with a button on it.
+    print("\n10 · the assistant's diagnostic")
+    CHAT["test"] = [
+        {"name": "The switch", "state": "ok", "detail": "The assistant answers first"},
+        {"name": "The knowledge base", "state": "ok", "detail": "43 how-tos"},
+        {"name": "The API key", "state": "fail", "detail": "No GEMINI_API_KEY here."},
+    ]
+    pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-setupgo]')]"
+                ".find(x=>x.dataset.setupgo==='chat'); if(r) r.click();}")
+    pg.wait_for_timeout(1200)
+    pg.evaluate("()=>{const b=document.querySelector('[data-chsetmenu]'); if(b) b.click();}")
+    pg.wait_for_timeout(500)
+
+    btn = pg.evaluate("""()=>{ const b=document.querySelector('[data-chtest]');
+        if(!b) return null;
+        const r=b.getBoundingClientRect();
+        const e=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+        return { there:true, hit: e ? (e.closest('[data-chtest]') ? 'button' : e.tagName) : 'nothing' }; }""")
+    ck("the office has a way to ask", bool(btn), btn)
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4) — and it was neither at first:
+    # the branch was written into the `change` listener, where a <button> can
+    # never reach it, so it rendered perfectly and did nothing (§96).
+    ck("and it is pressable, not merely present", bool(btn) and btn["hit"] == "button", btn)
+
+    if btn:
+        pg.evaluate("()=>{ document.querySelector('[data-chtest]').click(); }")
+        pg.wait_for_timeout(1200)
+        stopped = pg.evaluate("""()=>({
+            shown: !!document.querySelector('.chtest'),
+            head: (document.querySelector('.chtest-h')||{}).textContent || "",
+            stopped: [...document.querySelectorAll('.chtest-r')]
+                       .filter(r=>r.querySelector('.tdot.bad')).length })""")
+        ck("pressing it answers", stopped["shown"], stopped)
+        # WHERE IT STOPS IS THE ANSWER. "It is not working" sends somebody to
+        # look at everything; naming the step sends them to one page.
+        ck("a failure names the step that stopped it",
+           "not working" in stopped["head"].lower() and "key" in stopped["head"].lower(), stopped)
+        ck("and marks exactly one row as the stopping point", stopped["stopped"] == 1, stopped)
+
+        CHAT["test"] = [
+            {"name": "The switch", "state": "ok", "detail": "on"},
+            {"name": "The knowledge base", "state": "ok", "detail": "43 how-tos"},
+            {"name": "The API key", "state": "ok", "detail": "Set"},
+            {"name": "The model (x)", "state": "ok", "detail": "Answered in full"},
+            {"name": "A question it should know", "state": "ok", "detail": "From your key objectives."},
+        ]
+        pg.evaluate("()=>{ document.querySelector('[data-chtest]').click(); }")
+        pg.wait_for_timeout(1200)
+        good = pg.evaluate("""()=>({
+            head: (document.querySelector('.chtest-h')||{}).textContent || "",
+            stopped: [...document.querySelectorAll('.chtest-r')]
+                       .filter(r=>r.querySelector('.tdot.bad')).length })""")
+        # AND THE WORKING CASE MUST READ DIFFERENTLY, or the diagnostic is a
+        # decoration that always says the same thing.
+        ck("a working assistant says so", good["head"].lower().startswith("it is working"), good)
+        ck("and nothing is marked as a stopping point", good["stopped"] == 0, good)
+    CHAT["test"] = None
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

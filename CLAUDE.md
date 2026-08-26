@@ -1323,6 +1323,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **A FAILURE MODE DESIGNED TO BE INVISIBLE TO THE USER MUST STILL BE VISIBLE
+  TO THE OPERATOR (§116):** §112.2 made every assistant failure land on the
+  chat as it worked before — message stored, a person answers — which is right
+  for the asker and left the office unable to tell **no API key, a rejected
+  model, an unreachable provider and a genuine decline** apart: all four are a
+  message in the inbox and no explanation. The diagnostic **walks the chain and
+  reports where it STOPS**, because *"it is not working"* sends somebody to look
+  at everything and *"the API key"* sends them to one page. **It makes a REAL
+  call** — a key can be present and refused, a model name valid and retired —
+  and **stores nothing**, because it answers about this moment and a stored
+  answer goes stale invisibly (§35). Its last step separates *reachable but
+  declined a question the corpus covers* from *could not be reached*, which
+  would otherwise both read as "not working". **THE VERCEL TRAP IS NAMED IN THE
+  ROW ITSELF**: a deployment only has the environment variables that existed
+  when it was BUILT, so a key added afterwards needs a redeploy.
+- **IT RENDERED PERFECTLY AND DID NOTHING (§116.4):** the button's branch went
+  into the settings menu's **`change`** listener rather than its `click` one —
+  anchored on a `<select>` that genuinely belongs there — and **a `<button>`
+  never fires `change`**. Present, styled, and `elementFromPoint` returned it,
+  so every assertion short of PRESSING it passed. Found by pressing, then by
+  instrumenting the click: no request, no console error, and the button's own
+  label unchanged, which is what says *the handler never ran* rather than *the
+  request failed*. §96's family, fifth time.
 - **A CHECK THAT ASSERTS AGREEMENT PASSES WHEN BOTH SIDES VANISH (§113.8):**
   the knowledge base's contents are derived, and the check asserts one link per
   section — so when a fix pushed `undefined` into `secs` and the tour section
@@ -1802,7 +1825,28 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
+*Last Updated: 2026-08-26 &mdash; **v3.37: is the bot working?** (&sect;116).
+Islam turned the assistant on, sent a question, and nothing came back &mdash;
+*"but I received the message at the inbox."* **That was the design working**:
+&sect;112.2 made every failure land on the chat as it worked before the
+assistant existed, so the message is stored and a person answers it. **Which is
+exactly why he could not tell it apart from the assistant never having been
+asked.** Four completely different situations &mdash; no API key, a rejected
+model name, an unreachable provider, and the assistant legitimately declining
+&mdash; all produce a message in the inbox and no explanation. Right for the
+person asking; useless to the person who has just turned it on. *A failure mode
+designed to be invisible to the user must still be visible to the operator, and
+nothing in &sect;112 said so.* The diagnostic **walks the chain and reports
+where it stops**, because "it is not working" sends somebody to look at
+everything and "the API key" sends them to one page &mdash; and it names the
+Vercel trap in that row, since a deployment only carries the environment
+variables that existed when it was BUILT. **AND IT RENDERED PERFECTLY AND DID
+NOTHING**: the branch went into the settings menu's `change` listener rather
+than its `click` one, and a `<button>` never fires `change`. Present, styled,
+and `elementFromPoint` returned it &mdash; every assertion short of pressing it
+passed. &sect;96's family, fifth time.
+
+*Earlier the same day: **v3.37: the assistant (&sect;111,
 &sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me
 and I replied and the chat disappeared from all places."* **NOTHING WAS

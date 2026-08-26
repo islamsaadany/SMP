@@ -64,6 +64,29 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.37 — is the bot working? (§116)
+
+Islam turned the assistant on, asked it something, and nothing came back — but
+the message reached the inbox. That was the designed degradation working, and
+it is precisely why he could not tell it from the assistant never being asked.
+
+- **Four failures looked identical**: no API key, a rejected model, an
+  unreachable provider, and a genuine decline.
+- **The diagnostic walks the chain and names where it stops** — a button in the
+  Messages Settings dropdown, where you stand after flipping the switch.
+- It makes a **real call**, and stores nothing.
+- The **Vercel trap is named in the row**: a deployment only has the
+  environment variables that existed when it was built.
+
+**And it rendered perfectly and did nothing** — the branch went into the
+menu's `change` listener instead of `click`, and a `<button>` never fires
+`change`. Every assertion short of pressing it passed.
+
+**Verified:** office-chat.py §10 ALL CLEAR (asserts the diagnostic *separates*
+outcomes, not that it appears) · all five real states driven end to end against
+a stub modelling Google · qa.py clean · test-assistant 25/0 · test-authorize
+193/0.
+
 ### v3.37 — the assistant (§111, §112), and a chat that vanished (§113)
 
 **§113 — reported from production.** *"I replied and the chat disappeared from

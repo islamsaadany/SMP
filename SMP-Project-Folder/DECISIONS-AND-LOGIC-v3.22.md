@@ -15258,3 +15258,90 @@ next three — the rule is unchanged and is simply whoever lands first. Fourth
 renumber on this branch; anything sequential and shared is chosen in the same
 breath as the fetch-and-look that precedes every merge, never before.)*
 
+
+---
+
+## 116 · Is the bot working? (v3.37)
+
+> *"I tried it and enabled the assistant reply but nothing came back."* … *"But
+> I received the message at the inbox."* … *"I need to understand if the bot is
+> working."*
+
+### 116.1 The degradation was correct, and that is what made it invisible
+
+§112.2 built the assistant so that **every failure lands on the chat as it
+worked before it existed**: the message is stored, the conversation waits, a
+person answers. Islam's report is that behaviour working exactly as designed —
+which is why he could not tell it from the assistant simply never having been
+asked.
+
+**Four completely different situations look identical from the office's side:**
+no API key, a rejected model name, Google unreachable, and the assistant
+legitimately deciding it cannot answer. All four produce a message in the inbox
+and no explanation. Right for the person asking, who wants a human either way.
+Useless to the person who has just turned it on.
+
+*A failure mode designed to be invisible to the user must still be visible to
+the operator, and nothing in §112 said so.*
+
+### 116.2 It walks the chain and reports where it stops
+
+The diagnostic does not answer yes or no. **"It is not working" sends somebody
+to look at everything; "the API key" sends them to one page.** So each step is
+checked in the order the real call uses it, and the first failure ends the walk
+— reporting a model error underneath a missing key would be noise.
+
+| Step | What a failure there means |
+|---|---|
+| The switch | Everything is going to the inbox on purpose |
+| The knowledge base | `db/kb.json` did not reach the deployment |
+| The API key | No `GEMINI_API_KEY` — **and it names the Vercel trap**: a deployment only has the variables that existed when it was built |
+| The model | Reachable, refused, or the name retired — with the provider's own message |
+| A question it should know | It answered but declined a question the corpus covers, which is about the corpus rather than the connection |
+
+**It makes a real call.** Anything less tests the parts rather than the thing:
+a key can be present and refused, a model name valid and retired. It is the
+office's own button, so the cost is one question's worth of tokens when
+somebody presses it.
+
+**The last step is worth its place**: a model that is reachable and hands over a
+question with a right answer in the corpus is a different fault from a model
+that cannot be reached, and the two would otherwise both read as "not working".
+
+### 116.3 Nothing is stored
+
+The result is a question about **this moment**, so it lives where the answer is
+read and nowhere else. A stored last-attempt would go stale in a way nobody
+could see (§35: absent is not "none"), and on a serverless deployment there is
+no process to hold it in anyway.
+
+### 116.4 It rendered perfectly and did nothing
+
+The branch was written into the settings menu's **`change`** listener rather
+than its `click` listener — anchored on the representative `<select>`, which
+genuinely does belong there. **A `<button>` never fires `change`.**
+
+So the control was present, correctly styled, and `elementFromPoint` returned
+it: every assertion short of pressing it would have passed. It was found by
+pressing it, and then by instrumenting the click when the press did nothing —
+no request, no console error, the button's own label unchanged, which is what
+finally said *the handler is not running* rather than *the request failed*.
+
+§96's family exactly, and the fifth time this file records it: **a control
+wired to nothing is indistinguishable from a working one until somebody uses
+it.**
+
+### 116.5 What proves it
+
+`src/checks/office-chat.py` §10 asserts that the diagnostic **separates**
+outcomes rather than that it appears — a failing chain names the step that
+stopped it and marks exactly one row; a working chain says so and marks none.
+A check of the happy path alone would be the same silence with a button on it.
+
+And it presses the button, which is the only assertion that would have caught
+§116.4.
+
+**The check's own bug is worth a line**: the local holding the diagnostic's
+result was called `bad`, which is this file's module-level failure counter — so
+the summary crashed on a dict after every assertion had passed. Renamed to say
+what it holds.

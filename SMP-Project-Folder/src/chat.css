@@ -318,3 +318,36 @@ body.presenting .chatdock { display:none; }
   .chatpanel { width:auto; }
   .chatbtn { align-self:flex-end; }
 }
+
+/* ── IS THE BOT WORKING? (§116) ────────────────────────────────────────
+   The office's own diagnostic, in the dropdown they are already standing in.
+   Quiet until it has something to say: the chain that got that far is grey,
+   and the row where it stopped is the one that carries colour. */
+.chset-test { margin-top:10px; }
+.chtest { margin-top:10px; border:1px solid var(--line); border-radius:6px;
+          overflow:hidden; background:var(--surface); }
+.chtest-h { padding:8px 10px; font-size:var(--fs-note); font-weight:600;
+            border-bottom:1px solid var(--line); background:var(--ground); }
+.chtest.good .chtest-h { color:var(--good-tx); }
+.chtest.bad  .chtest-h { color:var(--bad-tx); }
+.chtest.off  .chtest-h { color:var(--ink-3); }
+.chtest-r { padding:7px 10px; border-top:1px solid var(--line-soft);
+            display:grid; grid-template-columns:auto 1fr auto; gap:6px 8px;
+            align-items:baseline; font-size:var(--fs-micro); }
+.chtest-r:first-of-type { border-top:0; }
+.chtest-n { color:var(--ink-2); }
+.chtest-s { color:var(--ink-3); text-transform:uppercase; letter-spacing:.06em;
+            font-size:10px; }
+/* The detail spans the row, because an error message is a sentence and a
+   sentence in a 90px column is a column of single words. */
+.chtest-d { grid-column:1 / -1; color:var(--ink-3); line-height:1.5;
+            word-break:break-word; }
+.tdot { width:7px; height:7px; border-radius:50%; display:inline-block;
+        background:var(--ink-3); position:relative; top:-1px; }
+.tdot.ok   { background:var(--good); }
+.tdot.warn { background:var(--warn); }
+.tdot.bad  { background:var(--bad); }
+.tdot.off  { background:var(--none); }   /* --line-firm does not exist; an undefined
+                                             var computes to transparent, which is
+                                             an invisible dot on the one row that
+                                             says the feature is off. */

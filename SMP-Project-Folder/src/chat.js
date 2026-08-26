@@ -598,6 +598,39 @@ var CHAT = (function(){
            opts.join("") + "</select>";
   }
 
+  /* The last test's result, held here rather than stored: it is a question
+     about this moment ("is it working now"), and a stored answer would go
+     stale in a way nobody could see (§35 — absent is not "none"). */
+  var BOXTEST = { busy: false, steps: null };
+
+  var TESTMARK = {
+    ok:   '<span class="tdot ok" aria-hidden="true"></span>',
+    warn: '<span class="tdot warn" aria-hidden="true"></span>',
+    fail: '<span class="tdot bad" aria-hidden="true"></span>',
+    off:  '<span class="tdot off" aria-hidden="true"></span>'
+  };
+  var TESTWORD = { ok: "working", warn: "check this", fail: "stopped here", off: "off" };
+
+  function testHtml(steps){
+    /* WHERE IT STOPS IS THE ANSWER, so the failing row is the loud one and
+       everything above it is quiet confirmation that the chain got that far. */
+    var bad = steps.filter(function(s){ return s.state === "fail"; })[0];
+    var off = steps.filter(function(s){ return s.state === "off"; })[0];
+    var head = bad ? "It is not working \u2014 " + bad.name.toLowerCase()
+             : off ? "It is switched off"
+             : "It is working";
+    return '<div class="chtest' + (bad ? " bad" : off ? " off" : " good") + '">' +
+      '<div class="chtest-h">' + esc2(head) + "</div>" +
+      steps.map(function(st){
+        return '<div class="chtest-r">' +
+          (TESTMARK[st.state] || TESTMARK.fail) +
+          '<span class="chtest-n">' + esc2(st.name) + "</span>" +
+          '<span class="chtest-s">' + esc2(TESTWORD[st.state] || st.state) + "</span>" +
+          (st.detail ? '<div class="chtest-d">' + esc2(st.detail) + "</div>" : "") +
+        "</div>";
+      }).join("") + "</div>";
+  }
+
   function settingsHtml(){
     var c = chatCfg();
     if (!SETMENU) {
@@ -625,7 +658,16 @@ var CHAT = (function(){
           'anything it cannot answer.</div>' +
           '<div class="chset-cost">It can only ever read the <b>knowledge base</b> &mdash; ' +
           'the same pages everybody can already open. It cannot see a figure, a plan or a ' +
-          'score, and it says so rather than guessing.</div></div>' +
+          'score, and it says so rather than guessing.</div>' +
+          /* IS IT WORKING? (§116). The degradation is silent by design — a
+             question the assistant could not answer looks exactly like a
+             question it was never asked — so the one place somebody stands
+             after turning it on gets a button that finds out. */
+          '<div class="chset-test">' +
+            '<button class="editbtn" data-chtest="1">' +
+              (BOXTEST.busy ? "Testing\u2026" : "Test the assistant") + '</button>' +
+            (BOXTEST.steps ? testHtml(BOXTEST.steps) : "") +
+          '</div></div>' +
 
         (c.assistant
           ? '<div class="chset-row"><div class="chset-lab">Tell someone when a question ' +
@@ -979,6 +1021,24 @@ var CHAT = (function(){
     wrap.addEventListener("click", function(e){
       var t = e.target.closest("[data-chsetmenu]");
       if (t) { SETMENU = !SETMENU; setMenuPaint(); return; }
+
+      /* IS IT WORKING? (§116) — and this branch was written into the `change`
+         listener first, where a <button> can never reach it: it rendered
+         perfectly, it was pressable, and pressing it did nothing at all. The
+         anchor was the rep `<select>`, which genuinely does belong there.
+         §96's family, and found the same way — by pressing the thing. */
+      var test = e.target.closest("[data-chtest]");
+      if (test) {
+        if (BOXTEST.busy) return;
+        BOXTEST.busy = true; BOXTEST.steps = null; setMenuPaint();
+        post({ action:"assistantTest" }, function(err, j){
+          BOXTEST.busy = false;
+          BOXTEST.steps = (j && j.steps) || [{ name:"The platform", state:"fail",
+            detail: err === "failed" ? "Could not reach the server." : String(err || "No answer.") }];
+          setMenuPaint();
+        });
+        return;
+      }
 
       var seg = e.target.closest("[data-chset]");
       if (seg) {

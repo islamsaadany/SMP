@@ -15,6 +15,7 @@ shell = open('shell.html').read()
 for tag, f in [("RULES","../../lib/rules.js"), ("AUDIENCE","../../lib/audience.js"),
                ("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
                ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
+               ("PPTX","pptx.js"),
                ("MAIL","mail.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
                ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("TOUR","tour.js"), ("SYNC","sync.js")]:

@@ -167,7 +167,7 @@ with sync_playwright() as p:
     open_overview(pg)
     txt = " | ".join(r["t"] for r in rows(pg))
     ck("the page is the Overview",
-       pg.eval_on_selector("#panel .secttl", "e=>e.textContent.trim()") == "Overview")
+       pg.eval_on_selector("#panel .setupttl", "e=>e.textContent.trim()") == "Overview")
     ck("the inbox row is drawn", "conversation" in txt, txt)
     ck("the password row is drawn", "password" in txt, txt)
     ck("the declaration row is drawn", "said where they work" in txt, txt)
@@ -210,14 +210,26 @@ with sync_playwright() as p:
        src["said"] == S["said"], (src["said"], S["said"]))
 
     print("\n── 3 · the register and the Overview count the same thing ──")
-    # §53.5's assertion, on the pair that actually drifted before (§93): the
-    # register's own chip and this page's row are one function now.
+    # §53.5's assertion, on the pair that actually drifted before (§93). The
+    # register's six alarm chips went in §116 — one attention BUTTON now, whose
+    # number is attentionQueue().length — so this asks the surviving surface
+    # rather than a selector this version removed (§51.11, and it went red
+    # rather than quiet only because the chip row is gone entirely).
     pg.evaluate("()=>{ currentSub='people'; paint(); }")
     pg.wait_for_timeout(700)
-    chip = pg.eval_on_selector_all(".phead2 .pill",
-                                   "e=>e.map(x=>x.textContent.trim()).join(' | ')")
-    ck("the register's chip carries the same password count",
-       ("%d with no password" % src["pw"]) in chip, "%s vs %s" % (src["pw"], chip))
+    btn = pg.evaluate("()=>{const e=document.querySelector('[data-attn] .attnn');"
+                      " return e ? parseInt(e.textContent,10) : null;}")
+    ck("the register's button carries its own queue's length",
+       btn == pg.evaluate("attentionQueue().length"),
+       (btn, pg.evaluate("attentionQueue().length")))
+    # AND THE TWO NUMBERS ARE THE SAME PEOPLE. The Overview counts those with
+    # no password; every one of them must be findable from the register, or a
+    # count sends somebody to a screen that does not list them (§16.7).
+    inq = pg.evaluate("""(n)=>{const q=attentionQueue();
+        const pw=q.filter(e=>e.why.some(w=>w.kind==='nopw')).length;
+        return {pw:pw, n:n};}""", src["pw"])
+    ck("...and the password row's people are all in it",
+       inq["pw"] == src["pw"], inq)
 
     print("\n── 4 · zero and not-asked are different screens ──")
     S["waiting"] = 0

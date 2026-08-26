@@ -1068,7 +1068,11 @@
 
   /* ── One header for the configuration tables ─────────────────────── */
   .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
-  .phead2 .secttl{font:400 24px/1.2 var(--serif);margin:0}
+  /* BOLD (§122.5). Islam, of the People register's: "the title needs to be
+     bold." ALL TWELVE Setup titles, not that one — `cfgHead()` is one function
+     and one page's title in a different weight from eleven others reads as a
+     mistake rather than as emphasis. */
+  .phead2 .secttl{font:700 24px/1.2 var(--serif);margin:0}
   /* IT WRAPS, or a chip added later pushes the buttons off the page (§93.4).
      `.phead2` has always wrapped; `.hright` did not, so it stayed one row and
      simply overflowed its pane — and the register's Register file button went

@@ -1,0 +1,495 @@
+<title>Register Header &amp; Edit Dialog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+  /* ── LIGHT IS THE COMPLETE SET (SMP's own Forefront palette) ───────── */
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --panel:#16325C; --panel-ink:#FFFFFF;
+    --warn-bg:#FBEBE0; --warn-tx:#A4512C;
+    --good-bg:#E4F0EA; --good-tx:#1F6248;
+    --cta:#C2410C; --cta-ink:#FFFFFF;
+    --doc-rule:#DDE2EA;
+    --was:#8C3327; --now:#1F6248;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --doc:"Newsreader",Georgia,"Times New Roman",serif;
+    --r-sm:6px; --r:8px; --r-pill:999px;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+      --line:#2B3852; --line-soft:#212C42;
+      --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+      --gold:#D9B76A; --gold-deep:#E3C989;
+      --panel:#060B16; --panel-ink:#E8EDF5;
+      --warn-bg:#2E1D10; --warn-tx:#FDBA74;
+      --good-bg:#0A2E22; --good-tx:#6EE7B7;
+      --cta:#E2703A; --cta-ink:#160B04;
+      --doc-rule:#24314A;
+      --was:#FCA5A5; --now:#6EE7B7;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0B1120; --surface:#131C2E; --surface-2:#1C2740;
+    --line:#2B3852; --line-soft:#212C42;
+    --ink:#E8EDF5; --ink-2:#C3CDDD; --ink-3:#94A3B8;
+    --gold:#D9B76A; --gold-deep:#E3C989;
+    --panel:#060B16; --panel-ink:#E8EDF5;
+    --warn-bg:#2E1D10; --warn-tx:#FDBA74;
+    --good-bg:#0A2E22; --good-tx:#6EE7B7;
+    --cta:#E2703A; --cta-ink:#160B04;
+    --doc-rule:#24314A;
+    --was:#FCA5A5; --now:#6EE7B7;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:400 16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+  .page{max-width:1180px;margin:0 auto;padding:56px 28px 96px;
+    display:flex;flex-direction:column;gap:0}
+
+  /* ── DOCUMENT VOICE ────────────────────────────────────────────────── */
+  .eyebrow{font:700 10.5px/1 var(--sans);letter-spacing:.14em;
+    text-transform:uppercase;color:var(--gold-deep);margin:0 0 14px}
+  h1{font:400 40px/1.15 var(--doc);margin:0 0 14px;text-wrap:balance;
+    letter-spacing:-.01em}
+  h2{font:400 27px/1.2 var(--doc);margin:0 0 10px;text-wrap:balance}
+  h3{font:600 15px/1.3 var(--sans);margin:0 0 8px}
+  .lede{font:400 18.5px/1.65 var(--sans);color:var(--ink-2);
+    max-width:63ch;margin:0}
+  p{max-width:66ch;margin:0 0 14px;color:var(--ink-2)}
+  p:last-child{margin-bottom:0}
+  .page > section{padding:44px 0;border-top:1px solid var(--doc-rule)}
+  .page > header{padding-bottom:40px}
+  strong{color:var(--ink);font-weight:600}
+  code{font:500 13.5px/1 var(--mono);background:var(--surface-2);
+    padding:2px 5px;border-radius:4px;color:var(--ink-2)}
+
+  /* Ask — his words, kept verbatim so the proposal can be checked against them */
+  .ask{background:var(--surface);border:1px solid var(--line);
+    border-left:3px solid var(--gold);border-radius:var(--r);
+    padding:16px 20px;margin:0 0 30px;max-width:72ch}
+  .ask p{margin:0;color:var(--ink-2);font-size:15px}
+  .ask q{font-style:normal}
+  .ask .who{display:block;font:700 10.5px/1 var(--sans);letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink-3);margin-bottom:8px}
+
+  /* ── SPECIMEN FRAME ────────────────────────────────────────────────── */
+  .spec{margin:26px 0 0;display:flex;flex-direction:column;gap:0}
+  .spec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    padding:0 0 9px}
+  .spec-t{font:700 10.5px/1 var(--sans);letter-spacing:.12em;
+    text-transform:uppercase}
+  .spec-t.was{color:var(--was)}
+  .spec-t.now{color:var(--now)}
+  .spec-m{font:500 12.5px/1.4 var(--sans);color:var(--ink-3);
+    font-variant-numeric:tabular-nums}
+  .frame{background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);overflow-x:auto}
+  .frame-in{padding:22px 24px;min-width:640px}
+
+  /* ── PRODUCT CHROME, rebuilt at true size ──────────────────────────── */
+  .p{font:400 15px/1.5 var(--sans);color:var(--ink)}
+  .secttl{font:400 24px/1.2 var(--sans);margin:0;color:var(--ink)}
+  .phead2{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:0 0 14px}
+  .hright{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .chip{font-size:11.5px;color:var(--ink-3);background:var(--surface-2);
+    border:1px solid var(--line);border-radius:var(--r-pill);padding:5px 12px;
+    font-weight:600;letter-spacing:.02em}
+  .tk-search{font:400 14px/1 var(--sans);color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:9px 12px;width:194px}
+  .tk-search.tight{width:160px}
+  .btn{font:700 12px/1 var(--sans);letter-spacing:.04em;color:var(--ink-2);
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:9px 13px;cursor:default;white-space:nowrap}
+  .btn.menu::after{content:" \25BE";color:var(--ink-3)}
+  .btn.add{border-color:var(--gold-deep);color:var(--ink);
+    box-shadow:0 0 0 2px color-mix(in srgb,var(--gold) 22%,transparent)}
+  .attn{font:700 12px/1 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+    background:var(--cta);color:var(--cta-ink);border:0;border-radius:var(--r-pill);
+    padding:9px 15px;display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
+  .attn .n{background:color-mix(in srgb,#000 22%,transparent);
+    border-radius:var(--r-pill);padding:1px 7px;font-variant-numeric:tabular-nums}
+  .attn .dot{width:11px;height:11px;border-radius:50%;
+    border:2px solid currentColor;display:inline-block}
+  .nocust{font:600 11.5px/1 var(--sans);color:var(--warn-tx);
+    background:var(--warn-bg);border-radius:var(--r-pill);padding:6px 11px;
+    white-space:nowrap}
+  .pcount{font-size:11.5px;color:var(--ink-3);margin:-6px 0 12px}
+
+  /* the table stub, only enough of it to show where it starts */
+  .tbl{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .tbl table{border-collapse:collapse;width:100%;font-size:13.5px}
+  .tbl th{background:var(--panel);color:var(--panel-ink);text-align:left;
+    font:700 10.5px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;
+    padding:11px 12px;white-space:nowrap}
+  .tbl td{padding:10px 12px;border-top:1px solid var(--line-soft);
+    color:var(--ink-2);white-space:nowrap}
+  .tbl tr td:first-child{color:var(--ink);font-weight:600}
+
+  /* the start-of-table marker */
+  .startline{position:relative;margin:0 0 6px;height:0}
+  .startline span{position:absolute;right:0;top:-9px;
+    font:700 9.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;
+    color:var(--now)}
+
+  /* ── DIALOG SPECIMEN ───────────────────────────────────────────────── */
+  .dlgwrap{display:flex;justify-content:center;background:var(--surface-2);
+    padding:20px;border-radius:var(--r)}
+  .dlg{background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;box-shadow:0 12px 34px rgba(10,20,40,.13);
+    padding:18px 24px 20px}
+  .dlg.two{width:938px}
+  .dlg.three{width:860px}
+  .dlg-s{border-bottom:1px solid var(--line-soft);padding-bottom:13px;
+    margin-bottom:16px}
+  .dlg-s b{display:block;font:600 20px/1.2 var(--sans);color:var(--ink)}
+  .dlg-s span{font-size:13px;color:var(--ink-3)}
+  .pdlg{display:grid;gap:13px 22px;align-items:start}
+  .dlg.two .pdlg{grid-template-columns:repeat(2,1fr)}
+  .dlg.three .pdlg{grid-template-columns:repeat(3,1fr)}
+  .pdf{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .pdf.wide{grid-column:1/-1}
+  .pdfl{font:700 10.5px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;color:var(--ink-3)}
+  .fld{font:400 15px/1 var(--sans);color:var(--ink);background:var(--surface);
+    border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;
+    width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap}
+  .fld.sel::after{content:"\25BE";float:right;color:var(--ink-3);font-size:11px}
+  .mono{font:400 15px/1 var(--mono);color:var(--ink);padding:11px 0 0}
+  .vwhy{font-size:12px;line-height:1.45;color:var(--ink-3);margin-top:3px}
+  .pdsect{grid-column:1/-1;font:700 10.5px/1 var(--sans);letter-spacing:.07em;
+    text-transform:uppercase;color:var(--gold-deep);
+    border-top:1px solid var(--line-soft);padding-top:13px;margin-top:3px}
+  .pdsect:first-child{border-top:0;padding-top:0;margin-top:0}
+  .rolebox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-top:2px}
+  .rolechip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;
+    background:var(--surface-2);border:1px solid var(--line);
+    border-radius:var(--r-pill);padding:5px 11px;color:var(--ink)}
+  .rolechip i{font-style:normal;color:var(--ink-3);font-size:11.5px}
+  .addrole{font:600 13px/1 var(--sans);color:var(--gold-deep);
+    text-decoration:underline;text-underline-offset:3px}
+  .dlg-f{display:flex;align-items:center;gap:16px;
+    border-top:1px solid var(--line-soft);margin-top:18px;padding-top:13px}
+  .dlg-f .rt{margin-left:auto;display:flex;align-items:center;gap:14px}
+  .save{font:700 13px/1 var(--sans);background:var(--panel);color:var(--panel-ink);
+    border:0;border-radius:var(--r-sm);padding:10px 16px}
+  .quiet{font:500 13px/1 var(--sans);color:var(--ink-3)}
+
+  /* the cut line — where a 720px-tall window stops showing the dialog */
+  .cut{position:relative}
+  .cut::after{content:"";position:absolute;left:-20px;right:-20px;
+    top:var(--cut-at);border-top:2px dashed var(--was);pointer-events:none}
+  .cutnote{font:700 9.5px/1 var(--sans);letter-spacing:.09em;
+    text-transform:uppercase;color:var(--was);margin-top:9px;text-align:center}
+  .empty-cell{border:1px dashed var(--was);border-radius:var(--r-sm);
+    display:flex;align-items:center;justify-content:center;min-height:56px;
+    font:600 10.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;
+    color:var(--was);opacity:.75}
+
+  /* ── MEASURE TABLE ─────────────────────────────────────────────────── */
+  .mt{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
+  .mt th{text-align:left;font:700 10.5px/1 var(--sans);letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink-3);padding:0 14px 9px 0;
+    border-bottom:1px solid var(--line)}
+  .mt td{padding:9px 14px 9px 0;border-bottom:1px solid var(--line-soft);
+    color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .mt td:first-child{color:var(--ink)}
+  .mt .was{color:var(--was);font-weight:600}
+  .mt .now{color:var(--now);font-weight:600}
+  .mt-wrap{overflow-x:auto}
+
+  .callout{background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--r);padding:18px 22px;margin-top:22px;max-width:72ch}
+  .callout h3{color:var(--ink)}
+  .callout p{font-size:15px}
+  ul{max-width:66ch;color:var(--ink-2);padding-left:20px;margin:0 0 14px}
+  li{margin-bottom:7px}
+  li::marker{color:var(--ink-3)}
+
+  .qbox{background:var(--warn-bg);border-radius:var(--r);padding:16px 20px;
+    margin-top:22px;max-width:72ch}
+  .qbox h3{color:var(--warn-tx);letter-spacing:.06em;text-transform:uppercase;
+    font-size:10.5px;font-weight:700}
+  .qbox p{color:var(--ink-2);font-size:15px}
+
+  @media (max-width:760px){
+    .page{padding:36px 18px 64px}
+    h1{font-size:31px}
+    h2{font-size:23px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="page">
+
+<header>
+  <p class="eyebrow">SMP &middot; People register &middot; mockup for sign-off</p>
+  <h1>One line above the table, and a dialog that fits the window</h1>
+  <p class="lede">Two changes, both measured against the build that is on the branch
+  now. Nothing below is built yet &mdash; this is the look to agree before any
+  source is touched.</p>
+</header>
+
+<section>
+  <h2>1 &middot; The header becomes one line</h2>
+
+  <div class="ask">
+    <span class="who">What you asked</span>
+    <p><q>The top part can include the password, the SMO badge remove it and remove
+    the 77 people active text and the password can come to the same line and
+    accordingly the whole table should be just below the buttons line.</q></p>
+  </div>
+
+  <p>Four things: drop the <strong>SMO</strong> badge, drop the count line, bring
+  <strong>Passwords</strong> up beside the other menus, and start the table
+  directly under that row.</p>
+
+  <p>The first three are removals. The fourth is the one with a constraint in it,
+  so I measured before drawing: today the controls need <strong>861px</strong> and
+  the title takes another 200px. Take the badge away and add Passwords, and the row
+  wants <strong>1107px</strong> &mdash; which fits a 1400px window and wraps on your
+  1512px laptop the moment the window is anything less than full width.</p>
+
+  <div class="spec">
+    <div class="spec-h">
+      <span class="spec-t was">Today</span>
+      <span class="spec-m">controls 861px &middot; wraps to two rows below 1400px &middot; a count line under it</span>
+    </div>
+    <div class="frame"><div class="frame-in p">
+      <div class="phead2">
+        <h2 class="secttl">People register</h2>
+        <div class="hright">
+          <span class="chip">SMO</span>
+          <input class="tk-search" placeholder="Search the register&hellip;" aria-label="Search">
+          <span class="attn"><span class="dot"></span>Needs attention <span class="n">2</span></span>
+          <span class="btn add">+ Add someone</span>
+          <span class="btn menu">Register file</span>
+          <span class="btn menu">Columns</span>
+        </div>
+      </div>
+      <div class="hright" style="margin:0 0 14px">
+        <span class="btn menu">Passwords</span>
+      </div>
+      <div class="pcount">77 people active</div>
+      <div class="tbl"><table>
+        <thead><tr><th>Name</th><th>Full name</th><th>Email</th><th>Unit</th><th>Roles</th></tr></thead>
+        <tbody>
+          <tr><td>Islam Saadany</td><td>Islam Saadany</td><td>islam.saadany@forefront.consulting</td><td>Strategy Management Office</td><td>Super user</td></tr>
+          <tr><td>Abdelhamid Mokhtar</td><td>Abdelhamid Mokhtar Ali</td><td>abdelhamid.mokhtar@rayatrade.com</td><td>Mobile</td><td>BU owner</td></tr>
+        </tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <div class="spec">
+    <div class="spec-h">
+      <span class="spec-t now">Proposed</span>
+      <span class="spec-m">controls 721px &middot; one row down to 1280px &middot; table starts immediately</span>
+    </div>
+    <div class="frame"><div class="frame-in p">
+      <div class="phead2">
+        <h2 class="secttl">People register</h2>
+        <div class="hright">
+          <input class="tk-search tight" placeholder="Search the register&hellip;" aria-label="Search">
+          <span class="attn"><span class="dot"></span>Attention <span class="n">2</span></span>
+          <span class="btn add">+ Add</span>
+          <span class="btn menu">Register file</span>
+          <span class="btn menu">Columns</span>
+          <span class="btn menu">Passwords</span>
+        </div>
+      </div>
+      <div class="startline"><span>&darr; table starts here</span></div>
+      <div class="tbl"><table>
+        <thead><tr><th>Name</th><th>Full name</th><th>Email</th><th>Unit</th><th>Roles</th></tr></thead>
+        <tbody>
+          <tr><td>Islam Saadany</td><td>Islam Saadany</td><td>islam.saadany@forefront.consulting</td><td>Strategy Management Office</td><td>Super user</td></tr>
+          <tr><td>Abdelhamid Mokhtar</td><td>Abdelhamid Mokhtar Ali</td><td>abdelhamid.mokhtar@rayatrade.com</td><td>Mobile</td><td>BU owner</td></tr>
+        </tbody>
+      </table></div>
+    </div></div>
+  </div>
+
+  <div class="mt-wrap">
+  <table class="mt">
+    <thead><tr><th>Control</th><th>Today</th><th>Proposed</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>SMO badge</td><td class="was">72px</td><td class="now">gone</td><td>Your ask. It says who you are, which the chrome already says.</td></tr>
+      <tr><td>Search</td><td>194px</td><td>160px</td><td>Kept &mdash; with the filters gone it is the only way to find a row by hand. It flexes wider when there is room.</td></tr>
+      <tr><td>Needs&nbsp;attention</td><td class="was">208px</td><td class="now">120px</td><td>Label shortened to <em>Attention</em>. The number is the part that is read.</td></tr>
+      <tr><td>+ Add someone</td><td class="was">136px</td><td class="now">80px</td><td>Shortened to <em>+ Add</em>. It sits beside a register; there is nothing else to add.</td></tr>
+      <tr><td>Register file</td><td>118px</td><td>118px</td><td>Unchanged.</td></tr>
+      <tr><td>Columns</td><td>93px</td><td>93px</td><td>Unchanged.</td></tr>
+      <tr><td>Passwords</td><td class="was">own row</td><td class="now">110px, same row</td><td>Your ask.</td></tr>
+      <tr><td><strong>Row total</strong></td><td class="was">861px + a second row</td><td class="now">721px, one row</td><td>Fits 1280px and up.</td></tr>
+      <tr><td>Count line</td><td class="was">a line of its own</td><td class="now">gone</td><td>Your ask. The table under it is the register's size.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="qbox">
+    <h3>One thing I need you to decide</h3>
+    <p>The count line also carries <strong>&ldquo;N units with no custodian&rdquo;</strong>
+    &mdash; the one outstanding thing on this page that is not about a person, so it
+    cannot join the Attention queue (there would be nobody to open). Removing the
+    line removes it too. My proposal: it becomes a small amber chip on the same row,
+    shown <em>only</em> when there is one &mdash; so today, with none, the row looks
+    exactly as drawn above. Say if you would rather it went entirely.</p>
+  </div>
+
+  <div class="callout">
+    <h3>What this costs</h3>
+    <p>Below 1280px the row still wraps to two &mdash; six controls and a title cannot
+    be made to fit a 1000px window, and shrinking them further would start hiding
+    words. And two labels get shorter, which is a small loss of clarity bought for
+    140px.</p>
+  </div>
+</section>
+
+<section>
+  <h2>2 &middot; The dialog stops scrolling</h2>
+
+  <div class="ask">
+    <span class="who">What you asked</span>
+    <p><q>That's a very wide design that even require a scroll &mdash; make it compact
+    with no need to scroll.</q></p>
+  </div>
+
+  <p>Measured: the dialog is <strong>938px wide</strong> with two 434px columns, and
+  its content runs <strong>482px</strong>. On a 720px-tall window the body is cut at
+  538px and scrolls &mdash; which is what you hit. Two things are spending that
+  height: the <strong>Unit</strong> row leaves the cell beside it empty, and
+  <strong>Sign-in name</strong> carries a two-line paragraph.</p>
+
+  <div class="spec">
+    <div class="spec-h">
+      <span class="spec-t was">Today</span>
+      <span class="spec-m">938px wide &middot; 2 columns &middot; content 482px &middot; scrolls below a 768px window</span>
+    </div>
+    <div class="frame"><div class="frame-in" style="padding:0">
+      <div class="dlgwrap cut" style="--cut-at:560px">
+        <div class="dlg two p">
+          <div class="dlg-s"><b>Islam Saadany</b>
+            <span>Super user &middot; the group &middot; Function head &middot; SMO</span></div>
+          <div class="pdlg">
+            <div class="pdsect">Who they are</div>
+            <div class="pdf"><div class="pdfl">Name</div><div class="fld">Islam Saadany</div></div>
+            <div class="pdf"><div class="pdfl">Full name</div><div class="fld">Islam Saadany</div></div>
+            <div class="pdf"><div class="pdfl">Emp. ID</div><div class="fld">10001</div></div>
+            <div class="pdf"><div class="pdfl">Email</div><div class="fld">islam.saadany@forefront.consulting</div></div>
+            <div class="pdf"><div class="pdfl">Mobile</div><div class="fld">+201006835001</div></div>
+            <div class="pdf"><div class="pdfl">Sign-in name</div><div class="mono">smo</div>
+              <div class="vwhy">Minted from the name. Their password and open sessions
+              are keyed on it, so it cannot be changed.</div></div>
+            <div class="pdsect">Where they sit, and what they may do</div>
+            <div class="pdf"><div class="pdfl">Job title</div><div class="fld">Chief Strategy Officer</div></div>
+            <div class="pdf"><div class="pdfl">Official BU</div><div class="fld sel">Support Function</div></div>
+            <div class="pdf"><div class="pdfl">Unit</div><div class="fld sel">Strategy Management Office (function)</div></div>
+            <div class="pdf"><div class="empty-cell">empty &mdash; 56px spent</div></div>
+            <div class="pdf wide"><div class="pdfl">Roles</div>
+              <div class="rolebox">
+                <span class="rolechip"><b>Super user</b> <i>the group</i> &times;</span>
+                <span class="addrole">+ role</span>
+              </div></div>
+          </div>
+          <div class="dlg-f"><span class="quiet">Retire</span>
+            <span class="rt"><span class="quiet">Cancel</span><span class="save">Save</span></span></div>
+        </div>
+      </div>
+      <p class="cutnote">&mdash; a 720px-tall window stops here &mdash;</p>
+    </div></div>
+  </div>
+
+  <div class="spec">
+    <div class="spec-h">
+      <span class="spec-t now">Proposed</span>
+      <span class="spec-m">860px wide &middot; 3 columns &middot; content 285px &middot; no scroll above a 560px window</span>
+    </div>
+    <div class="frame"><div class="frame-in" style="padding:0">
+      <div class="dlgwrap">
+        <div class="dlg three p">
+          <div class="dlg-s"><b>Islam Saadany</b>
+            <span>Super user &middot; the group &middot; Function head &middot; SMO</span></div>
+          <div class="pdlg">
+            <div class="pdsect">Who they are</div>
+            <div class="pdf"><div class="pdfl">Name</div><div class="fld">Islam Saadany</div></div>
+            <div class="pdf"><div class="pdfl">Full name</div><div class="fld">Islam Saadany</div></div>
+            <div class="pdf"><div class="pdfl">Emp. ID</div><div class="fld">10001</div></div>
+            <div class="pdf"><div class="pdfl">Email</div><div class="fld">islam.saadany@forefront.consulting</div></div>
+            <div class="pdf"><div class="pdfl">Mobile</div><div class="fld">+201006835001</div></div>
+            <div class="pdf"><div class="pdfl">Sign-in name</div><div class="fld" style="border-style:dashed;color:var(--ink-3)">smo</div></div>
+            <div class="pdsect">Where they sit, and what they may do</div>
+            <div class="pdf"><div class="pdfl">Job title</div><div class="fld">Chief Strategy Officer</div></div>
+            <div class="pdf"><div class="pdfl">Official BU</div><div class="fld sel">Support Function</div></div>
+            <div class="pdf"><div class="pdfl">Unit</div><div class="fld sel">Strategy Management Office&hellip;</div></div>
+            <div class="pdf wide"><div class="pdfl">Roles</div>
+              <div class="rolebox">
+                <span class="rolechip"><b>Super user</b> <i>the group</i> &times;</span>
+                <span class="addrole">+ role</span>
+              </div></div>
+          </div>
+          <div class="dlg-f"><span class="quiet">Retire</span>
+            <span class="rt"><span class="quiet">Cancel</span><span class="save">Save</span></span></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="mt-wrap">
+  <table class="mt">
+    <thead><tr><th></th><th>Today</th><th>Proposed</th></tr></thead>
+    <tbody>
+      <tr><td>Width</td><td class="was">938px</td><td class="now">860px</td></tr>
+      <tr><td>Columns</td><td class="was">2 &times; 434px</td><td class="now">3 &times; 264px</td></tr>
+      <tr><td>Content rows</td><td class="was">6</td><td class="now">4</td></tr>
+      <tr><td>Content height</td><td class="was">482px</td><td class="now">285px</td></tr>
+      <tr><td>Empty cells</td><td class="was">1 (beside Unit)</td><td class="now">none</td></tr>
+      <tr><td>Scrolls at</td><td class="was">any window under 768px tall</td><td class="now">none above 560px</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <h3>The three changes behind those numbers</h3>
+    <ul>
+      <li><strong>Three columns instead of two.</strong> Six rows become four. Nothing
+      is removed and nothing moves section &mdash; the same fields in the same two
+      groups, three across instead of two.</li>
+      <li><strong>The Unit row no longer orphans a cell.</strong> With three columns,
+      Job&nbsp;title, Official&nbsp;BU and Unit are one row, so nothing is left
+      standing beside a gap.</li>
+      <li><strong>The sign-in explanation moves to the hover.</strong> The paragraph
+      is the tallest single thing in the dialog and it says the same sentence every
+      time you open anybody. The name still shows, greyed and in a dashed box so it
+      reads as not-editable; the reason is on hovering it.</li>
+    </ul>
+  </div>
+
+  <div class="callout">
+    <h3>What this costs</h3>
+    <p>A 264px field is narrower than a 434px one, so a long email
+    &mdash; <code>islam.saadany@forefront.consulting</code> &mdash; fills its box
+    instead of sitting comfortably inside it. It is still fully editable and
+    scrolls within the field, which is ordinary for a text input, but it is a real
+    loss of comfort on the two longest fields. If you would rather keep the email
+    roomy, say so and Email spans two columns &mdash; that costs about 56px of the
+    197px saved, and still never scrolls.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What happens next</h2>
+  <p>Say yes, or say what to change, and I will build both against the sources, run
+  the suite, and put the result on the branch. Two questions are genuinely open:
+  <strong>the no-custodian chip</strong> in part one, and <strong>whether Email
+  should span two columns</strong> in part two. Everything else follows your words.</p>
+</section>
+
+</div>

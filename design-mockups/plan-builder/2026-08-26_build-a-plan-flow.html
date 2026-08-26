@@ -1,0 +1,375 @@
+<title>Build a Plan</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EFF2F6;
+    --line:#D6DCE5; --line-soft:#E6EAF0;
+    --ink:#171B22; --ink-2:#414A58; --ink-3:#636C79;
+    --navy:#16325C; --navy-ink:#FFFFFF; --navy-quiet:#9FB0C9;
+    --gold:#C9A24D; --gold-deep:#8A6B22;
+    --good:#2E7D5B; --good-bg:#E4F0EA; --attn:#B8860B; --attn-bg:#F7EFD6;
+    --bad:#B04434; --bad-bg:#F7E3E0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+      --line:#333A45; --line-soft:#2A303A;
+      --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+      --navy:#0F2242; --navy-ink:#E9ECF1; --navy-quiet:#8DA0BE;
+      --gold:#D9B665; --gold-deep:#C9A24D;
+      --good:#5FB68C; --good-bg:#0E2A1E; --attn:#D9B23C; --attn-bg:#2E2610;
+      --bad:#D97066; --bad-bg:#2E1616;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#14161A; --surface:#1C2027; --surface-2:#242932;
+    --line:#333A45; --line-soft:#2A303A;
+    --ink:#E9ECF1; --ink-2:#B4BCC8; --ink-3:#949DAA;
+    --navy:#0F2242; --navy-ink:#E9ECF1; --navy-quiet:#8DA0BE;
+    --gold:#D9B665; --gold-deep:#C9A24D;
+    --good:#5FB68C; --good-bg:#0E2A1E; --attn:#D9B23C; --attn-bg:#2E2610;
+    --bad:#D97066; --bad-bg:#2E1616;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font:14px/1.55 -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:36px 28px 80px}
+  .eyebrow{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold-deep)}
+  h1{font-family:"Source Serif 4",Georgia,serif;font-size:32px;line-height:1.15;margin:6px 0 8px;text-wrap:balance}
+  .lede{color:var(--ink-2);max-width:70ch;margin:0 0 8px}
+  h2{font-family:"Source Serif 4",Georgia,serif;font-size:21px;margin:0 0 4px}
+  .secnote{color:var(--ink-3);font-size:13px;margin:0 0 16px;max-width:78ch}
+  section{margin-top:46px}
+  .snum{display:inline-block;min-width:22px;padding:1px 7px;border-radius:99px;background:var(--navy);
+    color:var(--navy-ink);font-size:11px;font-weight:800;text-align:center;vertical-align:2px;margin-right:8px}
+
+  /* settled decisions */
+  .settled{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+  .settled div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--ink-2)}
+  .settled b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:2px}
+  .settled .tick{color:var(--good);font-weight:800;margin-right:5px}
+
+  /* flow strip */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:12px 0 4px}
+  .fstep{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:150px;flex:1}
+  .fstep b{display:block;font-size:12.5px}
+  .fstep span{font-size:11.5px;color:var(--ink-3)}
+  .farrow{align-self:center;color:var(--ink-3);padding:0 8px;font-size:15px;flex:none}
+  .froute{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-deep);margin:18px 0 6px}
+
+  .note{border-left:3px solid var(--gold);background:var(--surface-2);border-radius:0 8px 8px 0;
+    padding:10px 14px;font-size:12.5px;color:var(--ink-2);max-width:88ch;margin:12px 0}
+  .note b{color:var(--ink)}
+
+  /* ── mock frames: deliberate light-mode depictions of the product ── */
+  .mockwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 8px 28px rgba(15,23,42,.10);margin:14px 0 8px}
+  .mock{min-width:1020px;background:#F7F8FA;color:#171B22;
+    font:12px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  .cap{font-size:12px;color:var(--ink-3);margin:0 0 14px;max-width:88ch}
+  .m-top{background:#16325C;color:#fff;display:flex;align-items:center;gap:14px;padding:9px 16px}
+  .m-top .t{font-weight:700;font-size:12.5px}
+  .m-top .org{color:#C9A24D;font-weight:600}
+  .m-top .right{margin-left:auto;color:#9FB0C9;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+  .m-nav{background:#16325C;border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:2px;padding:6px 12px}
+  .m-nav .grp{color:#fff;font-size:12px;padding:5px 10px;border:1px solid rgba(255,255,255,.25);border-radius:7px;margin-right:6px}
+  .m-nav .u{color:#C7D2E4;font-size:12px;padding:5px 9px}
+  .m-nav .u.on{color:#fff;font-weight:700;border-bottom:2px solid #C9A24D}
+  .m-nav .gear{margin-left:auto;background:#C9A24D;color:#16325C;border-radius:7px;padding:4px 9px;font-weight:800}
+  .m-tabs{display:flex;gap:4px;padding:8px 16px 0;border-bottom:1px solid #D6DCE5;background:#F7F8FA}
+  .m-tabs span{padding:6px 12px;font-size:12px;color:#414A58;border-radius:8px 8px 0 0}
+  .m-tabs .on{background:#EFF2F6;color:#8A6B22;font-weight:700}
+
+  /* THE BUILDER BAND — the one new element */
+  .bband{display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid #D6DCE5;
+    border-left:3px solid #C9A24D;padding:8px 16px;flex-wrap:wrap}
+  .bband .who{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8A6B22;flex:none}
+  .bsteps{display:flex;align-items:center;gap:2px;flex:none}
+  .bstep{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#636C79;padding:3px 9px;border-radius:99px}
+  .bstep .n{width:15px;height:15px;border-radius:50%;border:1px solid #D6DCE5;font-size:9.5px;font-weight:800;
+    display:inline-flex;align-items:center;justify-content:center;color:#636C79;background:#fff}
+  .bstep.done .n{background:#E4F0EA;border-color:#2E7D5B;color:#2E7D5B}
+  .bstep.done{color:#2E7D5B}
+  .bstep.cur{background:#16325C;color:#fff;font-weight:700}
+  .bstep.cur .n{background:#C9A24D;border-color:#C9A24D;color:#16325C}
+  .bhint{font-size:11.5px;color:#414A58;flex:1;min-width:180px}
+  .bhint b{color:#171B22}
+  .bacts{display:flex;gap:6px;flex:none;margin-left:auto}
+  .bacts .btn{border:1px solid #D6DCE5;background:#fff;border-radius:7px;padding:4px 12px;font-size:11.5px;color:#414A58}
+  .bacts .btn.next{background:#16325C;color:#fff;border-color:#16325C;font-weight:700}
+  .bacts .quiet{border:none;background:none;color:#636C79;font-size:11.5px;text-decoration:underline;padding:4px 4px}
+
+  .m-body{padding:16px 18px 22px;display:flex;gap:16px;align-items:flex-start}
+  .m-card{background:#fff;border:1px solid #D6DCE5;border-radius:10px;padding:14px 16px;flex:1;min-width:0}
+  .m-card h4{margin:0 0 8px;font-size:13px;border-bottom:2px solid #16325C;padding-bottom:5px}
+  .m-fld{border:1px dashed #C9A24D;border-radius:7px;background:#FDFAF2;padding:7px 10px;font-size:12px;color:#171B22;margin:5px 0}
+  .m-fld.empty{color:#9AA3B0;font-style:italic}
+  .m-lbl{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#636C79;margin-top:9px}
+  .m-add{display:inline-block;border:1px solid #D6DCE5;background:#F7F8FA;border-radius:7px;
+    padding:4px 11px;font-size:11.5px;color:#414A58;margin-top:8px}
+
+  /* chooser modal mock */
+  .m-dim{background:rgba(15,23,42,.45);padding:34px 0 40px}
+  .m-modal{background:#fff;border-radius:12px;max-width:640px;margin:0 auto;padding:18px 22px 20px;
+    box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  .m-modal h3{margin:0 0 2px;font-size:15.5px}
+  .m-modal .sub{font-size:12px;color:#636C79;margin:0 0 12px}
+  .m-seg{display:inline-flex;border:1px solid #D6DCE5;border-radius:8px;overflow:hidden;margin-bottom:10px}
+  .m-seg span{padding:5px 14px;font-size:12px;color:#414A58;border-right:1px solid #D6DCE5}
+  .m-seg span:last-child{border-right:none}
+  .m-seg .on{background:#16325C;color:#fff;font-weight:700}
+  .m-list{border:1px solid #E6EAF0;border-radius:9px;overflow:hidden;margin-bottom:10px}
+  .m-li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid #F1F3F6;font-size:12.5px}
+  .m-li:first-child{border-top:none}
+  .m-li b{flex:1}
+  .m-li .st{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:99px;padding:2px 8px}
+  .st.empty{background:#EFF2F6;color:#636C79}
+  .st.has{background:#F7EFD6;color:#8A6B22}
+  .m-li .go{border:1px solid #16325C;color:#16325C;border-radius:7px;padding:3px 11px;font-size:11.5px;font-weight:700}
+  .m-newrow{display:flex;gap:8px;align-items:center;font-size:12px;color:#414A58;padding:2px 0 0}
+  .m-newrow .m-add{margin-top:0}
+
+  /* review mock */
+  .rvrow{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid #F1F3F6;font-size:12.5px}
+  .rvrow:first-child{border-top:none}
+  .rvrow b{width:170px;flex:none}
+  .rvrow .what{flex:1;color:#414A58}
+  .rv-ok{color:#2E7D5B;font-weight:800}
+  .rv-gap{color:#B8860B;font-weight:800}
+
+  /* costs */
+  .cost{display:grid;gap:10px}
+  .cost .find{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--gold);
+    border-radius:10px;padding:12px 16px}
+  .cost b{display:block;font-size:13.5px}
+  .cost p{margin:3px 0 0;color:var(--ink-2);font-size:13px;max-width:95ch}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">SMP &middot; design mockup &middot; 2026-08-26</div>
+  <h1>Building a plan on the platform</h1>
+  <p class="lede">The SMO team picks a unit or a function — or creates one — chooses how it plans,
+  and is walked through authoring the whole plan on the platform's own pages. No file, no second editor:
+  a guided flow over the pens that already exist.</p>
+
+  <section>
+    <h2><span class="snum">1</span>What is already settled</h2>
+    <p class="secnote">Agreed in the alignment before this mockup — the mockup draws these, it does not reopen them.</p>
+    <div class="settled">
+      <div><b><span class="tick">&#10003;</span>Functions choose, units don't</b>
+        A unit always plans in pillars. Only a function with nothing behind it is asked <i>pillars or projects</i> — the existing format switch, asked at a better moment.</div>
+      <div><b><span class="tick">&#10003;</span>Guided mode, not a wizard</b>
+        The flow walks the platform's real pages with the pen open. Every field is the page's own; every server rule applies unchanged.</div>
+      <div><b><span class="tick">&#10003;</span>Live immediately</b>
+        The plan appears as it is built, like pen edits today. No draft flag, no state to forget to clear; missing things read honestly as missing.</div>
+      <div><b><span class="tick">&#10003;</span>New or existing subject</b>
+        The first step offers the existing units and functions <i>and</i> creating a new one in place — which also gives Setup &rsaquo; Business units its missing "+ Add".</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="snum">2</span>The flow at a glance</h2>
+    <p class="secnote">Two routes after the first step, decided by what the subject is. Order matters and the flow says why at each step — but nothing is locked: Back always works, and every step may be left partly filled.</p>
+
+    <div class="froute">Pillars route &mdash; a unit, or a function that plans in pillars</div>
+    <div class="flow">
+      <div class="fstep"><b>Choose the subject</b><span>existing or new</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Foundation</b><span>who we are &middot; aspiration &middot; end in mind</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Key objectives</b><span>name, direction, targets</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>SWOT</b><span>the analysis the pillars come from</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Pillars</b><span>each with measures &amp; tactics</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Review</b><span>what is filled, what is not</span></div>
+    </div>
+
+    <div class="froute">Projects route &mdash; a function that plans in projects</div>
+    <div class="flow">
+      <div class="fstep"><b>Choose the subject</b><span>existing or new</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Definition</b><span>what this capability is</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Key objectives</b><span>name, direction, targets</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Projects</b><span>front matter &middot; deliverables &middot; outcomes &middot; milestones</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Review</b><span>what is filled, what is not</span></div>
+    </div>
+
+    <div class="note"><b>Progress is read off the data, never stored.</b> A step is "done" when it holds content.
+    Pausing costs nothing — reopening the builder for the same subject lands on the first step that is still empty.
+    Codes are minted the way the import mints them: automatically, by position.</div>
+  </section>
+
+  <section>
+    <h2><span class="snum">3</span>The door</h2>
+    <p class="secnote">Build a plan sits beside Import on the page where plans already arrive — one place, two doors:
+    upload a file, or build it here. Office only, like everything on this page.</p>
+    <div class="mockwrap"><div class="mock">
+      <div class="m-top"><span class="t">Strategy Management</span><span class="org">Raya Trade</span><span class="right">Setup &rsaquo; Import &amp; plans</span></div>
+      <div class="m-body">
+        <div class="m-card" style="max-width:460px">
+          <h4>Bring in a plan</h4>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;border:1px solid #D6DCE5;border-radius:9px;padding:12px">
+              <b style="font-size:12.5px">Upload a file</b>
+              <div style="font-size:11.5px;color:#636C79;margin:3px 0 8px">The .xlsx template, filled outside the platform.</div>
+              <span class="m-add">Choose a file&hellip;</span>
+            </div>
+            <div style="flex:1;border:1px solid #C9A24D;border-radius:9px;padding:12px;background:#FDFAF2">
+              <b style="font-size:12.5px">Build it here</b>
+              <div style="font-size:11.5px;color:#636C79;margin:3px 0 8px">A guided flow through the plan's pages.</div>
+              <span class="m-add" style="background:#16325C;color:#fff;border-color:#16325C;font-weight:700">Build a plan</span>
+            </div>
+          </div>
+        </div>
+        <div class="m-card"><h4>Archived plans</h4>
+          <div style="font-size:12px;color:#636C79">Unchanged — replacing or clearing still archives here, and building over an existing plan will too.</div></div>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2><span class="snum">4</span>Choosing the subject</h2>
+    <p class="secnote">The platform's own modal (§90's shape). Existing subjects show their plan status —
+    an empty one starts clean, one with a plan says plainly that starting fresh archives it first.
+    Creating a new subject happens in the same place; a new function is asked its format at birth, a new unit is not asked at all.</p>
+    <div class="mockwrap"><div class="mock"><div class="m-dim">
+      <div class="m-modal">
+        <h3>Build a plan</h3>
+        <p class="sub">Whose plan is this?</p>
+        <div class="m-seg"><span class="on">Business units</span><span>Supporting functions</span></div>
+        <div class="m-list">
+          <div class="m-li"><b>Mobile</b><span class="st has">Has a plan</span><span class="go">Start fresh</span></div>
+          <div class="m-li"><b>Line Electronics</b><span class="st empty">Empty</span><span class="go">Build</span></div>
+          <div class="m-li"><b>Nigeria</b><span class="st empty">Empty</span><span class="go">Build</span></div>
+          <div class="m-li" style="color:#636C79">&hellip; the other seven units</div>
+        </div>
+        <div class="m-newrow"><span class="m-add">+ New business unit</span><span class="m-add">+ New supporting function</span></div>
+        <div style="font-size:11px;color:#636C79;margin-top:10px">
+          Starting fresh on <b>Mobile</b> archives today's plan first — restorable from Archived plans. Nothing the builder does is a deletion.<br>
+          A new function asks one question here: <b>plans in pillars, or in projects?</b> A new unit asks for a name, a code prefix and its company.
+        </div>
+      </div>
+    </div></div></div>
+  </section>
+
+  <section>
+    <h2><span class="snum">5</span>The builder band</h2>
+    <p class="secnote">The one new piece of interface. A band under the tab row — visible on every step, never covering content.
+    It navigates the real pages with the pen already open, says what the current step wants, and counts what each step holds.
+    Below: step 2 on Line Electronics' Foundation, with step 1 already done.</p>
+    <div class="mockwrap"><div class="mock">
+      <div class="m-top"><span class="t">Strategy Management</span><span class="org">Raya Trade</span><span class="right">signed in as the SMO</span></div>
+      <div class="m-nav"><span class="grp">Raya Trade &#9662;</span><span class="u">Mobile</span><span class="u on">Line Electronics</span><span class="u">Nigeria</span><span class="u">&hellip;</span><span class="gear">&#9881;</span></div>
+      <div class="m-tabs"><span class="on">Strategy</span><span>Performance</span><span>My reporting</span></div>
+      <div class="bband">
+        <span class="who">Building this plan</span>
+        <div class="bsteps">
+          <span class="bstep done"><span class="n">&#10003;</span>Foundation</span>
+          <span class="bstep cur"><span class="n">2</span>Objectives</span>
+          <span class="bstep"><span class="n">3</span>SWOT</span>
+          <span class="bstep"><span class="n">4</span>Pillars</span>
+          <span class="bstep"><span class="n">5</span>Review</span>
+        </div>
+        <span class="bhint"><b>Key objectives</b> — what this unit is judged on. Name, direction and targets; 3&ndash;5 is typical. <b>2 added.</b></span>
+        <div class="bacts"><span class="quiet">Pause</span><span class="btn">Back</span><span class="btn next">Next</span></div>
+      </div>
+      <div class="m-body">
+        <div class="m-card"><h4>Who we are</h4>
+          <div class="m-lbl">We are</div><div class="m-fld">The consumer electronics arm of the group</div>
+          <div class="m-lbl">We serve</div><div class="m-fld">Retail chains and independent dealers</div>
+          <span class="m-add">+ Add a line</span>
+        </div>
+        <div class="m-card"><h4>Aspiration &amp; key objectives</h4>
+          <div class="m-fld">To lead the local market in every line we carry&hellip;</div>
+          <div class="m-lbl">Key objectives &middot; the step being built</div>
+          <div class="m-fld">Line revenue &middot; &ge; &middot; 1.2B EGP &middot; Sum</div>
+          <div class="m-fld">Dealer coverage &middot; &ge; &middot; 400 &middot; Latest</div>
+          <div class="m-fld empty">Name the next objective&hellip;</div>
+          <span class="m-add">+ Add objective</span>
+        </div>
+      </div>
+    </div></div>
+    <p class="cap">Everything inside the pane is the page's own edit mode — the dashed fields are the pens the office already has.
+    The band adds navigation and counts, never a second editor. <b>Pause</b> just leaves; the band comes back from the same door.</p>
+  </section>
+
+  <section>
+    <h2><span class="snum">6</span>The pillars step</h2>
+    <p class="secnote">The longest step, on the Plan page. The band's counts make the shape of the work visible —
+    pillars are added one by one, each with its measures and tactics, exactly as the pen does today.</p>
+    <div class="mockwrap"><div class="mock">
+      <div class="m-tabs"><span class="on">Strategy</span><span>Performance</span><span>My reporting</span></div>
+      <div class="bband">
+        <span class="who">Building this plan</span>
+        <div class="bsteps">
+          <span class="bstep done"><span class="n">&#10003;</span>Foundation</span>
+          <span class="bstep done"><span class="n">&#10003;</span>Objectives</span>
+          <span class="bstep done"><span class="n">&#10003;</span>SWOT</span>
+          <span class="bstep cur"><span class="n">4</span>Pillars</span>
+          <span class="bstep"><span class="n">5</span>Review</span>
+        </div>
+        <span class="bhint"><b>Pillars</b> — the work the strategy commits to. <b>2 pillars &middot; 5 measures &middot; 3 tactics.</b> LE02 has no tactics yet.</span>
+        <div class="bacts"><span class="quiet">Pause</span><span class="btn">Back</span><span class="btn next">Next</span></div>
+      </div>
+      <div class="m-body">
+        <div class="m-card" style="max-width:250px"><h4>Plan</h4>
+          <div class="m-fld">LE01 &middot; Route to market</div>
+          <div class="m-fld">LE02 &middot; After-sales excellence</div>
+          <span class="m-add">+ Add pillar</span>
+        </div>
+        <div class="m-card"><h4>LE02 &middot; After-sales excellence</h4>
+          <div class="m-lbl">Measures</div>
+          <div class="m-fld">Repair turnaround &middot; &le; &middot; 72 h &middot; Latest</div>
+          <div class="m-fld">Service NPS &middot; &ge; &middot; 60 &middot; Latest</div>
+          <span class="m-add">+ Add measure</span>
+          <div class="m-lbl">Tactics</div>
+          <div class="m-fld empty">No tactics yet — add the first</div>
+          <span class="m-add">+ Add tactic</span>
+        </div>
+      </div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2><span class="snum">7</span>The review step</h2>
+    <p class="secnote">Not a gate — an honest reading. Empty is allowed (a unit may genuinely have no SWOT yet);
+    the review names every gap so finishing with one is a decision, not an oversight. Each row jumps back to its step.</p>
+    <div class="mockwrap"><div class="mock">
+      <div class="bband">
+        <span class="who">Building this plan</span>
+        <div class="bsteps">
+          <span class="bstep done"><span class="n">&#10003;</span>Foundation</span>
+          <span class="bstep done"><span class="n">&#10003;</span>Objectives</span>
+          <span class="bstep done"><span class="n">&#10003;</span>SWOT</span>
+          <span class="bstep done"><span class="n">&#10003;</span>Pillars</span>
+          <span class="bstep cur"><span class="n">5</span>Review</span>
+        </div>
+        <span class="bhint"><b>Review</b> — the plan as it stands. Finish, or go back to any step.</span>
+        <div class="bacts"><span class="quiet">Pause</span><span class="btn">Back</span><span class="btn next">Finish building</span></div>
+      </div>
+      <div class="m-body"><div class="m-card" style="max-width:640px"><h4>Line Electronics &middot; the plan as it stands</h4>
+        <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Foundation</b><span class="what">3 clauses &middot; aspiration &middot; end in mind</span></div>
+        <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Key objectives</b><span class="what">4 objectives, all with direction and target</span></div>
+        <div class="rvrow"><span class="rv-gap">&#9679;</span><b>SWOT</b><span class="what">Strengths and weaknesses filled &middot; no opportunities or threats yet</span></div>
+        <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Pillars</b><span class="what">3 pillars &middot; 8 measures &middot; 9 tactics</span></div>
+        <div class="rvrow"><span class="rv-gap">&#9679;</span><b>Targets</b><span class="what">2 measures have no target — they will read as "missing" on Performance</span></div>
+        <div style="font-size:11.5px;color:#636C79;margin-top:10px">Finishing closes the band and nothing else — the plan has been live all along. Gaps stay findable here and on the pages.</div>
+      </div></div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2><span class="snum">8</span>What this costs, and what it touches</h2>
+    <div class="cost">
+      <div class="find"><b>An audit of every empty state comes first</b>
+        <p>The editors were built for correcting an imported plan, so some first-rows cannot be written — an empty unit's
+        "Who we are" has no way to add its first clause. Part one of the build is walking every authoring surface from a
+        truly empty subject and fixing what cannot start from nothing. The builder is only as good as these.</p></div>
+      <div class="find"><b>Setup &rsaquo; Business units gains "+ Add a unit"</b>
+        <p>Name, code prefix, company, weight — the same shape functions already have. The builder's "+ New business unit"
+        and this button are one function, never two. A new unit starts unweighted and the weighting page says so.</p></div>
+      <div class="find"><b>Almost nothing new on the server</b>
+        <p>Every edit the builder makes is a plan edit the server already classifies (unitPlan / capPlan); creating a unit or
+        function is setup, which is already the SMO's. No new stored state — the band's progress is derived from the plan itself.</p></div>
+      <div class="find"><b>Deliberately not in this module</b>
+        <p>Units planning in projects (settled: functions only). Draft visibility (settled: live immediately). Templates or
+        pre-filled example plans. Changing anything about how the xlsx import works — the two doors stay siblings.</p></div>
+    </div>
+  </section>
+</div>

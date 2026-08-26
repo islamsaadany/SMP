@@ -349,6 +349,23 @@ office" control is **pressable, not merely present** (§70, §93.4).
 
 ---
 
+## 9b · Step 1 is built (§103)
+
+`src/recipes.js` — **43 recipes as data**, rendered on the Knowledge base page
+and read by `scripts/extract-kb.js` into `db/kb.json`. One source, so the page
+and the assistant cannot drift (§5.3's rule, now real).
+
+**The corpus as generated:** 9 knowledge-base sections, 26 page explainers, 43
+recipes — **~9,800 words, about 13,200 tokens**. Still one prompt, which is the
+measurement §1 rests on. Up from the 9,500 estimated there, because the recipes
+are new writing rather than existing prose.
+
+`db/**` is already bundled into the serverless functions (`vercel.json`), so
+the corpus reaches `api/chat.js` with no configuration change.
+
+**Still to build, and the only part needing the API key:** `lib/assistant.js`,
+the settings, the `bot` flag, the representative email.
+
 ## 10 · Built alongside: reordering comes back (§101)
 
 Not part of the assistant, and recorded here because it came out of reviewing

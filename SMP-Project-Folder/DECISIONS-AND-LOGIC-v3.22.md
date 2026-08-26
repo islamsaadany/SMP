@@ -13242,3 +13242,95 @@ as something nothing guards (§94.5). 181 → 190.
 
 **Both failure modes proved to fail first**: `focusOn()` forced true, 1 failure;
 the switch left unclassified, 3.
+
+---
+
+## 103 · The knowledge base gets its missing half (v3.31, spec 016 step 1)
+
+The assistant's corpus is the feature's actual project, and it did not exist.
+**The knowledge base explained how things WORK and barely how to DO them** —
+four mentions of pressing anything across 693 lines of `PAGE_INFO`. But *"how
+do I submit my report"*, *"where do I add a project"* is what somebody types
+into a bubble in the corner, so an assistant answering from the old corpus
+would have declined most real questions and been right to.
+
+**43 recipes**, in seven groups, written in the voice Islam settled: concise —
+the answer, then what to do next, with **one clause of *why* on the twelve that
+refuse something**. A bare *"not yourself"* reads as the software being
+obstructive; *"not yourself — a plan you're measured against isn't yours to
+rewrite"* reads as a decision somebody made on purpose.
+
+### 103.1 They are DATA, and that is the whole point
+
+`src/recipes.js` holds an array, not another `kbSection()` call, because
+`scripts/extract-kb.js` reads the same array into `db/kb.json`. **The words a
+person reads on the page and the words the assistant answers from are the same
+words** — §42's rule applied to prose, the same argument that makes
+`lib/rules.js` one file and `db/seed-state.json` generated rather than typed.
+
+`{pillar}` is substituted at render time, so a tenant that calls a pillar
+something else is not answered in Raya's vocabulary (§65).
+
+### 103.2 `who` is relevance, never permission
+
+Some questions have two true answers — *"how do I add a project to a
+capability?"* is *open the pen* for the office and *ask the office* for
+everybody else. That is **two entries sharing a question**, and on the page
+**both are shown**: the knowledge base is readable by everyone (`c_kb`, area
+`always`), so the office's answer is not a secret, merely useless to somebody
+who cannot act on it.
+
+**So the mark goes on the AUDIENCE, never on the duplicate.** Marking only the
+second of a pair rendered the two-track question as the same heading twice with
+nothing between them, which reads as a bug; marking by position would leave a
+lone office recipe unmarked in a group that is not the office's.
+
+### 103.3 The table of contents was a second copy, and was already wrong
+
+Nine sections, **eight links** — the people register had been missing from the
+contents since the day it was added, and nobody noticed because a table of
+contents is the one thing on a page nobody audits. It is derived from the
+sections now. Found while adding seven more groups to it, which is the ordinary
+way these surface: **a second copy is fine until somebody edits the original.**
+
+### 103.4 You cannot stub a function the file declares — three times in one hour
+
+The extractor captures the Knowledge base page's own nine sections **at the
+call**: `kbSection(id, title, blocks)` takes plain data, so evaluating
+`config-render.js` with `kbSection` replaced records them with no parsing, no
+regex over source, and no copy.
+
+Getting there taught the same lesson three times:
+
+| What was stubbed | What happened | The fix |
+|---|---|---|
+| `L()` | the file declares its own, and a **function declaration hoists over anything the sandbox supplies** | feed it `LABELS`, the data it reads |
+| `kbRecipes()` | same | evaluate `recipes.js` into the same sandbox |
+| `kbSection()` | same — and this one **silently captured nothing** | replace it **after** evaluation, since `renderKB` looks it up at call time |
+
+**The third would have shipped a corpus missing a third of itself.** It did not,
+because the extractor **throws when nothing is captured** rather than writing
+what it has — §54.5's rule, earning its place within minutes of being written.
+
+`config-data.js` is evaluated only for `LABELS` and is allowed to throw partway
+(it is a browser file and reaches for `localStorage`); **what we came for is
+asserted instead**, which is the stronger check — it fails if the declaration
+ever moves below the throw.
+
+### 103.5 What proves it
+
+`node scripts/extract-kb.js --check` writes nothing and **fails if the
+committed corpus is out of step with the sources** — the discipline `build.py`
+already has, where the built file must be byte-identical to the shipped one.
+Proved by editing one recipe and watching it fail. The output is deterministic
+(no timestamp), so an unchanged run produces an empty diff.
+
+`src/checks/knowledge-base.py` asserts the **agreement, never the count**
+(§53.5): the page and `db/kb.json` are read from both sides and compared, so
+adding a recipe keeps it green and letting the two drift does not. It runs as a
+**unit head**, deliberately — the knowledge base is everyone's, and a check run
+as the SMO could not see it being withheld from anybody else (§94.2).
+
+**The corpus today: 9 sections, 26 page explainers, 43 recipes — ~9,800 words,
+about 13,200 tokens.** Still one prompt, which is the measurement the whole
+design rests on.

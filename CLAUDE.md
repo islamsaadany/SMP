@@ -1135,6 +1135,35 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE KNOWLEDGE BASE'S MISSING HALF, AND IT IS DATA (since v3.31, §103):**
+  it explained how things WORK and barely how to DO them — four mentions of
+  pressing anything in 693 lines of `PAGE_INFO` — so **`src/recipes.js` holds
+  43 task recipes as an ARRAY, not another `kbSection()` call**, because
+  `scripts/extract-kb.js` reads the same array into **`db/kb.json`**: the words
+  a person reads and the words the assistant answers from are the same words
+  (§42, applied to prose). `{pillar}` is substituted at render time (§65).
+  **`who` IS RELEVANCE, NEVER PERMISSION** — a question with two true answers
+  is two entries sharing a `q`, and BOTH are shown, because the knowledge base
+  is everyone's (§37); **the mark goes on the AUDIENCE, never on the
+  duplicate**, or a two-track question renders as one heading twice.
+  **`--check` fails when the corpus is out of step**, the discipline `build.py`
+  already has; output is deterministic so an unchanged run is an empty diff.
+  **The TOC was a hand-kept second copy and was ALREADY WRONG** — nine
+  sections, eight links, the register missing since the day it was added — so
+  it is derived now (§42, found only because seven groups were being added).
+- **YOU CANNOT STUB A FUNCTION THE FILE DECLARES (§103.4):** a function
+  declaration **hoists over anything a `vm` sandbox supplies**, so a stub
+  passed in at construction is overwritten the moment the file is evaluated.
+  Three times in one hour — `L()` and `kbRecipes()` (the fix is to feed them
+  the DATA they read: `LABELS`, `RECIPES`) and `kbSection()` (no data to feed,
+  so **replace it AFTER evaluation**, which works because `renderKB` looks it
+  up at call time). The third **silently captured nothing** and would have
+  shipped a corpus missing a third of itself — caught only because the
+  extractor **throws when it captures nothing** rather than writing what it
+  has (§54.5, earning its place within minutes). And a file evaluated only for
+  something it declares early may be allowed to throw partway, provided **what
+  you came for is asserted instead** — the stronger check, since it fails if
+  the declaration ever moves below the throw.
 - **THE WORLD IS TWO ALLOW-LISTS, ONE BEHIND THE OTHER (§102.4):**
   `worldOf()` does not pass the group through — it **lifts named keys off it**
   (`sets`, `claims`, `naming`, `focusOff`) — and **`W()` behind it names the
@@ -1404,7 +1433,27 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back
+*Last Updated: 2026-08-26 &mdash; **v3.31: the knowledge base gets its missing
+half** (&sect;103, spec 016 step 1). The assistant's corpus is the feature's
+actual project and it did not exist: the knowledge base explained how things
+WORK and barely how to DO them &mdash; four mentions of pressing anything across
+693 lines of `PAGE_INFO` &mdash; while *"how do I submit my report"* is what
+somebody types into a bubble in the corner. **43 recipes, and they are DATA**,
+so `scripts/extract-kb.js` reads the same array into `db/kb.json` and the words
+a person reads are the words the assistant answers from (&sect;42, applied to
+prose). **THE LESSON THAT BIT THREE TIMES IN ONE HOUR**: you cannot stub a
+function the file declares &mdash; a declaration hoists over anything a `vm`
+sandbox supplies, so `L()` and `kbRecipes()` had to be fed the DATA they read
+and `kbSection()` had to be replaced AFTER evaluation. The third **silently
+captured nothing** and would have shipped a corpus missing a third of itself;
+it did not, because the extractor throws when it captures nothing rather than
+writing what it has (&sect;54.5, earning its place within minutes of being
+written). **And the table of contents was a second copy that was already
+wrong** &mdash; nine sections, eight links, the people register missing since
+the day it was added, found only because seven more groups were being added to
+it. Corpus today: **~9,800 words, about 13,200 tokens**, still one prompt.
+
+*Earlier the same day: **v3.30: reordering comes back
 (&sect;101), and focus measures get a switch (&sect;102)**. The second one
 carries the bug worth reading: the switch was wired, the rule was written, the
 writer worked &mdash; and flipping it changed nothing at all. **`worldOf()` does

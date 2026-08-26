@@ -2700,6 +2700,52 @@ function kbSection(id, title, blocks){
     }).join("") + '</div>';
 }
 
+/* ── The task recipes on the page (§103) ─────────────────────────────
+   Rendered from `RECIPES`, which is DATA — so `scripts/extract-kb.js` reads
+   the same array into the assistant's corpus and the words a person reads and
+   the words it answers from cannot drift (§42, applied to prose).
+
+   `{pillar}` and `{pillars}` are substituted here rather than baked in, because
+   a tenant that calls a pillar something else must not be answered in Raya's
+   vocabulary (§65) — the same reason `L()` exists everywhere else.
+
+   A recipe's answer is one string with `|` between paragraphs. Not an array:
+   the file is long enough already, and a separator that cannot appear in prose
+   costs nothing to read and one line to split. */
+function recipeText(t){
+  return String(t)
+    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
+    .replace(/\{pillar\}/g, L("pillar","bu"));
+}
+
+function kbRecipes(){
+  return RECIPES.map(function(g){
+    var items = g.items.map(function(r){
+      /* TWO TRUE ANSWERS TO ONE QUESTION are two entries sharing a `q`
+         (spec 016 §5.2b). On the page BOTH are shown, because the knowledge
+         base is readable by everyone and the office's answer is not a secret —
+         it is merely useless to somebody who cannot do it.
+
+         SO THE MARK GOES ON THE AUDIENCE, NEVER ON THE DUPLICATE. Marking only
+         the second of a pair left the two-track question rendering as the same
+         heading twice with nothing between them, which reads as a bug; and
+         marking by position would leave a lone office recipe unmarked in a
+         group that is not the office's. Whoever it is for, it says so. */
+      var who = r.who || g.who;
+      return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
+          (who === "office"
+            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
+        recipeText(r.a).split("|").map(function(para){
+          return '<p class="kb-p">' + para + '</p>';
+        }).join("") +
+      '</div>';
+    }).join("");
+    return { id: "how-" + g.g.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, ""),
+             title: g.g, html: items };
+  });
+}
+
 function renderKB(){
   var L1 = L("pillar","bu");
   var secs = [
@@ -2905,18 +2951,35 @@ function renderKB(){
     ])
   ];
 
-  var toc = '<div class="kb-toc">' + [
-      ["scoring","Scoring"],["access","Access"],["labels","Labels"],
-      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"],
-      ["mail","Email"]
-    ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
+  /* THE RECIPES: how to DO things, as opposed to how things work. Their own
+     part of the page, because mixing a task into a paragraph of reasoning
+     serves neither — somebody reading the Access section wants the argument,
+     somebody asking "where do I press" wants four lines. */
+  var recs = kbRecipes();
+  recs.forEach(function(r){
+    secs.push('<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
+              '</h3>' + r.html + '</div>');
+  });
+
+  /* DERIVED, NEVER LISTED. This was a hand-written array beside the sections
+     and it was ALREADY WRONG — nine sections, eight links, with the people
+     register missing since the day it was added. A second copy of a list is a
+     list that goes stale on the first edit somebody forgets (§42). */
+  var toc = '<div class="kb-toc">' +
+    secs.map(function(html){
+      var id = (html.match(/id="kb-([a-z-]+)"/) || [])[1];
+      var title = (html.match(/<h3>([^<]*)/) || [])[1] || "";
+      title = title.split(" \u2014 ")[0];
+      return id ? '<a href="#kb-' + id + '">' + title + '</a>' : '';
+    }).join("") + '</div>';
 
   return cfgHead("Knowledge base",
-      ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
+      ['<span class="pill kind">Everyone</span>',
+       secs.length + ' sections', recipeCount() + ' how-tos'],
       null, false) +
-    '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
-      'settle that a reader would need to know belongs here rather than in a note under ' +
-      'the screen it happens to affect.</p>' +
+    '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
+      'place. This grows: anything we settle that a reader would need to know belongs here ' +
+      'rather than in a note under the screen it happens to affect.</p>' +
     toc + '<div class="kb">' + secs.join("") + '</div>';
 }
 

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.29 shipped (live) · **v3.30 in progress on the branch**
+**Latest version:** v3.30 shipped (live) · **v3.31 in progress on the branch**
 **Last updated:** 2026-08-25
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
@@ -53,6 +53,30 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.31 — the knowledge base gets its missing half (§103, spec 016 step 1)
+
+The assistant's corpus, which is the feature's actual project.
+
+- **43 task recipes** in `src/recipes.js`, in seven groups — how to DO things,
+  which the knowledge base barely covered (four mentions of pressing anything
+  in 693 lines of `PAGE_INFO`). Twelve refuse something and keep one clause of
+  *why*.
+- **They are DATA**, so `scripts/extract-kb.js` reads the same array into
+  `db/kb.json` — page and assistant, one source.
+- **`db/kb.json`: 9 sections, 26 page explainers, 43 recipes — ~9,800 words,
+  about 13,200 tokens.** Still one prompt.
+- The knowledge base's own sections are captured **at the `kbSection()` call**,
+  so no prose was moved or copied.
+- The table of contents is derived — it was a second copy and was already wrong
+  (nine sections, eight links).
+
+**Verified:** new `src/checks/knowledge-base.py` **ALL CLEAR** (asserts the
+page and the corpus agree, run as a unit head) · `--check` proved to fail by
+editing one recipe · output byte-identical on a second run · qa.py clean.
+
+**Next, and the only step needing the API key:** `lib/assistant.js`, the
+settings, the `bot` flag and the representative email.
 
 ### v3.30 — reordering comes back (§101), and focus gets a switch (§102)
 

@@ -12,7 +12,7 @@ shell = open('shell.html').read()
 # the server then refuses (spec 006 §2).
 for tag, f in [("RULES","../../lib/rules.js"), ("AUDIENCE","../../lib/audience.js"),
                ("DATA","group-data.js"), ("CONFIGDATA","config-data.js"),
-               ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
+               ("ARRANGE","arrange.js"), ("PAGEINFO","pageinfo.js"), ("RECIPES","recipes.js"), ("TEMPLATES","templates.js"), ("XLSX","xlsx.js"),
                ("MAIL","mail.js"),
                ("RENDER","group-render.js"), ("CONFIGRENDER","config-render.js"), ("PRESENT","present.js"), ("SLIDES","slides.js"),
                ("SEARCHSEL","searchsel.js"), ("CHAT","chat.js"), ("SYNC","sync.js")]:

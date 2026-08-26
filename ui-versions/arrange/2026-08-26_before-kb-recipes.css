@@ -250,21 +250,6 @@
   .kb-sec h3 { font:400 21px/1.25 var(--serif); margin:0 0 4px; }
   .kb-sec h4.mini { margin:16px 0 4px; }
   .kb-p { font-size:14.5px; line-height:1.62; color:var(--ink-2); max-width:74ch; margin:0 0 10px; }
-  /* ── The task recipes (§103) ────────────────────────────────────
-     A recipe is a question and its answer, and the ONLY thing separating one
-     from the next was the boldness of the heading — so two answers ran
-     together and the boundary had to be inferred from weight alone. A gap
-     above each, and the question set on the same `.mini` key the sections
-     already use, so a how-to reads as a heading in the page's own voice
-     rather than as a new kind of type. */
-  .kb-rec + .kb-rec { margin-top:18px; }
-  .kb-q { font-size:14.5px; font-weight:600; color:var(--ink); margin:0 0 6px;
-          display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
-          max-width:74ch; }
-  /* The audience mark is quiet: it says who an answer is useful to, never who
-     may read it — the knowledge base is everyone's (§37). */
-  .kb-q .pill { flex:0 0 auto; }
-  .kb-how h3 { margin-bottom:14px; }
 
   /* ── The pen, in the corner of the box it edits ──────────────────
      visibility rather than display, so the button always holds its box and a

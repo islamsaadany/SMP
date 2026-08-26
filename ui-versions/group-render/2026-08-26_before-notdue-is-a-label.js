@@ -2562,25 +2562,9 @@ function msPill(m){ return statusPill(m, "Completed"); }
    -- a box that can contradict the word beside it is a box that eventually
    will. A row nobody is being asked for shows what it is instead. */
 function pctRead(x, when){
-  if (when != null && !dueThisCycle(when)) return notDueCell();
+  if (when != null && !dueThisCycle(when)) return '<span class="pill kind">Not due</span>';
   var v = statusReads(x);
   return v == null ? "&mdash;" : v + "%";
-}
-/* ── NOT DUE IS A LABEL, NOT A LOCK (§101.8) ──────────────────────
-   The comment over the reporting pane has said exactly that since it was
-   written, and the code did the opposite: a row not due this cycle had its
-   control REPLACED by the word, so the one thing the sentence promised —
-   reporting early — was the one thing that could not be done. The same gate
-   on Performance read a row that HAD been reported early as a dash while its
-   figure went on counting toward the score, which is a screen disagreeing
-   with the number beside it.
-
-   One rule, four places: a not-due row is QUIET UNTIL IT CARRIES A READING,
-   and says what it carries the moment it does. The gate moves from "is this
-   due" to "has this been answered". */
-function notDueCell(){ return '<span class="pill kind">Not due</span>'; }
-function reportedAny(x, d){
-  return d ? !!x.status : (x.actual != null && x.actual !== "");
 }
 var MS_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Completed"]];
 var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Delivered"]];
@@ -2651,15 +2635,14 @@ function projPerformanceBody(p, fk){
   var dxr = dxRows(p).map(function(row, i){
     var o = row.obj, when = dxWhen(row), d = dxIsDeliv(row);
     var notDue = !dueThisCycle(when);
-    var has = reportedAny(o, d);
     var got = d ? statusPill(o, "Delivered")
-                : (has ? esc(o.actual) : (notDue ? notDueCell() : '<span class="pill kind">&mdash;</span>'));
+                : (o.progress == null ? '<span class="pill kind">Not due</span>' : esc(o.actual));
     var reads = d ? statusReads(o) : o.progress;
     /* "Finished" is a status for a deliverable and a REPORTED FIGURE for an
        outcome. Asking statusReads() of an outcome answers null, which read
        every measured outcome as overdue. */
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
-    return '<tr' + (notDue && !has ? ' class="notdue"' : '') + '>' +
+    return '<tr' + (notDue || (!d && o.progress == null) ? ' class="notdue"' : '') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(o.name) + lateNote(when, done) +
         (o.note ? '<span class="why">' + esc(o.note) + '</span>' : '') + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
@@ -2667,16 +2650,17 @@ function projPerformanceBody(p, fk){
       '<td class="cc">' + got + '</td>' +
       '<td class="num final"' + (reads == null ? '' :
         ' style="color:var(--' + band(reads) + ')"') + '>' +
-        (has ? pct(reads) : (notDue ? notDueCell() : "&mdash;")) + '</td></tr>';
+        (notDue ? "&mdash;" : pct(reads)) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
-    var v = msReads(m), quiet = !dueThisCycle(m.finish) && !m.status;
-    return '<tr' + (quiet ? ' class="notdue"' : '') + '>' +
+    var v = msReads(m);
+    return '<tr' + (dueThisCycle(m.finish) ? '' : ' class="notdue"') + '>' +
       '<td class="idx">' + (i+1) + '</td><td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + esc(m.owner || "\u2014") + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
-      '<td class="cc">' + (quiet ? notDueCell() : msPill(m)) + '</td>' +
-      '<td class="num final">' + (quiet ? notDueCell() : (v == null ? "&mdash;" : v + "%")) +
+      '<td class="cc">' + (dueThisCycle(m.finish) ? msPill(m)
+        : '<span class="pill kind">Not due</span>') + '</td>' +
+      '<td class="num final">' + (dueThisCycle(m.finish) && v != null ? v + "%" : "&mdash;") +
       '</td></tr>';
   }).join("");
   var mst = projMilestones(p);
@@ -2987,29 +2971,27 @@ function projReportBody(p, may, fk){
      per-cent is computed against the target -- shown, never typed.
 
      A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting
-     there as an empty box somebody forgot -- but THE CONTROL IS STILL THERE,
-     because anyone who wants to report early may (§101.8). That sentence was
-     written here first and the code under it did the opposite for a version:
-     it replaced the picker with the word, so the one act the sentence
-     promised was the one act the pane refused. The word now sits where the
-     READING would be, and steps aside the moment there is one. */
+     there as an empty box somebody forgot. The control is still live: anyone
+     who wants to report early can, which is why this is a label and not a
+     lock. */
   var dxr = dxRows(p).map(function(row, i){
     var o = row.obj, d = dxIsDeliv(row), when = dxWhen(row);
     var notDue = d ? !dueThisCycle(when) : !outcomeDue(o);
-    var has = reportedAny(o, d), quiet = notDue && !has;
     var ent, pcell;
-    if (d) {
+    if (notDue) {
+      ent = '<span class="pill kind">Not asked</span>';
+      pcell = '<span class="pill kind">Not due</span>';
+    } else if (d) {
       ent = capPickBox(o, may, DX_WORDS, o.status);
-      pcell = o.status === "wip" ? capPctBox(o, may, o.name)
-        : (has ? '<b>' + statusReads(o) + '%</b>'
-               : (notDue ? notDueCell() : '<b>&mdash;</b>'));
+      pcell = o.status === "wip"
+        ? capPctBox(o, may, o.name)
+        : '<b>' + (statusReads(o) == null ? "&mdash;" : statusReads(o) + "%") + '</b>';
     } else {
       ent = capEntryBox(o, splitTarget(String(o.target)).unit, may, o.name);
-      pcell = has ? '<span class="fixedval">' + (o.progress == null ? "&mdash;" : o.progress + "%") + '</span>'
-                  : (notDue ? notDueCell() : '<span class="fixedval">&mdash;</span>');
+      pcell = '<span class="fixedval">' + (o.progress == null ? "&mdash;" : o.progress + "%") + '</span>';
     }
     var done = d ? statusReads(o) === 100 : (o.actual != null && o.actual !== "");
-    return '<tr' + (quiet ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
+    return '<tr' + (notDue ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
       '<td>' + esc(o.name) + lateNote(when, done) + '</td>' +
       '<td class="cc">' + dxType(row) + '</td>' +
       '<td class="num">' + dxTarget(row) + '</td>' +
@@ -3018,14 +3000,15 @@ function projReportBody(p, may, fk){
       '<td class="notecol">' + capNoteBox(o, may) + '</td></tr>';
   }).join("");
   var mRows = p.milestones.map(function(m, i){
-    var notDue = !dueThisCycle(m.finish), quiet = notDue && !m.status;
-    return '<tr' + (quiet ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
+    var notDue = !dueThisCycle(m.finish);
+    return '<tr' + (notDue ? ' class="notdue"' : '') + '><td class="idx">' + (i+1) + '</td>' +
       '<td>' + esc(m.name) + '</td>' +
       '<td class="cc">' + dxDate(m.finish, m.status === "done") + '</td>' +
-      '<td class="cc">' + capPickBox(m, may, MS_WORDS, m.status) + '</td>' +
-      '<td class="cc">' + (m.status === "wip" ? capPctBox(m, may, m.name)
-        : (m.status ? '<b>' + msReads(m) + '%</b>'
-                    : (notDue ? notDueCell() : '<b>&mdash;</b>'))) + '</td>' +
+      '<td class="cc">' + (notDue ? '<span class="pill kind">Not asked</span>'
+        : capPickBox(m, may, MS_WORDS, m.status)) + '</td>' +
+      '<td class="cc">' + (notDue ? '<span class="pill kind">Not due</span>'
+        : (m.status === "wip" ? capPctBox(m, may, m.name)
+           : '<b>' + (msReads(m) == null ? "&mdash;" : msReads(m) + "%") + '</b>')) + '</td>' +
       '<td class="notecol">' + capNoteBox(m, may) + '</td></tr>';
   }).join("");
   return pillarBand(projCode(fk, p), p.name,

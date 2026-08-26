@@ -13052,3 +13052,48 @@ that asked the reader fifteen specific questions found it. *A name collision in
 one global scope fails silently and in the direction that looks correct* —
 which is the third time this file has recorded that sentence, and the second
 time this week.
+
+### 101.8 Not due is a label, not a lock
+
+The comment over the reporting pane said it in so many words, and had since the
+day it was written:
+
+> *A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting there
+> as an empty box somebody forgot. The control is still live: anyone who wants
+> to report early can, **which is why this is a label and not a lock**.*
+
+The code directly under it did the opposite. `if (notDue)` **replaced** the
+picker with the words *Not asked*, so the one act the sentence promised — and
+the one Islam had asked for outright, *"they can report on it exceptional"* —
+was the one act the pane refused. **A comment can describe an intention the
+code never carried out, and nothing in a build compares the two.**
+
+The same gate on Performance had a second face, and it was worse, because it
+made the screen disagree with the number beside it. `projDeliverySide()` averages
+**every** deliverable, due or not — so FIN01's fourth row (due Dec 26, delivered)
+was counting 100 toward the project's 63%, while the pane printed a dash against
+it. *A figure that counts and is not shown is a screen arguing with its own
+score.*
+
+**The gate moves from "is this due" to "has this been answered."** A not-due row
+is quiet until it carries a reading and says what it carries the moment it does.
+One rule, four places — the two panes × the two tables — which is why
+`notDueCell()` and `reportedAny()` exist rather than the predicate being written
+out four times and drifting.
+
+**THE FIRST CHECK PASSED ON A REVERTED BUILD.** Written against FIN01 as it
+stands, it never reached three of the four paths: that project's five milestones
+are all due, so putting the milestone lock back changed nothing the check could
+see, and it printed *ok* on the broken build. §94.2 from the inverse side — every
+other assertion here asks whether a cell is **answered**, and a row replaced
+wholesale by the word *Not asked* answers every cell, which is exactly why all
+of them stayed green while this was true. The check **makes** the four cases now
+(not due and silent, not due and answered early, on each table), and each of the
+three reversions was put back one at a time and watched to fail before the green
+run was believed. The third needed an assertion the first two did not: **Status
+and % must agree about whether a row was answered** — a status reading *Not due*
+beside a figure is the same fault wearing the other cell.
+
+**Deliberately not widened**: the unit's tactic table has the identical lock and
+is untouched, because it was not what was asked about. It is named here so it is
+a decision rather than an oversight.

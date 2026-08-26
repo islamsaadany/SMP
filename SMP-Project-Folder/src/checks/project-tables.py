@@ -11,9 +11,11 @@ It never asks where a column sits or how wide it is. It asks:
 
   * is every cell answering a question its row can answer — no dead em-dash
     left anywhere, on any of the three panes;
-  * does the date reader understand all four shapes people write, and the
-    two a CYCLE is named, including the half-year that made the old reader
-    answer "due" for everything;
+  * does the date reader understand every shape people write -- the month and
+    year a milestone now uses, the week-month it used yesterday, the quarter
+    and the full date already sitting in live plans -- and the two a CYCLE is
+    named, including the half-year that made the old reader answer "due" for
+    everything;
   * does a row that is not due leave the score AND the tally, and does a row
     that is late look different from one that is early;
   * does the per-cent type itself at both ends and open only in the middle;
@@ -122,7 +124,8 @@ with sync_playwright() as p:
       const t = (v, want) => ({ v: v, got: dueThisCycle(v), want: want });
       return { cycle: cycleMonth(), year: cycleYear(),
         cases: [t("July 26", false), t("Mar 26", true), t("Dec 26", false),
-                t("W3 Mar 26", true), t("W4 July 26", false), t("W1 May 26", true),
+                t("March 2026", true), t("July 2026", false), t("May 2026", true),
+                t("W3 Mar 26", true), t("W4 July 26", false),
                 t("Q1 2026", true), t("Q3 2026", false), t("Q2", true), t("Q3", false),
                 t("31 May 2026", true), t("31 Jul 2026", false),
                 t("Done", true), t("", true), t(null, true)],
@@ -190,13 +193,20 @@ with sync_playwright() as p:
             ck("%s: no cell blank or dashed on a row being asked for" % t["head"][1],
                not dead, len(dead))
 
-        # THE DATE STATES ARE VISIBLY DIFFERENT, which is the whole reason a
-        # deliverable got its date back.
+        # THE DATE IS OFF THE TABLES (§101.8) and must not have taken its two
+        # readings with it. A deliverable or outcome that is LATE says so
+        # under its name; one that is NOT DUE is dimmed and says so where the
+        # figure would be. The milestone table still has its date column, so
+        # its own marks stay in the cell.
+        ck("no deliverables-and-outcomes table carries a Due date column",
+           all("Due date" not in t["head"] for t in dx), dx and dx[0]["head"])
+        ck("the milestone table keeps its own", all("Due date" in t["head"] for t in ms),
+           ms and ms[0]["head"])
         if not report and tab == "Performance":
             late = sum(1 for t in dx + ms for r in t["rows"] for c in r["cells"] if c["late"])
-            soon = sum(1 for t in dx + ms for r in t["rows"] for c in r["cells"] if c["soon"])
-            ck("overdue rows are marked", late > 0, late)
-            ck("not-due rows are marked, and differently", soon > 0, soon)
+            notdue = sum(1 for t in dx + ms for r in t["rows"] if r["notDue"])
+            ck("late rows are still marked, now under the name", late > 0, late)
+            ck("not-due rows are still marked, and differently", notdue > 0, notdue)
 
     # ── THE PER-CENT TYPES ITSELF ────────────────────────────────────────
     # §94.2: a check that only looks for something PRESENT cannot see a
@@ -232,24 +242,106 @@ with sync_playwright() as p:
         ["Project","Deliverable","Kind"], ["P","D","Delivered / not"]] })
         .filter(r => r.type === "DELIVERABLE");
       const now = capPlanFromWorkbook(c, { Deliverables: [
-        ["Project","Deliverable","Due date"], ["P","D","July 26"]] })
+        ["Project","Deliverable"], ["P","D"]] })
         .filter(r => r.type === "DELIVERABLE");
       return { planDeliv: head(plan, "Deliverables"), planOut: head(plan, "Outcomes"),
                planMs: head(plan, "Milestones"), progDeliv: head(prog, "Deliverables"),
                progMs: head(prog, "Milestones"),
                oldReads: old.length === 1 && !old[0].finish,
-               nowReads: now.length === 1 && now[0].finish === "July 26" };
+               nowReads: now.length === 1 && now[0].name === "D" };
     }""")
-    ck("the plan's Deliverables sheet asks for a Due date and not a Kind",
-       wb["planDeliv"] == ["Project", "Deliverable", "Due date"], wb["planDeliv"])
-    ck("the outcome sheet says Due date too", "Due date" in wb["planOut"], wb["planOut"])
+    # §101.8: the template asks for neither a Kind nor a Due date. The OUTCOME
+    # sheet keeps its date, deliberately -- see the note in the section.
+    ck("the plan's Deliverables sheet asks for neither a Kind nor a date",
+       wb["planDeliv"] == ["Project", "Deliverable"], wb["planDeliv"])
+    ck("the outcome sheet keeps its Due date", "Due date" in wb["planOut"], wb["planOut"])
     ck("the milestone sheet asks for a Description", "Description" in wb["planMs"], wb["planMs"])
     ck("the progress sheet asks for a status and a per-cent",
        "New status" in wb["progDeliv"] and "New %" in wb["progDeliv"], wb["progDeliv"])
+    ck("...and no longer shows a due date it cannot be given",
+       "Due date" not in wb["progDeliv"], wb["progDeliv"])
     ck("...and the milestone sheet does too",
        "New status" in wb["progMs"] and "New %" in wb["progMs"], wb["progMs"])
-    ck("a workbook written today reads its due date", wb["nowReads"], wb)
+    ck("a workbook written today reads", wb["nowReads"], wb)
     ck("a workbook written before this version still uploads", wb["oldReads"], wb)
+
+    # ── NOT DUE IS A LABEL, NOT A LOCK (§101.8) ──────────────────────────
+    # The inverse of §94.2: not "a control that should not be drawn", but a
+    # control that SHOULD be and was not. Every check above this one asks
+    # whether a cell is answered, and a row replaced wholesale by the word
+    # "Not asked" answers every cell -- so all of them passed while the pane
+    # refused the one act its own comment promised.
+    print("── not due is a label, not a lock")
+
+    # MAKE THE STATE (§99.7): FIN01 happens to carry one not-due deliverable
+    # and no not-due milestone at all, so three of the four paths would go
+    # unmeasured -- and a reverted build proved it, passing while the
+    # milestone lock was back in place. Four rows, one per case: not due and
+    # silent, not due and answered early, on each table.
+    pg.evaluate("""() => {
+      const c = capsOfFunction("finance")[0], p = c.projects[0];
+      const far = "Dec 27", d = p.deliverables, m = p.milestones;
+      d[d.length - 2].due = far; d[d.length - 2].status = null;
+      d[d.length - 1].due = far; d[d.length - 1].status = "done";
+      m[m.length - 2].finish = "December 2027"; m[m.length - 2].status = null;
+      m[m.length - 1].finish = "December 2027"; m[m.length - 1].status = "done";
+      paint();
+    }""")
+    pg.wait_for_timeout(250)
+
+    def cols(t):
+        h = t["head"]
+        return (h.index("Status") if "Status" in h else -1,
+                h.index("%") if "%" in h else -1)
+
+    for label, tab, sec, rep in (("Performance", "Performance", None, False),
+                                 ("Reporting", "Performance", None, True)):
+        landed = goto(pg, DEST, tab, sec, rep)
+        got = pg.evaluate(READ)
+        tabs = [t for t in got if cols(t)[0] > -1 and cols(t)[1] > -1]
+        ck("%s: the two tables are there [%s]" % (label, landed), len(tabs) == 2, len(tabs))
+        quiet = live = shown = dashed = mixed = 0
+        for t in tabs:
+            si, pi = cols(t)
+            for r in t["rows"]:
+                st, pc = r["cells"][si], r["cells"][pi]
+                if pc["text"] == "Not due":
+                    quiet += 1
+                    # a quiet row is DIMMED and, on Reporting, still typeable
+                    if rep and st["box"]:
+                        live += 1
+                    if not rep:
+                        live += 1
+                elif "%" in pc["text"]:
+                    shown += 1
+                # THE BUG, stated as an assertion: something reported, nothing read
+                said = st["text"] in ("Delivered", "Completed", "Not started") or st["box"]
+                if said and pc["text"] in ("\u2014", "-", ""):
+                    dashed += 1
+                # the two cells must agree about whether the row was answered:
+                # a status reading "Not due" beside a figure is the same fault
+                # wearing the other cell (found by reverting only one of them)
+                if st["text"] == "Not due" and "%" in pc["text"]:
+                    mixed += 1
+        ck("%s: some row is not due and says so" % label, quiet >= 2, quiet)
+        ck("%s: every not-due row keeps its control" % label, live == quiet, (live, quiet))
+        ck("%s: rows that were answered read a figure" % label, shown > 0, shown)
+        ck("%s: no row is answered and read as a dash" % label, dashed == 0, dashed)
+        ck("%s: Status and %% never disagree about a not-due row" % label, mixed == 0, mixed)
+
+    # A row reported EARLY stops being quiet the moment it is: FIN01's fourth
+    # deliverable is due Dec 26 and delivered, so it must read 100%, not a dash
+    # -- the score has always counted it and the screen used to hide it.
+    early = pg.evaluate("""() => {
+      const c = FUNCTIONS.finance && capsOfFunction("finance")[0];
+      const p = (c.projects || []).find(x => (x.deliverables || [])
+        .some(d => d.status && !dueThisCycle(d.due)));
+      if (!p) return null;
+      const d = p.deliverables.find(x => x.status && !dueThisCycle(x.due));
+      return { side: projDeliverySide(p), reads: statusReads(d) };
+    }""")
+    ck("a deliverable reported early still counts toward the score",
+       early and early["reads"] is not None and early["side"] is not None, early)
 
     # ── THE DECK ─────────────────────────────────────────────────────────
     print("── the review deck")

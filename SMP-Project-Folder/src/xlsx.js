@@ -836,7 +836,7 @@ function capReadme(kind, capNames, picked){
        ["Dropdowns", "Direction, Compile, Kind, Timeline and the Project columns are lists. Unit suggests rather than insists: type your own if it is not offered."],
        ["Owners", "Type the person's name."],
        ["Targets", "The number in Target, the unit beside it \u2014 12 and d, not \"12 d\". A blank target is allowed: the outcome is recorded and left unscored."],
-       ["Due dates", "Match the project's Timeline: a project by Quarters wants Q1 2026, one by Dates wants 20 Mar 2026. A STATUS is not a due date \u2014 Done and Pending belong in the reporting cycle, not here. Anything else is still saved, and said out loud on upload."],
+       ["Milestone due dates", "A month and a year \u2014 July 2026. A STATUS is not a due date: Done and Pending belong in the reporting cycle, not here. A quarter or a full date is still read, so a file written earlier still uploads; anything that is not a time at all is saved as entered and said out loud on upload."],
        ["Milestone dates", "A milestone may finish after its project ends. It is saved exactly as entered and said out loud, never refused."],
        ["Blank rows", "Ignored."],
        ["Codes", "There are none to type. The platform assigns every code itself when the file arrives."],
@@ -897,17 +897,18 @@ function capPlanWorkbook(c){
        deliverable is delivered when the project ends, and the project's owner
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
-    { name:"Deliverables", widths:[34, 54, 16],
-      /* §101: no Kind. A deliverable is measured one way now -- delivered or
-         not, with a per-cent while it is under way -- so the plan has nothing
-         to choose here. Its direction is "=" and its target "Y/N", written by
-         the platform rather than asked of the person. */
-      head:["Project", "Deliverable", "Due date"],
+    { name:"Deliverables", widths:[34, 60],
+      /* §101.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
+         direction and target are written by the platform, and Islam took the
+         date off the templates "for now" -- the field survives in the model
+         and nothing asks for it, so every deliverable is simply always asked,
+         which is what the product did before §101 put the date back. */
+      head:["Project", "Deliverable"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
                    { range:"C2:C400", list:DELIV_KINDS }],
       rows:(c.projects || []).reduce(function(acc, p){
-        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name, d.due || ""]); });
+        (p.deliverables || []).forEach(function(d){ acc.push([p.name, d.name]); });
         return acc;
       }, []) },
 
@@ -954,12 +955,12 @@ function capProgressWorkbook(c){
        had. "New %" is read only for In progress -- the word decides the
        figure at both ends, and a per-cent behind "Delivered" is a number
        nobody can see. */
-    { name:"Deliverables", widths:[30, 44, 14, 18, 18, 12, 16], lockedCols:[6],
-      head:["Project", "Deliverable", "Due date", "Current status", "New status", "New %", "ID"],
-      validations:[{ range:"E2:E400", list:MS_STATUSES_D }],
+    { name:"Deliverables", widths:[30, 48, 18, 18, 12, 16], lockedCols:[5],
+      head:["Project", "Deliverable", "Current status", "New status", "New %", "ID"],
+      validations:[{ range:"D2:D400", list:MS_STATUSES_D }],
       rows:(c.projects || []).reduce(function(acc, p){
         (p.deliverables || []).forEach(function(d){
-          acc.push([p.name, d.name, d.due || "", delivStatusWord(d.status), "", "", d.id]);
+          acc.push([p.name, d.name, delivStatusWord(d.status), "", "", d.id]);
         });
         return acc;
       }, []) },

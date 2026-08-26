@@ -1,7 +1,7 @@
-"""ONE TABLE, ONE ROW SHAPE (§101).
+"""ONE TABLE, ONE ROW SHAPE (§103).
 
 §99 split a project's table in two because Direction, Target and the date had
-nothing to say for a deliverable. §101 gives a deliverable a real direction
+nothing to say for a deliverable. §103 gives a deliverable a real direction
 (`=`) and a real target (`Y/N`) instead, so the cells have ANSWERS and the
 split is undone — fewer parts, same problem solved.
 
@@ -145,10 +145,10 @@ with sync_playwright() as p:
     # ── EXECUTION DOES NOT MOVE (the claim this was sold on) ─────────────
     print("── the Execution figure")
     ex = pg.evaluate("""() => {
-      // §101 sold itself on "nobody's score moves", so the average is compared
+      // §103 sold itself on "nobody's score moves", so the average is compared
       // against the count it replaced -- with every per-cent stripped AND
       // every In progress settled, which is what a tenant looked like the day
-      // that shipped. THE SETTLING IS §101.10's DOING: an In progress with no
+      // that shipped. THE SETTLING IS §103.10's DOING: an In progress with no
       // number now LEAVES the average rather than counting as nought, so a
       // fixture that strips per-cents and leaves the statuses is no longer
       // modelling the old formula at all -- it would report the deliberate
@@ -166,7 +166,7 @@ with sync_playwright() as p:
         return { cap: c.name, milestones: n, count: count, avg: avg, same: count === avg };
       });
       // AND THE CLAIM FOR TODAY, which is the one somebody would ask about:
-      // not one row in the demo is halfway through a sentence, so §101.10 has
+      // not one row in the demo is halfway through a sentence, so §103.10 has
       // moved no figure that exists. If a later edit leaves one blank, this
       // says so rather than the parity above going quietly red.
       let pend = 0, wip = 0;
@@ -206,7 +206,7 @@ with sync_playwright() as p:
             ragged = [r for r in t["rows"] if sum(c["span"] for c in r["cells"]) != n]
             ck("%s: every row fills the grid" % t["head"][1], not ragged,
                [[c["text"] for c in r["cells"]] for r in ragged][:1])
-            # NO DEAD CELL. This is the complaint §99 was built for and §101
+            # NO DEAD CELL. This is the complaint §99 was built for and §103
             # answers differently: a cell holding nothing but an em-dash is
             # the table asking a row a question its kind cannot answer.
             dead = [c["text"] for r in t["rows"] if not r["notDue"]
@@ -214,7 +214,7 @@ with sync_playwright() as p:
             ck("%s: no cell blank or dashed on a row being asked for" % t["head"][1],
                not dead, len(dead))
 
-        # THE DATE IS OFF THE TABLES (§101.8) and must not have taken its two
+        # THE DATE IS OFF THE TABLES (§103.8) and must not have taken its two
         # readings with it. A deliverable or outcome that is LATE says so
         # under its name; one that is NOT DUE is dimmed and says so where the
         # figure would be. The milestone table still has its date column, so
@@ -271,7 +271,7 @@ with sync_playwright() as p:
                oldReads: old.length === 1 && !old[0].finish,
                nowReads: now.length === 1 && now[0].name === "D" };
     }""")
-    # §101.8: the template asks for neither a Kind nor a Due date. The OUTCOME
+    # §103.8: the template asks for neither a Kind nor a Due date. The OUTCOME
     # sheet keeps its date, deliberately -- see the note in the section.
     ck("the plan's Deliverables sheet asks for neither a Kind nor a date",
        wb["planDeliv"] == ["Project", "Deliverable"], wb["planDeliv"])
@@ -286,7 +286,7 @@ with sync_playwright() as p:
     ck("a workbook written today reads", wb["nowReads"], wb)
     ck("a workbook written before this version still uploads", wb["oldReads"], wb)
 
-    # ── NOT DUE IS A LABEL, NOT A LOCK (§101.8) ──────────────────────────
+    # ── NOT DUE IS A LABEL, NOT A LOCK (§103.8) ──────────────────────────
     # The inverse of §94.2: not "a control that should not be drawn", but a
     # control that SHOULD be and was not. Every check above this one asks
     # whether a cell is answered, and a row replaced wholesale by the word
@@ -310,7 +310,7 @@ with sync_playwright() as p:
     }""")
     pg.wait_for_timeout(250)
 
-    # §101.9: the score column is called Performance on one table and Progress
+    # §103.9: the score column is called Performance on one table and Progress
     # on the other, so it is found by EITHER name -- and both are asserted
     # below, because a check that accepts either would not notice one of them
     # reverting to the bare unit.
@@ -368,7 +368,7 @@ with sync_playwright() as p:
       const d = p.deliverables.find(x => x.status && !dueThisCycle(x.due));
       return { side: projDeliverySide(p), reads: statusReads(d) };
     }""")
-    # §101.9: the last column says WHAT it holds, not what it is measured in.
+    # §103.9: the last column says WHAT it holds, not what it is measured in.
     heads = pg.evaluate("""() => [...document.querySelectorAll(".pane table, .capbody table")]
       .map(t => [...t.querySelectorAll("thead th")].map(e => e.textContent.trim()))
       .filter(h => h.length)""")
@@ -384,7 +384,7 @@ with sync_playwright() as p:
     ck("a deliverable reported early still counts toward the score",
        early and early["reads"] is not None and early["side"] is not None, early)
 
-    # ── AN IN PROGRESS WITH NO NUMBER (§101.10) ──────────────────────────
+    # ── AN IN PROGRESS WITH NO NUMBER (§103.10) ──────────────────────────
     # Measured, not reasoned about: the whole fault was that the score moved
     # when nobody had said anything, so the assertion is the score.
     print("── an In progress with no number")
@@ -423,7 +423,7 @@ with sync_playwright() as p:
        sc["said"]["reads"] == 35 and not sc["said"]["pending"], sc["said"])
 
     # and the SCREEN says so -- on both panes and both tables, which is four
-    # places one predicate is asked (§101.10).
+    # places one predicate is asked (§103.10).
     for label, rep in (("Performance", False), ("Reporting", True)):
         goto(pg, DEST, "Performance", None, rep)
         pg.evaluate("""() => {
@@ -462,7 +462,7 @@ with sync_playwright() as p:
         }""")
         pg.wait_for_timeout(200)
 
-    # ── A FUNCTION SUBMITS (§102) ────────────────────────────────────────
+    # ── A FUNCTION SUBMITS (§104) ────────────────────────────────────────
     # §94.2 both ways: the control must BE there, and the refusals must stop it
     # -- a Submit that always submits would pass every "is it present" check.
     print("── a function submits its report")
@@ -485,7 +485,7 @@ with sync_playwright() as p:
         pg.click("[data-submit]", timeout=3000); pg.wait_for_timeout(350)
         return said.get("m", "")
 
-    # 1 · a row that owes a per-cent stops it (§101.10 with teeth)
+    # 1 · a row that owes a per-cent stops it (§103.10 with teeth)
     pg.evaluate("""() => {
       fnMissingNotes("finance").forEach(x => x.obj.note = "Explained.");
       const p = capsOfFunction("finance")[0].projects[0];
@@ -530,7 +530,7 @@ with sync_playwright() as p:
        not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST)
        and bool(pg.query_selector("[data-submit]")))
 
-    # ── A PLAN ALREADY STORED, CHECKED (§103) ────────────────────────────
+    # ── A PLAN ALREADY STORED, CHECKED (§105) ────────────────────────────
     # Both ends (§94.2): the note must appear on a project that has the fault
     # AND be absent from one that does not -- a note drawn always says nothing.
     print("── a plan already stored")

@@ -334,7 +334,7 @@ function deckSlidesFn(fk){
 
       /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
          a deliverable was carrying a second, quieter answer to both. */
-      /* ONE SLIDE, ONE ROW SHAPE (§101). Two slides made sense while a
+      /* ONE SLIDE, ONE ROW SHAPE (§103). Two slides made sense while a
          deliverable and an outcome answered different questions; they answer
          the same ones now, so a projector showing them apart would be showing
          a distinction the product no longer draws. */

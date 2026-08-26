@@ -200,11 +200,6 @@
 <script src="CHAT"></script>
 <script src="SYNC"></script>
 <script>
-/* WHICH BUILD THIS IS, stamped by build.py out of sw.js's SHELL constant —
-   the one string that is guaranteed to change whenever the built file's bytes
-   do (§91). A chat message carries it, so "it showed 4.2 on my screen" can be
-   answered without asking anybody which version they were looking at. */
-var BUILD_ID = "BUILDID";
 
 /* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
    a stacked list for Manage. They were replaced in 2.9 by one worded button
@@ -1800,7 +1795,7 @@ var BUILD_ID = "BUILDID";
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
-    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§101): both
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§103): both
        write `status`, and leaving In progress CLEARS the per-cent rather than
        leaving it stranded under a word that no longer wants one. A stale 35%
        sitting behind "Delivered" is a number nobody can see and the score
@@ -2109,7 +2104,7 @@ var BUILD_ID = "BUILDID";
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
-    /* ONE HANDLER FOR BOTH SUBMITS (§102). The attribute carries the TARGET --
+    /* ONE HANDLER FOR BOTH SUBMITS (§104). The attribute carries the TARGET --
        a unit key, or `fn:<key>` for a supporting function -- which is the same
        string `REVIEW.submitted` is keyed by and the same one the server
        authorises. It read `UNITS[...]` before, so wiring a function's button to

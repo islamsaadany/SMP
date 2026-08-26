@@ -2918,7 +2918,7 @@ function capKOScore(c){
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
    percentage when it is a percentage. Nothing reported is absent, not zero. */
-/* ── WHAT A STATUS READS AS (§101) ────────────────────────────────────────
+/* ── WHAT A STATUS READS AS (§103) ────────────────────────────────────────
    A deliverable and a milestone are reported the same way now: Not started,
    In progress with a per-cent, Delivered (or Completed). The figure follows
    the word at both ends and only the middle is typed, which is why `kind` --
@@ -2931,7 +2931,7 @@ function capKOScore(c){
    milestone in every tenant is in exactly that state on the day this ships.
    Reading it as 0 is what makes the Execution figure identical to the count
    it replaces; excluding it would raise every tenant's score overnight. */
-/* ── AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§101.10) ───────────────
+/* ── AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§103.10) ───────────────
    It returned 0, so the average COUNTED it -- and a project's figure fell the
    instant a dropdown changed, before the person who changed it had said
    anything at all. That is the platform putting a number in somebody's mouth,
@@ -3005,7 +3005,7 @@ function projOverruns(p){
 function capPerf(c){
   return sideAvg((c.projects || []).map(projPerf));
 }
-/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§101). It was
+/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§103). It was
    `done / total`: a milestone in progress counted as nothing. With a per-cent
    on the milestone it is the mean of what each one reads -- 100 done, 0 not
    started, its own figure in between -- and those are identical arithmetic
@@ -3021,7 +3021,7 @@ function capExec(c){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
     (p.milestones || []).forEach(function(x){
-      /* §101.10: a milestone halfway through a sentence leaves the average
+      /* §103.10: a milestone halfway through a sentence leaves the average
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
          so nought is what it is, not what we assumed. */
@@ -3039,7 +3039,7 @@ function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSid
 /* What a capability asks for this cycle: its key objectives, plus everything in
    its projects whose time has come. An outcome measured at Q4 is not an empty
    box somebody forgot in Q2 \u2014 it is not asked. */
-/* ── WHEN A ROW IS DUE (§101) ──────────────────────────────────────────────
+/* ── WHEN A ROW IS DUE (§103) ──────────────────────────────────────────────
    One reader, four written shapes, because the plan is written by people and
    people write dates four ways:
 
@@ -3162,7 +3162,7 @@ function outcomeDue(o){ return dueThisCycle(o.measureAt); }
    the predicate went too, at all four of its call sites, rather than being
    left behind always answering true (§24). An OUTCOME still has one, because
    a measurement time is a real thing somebody chose. */
-/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§101), not "everything in the
+/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§103), not "everything in the
    plan". A deliverable due next December is not an empty box somebody forgot
    in June -- it is not asked, exactly as an outcome measured in Q4 has never
    been asked in Q2. It leaves the count and it leaves the submit gate.
@@ -3748,7 +3748,7 @@ function reportedCount(u){
 /* A note is required where a figure lands in the bottom two bands. A red
    number with no explanation is the thing a review meeting stalls on. */
 /* WHAT A ROW READS, whatever kind of row it is. A tactic is a ratio, a
-   deliverable and a milestone are a status-and-per-cent (§101.10), and
+   deliverable and a milestone are a status-and-per-cent (§103.10), and
    everything else carries `progress`. One reader, because the note rule and
    the board both ask and two copies would disagree about a deliverable. */
 function rowReads(x){
@@ -3764,7 +3764,7 @@ function needsNote(x){
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
-/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§102) ────────────────────
+/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§104) ────────────────────
    The same three answers a unit has, over a function's own vocabulary: key
    objectives, deliverables and outcomes, milestones. `reportItems()` could not
    be reused -- a unit's rows hang off pillars and a function's off
@@ -3810,14 +3810,14 @@ function fnReportedCount(fk){
 }
 function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
 
-/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§102) ───────────
+/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§104) ───────────
    A unit and a function are the same product (§53.5), so the refusal is one
    function taking a TARGET rather than two that will drift. It returns the
    rows, never a sentence, because the caller says it in its own words.
 
    Two rules, and the second is new: a figure in the bottom two bands with no
    note (a red number nobody explained is what a review meeting stalls on),
-   and a row that said In progress and never said how far (§101.10 -- the
+   and a row that said In progress and never said how far (§103.10 -- the
    score leaves it out, so submitting would file a report with a hole in it). */
 function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
@@ -3962,6 +3962,15 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
+/* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
+   second copy — the answer is lib/rules.js's, asked for the person being viewed
+   as, so the handle the screen draws and the save the server accepts cannot
+   disagree. That disagreement is precisely what §94.3 shipped for two versions:
+   the drags worked on screen and were refused every time. */
+function mayArrangeHere(target){
+  return SMPRules.mayArrange(world(), viewer(),
+    target === undefined ? TARGET : target);
+}
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person

@@ -12845,8 +12845,327 @@ other rather than to a literal (§53.5). A check written against the problem
 survives somebody changing their mind about the wording; one written against
 the wording does not.
 
+*(§99 is another session's — one table, two halves — and it reached `main`
+first, so it keeps the number. This was written as §99 on its branch. Third
+renumber in a day; the rule is unchanged and is simply whoever lands first.)*
 
-## 100 · The plan's own shape, and a due date that is read (v3.27)
+---
+
+## 100 · The corner, corrected by using it (v3.28)
+
+Three notes from Islam within minutes of the merge going live, all of them from
+having the thing open rather than from reading about it. Each reverses or
+completes something §97 decided, and each is recorded here rather than edited
+into §97, because the argument §97 made was a good one and it is worth knowing
+which arguments lose.
+
+### 100.1 Where they were is not captured any more — §97.4 reversed
+
+> *"The line in front of the chat shouldn't be there."*
+
+Asked how far it should go — hidden from the sender, or gone entirely — he
+chose **gone everywhere**.
+
+§97.4 captured the page, the subject, the cycle and the build with every
+message and drew them under the sender's own words. The reasoning was §71's,
+and it is still a good argument in the abstract: *the screen already knows
+where somebody is, and asking them to describe it is asking them to do the
+computer's job*. What it did not survive is being **looked at**. On a real
+message the line is longer than the message, more technical than anything else
+in the panel, and it repeats under every single thing you send.
+
+**IT IS NOT MERELY HIDDEN.** `whereNow()` and `navWord()` are gone,
+`ICON_PAGE` is gone, `BUILD_ID` and the build-time stamp that produced it out
+of `sw.js` are gone, and **migration 023 drops the four columns** — §53.4's
+rule, the same act migration 016 performed when a deliverable lost its due date
+and its owner: *a column the platform no longer reads is worse than no column*,
+because the next person to open the table reads it as something that ought to
+be filled in. 022 stops creating them too, so a fresh database never grows
+them.
+
+**AND THE SENTENCE UNDER THE COMPOSER WENT WITH IT.** It read *"the page you
+are on is sent with your message"*, which stopped being true the moment that
+stopped happening. **A sentence that is merely stale is worse than no
+sentence, because somebody believes it.** The line is empty now, and
+`.chnote:empty` takes its height back.
+
+**The check was INVERTED rather than deleted**: it asserted the capture, and it
+now asserts the absence — §94.2's rule, that only a check looking for an
+absence can see something that should not be drawn. The easiest way to bring a
+removed feature back by accident is to stop asserting it is gone.
+
+### 100.2 It minimises; there was never anything to close
+
+> *"The user closed the chat box — it needs to be a minimize button as there
+> is no closing actually."*
+
+Exactly right, and the × was a small lie. There is **one conversation per
+person and it is permanent** (§97.1) — pressing that control puts the panel
+away and changes nothing else. A × promises an end to something that has none,
+and on a chat panel it reads as *discard this*, which is the one thing it
+cannot do. A minus, and the label says *Minimise*.
+
+### 100.3 A reply has to announce itself, and the badge was arriving late
+
+> *"When the admin replied the chat should show a notification on the callout
+> for the user to know he got an answer."*
+
+The count existed. What was missing was that it **arrived silently and up to
+three minutes late** — §98.1 took the shut panel's beat to 180s to stop a
+forgotten tab keeping the database awake, and that is right for a corner nobody
+is expecting anything from and wrong for the one person who has just asked a
+question.
+
+So there is a **third cadence** rather than a slower saving: `POLL_WAIT` at 15s,
+used only while the conversation is *waiting on the office* or holding an
+unread reply. It costs nothing in the ordinary case, which is the whole point —
+it is on only between asking and being answered, and it goes back to 180s the
+moment the office replies.
+
+And the arrival is now visible: a ring that expands out of the bubble and fades,
+twice. Not a bounce and not a colour change — the corner sits over somebody's
+work and the job is to be noticed, not to interrupt. `prefers-reduced-motion`
+gets the badge and nothing else, which is the point of asking.
+
+**THE BUG IN IT COULD NOT HAVE BEEN FOUND BY READING.** The first version
+compared the arriving count against `state.unread` three lines *after*
+assigning the arriving count to `state.unread`, so the two were always equal
+and a reply could never announce itself. It read correctly and could not fire.
+The check found it; nothing else would have.
+
+**AND THE STUB WAS LYING ABOUT THE SERVER.** `checks/office-chat.py` answered
+`thread: null` where the real endpoint returns `{waiting: true}` after a send —
+so the client correctly stayed on the slow beat and the check read that as
+broken. A stub has to MODEL the server, not merely answer it; §94.11's argument
+about serving a real deployment, one layer further in.
+
+### 100.4 Clicking outside puts it away, and the bubble gets out from under it
+
+> *"If I click outside the box minimise it please, and when I open the chat box
+> make it at the bottom and hide the chat icon as if it comes above it — you get
+> me?"*
+
+Three asks in one sentence and they are one fault seen from three sides.
+
+**THE BUBBLE WAS STILL DRAWN UNDER THE OPEN PANEL.** The dock is a column at the
+bottom-right corner, so with both in it the panel sat a bubble's height — 60px
+plus the gap — off the bottom of the window, which is exactly what "make it at
+the bottom" describes. `.chatdock.chopen .chatbtn { display:none }` is the whole
+fix, and it is CSS off a class the opener already sets rather than a second
+piece of state: a bubble that opens a panel has nothing to say while the panel
+is open, and a control that would only ever re-do what is already done is
+furniture. Measured after: the panel's bottom edge is 18px from the window's,
+which is the dock's own inset.
+
+**CLICKING OUTSIDE MINIMISES IT**, on `pointerdown` rather than `click`, so it
+goes away as the press lands rather than on release — a panel that lingers until
+the mouse comes up reads as having missed the press. **Two things are not
+"outside"**: the dock itself, and an open modal — a screenshot opened *from* the
+panel renders into the platform's own overlay, which is not inside `#chatdock`,
+so without that second exception looking at the picture you just attached would
+put the panel away behind it.
+
+**AND ESCAPE NOW WORKS FROM ANYWHERE.** It had been wired on the composer alone,
+so it did nothing the moment focus moved to the attach button or a message —
+present, plausible and silent, which is the shape of fault this file keeps
+recording. It is on the document now, guarded on the panel being open so it
+cannot swallow an Escape meant for something else.
+
+**THE HALF-TYPED MESSAGE SURVIVES ALL THREE**, and that is asserted rather than
+assumed: minimising is not discarding (§100.2), so the check types half a
+sentence, clicks the page, reopens and reads it back.
+
+### 100.5 The office's box fits the screen — §100.5
+
+> *"The chat box requires a scroll up. This shouldn't happen — the chat box
+> stays fit to the screen to show the chat box and Send, and what can be
+> scrolled is the left pane with the chats."*
+
+`.chinbox` stood at a **fixed 593px** however tall the window was, with the
+thread capped at 430px inside it. On a tall screen that leaves dead space; on a
+short one the reply box and Send fall below the fold, so answering somebody
+begins with scrolling to find the control. Measured before touching it: at 900px
+the page scrolled **306px**, at 700px it scrolled **506px** and the composer was
+off-screen entirely.
+
+The box is `calc(100dvh - var(--chin-top) - 20px)` now, where `--chin-top` is
+its own distance from the top of the document, set by the one line of JS that
+can know it and re-measured on resize.
+
+**THIS IS NOT §28.3's TRAP, AND THE DIFFERENCE IS WORTH STATING.** That rule —
+never size anything against a JS-measured value that the size itself can change
+— cost v2.8 an infinite oscillation: measured height fed page height fed the
+scroll clamp fed the header's condense fed the measured height. There is no loop
+here. What sits **above** this box does not move when the box gets taller or
+shorter, so the measurement is stable in a way a max-height fed by a height
+never was. The old condense-on-scroll, which was the thing that made the top
+move, was removed in v3.3.
+
+`min-height: 340px` is the floor: below it the box stops shrinking and the page
+scrolls instead, because a thread squeezed into 150px is not a usable screen and
+a window that short is somebody's split view rather than their laptop.
+
+**THE SCROLLING MOVES INSIDE.** `min-height: 0` on the queue, the thread and the
+thread's body — without it a grid or flex child refuses to shrink below its
+content and pushes the box open again, which is the same fixed height arriving
+by a different road. Each of the two panes now has a scroller of its own, which
+is precisely what was asked for.
+
+**AND THE CHECK ASSERTS THE RELATIONSHIP, NEVER THE NUMBER** (§53.5, §94.14,
+§100.3's stub lesson pointing the same way). Section 8 of
+`src/checks/office-chat.py` sweeps 1000 / 860 / 760 / 660px and asserts that
+Send is inside the window, that the thread scrolls inside its own box, that the
+queue has a scroller — and that the box's height **moved with the window**. That
+last one is the assertion that matters: every other one of them passes on a tall
+window with the fixed height back in place, which is how this shipped. Proved by
+putting `height: 593px` back and watching it fail at 660px and on the sweep of
+heights, then restoring it.
+
+**THE STUB HAD TO GROW A CONVERSATION.** The office's page had never been
+measured with a thread open, because the stub answered `queue` and `thread` with
+the person's own payload — so the inbox drew "Pick somebody on the left" and
+every assertion about a thread would have had nothing to look at. It carries
+twenty alternating messages now, deliberately more than fit the tallest window
+swept: a thread of three fits every screen and would report a box that *cannot*
+scroll as one that *need not*. §100.3's lesson a second time, in the same file —
+a stub has to model the server, and modelling it includes carrying enough data
+for the thing under test to be under any strain at all.
+
+**WHAT IS LEFT IS NAMED RATHER THAN GLOSSED.** The page can still scroll, and
+measuring it says why: at a 1000px window the inbox runs from document 140 to
+980 and the page is 1206 tall — the extra is **Setup's own rail**, sixteen
+entries at 1029px, plus `main.wrap`'s 80px foot. That is not this box and not
+this page; it is every Setup page, and §28.3's rule is explicit that a
+navigation rail must never be capped, because a list that says "it ends here"
+when it does not is worse than a page that scrolls. So the assertion is the one
+that was actually asked for — **Send is on screen at scroll 0, at every height
+swept** — and not "the page cannot scroll", which would be a different and
+worse product. Measured on the real server at 1000 / 860 / 760 / 660px: Send on
+screen every time, the box at 840 / 700 / 600 / 500px.
+
+---
+
+## 101 · Reordering comes back, as its own grant (v3.30)
+
+> *"I will give it back — shall we align where to visually have it? I was
+> thinking it can land in the same place of the pen for the non-SMO roles, and
+> it can be another shape that indicates arrangement, and it's only in the
+> strategy plan part which mirrors in the reporting and performance."*
+
+**This reverses §94.3, and every word §94.3 wrote down stayed true.** That
+section closed reordering to the office on the argument that the order of a
+plan is as much a part of what was agreed as its words — and it found, while
+doing so, that `lib/authorize.js` compares row ids **in order**, so every drag a
+unit head had ever made was already being refused on save. The rows moved on
+screen and the save came back refused. §94.15 then removed the explicit Arrange
+button, because its stated audience — *people who can arrange but have no pen* —
+had just been emptied.
+
+What changes is not that reordering stopped being a plan decision. It is that
+**the plan's ORDER is the unit's to decide, while the plan's WORDS remain the
+office's.**
+
+### 101.1 It is a separate rule, not a hole in `mayAuthorPage()`
+
+The cheap fix would have been to let these roles through the authoring gate.
+That would have handed them the words as well — the exact fault §94 existed to
+fix. So `mayArrange()` is its own function in `lib/rules.js`, and the two
+questions are asked separately on both sides:
+
+| | Authoring | Arranging |
+|---|---|---|
+| Rename, add or remove a row | the office | — |
+| Move a row | the office | **and whoever holds the thing** |
+
+**Who, in Islam's words:** *"no, only custodian and BU owner"*, and of a
+supporting function's Projects pane, *"same"*. A function has no BU owner, so
+the holder there is its **head**; a custodian attached to a function holds it
+the same way. `ARRANGE_ROLES` is `["owner", "custodian", "fnhead"]`.
+
+**A Contributor never** — asked directly and answered no. **A group or company
+CEO only if they also hold one of those**, because reaching a unit is not
+holding it (§37). Measured rather than assumed: `ceo` comes back false on every
+unit, and the one contributor in the seed comes back false on their own.
+
+**The grant still has to say edit.** This narrows from the matrix, it never
+widens: a tenant that has closed a unit's plan to its own custodian keeps it
+closed.
+
+### 101.2 The authoriser had to learn a new shape
+
+`same(idsOf(a), idsOf(b))` is an **ordered** comparison, so a reorder and a
+rewrite were indistinguishable — both simply "the ids are not the same". That
+one line is the whole of why §94.3's drags failed silently.
+
+`reordered()` answers **by set**, not by sorting and comparing: a list holding
+the same id twice would sort-compare equal to a list holding it twice in the
+other order, and a reorder is the one classification where a duplicate id must
+not be waved through. An all-null pair — the group's six objectives, which have
+never had ids (§96.4) — is never called a reorder, because it cannot be told
+apart from any other all-null pair.
+
+A reorder classifies as **`arrange`** and is authorised through `mayArrange()`.
+Anything else about the list is still `unitPlan`.
+
+### 101.3 The control: Islam picked the arrows
+
+Settled from a mockup made of the **real platform** — the built file driven to a
+unit's Plan pane, each candidate injected into the live pane, so both sides of
+the comparison were the same build (§41.9, §96.6). Three candidates:
+
+| | | |
+|---|---|---|
+| **A** | The grip mark | Recommended: it wears the same mark as the handles it turns on |
+| **B** | Up-down arrows | **Chosen** |
+| **C** | The word, in the corner | Ruled out by measurement — a 28px circle becomes a 74px pill in a band with 34px of clearance |
+
+**Recorded, not re-argued.** The cost of B is that it is a generic glyph
+matching nothing else on the page, so the `title` and `aria-label` carry the
+whole meaning and are not decoration. If it confuses anybody, A is a one-line
+change: the slot, the states and the wiring are identical.
+
+**It shares the pen's slot and never appears beside one.** §94.15's argument
+survives in the direction that still matters — the office arranges through the
+pen, so drawing both would put two controls that do the same thing in one
+corner. `paneActs()` is the one builder, because the unit's Plan pane and a
+capability's Projects pane had that line written twice and a third would have
+been written the day somebody added a pane (§53.5).
+
+**Nothing was needed for Performance or Reporting.** Islam: *"it's only in the
+strategy plan part which mirrors in the reporting and performance."* Exactly
+so — the order **is** the array, so both already follow.
+
+### 101.4 What proves it
+
+**The screen and the rule are asked separately and compared** — that mismatch is
+what shipped §94.3's silent refusals, so `src/checks/plan-arrange.py` asks
+`SMPRules.mayArrange()` alongside every assertion about a drawn control, and
+asserts **both ends** for five viewers: the control that should be there and the
+one that should not (§94.2). The button is **pressed**, not merely found
+(§70, §93.4), and pressing it must produce handles — 0 → 13 — because a control
+wired to nothing renders perfectly (§96).
+
+`scripts/test-authorize.js` gains section 13, and its most important
+assertions are the ones that would fail if this became a hole rather than a
+door: **a holder still may not rename or remove a pillar, and may not reorder
+another unit's.** It also asks the classifier directly, because every other
+assertion would pass if `arrange` were classified as something nothing guards
+(§94.5). 165 → 181.
+
+**Both failure modes were proved to fail before being trusted**: with
+`mayArrange` forced false, 6 failures; with `reordered()` forced false — the
+§94.3 state exactly — 5.
+
+
+*(§100 and §101 are another session's — the office chat corrected by use,
+and reordering coming back — and they reached `main` first, so they keep the
+numbers. This and everything under it was written as §100–§103 on its branch.
+Fourth renumber in two days; the rule is unchanged and is simply whoever lands
+first.)*
+
+---
+
+## 102 · The plan's own shape, and a due date that is read (v3.27)
 
 Islam, stepping back from the client's data: *"let's consider that if we don't
 really have a current template and we need to refine the template regardless of
@@ -12864,7 +13183,7 @@ them**: a plan says what was committed to and never holds a result (actuals,
 statuses and notes arrive through a cycle), and the project's Timeline decides
 how every date under it reads.
 
-### 100.1 The milestone keeps its name — the LABEL was the fault
+### 102.1 The milestone keeps its name — the LABEL was the fault
 
 I recommended collapsing `Milestone` and `What it covers` into one Description,
 on the argument that two free-text columns side by side is how a field ends up
@@ -12883,7 +13202,7 @@ stays, in his order, and only the label changes.
 column heading is a label, and the workbook writes *Description* and reads
 either.
 
-### 100.2 A due date is read against its project's timeline, and never refused
+### 102.2 A due date is read against its project's timeline, and never refused
 
 A live plan arrived with **`Done` and `Pending` in the Due date column** —
 statuses, which belong to the reporting cycle — and the platform said nothing,
@@ -12907,7 +13226,7 @@ platform can compare. **A bare quarter with no year passes**, because 55 of the
 60 milestones in the worked example are written that way and they are not
 wrong — the project's own start and end carry the year.
 
-### 100.3 The Excel date format was agreed and then found impossible
+### 102.3 The Excel date format was agreed and then found impossible
 
 The recommendation Islam approved included *"the template gets a real date
 format on the cell"*. **It cannot, and the reason is worth recording rather
@@ -12922,7 +13241,7 @@ what belongs in the column in the sheet the person is filling in, and the
 **upload says what it noticed**. Recorded as a reversal of a recommendation I
 made, not of a decision he made.
 
-### 100.4 Two questions were not understood, and that is a finding
+### 102.4 Two questions were not understood, and that is a finding
 
 Islam answered *"What do you mean?"* to the deliverable-indicator question and
 *"Not sure what you mean"* to the missing-project-field one. **Both were
@@ -12934,13 +13253,13 @@ in simple, non-technical words" and is easy to fail while sounding precise.
 
 
 
-## 101 · One table, one row shape (v3.27)
+## 103 · One table, one row shape (v3.27)
 
 The section that reversed itself twice in a day and came out simpler than
 either version. It ran through eight rounds of refinement, and the argument
 that decided it was Islam's: *"wait, I over complicated things."*
 
-### 101.1 The split is undone, and undone for a better reason
+### 103.1 The split is undone, and undone for a better reason
 
 §99 cut the deliverables-and-outcomes table in two because `Direction`,
 `Target` and the date had **nothing to say for a deliverable** — the em-dash
@@ -12963,7 +13282,7 @@ grew a second half. He asked to change the target from `100%` to `Y/N`; with a
 `Y/N` target there is nothing to be greater than, and a blank cell would have
 put back the one thing this merge removed.
 
-### 101.2 A deliverable and a milestone are reported the same way
+### 103.2 A deliverable and a milestone are reported the same way
 
 Not started · In progress · Delivered (Completed, on a milestone), **with a
 per-cent that types itself at both ends**: 100 for the finished word, 0 for the
@@ -12980,17 +13299,17 @@ worth keeping, because the argument was right and its premise stopped holding.
 about how a deliverable is measured, and a column offering a choice that
 changes nothing is worse than no column.
 
-### 101.3 A due date comes back, and reverses §53.4 on its author's own reason
+### 103.3 A due date comes back, and reverses §53.4 on its author's own reason
 
 §53.4 dropped `deliverables.due` on Islam's argument: *"it's not mandatory as
 it's a full project due — it's delivered when the project ends."* His argument
 now is that **some deliverables land before the project ends**, which is simply
-more true of real plans. Migration 023 puts the column back that 016 dropped.
+more true of real plans. Migration 024 puts the column back that 016 dropped.
 
 **The owner does not come back.** §53.4's other half — *"there is no owner on
 the deliverables, the department is responsible"* — is untouched.
 
-### 101.4 One reader, four written shapes, and the cycle read the same way
+### 103.4 One reader, four written shapes, and the cycle read the same way
 
 `monthsOf()` resolves `July 26`, `W3 Mar 26`, `Q3 2026`, `31 May 2026`, `H1
 2026` and `FY26` to **months since year zero** — the coarsest unit any of them
@@ -13009,7 +13328,7 @@ label somebody types; `to` is the field that means it.
 "Q3 2026" as nothing, but it also reads bare numbers and stray words as dates
 in ways that would quietly turn a typo into a deadline.
 
-### 101.5 A row is asked for only once it is due, and the tally changes meaning
+### 103.5 A row is asked for only once it is due, and the tally changes meaning
 
 Not due is quiet, leaves the `reported` tally and the submit gate, and counts
 toward no score. Overdue is loud. **They are opposite readings and must not
@@ -13021,11 +13340,11 @@ plan". Submitting gets easier early in a project and no easier late, which is
 the right way round: a unit is chased for what is late, never for what has not
 started.
 
-### 101.6 Nobody's score moves, and it is asserted rather than promised
+### 103.6 Nobody's score moves, and it is asserted rather than promised
 
 Every deliverable already recorded maps onto the three states at exactly the
 figure it scores today — `yes`→Delivered 100, `no`→Not started 0, `100`→100,
-`0`→0, `57`→In progress 57. Migration 023 is score-preserving by construction.
+`0`→0, `57`→In progress 57. Migration 024 is score-preserving by construction.
 
 **Execution changed shape and not value.** It was `done ÷ total`; it is the
 mean of what each milestone reads. Those are the same arithmetic while no
@@ -13035,7 +13354,7 @@ formulas across all eight capabilities** rather than taking my word for it. The
 counts stay beside the figure: "5 of 12 completed" and "42%" answer two
 different questions.
 
-### 101.7 Two `var MONTHS`, and it failed in the safe direction
+### 103.7 Two `var MONTHS`, and it failed in the safe direction
 
 `monthIndex("July")` returned **−1**, so `monthsOf` read every month as
 unknown, so `dueThisCycle` read null as *always asked*, so **every row on every
@@ -13053,7 +13372,7 @@ one global scope fails silently and in the direction that looks correct* —
 which is the third time this file has recorded that sentence, and the second
 time this week.
 
-### 101.8 Not due is a label, not a lock
+### 103.8 Not due is a label, not a lock
 
 The comment over the reporting pane said it in so many words, and had since the
 day it was written:
@@ -13098,16 +13417,16 @@ beside a figure is the same fault wearing the other cell.
 is untouched, because it was not what was asked about. It is named here so it is
 a decision rather than an oversight.
 
-### 101.9 The score column says what it holds, not what it is measured in
+### 103.9 The score column says what it holds, not what it is measured in
 
 Islam: *"for the deliverables and outcomes % column name it Performance and for
 the % column in the milestones name it Progress."*
 
 **`%` is a unit, not a name.** It says what the cell is measured in and nothing
-about what it measures — on the one column somebody runs their eye down. §101
+about what it measures — on the one column somebody runs their eye down. §103
 made both headings `%` in the same move that put the two kinds of row into one
 table; that was right for the row shape and wrong for the heading, and it is the
-third word this column has worn (`Reads` → `Performance` in §99.8, `%` in §101,
+third word this column has worn (`Reads` → `Performance` in §99.8, `%` in §103,
 and now back to two words, one per table).
 
 **Two tables, two numbers, two words.** They are not the same figure wearing one
@@ -13117,7 +13436,7 @@ heading:
   already the product's for exactly this number: the card above the table says
   *Project performance*, and the group's projects table has said *Performance*
   since it existed. §99.8 settled it once, against my own recommendation of
-  *Score*, and §101 lost it by accident rather than by argument.
+  *Score*, and §103 lost it by accident rather than by argument.
 * **Progress** — a milestone answers *how far*. §99.8 recorded *Progress was
   never a candidate: the milestone table below uses it for a STATUS* — that was
   true when a milestone's only column was `Status`, and it stopped being true
@@ -13140,13 +13459,13 @@ project tables measured in **present mode** — the only place a slide has a
 width at all (§69) — overflow neither across nor down.
 
 **Flagged, not changed:** the review deck still carries a **Due date** column on
-its deliverables-and-outcomes table, which the three panes lost in §101.8. The
+its deliverables-and-outcomes table, which the three panes lost in §103.8. The
 ask named the tables and the upload templates; the deck was not mentioned, and a
 column present on a projector and absent in the product is exactly the drift
 this file keeps recording. It is Islam's call, so it is written down rather than
 quietly aligned.
 
-### 101.10 An In progress with no number is not nought
+### 103.10 An In progress with no number is not nought
 
 Islam: *"in the reporting in the deliverables or the milestones if someone
 enters in progress they need to set the % of the progress or performance. is
@@ -13188,14 +13507,14 @@ is counted as nought, because `projMilestones()` calls it *Not started* — that
 is what it is, not what we assumed. Only a milestone halfway through a sentence
 leaves, and `pending` is returned beside the figure so the count is answerable.
 
-**THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED.** §101 was sold on
+**THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED.** §103 was sold on
 *nobody's score moves*, proved by stripping every per-cent and comparing the
 average against the `done/total` it replaced. That fixture stopped modelling
 the old formula the moment this landed — a stripped wip now leaves the average
 instead of counting nought — so it went red on all eight capabilities and would
 have reported a deliberate decision as a regression for ever. It settles every
 *In progress* as well as stripping the per-cent, which is what a tenant
-actually looked like the day §101 shipped. **And the claim for today is asserted
+actually looked like the day §103 shipped. **And the claim for today is asserted
 separately**: all 18 In progress milestones in the demo carry a number, so
 `pending` is **0** across every capability and this change moved no figure that
 exists.
@@ -13216,10 +13535,10 @@ Not built here, because a function's Submit is a feature and not a fix, and
 what it means for a function to submit — one function, or one per capability —
 is a decision.
 
-### 102 A supporting function submits its report
+## 104 · A supporting function submits its report (v3.27)
 
 Islam: *"We need have a submit to SMO in the capabilities projects as well is
-that set?"* It was not — §101.10 had just recorded that the refusal it needed
+that set?"* It was not — §103.10 had just recorded that the refusal it needed
 had nothing to attach to. What that section missed, and what looking properly
 found, is that **everything except the button was already built**:
 
@@ -13254,7 +13573,7 @@ Two rules stop it, and the second is new:
    milestone. `rowReads()` is that one reader (a tactic is a ratio, a
    deliverable and a milestone are a status-and-per-cent, everything else
    carries `progress`);
-2. **a row that said In progress and never said how far** (§101.10) — the score
+2. **a row that said In progress and never said how far** (§103.10) — the score
    leaves it out, so submitting would file a report with a hole in it.
 
 Measured before it was built: **every function is blocked by rule 1 today, and
@@ -13262,13 +13581,13 @@ so is every unit but Nigeria.** The demo behaves identically on both sides,
 which is the evidence that the generalisation is faithful rather than
 over-strict.
 
-#### 102.1 The board, because a submission nobody can see is half a feature
+#### 104.1 The board, because a submission nobody can see is half a feature
 
 Setup › Running the cycle listed units only. Functions are rows in the **same**
 table — "who has reported" is one question — with the totals at the top
 counting them.
 
-#### 102.2 Three columns are three layers, not two vocabularies
+#### 104.2 Three columns are three layers, not two vocabularies
 
 The first drawing gave the function half its own column strip: *Key objectives ·
 Deliverables & outcomes · Milestones*. **It collided.** A strip's column widths
@@ -13302,7 +13621,7 @@ Two measuring lessons on the way, both §88's rule arriving somewhere new:
 `dxband` was orphaned when §99.7 removed the split that used it (§24 would have
 had it deleted). It is the right shape for exactly this, and it is used again.
 
-#### 102.3 The server was never asked a question
+#### 104.3 The server was never asked a question
 
 `scripts/test-authorize.js` had no test for an `fn:` submission at all — there
 was no control, so no test had a reason to exist. It asks **both ends** now
@@ -13310,28 +13629,28 @@ was no control, so no test had a reason to exist. It asks **both ends** now
 Without the second, the branch could accept anybody and the first would still
 print *ok*. Proved by flipping it and watching it fail.
 
-#### 102.4 "1 need notes"
+#### 104.4 "1 need notes"
 
 Flagged first rather than fixed, because correcting a label is Islam's call
 (rule 1c), and then corrected on his go-ahead. It is the unit half's wording
 and it has been wrong for as long as that column has existed — **unnoticed
-because it was rare**, and §102.1 put it on seven more rows where it stopped
+because it was rare**, and §104.1 put it on seven more rows where it stopped
 being rare. *A defect can hide behind how seldom it is reached, and adding rows
 is a way of finding one.*
 
 `notesOwed(n)` is one function, because two halves of one board saying it
-differently is the exact fault §102.2 was just built to avoid (§53.5). Measured
+differently is the exact fault §104.2 was just built to avoid (§53.5). Measured
 at 1440 / 1280 / 1000: the longer string wraps nowhere and the table is no
 wider than it was (the 2px it overflows at 1000px is the pre-existing one, and
 was measured with the function half removed).
 
-### 103 What the merge does to a plan already uploaded
+## 105 · What the merge does to a plan already uploaded (v3.27)
 
 Islam, before merging: *"what will happen to the previously uploaded plan —
 should we resolve the changes here or is there a way to resolve the uploaded
 data against the new format and templates there?"*
 
-**Nothing is deleted.** Migration 023 remaps a deliverable's `kind`+`actual`
+**Nothing is deleted.** Migration 024 remaps a deliverable's `kind`+`actual`
 into `status`(+`pct`) and is score-preserving by construction; outcomes, key
 objectives, notes and milestone statuses are untouched. Two columns are NEW,
 so every existing row has them empty: `deliverables.due` and
@@ -13340,7 +13659,7 @@ the old model did not ask for one.
 
 **Two things change on day one, and the first is not small.**
 
-#### 103.1 Execution rises, on every capability
+#### 105.1 Execution rises, on every capability
 
 Measured on the demo with every milestone per-cent stripped, which is exactly
 the shape of a tenant that has been running on `main`:
@@ -13353,21 +13672,21 @@ the shape of a tenant that has been running on `main`:
 | Financial Infrastructure | 42% | **50%** |
 
 Between **+8 and +27 points**, all eight. Nothing is wrong: today an *In
-progress* milestone reads **nought**, and §101.10 made it **outstanding** —
+progress* milestone reads **nought**, and §103.10 made it **outstanding** —
 excluded from the average until it says how far. The figure settles as the
 per-cents arrive. But it rises silently, and *a score that moves for a reason
 nothing on the page states is a score nobody can defend.*
 
 So the Execution card prints what it is built on: **`5 of 12 milestones · 2 not
-counted yet`**. `capExec()` has returned that count since §101.10 and nothing
+counted yet`**. `capExec()` has returned that count since §103.10 and nothing
 showed it. Only drawn when there is one — a card that always says *0
 outstanding* is noise on every capability that has nothing outstanding.
 
-#### 103.2 A due date that is not one, in a plan already stored
+#### 105.2 A due date that is not one, in a plan already stored
 
 `Done`, `Pending` and a bare `Q3` stay exactly as entered, show in the Due date
 column, and read as **always due** — the safe direction, and still wrong. The
-upload has warned about this since §100; **nothing has ever looked at a plan
+upload has warned about this since §102; **nothing has ever looked at a plan
 already in the database**, so a tenant that uploaded before that check existed
 is told nothing and has to find them by eye across every project.
 
@@ -13384,19 +13703,19 @@ on another screen.
 **MILESTONES ONLY, deliberately.** A milestone's due date is on that page and
 the pen edits it, so the note points at something fixable there — verified by
 typing `March 2026` over `Pending` and watching it stick, and asserted as a
-loop that closes. A deliverable's due date is drawn on no pane since §101.8, so
+loop that closes. A deliverable's due date is drawn on no pane since §103.8, so
 naming a bad one would send somebody looking for a control that is not there
 (§61). Its only door is an upload, which already validates it.
 
-#### 103.3 Where it gets resolved: there, not here
+#### 105.3 Where it gets resolved: there, not here
 
 Both are per-row facts only the client can supply, and both now have a route in
 the product: the per-cents through the reporting pane (which marks each one and
-refuses the submission until it is answered — §102), the dates through the pen
+refuses the submission until it is answered — §104), the dates through the pen
 on Strategy › Projects. Nothing needs correcting in this repository, and
 nothing should be: a plan is the client's.
 
-**Still not run:** migration 023 against a real Postgres. It is score-preserving
+**Still not run:** migration 024 against a real Postgres. It is score-preserving
 by construction and the *formula* parity is asserted, but the SQL itself has
 not been executed against a live schema in this session. That is the one thing
 between here and a safe merge.

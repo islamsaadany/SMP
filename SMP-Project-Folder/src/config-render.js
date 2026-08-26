@@ -3909,7 +3909,7 @@ function renderArchives(){
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
 /* "1 need notes" was on the unit half for as long as it has existed and went
-   unnoticed while it was rare; §102 put it on seven more rows and it stopped
+   unnoticed while it was rare; §104 put it on seven more rows and it stopped
    being rare. ONE function, because the two halves saying it differently is
    the fault this board was just built to avoid (§53.5). */
 function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
@@ -3942,7 +3942,7 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§102) ────────────────────
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§104) ────────────────────
      A submission the SMO cannot see anywhere is half a feature. They go in the
      SAME table rather than a second one, because "who has reported" is one
      question -- but a function's three counts are its own vocabulary (key
@@ -3961,7 +3961,7 @@ function renderCycle(){
     var who = personName(f.custodian) || personName(f.head) || "\u2014";
     var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
     var miss = fnMissingNotes(fk).length;
-    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§102.2).
+    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§104.2).
        The first drawing gave the function half its own column strip and it
        COLLIDED: the strip's widths come from the table's own <thead> -- a
        unit's words -- and "DELIVERABLES" alone is wider than the Measures

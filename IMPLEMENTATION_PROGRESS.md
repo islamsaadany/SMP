@@ -6,8 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.22 shipped · **v3.27 in progress on the branch**
-**Last updated:** 2026-08-25
+**Latest version:** v3.30 shipped (live) · **v3.31 in progress on the branch**
+**Last updated:** 2026-08-26
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -53,6 +53,119 @@ Nothing proceeds past this line without an answer.
 ---
 
 ## Built and verified
+
+### v3.31 — the plan's own shape, one row, and a function that submits (§102–§105)
+
+Four sections of one thread: the project tables rethought from the plan
+outwards, then the two things that thread turned up.
+
+- **§102 · The plan's own shape.** A milestone keeps a **name and** a
+  description; a deliverable gets a **due date** back (some land before the
+  project ends). Dates are read, never refused — `Done` and `Pending` in a
+  due-date column are **named as what they are**.
+- **§103 · One table, one row shape.** §99's split is undone for a better
+  reason: giving a deliverable a real direction (`=`) and target (`Y/N`) means
+  the cells it left empty now have answers. Reporting is **Not started / In
+  progress / Delivered**, the per-cent typing itself at both ends. The score
+  column is **Performance** on deliverables and outcomes, **Progress** on
+  milestones — `%` is a unit, not a name.
+- **Not due is a label, not a lock** (§103.8). The comment said so from the day
+  it was written and the code did the opposite: a not-due row had its picker
+  **replaced** by a word, so reporting early was the one act the pane refused.
+- **An In progress with no number is not nought** (§103.10). It read **0**, so
+  the average counted it and a project's figure fell the instant a dropdown
+  changed. It leaves the average now and the row is marked *Needs a %*.
+- **§104 · A supporting function submits**, and everything except the button
+  was already built — the server has carried an explicit `fn:` branch since
+  spec 006. The dot on that tab had been asking for a submission nobody could
+  make. It refuses on a row owing a per-cent or a red figure with no note, and
+  the SMO's cycle board carries the functions.
+- **§105 · What the merge does to a plan already uploaded.** Nothing is
+  deleted. **Execution rises 8–27 points on every capability**, because an In
+  progress milestone stops counting as nought — so the card now prints
+  `5 of 12 milestones · 2 not counted yet`. And a bad due date in a plan
+  **already stored** is finally noticed, named by value and row, with the count
+  on the rail.
+
+**Verified:** `src/checks/project-tables.py` all passed, every new assertion
+proved able to fail first · test-authorize **184, 0 failed** · qa.py clean ·
+main's `plan-arrange.py` and `office-chat.py` ALL CLEAR against the merged
+build. **Not run: migration 024 against a real Postgres** — score-preserving by
+construction, formula parity asserted, SQL never executed against a live schema.
+
+### v3.30 — reordering comes back, as its own grant (§101)
+
+Islam is giving arrangement back to unit people, reversing §94.3.
+
+- **`mayArrange()` is a separate rule**, not a widening of the authoring gate —
+  the order of a plan is the unit's; its words stay the office's.
+- **Who:** BU owner, strategy custodian, supporting function head. Never a
+  contributor; a group or company CEO only if they hold one of those.
+- **The authoriser learned a new shape.** `same(idsOf(a), idsOf(b))` is an
+  ordered comparison, which is why §94.3's drags were refused silently.
+  `reordered()` answers by set and classifies as `arrange`.
+- **The control** is up-down arrows in the pen's slot — Islam's pick over the
+  grip mark — and is never drawn beside a pen. Settled from a mockup made of
+  the real platform.
+- Performance and Reporting needed nothing: the order **is** the array.
+
+**Verified:** test-authorize 165 → **181, 0 failed** · new
+`src/checks/plan-arrange.py` **ALL CLEAR** (five viewers, both ends, the button
+pressed, 0 → 13 handles) · qa.py clean · both failure modes proved to fail
+before being trusted.
+
+### v3.29 — the corner, corrected again (§100.4, §100.5)
+
+Three more notes from using it, and one of them turned out to be three.
+
+- **Clicking outside minimises the panel**, on `pointerdown`, with the dock and
+  an open modal deliberately not counting as "outside" (a screenshot opened
+  *from* the panel renders into the platform's overlay). **Escape now works from
+  anywhere** — it had been wired on the composer alone, so it did nothing once
+  focus moved. A half-typed message survives all of it.
+- **The bubble is not drawn while the panel is open**, which is what puts the
+  panel's bottom edge 18px from the window's instead of a bubble's height above
+  it. CSS off the class the opener already sets, not a second piece of state.
+- **The office's inbox follows the window.** It stood at a fixed 593px, so on a
+  short screen the reply box and Send fell below the fold — 506px of page scroll
+  at 700px tall, measured before touching it. Now `calc(100dvh - --chin-top -
+  20px)` with a 340px floor, and the scrolling moved inside the two panes.
+
+**Verified:** office-chat.py **ALL CLEAR** with a new section 8 sweeping four
+window heights · the fix proved by putting `height:593px` back and watching
+section 8 fail at 660px and on the sweep · qa.py clean.
+
+**The assertion that matters is that the box MOVED with the window.** Every
+other one of section 8's — Send on screen, the thread scrolling in its own box —
+passes on a tall window with the fixed height back in place, which is exactly
+how this shipped. And the stub had to grow a conversation of twenty messages
+before any of it could be measured: the office's page had never once been
+opened with a thread in it, so the inbox drew "Pick somebody on the left" and
+there was nothing to look at.
+
+### v3.28 — the corner, corrected by using it (§100.1–§100.3)
+
+Three notes from Islam within minutes of v3.26 reaching production, all from
+having it open rather than reading about it.
+
+- **The captured context line is gone everywhere** — §97.4 reversed. Not hidden
+  from the sender: the helpers, the icon, `BUILD_ID` and the build stamp are
+  deleted, and **migration 023 drops the four columns**. The composer's
+  "the page you are on is sent with your message" went with it.
+- **The × is a minus labelled Minimise.** Nothing was ever closed — one
+  conversation per person, permanent.
+- **A reply announces itself.** A third cadence (15s) while the conversation is
+  waiting, back to 180s once answered, and a one-shot ring on the bubble.
+
+**Verified:** office-chat.py **37 checks ALL CLEAR** (the context assertions
+inverted to assert absence) · test-chat.js 52/52 · settings drive 21/21 · chat
+drive 25/25 · test-authorize 165/165 · test-roundtrip on a virgin database all
+PASS · migration 023 applied and the columns confirmed gone.
+
+Two things the checks caught that reading would not have: the announcement
+compared the arriving count against a value it had already overwritten, so it
+could never fire; and the check's stub answered `thread: null` where the real
+server returns `{waiting:true}`, so correct client behaviour read as broken.
 
 ### v3.27 — the chat gets a switch, and a poll gets cheaper (§98)
 

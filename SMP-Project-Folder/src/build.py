@@ -6,19 +6,6 @@ css = (open('_shared.css').read() + "\n" + open('group-extra.css').read()
        + "\n" + open('present.css').read() + "\n" + open('chat.css').read())
 shell = open('shell.html').read()
 
-# ── WHICH BUILD A MESSAGE WAS SENT FROM (§97.4) ─────────────────────────
-# Read out of sw.js's SHELL constant rather than written here, because that is
-# the ONE string this project already guarantees changes whenever the built
-# file's bytes do (§91) — a version literal in a source is a version literal
-# that goes stale, and one that lies about which build somebody was looking at
-# is worse than none. A chat message carries it, so "it showed 4.2 on my
-# screen" can be answered without asking which version they had.
-import re as _re
-_sw = open('../../sw.js').read()
-_m = _re.search(r'const SHELL\s*=\s*"([^"]+)"', _sw)
-if not _m:
-    raise SystemExit("BUILD REFUSED — sw.js has no SHELL constant to take the build id from.")
-shell = shell.replace("BUILDID", _m.group(1))
 # lib/rules.js is the SHARED one — the same file api/state.js requires. It is
 # inlined FIRST so config-data.js can alias it. Two copies of "may this person
 # edit this" would drift, and the drift is silent: a screen that offers an edit

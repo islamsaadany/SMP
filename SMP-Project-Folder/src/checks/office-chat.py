@@ -35,6 +35,24 @@ PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
         "cfg": {"on": True, "shots": True, "promise": "Usually answers the same day",
                 "beat": 4000}}
+
+# THE OFFICE'S SIDE NEEDS A CONVERSATION TO LOOK AT, and section 8 measures a
+# box that has to be TOO FULL to fit — a thread of three messages fits every
+# window and would report a page that cannot scroll as a page that need not.
+# Twenty, alternating, so the thread genuinely overflows at the tallest size
+# swept and the assertion is about the box rather than about the content.
+BOXMSGS = [{"id": i + 1, "at": "2026-08-25T09:%02d:00Z" % i,
+            "from_office": bool(i % 2), "by_key": "ceo" if i % 2 else "hend",
+            "by_name": "Strategy Office" if i % 2 else "Hend Farouk",
+            "body": ("Noted — the March import is what carried it." if i % 2 else
+                     "The Q3 target on Active Base still reads 4.2M on our page."),
+            "flag": None, "has_shot": False} for i in range(20)]
+BOXQUEUE = [{"person_key": "hend", "person_name": "Hend Farouk", "live_name": "Hend Farouk",
+             "waiting": True, "last_at": "2026-08-25T09:19:00Z", "here_at": None,
+             "unit_key": "mobile", "fn_key": None, "title": "Head of Mobile", "gone": False,
+             "unread": 1, "last_body": BOXMSGS[-1]["body"],
+             "last_from_office": BOXMSGS[-1]["from_office"],
+             "last_by": BOXMSGS[-1]["by_name"], "flagged": 0}]
 errs, bad = [], 0
 
 
@@ -81,12 +99,32 @@ class H(http.server.BaseHTTPRequestHandler):
             return
         if body.get("action") == "say":
             CHAT["said"].append(body)
+            # THE STUB HAS TO MODEL THE SERVER, not merely answer. A real `say`
+            # comes back with the conversation WAITING, and that is what puts
+            # the shut panel on the 15s beat instead of 180s (§99) — a stub
+            # that returned `thread: null` made the client behave correctly and
+            # the check read it as broken.
+            CHAT["thread"] = {"waiting": True}
             CHAT["messages"].append({
                 "id": len(CHAT["messages"]) + 1, "at": "2026-08-25T09:00:00Z",
                 "from_office": False, "by_key": "smo", "by_name": "Mohamed Essam",
                 "body": body.get("body") or "", "page": body.get("page"),
                 "target": body.get("target"), "cycle": body.get("cycle"),
                 "build": body.get("build"), "flag": None, "has_shot": False})
+        if body.get("action") == "queue":
+            self._send(200, json.dumps({
+                "ok": True, "office": True, "threads": BOXQUEUE, "chat": CHAT["cfg"],
+                "waiting": 1, "flagged": 0, "hereMinutes": 5, "mail": False}).encode(),
+                "application/json")
+            return
+        if body.get("action") == "thread":
+            self._send(200, json.dumps({
+                "ok": True, "person": "hend", "name": "Hend Farouk", "gone": False,
+                "unit": "mobile", "fn": None, "title": "Head of Mobile",
+                "address": None, "waiting": True, "here": False, "hereAt": None,
+                "mail": False, "chatOn": CHAT["cfg"].get("on", True),
+                "messages": BOXMSGS}).encode(), "application/json")
+            return
         if body.get("action") == "mine":
             CHAT["polls"] += 1
         self._send(200, json.dumps({
@@ -151,15 +189,25 @@ with sync_playwright() as p:
     pg.click("#chatsend")
     pg.wait_for_timeout(900)
     ck("the message is in the conversation", "does not match" in pg.inner_text("#chatbody"))
+    # ── NOTHING ABOUT WHERE THEY WERE TRAVELS WITH IT (§99) ──────────
+    # This used to assert the opposite — that the page, the cycle and the build
+    # were captured and sent. Islam asked for that gone everywhere, so the
+    # check is inverted rather than deleted: §94.2's rule, that only a check
+    # looking for an ABSENCE can see something that should not be drawn, and
+    # the easiest way to bring a removed feature back by accident is to stop
+    # asserting it is gone.
     said = CHAT["said"][-1] if CHAT["said"] else {}
-    # CAPTURED, NOT TYPED (§71) — and in the NAVIGATION'S OWN WORDS, never the
-    # tab key, which put "the group › performance" on a message where the
-    # screen said "Group › Performance" (§93.12, §94.6).
-    ck("where they were was sent with it", bool(said.get("page")), said.get("page"))
-    ck("and it is the navigation's own words, not a key",
-       said.get("page", "").split(" › ")[0][:1].isupper(), said.get("page"))
-    ck("the build went with it", bool(said.get("build")), said.get("build"))
-    ck("and the cycle", bool(said.get("cycle")), said.get("cycle"))
+    for k in ("page", "target", "cycle", "build"):
+        ck("nothing is sent about where they were: %s" % k, not said.get(k), said.get(k))
+    ck("and the message itself still arrives whole",
+       said.get("body", "").startswith("The Q3 target"))
+    ck("no context line is drawn under it",
+       pg.eval_on_selector_all(".chctx", "n => n.length") == 0)
+    # AND THE FOOTER STOPS PROMISING IT. A sentence that is merely stale is
+    # worse than no sentence, because somebody believes it.
+    ck("the composer no longer says the page is sent",
+       "page you are on" not in pg.inner_text("#chatnote"),
+       pg.inner_text("#chatnote"))
 
     # ── 3 · A POLL MUST NOT EAT WHAT SOMEBODY IS TYPING ──────────────────
     # The rule this whole file is built around (§35, §71.2, §30.1). The panel
@@ -174,6 +222,70 @@ with sync_playwright() as p:
        pg.input_value("#chatsay") == "half a sentence I have not finished",
        pg.input_value("#chatsay"))
     pg.fill("#chatsay", "")
+
+    # ── 3b · IT MINIMISES, AND A REPLY ANNOUNCES ITSELF (§99) ────────────
+    print("\n3b · the corner's two corrections")
+    def poll_once(within=8000):
+        was, waited = CHAT["polls"], 0
+        while CHAT["polls"] == was and waited < within:
+            pg.wait_for_timeout(250); waited += 250
+        return CHAT["polls"] > was
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    lab = pg.eval_on_selector("#chatclose", "e => e.getAttribute('aria-label') || ''")
+    ck("the control says minimise, not close", "inimis" in lab or "inimiz" in lab, lab)
+    ck("and it is not a cross", "×" not in pg.inner_text("#chatclose"))
+    # OPEN, THE BUBBLE IS NOT DRAWN AND THE PANEL SITS AT THE BOTTOM (§100.4).
+    ck("the bubble is not drawn while the panel is open",
+       pg.eval_on_selector("#chatbtn", "e => e.getClientRects().length === 0"))
+    gap = pg.evaluate("""() => {
+        const p = document.getElementById('chatpanel').getBoundingClientRect();
+        return Math.round(window.innerHeight - p.bottom); }""")
+    ck("and the panel reaches the bottom of the window (%dpx)" % gap, gap <= 24, gap)
+
+    pg.click("#chatclose")
+    ck("pressing it puts the panel away", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    ck("and the bubble comes back", pg.eval_on_selector("#chatbtn", "e => e.getClientRects().length > 0"))
+    ck("and the conversation is still there afterwards", len(CHAT["messages"]) > 0)
+
+    # CLICKING AWAY MINIMISES IT, AND LOSES NOTHING.
+    pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    pg.fill("#chatsay", "half written, and I clicked away")
+    pg.mouse.click(200, 300)
+    pg.wait_for_timeout(300)
+    ck("clicking outside minimises it", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.click("#chatbtn")
+    pg.wait_for_timeout(300)
+    ck("and the half-typed message survived it",
+       pg.input_value("#chatsay") == "half written, and I clicked away",
+       pg.input_value("#chatsay"))
+    # A CLICK INSIDE IS NOT OUTSIDE.
+    pg.click("#chatbody")
+    pg.wait_for_timeout(200)
+    ck("a click inside the panel leaves it open",
+       not pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.keyboard.press("Escape")
+    pg.wait_for_timeout(250)
+    ck("Escape minimises it from anywhere", pg.eval_on_selector("#chatpanel", "e => e.hidden"))
+    pg.fill("#chatsay", "") if not pg.eval_on_selector("#chatpanel", "e => e.hidden") else None
+
+    # A REPLY THAT LANDS WHILE THE PANEL IS SHUT HAS TO SAY SO.
+    CHAT["messages"].append({
+        "id": 99, "at": "2026-08-25T09:30:00Z", "from_office": True,
+        "by_key": "smo", "by_name": "Nada Kamal", "body": "Looking at it now.",
+        "flag": None, "has_shot": False})
+    CHAT["unread"] = 1
+    ck("the client asks again while waiting", poll_once(25000))
+    pg.wait_for_timeout(400)
+    ck("the count appears on the bubble",
+       not pg.eval_on_selector("#chatn", "e => e.hidden") and
+       pg.inner_text("#chatn").strip() == "1", pg.inner_text("#chatn"))
+    ck("and the bubble announces it rather than changing in silence",
+       pg.eval_on_selector("#chatbtn", "e => e.classList.contains('chring')"))
+    CHAT["unread"] = 0
+
 
     # ── 4 · THE THREE ABSENCES ───────────────────────────────────────────
     print("\n4 · where the corner must NOT be")
@@ -203,8 +315,17 @@ with sync_playwright() as p:
     pg.wait_for_selector("#chinbox", timeout=8000)
     ck("the inbox drew its two halves",
        pg.is_visible("#chqlist") and pg.is_visible("#chthread"))
-    ck("and says what to do when nothing is picked",
-       "Pick somebody" in pg.inner_text("#chthread"))
+    # AND IT OPENS ON SOMEBODY. The office comes here because a conversation is
+    # waiting, so an inbox that lands on "pick somebody" with one row on the
+    # left has made them press a button to be told what they came to read.
+    pg.wait_for_selector(".chqrow", timeout=8000)
+    pg.wait_for_selector("#chtbody", timeout=8000)
+    ck("and opens on the conversation that is waiting",
+       "4.2M" in pg.inner_text("#chtbody"))
+    # ONE LINE PER ROW (§88) — a message is arbitrarily long and must not open
+    # the queue up into a column of paragraphs.
+    hs = pg.eval_on_selector_all(".chqrow", "n => n.map(x => x.getBoundingClientRect().height)")
+    ck("a queue row stays one card tall %r" % hs, all(h < 90 for h in hs), hs)
 
     # ── 6 · THE SETTINGS THE OFFICE HAS SET REACH THE CORNER (§98) ───────
     # Asserted from the PERSON's side, because that is the side the settings
@@ -264,6 +385,50 @@ with sync_playwright() as p:
     ck("and closes the panel with it",
        pg.eval_on_selector("#chatpanel", "e => e.hidden"))
     CHAT["cfg"] = dict(CHAT["cfg"], on=True, beat=4000)
+
+    # ── 8 · THE OFFICE'S BOX FITS THE SCREEN (§100.5) ────────────────────
+    # Islam: "the chat box requires a scroll up — this shouldn't happen." It
+    # stood at a fixed height however tall the window was, so on a short screen
+    # the reply box and Send fell below the fold.
+    #
+    # SWEPT, not checked at one size (§27.1: a layout verified at the height
+    # that passes is not verified), and what is asserted is the RELATIONSHIP —
+    # Send inside the window, the thread scrolling inside its own box — never a
+    # number, so a later change to the chrome keeps it green (§53.5, §94.14).
+    print("\n8 · the office's box fits the screen")
+    heights = []
+    for vh in (1000, 860, 760, 660):
+        pg.set_viewport_size({"width": 1400, "height": vh})
+        pg.wait_for_timeout(500)
+        m = pg.evaluate("""() => {
+            const q = s => document.querySelector(s);
+            const tb = q('#chtbody'), send = q('[data-chreplysend]');
+            if (!tb || !send) return null;
+            const r = send.getBoundingClientRect();
+            return { sendVisible: r.bottom <= window.innerHeight + 1 && r.top >= 0,
+                     threadScrolls: tb.scrollHeight > tb.clientHeight + 2,
+                     inbox: Math.round(q('#chinbox').getBoundingClientRect().height) }; }""")
+        if not m:
+            ck("a conversation is open at %dpx" % vh, False, "no thread")
+            continue
+        ck("at %dpx the Send button is on screen without scrolling" % vh, m["sendVisible"], m)
+        ck("at %dpx the box shrank with the window (%dpx)" % (vh, m["inbox"]),
+           m["inbox"] < vh, m["inbox"])
+        heights.append(m["inbox"])
+    # A FIXED HEIGHT PASSES EVERY ONE OF THOSE ON A TALL WINDOW, which is how
+    # this shipped in the first place — the box has to FOLLOW the window, so
+    # what is asserted is that it moved, not that it fitted.
+    ck("and it follows the window rather than standing at one size %r" % heights,
+       len(heights) == 4 and all(heights[i] > heights[i + 1] for i in range(3)), heights)
+    # AND THE THREAD IS WHAT SCROLLS, not the page.
+    pg.set_viewport_size({"width": 1400, "height": 760})
+    pg.wait_for_timeout(400)
+    ck("the thread scrolls inside its own box",
+       pg.eval_on_selector("#chtbody", "e => e.scrollHeight > e.clientHeight + 2"))
+    ck("and the queue has a scroller of its own",
+       pg.eval_on_selector("#chqlist", "e => getComputedStyle(e).overflowY === 'auto'"))
+    pg.set_viewport_size({"width": 1400, "height": 950})
+    pg.wait_for_timeout(300)
 
     ck("no console errors", not errs, errs[:4])
 

@@ -806,7 +806,7 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 /* The same three states, one word apart: a deliverable is DELIVERED where a
-   milestone is COMPLETED, and that difference is right (§101). */
+   milestone is COMPLETED, and that difference is right (§103). */
 var MS_STATUSES_D = ["Not started", "In progress", "Delivered"];
 
 /* ONE NAMING IN THE FILE (§51.19, Islam: "I don't think we should have the
@@ -898,11 +898,11 @@ function capPlanWorkbook(c){
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
     { name:"Deliverables", widths:[34, 60],
-      /* §101.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
+      /* §103.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
          direction and target are written by the platform, and Islam took the
          date off the templates "for now" -- the field survives in the model
          and nothing asks for it, so every deliverable is simply always asked,
-         which is what the product did before §101 put the date back. */
+         which is what the product did before §103 put the date back. */
       head:["Project", "Deliverable"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
@@ -951,7 +951,7 @@ function capProgressWorkbook(c){
                 m.actual == null ? "" : String(m.actual), "", m.id];
       }) },
 
-    /* §101: a status and a per-cent, the pair the Milestones sheet has always
+    /* §103: a status and a per-cent, the pair the Milestones sheet has always
        had. "New %" is read only for In progress -- the word decides the
        figure at both ends, and a per-cent behind "Delivered" is a number
        nobody can see. */
@@ -1028,7 +1028,7 @@ function capPlanFromWorkbook(c, sheets){
     });
   }
   child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
-    /* Due date since §101; a workbook written before it has a Kind column
+    /* Due date since §103; a workbook written before it has a Kind column
        instead, which is read and ignored (§58: write the new label, read
        whatever arrives). */
     row.finish = r["Due date"] != null ? r["Due date"] : "";
@@ -1042,7 +1042,7 @@ function capPlanFromWorkbook(c, sheets){
                    : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
-    /* Description since §100, read as either (§58). The STORED field keeps its
+    /* Description since §102, read as either (§58). The STORED field keeps its
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];

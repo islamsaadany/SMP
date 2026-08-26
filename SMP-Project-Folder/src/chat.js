@@ -38,6 +38,17 @@ var CHAT = (function(){
      minutes is plenty: at 60s a single tab left open overnight was eight
      hundred requests for nothing (§98.1). */
   var POLL_SHUT = 180000;
+  /* AND A THIRD CADENCE, FOR THE ONE STATE THAT NEEDS IT (§99). Somebody who
+     has asked something and not been answered is WAITING — they are the only
+     person for whom a badge arriving three minutes late is a badge arriving
+     too late. 180s is right for a corner nobody is expecting anything from
+     and wrong for that person, so while their conversation is outstanding the
+     shut panel asks every 15 seconds instead.
+
+     It costs nothing in the ordinary case, which is the whole point: it is on
+     only between asking and being answered, and it goes back to 180s the
+     moment the office replies. */
+  var POLL_WAIT = 15000;
   var PIC_EDGE = 1600;
 
   /* What the server last told us the office has set. Started from the shared
@@ -83,50 +94,16 @@ var CHAT = (function(){
       .catch(function(e){ done(String((e && e.message) || e), null); });
   }
 
-  /* ── WHERE SOMEBODY IS, CAPTURED AND NOT TYPED (§71's rule) ─────────────
-     The page, the subject and the cycle are things the screen already knows.
-     Asking for them is asking a person to do the computer's job, and they get
-     it wrong more often than the machine does.
+  /* WHERE SOMEBODY WAS USED TO BE CAPTURED AND SENT WITH EVERY MESSAGE — the
+     page, the subject, the cycle and the build, drawn under the sender's own
+     words (§97.4). Islam, looking at it on a real message: *"the line in front
+     of the chat shouldn't be there"*, and, asked how far it should go, chose
+     GONE EVERYWHERE rather than merely hidden from the sender.
 
-     Read defensively from the shell's globals: this file is inlined before
-     them and a boot that failed half way must not take the chat down with it —
-     "I cannot open anything" is exactly when somebody needs to write in. */
-  /* READ OFF THE NAVIGATION ITSELF, in the words it is wearing. Not from
-     `currentSub`, which is a KEY — that put "the group › performance" on a
-     message where the screen said "Group › Performance". The register learned
-     this one already (§93.12): what somebody is told they were looking at has
-     to be what the navigation called it, and the only way that cannot drift is
-     to take the string from the navigation. */
-  function navWord(sel){
-    var b = document.querySelector(sel);
-    if (!b) return "";
-    var c = b.cloneNode(true);
-    /* Three things inside a navigation control that are not its NAME: the
-       visually-hidden status on a tab ("— not submitted yet"), the caret on a
-       dropdown, and the count under a menu item. */
-    Array.prototype.forEach.call(c.querySelectorAll(".vh, .dlcar, .dlsub"),
-                                 function(n){ n.remove(); });
-    return c.textContent.replace(/\s+/g, " ").trim();
-  }
-  function whereNow(){
-    var out = { page:"", target:"", cycle:"", build:"" };
-    try {
-      if (typeof current !== "undefined") out.target = String(current || "");
-      out.page = [
-        /* NOT `#units button` — the group and the companies sit in a DROPDOWN
-           whose <summary> carries the selection, so asking only for buttons
-           leaves every group page with no destination on it and slides the
-           tab's name into first position. §94.6's trap, which cost that
-           section a wrong landing page for the same reason. */
-        navWord('#units [aria-selected="true"]'),
-        navWord('#subtabs button[aria-selected="true"]') || navWord(".setuprail .ritem.on"),
-        navWord('#secrow-in button[aria-selected="true"]')
-      ].filter(Boolean).join(" › ");
-      if (typeof REVIEW !== "undefined" && REVIEW && REVIEW.name) out.cycle = String(REVIEW.name);
-      if (typeof BUILD_ID !== "undefined" && BUILD_ID) out.build = String(BUILD_ID);
-    } catch (e) {}
-    return out;
-  }
+     So `whereNow()` and `navWord()` are gone with it, and §24's rule is why
+     they are gone rather than left unused: a helper nobody calls is one the
+     next person reads as load-bearing. `BUILD_ID` and the build-time stamp
+     that produced it go too — they existed for this line and nothing else. */
 
   function when(at){
     var d = new Date(at), now = new Date();
@@ -157,10 +134,6 @@ var CHAT = (function(){
     return d + (d === 1 ? " day ago" : " days ago");
   }
 
-  var ICON_PAGE =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
-    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>';
   var ICON_CLOCK =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -175,11 +148,6 @@ var CHAT = (function(){
     var mine = mineIsOffice ? m.from_office : !m.from_office;
     var who = m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
                             : (mineIsOffice ? (m.by_name || "") : "You");
-    var ctx = "";
-    if (!m.from_office && (m.page || m.cycle)) {
-      ctx = '<div class="chctx">' + ICON_PAGE + " " +
-            esc2([m.page, m.cycle, m.build].filter(Boolean).join(" · ")) + "</div>";
-    }
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
         '<span class="chthumb"></span> Screenshot — open</button>'
@@ -197,7 +165,7 @@ var CHAT = (function(){
     return '<div class="chmsg ' + (mine ? "chme" : "chthem") + '">' +
       '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
       flag + "</div>" +
-      '<div class="chbod">' + esc2(m.body) + pic + "</div>" + ctx + "</div>";
+      '<div class="chbod">' + esc2(m.body) + pic + "</div></div>";
   }
 
   function threadHtml(msgs, mineIsOffice, showFlag){
@@ -219,7 +187,15 @@ var CHAT = (function(){
         '<div class="chathead">' +
           "<div><div class=\"cht\">Strategy Office</div>" +
           '<div class="chs" id="chatsub"></div></div>' +
-          '<button class="chx" id="chatclose" type="button" aria-label="Close">&times;</button>' +
+          /* A MINUS, NOT A CROSS (Islam: "it need to be a minimize button as
+             there is no closing actually"). Nothing is closed by pressing it —
+             the conversation is permanent, one per person, and it is the same
+             one next time. A × promises an end to something that has none, and
+             on a chat it reads as "discard this". */
+          '<button class="chx" id="chatclose" type="button" title="Minimise" ' +
+            'aria-label="Minimise this conversation">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+            'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
         "</div>" +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
@@ -235,7 +211,7 @@ var CHAT = (function(){
               'aria-label="Your message"></textarea>' +
             '<button class="chsend" id="chatsend" type="button">Send</button>' +
           "</div>" +
-          '<div class="chnote" id="chatnote">The page you are on is sent with your message.</div>' +
+          '<div class="chnote" id="chatnote"></div>' +
         "</div>" +
       "</div>" +
       '<button class="chatbtn" id="chatbtn" type="button" aria-label="Message the Strategy Office">' +
@@ -290,9 +266,13 @@ var CHAT = (function(){
     var note = el("chatnote");
     if (note) {
       note.className = "chnote" + (lastErr ? " bad" : "");
+      /* EMPTY WHEN THERE IS NOTHING TO SAY. It used to carry "the page you are
+         on is sent with your message", which stopped being true the moment
+         that stopped happening — and a sentence that is merely stale is worse
+         than no sentence, because somebody believes it. */
       note.textContent = lastErr ? lastErr
         : shot ? "A screenshot is attached. It is sent with your next message."
-        : "The page you are on is sent with your message.";
+        : "";
     }
   }
 
@@ -300,6 +280,19 @@ var CHAT = (function(){
     if (!servable()) return;
     post({ action:"mine" }, function(err, j){
       if (!err && j) {
+        /* ASKED BEFORE ANYTHING IS OVERWRITTEN, and the first version of this
+           got it wrong in the quietest possible way: it compared the new count
+           against `state.unread` three lines AFTER assigning the new count to
+           `state.unread`, so the two were always equal and a reply could never
+           announce itself. It read correctly and could not fire. Found by the
+           check, which is the only thing that would have.
+
+           "A reply just landed" is the only moment there is anything to
+           announce — a badge that was already there must not re-announce
+           itself every four seconds. */
+        var arrived = loaded && (j.unread || 0) > state.unread;
+        var wasWaiting = expecting();
+
         state.messages = j.messages || [];
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
@@ -321,6 +314,10 @@ var CHAT = (function(){
         if (dock) dock.hidden = !cfg.on;
         if (!cfg.on && open) setOpen(false);
         drawPanel();
+        if (arrived && !open) announce();
+        /* The clock changes with the state, not only with the panel: somebody
+           who has just been answered stops expecting and goes back to 180s. */
+        if (wasWaiting !== expecting()) beat();
         /* Opened, and something new arrived while it was open — read it. */
         if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
       } else if (j && (j.__status === 401 || j.__status === 403)) {
@@ -333,6 +330,10 @@ var CHAT = (function(){
     });
   }
 
+  /* Waiting on the office, or holding a reply nobody has read yet. */
+  function expecting(){
+    return !!(state.unread > 0 || (state.thread && state.thread.waiting));
+  }
   function stop(){ if (timer) { clearInterval(timer); timer = null; } }
   function beat(){
     stop();
@@ -343,12 +344,33 @@ var CHAT = (function(){
        starts it again, and the poll it fires on the way back is what makes
        the badge right before anybody has looked at it. */
     if (document.hidden) return;
-    timer = setInterval(poll, open ? (cfg.beat || 4000) : POLL_SHUT);
+    timer = setInterval(poll, open ? (cfg.beat || 4000) : (expecting() ? POLL_WAIT : POLL_SHUT));
+  }
+
+  /* ONE SHOT, AND THE CLASS IS TAKEN OFF AGAIN so the next reply can announce
+     itself too. Everything about it is in CSS, including the respect for
+     `prefers-reduced-motion` — a corner that jumps at somebody who has asked
+     not to be jumped at is worse than a silent badge. */
+  function announce(){
+    var b = el("chatbtn");
+    if (!b) return;
+    b.classList.remove("chring");
+    void b.offsetWidth;              /* restart the animation, not queue it */
+    b.classList.add("chring");
+    setTimeout(function(){ b.classList.remove("chring"); }, 2600);
   }
 
   function setOpen(v){
     open = !!v;
     var p = el("chatpanel"); if (p) p.hidden = !open;
+    /* THE BUBBLE IS NOT DRAWN WHILE THE PANEL IS OPEN (§100.4). It used to sit
+       underneath, which pushed the panel 60px off the bottom of the window and
+       left a control on screen whose only job is to open what is already open.
+       Hiding it puts the panel where the bubble was — at the bottom, which is
+       where somebody just clicked. A class, so the rule is one line of CSS and
+       the mobile layout inherits it. */
+    var dock = el("chatdock");
+    if (dock) dock.classList.toggle("chopen", open);
     if (open) {
       drawPanel();
       var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
@@ -366,9 +388,7 @@ var CHAT = (function(){
     if (!text && !shot) return;
     sending = true; lastErr = "";
     var btn = el("chatsend"); if (btn) btn.disabled = true;
-    var w = whereNow();
-    post({ action:"say", body:text, shot:shot, page:w.page, target:w.target,
-           cycle:w.cycle, build:w.build }, function(err, j){
+    post({ action:"say", body:text, shot:shot }, function(err, j){
       sending = false;
       if (btn) btn.disabled = false;
       if (err) {
@@ -437,6 +457,32 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
+    /* ── CLICKING AWAY MINIMISES IT (§100.4) ────────────────────────
+       Islam: "if I click outside the box minimize it please." Nothing is lost
+       by it — the panel is hidden rather than rebuilt, so a half-typed message
+       is still in the box when it comes back, which is what makes dismissing
+       it this cheaply safe.
+
+       CAPTURE PHASE, so a control that stops propagation cannot leave the
+       panel open behind whatever it just did; `pointerdown` rather than
+       `click`, so it goes away as the press lands rather than on release.
+
+       TWO THINGS ARE NOT "OUTSIDE": the dock itself, and an open modal — a
+       screenshot opened FROM the panel renders into the platform's own overlay,
+       and closing the panel behind it would be dismissing the thing you are
+       standing in. */
+    document.addEventListener("pointerdown", function(e){
+      if (!open) return;
+      var t = e.target;
+      if (t && t.closest && t.closest("#chatdock")) return;
+      if (document.querySelector(".overlay.on")) return;
+      setOpen(false);
+    }, true);
+    /* Escape, from anywhere — it was only wired inside the composer, so it did
+       nothing once the focus had moved to the attach button or a message. */
+    document.addEventListener("keydown", function(e){
+      if (open && e.key === "Escape") setOpen(false);
+    });
     window.addEventListener("focus", function(){ if (mounted && !document.hidden) poll(); });
     document.addEventListener("visibilitychange", function(){
       if (!mounted) return;
@@ -831,6 +877,19 @@ var CHAT = (function(){
     });
   }
 
+  /* WHERE THE BOX STARTS, so CSS can make it end at the bottom of the window
+     (§100.5). Its DOCUMENT offset, not its position on screen — that one moves
+     with every scroll and would resize the box as you scrolled it. Nothing
+     above the box moves when the box changes height, so there is no loop here:
+     §28.3's warning is about a max-height fed by a measurement the height
+     itself changes, and this is not one. */
+  function fitInbox(){
+    var root = el("chinbox");
+    if (!root) return;
+    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    root.style.setProperty("--chin-top", Math.round(top) + "px");
+  }
+
   function wireInbox(){
     wireSettings();
     var root = el("chinbox");
@@ -902,6 +961,12 @@ var CHAT = (function(){
     var find = el("chqfind");
     if (find) find.addEventListener("input", function(){ box.q = this.value; drawQueue(); });
 
+    fitInbox();
+    /* Re-measured on resize, because the chrome's rows wrap at narrow widths
+       and the box's top moves with them. Bound once, on the container that is
+       torn down with the page — `boxBeat()` already stops when #chinbox is
+       gone, and this asks the same question. */
+    window.addEventListener("resize", function(){ if (el("chinbox")) fitInbox(); });
     drawQueue();
     drawThread();
     boxLoadQueue(function(){

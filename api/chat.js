@@ -78,8 +78,7 @@ const str = function (v, max) {
    is asked for in three places and a column added to two of them is the bug
    nobody sees until a message renders without its picture. */
 const MSG_COLS =
-  "id, at, from_office, by_key, by_name, body, page, target, cycle, build, flag, " +
-  "(shot IS NOT NULL) AS has_shot";
+  "id, at, from_office, by_key, by_name, body, flag, (shot IS NOT NULL) AS has_shot";
 
 /* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
    ONE SMALL QUERY, not `readState()`. This endpoint has never read the
@@ -199,13 +198,16 @@ module.exports = async function handler(req, res) {
         return send(res, 400, { ok: false, error: "That is not a picture this can store." });
       }
       await ensureThread(client, me.key, me.name);
+      /* NOTHING ABOUT WHERE THEY WERE. §97 captured the page, the subject, the
+         cycle and the build and drew them under the sender's own words; Islam
+         asked for that gone everywhere rather than merely hidden, so it is not
+         stored either — and migration 023 takes the four columns with it,
+         because a column the platform no longer reads is worse than no column
+         (§53.4). Anything a browser still posts is ignored here. */
       await client.query(
-        "INSERT INTO chat_messages (person_key, from_office, by_key, by_name, body, " +
-        "                           page, target, cycle, build, shot) " +
-        "VALUES ($1,false,$2,$3,$4,$5,$6,$7,$8,$9)",
-        [me.key, me.key, me.name || null, text,
-         str(body.page, 120), str(body.target, 120), str(body.cycle, 120),
-         str(body.build, 60), shot]);
+        "INSERT INTO chat_messages (person_key, from_office, by_key, by_name, body, shot) " +
+        "VALUES ($1,false,$2,$3,$4,$5)",
+        [me.key, me.key, me.name || null, text, shot]);
       /* WAITING GOES BACK ON WHEN THEY WRITE, whatever it was. A conversation
          the office marked answered is not answered any more the moment the
          person says something else, and nobody should have to notice. */

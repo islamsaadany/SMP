@@ -3568,7 +3568,7 @@
                   color:var(--gold-deep); font-weight:700; }
   tr.notdue td { opacity:.62; }
 
-  /* ── ONE ROW SHAPE (§101) ────────────────────────────────────────
+  /* ── ONE ROW SHAPE (§103) ────────────────────────────────────────
      The Type pill takes a fixed box: "Deliverable" and "Outcome" are seven
      characters apart, and left to themselves the column reads as two
      different marks rather than one question answered two ways. */
@@ -3599,7 +3599,7 @@
      IN arrange.css AND NOT config.css, deliberately: that file has now held
      the same rule block twice on four separate occasions (§29.2, §51.5,
      §53.6, §88), and this is concatenated last of the four stylesheets. */
-  /* §102.2: NOT nowrap. It spans the whole table, so it is the one row with
+  /* §104.2: NOT nowrap. It spans the whole table, so it is the one row with
      room for a sentence -- and at 1000px that sentence pushed the table 8px
      wider than its box rather than taking a second line, which is the opposite
      of what a full-width band is for. Line-height goes from 1 to 1.35 so two
@@ -3615,7 +3615,7 @@
      reads as a break rather than as a rule. Never on the first, which opens
      the table. */
   tr.dxband:not(:first-child) th { border-top:14px solid var(--surface); }
-  /* §102: the column strip WRAPS, and the nowrap it used to carry is why.
+  /* §104: the column strip WRAPS, and the nowrap it used to carry is why.
      Its columns are sized by the table's own <thead> -- a unit's vocabulary --
      and a function's words are longer, so "Deliverables & outcomes" ran
      straight over "Milestones" with nothing to stop it. §88's one-line rule is
@@ -4139,7 +4139,7 @@
                                max-width:none; overflow:visible;
                                text-overflow:clip; vertical-align:bottom; }
 
-  /* ── §101.10: THE MARK SITS UNDER THE BOX IT IS ABOUT ──────────────────
+  /* ── §103.10: THE MARK SITS UNDER THE BOX IT IS ABOUT ──────────────────
      Beside it there is no room -- the per-cent cell is a box and little else --
      and a mark on its own line is what makes it read as a state of the row
      rather than a label on the field. Its own class, not `td .missing`, so the
@@ -4591,6 +4591,11 @@
 .chatdock { position:fixed; right:18px; bottom:18px; z-index:45;
             display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
 .chatdock[hidden] { display:none; }
+/* OPEN, THE BUBBLE IS GONE (§100.4). It sat under the panel, pushing it 60px
+   up from the bottom of the window and offering to open what was already
+   open. With it gone the panel's bottom edge is the dock's, which is where
+   the bubble was — so the panel opens exactly where it was pressed. */
+.chatdock.chopen .chatbtn { display:none; }
 
 /* A DECK IS NOT A PLACE FOR A CHAT BUBBLE. Presentation puts the platform on a
    projector in front of the board, and a floating control in the corner of a
@@ -4605,6 +4610,26 @@ body.presenting .chatdock { display:none; }
 .chatbtn:hover { background:var(--panel-hover); }
 .chatbtn:focus-visible { outline:2px solid var(--focus); outline-offset:3px; }
 .chatbtn svg { width:23px; height:23px; }
+/* ── A REPLY ANNOUNCES ITSELF (§99) ───────────────────────────────────
+   Islam: "when the admin replied the chat should show a notification on the
+   callout for the user to know he got an answer." The count was already
+   there; what was missing is that it ARRIVED silently, and up to three
+   minutes late. This is the arriving.
+
+   A ring that expands out of the bubble and fades, twice — not a bounce and
+   not a colour change: the corner sits over somebody's work and the job is to
+   be noticed, not to interrupt. `prefers-reduced-motion` gets the badge and
+   nothing else, which is the whole point of asking. */
+@keyframes chring {
+  0%   { box-shadow:0 0 0 0 var(--accent-glow, rgb(201 162 77/.5)); }
+  70%  { box-shadow:0 0 0 14px rgb(201 162 77/0); }
+  100% { box-shadow:0 0 0 0 rgb(201 162 77/0); }
+}
+.chatbtn.chring { animation:chring 1.3s ease-out 2; }
+@media (prefers-reduced-motion: reduce) {
+  .chatbtn.chring { animation:none; }
+}
+
 .chatbtn .chn { position:absolute; top:-3px; right:-3px; min-width:20px; height:20px;
                 border-radius:var(--r-pill); background:var(--gold); color:var(--on-accent,#1B1400);
                 font-size:var(--fs-micro); font-weight:800; display:grid; place-items:center;
@@ -4624,8 +4649,11 @@ body.presenting .chatdock { display:none; }
 .chathead .chs { font-size:var(--fs-micro); color:var(--panel-quiet); margin-top:2px;
                  display:flex; align-items:center; gap:5px; }
 .chathead .chx { margin-left:auto; background:none; border:none; color:var(--panel-quiet);
-                 font-size:18px; cursor:pointer; line-height:1; padding:2px 4px; }
-.chathead .chx:hover { color:var(--panel-ink); }
+                 cursor:pointer; line-height:0; padding:4px; border-radius:5px;
+                 display:grid; place-items:center; }
+.chathead .chx svg { width:16px; height:16px; }
+.chathead .chx:hover { color:var(--panel-ink); background:rgb(255 255 255/.12); }
+.chathead .chx:focus-visible { outline:2px solid var(--panel-ink); outline-offset:1px; }
 .chatdot { width:6px; height:6px; border-radius:50%; background:var(--good); flex:none; }
 
 .chatbody { padding:14px 13px; display:flex; flex-direction:column; gap:14px;
@@ -4647,9 +4675,6 @@ body.presenting .chatdock { display:none; }
 .chmsg.chme { align-self:flex-end; align-items:flex-end; }
 .chmsg.chme .chbod { background:var(--surface-2); border:1px solid var(--line-soft); }
 
-.chctx { font-size:var(--fs-micro); color:var(--ink-3); display:flex; align-items:center;
-         gap:5px; padding-left:2px; }
-.chctx svg { width:11px; height:11px; flex:none; opacity:.75; }
 
 .chshot { display:inline-flex; align-items:center; gap:7px; margin-top:7px;
           border:1px solid var(--line); border-radius:6px; padding:5px 8px;
@@ -4681,6 +4706,10 @@ body.presenting .chatdock { display:none; }
 .chsend:hover { background:var(--panel-hover); }
 .chsend[disabled] { opacity:.5; cursor:default; }
 .chnote { font-size:var(--fs-micro); color:var(--ink-3); padding:0 2px 1px; }
+/* It is empty most of the time now that nothing is promised about the page
+   (§99), and an empty line still spends its height — so it takes no room
+   until it has something to say. */
+.chnote:empty { display:none; }
 .chnote.bad { color:var(--bad-tx); }
 
 .chempty { display:flex; flex-direction:column; gap:9px; align-items:center;
@@ -4690,11 +4719,33 @@ body.presenting .chatdock { display:none; }
              max-width:30ch; }
 
 /* ── THE OFFICE'S INBOX (a Setup page) ─────────────────────────────────── */
-.chinbox { display:grid; grid-template-columns:272px 1fr; min-height:440px;
+/* ── THE INBOX FITS THE SCREEN (§100.5) ────────────────────────────────
+   Islam: "the chat box requires a scroll up — this shouldn't happen. The chat
+   box stays fit to the screen to show the chat box and send, and what can be
+   scrolled is the left pane with the chats."
+
+   The thread body was already capped and scrolling; what was not was the BOX,
+   which stood at a fixed 593px however tall the window was — so on a 700px
+   screen the reply box and Send fell below the fold and the page had to be
+   scrolled to answer anybody. Measured before touching it: at 900px the page
+   scrolled 306px, at 700px it scrolled 506px and the composer was off-screen.
+
+   `--chin-top` is the box's own distance from the top of the DOCUMENT, set by
+   the one line of JS that can know it. §28.3's rule is about sizing against a
+   measured value THE SIZE ITSELF CAN CHANGE — the feedback loop that cost v2.8
+   an infinite oscillation. There is no loop here: what sits above this box does
+   not move when the box gets taller or shorter, so the measurement is stable
+   in a way a max-height fed by a height never was. */
+.chinbox { display:grid; grid-template-columns:272px 1fr;
+           height:calc(100dvh - var(--chin-top, 190px) - 20px);
+           /* Below this it stops shrinking and the page scrolls instead — a
+              thread squeezed into 150px is not a usable screen, and a window
+              that short is somebody's split view rather than their laptop. */
+           min-height:340px;
            border:1px solid var(--line); border-radius:var(--r); overflow:hidden;
            background:var(--surface); }
 .chq { border-right:1px solid var(--line); background:var(--ground);
-       display:flex; flex-direction:column; max-height:620px; }
+       display:flex; flex-direction:column; min-height:0; }
 .chqtop { padding:9px 10px; border-bottom:1px solid var(--line); display:flex; gap:7px; }
 .chqtop input { flex:1; border:1px solid var(--line); border-radius:6px;
                 background:var(--surface); color:var(--ink); padding:6px 9px;
@@ -4741,7 +4792,8 @@ body.presenting .chatdock { display:none; }
 .chqrow .chwh { grid-column:1/-1; font-size:var(--fs-micro); color:var(--ink-3);
                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.chthread { display:flex; flex-direction:column; background:var(--surface); min-width:0; }
+.chthread { display:flex; flex-direction:column; background:var(--surface);
+             min-width:0; min-height:0; }
 .chthead { padding:10px 14px; border-bottom:1px solid var(--line);
            display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .chthead .chnm { font-size:var(--fs-body); font-weight:650; }
@@ -4752,8 +4804,12 @@ body.presenting .chatdock { display:none; }
           font-family:inherit; }
 .chmini:hover { border-color:var(--gold-deep); color:var(--ink); }
 .chmini.on { color:var(--attn-tx); border-color:var(--attn); background:var(--attn-bg); }
+/* NO max-height ANY MORE. It takes what the box has left after the header and
+   the composer, and scrolls inside that — which is what keeps Send on screen
+   at every window height rather than at one. `min-height:0` is what lets a
+   flex child shrink below its content at all. */
 .chtbody { padding:14px; display:flex; flex-direction:column; gap:14px;
-           background:var(--ground); flex:1; overflow-y:auto; max-height:430px; }
+           background:var(--ground); flex:1; min-height:0; overflow-y:auto; }
 .chtfoot { border-top:1px solid var(--line); background:var(--surface); padding:10px 12px;
            display:flex; flex-direction:column; gap:8px; }
 
@@ -5831,6 +5887,47 @@ THEME.apply();
     return grantAtPage(w, person, pageKey, target) === "edit";
   }
 
+  /* ── REORDERING COMES BACK, AND IT IS ITS OWN QUESTION (§101) ────
+     §94.3 folded reordering into authoring and closed it to the office, on the
+     argument that the order of a plan is as much a part of what was agreed as
+     its words. Islam is giving it back: "I will give it back — shall we align
+     where to visually have it?"
+
+     IT IS A SEPARATE RULE, NOT A HOLE IN mayAuthorPage(). Authoring means
+     changing WHAT the plan says; arranging means changing the order the same
+     rows are read in. Widening mayAuthorPage() to let these roles through
+     would have handed them the words as well — the exact fault §94 was fixing.
+
+     WHO: the roles that HOLD the thing. Islam: "no, only custodian and BU
+     owner", and, of a supporting function's Projects pane, "same". A function
+     has no BU owner, so the holder there is its head — and a custodian
+     attached to a function holds it the same way. A Contributor never, which
+     was asked and answered directly; a group or company CEO only if they also
+     hold one of these, because reaching a unit is not holding it (§37).
+
+     THE GRANT STILL HAS TO SAY EDIT. This narrows from the grant, it never
+     widens: a tenant that has closed a unit's plan to its own custodian keeps
+     it closed. The office is answered first and separately — they arrange
+     through the pen, and inOffice() is the tenth-place lesson of §89. */
+  var ARRANGE_ROLES = ["owner", "custodian", "fnhead"];
+
+  function mayArrange(w, person, target) {
+    if (!person || !target) return false;
+    if (target === "group") return isOffice(w, person);
+    if (isOffice(w, person)) return grantAtPage(w, person, planPageOf(target), target) === "edit";
+    var holds = rolesOrFloor(w, person).some(function (r) {
+      return ARRANGE_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, target);
+    });
+    if (!holds) return false;
+    return grantAtPage(w, person, planPageOf(target), target) === "edit";
+  }
+
+  /* A unit arranges its Plan; a supporting function arranges its Projects.
+     One place, so the two panes cannot be asked different questions (§53.5). */
+  function planPageOf(target) {
+    return String(target).indexOf("fn:") === 0 ? "k_proj" : "u_plan";
+  }
+
   /* ── 5 · Figure sets (§16.7, spec 008) ───────────────────────────
      Many figures are not the business unit's number. Revenue and margin exist
      in Finance before a unit is asked for them, and asking the unit to type
@@ -6163,6 +6260,7 @@ THEME.apply();
     isOffice: isOffice, isOfficeRole: isOfficeRole, isSuperRole: isSuperRole,
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
+    ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
     editingRoles: editingRoles, onlyVia: onlyVia, rolesOrFloor: rolesOrFloor,
@@ -10404,7 +10502,7 @@ function capKOScore(c){
 
 /* A deliverable reads 100 or 0 when it is delivered-or-not, and its own
    percentage when it is a percentage. Nothing reported is absent, not zero. */
-/* ── WHAT A STATUS READS AS (§101) ────────────────────────────────────────
+/* ── WHAT A STATUS READS AS (§103) ────────────────────────────────────────
    A deliverable and a milestone are reported the same way now: Not started,
    In progress with a per-cent, Delivered (or Completed). The figure follows
    the word at both ends and only the middle is typed, which is why `kind` --
@@ -10417,7 +10515,7 @@ function capKOScore(c){
    milestone in every tenant is in exactly that state on the day this ships.
    Reading it as 0 is what makes the Execution figure identical to the count
    it replaces; excluding it would raise every tenant's score overnight. */
-/* ── AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§101.10) ───────────────
+/* ── AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§103.10) ───────────────
    It returned 0, so the average COUNTED it -- and a project's figure fell the
    instant a dropdown changed, before the person who changed it had said
    anything at all. That is the platform putting a number in somebody's mouth,
@@ -10491,7 +10589,7 @@ function projOverruns(p){
 function capPerf(c){
   return sideAvg((c.projects || []).map(projPerf));
 }
-/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§101). It was
+/* EXECUTION IS AN AVERAGE NOW, AND IT IS THE SAME NUMBER (§103). It was
    `done / total`: a milestone in progress counted as nothing. With a per-cent
    on the milestone it is the mean of what each one reads -- 100 done, 0 not
    started, its own figure in between -- and those are identical arithmetic
@@ -10507,7 +10605,7 @@ function capExec(c){
     var m = projMilestones(p);
     done += m.done; wip += m.wip; todo += m.todo; total += m.total;
     (p.milestones || []).forEach(function(x){
-      /* §101.10: a milestone halfway through a sentence leaves the average
+      /* §103.10: a milestone halfway through a sentence leaves the average
          rather than dragging it down. `|| 0` still stands for a milestone
          NOBODY has touched -- projMilestones() counts that one as Not started,
          so nought is what it is, not what we assumed. */
@@ -10525,7 +10623,7 @@ function capOutcomeSide(c){ return sideAvg((c.projects || []).map(projOutcomeSid
 /* What a capability asks for this cycle: its key objectives, plus everything in
    its projects whose time has come. An outcome measured at Q4 is not an empty
    box somebody forgot in Q2 \u2014 it is not asked. */
-/* ── WHEN A ROW IS DUE (§101) ──────────────────────────────────────────────
+/* ── WHEN A ROW IS DUE (§103) ──────────────────────────────────────────────
    One reader, four written shapes, because the plan is written by people and
    people write dates four ways:
 
@@ -10648,7 +10746,7 @@ function outcomeDue(o){ return dueThisCycle(o.measureAt); }
    the predicate went too, at all four of its call sites, rather than being
    left behind always answering true (§24). An OUTCOME still has one, because
    a measurement time is a real thing somebody chose. */
-/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§101), not "everything in the
+/* THE TALLY MEANS "WHAT YOU OWE THIS CYCLE" (§103), not "everything in the
    plan". A deliverable due next December is not an empty box somebody forgot
    in June -- it is not asked, exactly as an outcome measured in Q4 has never
    been asked in Q2. It leaves the count and it leaves the submit gate.
@@ -11234,7 +11332,7 @@ function reportedCount(u){
 /* A note is required where a figure lands in the bottom two bands. A red
    number with no explanation is the thing a review meeting stalls on. */
 /* WHAT A ROW READS, whatever kind of row it is. A tactic is a ratio, a
-   deliverable and a milestone are a status-and-per-cent (§101.10), and
+   deliverable and a milestone are a status-and-per-cent (§103.10), and
    everything else carries `progress`. One reader, because the note rule and
    the board both ask and two copies would disagree about a deliverable. */
 function rowReads(x){
@@ -11250,7 +11348,7 @@ function needsNote(x){
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
 
-/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§102) ────────────────────
+/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§104) ────────────────────
    The same three answers a unit has, over a function's own vocabulary: key
    objectives, deliverables and outcomes, milestones. `reportItems()` could not
    be reused -- a unit's rows hang off pillars and a function's off
@@ -11296,14 +11394,14 @@ function fnReportedCount(fk){
 }
 function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
 
-/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§102) ───────────
+/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§104) ───────────
    A unit and a function are the same product (§53.5), so the refusal is one
    function taking a TARGET rather than two that will drift. It returns the
    rows, never a sentence, because the caller says it in its own words.
 
    Two rules, and the second is new: a figure in the bottom two bands with no
    note (a red number nobody explained is what a review meeting stalls on),
-   and a row that said In progress and never said how far (§101.10 -- the
+   and a row that said In progress and never said how far (§103.10 -- the
    score leaves it out, so submitting would file a report with a hole in it). */
 function submitBlockers(target){
   var t = String(target || ""), fn = t.indexOf("fn:") === 0;
@@ -11448,6 +11546,15 @@ function mayAuthor(acKey, target){
     target === undefined ? TARGET : target);
 }
 function mayEditPlan(){ return mayAuthor("u_plan"); }
+/* MAY THIS PERSON REORDER WHAT THEY ARE LOOKING AT (§101)? A wrapper, never a
+   second copy — the answer is lib/rules.js's, asked for the person being viewed
+   as, so the handle the screen draws and the save the server accepts cannot
+   disagree. That disagreement is precisely what §94.3 shipped for two versions:
+   the drags worked on screen and were refused every time. */
+function mayArrangeHere(target){
+  return SMPRules.mayArrange(world(), viewer(),
+    target === undefined ? TARGET : target);
+}
 
 /* ── THE THREE THE SMO TEAM DOES NOT GET (§89) ─────────────────────
    Wrappers, not copies: the answer is `lib/rules.js`'s, asked for the person
@@ -12895,11 +13002,28 @@ function arranging(scope, unitKey){
    AND `hasRole("super")` WAS THE TENTH PLACE MEANING "the office" (§89). The
    SMO team could not arrange anything at group level: not a bug anybody would
    report, because the only sign is a control that is not there. */
+/* ── AND IT COMES BACK, AS ITS OWN GRANT (§101, reversing §94.3) ──
+   Islam: "I will give it back." The paragraph above records why §94.3 took it
+   away, and every word of it stayed true — the drags really were being refused
+   on save. What changes is not that reordering stopped being a plan decision;
+   it is that the plan's ORDER is now the unit's to decide while the plan's
+   WORDS remain the office's.
+
+   SO IT IS A SEPARATE QUESTION, not a hole in mayAuthor(). Widening the
+   authoring rule to let a custodian reorder would have handed them the words
+   as well, which is the exact fault §94 was fixing.
+
+   WHO, in Islam's words: "no, only custodian and BU owner", and of a
+   supporting function's pane, "same" — so the holder there is its head. Never
+   a Contributor, asked and answered directly. The one answer lives in
+   lib/rules.js and BOTH SIDES ASK IT: the server classifies a reorder
+   separately and authorises it with the same function, so a handle this draws
+   can never be a save the server rejects. */
 function canArrange(scope, unitKey){
   /* Units, capabilities and themes at group level: the office's, with no
      page behind it to ask a grant of. */
   if (scope === "group") return inOffice();
-  return !!unitKey && mayAuthor("u_plan", unitKey);
+  return !!unitKey && mayArrangeHere(unitKey);
 }
 
 function handle(label){
@@ -14301,7 +14425,7 @@ function applyProgress(u, d){
   });
 }
 
-/* ── WHAT COUNTS AS A DUE DATE (§100) ─────────────────────────────────────
+/* ── WHAT COUNTS AS A DUE DATE (§102) ─────────────────────────────────────
    A milestone's due date is written in its PROJECT'S units: a project run by
    quarters says "Q1 2026", one run by dates says "20 Mar 2026". The field has
    always taken any text and always will -- see the notice in validateCapPlan for
@@ -14321,7 +14445,7 @@ function applyProgress(u, d){
 var MS_STATUS_WORDS = ["done", "pending", "completed", "complete", "not started",
                        "in progress", "wip", "ongoing", "todo", "open", "closed",
                        "n/a", "na", "tbd", "planned", "delayed"];
-/* §101: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
+/* §103: EITHER FORM IS RIGHT ON ANY ROW, so this no longer asks the project's
    timeline. A workshop lands on a day and a report lands in a month, and one
    project has both -- the platform's job is to notice what is not a time at
    all, which is still exactly the case that started this: "Done" and
@@ -14411,7 +14535,7 @@ function capPlanTemplate(c){
    the stored keys — a sheet filled by hand should not need to know that "In
    progress" is spelled "wip" inside the platform. */
 /* A deliverable says Delivered where a milestone says Completed; the stored
-   key is the same in both (§101), so one pair of functions with the word
+   key is the same in both (§103), so one pair of functions with the word
    passed in rather than two pairs that can drift. */
 function delivStatusWord(s){ return s === "done" ? "Delivered" : msStatusWord(s); }
 function delivStatusKey(v){
@@ -14554,7 +14678,7 @@ function validateCapPlan(c, rows){
   rows.forEach(function(r){
     if (r.type === "PROJECT" && timelineKey(r.timeline) === "date" && r.end) projEnd[r.id] = r.end;
   });
-  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§100). A live plan
+  /* A DUE DATE IS READ AGAINST ITS PROJECT'S TIMELINE (§102). A live plan
      arrived with "Done" and "Pending" in the Due date column -- statuses,
      which belong to the reporting cycle -- and the platform said nothing,
      because the field takes any text. It still takes any text: refusing the
@@ -15615,7 +15739,7 @@ var DELIV_KINDS = ["Delivered / not", "% delivered"];
 var TIMELINES = ["Quarters", "Dates"];
 var MS_STATUSES = ["Not started", "In progress", "Completed"];
 /* The same three states, one word apart: a deliverable is DELIVERED where a
-   milestone is COMPLETED, and that difference is right (§101). */
+   milestone is COMPLETED, and that difference is right (§103). */
 var MS_STATUSES_D = ["Not started", "In progress", "Delivered"];
 
 /* ONE NAMING IN THE FILE (§51.19, Islam: "I don't think we should have the
@@ -15707,11 +15831,11 @@ function capPlanWorkbook(c){
        is the project's. A column the platform no longer reads is worse than
        no column — somebody fills it in and nothing happens. */
     { name:"Deliverables", widths:[34, 60],
-      /* §101.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
+      /* §103.8: NO DUE DATE COLUMN, and no Kind either. A deliverable's
          direction and target are written by the platform, and Islam took the
          date off the templates "for now" -- the field survives in the model
          and nothing asks for it, so every deliverable is simply always asked,
-         which is what the product did before §101 put the date back. */
+         which is what the product did before §103 put the date back. */
       head:["Project", "Deliverable"],
       validations:[{ range:"A2:A400", from:PROJECT_RANGE,
                      error:"Choose a project from the Projects sheet." },
@@ -15760,7 +15884,7 @@ function capProgressWorkbook(c){
                 m.actual == null ? "" : String(m.actual), "", m.id];
       }) },
 
-    /* §101: a status and a per-cent, the pair the Milestones sheet has always
+    /* §103: a status and a per-cent, the pair the Milestones sheet has always
        had. "New %" is read only for In progress -- the word decides the
        figure at both ends, and a per-cent behind "Delivered" is a number
        nobody can see. */
@@ -15837,7 +15961,7 @@ function capPlanFromWorkbook(c, sheets){
     });
   }
   child("Deliverables", "DELIVERABLE", "Deliverable", "D", function(row, r){
-    /* Due date since §101; a workbook written before it has a Kind column
+    /* Due date since §103; a workbook written before it has a Kind column
        instead, which is read and ignored (§58: write the new label, read
        whatever arrives). */
     row.finish = r["Due date"] != null ? r["Due date"] : "";
@@ -15851,7 +15975,7 @@ function capPlanFromWorkbook(c, sheets){
                    : r["Measure date"] != null ? r["Measure date"] : r["Measured at"];
   });
   child("Milestones", "MILESTONE", "Milestone", "M", function(row, r){
-    /* Description since §100, read as either (§58). The STORED field keeps its
+    /* Description since §102, read as either (§58). The STORED field keeps its
        spelling -- `covers` is an identifier, "Description" is a label. */
     row.covers = r["Description"] != null ? r["Description"] : r["What it covers"];
     row.owner = r["Owner"];
@@ -17902,6 +18026,39 @@ function editBar(page, acKey){
    must not move anything when it appears.)
 
    Same data-page contract as editBar, so the shell's wiring is untouched. */
+/* THE ARRANGE CONTROL (§101). It shares the pen's SLOT and the pen's shape —
+   28px, same corner, gold when live — because whoever has one never has the
+   other: the office arranges through the pen, everybody else through this.
+
+   THE ICON IS THE UP-DOWN ARROWS, and it is Islam's pick over a grip mark that
+   would have matched the handles it turns on. Recorded rather than re-argued:
+   the cost of a generic glyph is that it matches nothing else on the page, so
+   the title and the aria-label carry the whole meaning and are not decoration.
+
+   NOT DRAWN FOR SOMEBODY WHO HAS THE PEN, or the corner holds two controls
+   that do the same thing — §94.15's argument, which is what removed the last
+   Arrange button, and it still holds in the one direction that matters. */
+/* ONE SLOT, ASKED ONCE. The unit's Plan pane and a capability's Projects pane
+   had the same line written twice; a third would have been written the day
+   somebody added a pane, and §53.5's whole rule is that a unit and a function
+   must not drift apart in silence. */
+function paneActs(page, acKey){
+  var inner = penBtn(page, acKey) + arrangePaneBtn();
+  return inner ? '<div class="paneact">' + inner + '</div>' : '';
+}
+
+function arrangePaneBtn(target){
+  if (mayEditPlan() || !mayArrangeHere(target)) return '';
+  var on = !!ARRANGE;
+  var label = on ? "Done arranging" : "Arrange";
+  return '<button class="penbtn arrpen' + (on ? " on" : "") + '" data-arrange="1"' +
+    ' title="' + label + '" aria-label="' + label + '">' +
+    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M7 7L10 4l3 3M13 13l-3 3-3-3M10 4.6v10.8"/></svg>' +
+    '</button>';
+}
+
 function penBtn(page, acKey){
   if (!mayAuthor(acKey || "u_found")) return '';
   var on = EDIT_PAGE[page];
@@ -18713,7 +18870,7 @@ function splitOrPane(list, sel, rail, pane){
    unit's. The dates are on the project's own cover line, which is where a
    date belongs; a function left holding a helper nothing calls is how a
    stylesheet ends up describing a control the product does not have (§24). */
-/* ── ONE TABLE, ONE ROW SHAPE (§101, undoing §99's split) ────────────────
+/* ── ONE TABLE, ONE ROW SHAPE (§103, undoing §99's split) ────────────────
    §99 cut the table in two because Direction, Target and Due date had nothing
    to say for a deliverable -- the em-dash was the table asking a row a
    question its kind could not answer. Islam: *"wait, I over complicated
@@ -18734,7 +18891,7 @@ function splitOrPane(list, sel, rail, pane){
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
 var DX_HEADING = "Deliverables and outcomes";
-/* ── WHAT THE SCORE COLUMN IS CALLED (§101.9) ─────────────────────────
+/* ── WHAT THE SCORE COLUMN IS CALLED (§103.9) ─────────────────────────
    The two tables read their last column from two different numbers, so they
    say two different words. A deliverable or an outcome answers "how well" --
    PERFORMANCE, the word this pane's own card and the group's projects table
@@ -18769,7 +18926,7 @@ function dxTarget(row){
    stored field is an identifier and renaming one is a migration for a word
    nobody reads (§58, §65). `dxWhen` is the one place that knows which.
 
-   §101.8: NO SETTER. The date is off the tables and off the templates "for
+   §103.8: NO SETTER. The date is off the tables and off the templates "for
    now", so nothing writes it any more -- and a setter with no caller is the
    kind of leftover §24 exists to stop. The READER stays, because the date is
    still what decides whether a row is asked for and whether it is late, for
@@ -18779,7 +18936,7 @@ function dxWhen(row){ return dxIsDeliv(row) ? row.obj.due : row.obj.measureAt; }
    loud -- past its date, unfinished, and being asked for. Not due is quiet --
    its cycle has not come, so nothing is asked and nothing is scored. On time
    is just a date. */
-/* THE DUE DATE IS HIDDEN, NOT DELETED (§101.8). It still decides whether a
+/* THE DUE DATE IS HIDDEN, NOT DELETED (§103.8). It still decides whether a
    row is asked for this cycle and whether it is late -- it simply stopped
    being a column on the two panes people READ. So the lateness it used to
    carry moves under the name, which is where a row's own qualifiers already
@@ -18821,7 +18978,7 @@ function pctRead(x, when){
   var v = statusReads(x);
   return v == null ? "&mdash;" : v + "%";
 }
-/* ── NOT DUE IS A LABEL, NOT A LOCK (§101.8) ──────────────────────
+/* ── NOT DUE IS A LABEL, NOT A LOCK (§103.8) ──────────────────────
    The comment over the reporting pane has said exactly that since it was
    written, and the code did the opposite: a row not due this cycle had its
    control REPLACED by the word, so the one thing the sentence promised —
@@ -18836,7 +18993,7 @@ function pctRead(x, when){
 function notDueCell(){ return '<span class="pill kind">Not due</span>'; }
 /* An In progress that has not said how far is OUTSTANDING, and the pane says
    so rather than leaving an empty box that reads like the optional Note beside
-   it (§101.10). The same `.missing` the plan pane uses for a target nobody
+   it (§103.10). The same `.missing` the plan pane uses for a target nobody
    set -- one idiom for "this is owed", not a second one. */
 function needsPct(){ return '<span class="missing pctneed">Needs a %</span>'; }
 function reportedAny(x, d){
@@ -18846,8 +19003,8 @@ var MS_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"],
 var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"], ["done", "Delivered"]];
 /* A milestone finishing after the project's end date is saved as entered and
    said out loud. Two things might be true and the platform picks neither. */
-/* ── A DUE DATE THAT IS NOT ONE, IN A PLAN ALREADY STORED (§103) ─────────
-   The upload has warned about this since §100 -- "Done" and "Pending" sitting
+/* ── A DUE DATE THAT IS NOT ONE, IN A PLAN ALREADY STORED (§105) ─────────
+   The upload has warned about this since §102 -- "Done" and "Pending" sitting
    in a due-date column, named as what they are rather than as "invalid". But
    NOTHING HAS EVER LOOKED AT A PLAN ALREADY IN THE DATABASE, so a tenant that
    uploaded before that check existed is told nothing at all and has to find
@@ -18859,7 +19016,7 @@ var DX_WORDS = [["", "\u2014"], ["todo", "Not started"], ["wip", "In progress"],
 
    MILESTONES ONLY, deliberately. A milestone's due date is on this page and
    the pen edits it, so the note points at something that can be fixed here. A
-   deliverable's due date is not drawn on any pane since §101.8, so naming a
+   deliverable's due date is not drawn on any pane since §103.8, so naming a
    bad one would send somebody looking for a control that is not there (§61).
    Its only door is an upload, which already validates it. */
 function badDues(p){
@@ -18918,9 +19075,9 @@ function capScoreCards(c){
     '<div class="minirow"><div><em>Deliverables</em><b>' + pct(capDeliverySide(c)) + '</b></div>' +
       '<div><em>Outcomes</em><b>' + pct(capOutcomeSide(c)) + '</b></div>' +
       '<div><em>Projects</em><b>' + c.projects.length + '</b></div></div></div>');
-  /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§103). An In
+  /* WHAT THE FIGURE IS BUILT ON, WHEN SOME OF IT IS MISSING (§105). An In
      progress milestone with no per-cent LEAVES the average rather than
-     counting as nought (§101.10) -- honest, and silent, so the figure rises
+     counting as nought (§103.10) -- honest, and silent, so the figure rises
      and nothing on the card says why. `capExec()` has returned the count since
      that section and nothing showed it. Only drawn when there is one: a card
      that always says "0 outstanding" is noise on every capability that has
@@ -18956,7 +19113,7 @@ function capKOTable(c){
 function projPerformanceBody(p, fk){
   /* Status holds the WORD for a deliverable and the FIGURE for an outcome --
      both are "what was reported" -- and % holds the number the score is built
-     from, for both, so the score column runs down one edge (§101). */
+     from, for both, so the score column runs down one edge (§103). */
   var dxr = dxRows(p).map(function(row, i){
     var o = row.obj, when = dxWhen(row), d = dxIsDeliv(row);
     var notDue = !dueThisCycle(when);
@@ -19115,7 +19272,7 @@ function projPlanBody(p, fk){
     return on ? ' class="sortable" data-item="tr" data-kind="' + kind +
       '" data-fk="' + esc(fk) + '" data-pid="' + esc(p.id) + '"' : '';
   };
-  /* ONE ROW SHAPE (§101). A deliverable's direction and target are written
+  /* ONE ROW SHAPE (§103). A deliverable's direction and target are written
      for it; only its due date is its own to choose. An outcome carries all
      three. Every cell answered, and no band to keep two halves aligned. */
   var dxr = dxRows(p).map(function(row, i){
@@ -19169,8 +19326,7 @@ function projPlanBody(p, fk){
     : pillarBand(projCode(fk, p), p.name,
         (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
         '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>');
-  return band +
-    (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '') +
+  return band + paneActs("plan", "u_plan") +
 
     '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' +
       (ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; }) : esc(p.brief)) + '</p>' +
@@ -19190,7 +19346,7 @@ function projPlanBody(p, fk){
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
     '<h4 class="mini">Milestones <em>\u2014 the timeline as planned</em></h4>' +
-    /* NAME, THEN DESCRIPTION (§100). Islam: "we need the milestone name before
+    /* NAME, THEN DESCRIPTION (§102). Islam: "we need the milestone name before
        the description." So the pair stays -- a milestone is identified by a
        short name and explained by a line under it -- and only the LABEL
        changes: "What it covers" was a question, "Description" is the word the
@@ -19265,7 +19421,7 @@ function capEntryBox(x, unit, may, label){
     '" placeholder="\u2014" aria-label="Report ' + esc(label) + '">' +
     (unit ? '<span class="unitsuf">' + esc(unit) + '</span>' : '') + '</span>';
 }
-/* THE PER-CENT AN IN-PROGRESS ROW REQUIRES (§101). Its own field rather than
+/* THE PER-CENT AN IN-PROGRESS ROW REQUIRES (§103). Its own field rather than
    capEntryBox's, because that one writes `actual` -- the outcome's figure --
    and this writes `pct`. One box, two meanings, would be exactly the fault
    this whole section removed from the tables. */
@@ -19296,7 +19452,7 @@ function projReportBody(p, may, fk){
   var r = projReported(p);
   /* THE PANE SOMEBODY FILLS IN UNDER TIME PRESSURE, and the widest table in
      the product at eight columns -- the honest cost of one row shape carrying
-     Type, Due date, Target, Status, % and Note (§101).
+     Type, Due date, Target, Status, % and Note (§103).
 
      A deliverable PICKS a status and the per-cent follows: 100 for Delivered,
      0 for Not started, a box only for In progress, which is the whole of "in
@@ -19305,7 +19461,7 @@ function projReportBody(p, may, fk){
 
      A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting
      there as an empty box somebody forgot -- but THE CONTROL IS STILL THERE,
-     because anyone who wants to report early may (§101.8). That sentence was
+     because anyone who wants to report early may (§103.8). That sentence was
      written here first and the code under it did the opposite for a version:
      it replaced the picker with the word, so the one act the sentence
      promised was the one act the pane refused. The word now sits where the
@@ -19401,7 +19557,7 @@ function renderFnReport(fnKey){
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;
-  /* ── A FUNCTION SUBMITS, AND IT ALWAYS COULD (§102) ──────────────────
+  /* ── A FUNCTION SUBMITS, AND IT ALWAYS COULD (§104) ──────────────────
      Every other half of this was already built: `canSpeakFor()` answers for an
      `fn:` target, `CURRENT_REPORT_KEY` is already that string,
      `reportSectionState()` already draws the Submitted badge from it, and
@@ -19636,8 +19792,7 @@ function unitPlanBody(it, u, railed){
         (meta ? '<div class="pmeta">' + meta + '</div>' : '') + '</div>' +
         kindPill(it) +
         (mayEditPlan() ? penBtn("plan", "u_plan") : '') + '</div>'
-    : pillarBand(code, it.name) +
-      (mayEditPlan() ? '<div class="paneact">' + penBtn("plan", "u_plan") + '</div>' : '');
+    : pillarBand(code, it.name) + paneActs("plan", "u_plan");
   return head +
     /* NO NOTE UNDER THE PILLAR (Islam, 2026-08-22: "there is a statement under
        the title of the direction in the mobile, generally standardize the view
@@ -23758,7 +23913,7 @@ function renderArchives(){
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
 /* "1 need notes" was on the unit half for as long as it has existed and went
-   unnoticed while it was rare; §102 put it on seven more rows and it stopped
+   unnoticed while it was rare; §104 put it on seven more rows and it stopped
    being rare. ONE function, because the two halves saying it differently is
    the fault this board was just built to avoid (§53.5). */
 function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
@@ -23791,7 +23946,7 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§102) ────────────────────
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§104) ────────────────────
      A submission the SMO cannot see anywhere is half a feature. They go in the
      SAME table rather than a second one, because "who has reported" is one
      question -- but a function's three counts are its own vocabulary (key
@@ -23810,7 +23965,7 @@ function renderCycle(){
     var who = personName(f.custodian) || personName(f.head) || "\u2014";
     var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
     var miss = fnMissingNotes(fk).length;
-    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§102.2).
+    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§104.2).
        The first drawing gave the function half its own column strip and it
        COLLIDED: the strip's widths come from the table's own <thead> -- a
        unit's words -- and "DELIVERABLES" alone is wider than the Measures
@@ -25726,7 +25881,7 @@ function deckSlidesFn(fk){
 
       /* NO OWNER AND NO DUE (§53.4). The project has an owner and an end date;
          a deliverable was carrying a second, quieter answer to both. */
-      /* ONE SLIDE, ONE ROW SHAPE (§101). Two slides made sense while a
+      /* ONE SLIDE, ONE ROW SHAPE (§103). Two slides made sense while a
          deliverable and an outcome answered different questions; they answer
          the same ones now, so a projector showing them apart would be showing
          a distinction the product no longer draws. */
@@ -27222,6 +27377,17 @@ var CHAT = (function(){
      minutes is plenty: at 60s a single tab left open overnight was eight
      hundred requests for nothing (§98.1). */
   var POLL_SHUT = 180000;
+  /* AND A THIRD CADENCE, FOR THE ONE STATE THAT NEEDS IT (§99). Somebody who
+     has asked something and not been answered is WAITING — they are the only
+     person for whom a badge arriving three minutes late is a badge arriving
+     too late. 180s is right for a corner nobody is expecting anything from
+     and wrong for that person, so while their conversation is outstanding the
+     shut panel asks every 15 seconds instead.
+
+     It costs nothing in the ordinary case, which is the whole point: it is on
+     only between asking and being answered, and it goes back to 180s the
+     moment the office replies. */
+  var POLL_WAIT = 15000;
   var PIC_EDGE = 1600;
 
   /* What the server last told us the office has set. Started from the shared
@@ -27267,50 +27433,16 @@ var CHAT = (function(){
       .catch(function(e){ done(String((e && e.message) || e), null); });
   }
 
-  /* ── WHERE SOMEBODY IS, CAPTURED AND NOT TYPED (§71's rule) ─────────────
-     The page, the subject and the cycle are things the screen already knows.
-     Asking for them is asking a person to do the computer's job, and they get
-     it wrong more often than the machine does.
+  /* WHERE SOMEBODY WAS USED TO BE CAPTURED AND SENT WITH EVERY MESSAGE — the
+     page, the subject, the cycle and the build, drawn under the sender's own
+     words (§97.4). Islam, looking at it on a real message: *"the line in front
+     of the chat shouldn't be there"*, and, asked how far it should go, chose
+     GONE EVERYWHERE rather than merely hidden from the sender.
 
-     Read defensively from the shell's globals: this file is inlined before
-     them and a boot that failed half way must not take the chat down with it —
-     "I cannot open anything" is exactly when somebody needs to write in. */
-  /* READ OFF THE NAVIGATION ITSELF, in the words it is wearing. Not from
-     `currentSub`, which is a KEY — that put "the group › performance" on a
-     message where the screen said "Group › Performance". The register learned
-     this one already (§93.12): what somebody is told they were looking at has
-     to be what the navigation called it, and the only way that cannot drift is
-     to take the string from the navigation. */
-  function navWord(sel){
-    var b = document.querySelector(sel);
-    if (!b) return "";
-    var c = b.cloneNode(true);
-    /* Three things inside a navigation control that are not its NAME: the
-       visually-hidden status on a tab ("— not submitted yet"), the caret on a
-       dropdown, and the count under a menu item. */
-    Array.prototype.forEach.call(c.querySelectorAll(".vh, .dlcar, .dlsub"),
-                                 function(n){ n.remove(); });
-    return c.textContent.replace(/\s+/g, " ").trim();
-  }
-  function whereNow(){
-    var out = { page:"", target:"", cycle:"", build:"" };
-    try {
-      if (typeof current !== "undefined") out.target = String(current || "");
-      out.page = [
-        /* NOT `#units button` — the group and the companies sit in a DROPDOWN
-           whose <summary> carries the selection, so asking only for buttons
-           leaves every group page with no destination on it and slides the
-           tab's name into first position. §94.6's trap, which cost that
-           section a wrong landing page for the same reason. */
-        navWord('#units [aria-selected="true"]'),
-        navWord('#subtabs button[aria-selected="true"]') || navWord(".setuprail .ritem.on"),
-        navWord('#secrow-in button[aria-selected="true"]')
-      ].filter(Boolean).join(" › ");
-      if (typeof REVIEW !== "undefined" && REVIEW && REVIEW.name) out.cycle = String(REVIEW.name);
-      if (typeof BUILD_ID !== "undefined" && BUILD_ID) out.build = String(BUILD_ID);
-    } catch (e) {}
-    return out;
-  }
+     So `whereNow()` and `navWord()` are gone with it, and §24's rule is why
+     they are gone rather than left unused: a helper nobody calls is one the
+     next person reads as load-bearing. `BUILD_ID` and the build-time stamp
+     that produced it go too — they existed for this line and nothing else. */
 
   function when(at){
     var d = new Date(at), now = new Date();
@@ -27341,10 +27473,6 @@ var CHAT = (function(){
     return d + (d === 1 ? " day ago" : " days ago");
   }
 
-  var ICON_PAGE =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
-    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></svg>';
   var ICON_CLOCK =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
     'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -27359,11 +27487,6 @@ var CHAT = (function(){
     var mine = mineIsOffice ? m.from_office : !m.from_office;
     var who = m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
                             : (mineIsOffice ? (m.by_name || "") : "You");
-    var ctx = "";
-    if (!m.from_office && (m.page || m.cycle)) {
-      ctx = '<div class="chctx">' + ICON_PAGE + " " +
-            esc2([m.page, m.cycle, m.build].filter(Boolean).join(" · ")) + "</div>";
-    }
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
         '<span class="chthumb"></span> Screenshot — open</button>'
@@ -27381,7 +27504,7 @@ var CHAT = (function(){
     return '<div class="chmsg ' + (mine ? "chme" : "chthem") + '">' +
       '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
       flag + "</div>" +
-      '<div class="chbod">' + esc2(m.body) + pic + "</div>" + ctx + "</div>";
+      '<div class="chbod">' + esc2(m.body) + pic + "</div></div>";
   }
 
   function threadHtml(msgs, mineIsOffice, showFlag){
@@ -27403,7 +27526,15 @@ var CHAT = (function(){
         '<div class="chathead">' +
           "<div><div class=\"cht\">Strategy Office</div>" +
           '<div class="chs" id="chatsub"></div></div>' +
-          '<button class="chx" id="chatclose" type="button" aria-label="Close">&times;</button>' +
+          /* A MINUS, NOT A CROSS (Islam: "it need to be a minimize button as
+             there is no closing actually"). Nothing is closed by pressing it —
+             the conversation is permanent, one per person, and it is the same
+             one next time. A × promises an end to something that has none, and
+             on a chat it reads as "discard this". */
+          '<button class="chx" id="chatclose" type="button" title="Minimise" ' +
+            'aria-label="Minimise this conversation">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+            'stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>' +
         "</div>" +
         '<div class="chatbody" id="chatbody"></div>' +
         '<div class="chatfoot">' +
@@ -27419,7 +27550,7 @@ var CHAT = (function(){
               'aria-label="Your message"></textarea>' +
             '<button class="chsend" id="chatsend" type="button">Send</button>' +
           "</div>" +
-          '<div class="chnote" id="chatnote">The page you are on is sent with your message.</div>' +
+          '<div class="chnote" id="chatnote"></div>' +
         "</div>" +
       "</div>" +
       '<button class="chatbtn" id="chatbtn" type="button" aria-label="Message the Strategy Office">' +
@@ -27474,9 +27605,13 @@ var CHAT = (function(){
     var note = el("chatnote");
     if (note) {
       note.className = "chnote" + (lastErr ? " bad" : "");
+      /* EMPTY WHEN THERE IS NOTHING TO SAY. It used to carry "the page you are
+         on is sent with your message", which stopped being true the moment
+         that stopped happening — and a sentence that is merely stale is worse
+         than no sentence, because somebody believes it. */
       note.textContent = lastErr ? lastErr
         : shot ? "A screenshot is attached. It is sent with your next message."
-        : "The page you are on is sent with your message.";
+        : "";
     }
   }
 
@@ -27484,6 +27619,19 @@ var CHAT = (function(){
     if (!servable()) return;
     post({ action:"mine" }, function(err, j){
       if (!err && j) {
+        /* ASKED BEFORE ANYTHING IS OVERWRITTEN, and the first version of this
+           got it wrong in the quietest possible way: it compared the new count
+           against `state.unread` three lines AFTER assigning the new count to
+           `state.unread`, so the two were always equal and a reply could never
+           announce itself. It read correctly and could not fire. Found by the
+           check, which is the only thing that would have.
+
+           "A reply just landed" is the only moment there is anything to
+           announce — a badge that was already there must not re-announce
+           itself every four seconds. */
+        var arrived = loaded && (j.unread || 0) > state.unread;
+        var wasWaiting = expecting();
+
         state.messages = j.messages || [];
         state.unread = j.unread || 0;
         state.thread = j.thread || null;
@@ -27505,6 +27653,10 @@ var CHAT = (function(){
         if (dock) dock.hidden = !cfg.on;
         if (!cfg.on && open) setOpen(false);
         drawPanel();
+        if (arrived && !open) announce();
+        /* The clock changes with the state, not only with the panel: somebody
+           who has just been answered stops expecting and goes back to 180s. */
+        if (wasWaiting !== expecting()) beat();
         /* Opened, and something new arrived while it was open — read it. */
         if (open && state.unread > 0) post({ action:"seen" }, function(){ state.unread = 0; });
       } else if (j && (j.__status === 401 || j.__status === 403)) {
@@ -27517,6 +27669,10 @@ var CHAT = (function(){
     });
   }
 
+  /* Waiting on the office, or holding a reply nobody has read yet. */
+  function expecting(){
+    return !!(state.unread > 0 || (state.thread && state.thread.waiting));
+  }
   function stop(){ if (timer) { clearInterval(timer); timer = null; } }
   function beat(){
     stop();
@@ -27527,12 +27683,33 @@ var CHAT = (function(){
        starts it again, and the poll it fires on the way back is what makes
        the badge right before anybody has looked at it. */
     if (document.hidden) return;
-    timer = setInterval(poll, open ? (cfg.beat || 4000) : POLL_SHUT);
+    timer = setInterval(poll, open ? (cfg.beat || 4000) : (expecting() ? POLL_WAIT : POLL_SHUT));
+  }
+
+  /* ONE SHOT, AND THE CLASS IS TAKEN OFF AGAIN so the next reply can announce
+     itself too. Everything about it is in CSS, including the respect for
+     `prefers-reduced-motion` — a corner that jumps at somebody who has asked
+     not to be jumped at is worse than a silent badge. */
+  function announce(){
+    var b = el("chatbtn");
+    if (!b) return;
+    b.classList.remove("chring");
+    void b.offsetWidth;              /* restart the animation, not queue it */
+    b.classList.add("chring");
+    setTimeout(function(){ b.classList.remove("chring"); }, 2600);
   }
 
   function setOpen(v){
     open = !!v;
     var p = el("chatpanel"); if (p) p.hidden = !open;
+    /* THE BUBBLE IS NOT DRAWN WHILE THE PANEL IS OPEN (§100.4). It used to sit
+       underneath, which pushed the panel 60px off the bottom of the window and
+       left a control on screen whose only job is to open what is already open.
+       Hiding it puts the panel where the bubble was — at the bottom, which is
+       where somebody just clicked. A class, so the rule is one line of CSS and
+       the mobile layout inherits it. */
+    var dock = el("chatdock");
+    if (dock) dock.classList.toggle("chopen", open);
     if (open) {
       drawPanel();
       var body = el("chatbody"); if (body) body.scrollTop = body.scrollHeight;
@@ -27550,9 +27727,7 @@ var CHAT = (function(){
     if (!text && !shot) return;
     sending = true; lastErr = "";
     var btn = el("chatsend"); if (btn) btn.disabled = true;
-    var w = whereNow();
-    post({ action:"say", body:text, shot:shot, page:w.page, target:w.target,
-           cycle:w.cycle, build:w.build }, function(err, j){
+    post({ action:"say", body:text, shot:shot }, function(err, j){
       sending = false;
       if (btn) btn.disabled = false;
       if (err) {
@@ -27621,6 +27796,32 @@ var CHAT = (function(){
        matters — `focus` alone does not fire when a background tab is brought
        forward in some browsers, and it is the hidden case the clock stops
        for (§98.1). */
+    /* ── CLICKING AWAY MINIMISES IT (§100.4) ────────────────────────
+       Islam: "if I click outside the box minimize it please." Nothing is lost
+       by it — the panel is hidden rather than rebuilt, so a half-typed message
+       is still in the box when it comes back, which is what makes dismissing
+       it this cheaply safe.
+
+       CAPTURE PHASE, so a control that stops propagation cannot leave the
+       panel open behind whatever it just did; `pointerdown` rather than
+       `click`, so it goes away as the press lands rather than on release.
+
+       TWO THINGS ARE NOT "OUTSIDE": the dock itself, and an open modal — a
+       screenshot opened FROM the panel renders into the platform's own overlay,
+       and closing the panel behind it would be dismissing the thing you are
+       standing in. */
+    document.addEventListener("pointerdown", function(e){
+      if (!open) return;
+      var t = e.target;
+      if (t && t.closest && t.closest("#chatdock")) return;
+      if (document.querySelector(".overlay.on")) return;
+      setOpen(false);
+    }, true);
+    /* Escape, from anywhere — it was only wired inside the composer, so it did
+       nothing once the focus had moved to the attach button or a message. */
+    document.addEventListener("keydown", function(e){
+      if (open && e.key === "Escape") setOpen(false);
+    });
     window.addEventListener("focus", function(){ if (mounted && !document.hidden) poll(); });
     document.addEventListener("visibilitychange", function(){
       if (!mounted) return;
@@ -28015,6 +28216,19 @@ var CHAT = (function(){
     });
   }
 
+  /* WHERE THE BOX STARTS, so CSS can make it end at the bottom of the window
+     (§100.5). Its DOCUMENT offset, not its position on screen — that one moves
+     with every scroll and would resize the box as you scrolled it. Nothing
+     above the box moves when the box changes height, so there is no loop here:
+     §28.3's warning is about a max-height fed by a measurement the height
+     itself changes, and this is not one. */
+  function fitInbox(){
+    var root = el("chinbox");
+    if (!root) return;
+    var top = root.getBoundingClientRect().top + (window.pageYOffset || 0);
+    root.style.setProperty("--chin-top", Math.round(top) + "px");
+  }
+
   function wireInbox(){
     wireSettings();
     var root = el("chinbox");
@@ -28086,6 +28300,12 @@ var CHAT = (function(){
     var find = el("chqfind");
     if (find) find.addEventListener("input", function(){ box.q = this.value; drawQueue(); });
 
+    fitInbox();
+    /* Re-measured on resize, because the chrome's rows wrap at narrow widths
+       and the box's top moves with them. Bound once, on the container that is
+       torn down with the page — `boxBeat()` already stops when #chinbox is
+       gone, and this asks the same question. */
+    window.addEventListener("resize", function(){ if (el("chinbox")) fitInbox(); });
     drawQueue();
     drawThread();
     boxLoadQueue(function(){
@@ -28771,11 +28991,6 @@ var SYNC = (function () {
 
 </script>
 <script>
-/* WHICH BUILD THIS IS, stamped by build.py out of sw.js's SHELL constant —
-   the one string that is guaranteed to change whenever the built file's bytes
-   do (§91). A chat message carries it, so "it showed 4.2 on my screen" can be
-   answered without asking anybody which version they were looking at. */
-var BUILD_ID = "smp-shell-v3.27-tables";
 
 /* Two drawn glyphs used to sit at the right of the row — a gear for Setup and
    a stacked list for Manage. They were replaced in 2.9 by one worded button
@@ -30371,7 +30586,7 @@ var BUILD_ID = "smp-shell-v3.27-tables";
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
-    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§101): both
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§103): both
        write `status`, and leaving In progress CLEARS the per-cent rather than
        leaving it stranded under a word that no longer wants one. A stale 35%
        sitting behind "Delivered" is a number nobody can see and the score
@@ -30680,7 +30895,7 @@ var BUILD_ID = "smp-shell-v3.27-tables";
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
-    /* ONE HANDLER FOR BOTH SUBMITS (§102). The attribute carries the TARGET --
+    /* ONE HANDLER FOR BOTH SUBMITS (§104). The attribute carries the TARGET --
        a unit key, or `fn:<key>` for a supporting function -- which is the same
        string `REVIEW.submitted` is keyed by and the same one the server
        authorises. It read `UNITS[...]` before, so wiring a function's button to

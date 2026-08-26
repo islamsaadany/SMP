@@ -82,8 +82,7 @@ async function signIn(who, password) {
     if (!smo.ok || !her.ok) throw new Error("cannot continue without both sessions");
 
     console.log("\nANYBODY SIGNED IN MAY WRITE — that is the whole point (§71).");
-    let r = await call(her.cookie, { action: "say", body: "The Care figure looks wrong to me.",
-                                     page: "Care › Performance", cycle: "H1 2026" });
+    let r = await call(her.cookie, { action: "say", body: "The Care figure looks wrong to me." });
     ok(r.status === 200 && r.body.ok, "somebody with no role can write to the office");
     ok(r.body.messages && r.body.messages.length === 1, "and it comes straight back in their thread");
 

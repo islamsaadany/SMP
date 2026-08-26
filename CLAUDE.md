@@ -1030,7 +1030,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   label off the page and compares the two halves to each other (§53.5) —
   *a check written against the problem survives somebody changing their mind
   about the wording.*
-  **NOT DUE IS A LABEL, NOT A LOCK (§101.8):** the comment over the reporting
+  **NOT DUE IS A LABEL, NOT A LOCK (§103.8):** the comment over the reporting
   pane said exactly that from the day it was written and the code under it did
   the opposite — `if (notDue)` **replaced** the picker with the words *Not
   asked*, so reporting early (asked for outright: *"they can report on it
@@ -1052,7 +1052,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   own assertion, that **Status and % must agree about whether a row was
   answered**. Deliberately not widened: the unit's tactic table has the
   identical lock and is untouched.
-  **THE SCORE COLUMN SAYS WHAT IT HOLDS, NOT WHAT IT IS MEASURED IN (§101.9):**
+  **THE SCORE COLUMN SAYS WHAT IT HOLDS, NOT WHAT IT IS MEASURED IN (§103.9):**
   `%` is a unit, not a name — it says what the cell is measured in and nothing
   about what it measures, on the one column somebody runs their eye down. It is
   **Performance** on the deliverables and outcomes (*how well*, the word the
@@ -1068,10 +1068,10 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   both tables would pass. Measured at 1920/1500/1280/1000 (§27.1) and in the
   deck **in present mode**, the only place a slide has a width at all (§69): no
   header wraps, nothing scrolls. **Flagged, not changed**: the deck still
-  carries a **Due date** column the three panes lost in §101.8 — the ask named
+  carries a **Due date** column the three panes lost in §103.8 — the ask named
   the tables and the templates, and a column on a projector that is absent in
   the product is a decision, not a tidy-up.
-  **AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§101.10):** the box opened and
+  **AN IN PROGRESS WITH NO NUMBER IS NOT NOUGHT (§103.10):** the box opened and
   nothing else did — nothing said the number was owed, and `statusReads()`
   returned **0** for a wip with no per-cent, so the average COUNTED it: project
   performance 63 → 50 and Execution 49 → 41 **the instant the dropdown
@@ -1088,7 +1088,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   must agree about one row are how *given* and *reads* drift apart.
   **`capExec()` KEEPS ITS `|| 0` ON PURPOSE** — a milestone nobody has TOUCHED
   is Not started and nought is what it is; only one halfway through a sentence
-  leaves. **THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED**: §101's
+  leaves. **THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED**: §103's
   "nobody's score moves" fixture stripped per-cents and left the statuses,
   which stopped modelling the old formula the moment this landed — it went red
   on all eight capabilities and would have called a deliberate decision a
@@ -1096,7 +1096,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   asserted separately** (all 18 In progress milestones in the demo carry a
   number, so `pending` is 0 and no existing figure moved).
   **A SUPPORTING FUNCTION SUBMITS, AND EVERYTHING BUT THE BUTTON WAS ALREADY
-  BUILT (§102):** `canSpeakFor()`, `CURRENT_REPORT_KEY`, `reportSectionState()`,
+  BUILT (§104):** `canSpeakFor()`, `CURRENT_REPORT_KEY`, `reportSectionState()`,
   `reportPending()` and **`lib/authorize.js`'s `reportState` case** all carried
   an explicit `fn:` branch — **§71's fault exactly**, the back half built and
   the control never drawn, which is why the dot had been telling a function
@@ -1110,11 +1110,11 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   submitted `undefined` and reported nothing in the way. Two rules stop it: a
   figure at risk with no note (the unit's, with `rowReads()` teaching
   `needsNote()` to read a deliverable and a milestone) and a row that said In
-  progress and never said how far (§101.10). **Measured before building: every
+  progress and never said how far (§103.10). **Measured before building: every
   function is blocked by the note rule today, and so is every unit but
   Nigeria** — the demo behaves identically on both sides, which is the evidence
   the generalisation is faithful rather than over-strict.
-  **THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§102.2):** the board's
+  **THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§104.2):** the board's
   function half first got its own column strip and it **collided** — a strip's
   widths come from the table's own `<thead>`, and `DELIVERABLES` alone is wider
   than the Measures column at every width from 1920 down. Wrapping cannot save
@@ -1131,12 +1131,12 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `test-authorize.js` had no `fn:` submission test at all, because there was no
   control, so no test had a reason to exist — it asks BOTH ends now, or the
   branch could accept anybody and the first assertion would still print ok.
-  **AND "1 NEED NOTES" HAD BEEN WRONG SINCE THE COLUMN EXISTED (§102.4)** —
+  **AND "1 NEED NOTES" HAD BEEN WRONG SINCE THE COLUMN EXISTED (§104.4)** —
   unnoticed because it was rare, until the function rows put it on seven more.
   `notesOwed()` is one function: two halves of one board saying it differently
-  is the fault §102.2 was built to avoid. *A defect can hide behind how seldom
+  is the fault §104.2 was built to avoid. *A defect can hide behind how seldom
   it is reached, and adding rows is a way of finding one.*
-  **ASKED FOR AND NOT BUILT — THE REFUSAL (§101.10):** *"refuse the
+  **ASKED FOR AND NOT BUILT — THE REFUSAL (§103.10):** *"refuse the
   submission"* has nothing to attach to: **a capability's Reporting page has no
   Submit button.** One `data-submit` exists in the whole platform and it is on
   a UNIT; a function's reporting bar carries the tally and *Save draft* and
@@ -1145,20 +1145,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   there is no control that would clear it — §69's own rule broken by the thing
   that wrote it. A function's Submit is a feature, not a fix, and what it means
   (one per function, or one per capability) is a decision. **ANSWERED THE
-  SAME DAY, in §102 above:** one per function, and the server had been ready
+  SAME DAY, in §104 above:** one per function, and the server had been ready
   for it all along.
-  **WHAT A MERGE DOES TO A PLAN ALREADY UPLOADED (§103):** nothing is deleted —
-  migration 023 is score-preserving by construction and only `deliverables.due`
+  **WHAT A MERGE DOES TO A PLAN ALREADY UPLOADED (§105):** nothing is deleted —
+  migration 024 is score-preserving by construction and only `deliverables.due`
   and `milestones.pct` are new, so every existing row has them empty. **TWO
   THINGS CHANGE, AND THE FIRST IS NOT SMALL.** Measured with every milestone
   per-cent stripped (the shape of a tenant running on `main`), **Execution
   rises 8–27 points on all eight capabilities** — today an In progress
-  milestone reads NOUGHT and §101.10 made it OUTSTANDING, so it leaves the
+  milestone reads NOUGHT and §103.10 made it OUTSTANDING, so it leaves the
   average. Correct, and silent, and *a score that moves for a reason nothing on
   the page states is a score nobody can defend*: the card prints
   **`5 of 12 milestones · 2 not counted yet`**, only when there is one.
   **AND A DUE DATE THAT IS NOT ONE IS FINALLY NOTICED IN A STORED PLAN**
-  (§103.2) — the upload has warned since §100 and **nothing ever looked at the
+  (§105.2) — the upload has warned since §102 and **nothing ever looked at the
   database**, so a tenant that uploaded before that check is told nothing.
   `dueNote()` names the **value AND the row** ("Pending on Solution design"),
   beside `overrunNote()` whose shape it borrows, with the count on the RAIL so
@@ -1167,9 +1167,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   the product already use — a second question would be a second definition of
   "a date". **MILESTONES ONLY**: their date is on that page and the pen edits
   it, so the note points at something fixable; a deliverable's is drawn on no
-  pane since §101.8 and naming a bad one would send somebody after a control
+  pane since §103.8 and naming a bad one would send somebody after a control
   that is not there (§61). **Resolved THERE, never here** — a plan is the
-  client's. **Still not run: migration 023 against a real Postgres.**
+  client's. **Still not run: migration 024 against a real Postgres.**
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:
@@ -1238,6 +1238,18 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   (the server half, against a real Postgres, signing in as somebody with no
   role because a check that only looks for something PRESENT cannot see a shut
   door, §94.2).
+- **THE CORNER MINIMISES, AND A REPLY ANNOUNCES ITSELF (since v3.28, §99):**
+  the panel's control is a **minus labelled Minimise**, not a × — one
+  conversation per person, permanent, so nothing is ever closed. A reply that
+  lands while it is shut gets a **third cadence** (`POLL_WAIT`, 15s) used only
+  while the conversation is waiting or holds an unread, back to 180s the moment
+  it is answered — plus a one-shot ring on the bubble, and nothing under
+  `prefers-reduced-motion`. **§97.4 IS REVERSED**: nothing about where somebody
+  was is captured, sent, stored or drawn — `whereNow()`, `navWord()`,
+  `ICON_PAGE`, `BUILD_ID` and the `sw.js` build stamp are all gone, and
+  **migration 023 drops `page`/`target`/`cycle`/`build`** (§53.4). The
+  composer's footer sentence went with it, because a sentence that is merely
+  stale is worse than none.
 - **THE CHAT HAS A SWITCH, AND POLLING WAS THE REAL COST (since v3.27, §98):**
   five controls in a **Settings dropdown on the Messages page header** (§90's
   shape, never a second Setup page — §32) — on/off, Live/Relaxed, the promise
@@ -1263,6 +1275,57 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **REORDERING IS THE UNIT'S, THE WORDS ARE THE OFFICE'S (since v3.30, §101,
+  reversing §94.3):** `mayArrange()` in `lib/rules.js` is **its own rule, never
+  a hole in `mayAuthorPage()`** — widening the authoring gate to let a custodian
+  reorder would have handed them the words too, which is the fault §94 existed
+  to fix. `ARRANGE_ROLES` is `owner · custodian · fnhead` — **the roles that
+  HOLD the thing** (Islam: *"only custodian and BU owner"*, and of a function's
+  Projects pane, *"same"*, which is its head). A Contributor never; a group or
+  company CEO only if they hold one of those, because **reaching a unit is not
+  holding it** (§37). The grant must still say edit, so this narrows and never
+  widens. **`same(idsOf(a), idsOf(b))` IS AN ORDERED COMPARISON** — that one
+  line is the whole of why §94.3's drags moved on screen and were refused on
+  save — so `reordered()` answers **by SET** (never by sorting, or one list
+  holding an id twice compares equal to another holding it twice in the other
+  order) and an **all-null pair is never a reorder** (§96.4's ID-less group
+  objectives). It classifies as `arrange`; anything else about the list is
+  still `unitPlan`. **THE CONTROL SHARES THE PEN'S SLOT AND NEVER SITS BESIDE
+  ONE** — §94.15's argument holds in the direction that still matters — and
+  `paneActs()` is the ONE builder, because that line was written twice (§53.5).
+  **Islam picked the up-down arrows over the grip mark** that would have matched
+  the handles it turns on: recorded, not re-argued, and the cost is that a
+  generic glyph puts the whole meaning in the `title` and `aria-label`.
+  **Nothing was needed for Performance or Reporting — the order IS the array.**
+  Proved by asking the screen AND the shared rule for five viewers and
+  asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
+  forcing each half false to watch the checks fail (§94.5).
+- **THE CORNER MINIMISES, AND THE INBOX FOLLOWS THE WINDOW (since v3.29,
+  §100.4, §100.5):** **the bubble is not drawn while the panel is open** —
+  it sat underneath in the same dock column, pushing the panel a bubble's height
+  off the bottom of the window, and the fix is CSS off the class the opener
+  already sets, never a second piece of state. **Clicking outside minimises**,
+  on `pointerdown` (a panel that lingers until the mouse comes up reads as
+  having missed the press), and **TWO THINGS ARE NOT "OUTSIDE"**: the dock, and
+  an open modal — a screenshot opened FROM the panel renders into the
+  platform's own overlay, so without that exception looking at the picture you
+  just attached puts the panel away behind it. **Escape is on the DOCUMENT** —
+  it had been wired on the composer alone and did nothing once focus moved to
+  the attach button (present, plausible and silent). **Minimising is never
+  discarding** (§100.2), so the check types half a sentence and reads it back.
+  **`.chinbox` IS `calc(100dvh - --chin-top - 20px)`**, floor 340px, with
+  `min-height:0` on the queue, the thread and the thread's body or a grid/flex
+  child refuses to shrink below its content and pushes the fixed height back in
+  by another road. **NOT §28.3's LOOP, and the difference is the point**:
+  nothing ABOVE the box moves when the box resizes, so the measurement is
+  stable in a way a max-height fed by a height never was (the condense-on-scroll
+  that made the top move went in v3.3). **THE ASSERTION IS THAT IT MOVED**, not
+  that it fitted — every other assertion in `checks/office-chat.py` §8 passes on
+  a tall window with the fixed 593px back in place, which is how this shipped;
+  proved by putting it back and watching §8 fail. **AND THE STUB HAD TO GROW A
+  CONVERSATION**: the office's page had never once been measured with a thread
+  open, and twenty messages rather than three, or a box that CANNOT scroll
+  reports as one that NEED not.
 - **Email (since v3.23, §72; the credential moved in §97.5):** **`lib/mailer.js`
   is the only place `RESEND_API_KEY` is read**, and nothing it returns contains
   it — `api/mail.js` and `api/chat.js` both call it. §72's rule is unchanged;
@@ -1453,7 +1516,100 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **&sect;99: one table, two halves.** It opened
+*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back, as its own
+grant** (&sect;101, reversing &sect;94.3). *"I will give it back &mdash; shall we
+align where to visually have it?"* **EVERY WORD &sect;94.3 WROTE DOWN STAYED
+TRUE**, which is what makes this a reversal rather than a correction: that
+section closed reordering to the office because the order of a plan is as much
+a part of what was agreed as its words, and it found on the way that
+`lib/authorize.js` compares row ids **in order**, so every drag a unit head had
+ever made was already being refused on save &mdash; the rows moved and the save
+came back no. What changes is not that reordering stopped being a plan decision.
+It is that **the plan's ORDER is the unit's to decide while the plan's WORDS
+remain the office's**, and that is why `mayArrange()` is its own rule and not a
+hole in `mayAuthorPage()`: the cheap fix would have handed them the words too,
+which is the exact fault &sect;94 existed to fix. **THE AUTHORISER HAD TO LEARN
+A NEW SHAPE** &mdash; `reordered()` answers by SET, never by sorting, because one
+list holding an id twice would sort-compare equal to another holding it twice in
+the other order, and an all-null pair is never a reorder (&sect;96.4's ID-less
+group objectives). **Islam picked the up-down arrows over the grip mark** that
+would have matched the handles it turns on; recorded and not re-argued, with the
+cost stated: a generic glyph puts the whole meaning into the `title` and the
+`aria-label`. Settled from a mockup made of the REAL platform &mdash; the built
+file driven to a unit's Plan pane with each candidate injected into the live
+pane, both sides the same build (&sect;41.9) &mdash; and two faults on the way
+worth the comments they now carry: **Plan is a SECTION, not a tab**, so clicking
+a tab called "plan" captured Performance under Plan's name (&sect;50.6 again),
+and **`.paneact` does not exist for the people this is for**, so the first run
+produced six identical pictures of an empty corner &mdash; itself the finding,
+since giving them the control means rendering the slot and not merely filling
+it. **AND BOTH FAILURE MODES WERE PROVED TO FAIL BEFORE BEING TRUSTED**: with
+`mayArrange` forced false, 6 failures; with `reordered()` forced false &mdash;
+the &sect;94.3 state exactly &mdash; 5.*
+
+*Earlier: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
+follows the window** (&sect;100.4, &sect;100.5). Two more messages from having
+the thing open, and the first was three asks in one sentence that turned out to
+be one fault seen from three sides. *"If I click outside the box minimise it
+please, and when I open the chat box make it at the bottom and hide the chat
+icon as if it comes above it."* **THE BUBBLE WAS STILL DRAWN UNDER THE OPEN
+PANEL** &mdash; the dock is a column, so with both in it the panel sat 60px plus
+a gap off the bottom of the window, which is exactly what *"make it at the
+bottom"* describes; one CSS rule off the class the opener already sets, because
+a bubble that opens a panel has nothing to say while the panel is open. Clicking
+outside minimises on `pointerdown` rather than `click`, and **two things are not
+"outside"** &mdash; the dock, and an open modal, or looking at the screenshot you
+just attached would put the panel away behind it. **AND ESCAPE HAD NEVER WORKED
+FROM ANYWHERE BUT THE COMPOSER**: present, plausible and silent, which is the
+shape this file keeps recording. Then: *"the chat box requires a scroll up, this
+shouldn't happen."* The office's inbox stood at a **fixed 593px** however tall
+the window was &mdash; 506px of page scroll at 700px, with the reply box and Send
+off the fold, so answering somebody began with hunting for the control. It
+follows the window now, and **this is deliberately not &sect;28.3's feedback
+loop**: nothing ABOVE the box moves when the box resizes, which is what made
+v2.8's max-height oscillate for ever and does not apply here. **THE ASSERTION IS
+THAT THE BOX MOVED, NOT THAT IT FITTED** &mdash; every other assertion in the new
+section 8 passes on a tall window with the fixed height back in place, which is
+precisely how this shipped, so it was proved by putting `height:593px` back and
+watching the check fail. **And the stub had to grow a conversation**: the
+office's page had never once been measured with a thread open, so the inbox drew
+*"Pick somebody on the left"* and there was nothing to look at &mdash;
+&sect;100.3's lesson a second time in the same file, and modelling the server
+includes carrying enough data for the thing under test to be under any strain at
+all.*
+
+*Earlier: 2026-08-25 &mdash; **v3.28: the corner, corrected by using it**
+(&sect;100). Three notes within minutes of the merge going live, each of them
+from having the thing open rather than from reading about it. **&sect;97.4 IS
+REVERSED**: *"the line in front of the chat shouldn't be there"*, and asked
+whether it should be hidden from the sender or gone entirely, Islam chose gone.
+The argument for capturing the page was &sect;71's and it is still a good
+argument in the abstract &mdash; the screen knows where somebody is, so asking
+them is asking them to do the computer's job &mdash; and it did not survive
+being LOOKED AT: on a real message the line is longer than the message and
+repeats under every single thing you send. It is not merely hidden: the two
+helpers, the icon, `BUILD_ID` and the build-time stamp all go, and **migration
+023 drops the four columns** (&sect;53.4 &mdash; a column the platform no longer
+reads is worse than no column). **And the sentence under the composer went with
+it**, because *"the page you are on is sent with your message"* stopped being
+true the moment that stopped happening, and a sentence that is merely stale is
+worse than no sentence. **THE &times; WAS A SMALL LIE**: there is one
+conversation per person and it is permanent, so nothing is ever closed &mdash;
+it is a minus now, labelled Minimise. **AND A REPLY HAS TO ANNOUNCE ITSELF**:
+the count existed but arrived silently and up to three minutes late, because
+&sect;98.1 took the shut panel to 180s. A **third cadence** rather than a
+slower saving &mdash; 15s while the conversation is waiting on the office, back
+to 180s the moment it is answered &mdash; plus a ring that expands out of the
+bubble twice, and nothing at all under `prefers-reduced-motion`. **The bug in
+that could not have been found by reading**: the arriving count was compared
+against `state.unread` three lines AFTER being assigned to it, so the two were
+always equal and a reply could never announce itself. It read correctly and
+could not fire. **And the stub was lying about the server** &mdash; it answered
+`thread: null` where the real endpoint returns `{waiting:true}`, so the client
+behaved correctly and the check called it broken. A stub has to MODEL the
+server, not merely answer it.*
+
+*Earlier: 2026-08-25 &mdash; **&sect;99: one table, two halves.** It opened
 as a question about a column that was there &mdash; *"for the project plans the
 milestones has no due date? or am I confused?"* &mdash; and he was not confused
 about the screen: a milestone has carried `finish` since the capability model

@@ -89,33 +89,6 @@ function omit(o, fields) {
   return out;
 }
 function idsOf(list) { return (list || []).map(function (x) { return x && x.id; }); }
-
-/* THE SAME ROWS IN A DIFFERENT ORDER IS NOT THE SAME CHANGE AS DIFFERENT ROWS
-   (§101). Both fail `same(idsOf(a), idsOf(b))`, because that comparison is
-   ordered — which is exactly why every drag a unit head made was classified as
-   authoring the plan and refused on save, silently, while the rows moved on
-   screen (§94.3 recorded it; this is the other half of giving it back).
-
-   Answered by SET rather than by sorting the two arrays and comparing: a list
-   that somehow held the same id twice would sort-compare equal to a list that
-   held it twice in the other order, and a reorder is the one classification
-   where a duplicate id must NOT be waved through. Null ids are the group's six
-   objectives, which have never had them (§96.4) — an all-null pair cannot be
-   told apart, so it is never called a reorder. */
-function reordered(sList, iList) {
-  const a = idsOf(sList), b = idsOf(iList);
-  if (a.length !== b.length || a.length === 0) return false;
-  if (a.every(function (x) { return x == null; })) return false;
-  if (same(a, b)) return false;                       /* nothing moved */
-  const count = {};
-  a.forEach(function (x) { count[String(x)] = (count[String(x)] || 0) + 1; });
-  for (let i = 0; i < b.length; i++) {
-    const k = String(b[i]);
-    if (!count[k]) return false;                      /* a row arrived or left */
-    count[k]--;
-  }
-  return true;
-}
 function byId(list) {
   const m = {};
   (list || []).forEach(function (x) { if (x && x.id !== undefined) m[x.id] = x; });
@@ -311,11 +284,8 @@ function uniq(a) {
 /* A list of rows with ids, split into what is reporting and what is plan.
    A change to WHICH rows exist is always plan: adding or removing a measure
    is authoring, not reporting. */
-function splitRows(sList, iList, fields, onReport, onPlan, onArrange) {
-  if (!same(idsOf(sList), idsOf(iList))) {
-    if (onArrange && reordered(sList, iList)) { onArrange(); return; }
-    onPlan(); return;
-  }
+function splitRows(sList, iList, fields, onReport, onPlan) {
+  if (!same(idsOf(sList), idsOf(iList))) { onPlan(); return; }
   const sm = byId(sList), im = byId(iList);
   const moved = [];
   let planMoved = false;
@@ -403,13 +373,11 @@ function collectUnit(key, su, iu, add, w) {
     function () {});
   splitRows(su.keyObjectives, iu.keyObjectives, REPORT.unitKO.concat(SRC),
     function () {},
-    function () { add("unitPlan", key, "the unit's key objectives"); },
-    function () { add("arrange", key, "the order of the unit's key objectives"); });
+    function () { add("unitPlan", key, "the unit's key objectives"); });
 
   /* Pillars, and the measures and tactics under them. */
   if (!same(idsOf(su.items), idsOf(iu.items))) {
-    if (reordered(su.items, iu.items)) add("arrange", key, "the order of the unit's pillars");
-    else add("unitPlan", key, "the unit's pillars");
+    add("unitPlan", key, "the unit's pillars");
   } else {
     const sm = byId(su.items), im = byId(iu.items);
     const moved = [];
@@ -668,16 +636,6 @@ function authorize(stored, incoming, person) {
       case "unitPlan":
         if (!R.mayAuthorPage(w, person, "u_plan", ch.target))
           no("A plan is corrected by the SMO — " + ch.what + where + " cannot be changed here.");
-        return;
-
-      /* REORDERING IS ITS OWN GRANT AGAIN (§101). Asked through the shared
-         rule, never re-derived here — a screen that offers a handle the server
-         then refuses is the drift this file exists to prevent, and it is
-         exactly what happened for the two versions §94.3 was in force. */
-      case "arrange":
-        if (!R.mayArrange(w, person, ch.target))
-          no("Reordering " + ch.what + where + " is the unit's own to do — " +
-             "this sign-in does not hold it.");
         return;
 
       case "unitReporting":

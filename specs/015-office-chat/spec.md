@@ -241,3 +241,56 @@ first (§61).
 **The two real hosting limits are a licence and a database, not a quota:**
 Vercel's Hobby plan is not licensed for commercial use, and Neon's free compute
 never autosuspends while anything polls.
+
+
+---
+
+## 9 · Corrected by using it (v3.28, §100)
+
+Three notes within minutes of v3.26 reaching production.
+
+**§2.3 IS REVERSED.** *"The line in front of the chat shouldn't be there"* —
+and, asked whether it should be hidden from the sender or gone entirely, Islam
+chose gone. Nothing about where somebody was is captured, sent, stored or
+drawn. `whereNow()`, `navWord()`, `ICON_PAGE`, `BUILD_ID` and the build-time
+stamp are deleted; **migration 023 drops `page`, `target`, `cycle` and
+`build`**, and 022 stops creating them.
+
+§2.4 goes with it — the build id existed only to feed that line.
+
+**The composer's footer sentence went too.** It promised the page was sent;
+that stopped being true, and a sentence that is merely stale is worse than no
+sentence.
+
+**The × is a minus, labelled Minimise.** There is one conversation per person
+and it is permanent (§2.1), so nothing is ever closed — a × promises an end to
+something that has none.
+
+**A reply announces itself.** The unread count existed but arrived silently and
+up to three minutes late, because §8 took the shut panel's beat to 180s. A
+third cadence — 15s while the conversation is waiting on the office or holds an
+unread, back to 180s once answered — plus a one-shot ring on the bubble, and
+nothing at all under `prefers-reduced-motion`.
+
+**Clicking outside minimises it**, on `pointerdown`, with two exceptions that
+are not "outside": the dock itself, and an open modal (a screenshot opened from
+the panel renders into the platform's overlay). **Escape works from anywhere**
+now — it had been wired on the composer alone, so it did nothing once focus
+moved. **The bubble is not drawn while the panel is open**, which is what puts
+the panel's bottom edge on the window's rather than a bubble's height above it.
+A half-typed message survives all three.
+
+**The office's box fits the screen.** `.chinbox` stood at a fixed 593px, so on a
+short window the reply box and Send fell below the fold — measured at 506px of
+page scroll at 700px tall. It is `calc(100dvh - --chin-top - 20px)` now, with a
+340px floor, and `min-height: 0` on the queue, the thread and the thread's body
+so the scrolling moves inside the two panes instead of onto the page. This is
+not §28.3's feedback loop: nothing above the box moves when the box resizes.
+
+**§7 gains section 8**, sweeping four window heights and asserting the
+relationship — Send inside the window, each pane scrolling in its own box, and
+the box's height *moving with the window*. That last assertion is the one that
+matters: everything else passes on a tall window with the fixed height back in,
+which is how this shipped. The stub now carries a queue and a twenty-message
+thread, because the office's page had never once been measured with a
+conversation open.

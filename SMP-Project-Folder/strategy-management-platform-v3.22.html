@@ -12416,6 +12416,33 @@ function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projec
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
 
+/* A STORED LIST NEVER HOLDS A HOLE (§114). A pillars function's plan rides in
+   one JSON blob (functions.extra), and JSON writes an array hole or an
+   undefined entry as null — which is how one poisoned reorder commit left a
+   null inside a tactics list and the CF page threw on every visit from the
+   next hydration on, while the click looked like it did nothing. The commit
+   is fixed in arrange.js; this heals what a tenant already saved. It only
+   REMOVES — a reader must never create the field it was looking for (§50.6) —
+   and the next autosave persists the clean lists, so the poison does not
+   outlive one visit. Units need none of this: their plans are stored
+   row-by-row and a null cannot survive that road. */
+function fnPruneNulls(f){
+  if (!f) return f;
+  var live = function(x){ return x != null; };
+  if (Array.isArray(f.items)) {
+    f.items = f.items.filter(live);
+    f.items.forEach(function(p){
+      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
+      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
+    });
+  }
+  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
+  if (f.swot) ["s","w","o","t"].forEach(function(k){
+    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
+  });
+  return f;
+}
+
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a
    projects function or a retired one is a pointer at something that cannot
@@ -13645,8 +13672,17 @@ function handle(label){
 function makeSortable(container, itemSel, onCommit){
   var dragging = null;
 
+  /* DATA ROWS ONLY (§114). The plan pane's add row is a <tr> inside the same
+     tbody — undraggable, because it has no grip, and that was mistaken for
+     safe: it was still COUNTED on every commit. A row with no data-oi read as
+     +undefined = NaN, applyOrder pushed arr[NaN] = undefined onto the list,
+     and the autosave's JSON wrote it as null into a pillars function's plan —
+     which is stored as one blob, so the null came back on every hydration and
+     the page threw before it could replace what was on screen. Every real
+     sortable item carries data-oi; anything without one is furniture. */
   function siblings(){
-    return Array.prototype.slice.call(container.querySelectorAll(itemSel));
+    return Array.prototype.slice.call(container.querySelectorAll(itemSel))
+      .filter(function(el){ return el.dataset.oi != null; });
   }
 
   function renumber(){
@@ -13715,8 +13751,24 @@ function makeSortable(container, itemSel, onCommit){
   });
 }
 
-/* Apply a committed order to the underlying array. */
+/* Apply a committed order to the underlying array.
+
+   AND REFUSE ONE THAT DOES NOT ACCOUNT FOR EVERY ROW EXACTLY ONCE (§114).
+   A commit is a permutation of 0..n-1 or it is wrong: an index outside the
+   array pushes undefined (which a save turns into null — the poison that
+   broke the CF function), and a missing or doubled index silently drops or
+   duplicates a row somebody wrote. The backstop keeps the array untouched
+   rather than half-applying: with siblings() fixed above this should never
+   fire, and if it ever does, an unchanged order is the only outcome that
+   loses nothing. */
 function applyOrder(arr, order){
+  if (order.length !== arr.length) return;
+  var seen = {};
+  for (var k = 0; k < order.length; k++) {
+    var i = order[k];
+    if (typeof i !== "number" || !isFinite(i) || i < 0 || i >= arr.length || seen[i]) return;
+    seen[i] = true;
+  }
   var copy = order.map(function(i){ return arr[i]; });
   arr.length = 0;
   copy.forEach(function(x){ arr.push(x); });
@@ -29831,6 +29883,19 @@ var TOUR = (function(){
   function storyFor(person){
     var rs = rolesOf(person), has = {};
     rs.forEach(function(r){ has[r.role] = r; });
+    /* THE OFFICE IS NEVER OFFERED THE TOUR (§114, Islam: "yes stop it to the
+       SMO"). The tour orients a first-time user; the office runs the
+       platform. And the gate has to sit HERE rather than only on the seat
+       role, because the bootstrap SMO also heads the SMO function — fnhead
+       matched below and the "owner" story fired for the one person in the
+       tenant it could not be for, with the dock eating every click while its
+       welcome card waited. isOfficeRole() is the one definition of the
+       office (§89, §97); no second copy of it here. */
+    if (rs.some(function(r){
+      return (typeof SMPRules !== "undefined" && SMPRules.isOfficeRole)
+        ? SMPRules.isOfficeRole(r.role)
+        : (r.role === "super" || r.role === "smoteam");
+    })) return null;
     if (has.custodian) return "custodian";
     if (has.owner || has.fnhead) return "owner";
     return null;
@@ -30606,6 +30671,13 @@ var SYNC = (function () {
     window.UNITS = state.units;
     window.FUNCTION_KEYS = state.functionKeys;
     window.FUNCTIONS = state.functions;
+    /* Heal at the one door stored plans arrive through (§114): a function's
+       plan is a JSON blob, and a blob written while a list held an undefined
+       entry holds a literal null for ever — every visit to that function's
+       pages then dies mid-paint and the tab reads as dead. Remove-only. */
+    if (typeof fnPruneNulls === "function") {
+      (window.FUNCTION_KEYS || []).forEach(function (k) { fnPruneNulls(window.FUNCTIONS[k]); });
+    }
     /* A tenant that predates the company level has neither, and an empty
        company list is a valid answer: every unit is then its own. */
     window.COMPANY_KEYS = state.companyKeys || [];

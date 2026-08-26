@@ -4376,33 +4376,6 @@ function fnFormat(f){ return (f && f.format === "pillars") ? "pillars" : "projec
 function fnPlansInPillars(f){ return fnFormat(f) === "pillars"; }
 function fnItems(f){ return (f && Array.isArray(f.items)) ? f.items : []; }
 
-/* A STORED LIST NEVER HOLDS A HOLE (§114). A pillars function's plan rides in
-   one JSON blob (functions.extra), and JSON writes an array hole or an
-   undefined entry as null — which is how one poisoned reorder commit left a
-   null inside a tactics list and the CF page threw on every visit from the
-   next hydration on, while the click looked like it did nothing. The commit
-   is fixed in arrange.js; this heals what a tenant already saved. It only
-   REMOVES — a reader must never create the field it was looking for (§50.6) —
-   and the next autosave persists the clean lists, so the poison does not
-   outlive one visit. Units need none of this: their plans are stored
-   row-by-row and a null cannot survive that road. */
-function fnPruneNulls(f){
-  if (!f) return f;
-  var live = function(x){ return x != null; };
-  if (Array.isArray(f.items)) {
-    f.items = f.items.filter(live);
-    f.items.forEach(function(p){
-      if (Array.isArray(p.measures)) p.measures = p.measures.filter(live);
-      if (Array.isArray(p.tactics))  p.tactics  = p.tactics.filter(live);
-    });
-  }
-  if (Array.isArray(f.keyObjectives)) f.keyObjectives = f.keyObjectives.filter(live);
-  if (f.swot) ["s","w","o","t"].forEach(function(k){
-    if (Array.isArray(f.swot[k])) f.swot[k] = f.swot[k].filter(live);
-  });
-  return f;
-}
-
 /* WHICH function carries this pillar, if any. Returns null unless the pointer
    names a function that exists, is active AND plans in pillars — a pointer at a
    projects function or a retired one is a pointer at something that cannot

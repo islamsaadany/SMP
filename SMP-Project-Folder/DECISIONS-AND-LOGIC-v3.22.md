@@ -13334,3 +13334,114 @@ as the SMO could not see it being withheld from anybody else (§94.2).
 **The corpus today: 9 sections, 26 page explainers, 43 recipes — ~9,800 words,
 about 13,200 tokens.** Still one prompt, which is the measurement the whole
 design rests on.
+
+---
+
+## 104 · The assistant answers first (v3.31, spec 016 step 2)
+
+Islam, mid-build: *"I will add a Gemini API key"*, and — the sentence that
+settled the shape — *"I need a switch to turn off AI response and just keep it
+to the SMO inbox."*
+
+### 104.1 Off is the default, and off is enforced on the server
+
+**The switch was already the design and now it is the default.** The chat's four
+existing settings ship *on* because they describe a chat that already worked;
+this one describes a capability that did not, so a deployment that upgrades
+gets exactly the chat it had.
+
+`chatCfg()` reads the two new settings **the other way round from the other
+four**: only an explicit `true` turns them on, so a stale or half-written value
+can never switch the assistant on by accident.
+
+**And off means the model is never called**, in `say`, on the server. Not by
+hiding a control — with the assistant off there is nothing on screen to hide,
+so the guard *is* the feature (§42, §44, §98.2: a switch that only hides a
+control is decoration). The check asserts it as a **call count of zero**, not
+as an absent button.
+
+### 104.2 Order is the whole robustness argument
+
+The person's message is **inserted, and the thread is already waiting**, before
+the model is asked. So every way this can fail — no key, a refusal, a timeout,
+a malformed answer, the setting off — lands on exactly the chat as it worked
+before the assistant existed: the words are saved and a person answers them.
+**Nothing a human typed is ever lost to the assistant failing.**
+
+Four failure modes, failing at four different places in the call, each injected
+separately by `scripts/test-assistant.js` — because a build that lost the
+degradation would still pass every happy-path assertion.
+
+### 104.3 The handoff is a flag, never a sentence
+
+If it merely replied *"the office will get back to you"*, the thread would read
+as answered and drop out of the queue — the person told somebody is coming and
+nobody is. So the model returns `{answered, reply, source}` and the platform
+reads the **flag**; the words are shown only when it is true. An `answered`
+with an empty reply is treated as a handoff, checked rather than trusted,
+because that flag is what moves a conversation out of the office's sight.
+
+**And a wrong answer needs a way out**, because §104's spec covers the
+assistant *knowing* it cannot answer and the harder case is it being
+confidently wrong — which, since an answered thread has already left the queue,
+would otherwise be a dead end. Every assistant answer carries *"This didn't
+answer it — send it to the office"*, and it sends an **ordinary message**
+rather than hitting a new endpoint: saying so in words is what puts the thread
+back in the queue, and it leaves the office reading *why* the answer was wrong.
+
+### 104.4 An answer from a machine never wears a colleague's name
+
+Migration 024 adds `bot` and `source` to `chat_messages`. **A column rather
+than a reserved `by_key`** like `"assistant"`, which is a person key that could
+collide with a real person's the day somebody is called that (§87: a name is
+never an identifier).
+
+**`from_office` TRUE and `bot` TRUE.** The assistant answers on the office's
+behalf, so the conversation's shape is unchanged — a message is either the
+person's or the office's — and the mark is a property of *how* the office's
+side was written. The panel signs it *"Assistant · answered from the knowledge
+base"*.
+
+`source` is the section the answer came from, so a person can go and read the
+whole thing and **a wrong answer is traceable to the paragraph that produced
+it**.
+
+### 104.5 Gemini, and the two things that made it a design decision
+
+**No SDK.** The repository carries `pg` and nothing else, and `lib/mailer.js`
+already calls a third-party API over plain HTTP: a dependency is a supply
+chain, and this is one POST. `GEMINI_API_KEY` is read in **exactly one place**
+and nothing the module returns contains it (§72, §97.5).
+
+**The model name is an environment variable.** Provider model names are renamed
+and retired on somebody else's schedule and a rename must not need a deploy —
+so `GEMINI_MODEL` overrides the default, and a rejected name is reported **with
+the name in it**, because "400 Bad Request" sends whoever reads the log to the
+wrong place.
+
+**`GEMINI_ENDPOINT` is a seam, not a test hook.** It is what lets the check
+*model* the provider rather than branch around it (§100.3, where a stub that
+merely answered instead of modelling made a correct client read as broken) —
+and it is the same seam a client behind a corporate proxy would need.
+
+Caching is not assumed: Gemini's explicit context caching has a minimum token
+count the ~13,800-token corpus may sit under, so the cost case is the full
+input per question.
+
+### 104.6 What proves it
+
+**Nothing asserts what the assistant says.** Its wording is not deterministic
+and never will be, so `scripts/test-assistant.js` asserts the **contract**
+(§94.8) — 25 checks: the switch off means zero calls; `answered:true` writes a
+marked message and clears Waiting; `answered:false` writes nothing and leaves
+it Waiting; four failure modes each degrade; the corpus really is sent whole
+with the tenant's own vocabulary and the asker's role; a JSON schema is
+demanded rather than hoped for; and temperature is 0, because this is recall
+rather than composition.
+
+### 104.7 A list of exceptions is a list somebody forgets to add to
+
+`chatSet()` read `key === "promise" ? string : boolean` — so the moment a
+second string setting existed (`rep`), it would have stored `true` for whoever
+was chosen, silently, and the picker would then have shown nobody. **The type
+comes from the default now**, which cannot be forgotten.

@@ -578,7 +578,13 @@ function chatWritable(){
 function chatSet(key, value){
   if (!Object.prototype.hasOwnProperty.call(SMPRules.CHAT_DEFAULTS, key)) return;
   var dflt = SMPRules.CHAT_DEFAULTS[key];
-  var v = (key === "promise") ? String(value == null ? "" : value).trim() : !!value;
+  /* THE TYPE COMES FROM THE DEFAULT, not from a list of key names. This read
+     `key === "promise" ? string : boolean`, so the moment a second string
+     setting existed (`rep`, §104) it would have stored `true` for whoever was
+     chosen — silently, and in a way the picker would then show as nobody. A
+     list of exceptions is a list somebody has to remember to add to. */
+  var isText = typeof dflt === "string";
+  var v = isText ? String(value == null ? "" : value).trim() : !!value;
   var c = chatWritable();
   /* The promise is stored only when it differs from the shipped sentence, so
      improving that sentence later reaches every tenant that never wrote one. */

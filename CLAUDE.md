@@ -1135,6 +1135,38 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE ASSISTANT ANSWERS FIRST, AND OFF IS THE DEFAULT (since v3.31, §104;
+  spec 016):** Islam — *"I need a switch to turn off AI response and just keep
+  it to the SMO inbox."* `CHAT_DEFAULTS.assistant` is **false**, and
+  `chatCfg()` reads it and `notify` **the other way round from the other four**
+  — only an explicit `true` turns them on, so a stale value cannot switch it on
+  by accident. **OFF MEANS THE MODEL IS NEVER CALLED**, in `say`, on the
+  server: with the assistant off there is nothing on screen to hide, so the
+  guard IS the feature (§42, §98.2) — asserted as a CALL COUNT OF ZERO, never
+  as an absent button. **ORDER IS THE ROBUSTNESS ARGUMENT**: the message is
+  inserted and the thread is already waiting BEFORE the model is asked, so no
+  key, a refusal, a timeout, a malformed answer and the setting off all land on
+  exactly the chat as it worked before — four failure modes, injected
+  separately, because a build that lost the degradation passes every happy-path
+  assertion. **THE HANDOFF IS A FLAG, NEVER A SENTENCE** (`{answered, reply,
+  source}`), or the thread reads as answered and drops out of the queue with
+  nobody coming; an `answered` with an empty reply is treated as a handoff,
+  checked rather than trusted. **EVERY ANSWER CARRIES A WAY OUT**, because the
+  spec covers the assistant KNOWING it cannot answer and the harder case is it
+  being confidently wrong — and it sends an ORDINARY MESSAGE, so the office
+  reads why. **`bot` IS A COLUMN, NEVER A RESERVED `by_key`** (§87: a name is
+  never an identifier), and it is `from_office` TRUE + `bot` TRUE, because the
+  assistant answers on the office's behalf and the mark is about HOW that side
+  was written. **`GEMINI_API_KEY` IS READ IN ONE PLACE** and no SDK is added
+  (§72, §97.5 — this is one POST); **`GEMINI_MODEL` and `GEMINI_ENDPOINT` are
+  environment variables**, the first because provider names are retired on
+  somebody else's schedule and the second because a check must MODEL the
+  provider rather than branch around it (§100.3).
+- **A LIST OF EXCEPTIONS IS A LIST SOMEBODY FORGETS TO ADD TO (§104.7):**
+  `chatSet()` read `key === "promise" ? string : boolean`, so the second string
+  setting would have stored `true` for whoever was chosen — silently, with the
+  picker then showing nobody. **Take the type from the DEFAULT**, which cannot
+  be forgotten.
 - **THE KNOWLEDGE BASE'S MISSING HALF, AND IT IS DATA (since v3.31, §103):**
   it explained how things WORK and barely how to DO them — four mentions of
   pressing anything in 693 lines of `PAGE_INFO` — so **`src/recipes.js` holds
@@ -1434,7 +1466,25 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-26 &mdash; **v3.31: the knowledge base gets its missing
-half** (&sect;103, spec 016 step 1). The assistant's corpus is the feature's
+half (&sect;103) and the assistant answers first (&sect;104)**. Islam, mid-build:
+*"I need a switch to turn off AI response and just keep it to the SMO inbox"*
+&mdash; which was already the design and is now the DEFAULT, because the chat's
+four existing settings ship on to describe a chat that already worked and this
+one describes a capability that did not. **OFF IS ENFORCED ON THE SERVER**,
+where the model is simply never called: with the assistant off there is nothing
+on screen to hide, so the guard IS the feature, and the check asserts a call
+count of ZERO rather than an absent button. **ORDER IS THE WHOLE ROBUSTNESS
+ARGUMENT** &mdash; the message is stored and the thread is already waiting
+before the model is asked, so no key, a refusal, a timeout and a malformed
+answer all land on exactly the chat as it worked before; four failure modes,
+injected separately, because a build that lost the degradation passes every
+happy-path assertion. **THE HANDOFF IS A FLAG AND NEVER A SENTENCE**, or the
+thread reads as answered and drops out of the queue with nobody coming. Gemini
+rather than Claude, at Islam's choice, with **no SDK** (one POST, and the repo
+carries `pg` and nothing else) and the **model name in an environment
+variable**, because provider names are retired on somebody else's schedule.
+
+*Earlier the same day: **&sect;103, the knowledge base's missing half**. The assistant's corpus is the feature's
 actual project and it did not exist: the knowledge base explained how things
 WORK and barely how to DO them &mdash; four mentions of pressing anything across
 693 lines of `PAGE_INFO` &mdash; while *"how do I submit my report"* is what

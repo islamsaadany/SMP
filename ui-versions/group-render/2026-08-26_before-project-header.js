@@ -229,21 +229,6 @@ function qs(t){
   return '<span class="qs">' + out + "</span>";
 }
 
-/* THE QUARTERS, PRESSABLE (§114). The same four marks qs() draws, as
-   buttons, behind the pen — §42 classified a tactic's quarter as PLAN on the
-   server four versions before the screen could edit one, so this draws the
-   control the authoriser has been guarding all along. By id, never index
-   (§48.2). */
-function qsEdit(t){
-  var q = quartersOf(t), out = "";
-  for (var i = 0; i < 4; i++) {
-    out += '<button class="qtog' + (q[i] ? " on" : "") + '" data-qtog="' +
-      esc(t.id) + '|' + (i + 1) + '" title="Quarter ' + (i + 1) +
-      (q[i] ? " — planned; press to clear" : " — press to plan") + '">' + (i + 1) + '</button>';
-  }
-  return '<span class="qs qs-edit">' + out + '</span>';
-}
-
 /* Measure name reads left; every figure centres under its column. Progress
    carries the band colour, since it is the row's conclusion. */
 function measureRows(ms, opts){
@@ -2900,73 +2885,6 @@ function projEditing(){
 function projArranging(fk){
   return arranging("unit", "fn:" + fk) || projEditing();
 }
-/* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────────
-   Islam: "any project needs 3 things at its starting part which are the brief,
-   stakeholders, start and end date."
-
-   THE START AND END WERE STORED AND SHOWN NOWHERE. They appeared in exactly
-   one place in the whole product -- the review deck -- so the one page that
-   AUTHORS a project could not tell you when it runs. The overrun note was the
-   only thing that mentioned the end date, and only when a milestone overshot
-   it. That is the gap; the arrangement is the answer to it.
-
-   ONE BOX, DIVIDED: who and when down the left, what and with whom on the
-   right. Not a `<table>`, deliberately -- the platform sets a global
-   `table { min-width: 620px }` so its data tables never squash, which makes any
-   small table overflow its own grid track by 300px. A grid of rows has no such
-   inheritance, and the labels still line up in a column, which is the whole
-   reason a table was asked for.
-
-   BOTH VALUE COLUMNS START AT THE SAME X. The left column is sized to the
-   longest label there and the right to the longest label there, so "the brief
-   begins where the pills begin" is a property of the grid rather than
-   something that happens to be true today. */
-function projFrontMatter(p, ed){
-  var row = function(side, label, value){
-    return '<div class="pfrow"><em>' + label + '</em><div class="pfval">' + value + '</div></div>';
-  };
-  var f = function(v, setter){
-    return ed ? inputOr("plan", v == null ? "" : v, "", setter)
-              : (v ? esc(v) : '<span class="missing">Missing</span>');
-  };
-  /* The pills carry their own leading margin, which is right in a sentence and
-     wrong as the first thing in a cell -- `.pfval` neutralises it so the chip's
-     BORDER lines up with the brief's first letter, not its text. */
-  var stake = ed
-    ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
-        function(v){ p.stakeholders = collabParse(v); })
-    : ((p.stakeholders || []).length
-        ? (p.stakeholders || []).map(function(x){
-            return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
-        : '<span class="missing">None named</span>');
-  /* REPEATS (§115). Read mode shows the row only when it says something — a
-     "Repeats: No" on every build-once project is noise (§41's budget, in
-     words). The setter DELETES the key on the default (§50.6): a project
-     unmarked and one never asked must be byte-identical. */
-  var repRow = "";
-  if (ed) {
-    repRow = row("l", "Repeats",
-      selectOr("plan", p.repeats === "cycle" ? "Each cycle" : "No",
-        ["No", "Each cycle"], "",
-        function(v){ if (v === "Each cycle") p.repeats = "cycle"; else delete p.repeats; }));
-  } else if (p.repeats === "cycle") {
-    repRow = row("l", "Repeats", "Each cycle");
-  }
-  return '<div class="pfront">' +
-    '<div class="pfcol">' +
-      row("l", "Owner", f(p.owner, function(v){ p.owner = v; })) +
-      row("l", "Start", f(p.start, function(v){ p.start = v; })) +
-      row("l", "End",   f(p.end,   function(v){ p.end   = v; })) +
-      repRow +
-    '</div>' +
-    '<div class="pfcol pfright">' +
-      row("r", "Brief", ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; })
-                           : '<p>' + esc(p.brief || "") + '</p>') +
-      row("r", "Stakeholders", stake) +
-    '</div>' +
-  '</div>';
-}
-
 function projPlanBody(p, fk){
   /* NO DUE AND NO OWNER (§53.4). Islam: a deliverable is delivered when the
      project ends, so a date of its own was a second answer to a question the
@@ -3033,22 +2951,33 @@ function projPlanBody(p, fk){
      band carries the project's NAME, so in edit mode it has to become a field
      or the one thing a new project needs most cannot be typed — the same
      exception the pillar heading makes (see unitPlanBody). */
-  /* THE BAND IS IDENTITY, THE BLOCK IS THE FACTS (§109). The owner moved into
-     the front matter below, and the Timeline pill is GONE -- not relocated.
-     Islam asked what it was for and the honest answer was almost nothing: it
-     once decided how every date on the project was read, §104 ended that
-     (either form is right on any row), and the only thing it still gated was
-     projOverruns(), which needs two parseable dates and gives up without them
-     anyway. Its one remaining effect was to SUPPRESS a true overrun warning on
-     a project marked "By quarter" whose end date happened to be a date. The
-     field is untouched in the data and on the import template; what goes is a
-     pill nobody could act on. */
   var band = ed
     ? '<div class="pband"><span class="pband-code">' + esc(projCode(fk, p)) + '</span>' +
         '<span class="pband-name">' +
-          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span></div>'
-    : pillarBand(projCode(fk, p), p.name, "");
-  return band + paneActs("plan", "u_plan") + projFrontMatter(p, ed) +
+          inputOr("plan", p.name, "", function(v){ p.name = v; }) + '</span>' +
+        '<span class="pband-r">' +
+          inputOr("plan", p.owner || "", "", function(v){ p.owner = v; }) +
+          '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") +
+        '</span></span></div>'
+    : pillarBand(projCode(fk, p), p.name,
+        (p.owner ? '<span class="pband-n">' + esc(p.owner) + '</span>' : '') +
+        '<span class="pill kind">' + (p.timeline === "date" ? "By date" : "By quarter") + '</span>');
+  return band + paneActs("plan", "u_plan") +
+
+    '<h4 class="mini">Brief</h4><p class="sub" style="margin:0">' +
+      (ed ? fieldOr("plan", p.brief || "", "", function(v){ p.brief = v; }) : esc(p.brief)) + '</p>' +
+    '<h4 class="mini">Stakeholders</h4>' +
+    /* Typed as one line and stored as a list, through collabParse/collabNames
+       — the same pair the tactics table uses for collaborators (§50.2), so
+       "how is a list of names typed" has one answer in the platform. */
+    /* collabText() takes the ROW and reads `.collaborators` off it; a project's
+       list is `.stakeholders`, so it is handed a row-shaped object rather than
+       the array — which returned [] and would have blanked every stakeholder
+       list the moment the pen went on. */
+    (ed ? inputOr("plan", collabText({ collaborators: p.stakeholders }), "",
+            function(v){ p.stakeholders = collabParse(v); })
+        : (p.stakeholders || []).map(function(x){
+            return '<span class="pill kind">' + esc(x) + '</span> '; }).join("")) +
     '<h4 class="mini">' + DX_HEADING +
       ' <em>\u2014 what the project hands over, and what it is meant to change</em></h4>' +
     miniTable(["#","Deliverables &amp; outcomes","Type","Direction","Target"], dxr) +
@@ -3463,22 +3392,7 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
-      /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
-         direction and the compile rule because "they change what a figure
-         MEANS" — the right worry while the pen could fall to the person being
-         measured, and §94 ended that: the pen is the office's. What was left
-         was the office unable to correct exactly the fields that most need
-         correcting after an upload. The vocabulary is the Temple's own
-         (selectOr, same options), never a second list (§53.5) — and a value
-         already stored that is NOT in the list is prepended rather than
-         silently displayed wrong (§96.2: the display must not disagree with
-         the data). */
-      '<td class="cc">' + (ed
-        ? selectOr("plan", m.dir || "",
-            (m.dir && ["\u2265","\u2264"].indexOf(m.dir) < 0 ? [m.dir] : [])
-              .concat(m.dir ? [] : [""]).concat(["\u2265","\u2264"]), "mono",
-            function(v){ m.dir = v; })
-        : esc(m.dir)) + '</td>' +
+      '<td class="cc">' + esc(m.dir) + '</td>' +
       '<td class="num">' + cell(m.target, function(v){ m.target = v; }, "mono") + '</td>' +
       /* NO 3-YEAR COLUMN. Islam, 2026-08-22: "in the direction plans the key
          measures are for 1 year only". A pillar's key measures carry one
@@ -3487,12 +3401,7 @@ function unitPlanBody(it, u, railed){
          and keep theirs. `target3y` is still stored and still travels through
          import, export and the archive — this removes a column, not a field,
          so nothing a plan already carries is lost. */
-      '<td class="cc">' + (ed
-        ? selectOr("plan", m.compile || "",
-            (m.compile && ["Sum","Latest","Average"].indexOf(m.compile) < 0 ? [m.compile] : [])
-              .concat(m.compile ? [] : [""]).concat(["Sum","Latest","Average"]), "",
-            function(v){ m.compile = v; })
-        : esc(m.compile || "\u2014")) + '</td></tr>';
+      '<td class="cc">' + esc(m.compile || "\u2014") + '</td></tr>';
   }).join("");
   var tRows = it.tactics.map(function(t, i){
     return '<tr data-oi="' + i + '"><td class="idx">' +
@@ -3510,7 +3419,7 @@ function unitPlanBody(it, u, railed){
       '<td class="collabs">' + (ed
         ? inputOr("plan", collabText(t), "", function(v){ t.collaborators = collabParse(v); })
         : collabCell(t)) + '</td>' +
-      '<td>' + (ed ? qsEdit(t) : qs(t)) + '</td></tr>';
+      '<td>' + qs(t) + '</td></tr>';
   }).join("");
   var meta = pillarMeta(it);
   var head = showHead

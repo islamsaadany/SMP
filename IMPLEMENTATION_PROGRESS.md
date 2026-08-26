@@ -6,8 +6,9 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.31 shipped (live) · **v3.32 in progress on the branch**
+**Latest version:** v3.37 on `main` · **v3.38 in progress on the branch**
 **Last updated:** 2026-08-26
+
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -52,7 +53,107 @@ Nothing proceeds past this line without an answer.
 
 ---
 
+## Known red, on purpose
+
+- **`checks/no-jump.py` — "sorting a column" (1 JUMPED).** Real defect,
+  diagnosed 2026-08-26 (§109.5): with a register row open for editing, sorting
+  collapses the page 1457px → 913px (the open row keeps its class, loses its
+  height) and the scroll clamps up. Pre-dates the §109 merge; needs its own
+  fix in the register's sort, not a merge-widening patch. Until then this red
+  is a true signal — do not silence it.
+
 ## Built and verified
+
+### v3.37 — the assistant (§111, §112), and a chat that vanished (§113)
+
+**§113 — reported from production.** *"I replied and the chat disappeared from
+all places."* Nothing was deleted: replying marks a conversation answered, the
+inbox opens on Waiting, and Waiting excludes answered ones — so replying
+removed the row from the list the office was looking at. Two correct decisions;
+nobody had asked what they do to each other.
+
+- **The conversation you have open is exempt from the filter**, and only that
+  one. Waiting still means Waiting.
+- **An empty list names where everything went** instead of being a dead end —
+  and the Flagged tab stops claiming there are no conversations when there are.
+- A handler that lit tabs by comparing nodes would have un-lit all three when
+  the new shortcut was pressed. Lit by value now.
+
+**Verified:** office-chat.py §9 ALL CLEAR, proved to fail (3 failures) with the
+exemption removed. Reproduced against a real database before and after.
+
+### v3.37 — the assistant (§111, §112; spec 016)
+
+**§111 — the corpus.** 43 task recipes in `src/recipes.js`, as data, rendered
+on the Knowledge base page and read by `scripts/extract-kb.js` into
+`db/kb.json`: 9 sections, 26 page explainers, 43 recipes, ~9,800 words.
+
+**§112 — the assistant answers first.** Gemini, at Islam's choice.
+
+- **Off is the default**, and off means the model is never called — enforced in
+  `say` on the server, asserted as a call count of zero.
+- **Order is the robustness argument:** the message is stored and the thread is
+  already waiting before the model is asked, so every failure lands on exactly
+  the chat as it worked before.
+- **The handoff is a flag**, not a sentence — `{answered, reply, source}`.
+- **Every answer carries a way out**, for the case the spec did not cover: the
+  assistant being confidently wrong.
+- `bot` and `source` columns (migration 024); an answer never wears a
+  colleague's name.
+- A handoff can email a named representative — its own switch.
+
+**Verified:** `scripts/test-assistant.js` **25 passed, 0 failed** against a real
+Postgres and a stub that models Google · office-chat.py ALL CLEAR ·
+knowledge-base.py ALL CLEAR · test-authorize 190/0 · qa.py clean.
+
+**Waiting on:** `GEMINI_API_KEY` in Vercel. Everything is built and tested
+against a stub; the live call is the only unexercised path.
+
+### v3.35 — the pen's last read-only fields, and a repeating project (§114–§115)
+
+- **§114:** a measure's direction and compile, and a tactic's quarters, are
+  editable behind the plan pen — §31's read-only reason expired with §94. The
+  Temple's own vocabulary; quarters as pressable marks; all three proved to
+  WRITE (§96).
+- **§115: a repeating project.** CX-mystery-shopping-shaped work is marked
+  *Repeats: each cycle* from the front matter pen. On a new cycle it is
+  archived, cleared and its dates shift one cycle forward (rhythm kept,
+  adjustable); an **unmarked project now keeps its figures** — before this,
+  every project was wiped on every new cycle, a landmine the live tenant had
+  not yet stepped on. The archive also stops storing a deliverable's deleted
+  `actual` and starts keeping the milestone's `pct` (stale since migration 024).
+
+**Verified:** `plan-fields.py` and `repeat-project.py` all passed, the second
+failing three ways on the pre-§115 build before its green was believed ·
+test-authorize **195** · full battery + qa.py clean.
+
+### v3.34 — a project's front matter (§109)
+
+Islam: *"any project needs 3 things at its starting part — the brief,
+stakeholders, start and end date."*
+
+- **The start and end were stored and shown nowhere.** They appeared in exactly
+  one place in the whole product — the review deck — so the page that *authors*
+  a project could not say when it runs.
+- **One box, divided:** owner · start · end down the left, the brief and the
+  stakeholders as two labelled rows on the right. Settled from a mockup made of
+  the real platform, over two other arrangements.
+- **Deliberately not a `<table>`.** The platform's global
+  `table { min-width: 620px }` makes any small table overflow its own grid track
+  by 300px — Islam caught it in the mockup, and the column was 320px throughout.
+- **Both value columns start at one x**, which was the ask: each column's label
+  track is sized to its own longest label, and a pill's leading margin is pulled
+  back so the chip's border meets the brief's first letter.
+- **The Timeline pill is gone.** It once decided how every date was read; §104
+  ended that, and its one remaining effect was to *suppress* a true overrun
+  warning. The field and the import template are untouched.
+- **Plan pane only** — Performance and Reporting show no dates, confirmed as
+  right by Islam rather than assumed.
+
+**Verified:** new `src/checks/project-header.py` **all passed**, both halves
+proved able to fail first (an `auto` label track reproduces the exact
+misalignment, 627 vs 687; wiring one field to a bare `<input>` fails twice) ·
+every other check clean against the merged build · qa.py clean.
 
 ### v3.32 — the onboarding tour (§107, spec 017)
 
@@ -97,6 +198,7 @@ to tour.
 
 **Waiting on Islam:** the owner story's copy. The custodian's is his, word
 for word off the signed-off mockup; the owner's is mine until he has read it.
+
 ### v3.30 — reordering comes back (§101), and focus gets a switch (§102)
 
 Two small independent changes, both agreed in words first.

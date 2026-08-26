@@ -883,45 +883,6 @@ function saidWhereNote(p, editable){
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
 
-/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§108.10) ──
-   NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
-   server fact fetched separately from the state graph, so there are three
-   answers and not two: a number, "nothing waiting", and "we do not know yet".
-   §93 is the whole reason — the register reported everybody as having no
-   password because a failed ask was being counted as an absence, and the dash
-   that replaced it means exactly this null. The Overview draws no row at all
-   for a null, which is the same decision one surface further out: a summary
-   that prints 0 for a question it never asked is worse than a summary that
-   stays quiet.
-
-   EXTRACTED RATHER THAN COPIED. The register computed both inline, which was
-   right while it was the only page that wanted them; the Overview exists to
-   summarise this page, so a second copy would be two answers to one question
-   in the one place a disagreement is guaranteed to be seen (§53.5). */
-function noPasswordCount(){
-  var live = typeof SYNC !== "undefined" && SYNC.isLive();
-  /* A FAILED ASK IS NOT AN ANSWER (§93): PWSTATES carries {__error} when the
-     server refused, and counting over it would read every key as absent. */
-  if (!live || !PWSTATES || PWSTATES.__error) return null;
-  /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89) — the same set the
-     register counts and the same set the server would issue to. */
-  return passwordReach().filter(function(p){
-    return PWSTATES[p.key] === "none";
-  }).length;
-}
-/* Somebody said where they work and it disagrees with where they are attached
-   — which is exactly `saidWhereNote()`'s own test, asked of the whole register
-   rather than of one row. Silent agreement is not an outstanding item (§56). */
-function saidWhereCount(){
-  var live = typeof SYNC !== "undefined" && SYNC.isLive();
-  if (!live || !SAIDWHERE || SAIDWHERE.__error) return null;
-  return PEOPLE.filter(function(p){
-    if (!personActive(p)) return false;
-    var said = SAIDWHERE[p.key];
-    return !!said && said !== personAt(p);
-  }).length;
-}
-
 /* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
    Islam: "add a columns filter to mark what to show of the columns and make
    the contact unchecked by default."
@@ -1078,11 +1039,14 @@ function renderPeople(){
      number the server is going to shrink (§35: the server picks the set). */
   var reach = live ? passwordReach() : [];
   var noCust = unitsWithoutCustodian();
-  /* A FAILED ASK IS NOT AN ANSWER (§93), and the test now lives in
-     noPasswordCount() so the Overview counts what this chip counts (§108.10).
-     `|| 0` is the coercion this page wants and the Overview does not: here a
-     null means "draw no chip", there it means "draw no row". */
-  var noPw = noPasswordCount() || 0;
+  /* A FAILED ASK IS NOT AN ANSWER (§93). PWSTATES holds {__error} when the
+     server refused or could not be reached, and counting over it would read
+     every key as absent and report nobody as missing a password — the same
+     shape of quiet-wrong-answer the dash itself was. */
+  var pwOk = !!PWSTATES && !PWSTATES.__error;
+  var noPw = live && pwOk
+    ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
+    : 0;
 
   /* Lifted out of this function 2026-08-23: restoring a person names the
      places their roles were held, and a second copy of this in the shell is
@@ -1125,8 +1089,9 @@ function renderPeople(){
 
   function roleCell(p){
     /* The role chips' × and the picker belong to the OPEN row, not to a page
-       mode (§79.2). Computed here rather than passed, because a parameter the
-       caller forgot would put an × on a closed row. */
+       mode (§79.2). Computed here rather than passed, because roleCell and
+       roleWhereCell are two halves of one control (§69.1) and a parameter one
+       of them forgot would put an × on a closed row. */
     var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
@@ -1179,47 +1144,22 @@ function renderPeople(){
          being typed, not read. */
       : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
     if (!editable) return held;
-    /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
-       `SMPRules.personRoles()` opens with "a retired person holds nothing" and
-       returns [] — but the picker was drawn on a retired row anyway, so giving
-       one Business unit owner WROTE the grant (the unit's `head` now points at
-       them) while the row went on reading "No role": the rule that decides what
-       a row SHOWS is not the one the grant went through, and nothing compared
-       them.
+    /* ── HALF THE PICKER. The other half is in the Unit column ────────
+       Islam: "keep the unit selection in the unit and keep the role selection
+       in the role so I can choose both but each in it's right placement."
 
-       Two silent wrongs in one press — nothing said the grant had happened, and
-       a unit was left pointed at somebody who cannot sign in, which is exactly
-       the state §93.4's custodian count exists to find. Refused where the
-       control was, and the refusal says the way out (§62). */
-    if (!personActive(p))
-      return held + '<span class="rolestop">Retired \u2014 restore this person ' +
-        'before giving them a role.</span>';
-    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§110) ───────
-       Islam, of the second half this used to draw: "choose where is very
-       strange sentence. make it Unit and it's already in a cell what am I
-       missing here?"
+       Right, and the old control was the giveaway: it opened a role select AND
+       a where select inside the Roles cell, so the Unit column sat empty
+       beside a dropdown naming a unit. One control spanning two columns is a
+       control that belongs in neither.
 
-       Nothing, and it was worse than redundant. `personAtChoices()` — the Unit
-       cell's own dropdown — offers the group, every unit, every function and
-       every company: item for item the list `roleWheres()` was drawing from, a
-       superset of every role's where. And `grantPersonRole()` WRITES IT BACK
-       every time — owner and unit custodian set `p.unit`, fnhead sets `p.fn`,
-       cceo sets `p.company` — so the second dropdown asked a question the first
-       had already answered and then forced its own answer onto it. The two
-       could never disagree, because the grant made them agree.
-
-       §69.1's split survives in the half that mattered: the unit selection is
-       in the Unit column and the role selection is in Roles. What goes is the
-       DUPLICATE, not the arrangement. §46.4's "where somebody sits and where a
-       role reaches are two different facts" stayed true of the CONCEPTS and was
-       never true of the code.
-
-       AND IT IS WHY THEY NO LONGER BLOCK EACH OTHER (Islam: "the role and the
-       unit shouldn't block each other but they only function together"). Two
-       ordinary fields on the row, set in either order, neither emptying the
-       other; both have to say something before somebody holds a role somewhere,
-       and where they cannot agree the row explains it rather than doing
-       nothing. */
+       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
+       × is already a selection somebody can take back (§62's "the refusal is
+       where the confirmation would be", turned round: the undo is where the
+       confirmation would be). So the role is granted the moment BOTH halves
+       have been chosen — which is why both start on a blank "Choose…" option
+       rather than pre-selected: a picker that commits on its own must never
+       commit something nobody picked. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
@@ -1229,45 +1169,37 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>' + roleStop(p)
+            }).join("") + '</select>'
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
-     The one thing the old pair could not do. It committed on the second answer,
-     so "not yet" and "never" looked identical from the outside: nothing
-     happened, and nothing was said.
-
-     TWO REFUSALS, TWO SENTENCES, because they have different ways out — one
-     wants a Unit set at all, the other wants a different KIND of Unit. What
-     each role may be held at is still `roleWheres()` and nothing else: this
-     asks that list rather than carrying a second opinion about it (§42), and
-     only the WORD for a kind is written here.
-
-     `ROLESTOP` is the outcome of the last pick and lives on the screen, never
-     on the person (§25.2) — cleared by the pick that succeeds, by opening the
-     picker again, and by leaving the row. */
-  function roleStop(p){
-    if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
-    return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
+  /* The second half, drawn in the Unit column and nowhere else. It is only
+     ever present while a role is being given, and it is EMPTY until a role has
+     been picked, because which places are offered depends on which role it is:
+     a company CEO is seated at a company, a function head at a function, and
+     one combined list would offer Company CEO of Mobile (§35). */
+  function roleWhereCell(p){
+    if (!rowOpen(p)) return "";
+    if (ADDROLE !== p.key) return "";
+    if (!ADDROLE_KIND) {
+      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
+    }
+    var wheres = roleWheres(ADDROLE_KIND);
+    /* A ROLE WITH ONE PLACE IS ALREADY GIVEN (§92). This used to render a
+       select holding a single option and wait to be told which of the one to
+       use — the comment here even claimed it "says it rather than offering a
+       list of one", which is what it should have done and not what it did.
+       The grant happens on the role pick now, so this cell is never reached
+       for those; the guard stays because a role list that gains a
+       single-destination entry later must not fall back into asking. */
+    if (wheres.length <= 1) return "";
+    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
+      'aria-label="Where ' + esc(p.name) + ' holds it">' +
+      '<option value="" selected>Choose where\u2026</option>' +
+      wheres.map(function(w){
+        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
+      }).join("") + '</select>';
   }
-
-  /* roleWhereCell() was here. It drew the picker's second half — "Choose
-     where\u2026" — in the Unit column, and §110 deleted it rather than renaming
-     it: the cell's own dropdown already answers that question and the grant
-     already writes the answer back, so the two could never disagree. Removed
-     with its call site rather than left returning "" (§24), because a function
-     nothing calls is one the next reader has to prove is dead before touching
-     anything near it.
-
-     It also carried a bug worth remembering. `.cfg table td` is
-     `white-space:nowrap` (§88's one-line standard), so the cell laid its two
-     controls SIDE BY SIDE rather than stacking them: the second started 150px
-     into a 158px cell, ran 133px past its own right edge and landed under the
-     Email field, which took every click. Present, enabled, correctly sized and
-     unreachable — §93.4 for the third time, and invisible to every check in the
-     suite, because all of them ask whether a control is in the document.
-     `elementFromPoint` at its own centre returned the Email input. */
 
   /* contactCell() was here. It stacked the address over the number in one
      cell, and the two are two columns now (§69.16) — a function nothing calls
@@ -1686,7 +1618,13 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, ed) + '</td>' : '') +
+        saidWhereNote(p, ed) +
+        /* The role picker's second half (§69). It sits UNDER what the cell
+           already says rather than replacing it: where somebody sits and where
+           a role reaches are two different facts (§46.4), and a picker that
+           hid the first while choosing the second would be asking the question
+           with the answer covered up. */
+        roleWhereCell(p) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -2762,52 +2700,6 @@ function kbSection(id, title, blocks){
     }).join("") + '</div>';
 }
 
-/* ── The task recipes on the page (§103) ─────────────────────────────
-   Rendered from `RECIPES`, which is DATA — so `scripts/extract-kb.js` reads
-   the same array into the assistant's corpus and the words a person reads and
-   the words it answers from cannot drift (§42, applied to prose).
-
-   `{pillar}` and `{pillars}` are substituted here rather than baked in, because
-   a tenant that calls a pillar something else must not be answered in Raya's
-   vocabulary (§65) — the same reason `L()` exists everywhere else.
-
-   A recipe's answer is one string with `|` between paragraphs. Not an array:
-   the file is long enough already, and a separator that cannot appear in prose
-   costs nothing to read and one line to split. */
-function recipeText(t){
-  return String(t)
-    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
-    .replace(/\{pillar\}/g, L("pillar","bu"));
-}
-
-function kbRecipes(){
-  return RECIPES.map(function(g){
-    var items = g.items.map(function(r){
-      /* TWO TRUE ANSWERS TO ONE QUESTION are two entries sharing a `q`
-         (spec 016 §5.2b). On the page BOTH are shown, because the knowledge
-         base is readable by everyone and the office's answer is not a secret —
-         it is merely useless to somebody who cannot do it.
-
-         SO THE MARK GOES ON THE AUDIENCE, NEVER ON THE DUPLICATE. Marking only
-         the second of a pair left the two-track question rendering as the same
-         heading twice with nothing between them, which reads as a bug; and
-         marking by position would leave a lone office recipe unmarked in a
-         group that is not the office's. Whoever it is for, it says so. */
-      var who = r.who || g.who;
-      return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
-        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
-          (who === "office"
-            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
-        recipeText(r.a).split("|").map(function(para){
-          return '<p class="kb-p">' + para + '</p>';
-        }).join("") +
-      '</div>';
-    }).join("");
-    return { id: "how-" + g.g.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, ""),
-             title: g.g, html: items };
-  });
-}
-
 function renderKB(){
   var L1 = L("pillar","bu");
   var secs = [
@@ -3013,20 +2905,12 @@ function renderKB(){
     ])
   ];
 
-  /* THE RECIPES: how to DO things, as opposed to how things work. Their own
-     part of the page, because mixing a task into a paragraph of reasoning
-     serves neither — somebody reading the Access section wants the argument,
-     somebody asking "where do I press" wants four lines. */
-  var recs = kbRecipes();
-  recs.forEach(function(r){
-    secs.push('<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
-              '</h3>' + r.html + '</div>');
-  });
+  var toc = '<div class="kb-toc">' + [
+      ["scoring","Scoring"],["access","Access"],["labels","Labels"],
+      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"],
+      ["mail","Email"]
+    ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
-  /* DERIVED, NEVER LISTED. This was a hand-written array beside the sections
-     and it was ALREADY WRONG — nine sections, eight links, with the people
-     register missing since the day it was added. A second copy of a list is a
-     list that goes stale on the first edit somebody forgets (§42). */
   /* ── THE TOUR'S ONE WAY BACK IN (spec 017) ───────────────────────
      Explanation lives here (v3.5), so the replay of the guided tour lives
      here too rather than growing furniture of its own on a page somebody
@@ -3046,41 +2930,13 @@ function renderKB(){
       '">Start the tour</button></p></div>'
     : '';
 
-  /* THE TOUR IS A SECTION, SO IT GOES IN THE ARRAY (merge, §113.8). It
-     arrived from the other session concatenated straight into the page — a
-     real `.kb-sec` with a title and an id, but not in `secs`, so the derived
-     contents listed sixteen of seventeen sections and the tour had no link.
-     Exactly the fault deriving the contents was meant to end, arriving from
-     the other side of a merge. First, because somebody who has just arrived
-     needs the tour before they need the reference.
-
-     AND IT HAS TO SIT BELOW `tourBlock`'s ASSIGNMENT, which is what the first
-     attempt got wrong: `var` hoists the declaration and not the value, so an
-     unshift written above it pushed `undefined`, the `if` was false, and the
-     tour silently left the page. */
-  if (tourBlock) secs.unshift(tourBlock);
-
-  var toc = '<div class="kb-toc">' +
-    secs.map(function(html){
-      var id = (html.match(/id="kb-([a-z-]+)"/) || [])[1];
-      var title = (html.match(/<h3>([^<]*)/) || [])[1] || "";
-      title = title.split(" \u2014 ")[0];
-      return id ? '<a href="#kb-' + id + '">' + title + '</a>' : '';
-    }).join("") + '</div>';
-
-
   return cfgHead("Knowledge base",
-      ['<span class="pill kind">Everyone</span>',
-       secs.length + ' sections', recipeCount() + ' how-tos'],
+      ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
       null, false) +
-    /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
-       exist now (§111); `tourBlock` is the other session's onboarding tour
-       (§107), and it opens the page because somebody who has just arrived
-       needs the tour before they need the reference. */
-    '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
-      'place. This grows: anything we settle that a reader would need to know belongs here ' +
-      'rather than in a note under the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + secs.join("") + '</div>';
+    '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
+      'settle that a reader would need to know belongs here rather than in a note under ' +
+      'the screen it happens to affect.</p>' +
+    toc + '<div class="kb">' + tourBlock + secs.join("") + '</div>';
 }
 
 
@@ -4091,147 +3947,6 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
-/* ══ SETUP · OVERVIEW (§108.10, spec 018) ════════════════════════════════
-   Islam, on the makeover: Option A, and the gear lands here.
-
-   THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
-   existed the answer took a walk through five pages, because each outstanding
-   thing lived only on the page that fixes it. That is right for the thing and
-   wrong for the question: nobody opens Setup to read the People register, they
-   open it to find out whether the register needs them.
-
-   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design. A
-   summary page is the one place a disagreement with the page it summarises is
-   guaranteed to be seen and impossible to explain, so no row is allowed to
-   compute anything: each declares a `count` that calls the SAME function the
-   destination page calls, and `checks/setup-overview.py` asserts the two agree
-   rather than asserting the number (§53.5, §94.8). Add a row here with fresh
-   arithmetic in it and the check cannot help you.
-
-   NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
-   fact fetched outside the state graph, so "we have not asked" is a real third
-   state and it is not "nothing is waiting" (§93, §108.10). A row whose count
-   is null is absent — never a 0, and never a spinner, because a page that
-   shows five zeroes while it is thinking has told somebody they are clear when
-   it does not know.
-
-   THE DESTINATION IS THE PAGE THAT FIXES IT, never a page that merely mentions
-   it — the row is a door, and §16.7's rule that a refusal must send somebody
-   somewhere applies just as much to a notice. */
-function attentionRows(){
-  var rows = [
-    { k:"chat",  dest:"chat",   glyph:"✉",
-      count: function(){ return OVQUEUE && !OVQUEUE.__error
-                                ? (OVQUEUE.waiting | 0) : null; },
-      text:  function(n){ return plural(n, "conversation") + " waiting for an answer"; } },
-    { k:"claims", dest:"cycle", glyph:"Σ",
-      count: function(){ return openClaimsList().length; },
-      text:  function(n){ return plural(n, "claim request") + " to answer"; } },
-    { k:"nocust", dest:"people", glyph:"☰",
-      count: function(){ return unitsWithoutCustodian().length; },
-      text:  function(n){ return plural(n, "unit") + " with no custodian"; } },
-    { k:"nopw",   dest:"people", glyph:"⚿",
-      count: noPasswordCount,
-      text:  function(n){ return n + (n === 1 ? " person has" : " people have") +
-                                 " never been issued a password"; } },
-    { k:"said",   dest:"people", glyph:"◎",
-      count: saidWhereCount,
-      text:  function(n){ return plural(n, "person", "people") +
-                                 " said where they work — accept or dismiss"; } }
-  ];
-  return rows.map(function(r){
-    var n = r.count();
-    return { k:r.k, n:n, dest:r.dest, glyph:r.glyph,
-             text: (n == null || n <= 0) ? null : r.text(n) };
-  }).filter(function(r){ return r.text !== null; });
-}
-
-/* The label a row's destination wears in the rail, asked of the rail's own
-   list rather than written out again — rename a page and this follows (§108.3
-   renamed three of them in one afternoon). */
-function attnDestLabel(k){
-  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
-    function(x){ return x.k === k; })[0];
-  return d ? d.label : k;
-}
-
-var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
-
-/* ── THE SAME COUNTS, ON THE RAIL (§108.15) ────────────────────────────
-   A pill beside a rail entry says "there is something here for you" without
-   opening it, which is HR_ERP's practice and the last piece of the makeover.
-   It is deliberately LAST: a pill is only worth drawing once the count behind
-   it is real, and until the Overview existed there was no shared, agreed count
-   to draw — a rail badge computed on its own would have been the drift §108.10
-   was built to prevent, in the one place nobody would ever see it disagree.
-
-   SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
-   waiting on the register" is exactly what somebody wants from a rail badge.
-   Nothing new is counted here, which is the whole point.
-
-   NEVER FOR SOMEBODY WHO CANNOT CLEAR IT (§69). The Performance dot was shown
-   to readers until it was noticed that asking a person to act on something
-   they hold no control over is how a screen nags. These counts are the
-   office's queue, so they are drawn for the office and for nobody else. */
-function attentionByPage(){
-  var by = {};
-  if (typeof inOffice === "function" && !inOffice()) return by;
-  attentionRows().forEach(function(r){
-    by[r.dest] = (by[r.dest] || 0) + (r.n | 0);
-  });
-  return by;
-}
-
-function renderOverview(){
-  var open = REVIEW.state === "open";
-  var t = cycleTotals();
-  var att = attentionRows();
-
-  /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
-     cycleTotals() (§108.9) — read here and acted on there, which is why the
-     strip carries a way through rather than any control of its own. */
-  var strip =
-    '<div class="ovcycle">' +
-      '<div class="ovcyc-l">' +
-        '<div class="ovcyc-name">' + esc(REVIEW.name) +
-          ' <span class="badge b-' + (open ? "open" : "none") + '">' +
-          (open ? "Open" : "Closed") + '</span></div>' +
-        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
-          ' &middot; due ' + esc(REVIEW.due) +
-          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
-      '</div>' +
-      '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
-        ' items reported</span></div>' +
-      '<div class="ovcyc-chips">' +
-        '<span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') +
-      '</div>' +
-      '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
-        'Open the cycle page</button>' +
-    '</div>';
-
-  var body = att.length
-    ? '<div class="ovlist">' + att.map(function(r){
-        return '<button type="button" class="ovrow" data-setupgo="' + esc(r.dest) + '">' +
-          '<span class="ovico" aria-hidden="true">' + r.glyph + '</span>' +
-          '<span class="ovtext">' + esc(r.text) + '</span>' +
-          '<span class="ovto">' + esc(attnDestLabel(r.dest)) + ' ›</span></button>';
-      }).join("") + '</div>'
-    /* NOT AN EMPTY BOX (§45.2 turned round). A page whose one job is to say
-       whether anything is waiting has to be able to say NO — an absent section
-       would read as a section that failed to load. */
-    : '<div class="ovquiet"><b>Nothing is waiting on the office.</b>' +
-      '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
-      'the list on the left.</span></div>';
-
-  return cfgHead("Overview", [], null, false, null, null, "") +
-    strip +
-    '<div class="ovh">Waiting on the office</div>' +
-    body;
-}
-
 /* ── Setup · Reporting cycle ────────────────────────────────────────
    Opening turns a plan into a request. Closing snapshots it, which is the
    only way the product ever acquires a past to compare against.
@@ -4342,11 +4057,17 @@ function renderCycle(){
         'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
   }
 
-  /* ONE ANSWER, TWO PAGES (§108.1). The totals were computed inline here and
-     the Overview opens on the same four numbers; cycleTotals() in
-     config-data.js is now the only place they are worked out, and it counts
-     the FUNCTIONS this page put on the board (§105) as well as the units. */
-  var t = cycleTotals();
+  var t = { done:0, total:0, sub:0, none:0 };
+  activeKeys().forEach(function(k){
+    var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
+    var st = unitState(UNITS[k]);
+    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
+  });
+  fnKeys.forEach(function(fk){
+    var c = fnReportedCount(fk); t.done += c.done; t.total += c.total;
+    var st = fnState(fk);
+    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
+  });
 
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
@@ -4399,7 +4120,7 @@ function renderCycle(){
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
       '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        '<span class="badge b-part">' + (activeKeys().length - t.sub - t.none) + ' in progress</span>' +
         (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
       '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
     '</div></div>';

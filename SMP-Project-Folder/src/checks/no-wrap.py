@@ -60,6 +60,15 @@ MEASURE = r"""() => {
        measurement of the thing being asserted, and it cannot be confused by
        anything around it (§50.6, caught inside an hour this time). */
     rows.forEach((r, ri) => {
+      /* A BAND IS A HEADING, NOT A DATA ROW (§105.2). §88's rule exists so a
+         row's height cannot depend on how long somebody's email is — that is
+         about CELLS. The cycle board's "Supporting functions" band spans the
+         whole table and carries a sentence of vocabulary; §105.2 decided it
+         takes a second line at 1000px rather than pushing the table 8px past
+         its box, which was the measured alternative. Asserting one line here
+         would make the fix "delete real content" — the exact trap §88's own
+         note about equal row heights names. */
+      if (r.classList.contains('dxband') || r.classList.contains('dxhead')) return;
       const walk = document.createTreeWalker(r, NodeFilter.SHOW_TEXT);
       let n;
       while ((n = walk.nextNode())) {

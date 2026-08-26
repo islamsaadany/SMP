@@ -34,6 +34,31 @@ const io = require("../lib/state-io.js");
 const Rules = require("../lib/rules.js");
 const Audience = require("../lib/audience.js");
 const mailer = require("../lib/mailer.js");
+const assistant = require("../lib/assistant.js");
+
+/* THE CORPUS IS READ ONCE PER PROCESS. It is a 70KB file that never changes
+   between deploys, and §98.1's lesson was that per-request work nobody thinks
+   about is what a poll turns into a bill. Failure is not cached: a deploy that
+   somehow shipped without it should retry rather than be permanently mute. */
+let KB = null;
+function corpus() {
+  if (KB) return KB;
+  try { KB = require("../db/kb.json"); } catch (e) { return null; }
+  return KB;
+}
+
+/* WHAT THE ASSISTANT IS CALLED, in one place. It is not a person key — §87's
+   rule, and the reason migration 024 adds a column rather than reserving a
+   name that a real person could one day be given. */
+const ASSISTANT_NAME = "Assistant";
+
+/* Escaping, for the one message this file composes itself. Everything else it
+   sends was built in the browser and arrives escaped. */
+function escHtml(t) {
+  return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+  });
+}
 const { ensureReady } = io;
 function getPool() { return io.getPool(pg); }
 
@@ -77,8 +102,13 @@ const str = function (v, max) {
 /* The columns every message is read through, in one string, because the list
    is asked for in three places and a column added to two of them is the bug
    nobody sees until a message renders without its picture. */
+/* `bot` and `source` travel with every message (§104): a reader that cannot
+   tell an automated answer from a colleague's has no way to draw the
+   difference, and the whole point of the column is that the difference is
+   drawn. */
 const MSG_COLS =
-  "id, at, from_office, by_key, by_name, body, flag, (shot IS NOT NULL) AS has_shot";
+  "id, at, from_office, by_key, by_name, body, flag, bot, source, " +
+  "(shot IS NOT NULL) AS has_shot";
 
 /* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
    ONE SMALL QUERY, not `readState()`. This endpoint has never read the
@@ -122,6 +152,88 @@ async function mine(client, me) {
     return m.from_office && (!t.seen_by_them || new Date(m.at) > new Date(t.seen_by_them));
   }).length;
   return { ok: true, thread: { waiting: t.waiting, lastAt: t.last_at }, messages: msgs, unread: unread };
+}
+
+/* ── ASKING THE ASSISTANT ─────────────────────────────────────────────
+   Returns `{answered, reply, source}` or null. NEVER THROWS: a caller that has
+   already stored the person's message must not lose it to a provider having a
+   bad afternoon (spec 016 §4.2). */
+async function assistantAnswer(client, me, question) {
+  const kb = corpus();
+  if (!kb || !assistant.configured()) return null;
+  try {
+    /* The conversation so far, so a follow-up reads as one. Bounded, because
+       an old thread is unbounded and the corpus is already 13k tokens. */
+    const hist = (await client.query(
+      "SELECT from_office, body FROM chat_messages WHERE person_key = $1 " +
+      "ORDER BY at DESC, id DESC LIMIT 9", [me.key])).rows.reverse();
+    /* The last row IS the question just stored; the model gets it as the
+       question rather than twice. */
+    hist.pop();
+    const org = (await client.query("SELECT extra FROM org WHERE id = 1")).rows[0] || {};
+    const labels = ((org.extra || {}).labels) || {};
+    const out = await assistant.ask({
+      kb: kb, question: question, history: hist,
+      who: roleWord(me), labels: labels
+    });
+    if (!out || !out.ok) return null;
+    return out;
+  } catch (e) {
+    return null;
+  }
+}
+
+/* WHO IS ASKING, in the words the corpus uses — so the assistant can pick
+   between two answers to one question (spec 016 §5.2b). READ FROM THE SESSION,
+   never sent by the browser: it decides which answer somebody gets, and a
+   value the client supplies is a value the client chooses. */
+function roleWord(me) {
+  const k = String((me && me.role) || "");
+  if (Rules.isOfficeRole(k)) return "a member of the Strategy Office";
+  if (k === "gceo" || k === "cceo") return "a chief executive";
+  if (k === "owner") return "the head of a business unit";
+  if (k === "custodian") return "a strategy custodian";
+  if (k === "fnhead") return "the head of a supporting function";
+  return "someone in the organisation";
+}
+
+/* ── TELLING A PERSON THAT A PERSON IS NEEDED (§104.4) ────────────────
+   With the assistant answering most things, a handoff is the exception — and
+   an exception nobody is told about is one nobody acts on. Sent at the moment
+   it happens, because there is no scheduler on Vercel (§97.5 settled that).
+
+   IT NEVER COSTS THE HANDOFF. The conversation is already waiting before this
+   runs; a mail failure leaves it waiting, which is the correct state. */
+async function tellTheOffice(client, me, text, cfg) {
+  if (!cfg.notify || !cfg.rep) return;
+  if (cfg.rep === me.key) return;          /* nobody is emailed about their own message */
+  if (!mailer.configured()) return;
+  try {
+    const r = (await client.query(
+      "SELECT name, extra FROM people WHERE key = $1", [cfg.rep])).rows[0];
+    const to = r && Audience.addressOf(r.extra || {});
+    if (!to) return;
+    const who = (me.name || me.key);
+    /* PLAIN, AND DELIBERATELY NOT THE TENANT'S BRANDED TEMPLATE. `MAIL.html`
+       is a browser file (§72) and the office's reply is composed there, so it
+       is out of reach here — but it should be anyway: that template exists for
+       what the ORGANISATION looks like to somebody outside the platform, and
+       this is an operational nudge to one person who works in it. Tables,
+       inline styles and literal colours all the same, because email is not the
+       web (§72). */
+    await mailer.sendOne({
+      to: to,
+      subject: "A question is waiting: " + who,
+      html: '<div style="font:15px/1.6 -apple-system,Segoe UI,Arial,sans-serif;color:#1B2740">' +
+            '<p style="margin:0 0 12px"><b>' + escHtml(who) + '</b> asked something the ' +
+            'assistant could not answer.</p>' +
+            '<blockquote style="margin:0 0 12px;padding:10px 14px;border-left:3px solid #C9A24D;' +
+            'background:#F4F6FA;color:#3D4C68">' + escHtml(String(text || "").slice(0, 400)) +
+            '</blockquote>' +
+            '<p style="margin:0;color:#5E6E88">It is waiting in Setup &rsaquo; Running the ' +
+            'cycle &rsaquo; Messages.</p></div>'
+    });
+  } catch (e) { /* a mail failure never costs the handoff */ }
 }
 
 module.exports = async function handler(req, res) {
@@ -222,6 +334,43 @@ module.exports = async function handler(req, res) {
       await client.query(
         "UPDATE chat_threads SET waiting = true, last_at = now(), " +
         "       seen_by_them = now() WHERE person_key = $1", [me.key]);
+
+      /* ── THE ASSISTANT ANSWERS FIRST (§104, spec 016) ──────────────
+         ORDER IS THE WHOLE ROBUSTNESS ARGUMENT. The message is INSERTED and
+         the thread is ALREADY WAITING by the time this runs, so every way
+         this can fail — no key, a refusal, a timeout, a malformed answer,
+         the setting off — lands on exactly the chat as it worked before the
+         assistant existed: the words are saved and a person answers them.
+         Nothing a human typed is ever lost to the assistant failing.
+
+         AND THE HANDOFF IS A FLAG, NEVER A SENTENCE. If it merely replied
+         "the office will get back to you", the thread would read as answered
+         and drop out of the queue — the person told somebody is coming and
+         nobody is (spec 016 §4.1). So `answered` decides, and the words are
+         only shown when it is true. */
+      if (cfg.assistant) {
+        const a = await assistantAnswer(client, me, text);
+        if (a && a.answered) {
+          await client.query(
+            "INSERT INTO chat_messages (person_key, from_office, bot, by_key, by_name, body, source) " +
+            "VALUES ($1,true,true,$2,$3,$4,$5)",
+            [me.key, "assistant", ASSISTANT_NAME, a.reply, a.source]);
+          /* ANSWERED, so it leaves the office's Waiting list — Islam's own
+             decision, with the cost stated when he made it: a wrong answer
+             sits unnoticed until somebody complains, which is why every
+             assistant answer carries a way out on the screen. */
+          await client.query(
+            "UPDATE chat_threads SET waiting = false, last_at = now() WHERE person_key = $1",
+            [me.key]);
+        }
+      }
+      /* A HANDOFF REACHES A PERSON (§104.4). Only when the conversation is
+         still waiting — an answered one is not an exception and nobody needs
+         telling about it. */
+      const stillWaiting = (await client.query(
+        "SELECT waiting FROM chat_threads WHERE person_key = $1", [me.key])).rows[0];
+      if (stillWaiting && stillWaiting.waiting) await tellTheOffice(client, me, text, cfg);
+
       return send(res, 200, await mine(client, me));
     }
 

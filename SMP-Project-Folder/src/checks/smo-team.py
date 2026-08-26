@@ -191,7 +191,18 @@ with sync_playwright() as p:
     ck("...and no where control was left waiting",
        pg.query_selector('[data-prole-where="%s"]' % floor) is None)
 
-    # A ROLE WITH A REAL CHOICE STILL ASKS. Ten units cannot be guessed.
+    # A ROLE WITH A REAL CHOICE READS THE UNIT CELL (§110, reversing the
+    # second half of §92's shape).
+    #
+    # §92 said a role with one destination is granted on the pick and a role
+    # with a real choice asks a second question — and this asserted both. The
+    # second half is gone: the Unit cell already holds where somebody is, and
+    # `grantPersonRole()` was writing that same field back on every grant, so
+    # the question was being asked and then over-answered. What survives here
+    # is the half that still means something — SMO team is granted on the pick
+    # — plus the two ends of the half that changed: a unit owner lands at
+    # whatever the Unit says, and lands nowhere, with a sentence, when it says
+    # nothing.
     #
     # THE ROW IS STILL OPEN, so it is not re-opened: an open row shows Save and
     # Cancel where the ⋮ was (spec 012 §2.1), and the first version of this
@@ -202,14 +213,33 @@ with sync_playwright() as p:
     ck("the open row shows Save and Cancel rather than a menu",
        pg.query_selector('.kebab[data-pmenu="%s"]' % floor) is None and
        pg.query_selector("[data-rowsave]") is not None)
+    # WITH NO UNIT SET: refused, and it SAYS SO. Nothing granted on its own is
+    # what the old pair did silently, so both ends are asked (§94.2).
+    pg.evaluate("(k)=>{ attachPersonAt(personBy(k), null); paint(); }", floor)
+    pg.wait_for_timeout(400)
     pg.click('[data-prole-open="%s"]' % floor)
     pg.wait_for_timeout(350)
     pg.select_option('[data-prole-pick="%s"]' % floor, "owner")
     pg.wait_for_timeout(500)
-    ck("a unit owner is still asked which unit",
-       pg.query_selector('[data-prole-where="%s"]' % floor) is not None)
-    ck("...and nothing was granted until it is answered",
+    said = pg.evaluate("()=>{const e=document.querySelector('.rolestop');"
+                       "return e?e.textContent.trim():null;}")
+    ck("with no Unit, a unit owner is refused",
        "owner" not in pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role).join(',')", floor))
+    ck("...and the row says to set the Unit", bool(said) and "Unit" in said, said)
+    ck("...and there is no second dropdown to answer",
+       pg.query_selector('[data-prole-where="%s"]' % floor) is None)
+
+    # AND ANSWERING THE OTHER HALF FINISHES IT. The picker is still open with
+    # `owner` showing, so picking it again would fire no `change` at all —
+    # setting the Unit is what completes the grant, in the other order.
+    # (This is what caught it: written as a second role pick, it waited thirty
+    # seconds for a "+ role" button the product is right not to be drawing.)
+    pg.select_option('[data-pat="%s"]' % floor, "nigeria")
+    pg.wait_for_timeout(600)
+    held = pg.evaluate("(k)=>personRoles(personBy(k)).map(r=>r.role+'@'+r.at).join(',')", floor)
+    ck("setting the Unit completes the refused pick", "owner@nigeria" in held, held)
+    ck("...and the refusal is gone",
+       pg.evaluate("()=>!document.querySelector('.rolestop')"))
 
 
     print("\nerrors:", errs or "none")

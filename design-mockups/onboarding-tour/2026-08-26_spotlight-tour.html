@@ -105,8 +105,15 @@
   .repbtn{font:inherit;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
           background:var(--cta);color:var(--cta-ink);border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
   .repbtn:hover{background:var(--cta-hover)}
+  .presswrap{position:relative}
   .presbtn{font:inherit;font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;
-           background:none;border:1px solid var(--line);border-radius:7px;padding:8px 14px;color:var(--ink-2);cursor:pointer}
+           background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:8px 14px;color:var(--ink-2);cursor:pointer}
+  .presmenu{position:absolute;left:0;top:calc(100% + 5px);min-width:150px;background:var(--surface);
+            border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 22px rgba(9,14,24,.18);
+            padding:4px;z-index:5}
+  .pmitem{display:block;width:100%;text-align:left;font:inherit;font-size:12.5px;color:var(--ink);
+          background:none;border:0;border-radius:6px;padding:7px 10px;cursor:pointer}
+  .pmitem:hover{background:var(--surface-2)}
   .legend{margin-left:auto;display:flex;gap:12px;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:4px;vertical-align:-1px}
   .hl{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
@@ -118,18 +125,19 @@
             text-align:center;color:var(--ink-3);font-size:12.5px}
 
   /* ── The tour itself ─────────────────────────────────────────────────── */
-  .tdim{position:absolute;inset:0;background:var(--dim);z-index:40;display:none}
+  /* The click-absorber: transparent — ALL dimming is painted by the SVG
+     shade, whose mask can hold SEVERAL holes at once (the active button AND
+     the section it opened), which one box-shadow cutout never could. */
+  .tdim{position:absolute;inset:0;background:transparent;z-index:40;display:none}
   .frame.touring .tdim{display:block}
-  .thole{position:absolute;z-index:41;border-radius:9px;pointer-events:none;display:none;
-         box-shadow:0 0 0 9999px var(--dim), 0 0 0 2px var(--gold), 0 0 18px 2px rgba(201,162,77,.55)}
-  /* A step whose subject is the WHOLE view drops the dim — dimming means
-     nothing when everything is the subject — and keeps only the ring. */
-  .thole.open{box-shadow:0 0 0 2px var(--gold), 0 0 18px 2px rgba(201,162,77,.55)}
-  .thole.doing{animation:tpulse 1.6s ease-in-out infinite}
-  @keyframes tpulse{
-    0%,100%{box-shadow:0 0 0 9999px var(--dim),0 0 0 2px var(--gold),0 0 10px 1px rgba(201,162,77,.4)}
-    50%    {box-shadow:0 0 0 9999px var(--dim),0 0 0 4px var(--gold),0 0 24px 5px rgba(201,162,77,.75)}}
-  @media (prefers-reduced-motion:reduce){.thole.doing{animation:none}}
+  .tsvg{position:absolute;inset:0;width:100%;height:100%;z-index:41;pointer-events:none;display:none}
+  .frame.touring .tsvg{display:block}
+  #tshade{fill:var(--dim)}
+  .tring{fill:none;stroke:var(--gold);stroke-width:2;
+         filter:drop-shadow(0 0 6px rgba(201,162,77,.6))}
+  .tring.doing{animation:tpulse 1.6s ease-in-out infinite}
+  @keyframes tpulse{0%,100%{stroke-width:2;opacity:.75}50%{stroke-width:4;opacity:1}}
+  @media (prefers-reduced-motion:reduce){.tring.doing{animation:none}}
   .frame.touring .lit{position:relative;z-index:42}
   /* The card is a little transparent by design — where it must share space
      with the page, what is under it stays readable through it. */
@@ -166,24 +174,24 @@
 
 <div class="mkwrap">
   <div class="mkhead">
-    <span class="mkt">Design mockup · for sign-off · rev 2</span>
+    <span class="mkt">Design mockup · for sign-off · rev 3</span>
     <h1>Onboarding tour — dim, spotlight, story</h1>
     <span class="mkd">2026-08-26 · not the product</span>
   </div>
 
   <div class="mknote">
     <div class="mkcard">
-      <h2>What is proposed — revised after review</h2>
-      <p>First sign-in opens a guided tour <b>on demo data</b>: the page dims, one control stays
+      <h2>What is proposed — rev 3 after review</h2>
+      <p>First sign-in opens a guided tour <b>on demo data</b>: the page dims, what matters stays
          lit, a short card says what it is. <b>Look</b> steps advance with Next; <b>do</b> steps
-         have no Next — the person presses the lit control itself. Every card now carries
-         <b>&#8249; Back</b> beside the step count, Skip tour and &#215;.</p>
-      <p>Changed from rev 1: <b>Back on every step</b> · the strategy walk now opens the real
-         sections <b>one by one, in place</b> (Strategy is one tab holding Foundation &#183; SWOT
-         &#183; Plan) · the card is <b>slightly transparent</b> and placed <b>beside the
-         spotlight, never over it</b> · the Performance page now matches the built product — the
-         Report and Presentation buttons with the band legend are its <b>first row</b> · and
-         <b>Presentation gets its own step</b>. 9 steps.</p>
+         have no Next — the person presses the lit control itself. Every card carries
+         <b>&#8249; Back</b>, the step count, Skip tour and &#215;.</p>
+      <p>Changed from rev 2: on navigation steps the spotlight is <b>the one button that says
+         where you are</b> (Mobile, then the Strategy tab), not the whole row — and the dim can
+         now hold <b>two spotlights at once</b>, so each strategy section lights its own section
+         button AND its content together while everything else dims. <b>Presentation is now a
+         do-step</b>: pressing it really opens its menu, and the next step explains Present and
+         Manage slides inside it. 10 steps.</p>
     </div>
     <div class="mkcard mkcost">
       <h2>Costs, stated</h2>
@@ -201,8 +209,8 @@
     </div>
   </div>
 
-  <span class="replay">Check: press through all 9 steps · use Back, including from a do-step ·
-    press the lit controls on steps 6&#8211;7 · try Skip and &#215; · resize mid-step.
+  <span class="replay">Check: press through all 10 steps · use Back, including from a do-step ·
+    press the lit controls on steps 7&#8211;9 · try Skip and &#215; · resize mid-step.
     <button id="restart">Restart the tour</button></span>
 
   <!-- ════════ Platform replica ════════ -->
@@ -214,7 +222,7 @@
       </div>
       <div class="crow2" id="navrow">
         <button class="navb">The group &#9662;</button>
-        <button class="navb on">Mobile</button>
+        <button class="navb on" id="navMobile">Mobile</button>
         <button class="navb">B2B Ecomm</button>
         <button class="navb">Retail Stores</button>
         <button class="navb">Care</button>
@@ -290,7 +298,13 @@
     <div class="page" id="viewPerf" hidden>
       <div class="actrow">
         <button class="repbtn" id="btnReport">Report</button>
-        <button class="presbtn" id="btnPresent">Presentation &#9662;</button>
+        <span class="presswrap">
+          <button class="presbtn" id="btnPresent">Presentation &#9662;</button>
+          <div class="presmenu" id="presMenu" hidden>
+            <button class="pmitem">Present</button>
+            <button class="pmitem">Manage slides</button>
+          </div>
+        </span>
         <span class="legend">
           <span><i style="background:var(--ok)"></i>On track</span>
           <span><i style="background:var(--warn)"></i>Watch</span>
@@ -307,7 +321,14 @@
 
     <!-- Tour machinery -->
     <div class="tdim" id="tdim"></div>
-    <div class="thole" id="thole"></div>
+    <svg class="tsvg" id="tsvg">
+      <defs><mask id="tmask">
+        <rect width="100%" height="100%" fill="#fff"></rect>
+        <g id="tholes"></g>
+      </mask></defs>
+      <rect id="tshade" width="100%" height="100%" mask="url(#tmask)"></rect>
+      <g id="trings"></g>
+    </svg>
     <div class="tcard" id="tcard">
       <div class="tctop"><span class="tstep" id="tstep"></span>
         <button class="tx" id="tclose" title="Close the tour" aria-label="Close the tour">&#215;</button></div>
@@ -322,12 +343,14 @@
 <script>
 (function(){
   "use strict";
-  var frame=document.getElementById("frame"), dim=document.getElementById("tdim"),
-      hole=document.getElementById("thole"), card=document.getElementById("tcard");
+  var frame=document.getElementById("frame"), svg=document.getElementById("tsvg"),
+      holesG=document.getElementById("tholes"), ringsG=document.getElementById("trings"),
+      card=document.getElementById("tcard");
 
-  /* One place decides what the replica shows: a view key, applied by every
-     step — which is what makes Back free (going back reapplies the view). */
-  function showView(v){
+  /* One place decides what the replica shows: a view key plus whether the
+     Presentation menu is open, applied by every step — which is what makes
+     Back free (going back reapplies the state). */
+  function showView(v, menu){
     ["Found","Swot","Plan","Perf"].forEach(function(n){
       document.getElementById("view"+n).hidden = (v!==n.toLowerCase()); });
     var strat = v!=="perf";
@@ -337,42 +360,48 @@
     document.getElementById("secFound").classList.toggle("on",v==="found");
     document.getElementById("secSwot").classList.toggle("on",v==="swot");
     document.getElementById("secPlan").classList.toggle("on",v==="plan");
+    document.getElementById("presMenu").hidden = !menu;
   }
 
-  /* The story: {view, target, kind, title, body}. "do" waits for a real click
-     on the target; "look" advances with Next; no target = a centred card. */
+  /* The story: {view, targets:[selectors], kind, title, body}. The LAST
+     target is the step's main subject (the card keeps clear of it); every
+     target gets its own hole in the one shade, so a section step lights the
+     section BUTTON and the section it opened together. "do" waits for a real
+     click on the last target. No targets = a centred card. */
   var STORY=[
     {kind:"welcome", view:"plan", title:"Welcome to the Strategy Management Platform",
      body:"This two-minute tour shows you around on <b>demo data</b> — a full worked example. "+
           "Nothing you press during the tour can change anything real, so press freely.",
      next:"Start the tour", skiplabel:"Not now"},
-    {kind:"look", view:"plan", target:"#navrow", title:"This row is the business",
-     body:"Each button is a business unit or a supporting function. You open the ones you are "+
-          "responsible for — during the tour, that is Raya Trade's Mobile unit."},
-    {kind:"look", view:"plan", target:"#tabrow", title:"What was agreed, and how it is going",
+    {kind:"look", view:"plan", targets:["#navMobile"], title:"You are here: Mobile",
+     body:"This row is the business — every button a unit or a supporting function, and the "+
+          "lit one is where you are. You will only see the ones you are responsible for."},
+    {kind:"look", view:"plan", targets:["#tabStrat"], title:"The Strategy tab",
      body:"<b>Strategy</b> holds what was agreed, in three sections you will see one by one. "+
-          "<b>Performance</b> shows what the reported figures make of it. As a custodian, "+
-          "you will live mostly in these two."},
-    {kind:"look", view:"found", target:"#foundBody", title:"Strategy &#8250; Foundation",
+          "<b>Performance</b>, beside it, shows what the reported figures make of it."},
+    {kind:"look", view:"found", targets:["#secFound","#foundBody"], title:"Strategy &#8250; Foundation",
      body:"Who the unit is: the aspiration, and the key objectives the unit is judged on."},
-    {kind:"look", view:"swot", target:"#swotBody", title:"Strategy &#8250; SWOT",
+    {kind:"look", view:"swot", targets:["#secSwot","#swotBody"], title:"Strategy &#8250; SWOT",
      body:"The reasoning the plan was built from — strengths, weaknesses, opportunities, "+
           "threats. The pillars answer what this table says."},
-    {kind:"look", view:"plan", target:"#planRail", title:"Strategy &#8250; Plan — the pillars",
+    {kind:"look", view:"plan", targets:["#secPlan","#planRail"], title:"Strategy &#8250; Plan — the pillars",
      body:"The plan itself. Each pillar on this rail holds the measures your unit is scored "+
           "on and the tactics that deliver them."},
-    {kind:"look", view:"plan", target:"#planPane", title:"A pillar's measures and tactics",
+    {kind:"look", view:"plan", targets:["#secPlan","#planPane"], title:"A pillar's measures and tactics",
      body:"Open a pillar and this pane shows its measures, targets and how each compiles. "+
           "This is what reporting fills with figures each cycle."},
-    {kind:"do", view:"plan", target:"#tabPerf", title:"See how a plan becomes a score",
+    {kind:"do", view:"plan", targets:["#tabPerf"], title:"See how a plan becomes a score",
      body:"Performance reads the plan and the reported figures together and turns them into "+
           "the unit's score.", hint:"Press Performance to continue"},
-    {kind:"do", view:"perf", target:"#btnReport", title:"Where your figures go in",
+    {kind:"do", view:"perf", targets:["#btnReport"], title:"Where your figures go in",
      body:"While a reporting cycle is open, <b>Report</b> is where you enter this quarter's "+
           "figures and submit them for the unit.", hint:"Press Report to continue"},
-    {kind:"look", view:"perf", target:"#btnPresent", title:"The unit's story, as slides",
-     body:"<b>Presentation</b> turns this page into the review deck — Present it live on a "+
-          "projector, or manage its slides first."},
+    {kind:"do", view:"perf", targets:["#btnPresent"], title:"The unit's story, as slides",
+     body:"<b>Presentation</b> turns this page into the review deck.",
+     hint:"Press Presentation to open it"},
+    {kind:"look", view:"perf", menu:true, targets:["#presMenu"], title:"Present, or manage the slides",
+     body:"<b>Present</b> plays the deck full-screen for a projector. <b>Manage slides</b> is "+
+          "where you arrange it first — including picture slides of your own."},
     {kind:"finish", view:"perf", title:"That's the essentials",
      body:"You can replay this tour any time from the <b>Knowledge base</b>. The moment this "+
           "closes you are back on your own data.", next:"Close"}
@@ -381,43 +410,45 @@
   var at=-1, lit=null;
   function clearLit(){ if(lit){lit.classList.remove("lit");lit=null;} }
   function end(){ clearLit(); frame.classList.remove("touring");
-                  hole.style.display=card.style.display="none"; at=-1; }
+                  card.style.display="none"; showView("plan",false); at=-1; }
+  function svgRect(g, h, cls){
+    var r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    r.setAttribute("x",h.l); r.setAttribute("y",h.t);
+    r.setAttribute("width",h.w); r.setAttribute("height",h.ht);
+    r.setAttribute("rx",9);
+    if(cls) r.setAttribute("class",cls); else r.setAttribute("fill","#000");
+    g.appendChild(r);
+  }
 
   function place(){
     if(at<0) return;
     var s=STORY[at], fr=frame.getBoundingClientRect();
-    if(!s.target){ hole.style.display="none"; dim.style.background="";
-                   card.classList.add("center");
-                   card.style.left=card.style.top=""; card.style.display="block"; return; }
+    holesG.innerHTML=""; ringsG.innerHTML="";
+    if(!s.targets){ card.classList.add("center");
+                    card.style.left=card.style.top=""; card.style.display="block"; return; }
     card.classList.remove("center");
-    /* The hole's own box-shadow paints ALL the dim; the full-cover layer goes
-       transparent and only absorbs clicks — otherwise the spotlight is dimmed
-       too and a lit tab's text washes out (the §68.10 family). */
-    dim.style.background="transparent";
-    var el=frame.querySelector(s.target), r=el.getBoundingClientRect(), pad=6;
-    var h={l:r.left-fr.left-pad, t:r.top-fr.top-pad, w:r.width+2*pad, ht:r.height+2*pad};
-    hole.style.display="block";
-    hole.className="thole"+(s.kind==="do"?" doing":"");
-    hole.style.left=h.l+"px"; hole.style.top=h.t+"px";
-    hole.style.width=h.w+"px"; hole.style.height=h.ht+"px";
+    var pad=6, hs=s.targets.map(function(sel){
+      var r=frame.querySelector(sel).getBoundingClientRect();
+      return {l:r.left-fr.left-pad, t:r.top-fr.top-pad, w:r.width+2*pad, ht:r.height+2*pad};
+    });
+    hs.forEach(function(h){ svgRect(holesG,h);
+                            svgRect(ringsG,h,"tring"+(s.kind==="do"?" doing":"")); });
     card.style.display="block";
-    /* The card sits BESIDE the spotlight, never over it: try below, right,
-       left, above — first candidate fully inside the frame that does not
-       intersect the hole wins; the below-clamped position is the fallback. */
-    var cw=card.offsetWidth, ch=card.offsetHeight,
+    /* The card sits BESIDE the spotlights, never over one: candidates around
+       the MAIN subject (the last target), first position inside the frame
+       that clears every hole wins; corner-dock is the translucent fallback. */
+    var h=hs[hs.length-1], cw=card.offsetWidth, ch=card.offsetHeight,
         W=frame.offsetWidth, H=frame.offsetHeight, g=14, m=8;
     function fits(c){ return c.l>=m && c.t>=m && c.l+cw<=W-m && c.t+ch<=H-m; }
-    function clear(c){ return c.l>=h.l+h.w||c.l+cw<=h.l||c.t>=h.t+h.ht||c.t+ch<=h.t; }
-    /* …and when the spotlight is a whole content region with no room beside
-       it, the card docks in a corner of the frame instead of covering it. */
+    function clearAll(c){ return hs.every(function(x){
+      return c.l>=x.l+x.w||c.l+cw<=x.l||c.t>=x.t+x.ht||c.t+ch<=x.t; }); }
     var cands=[{l:h.l,t:h.t+h.ht+g},{l:h.l+h.w+g,t:h.t},{l:h.l-cw-g,t:h.t},{l:h.l,t:h.t-ch-g},
                {l:W-cw-m,t:H-ch-m},{l:m,t:H-ch-m}],
         pick=null;
     for(var i=0;i<cands.length;i++){
       var c={l:Math.min(Math.max(m,cands[i].l),W-cw-m),t:cands[i].t};
-      if(fits(c)&&clear(c)){pick=c;break;} }
-    if(!pick){ hole.classList.add("open");
-               pick={l:W-cw-m, t:Math.min(Math.max(m,h.t+h.ht+g),H-ch-m)}; }
+      if(fits(c)&&clearAll(c)){pick=c;break;} }
+    if(!pick) pick={l:W-cw-m, t:Math.min(Math.max(m,h.t+h.ht+g),H-ch-m)};
     card.style.left=pick.l+"px"; card.style.top=pick.t+"px";
   }
 
@@ -425,7 +456,7 @@
     clearLit();
     if(n>=STORY.length){ end(); return; }
     at=Math.max(0,n); var s=STORY[at];
-    showView(s.view);
+    showView(s.view, !!s.menu);
     document.getElementById("tstep").textContent=
       s.kind==="welcome" ? "The tour · strategy custodian" :
       s.kind==="finish"  ? "The tour · done" : "Step "+at+" of "+(STORY.length-2);
@@ -440,7 +471,8 @@
       f.innerHTML=back+'<button class="tskip" data-t="skipall">Skip tour</button>'+
         '<span class="tdo"><span class="dhint">'+s.hint+'</span>'+
         '<button class="dskip" data-t="skipstep">or skip this step</button></span>';
-      var el=frame.querySelector(s.target); lit=el; el.classList.add("lit");
+      var el=frame.querySelector(s.targets[s.targets.length-1]);
+      lit=el; el.classList.add("lit");
     } else {
       f.innerHTML=back+'<button class="tskip" data-t="skipall">'+(s.skiplabel||"Skip tour")+'</button>'+
         '<button class="tnext" data-t="next">'+(s.next||"Next")+'</button>';

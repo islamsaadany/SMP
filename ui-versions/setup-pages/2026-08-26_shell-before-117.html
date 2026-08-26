@@ -458,7 +458,7 @@
          section is refused, so a view-only holder of c_import sees Archived
          plans alone and somebody with neither sees no entry — exactly what the
          two separate rows did, in one row. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Import & archives", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", glyph:"⇅", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
         sections: function(){
           return [{ k:"in",   ac:"c_import", label:"Import a plan",
                     when: function(){ return grant("c_import") === "edit"; },
@@ -1551,14 +1551,6 @@
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
-    /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§117.1). Twenty
-       lines down, a page with sections reassigns `def` to whichever section is
-       open — so reading the name after that gives the SECTION's: Figure sets
-       was titling itself "Sets configuration" and Import & archives "Import a
-       plan", which is the rail pointing at one name and the page showing
-       another all over again. The rail's own label is the page's name whether
-       or not it has sections inside it. */
-    var pageName = def ? (def.label || "") : "";
     var secs = def.sections ? allowed(def.sections(arg), TARGET) : null;
     var secrowHTML = "";
     /* `secs.length`, not `secs`. An empty array is truthy, so a def whose every
@@ -1583,13 +1575,6 @@
     /* The per-page Info button left the header in 2.9. The explanations in
        PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
        inside the pages themselves. */
-    /* THE NAME THE SHELL IS ABOUT TO SHOW (§117.1), set BEFORE the page
-       renders, because cfgHead() reads it to decide whether its own heading
-       would be repeating it. Cleared for every non-Setup page, or a unit's
-       section called "Performance" would go unnamed on a page the rail is not
-       even drawing. */
-    PAGE_TITLE = railed ? (pageName || null) : null;
-
     var body = (current === "group" || current === "setup" || current === "manage")
       ? def.render()
       /* A company is passed its key, the way a function is: there is no
@@ -1604,15 +1589,7 @@
     document.getElementById("panel").innerHTML = railed
       ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
         setupRail(defs, currentSub) +
-        /* ── THE PAGE HEADER, AND IT STAYS (§117.2) ──────────────────
-           Islam: *"this page needs to be sticky for the title."* Measured
-           first: the rail's head and search already stick and the pane's
-           title did not — it scrolled 600px away with everything else. It
-           pins at the same offset the rail's head uses, so the two line up
-           rather than one sliding under the other. */
-        '<div class="pane setuppane">' +
-          '<div class="setuphead"><h1 class="setupttl">' + esc(pageName) + '</h1></div>' +
-          secrowHTML + body + '</div></div>'
+        '<div class="pane setuppane">' + secrowHTML + body + '</div></div>'
       : body;
 
     /* Group Performance is four sections; they become a third nav row rather

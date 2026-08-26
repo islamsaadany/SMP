@@ -15456,3 +15456,98 @@ instead of for a clock, and the assertion itself is untouched. 4/4 after.
 
 **`no-jump` is left failing, deliberately** — it fails identically on
 `origin/main` (verified in a worktree) and belongs to whoever owns that page.
+
+## 117 · The Setup pages sit still (v3.30)
+
+Islam, five notes on the built product: *"make the title like overview with a
+better design … this page needs to be sticky for the title and the setup header
+and search bar … there is some duplication in the titles like business unit
+business unit … the rail options needs to be smaller in height and no title is
+double line … think of the overall design of the pages as well."*
+
+Settled from a measured mockup, and **two of the five were not what they looked
+like**. The rail's head and search bar ALREADY stick — measured, they move 33px
+and pin — so "make it sticky" was about the pane's title, which scrolled 600px
+away with everything else. And the title's design was not the problem: at 24px
+it is already the largest thing on the page. What it lacked was a CONTAINER, so
+it read as the page's first line rather than as its header.
+
+### 117.1 The page is named once, in the rail's own word
+
+Two pages printed their name twice (Business units, Companies) and **five called
+themselves something the rail did not** — Terminology opened *"Labels"*, Email
+opened *"Communication"*, Roles & access opened *"Who may see what"*, Import &
+archives opened *"Plan import"*, and Reporting cycle had no title at all. That
+is §108's rename reaching the navigation and stopping there: my own drift, and
+invisible on any single page, because a page looks wrong only when it is read
+beside the rail that points at it.
+
+**THE SHELL DRAWS THE NAME, FROM THE DEF'S LABEL** — the one list that already
+holds it, so the two can never disagree again. `PAGE_TITLE` is set before the
+page renders, and both `cfgHead()` and `section()` **drop a heading that repeats
+it** (§28's rule: a header saying nothing new still spends its line). Compared
+against the NAME, never by position — the Reporting cycle's first section is
+*"Who has reported"*, a real section, and it keeps its heading.
+
+**AND THE NAME IS TAKEN BEFORE `def` BECOMES A SECTION.** Twenty lines into
+`paint()` a page with sections reassigns `def` to whichever section is open, so
+reading the label after that gives the SECTION's: Figure sets titled itself
+*"Sets configuration"* and Import & archives *"Import a plan"* — the same fault
+the change was made to remove, reintroduced by reading the right field at the
+wrong moment.
+
+### 117.2 The header stays, and it needed §53.7's filler
+
+`.setuphead` pins at **the rail's own offset expression**, not a number of its
+own, so the two stay level as the chrome changes height (§29.4: one number, not
+two).
+
+**AND THE STRIP ABOVE IT HAD TO BE FILLED.** A sticky header pins BELOW the
+chrome by `--rail-gap`, and that gap is page rather than header — so table rows
+slid through it and a row was visible above the pinned title. §53.7's own
+pattern, already carried by the rail and the capability band: a `::before` that
+takes the ground up over the strip. Safe in the flow position here, which is
+what §53.7 warns about, because this header is the first thing in the pane.
+
+**THE CONTROLS ROW IS NOT PULLED INTO IT.** A `margin-top:-52px` did that first
+and the row is not sticky, so scrolling slid it out from under the pinned title
+and left a stray *"Clear plan"* floating above it. **A sticky box may only
+overlap something that pins with it.**
+
+### 117.3 Shorter rows, and a label shortened rather than clipped
+
+45px a row, and *"Plan import & archives"* wrapped to 66px — which is what made
+the list 961px and pushed the last entries below the fold. Rows are 36px now and
+the list is 816px.
+
+**THE LABEL WAS SHORTENED, NOT ELLIPSISED.** An ellipsis is right in a table
+cell (§88) and wrong in a navigation list, where the label IS the destination —
+half a name behind a hover is a door you cannot read. *Import & archives*, in
+the rail's own sentence case, which the other seventeen entries all use.
+`text-overflow` stays as a GUARD, so the next over-long label fails loudly in
+the check rather than quietly growing the rail again.
+
+### 117.4 The table head goes with it, and the headings are separated
+
+**NOT EVERY TABLE PINS TO THE PAGE.** `.cfg.peoplebox` and `.cfg.srctable` are
+their own scroll boxes with their own sticky heads at `top:0` INSIDE them, which
+is the right answer for a boxed table — applying a page offset there put the
+register's headings **293px down**, measured. They are excluded rather than
+overridden: two rules fighting over one thead is how a head ends up pinned to
+neither.
+
+The headings are uppercase, letter-spaced and 8px-padded with nothing between
+them, so at a narrow pane *"Shown in the nav"* and *"Code"* merged into one
+word — exactly what Islam's screenshot shows. A hairline between header cells
+costs no width and no height and is what makes a table read as columns.
+
+### 117.5 §51.11, in my own checks, twice in one change
+
+The rail row gained a glyph span, so `.ritem`'s `textContent` became
+*"People register2"*; then the page's name moved out of `.secttl` into
+`.setupttl`, and a heading that merely repeated the name stopped being drawn at
+all — so two checks reading `#panel .secttl` for the title **crashed on a
+missing element** rather than failing an assertion. Both were found by running
+the whole suite rather than the one file being worked on. *When a control
+changes shape, grep every check for the old selector — not the one that failed
+first.*

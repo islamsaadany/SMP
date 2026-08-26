@@ -202,6 +202,21 @@ with sync_playwright() as p:
       probe.remove(); return bad;}""")
     ck("no glyph renders as an empty box", not tofu, tofu)
 
+    # SHORTER ROWS, AND NO LABEL ON TWO LINES (§117.3). Islam measured the
+    # symptom: 45px a row and one label wrapping to 66px, which is what put the
+    # last entries below the fold. The assertion is that no row is TALLER than
+    # the rest — a single wrapped label is what this catches, and it is what a
+    # future long name would do again.
+    hs = [r["h"] for r in pg.eval_on_selector_all(".setuprail .ritem",
+        "e=>e.map(x=>({h:Math.round(x.getBoundingClientRect().height)}))")]
+    ck("every row is the same height", max(hs) - min(hs) <= 1, sorted(set(hs)))
+    ck("and that height is the tighter one", max(hs) <= 38, sorted(set(hs)))
+    # A label clipped by the ellipsis guard is a destination you cannot read,
+    # so the NAME has to fit rather than the row merely being tidy (§117.3).
+    clipped = pg.eval_on_selector_all(".setuprail .rilab",
+        "e=>e.filter(x=>x.scrollWidth>x.clientWidth+1).map(x=>x.textContent.trim())")
+    ck("no label is clipped", not clipped, clipped)
+
     print("\n── 6 · People & access is in the order the mockup drew (§116.3) ──")
     order = pg.evaluate("""()=>{
       const h=[...document.querySelectorAll('.setuprail .rgroup')]

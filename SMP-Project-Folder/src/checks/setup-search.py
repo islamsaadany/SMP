@@ -156,7 +156,7 @@ with sync_playwright() as p:
     type_q(pg, "logo")
     pg.query_selector('.setuprail .ritem[data-setupgo="brand"]').click()
     pg.wait_for_timeout(500)
-    ck("the page opened", pg.eval_on_selector("#panel .secttl", "e=>e.textContent.trim()")
+    ck("the page opened", pg.eval_on_selector("#panel .setupttl", "e=>e.textContent.trim()")
        == "Branding")
     ck("and the rail is no longer filtered",
        pg.eval_on_selector("[data-railq]", "e=>e.value") == "" and

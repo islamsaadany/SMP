@@ -670,18 +670,10 @@ function section(eyebrow, title, note, body, tipText, action){
      empty <h2> still spends its line-height and its margin, which on the unit
      Performance page was pushing the rail a heading's worth further down the
      page for a heading that rendered as blank. */
-  /* AND A HEADING THAT REPEATS THE PAGE'S OWN NAME DOES NOT GET ONE EITHER
-     (§117.1). The Setup page's name is drawn by the shell now, so a section
-     called what the page is called says it twice — the same argument as the
-     empty header above, with the header full of a word already on screen.
-     Compared against the name being shown rather than by position: a real
-     first section keeps its heading. */
-  var dupTitle = title && typeof PAGE_TITLE !== "undefined" && PAGE_TITLE != null &&
-                 String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
-  var head = (eyebrow || (title && !dupTitle) || action)
+  var head = (eyebrow || title || action)
     ? '<div class="section-h">' +
         (eyebrow ? '<span class="section-n">' + eyebrow + '</span>' : '') +
-        (title && !dupTitle ? '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' : '') +
+        (title ? '<h2>' + title + (tipText ? tip(tipText) : '') + '</h2>' : '') +
         (action || '') + '</div>'
     : '';
   return '<div class="section">' + head +

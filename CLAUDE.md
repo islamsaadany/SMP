@@ -1802,6 +1802,8 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
                                 # not DRAWN ships as a blank box (§52, §116.2)
+python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
+                                # and the name and the table head stay on screen (§117)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:

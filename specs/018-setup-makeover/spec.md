@@ -159,7 +159,26 @@ product beside the signed-off mockup:
 4. **The strip's way through keeps its place** — 19px from the right edge at
    every width from 1920 to 1024, and the strip never exceeds 145px.
 
-## 9 · Still open
+## 9 · The pages sit still (§117)
+
+Five notes on the built product, settled from a measured mockup. Two were not
+what they looked like: the rail's head and search **already** stick (they move
+33px and pin), so the ask was about the pane's title; and the title's problem
+was not its size but that it had no container.
+
+- **Named once, in the rail's word.** The shell draws the page's name from the
+  def's label, and a section heading repeating it is dropped — compared against
+  the name, never by position, so a real first section keeps its heading.
+  Fixes two duplicates and five pages that disagreed with the rail.
+- **The name and the table head stay on screen**, pinned at the rail's own
+  offset expression, with §53.7's ground filler over the strip above.
+  `.peoplebox` and `.srctable` keep their own in-box sticky heads.
+- **36px rows**, and the long label shortened to *Import & archives* rather
+  than clipped: in a navigation list the label is the destination.
+- **A hairline between table headings**, which at a narrow pane were merging
+  into one word.
+
+## 10 · Still open
 
 Nothing from this makeover. The two candidates deliberately NOT built:
 **data-search** (a typed person's name jumping to their register row) — a real

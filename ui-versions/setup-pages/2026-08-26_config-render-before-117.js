@@ -45,7 +45,7 @@ function renderLabels(){
        explanation - it is a state that blocks saving and has to be seen. */
     : '';
 
-  return section("", "Terminology", null,
+  return section("", "Labels", null,
       '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
       '<th style="width:33%">Display at group level</th>' +
@@ -202,7 +202,7 @@ function renderAccess(){
       }).join("") + '</tr>';
   }).join("");
 
-  return section("", "Roles & access",
+  return section("", "Who may see what",
       "Eight roles and the floor beneath them, against the kinds of page each may " +
       "reach. Edit includes view. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
@@ -365,31 +365,10 @@ var CLEARMENU = null;
    worded dropdown buttons beside the title — and Islam asked for the password
    actions to match, so the slot exists rather than each page inventing a place
    to put its own (§47.2). */
-/* ── THE PAGE IS NAMED ONCE (§117.1) ─────────────────────────────────────
-   Islam: *"there is some duplication in the titles like business unit business
-   unit"* — Business units and Companies each printed their name as the page
-   title and again as the first section's heading.
-
-   The Setup page's name is drawn by the shell now, from the RAIL'S OWN LABEL,
-   so the two can never disagree: five pages were calling themselves something
-   the rail did not (Terminology opened "Labels", Email opened "Communication"),
-   which is §108's rename reaching the navigation and stopping there.
-
-   SO A SECTION HEADING THAT REPEATS THE PAGE'S NAME IS NOT DRAWN — §28's rule
-   that a header saying nothing new still spends its line. It is compared
-   against the name the shell is showing, NOT suppressed by position: the
-   Reporting cycle's first section is "Who has reported", which is a real
-   section name and keeps its heading. The row itself survives either way,
-   because it also carries the page's controls. */
-var PAGE_TITLE = null;
-
 function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
   var editing = EDITING[editKey];
   var open = CLEARMENU === editKey;
-  var dup = PAGE_TITLE != null &&
-            String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
-  return '<div class="phead2' + (dup ? ' named' : '') + '">' +
-    (dup ? '' : '<h2 class="secttl">' + title + '</h2>') +
+  return '<div class="phead2"><h2 class="secttl">' + title + '</h2>' +
     '<div class="hright">' +
       chips.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
       (extra || "") +
@@ -5095,7 +5074,7 @@ function renderComms(){
       '</span>' +
     '</span></td></tr></tbody></table></div>';
 
-  return cfgHead("Email",
+  return cfgHead("Communication",
       ['<span class="pill kind">SMO</span>',
        set ? 'set for this tenant' : 'using the defaults'],
       "comms", mayEdit, null) +

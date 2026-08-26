@@ -16248,3 +16248,79 @@ content ends before its cap and the two legitimately differ. The pane is still
 capped by the rail's expression — that is the point of taking it — but what was
 asked for is that the table reaches the fold, so **the window is what is
 measured now**, at both ends: it must reach it and must never pass it.
+
+## 123 · A tactic that names no quarter, a closing slide, and the overview's download (v3.45)
+
+Three more from using the plan download, on a tenant whose plan is still
+being filled in — which is exactly the state the Missing marks were built for
+and the state the demo never shows (§94.2).
+
+### 123.1 No quarter at all is a gap; a blank one is not
+
+Islam, on a tactics slide with a Missing owner and four empty quarter
+columns: *"in the tactics slide, Qs are missing as well."*
+
+**§119.1 DELIBERATELY LEFT A BLANK QUARTER ALONE, AND THAT IS STILL RIGHT.**
+A tactic marked Q2 and Q3 is *saying something* about Q1 and Q4 by leaving
+them empty — the absence is the answer, which is why an unticked quarter gets
+no mark. What that reasoning never covered is **all four empty**: nobody has
+said when this runs at all, and that is a fact the plan owes exactly like a
+missing owner. The rule is therefore not "flag an empty cell" but "flag a row
+that answered nothing".
+
+**ONE MISSING ACROSS THE FOUR, NEVER FOUR OF THEM.** The gap is a single
+unanswered question; printing it once per column turns one omission into a
+row of alarm and makes a half-filled plan unreadable. It is a real merged
+cell — `gridSpan="4"` on the first and `hMerge="1"` on the other three, the
+pair DrawingML needs — so it centres across the block the way a person would
+draw it.
+
+### 123.2 The deck closes on Thank you
+
+*"add a thank you page at the end of the ppt."* `present.js` has ended on a
+`d-thanks` cover slide since the projected deck existed — the words, the
+rule, the subject beneath — so this is the plan deck learning the manners the
+review deck already has rather than a new idea (§53.5, a unit and a function
+are the same product, applied to two decks of the same plan).
+
+### 123.3 The Function overview carries the download too
+
+*"the functional projects has no download button we need a download button."*
+Measured first, because the button IS on a capability's Projects pane and was
+confirmed there on live production (§119.5 asked about this and got no
+answer). What the measurement found is the half nobody had looked at: a
+capability function's strategy tab is **two sections** — Function overview
+and Projects — and only the second had a `.paneact` to hang the button on.
+One deck comes out either way, so from the overview there was simply no way
+to take the plan away. `DL_PAGES` names the two page keys and `editBar()`
+draws it beside Edit.
+
+**AND IT RENDERED INVISIBLE, WHICH IS §70 EXACTLY.** `.penbtn` is built for a
+card corner: absolutely positioned, `opacity:0` until its `.hoverpen` parent
+is hovered. Dropped into `.pageact` — a flex row of worded buttons — it
+appeared in the document, answered every DOM query, and could not be seen or
+pressed. It was caught only because the check CLICKS the control instead of
+asking whether it exists; Playwright refuses to click something invisible.
+`.pageact .penbtn` is `position:static` and always visible.
+
+**THE DOWNLOAD IS NOT AN AUTHORING CONTROL**, so `editBar()` asks for it
+before the pen's gate and draws the bar when either is answered — a person
+who may not author the overview may still take it away.
+
+### 123.4 What proves it
+
+`checks/strategy-split.py` §5 makes the state (a pillar whose tactics lose
+their quarters, with ONE tactic keeping a quarter so both halves are
+measured), reads the merged cell's `gridSpan`/`hMerge` attributes rather than
+its text alone, asserts the last slide of both decks is the Thank you, and
+**presses** the overview's button with an `elementFromPoint` hit test before
+downloading through it. Proved able to fail three ways (3 / 3 / 1).
+
+**AND TWO OF THE FIRST RUN'S THREE FAILURES WERE THE CHECK.** `sorted()` over
+slide parts is LEXICOGRAPHIC — `slide10.xml` before `slide2.xml` — so the
+check read a pillar it had not touched and reported the product broken;
+`slidenames()` sorts numerically now and every reader in the file uses it.
+The other was `grab()` looking only inside `.pane`, which the overview's bar
+is not. *A measurement that is wrong in the direction of "broken" costs as
+much as one that is wrong in the direction of "clean" (§68.10), and the first
+instinct — to go and change the builder — would have damaged working code.*

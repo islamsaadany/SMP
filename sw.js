@@ -114,7 +114,13 @@
    and pushing it, and main is now serving "smp-shell-v3.43-setup".
    Confirmed against origin/main, and to be confirmed once more
    immediately before any push to main (§94.16). */
-const SHELL = "smp-shell-v3.44";
+/* v3.45 — §123: the deck marks a tactic that names no quarter, closes on
+   Thank you, and the Function overview carries the download too. §94.12
+   for the ninth time and the sixth on this piece of work — v3.39 through
+   v3.44 were each taken by main inside the window between reading a name
+   and pushing it. Confirmed against origin/main serving "smp-shell-v3.44",
+   to be confirmed once more immediately before the push (§94.16). */
+const SHELL = "smp-shell-v3.45";
 const ASSETS = [
   "/",
   "/index.html",

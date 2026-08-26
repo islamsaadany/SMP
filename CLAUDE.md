@@ -2016,7 +2016,29 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.44: one line above the table, and a
+*Last Updated: 2026-08-26 &mdash; **v3.45: a tactic that names no quarter, a
+closing slide, and the overview's download (&sect;123)**. Three more from using
+the plan download on a plan still being filled in. **A tactic with NO quarter
+at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter
+alone (a tactic marked Q2 and Q3 is saying something by leaving Q1 and Q4
+empty), and that reasoning never covered a row that answered nothing; it is
+**one Missing merged across the four columns**, never four, because the gap is
+one unanswered question and four alarms make a half-filled plan unreadable.
+**The deck closes on Thank you**, which is `present.js`'s own last slide
+(&sect;53.5: two decks of the same plan should have the same manners). **And
+the Function overview carries the download too** &mdash; a capability
+function's strategy tab is TWO sections and only Projects had a `.paneact` to
+hang the button on, so from the other half there was no way to take the plan
+away. **IT RENDERED INVISIBLE FIRST, WHICH IS &sect;70 EXACTLY**: `.penbtn` is
+built for a card corner (absolute, `opacity:0` until hovered) and a worded bar
+is not one, so it sat in the document answering every DOM query and could not
+be pressed &mdash; caught only because the check CLICKS. **And two of the first
+run's three failures were the check, not the product**: `sorted()` over slide
+parts is lexicographic, so `slide10` came before `slide2` and it measured a
+pillar it had never touched. A measurement wrong in the direction of "broken"
+costs as much as one wrong in the direction of "clean".*
+
+*Earlier: 2026-08-26 &mdash; **v3.44: one line above the table, and a
 dialog that fits the window** (&sect;120), **with a bold title and a table
 that reaches the fold** (&sect;120.5). Two asks minutes apart, both from
 using the register on his own laptop, and both turned out to be **waste rather

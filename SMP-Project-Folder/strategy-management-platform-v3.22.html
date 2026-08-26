@@ -1335,6 +1335,18 @@
      the corner itself. */
   .pane .paneact .penbtn.dlpen { right:36px; }
   .pane .paneact .penbtn.dlpen:only-child { right:0; }
+  .pageact .penbtn { position:static; visibility:visible; opacity:1;
+                     margin-right:8px; align-self:center; }
+  /* ── THE SAME BUTTON IN A WORDED BAR (§119.9) ─────────────────────
+     `.pageact` is a flex ROW of worded buttons — the Function overview's Edit
+     bar — and `.penbtn` is built for a card corner: absolutely positioned and
+     `opacity:0` until its `.hoverpen` parent is hovered. Dropped into the bar
+     unstyled it rendered, sat in the document, answered every DOM query and
+     COULD NOT BE SEEN OR PRESSED: §70's fault exactly, caught here only
+     because the check clicks the control rather than asking whether it
+     exists. In this context it is an ordinary inline control that is always
+     there, sized to sit beside the Edit button. */
+
   /* ── THE PEN ON A PLAN IS NOT HOVER-ONLY (§70) ────────────────────
      Islam: "in the project page I need to have the edit and add access, to
      edit current projects or add one. Same for the strategy plan page for the
@@ -17966,7 +17978,14 @@ function pptxTable(id, box, widths, head, rows){
     var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
                 : o.miss ? { sz:1100, b:true, color:C.bad }
                 :          { sz:1100, color:C.ink };
-    return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
+    /* `span` opens a cell across the columns after it and `merged` is each of
+       those columns saying "I am the one before me" — the pair DrawingML needs
+       for a merged run, and what lets one Missing sit across Q1–Q4 rather than
+       being printed four times (§119.7). */
+    if (o.merged) return '<a:tc hMerge="1"><a:txBody><a:bodyPr/><a:lstStyle/>' +
+      pptxPara(pptxRun("", { sz:1100 })) + '</a:txBody><a:tcPr/></a:tc>';
+    return '<a:tc' + (o.span ? ' gridSpan="' + o.span + '"' : '') +
+      '><a:txBody><a:bodyPr/><a:lstStyle/>' +
       pptxPara(pptxRun(o.miss ? "Missing" : (o.t == null ? "" : o.t), runOpts),
                o.align ? { align: o.align } : undefined) +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
@@ -18041,9 +18060,39 @@ function pptxTableSlides(kicker, title, widths, head, rows){
    the tactics columns a column for each Q with a mark for the qs in action",
    the shape the plan workbook's Q1–Q4 columns already have). */
 function pptxQCells(t){
+  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§119.7).
+     Islam, seeing four empty columns beside a Missing owner: "in the tactics
+     slide, Qs are missing as well." §119.1 deliberately left a blank quarter
+     alone and that is still right — a tactic that runs in Q2 and Q3 is saying
+     something about Q1 and Q4 by leaving them empty. What it cannot mean is
+     ALL FOUR empty: nobody has said when this runs at all, which is exactly
+     what the plan owes. One Missing across the four, never four of them: the
+     gap is one fact, and printing it four times makes a row of alarm out of a
+     single unanswered question. */
+  var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
+  if (!any) return [{ miss:true, align:"ctr", span:4 },
+                    { merged:true }, { merged:true }, { merged:true }];
   return ["q1","q2","q3","q4"].map(function(q){
     return { t: t[q] ? "\u2713" : "", align: "ctr" };
   });
+}
+
+/* THE DECK CLOSES THE WAY THE REVIEW DECK CLOSES (§119.8). Islam: "add a
+   thank you page at the end of the ppt." `present.js` has ended on a
+   `d-thanks` cover slide since the deck existed — same words, same shape, the
+   subject's name under a rule — so this is the plan deck learning the manners
+   the projected one already has rather than a new idea (§53.5). */
+function pptxThanks(name, subLine){
+  var C = pptxColors();
+  return pptxSlideXml([
+    pptxText(2, { x:0, y:0, cx:PPTX_W, cy:PPTX_H }, [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.bar }),
+    pptxText(3, { x:PPTX_MX, y:2834640, cx:PPTX_CW, cy:1005840 },
+      [pptxPara(pptxRun("Thank you", { sz:4400, b:true, color:C.ground }))]),
+    pptxText(4, { x:PPTX_MX, y:3931920, cx:1828800, cy:45720 },
+      [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.accent }),
+    pptxText(5, { x:PPTX_MX, y:4114800, cx:PPTX_CW, cy:365760 },
+      [pptxPara(pptxRun(subLine, { sz:1400, color:C.ground }))])
+  ]);
 }
 
 function pptxCover(orgLine, name, subLine){
@@ -18137,6 +18186,7 @@ function pptxUnitSlides(u, kicker){
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
   });
+  slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
 }
 
@@ -18178,6 +18228,7 @@ function pptxFnSlides(fk){
           plural((p.milestones || []).length, "milestone")];
       })));
   });
+  slides.push(pptxThanks(f.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
 }
 
@@ -20187,8 +20238,12 @@ function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
    pen that is open to somebody the rule closes it to — the gate is on the
    control, not on each of the eleven call sites that draw one. */
 function editBar(page, acKey){
-  if (!mayAuthor(acKey || "u_found")) return '';
-  return '<div class="pageact"><button class="editbtn" data-page="' + page + '">' +
+  /* THE DOWNLOAD IS NOT AN AUTHORING CONTROL (§119.9), so it is asked for
+     BEFORE the pen's gate and the bar is drawn when either is answered — a
+     custodian who may not author the overview may still take it away. */
+  var dl = dlPlanBtn(page);
+  if (!mayAuthor(acKey || "u_found")) return dl ? '<div class="pageact">' + dl + '</div>' : '';
+  return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
 
@@ -20235,8 +20290,18 @@ function paneActs(page, acKey){
    function's head see it and a CEO passing through does not (§37: reaching is
    not holding). The press asks the rule AGAIN (§48.2, in pptx.js), because
    the viewer switcher can change who this is between paint and click. */
+/* THE WHOLE STRATEGY TAB CARRIES IT, NOT ONLY THE PLAN PANE (§119.9).
+   Islam: "the functional projects has no download button we need a download
+   button." A capability function's strategy tab is TWO sections — Function
+   overview (what each capability is) and Projects — and only the second had
+   a `.paneact` to hang the button on, so from the first half of the same tab
+   there was no way to take the plan away. One deck comes out either way, so
+   the button belongs on both: `"capfoundation"` is the overview's page key,
+   drawn in its Edit bar rather than a pane corner because that section is
+   cards and has no pane (§30's rule about which control suits which shape). */
+var DL_PAGES = { plan:1, capfoundation:1 };
 function dlPlanBtn(page){
-  if (page !== "plan") return '';
+  if (!DL_PAGES[page]) return '';
   if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
   return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
     ' title="Download the plan as slides (.pptx)"' +

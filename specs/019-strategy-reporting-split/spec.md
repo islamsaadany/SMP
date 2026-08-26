@@ -70,3 +70,18 @@ From using it, the day it shipped:
 5. **Arrange/download on a capability's Projects pane** could not be
    reproduced — both draw correctly on live production for the office and for
    a function head — and is asked rather than fixed (§119.5).
+
+
+---
+
+## 5 · Follow-ups, §123 (v3.45)
+
+6. **A tactic with no quarter at all** is marked Missing, once, merged across
+   the four columns; a tactic that names some quarters is untouched (§119.1
+   stands).
+7. **Every plan deck closes on a Thank you slide**, the shape `present.js`
+   already ends on.
+8. **The Function overview carries the download too** — the other section of a
+   capability function's strategy tab. It first rendered invisible (§70: a
+   card-corner control in a worded bar), caught by clicking rather than
+   querying.

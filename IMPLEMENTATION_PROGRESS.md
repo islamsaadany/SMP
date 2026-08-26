@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.42 on `main`
+**Latest version:** v3.45 on `main`
 **Last updated:** 2026-08-26
 **Last updated:** 2026-08-26
 
@@ -64,6 +64,16 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.45 — the deck's last gaps, and the overview's download (§123)
+
+- **A tactic that names no quarter is marked Missing**, once, merged across
+  Q1–Q4. A tactic that names some quarters is left alone, as before.
+- **Every plan deck ends on a Thank you slide**, matching the review deck.
+- **The Function overview carries the download**, beside Edit — the other half
+  of a capability function's strategy tab had no way to take the plan away.
+- Proved by `checks/strategy-split.py` §5 (state made, merged-cell attributes
+  read, the button pressed with a hit test), able to fail 3 ways.
 
 ### v3.41 — the CF tab (§118)
 

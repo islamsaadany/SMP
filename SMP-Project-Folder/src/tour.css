@@ -54,6 +54,13 @@ body.presenting .tourdock { display:none; }
   left:50%; top:50%; transform:translate(-50%,-50%);
   width:390px; background:var(--surface);
 }
+/* THE PROMPT IS THREE CONTROLS, NOT TWO. At the welcome's width its buttons
+   wrapped onto two lines each — readable, and it looks like something that
+   did not fit, which is the wrong impression to give at the one moment
+   somebody is deciding whether to keep the tour at all. Found by looking at
+   it in dark mode rather than by measuring anything. */
+.tourdock .tcard.tasking { width:452px; }
+.tourdock .tcard.tasking .tfoot button { white-space:nowrap; }
 
 .tourdock .tctop { display:flex; align-items:center; padding:11px 14px 0; }
 .tourdock .tstep { font-size:var(--fs-micro,10.5px); text-transform:uppercase;

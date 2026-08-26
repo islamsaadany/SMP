@@ -6,8 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.28 shipped (live) · **v3.29 in progress on the branch**
-**Last updated:** 2026-08-25
+**Latest version:** v3.29 shipped (live) · **v3.30 in progress on the branch**
+**Last updated:** 2026-08-26
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
 reversing §19.4).
 **Direction:** rebuilding on the HR_ERP stack (§20, decided 2026-08-20).
@@ -52,26 +52,42 @@ Nothing proceeds past this line without an answer.
 
 ---
 
-## Agreed, not built
+## Built and verified
 
-### The onboarding tour (spec 016) — agreed 2026-08-26
+### v3.30 — the onboarding tour (§101, spec 016)
 
 A first-sign-in guided tour on demo data: the page dims, what matters stays
-lit — the one button that says where you are, or a section button with its
-content — and a short card explains it. Nine self-walking steps (Next/Back
-only; the interactive-clicking answer was reversed after Islam used it in the
-mockup), one exit through × asking *Don't show again* / *Skip for now*,
-replay from the Knowledge base, memory in the browser only. Two stories in
-the first release: strategy custodian and unit/function owner. The look was
-settled from a working mockup in four reviewed revisions
-(`design-mockups/onboarding-tour/2026-08-26_spotlight-tour.html`, rev 4
-signed off). Ships with a build check that walks every story as every role
-and fails when a tour target disappears (§51.11's fault, made impossible).
-The decisions-document § is assigned when it lands on `main`.
+lit — the one button that says where you are, or a section button together
+with its content — and a short card explains it. **Two stories** (strategy
+custodian; unit / function owner), told wherever the person actually works,
+on a unit or on a function. Next and Back only; **one exit** through the ×,
+which asks *Don't show again* or *Skip for now* with a way back for a stray
+press. Replay from the Knowledge base. Memory in the browser only.
 
----
+Settled over **four reviewed revisions of a working mockup** before a line of
+`src/` was touched — and three of the five decisions are reversals of
+something drawn first, none of which could have been argued in the abstract:
+the interactive click-the-real-button tour was built and then reversed
+(§101.2), Skip tour was removed in favour of the × asking (§101.3), and the
+spotlight narrowed from the whole navigation row to the one button that says
+where you are (§101.4).
 
-## Built and verified
+Built with `src/tour.js` + `tour.css`, mounted outside every region `paint()`
+rewrites, holding selectors rather than nodes, navigating by pressing the
+platform's own controls, and reading roles through the platform's own
+`personRoles()`. `src/checks/tour.py` walks every story as every role —
+custodian on a unit AND on a function, owner of a unit AND head of a
+function — and was **proved able to fail before its green run was believed**
+(§101.10); the first deliberate break was a no-op and caught nothing, which
+is §94.5's own fault repeated.
+
+Found by measuring rather than reasoning: a step that disagreed with itself
+once a function walked it (§101.7), a tenant's label inflected into *"the
+pillarss"* (§101.8), and a contrast measurement proved real by wrecking the
+card's text and watching it report 1.6:1.
+
+**Waiting on Islam:** the owner story's copy. The custodian's is his, word
+for word off the signed-off mockup; the owner's is mine until he has read it.
 
 ### v3.29 — the corner, corrected again (§100.4, §100.5)
 

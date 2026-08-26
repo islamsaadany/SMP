@@ -31,11 +31,23 @@ breaks the tour two ways on purpose — a misspelt target selector and a step
 sent to the wrong section — and requires BOTH to be caught. A green run is
 only worth something once that has been seen to go red.
 """
-import pathlib, sys
+import pathlib, re, sys
 from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
+
+# ── THE CONTRAST MEASURER IS READ OUT OF THE SWEEP, NOT COPIED ───────
+# The tour's card, its prompt and its ring are surfaces the platform has never
+# had before, and the contrast sweep cannot reach them: they exist only while a
+# tour is running, which is not a state anybody arrives at by navigating (§41.4
+# is the same trap — a sweep that walks pages only ever sees states that are
+# pages). So they are measured here, with the sweep's OWN function pulled out
+# of its source rather than a copy of it (§67): two contrast rules would drift,
+# and the one that drifts is the one nobody is looking at.
+_SWEEP = (ROOT / "scripts/contrast-sweep.py").read_text()
+_m = re.search(r'JS = r"""(.*?)"""', _SWEEP, re.S)
+CONTRAST_JS = _m.group(1) if _m else None
 
 # Who gets which story, in the baked worked example. The custodian and the
 # head of the same unit are deliberately BOTH walked: a unit and a function
@@ -44,6 +56,20 @@ FILE = ROOT / "SMP-Project-Folder/src/strategy-management-platform.html"
 VIEWERS = {
     "own_mob": "custodian",   # Mobile's strategy custodian
     "own_ret": "custodian",   # Retail Stores' — a second unit, same story
+    "fn_mkt2": "custodian",   # Marketing's — a custodian on a FUNCTION and
+                              # nothing else. The role's scope is "unitfn", so
+                              # this story is told on both sides too and its
+                              # copy has to be true on both. NOT `own_it`,
+                              # which holds custodian on the IT unit AND the
+                              # IT function: it walks the UNIT, so adding it
+                              # measured the unit side twice while looking
+                              # like it covered the function (§94.2 — a check
+                              # can be blind in the reassuring direction).
+    "mobhead": "owner",       # a unit head — the owner story on a unit
+    "fn_fin":  "owner",       # a function head — the SAME story, and the one
+                              # that drops SWOT and spells its tabs `fnstrat`
+                              # / `proj`. Walking only the unit side is how
+                              # the two halves drift in silence (§53.5).
 }
 
 fails = []
@@ -85,15 +111,15 @@ def where(pg):
     }""")
 
 
-def steps_of(pg, story):
-    """The story's own declarations, read out of the built file — so the check
-    walks whatever the product actually ships rather than a copy of it."""
-    return pg.evaluate("""(story) => {
-      // TOUR keeps STORIES private; the walk reads what each step DID, so the
-      // declarations come from the one place they exist. Exposed for the
-      // check through a deliberate read-only door rather than by scraping.
-      return window.__tourSteps ? window.__tourSteps(story) : null;
-    }""", story)
+def steps_of(pg, story=None):
+    """The step list the engine is ACTUALLY walking — concepts already
+    resolved for this place. Read out of the product rather than held as a
+    copy here: a check with its own list goes green while a step added to the
+    story is never visited, which is §51.11 wearing the other hat. And it must
+    be the RESOLVED list, because a function legitimately has no SWOT step —
+    comparing against the raw story would demand a card the product is right
+    not to draw."""
+    return pg.evaluate("() => TOUR.__steps()")
 
 
 def walk(pg, viewer, story, broken_sec=None):
@@ -331,6 +357,38 @@ def open_kb(pg):
     pg.wait_for_timeout(400)
 
 
+def contrast(pg):
+    """The card, the prompt and the dots, in BOTH themes. A new surface has
+    never been measured, and `--gold-deep` on the wrong ground is §38.5's
+    fault for the sixth time."""
+    if not check(CONTRAST_JS is not None,
+                 "the contrast sweep's JS could not be read — measuring nothing"):
+        return
+    pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    for theme in ("light", "dark"):
+        pg.evaluate("(t) => document.documentElement.setAttribute('data-theme', t)", theme)
+        pg.wait_for_timeout(200)
+        pg.evaluate("(s) => TOUR.start(s)", "custodian")
+        pg.wait_for_timeout(300)
+        f = pg.evaluate(CONTRAST_JS, "#tcard")
+        check(f == [], f"the welcome card fails contrast in {theme}: {f}")
+        # A step with a spotlight — the card is translucent there, which is
+        # exactly the case worth measuring rather than assuming.
+        pg.click("#tourdock [data-t=next]"); pg.wait_for_timeout(250)
+        pg.click("#tourdock [data-t=next]"); pg.wait_for_timeout(250)
+        pg.click("#tourdock [data-t=next]"); pg.wait_for_timeout(300)
+        f = pg.evaluate(CONTRAST_JS, "#tcard")
+        check(f == [], f"the step card fails contrast in {theme}: {f}")
+        # And the close prompt, which is a different set of controls.
+        pg.click("#tclose"); pg.wait_for_timeout(250)
+        f = pg.evaluate(CONTRAST_JS, "#tcard")
+        check(f == [], f"the close prompt fails contrast in {theme}: {f}")
+        pg.click("[data-t=never]"); pg.wait_for_timeout(200)
+        pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    pg.evaluate("document.documentElement.removeAttribute('data-theme')")
+    pg.wait_for_timeout(150)
+
+
 def run(page_break_sec=None, break_target=False):
     with sync_playwright() as p:
         b = p.chromium.launch()
@@ -344,19 +402,6 @@ def run(page_break_sec=None, break_target=False):
         # A read-only door onto the story declarations. Installed by the CHECK,
         # never shipped: the product has no reason to expose them, and a check
         # that scraped the card's words would break on every copy edit (§94.8).
-        pg.evaluate("""() => {
-          window.__tourSteps = function(story){
-            const src = TOUR.__stories || null;
-            return src ? src[story].steps.map(s => ({
-              dest:s.dest||null, tab:s.tab||null, sec:s.sec||null,
-              targets:(s.targets||[]).map(t => t.split('$own').join(
-                document.querySelector('#units [data-u][aria-selected=true]')
-                  ? document.querySelector('#units [data-u][aria-selected=true]').dataset.u
-                  : ''))
-            })) : null;
-          };
-        }""")
-
         # ── THE TWO DELIBERATE BREAKS (§94.5) ────────────────────────
         if break_target:
             pg.evaluate("""() => { TOUR.__stories.custodian.steps[3].targets =
@@ -383,6 +428,7 @@ def run(page_break_sec=None, break_target=False):
         close_prompt(pg, "custodian")
         offer_rules(pg, "custodian")
         knowledge_base(pg)
+        contrast(pg)
 
         # THE TOUR NEVER OPENS THE PRESENTATION MENU (rev 4). The step
         # explains it in place; a menu the tour opened would be a control it

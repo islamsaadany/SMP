@@ -118,6 +118,60 @@ var TOUR = (function(){
     return at;
   }
 
+  /* ── A UNIT AND A FUNCTION ARE THE SAME PRODUCT, AND THEY SPELL IT
+        DIFFERENTLY (§53) ─────────────────────────────────────────────────
+     The concepts a story names are the same on both sides — the strategy
+     tab, the page that holds the plan — but the KEYS are not: a function's
+     tab is `fnstrat`, its plan section is `proj`, and it has no SWOT at all.
+
+     So a step names the CONCEPT and this turns it into the key for wherever
+     the story is being told. The one genuine difference — a function has no
+     SWOT — is a step that is dropped rather than a step that lights nothing,
+     and the counter counts what is actually walked (§61's fault otherwise:
+     a screen that offers something the person cannot reach).
+
+     Stated here, in one place, which is the other half of §53's rule: where
+     the two sides differ, say which and why. */
+  function isFnPlace(k){ return String(k).indexOf("fn:") === 0; }
+  var FN_TABS = { strategy:"fnstrat", performance:"fnperf" };
+  var FN_SECS = { found:"found", plan:"proj", swot:null };
+  function tabKeyFor(place, k){
+    return isFnPlace(place) ? (FN_TABS[k] || k) : k;
+  }
+  function secKeyFor(place, k){
+    if (!k) return k;
+    return isFnPlace(place) ? FN_SECS[k] : k;
+  }
+  /* The steps this story really has, for this place: concepts resolved, and
+     anything the place cannot show dropped. */
+  function resolve(list, place){
+    var out = [];
+    list.forEach(function(s){
+      var sec = secKeyFor(place, s.sec);
+      if (s.sec && sec === null) return;          /* a function has no SWOT */
+      var t = {};
+      for (var k in s) if (Object.prototype.hasOwnProperty.call(s, k)) t[k] = s[k];
+      t.tab = s.tab ? tabKeyFor(place, s.tab) : s.tab;
+      t.sec = sec;
+      /* $tab and $sec ARE THE STEP'S OWN KEYS, not a second spelling of
+         them. A step that named its tab in `tab:` and again inside a
+         selector could disagree with itself — and did, the first time a
+         function walked this story: the fields were resolved to `fnstrat`
+         and the selector still said `strategy`, so the step lit nothing.
+         Caught by checks/tour.py on the function side within a minute of
+         the owner story existing, which is exactly §53.5's argument for
+         walking both. */
+      t.targets = (s.targets || []).map(function(sel){
+        return sel.split("$own").join(place || "")
+                  .split("$tab").join('#subtabs [data-s="' + (t.tab || "") + '"]')
+                  .split("$sec").join('#secrow-in [data-sub2="' + (t.sec || "") + '"]');
+      });
+      if (!s.targets) delete t.targets;
+      out.push(t);
+    });
+    return out;
+  }
+
   /* ── THE STORIES ──────────────────────────────────────────────────────
      Data, not code. A step is {dest,tab,sec,targets,title,body} and the LAST
      target is the step's subject — the card is placed around that one and
@@ -144,53 +198,172 @@ var TOUR = (function(){
                "responsible for." },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#subtabs [data-s=\"strategy\"]"],
+          targets:["$tab"],
           title:"The Strategy tab",
           body:"<b>Strategy</b> holds what was agreed, in three sections you will see one by " +
                "one. <b>Performance</b>, beside it, shows what the reported figures make of it." },
 
         { dest:"$own", tab:"strategy", sec:"found",
-          targets:["#secrow-in [data-sub2=\"found\"]", "#panel"],
-          title:"Strategy › Foundation",
-          body:"Who the unit is: the aspiration, and the key objectives the unit is judged on." },
+          targets:["$sec", "#panel"],
+          title:function(at){ return isFnPlace(at) ? "Strategy › Overview" : "Strategy › Foundation"; },
+          body:function(at){ return isFnPlace(at)
+            ? "What this function is here to do, and the capabilities it owns."
+            : "Who the unit is: the aspiration, and the " + L("keyobj","bu").toLowerCase() +
+              " it is judged on."; } },
 
         { dest:"$own", tab:"strategy", sec:"swot",
-          targets:["#secrow-in [data-sub2=\"swot\"]", "#panel"],
+          targets:["$sec", "#panel"],
           title:"Strategy › SWOT",
           body:"The reasoning the plan was built from — strengths, weaknesses, " +
                "opportunities, threats. The pillars answer what this table says." },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#secrow-in [data-sub2=\"plan\"]", "#panel .split > .rail"],
-          title:"Strategy › Plan — the pillars",
-          body:"The plan itself. Each pillar on this rail holds the measures your unit is " +
-               "scored on and the tactics that deliver them." },
+          targets:["$sec", "#panel .split > .rail"],
+          /* ── A TENANT'S LABEL IS NEVER INFLECTED (found by reading the
+                cards, not by a check) ──────────────────────────────────
+             `L("pillar","bu")` is whatever the client typed — "Pillars"
+             here — so appending an "s" produced *the pillarss* and a
+             possessive produced *A pillars's*. There is no singular to
+             reach for: `internal` is the PLATFORM's word, not theirs, and
+             on this tenant `keyobj` is the same string in both columns.
+             So every sentence is written to take the label EXACTLY as it
+             is given, and none of them makes it singular or plural. */
+          title:function(at){ return isFnPlace(at)
+            ? "Strategy › Projects"
+            : "Strategy › Plan — " + L("pillar","bu"); },
+          body:function(at){ return isFnPlace(at)
+            ? "The work itself. Each project on this rail holds the deliverables it hands " +
+              "over, the outcomes it is meant to change, and the milestones along the way."
+            : L("pillar","bu") + " sit on this rail, and each one holds the measures your " +
+              "unit is scored on and the tactics that deliver them."; } },
 
         { dest:"$own", tab:"strategy", sec:"plan",
-          targets:["#secrow-in [data-sub2=\"plan\"]", "#panel .split > .pane"],
-          title:"A pillar's measures and tactics",
-          body:"Open a pillar and this pane shows its measures, targets and how each " +
-               "compiles. This is what reporting fills with figures each cycle." },
+          targets:["$sec", "#panel .split > .pane"],
+          title:function(at){ return isFnPlace(at) ? "What a project hands over"
+                                                  : "Measures and tactics"; },
+          body:function(at){ return isFnPlace(at)
+            ? "Open a project and this pane shows what it delivers and what it is meant to " +
+              "change. This is what reporting fills in each cycle."
+            : "Open one and this pane shows its measures, targets and how each compiles. " +
+              "This is what reporting fills with figures each cycle."; } },
 
         { dest:"$own", tab:"performance",
-          targets:["#subtabs [data-s=\"performance\"]", "#panel .scores"],
+          targets:["$tab", "#panel .scores"],
           title:"Performance — the headline numbers",
-          body:"The <b>Performance</b> tab turns the plan and the reported figures into the " +
-               "unit's score. Three readings, left to right: what we are judged on, how the " +
-               "work we set ourselves is going, and whether the work happened." },
+          body:function(at){ return "The <b>Performance</b> tab turns the plan and the " +
+            "reported figures into " + (isFnPlace(at) ? "the function's" : "the unit's") +
+            " score. Three readings, left to right: what we are judged on, how the work we " +
+            "set ourselves is going, and whether the work happened."; } },
 
         { dest:"$own", tab:"performance",
           targets:["#panel [data-report]"],
           title:"Where your figures go in",
-          body:"While a reporting cycle is open, <b>Report</b> is where you enter this " +
-               "quarter's figures and submit them for the unit." },
+          body:function(at){ return "While a reporting cycle is open, <b>Report</b> is where " +
+            "you enter this quarter's figures and submit them for the " +
+            (isFnPlace(at) ? "function" : "unit") + "."; } },
 
         { dest:"$own", tab:"performance",
           targets:["#panel .pageact .dlmenu, #panel .bands-act .dlmenu"],
-          title:"The unit's story, as slides",
+          title:function(at){ return isFnPlace(at) ? "The function's story, as slides"
+                                                  : "The unit's story, as slides"; },
           body:"<b>Presentation</b> turns this page into the review deck — <b>Present</b> " +
                "plays it full-screen for a projector, and <b>Manage slides</b> lets you " +
                "arrange it first, including picture slides of your own." },
+
+        { kind:"finish",
+          title:"That's the essentials",
+          body:"You can replay this tour any time from the <b>Knowledge base</b>. The moment " +
+               "this closes you are back on your own data.",
+          next:"Close" }
+      ]
+    },
+
+    /* ── THE OWNER'S STORY ────────────────────────────────────────────
+       The same walk, addressed to the person ACCOUNTABLE for the thing
+       rather than to the person who carries the strategy work on it: a
+       unit owner or a supporting function head. It is one story rather
+       than two because a unit and a function are the same product (§53) —
+       the tab and section keys differ and are resolved above, and the one
+       real difference (a function has no SWOT) drops a step.
+
+       THE COPY IS A DRAFT AWAITING ISLAM'S APPROVAL (spec 016 FR-012,
+       Constitution VIII). The custodian's words are his, off the mockup;
+       these are mine until he has read them. */
+    owner: {
+      role: "Business unit / function owner",
+      steps: [
+        { kind:"welcome",
+          title:"Welcome to the Strategy Management Platform",
+          body:"This two-minute tour shows you around on <b>demo data</b> — a full worked " +
+               "example, labelled the whole time. Nothing in it is your own data, and nothing " +
+               "it shows can be saved.",
+          next:"Start the tour" },
+
+        { dest:"$own", tab:"strategy", sec:"plan",
+          targets:["#units [data-u=\"$own\"]"],
+          title:"You are here",
+          body:"This row is the business. The lit one is what you are accountable for — you " +
+               "will only see the parts you have a seat in." },
+
+        { dest:"$own", tab:"strategy", sec:"plan",
+          targets:["$tab"],
+          title:"What was agreed, and how it is going",
+          body:"<b>Strategy</b> holds what was committed to. <b>Performance</b>, beside it, " +
+               "is what the reported figures make of that commitment." },
+
+        { dest:"$own", tab:"strategy", sec:"found",
+          targets:["$sec", "#panel"],
+          title:"What you are judged on",
+          body:function(at){ return isFnPlace(at)
+            ? "What this function is here to do, and the capabilities it owns. Everything " +
+              "further in exists to move these."
+            : "The aspiration, and the " + L("keyobj","bu").toLowerCase() + " underneath it. " +
+              "These are what your score is built from — everything further in exists to " +
+              "move them."; } },
+
+        { dest:"$own", tab:"strategy", sec:"swot",
+          targets:["$sec", "#panel"],
+          title:"The reasoning behind the plan",
+          body:"Strengths, weaknesses, opportunities and threats — the case the pillars were " +
+               "chosen to answer. Worth a look when a pillar stops making sense." },
+
+        { dest:"$own", tab:"strategy", sec:"plan",
+          targets:["$sec", "#panel .split > .rail"],
+          title:function(at){ return isFnPlace(at) ? "The work itself" : "The plan itself"; },
+          body:function(at){ return isFnPlace(at)
+            ? "Each project on this rail holds what it hands over and what it is meant to " +
+              "change. The strategy office authors this; you are accountable for it landing."
+            : L("pillar","bu") + " sit on this rail, each holding the measures it is scored " +
+              "on and the work that delivers them. The strategy office authors this; you are " +
+              "accountable for it landing."; } },
+
+        { dest:"$own", tab:"strategy", sec:"plan",
+          targets:["$sec", "#panel .split > .pane"],
+          title:"Targets, and how each one compiles",
+          body:"How a figure is judged is decided here, in the plan — not at reporting time. " +
+               "That is deliberate: it stops how something is measured changing while it is " +
+               "being measured." },
+
+        { dest:"$own", tab:"performance",
+          targets:["$tab", "#panel .scores"],
+          title:"Your headline numbers",
+          body:"Three readings, left to right: what you are judged on, how the work you set " +
+               "yourself is going, and whether that work actually happened. They can disagree, " +
+               "and when they do the gap is the conversation." },
+
+        { dest:"$own", tab:"performance",
+          targets:["#panel [data-report]"],
+          title:"Where the figures come in",
+          body:"While a cycle is open, <b>Report</b> is where this quarter's figures are " +
+               "entered and submitted. Submitting speaks for the whole unit, which is why it " +
+               "sits with you and your custodian." },
+
+        { dest:"$own", tab:"performance",
+          targets:["#panel .pageact .dlmenu, #panel .bands-act .dlmenu"],
+          title:"Your story, as slides",
+          body:"<b>Presentation</b> turns this page into the review deck — <b>Present</b> " +
+               "plays it full-screen, and <b>Manage slides</b> lets you arrange it first. " +
+               "It is built fresh every time, so it is never out of date." },
 
         { kind:"finish",
           title:"That's the essentials",
@@ -213,13 +386,9 @@ var TOUR = (function(){
   function running(){ return at >= 0; }
   function ordinary(){ return Math.max(0, steps.length - 2); }
 
-  /* A step's selectors, with $own filled in. Written here rather than at
-     authoring time because the same story is told to different people. */
-  function selectorsOf(s){
-    return (s.targets || []).map(function(sel){
-      return own ? sel.split("$own").join(own) : sel;
-    });
-  }
+  /* Already resolved by resolve() at start() — a step on the active list
+     names real selectors, real tab keys and real section keys. */
+  function selectorsOf(s){ return s.targets || []; }
 
   /* ── THE DOCK ─────────────────────────────────────────────────────────
      Appended to <body>, which is the whole point: #panel is rewritten by
@@ -333,10 +502,12 @@ var TOUR = (function(){
     if (asking || !s.targets) {
       docked = false;
       card.classList.add("tcentre");
+      card.classList.toggle("tasking", asking);
       card.style.left = card.style.top = "";
       return;
     }
     card.classList.remove("tcentre");
+    card.classList.remove("tasking");
 
     var pad = 6, hs = [];
     selectorsOf(s).forEach(function(sel){
@@ -407,8 +578,15 @@ var TOUR = (function(){
       s.kind === "welcome" ? "The tour · " + STORIES[story].role :
       s.kind === "finish"  ? "The tour · done" :
       "Step " + at + " of " + ordinary();
-    el("ttitle").innerHTML = s.title;
-    el("tbody").innerHTML = s.body;
+    /* ── WORDS MAY BE A FUNCTION, AND SOMETIMES MUST BE (§64) ────────
+       A step naming the tenant's word for a pillar cannot be a constant:
+       constants are evaluated before hydration, so it would hold the baked
+       example's vocabulary on a client's deployment. The same call also
+       lets one step say the true thing on both sides of §53's line — a
+       unit's rail holds pillars with measures, a function's holds projects
+       with deliverables — without a second story to keep in step. */
+    el("ttitle").innerHTML = typeof s.title === "function" ? s.title(own) : s.title;
+    el("tbody").innerHTML  = typeof s.body  === "function" ? s.body(own)  : s.body;
     var dots = "";
     for (var i = 0; i < steps.length; i++) dots += '<i' + (i === at ? ' class="on"' : '') + '></i>';
     el("tdots").innerHTML = dots;
@@ -457,7 +635,7 @@ var TOUR = (function(){
      tour that left somebody in demo mode would leave them looking at a
      worked example wearing their own tenant's name. */
   function end(){
-    at = -1; asking = false;
+    at = -1; asking = false; docked = false;
     if (dock) dock.hidden = true;
     if (prevMode && window.SYNC && SYNC.setMode) {
       try { SYNC.setMode(prevMode); } catch(e){}
@@ -469,12 +647,13 @@ var TOUR = (function(){
     if (!STORIES[key]) return;
     mount();
     if (!dock) return;
-    story = key; steps = STORIES[key].steps;
+    story = key;
     /* `viewer()` is the platform's own answer to "who is this", and it
        RESOLVES rather than returning a maybe — including after a hydration or
        a dataset swap moved the register under us, which this function is
        about to do. */
     own = ownPlace(viewer()) || firstDest();
+    steps = resolve(STORIES[key].steps, own);
     /* Remembered BEFORE the switch, or the way back is lost. Read through
        `demoMode()`, which the platform already exports — null means live, so
        there is no new export to keep in step with `mode`.
@@ -544,6 +723,12 @@ var TOUR = (function(){
        visited, which is §51.11 wearing the other hat. Two underscores because
        nothing in the platform may read this: a caller wanting to know where
        the tour is asks state(). */
-    __stories: STORIES
+    __stories: STORIES,
+    /* The ACTIVE list — concepts resolved for wherever the tour is being
+       told. checks/tour.py walks this rather than the raw story, because
+       the raw story is not what anybody sees: a function drops SWOT, and a
+       check comparing against the unresolved list would demand a step the
+       product is right not to draw. */
+    __steps: function(){ return steps; }
   };
 })();

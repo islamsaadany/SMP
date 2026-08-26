@@ -13042,3 +13042,209 @@ that was actually asked for — **Send is on screen at scroll 0, at every height
 swept** — and not "the page cannot scroll", which would be a different and
 worse product. Measured on the real server at 1000 / 860 / 760 / 660px: Send on
 screen every time, the box at 840 / 700 / 600 / 500px.
+
+---
+
+## 101 · The onboarding tour (v3.30, spec 016)
+
+> *"For first time users we need some orientation flow that takes them through
+> the platform — the concept of highlighting some areas while dimming the rest
+> of the page with focus on a button or an area with brief messages with a next
+> and skip and close buttons for this onboarding flow which would take them
+> through the tabs and the buttons to press and the functionality in a user
+> story mode for proper onboarding. Think with me about this to build a proper
+> spec plan."*
+
+Settled over four reviewed revisions of a working mockup before a line of
+`src/` was touched, and the value of that is measurable: **three of the five
+decisions below are reversals of something drawn first**. None of them could
+have been argued in the abstract; each was obvious the moment it was on screen.
+
+### 101.1 The five decisions
+
+| # | Question | Answer |
+|---|----------|--------|
+| 1 | One tour or a story per role? | **Per role.** First release: the strategy custodian and the business unit / function owner. |
+| 2 | Does the person press the real controls? | **No — the tour walks itself.** *Reversed*, see §101.2. |
+| 3 | When does it fire? | **First sign-in**, remembered per browser; replay from the Knowledge base. |
+| 4 | What data does it show? | **Demo data**, which the tour enters and leaves itself. |
+| 5 | How does it end? | **One exit.** No Skip-tour control; the × asks. *Reversed*, see §101.3. |
+
+### 101.2 The interactive tour was built, used, and reversed
+
+The first alignment asked whether the tour should narrate or let people press
+the real buttons, and the answer was *"let them click, that would be more
+interactive"* — so mockup rev 3 had **do-steps**: the spotlight pulsed, Next
+disappeared, and pressing the real Performance tab was what advanced the tour.
+It was safe to build precisely because of decision 4: **demo mode refuses every
+write (§21, §67), so a first-time user pressing real controls can break
+nothing.** The sandbox was the licence for the interactivity.
+
+Then: *"skip the buttons clicking overall for performance or reporting or any
+other button."*
+
+**A tour that waits for a press is a tour that can be got wrong**, and the
+person it is written for is the one person in the tenant with no idea which
+button was meant. Narrating costs nothing that the pressing bought — demo mode
+was never protecting against the tour, it was protecting against the person.
+So: Next and Back, and each step declares WHERE it wants the platform to be
+while the engine gets it there.
+
+Recorded as a reversal rather than edited away, because the intervening
+revisions were built under the first answer and the argument for it was
+sound — it was **the wrong answer for the audience**, not a bad idea.
+
+### 101.3 Skip tour goes, and the × asks instead
+
+> *"Let's remove skip tour as the x button does the job, and on closing with
+> the x we might prompt him to never show again or skip for now."*
+
+Two controls for one act. What makes removing the one safe is that the other
+starts **asking**: *Don't show again* (durable), *Skip for now* (this session),
+and a quiet **Keep the tour** for a stray press — §92's rule, that a control
+which commits on one press needs its undo where the confirmation would be.
+
+Not `confirm()`: a browser dialog can be silenced permanently on some other
+site (§95), and the question is about the thing already on screen.
+
+### 101.4 The spotlight has to say WHERE YOU ARE
+
+> *"On navigating the buttons you need to dim the rest of the space and the
+> other buttons and highlight the buttons of selection a bit to know where am I."*
+
+Rev 2 lit the whole navigation row, which names the *set* and not the
+*selection* — so the one question a first-time viewer actually has went
+unanswered. It lights **the single button of the current selection** now.
+
+**That is what forced the mechanism.** A section step has to light the section
+button AND the section it opened — two lit regions at once — and a box-shadow
+cutout can only ever have one hole. So the dim is an **SVG mask** carrying one
+hole per target. The click-absorber above it is TRANSPARENT and does nothing
+but swallow presses: a second dim laid over a lit control washes out the very
+thing the step is about (§68.10's family, from the other side).
+
+### 101.5 Performance opens on its numbers, and Presentation is not opened at all
+
+> *"On clicking performance it should show at least the first section of the
+> performance page with the numbers before pushing to the report button."*
+> … *"For the press performance for the presentation just explain it without
+> opening and showing the drop down."*
+
+The tour opens the tab itself and lights **the tab together with the three
+headline figures** before Report is mentioned — a person who has not yet seen
+what Performance *is* has no use for the button that fills it. Presentation is
+explained **in place**, its menu shut: a menu the tour opened would be a
+control the tour pressed, which is the thing §101.2 reversed.
+
+### 101.6 The engine keeps no copy of anything
+
+Three rules, and each is a fault this document already records:
+
+**It never calls `paint()`** (§97) and **holds selectors, never nodes** (§35) —
+every paint replaces the elements a spotlight is drawn around, so `onPaint()`
+re-resolves and re-places, called at the end of `paint()` beside
+`SEARCHSEL.wire()` and `CHAT.wireInbox()`.
+
+**It navigates by pressing the real controls** — `[data-u]`, `[data-s]`,
+`[data-sub2]` — so the shell's own handlers do the navigating. A second copy of
+"how do I open a section" is a copy that drifts (Constitution IX).
+
+**It asks the platform's own `personRoles()`**, never `SMPRules` directly:
+`world()` in `config-data.js` is the one builder, and its own comment records
+what happened twice in an afternoon when a caller assembled the state itself.
+
+### 101.7 A step names a CONCEPT; a place spells it
+
+A unit's strategy tab is `strategy` and its plan section is `plan`; a
+function's are `fnstrat` and `proj`, and **a function has no SWOT at all**. So
+a step names the concept and `resolve()` turns it into the key for wherever the
+story is being told, dropping the step a place genuinely cannot show — and the
+counter counts what is actually walked, or it promises a card that never comes
+(§61's fault).
+
+**AND THE TARGETS SAY `$tab` / `$sec` RATHER THAN REPEATING THE KEY.** The
+first build resolved the step's *fields* and left the *selectors* spelling a
+unit's keys, so the first function to walk the owner story lit nothing on four
+of eight steps — a step disagreeing with itself. `checks/tour.py` caught it
+within a minute of the owner story existing, which is §53.5's argument for
+walking both sides, paid back immediately.
+
+### 101.8 A tenant's label is never inflected
+
+`L("pillar","bu")` is whatever the client typed — *"Pillars"* on this tenant —
+so `+ "s"` produced ***the pillarss*** and a possessive produced ***A
+pillars's***. There is no singular to reach for: `internal` is the platform's
+word rather than theirs, and on this tenant `keyobj` is the same string in both
+columns. **Every sentence takes the label exactly as given**, and none makes it
+singular or plural.
+
+Found by printing the nine card titles and reading them — not by any check.
+Worth recording as the limit of what a check catches: the assertions were all
+true while the words were wrong.
+
+### 101.9 Copy that names a place is a FUNCTION, not a constant
+
+§64's rule, earned again. A constant is evaluated before hydration, so a step
+naming the tenant's vocabulary would hold the *baked example's* words on a
+client's deployment. Making the words a function of the place also lets one
+step say the true thing on both sides of §53's line — *"Pillars sit on this
+rail"* on a unit, *"each project holds the deliverables it hands over"* on a
+function — with no second story to keep in step.
+
+### 101.10 What the check exists for, and how it was made trustworthy
+
+**A tour keyed on markup that no longer exists does not fail — it passes
+quietly** (§51.11). Rename a `data-sub2`, move the Report button, and every
+sweep stays green while the tour lights nothing. So `src/checks/tour.py` walks
+**every story as every role it can be offered to** — a custodian on a unit and
+on a function, an owner of a unit and the head of a function — asserting that
+the platform is where each step declares, that every target has a **real box**
+(`getClientRects`, never a computed style — §68.10), that a ring sits over each,
+that the card clears them, that Back retraces the **page** and not only the
+card, and that the absences hold: no skip control, no menu opened, no offer
+after *Don't show again* while replay still works (**both ends**, §90).
+
+**IT WAS PROVED ABLE TO FAIL FIRST (§94.5), AND THE FIRST ATTEMPT COULD NOT.**
+The deliberate break set a step's section to the value it already held — a
+no-op, caught by nothing, which is exactly `test-authorize.js`'s fault in
+§94.5. The break is now a section key that no longer exists, which is the real
+failure being guarded against, and both breaks are caught with precise
+messages.
+
+**Two more found only by measuring.** `own_it` holds custodian on the IT
+*unit* and the IT *function*, so adding them to the check walked the unit twice
+while looking like it covered functions — `fn_mkt2` is the true case. And the
+contrast measurement was proved real by wrecking the card's text colour and
+watching it report 1.6:1, because a measurement that returns nothing looks
+identical whether it is clean or blind.
+
+### 101.11 The card may cover a spotlight, and only when it had nowhere to stand
+
+At full width (§94.13) a step whose subject is the whole content area leaves no
+"beside". The engine tries below, right, left, above, then docks in a corner —
+and **says so itself** (`docked`), so the check permits overlap in exactly that
+case. Forbidding it outright fails on a real page; ignoring it lets a card sit
+over a button nobody can then see. The translucency is what makes the docked
+case acceptable, and it is why it exists (Islam, rev 2: *"make it a bit
+transparent in general"*).
+
+### 101.12 What it stores, and what a broken store means
+
+`localStorage` for *never*, `sessionStorage` for *skip for now* — so **a new
+sign-in is a new session** and that promise is kept by the browser rather than
+by a date somebody has to reason about. Nothing reaches the state graph (§25,
+§47.1): no save, no migration, nothing for `lib/authorize.js` to classify.
+
+**A THROWING STORE READS AS ALREADY-MARKED.** A browser with site data blocked
+cannot remember the answer, so offering would mean offering on every load — and
+a tour nobody can dismiss is worse than no tour. It fails quiet.
+
+### 101.13 The cost, stated
+
+Per-browser memory means a new device offers the tour once more. Chosen over a
+server-side flag, whose cost is a save for the authoriser to classify for a
+fact that costs nothing to forget. One press of × answers it.
+
+**Still open:** the SMO, CEO and contributor stories (§16 backlog), and the
+owner story's copy, which is **mine until Islam has read it** — the custodian's
+is his, word for word off the signed-off mockup.

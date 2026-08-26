@@ -1135,6 +1135,37 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **THE ONBOARDING TOUR IS TOLD WHERE THE PERSON WORKS (since v3.30, §101;
+  spec 016):** a first-sign-in guided tour on **demo data**, two stories
+  (strategy custodian; unit/function owner), told on a unit or a function —
+  whichever the person actually holds their role over. `src/tour.js` mounts to
+  `<body>` like the chat corner, **never calls `paint()`**, **holds selectors
+  and not nodes** (re-anchored by `TOUR.onPaint()` at the end of `paint()`),
+  and **navigates by pressing the platform's own `[data-u]` / `[data-s]` /
+  `[data-sub2]` controls** rather than keeping a second copy of the shell's
+  navigation. Roles come from the platform's own `personRoles()`, never from
+  `SMPRules` directly — `world()` is the ONE builder and its comment records
+  what happens twice in an afternoon otherwise. **A STEP NAMES A CONCEPT AND A
+  PLACE SPELLS IT**: `resolve()` turns `strategy`/`plan` into `fnstrat`/`proj`
+  for a function and DROPS the step a place cannot show (a function has no
+  SWOT), so the counter counts what is actually walked (§61). **AND THE
+  TARGETS SAY `$tab` / `$sec`** rather than repeating the key — the first
+  build resolved the fields and left the selectors spelling a unit's keys, so
+  a step disagreed with itself and lit nothing on four of eight steps.
+  **A TENANT'S LABEL IS NEVER INFLECTED** (§101.8): `L("pillar","bu")` is
+  *"Pillars"*, so `+ "s"` printed *the pillarss* — there is no singular to
+  reach for, and every sentence takes the label exactly as given. **COPY THAT
+  NAMES A PLACE IS A FUNCTION** (§64 again), or a constant evaluated before
+  hydration holds the baked example's vocabulary on a client's deployment.
+  Memory is `localStorage` (*never*) and `sessionStorage` (*skip for now*, so
+  a new sign-in is a new session), and **a throwing store reads as
+  already-marked** — a tour nobody can dismiss is worse than no tour.
+  `src/checks/tour.py` walks **every story as every role** and was **proved
+  able to fail first** (§94.5) — the first deliberate break set a value to
+  what it already was and caught nothing, which is §94.5's own example.
+  **`own_it` is not a function custodian for checking purposes**: they hold it
+  on the IT unit AND the IT function, so the walk measures the unit twice
+  while looking like it covers functions — `fn_mkt2` is the true case.
 - **THE CORNER MINIMISES, AND THE INBOX FOLLOWS THE WINDOW (since v3.29,
   §100.4, §100.5):** **the bubble is not drawn while the panel is open** —
   it sat underneath in the same dock column, pushing the panel a bubble's height
@@ -1351,7 +1382,50 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
+*Last Updated: 2026-08-26 &mdash; **v3.30: the onboarding tour** (&sect;101,
+spec 016). *"For first time users we need some orientation flow that takes them
+through the platform … highlighting some areas while dimming the rest of the
+page … in a user story mode."* Settled over **four reviewed revisions of a
+working mockup** before a line of `src/` was touched, and that is the part
+worth keeping: **three of the five decisions are reversals of something drawn
+first**, and not one of them could have been argued in the abstract.
+**THE INTERACTIVE TOUR WAS BUILT AND THEN REVERSED** &mdash; the first
+alignment said *"let them click, that would be more interactive"*, and demo
+mode made it safe to let a first-time user press real controls, because a
+dataset that refuses every write is the licence for that. Then: *"skip the
+buttons clicking overall."* **A tour that waits for a press is a tour that can
+be got wrong, by the one person in the tenant with no idea which button was
+meant** &mdash; narrating costs nothing the pressing bought. **SKIP TOUR WENT
+AND THE &times; STARTED ASKING** (*Don't show again* / *Skip for now*, with a
+way back for a stray press), because two controls for one act is one too many.
+**AND THE SPOTLIGHT HAD TO SAY WHERE YOU ARE**: lighting the whole navigation
+row names the SET and not the SELECTION, which is the one question a
+first-time viewer actually has &mdash; and lighting one button while ALSO
+lighting a section and its content is what forced the dim to become an **SVG
+mask**, since a box-shadow cutout can only ever have one hole. Built to hold
+**no copy of anything**: it never calls `paint()`, holds selectors rather than
+nodes, navigates by pressing the platform's own controls, and reads roles
+through the platform's own `personRoles()`. **A STEP NAMES A CONCEPT AND A
+PLACE SPELLS IT** &mdash; and the first build resolved the step's FIELDS while
+leaving its SELECTORS spelling a unit's keys, so a step disagreed with itself
+and the first function to walk the owner story lit nothing on four of eight
+steps; `checks/tour.py` caught it within a minute of that story existing,
+which is &sect;53.5's argument for walking both sides paid back immediately.
+**THE CHECK WAS PROVED ABLE TO FAIL BEFORE ITS GREEN RUN WAS BELIEVED**
+(&sect;94.5) **and the first attempt could not**: the deliberate break set a
+step's section to the value it already held, a no-op caught by nothing, which
+is exactly the fault &sect;94.5 records in `test-authorize.js`. Two more found
+only by measuring: `own_it` holds custodian on the IT unit AND the IT
+function, so adding them walked the unit twice while looking like it covered
+functions; and the contrast measurement was proved real by wrecking the card's
+text colour and watching it report 1.6:1, because a measurement that returns
+nothing looks identical whether it is clean or blind. **AND THE WORDS WERE
+WRONG WHILE EVERY ASSERTION WAS TRUE** (&sect;101.8): `L("pillar","bu")` is
+*"Pillars"*, so the card read *"Strategy &rsaquo; Plan &mdash; the pillarss"*
+&mdash; found by printing the nine titles and READING them, which no check
+would have done. A tenant's label is never inflected.*
+
+*Earlier: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
 follows the window** (&sect;100.4, &sect;100.5). Two more messages from having
 the thing open, and the first was three asks in one sentence that turned out to
 be one fault seen from three sides. *"If I click outside the box minimise it

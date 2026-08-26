@@ -1868,6 +1868,9 @@ python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pre
                                 # download unzipped and read — figures proved absent (§117)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
+python3 checks/plan-builder.py  # building a plan ON the platform: the door, the chooser,
+                                # the band's map, every row form asked of the DATA, and the
+                                # empty-state fixes — proved able to fail twice (§118)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
@@ -1914,7 +1917,40 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
+*Last Updated: 2026-08-26 &mdash; **v3.41: building a plan on the platform
+(&sect;118, spec 020)**. Islam: *"I want the team of the SMO to be able to
+build a plan on the platform directly … they identify a function or a unit
+and set which way are they going to plan pillars or projects and then they go
+in a flow."* Settled over two mockup revisions, and both of his corrections
+ARE the design: **a map, not a march** (the band under the tab row is one
+chip per section, openable in any order, each chip reading the DATA — ✓ /
+count / ○ — so nothing is stored and pausing costs nothing), and **a row is
+added whole** (every "+ Add" in build mode opens &sect;116's dialog shape
+asking that row kind's fields in the outcome's order; the name makes Add
+live, everything else is NAMED while empty and never forced). Only a
+function is asked *pillars or projects* — a unit always plans in pillars —
+and the door is beside Import: two doors on the page where plans arrive,
+with **Continue AND Start fresh** on a subject with content (one button that
+always cleared would make pausing cost the whole plan) and Start fresh going
+through the import's own archive path (&sect;49.2). **PART ONE WAS AN AUDIT,
+AND IT FOUND FIVE SURFACES THAT COULD BE READ AND NEVER STARTED** (&sect;61's
+trap, five more times): no first "Who we are" line (unit AND group), no SWOT
+add, an empty Plan page that was a dead end pointing at Import, a VIRGIN
+pillars function whose first row was accepted on screen and written nowhere
+(`unitLike()`'s frozen empties — `unitLikeWritable()` now), and a
+capability's key objectives readable on the Overview and writable nowhere.
+Plus one found half-built: "+ Add a business unit" minted "New unit 1" with
+`real:false` — stamping the SMO's own unit as ILLUSTRATIVE — and hardcoded
+factor keys; it asks the form now, and the weighting row is minted from the
+factor list (&sect;104.7). **The server needed nothing**: every builder edit
+is a change the authoriser already classifies. `checks/plan-builder.py` asks
+the DATA after pressing every control, and was **proved able to fail twice —
+the second proof caught the check itself** (a substring "agreement" that a
+lying chip satisfied; it compares the chip's mark now). Flagged, not built:
+a pillars function's key objectives still have no authoring surface
+anywhere.*
+
+*Earlier: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
 the plan as slides (&sect;117, spec 019)**. Islam: *"the strategy should be
 locked from the non SMO but the reporting should be editable by who we grant
 the access so they can submit — we need this split in the roles and access

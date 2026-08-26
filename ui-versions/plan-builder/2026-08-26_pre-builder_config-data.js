@@ -5345,43 +5345,19 @@ function pillarsUsingTheme(ab){
    click into it crashes on a missing array. It arrives inactive-in-content
    but active in the nav, weighted at zero until the SMO fills its factor row,
    and with the group's clause labels as a starting skeleton. */
-/* THE ONE MINTER FOR A UNIT (§118). It existed argless — "New unit 1", key
-   "newunit1" — and the builder gives it the three answers a real unit
-   arrives with: its name, its code prefix and its company. Three of its old
-   habits are corrected in the same breath, each a §-numbered fault:
-   · the key is minted from the NAME the way a function's and a person's are,
-     so the graph does not fill with "newunit3"s (§87's spirit);
-   · the weighting row's values are minted from the FACTOR LIST, never a
-     hardcoded rev/prof/imp/growth — a tenant that renamed a factor got a row
-     the composite could not read (§104.7's list-of-exceptions fault);
-   · `real` is TRUE: that flag marks DEMO content as illustrative (§21), and
-     a unit the SMO just created is the client's own. */
-function addBusinessUnit(name, prefix, company){
-  var nm = String(name || "").trim(), key;
-  if (nm) {
-    var base = nm.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 18);
-    if (!base) base = "unit";
-    key = base;
-    var n2 = 2;
-    while (UNITS[key]) { key = base + n2; n2++; }
-  } else {
-    var n = 1;
-    do { key = "newunit" + n; nm = "New unit " + n; n++; } while (UNITS[key]);
-  }
+function addBusinessUnit(){
+  var n = 1, key, name;
+  do { key = "newunit" + n; name = "New unit " + n; n++; } while (UNITS[key]);
   UNITS[key] = {
-    name: nm,
-    codePrefix: (String(prefix || "").trim() || nm.replace(/[^A-Za-z0-9]/g, "").slice(0, 3) || "NU").toUpperCase(),
-    weight: 0, real: true, active: true, ukey: key,
-    company: company || null,
+    name: name, codePrefix: "NU", weight: 0, real: false, active: true, ukey: key,
     clauses: GROUP.clauses.map(function(c, i){ return [c[0], "", key + "-F" + (i + 1)]; }),
     aspiration: "", endInMind: "",
     keyObjectives: [], swot: { s: [], w: [], o: [], t: [] }, items: []
   };
   UNIT_KEYS.push(key);
   UNIT_ROLES[key] = { head: null, custodian: null };
-  var wrow = { key: key, unit: nm, why: "" };
-  (GROUP.weighting.factors || []).forEach(function(f){ wrow[f.key] = 0; });
-  GROUP.weighting.units.push(wrow);
+  GROUP.weighting.units.push({ key: key, unit: name, rev: 0, prof: 0, imp: 1, growth: 0,
+    why: "" });
   syncWeights();
   return key;
 }

@@ -1385,20 +1385,12 @@ function renderGroupFoundation(){
      the operand went and the `+` went with it, leaving the `return` stranded.
      Cost: a blank page for every viewer, and no edit route to the group's
      clauses, purpose, aspiration or values for anyone including the SMO. */
-  /* Same first-line fix as the unit's (§118's audit): the lead opens with
-     the pen, a line can be removed, and the first one can be written. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
-      GROUP.clauses.map(function(c, ci){
-        return '<div class="clause"><dt>' +
-          (gpg ? inputOr(gpg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) +
-          (gpg ? '<button class="xbtn" data-clauserm="group|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (gpg ? '<div class="addrow"><button class="editbtn" data-clauseadd="group">+ Add a line</button></div>' : '') +
-      '</div>' +
+      GROUP.clauses.map(function(c){
+        return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
+          fieldOr(gpg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+      }).join("") + '</dl></div>' +
       '<div class="fcol">' +
         '<div class="card"><h2 class="sec first">' + L("purpose","group") + '</h2>' +
         '<p class="statement">' + fieldOr(gpg, GROUP.mission, "big-field",
@@ -2030,23 +2022,12 @@ function koBand(objectives, page, acKey, owner, isGroup){
 
 function renderUnitFoundation(u){
   var upg = authoring("foundation", "u_found") ? "foundation" : null;
-  /* THE FIRST LINE CAN BE WRITTEN (§118's audit). The pen edited a clause's
-     TEXT and never its lead, and an empty list rendered nothing to edit and
-     no way to add — so a from-scratch unit could not say who it is at all
-     (§61's trap on the oldest surface in the product). The lead opens with
-     the pen because the leads are the unit's own words, not a fixed form. */
   return '<div class="fgrid"><div class="card"><h2 class="sec first">Who we are</h2>' +
       '<dl style="margin:0">' +
-      u.clauses.map(function(c, ci){
-        return '<div class="clause"><dt>' +
-          (upg ? inputOr(upg, c[0], "", function(v){ c[0] = v; }) : esc(c[0])) + '</dt><dd>' +
-          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) +
-          (upg ? '<button class="xbtn" data-clauserm="' + esc(u.ukey) + '|' + ci +
-            '" title="Remove this line" aria-label="Remove this line">&times;</button>' : '') +
-          '</dd></div>';
-      }).join("") + '</dl>' +
-      (upg ? '<div class="addrow"><button class="editbtn" data-clauseadd="' + esc(u.ukey) +
-        '">+ Add a line</button></div>' : '') + '</div>' +
+      u.clauses.map(function(c){
+        return '<div class="clause"><dt>' + esc(c[0]) + '</dt><dd>' +
+          fieldOr(upg, c[1], "", function(v){ c[1] = v; }) + '</dd></div>';
+      }).join("") + '</dl></div>' +
       aspirationCard(L("aspiration","bu"), u.aspiration, u.endInMind, u.keyObjectives, "foundation",
         function(v){ u.aspiration = v; }, function(v){ u.endInMind = v; }, "u_found",
         false, u) +
@@ -2058,24 +2039,15 @@ function renderUnitFoundation(u){
    Static, like the foundation. Context, not a score — nothing here feeds a
    number. */
 function renderUnitAnalysis(u){
-  /* THE FIRST LINE CAN BE WRITTEN (§118's audit). The pen edited what a file
-     had put here and an empty quadrant offered nothing at all — so a SWOT
-     could only ever ARRIVE, never start. Add per quadrant, remove per line,
-     both re-asked on the click (§48.2). */
   var box = function(cls, key, title){
     var list = u.swot[key] || [];
-    var ed = authoring("analysis", "u_anal");
     return '<section class="' + cls + '"><h3>' + title + '</h3><ol class="swotlist">' +
       list.map(function(x, i){
         return '<li><span class="swot-n">' + (i + 1) + '</span>' +
-          (ed
-            ? fieldOr("analysis", x, "", function(v){ list[i] = v; }) +
-              '<button class="xbtn" data-swrm="' + esc(u.ukey) + '|' + key + '|' + i +
-              '" title="Remove this line" aria-label="Remove this line">&times;</button>'
+          (authoring("analysis", "u_anal")
+            ? fieldOr("analysis", x, "", function(v){ list[i] = v; })
             : '<span>' + esc(x) + '</span>') + '</li>';
-      }).join("") + '</ol>' +
-      (ed ? '<div class="addrow"><button class="editbtn" data-swadd="' + esc(u.ukey) + '|' + key +
-        '">+ Add</button></div>' : '') + '</section>';
+      }).join("") + '</ol></section>';
   };
   return '<div class="swot hoverpen">' + penBtn("analysis", "u_anal") +
     box("s","s","Strengths") + box("w","w","Weaknesses") +
@@ -2871,17 +2843,10 @@ function projPerformanceBody(p, fk){
    is the one that gets left behind (§59). */
 function fnNothingBehind(fk){
   var f = FUNCTIONS[fk];
-  /* And the person who could give it one is offered the act, not only the
-     directions (\u00a7118's audit, \u00a761's rule): the button re-asks the shared
-     rule on the click, because this note has no pen to gate it. */
   return '<div class="note">' + esc(f ? f.name : "This function") +
     ' improves no capability yet, so there is nothing here to plan or report. ' +
-    (mayAuthor("k_found", "fn:" + fk)
-      ? '<button class="linkbu" data-fncapadd="' + esc(fk) + '">Add its first capability</button> &mdash; ' +
-        'or allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan in ' +
-        L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.'
-      : 'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
-        'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.') + '</div>';
+    'Allocate one on <b>Setup \u2192 Capabilities</b>, or set this function to plan ' +
+    'in ' + L("pillar", "bu").toLowerCase() + ' on <b>Setup \u2192 Functions</b>.</div>';
 }
 
 function renderFnPerformance(fnKey){
@@ -3606,18 +3571,9 @@ function renderUnitPlan(u){
      on a supporting function's own page — and only ever appeared there,
      because before §61 a function with no plan was missing from the navigation
      and there was no way to reach the sentence. */
-  /* AN EMPTY PLAN IS WHERE THE FIRST PILLAR GOES (\u00a7118's audit, \u00a761's shape
-     from the capability side): the note used to point at Import and offer
-     nothing, and the pen had no pane to sit on \u2014 so the only way to start a
-     plan here was to upload one. The button asks mayEditPlan() itself
-     because there is no pen on an empty page to gate it (\u00a761's trap: the
-     control's anchor is the thing that does not exist yet). */
   if (!sel) return '<div class="note">' + esc(u.name) + ' has no ' +
     L("pillar", "bu").toLowerCase() + ' yet, so there is no plan to show. ' +
-    (typeof mayEditPlan === "function" && mayEditPlan()
-      ? '<button class="linkbu" data-rowadd="pillar|' + esc(u.ukey) +
-        '">Add the first one</button> &mdash; or upload a plan on <b>Setup \u2192 Import &amp; plans</b>.'
-      : 'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.') + '</div>';
+    'A plan arrives as a file: <b>Setup \u2192 Import</b>, the pillars template.</div>';
   /* Key objectives are NOT repeated here. They are authored on Foundation and
      read on Performance \u2014 one place to author, one place to read. Showing them
      again above the rail was duplication, and a duplicated table is a table
@@ -3690,17 +3646,9 @@ function renderFnFoundation(fnKey){
       ' \u2014 the aspiration, the SWOT and the key objectives are set there, and ' +
       'what is planned here is the work under them. Open <b>Plan</b> to see it.</div>';
   }
-  var ed = authoring("capfoundation", "k_found");
   return editBar("capfoundation", "k_found") + caps.map(function(c){
     var f = functionOf(c.fn);
-    /* A CAPABILITY'S OBJECTIVES CAN FINALLY BE AUTHORED HERE (§118's audit).
-       They could arrive in a projects file and be READ on this page, and no
-       surface in the product could write the first one — the same
-       import-only trap as the SWOT and the clauses. Behind the page's own
-       pen; a row minted empty carries the same shape the seed's rows have. */
-    var koBlock = ed
-      ? capKoEdit(c)
-      : c.keyObjectives.length
+    var koBlock = c.keyObjectives.length
       ? '<div class="ohead"><span>Objective</span><span>This year</span><span>Weight</span></div>' +
         c.keyObjectives.map(function(m){
           return '<div class="orow"><span class="on">' + esc(m.name) + '</span>' +
@@ -3722,37 +3670,7 @@ function renderFnFoundation(fnKey){
         '<span class="pill horizon">Horizon &middot; ' + horizonLabel() + '</span></div>' +
         koBlock + '</div>' +
     '</div></div>';
-  }).join("") +
-  /* A second capability for the same function, added where the first is
-     described. addCapability() is the ONE minter (§51.11) — the Temple's
-     add and this one cannot drift. */
-  (ed ? '<div class="addrow"><button class="editbtn" data-fncapadd="' + esc(fk) +
-    '">+ Add a capability</button></div>' : '');
-}
-
-/* The capability objectives editor — koEdit's shape with the WEIGHT column a
-   capability's rows actually carry, addressed by capId + index the way the
-   Temple's tables are (no ids: the seed's rows never had them, and §96.4's
-   rule about mixed lists says do not mint some now). */
-function capKoEdit(c){
-  var pg = "capfoundation";
-  return '<div class="scroll"><table><thead><tr><th>Objective</th><th class="cc">Dir.</th>' +
-    '<th class="cc">This year</th><th class="cc">Compile</th><th class="cc">Weight %</th><th></th></tr></thead><tbody>' +
-    c.keyObjectives.map(function(m, i){
-      return '<tr><td>' + inputOr(pg, m.name, "", function(v){ m.name = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.dir || "≥", ["≥", "≤"], "",
-          function(v){ m.dir = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.target || "", "mono",
-          function(v){ m.target = v; }) + '</td>' +
-        '<td class="cc">' + selectOr(pg, m.compile || "Latest", ["Sum", "Latest", "Average"], "",
-          function(v){ m.compile = v; }) + '</td>' +
-        '<td class="cc">' + inputOr(pg, m.weight == null ? "" : String(m.weight), "mono",
-          function(v){ m.weight = (v === "" || !isFinite(+v)) ? null : +v; }) + '</td>' +
-        '<td class="cc"><button class="rmbtn" data-capkorm="' + esc(c.id) + '|' + i +
-          '">Remove</button></td></tr>';
-    }).join("") + '</tbody></table></div>' +
-    '<div class="addrow"><button class="editbtn" data-capkoadd="' + esc(c.id) +
-      '">+ Add an objective</button></div>';
+  }).join("");
 }
 
 

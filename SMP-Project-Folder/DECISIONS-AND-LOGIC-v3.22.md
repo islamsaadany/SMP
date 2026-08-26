@@ -15656,3 +15656,143 @@ moving the page (220 → 93) — it fails identically on the pre-§117 build, so
 it is not this section's, and it is recorded here rather than quietly fixed.
 `checks/plan-arrange.py` learned `SMP_CHROME` and to stop counting the new
 download button as a pen (§51.11, on the day the control changed shape).
+
+## 118 · Building a plan on the platform (v3.41, spec 020)
+
+Islam: *"I want the team of the SMO to be able to build a plan on the platform
+directly. so they identify a function or a unit and set which way are they
+going to plan pillars or projects and then they go in a flow of building the
+plans on the platform."* Settled over two mockup revisions
+(`design-mockups/plan-builder/`), and both of his corrections to revision 1
+are the decisions that shape the module.
+
+### 118.1 The decisions
+
+**FUNCTIONS CHOOSE, UNITS DO NOT.** A unit always plans in pillars — the
+scoring model, the import template and every unit page assume it. Only a
+function with nothing behind it is asked *pillars or projects*, and the
+question writes the `format` field spec 010 already stores, asked at a better
+moment: the function's birth.
+
+**A MAP, NOT A MARCH** (his first correction: *"the SMO might not build in
+that sequence — he might jump to a certain area"*). The band under the tab
+row is one chip per section of the plan — unit: Foundation · Objectives ·
+SWOT · Pillars · Review; projects function: Definitions · Objectives ·
+Projects · Review; pillars function: Pillars · Review — and every chip opens
+its section directly with the pen on. Nothing waits on a previous step. The
+chips read the DATA (✓ filled, a count so far, ○ empty), so they cannot
+drift from the plan; the same derivation is why **pausing costs nothing and
+nothing is stored** — no draft flag, no progress record, no state anybody
+can forget to clear. BUILDER is a screen mode and not even a preference.
+
+**A ROW IS ADDED WHOLE** (his second: *"the build up should be in boxes that
+respect the outcome structure … the template should protect the structure of
+the outcome"*). Every "+ Add" in build mode opens a form — §116's dialog
+shape, generalised — asking that row kind's fields in the order the outcome
+reads them. The name is the one field that makes Add live; everything else is
+asked, NAMED in an amber line while empty, and never forced, because a hard
+requirement makes somebody invent a number to get past a box ("we have not
+set the target yet" stays sayable, §47's rule about honest states). *Add &
+add another* keeps the form open for building a table in one sitting. The
+rows are applied through the pen's own minters (`addPillar`, `addMeasure`,
+`koMint`, …) and the option lists are the pen's own `selectOr` vocabulary —
+never a second copy of either (§53.5).
+
+**LIVE IMMEDIATELY.** The plan appears as it is built, exactly like pen
+edits; missing things read honestly as missing through the marks the pages
+already carry.
+
+**THE DOOR IS BESIDE IMPORT** — the page where plans arrive grows a second
+door, *Build it here*, and the chooser it opens lists every subject with an
+honest status. **A subject with content gets Continue AND Start fresh** —
+the first check run found the flaw: one button that always cleared would
+have made pausing cost the whole plan. Starting fresh goes through
+`clearUnitPlan()` / `clearFunction()`, the import's own path, so **it
+archives first and nothing the builder does is a deletion** (§49.2; a
+pillars function through the writable view + write-back, the same way an
+uploaded replacement goes). Creating a subject happens in the same place: a
+new function asks its format; a new projects function gets its first
+capability minted, named after it, because a projects plan has to hang off
+something and `addCapability()` is the one minter (§51.11).
+
+### 118.2 The empty-state audit — part one of the build, and five findings
+
+The editors were built for CORRECTING an imported plan, so from a truly
+empty subject several surfaces could be read and never started — §61's trap,
+found five more times in one walk:
+
+1. **"Who we are" had no first line.** The pen edited a clause's text and
+   never its lead, and an empty list rendered nothing and offered nothing.
+   Add, remove and an editable lead now, on the unit's foundation AND the
+   group's (the same table, the same fault).
+2. **The SWOT could only ever arrive.** No add, no remove, in any quadrant.
+3. **An empty unit's Plan page was a dead end** — "A plan arrives as a file:
+   Setup → Import" and nothing else, with no pane for the pen to sit on. It
+   offers the first pillar now to whoever `mayEditPlan()`, with the button
+   asking the rule itself because there is no pen to gate it.
+4. **A VIRGIN pillars function swallowed its first row silently**: the
+   rowadd handler resolved subjects through `unitLike()`, whose reading view
+   hands a function frozen empties (§50.6) — so the first add pushed into an
+   array the function never held, accepted on screen and written nowhere.
+   `unitLikeWritable()` now, which mints the containers.
+5. **A capability's key objectives were import-only**: readable on the
+   function's Overview, writable nowhere in the product. `capKoEdit()` —
+   koEdit's shape with the weight column a capability's rows carry — behind
+   the page's own pen, plus "+ Add a capability" on the Overview and on the
+   empty-function note.
+
+**And the Business units page's "+ Add a business unit" was found half-built
+on the way**: wired since some earlier version to an argless
+`addBusinessUnit()` that minted "New unit 1", key `newunit1`, prefix NU,
+`real:false` — stamping a unit the SMO just created as ILLUSTRATIVE (§21's
+flag) — with the weighting row's values hardcoded as rev/prof/imp/growth
+(§104.7's list-of-exceptions fault: a tenant that renamed a factor got a row
+the composite could not read). One minter still, now taking name, prefix and
+company from the builder's form; the key minted from the name; `real:true`;
+the weighting row minted from the factor list.
+
+### 118.3 The shape of the code
+
+`src/builder.js` holds state, HTML and data logic — everything that lives in
+the shared global scope. The SHELL owns what its closure owns: navigation,
+the modal, the wiring of every `data-b*` attribute (whoever rewrites the DOM
+re-wires it, §24/§30.1). The band (`#buildband`) sits OUTSIDE the sticky
+chrome — a band added to the pinned rows would move `--chrome-h` and every
+sticky offset under it (§101.5) — and is repainted by paint() after the
+navigation settles, because the chips read `currentSub`/`CURSEC`.
+`fieldSaved()` was hoisted out of wire()'s closure — the builder's dialogs
+write rows from outside it, and a second copy of "how an edit reaches the
+database" is §53.5's drift. **The server needed nothing**: every edit the
+builder makes is a plan/setup change `lib/authorize.js` already classifies,
+and an added unit or function is the office's by §42's unclassified rule.
+
+Three faults found by driving rather than reading: `builderSubjectName()`
+first asked `unitLike()` and every projects function was NAMELESS (that
+resolver answers only what the unit pages draw); closing the form's dialog
+EMPTIES its body, which blurs the field being typed, which fires `change`
+into a form that no longer exists (Escape threw on exactly that — §30.1's
+family from the far side; guarded); and the viewer switcher moves `current`
+to the new viewer's entry (§94.6), so "the band comes back when the SMO
+returns" is true through the chooser's Continue, not by standing still.
+
+### 118.4 What proves it
+
+`src/checks/plan-builder.py` — ten sections, every assertion asking the DATA
+after pressing the CONTROL (§96's question), making every state it measures
+(§94.2: an empty unit, a virgin function, a subject mid-build). Both ends
+each time: the chooser's statuses asserted to AGREE with `builderHasPlan()`,
+and the band asserted to HIDE for a viewer `SMPRules.mayAuthorPage()`
+refuses — found by asking the rule for a refused person rather than guessing
+one. **Proved able to fail twice before its green was believed (§94.5), and
+the second proof caught THE CHECK**: with the plan chip forced to lie, the
+first "agreement" assertion passed, because it looked for the count as a
+substring of the review row and the gap sentence beside the lying chip also
+contained a "1". It compares the chip's own mark against the data now, and
+the same break fails it. The full `qa.py` sweep and the affected checks
+(foundation-objectives, strategy-office, plan-fields, strategy-split,
+project-tables, tour, page-width, setup-overview) are green.
+
+**Flagged, not built**: a pillars function's key objectives still have no
+authoring surface anywhere (the Overview says its foundation is the
+parent's), so the builder's pillars-function route carries Plan and Review
+only — giving them a surface is a decision, not a tidy-up.

@@ -190,7 +190,31 @@ const stub = http.createServer(function (req, res) {
      noKey.ok === false && /GEMINI_API_KEY/.test(noKey.why), noKey);
   process.env.GEMINI_API_KEY = "test-key-not-a-real-one";
 
-  console.log("\n5 · what actually goes to the provider");
+  /* §120. "Rejected" and "not the key you made" are two different errands and
+     the deployment cannot tell them apart from outside — so the shape is
+     reported, and the one thing that must never happen is the VALUE reaching
+     the screen. Asserted here rather than in the browser check, whose stub
+     supplies the steps and would never run this at all (§94.2). */
+  console.log("\n5 · which key, without saying which key");
+  process.env.GEMINI_API_KEY = "AIzaSyC00000000000000000000000000000000";
+  let shape = assistant.keyShape();
+  ck("an AI Studio key is recognised by its shape",
+     shape && shape.len === 39 && shape.head === "AIza" && shape.looksRight === true, shape);
+  ck("and no more of it than that is ever handed out",
+     shape && Object.keys(shape).sort().join() === "head,len,looksRight" &&
+     !/0{5}/.test(JSON.stringify(shape)), shape);
+  process.env.GEMINI_API_KEY = "ya29.a0AfH6SMBexample-oauth-token-not-a-key";
+  shape = assistant.keyShape();
+  ck("a credential of any other shape is called out as one",
+     shape && shape.looksRight === false, shape);
+  process.env.GEMINI_API_KEY = "  AIzaSyC00000000000000000000000000000000\n";
+  ck("and the shape is read AFTER the trim, or a clean key reads as malformed",
+     assistant.keyShape().looksRight === true, assistant.keyShape());
+  delete process.env.GEMINI_API_KEY;
+  ck("no key, no shape", assistant.keyShape() === null);
+  process.env.GEMINI_API_KEY = "test-key-not-a-real-one";
+
+  console.log("\n6 · what actually goes to the provider");
   MODE = "answer";
   await assistant.ask({ kb: kb, question: "how do I report", history: [], who: "a strategy custodian", labels: { pillar: "direction", pillars: "directions" } });
   const sys = (LAST.systemInstruction.parts || []).map(function (p) { return p.text; }).join("\n");

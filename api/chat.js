@@ -454,14 +454,30 @@ module.exports = async function handler(req, res) {
          while the row beneath it carried the provider's "API key not valid".
          Presence is all this step can see; whether the key is accepted is the
          model step's answer, and it now says so there. */
+      /* AND WHICH KEY, IN A SHAPE THAT GIVES NOTHING AWAY (§120). "Rejected"
+         and "not the key you made" send somebody to two different websites,
+         and the deployment cannot tell them apart from the outside — so it
+         says the length and the first four characters, and whether that is
+         the shape an AI Studio key has. */
+      const shape = assistant.keyShape();
       step("The API key", assistant.configured() ? "ok" : "fail",
-           assistant.configured()
-             ? "Present on this deployment. Whether the provider accepts it is " +
-               "the next step."
+           shape
+             ? (shape.len + " characters, starting " + shape.head + ". " +
+                (shape.looksRight
+                  ? "That is the shape of an AI Studio key — whether the provider " +
+                    "accepts this one is the next step. If it is refused, check " +
+                    "this against the key in AI Studio: a deployment only has the " +
+                    "variables that existed when it was BUILT, so a key changed " +
+                    "since then needs a redeploy."
+                  : "AN AI STUDIO KEY IS " + assistant.KEY_LEN + " CHARACTERS " +
+                    "STARTING " + assistant.KEY_HEAD + ", so this is a different " +
+                    "kind of credential — an OAuth token, a service account or a " +
+                    "Vertex key will be refused however the project is set up. " +
+                    "Make one at aistudio.google.com/apikey."))
              : "No " + assistant.KEY_NAME + " here. Note that Vercel only " +
                "gives a deployment the variables that existed when it was " +
                "built — if it was added since, redeploy.",
-           assistant.configured() ? "present" : null);
+           !shape ? null : shape.looksRight ? "present" : "wrong shape");
 
       /* THE CALL ITSELF, only once there is something to call with. */
       if (kb && assistant.configured()) {

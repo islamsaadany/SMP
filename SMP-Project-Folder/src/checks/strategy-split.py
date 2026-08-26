@@ -426,7 +426,7 @@ with sync_playwright() as p:
                         "merged": [c.get("hMerge") for c in qs[1:]] })
             break
         ck("the tactics table was found", len(rows) > 0, len(rows))
-        # THE TEMPLATE'S SHAPE IS NOT SPENT ON SAYING THE GAP (§123.1, Islam's
+        # THE TEMPLATE'S SHAPE IS NOT SPENT ON SAYING THE GAP (§128.1, Islam's
         # correction): four separate columns on EVERY row, no merged cell ever.
         ck("every row keeps all four quarter columns",
            all(r["cells"] == 4 for r in rows), [r["cells"] for r in rows])

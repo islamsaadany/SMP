@@ -44,6 +44,7 @@ PERSON = {"key": "smo", "name": "Mohamed Essam", "role": "super"}
 
 # What the stub /api/chat answers with, and whether it answers at all.
 CHAT = {"status": 200, "messages": [], "unread": 0, "thread": None, "polls": 0, "said": [],
+        "test": None,
         "cfg": {"on": True, "shots": True, "promise": "Usually answers the same day",
                 "beat": 4000}}
 
@@ -122,6 +123,10 @@ class H(http.server.BaseHTTPRequestHandler):
                 "body": body.get("body") or "", "page": body.get("page"),
                 "target": body.get("target"), "cycle": body.get("cycle"),
                 "build": body.get("build"), "flag": None, "has_shot": False})
+        if body.get("action") == "assistantTest":
+            self._send(200, json.dumps({"ok": True, "steps": CHAT.get("test") or []}).encode(),
+                       "application/json")
+            return
         if body.get("action") == "queue":
             self._send(200, json.dumps({
                 "ok": True, "office": True, "threads": BOXQUEUE, "chat": CHAT["cfg"],
@@ -510,6 +515,255 @@ with sync_playwright() as p:
     pg.evaluate("()=>{const b=[...document.querySelectorAll('.chqtab')]"
                 ".find(x=>x.dataset.chtab==='waiting'); if(b) b.click();}")
     pg.wait_for_timeout(400)
+
+    # ── 10 · IS THE BOT WORKING? (§123) ──────────────────────────────────
+    # Islam, having turned the assistant on and had nothing come back: "I need
+    # to understand if the bot is working."
+    #
+    # THE DEGRADATION WAS CORRECT AND SILENT. §112.2 made every failure land on
+    # the chat as it worked before, so no key, a rejected model and a genuine
+    # decline all look the same from the office's side. What is asserted is
+    # that the diagnostic SEPARATES them — a check of the happy path alone
+    # would be the same silence with a button on it.
+    print("\n10 · the assistant's diagnostic")
+    CHAT["test"] = [
+        {"name": "The switch", "state": "ok", "detail": "The assistant answers first"},
+        {"name": "The knowledge base", "state": "ok", "detail": "43 how-tos"},
+        {"name": "The API key", "state": "fail", "detail": "No GEMINI_API_KEY here."},
+    ]
+    pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-setupgo]')]"
+                ".find(x=>x.dataset.setupgo==='chat'); if(r) r.click();}")
+    pg.wait_for_timeout(1200)
+    pg.evaluate("()=>{const b=document.querySelector('[data-chsetmenu]'); if(b) b.click();}")
+    pg.wait_for_timeout(500)
+
+    btn = pg.evaluate("""()=>{ const b=document.querySelector('[data-chtest]');
+        if(!b) return null;
+        const r=b.getBoundingClientRect();
+        const e=document.elementFromPoint(r.left+r.width/2, r.top+r.height/2);
+        return { there:true, hit: e ? (e.closest('[data-chtest]') ? 'button' : e.tagName) : 'nothing' }; }""")
+    ck("the office has a way to ask", bool(btn), btn)
+    # PRESSABLE, NOT MERELY PRESENT (§70, §93.4) — and it was neither at first:
+    # the branch was written into the `change` listener, where a <button> can
+    # never reach it, so it rendered perfectly and did nothing (§96).
+    ck("and it is pressable, not merely present", bool(btn) and btn["hit"] == "button", btn)
+
+    if btn:
+        pg.evaluate("()=>{ document.querySelector('[data-chtest]').click(); }")
+        pg.wait_for_timeout(1200)
+        stopped = pg.evaluate("""()=>({
+            shown: !!document.querySelector('.chtest'),
+            head: (document.querySelector('.chtest-h')||{}).textContent || "",
+            stopped: [...document.querySelectorAll('.chtest-r')]
+                       .filter(r=>r.querySelector('.tdot.bad')).length })""")
+        ck("pressing it answers", stopped["shown"], stopped)
+        # WHERE IT STOPS IS THE ANSWER. "It is not working" sends somebody to
+        # look at everything; naming the step sends them to one page.
+        ck("a failure names the step that stopped it",
+           "not working" in stopped["head"].lower() and "key" in stopped["head"].lower(), stopped)
+        ck("and marks exactly one row as the stopping point", stopped["stopped"] == 1, stopped)
+        # AND THE NAME IS NOT SHOUTED DOWN (§124). The headline lowercases the
+        # step's name so it reads as a sentence, and lowercasing the WHOLE of
+        # it turned "The API key" into "the api key" in the one line somebody
+        # reads first. Only the leading article moves.
+        ck("an acronym in the step's name survives the headline",
+           "the API key" in stopped["head"], stopped)
+
+        # ── PRESENT IS NOT VALID (§124) ──────────────────────────────────
+        # The row that says a key is there had said WORKING, off nothing but a
+        # non-empty variable — while the row beneath it carried the provider
+        # refusing that same key. A state is how a row is DRAWN; what it SAYS
+        # about itself is a separate fact, and this is the one row where the
+        # two must differ.
+        CHAT["test"] = [
+            {"name": "The switch", "state": "ok", "detail": "on"},
+            {"name": "The knowledge base", "state": "ok", "detail": "43 how-tos"},
+            {"name": "The API key", "state": "ok", "word": "present",
+             "detail": "Present on this deployment."},
+            {"name": "The key itself", "state": "fail",
+             "detail": "the provider rejected the key: API key not valid."},
+        ]
+        pg.evaluate("()=>{ document.querySelector('[data-chtest]').click(); }")
+        pg.wait_for_timeout(1200)
+        pres = pg.evaluate("""()=>{ const rows=[...document.querySelectorAll('.chtest-r')];
+            const find=n=>rows.find(r=>(r.querySelector('.chtest-n')||{}).textContent===n);
+            const word=n=>{ const r=find(n); return r ? (r.querySelector('.chtest-s')||{}).textContent : null; };
+            return { key: word('The API key'), itself: word('The key itself'),
+                     head: (document.querySelector('.chtest-h')||{}).textContent || "" }; }""")
+        ck("a present key never claims to be working",
+           pres["key"] and "work" not in pres["key"].lower(), pres)
+        ck("it says only what it checked", (pres["key"] or "").lower() == "present", pres)
+        ck("and the refusal is reported against the key, not the model",
+           "key itself" in pres["head"].lower(), pres)
+
+        CHAT["test"] = [
+            {"name": "The switch", "state": "ok", "detail": "on"},
+            {"name": "The knowledge base", "state": "ok", "detail": "43 how-tos"},
+            {"name": "The API key", "state": "ok", "detail": "Set"},
+            {"name": "The model (x)", "state": "ok", "detail": "Answered in full"},
+            {"name": "A question it should know", "state": "ok", "detail": "From your key objectives."},
+        ]
+        pg.evaluate("()=>{ document.querySelector('[data-chtest]').click(); }")
+        pg.wait_for_timeout(1200)
+        good = pg.evaluate("""()=>({
+            head: (document.querySelector('.chtest-h')||{}).textContent || "",
+            stopped: [...document.querySelectorAll('.chtest-r')]
+                       .filter(r=>r.querySelector('.tdot.bad')).length })""")
+        # AND THE WORKING CASE MUST READ DIFFERENTLY, or the diagnostic is a
+        # decoration that always says the same thing.
+        ck("a working assistant says so", good["head"].lower().startswith("it is working"), good)
+        ck("and nothing is marked as a stopping point", good["stopped"] == 0, good)
+    CHAT["test"] = None
+
+    # ── 11 · A HANDOFF IS SAID OUT LOUD (§125) ───────────────────────────
+    # It used to write nothing at all, which left the person looking at a
+    # screen identical to the one they would see if the assistant had never
+    # run. So what is asserted is that the two states DIFFER on screen — and
+    # that saying so did not quietly turn the thread into an answered one.
+    print("\n11 · a handoff the person can see")
+    CHAT["messages"] = [
+        {"id": 1, "at": "2026-08-26T09:00:00Z", "from_office": False, "by_key": "smo",
+         "by_name": "Mohamed Essam", "body": "Where do I change the logo?",
+         "flag": None, "bot": False, "handoff": False, "has_shot": False},
+        {"id": 2, "at": "2026-08-26T09:00:02Z", "from_office": True, "by_key": "assistant",
+         "by_name": "Assistant",
+         "body": "I could not answer this one from the knowledge base. The office has it.",
+         "flag": None, "bot": True, "handoff": True, "has_shot": False},
+    ]
+    CHAT["thread"] = {"waiting": True}
+    # NO REFRESH HOOK, AND DELIBERATELY NOT ADDING ONE. The panel has exactly
+    # one way to learn anything — its own poll (§97: nothing here ever calls
+    # paint()) — so the check waits for a beat rather than reaching into the
+    # module, and is measuring the path the product actually uses.
+    # SECTION 10 LEFT THE SETTINGS MENU OPEN, and it covers the corner — the
+    # click was refused outright rather than landing somewhere wrong, which is
+    # the good failure (§110). Put it away the way a person would.
+    pg.evaluate("()=>{const b=document.querySelector('[data-chsetmenu]'); if(b) b.click();}")
+    pg.wait_for_timeout(400)
+    if pg.eval_on_selector("#chatpanel", "e => e.hidden"):
+        pg.click("#chatbtn")
+    pg.wait_for_selector("#chatpanel:not([hidden])")
+    pg.wait_for_timeout(5600)
+    hand = pg.evaluate("""()=>({
+        sys:  [...document.querySelectorAll('#chatbody .chsys')].map(x=>x.innerText),
+        bub:  document.querySelectorAll('#chatbody .chmsg').length,
+        out:  document.querySelectorAll('#chatbody .chout').length,
+        named: [...document.querySelectorAll('#chatbody .chsys .chwho')].length })""")
+    ck("the person is told the assistant could not answer", len(hand["sys"]) == 1, hand)
+    # NOT A MESSAGE. The two sides of this conversation are the person and the
+    # office, and a handoff is neither — so it wears no name and no bubble.
+    ck("and it is narrated, not spoken by anybody",
+       hand["bub"] == 1 and hand["named"] == 0, hand)
+    # NO WAY OUT ON IT. That button is for a confident WRONG answer, where the
+    # conversation has already left the queue; here somebody is already coming
+    # and a control asking for what is happening anyway is worse than none.
+    ck("and carries no way out, because one is not needed", hand["out"] == 0, hand)
+
+    # AND THE OTHER STATE MUST LOOK DIFFERENT, or this asserts nothing: a build
+    # that drew the line for every bot message would pass every line above.
+    CHAT["messages"][1] = dict(CHAT["messages"][1],
+                               body="From your key objectives — each actual against its target.",
+                               handoff=False, source="headline")
+    CHAT["thread"] = {"waiting": False}
+    pg.wait_for_timeout(5600)
+    ans = pg.evaluate("""()=>({
+        sys: document.querySelectorAll('#chatbody .chsys').length,
+        bot: document.querySelectorAll('#chatbody .chmsg.chbot').length,
+        out: document.querySelectorAll('#chatbody .chout').length })""")
+    ck("a real answer is a message, not a narrated line",
+       ans["sys"] == 0 and ans["bot"] == 1, ans)
+    ck("and it is the answer that carries the way out", ans["out"] == 1, ans)
+    CHAT["messages"] = []
+    CHAT["thread"] = None
+
+    # ── 12 · THE SETTINGS, RE-SEQUENCED (§127) ───────────────────────────
+    # ASSERTS THE PROBLEMS, NEVER THE LAYOUT (§94.8). The faults were: the
+    # master switch sat third, under a setting it governs; the two email rows
+    # sat five rows apart; the explanations were longer than the controls; and
+    # a hover note is unreachable on a touch screen. A check written against
+    # "row 4 is Assistant" would have to be rewritten the day anything moves.
+    print("\n12 · the settings, in the order somebody decides them")
+    pg.evaluate("()=>{const b=document.querySelector('[data-chsetmenu]');"
+                " if(b && !document.querySelector('.chset')) b.click();}")
+    pg.wait_for_timeout(400)
+    # The assistant ON, so Handover email is drawn at all — it is the row that
+    # carries the one status that must NOT have become a tooltip.
+    pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="assistant"]')]
+        .find(x=>x.dataset.chval==='1' && !x.closest('.seg').classList.contains('lit'));
+        if(b) b.click();}""")
+    pg.wait_for_timeout(900)
+    if not pg.query_selector('[data-chset="notify"]'):
+        pg.evaluate("""()=>{const b=[...document.querySelectorAll('[data-chset="assistant"]')]
+            .find(x=>x.dataset.chval==='1'); if(b) b.click();}""")
+        pg.wait_for_timeout(900)
+
+    seq = pg.eval_on_selector_all(
+        ".chset .chset-row .chset-lab", "n=>n.map(x=>x.childNodes[0].textContent.trim())")
+    ck("every setting is one or two words", bool(seq) and all(len(w.split()) <= 2 for w in seq), seq)
+    # THE MASTER SWITCH GOVERNS EVERY OTHER ROW, so it cannot sit under one.
+    ck("the switch that turns the whole thing off comes first",
+       seq and seq[0] == "Chat", seq)
+    # TWO SETTINGS ABOUT THE SAME ACT BELONG TOGETHER. They were five rows apart.
+    if "Handover email" in seq and "Away email" in seq:
+        ck("the two email settings are next to each other",
+           abs(seq.index("Handover email") - seq.index("Away email")) == 1, seq)
+    # TEST IS WHERE SOMEBODY STANDS AFTER FLIPPING THE ASSISTANT (§123).
+    ck("Test the assistant is in the assistant's own row",
+       pg.evaluate("""()=>{const t=document.querySelector('[data-chtest]');
+           const r=t && t.closest('.chset-row');
+           return !!r && r.querySelector('[data-chset="assistant"]') !== null;}"""), None)
+
+    marks = pg.eval_on_selector_all(".chset .tip", "n=>n.length")
+    ck("every setting explains itself behind a mark", marks == len(seq), [marks, len(seq)])
+    # A STATUS IS NOT AN EXPLANATION and must not have gone behind a hover: a
+    # tooltip cannot say "nobody is chosen" to somebody who never hovers.
+    left = pg.eval_on_selector_all(".chset .chset-hint, .chset .chset-cost",
+                                   "n=>n.map(x=>x.innerText)")
+    ck("the prose is gone from the page", len(left) <= 1, left)
+    ck("but the live status is not",
+       len(left) == 1 and ("wait" in left[0].lower() or "emailed" in left[0].lower()
+                           or "no one is set" in left[0].lower()), left)
+
+    # A TAP OPENS IT. Hover does not exist on a tablet, and every explanation
+    # now lives behind one of these — so a mark that answers only a mouse is
+    # half the readers of this panel unable to read it.
+    opened, outside = [], []
+    for i in range(marks):
+        # THE BUBBLE IS A ::after AND SO IS NOT AN ELEMENT — it has no
+        # getBoundingClientRect, and measuring the ROW instead measures
+        # something that is inside the panel by definition, which is a check
+        # that cannot fail (§53.7's blind spot, §94.5). Its box is computed
+        # from the containing block that `position` actually gives it, so the
+        # measurement follows the CSS rather than assuming which rule is live.
+        st = pg.evaluate("""(i)=>{const t=[...document.querySelectorAll('.chset .tip')][i];
+            t.click();
+            const s=getComputedStyle(t,'::after'), own=getComputedStyle(t);
+            const cb=(own.position==='static' ? t.closest('.chset-row') : t)
+                       .getBoundingClientRect();
+            const w=parseFloat(s.width)+parseFloat(s.paddingLeft)+parseFloat(s.paddingRight);
+            let left=cb.left+parseFloat(s.left||0);
+            const m=/matrix\(([^)]+)\)/.exec(s.transform||"");
+            if (m) left += parseFloat(m[1].split(',')[4]||0);
+            const panel=document.querySelector('.chset').getBoundingClientRect();
+            return { shown: s.display === 'block',
+                     text: (t.dataset.tip||'').length,
+                     box: [Math.round(left), Math.round(left+w)],
+                     panel: [Math.round(panel.left), Math.round(panel.right)],
+                     inPanel: left >= panel.left - 1 && left + w <= panel.right + 1,
+                     open: document.querySelectorAll('.chset .tip.on').length };}""", i)
+        if not st["shown"] or st["text"] < 20: opened.append([i, st])
+        if not st["inPanel"] or st["open"] != 1: outside.append([i, st])
+    ck("pressing a mark opens its note, and there is something in it", not opened, opened[:2])
+    # ONE AT A TIME, and inside the panel — the platform's default centres the
+    # bubble on a 14px icon, which hung a 264px note off the side of a 392px
+    # dropdown. Anchored to the row instead, so it holds for every row.
+    ck("one note at a time, and always inside the panel", not outside, outside[:2])
+    # AND ANY OTHER PRESS PUTS IT AWAY, or a note stands over the control that
+    # was just pressed.
+    pg.evaluate("()=>{const r=document.querySelector('.chset-h'); if(r) r.click();}")
+    pg.wait_for_timeout(250)
+    ck("and pressing anything else puts it away",
+       pg.eval_on_selector_all(".chset .tip.on", "n=>n.length") == 0)
 
     # ── 7 · AND A SESSION THE SERVER REFUSES, LAST ON PURPOSE ────────────
     # A refused session takes the corner away rather than leaving a control

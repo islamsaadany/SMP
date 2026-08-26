@@ -114,10 +114,10 @@
    and pushing it, and main is now serving "smp-shell-v3.43-setup".
    Confirmed against origin/main, and to be confirmed once more
    immediately before any push to main (§94.16). */
-/* v3.46-plandeck — §123: the deck marks a tactic that names no quarter,
+/* v3.46-plandeck — §128: the deck marks a tactic that names no quarter,
    closes on Thank you, and the Function overview carries the download too.
 
-   §94.12 FOR THE TENTH TIME, and the SEVENTH on this one piece of work:
+   §94.12 FOR THE TENTH TIME (and it did NOT collide this time), and the SEVENTH on this one piece of work:
    v3.39, v3.40, v3.41, v3.43, v3.44 and v3.45 were each taken by main inside
    the window between reading a name and pushing it. §99's answer is applied
    properly this time — the bare next number is a rule two sessions follow

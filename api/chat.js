@@ -107,7 +107,7 @@ const str = function (v, max) {
    difference, and the whole point of the column is that the difference is
    drawn. */
 const MSG_COLS =
-  "id, at, from_office, by_key, by_name, body, flag, bot, source, " +
+  "id, at, from_office, by_key, by_name, body, flag, bot, source, handoff, " +
   "(shot IS NOT NULL) AS has_shot";
 
 /* ── WHAT THE OFFICE HAS SET ABOUT THE CHAT (§98) ───────────────────────
@@ -350,6 +350,31 @@ module.exports = async function handler(req, res) {
          only shown when it is true. */
       if (cfg.assistant) {
         const a = await assistantAnswer(client, me, text);
+        /* SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125). A handoff used to
+           write nothing at all, on the sound reasoning that a sentence would
+           make the thread read as answered — and the person was left looking
+           at a screen identical to the one they would see if the assistant had
+           never run. §123's lesson one layer in.
+
+           SO THE LINE IS THE PRODUCT'S, NEVER THE MODEL'S: §104's rule is that
+           `answered` decides and the model's words are only shown when it is
+           true, which is untouched. This is fixed text, and the thread STAYS
+           WAITING, so the office's queue and the email below are unchanged and
+           somebody still comes.
+
+           AND ONLY FOR A REAL HANDOFF — `a` is null when the assistant could
+           not be asked at all (no key, no corpus, a timeout, a refusal), and
+           every one of those must go on landing exactly as the chat worked
+           before the assistant existed (§112.2). Declining is a decision; the
+           other four are not, and telling somebody the assistant considered
+           their question when it never saw it would be a lie the operator
+           cannot see. */
+        if (a && !a.answered) {
+          await client.query(
+            "INSERT INTO chat_messages (person_key, from_office, bot, handoff, by_key, by_name, body) " +
+            "VALUES ($1,true,true,true,$2,$3,$4)",
+            [me.key, "assistant", ASSISTANT_NAME, assistant.HANDOFF_LINE]);
+        }
         if (a && a.answered) {
           await client.query(
             "INSERT INTO chat_messages (person_key, from_office, bot, by_key, by_name, body, source) " +
@@ -379,6 +404,116 @@ module.exports = async function handler(req, res) {
        is the same sentence: naming which of the two roles somebody lacks tells
        an outsider the shape of the office. */
     if (!office) return send(res, 403, { ok: false, error: "The Strategy Office answers these." });
+
+    /* ── IS THE BOT WORKING? (§123) ───────────────────────────────────
+       Islam, having turned the assistant on and had nothing come back: "I need
+       to understand if the bot is working."
+
+       THE DEGRADATION WAS CORRECT AND SILENT, which is the fault. §112.2 made
+       every failure land on the chat as it worked before — the message is
+       stored and a person answers it — so no key, a rejected model, Google
+       unreachable, and the assistant legitimately declining all look
+       identical from the office's side: something arrives in the inbox and
+       nothing explains itself. Right for the person asking; useless to the
+       person who just turned it on.
+
+       SO IT WALKS THE CHAIN AND REPORTS WHERE IT STOPS, rather than answering
+       yes or no. "It is not working" sends somebody to look at everything;
+       "the key is missing" sends them to one page. Each step is checked in the
+       order the real path uses them, and the first failure ends the walk —
+       reporting a model error under a missing key would be noise.
+
+       IT MAKES A REAL CALL. Anything less tests the parts and not the thing:
+       a key can be present and refused, a model name can be valid and retired.
+       It is the office's own button, so the cost is one question's worth of
+       tokens when somebody presses it. */
+    if (action === "assistantTest") {
+      const steps = [];
+      /* THE WORD IS THE STEP'S TO CHOOSE (§124). "ok" is the state the row
+         is drawn in; what the row SAYS about itself is a different fact, and
+         the API key's is "present" rather than "working" — which is the whole
+         of what this page got wrong the first time. */
+      const step = function (name, state, detail, word) {
+        steps.push({ name: name, state: state, detail: detail || null,
+                     word: word || null });
+      };
+
+      step("The switch", cfg.assistant ? "ok" : "off",
+           cfg.assistant ? "The assistant answers first"
+                         : "Everything goes straight to this inbox");
+
+      const kb = corpus();
+      step("The knowledge base", kb ? "ok" : "fail",
+           kb ? ((kb.recipes || []).length + " how-tos, " +
+                 (kb.sections || []).length + " sections, " +
+                 (kb.pages || []).length + " page explainers")
+              : "db/kb.json did not reach this deployment");
+
+      /* PRESENT, NOT VALID (§124). This row said "working" off a non-empty
+         variable, and Islam read that — reasonably — as the key being fine,
+         while the row beneath it carried the provider's "API key not valid".
+         Presence is all this step can see; whether the key is accepted is the
+         model step's answer, and it now says so there. */
+      /* AND WHICH KEY, IN A SHAPE THAT GIVES NOTHING AWAY (§126). "Rejected"
+         and "not the key you made" send somebody to two different websites,
+         and the deployment cannot tell them apart from the outside — so it
+         says the length and the first four characters, and whether that is
+         the shape an AI Studio key has. */
+      const shape = assistant.keyShape();
+      step("The API key", assistant.configured() ? "ok" : "fail",
+           shape
+             ? (shape.len + " characters, starting " + shape.head + ". " +
+                (shape.looksRight
+                  ? "That is the shape of an AI Studio key — whether the provider " +
+                    "accepts this one is the next step. If it is refused, check " +
+                    "this against the key in AI Studio: a deployment only has the " +
+                    "variables that existed when it was BUILT, so a key changed " +
+                    "since then needs a redeploy."
+                  : "AN AI STUDIO KEY IS " + assistant.KEY_LEN + " CHARACTERS " +
+                    "STARTING " + assistant.KEY_HEAD + ", so this is a different " +
+                    "kind of credential — an OAuth token, a service account or a " +
+                    "Vertex key will be refused however the project is set up. " +
+                    "Make one at aistudio.google.com/apikey."))
+             : "No " + assistant.KEY_NAME + " here. Note that Vercel only " +
+               "gives a deployment the variables that existed when it was " +
+               "built — if it was added since, redeploy.",
+           !shape ? null : shape.looksRight ? "present" : "wrong shape");
+
+      /* THE CALL ITSELF, only once there is something to call with. */
+      if (kb && assistant.configured()) {
+        const q = "How is my unit's headline number worked out?";
+        const out = await assistant.ask({
+          kb: kb, question: q, history: [],
+          who: "a member of the Strategy Office", labels: {}
+        });
+        if (out && out.badKey) {
+          /* REPORTED AGAINST THE KEY, because that is what is wrong and that
+             is the page somebody has to go to. The three causes worth naming
+             are the ones that produce a correct-looking key the provider
+             refuses, and none of them is visible from here. */
+          step("The key itself", "fail",
+               out.why + " — most often the key was pasted with a stray space " +
+               "or newline, is restricted to a website or IP (a server key must " +
+               "not be), or belongs to a project where the Generative Language " +
+               "API is not switched on.");
+        } else if (!out || !out.ok) {
+          step("The model (" + assistant.model() + ")", "fail",
+               (out && out.why) || "no answer");
+        } else {
+          step("The model (" + assistant.model() + ")", "ok", "Answered in full");
+          /* ANSWERING IS NOT THE SAME AS ANSWERING WELL, and this one question
+             has a right answer in the corpus — so a handover here means the
+             corpus reached it and it declined, which is a different problem
+             from the model being unreachable and is worth separating. */
+          step("A question it should know", out.answered ? "ok" : "warn",
+               out.answered
+                 ? out.reply + (out.source ? "   [" + out.source + "]" : "")
+                 : "It handed this one over. The model is reachable, so this is " +
+                   "about the knowledge base rather than the connection.");
+        }
+      }
+      return send(res, 200, { ok: true, steps: steps });
+    }
 
     /* THE QUEUE IS PEOPLE, NOT TICKETS (§97.2). Two groups, and the last line
        of each conversation so a name has something under it. */

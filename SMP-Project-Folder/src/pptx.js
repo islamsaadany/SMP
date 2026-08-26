@@ -118,7 +118,7 @@ function pptxTable(id, box, widths, head, rows){
     /* Three weights: the header, a GAP (the word Missing), and an ordinary
        value — plus `alarm`, which is an ordinary value wearing the gap's
        colour, for a mark that says something is owed without being a word
-       (§123.1: the quarter ticks). */
+       (§128.1: the quarter ticks). */
     var runOpts = hdr     ? { sz:1100, b:true, color:C.ground }
                 : o.miss  ? { sz:1100, b:true, color:C.bad }
                 : o.alarm ? { sz:1100, b:true, color:C.bad }
@@ -198,10 +198,10 @@ function pptxTableSlides(kicker, title, widths, head, rows){
    the tactics columns a column for each Q with a mark for the qs in action",
    the shape the plan workbook's Q1–Q4 columns already have). */
 function pptxQCells(t){
-  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§123.1,
+  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§128.1,
      corrected by Islam the same day).
 
-     §123 first answered this by merging one bold red `Missing` across the
+     §128 first answered this by merging one bold red `Missing` across the
      four columns. Islam: "you changed the quarters columns format to type
      missing that's wrong, the template should stay the same — revert the
      columns of the quarters to separate columns and maybe make check marks in

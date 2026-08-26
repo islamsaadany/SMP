@@ -74,7 +74,7 @@ From using it, the day it shipped:
 
 ---
 
-## 5 · Follow-ups, §123 (v3.46)
+## 5 · Follow-ups, §128 (v3.46)
 
 6. **A tactic with no quarter at all** is ticked in **bold red in all four**
    quarter columns; the four columns keep the template's shape and nothing is

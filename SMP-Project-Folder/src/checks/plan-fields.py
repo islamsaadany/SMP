@@ -103,6 +103,29 @@ with sync_playwright() as p:
     ck("a stored value outside the vocabulary stays visible and selected",
        odd["drawn"] and odd["selected"] == "=", odd)
 
+    # ── THE × SITS ON THE LINE (§114.4) ────────────────────────────────
+    # The problem, not the pixel: with the pen on, a cell holding a field and
+    # a remove button keeps them on ONE line with the × hittable — it used to
+    # wrap and grow every editable row by 20px. Asserted here because this is
+    # the check that already has the pen open; the :has() rule reaches every
+    # table using the pair.
+    seat = pg.evaluate("""() => {
+      const tds = [...document.querySelectorAll('.pane td')]
+        .filter(c => c.querySelector(':scope > .fld') && c.querySelector(':scope > .xbtn'));
+      if (!tds.length) return { none: true };
+      return tds.map(td => {
+        const f = td.querySelector(':scope > .fld'), x = td.querySelector(':scope > .xbtn');
+        const fr = f.getBoundingClientRect(), xr = x.getBoundingClientRect();
+        const hit = document.elementFromPoint(xr.left + xr.width/2, xr.top + xr.height/2);
+        return { sameLine: Math.abs((xr.top + xr.height/2) - (fr.top + fr.height/2)) < 8,
+                 hittable: hit === x || x.contains(hit) };
+      });
+    }""")
+    ck("every field-and-× pair shares one line (%d cells)" % (0 if seat == {"none": True} else len(seat)),
+       seat != {"none": True} and all(c["sameLine"] for c in seat), seat if seat == {"none": True} else [c for c in seat if not c["sameLine"]][:2])
+    ck("...and every × is hittable at its centre",
+       seat != {"none": True} and all(c["hittable"] for c in seat), [c for c in seat if not c.get("hittable")][:2])
+
     ck("no console errors", not errs, errs[:2])
     b.close()
 print(("\n%d FAILED" % bad) if bad else "\nall passed")

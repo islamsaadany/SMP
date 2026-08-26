@@ -15295,6 +15295,42 @@ along finally exists.
 editor wired to nothing looks identical), and asserts the closed end too —
 pen off, none of the three is drawn (§94.2).
 
+### 114.4 The remove button's seat
+
+Islam, with a screenshot of an open plan row: *"for the x that delete
+something can you think of a better placement for it rather than taking a
+full line?"*
+
+The × that removes a row rides in the name cell — a column of its own would
+cost every row its width — but `.fld` is `width:100%`, so the button wrapped
+under the field and **every editable row spent 20px of height (56 → 76px) on
+a 14px glyph**. Two placements were drawn **in the real platform** (§41.9,
+§101's method — the built file driven to a unit's open plan pane with each
+candidate injected live, both themes) and published as a mockup:
+**A**, the field yields 30px and the × sits beside it on the same line; **B**,
+the × drawn inside the field's right edge, the way a search box carries its
+clear button. A was recommended and **Islam picked A**.
+
+**B loses on semantics, not on pixels**: an × inside an input is the
+clear-the-text idiom — press it and you expect an empty field, not a missing
+row. The one glyph would have carried two meanings depending on which box it
+sat in, which is §87's twins drawn in chrome. So the × sits **outside the
+border**, where what it acts on is the row it shares a line with.
+
+**Keyed on the PAIR, never on the table**: `td:has(> .fld + .xbtn)` reaches
+every cell where a field and a remove button actually sit together — the plan
+pen, the project panes, wherever the pattern lands next — and touches nothing
+else, so a field without an × keeps its full width and a table added later is
+seated the day it is added (§94's gate-on-the-control, in CSS).
+
+`checks/plan-fields.py` asserts the problem, not the layout (§94.8): every
+field-and-× pair shares one line (centre difference under 8px, 9 cells on the
+demo plan), and **every × is hittable at its centre** —
+`document.elementFromPoint` must return the button, §93.4's press-the-point,
+because a button on the right line but under a neighbour is the same fault
+with a nicer face. Proved able to fail before it was trusted (§94.5): with
+the width rule removed, 1 FAILED; restored, all passed.
+
 ## 115 · A repeating project (v3.38)
 
 Islam: *"the CX mystery shopping happens on H1 and is repeated for H2 — same
@@ -16248,14 +16284,446 @@ content ends before its cap and the two legitimately differ. The pane is still
 capped by the rail's expression — that is the point of taking it — but what was
 asked for is that the table reaches the fold, so **the window is what is
 measured now**, at both ends: it must reach it and must never pass it.
+---
 
-## 123 · A tactic that names no quarter, a closing slide, and the overview's download (v3.46)
+*(Numbered §123–§127 at merge time. They were written as §116, §117, §119,
+§120 and §121 on their branch; another session's work reached `main` first and
+took every one of those, so all five move together — the rule is unchanged and
+is simply whoever lands first. Fifth renumber on this branch. Read them as one
+run: a diagnostic (§123), the diagnostic correcting itself twice (§124, §126),
+the handoff it made visible (§125), and the settings page it sat on (§127).)*
+
+## 123 · Is the bot working? (v3.46)
+
+> *"I tried it and enabled the assistant reply but nothing came back."* … *"But
+> I received the message at the inbox."* … *"I need to understand if the bot is
+> working."*
+
+### 123.1 The degradation was correct, and that is what made it invisible
+
+§112.2 built the assistant so that **every failure lands on the chat as it
+worked before it existed**: the message is stored, the conversation waits, a
+person answers. Islam's report is that behaviour working exactly as designed —
+which is why he could not tell it from the assistant simply never having been
+asked.
+
+**Four completely different situations look identical from the office's side:**
+no API key, a rejected model name, Google unreachable, and the assistant
+legitimately deciding it cannot answer. All four produce a message in the inbox
+and no explanation. Right for the person asking, who wants a human either way.
+Useless to the person who has just turned it on.
+
+*A failure mode designed to be invisible to the user must still be visible to
+the operator, and nothing in §112 said so.*
+
+### 123.2 It walks the chain and reports where it stops
+
+The diagnostic does not answer yes or no. **"It is not working" sends somebody
+to look at everything; "the API key" sends them to one page.** So each step is
+checked in the order the real call uses it, and the first failure ends the walk
+— reporting a model error underneath a missing key would be noise.
+
+| Step | What a failure there means |
+|---|---|
+| The switch | Everything is going to the inbox on purpose |
+| The knowledge base | `db/kb.json` did not reach the deployment |
+| The API key | No `GEMINI_API_KEY` — **and it names the Vercel trap**: a deployment only has the variables that existed when it was built |
+| The model | Reachable, refused, or the name retired — with the provider's own message |
+| A question it should know | It answered but declined a question the corpus covers, which is about the corpus rather than the connection |
+
+**It makes a real call.** Anything less tests the parts rather than the thing:
+a key can be present and refused, a model name valid and retired. It is the
+office's own button, so the cost is one question's worth of tokens when
+somebody presses it.
+
+**The last step is worth its place**: a model that is reachable and hands over a
+question with a right answer in the corpus is a different fault from a model
+that cannot be reached, and the two would otherwise both read as "not working".
+
+### 123.3 Nothing is stored
+
+The result is a question about **this moment**, so it lives where the answer is
+read and nowhere else. A stored last-attempt would go stale in a way nobody
+could see (§35: absent is not "none"), and on a serverless deployment there is
+no process to hold it in anyway.
+
+### 123.4 It rendered perfectly and did nothing
+
+The branch was written into the settings menu's **`change`** listener rather
+than its `click` listener — anchored on the representative `<select>`, which
+genuinely does belong there. **A `<button>` never fires `change`.**
+
+So the control was present, correctly styled, and `elementFromPoint` returned
+it: every assertion short of pressing it would have passed. It was found by
+pressing it, and then by instrumenting the click when the press did nothing —
+no request, no console error, the button's own label unchanged, which is what
+finally said *the handler is not running* rather than *the request failed*.
+
+§96's family exactly, and the fifth time this file records it: **a control
+wired to nothing is indistinguishable from a working one until somebody uses
+it.**
+
+### 123.5 What proves it
+
+`src/checks/office-chat.py` §10 asserts that the diagnostic **separates**
+outcomes rather than that it appears — a failing chain names the step that
+stopped it and marks exactly one row; a working chain says so and marks none.
+A check of the happy path alone would be the same silence with a button on it.
+
+And it presses the button, which is the only assertion that would have caught
+§123.4.
+
+**The check's own bug is worth a line**: the local holding the diagnostic's
+result was called `bad`, which is this file's module-level failure counter — so
+the summary crashed on a dict after every assertion had passed. Renamed to say
+what it holds.
+
+
+---
+
+## 124 · The diagnostic said the key was working while the provider refused it (v3.46)
+
+> Islam, having pressed §123's button: a screen reading **"It is not working —
+> the model (gemini-2.5-flash)"**, with *The API key · **WORKING** · Set on this
+> deployment* directly above *the assistant refused the request (400: API key
+> not valid. Please pass a valid API key.)*
+
+**Two rows on one screen contradicting each other, and the diagnostic wrote
+both.** §123 exists to send somebody to one page, and this sent them to the
+model page while the fault was the key.
+
+### 124.1 The row said "working" and had only checked presence
+
+`configured()` is `!!apiKey()` — a non-empty environment variable and nothing
+else. It cannot know whether Google accepts that value, and it never claimed
+to; **the word "working" claimed it on its behalf.**
+
+The state and the word had been the same fact: `TESTWORD` turned `ok` into
+*working*, `fail` into *stopped here*. That is right for every step whose check
+IS the thing — the switch is on, the corpus loaded, the model answered — and
+wrong for exactly one, because presence is all that step can see.
+
+So **a step chooses its own word** where the state's default would overclaim.
+The API key's is **PRESENT**, with the detail saying outright that whether the
+provider accepts it is the next step's answer.
+
+*A status word is a claim, and a claim wider than what was measured is a wrong
+answer wearing a green dot.* §35's rule with the sign reversed — that one is
+about absence being reported as "none"; this is presence being reported as
+proof.
+
+### 124.2 And the refusal belonged to the key, not to the model
+
+**Google answers a bad key with 400**, not 401 — so the generic branch caught
+it and reported it under *The model (…)*, which is the step that happened to be
+running rather than the thing that was wrong. `looksLikeBadKey(status, detail)`
+in `lib/assistant.js` reads 401 and 403 **and the provider's own words**,
+because the status alone cannot be trusted here; `ask()` returns
+`{ok:false, badKey:true}` and the diagnostic reports it as **The key itself**.
+
+**The three causes are named**, because all three produce a key that looks
+correct in the dashboard and is refused: a stray space or newline in the paste,
+a key restricted to a website or IP (a server key must not be), or a project
+where the Generative Language API was never switched on. None of them is
+visible from inside the deployment, so a diagnostic that stops at "rejected"
+leaves somebody staring at a value that looks right.
+
+### 124.3 Two of them are now impossible
+
+`apiKey()` **trims and strips surrounding quotes**. A key pasted into a
+dashboard field arrives with a trailing newline often enough to be the first
+thing to rule out, and some people paste it with its quotes. Both produce the
+provider's least helpful error against a character-for-character correct key,
+and neither is visible anywhere — the variable is set, it is non-empty, and it
+is wrong.
+
+Done in the reader rather than in an instruction to go and check: **a value
+that only works when it is clean should be cleaned by whatever reads it.**
+`model()` is trimmed with it, for the same reason and by the same road.
+
+### 124.4 The headline lowercased an acronym
+
+*"It is not working — the api key"*. The sentence lowercases the step's name so
+it reads as prose, and `toLowerCase()` reached the whole of it. `unCap()` moves
+**only the leading article**.
+
+Small, and worth the line: the headline is the one thing somebody reads before
+deciding whether to keep reading, and a product that cannot spell its own field
+names is read as a product that is guessing.
+
+### 124.5 What proves it
+
+Three assertions in `checks/office-chat.py` §10, and each was watched to fail
+before the green run was believed (§94.5 — 3 failures against the previous
+build):
+
+- a present key **never claims to be working**, and says only what it checked;
+- the refusal is reported **against the key, not the model**;
+- an acronym in a step's name **survives the headline**.
+
+The first is the one that matters, and it is a *these two must differ* check
+rather than a *these two must match* one — §113.8's blind spot does not apply,
+because the failure it guards against is precisely the two collapsing into one
+word.
+
+**Driven end to end against a stub standing in for Google**, in all five
+states — no key, a key it refuses, a retired model, exhausted quota, a real
+answer — because §123's own lesson is that the parts can each be right while
+the thing is not. Every one lands on the step it belongs to.
+
+
+---
+
+## 125 · A handoff was invisible to the person who asked (v3.46)
+
+> Islam, with the assistant on, a key the provider now accepts and the switch
+> showing ON: *"nothing happens at all."*
+
+### 125.1 Saying nothing is not a neutral outcome
+
+§104 wrote **nothing** on a handoff, and the reasoning was sound: a bot message
+saying *"the office will get back to you"* reads as an answer, and the
+conversation would drop out of the office's queue with nobody coming. So
+`answered` decides, and the model's words are shown only when it is true.
+
+What was never asked is **what that looks like from the other end.** The person
+sees no reply, no acknowledgement, nothing — which is byte-for-byte what they
+would see if the assistant had never been asked at all. Four states already
+looked alike to the office and §123 separated them; this is the same fault one
+layer in, on the side §123 did not touch.
+
+*A failure mode designed to be invisible must still be visible to somebody, and
+"the operator" was only half the answer.*
+
+### 125.2 It is narrated, not spoken
+
+One line, in the **product's** words and never the model's — which does not
+reverse §104, because that rule is about the model's sentence never being
+allowed to stand in for an answer, and `answered` still decides everything. The
+line is fixed text and the thread **stays waiting**, so the office's queue, the
+Waiting tab and the email chase are all exactly as they were.
+
+It wears **no name, no time and no bubble**. The two sides of this conversation
+are the person and the office, and a handoff is neither — it is the product
+saying what happened, so it reads as a break in the conversation rather than a
+turn in it. The office sees the same line in the thread, which is the point: it
+says the assistant looked before this reached them.
+
+**No way out on it.** That control (spec 016 §4.3) exists for a confident
+*wrong* answer, where the conversation has already left the queue and the
+person would otherwise be stranded. Here somebody is already coming, and a
+control asking for what is happening anyway is worse than no control (§62,
+§110).
+
+### 125.3 A handoff is a decision; a failure is not
+
+Only `answered: false` from a model that actually ran gets the line. Every one
+of §112.2's failures — no key, a refusal, a timeout, malformed JSON, the switch
+off — goes on writing **nothing at all**, exactly as the chat worked before the
+assistant existed.
+
+The difference matters: telling somebody the assistant considered their
+question when it never saw it is a lie the operator cannot see, and it would
+mask precisely the faults §123 was built to surface.
+
+`handoff` is a **column** (migration 026), for §104's own reason — the
+alternative is a reserved body string or a sentinel `source`, and both are a
+name doing an identifier's job (§87). And `HANDOFF_LINE` lives in
+`lib/assistant.js`, not beside the `INSERT` that writes it, because `api/chat.js`
+and `scripts/test-assistant.js` both need it and a string written twice drifts
+(§53.5).
+
+### 125.4 A test that reads a setting it does not control
+
+`test-chat.js` failed five assertions on the run after a dev-server restart and
+passed on the next, twice — which looks exactly like a race and is not one.
+**With the assistant on and a key present, her message comes back with a second
+row beside it and her conversation is no longer waiting**, so five assertions
+about the human path fail for a reason none of them is about. It passed on the
+second run because that file's own settings section clears the switch on its
+way past.
+
+It now forces the switch off at setup and puts the tenant's settings back in
+the `finally` — **including absent, which is not the same as `{}`** (§50.6).
+
+*An hour went into hunting a product race that did not exist. A test whose
+result depends on what somebody set on a screen an hour ago is not a test.*
+
+### 125.5 What proves it
+
+- **`scripts/test-assistant.js`** — a handoff writes exactly one row, marked as
+  a handoff and not as an answer, in the product's own words, and the thread is
+  still waiting; every failure still writes nothing at all. Both watched to
+  fail first (2 failures each way).
+- **`checks/office-chat.py` §11** — the line is on screen, narrated rather than
+  spoken, and carries no way out; **and a real answer looks different**, or a
+  build that drew the line for every bot message would pass every assertion
+  above it. Watched to fail: 3 failures with the rendering reverted.
+- **One assertion was thrown away for being unfalsifiable.** *"Never the
+  model's own words"* was written against the stored row — and `ask()` already
+  blanks the reply when `answered` is false, so it passed however the caller
+  behaved. It is asserted on `ask()` now, where it can fail. §94.5, found by
+  this file's own break test rather than by reading.
+- **Measured, not assumed**: the line is 5.00:1 light and 6.61:1 dark, at
+  `--fs-small` and not `--fs-micro` — that token is for breadcrumbs and metric
+  keys, and this is a sentence somebody has to read. **The chat panel has never
+  been in the contrast sweep at all** (§94.11: the whole feature is invisible
+  over `file://`), so this was measured by hand. Recorded as a gap rather than
+  quietly widened here.
+- Migration 026 applied to a **virgin database**, round trip PASS (§113.7).
+
+### 125.6 Found and not fixed
+
+`.chbot` and `.chout` have **no CSS anywhere in the product**. The way-out
+button under an assistant answer — *"This didn't answer it — send it to the
+office"* — renders as a bare browser button in a panel that is otherwise
+carefully styled, and a bot message is distinguished from the office's only by
+its label. Left alone deliberately: it is a visual decision on a surface this
+section was not asked to touch (rule 1c), and it is named here rather than
+silently corrected.
+
+
+---
+
+## 126 · Which key, without saying which key (v3.46)
+
+> Islam's diagnostic: **the switch WORKING, the knowledge base WORKING, the API
+> key PRESENT** — and the provider still refusing it.
+
+Everything the page could see was right, and the one fact that would explain it
+is the value itself, which must never be printed.
+
+**"Rejected" and "not the key you made" are two different errands.** The first
+sends somebody to Google's console to look at restrictions; the second sends
+them to Vercel, because **a deployment only carries the environment variables
+that existed when it was BUILT**, so a key changed since then is still the old
+one. Nothing on the screen could tell them apart.
+
+Its **length and its first four characters** are enough, and neither is a
+secret: an AI Studio key is `AIza` plus 35 characters, so a value of any other
+shape is a different **kind** of credential — an OAuth token, a service account,
+a Vertex key — and no amount of looking at Google will ever explain that one.
+Four characters of a 39-character string is not the string, and the row is
+behind the office's own door in any case.
+
+**Read after the trim** (§124), or that cleaning would make a good key report as
+malformed — asserted, because the ordering is invisible and would break
+silently. **Asserted in `test-assistant.js` and not in the browser check**,
+whose stub supplies the steps and would never run this at all (§94.2), with an
+explicit assertion that the shape carries nothing beyond a length and four
+characters.
+
+### 126.1 A real fault, found and set aside
+
+Chasing this turned up something else: **the autosave is debounced 800ms and
+nothing flushes it when the page goes away.** Measured with the chat settings
+wiped from the database — press ON, navigate 150ms later, **saves sent: none**,
+database unchanged, screen still reading ON. It is not the chat's: `sync.js` is
+the autosave for the **whole platform**, so branding, terminology and the access
+matrix all have the same hole.
+
+**It is NOT what Islam hit** — his diagnostic reads *The switch — WORKING*,
+which is the server's own answer — and it is recorded here rather than fixed,
+because a change to the save path for every page in the product on the way past
+another problem is exactly what rule 1b exists to stop.
+
+---
+
+## 127 · The settings, in the order somebody decides them (v3.46)
+
+> *"Refine the settings of chat — think of the logical sequence of the settings,
+> make the titles concise and any explanation can be a tooltip on hovering."*
+
+Settled from a mockup made of **this very panel** — the real build, with its
+rows reordered in the browser (§41.9) — before a line of `src/` was touched.
+**882px → 478px**, same seven controls, nothing removed.
+
+### 127.1 The order was not one
+
+The **master switch** — the one that decides whether any of this exists — sat
+**third**, underneath the assistant, which is a decision *about* the chat rather
+than one *above* it. And the two email settings sat **five rows apart** with
+three unrelated rows between them.
+
+It runs one way now, from *does this exist* down to *a tuning knob*, so a reader
+never has to go back up:
+
+| | |
+|---|---|
+| Chat · Promise · Screenshots | what it is, and what people get |
+| Assistant (+ Test) | who answers |
+| Handover email · Away email | how people are reached |
+| Reply checks | how it runs |
+
+**The titles are one or two words and the KEYS DO NOT MOVE** (§30.2, §65,
+§108.3): renaming a stored key would reset the setting for every tenant that had
+ever touched it, for the sake of a word nobody reads. The panel heading becomes
+**Chat settings**, Islam's own call, so it does not collide with a row now
+called Chat.
+
+### 127.2 A status is not an explanation
+
+Every line of prose became a tooltip. **"No one is set — handoffs wait in this
+inbox until somebody is chosen" did not**, because it is a fact about right now
+rather than a description of how a setting works: behind a hover, somebody turns
+Handover email on, nobody is chosen, and nothing ever says so (§35, §45.2).
+
+That is the one line drawn inside what was asked for, and it is the difference
+between prose and state.
+
+### 127.3 A tooltip that only answers a mouse
+
+Hover does not exist on a tablet, and since every explanation now lives behind
+one of these marks, a note that only answers a mouse is half this panel's
+readers unable to read it. **A tap opens it** — Islam's call when it was put to
+him — with `.on` sitting beside the `:hover` and `:focus` the platform already
+uses, so nothing about the mark changes for anybody else.
+
+**`.tip` is the platform's own**, declared once in `group-extra.css` and reused
+rather than drawn again (§53.5) — `display:none` and not `opacity:0`, for the
+reason §27.2 records at length. **Scoped to this panel deliberately**: `.tip` is
+used all over the product, and giving every one of them a tap would be a change
+to pages this was not asked to touch.
+
+**And the bubble had to stop hanging off the side.** The platform's default
+centres a 264px note on a 14px mark, which inside a 392px dropdown puts most of
+it outside the panel — and the seven marks sit at seven different x positions,
+so no single offset fixes them. Making the mark `position:static` hands the
+bubble to `.chset-row` instead, where it spans exactly the row: inside the
+panel **by construction rather than by arithmetic**.
+
+### 127.4 What proves it
+
+`checks/office-chat.py` §12 asserts **the problems, never the layout** (§94.8) —
+a check written against *"row 4 is Assistant"* has to be rewritten the day
+anything moves:
+
+- the switch that turns the whole thing off comes **first**;
+- the two email settings are **adjacent**;
+- Test is in the **assistant's own row**;
+- every setting explains itself behind a mark, and **pressing** one opens it;
+- **one at a time, and the bubble lands inside the panel**;
+- the prose is gone and **the live status is not**.
+
+Watched to fail first (§94.5): moving the master switch back down, 1 failure;
+reverting the tap, 1; reverting the anchoring, 1.
+
+**And one of those assertions could not fail when it was first written.** It
+measured the ROW against the panel — and a row is inside its own panel by
+definition, so it passed on the broken build. A `::after` is not an element and
+has no `getBoundingClientRect` (§53.7's blind spot), so the bubble's box is now
+computed from **whichever containing block `position` actually gives it**,
+following the CSS rather than assuming which rule is live. Only then did it
+report `box [899,1187] · panel [969,1361]`.
+
+
+## 128 · A tactic that names no quarter, a closing slide, and the overview's download (v3.46)
 
 Three more from using the plan download, on a tenant whose plan is still
 being filled in — which is exactly the state the Missing marks were built for
 and the state the demo never shows (§94.2).
 
-### 123.1 No quarter at all is a gap; a blank one is not
+### 128.1 No quarter at all is a gap; a blank one is not
 
 Islam, on a tactics slide with a Missing owner and four empty quarter
 columns: *"in the tactics slide, Qs are missing as well."*
@@ -16289,7 +16757,7 @@ gap, beside a Missing owner in that same red. It reads as "no answer here"
 without a word and without a merged cell. `gridSpan`, `hMerge` and the
 `merged` cell type are DELETED rather than left unused (§24).
 
-### 123.2 The deck closes on Thank you
+### 128.2 The deck closes on Thank you
 
 *"add a thank you page at the end of the ppt."* `present.js` has ended on a
 `d-thanks` cover slide since the projected deck existed — the words, the
@@ -16297,7 +16765,7 @@ rule, the subject beneath — so this is the plan deck learning the manners the
 review deck already has rather than a new idea (§53.5, a unit and a function
 are the same product, applied to two decks of the same plan).
 
-### 123.3 The Function overview carries the download too
+### 128.3 The Function overview carries the download too
 
 *"the functional projects has no download button we need a download button."*
 Measured first, because the button IS on a capability's Projects pane and was
@@ -16321,7 +16789,7 @@ asking whether it exists; Playwright refuses to click something invisible.
 before the pen's gate and draws the bar when either is answered — a person
 who may not author the overview may still take it away.
 
-### 123.4 What proves it
+### 128.4 What proves it
 
 `checks/strategy-split.py` §5 makes the state (a pillar whose tactics lose
 their quarters, with ONE tactic keeping a quarter so both halves are

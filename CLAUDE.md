@@ -1391,6 +1391,132 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   by `checks/office-chat.py` §6 (which passed for the wrong reason first — it
   pressed the bubble to open a panel that was already open, closing it) and by
   `scripts/test-chat.js`.
+- **A FAILURE MODE DESIGNED TO BE INVISIBLE TO THE USER MUST STILL BE VISIBLE
+  TO THE OPERATOR (§123):** §112.2 made every assistant failure land on the
+  chat as it worked before — message stored, a person answers — which is right
+  for the asker and left the office unable to tell **no API key, a rejected
+  model, an unreachable provider and a genuine decline** apart: all four are a
+  message in the inbox and no explanation. The diagnostic **walks the chain and
+  reports where it STOPS**, because *"it is not working"* sends somebody to look
+  at everything and *"the API key"* sends them to one page. **It makes a REAL
+  call** — a key can be present and refused, a model name valid and retired —
+  and **stores nothing**, because it answers about this moment and a stored
+  answer goes stale invisibly (§35). Its last step separates *reachable but
+  declined a question the corpus covers* from *could not be reached*, which
+  would otherwise both read as "not working". **THE VERCEL TRAP IS NAMED IN THE
+  ROW ITSELF**: a deployment only has the environment variables that existed
+  when it was BUILT, so a key added afterwards needs a redeploy.
+- **IT RENDERED PERFECTLY AND DID NOTHING (§123.4):** the button's branch went
+  into the settings menu's **`change`** listener rather than its `click` one —
+  anchored on a `<select>` that genuinely belongs there — and **a `<button>`
+  never fires `change`**. Present, styled, and `elementFromPoint` returned it,
+  so every assertion short of PRESSING it passed. Found by pressing, then by
+  instrumenting the click: no request, no console error, and the button's own
+  label unchanged, which is what says *the handler never ran* rather than *the
+  request failed*. §96's family, fifth time.
+- **THE SETTINGS RUN ONE WAY, AND A STATUS IS NOT AN EXPLANATION (§127):**
+  asked to rethink the chat settings' sequence, titles and explanations, and
+  settled from a mockup made of THAT VERY PANEL (§41.9) — **882px → 478px**,
+  same seven controls, nothing removed. **THE ORDER WAS NOT ONE**: the master
+  switch sat THIRD, under the assistant, which is a decision ABOUT the chat
+  rather than one above it, and the two email rows sat five apart. It descends
+  from *does this exist* to *a tuning knob* — Chat · Promise · Screenshots →
+  Assistant (+ Test) → Handover email · Away email → Reply checks — and **the
+  KEYS DO NOT MOVE** (§30.2), or every tenant that had touched a setting would
+  have it reset for a word nobody reads. **EVERY LINE OF PROSE BECAME A
+  TOOLTIP; "No one is set" DID NOT** — it is a fact about right now, not a
+  description of how a setting works, and behind a hover somebody turns
+  Handover email on, nobody is chosen, and nothing ever says so (§35, §45.2).
+  **A TAP OPENS IT** (hover does not exist on a tablet, and the notes now carry
+  the whole explanation), reusing the platform's own `.tip` rather than drawing
+  a second one (§53.5) and **scoped to this panel**, because `.tip` is used
+  everywhere and widening it is a change to pages this was not asked to touch.
+  **AND THE BUBBLE HAD TO STOP HANGING OFF THE SIDE**: centring a 264px note on
+  a 14px mark puts most of it outside a 392px dropdown, and seven marks sit at
+  seven x positions — `position:static` hands it to `.chset-row`, where it
+  spans the row, inside the panel **by construction rather than by arithmetic**.
+  **AND THE CHECK COULD NOT FAIL WHEN FIRST WRITTEN**: it measured the ROW
+  against the panel, and a row is inside its own panel by definition. A
+  `::after` has no `getBoundingClientRect` (§53.7), so the box is computed from
+  **whichever containing block `position` actually gives it** — following the
+  CSS instead of assuming which rule is live.
+- **A DEPLOYMENT CANNOT SAY WHICH KEY IT HAS, AND MUST SAY ENOUGH (§126):**
+  the diagnostic read *switch WORKING · knowledge base WORKING · key PRESENT*
+  with the provider still refusing it — and **"rejected" and "not the key you
+  made" are two different errands**, the first to Google's console, the second
+  to Vercel (a deployment only carries the variables that existed when it was
+  BUILT). Its **length and first four characters** settle it and are not a
+  secret: an AI Studio key is `AIza` plus 35, so any other shape is a different
+  KIND of credential and no amount of looking at Google explains it. **Read
+  AFTER §124's trim**, asserted, because that ordering is invisible and would
+  break silently — and asserted in `test-assistant.js`, never the browser
+  check, whose stub supplies the steps and would never run it (§94.2).
+- **A DEBOUNCED SAVE WITH NO FLUSH LOSES THE LAST 800ms (§126.1, RECORDED NOT
+  FIXED):** press a switch, leave the page 150ms later — **saves sent: none**,
+  database unchanged, screen still showing the new value. `sync.js` is the
+  autosave for the WHOLE platform, so branding, terminology and the access
+  matrix have the same hole. **It was NOT the fault being chased** (the
+  diagnostic said the switch had saved), and it is written down rather than
+  fixed on the way past: changing the save path for every page in the product
+  while looking at something else is what rule 1b exists to stop.
+- **SAYING NOTHING IS NOT A NEUTRAL OUTCOME (§125):** with the assistant on
+  and a working key, Islam got *"nothing happens at all"* — and that was §104
+  working as designed. A handoff wrote NOTHING, on sound reasoning (a sentence
+  would read as an answer and drop the conversation out of the office's queue
+  with nobody coming), and what was never asked is what that looks like from
+  the other end: **identical to the assistant never having been asked.**
+  §123's fault one layer in, on the side §123 did not touch. It is **one line,
+  in the PRODUCT's words and never the model's** — §104 is untouched, because
+  that rule is about the model's sentence never standing in for an answer and
+  `answered` still decides — and **the thread stays WAITING**, so the queue,
+  the Waiting tab and the email chase are unchanged. **NARRATED, NOT SPOKEN**:
+  no name, no time, no bubble, because the two sides of the conversation are
+  the person and the office and a handoff is neither; **and no way out on it**,
+  since that control is for a confident WRONG answer and here somebody is
+  already coming (§62, §110). **A HANDOFF IS A DECISION; A FAILURE IS NOT** —
+  no key, a refusal, a timeout, malformed JSON and the switch off all go on
+  writing nothing at all (§112.2), because telling somebody the assistant
+  considered their question when it never saw it is a lie the operator cannot
+  see. `handoff` is a COLUMN (026) for §104's own reason, and `HANDOFF_LINE`
+  lives in `lib/assistant.js` because two files need it (§53.5). **AND ONE
+  ASSERTION WAS THROWN AWAY FOR BEING UNFALSIFIABLE** — *"never the model's own
+  words"* asked of the stored row, when `ask()` already blanks the reply, so it
+  passed however the caller behaved; asked of `ask()` now (§94.5). **THE CHAT
+  PANEL HAS NEVER BEEN IN THE CONTRAST SWEEP** (§94.11 — invisible over
+  `file://`), so the line was measured by hand: 5.00 light, 6.61 dark, at
+  `--fs-small` because `--fs-micro` is for breadcrumbs and this is a sentence.
+- **A TEST THAT READS A SETTING IT DOES NOT CONTROL IS NOT A TEST (§125.4):**
+  `test-chat.js` failed five assertions after a dev-server restart and passed
+  on the next run, twice — which looks exactly like a race and is not one.
+  **With the assistant on, her message comes back with a second row beside it
+  and her conversation is no longer waiting**, so five assertions about the
+  human path fail for a reason none of them is about; it passed second time
+  because that file's own settings section clears the switch on its way past.
+  It forces the switch off at setup and restores the tenant's settings in the
+  `finally` — **including ABSENT, which is not `{}`** (§50.6).
+- **A STATUS WORD IS A CLAIM, AND PRESENCE IS NOT PROOF (§124):** §123's own
+  screen said *The API key · **WORKING*** directly above the provider's *400:
+  API key not valid* — two rows contradicting each other, both written by the
+  diagnostic. `configured()` is `!!apiKey()` and never claimed more; **the word
+  claimed it on its behalf**, because the state and the word had been one fact
+  (`ok` → *working*). Right for every step whose check IS the thing, wrong for
+  the one step that can only see presence — so **a step now chooses its own
+  word** where the default would overclaim, and that row reads **PRESENT** with
+  the detail saying the next step is what answers it. §35 with the sign
+  reversed: that one is absence reported as *none*, this is presence reported
+  as proof. **AND THE REFUSAL BELONGED TO THE KEY, NOT THE MODEL** — Google
+  answers a bad key with **400**, not 401, so the generic branch reported it
+  under whichever step happened to be running; `looksLikeBadKey()` reads 401,
+  403 **and the provider's own words**, and the row is *The key itself*, naming
+  the three causes that produce a correct-looking key the provider refuses (a
+  pasted newline, a website/IP restriction on a server key, the Generative
+  Language API never switched on). **TWO OF THOSE ARE NOW IMPOSSIBLE**:
+  `apiKey()` trims and strips surrounding quotes, because *a value that only
+  works when it is clean should be cleaned by whatever reads it* — done in the
+  reader, never as an instruction to go and check. The check asserts *these two
+  must DIFFER* (§113.8 does not apply — the fault it guards is the two
+  collapsing into one word), and was watched to fail first: 3 failures against
+  the previous build.
 - **A CHECK THAT ASSERTS AGREEMENT PASSES WHEN BOTH SIDES VANISH (§113.8):**
   the knowledge base's contents are derived, and the check asserts one link per
   section — so when a fix pushed `undefined` into `secs` and the tour section
@@ -2017,7 +2143,7 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 ---
 
 *Last Updated: 2026-08-26 &mdash; **v3.46: a tactic that names no quarter, a
-closing slide, and the overview's download (&sect;123)**. Three more from using
+closing slide, and the overview's download (&sect;128)**. Three more from using
 the plan download on a plan still being filled in. **A tactic with NO quarter
 at all is a gap** &mdash; &sect;119.1 was right to leave a single blank quarter
 alone (a tactic marked Q2 and Q3 is saying something by leaving Q1 and Q4
@@ -2043,6 +2169,62 @@ pillar it had never touched. A measurement wrong in the direction of "broken"
 costs as much as one wrong in the direction of "clean".*
 
 *Earlier: 2026-08-26 &mdash; **v3.44: one line above the table, and a
+
+*Earlier: 2026-08-26 &mdash; **v3.46: is the bot working, and the settings
+that sit under the question** (&sect;123&ndash;&sect;127). Islam turned the
+assistant on and nothing came back &mdash; *"but I received the message at the
+inbox."* **That was the design working**: &sect;112.2 made every failure land on
+the chat as it worked before the assistant existed, which is right for the
+person asking and left the office unable to tell **no API key, a rejected model,
+an unreachable provider and a genuine decline** apart. *A failure mode designed
+to be invisible to the user must still be visible to the operator.* So the
+diagnostic **walks the chain and reports where it STOPS** (&sect;123) &mdash;
+and it **rendered perfectly and did nothing**, its branch written into the
+settings menu's `change` listener where a `<button>` never reaches: present,
+styled, and `elementFromPoint` returned it, so every assertion short of PRESSING
+it passed. &sect;96's family, fifth time.
+
+**THEN THE DIAGNOSTIC CONTRADICTED ITSELF** (&sect;124): *The API key ·
+**WORKING*** sat directly above the provider's *400: API key not valid*.
+`configured()` is `!!apiKey()` and never claimed more &mdash; **the word claimed
+it on the key's behalf**, because a step's state and its word had been one fact.
+A step chooses its own word now where the default would overclaim, and that row
+reads **PRESENT**. &sect;35 with the sign reversed: that one is absence reported
+as *none*, this is presence reported as proof. **And the refusal belonged to the
+KEY, not the model** &mdash; Google answers a bad key with **400**, so the
+generic branch had been reporting it under whichever step happened to be
+running.
+
+**THE HANDOFF WAS INVISIBLE TO THE PERSON WHO ASKED** (&sect;125): it wrote
+nothing at all, on sound reasoning &mdash; a sentence would read as an answer
+and drop the conversation out of the office's queue with nobody coming &mdash;
+and *what was never asked is what that looks like from the other end*, which is
+byte-for-byte what somebody sees when the assistant was never asked. One line
+now says so, in the PRODUCT's words and never the model's, with the thread still
+WAITING. **A handoff is a decision; a failure is not**, so no key, a timeout and
+the switch off all go on writing nothing.
+
+**AND THE DEPLOYMENT COULD NOT SAY WHICH KEY IT HAD** (&sect;126): *"rejected"*
+and *"that is not the key you made"* are two different errands &mdash; one to
+Google's console, one to Vercel, whose deployments only carry the variables that
+existed when they were BUILT. The row reports the key's **length and first four
+characters**, which settle it and are not a secret. **Recorded and deliberately
+not fixed** on the way past: the autosave is debounced 800ms with **no flush
+when the page goes away**, so any setting changed and left within 800ms is lost
+while the screen shows the new value &mdash; every page in the product, and not
+what Islam hit.
+
+**AND THE SETTINGS RUN ONE WAY AT LAST** (&sect;127, settled from a mockup made
+of that very panel): the master switch sat **third**, under a setting it
+governs, and the two email rows sat five apart. **882px &rarr; 478px**, same
+seven controls, keys unmoved, every explanation behind a mark that opens on
+hover, focus **or tap**. **A status is not an explanation** &mdash; *"No one is
+set"* stays on the page, because behind a hover somebody turns Handover email
+on, nobody is chosen, and nothing ever says so. **And one assertion could not
+fail when it was written**: it measured the ROW against the panel, and a row is
+inside its own panel by definition.
+
+*Earlier, from another session: **v3.44: one line above the table, and a
 dialog that fits the window** (&sect;120), **with a bold title and a table
 that reaches the fold** (&sect;120.5). Two asks minutes apart, both from
 using the register on his own laptop, and both turned out to be **waste rather
@@ -2203,6 +2385,46 @@ as a difference. **And the count and the queue had drifted the other way** &mdas
 the Overview counts people this viewer may issue a password TO (&sect;89) and
 the queue counted everybody, so a Super user with no password put a row in the
 list that whoever works through it has no control to clear.*
+
+*Earlier (recorded at the &sect;114.4 merge, the block the v3.38 merge should
+have carried): 2026-08-26 &mdash; **v3.38: the pen's last read-only fields,
+a repeating project, and the remove button's seat** (&sect;114, &sect;115,
+&sect;114.4). **THE THREE FIELDS WERE READ-ONLY ON PURPOSE, AND THE PURPOSE
+EXPIRED**: &sect;31 closed a measure's direction and compile rule and a
+tactic's quarters because *"they change what a figure MEANS"* &mdash; the
+right worry while the pen could fall to the person being measured &mdash; and
+&sect;94 closed the pen to the office, so what was left was the office unable
+to correct exactly the fields that most need correcting after an upload.
+&sect;94.15's shape: a rule whose stated reason has expired does not get to
+stand on habit. The vocabulary is the Temple's own `selectOr` lists, a stored
+value outside the list is PREPENDED rather than displayed wrong (&sect;96.2
+from the display side), and the satisfying half is that **&sect;42 classified
+a quarter change as PLAN on the server four versions before the screen could
+make one**. **A PROJECT CAN REPEAT** (&sect;115): the CX mystery shopping runs
+H1 and again H2, and Islam refused the duplicate rows &mdash; one project,
+marked *Repeats: Each cycle* in its front matter, whose figures are re-asked
+and whose dates SHIFT by the new cycle's span when a cycle opens. **The
+machinery mostly existed and pointed the other way**: `clearAllNotes` was
+already wiping EVERY project's figures on each new cycle &mdash; a delivered
+project erased the day H2 opens, unseen because the live tenant is still in
+cycle 1 &mdash; so &sect;115 made the clear a decision per project: marked
+ones re-ask and shift, unmarked ones KEEP their figures. `shiftWhen()` is
+`monthsOf`'s mirror &mdash; one reader, one shifter, and an unreadable date is
+left exactly as it arrived &mdash; and `figuresSnapshot` was archiving a
+field deleted by migration 024 (`actual`) while missing the milestone `pct`
+that replaced it: **a snapshot of stale fields is an archive of nothing, and
+nothing complains**. The check turns the cycle through the REAL close and
+open controls, dialogs and all, and failed three ways on the pre-&sect;115
+build before its green was believed (&sect;94.5). **AND THE &times; STOPPED
+TAKING A FULL LINE** (&sect;114.4): `.fld` is `width:100%`, so the remove
+button wrapped and every editable row spent 20px on a 14px glyph. Two
+placements drawn in the real platform; Islam picked **beside the field**, and
+inside-the-field lost on SEMANTICS, not pixels &mdash; an &times; inside an
+input is the clear-the-text idiom, and this one removes the ROW. Keyed on the
+pair (`td:has(> .fld + .xbtn)`), so every table using the pattern is seated
+and nothing else is touched; the check presses the point
+(`elementFromPoint` at the button's centre, &sect;93.4).*
+
 *Earlier: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
 &sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me

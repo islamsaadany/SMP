@@ -65,7 +65,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.46 — the deck's last gaps, and the overview's download (§123)
+### v3.46 — the deck's last gaps, and the overview's download (§128)
 
 - **A tactic that names no quarter is ticked in bold red in all four**
   quarter columns — the template's four columns are untouched and nothing is
@@ -76,6 +76,132 @@ Nothing proceeds past this line without an answer.
 - Proved by `checks/strategy-split.py` §5 (state made, merged-cell attributes
   read, the button pressed with a hit test), able to fail 3 ways.
 
+### v3.46 — the settings, in the order you'd decide them (§127)
+
+Asked to rethink the chat settings' sequence, titles and explanations. Settled
+from a mockup made of that very panel, approved, then built. **882px → 478px**,
+same seven controls, nothing removed, no stored key renamed.
+
+- **The order was not one.** The master switch sat *third*, under a setting it
+  governs; the two email rows sat five apart. It now descends from *does this
+  exist* to *a tuning knob*.
+- **Every explanation is a tooltip** that opens on **hover, focus or tap** —
+  hover doesn't exist on a tablet, and these now carry the whole explanation.
+- **A status is not an explanation.** *"No one is set"* stays on the page: behind
+  a hover, somebody turns Handover email on, nobody is chosen, and nothing says
+  so.
+- **The bubble is anchored to the row, not the mark** — centring a 264px note on
+  a 14px mark hangs it off a 392px dropdown, at seven different x positions.
+
+**Verified:** office-chat.py §12 ALL CLEAR, asserting the *problems* rather than
+the layout, each watched to fail first · qa.py ERRORS: none · test-chat 52/0 ·
+test-assistant 33/0 · test-authorize 193/0. **One assertion was rewritten for
+being unfalsifiable** — it measured the row against the panel, and a row is
+inside its own panel by definition.
+
+### v3.46 — which key, without saying which key (§126)
+
+The diagnostic read *switch WORKING · knowledge base WORKING · key PRESENT*
+with Google still refusing the key. **"Rejected" and "that's not the key you
+made" send you to two different websites**, and nothing on screen could tell
+them apart.
+
+The key row now reports its **length and first four characters** — an AI Studio
+key is `AIza` plus 35, so any other shape is a different kind of credential
+entirely — and names the Vercel trap: a deployment only carries the variables
+that existed when it was **built**.
+
+**Recorded and deliberately not fixed:** the autosave is debounced 800ms with
+**no flush when the page goes away**. Press a switch, leave 150ms later, and
+nothing is saved while the screen shows the new value. It affects every setting
+in the platform, and it was **not** the fault being chased.
+
+### v3.46 — a handoff the person can see (§125)
+
+*"Nothing happens at all"* — with the assistant on and a key the provider now
+accepts. That was §104 working exactly as designed, and that is the problem.
+
+- **A handoff wrote nothing**, so the person saw a screen identical to the one
+  they'd see if the assistant had never been asked. §123 separated four
+  failures for the *operator*; this is the same fault on the *person's* side.
+- **One line now says so** — the product's words, never the model's — and the
+  conversation **stays waiting**, so the office's queue, the Waiting tab and
+  the email chase are unchanged.
+- **Narrated, not spoken**: no name, no bubble, no way out button. The two
+  sides of the conversation are the person and the office; a handoff is
+  neither, and somebody is already coming.
+- **A failure still writes nothing.** No key, a refusal, a timeout, malformed
+  JSON, the switch off — all unchanged. A handoff is a decision; a failure is
+  not, and saying otherwise would mask the faults §123 exists to surface.
+
+**And a test was found reading a setting it did not control** — `test-chat.js`
+failed five assertions after a restart and passed on the next run, which looks
+exactly like a race and is not one: with the assistant on, her message comes
+back with a second row beside it. An hour went into hunting a product race that
+did not exist.
+
+**Verified:** test-assistant 28/0 and office-chat.py ALL CLEAR, each new
+assertion watched to fail first (2 and 3 failures respectively) · one assertion
+thrown away for being unfalsifiable (§94.5) · test-chat 52/0, twice running ·
+qa.py ERRORS: none · test-authorize 193/0 · extract-kb --check in step ·
+migration 026 applied to a **virgin database**, round trip PASS (§113.7) ·
+contrast measured by hand at 5.00 light / 6.61 dark, because the chat panel has
+never been in the sweep at all.
+
+**Flagged, not fixed:** `.chbot` and `.chout` have no CSS anywhere — the
+way-out button under an assistant answer is a bare browser button. A visual
+decision on a surface this work was not asked to touch.
+
+### v3.46 — the diagnostic contradicted itself (§124)
+
+The first thing §123's button reported was **"It is not working — the model"**
+with *The API key · **WORKING*** in the row directly above the provider's
+*400: API key not valid*. Two rows on one screen disagreeing, both written by
+the diagnostic.
+
+- **A status word is a claim.** `configured()` only checks that a variable is
+  non-empty; the word *working* claimed the provider accepts it. That row reads
+  **PRESENT** now, and a step may choose its own word wherever the state's
+  default would overclaim.
+- **The refusal is reported against the key, not the model.** Google answers a
+  bad key with **400**, so the generic branch had caught it —
+  `looksLikeBadKey()` reads 401, 403 and the provider's own words, and the row
+  is *The key itself*, naming the three causes that produce a correct-looking
+  key the provider refuses.
+- **Two of those can no longer happen**: `apiKey()` trims and strips
+  surrounding quotes, because a value that only works when it is clean should
+  be cleaned by whatever reads it.
+- **The headline spells its own field names** — `toLowerCase()` had turned
+  *The API key* into *the api key*; only the leading article moves now.
+
+**Verified:** office-chat.py ALL CLEAR with three new assertions, each watched
+to fail first (3 failures against the previous build) · all five real states
+driven end to end against a Google stub, each landing on the step it belongs
+to · qa.py ERRORS: none · test-chat 52/0 · test-assistant 25/0 ·
+test-authorize 193/0 · extract-kb --check in step.
+
+### v3.46 — is the bot working? (§123)
+
+Islam turned the assistant on, asked it something, and nothing came back — but
+the message reached the inbox. That was the designed degradation working, and
+it is precisely why he could not tell it from the assistant never being asked.
+
+- **Four failures looked identical**: no API key, a rejected model, an
+  unreachable provider, and a genuine decline.
+- **The diagnostic walks the chain and names where it stops** — a button in the
+  Messages Settings dropdown, where you stand after flipping the switch.
+- It makes a **real call**, and stores nothing.
+- The **Vercel trap is named in the row**: a deployment only has the
+  environment variables that existed when it was built.
+
+**And it rendered perfectly and did nothing** — the branch went into the
+menu's `change` listener instead of `click`, and a `<button>` never fires
+`change`. Every assertion short of pressing it passed.
+
+**Verified:** office-chat.py §10 ALL CLEAR (asserts the diagnostic *separates*
+outcomes, not that it appears) · all five real states driven end to end against
+a stub modelling Google · qa.py clean · test-assistant 25/0 · test-authorize
+193/0.
 ### v3.41 — the CF tab (§118)
 
 **§118 — reported from production.** *"The CF tab is not showing anything
@@ -181,7 +307,7 @@ knowledge-base.py ALL CLEAR · test-authorize 190/0 · qa.py clean.
 **Waiting on:** `GEMINI_API_KEY` in Vercel. Everything is built and tested
 against a stub; the live call is the only unexercised path.
 
-### v3.35 — the pen's last read-only fields, and a repeating project (§114–§115)
+### v3.38 — the pen's last read-only fields, and a repeating project (§114–§115)
 
 - **§114:** a measure's direction and compile, and a tactic's quarters, are
   editable behind the plan pen — §31's read-only reason expired with §94. The
@@ -195,9 +321,17 @@ against a stub; the live call is the only unexercised path.
   not yet stepped on. The archive also stops storing a deliverable's deleted
   `actual` and starts keeping the milestone's `pct` (stale since migration 024).
 
+- **§114.4: the remove button's seat.** The row-removing × wrapped under its
+  field (`.fld` is `width:100%`) and cost every editable row 20px. Islam picked
+  **beside the field** over inside it — inside an input, an × means clear the
+  text, not remove the row. Keyed on the pair (`td:has(> .fld + .xbtn)`), so
+  every table using the pattern is seated at once.
+
 **Verified:** `plan-fields.py` and `repeat-project.py` all passed, the second
 failing three ways on the pre-§115 build before its green was believed ·
-test-authorize **195** · full battery + qa.py clean.
+test-authorize **195** · full battery + qa.py clean · §114.4: pairs share one
+line and the × is hittable at its centre, proved able to fail (width rule
+removed → 1 FAILED).
 
 ### v3.34 — a project's front matter (§109)
 

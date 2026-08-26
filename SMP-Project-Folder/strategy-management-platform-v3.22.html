@@ -2213,11 +2213,35 @@
   /* And the input is bounded BY the cell rather than by a number of its own,
      so the two can never disagree about where the column ends. */
   .peoplecfg td.namecell input.fld { max-width:100%; box-sizing:border-box; }
-  /* AND EVERY OTHER FIELD IN AN OPEN ROW, for the same reason (§93.10): bounded
-     BY the cell rather than by a number of its own, so the two can never
-     disagree about where the column ends. It is what kept the name column
-     honest since §69 and was never extended to the rest of the row. */
-  .peoplecfg tr.tk-open input.fld { max-width:100%; box-sizing:border-box; }
+  /* ── AND EVERY OTHER FIELD IN AN OPEN ROW, WHICH `max-width` COULD NOT
+     DO (§110) ──────────────────────────────────────────────────────────
+     Islam, with a screenshot of an open row: "the boxes are overflowing on each
+     other." Measured at 1440: the Job title field is 170px in a 158px cell and
+     paints 21px over its neighbour, Email 11px, Official BU 1px — an `<input>`
+     with no size takes about 170px of intrinsic width and `overflow:visible`
+     (§93.10, kept on purpose so a control is never cut off) lets it spill.
+
+     `max-width:100%` DOES NOTHING HERE, and that is the trap worth recording:
+     a percentage resolves against the containing block, which under
+     `table-layout:auto` is a width the cell has not settled yet — so the
+     browser treats it as `none`. §93.10 met the same wall from the other side
+     and wrote down that "a px cap computed correctly and changed nothing on
+     screen"; measured again here, a px cap still moves nothing. `width:100%`
+     does, because a definite width makes the field stop CONTRIBUTING its
+     intrinsic size to the column in the first place — and `min-width:0` is what
+     lets it, since a form control's automatic minimum size is otherwise its
+     intrinsic width and would hold the column open by another road.
+
+     THE MEASURE IS THAT NOTHING MOVES, not that nothing overflows. Every
+     content column now holds exactly its closed width when a row opens — Name
+     216, Job title 150, Unit 150, Roles 227, all +0, where before the table
+     grew 188px the moment a pen was pressed. The one column that still widens
+     is the actions column (49 → 133px), which is Save and Cancel replacing the
+     ⋮; it is the LAST column and it is frozen, so nothing to its left moves.
+     §93.10's promise, kept for the first time. */
+  .cfg table tr.tk-open td input.fld,
+  .cfg table tr.tk-open td textarea.fld {
+    width:100%; min-width:0; box-sizing:border-box; }
   /* THE OFFSET IS A MEASUREMENT, SO THE WIDTH HAS TO BE ONE TOO. `left` for
      the second frozen column must equal the first one's rendered BORDER-BOX
      width, and under `table-layout:auto` a `width` is a suggestion the browser
@@ -2572,18 +2596,20 @@
                            color:var(--ink-2); }
   .hmenu-panel.pwset .cq b { color:var(--ink); font-weight:700; }
 
-  /* ── The role picker, one half per column (§69) ──────────────────
-     Both are bounded. A `select.fld` in this table is `width:100%` with no
-     intrinsic minimum, so under the auto layout the register uses it claims
-     the whole box and crushes the name columns — measured at 920px before this
-     existed. The Unit column's is the narrower of the two: it holds a unit
-     name, where the Roles one holds "Strategy custodian".
+  /* ── The role picker: one dropdown, and why a pick did not land (§110)
+     `select.rolewhere` and `.rolewhy` were the second half's, deleted with it
+     (§24) — the Unit cell answers where, and the widths those two needed were
+     the whole reason this block existed.
 
-     The two widths themselves are NOT here: `.cfg .unitcfg select.fld` in
-     arrange.css is (0,3,1) and later in the concatenation, so it beats
-     anything this file can say about them. They live beside it (§69). */
-  .peoplecfg select.rolewhere { margin-top:5px; }
-  .peoplecfg .rolewhy { display:block; margin:5px 0 0; }
+     THE REFUSAL WRAPS, AND IT HAS TO SAY SO OUT LOUD. `.cfg table td` is
+     `white-space:nowrap` (§88), which is right for a value and wrong for a
+     sentence — left alone it would run the sentence off the side of the cell,
+     which is precisely the fault §110 came from. Bounded at 230px so it cannot
+     hold the Roles column open either: `td.roles` is one of §88's exemptions
+     (`max-width:none`), so nothing above it would stop it. */
+  .rolestop { display:block; margin:6px 0 0; max-width:230px;
+              white-space:normal; font-size:11.5px; line-height:1.4;
+              color:var(--bad); }
   /* The two collective actions, side by side and plainly different weights. */
   .bulkrow { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0 0; }
   .bulkrow button { display:inline-flex; align-items:center; gap:8px; }
@@ -3480,6 +3506,21 @@
   .kb-sec h3 { font:400 21px/1.25 var(--serif); margin:0 0 4px; }
   .kb-sec h4.mini { margin:16px 0 4px; }
   .kb-p { font-size:14.5px; line-height:1.62; color:var(--ink-2); max-width:74ch; margin:0 0 10px; }
+  /* ── The task recipes (§103) ────────────────────────────────────
+     A recipe is a question and its answer, and the ONLY thing separating one
+     from the next was the boldness of the heading — so two answers ran
+     together and the boundary had to be inferred from weight alone. A gap
+     above each, and the question set on the same `.mini` key the sections
+     already use, so a how-to reads as a heading in the page's own voice
+     rather than as a new kind of type. */
+  .kb-rec + .kb-rec { margin-top:18px; }
+  .kb-q { font-size:14.5px; font-weight:600; color:var(--ink); margin:0 0 6px;
+          display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;
+          max-width:74ch; }
+  /* The audience mark is quiet: it says who an answer is useful to, never who
+     may read it — the knowledge base is everyone's (§37). */
+  .kb-q .pill { flex:0 0 auto; }
+  .kb-how h3 { margin-bottom:14px; }
 
   /* ── The pen, in the corner of the box it edits ──────────────────
      visibility rather than display, so the button always holds its box and a
@@ -3595,7 +3636,8 @@
      it did nothing: this selector is (0,3,1) against that file's (0,2,1) AND
      later in build.py's concatenation, so it won twice over. */
   .cfg .peoplecfg select.rolepick { min-width:150px; max-width:186px; }
-  .cfg .peoplecfg select.rolewhere { min-width:132px; max-width:170px; }
+  /* `select.rolewhere` was here and went with the control (§110, §24): the Unit
+     cell answers where, so there is no second select to bound. */
   /* AND THE ROW'S OWN TWO, WHICH §69 MISSED (§93.10). Exactly the same fault
      and exactly the same 920px: the role picker's pair were bounded and the
      pair that appear when a ROW is opened for editing were not, because they
@@ -4384,7 +4426,7 @@
     .pfright { border-left:0; border-top:1px solid var(--line); }
   }
 
-  /* ── THE QUARTERS, PRESSABLE (§111) ──────────────────────────────────
+  /* ── THE QUARTERS, PRESSABLE (§114) ──────────────────────────────────
      The same four marks qs() draws, as buttons. The lit state borrows the
      read-mode mark's own colours so the row reads the same with the pen on
      and off; only the border says "pressable". */
@@ -5122,6 +5164,14 @@ body.presenting .chatdock { display:none; }
 
 .chnothing { margin:auto; text-align:center; color:var(--ink-3);
              font-size:var(--fs-note); padding:30px 20px; max-width:34ch; line-height:1.55; }
+/* The way back, inside the empty state that would otherwise be a dead end
+   (§105). A button rather than a link: it changes what this list shows, it
+   does not go anywhere. */
+.chnothing .chlink { display:inline; background:none; border:0; padding:0;
+                     font:inherit; color:var(--gold-deep); cursor:pointer;
+                     text-decoration:underline; text-underline-offset:2px; }
+.chnothing .chlink:hover { color:var(--gold); }
+.chnothing .chlink:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
 
 @media (max-width:820px) {
   .chinbox { grid-template-columns:1fr; }
@@ -6511,7 +6561,26 @@ THEME.apply();
     fast: true,      /* Live (4s) rather than Relaxed (15s) */
     promise: "",     /* falls back to the shipped sentence when empty */
     shots: true,     /* a screenshot may be attached */
-    mail: true       /* a reply chases somebody who is away */
+    mail: true,      /* a reply chases somebody who is away */
+    /* ── THE ASSISTANT, OFF UNTIL SOMEBODY TURNS IT ON (§104) ──────
+       Islam: "I need a switch to turn off AI response and just keep it to the
+       SMO inbox." That is the DEFAULT, not a mode — the four settings above
+       ship on because they describe a chat that already worked, and this one
+       describes a capability that did not. A deployment that upgrades gets
+       exactly the chat it had.
+
+       OFF IS ENFORCED ON THE SERVER, in `say`, where the model is simply never
+       called. Not by hiding a control: with the assistant off there is nothing
+       on screen to hide, so the guard IS the feature (§42, §44, §98.2 — a
+       switch that only hides a control is decoration). */
+    assistant: false,
+    /* Whether a question the assistant could not answer emails somebody, and
+       who. Its own switch rather than part of the assistant's, because the
+       event is "a conversation is waiting on a person" — which happens whether
+       or not the assistant is on, and tying it to the assistant would mean
+       turning the assistant off silently turned the emails off too. */
+    notify: false,
+    rep: ""
   });
   var CHAT_PROMISE = "Usually answers the same day";
 
@@ -6522,6 +6591,13 @@ THEME.apply();
       fast:    !c || c.fast    !== false,
       shots:   !c || c.shots   !== false,
       mail:    !c || c.mail    !== false,
+      /* THE TWO THAT DEFAULT OFF ARE READ THE OTHER WAY ROUND — only an
+         explicit `true` turns them on, so a stale or half-written value can
+         never switch the assistant on by accident. The four above read
+         "anything but false", because their default is on. */
+      assistant: !!(c && c.assistant === true),
+      notify:    !!(c && c.notify === true),
+      rep:       (c && typeof c.rep === "string") ? c.rep.trim() : "",
       promise: (c && typeof c.promise === "string" && c.promise.trim())
                  ? c.promise.trim() : CHAT_PROMISE
     };
@@ -8127,6 +8203,11 @@ var NEWSET = { name: "", team: "", owner: "", pick: "smo" };
    held here rather than recomputed on every paint, because the person
    answering it may go and look at the row it names and come back. */
 var ADDROLE = null, ADDROLE_KIND = "owner";
+/* ── WHY THE LAST PICK DID NOT LAND (§110) ────────────────────────────
+   `{key, why}`, or null. A property of the screen and never of the person
+   (§25.2) — it is the outcome of one press, cleared by the press that
+   succeeds, by opening the picker again and by leaving the row. */
+var ROLESTOP = null;
 var NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
 function newPersonReset(){
   NEWPERSON = { name:"", empId:"", email:"", hit:null, hitBy:null, warn:null };
@@ -8554,7 +8635,13 @@ function chatWritable(){
 function chatSet(key, value){
   if (!Object.prototype.hasOwnProperty.call(SMPRules.CHAT_DEFAULTS, key)) return;
   var dflt = SMPRules.CHAT_DEFAULTS[key];
-  var v = (key === "promise") ? String(value == null ? "" : value).trim() : !!value;
+  /* THE TYPE COMES FROM THE DEFAULT, not from a list of key names. This read
+     `key === "promise" ? string : boolean`, so the moment a second string
+     setting existed (`rep`, §104) it would have stored `true` for whoever was
+     chosen — silently, and in a way the picker would then show as nobody. A
+     list of exceptions is a list somebody has to remember to add to. */
+  var isText = typeof dflt === "string";
+  var v = isText ? String(value == null ? "" : value).trim() : !!value;
   var c = chatWritable();
   /* The promise is stored only when it differs from the shipped sentence, so
      improving that sentence later reaches every tenant that never wrote one. */
@@ -8712,9 +8799,56 @@ function rowEditLive(){
   var t = rowEditTable();
   return (t && ROWFIND[t]) ? ROWFIND[t](rowEditKey()) : null;
 }
+/* ── AND WHAT POINTS AT THE ROW, NOT ONLY WHAT IS IN IT (§110) ───────
+   A person's roles are not ON the person: a unit's `head` and a function's
+   `custodian` point AT them (§33), and `ROWWAS` is a copy of the row. So Cancel
+   restored `p.unit` and left the grant standing — press it after giving
+   somebody Business unit owner of Nigeria and they read as its owner while
+   sitting at the group. One fact contradicting itself, from one press.
+
+   `ROWHELD` is every one of those pointers as it stood when the row opened.
+   Not the person's ROLE LIST, which was the first answer and was not enough:
+   granting an owner OVERWRITES whoever held it, so undoing the grant by
+   revoking it left the unit with no head at all — the displaced person was
+   gone and nothing remembered them. What has to come back is the pointers, and
+   they are what is copied.
+
+   Both maps whole, because a grant can move a seat this row never named — a
+   custodian handed to a function moves `FUNCTIONS[k].custodian` — and they are
+   two small objects (ten units, eight functions, two keys each), which is
+   cheaper than working out in advance which of them a press might reach. */
+var ROWHELD = null;
+function rolePointers(){
+  var out = { units:{}, fns:{} };
+  UNIT_KEYS.forEach(function(k){
+    var r = UNIT_ROLES[k] || {};
+    out.units[k] = { head:r.head || null, custodian:r.custodian || null };
+  });
+  FUNCTION_KEYS.forEach(function(k){
+    var f = FUNCTIONS[k] || {};
+    out.fns[k] = { head:f.head || null, custodian:f.custodian || null };
+  });
+  return out;
+}
+/* PUT BACK IN PLACE, never by replacing the object — the same rule
+   rowEditCancel already follows for the person, and for the same reason: an
+   open menu or a chip may be holding a reference to the one that is there. */
+function restoreRolePointers(was){
+  if (!was) return;
+  Object.keys(was.units).forEach(function(k){
+    var r = unitRolesFor(k);
+    r.head = was.units[k].head; r.custodian = was.units[k].custodian;
+  });
+  Object.keys(was.fns).forEach(function(k){
+    var f = FUNCTIONS[k];
+    if (!f) return;
+    f.head = was.fns[k].head; f.custodian = was.fns[k].custodian;
+  });
+}
 function rowEditOpen(table, key, obj){
   ROWEDIT = table + ":" + key;
   ROWWAS = obj ? JSON.parse(JSON.stringify(obj)) : null;
+  ROWHELD = (table === "people" && obj) ? rolePointers() : null;
 }
 /* PUT BACK IN PLACE, never by replacing the object. Something else may already
    hold a reference to this person — the viewer switcher, a role chip, an open
@@ -8725,13 +8859,18 @@ function rowEditOpen(table, key, obj){
    a row that still exists. */
 function rowEditCancel(obj){
   if (obj === undefined) obj = rowEditLive();
+  /* The pointers first and the row second, so that a grant's two halves are
+     undone in the order they were written: grantPersonRole() writes the
+     pointer AND the person's own attachment, and ROWWAS is what puts the
+     second one back. */
+  restoreRolePointers(ROWHELD);
   if (obj && ROWWAS) {
     Object.keys(obj).forEach(function(k){ if (!(k in ROWWAS)) delete obj[k]; });
     Object.keys(ROWWAS).forEach(function(k){ obj[k] = ROWWAS[k]; });
   }
-  ROWEDIT = null; ROWWAS = null;
+  ROWEDIT = null; ROWWAS = null; ROWHELD = null;
 }
-function rowEditClose(){ ROWEDIT = null; ROWWAS = null; }
+function rowEditClose(){ ROWEDIT = null; ROWWAS = null; ROWHELD = null; }
 
 var SHORT_NAME_WORDS = 3;
 function shortName(name){ return nameWords(name, SHORT_NAME_WORDS); }
@@ -10025,6 +10164,28 @@ function roleKeyByName(name){
    file naming it would be asking for a role that arrives by itself, so the
    template does not offer it and the reader says so plainly. */
 function roleIsGrantable(key){ return !!key && !SMPRules.isOwnLinesRole(key); }
+/* ── THE WORD FOR WHERE A ROLE IS HELD (§110) ─────────────────────────
+   For the sentence a refused pick shows, and for nothing else. It is a LABEL,
+   not a second rule: `roleWheres()` still decides what may be held where, and
+   this only says it in English — so a role whose list changes cannot end up
+   with a sentence that contradicts the list.
+
+   Derived from the list rather than written beside it, for the same reason:
+   the kinds actually offered are what the person has to pick from. */
+function roleAtWord(roleKey){
+  var kinds = {};
+  roleWheres(roleKey).forEach(function(w){
+    kinds[w.v === "group" ? "group"
+        : String(w.v).indexOf("fn:") === 0 ? "fn"
+        : String(w.v).indexOf("co:") === 0 ? "co" : "unit"] = 1;
+  });
+  var WORD = { group:"the group", unit:"a business unit",
+               fn:"a supporting function", co:"a company" };
+  var out = Object.keys(kinds).map(function(k){ return WORD[k]; });
+  if (!out.length) return "somewhere that does not exist yet";
+  if (out.length === 1) return out[0];
+  return out.slice(0, -1).join(", ") + " or " + out[out.length - 1];
+}
 
 /* Reads the sheet against the stored world and says what would happen. It
    changes NOTHING — the review step exists so that an upload is looked at
@@ -11123,7 +11284,7 @@ function monthsOf(v, last){
    55 of the 60 milestones in the worked example are a bare quarter with no
    year, so a year has to come from somewhere: it comes from the cycle, which
    is the only year the platform actually knows. */
-/* ── SHIFTING A DATE BY A RUN (§112) ─────────────────────────────────────
+/* ── SHIFTING A DATE BY A RUN (§115) ─────────────────────────────────────
    A repeating project keeps its rhythm: fieldwork in month 2 of the run stays
    fieldwork in month 2, so when a new cycle opens every date on a marked
    project moves forward by the CLOSED cycle's length. One writer, mirroring
@@ -12812,7 +12973,7 @@ function figuresSnapshot(){
     snap.groupCaps[c.id] = { perf:c.perf, exec:c.exec };
     (c.keyObjectives || []).forEach(function(x){ put(m, x, ["actual","progress","note"]); });
     (c.projects || []).forEach(function(p){
-      /* status/pct, NOT actual (§112): migration 024 deleted a deliverable's
+      /* status/pct, NOT actual (§115): migration 024 deleted a deliverable's
          `actual` and gave milestones a per-cent, and this snapshot was never
          told — so every archive since the one-row shape stored `undefined`
          for a deliverable and lost the milestone's number. §51.10's rule, in
@@ -12908,15 +13069,15 @@ function clearAllNotes(){
     });
   });
   (GROUP.keyObjectives || []).forEach(function(x){ x.note = ""; });
-  /* The capabilities left this function in §112 — their new-cycle behaviour
+  /* The capabilities left this function in §115 — their new-cycle behaviour
      is a decision per PROJECT now, not a blanket clear, and it lives in
      clearForNewCycle() where the cycle's own length is still readable. */
 }
 
 /* Everything a new cycle asks again: the units' figures, the group's, the
    capabilities', the notes beneath them, and who had submitted. */
-/* ── WHAT A NEW CYCLE DOES TO A CAPABILITY (§112) ────────────────────────
-   Until §112 every project was wiped when a cycle opened — clearCapability's
+/* ── WHAT A NEW CYCLE DOES TO A CAPABILITY (§115) ────────────────────────
+   Until §115 every project was wiped when a cycle opened — clearCapability's
    "nums" pass, written before anyone had opened a second cycle on real data —
    so the day H2 opened, a DELIVERED project's record would have been erased
    and its Execution read as nought. That clear is now a decision each project
@@ -14376,6 +14537,248 @@ function pageInfoFor(key){
     d.body.map(function(x){
       return '<h4 class="mini">' + x[0] + '</h4><p class="sub" style="margin:0 0 14px">' + x[1] + '</p>';
     }).join(""));
+}
+
+</script>
+<script>
+/* ── Task recipes ─────────────────────────────────────────────────────────
+   The knowledge base explains how things WORK. These explain how to DO things,
+   which is what somebody types into a bubble in the corner — and until now the
+   platform had almost none of it: four mentions of pressing anything across
+   693 lines of PAGE_INFO.
+
+   DATA, NOT A RENDER FUNCTION, and that is the whole reason this file exists
+   rather than another `kbSection()` call. `scripts/extract-kb.js` reads it
+   straight into `db/kb.json` for the assistant, so the words a person reads on
+   the Knowledge base page and the words the assistant answers from are the
+   same words (§42: never a second copy of a rule, applied to prose).
+
+   THE VOICE, settled with Islam: concise — the answer, then what to do next.
+   A recipe that REFUSES something keeps one clause of WHY. A bare "not
+   yourself" reads as the software being obstructive; "not yourself — a plan
+   you're measured against isn't yours to rewrite" reads as a decision somebody
+   made on purpose. Twelve of these refuse something, and those twelve are the
+   ones people will be annoyed by.
+
+   `who` IS RELEVANCE, NEVER PERMISSION. "office" means the answer is only
+   useful to somebody who can do it — every word here is readable by everyone,
+   because the knowledge base is (`c_kb`, area "always"). A question with two
+   true answers is TWO entries sharing a `q`, and the assistant picks by the
+   asker's roles. The moment a tag is used to hide something it has become
+   authorisation by prose, and that is a different feature (spec 016 §3).
+
+   NO SECTION NUMBERS AND NO INTERNAL VOCABULARY: these are read by somebody
+   who has just hit a wall. The tenant's own words for a pillar and a business
+   unit are substituted at render time by L(). */
+var RECIPES = [
+
+{ g: "Reporting", items: [
+  { id: "report-a-figure", q: "How do I report a figure?",
+    a: "Open your unit, go to <b>Performance</b>, and press <b>Report</b>. That turns the " +
+       "page into a reporting form: each measure takes its actual, and a note if it needs one." +
+       "|<b>Save draft</b> keeps what you have typed without telling anyone. <b>Submit</b> " +
+       "sends it to the office." },
+  { id: "draft-vs-submit", q: "What is the difference between Save draft and Submit?",
+    a: "A draft is yours — saved, and nobody is told. Submitting hands the figures to the " +
+       "office and marks your unit as having reported for the cycle." +
+       "|Draft as often as you like; submit once the whole set is right." },
+  { id: "report-after-lock", q: "Can I still report once the cycle is locked?",
+    a: "No — once the office locks a cycle the figures are fixed. That is what makes a closed " +
+       "cycle a record of what was true at the time rather than something that keeps moving." +
+       "|If a number is wrong, say so here. The office can still correct it." },
+  { id: "someone-elses-figure", q: "Why is one of my figures somebody else's to enter?",
+    a: "Some numbers belong to a team rather than to the unit that reports them — revenue " +
+       "exists in Finance before anyone asks you for it. Those are grouped into a named " +
+       "<b>figure set</b>, and the set's <b>figure owner</b> enters them wherever they appear." +
+       "|It still counts towards your unit's total, so you can chase it. The page names who owes it." },
+  { id: "dash-not-zero", q: "Why does my score show a dash instead of 0?",
+    a: "Nothing has been reported for it yet. A dash means <i>not yet measurable</i>; 0 would " +
+       "mean a real result of nothing, and would pull your average down." +
+       "|Report an actual and the score appears." },
+  { id: "figure-note", q: "How do I add a note to a figure, and who reads it?",
+    a: "The note sits beside the actual on the reporting form. The office reads it, and it " +
+       "travels with the figure into the review." +
+       "|Use it for the thing a number cannot say — why it moved, or what happens next." },
+  { id: "submitted-by-mistake", q: "I submitted by mistake — what now?",
+    a: "Tell the office here. Submitting is how a unit speaks for itself, so it is not " +
+       "something you can quietly take back, but the office can reopen it for you." },
+  { id: "the-dot", q: "What is the dot beside Performance?",
+    a: "It means this subject owes a submission and you are able to make it. It clears when " +
+       "you submit." +
+       "|If you cannot report, you never see it — the platform does not nag somebody who has " +
+       "no control that would clear it." },
+  { id: "who-reports", q: "Who reports my unit's figures?",
+    a: "Your unit's <b>strategy custodian</b> or its <b>head</b>. Submitting speaks for the " +
+       "whole unit, so it stays with the people who hold it." +
+       "|Two exceptions: a figure that belongs to a figure set is entered by that set's owner " +
+       "wherever it appears, and the office can report on anyone's behalf." }
+]},
+
+{ g: "My plan", items: [
+  { id: "plan-mistake", q: "There is a mistake in my plan — how do I fix it?",
+    a: "Not yourself. Plans are corrected by the Strategy Office — a plan you are measured " +
+       "against is not yours to rewrite." +
+       "|Tell them here what is wrong. That covers the aspiration and the SWOT too, not only " +
+       "the measures." },
+  { id: "add-a-row", q: "How do I add a {pillar}, a measure or a tactic?",
+    a: "The office adds them, on your unit's <b>Plan</b> page. Ask here and say where it " +
+       "belongs and what it should be called." },
+  { id: "reorder", q: "How do I reorder my {pillars}?",
+    a: "Press the arrange control in the top-right of the Plan pane, drag the rows by the " +
+       "handles that appear, and press it again when you are done." +
+       "|The order carries through to Performance and Reporting on its own." },
+  { id: "who-edits-plan", q: "Who can edit my unit's plan, and why not me?",
+    a: "The Strategy Office. A plan is the agreement you are measured against, so it stays " +
+       "with the people who keep the agreement rather than with either side of it." +
+       "|Everything else — reading it, reporting against it, explaining a figure — is yours." },
+  { id: "plan-arrives", q: "How does a plan arrive in the first place?",
+    a: "It is authored once, by the office, and everything after that is reporting against it." +
+       "|If yours is missing or wrong, ask here." },
+  { id: "old-plan", q: "What happens to my old plan when a new one is uploaded?",
+    a: "It is archived, not deleted, and it can be restored. Nothing an import does is a deletion." },
+  { id: "collaborator", q: "What is a collaborator on a tactic?",
+    a: "Somebody who supports the tactic alongside the person accountable for it. It records " +
+       "who is involved — it does not by itself let them report the line." +
+       "|The office sets them." },
+  { id: "change-targets", q: "Can I change my targets during the year?",
+    a: "Not yourself, and the office will usually say no mid-cycle — a target that moves while " +
+       "it is being measured stops being a target." +
+       "|If something genuinely changed, say what and why here." }
+]},
+
+{ g: "Understanding the numbers", items: [
+  { id: "headline", q: "How is my unit's headline number worked out?",
+    a: "From your <b>key objectives</b> — each actual against its target." +
+       "|Not from the {pillars} below, which is why the two can disagree without either being " +
+       "wrong. They sit at different altitudes." },
+  { id: "pillar-vs-objectives", q: "Why does a {pillar} disagree with my objectives?",
+    a: "A {pillar}'s measures are internal to that {pillar}; your objectives are what the unit " +
+       "is judged on. A {pillar} can struggle while the objectives are fine." +
+       "|The platform keeps them apart rather than blending them into one number that answers " +
+       "neither." },
+  { id: "execution", q: "What is execution, and why is 100% not “finished”?",
+    a: "It is what has been delivered divided by what should have been delivered <b>by now</b>, " +
+       "worked out from each tactic's quarters." +
+       "|So 100% means exactly on plan, not complete." },
+  { id: "colours", q: "What do the colours mean?",
+    a: "One scale for every figure judged against a benchmark: on track from 85%, needs " +
+       "attention from 70%, at risk from 50%, off track below that." +
+       "|The colour and the word come from the same place, so they can never disagree." },
+  { id: "focus-measure", q: "What is a focus measure?",
+    a: "One the CEO has marked as a measure the year turns on. It changes no score — it changes " +
+       "what gets looked at first." },
+  { id: "reward-line", q: "What is the reward line?",
+    a: "The point at which delivering the commitment earns. At 100% it is the target itself; " +
+       "set higher, a measure can meet its target without clearing the line and reads as " +
+       "<i>met, not earning</i>." +
+       "|Either way it is scored against its own target exactly as before." },
+  { id: "unit-to-group", q: "How does my unit's number reach the group's?",
+    a: "Weighted, not averaged. Each unit carries a weight set on the group's <b>Weighting</b> " +
+       "tab, and the group's figure is the weighted average of the unit headlines." +
+       "|Position on the page is not weight — arranging changes nothing." }
+]},
+
+{ g: "Capabilities and projects", items: [
+  { id: "add-project", q: "How do I add a project to a capability?", who: "office",
+    a: "On the capability's <b>Projects</b> page, with the pen open. Projects belong to the " +
+       "supporting function that owns the capability." },
+  { id: "add-project-ask", q: "How do I add a project to a capability?", who: "everyone",
+    a: "The office adds them. Say which capability it belongs to and what it should be called." },
+  { id: "deliverable-or-outcome", q: "Deliverable or outcome — which is this?",
+    a: "A <b>deliverable</b> is a thing you produce; an <b>outcome</b> is a change you can " +
+       "measure. If it has a target and a direction, it is an outcome." +
+       "|Both are evidence, and the score reads them as two halves." },
+  { id: "project-performance", q: "How is a project's performance worked out?",
+    a: "Half from its deliverables and half from its outcomes. Where a project has only one of " +
+       "the two, that side carries the whole score." },
+  { id: "no-outcomes", q: "Why has my project no outcomes section?",
+    a: "Because it has none yet. An empty half is not drawn — a project with no outcomes is a " +
+       "plan that committed to no measurable change, not a broken screen." +
+       "|Open the pen and both halves appear, so you can add the first one." }
+]},
+
+{ g: "Getting at things", items: [
+  { id: "password", q: "How do I change my password?",
+    a: "Ask the office here and they issue a temporary one; you choose your own the moment you " +
+       "use it." +
+       "|<i>If you have forgotten it you cannot reach this chat at all — you are asking from " +
+       "inside the platform. Ask the office by any other route you have.</i>" },
+  { id: "other-unit", q: "Why can't I open another business unit?",
+    a: "Access is by page: a unit you are not attached to is removed, not trimmed. You see what " +
+       "your role is attached to." +
+       "|Need something you can't open? Ask here — granting it is the office's to do." },
+  { id: "my-role", q: "What does my role let me do?",
+    a: "It depends on what it is attached to as much as what it is called — holding a unit " +
+       "gives you that unit, not all of them. Hold several roles and you get the most generous " +
+       "answer of them, each about its own thing." +
+       "|The <b>Access</b> section above has the full picture." },
+  { id: "get-access", q: "How do I get access to something I cannot open?",
+    a: "Ask here, and say which page and why. Access is the office's to grant." }
+]},
+
+{ g: "The office's own work", who: "office", items: [
+  { id: "add-person", q: "How do I add somebody to the register?",
+    a: "<b>Setup › People</b>, on the register itself. Give them an employee number or an " +
+       "email — a name is not an identifier, and two people really can share one." },
+  { id: "people-file", q: "How do I upload the people file?",
+    a: "<b>Setup › People</b>, from the register's file menu. It <b>adds and amends and " +
+       "never removes</b> — nobody is retired by being left out of a file." +
+       "|Anything it cannot match is set aside for you to answer rather than guessed at." },
+  { id: "new-cycle", q: "How do I open a new reporting cycle?",
+    a: "<b>Setup › Running the cycle</b>. Opening one archives the figures and then clears " +
+       "them, so every unit is asked again rather than inheriting last quarter's answers." },
+  { id: "run-review", q: "How do I run a review, or present one?",
+    a: "On a unit's <b>Performance</b> page — <b>Report</b> to enter figures, " +
+       "<b>Presentation</b> to project the deck or to manage its slides." },
+  { id: "picture-slide", q: "How do I put a picture into the review deck?",
+    a: "Under <b>Presentation › Manage slides</b>. Pick where it goes and it is assembled " +
+       "into the deck when the deck opens." +
+       "|It belongs to the cycle, so it is archived with the figures." },
+  { id: "branding", q: "How do I set the colours and the logo?",
+    a: "<b>Setup › Branding</b>. The mark must be a PNG — an uploaded SVG can carry code, " +
+       "which is not a risk worth taking for a logo." },
+  { id: "demo-data", q: "What does Demo data do, and why can't I save in it?",
+    a: "It shows the full worked example — an invented tenant, so you can see a filled platform " +
+       "without touching yours. It refuses to save on purpose." +
+       "|<b>Clear project</b> shows the opposite: exactly what a new deployment looks like on " +
+       "day one." },
+  { id: "focus-switch", q: "How do I turn focus measures off?",
+    a: "<b>Setup › Focus measures</b>, on the button in the page header. Off hides them " +
+       "everywhere and keeps every mark, so turning it back on restores them." }
+]},
+
+{ g: "The platform itself", items: [
+  { id: "offline", q: "Does it work with no internet, and can I install it?",
+    a: "Yes to both. It is a single page and it keeps itself, so it opens offline, and your " +
+       "browser will offer to install it with its own icon and window." +
+       "|What it cannot do offline is save — anything typed goes up when you are back." },
+  { id: "where-data", q: "Where does my data live?",
+    a: "In a database belonging to this deployment. Figures, plans and people are stored there; " +
+       "what you have chosen on screen — light or dark, which columns you show — stays in your " +
+       "own browser." }
+]}
+
+];
+
+/* How many, asked in one place so the page's header and any check agree. */
+function recipeCount(){
+  return RECIPES.reduce(function(n, g){ return n + g.items.length; }, 0);
+}
+
+/* Every recipe flat, with its group and audience resolved — the shape both the
+   page and `scripts/extract-kb.js` want, so neither walks the nesting itself. */
+function recipesFlat(){
+  var out = [];
+  RECIPES.forEach(function(g){
+    g.items.forEach(function(r){
+      out.push({ id: r.id, group: g.g, q: r.q, a: r.a, who: r.who || g.who || "everyone" });
+    });
+  });
+  return out;
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { RECIPES: RECIPES, recipeCount: recipeCount, recipesFlat: recipesFlat };
 }
 
 </script>
@@ -17156,7 +17559,7 @@ function qs(t){
   return '<span class="qs">' + out + "</span>";
 }
 
-/* THE QUARTERS, PRESSABLE (§111). The same four marks qs() draws, as
+/* THE QUARTERS, PRESSABLE (§114). The same four marks qs() draws, as
    buttons, behind the pen — §42 classified a tactic's quarter as PLAN on the
    server four versions before the screen could edit one, so this draws the
    control the authoriser has been guarding all along. By id, never index
@@ -19866,7 +20269,7 @@ function projFrontMatter(p, ed){
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
         : '<span class="missing">None named</span>');
-  /* REPEATS (§112). Read mode shows the row only when it says something — a
+  /* REPEATS (§115). Read mode shows the row only when it says something — a
      "Repeats: No" on every build-once project is noise (§41's budget, in
      words). The setter DELETES the key on the default (§50.6): a project
      unmarked and one never asked must be byte-identical. */
@@ -20390,7 +20793,7 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
-      /* EDITABLE SINCE §111, reversing §31's read-only. That section closed the
+      /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
          MEANS" — the right worry while the pen could fall to the person being
          measured, and §94 ended that: the pen is the office's. What was left
@@ -21783,9 +22186,8 @@ function renderPeople(){
 
   function roleCell(p){
     /* The role chips' × and the picker belong to the OPEN row, not to a page
-       mode (§79.2). Computed here rather than passed, because roleCell and
-       roleWhereCell are two halves of one control (§69.1) and a parameter one
-       of them forgot would put an × on a closed row. */
+       mode (§79.2). Computed here rather than passed, because a parameter the
+       caller forgot would put an × on a closed row. */
     var editable = rowOpen(p);
     var rs = personRoles(p);
     var home = belongsKey(p);
@@ -21838,22 +22240,47 @@ function renderPeople(){
          being typed, not read. */
       : (editable && ADDROLE === p.key ? '' : '<span class="pill none">No role</span>');
     if (!editable) return held;
-    /* ── HALF THE PICKER. The other half is in the Unit column ────────
-       Islam: "keep the unit selection in the unit and keep the role selection
-       in the role so I can choose both but each in it's right placement."
+    /* ── A RETIRED ROW HOLDS NOTHING, SO IT IS NOT OFFERED A ROLE ─────
+       `SMPRules.personRoles()` opens with "a retired person holds nothing" and
+       returns [] — but the picker was drawn on a retired row anyway, so giving
+       one Business unit owner WROTE the grant (the unit's `head` now points at
+       them) while the row went on reading "No role": the rule that decides what
+       a row SHOWS is not the one the grant went through, and nothing compared
+       them.
 
-       Right, and the old control was the giveaway: it opened a role select AND
-       a where select inside the Roles cell, so the Unit column sat empty
-       beside a dropdown naming a unit. One control spanning two columns is a
-       control that belongs in neither.
+       Two silent wrongs in one press — nothing said the grant had happened, and
+       a unit was left pointed at somebody who cannot sign in, which is exactly
+       the state §93.4's custodian count exists to find. Refused where the
+       control was, and the refusal says the way out (§62). */
+    if (!personActive(p))
+      return held + '<span class="rolestop">Retired \u2014 restore this person ' +
+        'before giving them a role.</span>';
+    /* ── ONE DROPDOWN: THE UNIT CELL ALREADY SAYS WHERE (§110) ───────
+       Islam, of the second half this used to draw: "choose where is very
+       strange sentence. make it Unit and it's already in a cell what am I
+       missing here?"
 
-       NO GIVE AND NO CANCEL. A pair of dropdowns whose result carries its own
-       × is already a selection somebody can take back (§62's "the refusal is
-       where the confirmation would be", turned round: the undo is where the
-       confirmation would be). So the role is granted the moment BOTH halves
-       have been chosen — which is why both start on a blank "Choose…" option
-       rather than pre-selected: a picker that commits on its own must never
-       commit something nobody picked. */
+       Nothing, and it was worse than redundant. `personAtChoices()` — the Unit
+       cell's own dropdown — offers the group, every unit, every function and
+       every company: item for item the list `roleWheres()` was drawing from, a
+       superset of every role's where. And `grantPersonRole()` WRITES IT BACK
+       every time — owner and unit custodian set `p.unit`, fnhead sets `p.fn`,
+       cceo sets `p.company` — so the second dropdown asked a question the first
+       had already answered and then forced its own answer onto it. The two
+       could never disagree, because the grant made them agree.
+
+       §69.1's split survives in the half that mattered: the unit selection is
+       in the Unit column and the role selection is in Roles. What goes is the
+       DUPLICATE, not the arrangement. §46.4's "where somebody sits and where a
+       role reaches are two different facts" stayed true of the CONCEPTS and was
+       never true of the code.
+
+       AND IT IS WHY THEY NO LONGER BLOCK EACH OTHER (Islam: "the role and the
+       unit shouldn't block each other but they only function together"). Two
+       ordinary fields on the row, set in either order, neither emptying the
+       other; both have to say something before somebody holds a role somewhere,
+       and where they cannot agree the row explains it rather than doing
+       nothing. */
     var addRole = ADDROLE === p.key;
     return held +
       (addRole
@@ -21863,37 +22290,45 @@ function renderPeople(){
             ROLES.filter(function(r){ return roleIsGrantable(r.key); }).map(function(r){
               return '<option value="' + r.key + '"' + (r.key === ADDROLE_KIND ? " selected" : "") +
                 '>' + esc(r.name) + '</option>';
-            }).join("") + '</select>'
+            }).join("") + '</select>' + roleStop(p)
         : '<button class="linkbu" data-prole-open="' + p.key + '">+ role</button>');
   }
 
-  /* The second half, drawn in the Unit column and nowhere else. It is only
-     ever present while a role is being given, and it is EMPTY until a role has
-     been picked, because which places are offered depends on which role it is:
-     a company CEO is seated at a company, a function head at a function, and
-     one combined list would offer Company CEO of Mobile (§35). */
-  function roleWhereCell(p){
-    if (!rowOpen(p)) return "";
-    if (ADDROLE !== p.key) return "";
-    if (!ADDROLE_KIND) {
-      return '<span class="why rolewhy" style="margin:0">pick a role first</span>';
-    }
-    var wheres = roleWheres(ADDROLE_KIND);
-    /* A ROLE WITH ONE PLACE IS ALREADY GIVEN (§92). This used to render a
-       select holding a single option and wait to be told which of the one to
-       use — the comment here even claimed it "says it rather than offering a
-       list of one", which is what it should have done and not what it did.
-       The grant happens on the role pick now, so this cell is never reached
-       for those; the guard stays because a role list that gains a
-       single-destination entry later must not fall back into asking. */
-    if (wheres.length <= 1) return "";
-    return '<select class="fld rolewhere" data-prole-where="' + p.key + '" ' +
-      'aria-label="Where ' + esc(p.name) + ' holds it">' +
-      '<option value="" selected>Choose where\u2026</option>' +
-      wheres.map(function(w){
-        return '<option value="' + esc(w.v) + '">' + esc(w.label) + '</option>';
-      }).join("") + '</select>';
+  /* ── A PICK THAT CANNOT LAND SAYS SO, WHERE IT WAS MADE (§110) ─────
+     The one thing the old pair could not do. It committed on the second answer,
+     so "not yet" and "never" looked identical from the outside: nothing
+     happened, and nothing was said.
+
+     TWO REFUSALS, TWO SENTENCES, because they have different ways out — one
+     wants a Unit set at all, the other wants a different KIND of Unit. What
+     each role may be held at is still `roleWheres()` and nothing else: this
+     asks that list rather than carrying a second opinion about it (§42), and
+     only the WORD for a kind is written here.
+
+     `ROLESTOP` is the outcome of the last pick and lives on the screen, never
+     on the person (§25.2) — cleared by the pick that succeeds, by opening the
+     picker again, and by leaving the row. */
+  function roleStop(p){
+    if (!ROLESTOP || ROLESTOP.key !== p.key) return "";
+    return '<span class="rolestop">' + esc(ROLESTOP.why) + '</span>';
   }
+
+  /* roleWhereCell() was here. It drew the picker's second half — "Choose
+     where\u2026" — in the Unit column, and §110 deleted it rather than renaming
+     it: the cell's own dropdown already answers that question and the grant
+     already writes the answer back, so the two could never disagree. Removed
+     with its call site rather than left returning "" (§24), because a function
+     nothing calls is one the next reader has to prove is dead before touching
+     anything near it.
+
+     It also carried a bug worth remembering. `.cfg table td` is
+     `white-space:nowrap` (§88's one-line standard), so the cell laid its two
+     controls SIDE BY SIDE rather than stacking them: the second started 150px
+     into a 158px cell, ran 133px past its own right edge and landed under the
+     Email field, which took every click. Present, enabled, correctly sized and
+     unreachable — §93.4 for the third time, and invisible to every check in the
+     suite, because all of them ask whether a control is in the document.
+     `elementFromPoint` at its own centre returned the Email input. */
 
   /* contactCell() was here. It stacked the address over the number in one
      cell, and the two are two columns now (§69.16) — a function nothing calls
@@ -22312,13 +22747,7 @@ function renderPeople(){
                 ? '<span class="why" style="margin:0">&mdash; the list says ' +
                   esc(whereLabel(drift)) + '</span>'
                 : '<span class="why" style="margin:0">&mdash;</span>'))) +
-        saidWhereNote(p, ed) +
-        /* The role picker's second half (§69). It sits UNDER what the cell
-           already says rather than replacing it: where somebody sits and where
-           a role reaches are two different facts (§46.4), and a picker that
-           hid the first while choosing the second would be asking the question
-           with the answer covered up. */
-        roleWhereCell(p) + '</td>' : '') +
+        saidWhereNote(p, ed) + '</td>' : '') +
       /* Email above the number. Both are how you reach somebody, and giving
          each a column of its own made an eleven-column register — the pair is
          one answer to one question. */
@@ -23394,6 +23823,52 @@ function kbSection(id, title, blocks){
     }).join("") + '</div>';
 }
 
+/* ── The task recipes on the page (§103) ─────────────────────────────
+   Rendered from `RECIPES`, which is DATA — so `scripts/extract-kb.js` reads
+   the same array into the assistant's corpus and the words a person reads and
+   the words it answers from cannot drift (§42, applied to prose).
+
+   `{pillar}` and `{pillars}` are substituted here rather than baked in, because
+   a tenant that calls a pillar something else must not be answered in Raya's
+   vocabulary (§65) — the same reason `L()` exists everywhere else.
+
+   A recipe's answer is one string with `|` between paragraphs. Not an array:
+   the file is long enough already, and a separator that cannot appear in prose
+   costs nothing to read and one line to split. */
+function recipeText(t){
+  return String(t)
+    .replace(/\{pillars\}/g, plural(2, L("pillar","bu")))
+    .replace(/\{pillar\}/g, L("pillar","bu"));
+}
+
+function kbRecipes(){
+  return RECIPES.map(function(g){
+    var items = g.items.map(function(r){
+      /* TWO TRUE ANSWERS TO ONE QUESTION are two entries sharing a `q`
+         (spec 016 §5.2b). On the page BOTH are shown, because the knowledge
+         base is readable by everyone and the office's answer is not a secret —
+         it is merely useless to somebody who cannot do it.
+
+         SO THE MARK GOES ON THE AUDIENCE, NEVER ON THE DUPLICATE. Marking only
+         the second of a pair left the two-track question rendering as the same
+         heading twice with nothing between them, which reads as a bug; and
+         marking by position would leave a lone office recipe unmarked in a
+         group that is not the office's. Whoever it is for, it says so. */
+      var who = r.who || g.who;
+      return '<div class="kb-rec" id="kb-r-' + esc(r.id) + '">' +
+        '<h4 class="kb-q">' + esc(recipeText(r.q)) +
+          (who === "office"
+            ? ' <span class="pill kind">Strategy Office</span>' : '') + '</h4>' +
+        recipeText(r.a).split("|").map(function(para){
+          return '<p class="kb-p">' + para + '</p>';
+        }).join("") +
+      '</div>';
+    }).join("");
+    return { id: "how-" + g.g.toLowerCase().replace(/[^a-z]+/g, "-").replace(/^-|-$/g, ""),
+             title: g.g, html: items };
+  });
+}
+
 function renderKB(){
   var L1 = L("pillar","bu");
   var secs = [
@@ -23599,12 +24074,20 @@ function renderKB(){
     ])
   ];
 
-  var toc = '<div class="kb-toc">' + [
-      ["scoring","Scoring"],["access","Access"],["labels","Labels"],
-      ["units","Units & functions"],["plans","Plans"],["cycle","Cycle"],["data","Data"],
-      ["mail","Email"]
-    ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
+  /* THE RECIPES: how to DO things, as opposed to how things work. Their own
+     part of the page, because mixing a task into a paragraph of reasoning
+     serves neither — somebody reading the Access section wants the argument,
+     somebody asking "where do I press" wants four lines. */
+  var recs = kbRecipes();
+  recs.forEach(function(r){
+    secs.push('<div class="kb-sec kb-how" id="kb-' + r.id + '"><h3>' + esc(r.title) +
+              '</h3>' + r.html + '</div>');
+  });
 
+  /* DERIVED, NEVER LISTED. This was a hand-written array beside the sections
+     and it was ALREADY WRONG — nine sections, eight links, with the people
+     register missing since the day it was added. A second copy of a list is a
+     list that goes stale on the first edit somebody forgets (§42). */
   /* ── THE TOUR'S ONE WAY BACK IN (spec 017) ───────────────────────
      Explanation lives here (v3.5), so the replay of the guided tour lives
      here too rather than growing furniture of its own on a page somebody
@@ -23624,13 +24107,41 @@ function renderKB(){
       '">Start the tour</button></p></div>'
     : '';
 
+  /* THE TOUR IS A SECTION, SO IT GOES IN THE ARRAY (merge, §113.8). It
+     arrived from the other session concatenated straight into the page — a
+     real `.kb-sec` with a title and an id, but not in `secs`, so the derived
+     contents listed sixteen of seventeen sections and the tour had no link.
+     Exactly the fault deriving the contents was meant to end, arriving from
+     the other side of a merge. First, because somebody who has just arrived
+     needs the tour before they need the reference.
+
+     AND IT HAS TO SIT BELOW `tourBlock`'s ASSIGNMENT, which is what the first
+     attempt got wrong: `var` hoists the declaration and not the value, so an
+     unshift written above it pushed `undefined`, the `if` was false, and the
+     tour silently left the page. */
+  if (tourBlock) secs.unshift(tourBlock);
+
+  var toc = '<div class="kb-toc">' +
+    secs.map(function(html){
+      var id = (html.match(/id="kb-([a-z-]+)"/) || [])[1];
+      var title = (html.match(/<h3>([^<]*)/) || [])[1] || "";
+      title = title.split(" \u2014 ")[0];
+      return id ? '<a href="#kb-' + id + '">' + title + '</a>' : '';
+    }).join("") + '</div>';
+
+
   return cfgHead("Knowledge base",
-      ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
+      ['<span class="pill kind">Everyone</span>',
+       secs.length + ' sections', recipeCount() + ' how-tos'],
       null, false) +
-    '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
-      'settle that a reader would need to know belongs here rather than in a note under ' +
-      'the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + tourBlock + secs.join("") + '</div>';
+    /* BOTH SIDES OF THE MERGE BELONG HERE. The lede names the how-tos, which
+       exist now (§111); `tourBlock` is the other session's onboarding tour
+       (§107), and it opens the page because somebody who has just arrived
+       needs the tour before they need the reference. */
+    '<p class="kb-lede">How the platform works, and how to do things in it \u2014 in one ' +
+      'place. This grows: anything we settle that a reader would need to know belongs here ' +
+      'rather than in a note under the screen it happens to affect.</p>' +
+    toc + '<div class="kb">' + secs.join("") + '</div>';
 }
 
 
@@ -28356,7 +28867,15 @@ var CHAT = (function(){
      about what a message looks like. */
   function msgHtml(m, mineIsOffice, showFlag){
     var mine = mineIsOffice ? m.from_office : !m.from_office;
-    var who = m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
+    /* AN ASSISTANT'S ANSWER NEVER WEARS A COLLEAGUE'S NAME (§104). This
+       product spends a great deal of care on who is authorised to say what —
+       §31 closed a plan to the person measured against it, §94 closed the
+       strategy tab to the office — and an automated answer signed "Strategy
+       Office" is a ruling as far as the reader is concerned. It is from the
+       office (that is whose side of the conversation it is on) and it says
+       plainly that a machine wrote it. */
+    var who = m.bot ? "Assistant · answered from the knowledge base"
+            : m.from_office ? ((m.by_name || "The office") + " · Strategy Office")
                             : (mineIsOffice ? (m.by_name || "") : "You");
     var pic = m.has_shot
       ? '<button class="chshot" type="button" data-chshot="' + m.id + '">' +
@@ -28372,18 +28891,34 @@ var CHAT = (function(){
              'data-chflag="' + m.id + '" data-chflagged="' + esc2(m.flag || "") + '">' +
              (m.flag ? esc2(m.flag) : "Flag") + "</button>";
     }
-    return '<div class="chmsg ' + (mine ? "chme" : "chthem") + '">' +
+    /* THE WAY OUT (spec 016 §4.3). The assistant KNOWING it cannot answer is
+       handled on the server; this is for the harder case — it answered, and it
+       was wrong. Without it a confident wrong answer is a dead end, because an
+       answered conversation has already left the office's queue.
+
+       Only on the reader's own side, and only on the last thing said: an
+       escape hatch under every historical answer is clutter, and the office
+       does not need one at all. */
+    var out = "";
+    if (m.bot && !mineIsOffice && m.last) {
+      out = '<button class="chout" type="button" data-chhuman="1">' +
+            "This didn\u2019t answer it \u2014 send it to the office</button>";
+    }
+    return '<div class="chmsg ' + (mine ? "chme" : "chthem") + (m.bot ? " chbot" : "") + '">' +
       '<div class="chwho"><span>' + esc2(who) + "</span><span>" + esc2(when(m.at)) + "</span>" +
       flag + "</div>" +
-      '<div class="chbod">' + esc2(m.body) + pic + "</div></div>";
+      '<div class="chbod">' + esc2(m.body) + pic + "</div>" + out + "</div>";
   }
 
   function threadHtml(msgs, mineIsOffice, showFlag){
     if (!msgs.length) return "";
     var out = [], day = "";
-    msgs.forEach(function(m){
+    msgs.forEach(function(m, i){
       var d = dayOf(m.at);
       if (d !== day) { day = d; out.push('<div class="chatday">' + esc2(d) + "</div>"); }
+      /* WHICH ONE IS LAST is decided here, where the list is, rather than by
+         msgHtml comparing ids it cannot see the rest of. */
+      m.last = (i === msgs.length - 1);
       out.push(msgHtml(m, mineIsOffice, showFlag));
     });
     return out.join("");
@@ -28649,6 +29184,28 @@ var CHAT = (function(){
     el("chatbtn").addEventListener("click", function(){ setOpen(!open); });
     el("chatclose").addEventListener("click", function(){ setOpen(false); });
     el("chatsend").addEventListener("click", send);
+    /* DELEGATED, because the message it sits on is redrawn by every poll — a
+       handler bound to the button itself would be destroyed four seconds after
+       it appeared (§24: whoever rewrites the DOM re-wires it, and the cheapest
+       way to obey that is not to bind to the thing being rewritten). */
+    el("chatbody").addEventListener("click", function(e){
+      var b = e.target.closest && e.target.closest("[data-chhuman]");
+      if (!b) return;
+      b.disabled = true;
+      /* IT IS AN ORDINARY MESSAGE, deliberately — not a new endpoint and not a
+         flag on the thread. Saying so in words is what puts the conversation
+         back in the office's queue, and it leaves the office reading WHY the
+         answer was wrong rather than a bare marker. The server's own rule
+         (spec 016 §4.3) sends a request for a person straight to a handoff, so
+         this cannot be answered by the assistant a second time. */
+      post({ action:"say", body:"That didn\u2019t answer it \u2014 could someone from " +
+             "the office look at this?" }, function(err, j){
+        if (err || !j) { b.disabled = false; lastErr = "That did not send. Try again."; drawPanel(); return; }
+        state.messages = j.messages || state.messages;
+        state.thread = j.thread || state.thread;
+        drawPanel();
+      });
+    });
     el("chatpic").addEventListener("click", function(){ el("chatfile").click(); });
     el("chatfile").addEventListener("change", function(){ takePicture(this.files && this.files[0]); });
     var say = el("chatsay");
@@ -28736,6 +29293,32 @@ var CHAT = (function(){
         (!!val) + '">' + on + '</button></span>';
   }
 
+  /* WHO THE HANDOFF REACHES. Only people who are in the office are offered —
+     a representative outside it would be told a question is waiting on a page
+     they cannot open (§61's shape). Read from the register, so a retired
+     person stops being offered without anybody remembering to change it. */
+  function officePeople(){
+    return (typeof PEOPLE === "undefined" ? [] : PEOPLE).filter(function(p){
+      return p.active !== false && SMPRules.isOfficeRole(String(p.role || ""));
+    });
+  }
+  function repName(key){
+    var p = officePeople().filter(function(x){ return x.key === key; })[0];
+    return p ? (p.name || p.key) : key;
+  }
+  function repPicker(key){
+    /* NOBODY SET IS AN OPTION, AND IT IS THE FIRST ONE. §35's rule: absent is
+       not "none" — the row has to be able to say nobody was chosen, or the
+       first name in the register becomes the default by accident. */
+    var opts = ['<option value=""' + (key ? "" : " selected") + '>No one yet</option>'];
+    officePeople().forEach(function(p){
+      opts.push('<option value="' + esc2(p.key) + '"' + (p.key === key ? " selected" : "") +
+                ">" + esc2(p.name || p.key) + "</option>");
+    });
+    return '<select data-chrep="1" aria-label="Who is told when a question needs a person">' +
+           opts.join("") + "</select>";
+  }
+
   function settingsHtml(){
     var c = chatCfg();
     if (!SETMENU) {
@@ -28748,6 +29331,36 @@ var CHAT = (function(){
       '<span class="hcar">&#9662;</span></button>' +
       '<div class="hmenu-panel chset">' +
         '<div class="chset-h">The chat</div>' +
+
+        /* ── THE ASSISTANT, AND ITS SWITCH IS FIRST (§104) ────────────
+           Islam: "I need a switch to turn off AI response and just keep it to
+           the SMO inbox." It is OFF until somebody turns it on, and off is
+           enforced on the server, where the model is simply never called —
+           with the assistant off there is no control on screen to hide, so the
+           guard IS the feature (§42, §98.2). */
+        '<div class="chset-row"><div class="chset-lab">The assistant answers first' +
+          '<span class="chset-ctl">' + segHtml("assistant", "Off", "On", c.assistant, true) +
+          '</span></div>' +
+          '<div class="chset-hint">Off sends every question straight to this inbox, exactly ' +
+          'as it does today. On, it answers from the knowledge base first and hands over ' +
+          'anything it cannot answer.</div>' +
+          '<div class="chset-cost">It can only ever read the <b>knowledge base</b> &mdash; ' +
+          'the same pages everybody can already open. It cannot see a figure, a plan or a ' +
+          'score, and it says so rather than guessing.</div></div>' +
+
+        (c.assistant
+          ? '<div class="chset-row"><div class="chset-lab">Tell someone when a question ' +
+              'needs a person<span class="chset-ctl">' +
+              segHtml("notify", "Off", "On", c.notify, true) + '</span></div>' +
+              '<div class="chset-hint">' +
+              (c.notify
+                ? (c.rep ? 'Emailed to ' + esc2(repName(c.rep)) + ' the moment it happens.'
+                         : '<b>No one is set</b> &mdash; handoffs wait in this inbox until ' +
+                           'somebody is chosen below.')
+                : 'Handoffs wait here until somebody opens the page.') + '</div>' +
+              (c.notify ? '<div class="chset-ctl chset-who">' + repPicker(c.rep) + '</div>' : '') +
+            '</div>'
+          : '') +
 
         '<div class="chset-row"><div class="chset-lab">People can write to the office' +
           '<span class="chset-ctl">' + segHtml("on", "Off", "On", c.on, true) + '</span></div>' +
@@ -28819,15 +29432,39 @@ var CHAT = (function(){
       "</div>";
   }
 
+  /* ── THE ONE YOU HAVE OPEN NEVER LEAVES THE LIST (§105) ─────────
+     Islam: "the chat was a user he sent to me and I replied and the chat
+     disappeared from all places."
+
+     Nothing was deleted — replying marks a conversation ANSWERED (§71: the
+     status you must remember to set is the one nobody sets), and the inbox
+     opens on WAITING, which by definition excludes answered ones. So the act
+     of replying removed the row from the list the office was looking at, while
+     its thread sat open on the right. It reads as destruction, and coming back
+     to the page shows it gone again, because the page always opens on Waiting.
+
+     THE FILTER IS NOT WRONG AND IS NOT CHANGED. Waiting is the work queue and
+     it has to keep meaning what it means at thirty conversations. What is
+     wrong is that it applied to the conversation you are IN — so that one is
+     exempt, and only that one. A search still hides it, deliberately: typing
+     in the box is asking to see something else. */
   function boxRows(){
     var q = box.q.toLowerCase();
     return (box.threads || []).filter(function(t){
+      var open = t.person_key && t.person_key === box.person;
+      if (!q && open) return true;
       if (box.tab === "waiting" && !t.waiting) return false;
       if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
       if (!q) return true;
       return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
              String(t.last_body || "").toLowerCase().indexOf(q) > -1;
     });
+  }
+
+  /* How many conversations the current filter is HIDING, so an empty list can
+     say where everything went rather than only that there is nothing here. */
+  function boxHidden(){
+    return (box.threads || []).length - boxRows().length;
   }
 
   function placeOf(t){
@@ -28843,9 +29480,27 @@ var CHAT = (function(){
     var list = el("chqlist"); if (!list) return;
     var rows = boxRows();
     if (!rows.length) {
+      /* AN EMPTY LIST SAYS WHERE EVERYTHING WENT (§105). "Nobody is waiting"
+         is true and was a dead end: with an answered conversation hidden
+         behind a filter nothing on the screen mentioned, the only way back to
+         it was to already know about the All tab.
+
+         AND THE FLAGGED TAB WAS SAYING SOMETHING FALSE — "No conversations
+         yet" when there are conversations and none of them is flagged. Found
+         while reproducing the other one; the same shape of lie, and the same
+         fix: an empty state describes THIS filter, never the whole product. */
+      var hid = boxHidden();
+      var elsewhere = hid > 0
+        ? ' <button class="chlink" type="button" data-chtab="all">' +
+          hid + " " + (hid === 1 ? "conversation is" : "conversations are") +
+          " on All</button>"
+        : "";
       list.innerHTML = '<div class="chnothing">' +
         (box.q ? "Nothing matches that."
-               : box.tab === "waiting" ? "Nobody is waiting. That is the good state."
+               : box.tab === "waiting"
+                   ? "Nobody is waiting. That is the good state." + elsewhere
+               : box.tab === "flagged"
+                   ? "Nothing is flagged." + elsewhere
                : "No conversations yet.") + "</div>";
       return;
     }
@@ -29080,6 +29735,15 @@ var CHAT = (function(){
     /* TYPING NEVER REPAINTS (§35). The promise is written on `change`, which
        fires on blur, so the box is never replaced under the cursor. */
     wrap.addEventListener("change", function(e){
+      var rep = e.target.closest("[data-chrep]");
+      if (rep) {
+        chatSet("rep", rep.value);
+        saved();
+        /* The hint above it names who was chosen, so the menu redraws — never
+           paint(), which would rebuild the page behind an open menu (§30.1). */
+        setMenuPaint();
+        return;
+      }
       var inp = e.target.closest("[data-chpromise]");
       if (!inp) return;
       chatSet("promise", inp.value);
@@ -29144,9 +29808,17 @@ var CHAT = (function(){
       var tab = e.target.closest("[data-chtab]");
       if (tab) {
         box.tab = tab.dataset.chtab;
-        Array.prototype.forEach.call(root.querySelectorAll("[data-chtab]"), function(b){
-          b.classList.toggle("on", b === tab);
-          b.setAttribute("aria-selected", b === tab ? "true" : "false");
+        /* LIT BY VALUE, NEVER BY IDENTITY. This compared `b === tab` across
+           every `[data-chtab]` in the page, which was fine while the only ones
+           were the three tabs themselves — and the moment the empty state grew
+           a "N conversations are on All" link (§105), pressing THAT would have
+           lit the link and un-lit all three tabs, leaving the row with nothing
+           selected. Scoped to the tab row and matched on the value, so a
+           shortcut to a tab lights the tab. */
+        Array.prototype.forEach.call(root.querySelectorAll(".chqtab"), function(b){
+          var on = b.dataset.chtab === box.tab;
+          b.classList.toggle("on", on);
+          b.setAttribute("aria-selected", on ? "true" : "false");
         });
         drawQueue();
         return;
@@ -33778,58 +34450,70 @@ var SYNC = (function () {
        choosing both halves IS the grant. */
     document.querySelectorAll("[data-prole-open]").forEach(function(b){
       b.addEventListener("click", function(){
-        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; paint();
+        ADDROLE = b.dataset.proleOpen; ADDROLE_KIND = ""; ROLESTOP = null; paint();
       });
     });
-    /* Choosing the role repaints, because the SECOND select's options depend
-       on the first: a company CEO is attached to a company, a function head to
-       a function. One list of every role-times-place would offer Company CEO
-       of Mobile. Emptying it back to "Choose a role…" empties the other half
-       with it, rather than leaving a unit list standing under no role. */
-    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        ADDROLE_KIND = sel.value;
-        /* ── ONE DESTINATION IS NOT A QUESTION (§92, Islam) ────────────
-           "I added SMO to Mohamed Essam but the employee role persisted and
-           SMO wasn't added." It had not been: the pair commits when the SECOND
-           half is answered (§69.1), and for a seat held over the group the
-           second half is a list of one — so the register asked which of the
-           group to pick, and doing nothing looked exactly like the control
-           being broken.
+    /* ── THE ROLE LANDS WHERE THE UNIT CELL ALREADY SAYS (§110) ──────
+       There is no second dropdown any more. The picker's other half asked a
+       question the Unit cell had already answered and then wrote its own answer
+       into that same cell (see roleCell in config-render.js); one control is
+       what was left once the duplicate went.
 
-           §32 settled this shape twice already (the gate's Starting page, the
-           Manage menu holding one item): a door behind a door. Where there is
-           one place a role can be held, it is granted here and the second half
-           never appears. Everything with a real choice — a unit owner, a
-           custodian, a company CEO — is unchanged.
+       `personAt(p)` is the ONE reader of "where does this person sit" (§54.1),
+       so the grant asks it rather than reading the `data-pat` select off the
+       screen: the select is a rendering of that fact, and reading the rendering
+       is how two answers to one question get started.
 
-           THE UNDO IS THE × ON THE CHIP, which is what let §69 drop Give and
-           Cancel in the first place: a grant that commits on one press is safe
-           precisely because taking it off is one press too. */
-        var wheres = ADDROLE_KIND ? roleWheres(ADDROLE_KIND) : [];
-        if (roleIsGrantable(ADDROLE_KIND) && wheres.length === 1) {
-          grantPersonRole(sel.dataset.prolePick, ADDROLE_KIND, wheres[0].v);
-          ADDROLE = null; ADDROLE_KIND = "";
+       WHAT A ROLE MAY BE HELD AT IS STILL `roleWheres()` AND NOTHING ELSE. This
+       does not carry a second opinion about it — it asks that list whether the
+       place the person is in is on it, which keeps one definition (§42) and
+       makes a role added later correct here on the day it is added. */
+    /* ── AND IT IS TRIED AGAIN WHEN THE UNIT CHANGES ────────────────
+       Found by a check, and it is the same family of fault as the one §110
+       started from. A refused pick leaves the picker open — which is right, so
+       the Unit can be set and the role taken again — but the role select is
+       still SHOWING that role, so picking it a second time fires no `change` at
+       all. Set the Unit, reach for the role, and the control does nothing:
+       exactly the silence this section exists to remove.
+
+       So the grant is one function and the ORDER stops mattering. Islam: "the
+       role and the unit shouldn't block each other but they only function
+       together." Whichever of the two is answered second is the one that
+       completes it. */
+    function tryGrantRole(key, role){
+        ADDROLE_KIND = role;
+        if (!roleIsGrantable(role)) { ROLESTOP = null; paint(); return; }
+        var p = personBy(key);
+        var at = personAt(p);
+        var wheres = roleWheres(role);
+        /* ── A SEAT HELD OVER THE GROUP IGNORES THE UNIT (§92) ─────────
+           Super user, SMO team and Group CEO have one destination, so the Unit
+           cell has nothing to say about them and must not be able to refuse
+           them: somebody sitting in Mobile can be the Super user. §92 granted
+           these on the role pick and that is unchanged — it is now the same
+           line as everything else rather than a special case beside it. */
+        if (wheres.length === 1) at = wheres[0].v;
+        else if (!wheres.some(function(w){ return w.v === at; })) {
+          /* NOT YET AND NEVER ARE DIFFERENT SENTENCES, because they have
+             different ways out: one wants a Unit set at all, the other wants a
+             different KIND of Unit. The old pair could say neither — it
+             committed on the second answer, so both looked like nothing
+             happening. */
+          ROLESTOP = { key:key, why: at
+            ? roleName(role) + " is held at " + roleAtWord(role) + ". Change the Unit."
+            : "Set the Unit first \u2014 " + roleName(role) + " is held at " +
+              roleAtWord(role) + "." };
+          paint();
+          return;
         }
-        paint();
-      });
-    });
-    /* NO GIVE BUTTON. The pair commits itself the moment the second half is
-       answered — Islam: "without give or cancel … eventually it's a selection
-       that I can remove after with the x button you made."
-
-       Which is why it is guarded on BOTH halves rather than on this one: a
-       change event on the where select can only fire after a role was picked,
-       but ADDROLE_KIND is a global that a repaint between the two could have
-       cleared, and granting `undefined` at a unit writes a role nothing can
-       name and nothing can take off. */
-    document.querySelectorAll("[data-prole-where]").forEach(function(sel){
-      sel.addEventListener("change", function(){
-        var key = sel.dataset.proleWhere;
-        if (!sel.value || !roleIsGrantable(ADDROLE_KIND)) return;
-        grantPersonRole(key, ADDROLE_KIND, sel.value);
+        ROLESTOP = null;
+        grantPersonRole(key, role, at);
         ADDROLE = null; ADDROLE_KIND = "";
         paint();
+    }
+    document.querySelectorAll("[data-prole-pick]").forEach(function(sel){
+      sel.addEventListener("change", function(){
+        tryGrantRole(sel.dataset.prolePick, sel.value);
       });
     });
     document.querySelectorAll("[data-prole-off]").forEach(function(b){
@@ -33870,6 +34554,17 @@ var SYNC = (function () {
         var p = personBy(sel.dataset.pat);
         if (!p) return;
         attachPersonAt(p, sel.value || null);
+        /* THE OTHER HALF OF "EITHER ORDER" (§110). If a role is picked and
+           standing refused on this row, moving the person is the answer it was
+           waiting for — so it is taken now, rather than leaving somebody to
+           re-pick a role the select is already showing. Only while a refusal is
+           standing: changing the Unit on a row nobody is granting a role on
+           stays what it has always been, a move and nothing else. */
+        if (ROLESTOP && ROLESTOP.key === p.key && ADDROLE === p.key &&
+            roleIsGrantable(ADDROLE_KIND)) {
+          tryGrantRole(p.key, ADDROLE_KIND);
+          return;
+        }
         paint();
       });
     });
@@ -34079,6 +34774,32 @@ var SYNC = (function () {
       });
     });
 
+    /* ── PUTTING THE CURSOR IN A FIELD MUST NOT MOVE THE ROW (§110) ──
+       Islam: "once I open the edit of a line the line jumps to the first line,
+       that is the wrong behaviour."
+
+       It is the CURSOR, not the repaint. The register is its own scrolling box
+       (`.cfg`), and a plain focus() lets the browser scroll the focused field
+       into view — so opening row 20 of 33 scrolled that box from 0 to 533px and
+       hauled the row from y=638 to y=105, which is where the first line sits.
+       His words exactly, and measured.
+
+       `preventScroll` holds the row where it was pressed and still lands the
+       cursor in the right field: nothing needs scrolling, because the row is
+       already where the person just clicked.
+
+       AND `no-jump.py` HAS BEEN GREEN THROUGHOUT — it opens a row and then
+       measures repaints, so it never once measured the act of opening one
+       (§94.2). It does now.
+
+       `focusNoScroll` rather than the option written twice: the register's pen
+       and the six inline pens are the same act, and §85 already found out what
+       happens when that pair of lines is maintained in two places. */
+    function focusNoScroll(f){
+      if (!f) return;
+      try { f.focus({ preventScroll: true }); } catch (e) { f.focus(); }
+      if (f.select) f.select();
+    }
     /* ── EDIT THIS ROW (§79.2, spec 012 §2.1) ───────────────────────
        It used to turn the whole page's edit mode on and put the cursor in this
        person's name — 297 inputs to change one job title. It opens the ROW now.
@@ -34090,9 +34811,9 @@ var SYNC = (function () {
         var key = b.dataset.pedit;
         rowEditOpen("people", key, personBy(key));
         PMENU = null;
+        ROLESTOP = null;
         paint();
-        var f = document.querySelector('[data-pname="' + key + '"]');
-        if (f) { f.focus(); f.select(); }
+        focusNoScroll(document.querySelector('[data-pname="' + key + '"]'));
       });
     });
     /* Save writes nothing of its own: every field has already written itself
@@ -34110,13 +34831,18 @@ var SYNC = (function () {
         var bits = b.dataset.rowedit.split("|"), table = bits[0], key = bits.slice(1).join("|");
         rowEditOpen(table, key, ROWFIND[table] ? ROWFIND[table](key) : null);
         paint();
-        var f = document.querySelector(".tk-firstfield");
-        if (f) { f.focus(); if (f.select) f.select(); }
+        focusNoScroll(document.querySelector(".tk-firstfield"));
       });
     });
+    /* LEAVING THE ROW TAKES THE PICKER WITH IT (§110). `ADDROLE` and
+       `ROLESTOP` are both properties of one open row, and neither was being
+       cleared when the row closed — so a refusal answered by pressing Cancel
+       came back the next time that row was opened, about a pick nobody had just
+       made. Screen state outliving the screen it belongs to (§25.2). */
     document.querySelectorAll("[data-rowsave]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditClose();
+        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -34124,6 +34850,7 @@ var SYNC = (function () {
     document.querySelectorAll("[data-rowcancel]").forEach(function(b){
       b.addEventListener("click", function(){
         rowEditCancel();
+        ADDROLE = null; ADDROLE_KIND = ""; ROLESTOP = null;
         if (typeof SYNC !== "undefined" && SYNC.afterPaint) SYNC.afterPaint();
         paint();
       });
@@ -35082,7 +35809,7 @@ var SYNC = (function () {
         paint();
       });
     });
-    /* THE QUARTER TOGGLES (§111). By id through listById, the same resolver
+    /* THE QUARTER TOGGLES (§114). By id through listById, the same resolver
        every other row control uses — and §42 has classified a quarter change
        as PLAN on the server since before the screen could make one, so the
        guard here matches the refusal there. */

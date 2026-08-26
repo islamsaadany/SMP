@@ -843,7 +843,7 @@ console.log("\n10b · a function submits its report");
   check("...and may NOT submit another function's", !v.ok, "it was allowed");
 })();
 
-/* ── 10c · THE REPEATS MARK IS PLAN (§112) ──────────────────────────
+/* ── 10c · THE REPEATS MARK IS PLAN (§115) ──────────────────────────
    `p.repeats` is a new field on a project row, so it classifies the way any
    project change does — capPlan, the office's (§94). Both ends (§94.2): the
    SMO may mark it, the function's own head may not, or the flag that decides

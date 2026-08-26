@@ -711,39 +711,15 @@ var CHAT = (function(){
       "</div>";
   }
 
-  /* ── THE ONE YOU HAVE OPEN NEVER LEAVES THE LIST (§105) ─────────
-     Islam: "the chat was a user he sent to me and I replied and the chat
-     disappeared from all places."
-
-     Nothing was deleted — replying marks a conversation ANSWERED (§71: the
-     status you must remember to set is the one nobody sets), and the inbox
-     opens on WAITING, which by definition excludes answered ones. So the act
-     of replying removed the row from the list the office was looking at, while
-     its thread sat open on the right. It reads as destruction, and coming back
-     to the page shows it gone again, because the page always opens on Waiting.
-
-     THE FILTER IS NOT WRONG AND IS NOT CHANGED. Waiting is the work queue and
-     it has to keep meaning what it means at thirty conversations. What is
-     wrong is that it applied to the conversation you are IN — so that one is
-     exempt, and only that one. A search still hides it, deliberately: typing
-     in the box is asking to see something else. */
   function boxRows(){
     var q = box.q.toLowerCase();
     return (box.threads || []).filter(function(t){
-      var open = t.person_key && t.person_key === box.person;
-      if (!q && open) return true;
       if (box.tab === "waiting" && !t.waiting) return false;
       if (box.tab === "flagged" && !(+t.flagged > 0)) return false;
       if (!q) return true;
       return String(t.live_name || t.person_name || "").toLowerCase().indexOf(q) > -1 ||
              String(t.last_body || "").toLowerCase().indexOf(q) > -1;
     });
-  }
-
-  /* How many conversations the current filter is HIDING, so an empty list can
-     say where everything went rather than only that there is nothing here. */
-  function boxHidden(){
-    return (box.threads || []).length - boxRows().length;
   }
 
   function placeOf(t){
@@ -759,27 +735,9 @@ var CHAT = (function(){
     var list = el("chqlist"); if (!list) return;
     var rows = boxRows();
     if (!rows.length) {
-      /* AN EMPTY LIST SAYS WHERE EVERYTHING WENT (§105). "Nobody is waiting"
-         is true and was a dead end: with an answered conversation hidden
-         behind a filter nothing on the screen mentioned, the only way back to
-         it was to already know about the All tab.
-
-         AND THE FLAGGED TAB WAS SAYING SOMETHING FALSE — "No conversations
-         yet" when there are conversations and none of them is flagged. Found
-         while reproducing the other one; the same shape of lie, and the same
-         fix: an empty state describes THIS filter, never the whole product. */
-      var hid = boxHidden();
-      var elsewhere = hid > 0
-        ? ' <button class="chlink" type="button" data-chtab="all">' +
-          hid + " " + (hid === 1 ? "conversation is" : "conversations are") +
-          " on All</button>"
-        : "";
       list.innerHTML = '<div class="chnothing">' +
         (box.q ? "Nothing matches that."
-               : box.tab === "waiting"
-                   ? "Nobody is waiting. That is the good state." + elsewhere
-               : box.tab === "flagged"
-                   ? "Nothing is flagged." + elsewhere
+               : box.tab === "waiting" ? "Nobody is waiting. That is the good state."
                : "No conversations yet.") + "</div>";
       return;
     }
@@ -1087,17 +1045,9 @@ var CHAT = (function(){
       var tab = e.target.closest("[data-chtab]");
       if (tab) {
         box.tab = tab.dataset.chtab;
-        /* LIT BY VALUE, NEVER BY IDENTITY. This compared `b === tab` across
-           every `[data-chtab]` in the page, which was fine while the only ones
-           were the three tabs themselves — and the moment the empty state grew
-           a "N conversations are on All" link (§105), pressing THAT would have
-           lit the link and un-lit all three tabs, leaving the row with nothing
-           selected. Scoped to the tab row and matched on the value, so a
-           shortcut to a tab lights the tab. */
-        Array.prototype.forEach.call(root.querySelectorAll(".chqtab"), function(b){
-          var on = b.dataset.chtab === box.tab;
-          b.classList.toggle("on", on);
-          b.setAttribute("aria-selected", on ? "true" : "false");
+        Array.prototype.forEach.call(root.querySelectorAll("[data-chtab]"), function(b){
+          b.classList.toggle("on", b === tab);
+          b.setAttribute("aria-selected", b === tab ? "true" : "false");
         });
         drawQueue();
         return;
@@ -1151,27 +1101,6 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
-    unread: function(){ return state.unread; },
-    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
-       The same `queue` action the inbox already calls, whose answer already
-       carries the two counts — so this is a second READER of one endpoint and
-       not a second endpoint, and the number the Overview prints is by
-       construction the number the Inbox's own tab prints.
-
-       IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
-       writing box.threads from here would leave a half-built queue behind for
-       whenever the inbox is next opened, and `drawQueue()` would be painting
-       into a document that does not have it. The Overview wants two integers.
-
-       `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
-       caller draws nothing for a null and "nothing is waiting" for a 0, and
-       those are different things to say (§108.10, §93). */
-    officeQueue: function(cb){
-      if (!servable()) return cb(null, null);
-      post({ action:"queue" }, function(err, j){
-        if (err || !j) return cb(err || new Error("no answer"), null);
-        cb(null, { waiting: j.waiting | 0, flagged: j.flagged | 0 });
-      });
-    }
+    unread: function(){ return state.unread; }
   };
 })();

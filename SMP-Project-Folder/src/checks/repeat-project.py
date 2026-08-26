@@ -1,16 +1,16 @@
-"""A REPEATING PROJECT (§112) — and what a new cycle now leaves alone.
+"""A REPEATING PROJECT (§115) — and what a new cycle now leaves alone.
 
 Islam: "the CX mystery shopping happens on H1 and is repeated for H2, same
 outcomes, same deliverables, same timeline — but we don't want things repeated
 in the same project."
 
 The machinery mostly existed: every new cycle already archived and cleared
-EVERY project's figures (clearCapability's "nums" pass). What §112 changes is
+EVERY project's figures (clearCapability's "nums" pass). What §115 changes is
 that the clear became a decision each project makes — a project marked
 `repeats: "cycle"` is re-asked with its dates shifted one cycle forward, and
 an unmarked one KEEPS its figures, because delivered is delivered.
 
-THIS CHECK FAILS ON THE PRE-§112 BUILD BY CONSTRUCTION: there, the unmarked
+THIS CHECK FAILS ON THE PRE-§115 BUILD BY CONSTRUCTION: there, the unmarked
 project is wiped too, and no date shifts. The state is MADE (§94.2 — the demo
 has no repeating project), the cycle is closed and reopened through the REAL
 controls with their real confirm dialogs, and the archive is read back for the

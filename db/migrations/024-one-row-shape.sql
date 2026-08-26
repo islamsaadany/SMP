@@ -32,6 +32,23 @@
 -- @phase: pre, because a schema change has to be in place before the seed
 -- writes rows against it (§33.5).
 
+-- ── A FRESH DATABASE HAS NO `actual` TO READ (fixed on merge, §113.7) ──
+--    This failed outright on a virgin deployment: `schema.sql` no longer
+--    creates `deliverables.actual` (it says so, three lines up), so every
+--    UPDATE below referencing it could not even PARSE — 42703, before a single
+--    row was touched. An EXISTING tenant still has the column, so the
+--    migration ran perfectly on the one database anybody was testing against.
+--
+--    Production was never at risk and every NEW deployment was: the platform
+--    applies schema + migrations + seed on first contact with an empty
+--    database, so a new client could not have been set up at all.
+--
+--    The column is put back if it is missing, which on a fresh database means
+--    NULL in a table that is still empty at pre-phase — so the UPDATEs below
+--    match nothing, and the DROP at the end takes it away again. Idempotent on
+--    both kinds of database, and it leaves the migration's own logic untouched.
+ALTER TABLE deliverables ADD COLUMN IF NOT EXISTS actual text;
+
 ALTER TABLE deliverables ADD COLUMN IF NOT EXISTS due    text;
 ALTER TABLE deliverables ADD COLUMN IF NOT EXISTS status text;
 ALTER TABLE deliverables ADD COLUMN IF NOT EXISTS pct    numeric;

@@ -229,7 +229,7 @@ function qs(t){
   return '<span class="qs">' + out + "</span>";
 }
 
-/* THE QUARTERS, PRESSABLE (§111). The same four marks qs() draws, as
+/* THE QUARTERS, PRESSABLE (§114). The same four marks qs() draws, as
    buttons, behind the pen — §42 classified a tactic's quarter as PLAN on the
    server four versions before the screen could edit one, so this draws the
    control the authoriser has been guarding all along. By id, never index
@@ -2939,7 +2939,7 @@ function projFrontMatter(p, ed){
         ? (p.stakeholders || []).map(function(x){
             return '<span class="pill kind">' + esc(x) + '</span>'; }).join(" ")
         : '<span class="missing">None named</span>');
-  /* REPEATS (§112). Read mode shows the row only when it says something — a
+  /* REPEATS (§115). Read mode shows the row only when it says something — a
      "Repeats: No" on every build-once project is noise (§41's budget, in
      words). The setter DELETES the key on the default (§50.6): a project
      unmarked and one never asked must be byte-identical. */
@@ -3463,7 +3463,7 @@ function unitPlanBody(it, u, railed){
       '<span class="idx-n">' + (i+1) + '</span></td>' +
       '<td>' + (ed ? inputOr("plan", m.name, "", function(v){ m.name = v; }) : esc(m.name)) +
         xb("measures", m.id) + '</td>' +
-      /* EDITABLE SINCE §111, reversing §31's read-only. That section closed the
+      /* EDITABLE SINCE §114, reversing §31's read-only. That section closed the
          direction and the compile rule because "they change what a figure
          MEANS" — the right worry while the pen could fall to the person being
          measured, and §94 ended that: the pen is the office's. What was left

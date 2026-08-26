@@ -14047,3 +14047,432 @@ page. **"It started" is not "it went anywhere."** The check now asserts a
 destination is selected, the Knowledge base is gone from the screen, and
 there are tabs to tour — and each was watched failing on the reverted build
 before the green run was believed (§94.5).
+
+## 108 · The Setup makeover (v3.30)
+
+> *"Rethink the whole settings page. The design, the grouping, the arrangement,
+> a search bar maybe, the namings … let's have a makeover that makes things
+> easier for the SMO team. The HRerp project has nice practice in the admin page
+> we can consider as well. Do your audit and evaluation and come back to me with
+> suggested structures and mockups to decide and we can do it step by step."*
+
+Settled from a mockup carrying the audit, two drawn structures and a per-row
+naming table (`design-mockups/setup-makeover/2026-08-26_…html`, published as an
+artifact per A17). Islam chose **Option A** — the rail keeps the door, an
+Overview page opens it — with the gear landing on Overview, search on names and
+keywords first, and every naming accepted as proposed.
+
+**THIS SECTION IS STEP 1 AND SAYS SO.** The Overview page and the search box are
+chosen and not yet built; what is here is the part that needed no new page —
+the words, the grouping, the merge, and the window. They are together because
+they are one answer to one question: the rail was unreadable AND too tall, and
+fixing either alone leaves the SMO team scrolling past questions to find
+answers.
+
+### 108.1 The audit, in numbers rather than adjectives
+
+Measured on v3.29 as the SMO with every group unfolded, which is the state the
+office actually works in:
+
+* the rail is **984px tall and pins 128px down**, so it hangs **112px** below a
+  1000px window, **212px** below a 900px one and **312px** below an 800px one.
+  What falls off the bottom is **Branding and Communication** — §90's "a control
+  below the fold is a control that does nothing", by a road §90 did not walk;
+* **eighteen entries under five groups**, of which the office uses one group
+  daily and the other twelve rows rarely;
+* **three rows out of one word family** — Messages, Send a message,
+  Communication — in three different groups;
+* the group badges count **entries** (6 · 3 · 4 · 3 · 2): numbers that never
+  change, wearing the shape of numbers that should.
+
+### 108.2 The group names answer rather than ask
+
+§46 named the groups as the QUESTION you came to answer — *Who*, *What we run*,
+*How it's measured*, *How it looks* — and that argument was right about the
+GROUPING and wrong about the words. A rail is scanned, not read, and at 9.5px
+uppercase a question reads a beat slower than its own answer. Four are renamed
+to the thing they hold; **Running the cycle is untouched**, because it already
+names exactly what is behind it and it is the one group the office lives in.
+
+**THE KEYS DO NOT MOVE.** `cycle`/`who`/`run`/`meas`/`look` are what `grp` on
+every def points at and what the folded-state map is keyed by in localStorage —
+renaming a key would silently unfold every group for everybody who has ever
+touched one (§30.2). Labels only.
+
+### 108.3 Three names, one word family — and the page narrower than its name
+
+**Messages → Inbox.** It is what the office ANSWERS; *Send a message* is what
+the office SENDS. A name that could be either identifies neither. HR_ERP settled
+this exact collision — *Announcements* beside *Communications* — the same way.
+
+**Communication → Email.** The easiest of the three, because the page is
+narrower than its name: it sets the display name, the reply-to, the kicker and
+the footer of what LEAVES the platform. Naming it Email is what lets the other
+two each mean one thing.
+
+**Labels → Terminology.** The page holds what this tenant calls a pillar, a
+theme, an aspiration — its vocabulary, and the contract every other screen reads
+its words from. *Labels* is what a developer calls that.
+
+**Official BU list is deliberately NOT renamed**, though it sits two rows from
+*Business units* and reads as its twin. "Official BU" is the client's own word
+(§58) and the page exists to hold it; the confusion is answered by the one-line
+description Option A puts beside it, not by taking the client's word away.
+
+### 108.4 Import and Archived plans are one page with two sections
+
+Two rail rows about ONE subject: a plan arriving, and the plan it displaced.
+They are inseparable by construction — §22 made importing an ARCHIVING act — so
+every visit to one is a question about the other. This is the shape Figure sets
+already settled (§46.2).
+
+**THE KEY STAYS `import`** and `archives` is the key that goes: nothing outside
+the def list ever named it, while `import` is what the rail walk and three
+checks click, so the merge costs no selector.
+
+**EACH SECTION KEEPS ITS OWN GATE**, which is what makes it safe. §48.2 closed
+Import to anybody without `edit` because there is nothing to READ on it, and
+that `when` moves onto the SECTION rather than being softened into the parent.
+paint() drops a def whose every section is refused, so a view-only holder of
+`c_import` sees Archived plans alone and somebody with neither sees no entry —
+exactly what the two rows did, in one row.
+
+### 108.5 The rail fits the window — and §28.3 said it must not
+
+Islam, on reading the proposal: *"Would the rail stay fit to the window with an
+internal scroll down?"* It did not, and the fix runs straight into a rule this
+file states in absolute terms.
+
+**§28.3's rule is "the sticky OFFSET may read `--chrome-h`, a max-height never
+may."** It was written against v2.8's oscillation, whose loop ran: measured
+chrome height → rail height → page height → scroll clamp → header CONDENSE →
+measured chrome height. **The condense was deleted in v3.3**, so the loop is
+broken at a link rather than argued away — `--chrome-h` is a constant now
+(measured: 73px, identical at 1000, 900, 800 and 700px tall). This is the same
+test §100.5 applied to the office's inbox one version ago, and the same answer:
+nothing above the box moves when the box resizes.
+
+**THE ASSERTION IS THE ONE THAT LICENSES THE CAP.** `checks/setup-rail.py` §3
+folds every group — the biggest height change the rail can make on its own —
+and asserts `--chrome-h` is unmoved by it. If it ever answers differently, the
+loop is back and the cap has to go.
+
+**THE HEAD STAYS, THE LIST SCROLLS.** Capping the whole rail would carry *Setup*
+and the collapse control off the top, so the rows sit in `.raillist` and only
+that scrolls. `min-height:0` on it is load-bearing: a flex child refuses to
+shrink below its content without it, and the cap would be pushed back out by
+the content it is capping.
+
+**THE NUMBER IS THE PINNED OFFSET, AND THE PROTOTYPE SITS 33px LOWER.** This
+file carries the yellow banner above the chrome, so at scroll 0 the rail's flow
+position is 128px while its sticky pin is 95px — the banner's own height. The
+cap is written against the PIN, which is where the rail spends its life and
+where a real deployment puts it at scroll 0 as well. Cost: 13px below the fold
+at scroll 0, in the prototype only, self-correcting because the banner is itself
+33px of scrollable page. Sizing against the flow position would need JS and
+would waste 33px of rail on every screen for ever, to fix a state that lasts one
+scroll.
+
+### 108.6 It never says "it ends here" — §100.5 reversed, and its objection kept
+
+**§100.5 refused to cap this rail six days ago**, and its reason was not §28.3's
+loop: *"a navigation rail must never be capped, because a list that says 'it
+ends here' when it does not is worse than a page that scrolls."* That objection
+is right and it is about the AFFORDANCE rather than the cap. So the cap ships
+**with the sign**: a thin visible scrollbar track (an overlay scrollbar that
+appears only once you are scrolling cannot tell you that scrolling is possible),
+and a fade at the foot of the list.
+
+**A STICKY PSEUDO-ELEMENT, WHICH GETS OUT OF ITS OWN WAY.** `::after` is the
+last box in the scroller's flow, so `position:sticky; bottom:0` holds it against
+the bottom edge while there is content beneath, and at the end of the scroll it
+comes to rest after the last row with nothing left to cover. It is true exactly
+when it is showing, and needs no JS, no scroll listener and no measurement.
+
+**AND TWO ATTEMPTS TO BE CLEVER BROKE THE THING IT PROTECTS.** First
+`margin-top:-22px`, to give back the height the fade occupies — it takes 22px
+off the SCROLLABLE height instead, and the check named the last five entries
+(Figure sets, Scoring bands, Terminology, Branding, Email) as unreachable: the
+exact fault the fade exists to prevent, arriving by the other road. Removing it
+did not fix it, which is the part worth keeping — the real cause was
+**`scroll-behavior:smooth`**, added speculatively in the same edit, which makes
+`scrollIntoView` ASYNCHRONOUS so the check measured before the scroll landed.
+Nothing in the product scrolls this rail programmatically, so it earned nothing
+and is gone (§24). *A speculative nicety broke a real reachability assertion,
+and it was not the cause I suspected first.*
+
+### 108.7 The check asserts the problem, not the numbers
+
+`src/checks/setup-rail.py`, and every assertion is written against the fault
+rather than the layout (§94.8), so a later change to the gutters, the groups or
+the entry list stays green and a cap quietly removed does not: the rail ends
+inside the window at four heights; **every entry can be brought into view by
+scrolling the rail's own list and not the page**; the head stays put; and
+`--chrome-h` does not move when the rail's height does.
+
+**PROVED ABLE TO FAIL BEFORE IT WAS TRUSTED** (§94.5): with the cap removed it
+reports **8 failures**, including a row driven off-screen and the page scrolling
+where the list should have. And it is **measured in the pinned state on
+purpose** — measuring at scroll 0 here would assert the prototype banner's
+accident rather than the product's behaviour.
+
+**Re-run and green:** `qa.py` (31 viewers, ERRORS: none), `no-wrap`, `row-edit`,
+`duplicates`, `page-width`, and `office-chat` over HTTP — which is the only
+place the Inbox row exists at all, because the chat is invisible over `file://`
+(§94.11, §97.9).
+
+### 108.8 Still to build, in the order agreed
+
+1. **The Overview page** — the cycle strip, and the "waiting on the office" rows.
+   Its counts must come from the same functions the pages themselves use, or the
+   Overview becomes a page that lies; the check has to assert that agreement
+   (§53.5), not the numbers.
+2. **The rail's search** — names and hidden keywords ("logo" → Branding,
+   "password" → People register). Typing must never repaint (§35, §45.5).
+3. **Attention pills**, and the group badge changing meaning from entry-count to
+   waiting-count — deliberately last, because a pill is only worth drawing once
+   the counts behind it are real.
+
+### 108.9 The cycle's four numbers are asked once
+
+The Reporting cycle page computed its totals inline, which was right while it
+was the only page that wanted them. The Overview opens on the same four, and a
+second loop over `activeKeys()` would be two answers to one question — in the
+one place a disagreement is guaranteed to be seen, since the whole point of the
+page is to restate other pages. `cycleTotals()` in `config-data.js`, called by
+both.
+
+`progress` is **derived rather than counted** — the cycle page's own arithmetic
+moved rather than re-reasoned. A unit is in progress when it is neither
+submitted nor untouched, so it is the remainder and can never disagree with the
+other two.
+
+### 108.10 The Overview: every row names the function it counts
+
+The page answers one question — *is anything waiting on me?* — and before it
+existed the answer took a walk through five pages, because each outstanding
+thing lives only on the page that fixes it. That is right for the thing and
+wrong for the question: nobody opens Setup to read the People register, they
+open it to find out whether the register needs them.
+
+**NO ROW IS ALLOWED TO COMPUTE ANYTHING.** Each declares a `count` that calls
+the SAME function its destination page calls, and the check asserts the two
+AGREE rather than asserting the number (§53.5, §94.8). Two of the five were
+already shared functions (`openClaimsList`, `unitsWithoutCustodian`); the other
+three were inline in the register or unavailable, and are extracted rather than
+copied — `noPasswordCount()`, `saidWhereCount()`, and `CHAT.officeQueue()`,
+which is a second READER of the `queue` action the inbox already calls rather
+than a second endpoint, so the number the Overview prints is by construction the
+number the Inbox's own tab prints.
+
+**A COUNT HAS THREE ANSWERS, NOT TWO** — a number, zero, and *we have not
+asked*. Three of the five depend on a server fact fetched outside the state
+graph, so `null` is real and is not zero: a null row is absent, a zero says
+nothing is waiting, and the page never prints `0`. This is §93's fault one
+surface further out — the register reported everybody as having no password
+because a failed ask was counted as an absence, and a summary that shows five
+zeroes while it is still thinking has told somebody they are clear when it does
+not know.
+
+**SAYING NO IS THE PAGE'S JOB TOO** (§45.2 turned round). A page that exists to
+report whether anything is waiting must be able to report that nothing is, or an
+absent list reads as a list that failed to load.
+
+**IT IS THE OFFICE'S**, by the same `when` as Send a message and Inbox, and a
+rule rather than a matrix cell for the same reason those two are (§37, §89).
+A non-office viewer's gear falls through to `st[0]` — Reporting cycle, where it
+landed before this page existed, asserted for a real viewer rather than assumed.
+
+**THE DESTINATION IS THE PAGE THAT FIXES IT**, never one that merely mentions
+it, and its LABEL is read off the rail's own list — §108.3 renamed three pages
+in one afternoon, and a row naming its own destination would have been the
+fourth place to edit.
+
+### 108.11 Two fetches keyed on markup, and one that never said it failed
+
+**KEYED ON THE PAGE NOW, NOT ON ITS MARKUP.** §93.2 keyed the password and
+declaration fetches on `.peoplecfg`, the register's table — better than the pen
+it replaced, and still the same KIND of thing: a class name a restyle can retire
+with nothing failing. It asks the two pages that want the answer by NAME, which
+is data and cannot silently stop matching. The Overview had to join that list,
+and gating it on the register's markup would have given it a permanent, silent
+null — which draws no row. That is this exact fault for the third time, in the
+safe-looking direction every time.
+
+**AND THE DECLARATIONS FETCH NEVER SAID IT FAILED.** `if (err) return` left
+`SAIDWHERE` as `{}` — "asked, and nobody declared anything" — the exact shape
+§93 removed from the passwords sitting beside it and did not come back for. It
+cost the register nothing visible, which is why it survived; it would have cost
+the Overview a **false all-clear**, which is the one thing that page must never
+give.
+
+### 108.12 The checks, and the one that was wrong rather than the product
+
+`checks/setup-overview.py` runs over `file://` and **makes the state it
+measures**: the demo tenant has every custodian filled and no open claims, so on
+the shipped data the page correctly shows its quiet state and every attention
+row is unexercised (§45.2, §94.2). It seeds two custodian gaps and one claim,
+asserts the exact rows that appear and that each agrees with its source, presses
+one to prove a row is a door, then puts the tenant back.
+
+`checks/setup-overview-live.py` serves the built file over HTTP with a stub,
+because the other three rows do not exist over `file://` at all — asserted
+absent there, which is also what a completely broken fetch looks like (§94.11).
+It asserts each number equals what its source answered, that the register's own
+chip carries the same password count, and that **zero and not-asked are
+different screens**.
+
+**THE FIRST RUN'S ONE FAILURE WAS THE CHECK.** It asserted the password count
+equalled the stub's own number, and the page said 2 where the stub had marked 3
+— because the first people on the seed are the SMO and a Super user, and §89
+says the office is never a target for issuing, so `passwordReach()` drops them.
+The product was right and the register agreed with it. It is now asserted as the
+RELATIONSHIP it is — those marked "none" that this viewer may actually reach —
+**with the raw stub number asserted to differ**, or it would quietly pass again
+the day that exclusion stopped working.
+
+**BOTH WERE PROVED ABLE TO FAIL** (§94.5): drifting the strip's totals by one
+fails the agreement assertion, and collapsing a null count to 0 fails two
+assertions in the live file, including *"a refusal is not reported as an
+all-clear it did not verify"*.
+
+### 108.13 Finding a setting by the errand
+
+Eighteen entries is past the size where scanning beats typing, and some errands
+do not know their page at all: *"where do I change the logo"* is Branding,
+*"where do I reset a password"* is the People register. So each row carries the
+words somebody would actually type, in **`find` on the def beside its label** —
+ONE list, so a rename cannot orphan them (§108.3 renamed three pages in an
+afternoon, and a second table of keywords would have been the fourth place to
+edit). The group's label is folded into the same blob, so *"measurement"* finds
+the three pages under it for nothing.
+
+**EVERY WORD MUST MATCH, IN ANY ORDER.** *"reset password"* and *"password
+reset"* are the same errand, and somebody who types both words means both.
+
+**THE BOX IS IN THE HEAD, NOT IN THE LIST.** §108.5 capped `.raillist` to the
+window, so a box inside it would scroll away from the results it is filtering —
+§90's control-below-the-fold by another road.
+
+**TYPING NEVER REPAINTS** (§35, §45.5): the filter hides rows in place. But the
+query is held in `RAILQ` rather than only in the box, and the box is rendered
+from it, because an UNRELATED repaint can still arrive mid-word — the Overview's
+three fetches each end in `paint()` and answer about a second after the page
+opens, which is exactly when somebody is typing. The filter is re-applied at the
+end of every paint, or a repaint would quietly show the whole list again to
+somebody who believes they are reading their results.
+
+**CLEARED ON ARRIVAL.** A rail still filtered after you have landed is a rail
+telling you Setup holds two things. Escape clears it and *only* it — the one
+thing wanted after a search that found nothing is the list back.
+
+**AND IT SAYS WHEN IT FINDS NOTHING** (§45.2, §108.10): a rail that empties
+itself reads as a rail that broke.
+
+### 108.14 A folded group's rows stay in the DOM
+
+Folded items used to be **omitted from the render entirely**, which was fine
+while folding was the only thing that ever hid a row — and made search
+impossible, because the filter runs over the DOM and cannot reveal a row that
+was never drawn. **The failure would have been silent**: the search would report
+nothing found, which looks exactly like *"there is no such setting"*.
+
+So the fold is a STATE rather than an omission — `hidden` on a container, set at
+render time so a shut group is never visible for the frame between paint and
+wire. `railFilter()` then decides visibility alone while a query is live, fold
+state included, so there is never a fight between a CSS fold and a JS filter
+over the same row; clearing the query puts every group back exactly as it was
+found, folded ones folded.
+
+### 108.15 The pills, last on purpose
+
+A pill beside a rail entry says *there is something here for you* without
+opening it — HR_ERP's practice, and the last piece of the makeover. It is
+deliberately **last**: a pill is only worth drawing once the count behind it is
+real, and until the Overview existed there was no shared, agreed count to draw.
+A rail badge computing its own arithmetic would have been exactly the drift
+§108.10 was built to prevent, in the one place nobody would ever see it
+disagree.
+
+**SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION.** Several rows point
+at the People register — custodians, passwords, declarations — and *"7 things
+waiting on the register"* is what somebody wants from a rail badge. Nothing new
+is counted.
+
+**NEVER A ZERO**, so a lit row always means something, and **never for somebody
+who cannot clear it** — §69's Performance dot was shown to readers until it was
+noticed that asking a person to act on something they hold no control over is
+how a screen nags. These are the office's queue, so they are drawn for the
+office alone.
+
+**THE GROUP'S PILL ONLY WHILE IT IS FOLDED**, and that is not a detail: an open
+group's rows carry their own pills, so a heading repeating their sum would be
+the same number twice. Folded, the rows cannot speak, and the heading is the
+only thing that can say something behind here needs you. The **entry count keeps
+its job and its quiet shape** — the audit's complaint was that it wore the shape
+of a number that changes while never changing, and that is answered by giving
+the changing number a *different* shape, not by taking the steady one away.
+
+**§51.11 AGAIN, IN MY OWN CHECK.** The row gained a label span and a pill, so
+`.ritem`'s `textContent` became `"People register2"` and three assertions in
+`setup-overview.py` broke — the one place the rule bites is the moment you
+change a control's shape, and the fix is to grep every check for it rather than
+the one that failed first. `qa.py`'s `.rail .ritem b` is a DIFFERENT rail (a
+unit's plan) and correctly needed nothing.
+
+**AND THE CONTRAST SCARE WAS THE MEASURING SCRIPT** (§68.10). A throwaway sweep
+reported eight failures across the new surfaces, including the pill at 1.64:1.
+Its transparent-background test compared `'rgba(0,0,0,0)'` against
+`'rgba(0, 0, 0, 0)'` — a spelling, not a value — so the loop never ran and every
+element was measured against BLACK. Testing the alpha channel instead: **0
+failures**, the pill at 5.32:1 light and 9.34:1 dark. *A correct build reported
+broken is the same class of fault as a broken build reported clean, and the
+first instinct — to go and change a colour — would have damaged a working
+palette.*
+
+
+### 108.16 What the merge with §101–§107 actually did
+
+Main moved seven sections and two specs while this branch was building, so the
+whole block above is **renumbered from §101 to §108** and its spec from 016 to
+018 — main's §101 is *"One table, one row shape"* and its spec 016 is the office
+assistant. Only the SUBSECTIONED references moved: main's own code carries a
+bare `§101` in `arrange.js`, `group-render.js`, `config-data.js` and
+`checks/plan-arrange.py`, and those are its own.
+
+**THE ONE REAL SEMANTIC CONFLICT WAS WORTH THE WHOLE CAREFUL MERGE** (§56.7,
+which is why the built file is regenerated and never merged). §105 put the
+**supporting functions on the cycle board** by adding a second loop to the
+totals computed inline in `renderCycle()`; §108.9 had lifted those totals into
+`cycleTotals()` counting units alone. Either side taken whole is wrong — mine
+drops the functions from the board's headline, theirs keeps a second copy of the
+arithmetic the Overview now shares. `cycleTotals()` counts **both**, and the
+function list is named once as `boardFunctionKeys()` rather than left as a
+filter written out twice.
+
+**AND IT FIXED A MISCOUNT NOBODY HAD NOTICED.** Main's inline version derived
+"in progress" as `activeKeys().length - t.sub - t.none` while `sub` and `none`
+had already grown to include the functions — so every submitted function took
+one off the in-progress figure. The board read **6 submitted · 3 in progress**
+over fifteen rows; it reads **6 · 10** now, out of 17. The remainder is derived
+from `t.units`, which is the count the loop itself kept, so the three can never
+disagree again.
+
+**THREE OF MAIN'S OWN HTTP CHECKS WERE ALREADY RED**, and it is worth writing
+down because the cause is a good one: the onboarding tour auto-opens for a
+first-time viewer, and its dim layer covers the page — so `office-chat`,
+`send-message` and `boot-skeleton` timed out clicking through it, on main,
+before this branch touched anything. Verified by building `origin/main` in a
+worktree and running them there. They are suppressed the way a RETURNING viewer
+suppresses the tour (its own "Skip for now" session flag) rather than by
+disabling it: the tour has its own check, and a sibling check reaching into its
+internals would be one file quietly asserting another's feature away.
+
+**THREE OTHERS ARE LEFT RED, DELIBERATELY.** `no-wrap` (a function row on the
+cycle board runs to two lines, against §88), `no-jump` (sorting a column moves
+the page), and `strategy-office` (which still asserts §94.15's *"no way to
+reorder at all"* after §101 reversed it and gave Arrange its own grant) all fail
+identically on `origin/main`. Each needs a decision about the PRODUCT — whether
+Arrange belongs there now, what a long function name should do in that cell —
+and guessing one inside a merge is how a reversal gets quietly re-reversed.
+Reported rather than patched.

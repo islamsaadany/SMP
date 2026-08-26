@@ -3865,6 +3865,49 @@ function reportState(c, key){
   return { key:"part", label:"In progress" };
 }
 
+/* ── HOW THE CYCLE IS GOING, ASKED ONCE (§108.9) ──────────────────────
+   The Reporting cycle page computed this inline, which was right while it was
+   the only page that wanted it. The Overview opens on the same four numbers,
+   and a second loop over activeKeys() would be two answers to one question —
+   the drift §53.5 exists to catch, invited deliberately by a page whose whole
+   job is to summarise other pages.
+
+   `progress` is DERIVED rather than counted, and that is the cycle page's own
+   arithmetic moved rather than re-reasoned: a unit is in progress when it is
+   neither submitted nor untouched, so it is the remainder and can never
+   disagree with the other two. */
+/* WHICH SUPPORTING FUNCTIONS ARE ON THE BOARD (§105, named once in §108.1).
+   The filter was written inline in renderCycle(); the totals need exactly the
+   same list, and two copies of it is how a board and its own summary come to
+   disagree about how many things were asked for. */
+function boardFunctionKeys(){
+  return Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+}
+
+function cycleTotals(){
+  var t = { done:0, total:0, sub:0, none:0, units:0 };
+  function add(c, st){
+    t.done += c.done; t.total += c.total;
+    if (st.key === "done") t.sub++;
+    if (st.key === "late") t.none++;
+    t.units++;
+  }
+  activeKeys().forEach(function(k){ add(reportedCount(UNITS[k]), unitState(UNITS[k])); });
+  /* THE FUNCTIONS COUNT TOO (§105). They report, they submit, and they are on
+     the board — so leaving them out of the headline would say 6 of 10 on a
+     page listing fifteen rows. */
+  boardFunctionKeys().forEach(function(fk){ add(fnReportedCount(fk), fnState(fk)); });
+  /* DERIVED, NEVER COUNTED: in progress is whatever is neither submitted nor
+     untouched, so it cannot disagree with the other two. It also FIXES a real
+     miscount — the inline version divided by `activeKeys().length` while
+     `sub` and `none` had already grown to include the functions, so every
+     submitted function took one off "in progress" (§108.1). */
+  t.progress = t.units - t.sub - t.none;
+  return t;
+}
+
 /* Two units are genuinely mid-report: some figures in, some not. Without this
    every row on the SMO's board reads 100% and the screen cannot show what it
    exists to show. */

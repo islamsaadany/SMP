@@ -473,6 +473,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **TERSE DROPS THE DETAIL, NEVER THE ALARM (§118.3):** the pillar rail opens
+  COLLAPSED now (absent reads as terse, so only an explicit press turns it
+  off), and that small line had been carrying two different kinds of thing —
+  the routine counts, and §106.2's *N rows to check*, put there so the project
+  holding a bad date is findable without opening each (§93.4). `railSub(html,
+  alarm)` tells them apart. **Found by `checks/project-tables.py` going red on
+  the day the default flipped**, not by reading the rail.
+- **THE KNOWLEDGE BASE IS THE OFFICE'S (§118.4, REVERSING §30 AND §37):**
+  `when: inOffice()` on the page def, the shape `c_send` and `c_chat` use —
+  never a matrix cell, because who reads the office's own working notes is not
+  a tick somebody could set on a bad afternoon. `c_kb` stays `area:"always"`.
+  **The prose that claimed it was everyone's was corrected in the same edit**
+  (the access page and `pageinfo.js`), or the product goes on saying what it
+  stopped doing. **THE COST IS REAL AND RECORDED**: the tour's replay button
+  lives on that page and `storyFor()` fits nobody who can now open it — §61's
+  trap from the other side. The first-run tour is untouched; `checks/tour.py`
+  asserts the absent half and deliberately does not assert the unreachability.
+- **THE DECK NAMES WHAT THE PLAN OWES (§118.1):** `Missing`, bold, in the
+  platform's own `--bad` — and **the slide is drawn even when it is empty**,
+  because skipping it says *nothing is missing here*. An optional blank is not
+  a gap: collaborators and an unmarked quarter are left alone. The check MAKES
+  the gaps (§94.2) and asserts an EXACT count plus **that the filled facts are
+  untouched**, or a builder that marked everything would pass.
 - **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
@@ -1882,9 +1905,9 @@ python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a re
                                 # (§108.13, §108.14 — all three fail silently)
                                 # setup-rail.py also measures every rail GLYPH against a
                                 # character guaranteed missing: a mark that is MAPPED and
-                                # not DRAWN ships as a blank box (§52, §119.2)
+                                # not DRAWN ships as a blank box (§52, §120.2)
 python3 checks/setup-pages.py   # every Setup page is named ONCE and in the rail's own word,
-                                # and the name and the table head stay on screen (§120)
+                                # and the name and the table head stay on screen (§121)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1919,7 +1942,30 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.41: the CF tab, the add row, and a
+*Last Updated: 2026-08-26 &mdash; **v3.42: the deck names its gaps, and the
+base becomes the office's (&sect;119)**. Five follow-ups from using &sect;117.
+**The plan download says `Missing` in bold red** wherever the plan owes
+something &mdash; a direction, a target, a compile rule, an owner, a date, an
+aspiration, an empty SWOT quadrant &mdash; in the platform's own `--bad`, and
+**the slide is drawn even when it is empty**, because a skipped slide is the
+strongest way of saying nothing is missing. **The tactics table becomes four
+quarter columns** with a mark in the ones in action, the shape the workbook
+already has. **The pillar rail opens collapsed**, read the other way round like
+&sect;104's two settings so only an explicit press turns it off &mdash; **and
+the alarm survives the collapse**, because that small line was carrying two
+different kinds of thing and &sect;106.2's count of rows to check had been put
+there deliberately (found by a check going red, not by reading). **The
+knowledge base becomes the office's, REVERSING &sect;30 and &sect;37** &mdash;
+gated `when: inOffice()` like `c_send`, never a matrix cell &mdash; with the
+two places the product CLAIMED it was everyone's corrected in the same edit.
+**And it leaves the tour's replay button unreachable**: the stories fit the
+custodian and the owner, who can no longer open the page, while the office, who
+can, fits none. Recorded and NOT asserted, because a check that froze it would
+freeze the mistake; the first-run tour is untouched. **One item could not be
+reproduced** (&sect;119.5: a capability's Projects pane draws the download for
+the office and the head on live production) and is asked rather than fixed.*
+
+*Earlier: 2026-08-26 &mdash; **v3.41: the CF tab, the add row, and a
 null that outlived its session (&sect;118)**. From production, within hours of
 &sect;113: *"the CF tab is not showing anything while it was showing it a
 minute ago."* The tab was fine; **the PAGE could no longer be drawn**, and a

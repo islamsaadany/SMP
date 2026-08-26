@@ -189,7 +189,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     ck("the tenant is put back", pg.eval_on_selector_all(".ovrow", "e=>e.length") == 0)
 
-    print("\n── 6b · a cycle with no dates SAYS so (§119.1) ──")
+    print("\n── 6b · a cycle with no dates SAYS so (§120.1) ──")
     # Islam's own screenshot: a client tenant whose cycle carries no dates read
     # "to  ·  due  ·  as of Q4" — three separators and nothing between them.
     # ASSERTED ON BOTH SURFACES, because the sentence is built once and the
@@ -217,7 +217,7 @@ with sync_playwright() as p:
       REVIEW.due='15 Jul 2026';REVIEW.endsQuarter=2;paint();}""")
     pg.wait_for_timeout(200)
 
-    print("\n── 6c · the way through keeps its place (§119.4) ──")
+    print("\n── 6c · the way through keeps its place (§120.4) ──")
     # It used to drop to the LEFT of a second line below 1280px, which reads as
     # an accident. The assertion is the PROBLEM, not a width: wherever it ends
     # up, it ends up at the right-hand edge (§94.8).

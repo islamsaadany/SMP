@@ -45,7 +45,7 @@ function renderLabels(){
        explanation - it is a state that blocks saving and has to be seen. */
     : '';
 
-  return section("", "Terminology", null,
+  return section("", "Labels", null,
       '<div class="cfg"><table><thead><tr>' +
       '<th style="width:34%">Internal name<span class="why">The contract. Never changes.</span></th>' +
       '<th style="width:33%">Display at group level</th>' +
@@ -227,7 +227,7 @@ function renderAccess(){
       }).join("") + '</tr>';
   }).join("");
 
-  return section("", "Roles & access",
+  return section("", "Who may see what",
       "Eight roles and the floor beneath them, against the kinds of page each may " +
       "reach. Edit includes view. The own columns answer in two halves — " +
       "Strategy is the words as agreed, Reporting is the figures entered against them. " +
@@ -399,31 +399,10 @@ var CLEARMENU = null;
    worded dropdown buttons beside the title — and Islam asked for the password
    actions to match, so the slot exists rather than each page inventing a place
    to put its own (§47.2). */
-/* ── THE PAGE IS NAMED ONCE (§121.1) ─────────────────────────────────────
-   Islam: *"there is some duplication in the titles like business unit business
-   unit"* — Business units and Companies each printed their name as the page
-   title and again as the first section's heading.
-
-   The Setup page's name is drawn by the shell now, from the RAIL'S OWN LABEL,
-   so the two can never disagree: five pages were calling themselves something
-   the rail did not (Terminology opened "Labels", Email opened "Communication"),
-   which is §108's rename reaching the navigation and stopping there.
-
-   SO A SECTION HEADING THAT REPEATS THE PAGE'S NAME IS NOT DRAWN — §28's rule
-   that a header saying nothing new still spends its line. It is compared
-   against the name the shell is showing, NOT suppressed by position: the
-   Reporting cycle's first section is "Who has reported", which is a real
-   section name and keeps its heading. The row itself survives either way,
-   because it also carries the page's controls. */
-var PAGE_TITLE = null;
-
 function cfgHead(title, chips, editKey, mayEdit, clearScope, labels, extra){
   var editing = EDITING[editKey];
   var open = CLEARMENU === editKey;
-  var dup = PAGE_TITLE != null &&
-            String(title).trim().toLowerCase() === String(PAGE_TITLE).trim().toLowerCase();
-  return '<div class="phead2' + (dup ? ' named' : '') + '">' +
-    (dup ? '' : '<h2 class="secttl">' + title + '</h2>') +
+  return '<div class="phead2"><h2 class="secttl">' + title + '</h2>' +
     '<div class="hright">' +
       chips.map(function(x){ return '<span class="chip">' + x + '</span>'; }).join("") +
       (extra || "") +
@@ -3017,11 +2996,9 @@ function renderKB(){
            'and opening it to a role is a deliberate act made on this table, not a side ' +
            'effect of letting the same people report (§117).' },
       { h: "Two things the table does not decide",
-        p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
-           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
-           'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
-           'by the group CEO and the SMO. These are rules; they do not change when the ' +
-           'table does.' },
+        p: 'The <b>knowledge base</b> is readable by everyone, always. And <b>focus ' +
+           'measures</b>, what carries reward, are marked by the group CEO and the SMO. ' +
+           'These are rules; they do not change when the table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
@@ -4351,9 +4328,9 @@ function renderOverview(){
         '<div class="ovcyc-name">' + esc(REVIEW.name) +
           ' <span class="badge b-' + (open ? "open" : "none") + '">' +
           (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant
-           has set no dates, rather than printing the separators alone. */
-        '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
+        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+          ' &middot; due ' + esc(REVIEW.due) +
+          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
       '</div>' +
       '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
         ' items reported</span></div>' +
@@ -4505,7 +4482,8 @@ function renderCycle(){
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
       '<span class="fstrip-t">' + esc(REVIEW.name) + '</span>' +
-      '<span class="fstrip-meta">' + esc(cycleMeta()) + '</span>' +
+      '<span class="fstrip-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+        ' &middot; due ' + esc(REVIEW.due) + ' &middot; as of Q' + REVIEW.endsQuarter + '</span>' +
       '<span class="badge b-' + (open ? "open" : "none") + '">' + (open ? "Open" : "Closed") + '</span>' +
       (can
         ? (open
@@ -5228,7 +5206,7 @@ function renderComms(){
       '</span>' +
     '</span></td></tr></tbody></table></div>';
 
-  return cfgHead("Email",
+  return cfgHead("Communication",
       ['<span class="pill kind">SMO</span>',
        set ? 'set for this tenant' : 'using the defaults'],
       "comms", mayEdit, null) +

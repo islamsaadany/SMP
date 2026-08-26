@@ -53,7 +53,7 @@ with sync_playwright() as p:
         "e=>e.map(x=>[x.dataset.setupgo, x.querySelector('.rilab').textContent.trim()])")
     ck("every Setup page is reachable to walk", len(entries) >= 15, len(entries))
 
-    print("\n── 1 · every page is named once, in the rail's own word (§120.1) ──")
+    print("\n── 1 · every page is named once, in the rail's own word (§121.1) ──")
     wrong_name, duplicated, missing = [], [], []
     for k, label in entries:
         pg.evaluate("k=>{currentSub=k;paint();}", k)
@@ -86,7 +86,7 @@ with sync_playwright() as p:
     h2 = pg.eval_on_selector_all("#panel h2", "e=>e.map(x=>x.textContent.trim())")
     ck("Reporting cycle keeps 'Who has reported'", "Who has reported" in h2, h2)
 
-    print("\n── 3 · the name and the table head stay put (§120.2, §120.4) ──")
+    print("\n── 3 · the name and the table head stay put (§121.2, §121.4) ──")
     pg.evaluate("()=>{currentSub='units';paint();window.scrollTo(0,0);}")
     pg.wait_for_timeout(400)
     top = pg.evaluate("""()=>({t:Math.round(document.querySelector('.setupttl').getBoundingClientRect().top),
@@ -115,7 +115,7 @@ with sync_playwright() as p:
     ck("the header carries a ground filler above it",
        strip["bg"] not in ("rgba(0, 0, 0, 0)", "transparent") and strip["h"] != "0px", strip)
 
-    print("\n── 5 · the headings are separated (§120.4) ──")
+    print("\n── 5 · the headings are separated (§121.4) ──")
     sep = pg.eval_on_selector_all("#panel table thead th + th",
         "e=>e.map(x=>getComputedStyle(x).borderLeftWidth)")
     ck("every heading after the first has a divider",

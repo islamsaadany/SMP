@@ -4181,7 +4181,7 @@ function boardFunctionKeys(){
   });
 }
 
-/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§119.1) ──────────────────────────
+/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§120.1) ──────────────────────────
    Islam, on a client tenant whose cycle has no dates: the strip read
    **"to  ·  due  ·  as of Q4"** — three separators and nothing between them,
    because the line was built by gluing the words around three values and the

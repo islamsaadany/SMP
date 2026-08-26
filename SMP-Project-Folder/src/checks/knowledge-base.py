@@ -38,9 +38,15 @@ with sync_playwright() as p:
     pg.goto(FILE, wait_until="load")
     pg.wait_for_timeout(2500)
 
-    # A UNIT HEAD, deliberately — the knowledge base is everyone's (§37), and a
-    # check run as the SMO could not see it being withheld from anybody else.
-    pg.evaluate("()=>{ VIEWER='mobhead'; paint(); "
+    # THE OFFICE, SINCE §119. This ran as a unit head on the argument that the
+    # knowledge base was everyone's (§37) and a check run as the SMO could not
+    # see it being withheld — which was the right reader until Islam closed the
+    # page to everybody but the Super user and the SMO team. The withholding is
+    # asserted in checks/strategy-split.py §4, of the page def itself and for
+    # four roles; this file measures the PAGE, so it opens it as somebody who
+    # can (§51.11: when a control changes shape, fix every check that held the
+    # old shape, not only the one that failed first).
+    pg.evaluate("()=>{ VIEWER=PEOPLE.filter(p=>p.role==='super')[0].key; paint(); "
                 "document.querySelector('[data-md=\"setup\"]').click(); }")
     pg.wait_for_timeout(700)
     pg.evaluate("()=>{const r=[...document.querySelectorAll('[data-setupgo]')]"

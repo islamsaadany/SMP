@@ -152,7 +152,7 @@ with sync_playwright() as p:
     ck("no cap below 900px", narrow["maxH"] == "none", narrow)
     ck("rows lay out in a row below 900px", narrow["dir"] == "row", narrow)
 
-    print("\n── 5 · every row carries its mark, and the labels line up (§119.2) ──")
+    print("\n── 5 · every row carries its mark, and the labels line up (§120.2) ──")
     pg.set_viewport_size({"width": 1600, "height": 1000})
     pg.wait_for_timeout(400)
     # UNFOLD EVERYTHING, or this measures whichever groups happen to be open —
@@ -174,7 +174,7 @@ with sync_playwright() as p:
     # THE POINT OF A GLYPH COLUMN IS THE COLUMN. A mark that shifts the name
     # row by row is worse than no mark — and this is exactly what the first
     # build did, because `group-extra.css` styles `.rail button.ritem` as a
-    # two-column grid and outranks this rail's own rule (§119.2). Measured,
+    # two-column grid and outranks this rail's own rule (§120.2). Measured,
     # never assumed: the fault was invisible in the source and obvious here.
     xs = sorted(set(r["lx"] for r in rows))
     ck("every label starts at the same x", len(xs) == 1, xs)
@@ -183,7 +183,7 @@ with sync_playwright() as p:
            "e=>getComputedStyle(e).gridTemplateColumns").startswith("15px"),
        pg.eval_on_selector(".setuprail .ritem", "e=>getComputedStyle(e).gridTemplateColumns"))
 
-    # A GLYPH THAT IS MAPPED AND NOT DRAWN IS A BLANK BOX (§52, §119.2). The
+    # A GLYPH THAT IS MAPPED AND NOT DRAWN IS A BLANK BOX (§52, §120.2). The
     # first build used U+2317 for the Official BU list; it looked right in the
     # mockup, whose font had it, and rendered as tofu in the product. Nothing
     # complains — the character is "supported", it just has no outline — so it
@@ -202,7 +202,7 @@ with sync_playwright() as p:
       probe.remove(); return bad;}""")
     ck("no glyph renders as an empty box", not tofu, tofu)
 
-    # SHORTER ROWS, AND NO LABEL ON TWO LINES (§120.3). Islam measured the
+    # SHORTER ROWS, AND NO LABEL ON TWO LINES (§121.3). Islam measured the
     # symptom: 45px a row and one label wrapping to 66px, which is what put the
     # last entries below the fold. The assertion is that no row is TALLER than
     # the rest — a single wrapped label is what this catches, and it is what a
@@ -212,12 +212,12 @@ with sync_playwright() as p:
     ck("every row is the same height", max(hs) - min(hs) <= 1, sorted(set(hs)))
     ck("and that height is the tighter one", max(hs) <= 38, sorted(set(hs)))
     # A label clipped by the ellipsis guard is a destination you cannot read,
-    # so the NAME has to fit rather than the row merely being tidy (§120.3).
+    # so the NAME has to fit rather than the row merely being tidy (§121.3).
     clipped = pg.eval_on_selector_all(".setuprail .rilab",
         "e=>e.filter(x=>x.scrollWidth>x.clientWidth+1).map(x=>x.textContent.trim())")
     ck("no label is clipped", not clipped, clipped)
 
-    print("\n── 6 · People & access is in the order the mockup drew (§119.3) ──")
+    print("\n── 6 · People & access is in the order the mockup drew (§120.3) ──")
     order = pg.evaluate("""()=>{
       const h=[...document.querySelectorAll('.setuprail .rgroup')]
                 .find(x=>/People/.test(x.textContent));

@@ -1927,7 +1927,7 @@
     background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
   /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
      so a row without a pill is the row it always was (§108.15). */
-  /* ── THIS ROW IS A GRID, AND IT IS NOT THIS FILE'S GRID (§119.2) ──
+  /* ── THIS ROW IS A GRID, AND IT IS NOT THIS FILE'S GRID (§120.2) ──
      `group-extra.css` styles `.rail button.ritem` as a two-column grid for a
      UNIT's plan rail, and the Setup rail is a `.rail` too — so that selector
      (0,2,1) has been outranking `.setuprail .ritem` (0,2,0) since the rail was
@@ -1946,7 +1946,7 @@
      specificity that genuinely wins, leaving the padding, borders and type to
      the rule that has been drawing this row all along. A cap on the glyph, 1fr
      for the name, auto for the pill. */
-  /* ── SHORTER ROWS, AND NEVER TWO LINES (§120.3) ───────────────────
+  /* ── SHORTER ROWS, AND NEVER TWO LINES (§121.3) ───────────────────
      Islam: *"the rail options needs to be smaller in height and no title is
      double line."* Measured: 45px a row, and "Plan import & archives" wrapped
      to 66px, which is what made the rail 785px and pushed the last entries
@@ -1963,7 +1963,7 @@
                                         text-overflow:ellipsis; }
   .setuprail .ritem { text-align:left; color:var(--ink-2);
                       font:500 13px/1.35 var(--sans); }
-  /* THE ROW'S MARK (§119.2). A fixed box so every label starts on the same
+  /* THE ROW'S MARK (§120.2). A fixed box so every label starts on the same
      x — a glyph column that jitters row to row is worse than none — and the
      row's own quiet ink, so it lights and dims WITH the row rather than
      competing with the pill at the other end (§41's accent budget: the pill is
@@ -2026,7 +2026,7 @@
     .setuprail .raillist { display:contents; }
   }
 
-  /* ══ THE SETUP PAGE'S OWN HEADER (§120.2) ════════════════════════
+  /* ══ THE SETUP PAGE'S OWN HEADER (§121.2) ════════════════════════
      Islam: *"this page needs to be sticky for the title."*
 
      PINNED AT THE RAIL'S OWN OFFSET, not at a number of its own: `.rail` uses
@@ -2076,7 +2076,7 @@
   .setuppane .phead2.named .hright { margin-left:0; }
   .setuppane .phead2.named:empty { display:none; }
 
-  /* ── AND THE TABLE'S HEAD GOES WITH IT (§120.4) ───────────────────
+  /* ── AND THE TABLE'S HEAD GOES WITH IT (§121.4) ───────────────────
      On the register at 33 rows the headings are gone by the time you are
      reading the rows, which is exactly when you need to know which column you
      are in. It pins UNDER the page header rather than at the top of the
@@ -2097,7 +2097,7 @@
       position:sticky; z-index:4;
       top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h));
       background:var(--panel); }
-  /* A HAIRLINE BETWEEN HEADINGS (§120.4). They are uppercase, letter-spaced
+  /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged
      into one word — measured on Islam's own screenshot. A divider costs no
      width and no height and is what makes a table read as columns. */
@@ -2126,7 +2126,7 @@
   .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
   .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
   .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  /* THE BUTTON HOLDS ITS PLACE (§119.4). The strip is one wrapping row, so
+  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, so
      below about 1280px the button dropped onto a line of its own and the strip
      grew from 72px to 126px — not broken, but it reads as an accident rather
      than a decision. The numbers and the chips are what should give way: they
@@ -2135,7 +2135,7 @@
 
      `order` rather than a media query, because the wrap point depends on the
      tenant's own cycle name and dates, not on a width anybody can name. */
-  /* THE BUTTON HOLDS ITS PLACE (§119.4). The strip is one wrapping row, and
+  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, and
      below about 1280px the button dropped to a line of its own, growing the
      strip from 72px to 126px — not broken, but it reads as an accident.
 
@@ -12615,7 +12615,7 @@ function boardFunctionKeys(){
   });
 }
 
-/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§119.1) ──────────────────────────
+/* ── WHAT A CYCLE SAYS ABOUT ITSELF (§120.1) ──────────────────────────
    Islam, on a client tenant whose cycle has no dates: the strip read
    **"to  ·  due  ·  as of Q4"** — three separators and nothing between them,
    because the line was built by gluing the words around three values and the
@@ -14694,10 +14694,10 @@ var PAGE_INFO = {
        "to a role is a deliberate act made on the table, not a side effect of letting the same " +
        "people report."],
       ["Two things are rules, not settings, so they are not in the table",
-       "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody " +
-       "can open is not an explanation. And <b>focus measures</b> &mdash; what carries reward " +
-       "&mdash; are marked by the group CEO and the SMO. Each of these used to be a cell in the " +
-       "matrix."],
+       "The <b>knowledge base</b> is the office's &mdash; the Super user and the SMO team &mdash; " +
+       "because it explains how the platform itself is run. And <b>focus measures</b> &mdash; " +
+       "what carries reward &mdash; are marked by the group CEO and the SMO. Each of these is a " +
+       "rule rather than a cell, so neither moves when the table does."],
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
@@ -17817,9 +17817,28 @@ function pptxColors(){
     bar:   strip(b.bar,    "#16325C"),      /* headers — the navigation's own */
     accent:strip(b.accent, "#C9A24D"),      /* the mark, sparingly (§41) */
     ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
-    zebra: "F2F5F9"
+    zebra: "F2F5F9",
+    /* The platform's own light --bad: what `.missing` wears on screen, worn
+       here on the slide's white ground (§119). */
+    bad:   "B04434"
   };
 }
+
+/* ── MISSING IS SAID, IN BOLD RED (§119) ─────────────────────────────
+   Islam: "identify the missing areas of the plan and type missing in bold red
+   so they know what they need to fill." The deck used to print an em-dash for
+   an empty plan fact, which reads as "nothing to say" when the truth is
+   "nobody has said it yet" — the same distinction §35 drew for the password
+   column. The product already marks an unset target `Missing` in red
+   (`.missing`, §104.10's family); the slides now speak the same word.
+
+   NOT every blank is a gap: collaborators are optional by design, and a
+   quarter column left unmarked is the mark. What gets the word is what the
+   PLAN OWES — a direction, a target, a compile rule, a tactic's owner, a
+   project's owner and dates, a capability's definition, the aspiration, and
+   an empty SWOT quadrant. */
+var PPTX_MISS = { miss: true };
+function orMiss(v){ return v ? v : PPTX_MISS; }
 
 /* ── The DrawingML fragments ────────────────────────────────────────── */
 function pptxRun(text, o){
@@ -17853,10 +17872,16 @@ function pptxText(id, box, paras, o){
    ink — §38.5: a surface with its own ground needs its own ink. */
 function pptxTable(id, box, widths, head, rows){
   var C = pptxColors();
-  function cell(text, hdr, ri){
+  function cell(c, hdr, ri){
+    /* A cell is a string, or an object: `{miss:true}` renders the bold red
+       Missing (§119); `{t, align}` carries a mark that wants centring. */
+    var o = (c !== null && typeof c === "object") ? c : { t: c };
+    var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
+                : o.miss ? { sz:1100, b:true, color:C.bad }
+                :          { sz:1100, color:C.ink };
     return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
-      pptxPara(pptxRun(text, hdr ? { sz:1100, b:true, color:C.ground }
-                                 : { sz:1100, color:C.ink })) +
+      pptxPara(pptxRun(o.miss ? "Missing" : (o.t == null ? "" : o.t), runOpts),
+               o.align ? { align: o.align } : undefined) +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
       '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
       '<a:solidFill><a:srgbClr val="' +
@@ -17925,10 +17950,13 @@ function pptxTableSlides(kicker, title, widths, head, rows){
   return out;
 }
 
-function pptxQuarters(t){
-  var qs = ["q1","q2","q3","q4"].map(function(q, i){ return t[q] ? "Q" + (i + 1) : null; })
-    .filter(Boolean);
-  return qs.length ? qs.join(" · ") : "—";
+/* One cell per quarter, a mark where the tactic runs (§119 — Islam: "make
+   the tactics columns a column for each Q with a mark for the qs in action",
+   the shape the plan workbook's Q1–Q4 columns already have). */
+function pptxQCells(t){
+  return ["q1","q2","q3","q4"].map(function(q){
+    return { t: t[q] ? "\u2713" : "", align: "ctr" };
+  });
 }
 
 function pptxCover(orgLine, name, subLine){
@@ -17960,33 +17988,40 @@ function pptxUnitSlides(u, kicker){
     found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
                          pptxRun(c[1], { sz:1200 })], { before:600 }));
   });
+  /* The Foundation slide is ALWAYS in the deck since §119: a slide skipped
+     for being empty hides exactly the gap the Missing marks exist to show. */
   var fShapes = pptxHead(kicker, "Foundation");
-  if (u.aspiration) fShapes.push(pptxText(6,
+  fShapes.push(pptxText(6,
     { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:1188720 },
     [pptxPara(pptxRun("ASPIRATION", { sz:1000, b:true, color:C.quiet })),
-     pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })],
+     u.aspiration
+       ? pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })
+       : pptxPara(pptxRun("Missing", { sz:1500, b:true, color:C.bad }), { before:600 })],
     { fill:C.zebra }));
   if (found.length) fShapes.push(pptxText(7,
     { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
-  if (u.aspiration || found.length) slides.push(pptxSlideXml(fShapes));
+  slides.push(pptxSlideXml(fShapes));
 
   var kos = u.keyObjectives || [];
   if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
     [4754880, 914400, 2621280, 2621280],
     ["Objective", "Dir.", "This year's target", "3-year target"],
-    kos.map(function(k){ return [k.name, k.dir || "", k.target || "—", k.target3y || "—"]; })));
+    kos.map(function(k){ return [k.name, orMiss(k.dir), orMiss(k.target), orMiss(k.target3y)]; })));
 
   /* The SWOT, asked for by name (Islam, 2026-08-26). Four boxes, two rows —
      the shape the Analysis page draws. */
   var sw = u.swot || {};
-  if ((sw.s || []).length || (sw.w || []).length || (sw.o || []).length || (sw.t || []).length) {
+  (function(){
     var half = (PPTX_CW - 228600) / 2, boxH = 2103120, id = 6;
     var quad = function(x, y, title, items){
-      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
-        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(
-          (items || []).map(function(t){
+      var body = (items || []).length
+        ? (items || []).map(function(t){
             return pptxPara(pptxRun("·  " + t, { sz:1000 }), { before:300 });
-          })), { fill:C.zebra });
+          })
+        : [pptxPara(pptxRun("Missing", { sz:1100, b:true, color:C.bad }), { before:300 })];
+      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
+        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(body),
+        { fill:C.zebra });
     };
     slides.push(pptxSlideXml(pptxHead(kicker, "Analysis — SWOT").concat([
       quad(PPTX_MX, PPTX_TABLE_Y, "Strengths", sw.s),
@@ -17994,7 +18029,7 @@ function pptxUnitSlides(u, kicker){
       quad(PPTX_MX, PPTX_TABLE_Y + boxH + 182880, "Opportunities", sw.o),
       quad(PPTX_MX + half + 228600, PPTX_TABLE_Y + boxH + 182880, "Threats", sw.t)
     ])));
-  }
+  })();
 
   /* One pillar, two tables, two slides — measures then tactics, the order the
      Plan pane reads them in. */
@@ -18005,14 +18040,14 @@ function pptxUnitSlides(u, kicker){
       [5303520, 914400, 2346960, 2346960],
       ["Measure", "Dir.", "Target", "Compiles"],
       (p.measures || []).map(function(m){
-        return [m.name, m.dir || "", m.target || "—", m.compile || "—"];
+        return [m.name, orMiss(m.dir), orMiss(m.target), orMiss(m.compile)];
       })));
     slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
-      [5303520, 2103120, 2103120, 1402080],
-      ["Tactic", "Owner", "Collaborators", "Quarters"],
+      [4571760, 2103120, 1676400, 640140, 640140, 640140, 640140],
+      ["Tactic", "Owner", "Collaborators", "Q1", "Q2", "Q3", "Q4"],
       (p.tactics || []).map(function(t){
-        return [t.name, t.owner || "—",
-                (t.collaborators || []).join(", ") || "—", pptxQuarters(t)];
+        return [t.name, orMiss(t.owner),
+                (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
   });
   return slides;
@@ -18030,24 +18065,27 @@ function pptxFnSlides(fk){
     "Strategy plan — as agreed, no reported figures · " + today));
   capsOfFunction(fk).forEach(function(c){
     var shapes = pptxHead(f.name, c.name);
-    if (c.def) shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
+    shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
       [pptxPara(pptxRun("WHAT IT IS", { sz:1000, b:true, color:C.quiet })),
-       pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })],
+       c.def
+         ? pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })
+         : pptxPara(pptxRun("Missing", { sz:1300, b:true, color:C.bad }), { before:600 })],
       { fill:C.zebra }));
     var kos = c.keyObjectives || [];
     if (kos.length) shapes.push(pptxTable(7,
-      { x:PPTX_MX, y:c.def ? 2529840 : PPTX_TABLE_Y, cx:PPTX_CW },
+      { x:PPTX_MX, y:2529840, cx:PPTX_CW },
       [5760720, 914400, 2118360, 2118360],
       ["Key objective", "Dir.", "Target", "Weight"],
       kos.slice(0, 8).map(function(k){
-        return [k.name, k.dir || "", k.target || "—", k.weight != null ? k.weight + "%" : "—"];
+        return [k.name, orMiss(k.dir), orMiss(k.target),
+                k.weight != null ? k.weight + "%" : PPTX_MISS];
       })));
     slides.push(pptxSlideXml(shapes));
     slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
       [3931920, 1737360, 1188720, 1188720, 2865120],
       ["Project", "Owner", "Start", "End", "Carries"],
       (c.projects || []).map(function(p){
-        return [p.name, p.owner || "—", p.start || "—", p.end || "—",
+        return [p.name, orMiss(p.owner), orMiss(p.start), orMiss(p.end),
           plural((p.deliverables || []).length, "deliverable") + " · " +
           plural((p.outcomes || []).length, "outcome") + " · " +
           plural((p.milestones || []).length, "milestone")];
@@ -19067,7 +19105,7 @@ function section(eyebrow, title, note, body, tipText, action){
      Performance page was pushing the rail a heading's worth further down the
      page for a heading that rendered as blank. */
   /* AND A HEADING THAT REPEATS THE PAGE'S OWN NAME DOES NOT GET ONE EITHER
-     (§120.1). The Setup page's name is drawn by the shell now, so a section
+     (§121.1). The Setup page's name is drawn by the shell now, so a section
      called what the page is called says it twice — the same argument as the
      empty header above, with the header full of a word already on screen.
      Compared against the name being shown rather than by position: a real
@@ -20879,8 +20917,20 @@ function railName(code, name){
    PREFERENCE, so it lives in localStorage beside the theme and the People
    page's columns (§25, §47.1) — putting it in the state graph would change
    the rail for everyone in the tenant. */
+/* ── COLLAPSED IS THE DEFAULT (§119) ──────────────────────────────
+   Islam: "make the default view for the pillar rail to be the collapsed one."
+   The rail's small line under each name carries counts and an owner — useful
+   once you are deep in a plan, noise when you are looking for which pillar to
+   open, and it is what makes a ten-pillar rail taller than the pane beside it.
+
+   READ THE OTHER WAY ROUND, LIKE §104'S TWO SETTINGS: absent now means TERSE,
+   so only an explicit "0" — somebody who pressed the control to bring the
+   detail back — turns it off. A stored "1" from before this change still
+   reads as terse, so nobody who had already collapsed it sees a change; and
+   the preference stays in localStorage, per screen, never the state graph
+   (§25, §47.1). */
 var RAIL_TERSE = (function(){
-  try { return localStorage.getItem("smp.rail.terse") === "1"; } catch(e){ return false; }
+  try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
 })();
 function railHead(label, n){
   return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
@@ -20891,8 +20941,20 @@ function railHead(label, n){
     'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
     '</button></div>';
 }
-function railSub(html){
-  return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
+function railSub(html, alarm){
+  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§119). Collapsed is the default
+     now, and the routine half of this line — how many measures, how many
+     tactics, who owns it — is exactly what somebody scanning for a pillar does
+     not need. The other half is not detail: §106.2 put the count of rows
+     wanting attention HERE so the project holding them can be found without
+     opening each in turn (§93.4, the count belonging where the gap is closed),
+     and a default that hid it would have quietly undone that. So an `alarm`
+     survives terse and the rest does not; with both, terse shows the alarm
+     alone. Found by checks/project-tables.py going red on the day the default
+     flipped — the rail's line was carrying two different kinds of thing and
+     nothing had had to tell them apart before. */
+  var body = RAIL_TERSE ? (alarm || "") : [html, alarm].filter(Boolean).join(" &middot; ");
+  return body ? '<span class="rsub">' + body + '</span>' : "";
 }
 
 /* `opts` carries the two things the PLAN page's rail needs and the
@@ -20902,6 +20964,9 @@ function railSub(html){
    to author a plan from the page that reports against it. */
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   opts = opts || {};
+  /* The half of the small line that survives a collapsed rail (§119). Optional
+     and last, so every existing caller is untouched. */
+  var alarmOf = opts.alarmOf;
   var lastGroup = null;
   var rows = list.map(function(it, i){
     var g = groupOf ? groupOf(it) : null, head = "";
@@ -20917,7 +20982,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
          names out as though something were there — the unit's Plan rail, which
          has never had a number, does not render one at all. */
       (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
-        railSub(subOf ? subOf(it) : "") +
+        railSub(subOf ? subOf(it) : "", alarmOf ? alarmOf(it) : "") +
       '</button>';
   }).join("");
   /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5): `data-item=".ritem"`, because
@@ -21516,17 +21581,18 @@ function renderFnProjects(fnKey){
        date AND the end date AND which kind of timeline, over three. */
     var rail = railFor(c.projects, sel, null,
       function(p){
-        var n = planAttention(p);
         return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
           plural(p.outcomes.length, "outcome") + ' &middot; ' +
-          plural(p.milestones.length, "milestone") +
-          /* Appended to the SUB line, never passed as `numOf`: that argument
-             puts a `.rnum` on EVERY row and an empty one still takes its
-             column in the grid (the note on railFor says so). */
-          (n ? ' &middot; <span class="missing">' + plural(n, "row") + ' to check</span>' : ''); },
+          plural(p.milestones.length, "milestone"); },
       null, null,
       function(p){ return projCode(fk, p); },
-      { arranging: on, add: ed, capId: c.id });
+      { arranging: on, add: ed, capId: c.id,
+        /* Appended to the SUB line, never passed as `numOf`: that argument
+           puts a `.rnum` on EVERY row and an empty one still takes its column
+           in the grid (the note on railFor says so). */
+        alarmOf: function(p){
+          var n = planAttention(p);
+          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */
@@ -22553,7 +22619,7 @@ var CLEARMENU = null;
    worded dropdown buttons beside the title — and Islam asked for the password
    actions to match, so the slot exists rather than each page inventing a place
    to put its own (§47.2). */
-/* ── THE PAGE IS NAMED ONCE (§120.1) ─────────────────────────────────────
+/* ── THE PAGE IS NAMED ONCE (§121.1) ─────────────────────────────────────
    Islam: *"there is some duplication in the titles like business unit business
    unit"* — Business units and Companies each printed their name as the page
    title and again as the first section's heading.
@@ -25171,9 +25237,11 @@ function renderKB(){
            'and opening it to a role is a deliberate act made on this table, not a side ' +
            'effect of letting the same people report (§117).' },
       { h: "Two things the table does not decide",
-        p: 'The <b>knowledge base</b> is readable by everyone, always. And <b>focus ' +
-           'measures</b>, what carries reward, are marked by the group CEO and the SMO. ' +
-           'These are rules; they do not change when the table does.' },
+        p: 'The <b>knowledge base</b> is the office\u2019s \u2014 the Super user and the ' +
+           'SMO team \u2014 because it explains how the platform itself is run (\u00a7119, ' +
+           'reversing \u00a730). And <b>focus measures</b>, what carries reward, are marked ' +
+           'by the group CEO and the SMO. These are rules; they do not change when the ' +
+           'table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
@@ -26503,7 +26571,7 @@ function renderOverview(){
         '<div class="ovcyc-name">' + esc(REVIEW.name) +
           ' <span class="badge b-' + (open ? "open" : "none") + '">' +
           (open ? "Open" : "Closed") + '</span></div>' +
-        /* ONE SENTENCE, TWO SURFACES (§119.1) — and it says so when a tenant
+        /* ONE SENTENCE, TWO SURFACES (§120.1) — and it says so when a tenant
            has set no dates, rather than printing the separators alone. */
         '<div class="ovcyc-meta">' + esc(cycleMeta()) + '</div>' +
       '</div>' +
@@ -32726,7 +32794,7 @@ var SYNC = (function () {
          in, and Companies already shares c_units on exactly this argument. */
       /* MY ORDER AND GLYPHS, MAIN'S KEYWORDS. §117's split added
          "strategy reporting split lock submit" to what finds Roles & access;
-         §119.3 put it above the BU list and gave both a mark. Neither side is
+         §120.3 put it above the BU list and gave both a mark. Neither side is
          complete without the other, which is what a two-line conflict looks
          like when both edits are right. */
       { k:"access", ac:"c_access", grp:"who", label:"Roles & access", glyph:"⚿", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
@@ -32869,8 +32937,25 @@ var SYNC = (function () {
                                                                         render:renderImport },
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
-      /* Last in its group: it explains the rest, so it is not where you start. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",                render:renderKB }
+      /* Last in its group: it explains the rest, so it is not where you start.
+
+         ── AND IT IS THE OFFICE'S NOW (§119) ──────────────────────────
+         Islam: "remove knowledge base from the view of all except the smo team
+         and the super user." It REVERSES §30's "readable by everyone, always"
+         and §37's naming of that as one of the three things too fundamental to
+         be a matrix cell — recorded as a reversal rather than overwritten
+         (Principle II), because the argument that put it there was a good one
+         and the client's is better: this knowledge base explains how the
+         PLATFORM is run — cycles, access, imports, the reasoning behind every
+         decision — which is the office's job and nobody else's reading.
+
+         `when: inOffice()`, the shape `c_send` and `c_chat` already use (§97),
+         NOT a matrix cell: who may read the office's own working notes is not
+         a tick somebody could set on a bad afternoon. `c_kb` stays `area:
+         "always"` so the grant machinery is untouched; this gate sits in front
+         of it, and nothing else reads that key. */
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", glyph:"▣", find:"help explain how documentation guide reference reasoning",
+        when: function(){ return inOffice(); },                          render:renderKB }
     ]
   };
 
@@ -33362,7 +33447,7 @@ var SYNC = (function () {
               '" data-setupgo="' + d.k + '" data-find="' +
               esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
               '">' +
-              /* THE GLYPH THE MOCKUP DREW (§119.2). It was one of the five
+              /* THE GLYPH THE MOCKUP DREW (§120.2). It was one of the five
                  HR_ERP practices taken in §108 and the only one that did not
                  get built — the Overview's own rows had theirs, which is why
                  that page looked finished and the rail beside it did not.
@@ -33955,7 +34040,7 @@ var SYNC = (function () {
     }).join("");
 
     var def = defs.filter(function(d){ return d.k === currentSub; })[0];
-    /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§120.1). Twenty
+    /* THE PAGE'S NAME, TAKEN BEFORE `def` BECOMES A SECTION (§121.1). Twenty
        lines down, a page with sections reassigns `def` to whichever section is
        open — so reading the name after that gives the SECTION's: Figure sets
        was titling itself "Sets configuration" and Import & archives "Import a
@@ -33987,7 +34072,7 @@ var SYNC = (function () {
     /* The per-page Info button left the header in 2.9. The explanations in
        PAGEINFO stay \u2014 they are still reachable from the [data-modal] links
        inside the pages themselves. */
-    /* THE NAME THE SHELL IS ABOUT TO SHOW (§120.1), set BEFORE the page
+    /* THE NAME THE SHELL IS ABOUT TO SHOW (§121.1), set BEFORE the page
        renders, because cfgHead() reads it to decide whether its own heading
        would be repeating it. Cleared for every non-Setup page, or a unit's
        section called "Performance" would go unnamed on a page the rail is not
@@ -34008,7 +34093,7 @@ var SYNC = (function () {
     document.getElementById("panel").innerHTML = railed
       ? '<div class="split setupsplit' + (RAIL_OPEN ? '' : ' shut') + '">' +
         setupRail(defs, currentSub) +
-        /* ── THE PAGE HEADER, AND IT STAYS (§120.2) ──────────────────
+        /* ── THE PAGE HEADER, AND IT STAYS (§121.2) ──────────────────
            Islam: *"this page needs to be sticky for the title."* Measured
            first: the rail's head and search already stick and the pane's
            title did not — it scrolled 600px away with everything else. It

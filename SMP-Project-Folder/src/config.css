@@ -528,7 +528,7 @@
     background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
   /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
      so a row without a pill is the row it always was (§108.15). */
-  /* ── THIS ROW IS A GRID, AND IT IS NOT THIS FILE'S GRID (§119.2) ──
+  /* ── THIS ROW IS A GRID, AND IT IS NOT THIS FILE'S GRID (§120.2) ──
      `group-extra.css` styles `.rail button.ritem` as a two-column grid for a
      UNIT's plan rail, and the Setup rail is a `.rail` too — so that selector
      (0,2,1) has been outranking `.setuprail .ritem` (0,2,0) since the rail was
@@ -547,7 +547,7 @@
      specificity that genuinely wins, leaving the padding, borders and type to
      the rule that has been drawing this row all along. A cap on the glyph, 1fr
      for the name, auto for the pill. */
-  /* ── SHORTER ROWS, AND NEVER TWO LINES (§120.3) ───────────────────
+  /* ── SHORTER ROWS, AND NEVER TWO LINES (§121.3) ───────────────────
      Islam: *"the rail options needs to be smaller in height and no title is
      double line."* Measured: 45px a row, and "Plan import & archives" wrapped
      to 66px, which is what made the rail 785px and pushed the last entries
@@ -564,7 +564,7 @@
                                         text-overflow:ellipsis; }
   .setuprail .ritem { text-align:left; color:var(--ink-2);
                       font:500 13px/1.35 var(--sans); }
-  /* THE ROW'S MARK (§119.2). A fixed box so every label starts on the same
+  /* THE ROW'S MARK (§120.2). A fixed box so every label starts on the same
      x — a glyph column that jitters row to row is worse than none — and the
      row's own quiet ink, so it lights and dims WITH the row rather than
      competing with the pill at the other end (§41's accent budget: the pill is
@@ -627,7 +627,7 @@
     .setuprail .raillist { display:contents; }
   }
 
-  /* ══ THE SETUP PAGE'S OWN HEADER (§120.2) ════════════════════════
+  /* ══ THE SETUP PAGE'S OWN HEADER (§121.2) ════════════════════════
      Islam: *"this page needs to be sticky for the title."*
 
      PINNED AT THE RAIL'S OWN OFFSET, not at a number of its own: `.rail` uses
@@ -677,7 +677,7 @@
   .setuppane .phead2.named .hright { margin-left:0; }
   .setuppane .phead2.named:empty { display:none; }
 
-  /* ── AND THE TABLE'S HEAD GOES WITH IT (§120.4) ───────────────────
+  /* ── AND THE TABLE'S HEAD GOES WITH IT (§121.4) ───────────────────
      On the register at 33 rows the headings are gone by the time you are
      reading the rows, which is exactly when you need to know which column you
      are in. It pins UNDER the page header rather than at the top of the
@@ -698,7 +698,7 @@
       position:sticky; z-index:4;
       top:calc(var(--chrome-h, 118px) + var(--rail-gap, 12px) + var(--sethead-h));
       background:var(--panel); }
-  /* A HAIRLINE BETWEEN HEADINGS (§120.4). They are uppercase, letter-spaced
+  /* A HAIRLINE BETWEEN HEADINGS (§121.4). They are uppercase, letter-spaced
      and 8px-padded, so at a narrow pane "Shown in the nav" and "Code" merged
      into one word — measured on Islam's own screenshot. A divider costs no
      width and no height and is what makes a table read as columns. */
@@ -727,7 +727,7 @@
   .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
   .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
   .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
-  /* THE BUTTON HOLDS ITS PLACE (§119.4). The strip is one wrapping row, so
+  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, so
      below about 1280px the button dropped onto a line of its own and the strip
      grew from 72px to 126px — not broken, but it reads as an accident rather
      than a decision. The numbers and the chips are what should give way: they
@@ -736,7 +736,7 @@
 
      `order` rather than a media query, because the wrap point depends on the
      tenant's own cycle name and dates, not on a width anybody can name. */
-  /* THE BUTTON HOLDS ITS PLACE (§119.4). The strip is one wrapping row, and
+  /* THE BUTTON HOLDS ITS PLACE (§120.4). The strip is one wrapping row, and
      below about 1280px the button dropped to a line of its own, growing the
      strip from 72px to 126px — not broken, but it reads as an accident.
 

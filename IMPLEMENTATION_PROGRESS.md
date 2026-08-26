@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.40 on `main` · **§118 built on the CF branch, awaiting Islam’s confirm**
+**Latest version:** v3.41 on `main` (§118 — the CF tab)
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -64,7 +64,7 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.41 (on the branch, awaiting Islam's confirm) — the CF tab (§118)
+### v3.41 — the CF tab (§118)
 
 **§118 — reported from production.** *"The CF tab is not showing anything
 while it was showing it a minute ago."* Reordering a measure or tactic with

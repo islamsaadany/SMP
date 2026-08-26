@@ -1,11 +1,11 @@
 ---
 
-description: "Task list for spec 016 — the onboarding tour"
+description: "Task list for spec 017 — the onboarding tour"
 ---
 
 # Tasks: The onboarding tour
 
-**Input**: Design documents from `specs/016-onboarding-tour/`
+**Input**: Design documents from `specs/017-onboarding-tour/`
 
 **Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
 [data-model.md](data-model.md), [contracts/tour-api.md](contracts/tour-api.md),

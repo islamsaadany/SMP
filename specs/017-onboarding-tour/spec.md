@@ -1,4 +1,4 @@
-# 016 · The onboarding tour
+# 017 · The onboarding tour
 
 **Feature Branch**: `claude/onboarding-flow-spec-v9g7x5`
 

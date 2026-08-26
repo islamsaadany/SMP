@@ -2911,7 +2911,7 @@ function renderKB(){
       ["mail","Email"]
     ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
-  /* ── THE TOUR'S ONE WAY BACK IN (spec 016) ───────────────────────
+  /* ── THE TOUR'S ONE WAY BACK IN (spec 017) ───────────────────────
      Explanation lives here (v3.5), so the replay of the guided tour lives
      here too rather than growing furniture of its own on a page somebody
      visits for another reason (§90).
@@ -2979,6 +2979,32 @@ function renderBandsExtra(){
    against the number rather than the name alone. */
 var FSET = { unit:"mobile" };
 
+/* THE SWITCH LIVES ON THE PAGE IT GOVERNS (§102), which is §90's shape and
+   §98's row: five chat settings went into a dropdown on the Messages page
+   rather than a Setup page of their own, because a switch behind its own rail
+   entry is a door behind a door (§32).
+
+   AND THE PAGE STAYS REACHABLE WHILE IT IS OFF. §61's trap, exactly: if
+   turning focus off removed the page that carries the switch, the only way to
+   turn it back on would be to turn it on first. So the page always renders,
+   and while off it says what is being kept. */
+function focusSwitch(){
+  var on = focusOn();
+  var marks = Object.keys(CYCLE.focus || {}).length;
+  if (!inOffice()) {
+    return on ? '' : '<div class="note">Focus measures are switched off for this ' +
+      'platform. The Strategy Office can turn them back on.</div>';
+  }
+  return '<div class="phead2"><div class="hright">' +
+    '<button class="editbtn' + (on ? ' on' : '') + '" data-focusswitch="' + (on ? "0" : "1") + '">' +
+      (on ? "Focus measures are on" : "Focus measures are off") + '</button>' +
+    '</div></div>' +
+    (on ? '' : '<div class="note">Nothing is shown anywhere in the platform, and ' +
+      '<b>' + marks + ' ' + plural(marks, "mark") + '</b> ' +
+      (marks === 1 ? "is" : "are") + ' being kept. Turning it back on restores ' +
+      (marks === 1 ? "it" : "them") + '.</div>');
+}
+
 function renderFocusSetup(){
   /* Marking is the CEO's and the SMO's — a rule now, not a cell (§37).
      mayMarkFocus() carries the lock too, so there is one gate, not two. */
@@ -2986,7 +3012,7 @@ function renderFocusSetup(){
   var u = UNITS[FSET.unit];
 
   var pick = function(m, src){
-    var on = isFocus(m.id);
+    var on = focusMarked(m.id);   /* the RAW map, never isFocus (§102) */
     return '<div class="pick ' + (on ? "on" : "off") + '">' +
       (editable
         ? '<button class="fmark-btn' + (on ? ' on' : '') + '" data-focus="' + m.id + '" ' +
@@ -3021,7 +3047,8 @@ function renderFocusSetup(){
         esc(UNITS[k].name) + (c ? "  \u2014 " + c + " marked" : "") + '</option>';
     }).join("") + '</select>';
 
-  return '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
+  return focusSwitch() +
+    '<div class="kv"><span class="pill kind">CEO &amp; SMO</span>' +
       '<span class="pill ' + (CYCLE.locked ? "none" : "good") + '">' +
         (CYCLE.locked ? "Locked for the cycle" : "Open for marking") + '</span>' +
       '<span class="pill kind">reward begins at ' + CYCLE.rewardAt + '%</span></div>' +
@@ -3927,6 +3954,12 @@ function renderArchives(){
    The SMO can close with gaps: waiting for the last number means never
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
+/* "1 need notes" was on the unit half for as long as it has existed and went
+   unnoticed while it was rare; §105 put it on seven more rows and it stopped
+   being rare. ONE function, because the two halves saying it differently is
+   the fault this board was just built to avoid (§53.5). */
+function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
+
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
@@ -3951,14 +3984,88 @@ function renderCycle(){
       '<td class="num">' + by.obj[0] + '/' + by.obj[1] + '</td>' +
       '<td class="num">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
       '<td class="num">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
+
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§105) ────────────────────
+     A submission the SMO cannot see anywhere is half a feature. They go in the
+     SAME table rather than a second one, because "who has reported" is one
+     question -- but a function's three counts are its own vocabulary (key
+     objectives, deliverables and outcomes, milestones) and a unit's are not,
+     so the half opens with a band and a quiet column strip. §99's answer to
+     exactly this problem, and the reason nothing about the unit half changes:
+     the two vocabularies never share a heading. */
+  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+  var fnRows = fnKeys.map(function(fk){
+    var c = fnReportedCount(fk), st = fnState(fk);
+    var f = FUNCTIONS[fk] || {};
+    /* Custodian first, head second -- the same order the unit row asks in, so
+       the board names the same kind of person on both halves (§53.5). */
+    var who = personName(f.custodian) || personName(f.head) || "\u2014";
+    var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
+    var miss = fnMissingNotes(fk).length;
+    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§105.2).
+       The first drawing gave the function half its own column strip and it
+       COLLIDED: the strip's widths come from the table's own <thead> -- a
+       unit's words -- and "DELIVERABLES" alone is wider than the Measures
+       column at every width from 1920 down, so it ran over Milestones with
+       nothing to stop it. Wrapping could not save it; a word that does not fit
+       does not fit.
+
+       The better answer was underneath the problem. A unit's three columns are
+       what we are judged on, what we measure, and the work: objectives,
+       measures, tactics. A function has the same three -- key objectives, its
+       OUTCOMES (a direction, a target and an actual: that is a measure), and
+       its deliverables and milestones (work that happened or did not). Mapped
+       onto the same headings the counts become COMPARABLE down the page, which
+       is more than the strip ever bought, and the vocabulary is named once in
+       the band above where nothing can collide. */
+    var by = { ko:[0,0], mea:[0,0], tac:[0,0] };
+    var deliv = 0, mile = 0;
+    fnAskedItems(fk).forEach(function(x){
+      var slot = x.kind === "objective" ? "ko" : x.kind === "outcome" ? "mea" : "tac";
+      if (x.kind === "deliverable") deliv++;
+      if (x.kind === "milestone") mile++;
+      by[slot][1]++;
+      var got = (x.kind === "deliverable" || x.kind === "milestone")
+        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
+      if (got) by[slot][0]++;
+    });
+    var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
+      ", asked this cycle";
+    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
+      '<td class="why" style="margin:0">' + esc(who) + '</td>' +
+      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
+        '<i style="width:' + pctD + '%"></i></span>' +
+        '<span class="mono why" style="margin:0">' + c.done + '/' + c.total + '</span></div></td>' +
+      '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
+      '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
+      '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
+      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
+  }).join("");
+  if (fnRows) {
+    /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
+       used it (§24 would have had it deleted). It is the right shape for
+       exactly this and it is used again. Its `em` slot carries the vocabulary,
+       which is the one place in this table wide enough to hold it. */
+    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
+        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
+        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
+  }
 
   var t = { done:0, total:0, sub:0, none:0 };
   activeKeys().forEach(function(k){
     var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
     var st = unitState(UNITS[k]);
+    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
+  });
+  fnKeys.forEach(function(fk){
+    var c = fnReportedCount(fk); t.done += c.done; t.total += c.total;
+    var st = fnState(fk);
     if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
   });
 
@@ -4058,7 +4165,7 @@ function renderCycle(){
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
         '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        '<tbody>' + rows + fnRows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
           'means never closing, and a cycle that never closes writes no history. Whatever is ' +

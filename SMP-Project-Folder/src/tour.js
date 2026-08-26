@@ -1,4 +1,4 @@
-/* ══ THE ONBOARDING TOUR (spec 016) ═════════════════════════════════════════
+/* ══ THE ONBOARDING TOUR (spec 017) ═════════════════════════════════════════
    Islam: "for first time users we need some orientation flow that takes them
    through the platform — highlighting some areas while dimming the rest of the
    page with focus on a button or an area with brief messages … in a user story
@@ -21,7 +21,7 @@
    that would be more interactive") — and Islam reversed it after using it:
    "skip the buttons clicking overall". So Next and Back are the only controls,
    and each step declares WHERE it wants the platform to be; the engine gets it
-   there. The reversal is recorded in spec 016's decisions table rather than
+   there. The reversal is recorded in spec 017's decisions table rather than
    quietly overwritten (Constitution II).
 
    ── IT RUNS ON DEMO DATA, AND THAT IS WHAT MAKES IT SAFE ──────────────────
@@ -286,7 +286,7 @@ var TOUR = (function(){
        the tab and section keys differ and are resolved above, and the one
        real difference (a function has no SWOT) drops a step.
 
-       THE COPY IS A DRAFT AWAITING ISLAM'S APPROVAL (spec 016 FR-012,
+       THE COPY IS A DRAFT AWAITING ISLAM'S APPROVAL (spec 017 FR-012,
        Constitution VIII). The custodian's words are his, off the mockup;
        these are mine until he has read them. */
     owner: {

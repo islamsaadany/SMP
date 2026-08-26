@@ -809,6 +809,40 @@ console.log("\n10 · a function that plans in pillars");
    function (§62). It is asserted rather than assumed, because the whole point
    of that rule is that nobody has to remember it, and the way to keep it
    honest is to check it the day the feature lands. */
+/* ── 10b · A FUNCTION SUBMITS ITS REPORT (§105) ────────────────────
+   The server has carried an explicit `fn:` branch in the `reportState` case
+   since spec 006, and nothing ever asked it a question -- the control was
+   never drawn, so no test had a reason to exist. §94.2 says a check that only
+   looks at something present cannot see a closed door, so BOTH ends are asked:
+   the function's own head may submit, and the head of another may not. */
+console.log("\n10b · a function submits its report");
+(function () {
+  const keys = Object.keys(SEED.functions || {});
+  const withHead = keys.filter(function (k) { return (SEED.functions[k] || {}).head; });
+  if (withHead.length < 2) {
+    check("the seed carries two functions with heads to test with", false); return;
+  }
+  const A1 = withHead[0], A2 = withHead[1];
+  const mine = function (fk) {
+    const base = clone(SEED), inc = clone(base);
+    inc.review.submitted = Object.assign({}, inc.review.submitted);
+    inc.review.submitted["fn:" + fk] = true;
+    return { base: base, inc: inc };
+  };
+  let t = mine(A1);
+  let v = A.authorize(t.base, t.inc, personOf(t.base, SEED.functions[A1].head));
+  check("a function head submits their own function's report", v.ok, v.refusals.join(" / "));
+  const kinds = A.collect(t.base, t.inc, R.worldOf(t.base))
+                 .map(function (c) { return c.kind + ":" + c.target; });
+  check("...classified as reportState against the fn: target",
+        kinds.indexOf("reportState:fn:" + A1) > -1, kinds.join());
+  /* THE CLOSED DOOR. Without this the branch could accept anybody and the
+     test above would still print ok. */
+  t = mine(A2);
+  v = A.authorize(t.base, t.inc, personOf(t.base, SEED.functions[A1].head));
+  check("...and may NOT submit another function's", !v.ok, "it was allowed");
+})();
+
 console.log("\n11 · a row leaving the register");
 (function () {
   const victim = SEED.people.filter(function (p) {
@@ -906,6 +940,110 @@ console.log("\n12 · the SMO team, and the three it does not get");
     });
   }, "3 · and may not promote itself to Super user", false);
 })();
+
+/* ── 13 · REORDERING IS THE UNIT'S AGAIN (§101, reversing §94.3) ──
+   The half that was silently broken for two versions: the drag handles were
+   drawn, the rows moved, and every save came back refused because the
+   authoriser compares row ids IN ORDER and could not tell a reorder from a
+   rewrite. So these assert BOTH SIDES of that line — a reorder goes through,
+   and the words are still the office's. Getting only the first would be a
+   feature that quietly handed the plan away. */
+console.log("\n13 · reordering, and the line it must not cross");
+function shuffleFirstToLast(list) { list.push(list.shift()); }
+
+[headKey, custKey, "smo"].forEach(function (who) {
+  allows(who, function (s) { shuffleFirstToLast(s.units[UNIT].items); },
+    who + " may reorder their own unit's pillars");
+  allows(who, function (s) { shuffleFirstToLast(s.units[UNIT].keyObjectives); },
+    who + " may reorder their own unit's key objectives");
+});
+
+/* THE WORDS ARE STILL THE OFFICE'S — this is the assertion that stops §101
+   from being a hole in §94 rather than a door beside it. */
+[headKey, custKey].forEach(function (who) {
+  refuses(who, function (s) { s.units[UNIT].items[0].name = "Renamed by a reorder test"; },
+    who + " still may not RENAME a pillar");
+  refuses(who, function (s) { s.units[UNIT].items.pop(); },
+    who + " still may not REMOVE a pillar");
+  refuses(who, function (s) { shuffleFirstToLast(s.units[OTHER].items); },
+    who + " may not reorder ANOTHER unit's pillars");
+});
+
+/* A contributor was asked about directly and answered no (Islam, 2026-08-26).
+   Found by role rather than by key, so a reseeded demo cannot quietly turn
+   this into an assertion about nobody (§54.5). */
+(function () {
+  const contribs = SEED.people.filter(function (p) {
+    const rs = R.personRoleKeys(w, p);
+    return rs.length > 0 && rs.every(R.isOwnLinesRole) && !!p.unit;
+  });
+  check("the seed still has a contributor to test with", contribs.length > 0,
+        "nobody holds only own-lines roles — this assertion is measuring nothing");
+  contribs.forEach(function (p) {
+    refuses(p.key, function (s) { shuffleFirstToLast(s.units[p.unit].items); },
+      "a contributor (" + p.key + ") may not reorder their unit's pillars");
+  });
+})();
+
+/* AND THE CLASSIFIER ITSELF, asked directly — because every assertion above
+   would also pass if `arrange` were being classified as something harmless
+   that nothing guards. §94.5's lesson: a check that cannot fail is invisible. */
+(function () {
+  const inc = clone(SEED); shuffleFirstToLast(inc.units[UNIT].items);
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("a reorder is classified as `arrange`, and as nothing else",
+        kinds.length > 0 && kinds.every(function (k) { return k === "arrange"; }),
+        "got: " + JSON.stringify(kinds));
+  const inc2 = clone(SEED); inc2.units[UNIT].items.pop();
+  const kinds2 = A.collect(SEED, inc2, w).map(function (c) { return c.kind; });
+  check("but a removed row is still `unitPlan`",
+        kinds2.indexOf("unitPlan") > -1, "got: " + JSON.stringify(kinds2));
+})();
+
+/* ── 14 · THE FOCUS SWITCH IS NOT A BIGGER MARK (§102) ────────────
+   Marking a measure is the CEO's and the SMO's (§37); turning the whole
+   feature off for the tenant is the SMO's alone. Asserted as a PAIR, because
+   the fault this guards against is the switch quietly inheriting the marks'
+   permission — which would let a CEO remove a feature rather than use it. */
+console.log("\n14 · the focus switch");
+allows("smo", function (s) { s.group.focusOff = true; },
+  "the SMO may switch focus measures off");
+refuses("ceo", function (s) { s.group.focusOff = true; },
+  "the CEO may NOT switch focus measures off");
+refuses(headKey, function (s) { s.group.focusOff = true; },
+  "a unit head may NOT switch focus measures off");
+
+/* AND THE MARKS ARE STILL THE CEO'S, or the pair above proves only that
+   something was locked down, not that the right thing was. */
+(function () {
+  const anyId = Object.keys(SEED.cycle.focus || {})[0] ||
+                (SEED.units[UNIT].keyObjectives[0] || {}).id;
+  check("the seed has a markable id to test with", !!anyId,
+        "no id — this assertion would be measuring nothing");
+  if (!anyId) return;
+  allows("ceo", function (s) { s.cycle.focus[anyId] = !s.cycle.focus[anyId]; },
+    "the CEO may still mark a focus measure");
+})();
+
+/* THE SWITCH CLASSIFIES AS setup, NOT focus. Every assertion above would pass
+   if it were classified as something nothing guards at all (§94.5). */
+(function () {
+  const inc = clone(SEED); inc.group.focusOff = true;
+  const kinds = A.collect(SEED, inc, w).map(function (c) { return c.kind; });
+  check("the switch is classified `setup`, and never `focus`",
+        kinds.length > 0 && kinds.indexOf("setup") > -1 && kinds.indexOf("focus") === -1,
+        "got: " + JSON.stringify(kinds));
+})();
+
+/* SWITCHING IT BACK ON DELETES THE KEY, so a tenant that never answered and one
+   that turned it off and on again are byte-identical (§50.6). Asserted from the
+   rule's own default rather than from the writer, because the writer lives in
+   the browser and this file cannot reach it. */
+check("an absent key reads as ON", R.focusOn(R.worldOf({ group: {} })) === true);
+check("and `false` reads as ON too, so a stale write cannot hide the feature",
+      R.focusOn(R.worldOf({ group: { focusOff: false } })) === true);
+check("only `true` switches it off",
+      R.focusOn(R.worldOf({ group: { focusOff: true } })) === false);
 
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

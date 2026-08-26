@@ -1752,6 +1752,12 @@
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
+    /* The focus feature's switch (§102). `this`, never a closure over the
+       element, for the reason stated three lines down. */
+    var fsw = document.querySelector("[data-focusswitch]");
+    if (fsw) fsw.addEventListener("click", function(){
+      setFocusOn(this.dataset.focusswitch === "1"); paint();
+    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
@@ -1801,12 +1807,32 @@
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
+    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§104): both
+       write `status`, and leaving In progress CLEARS the per-cent rather than
+       leaving it stranded under a word that no longer wants one. A stale 35%
+       sitting behind "Delivered" is a number nobody can see and the score
+       would not read -- but it would come back the moment somebody picked In
+       progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        if (hit.kind === "milestone") hit.obj.status = el.value || null;
-        else hit.obj.actual = el.value || null;
+        hit.obj.status = el.value || null;
+        if (hit.obj.status !== "wip") hit.obj.pct = null;
+        paint();
+      });
+    });
+    /* The per-cent, which only an In progress row has. Out of range is
+       clamped rather than refused: somebody typing 120 means "done", and an
+       error message in a table of thirty rows is a worse answer than a
+       number. */
+    document.querySelectorAll("[data-cpct]").forEach(function(el){
+      el.addEventListener("change", function(){
+        var hit = capItemById(el.dataset.cpct);
+        if (!hit) return;
+        var v = el.value.trim();
+        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
+        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
         paint();
       });
     });
@@ -2090,15 +2116,16 @@
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
+    /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
+       a unit key, or `fn:<key>` for a supporting function -- which is the same
+       string `REVIEW.submitted` is keyed by and the same one the server
+       authorises. It read `UNITS[...]` before, so wiring a function's button to
+       it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var u = UNITS[b.dataset.submit], miss = missingNotes(u);
-        if (miss.length) {
-          alert(miss.length + " figure" + (miss.length > 1 ? "s are" : " is") +
-            " at risk or off track with no note. Add a line to each before submitting.");
-          return;
-        }
-        REVIEW.submitted[b.dataset.submit] = true; paint();
+        var t = b.dataset.submit, why = submitRefusal(t);
+        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        REVIEW.submitted[t] = true; paint();
       });
     });
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
@@ -4252,7 +4279,7 @@
       b.addEventListener("click", function(){ ARRANGE = !ARRANGE; paint(); });
     });
 
-    /* ── REPLAYING THE GUIDED TOUR (spec 016) ────────────────────────
+    /* ── REPLAYING THE GUIDED TOUR (spec 017) ────────────────────────
        The Knowledge base's one entry. It starts the story this viewer's
        roles map to and IGNORES the stored "don't show again" — that mark
        answers "should it open by itself", which is a different question

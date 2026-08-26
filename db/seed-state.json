@@ -222,20 +222,21 @@
       "deliverables": [
        {
         "name": "Single documented order process",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Sep 26",
+        "status": "done",
         "id": "cap1-P1-D1"
        },
        {
         "name": "Unit-by-unit gap assessment",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Oct 26",
+        "status": "done",
         "id": "cap1-P1-D2"
        },
        {
         "name": "Process rolled out across the three units",
-        "kind": "pct",
-        "actual": 55,
+        "due": "Sep 26",
+        "status": "wip",
+        "pct": 55,
         "id": "cap1-P1-D3"
        }
       ],
@@ -265,7 +266,7 @@
         "name": "Process design and sign-off",
         "covers": "The target process agreed with all three unit heads",
         "owner": "Ashraf Abdelaty",
-        "finish": "Q1",
+        "finish": "March 2026",
         "status": "done",
         "id": "cap1-P1-M1"
        },
@@ -273,7 +274,7 @@
         "name": "Gap assessment per unit",
         "covers": "What each unit has to change to reach it",
         "owner": "Hala",
-        "finish": "Q2",
+        "finish": "May 2026",
         "status": "done",
         "id": "cap1-P1-M2"
        },
@@ -281,15 +282,16 @@
         "name": "Retail and Mazaya cutover",
         "covers": "Both units running the standard process",
         "owner": "Hala",
-        "finish": "Q3",
+        "finish": "July 2026",
         "status": "wip",
+        "pct": 60,
         "id": "cap1-P1-M3"
        },
        {
         "name": "Mobile cutover",
         "covers": "The last unit, gated on the ERP work",
         "owner": "Ashraf Abdelaty",
-        "finish": "Q4",
+        "finish": "November 2026",
         "status": "todo",
         "id": "cap1-P1-M4"
        }
@@ -311,14 +313,15 @@
       "deliverables": [
        {
         "name": "Cost-to-serve model built and validated",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Sep 26",
+        "status": "done",
         "id": "cap1-P2-D1"
        },
        {
         "name": "Monthly review running with all units",
-        "kind": "pct",
-        "actual": 60,
+        "due": "Oct 26",
+        "status": "wip",
+        "pct": 60,
         "id": "cap1-P2-D2"
        }
       ],
@@ -338,7 +341,7 @@
         "name": "Cost driver mapping",
         "covers": "Which activities carry the cost, by unit",
         "owner": "Fayad Sobhy",
-        "finish": "Q1",
+        "finish": "January 2026",
         "status": "done",
         "id": "cap1-P2-M1"
        },
@@ -346,7 +349,7 @@
         "name": "Model build and validation",
         "covers": "Model reconciled against two closed months",
         "owner": "Fayad Sobhy",
-        "finish": "Q2",
+        "finish": "May 2026",
         "status": "done",
         "id": "cap1-P2-M2"
        },
@@ -354,8 +357,9 @@
         "name": "Review cadence embedded",
         "covers": "A standing monthly session with each unit",
         "owner": "Hala",
-        "finish": "Q3",
+        "finish": "August 2026",
         "status": "wip",
+        "pct": 60,
         "id": "cap1-P2-M3"
        }
       ],
@@ -375,14 +379,15 @@
       "deliverables": [
        {
         "name": "Failure analysis on twelve months of orders",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Dec 26",
+        "status": "done",
         "id": "cap1-P3-D1"
        },
        {
         "name": "Corrective standard operating procedures",
-        "kind": "pct",
-        "actual": 40,
+        "due": "May 26",
+        "status": "wip",
+        "pct": 40,
         "id": "cap1-P3-D2"
        }
       ],
@@ -402,7 +407,7 @@
         "name": "Failure analysis",
         "covers": "Where rework originates and what it costs",
         "owner": "Hala",
-        "finish": "Q2",
+        "finish": "May 2026",
         "status": "done",
         "id": "cap1-P3-M1"
        },
@@ -410,15 +415,16 @@
         "name": "Procedure rewrite",
         "covers": "New procedures for the two main failure points",
         "owner": "Hala",
-        "finish": "Q3",
+        "finish": "September 2026",
         "status": "wip",
+        "pct": 60,
         "id": "cap1-P3-M2"
        },
        {
         "name": "Team retraining",
         "covers": "Distribution teams trained on the new procedures",
         "owner": "Hala",
-        "finish": "Q4",
+        "finish": "October 2026",
         "status": "todo",
         "id": "cap1-P3-M3"
        }
@@ -470,14 +476,15 @@
       "deliverables": [
        {
         "name": "Key-role definition agreed group-wide",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Apr 26",
+        "status": "done",
         "id": "cap2-P1-D1"
        },
        {
         "name": "Succession map per unit",
-        "kind": "pct",
-        "actual": 70,
+        "due": "Oct 26",
+        "status": "wip",
+        "pct": 70,
         "id": "cap2-P1-D2"
        }
       ],
@@ -498,7 +505,7 @@
         "name": "Key-role definition",
         "covers": "What counts as a key role, agreed with the units",
         "owner": "Noran Adel",
-        "finish": "Q1",
+        "finish": "February 2026",
         "status": "done",
         "id": "cap2-P1-M1"
        },
@@ -506,7 +513,7 @@
         "name": "Unit-by-unit mapping",
         "covers": "Successors named, gaps recorded",
         "owner": "Noran Adel",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "done",
         "id": "cap2-P1-M2"
        },
@@ -514,8 +521,9 @@
         "name": "Gap closure plans",
         "covers": "A plan for every role with no successor",
         "owner": "Noran Adel",
-        "finish": "Q3",
+        "finish": "September 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap2-P1-M3"
        }
       ],
@@ -535,14 +543,14 @@
       "deliverables": [
        {
         "name": "Exit interview analysis",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Sep 26",
+        "status": "done",
         "id": "cap2-P2-D1"
        },
        {
         "name": "Revised package and progression for both roles",
-        "kind": "binary",
-        "actual": "no",
+        "due": "Dec 26",
+        "status": "todo",
         "note": "Held pending the compensation review.",
         "id": "cap2-P2-D2"
        }
@@ -563,7 +571,7 @@
         "name": "Attrition analysis",
         "covers": "Which roles, which reasons, which managers",
         "owner": "Noran Adel",
-        "finish": "Q2",
+        "finish": "May 2026",
         "status": "done",
         "id": "cap2-P2-M1"
        },
@@ -571,15 +579,16 @@
         "name": "Package redesign",
         "covers": "Pay and progression reworked for both roles",
         "owner": "Noran Adel",
-        "finish": "Q3",
+        "finish": "August 2026",
         "status": "wip",
+        "pct": 75,
         "id": "cap2-P2-M2"
        },
        {
         "name": "Rollout and communication",
         "covers": "Both roles moved onto the new terms",
         "owner": "Noran Adel",
-        "finish": "Q4",
+        "finish": "October 2026",
         "status": "todo",
         "id": "cap2-P2-M3"
        }
@@ -601,14 +610,15 @@
       "deliverables": [
        {
         "name": "Annual training calendar published",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Apr 26",
+        "status": "done",
         "id": "cap2-P3-D1"
        },
        {
         "name": "Calendar delivered",
-        "kind": "pct",
-        "actual": 44,
+        "due": "Mar 26",
+        "status": "wip",
+        "pct": 44,
         "id": "cap2-P3-D2"
        }
       ],
@@ -629,7 +639,7 @@
         "name": "Needs assessment",
         "covers": "What each unit actually needs, not what it asks for",
         "owner": "Hala",
-        "finish": "Q1",
+        "finish": "February 2026",
         "status": "done",
         "id": "cap2-P3-M1"
        },
@@ -637,7 +647,7 @@
         "name": "Calendar published",
         "covers": "Dates, trainers and places confirmed for the year",
         "owner": "Hala",
-        "finish": "Q1",
+        "finish": "February 2026",
         "status": "done",
         "id": "cap2-P3-M2"
        },
@@ -645,15 +655,16 @@
         "name": "First-half delivery",
         "covers": "Sessions scheduled to Q2 delivered",
         "owner": "Hala",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "wip",
+        "pct": 40,
         "id": "cap2-P3-M3"
        },
        {
         "name": "Second-half delivery",
         "covers": "The remaining sessions",
         "owner": "Hala",
-        "finish": "Q4",
+        "finish": "November 2026",
         "status": "todo",
         "id": "cap2-P3-M4"
        }
@@ -696,14 +707,15 @@
       "deliverables": [
        {
         "name": "Target instance design",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Sep 26",
+        "status": "done",
         "id": "cap3-P1-D1"
        },
        {
         "name": "Instances migrated",
-        "kind": "pct",
-        "actual": 33,
+        "due": "Jun 26",
+        "status": "wip",
+        "pct": 33,
         "note": "Two of six migrated. Mobile's cutover moved to Q3 with the principal.",
         "id": "cap3-P1-D2"
        }
@@ -733,7 +745,7 @@
         "name": "Instance audit",
         "covers": "What is running where, and what depends on it",
         "owner": "Abdelhamid",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "done",
         "id": "cap3-P1-M1"
        },
@@ -741,7 +753,7 @@
         "name": "Target design and sequencing",
         "covers": "One target instance, and the order units move in",
         "owner": "Abdelhamid",
-        "finish": "Q2",
+        "finish": "April 2026",
         "status": "done",
         "id": "cap3-P1-M2"
        },
@@ -749,15 +761,16 @@
         "name": "First two migrations",
         "covers": "Treasury and Care moved across",
         "owner": "Abdelhamid",
-        "finish": "Q3",
+        "finish": "July 2026",
         "status": "wip",
+        "pct": 60,
         "id": "cap3-P1-M3"
        },
        {
         "name": "Remaining migrations",
         "covers": "Mobile, Retail, Mazaya and B2B",
         "owner": "Abdelhamid",
-        "finish": "Q4",
+        "finish": "November 2026",
         "status": "todo",
         "id": "cap3-P1-M4"
        }
@@ -779,14 +792,15 @@
       "deliverables": [
        {
         "name": "Warehouse built and loading nightly",
-        "kind": "binary",
-        "actual": "no",
+        "due": "Apr 26",
+        "status": "todo",
         "id": "cap3-P2-D1"
        },
        {
         "name": "Reporting layer live for sales and finance",
-        "kind": "pct",
-        "actual": 36,
+        "due": "Mar 26",
+        "status": "wip",
+        "pct": 36,
         "id": "cap3-P2-D2"
        }
       ],
@@ -807,7 +821,7 @@
         "name": "Model and source mapping",
         "covers": "What the warehouse holds and where it comes from",
         "owner": "Ramy Behairy",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "done",
         "id": "cap3-P2-M1"
        },
@@ -815,15 +829,16 @@
         "name": "Warehouse build",
         "covers": "Built, loading nightly, reconciled",
         "owner": "Ramy Behairy",
-        "finish": "Q3",
+        "finish": "August 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap3-P2-M2"
        },
        {
         "name": "Reporting layer rollout",
         "covers": "Sales and finance reporting moved onto it",
         "owner": "Ramy Behairy",
-        "finish": "Q4",
+        "finish": "October 2026",
         "status": "todo",
         "id": "cap3-P2-M3"
        }
@@ -844,14 +859,15 @@
       "deliverables": [
        {
         "name": "Backlog built and prioritised",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Oct 26",
+        "status": "done",
         "id": "cap3-P3-D1"
        },
        {
         "name": "Backlog delivered",
-        "kind": "pct",
-        "actual": 52,
+        "due": "Feb 26",
+        "status": "wip",
+        "pct": 52,
         "id": "cap3-P3-D2"
        }
       ],
@@ -871,7 +887,7 @@
         "name": "Candidate assessment",
         "covers": "Every manual process worth automating, sized",
         "owner": "Ramy Behairy",
-        "finish": "Q1",
+        "finish": "February 2026",
         "status": "done",
         "id": "cap3-P3-M1"
        },
@@ -879,7 +895,7 @@
         "name": "Cadence established",
         "covers": "A fortnightly release running",
         "owner": "Ramy Behairy",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "done",
         "id": "cap3-P3-M2"
        },
@@ -887,8 +903,9 @@
         "name": "Half the backlog delivered",
         "covers": "The top half by hours removed",
         "owner": "Ramy Behairy",
-        "finish": "Q3",
+        "finish": "August 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap3-P3-M3"
        }
       ],
@@ -917,14 +934,14 @@
       "deliverables": [
        {
         "name": "Market perception study",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Dec 26",
+        "status": "done",
         "id": "cap4-P1-D1"
        },
        {
         "name": "Positioning statement agreed by the board",
-        "kind": "binary",
-        "actual": "no",
+        "due": "Jul 26",
+        "status": "todo",
         "id": "cap4-P1-D2"
        }
       ],
@@ -944,7 +961,7 @@
         "name": "Perception study fielded",
         "covers": "Study run with trade and end customers",
         "owner": "Yara Kamal",
-        "finish": "Q2",
+        "finish": "April 2026",
         "status": "done",
         "id": "cap4-P1-M1"
        },
@@ -952,8 +969,9 @@
         "name": "Positioning workshop",
         "covers": "Options developed and tested with the board",
         "owner": "Yara Kamal",
-        "finish": "Q3",
+        "finish": "September 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap4-P1-M2"
        }
       ],
@@ -974,14 +992,15 @@
       "deliverables": [
        {
         "name": "Twelve-month communication calendar",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Sep 26",
+        "status": "done",
         "id": "cap4-P2-D1"
        },
        {
         "name": "Calendar executed",
-        "kind": "pct",
-        "actual": 35,
+        "due": "Dec 26",
+        "status": "wip",
+        "pct": 35,
         "id": "cap4-P2-D2"
        }
       ],
@@ -1001,7 +1020,7 @@
         "name": "Calendar built",
         "covers": "Twelve months of trade communication planned",
         "owner": "Tarek Nour",
-        "finish": "Q2",
+        "finish": "April 2026",
         "status": "done",
         "id": "cap4-P2-M1"
        },
@@ -1009,15 +1028,16 @@
         "name": "First-half execution",
         "covers": "Q2 and Q3 communication delivered",
         "owner": "Tarek Nour",
-        "finish": "Q3",
+        "finish": "September 2026",
         "status": "wip",
+        "pct": 25,
         "id": "cap4-P2-M2"
        },
        {
         "name": "Second-half execution",
         "covers": "Q4 communication delivered",
         "owner": "Tarek Nour",
-        "finish": "Q4",
+        "finish": "December 2026",
         "status": "todo",
         "id": "cap4-P2-M3"
        }
@@ -1059,14 +1079,15 @@
       "deliverables": [
        {
         "name": "Feedback instrument agreed across units",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Apr 26",
+        "status": "done",
         "id": "cap5-P1-D1"
        },
        {
         "name": "Loop running in all units",
-        "kind": "pct",
-        "actual": 50,
+        "due": "Dec 26",
+        "status": "wip",
+        "pct": 50,
         "id": "cap5-P1-D2"
        }
       ],
@@ -1095,7 +1116,7 @@
         "name": "Instrument design",
         "covers": "One question set used by every unit",
         "owner": "Mennah Farouk",
-        "finish": "Q1",
+        "finish": "January 2026",
         "status": "done",
         "id": "cap5-P1-M1"
        },
@@ -1103,7 +1124,7 @@
         "name": "Pilot in two units",
         "covers": "Retail and Care running the loop",
         "owner": "Mennah Farouk",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "done",
         "id": "cap5-P1-M2"
        },
@@ -1111,8 +1132,9 @@
         "name": "Rollout to remaining units",
         "covers": "Mobile, Mazaya and B2B",
         "owner": "Mennah Farouk",
-        "finish": "Q4",
+        "finish": "November 2026",
         "status": "wip",
+        "pct": 25,
         "id": "cap5-P1-M3"
        }
       ],
@@ -1132,14 +1154,15 @@
       "deliverables": [
        {
         "name": "Recovery standard published",
-        "kind": "binary",
-        "actual": "no",
+        "due": "Feb 26",
+        "status": "todo",
         "id": "cap5-P2-D1"
        },
        {
         "name": "Care teams trained",
-        "kind": "pct",
-        "actual": 20,
+        "due": "Oct 26",
+        "status": "wip",
+        "pct": 20,
         "id": "cap5-P2-D2"
        }
       ],
@@ -1159,15 +1182,16 @@
         "name": "Standard drafted",
         "covers": "What we owe a customer when we fail, by failure type",
         "owner": "Dalia Sabry",
-        "finish": "Q3",
+        "finish": "July 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap5-P2-M1"
        },
        {
         "name": "Training and rollout",
         "covers": "Every care team working to the standard",
         "owner": "Dalia Sabry",
-        "finish": "Q4",
+        "finish": "November 2026",
         "status": "todo",
         "id": "cap5-P2-M2"
        }
@@ -1198,14 +1222,15 @@
       "deliverables": [
        {
         "name": "Review framework and evidence pack",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Mar 26",
+        "status": "done",
         "id": "cap6-P1-D1"
        },
        {
         "name": "Quarterly reviews held",
-        "kind": "pct",
-        "actual": 50,
+        "due": "Feb 26",
+        "status": "wip",
+        "pct": 50,
         "id": "cap6-P1-D2"
        }
       ],
@@ -1225,7 +1250,7 @@
         "name": "Framework agreed",
         "covers": "What evidence a line is judged on",
         "owner": "Tarek Nour",
-        "finish": "Q2",
+        "finish": "April 2026",
         "status": "done",
         "id": "cap6-P1-M1"
        },
@@ -1233,15 +1258,16 @@
         "name": "First two reviews",
         "covers": "Q2 and Q3 reviews held with decisions recorded",
         "owner": "Tarek Nour",
-        "finish": "Q3",
+        "finish": "July 2026",
         "status": "wip",
+        "pct": 25,
         "id": "cap6-P1-M2"
        },
        {
         "name": "Second-half reviews",
         "covers": "Q4 review held",
         "owner": "Tarek Nour",
-        "finish": "Q4",
+        "finish": "December 2026",
         "status": "todo",
         "id": "cap6-P1-M3"
        }
@@ -1295,27 +1321,27 @@
       "deliverables": [
        {
         "name": "Oracle-based interest utilisation form",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "Feb 26",
+        "status": "done",
         "id": "cap7-P1-D1"
        },
        {
         "name": "Tracking interest expense on a daily basis",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "May 26",
+        "status": "done",
         "id": "cap7-P1-D2"
        },
        {
         "name": "Real-time data recalculation for corridor interest and pricing",
-        "kind": "binary",
-        "actual": "no",
+        "due": "May 26",
+        "status": "todo",
         "note": "Pricing corridor logic reopened with Treasury.",
         "id": "cap7-P1-D3"
        },
        {
         "name": "Daily treasury monitoring of debt balances",
-        "kind": "pct",
-        "actual": 100,
+        "due": "Dec 26",
+        "status": "done",
         "id": "cap7-P1-D4"
        }
       ],
@@ -1345,7 +1371,7 @@
         "name": "Solution design",
         "covers": "Treasury requirements and the calculation approach",
         "owner": "Finance",
-        "finish": "20 Mar 2026",
+        "finish": "March 2026",
         "status": "done",
         "id": "cap7-P1-M1"
        },
@@ -1353,7 +1379,7 @@
         "name": "Oracle form development",
         "covers": "Retrieval and calculation screens built",
         "owner": "IT",
-        "finish": "12 Apr 2026",
+        "finish": "April 2026",
         "status": "done",
         "id": "cap7-P1-M2"
        },
@@ -1361,7 +1387,7 @@
         "name": "Interest utilisation automation",
         "covers": "Calculation methodology and finance approval",
         "owner": "Finance",
-        "finish": "20 Apr 2026",
+        "finish": "April 2026",
         "status": "done",
         "id": "cap7-P1-M3"
        },
@@ -1369,7 +1395,7 @@
         "name": "Stakeholder validation",
         "covers": "Treasury validation of the outputs",
         "owner": "Treasury",
-        "finish": "10 May 2026",
+        "finish": "May 2026",
         "status": "done",
         "id": "cap7-P1-M4"
        },
@@ -1377,8 +1403,9 @@
         "name": "Reporting and analysis embedment",
         "covers": "BI integration of the utilisation report",
         "owner": "IT",
-        "finish": "31 May 2026",
+        "finish": "May 2026",
         "status": "wip",
+        "pct": 40,
         "id": "cap7-P1-M5"
        }
       ],
@@ -1399,20 +1426,20 @@
       "deliverables": [
        {
         "name": "Facility term sheet agreed with lead bank",
-        "kind": "binary",
-        "actual": null,
+        "due": "Feb 26",
+        "status": null,
         "id": "cap7-P2-D1"
        },
        {
         "name": "Covenant reporting pack rebuilt",
-        "kind": "pct",
-        "actual": null,
+        "due": "Sep 26",
+        "status": null,
         "id": "cap7-P2-D2"
        },
        {
         "name": "Legacy facilities closed",
-        "kind": "binary",
-        "actual": null,
+        "due": "Jun 26",
+        "status": null,
         "id": "cap7-P2-D3"
        }
       ],
@@ -1432,7 +1459,7 @@
         "name": "Facility review and bank shortlist",
         "covers": "Every facility held across the four banks, and a shortlist of candidate leads",
         "owner": "Treasury",
-        "finish": "Q1",
+        "finish": "January 2026",
         "status": "done",
         "id": "cap7-P2-M1"
        },
@@ -1440,15 +1467,16 @@
         "name": "Term sheet negotiation",
         "covers": "Commercial terms agreed with the appointed lead",
         "owner": "Treasury",
-        "finish": "Q2",
+        "finish": "June 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap7-P2-M2"
        },
        {
         "name": "Legal documentation",
         "covers": "Facility agreement and security package drafted and signed",
         "owner": "Finance",
-        "finish": "Q3",
+        "finish": "July 2026",
         "status": "todo",
         "id": "cap7-P2-M3"
        },
@@ -1456,7 +1484,7 @@
         "name": "Drawdown and legacy closure",
         "covers": "First drawdown, and the four legacy facilities closed",
         "owner": "Treasury",
-        "finish": "Q4",
+        "finish": "December 2026",
         "status": "todo",
         "id": "cap7-P2-M4"
        }
@@ -1477,14 +1505,14 @@
       "deliverables": [
        {
         "name": "Working capital baseline per unit",
-        "kind": "binary",
-        "actual": null,
+        "due": "Sep 26",
+        "status": null,
         "id": "cap7-P3-D1"
        },
        {
         "name": "Unit-level release plans agreed",
-        "kind": "pct",
-        "actual": null,
+        "due": "Dec 26",
+        "status": null,
         "id": "cap7-P3-D2"
        }
       ],
@@ -1522,7 +1550,7 @@
         "name": "Baseline per unit",
         "covers": "Receivables and stock position established for each unit",
         "owner": "Finance",
-        "finish": "Q3",
+        "finish": "September 2026",
         "status": "todo",
         "id": "cap7-P3-M1"
        },
@@ -1530,7 +1558,7 @@
         "name": "Release plans agreed",
         "covers": "A target and a plan agreed with every unit head",
         "owner": "Finance",
-        "finish": "Q4",
+        "finish": "November 2026",
         "status": "todo",
         "id": "cap7-P3-M2"
        },
@@ -1538,7 +1566,7 @@
         "name": "First review",
         "covers": "Progress against plan reviewed with the CFO",
         "owner": "Finance",
-        "finish": "Q4",
+        "finish": "December 2026",
         "status": "todo",
         "id": "cap7-P3-M3"
        }
@@ -1590,14 +1618,15 @@
       "deliverables": [
        {
         "name": "Review format and evidence pack",
-        "kind": "binary",
-        "actual": "yes",
+        "due": "May 26",
+        "status": "done",
         "id": "cap8-P1-D1"
        },
        {
         "name": "Reviews held with every unit",
-        "kind": "pct",
-        "actual": 66,
+        "due": "Oct 26",
+        "status": "wip",
+        "pct": 66,
         "id": "cap8-P1-D2"
        }
       ],
@@ -1617,7 +1646,7 @@
         "name": "Format agreed",
         "covers": "One review shape used with every unit",
         "owner": "Islam Saadany",
-        "finish": "Q1",
+        "finish": "January 2026",
         "status": "done",
         "id": "cap8-P1-M1"
        },
@@ -1625,7 +1654,7 @@
         "name": "First-half reviews",
         "covers": "Q1 and Q2 reviews held with all units",
         "owner": "Islam Saadany",
-        "finish": "Q2",
+        "finish": "May 2026",
         "status": "done",
         "id": "cap8-P1-M2"
        },
@@ -1633,8 +1662,9 @@
         "name": "Second-half reviews",
         "covers": "Q3 and Q4 reviews",
         "owner": "Islam Saadany",
-        "finish": "Q4",
+        "finish": "December 2026",
         "status": "wip",
+        "pct": 50,
         "id": "cap8-P1-M3"
        }
       ],
@@ -1654,14 +1684,16 @@
       "deliverables": [
        {
         "name": "All units' plans loaded",
-        "kind": "pct",
-        "actual": 70,
+        "due": "May 26",
+        "status": "wip",
+        "pct": 70,
         "id": "cap8-P2-D1"
        },
        {
         "name": "All units reporting through the platform",
-        "kind": "pct",
-        "actual": 40,
+        "due": "Jun 26",
+        "status": "wip",
+        "pct": 40,
         "id": "cap8-P2-D2"
        }
       ],
@@ -1681,15 +1713,16 @@
         "name": "Plans loaded",
         "covers": "Every unit's plan entered and checked",
         "owner": "Islam Saadany",
-        "finish": "Q3",
+        "finish": "August 2026",
         "status": "wip",
+        "pct": 60,
         "id": "cap8-P2-M1"
        },
        {
         "name": "First reporting cycle on the platform",
         "covers": "A full cycle run without spreadsheets",
         "owner": "Islam Saadany",
-        "finish": "Q4",
+        "finish": "October 2026",
         "status": "todo",
         "id": "cap8-P2-M2"
        }

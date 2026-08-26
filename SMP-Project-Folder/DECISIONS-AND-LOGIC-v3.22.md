@@ -13045,7 +13045,769 @@ screen every time, the box at 840 / 700 / 600 / 500px.
 
 ---
 
-## 101 · The onboarding tour (v3.30, spec 016)
+## 101 · Reordering comes back, as its own grant (v3.30)
+
+> *"I will give it back — shall we align where to visually have it? I was
+> thinking it can land in the same place of the pen for the non-SMO roles, and
+> it can be another shape that indicates arrangement, and it's only in the
+> strategy plan part which mirrors in the reporting and performance."*
+
+**This reverses §94.3, and every word §94.3 wrote down stayed true.** That
+section closed reordering to the office on the argument that the order of a
+plan is as much a part of what was agreed as its words — and it found, while
+doing so, that `lib/authorize.js` compares row ids **in order**, so every drag a
+unit head had ever made was already being refused on save. The rows moved on
+screen and the save came back refused. §94.15 then removed the explicit Arrange
+button, because its stated audience — *people who can arrange but have no pen* —
+had just been emptied.
+
+What changes is not that reordering stopped being a plan decision. It is that
+**the plan's ORDER is the unit's to decide, while the plan's WORDS remain the
+office's.**
+
+### 101.1 It is a separate rule, not a hole in `mayAuthorPage()`
+
+The cheap fix would have been to let these roles through the authoring gate.
+That would have handed them the words as well — the exact fault §94 existed to
+fix. So `mayArrange()` is its own function in `lib/rules.js`, and the two
+questions are asked separately on both sides:
+
+| | Authoring | Arranging |
+|---|---|---|
+| Rename, add or remove a row | the office | — |
+| Move a row | the office | **and whoever holds the thing** |
+
+**Who, in Islam's words:** *"no, only custodian and BU owner"*, and of a
+supporting function's Projects pane, *"same"*. A function has no BU owner, so
+the holder there is its **head**; a custodian attached to a function holds it
+the same way. `ARRANGE_ROLES` is `["owner", "custodian", "fnhead"]`.
+
+**A Contributor never** — asked directly and answered no. **A group or company
+CEO only if they also hold one of those**, because reaching a unit is not
+holding it (§37). Measured rather than assumed: `ceo` comes back false on every
+unit, and the one contributor in the seed comes back false on their own.
+
+**The grant still has to say edit.** This narrows from the matrix, it never
+widens: a tenant that has closed a unit's plan to its own custodian keeps it
+closed.
+
+### 101.2 The authoriser had to learn a new shape
+
+`same(idsOf(a), idsOf(b))` is an **ordered** comparison, so a reorder and a
+rewrite were indistinguishable — both simply "the ids are not the same". That
+one line is the whole of why §94.3's drags failed silently.
+
+`reordered()` answers **by set**, not by sorting and comparing: a list holding
+the same id twice would sort-compare equal to a list holding it twice in the
+other order, and a reorder is the one classification where a duplicate id must
+not be waved through. An all-null pair — the group's six objectives, which have
+never had ids (§96.4) — is never called a reorder, because it cannot be told
+apart from any other all-null pair.
+
+A reorder classifies as **`arrange`** and is authorised through `mayArrange()`.
+Anything else about the list is still `unitPlan`.
+
+### 101.3 The control: Islam picked the arrows
+
+Settled from a mockup made of the **real platform** — the built file driven to a
+unit's Plan pane, each candidate injected into the live pane, so both sides of
+the comparison were the same build (§41.9, §96.6). Three candidates:
+
+| | | |
+|---|---|---|
+| **A** | The grip mark | Recommended: it wears the same mark as the handles it turns on |
+| **B** | Up-down arrows | **Chosen** |
+| **C** | The word, in the corner | Ruled out by measurement — a 28px circle becomes a 74px pill in a band with 34px of clearance |
+
+**Recorded, not re-argued.** The cost of B is that it is a generic glyph
+matching nothing else on the page, so the `title` and `aria-label` carry the
+whole meaning and are not decoration. If it confuses anybody, A is a one-line
+change: the slot, the states and the wiring are identical.
+
+**It shares the pen's slot and never appears beside one.** §94.15's argument
+survives in the direction that still matters — the office arranges through the
+pen, so drawing both would put two controls that do the same thing in one
+corner. `paneActs()` is the one builder, because the unit's Plan pane and a
+capability's Projects pane had that line written twice and a third would have
+been written the day somebody added a pane (§53.5).
+
+**Nothing was needed for Performance or Reporting.** Islam: *"it's only in the
+strategy plan part which mirrors in the reporting and performance."* Exactly
+so — the order **is** the array, so both already follow.
+
+### 101.4 What proves it
+
+**The screen and the rule are asked separately and compared** — that mismatch is
+what shipped §94.3's silent refusals, so `src/checks/plan-arrange.py` asks
+`SMPRules.mayArrange()` alongside every assertion about a drawn control, and
+asserts **both ends** for five viewers: the control that should be there and the
+one that should not (§94.2). The button is **pressed**, not merely found
+(§70, §93.4), and pressing it must produce handles — 0 → 13 — because a control
+wired to nothing renders perfectly (§96).
+
+`scripts/test-authorize.js` gains section 13, and its most important
+assertions are the ones that would fail if this became a hole rather than a
+door: **a holder still may not rename or remove a pillar, and may not reorder
+another unit's.** It also asks the classifier directly, because every other
+assertion would pass if `arrange` were classified as something nothing guards
+(§94.5). 165 → 181.
+
+**Both failure modes were proved to fail before being trusted**: with
+`mayArrange` forced false, 6 failures; with `reordered()` forced false — the
+§94.3 state exactly — 5.
+
+---
+
+## 102 · Focus measures get a switch (v3.30)
+
+> *"For the focus measures case, give me the option to turn off in the product
+> settings in general to verify with the CEO later, and off means it disappears
+> across the platform."* — and, asked whether off should also forget: *"off and
+> on brings back history yes."*
+
+### 102.1 It hides; it never deletes
+
+`cycle.focus` keeps every mark while the feature is off, and turning it back on
+restores the lot. **§44's rule for the third time: a switch that destroys data
+is not a switch, it is a delete with a friendly label.** Measured rather than
+asserted — 9 marks stored, 0 drawn while off, 9 drawn again after.
+
+**Stored as an absence.** `GROUP.focusOff` exists only while the feature is off,
+so *on* is what a tenant that has never been asked already has, and turning it
+back on **deletes** the key rather than writing `false` (§50.6 — a reader that
+creates what it looked for puts a phantom change into every save). Only `true`
+switches it off, so a stale `false` from anywhere cannot hide the feature.
+
+**Named `focusOff`, not `focus`**, because `CYCLE.focus` is the marks map one
+level away, and two things called focus is exactly how §87's twins get made.
+
+### 102.2 One gate, because there was already one chokepoint
+
+Seven surfaces read focus — the mark beside a measure, the highlighted row on
+two tables, the unit's tally, the Focus board — and every one of them goes
+through **`isFocus()`**. So *"off means it disappears across the platform"* is
+one condition there, not seven that drift apart.
+
+**`focusMarked()` is the raw map and has exactly one caller**: the Focus
+measures page's own ticks, which must keep showing what is stored while the
+feature is off — otherwise the page would look emptied and turning it back on
+would look like recovering from a loss rather than lifting a curtain.
+
+### 102.3 The switch is not a bigger version of a mark
+
+Marking a measure is **the CEO's and the SMO's** (§37). Turning the whole
+feature off is **the SMO's alone**, classified `setup` beside `naming` — a CEO
+who may mark a measure must not be able to remove the feature for the tenant,
+and a switch anybody could flip would be no switch at all. Asserted as a pair,
+because the fault this guards against is the switch quietly inheriting the
+marks' permission.
+
+**And the page carrying the switch stays reachable while it is off** — §61's
+trap exactly: if turning focus off removed the page with the switch on it, the
+only way back on would be to turn it on first. The switch sits on the page it
+governs (§90's shape, §98's row), never behind a Setup page of its own (§32).
+
+### 102.4 The world is TWO allow-lists, one behind the other
+
+**The bug worth the whole section.** `focusOn()` read the setting, the page was
+wired, the writer worked — and switching it off changed nothing at all.
+
+`worldOf()` does not pass the group through; it **lifts named keys off it**
+(`sets`, `claims`, `naming`), and `W()` behind it **names the keys it keeps**.
+So a group setting has to be added in **both**, and forgetting either fails
+**silently and in the safe-looking direction**: the reader sees `undefined` and
+answers the default, which for a switch means *on*. Nothing throws, the page
+renders, and the control does nothing.
+
+**§44 recorded this once already** — *"the browser's `world()` carried `sets`
+but not `claims`, so the page answered from a world with no requests in it"* —
+and it arrived here by a different road: not a client/server difference this
+time, but two filters in the same function, in the same file, on the same
+object. **Found by driving the real page**, not by reading; the unit tests would
+have passed either way, because they build worlds by hand.
+
+### 102.5 What proves it
+
+`src/checks/focus-switch.py` asserts the three things that fail differently:
+**every surface goes dark** (not just the mark a narrower check would look
+for), **every mark survives** as a counted number before and after, and **the
+page carrying the switch survives being switched off**, with the switch
+*pressable* rather than merely present (§70, §93.4).
+
+`scripts/test-authorize.js` section 14 asserts the pair — the SMO may flip it,
+the CEO may not, and **the CEO may still mark**, because locking something down
+proves nothing unless the right thing stayed open. It also asks the classifier
+directly, since every other assertion would pass if the switch were classified
+as something nothing guards (§94.5). 181 → 190.
+
+**Both failure modes proved to fail first**: `focusOn()` forced true, 1 failure;
+the switch left unclassified, 3.
+
+
+*(§100 and §101 are another session's — the office chat corrected by use,
+and reordering coming back — and they reached `main` first, so they keep the
+numbers. This and everything under it was written as §100–§104 on its branch.
+Fourth renumber in two days; the rule is unchanged and is simply whoever lands
+first.)*
+
+---
+
+## 103 · The plan's own shape, and a due date that is read (v3.27)
+
+Islam, stepping back from the client's data: *"let's consider that if we don't
+really have a current template and we need to refine the template regardless of
+the data that we have … let's build together how the plan should look and then
+we will adjust the templates and upload templates and everything accordingly."*
+
+So the shape was drawn before anything was built —
+`design-mockups/plan-shape/2026-08-25_project-plan-anatomy.html` — showing what
+a project, a deliverable, an outcome and a milestone each carry **today**, read
+out of the platform rather than wished for, every field against the sheet and
+column it lives in, with four questions carrying a recommendation each.
+
+**Two rules were stated first, because everything below them follows from
+them**: a plan says what was committed to and never holds a result (actuals,
+statuses and notes arrive through a cycle), and the project's Timeline decides
+how every date under it reads.
+
+### 103.1 The milestone keeps its name — the LABEL was the fault
+
+I recommended collapsing `Milestone` and `What it covers` into one Description,
+on the argument that two free-text columns side by side is how a field ends up
+holding the wrong thing. Islam: *"we need the milestone name before the
+description."*
+
+**He is right and my recommendation was solving the wrong half.** A milestone
+IS identified by a short name and explained by a line under it — the rail, the
+deck's sub-line and every plan in the demo use exactly that pair. What was
+wrong was never the second column; it was that it asked a QUESTION (*What it
+covers*) where every other table in the product says **Description** — the word
+the tactics sheet has used since the import template existed. So the pair
+stays, in his order, and only the label changes.
+
+`covers` keeps its spelling (§58, §65): a stored field is an identifier, a
+column heading is a label, and the workbook writes *Description* and reads
+either.
+
+### 103.2 A due date is read against its project's timeline, and never refused
+
+A live plan arrived with **`Done` and `Pending` in the Due date column** —
+statuses, which belong to the reporting cycle — and the platform said nothing,
+because the field takes any text. `dueFits()` now asks whether what arrived
+matches the project's own units: a project run by quarters wants `Q1 2026`, one
+run by dates wants `20 Mar 2026`, and a project with no timeline accepts either
+because the platform does not know which was meant and **inventing an answer to
+complain about is worse than staying quiet**.
+
+**IT IS A NOTICE, NEVER A PROBLEM**, which is the same weight the overrun rule
+carries and for the same reason: §22's contract is that an upload AUTHORS a
+plan rather than arguing with it, and a file refused over this column is a file
+nobody can fix without the file. The message **names what the value is rather
+than calling it invalid** — telling somebody their status is invalid does not
+tell them where a status goes — so `Done` gets *"that is a status, and a status
+is reported each cycle rather than planned"*.
+
+`Date.parse` is the reader, deliberately: it is the same one `projOverruns()`
+and the overrun notice already use, so a date this calls good is a date the
+platform can compare. **A bare quarter with no year passes**, because 55 of the
+60 milestones in the worked example are written that way and they are not
+wrong — the project's own start and end carry the year.
+
+### 103.3 The Excel date format was agreed and then found impossible
+
+The recommendation Islam approved included *"the template gets a real date
+format on the cell"*. **It cannot, and the reason is worth recording rather
+than quietly dropping**: one column holds `Q3 2026` for a project run by
+quarters and `20 Mar 2026` for one run by dates, and a cell format applies to
+the COLUMN. Formatting it as a date would make every legitimate quarter look
+broken in Excel, and Excel needs a serial number rather than text for a real
+date cell in any case.
+
+What replaces it is the half that actually catches `Done`: the **Read me** says
+what belongs in the column in the sheet the person is filling in, and the
+**upload says what it noticed**. Recorded as a reversal of a recommendation I
+made, not of a decision he made.
+
+### 103.4 Two questions were not understood, and that is a finding
+
+Islam answered *"What do you mean?"* to the deliverable-indicator question and
+*"Not sure what you mean"* to the missing-project-field one. **Both were
+written in the platform's vocabulary rather than in his** — "does a deliverable
+need an indicator of its own" is a sentence that only means something to
+somebody holding the data model. They are re-asked in the next round in terms
+of a real project on a real screen, which is the whole of CLAUDE-RULES' "explain
+in simple, non-technical words" and is easy to fail while sounding precise.
+
+
+
+## 104 · One table, one row shape (v3.27)
+
+The section that reversed itself twice in a day and came out simpler than
+either version. It ran through eight rounds of refinement, and the argument
+that decided it was Islam's: *"wait, I over complicated things."*
+
+### 104.1 The split is undone, and undone for a better reason
+
+§99 cut the deliverables-and-outcomes table in two because `Direction`,
+`Target` and the date had **nothing to say for a deliverable** — the em-dash
+was the table asking a row a question its kind could not answer.
+
+Islam's fix is better than mine: **give a deliverable a real direction and a
+real target.** Its direction is `=` and its target `Y/N`, written by the
+platform rather than asked of the person, so those cells now have ANSWERS. The
+dead cells go because the questions became answerable rather than because the
+table was cut in two. **Fewer parts, same problem solved** — the band, the
+per-half column strip and the colspan arithmetic that kept two halves aligned
+all go with it (§24).
+
+**The Type column comes back**, and that is coherent rather than a reversal of
+a reversal: §99 removed it because the BAND said which kind a row was, and with
+no band something has to.
+
+**The direction is `=` and not `≥`**, which is the one thing he asked for that
+grew a second half. He asked to change the target from `100%` to `Y/N`; with a
+`Y/N` target there is nothing to be greater than, and a blank cell would have
+put back the one thing this merge removed.
+
+### 104.2 A deliverable and a milestone are reported the same way
+
+Not started · In progress · Delivered (Completed, on a milestone), **with a
+per-cent that types itself at both ends**: 100 for the finished word, 0 for the
+unstarted one, and a box only in the middle — which is the whole of *"in
+progress requires a % of completion"*. A box that can contradict the word
+beside it is a box that eventually will.
+
+**I argued against a third state** in §99.8, on the grounds that a state with
+no number forces the score to invent one. **Requiring the per-cent is what
+answers that**, so the objection is gone rather than overruled — a distinction
+worth keeping, because the argument was right and its premise stopped holding.
+
+`kind` is deleted. With one way to report, the plan has nothing left to choose
+about how a deliverable is measured, and a column offering a choice that
+changes nothing is worse than no column.
+
+### 104.3 A due date comes back, and reverses §53.4 on its author's own reason
+
+§53.4 dropped `deliverables.due` on Islam's argument: *"it's not mandatory as
+it's a full project due — it's delivered when the project ends."* His argument
+now is that **some deliverables land before the project ends**, which is simply
+more true of real plans. Migration 024 puts the column back that 016 dropped.
+
+**The owner does not come back.** §53.4's other half — *"there is no owner on
+the deliverables, the department is responsible"* — is untouched.
+
+### 104.4 One reader, four written shapes, and the cycle read the same way
+
+`monthsOf()` resolves `July 26`, `W3 Mar 26`, `Q3 2026`, `31 May 2026`, `H1
+2026` and `FY26` to **months since year zero** — the coarsest unit any of them
+share, because a week inside March is still March.
+
+**The old reader could not see a date at all.** `outcomeDue()` compared quarter
+to quarter, so it read `31 Mar 2026` as nothing — and when the cycle was called
+`H1 2026`, which is what the demo cycle is called and what a half-yearly review
+is always called, it answered **"due" for everything**.
+
+**The cycle's month comes from `REVIEW.to`**, which has said "Jun 2026" since
+the review model existed, rather than from parsing its NAME. The name is a
+label somebody types; `to` is the field that means it.
+
+`Date.parse` is deliberately the LAST resort rather than the first: it reads
+"Q3 2026" as nothing, but it also reads bare numbers and stray words as dates
+in ways that would quietly turn a typo into a deadline.
+
+### 104.5 A row is asked for only once it is due, and the tally changes meaning
+
+Not due is quiet, leaves the `reported` tally and the submit gate, and counts
+toward no score. Overdue is loud. **They are opposite readings and must not
+look alike.** The control stays live either way — anyone who wants to report
+early can, which is why this is a label and not a lock.
+
+The tally becomes **"what you owe this cycle"** rather than "everything in the
+plan". Submitting gets easier early in a project and no easier late, which is
+the right way round: a unit is chased for what is late, never for what has not
+started.
+
+### 104.6 Nobody's score moves, and it is asserted rather than promised
+
+Every deliverable already recorded maps onto the three states at exactly the
+figure it scores today — `yes`→Delivered 100, `no`→Not started 0, `100`→100,
+`0`→0, `57`→In progress 57. Migration 024 is score-preserving by construction.
+
+**Execution changed shape and not value.** It was `done ÷ total`; it is the
+mean of what each milestone reads. Those are the same arithmetic while no
+per-cent has been entered, which is every tenant on day one — and
+`checks/project-tables.py` **strips every per-cent and compares the two
+formulas across all eight capabilities** rather than taking my word for it. The
+counts stay beside the figure: "5 of 12 completed" and "42%" answer two
+different questions.
+
+### 104.7 Two `var MONTHS`, and it failed in the safe direction
+
+`monthIndex("July")` returned **−1**, so `monthsOf` read every month as
+unknown, so `dueThisCycle` read null as *always asked*, so **every row on every
+pane quietly read as due** — the exact fault the old quarter-only reader had,
+restored by accident on the day it was removed.
+
+The cause is §56.7 in a third place: **there is already a `var MONTHS` in
+`config-data.js`**, 1,400 lines below, holding the same twelve words
+CAPITALISED for formatting a date. Two `var`s of one name in one scope is one
+binding, the later wins, and `indexOf("jul")` against `["Jan",…]` is −1.
+
+**Nothing threw.** The page rendered, the sweep was green, and only a check
+that asked the reader fifteen specific questions found it. *A name collision in
+one global scope fails silently and in the direction that looks correct* —
+which is the third time this file has recorded that sentence, and the second
+time this week.
+
+### 104.8 Not due is a label, not a lock
+
+The comment over the reporting pane said it in so many words, and had since the
+day it was written:
+
+> *A ROW NOT DUE THIS CYCLE IS NOT ASKED, and says so rather than sitting there
+> as an empty box somebody forgot. The control is still live: anyone who wants
+> to report early can, **which is why this is a label and not a lock**.*
+
+The code directly under it did the opposite. `if (notDue)` **replaced** the
+picker with the words *Not asked*, so the one act the sentence promised — and
+the one Islam had asked for outright, *"they can report on it exceptional"* —
+was the one act the pane refused. **A comment can describe an intention the
+code never carried out, and nothing in a build compares the two.**
+
+The same gate on Performance had a second face, and it was worse, because it
+made the screen disagree with the number beside it. `projDeliverySide()` averages
+**every** deliverable, due or not — so FIN01's fourth row (due Dec 26, delivered)
+was counting 100 toward the project's 63%, while the pane printed a dash against
+it. *A figure that counts and is not shown is a screen arguing with its own
+score.*
+
+**The gate moves from "is this due" to "has this been answered."** A not-due row
+is quiet until it carries a reading and says what it carries the moment it does.
+One rule, four places — the two panes × the two tables — which is why
+`notDueCell()` and `reportedAny()` exist rather than the predicate being written
+out four times and drifting.
+
+**THE FIRST CHECK PASSED ON A REVERTED BUILD.** Written against FIN01 as it
+stands, it never reached three of the four paths: that project's five milestones
+are all due, so putting the milestone lock back changed nothing the check could
+see, and it printed *ok* on the broken build. §94.2 from the inverse side — every
+other assertion here asks whether a cell is **answered**, and a row replaced
+wholesale by the word *Not asked* answers every cell, which is exactly why all
+of them stayed green while this was true. The check **makes** the four cases now
+(not due and silent, not due and answered early, on each table), and each of the
+three reversions was put back one at a time and watched to fail before the green
+run was believed. The third needed an assertion the first two did not: **Status
+and % must agree about whether a row was answered** — a status reading *Not due*
+beside a figure is the same fault wearing the other cell.
+
+**Deliberately not widened**: the unit's tactic table has the identical lock and
+is untouched, because it was not what was asked about. It is named here so it is
+a decision rather than an oversight.
+
+### 104.9 The score column says what it holds, not what it is measured in
+
+Islam: *"for the deliverables and outcomes % column name it Performance and for
+the % column in the milestones name it Progress."*
+
+**`%` is a unit, not a name.** It says what the cell is measured in and nothing
+about what it measures — on the one column somebody runs their eye down. §104
+made both headings `%` in the same move that put the two kinds of row into one
+table; that was right for the row shape and wrong for the heading, and it is the
+third word this column has worn (`Reads` → `Performance` in §99.8, `%` in §104,
+and now back to two words, one per table).
+
+**Two tables, two numbers, two words.** They are not the same figure wearing one
+heading:
+
+* **Performance** — a deliverable or an outcome answers *how well*. The word is
+  already the product's for exactly this number: the card above the table says
+  *Project performance*, and the group's projects table has said *Performance*
+  since it existed. §99.8 settled it once, against my own recommendation of
+  *Score*, and §104 lost it by accident rather than by argument.
+* **Progress** — a milestone answers *how far*. §99.8 recorded *Progress was
+  never a candidate: the milestone table below uses it for a STATUS* — that was
+  true when a milestone's only column was `Status`, and it stopped being true
+  when the milestone table gained a per-cent of its own. **The twin (§87) is
+  gone, so the objection goes with it**: the two columns now read *Status* and
+  *Progress* and mean different things in plain English.
+
+`DX_PCT` and `MS_PCT` are declared once, beside `DX_HEADING`, because the
+Performance pane, the Reporting pane and the review deck are **three surfaces
+onto the same column** and the third is the one that gets left behind (§59).
+
+**The check asks for the two names, not for either.** Accepting *Performance or
+Progress* anywhere would go green on a build that had put the same word on both
+tables; it asserts each table's own, and that neither is left as the bare unit.
+
+**Measured, not assumed:** *Performance* is eight characters where `%` was one,
+on the widest table in the product. Swept at 1920 / 1500 / 1280 / 1000 (§27.1):
+no header wraps, no table scrolls sideways, no page does, and the deck's seven
+project tables measured in **present mode** — the only place a slide has a
+width at all (§69) — overflow neither across nor down.
+
+**Flagged, not changed:** the review deck still carries a **Due date** column on
+its deliverables-and-outcomes table, which the three panes lost in §104.8. The
+ask named the tables and the upload templates; the deck was not mentioned, and a
+column present on a projector and absent in the product is exactly the drift
+this file keeps recording. It is Islam's call, so it is written down rather than
+quietly aligned.
+
+### 104.10 An In progress with no number is not nought
+
+Islam: *"in the reporting in the deliverables or the milestones if someone
+enters in progress they need to set the % of the progress or performance. is
+that what's happening now?"*
+
+**Half of it was.** Driven rather than read, on FIN01:
+
+* the box **did** open — picking *In progress* replaces the read-out with an
+  empty per-cent box, on both tables;
+* nothing said it was owed. An empty box beside an empty Note box looks
+  optional, and the only signal was the tally quietly dropping 9/9 → 8/9;
+* **and the score did not wait.** `statusReads()` returned `0` for a wip with
+  no per-cent, so the average **counted** it: project performance 63 → 50 and
+  Execution 49 → 41 **the instant the dropdown changed**, before the person who
+  changed it had said anything at all.
+
+The third is the fault, and it is the one §99.8 had already ruled on from the
+other direction: *an In progress state with no number forces the score to
+invent one* was the reason a reporter is not allowed to pick how a deliverable
+is measured. The same sentence applies to the state itself.
+
+**It returns `null` now**, so `sideAvg()` leaves the row out the way it already
+leaves out an outcome nobody has measured. The row is not forgiven — it is
+**outstanding**: `statusPending()` names the state, the tally counts it as
+unanswered, and both panes mark it *Needs a %* in the same `.missing` the plan
+page uses for a target nobody set. One idiom for "this is owed", not a second.
+
+**`x.pct === ""` had to be named explicitly.** `Number("")` is **0**, not
+`NaN` — so an empty box would have gone on reading as a genuine nought through
+a fix aimed at exactly that. A typed `0` still reads 0, and the check asserts
+both.
+
+**`statusGiven()` is now `statusReads(x) != null`.** Two predicates that had to
+agree about the same row are how *given* and *reads* drift apart; there is one
+question, asked of the reading.
+
+**`capExec()` keeps its `|| 0`, on purpose.** A milestone **nobody has touched**
+is counted as nought, because `projMilestones()` calls it *Not started* — that
+is what it is, not what we assumed. Only a milestone halfway through a sentence
+leaves, and `pending` is returned beside the figure so the count is answerable.
+
+**THE PARITY CHECK HAD TO BE REWRITTEN, NOT SILENCED.** §104 was sold on
+*nobody's score moves*, proved by stripping every per-cent and comparing the
+average against the `done/total` it replaced. That fixture stopped modelling
+the old formula the moment this landed — a stripped wip now leaves the average
+instead of counting nought — so it went red on all eight capabilities and would
+have reported a deliberate decision as a regression for ever. It settles every
+*In progress* as well as stripping the per-cent, which is what a tenant
+actually looked like the day §104 shipped. **And the claim for today is asserted
+separately**: all 18 In progress milestones in the demo carry a number, so
+`pending` is **0** across every capability and this change moved no figure that
+exists.
+
+**WHAT WAS ASKED FOR AND IS NOT BUILT — the refusal.** Islam chose *"nothing,
+and refuse the submission"*: excluded from the average **and** Submit refuses
+while any row is In progress with no per-cent. **A capability's Reporting page
+has no Submit button.** Measured, not assumed — one `data-submit` exists in the
+whole platform and it is on a **unit**, and a function's reporting bar carries
+only the tally and *Save draft*. So there is nothing to attach the refusal to
+on the one page these rows live on.
+
+That is worth more than a note, because **`reportPending()` already returns
+true for an `fn:` target** — it puts the dot on a function's Performance tab
+saying *this subject owes a submission and you could make it*, and there is no
+control that would clear it. §69's own rule, broken by the thing that wrote it.
+Not built here, because a function's Submit is a feature and not a fix, and
+what it means for a function to submit — one function, or one per capability —
+is a decision.
+
+## 105 · A supporting function submits its report (v3.27)
+
+Islam: *"We need have a submit to SMO in the capabilities projects as well is
+that set?"* It was not — §104.10 had just recorded that the refusal it needed
+had nothing to attach to. What that section missed, and what looking properly
+found, is that **everything except the button was already built**:
+
+* `canSpeakFor()` has an explicit `fn:` branch and answers correctly;
+* `CURRENT_REPORT_KEY` is already the `fn:<key>` string;
+* `reportSectionState()` already draws the *Submitted* badge from it;
+* `reportPending()` already lights the dot on the tab;
+* **`lib/authorize.js` already classifies the change as `reportState` with an
+  explicit `fn:` branch** and refuses anyone who may not report for it.
+
+**§71's fault exactly** — the back half built, the control never drawn — and it
+is why the dot on a function's Performance tab has been saying *this subject
+owes a submission* with nothing on the page that would clear it. §69.9's own
+rule, broken by the section that wrote it.
+
+**One submission per function, keyed `fn:<key>`.** Not one per capability: that
+key shape is what all five of the above already expect, and a second shape
+would mean a second answer in five places. It is also the honest unit of the
+act — a unit submits its whole plan rather than one pillar at a time.
+
+**THE REFUSAL IS ONE FUNCTION FOR BOTH SIDES.** `submitBlockers(target)` takes a
+unit key or an `fn:` key and `submitRefusal(target)` says it in words, because a
+unit and a function are the same product (§53.5) and two Submits explaining
+themselves differently is precisely the drift that rule exists to stop. The old
+handler read `UNITS[b.dataset.submit]`, so wiring a function's button to it
+would have submitted `undefined` and reported nothing in the way.
+
+Two rules stop it, and the second is new:
+
+1. **a figure at risk or off track with no note** — the unit's existing rule,
+   which needed `needsNote()` to learn how to read a deliverable and a
+   milestone. `rowReads()` is that one reader (a tactic is a ratio, a
+   deliverable and a milestone are a status-and-per-cent, everything else
+   carries `progress`);
+2. **a row that said In progress and never said how far** (§104.10) — the score
+   leaves it out, so submitting would file a report with a hole in it.
+
+Measured before it was built: **every function is blocked by rule 1 today, and
+so is every unit but Nigeria.** The demo behaves identically on both sides,
+which is the evidence that the generalisation is faithful rather than
+over-strict.
+
+#### 105.1 The board, because a submission nobody can see is half a feature
+
+Setup › Running the cycle listed units only. Functions are rows in the **same**
+table — "who has reported" is one question — with the totals at the top
+counting them.
+
+#### 105.2 Three columns are three layers, not two vocabularies
+
+The first drawing gave the function half its own column strip: *Key objectives ·
+Deliverables & outcomes · Milestones*. **It collided.** A strip's column widths
+come from the table's own `<thead>` — a unit's words — and `DELIVERABLES` alone
+is wider than the Measures column at **every width from 1920 down**, so it ran
+straight over *Milestones*. Wrapping could not save it: a word that does not fit
+does not fit.
+
+The better answer was underneath the problem. A unit's three columns are *what
+we are judged on · what we measure · the work*. **A function has the same
+three** — key objectives; its **outcomes** (a direction, a target and an actual:
+that is a measure); its **deliverables and milestones** (work that happened or
+did not). Mapped onto the same headings the counts become **comparable down the
+page**, which is more than the strip ever bought, and the vocabulary is named
+once in the band above, where nothing can collide. Each count cell carries the
+specific words in its hover.
+
+Two measuring lessons on the way, both §88's rule arriving somewhere new:
+
+* **A table cell returns ONE client rect however many lines it holds**, so
+  asking a cell how many lines it has always answers one. A `Range` over its
+  contents gives a rect per line, and the fault being hunted — one line running
+  over the cell beside it — is *one line, wider than the box*. The first
+  detector reported four false positives at 1000px because of this.
+* **`tr.dxband th` carried `white-space: nowrap`**, which is right for a short
+  band label and wrong for a band that spans the whole table: at 1000px the
+  sentence pushed the table 8px wider than its box rather than taking a second
+  line. The 2px the table still overflows at that width is **pre-existing and
+  measured as such** — identical with the function half removed.
+
+`dxband` was orphaned when §99.7 removed the split that used it (§24 would have
+had it deleted). It is the right shape for exactly this, and it is used again.
+
+#### 105.3 The server was never asked a question
+
+`scripts/test-authorize.js` had no test for an `fn:` submission at all — there
+was no control, so no test had a reason to exist. It asks **both ends** now
+(§94.2): the function's own head may submit, and the head of another may not.
+Without the second, the branch could accept anybody and the first would still
+print *ok*. Proved by flipping it and watching it fail.
+
+#### 105.4 "1 need notes"
+
+Flagged first rather than fixed, because correcting a label is Islam's call
+(rule 1c), and then corrected on his go-ahead. It is the unit half's wording
+and it has been wrong for as long as that column has existed — **unnoticed
+because it was rare**, and §105.1 put it on seven more rows where it stopped
+being rare. *A defect can hide behind how seldom it is reached, and adding rows
+is a way of finding one.*
+
+`notesOwed(n)` is one function, because two halves of one board saying it
+differently is the exact fault §105.2 was just built to avoid (§53.5). Measured
+at 1440 / 1280 / 1000: the longer string wraps nowhere and the table is no
+wider than it was (the 2px it overflows at 1000px is the pre-existing one, and
+was measured with the function half removed).
+
+## 106 · What the merge does to a plan already uploaded (v3.27)
+
+Islam, before merging: *"what will happen to the previously uploaded plan —
+should we resolve the changes here or is there a way to resolve the uploaded
+data against the new format and templates there?"*
+
+**Nothing is deleted.** Migration 024 remaps a deliverable's `kind`+`actual`
+into `status`(+`pct`) and is score-preserving by construction; outcomes, key
+objectives, notes and milestone statuses are untouched. Two columns are NEW,
+so every existing row has them empty: `deliverables.due` and
+`milestones.pct` — and a milestone never *had* a per-cent to migrate, because
+the old model did not ask for one.
+
+**Two things change on day one, and the first is not small.**
+
+#### 106.1 Execution rises, on every capability
+
+Measured on the demo with every milestone per-cent stripped, which is exactly
+the shape of a tenant that has been running on `main`:
+
+| Capability | today | after the merge |
+| --- | --- | --- |
+| Operational Excellence · People · Innovation and Tech | 50% | **71%** |
+| Brand Positioning · Customer Centric · Strategy | 40% | **67%** |
+| Product Mindset | 33% | **50%** |
+| Financial Infrastructure | 42% | **50%** |
+
+Between **+8 and +27 points**, all eight. Nothing is wrong: today an *In
+progress* milestone reads **nought**, and §104.10 made it **outstanding** —
+excluded from the average until it says how far. The figure settles as the
+per-cents arrive. But it rises silently, and *a score that moves for a reason
+nothing on the page states is a score nobody can defend.*
+
+So the Execution card prints what it is built on: **`5 of 12 milestones · 2 not
+counted yet`**. `capExec()` has returned that count since §104.10 and nothing
+showed it. Only drawn when there is one — a card that always says *0
+outstanding* is noise on every capability that has nothing outstanding.
+
+#### 106.2 A due date that is not one, in a plan already stored
+
+`Done`, `Pending` and a bare `Q3` stay exactly as entered, show in the Due date
+column, and read as **always due** — the safe direction, and still wrong. The
+upload has warned about this since §103; **nothing has ever looked at a plan
+already in the database**, so a tenant that uploaded before that check existed
+is told nothing and has to find them by eye across every project.
+
+`dueNote(p)` is that half, finally built. `dueFits()` is the SAME reader the
+upload uses and the same one the product asks when it decides whether a row is
+due — a second question here would be a second definition of "a date" (§42, in
+the small). The note names the **value and the row** (*"Pending on Solution
+design"*), because "2 due dates are wrong" tells nobody which. It sits beside
+`overrunNote()`, whose shape and voice it borrows, and **the rail carries the
+count** so the project holding them can be found without opening each one:
+§93.4's rule, with the count one press from where the gap is closed rather than
+on another screen.
+
+**MILESTONES ONLY, deliberately.** A milestone's due date is on that page and
+the pen edits it, so the note points at something fixable there — verified by
+typing `March 2026` over `Pending` and watching it stick, and asserted as a
+loop that closes. A deliverable's due date is drawn on no pane since §104.8, so
+naming a bad one would send somebody looking for a control that is not there
+(§61). Its only door is an upload, which already validates it.
+
+#### 106.3 Where it gets resolved: there, not here
+
+Both are per-row facts only the client can supply, and both now have a route in
+the product: the per-cents through the reporting pane (which marks each one and
+refuses the submission until it is answered — §105), the dates through the pen
+on Strategy › Projects. Nothing needs correcting in this repository, and
+nothing should be: a plan is the client's.
+
+**Still not run:** migration 024 against a real Postgres. It is score-preserving
+by construction and the *formula* parity is asserted, but the SQL itself has
+not been executed against a live schema in this session. That is the one thing
+between here and a safe merge.
+
+## 107 · The onboarding tour (v3.32, spec 017)
 
 > *"For first time users we need some orientation flow that takes them through
 > the platform — the concept of highlighting some areas while dimming the rest
@@ -13060,17 +13822,17 @@ Settled over four reviewed revisions of a working mockup before a line of
 decisions below are reversals of something drawn first**. None of them could
 have been argued in the abstract; each was obvious the moment it was on screen.
 
-### 101.1 The five decisions
+### 107.1 The five decisions
 
 | # | Question | Answer |
 |---|----------|--------|
 | 1 | One tour or a story per role? | **Per role.** First release: the strategy custodian and the business unit / function owner. |
-| 2 | Does the person press the real controls? | **No — the tour walks itself.** *Reversed*, see §101.2. |
+| 2 | Does the person press the real controls? | **No — the tour walks itself.** *Reversed*, see §107.2. |
 | 3 | When does it fire? | **First sign-in**, remembered per browser; replay from the Knowledge base. |
 | 4 | What data does it show? | **Demo data**, which the tour enters and leaves itself. |
-| 5 | How does it end? | **One exit.** No Skip-tour control; the × asks. *Reversed*, see §101.3. |
+| 5 | How does it end? | **One exit.** No Skip-tour control; the × asks. *Reversed*, see §107.3. |
 
-### 101.2 The interactive tour was built, used, and reversed
+### 107.2 The interactive tour was built, used, and reversed
 
 The first alignment asked whether the tour should narrate or let people press
 the real buttons, and the answer was *"let them click, that would be more
@@ -13094,7 +13856,7 @@ Recorded as a reversal rather than edited away, because the intervening
 revisions were built under the first answer and the argument for it was
 sound — it was **the wrong answer for the audience**, not a bad idea.
 
-### 101.3 Skip tour goes, and the × asks instead
+### 107.3 Skip tour goes, and the × asks instead
 
 > *"Let's remove skip tour as the x button does the job, and on closing with
 > the x we might prompt him to never show again or skip for now."*
@@ -13107,7 +13869,7 @@ which commits on one press needs its undo where the confirmation would be.
 Not `confirm()`: a browser dialog can be silenced permanently on some other
 site (§95), and the question is about the thing already on screen.
 
-### 101.4 The spotlight has to say WHERE YOU ARE
+### 107.4 The spotlight has to say WHERE YOU ARE
 
 > *"On navigating the buttons you need to dim the rest of the space and the
 > other buttons and highlight the buttons of selection a bit to know where am I."*
@@ -13123,7 +13885,7 @@ hole per target. The click-absorber above it is TRANSPARENT and does nothing
 but swallow presses: a second dim laid over a lit control washes out the very
 thing the step is about (§68.10's family, from the other side).
 
-### 101.5 Performance opens on its numbers, and Presentation is not opened at all
+### 107.5 Performance opens on its numbers, and Presentation is not opened at all
 
 > *"On clicking performance it should show at least the first section of the
 > performance page with the numbers before pushing to the report button."*
@@ -13134,9 +13896,9 @@ The tour opens the tab itself and lights **the tab together with the three
 headline figures** before Report is mentioned — a person who has not yet seen
 what Performance *is* has no use for the button that fills it. Presentation is
 explained **in place**, its menu shut: a menu the tour opened would be a
-control the tour pressed, which is the thing §101.2 reversed.
+control the tour pressed, which is the thing §107.2 reversed.
 
-### 101.6 The engine keeps no copy of anything
+### 107.6 The engine keeps no copy of anything
 
 Three rules, and each is a fault this document already records:
 
@@ -13153,7 +13915,7 @@ re-resolves and re-places, called at the end of `paint()` beside
 `world()` in `config-data.js` is the one builder, and its own comment records
 what happened twice in an afternoon when a caller assembled the state itself.
 
-### 101.7 A step names a CONCEPT; a place spells it
+### 107.7 A step names a CONCEPT; a place spells it
 
 A unit's strategy tab is `strategy` and its plan section is `plan`; a
 function's are `fnstrat` and `proj`, and **a function has no SWOT at all**. So
@@ -13169,7 +13931,7 @@ of eight steps — a step disagreeing with itself. `checks/tour.py` caught it
 within a minute of the owner story existing, which is §53.5's argument for
 walking both sides, paid back immediately.
 
-### 101.8 A tenant's label is never inflected
+### 107.8 A tenant's label is never inflected
 
 `L("pillar","bu")` is whatever the client typed — *"Pillars"* on this tenant —
 so `+ "s"` produced ***the pillarss*** and a possessive produced ***A
@@ -13182,7 +13944,7 @@ Found by printing the nine card titles and reading them — not by any check.
 Worth recording as the limit of what a check catches: the assertions were all
 true while the words were wrong.
 
-### 101.9 Copy that names a place is a FUNCTION, not a constant
+### 107.9 Copy that names a place is a FUNCTION, not a constant
 
 §64's rule, earned again. A constant is evaluated before hydration, so a step
 naming the tenant's vocabulary would hold the *baked example's* words on a
@@ -13191,7 +13953,7 @@ step say the true thing on both sides of §53's line — *"Pillars sit on this
 rail"* on a unit, *"each project holds the deliverables it hands over"* on a
 function — with no second story to keep in step.
 
-### 101.10 What the check exists for, and how it was made trustworthy
+### 107.10 What the check exists for, and how it was made trustworthy
 
 **A tour keyed on markup that no longer exists does not fail — it passes
 quietly** (§51.11). Rename a `data-sub2`, move the Report button, and every
@@ -13218,7 +13980,7 @@ contrast measurement was proved real by wrecking the card's text colour and
 watching it report 1.6:1, because a measurement that returns nothing looks
 identical whether it is clean or blind.
 
-### 101.11 The card may cover a spotlight, and only when it had nowhere to stand
+### 107.11 The card may cover a spotlight, and only when it had nowhere to stand
 
 At full width (§94.13) a step whose subject is the whole content area leaves no
 "beside". The engine tries below, right, left, above, then docks in a corner —
@@ -13228,7 +13990,7 @@ over a button nobody can then see. The translucency is what makes the docked
 case acceptable, and it is why it exists (Islam, rev 2: *"make it a bit
 transparent in general"*).
 
-### 101.12 What it stores, and what a broken store means
+### 107.12 What it stores, and what a broken store means
 
 `localStorage` for *never*, `sessionStorage` for *skip for now* — so **a new
 sign-in is a new session** and that promise is kept by the browser rather than
@@ -13239,7 +14001,7 @@ by a date somebody has to reason about. Nothing reaches the state graph (§25,
 cannot remember the answer, so offering would mean offering on every load — and
 a tour nobody can dismiss is worse than no tour. It fails quiet.
 
-### 101.13 The cost, stated
+### 107.13 The cost, stated
 
 Per-browser memory means a new device offers the tour once more. Chosen over a
 server-side flag, whose cost is a save for the authoriser to classify for a

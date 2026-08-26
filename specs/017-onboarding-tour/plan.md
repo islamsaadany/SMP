@@ -2,7 +2,7 @@
 
 **Branch**: `claude/onboarding-flow-spec-v9g7x5` | **Date**: 2026-08-26 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `specs/016-onboarding-tour/spec.md`
+**Input**: Feature specification from `specs/017-onboarding-tour/spec.md`
 
 ## Summary
 
@@ -88,7 +88,7 @@ No violations; Complexity Tracking not needed.
 ### Documentation (this feature)
 
 ```text
-specs/016-onboarding-tour/
+specs/017-onboarding-tour/
 ├── spec.md
 ├── checklists/requirements.md
 ├── plan.md              # this file

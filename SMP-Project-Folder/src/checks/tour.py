@@ -1,4 +1,4 @@
-"""THE ONBOARDING TOUR (spec 016) — every story, as every role that gets it.
+"""THE ONBOARDING TOUR (spec 017) — every story, as every role that gets it.
 
 WHY THIS EXISTS AT ALL, and it is the whole reason the feature ships with a
 check of its own: A TOUR KEYED ON MARKUP THAT NO LONGER EXISTS DOES NOT FAIL,

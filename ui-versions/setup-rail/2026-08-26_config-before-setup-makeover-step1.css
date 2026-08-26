@@ -406,87 +406,6 @@
                        border-top:1px solid var(--line-soft);
                        border-bottom:1px solid var(--line-soft); }
   .setuprail .rgroup:first-of-type { border-top:0; }
-
-  /* ══ THE RAIL FITS THE WINDOW (§101.5) ════════════════════════════
-     Islam, on the makeover: "would the rail stay fit to the window with an
-     internal scroll down?" — and it did not. Measured before touching it, as
-     the SMO with every group open: the rail is 984px tall and pins 128px from
-     the top, so it hangs 112px below a 1000px window, 212px below a 900px one
-     and 312px below an 800px one. What falls off the bottom is Branding and
-     Email — and a control below the fold is a control that does nothing, which
-     is §90's fault by the one road §90 did not walk.
-
-     THE CAP IS SAFE HERE, AND §28.3 SAYS IT WOULD NOT BE. That rule — "the
-     sticky OFFSET may read --chrome-h, a max-height never may" — was written
-     against v2.8's oscillation, where the loop ran measured chrome height →
-     rail height → page height → scroll clamp → header CONDENSE → measured
-     chrome height. The condense was deleted in v3.3, so the loop is broken at
-     a link and not merely argued away: --chrome-h is now a constant (measured:
-     73px, identical at 1000, 900 and 800px tall). Nothing above the rail moves
-     when the rail gets shorter, which is exactly the test §100.5 applied to
-     the office's inbox a version ago and the same conclusion.
-
-     THE HEAD STAYS, THE LIST SCROLLS. Capping the whole rail and letting it
-     scroll as one would carry "Setup" and the collapse control off the top,
-     so the rows sit in `.raillist` and only that scrolls. `min-height:0` on it
-     is load-bearing: a flex child refuses to shrink below its content without
-     it, and the cap would be pushed back out by the content it is capping.
-
-     THE NUMBER IS THE PINNED OFFSET, AND THE PROTOTYPE SITS 33px LOWER. This
-     file carries the yellow "Prototype · group shape" banner ABOVE the chrome,
-     so at scroll 0 the rail's flow position is 128px while its sticky pin is
-     95px — measured, and it is the banner's own height. The cap is written
-     against the PIN, because that is where the rail spends its life and where
-     a real deployment (which has no banner) puts it at scroll 0 as well. The
-     cost is 13px of the rail below the fold at scroll 0 in the prototype only,
-     and it is self-correcting: the banner is itself 33px of scrollable page,
-     so the scroll that hides it is always available and pins the rail. Sizing
-     against the flow position instead would need JS and would waste 33px of
-     rail forever on every screen, to fix a state that lasts one scroll. */
-  .setuprail { display:flex; flex-direction:column; overflow:hidden;
-               max-height:calc(100dvh - var(--chrome-h, 118px)
-                                      - var(--rail-gap, 22px) - 20px);
-               /* Below this it stops shrinking and the page scrolls instead —
-                  §100.5's floor, for the same reason: a rail squeezed into a
-                  few rows is not navigation, and a window that short is
-                  somebody's split view rather than their screen. */
-               min-height:260px; }
-  .setuprail .rhead { flex:none; }
-  .setuprail .raillist { overflow-y:auto; min-height:0;
-                         /* A visible track rather than an overlay one: on macOS
-                            a scrollbar that only appears once you are already
-                            scrolling cannot tell you that scrolling is possible. */
-                         scrollbar-width:thin;
-                         scrollbar-color:var(--line) transparent; }
-
-  /* ── AND IT NEVER SAYS "IT ENDS HERE" (§101.6, answering §100.5) ──────
-     §100.5 refused to cap this rail six days ago, and its reason was not
-     §28.3's loop — it was that "a list that says it ends here when it does not
-     is worse than a page that scrolls." That objection is right, and it is
-     about the AFFORDANCE rather than the cap: a capped list with no sign of
-     more below is a list that lies. So the cap comes with the sign.
-
-     A STICKY PSEUDO-ELEMENT, WHICH GETS OUT OF ITS OWN WAY. `::after` is the
-     last box in the scroller's flow, so `position:sticky; bottom:0` holds it
-     against the bottom edge while there is content beneath — and at the end of
-     the scroll it comes to rest AFTER the last row, where it has nothing left
-     to cover. That is the whole trick: it is true exactly when it is showing,
-     and it needs no JS, no scroll listener and no measurement to know it.
-
-     IT COSTS ITS OWN HEIGHT, AND TRYING NOT TO BROKE IT. The first build
-     carried `margin-top:-22px` to give that height back, on the reasoning that
-     a fade must not push the last row out of reach. It does the opposite: the
-     negative margin takes 22px off the SCROLLABLE height, so the list could no
-     longer scroll far enough to reach its own end — the check named the last
-     five entries (Figure sets, Scoring bands, Terminology, Branding, Email) as
-     unreachable, which is precisely the fault this element exists to prevent,
-     arriving by the other road. The 22px is real and is paid: at the foot of
-     the scroll there is a fade's worth of blank under the last row, and the
-     last row is reachable. */
-  .setuprail .raillist::after {
-    content:""; display:block; position:sticky; bottom:0; z-index:1;
-    height:22px; pointer-events:none;
-    background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
   .setuprail .ritem { display:block; width:100%; text-align:left; background:none;
                       border:0; border-bottom:1px solid var(--line-soft);
                       padding:8px 13px; cursor:pointer;
@@ -513,18 +432,9 @@
   .setuppane .secrow button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:900px){
     .setupsplit { grid-template-columns:1fr; }
-    /* THE CAP COMES OFF WHERE THE RAIL IS NOT A RAIL (§101.5). Below 900px the
-       split stacks and this becomes a wrapping band ABOVE the page rather than
-       a column beside it — so it is no longer competing with the window for
-       height, and capping it would put a second scroll inside a page that is
-       already scrolling. `flex-direction:row` is restored explicitly: the base
-       rule turns it into a column, and inheriting that here would stack every
-       row full-width down the screen. */
-    .setuprail { display:flex; flex-direction:row; flex-wrap:wrap;
-                 max-height:none; min-height:0; overflow:visible; }
+    .setuprail { display:flex; flex-wrap:wrap; }
     .setuprail .rhead { width:100%; }
     .setuprail .rgroup { width:100%; }
-    .setuprail .raillist { display:contents; }
   }
 
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */

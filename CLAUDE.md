@@ -1317,6 +1317,9 @@ python3 build.py     # assembles strategy-management-platform.html (must be byte
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
+python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
+                                # by scrolling the LIST, and the cap does not move --chrome-h
+                                # (§101.5 — that last one is what licenses the cap at all)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1351,7 +1354,56 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
+*Last Updated: 2026-08-26 &mdash; **v3.30: the Setup makeover, step 1 &mdash;
+the words and the window** (&sect;101). Islam asked for the whole settings page
+to be rethought &mdash; design, grouping, arrangement, a search bar, the namings
+&mdash; and for HR_ERP's admin page to be considered. Settled from a mockup
+carrying the audit, two drawn structures and a per-row naming table: he chose
+**Option A**, the rail keeping the door with an Overview page opening it.
+**THE AUDIT IS IN NUMBERS RATHER THAN ADJECTIVES**: the rail is **984px tall and
+pins 128px down**, so it hung **112px** below a 1000px window and **312px**
+below an 800px one, and what fell off the bottom was Branding and Communication
+&mdash; &sect;90's "a control below the fold is a control that does nothing", by
+a road &sect;90 did not walk. **THREE ROWS CAME OUT OF ONE WORD FAMILY** &mdash;
+Messages, Send a message, Communication, in three different groups &mdash; which
+is the collision HR_ERP hit with *Announcements* beside *Communications* and
+settled the same way: **Inbox** is what the office ANSWERS, **Email** is what
+the page actually sets (the display name, reply-to, kicker and footer of what
+LEAVES), and **Terminology** is the tenant's vocabulary rather than stickers.
+**Official BU list is deliberately NOT renamed**: it is the client's own word
+(&sect;58), and the confusion with Business units is answered by a description
+beside it, not by taking their word away. The group names **answer rather than
+ask** &mdash; &sect;46 was right about the grouping and wrong about the words,
+because a rail is scanned and a question reads a beat slower than its answer
+&mdash; while **the keys do not move**, or every folded group would silently
+unfold for everybody who ever touched one (&sect;30.2). **Import and Archived
+plans become one page with two sections**, inseparable by construction since
+&sect;22 made importing an archiving act, **with each section keeping its own
+gate** so &sect;48.2's edit-only Import survives the merge. **AND THE RAIL FITS
+THE WINDOW, WHICH &sect;28.3 SAYS IT MUST NOT** (&sect;101.5): that rule was
+written against v2.8's oscillation, whose loop ran through the header CONDENSE
+&mdash; deleted in v3.3 &mdash; so it is broken at a link rather than argued
+away, and `--chrome-h` is now a constant (73px at every height swept).
+**&sect;100.5 REFUSED THIS SAME CAP SIX DAYS AGO** and its reason was not the
+loop but the affordance: *a list that says "it ends here" when it does not is
+worse than a page that scrolls.* That objection is right, so the cap ships with
+the sign &mdash; a visible scrollbar track and a **sticky fade that gets out of
+its own way**, coming to rest after the last row where it has nothing left to
+cover. **AND TWO ATTEMPTS TO BE CLEVER BROKE THE THING IT PROTECTS**: a
+`margin-top:-22px` meant to give back the fade's height took it off the
+SCROLLABLE height and stranded the last five entries, and removing it did not
+fix them &mdash; the real cause was a speculative **`scroll-behavior:smooth`**
+in the same edit, which makes `scrollIntoView` asynchronous so the check
+measured before the scroll landed. *A nicety nobody asked for broke a real
+reachability assertion, and it was not the cause I suspected first.* The check
+**asserts the problem, not the numbers**, and was **proved able to fail before
+it was trusted** &mdash; 8 failures with the cap removed. Still to build, in
+order: the **Overview page** (whose counts must come from the same functions the
+pages use, or it is a page that lies), the **rail's search**, then **attention
+pills**, last because a pill is only worth drawing once the count behind it is
+real.*
+
+*Earlier: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
 follows the window** (&sect;100.4, &sect;100.5). Two more messages from having
 the thing open, and the first was three asks in one sentence that turned out to
 be one fault seen from three sides. *"If I click outside the box minimise it
@@ -2501,7 +2553,14 @@ bought 22px on a 47px header. Gone: the listener, the `scrolled` class, every
 `body.scrolled` rule. `--chrome-h` stays and now reports a constant. Also: the
 rail lost its `max-height` (a capped rail cut lists off mid-row — a navigation
 list must never say "it ends here"); **the sticky OFFSET may read `--chrome-h`,
-a max-height never may** (§28.3, the v2.8 loop); Manage is a gear with the word
+a max-height never may** (§28.3, the v2.8 loop — **AMENDED BY §101.5/§101.6**:
+the loop ran through the header CONDENSE, which this same version deleted, so
+`--chrome-h` is now a constant and a max-height fed by it closes nothing. The
+Setup rail is capped to the window since v3.30. Two conditions, both asserted by
+`checks/setup-rail.py`: **nothing above the box may move when the box resizes**,
+and the capped list must **say that it continues** — a visible scrollbar track
+and a sticky fade, because §100.5's objection is right even where its refusal is
+not); Manage is a gear with the word
 in its `title`; a unit opens on Strategy › Plan; and `section()` omits an empty
 header rather than rendering a blank `<h2>` that still spends its margin (§28).*
 

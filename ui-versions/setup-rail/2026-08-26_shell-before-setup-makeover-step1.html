@@ -346,12 +346,7 @@
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
       { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      /* TERMINOLOGY, NOT "LABELS" (§101.3). The page holds what THIS tenant
-         calls a pillar, a theme, an aspiration — its vocabulary, and the one
-         contract every other screen reads its words from. "Labels" is what a
-         developer calls that; to everybody else it sounds like stickers on a
-         chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology",          render:renderLabels },
+      { k:"labels", ac:"c_labels", grp:"meas", label:"Labels",               render:renderLabels },
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
@@ -361,12 +356,7 @@
          accent, the tenant's name and the tenant's footer, so what it looks
          like is the same subject Branding answers — one step further out, where
          the reader is not in the platform at all. */
-      /* EMAIL, NOT "COMMUNICATION" (§101.3). The third of the colliding three,
-         and the easiest to settle because the page is narrower than its name:
-         it sets the display name, the reply-to, the kicker and the footer of
-         what LEAVES the platform — an email, and nothing else. Naming it Email
-         is what lets "Send a message" and "Inbox" each mean one thing too. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email",                 render:renderComms }
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Communication",         render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -392,61 +382,33 @@
          done here). `inOffice()` is the SMO team as well as the Super user, or
          the office would be one person deep on the one page that has to be
          answered the day somebody is on leave. */
-      /* INBOX, NOT "MESSAGES" (§101.3). Three rows in this rail came out of one
-         word family — Messages (the office answering the corner), Send a message
-         (the broadcast composer) and Communication (what an email wears) — and a
-         name that could be any of the three is a name that identifies none of
-         them. "Inbox" says which one you answer; "Send a message" is left alone,
-         because it already says the other thing; "Communication" becomes Email.
-         HR_ERP settled exactly this collision — Announcements beside
-         Communications — the same way, by renaming until each name meant one
-         thing. The KEY stays `chat`, which is what the page def, the endpoint,
-         `GROUP.chat` and checks/office-chat.py all name. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox",
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Messages",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
-      /* §74. A DOING page, so it sits with the cycle rather than beside the
-         Email SETTINGS — and gated at edit for Import's reason (§48.2): there
-         is nothing to read on a composer, so a view grant would open a page
-         whose every control the server then refuses. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
-        when: function(){ return inOffice(); },                          render:renderSendMessage },
+      /* EDIT, NOT VIEW — the page IS the action (§48.2). `a_cycle` defaults to
+         `view` for every role, so gating the row on "not none" put Import in
+         the rail of a contributor, a unit owner, a custodian and a company
+         CEO. They could apply a file, watch the receipt say it worked, and
+         then have the server refuse the save. There is nothing to READ on this
+         page, so restriction is by removing it (§37) rather than trimming it. */
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Import",
+        when: function(){ return grant("c_import") === "edit"; },        render:renderImport },
+      { k:"archives", ac:"c_import", grp:"cycle", label:"Archived plans",                 render:renderArchives },
       { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
-        when: ownsAnySource,                                render:renderMySources },
-
-      /* ── ONE PAGE, TWO SECTIONS (§101.4) ──────────────────────────────
-         Import and Archived plans were two rails rows about ONE subject: a
-         plan arriving, and the plan it displaced. They are inseparable by
-         construction — §22 made importing an ARCHIVING act, so every visit to
-         one is a question about the other ("did that replace something?",
-         "put the old one back"). This is the shape Figure sets already settled
-         (§46.2): two halves of one subject, one entry, sections inside.
-
-         THE KEY STAYS `import`, and `archives` is the key that goes. Nothing
-         outside this list ever named it, while `import` is what the rail walk
-         and three checks click — so the merge costs no selector.
-
-         EACH SECTION KEEPS ITS OWN GATE, which is the whole reason this is
-         safe: §48.2 closed Import to anybody without `edit` because there is
-         nothing to READ on it, and that `when` moves onto the section rather
-         than being softened into the parent. paint() drops a def whose every
-         section is refused, so a view-only holder of c_import sees Archived
-         plans alone and somebody with neither sees no entry — exactly what the
-         two separate rows did, in one row. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives",
-        sections: function(){
-          return [{ k:"in",   ac:"c_import", label:"Import a plan",
-                    when: function(){ return grant("c_import") === "edit"; },
-                                                                        render:renderImport },
-                  { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
-        } },
       /* Last in its group: it explains the rest, so it is not where you start. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB }
+      /* §74. A DOING page, so it sits with the cycle rather than beside the
+         Communication SETTINGS — and gated at edit for Import's reason
+         (§48.2): there is nothing to read on a composer, so a view grant would
+         open a page whose every control the server then refuses. */
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
+        when: function(){ return inOffice(); },                          render:renderSendMessage },
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB },
+      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
+        when: ownsAnySource,                                render:renderMySources }
     ]
   };
 
@@ -754,25 +716,12 @@
      other. */
   function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
 
-  /* THE GROUP NAMES ANSWER RATHER THAN ASK (§101.2). §46 named these as the
-     QUESTION you came to answer — "Who", "What we run", "How it's measured" —
-     and the argument was right about the grouping and wrong about the words:
-     a rail is scanned, not read, and at 9.5px uppercase a question reads a beat
-     slower than the answer to it. Four are renamed to the thing they hold;
-     "Running the cycle" is untouched, because it already names exactly what is
-     behind it and it is the one group the office lives in daily.
-
-     THE KEYS DO NOT MOVE. `cycle`/`who`/`run`/`meas`/`look` are what `grp` on
-     every def points at AND what the folded-state map is keyed by in
-     localStorage — renaming a key would silently unfold every group for
-     everybody who has ever touched one (§30.2). The label is the only thing
-     that changes here. */
   var SETUP_GROUPS = [
     { k:"cycle", label:"Running the cycle", note:"What you do while a cycle is open" },
-    { k:"who",  label:"People & access",   note:"Who exists, and what may they touch" },
-    { k:"run",  label:"The organisation",  note:"The things being planned" },
-    { k:"meas", label:"Measurement",       note:"What the numbers mean" },
-    { k:"look", label:"Branding & email",  note:"What the tenant wears, in here and on the way out" }
+    { k:"who",  label:"Who",              note:"Who exists, and what may they touch" },
+    { k:"run",  label:"What we run",      note:"The things being planned" },
+    { k:"meas", label:"How it's measured", note:"What the numbers mean" },
+    { k:"look", label:"How it looks",     note:"What it wears" }
   ];
 
   /* ══ THE RAIL COLLAPSES (§47.3) ═══════════════════════════════════
@@ -840,15 +789,10 @@
             '" data-setupgo="' + d.k + '">' + esc(d.label) + '</button>';
         }).join(""));
     }).join("");
-    /* THE LIST SCROLLS, THE HEAD DOES NOT (§101.5). The rows go inside their
-       own container so the rail can be capped to the window and still keep
-       "Setup" and the collapse control on screen — see the note in config.css
-       for why a max-height is safe here and was not in v2.8. */
     return '<div class="rail setuprail"><div class="rhead">Setup' +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
-        'aria-expanded="true">' + ICO_CHEV + '</button></div>' +
-      '<div class="raillist">' + rows + '</div></div>';
+        'aria-expanded="true">' + ICO_CHEV + '</button></div>' + rows + '</div>';
   }
 
   function menuGroups(){

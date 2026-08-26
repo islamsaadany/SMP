@@ -13042,3 +13042,190 @@ that was actually asked for — **Send is on screen at scroll 0, at every height
 swept** — and not "the page cannot scroll", which would be a different and
 worse product. Measured on the real server at 1000 / 860 / 760 / 660px: Send on
 screen every time, the box at 840 / 700 / 600 / 500px.
+
+---
+
+## 101 · The Setup makeover, step 1: the words and the window (v3.30)
+
+> *"Rethink the whole settings page. The design, the grouping, the arrangement,
+> a search bar maybe, the namings … let's have a makeover that makes things
+> easier for the SMO team. The HRerp project has nice practice in the admin page
+> we can consider as well. Do your audit and evaluation and come back to me with
+> suggested structures and mockups to decide and we can do it step by step."*
+
+Settled from a mockup carrying the audit, two drawn structures and a per-row
+naming table (`design-mockups/setup-makeover/2026-08-26_…html`, published as an
+artifact per A17). Islam chose **Option A** — the rail keeps the door, an
+Overview page opens it — with the gear landing on Overview, search on names and
+keywords first, and every naming accepted as proposed.
+
+**THIS SECTION IS STEP 1 AND SAYS SO.** The Overview page and the search box are
+chosen and not yet built; what is here is the part that needed no new page —
+the words, the grouping, the merge, and the window. They are together because
+they are one answer to one question: the rail was unreadable AND too tall, and
+fixing either alone leaves the SMO team scrolling past questions to find
+answers.
+
+### 101.1 The audit, in numbers rather than adjectives
+
+Measured on v3.29 as the SMO with every group unfolded, which is the state the
+office actually works in:
+
+* the rail is **984px tall and pins 128px down**, so it hangs **112px** below a
+  1000px window, **212px** below a 900px one and **312px** below an 800px one.
+  What falls off the bottom is **Branding and Communication** — §90's "a control
+  below the fold is a control that does nothing", by a road §90 did not walk;
+* **eighteen entries under five groups**, of which the office uses one group
+  daily and the other twelve rows rarely;
+* **three rows out of one word family** — Messages, Send a message,
+  Communication — in three different groups;
+* the group badges count **entries** (6 · 3 · 4 · 3 · 2): numbers that never
+  change, wearing the shape of numbers that should.
+
+### 101.2 The group names answer rather than ask
+
+§46 named the groups as the QUESTION you came to answer — *Who*, *What we run*,
+*How it's measured*, *How it looks* — and that argument was right about the
+GROUPING and wrong about the words. A rail is scanned, not read, and at 9.5px
+uppercase a question reads a beat slower than its own answer. Four are renamed
+to the thing they hold; **Running the cycle is untouched**, because it already
+names exactly what is behind it and it is the one group the office lives in.
+
+**THE KEYS DO NOT MOVE.** `cycle`/`who`/`run`/`meas`/`look` are what `grp` on
+every def points at and what the folded-state map is keyed by in localStorage —
+renaming a key would silently unfold every group for everybody who has ever
+touched one (§30.2). Labels only.
+
+### 101.3 Three names, one word family — and the page narrower than its name
+
+**Messages → Inbox.** It is what the office ANSWERS; *Send a message* is what
+the office SENDS. A name that could be either identifies neither. HR_ERP settled
+this exact collision — *Announcements* beside *Communications* — the same way.
+
+**Communication → Email.** The easiest of the three, because the page is
+narrower than its name: it sets the display name, the reply-to, the kicker and
+the footer of what LEAVES the platform. Naming it Email is what lets the other
+two each mean one thing.
+
+**Labels → Terminology.** The page holds what this tenant calls a pillar, a
+theme, an aspiration — its vocabulary, and the contract every other screen reads
+its words from. *Labels* is what a developer calls that.
+
+**Official BU list is deliberately NOT renamed**, though it sits two rows from
+*Business units* and reads as its twin. "Official BU" is the client's own word
+(§58) and the page exists to hold it; the confusion is answered by the one-line
+description Option A puts beside it, not by taking the client's word away.
+
+### 101.4 Import and Archived plans are one page with two sections
+
+Two rail rows about ONE subject: a plan arriving, and the plan it displaced.
+They are inseparable by construction — §22 made importing an ARCHIVING act — so
+every visit to one is a question about the other. This is the shape Figure sets
+already settled (§46.2).
+
+**THE KEY STAYS `import`** and `archives` is the key that goes: nothing outside
+the def list ever named it, while `import` is what the rail walk and three
+checks click, so the merge costs no selector.
+
+**EACH SECTION KEEPS ITS OWN GATE**, which is what makes it safe. §48.2 closed
+Import to anybody without `edit` because there is nothing to READ on it, and
+that `when` moves onto the SECTION rather than being softened into the parent.
+paint() drops a def whose every section is refused, so a view-only holder of
+`c_import` sees Archived plans alone and somebody with neither sees no entry —
+exactly what the two rows did, in one row.
+
+### 101.5 The rail fits the window — and §28.3 said it must not
+
+Islam, on reading the proposal: *"Would the rail stay fit to the window with an
+internal scroll down?"* It did not, and the fix runs straight into a rule this
+file states in absolute terms.
+
+**§28.3's rule is "the sticky OFFSET may read `--chrome-h`, a max-height never
+may."** It was written against v2.8's oscillation, whose loop ran: measured
+chrome height → rail height → page height → scroll clamp → header CONDENSE →
+measured chrome height. **The condense was deleted in v3.3**, so the loop is
+broken at a link rather than argued away — `--chrome-h` is a constant now
+(measured: 73px, identical at 1000, 900, 800 and 700px tall). This is the same
+test §100.5 applied to the office's inbox one version ago, and the same answer:
+nothing above the box moves when the box resizes.
+
+**THE ASSERTION IS THE ONE THAT LICENSES THE CAP.** `checks/setup-rail.py` §3
+folds every group — the biggest height change the rail can make on its own —
+and asserts `--chrome-h` is unmoved by it. If it ever answers differently, the
+loop is back and the cap has to go.
+
+**THE HEAD STAYS, THE LIST SCROLLS.** Capping the whole rail would carry *Setup*
+and the collapse control off the top, so the rows sit in `.raillist` and only
+that scrolls. `min-height:0` on it is load-bearing: a flex child refuses to
+shrink below its content without it, and the cap would be pushed back out by
+the content it is capping.
+
+**THE NUMBER IS THE PINNED OFFSET, AND THE PROTOTYPE SITS 33px LOWER.** This
+file carries the yellow banner above the chrome, so at scroll 0 the rail's flow
+position is 128px while its sticky pin is 95px — the banner's own height. The
+cap is written against the PIN, which is where the rail spends its life and
+where a real deployment puts it at scroll 0 as well. Cost: 13px below the fold
+at scroll 0, in the prototype only, self-correcting because the banner is itself
+33px of scrollable page. Sizing against the flow position would need JS and
+would waste 33px of rail on every screen for ever, to fix a state that lasts one
+scroll.
+
+### 101.6 It never says "it ends here" — §100.5 reversed, and its objection kept
+
+**§100.5 refused to cap this rail six days ago**, and its reason was not §28.3's
+loop: *"a navigation rail must never be capped, because a list that says 'it
+ends here' when it does not is worse than a page that scrolls."* That objection
+is right and it is about the AFFORDANCE rather than the cap. So the cap ships
+**with the sign**: a thin visible scrollbar track (an overlay scrollbar that
+appears only once you are scrolling cannot tell you that scrolling is possible),
+and a fade at the foot of the list.
+
+**A STICKY PSEUDO-ELEMENT, WHICH GETS OUT OF ITS OWN WAY.** `::after` is the
+last box in the scroller's flow, so `position:sticky; bottom:0` holds it against
+the bottom edge while there is content beneath, and at the end of the scroll it
+comes to rest after the last row with nothing left to cover. It is true exactly
+when it is showing, and needs no JS, no scroll listener and no measurement.
+
+**AND TWO ATTEMPTS TO BE CLEVER BROKE THE THING IT PROTECTS.** First
+`margin-top:-22px`, to give back the height the fade occupies — it takes 22px
+off the SCROLLABLE height instead, and the check named the last five entries
+(Figure sets, Scoring bands, Terminology, Branding, Email) as unreachable: the
+exact fault the fade exists to prevent, arriving by the other road. Removing it
+did not fix it, which is the part worth keeping — the real cause was
+**`scroll-behavior:smooth`**, added speculatively in the same edit, which makes
+`scrollIntoView` ASYNCHRONOUS so the check measured before the scroll landed.
+Nothing in the product scrolls this rail programmatically, so it earned nothing
+and is gone (§24). *A speculative nicety broke a real reachability assertion,
+and it was not the cause I suspected first.*
+
+### 101.7 The check asserts the problem, not the numbers
+
+`src/checks/setup-rail.py`, and every assertion is written against the fault
+rather than the layout (§94.8), so a later change to the gutters, the groups or
+the entry list stays green and a cap quietly removed does not: the rail ends
+inside the window at four heights; **every entry can be brought into view by
+scrolling the rail's own list and not the page**; the head stays put; and
+`--chrome-h` does not move when the rail's height does.
+
+**PROVED ABLE TO FAIL BEFORE IT WAS TRUSTED** (§94.5): with the cap removed it
+reports **8 failures**, including a row driven off-screen and the page scrolling
+where the list should have. And it is **measured in the pinned state on
+purpose** — measuring at scroll 0 here would assert the prototype banner's
+accident rather than the product's behaviour.
+
+**Re-run and green:** `qa.py` (31 viewers, ERRORS: none), `no-wrap`, `row-edit`,
+`duplicates`, `page-width`, and `office-chat` over HTTP — which is the only
+place the Inbox row exists at all, because the chat is invisible over `file://`
+(§94.11, §97.9).
+
+### 101.8 Still to build, in the order agreed
+
+1. **The Overview page** — the cycle strip, and the "waiting on the office" rows.
+   Its counts must come from the same functions the pages themselves use, or the
+   Overview becomes a page that lies; the check has to assert that agreement
+   (§53.5), not the numbers.
+2. **The rail's search** — names and hidden keywords ("logo" → Branding,
+   "password" → People register). Typing must never repaint (§35, §45.5).
+3. **Attention pills**, and the group badge changing meaning from entry-count to
+   waiting-count — deliberately last, because a pill is only worth drawing once
+   the counts behind it are real.

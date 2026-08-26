@@ -1,6 +1,6 @@
 # 016 · The Setup makeover
 
-**Version:** v3.30 · **Decisions:** §101 · **Status:** answered; steps 1–2 built, step 3 open
+**Version:** v3.30 · **Decisions:** §101 · **Status:** answered; built
 **Constitution:** checked against v1.1.0.
 
 Islam: *"Rethink the whole settings page. The design, the grouping, the
@@ -120,10 +120,30 @@ reason: *a list must not say "it ends here" when it does not.* So the cap ships
 with the sign — a visible scrollbar track and a sticky fade that comes to rest
 after the last row.
 
-## 7 · Still open
+## 7 · The search, and the pills
 
-1. **The rail's search** — names plus hidden keywords ("logo" → Branding,
-   "password" → People register). Typing must never repaint (§35, §45.5).
-2. **Attention pills on the rail**, and the group badge changing meaning from
-   entry-count to waiting-count. Last on purpose: a pill is only worth drawing
-   once the count behind it is real, which is what §5 above just made true.
+**The search** (§101.13) filters the rail on the page's name plus keywords held
+in `find` on the def beside the label — one list, so a rename cannot orphan
+them. Every typed word must match, in any order. The box sits in the rail's
+head, outside the list §101.5 capped, so it cannot scroll away from its own
+results. Typing never repaints; the query is held in `RAILQ` and re-applied
+after every paint, because the Overview's own fetches call `paint()` about a
+second after the page opens — exactly when somebody is typing. It clears on
+arrival, and says so when it finds nothing.
+
+That required the fold to stop omitting rows from the DOM (§101.14): a filter
+cannot reveal a row that was never drawn, and the failure would have looked
+exactly like "there is no such setting".
+
+**The pills** (§101.15) are the Overview's own rows summed by destination —
+nothing new is counted, so a rail badge cannot disagree with the page it points
+at. Never a zero; never for somebody who cannot clear it (§69); and on a group
+heading only while that group is folded, because an open group's rows already
+speak for themselves.
+
+## 8 · Still open
+
+Nothing from this makeover. The two candidates deliberately NOT built:
+**data-search** (a typed person's name jumping to their register row) — a real
+feature with its own decisions, and Islam chose keywords first; and **renaming
+`Official BU list`**, which stays the client's own word (§58).

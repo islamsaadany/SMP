@@ -58,7 +58,7 @@ with sync_playwright() as p:
 
     print("\n── 1 · the gear lands here, and only for the office ──")
     ck("the SMO lands on Overview",
-       pg.eval_on_selector(".setuprail .ritem.on", "e=>e.textContent.trim()") == "Overview")
+       pg.eval_on_selector(".setuprail .ritem.on .rilab", "e=>e.textContent.trim()") == "Overview")
     ck("Overview is first in the rail",
        pg.eval_on_selector(".setuprail [data-setupgo]", "e=>e.dataset.setupgo") == "overview")
 
@@ -121,11 +121,49 @@ with sync_playwright() as p:
     ck("the row names its destination as the rail names it",
        "People register" in txt and "Reporting cycle" in txt, txt)
 
+    print("\n── 4b · the rail's pills are the same counts (§101.15) ──")
+    # THE AGREEMENT AGAIN, one surface further out. The pill is not allowed to
+    # be its own arithmetic: it is the Overview's own rows summed by
+    # destination, so a rail badge can never disagree with the page it points
+    # at — which is the one place nobody would ever catch it.
+    pills = pg.eval_on_selector_all(".setuprail .ritem",
+        "e=>e.map(x=>({k:x.dataset.setupgo,"
+        " n:(x.querySelector('.riwait')||{}).textContent||null}))")
+    byp = pg.evaluate("attentionByPage()")
+    drawn = dict((r["k"], r["n"]) for r in pills if r["n"])
+    ck("every pill equals attentionByPage()",
+       drawn == dict((k, str(v)) for k, v in byp.items() if v), (drawn, byp))
+    ck("the People register's pill is the SUM of its Overview rows",
+       byp.get("people") == sum(r["n"] for r in
+                                pg.evaluate("attentionRows()") if r["dest"] == "people"),
+       byp)
+    # NEVER A ZERO: every page with nothing waiting must carry no pill at all.
+    quiet = [r["k"] for r in pills if not r["n"]]
+    ck("a page with nothing waiting carries no pill",
+       all(not byp.get(k) for k in quiet), [k for k in quiet if byp.get(k)])
+    ck("and no pill anywhere reads 0",
+       "0" not in [r["n"] for r in pills if r["n"]], pills)
+
+    # A FOLDED group speaks for its rows; an open one does not repeat them.
+    open_gw = pg.eval_on_selector_all(".setuprail .rgroup:not(.shut) .rgwait",
+                                      "e=>e.filter(x=>!x.hidden).length")
+    ck("an open group does not repeat its rows' pills", open_gw == 0, open_gw)
+    pg.evaluate("""()=>{const h=document.querySelector('.rgroup[data-railgrp=\"who\"]');
+                   if(h && !h.classList.contains('shut')) h.click();}""")
+    pg.wait_for_timeout(300)
+    gw = pg.eval_on_selector('.rgroup[data-railgrp="who"] .rgwait',
+                             "e=>e.textContent.trim()")
+    ck("a folded group carries the sum of what is behind it",
+       gw == str(byp.get("people", 0)), (gw, byp))
+    pg.evaluate("""()=>{const h=document.querySelector('.rgroup[data-railgrp=\"who\"]');
+                   if(h && h.classList.contains('shut')) h.click();}""")
+    pg.wait_for_timeout(250)
+
     print("\n── 5 · a row is a door ──")
     pg.query_selector('.ovrow[data-setupgo="people"]').click()
     pg.wait_for_timeout(500)
     ck("pressing the custodian row opens the People register",
-       pg.eval_on_selector(".setuprail .ritem.on", "e=>e.textContent.trim()") == "People register")
+       pg.eval_on_selector(".setuprail .ritem.on .rilab", "e=>e.textContent.trim()") == "People register")
 
     print("\n── 6 · one gap closes, one row goes ──")
     pg.evaluate("""()=>{ GROUP.claims=[]; currentSub='overview'; paint(); }""")
@@ -163,11 +201,15 @@ with sync_playwright() as p:
         office = pg.evaluate("inOffice()")
         has = pg.eval_on_selector_all('.setuprail [data-setupgo="overview"]', "e=>e.length")
         if not office:
-            landed = (w, pg.eval_on_selector(".setuprail .ritem.on", "e=>e.textContent.trim()"), has)
+            landed = (w, pg.eval_on_selector(".setuprail .ritem.on .rilab", "e=>e.textContent.trim()"), has)
             break
     if landed:
         ck("a non-office viewer is not offered Overview", landed[2] == 0, landed)
         ck("and their gear still lands on a real page", bool(landed[1]), landed)
+        # §69'S DOT: a count somebody cannot clear is a screen nagging them.
+        ck("and they are shown no attention pills at all",
+           pg.eval_on_selector_all(".setuprail .riwait, .setuprail .rgwait",
+                                   "e=>e.length") == 0)
     else:
         ck("a non-office viewer reached Setup at all", False,
            "nobody outside the office could open Setup — assertion not exercised")

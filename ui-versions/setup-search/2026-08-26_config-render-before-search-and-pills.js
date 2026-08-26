@@ -4003,32 +4003,6 @@ function attnDestLabel(k){
 
 var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
 
-/* ── THE SAME COUNTS, ON THE RAIL (§101.15) ────────────────────────────
-   A pill beside a rail entry says "there is something here for you" without
-   opening it, which is HR_ERP's practice and the last piece of the makeover.
-   It is deliberately LAST: a pill is only worth drawing once the count behind
-   it is real, and until the Overview existed there was no shared, agreed count
-   to draw — a rail badge computed on its own would have been the drift §101.10
-   was built to prevent, in the one place nobody would ever see it disagree.
-
-   SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION. Several rows point
-   at the People register — custodians, passwords, declarations — and "7 things
-   waiting on the register" is exactly what somebody wants from a rail badge.
-   Nothing new is counted here, which is the whole point.
-
-   NEVER FOR SOMEBODY WHO CANNOT CLEAR IT (§69). The Performance dot was shown
-   to readers until it was noticed that asking a person to act on something
-   they hold no control over is how a screen nags. These counts are the
-   office's queue, so they are drawn for the office and for nobody else. */
-function attentionByPage(){
-  var by = {};
-  if (typeof inOffice === "function" && !inOffice()) return by;
-  attentionRows().forEach(function(r){
-    by[r.dest] = (by[r.dest] || 0) + (r.n | 0);
-  });
-  return by;
-}
-
 function renderOverview(){
   var open = REVIEW.state === "open";
   var t = cycleTotals();

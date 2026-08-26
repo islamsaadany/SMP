@@ -1324,6 +1324,9 @@ python3 checks/setup-overview.py      # the Overview agrees with the pages it su
                                       # MAKES the state, because the demo tenant is all-clear
 python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
                                       # they exist at all (§101.12)
+python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
+                                # the filter, and a match inside a FOLDED group is findable
+                                # (§101.13, §101.14 — all three fail silently)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1358,8 +1361,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.30: the Setup makeover, steps 1 and 2 &mdash;
-the words, the window, and the Overview** (&sect;101). Islam asked for the whole settings page
+*Last Updated: 2026-08-26 &mdash; **v3.30: the Setup makeover, complete &mdash;
+the words, the window, the Overview, the search and the pills** (&sect;101). Islam asked for the whole settings page
 to be rethought &mdash; design, grouping, arrangement, a search bar, the namings
 &mdash; and for HR_ERP's admin page to be considered. Settled from a mockup
 carrying the audit, two drawn structures and a per-row naming table: he chose
@@ -1431,9 +1434,35 @@ asserted the password count equalled the stub's own number, and the page said 2
 where the stub marked 3 &mdash; because the first people on the seed are the SMO
 and a Super user, and &sect;89 excludes the office from issuing. It asserts the
 RELATIONSHIP now, **with the raw number asserted to differ**, or it would quietly
-pass again the day that exclusion broke. Still to build: the **rail's search**,
-then **attention pills** on the rail, last because a pill is only worth drawing
-once the count behind it is real &mdash; which is what this step just made true.*
+pass again the day that exclusion broke. **AND THE SEARCH AND THE PILLS FINISH IT.**
+**THE KEYWORDS LIVE ON THE DEF** (&sect;101.13), beside the label, because some
+errands do not know their page at all &mdash; *"where do I change the logo"* is
+Branding &mdash; and a second table of them would have been the fourth place to
+edit the day a page is renamed (&sect;101.3 renamed three in an afternoon). Every
+typed word must match in any order, since *"reset password"* and *"password
+reset"* are one errand. **TYPING NEVER REPAINTS** (&sect;35), and the query is
+held in a variable rather than only in the box, because the Overview's own three
+fetches each end in `paint()` about a second after the page opens &mdash;
+exactly when somebody is typing; the filter is re-applied after every paint, or
+a repaint quietly shows the whole list to somebody who believes they are reading
+their results. **AND THE FOLD HAD TO STOP OMITTING ROWS** (&sect;101.14): a
+filter cannot reveal a row that was never drawn, and that failure would have
+looked exactly like *"there is no such setting"*. **THE PILLS ARE THE OVERVIEW'S
+OWN ROWS SUMMED BY DESTINATION** (&sect;101.15) &mdash; nothing new is counted,
+so a rail badge cannot disagree with the page it points at; never a zero, never
+for somebody who cannot clear it (&sect;69's dot), and on a group heading only
+while that group is FOLDED, because an open group's rows already speak. **AND
+&sect;51.11 BIT IN MY OWN CHECK**: the row gained a label span and a pill, so
+`.ritem`'s `textContent` became `"People register2"` and three assertions broke
+&mdash; grep every check when a control changes shape, not the one that failed
+first. **AND THE CONTRAST SCARE WAS THE MEASURING SCRIPT** (&sect;68.10): a
+throwaway sweep reported eight failures including the pill at 1.64:1, because
+its transparency test compared `'rgba(0,0,0,0)'` against `'rgba(0, 0, 0, 0)'`
+&mdash; a spelling, not a value &mdash; so everything was measured against
+BLACK. Testing the alpha instead: **0 failures**, the pill at 5.32:1 light and
+9.34:1 dark. *A correct build reported broken is the same class of fault as a
+broken build reported clean, and the first instinct &mdash; to go and change a
+colour &mdash; would have damaged a working palette.*
 
 *Earlier: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
 follows the window** (&sect;100.4, &sect;100.5). Two more messages from having

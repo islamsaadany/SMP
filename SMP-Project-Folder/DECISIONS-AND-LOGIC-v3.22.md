@@ -13332,3 +13332,97 @@ the day that exclusion stopped working.
 fails the agreement assertion, and collapsing a null count to 0 fails two
 assertions in the live file, including *"a refusal is not reported as an
 all-clear it did not verify"*.
+
+### 101.13 Finding a setting by the errand
+
+Eighteen entries is past the size where scanning beats typing, and some errands
+do not know their page at all: *"where do I change the logo"* is Branding,
+*"where do I reset a password"* is the People register. So each row carries the
+words somebody would actually type, in **`find` on the def beside its label** —
+ONE list, so a rename cannot orphan them (§101.3 renamed three pages in an
+afternoon, and a second table of keywords would have been the fourth place to
+edit). The group's label is folded into the same blob, so *"measurement"* finds
+the three pages under it for nothing.
+
+**EVERY WORD MUST MATCH, IN ANY ORDER.** *"reset password"* and *"password
+reset"* are the same errand, and somebody who types both words means both.
+
+**THE BOX IS IN THE HEAD, NOT IN THE LIST.** §101.5 capped `.raillist` to the
+window, so a box inside it would scroll away from the results it is filtering —
+§90's control-below-the-fold by another road.
+
+**TYPING NEVER REPAINTS** (§35, §45.5): the filter hides rows in place. But the
+query is held in `RAILQ` rather than only in the box, and the box is rendered
+from it, because an UNRELATED repaint can still arrive mid-word — the Overview's
+three fetches each end in `paint()` and answer about a second after the page
+opens, which is exactly when somebody is typing. The filter is re-applied at the
+end of every paint, or a repaint would quietly show the whole list again to
+somebody who believes they are reading their results.
+
+**CLEARED ON ARRIVAL.** A rail still filtered after you have landed is a rail
+telling you Setup holds two things. Escape clears it and *only* it — the one
+thing wanted after a search that found nothing is the list back.
+
+**AND IT SAYS WHEN IT FINDS NOTHING** (§45.2, §101.10): a rail that empties
+itself reads as a rail that broke.
+
+### 101.14 A folded group's rows stay in the DOM
+
+Folded items used to be **omitted from the render entirely**, which was fine
+while folding was the only thing that ever hid a row — and made search
+impossible, because the filter runs over the DOM and cannot reveal a row that
+was never drawn. **The failure would have been silent**: the search would report
+nothing found, which looks exactly like *"there is no such setting"*.
+
+So the fold is a STATE rather than an omission — `hidden` on a container, set at
+render time so a shut group is never visible for the frame between paint and
+wire. `railFilter()` then decides visibility alone while a query is live, fold
+state included, so there is never a fight between a CSS fold and a JS filter
+over the same row; clearing the query puts every group back exactly as it was
+found, folded ones folded.
+
+### 101.15 The pills, last on purpose
+
+A pill beside a rail entry says *there is something here for you* without
+opening it — HR_ERP's practice, and the last piece of the makeover. It is
+deliberately **last**: a pill is only worth drawing once the count behind it is
+real, and until the Overview existed there was no shared, agreed count to draw.
+A rail badge computing its own arithmetic would have been exactly the drift
+§101.10 was built to prevent, in the one place nobody would ever see it
+disagree.
+
+**SO IT IS THE OVERVIEW'S OWN LIST, SUMMED BY DESTINATION.** Several rows point
+at the People register — custodians, passwords, declarations — and *"7 things
+waiting on the register"* is what somebody wants from a rail badge. Nothing new
+is counted.
+
+**NEVER A ZERO**, so a lit row always means something, and **never for somebody
+who cannot clear it** — §69's Performance dot was shown to readers until it was
+noticed that asking a person to act on something they hold no control over is
+how a screen nags. These are the office's queue, so they are drawn for the
+office alone.
+
+**THE GROUP'S PILL ONLY WHILE IT IS FOLDED**, and that is not a detail: an open
+group's rows carry their own pills, so a heading repeating their sum would be
+the same number twice. Folded, the rows cannot speak, and the heading is the
+only thing that can say something behind here needs you. The **entry count keeps
+its job and its quiet shape** — the audit's complaint was that it wore the shape
+of a number that changes while never changing, and that is answered by giving
+the changing number a *different* shape, not by taking the steady one away.
+
+**§51.11 AGAIN, IN MY OWN CHECK.** The row gained a label span and a pill, so
+`.ritem`'s `textContent` became `"People register2"` and three assertions in
+`setup-overview.py` broke — the one place the rule bites is the moment you
+change a control's shape, and the fix is to grep every check for it rather than
+the one that failed first. `qa.py`'s `.rail .ritem b` is a DIFFERENT rail (a
+unit's plan) and correctly needed nothing.
+
+**AND THE CONTRAST SCARE WAS THE MEASURING SCRIPT** (§68.10). A throwaway sweep
+reported eight failures across the new surfaces, including the pill at 1.64:1.
+Its transparent-background test compared `'rgba(0,0,0,0)'` against
+`'rgba(0, 0, 0, 0)'` — a spelling, not a value — so the loop never ran and every
+element was measured against BLACK. Testing the alpha channel instead: **0
+failures**, the pill at 5.32:1 light and 9.34:1 dark. *A correct build reported
+broken is the same class of fault as a broken build reported clean, and the
+first instinct — to go and change a colour — would have damaged a working
+palette.*

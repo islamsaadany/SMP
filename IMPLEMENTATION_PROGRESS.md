@@ -52,6 +52,25 @@ Nothing proceeds past this line without an answer.
 
 ---
 
+## Agreed, not built
+
+### The onboarding tour (spec 016) — agreed 2026-08-26
+
+A first-sign-in guided tour on demo data: the page dims, what matters stays
+lit — the one button that says where you are, or a section button with its
+content — and a short card explains it. Nine self-walking steps (Next/Back
+only; the interactive-clicking answer was reversed after Islam used it in the
+mockup), one exit through × asking *Don't show again* / *Skip for now*,
+replay from the Knowledge base, memory in the browser only. Two stories in
+the first release: strategy custodian and unit/function owner. The look was
+settled from a working mockup in four reviewed revisions
+(`design-mockups/onboarding-tour/2026-08-26_spotlight-tour.html`, rev 4
+signed off). Ships with a build check that walks every story as every role
+and fails when a tour target disappears (§51.11's fault, made impossible).
+The decisions-document § is assigned when it lands on `main`.
+
+---
+
 ## Built and verified
 
 ### v3.29 — the corner, corrected again (§100.4, §100.5)

@@ -3587,6 +3587,31 @@ function unitState(u){
   return { key:"part", label:"In progress" };
 }
 
+/* ── HOW THE CYCLE IS GOING, ASKED ONCE (§101.9) ──────────────────────
+   The Reporting cycle page computed this inline, which was right while it was
+   the only page that wanted it. The Overview opens on the same four numbers,
+   and a second loop over activeKeys() would be two answers to one question —
+   the drift §53.5 exists to catch, invited deliberately by a page whose whole
+   job is to summarise other pages.
+
+   `progress` is DERIVED rather than counted, and that is the cycle page's own
+   arithmetic moved rather than re-reasoned: a unit is in progress when it is
+   neither submitted nor untouched, so it is the remainder and can never
+   disagree with the other two. */
+function cycleTotals(){
+  var t = { done:0, total:0, sub:0, none:0, units:0 };
+  activeKeys().forEach(function(k){
+    var c = reportedCount(UNITS[k]);
+    t.done += c.done; t.total += c.total;
+    var st = unitState(UNITS[k]);
+    if (st.key === "done") t.sub++;
+    if (st.key === "late") t.none++;
+    t.units++;
+  });
+  t.progress = t.units - t.sub - t.none;
+  return t;
+}
+
 /* Two units are genuinely mid-report: some figures in, some not. Without this
    every row on the SMO's board reads 100% and the screen cannot show what it
    exists to show. */

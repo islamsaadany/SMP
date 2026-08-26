@@ -378,22 +378,9 @@
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§101.10, spec 016) ─────────────────────
-         FIRST AND `primary`, taking both from Reporting cycle: the office's
-         first question on opening Setup is not "how is the cycle going" but
-         "is anything waiting on me", and until this page existed the answer
-         took a walk through five pages.
-
-         THE OFFICE'S, BY THE SAME `when` AS Send a message AND Inbox — the
-         page says "waiting on the office", so for anybody else it would be a
-         page about somebody else's work. It is not a matrix cell for the same
-         reason those two are not (§37, §89): reading everything outstanding
-         across the whole tenant is not a tick somebody could set on a bad
-         afternoon. A non-office viewer's gear falls through to `st[0]`, which
-         is Reporting cycle — where it landed before this page existed. */
-      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", primary:true,
-        when: inOffice,                                                 render:renderOverview },
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", render:renderCycle },
+      /* FIRST, because it is the page you open before the others — and now
+         also because the gear lands on whichever def is `primary`. */
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -4118,17 +4105,9 @@
        threw, nothing was logged, and the passwords themselves were never
        touched — `credentials` is its own table outside the state graph (§19).
 
-       KEYED ON THE PAGE NOW, NOT ON ITS MARKUP (§101.11). §93.2 keyed it on
-       `.peoplecfg`, the register's table — better than the pen it replaced,
-       and still the same KIND of thing: a class name, which a restyle can
-       retire without anything failing. It asks the two pages that want the
-       answer by NAME, which is data rather than markup and cannot silently
-       stop matching. The Overview joins the list because it counts these two
-       facts (§101.10) — and gating it on the register's markup would have
-       given it a permanent, silent null, which draws no row: this exact fault
-       twice already, and in the safe-looking direction both times. */
-    var WANTS_PEOPLE_FACTS = { people:1, overview:1 };
-    var onRegister = !!WANTS_PEOPLE_FACTS[currentSub];
+       KEYED ON THE TABLE NOW, which is the thing that is actually there when
+       this is worth asking. */
+    var onRegister = !!document.querySelector(".peoplecfg");
     if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
@@ -4149,28 +4128,8 @@
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
-        /* AND IT SAYS SO NOW TOO (§101.11). This was `if (err) return`, which
-           leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
-           the exact shape §93 removed from the passwords beside it and did not
-           come back for. It costs the register nothing (a note per row, absent
-           either way) and it costs the Overview a false all-clear, which is
-           the one thing that page must never give. */
-        if (err) { SAIDWHERE = { __error: String(err.message || err) }; return; }
+        if (err) return;
         SAIDWHERE = said;
-        paint();
-      });
-    }
-    /* ── AND WHAT THE INBOX IS HOLDING (§101.10) ─────────────────────
-       Asked only on the Overview, because the Inbox counts its own queue when
-       it is open and the corner has its own cadence (§98.1) — a third asker
-       polling in the background is what §98 was about. Once per visit: this is
-       a summary somebody reads and then acts on, not a live board. */
-    if (OVQUEUE === null && currentSub === "overview" &&
-        typeof CHAT !== "undefined" && CHAT.servable && CHAT.servable() && inOffice()) {
-      OVQUEUE = {};
-      CHAT.officeQueue(function(err, q){
-        if (err || !q) { OVQUEUE = { __error: String((err && err.message) || err || "no answer") }; return; }
-        OVQUEUE = q;
         paint();
       });
     }

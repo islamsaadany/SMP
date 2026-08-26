@@ -883,45 +883,6 @@ function saidWhereNote(p, editable){
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
 
-/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§101.10) ──
-   NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
-   server fact fetched separately from the state graph, so there are three
-   answers and not two: a number, "nothing waiting", and "we do not know yet".
-   §93 is the whole reason — the register reported everybody as having no
-   password because a failed ask was being counted as an absence, and the dash
-   that replaced it means exactly this null. The Overview draws no row at all
-   for a null, which is the same decision one surface further out: a summary
-   that prints 0 for a question it never asked is worse than a summary that
-   stays quiet.
-
-   EXTRACTED RATHER THAN COPIED. The register computed both inline, which was
-   right while it was the only page that wanted them; the Overview exists to
-   summarise this page, so a second copy would be two answers to one question
-   in the one place a disagreement is guaranteed to be seen (§53.5). */
-function noPasswordCount(){
-  var live = typeof SYNC !== "undefined" && SYNC.isLive();
-  /* A FAILED ASK IS NOT AN ANSWER (§93): PWSTATES carries {__error} when the
-     server refused, and counting over it would read every key as absent. */
-  if (!live || !PWSTATES || PWSTATES.__error) return null;
-  /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89) — the same set the
-     register counts and the same set the server would issue to. */
-  return passwordReach().filter(function(p){
-    return PWSTATES[p.key] === "none";
-  }).length;
-}
-/* Somebody said where they work and it disagrees with where they are attached
-   — which is exactly `saidWhereNote()`'s own test, asked of the whole register
-   rather than of one row. Silent agreement is not an outstanding item (§56). */
-function saidWhereCount(){
-  var live = typeof SYNC !== "undefined" && SYNC.isLive();
-  if (!live || !SAIDWHERE || SAIDWHERE.__error) return null;
-  return PEOPLE.filter(function(p){
-    if (!personActive(p)) return false;
-    var said = SAIDWHERE[p.key];
-    return !!said && said !== personAt(p);
-  }).length;
-}
-
 /* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
    Islam: "add a columns filter to mark what to show of the columns and make
    the contact unchecked by default."
@@ -1078,11 +1039,14 @@ function renderPeople(){
      number the server is going to shrink (§35: the server picks the set). */
   var reach = live ? passwordReach() : [];
   var noCust = unitsWithoutCustodian();
-  /* A FAILED ASK IS NOT AN ANSWER (§93), and the test now lives in
-     noPasswordCount() so the Overview counts what this chip counts (§101.10).
-     `|| 0` is the coercion this page wants and the Overview does not: here a
-     null means "draw no chip", there it means "draw no row". */
-  var noPw = noPasswordCount() || 0;
+  /* A FAILED ASK IS NOT AN ANSWER (§93). PWSTATES holds {__error} when the
+     server refused or could not be reached, and counting over it would read
+     every key as absent and report nobody as missing a password — the same
+     shape of quiet-wrong-answer the dash itself was. */
+  var pwOk = !!PWSTATES && !PWSTATES.__error;
+  var noPw = live && pwOk
+    ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
+    : 0;
 
   /* Lifted out of this function 2026-08-23: restoring a person names the
      places their roles were held, and a second copy of this in the shell is
@@ -3937,121 +3901,6 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
-/* ══ SETUP · OVERVIEW (§101.10, spec 016) ════════════════════════════════
-   Islam, on the makeover: Option A, and the gear lands here.
-
-   THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
-   existed the answer took a walk through five pages, because each outstanding
-   thing lived only on the page that fixes it. That is right for the thing and
-   wrong for the question: nobody opens Setup to read the People register, they
-   open it to find out whether the register needs them.
-
-   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design. A
-   summary page is the one place a disagreement with the page it summarises is
-   guaranteed to be seen and impossible to explain, so no row is allowed to
-   compute anything: each declares a `count` that calls the SAME function the
-   destination page calls, and `checks/setup-overview.py` asserts the two agree
-   rather than asserting the number (§53.5, §94.8). Add a row here with fresh
-   arithmetic in it and the check cannot help you.
-
-   NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
-   fact fetched outside the state graph, so "we have not asked" is a real third
-   state and it is not "nothing is waiting" (§93, §101.10). A row whose count
-   is null is absent — never a 0, and never a spinner, because a page that
-   shows five zeroes while it is thinking has told somebody they are clear when
-   it does not know.
-
-   THE DESTINATION IS THE PAGE THAT FIXES IT, never a page that merely mentions
-   it — the row is a door, and §16.7's rule that a refusal must send somebody
-   somewhere applies just as much to a notice. */
-function attentionRows(){
-  var rows = [
-    { k:"chat",  dest:"chat",   glyph:"✉",
-      count: function(){ return OVQUEUE && !OVQUEUE.__error
-                                ? (OVQUEUE.waiting | 0) : null; },
-      text:  function(n){ return plural(n, "conversation") + " waiting for an answer"; } },
-    { k:"claims", dest:"cycle", glyph:"Σ",
-      count: function(){ return openClaimsList().length; },
-      text:  function(n){ return plural(n, "claim request") + " to answer"; } },
-    { k:"nocust", dest:"people", glyph:"☰",
-      count: function(){ return unitsWithoutCustodian().length; },
-      text:  function(n){ return plural(n, "unit") + " with no custodian"; } },
-    { k:"nopw",   dest:"people", glyph:"⚿",
-      count: noPasswordCount,
-      text:  function(n){ return n + (n === 1 ? " person has" : " people have") +
-                                 " never been issued a password"; } },
-    { k:"said",   dest:"people", glyph:"◎",
-      count: saidWhereCount,
-      text:  function(n){ return plural(n, "person", "people") +
-                                 " said where they work — accept or dismiss"; } }
-  ];
-  return rows.map(function(r){
-    var n = r.count();
-    return { k:r.k, n:n, dest:r.dest, glyph:r.glyph,
-             text: (n == null || n <= 0) ? null : r.text(n) };
-  }).filter(function(r){ return r.text !== null; });
-}
-
-/* The label a row's destination wears in the rail, asked of the rail's own
-   list rather than written out again — rename a page and this follows (§101.3
-   renamed three of them in one afternoon). */
-function attnDestLabel(k){
-  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
-    function(x){ return x.k === k; })[0];
-  return d ? d.label : k;
-}
-
-var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
-
-function renderOverview(){
-  var open = REVIEW.state === "open";
-  var t = cycleTotals();
-  var att = attentionRows();
-
-  /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
-     cycleTotals() (§101.9) — read here and acted on there, which is why the
-     strip carries a way through rather than any control of its own. */
-  var strip =
-    '<div class="ovcycle">' +
-      '<div class="ovcyc-l">' +
-        '<div class="ovcyc-name">' + esc(REVIEW.name) +
-          ' <span class="badge b-' + (open ? "open" : "none") + '">' +
-          (open ? "Open" : "Closed") + '</span></div>' +
-        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
-          ' &middot; due ' + esc(REVIEW.due) +
-          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
-      '</div>' +
-      '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
-        ' items reported</span></div>' +
-      '<div class="ovcyc-chips">' +
-        '<span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
-        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') +
-      '</div>' +
-      '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
-        'Open the cycle page</button>' +
-    '</div>';
-
-  var body = att.length
-    ? '<div class="ovlist">' + att.map(function(r){
-        return '<button type="button" class="ovrow" data-setupgo="' + esc(r.dest) + '">' +
-          '<span class="ovico" aria-hidden="true">' + r.glyph + '</span>' +
-          '<span class="ovtext">' + esc(r.text) + '</span>' +
-          '<span class="ovto">' + esc(attnDestLabel(r.dest)) + ' ›</span></button>';
-      }).join("") + '</div>'
-    /* NOT AN EMPTY BOX (§45.2 turned round). A page whose one job is to say
-       whether anything is waiting has to be able to say NO — an absent section
-       would read as a section that failed to load. */
-    : '<div class="ovquiet"><b>Nothing is waiting on the office.</b>' +
-      '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
-      'the list on the left.</span></div>';
-
-  return cfgHead("Overview", [], null, false, null, null, "") +
-    strip +
-    '<div class="ovh">Waiting on the office</div>' +
-    body;
-}
-
 /* ── Setup · Reporting cycle ────────────────────────────────────────
    Opening turns a plan into a request. Closing snapshots it, which is the
    only way the product ever acquires a past to compare against.
@@ -4087,9 +3936,12 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ONE ANSWER, TWO PAGES (§101.9). Lifted into config-data.js so the Overview
-     summarises this page rather than recomputing it. */
-  var t = cycleTotals();
+  var t = { done:0, total:0, sub:0, none:0 };
+  activeKeys().forEach(function(k){
+    var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
+    var st = unitState(UNITS[k]);
+    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
+  });
 
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
@@ -4142,7 +3994,7 @@ function renderCycle(){
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
       '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        '<span class="badge b-part">' + (activeKeys().length - t.sub - t.none) + ' in progress</span>' +
         (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
       '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
     '</div></div>';

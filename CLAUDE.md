@@ -1320,6 +1320,10 @@ python3 checks/office-chat.py   # the chat's client half — serves the built fi
 python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
                                 # by scrolling the LIST, and the cap does not move --chrome-h
                                 # (§101.5 — that last one is what licenses the cap at all)
+python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
+                                      # MAKES the state, because the demo tenant is all-clear
+python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
+                                      # they exist at all (§101.12)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1354,8 +1358,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.30: the Setup makeover, step 1 &mdash;
-the words and the window** (&sect;101). Islam asked for the whole settings page
+*Last Updated: 2026-08-26 &mdash; **v3.30: the Setup makeover, steps 1 and 2 &mdash;
+the words, the window, and the Overview** (&sect;101). Islam asked for the whole settings page
 to be rethought &mdash; design, grouping, arrangement, a search bar, the namings
 &mdash; and for HR_ERP's admin page to be considered. Settled from a mockup
 carrying the audit, two drawn structures and a per-row naming table: he chose
@@ -1397,11 +1401,39 @@ in the same edit, which makes `scrollIntoView` asynchronous so the check
 measured before the scroll landed. *A nicety nobody asked for broke a real
 reachability assertion, and it was not the cause I suspected first.* The check
 **asserts the problem, not the numbers**, and was **proved able to fail before
-it was trusted** &mdash; 8 failures with the cap removed. Still to build, in
-order: the **Overview page** (whose counts must come from the same functions the
-pages use, or it is a page that lies), the **rail's search**, then **attention
-pills**, last because a pill is only worth drawing once the count behind it is
-real.*
+it was trusted** &mdash; 8 failures with the cap removed.
+**AND THE OVERVIEW IS BUILT** (&sect;101.10, spec 016): the gear lands on it, and
+it answers the one question the office opens Setup to ask &mdash; *is anything
+waiting on me?* &mdash; which before it existed took a walk through five pages,
+because each outstanding thing lives only on the page that fixes it. **NO ROW
+COMPUTES ANYTHING**: each declares a `count` calling the SAME function its
+destination page calls, and the check asserts the two AGREE rather than asserting
+the number (&sect;53.5, &sect;94.8) &mdash; a summary page is the one place a
+disagreement is guaranteed to be seen and impossible to explain. Two sources were
+already shared; the other three are **extracted rather than copied**, and
+`CHAT.officeQueue()` is a second READER of the `queue` action the inbox already
+calls rather than a second endpoint, so the Overview's number is by construction
+the Inbox tab's number. **A COUNT HAS THREE ANSWERS, NOT TWO** &mdash; a number,
+zero, and *we have not asked* &mdash; so a null draws no row, a zero says nothing
+is waiting, and the page never prints `0`: &sect;93's fault one surface out,
+because a summary showing five zeroes while it is still thinking has told
+somebody they are clear when it does not know. **AND SAYING NO IS THE PAGE'S JOB
+TOO** (&sect;45.2 turned round), or an absent list reads as a list that failed to
+load. Three old faults arrived in new places: the password and declaration
+fetches were **keyed on the register's MARKUP** and are keyed on the page NAME
+now (the third time that class of gate has silently stopped matching, in the
+safe-looking direction every time); the declarations fetch **never said it
+failed**, leaving `{}` &mdash; harmless on the register, a false all-clear on the
+Overview; and the demo tenant is entirely clear, so the check **MAKES the state
+it measures** or every attention row ships unexercised (&sect;45.2, &sect;94.2).
+**AND THE FIRST LIVE RUN'S ONE FAILURE WAS THE CHECK, NOT THE PRODUCT**: it
+asserted the password count equalled the stub's own number, and the page said 2
+where the stub marked 3 &mdash; because the first people on the seed are the SMO
+and a Super user, and &sect;89 excludes the office from issuing. It asserts the
+RELATIONSHIP now, **with the raw number asserted to differ**, or it would quietly
+pass again the day that exclusion broke. Still to build: the **rail's search**,
+then **attention pills** on the rail, last because a pill is only worth drawing
+once the count behind it is real &mdash; which is what this step just made true.*
 
 *Earlier: 2026-08-25 &mdash; **v3.29: the corner minimises, and the inbox
 follows the window** (&sect;100.4, &sect;100.5). Two more messages from having

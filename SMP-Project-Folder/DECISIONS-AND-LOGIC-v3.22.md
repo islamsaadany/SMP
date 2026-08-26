@@ -13229,3 +13229,106 @@ place the Inbox row exists at all, because the chat is invisible over `file://`
 3. **Attention pills**, and the group badge changing meaning from entry-count to
    waiting-count — deliberately last, because a pill is only worth drawing once
    the counts behind it are real.
+
+### 101.9 The cycle's four numbers are asked once
+
+The Reporting cycle page computed its totals inline, which was right while it
+was the only page that wanted them. The Overview opens on the same four, and a
+second loop over `activeKeys()` would be two answers to one question — in the
+one place a disagreement is guaranteed to be seen, since the whole point of the
+page is to restate other pages. `cycleTotals()` in `config-data.js`, called by
+both.
+
+`progress` is **derived rather than counted** — the cycle page's own arithmetic
+moved rather than re-reasoned. A unit is in progress when it is neither
+submitted nor untouched, so it is the remainder and can never disagree with the
+other two.
+
+### 101.10 The Overview: every row names the function it counts
+
+The page answers one question — *is anything waiting on me?* — and before it
+existed the answer took a walk through five pages, because each outstanding
+thing lives only on the page that fixes it. That is right for the thing and
+wrong for the question: nobody opens Setup to read the People register, they
+open it to find out whether the register needs them.
+
+**NO ROW IS ALLOWED TO COMPUTE ANYTHING.** Each declares a `count` that calls
+the SAME function its destination page calls, and the check asserts the two
+AGREE rather than asserting the number (§53.5, §94.8). Two of the five were
+already shared functions (`openClaimsList`, `unitsWithoutCustodian`); the other
+three were inline in the register or unavailable, and are extracted rather than
+copied — `noPasswordCount()`, `saidWhereCount()`, and `CHAT.officeQueue()`,
+which is a second READER of the `queue` action the inbox already calls rather
+than a second endpoint, so the number the Overview prints is by construction the
+number the Inbox's own tab prints.
+
+**A COUNT HAS THREE ANSWERS, NOT TWO** — a number, zero, and *we have not
+asked*. Three of the five depend on a server fact fetched outside the state
+graph, so `null` is real and is not zero: a null row is absent, a zero says
+nothing is waiting, and the page never prints `0`. This is §93's fault one
+surface further out — the register reported everybody as having no password
+because a failed ask was counted as an absence, and a summary that shows five
+zeroes while it is still thinking has told somebody they are clear when it does
+not know.
+
+**SAYING NO IS THE PAGE'S JOB TOO** (§45.2 turned round). A page that exists to
+report whether anything is waiting must be able to report that nothing is, or an
+absent list reads as a list that failed to load.
+
+**IT IS THE OFFICE'S**, by the same `when` as Send a message and Inbox, and a
+rule rather than a matrix cell for the same reason those two are (§37, §89).
+A non-office viewer's gear falls through to `st[0]` — Reporting cycle, where it
+landed before this page existed, asserted for a real viewer rather than assumed.
+
+**THE DESTINATION IS THE PAGE THAT FIXES IT**, never one that merely mentions
+it, and its LABEL is read off the rail's own list — §101.3 renamed three pages
+in one afternoon, and a row naming its own destination would have been the
+fourth place to edit.
+
+### 101.11 Two fetches keyed on markup, and one that never said it failed
+
+**KEYED ON THE PAGE NOW, NOT ON ITS MARKUP.** §93.2 keyed the password and
+declaration fetches on `.peoplecfg`, the register's table — better than the pen
+it replaced, and still the same KIND of thing: a class name a restyle can retire
+with nothing failing. It asks the two pages that want the answer by NAME, which
+is data and cannot silently stop matching. The Overview had to join that list,
+and gating it on the register's markup would have given it a permanent, silent
+null — which draws no row. That is this exact fault for the third time, in the
+safe-looking direction every time.
+
+**AND THE DECLARATIONS FETCH NEVER SAID IT FAILED.** `if (err) return` left
+`SAIDWHERE` as `{}` — "asked, and nobody declared anything" — the exact shape
+§93 removed from the passwords sitting beside it and did not come back for. It
+cost the register nothing visible, which is why it survived; it would have cost
+the Overview a **false all-clear**, which is the one thing that page must never
+give.
+
+### 101.12 The checks, and the one that was wrong rather than the product
+
+`checks/setup-overview.py` runs over `file://` and **makes the state it
+measures**: the demo tenant has every custodian filled and no open claims, so on
+the shipped data the page correctly shows its quiet state and every attention
+row is unexercised (§45.2, §94.2). It seeds two custodian gaps and one claim,
+asserts the exact rows that appear and that each agrees with its source, presses
+one to prove a row is a door, then puts the tenant back.
+
+`checks/setup-overview-live.py` serves the built file over HTTP with a stub,
+because the other three rows do not exist over `file://` at all — asserted
+absent there, which is also what a completely broken fetch looks like (§94.11).
+It asserts each number equals what its source answered, that the register's own
+chip carries the same password count, and that **zero and not-asked are
+different screens**.
+
+**THE FIRST RUN'S ONE FAILURE WAS THE CHECK.** It asserted the password count
+equalled the stub's own number, and the page said 2 where the stub had marked 3
+— because the first people on the seed are the SMO and a Super user, and §89
+says the office is never a target for issuing, so `passwordReach()` drops them.
+The product was right and the register agreed with it. It is now asserted as the
+RELATIONSHIP it is — those marked "none" that this viewer may actually reach —
+**with the raw stub number asserted to differ**, or it would quietly pass again
+the day that exclusion stopped working.
+
+**BOTH WERE PROVED ABLE TO FAIL** (§94.5): drifting the strip's totals by one
+fails the agreement assertion, and collapsing a null count to 0 fails two
+assertions in the live file, including *"a refusal is not reported as an
+all-clear it did not verify"*.

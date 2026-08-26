@@ -1914,6 +1914,68 @@
     .setuprail .raillist { display:contents; }
   }
 
+  /* ══ SETUP · OVERVIEW (§101.10) ═══════════════════════════════════
+     The page the gear lands on: one strip saying how the cycle is going, and
+     a list of what is waiting on the office.
+
+     IT BORROWS `.fstrip`'s VOCABULARY WITHOUT BORROWING `.fstrip` — the same
+     ground, the same header rule, the same `.badge` chips, because this is
+     the Reporting cycle's own numbers and two different-looking versions of
+     one strip is how a summary stops reading as a summary (§B5). What it does
+     NOT borrow is the layout: `.fstrip` is a card with a titled head and a
+     body, and this is one row that ends in a way through. */
+  .ovcycle { display:flex; align-items:center; gap:22px; flex-wrap:wrap;
+             background:var(--surface); border:1px solid var(--line);
+             border-radius:var(--r); padding:14px 18px; margin:0 0 22px; }
+  .ovcyc-name { font:700 13.5px/1.3 var(--sans); color:var(--ink);
+                display:flex; align-items:center; gap:9px; }
+  .ovcyc-meta { color:var(--ink-3); font-size:12px; margin-top:3px; }
+  /* THE NUMBER IS THE SERIF ONE THE CYCLE PAGE USES, at the size a summary
+     wants rather than the size the page it summarises wants. */
+  .ovcyc-n { display:flex; align-items:baseline; gap:7px; font-family:var(--serif);
+             margin-left:auto; }
+  .ovcyc-n b { font-size:27px; font-weight:400; color:var(--ink); }
+  .ovcyc-n span { font-size:13px; color:var(--ink-3); font-family:var(--sans); }
+  .ovcyc-chips { display:flex; gap:7px; flex-wrap:wrap; }
+  .ovcyc-go { white-space:nowrap; }
+
+  .ovh { font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+         color:var(--ink-2); margin:0 0 8px; display:flex; align-items:center; gap:10px; }
+  .ovh::after { content:""; flex:1; height:1px; background:var(--line); }
+
+  /* A ROW IS A DOOR, SO IT IS A BUTTON. Each one names something outstanding
+     and goes to the page that fixes it — never a page that merely mentions it
+     (§16.7's rule, applied to a notice rather than to a refusal). */
+  .ovlist { border:1px solid var(--line); border-radius:var(--r);
+            background:var(--surface); overflow:hidden; }
+  .ovrow { display:flex; align-items:center; gap:11px; width:100%; text-align:left;
+           background:none; border:0; border-top:1px solid var(--line-soft);
+           padding:11px 15px; cursor:pointer; font:500 13px/1.4 var(--sans);
+           color:var(--ink); }
+  .ovrow:first-child { border-top:0; }
+  .ovrow:hover { background:var(--surface-2); }
+  .ovrow:focus-visible { outline:2px solid var(--gold); outline-offset:-2px; }
+  /* THE MARK IS LIT, BECAUSE EVERY ROW HERE IS SOMETHING OUTSTANDING — there
+     is no quiet state to distinguish it from, so the accent is carrying the
+     one meaning it has on this page. It stays inside §41's budget: a 24px
+     square, and the page draws no other fill. */
+  .ovico { width:24px; height:24px; border-radius:var(--r-sm); flex:none;
+           display:grid; place-items:center; font-size:12px;
+           background:var(--attn-bg); color:var(--attn-tx); }
+  .ovtext { min-width:0; }
+  .ovto { margin-left:auto; flex:none; font:700 11.5px/1 var(--sans);
+          color:var(--gold-deep); white-space:nowrap; }
+  .ovrow:hover .ovto { text-decoration:underline; }
+
+  /* SAYING NO IS THE PAGE'S JOB TOO (§45.2 turned round): a page that exists
+     to report whether anything is waiting must be able to report that nothing
+     is, or an absent list reads as a list that failed to load. */
+  .ovquiet { border:1px solid var(--line); border-radius:var(--r);
+             background:var(--surface); padding:16px 18px;
+             display:flex; flex-direction:column; gap:4px; }
+  .ovquiet b { font-size:13.5px; color:var(--ink); }
+  .ovquiet span { font-size:12.5px; color:var(--ink-3); line-height:1.5; }
+
   /* ══ FILL A FIGURE SET: THE FLAT TABLE (§46.5) ════════════════════ */
   .srctools { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
   .srctools .fbtn { font:600 12.5px/1 var(--sans); color:var(--ink-2);
@@ -11182,6 +11244,31 @@ function unitState(u){
   return { key:"part", label:"In progress" };
 }
 
+/* ── HOW THE CYCLE IS GOING, ASKED ONCE (§101.9) ──────────────────────
+   The Reporting cycle page computed this inline, which was right while it was
+   the only page that wanted it. The Overview opens on the same four numbers,
+   and a second loop over activeKeys() would be two answers to one question —
+   the drift §53.5 exists to catch, invited deliberately by a page whose whole
+   job is to summarise other pages.
+
+   `progress` is DERIVED rather than counted, and that is the cycle page's own
+   arithmetic moved rather than re-reasoned: a unit is in progress when it is
+   neither submitted nor untouched, so it is the remainder and can never
+   disagree with the other two. */
+function cycleTotals(){
+  var t = { done:0, total:0, sub:0, none:0, units:0 };
+  activeKeys().forEach(function(k){
+    var c = reportedCount(UNITS[k]);
+    t.done += c.done; t.total += c.total;
+    var st = unitState(UNITS[k]);
+    if (st.key === "done") t.sub++;
+    if (st.key === "late") t.none++;
+    t.units++;
+  });
+  t.progress = t.units - t.sub - t.none;
+  return t;
+}
+
 /* Two units are genuinely mid-report: some figures in, some not. Without this
    every row on the SMO's board reads 100% and the screen cannot show what it
    exists to show. */
@@ -20407,6 +20494,45 @@ function saidWhereNote(p, editable){
    separately and simply has nothing to show from a file. */
 var SAIDWHERE = null;  /* key -> the `at` they picked, once asked */
 
+/* ── THE THREE COUNTS THE OVERVIEW AND THE REGISTER SHARE (§101.10) ──
+   NULL IS "WE HAVE NOT ASKED", AND IT IS NOT ZERO. Both of these depend on a
+   server fact fetched separately from the state graph, so there are three
+   answers and not two: a number, "nothing waiting", and "we do not know yet".
+   §93 is the whole reason — the register reported everybody as having no
+   password because a failed ask was being counted as an absence, and the dash
+   that replaced it means exactly this null. The Overview draws no row at all
+   for a null, which is the same decision one surface further out: a summary
+   that prints 0 for a question it never asked is worse than a summary that
+   stays quiet.
+
+   EXTRACTED RATHER THAN COPIED. The register computed both inline, which was
+   right while it was the only page that wanted them; the Overview exists to
+   summarise this page, so a second copy would be two answers to one question
+   in the one place a disagreement is guaranteed to be seen (§53.5). */
+function noPasswordCount(){
+  var live = typeof SYNC !== "undefined" && SYNC.isLive();
+  /* A FAILED ASK IS NOT AN ANSWER (§93): PWSTATES carries {__error} when the
+     server refused, and counting over it would read every key as absent. */
+  if (!live || !PWSTATES || PWSTATES.__error) return null;
+  /* COUNTED OVER WHO THIS VIEWER MAY ACTUALLY REACH (§89) — the same set the
+     register counts and the same set the server would issue to. */
+  return passwordReach().filter(function(p){
+    return PWSTATES[p.key] === "none";
+  }).length;
+}
+/* Somebody said where they work and it disagrees with where they are attached
+   — which is exactly `saidWhereNote()`'s own test, asked of the whole register
+   rather than of one row. Silent agreement is not an outstanding item (§56). */
+function saidWhereCount(){
+  var live = typeof SYNC !== "undefined" && SYNC.isLive();
+  if (!live || !SAIDWHERE || SAIDWHERE.__error) return null;
+  return PEOPLE.filter(function(p){
+    if (!personActive(p)) return false;
+    var said = SAIDWHERE[p.key];
+    return !!said && said !== personAt(p);
+  }).length;
+}
+
 /* ══ WHICH COLUMNS THE REGISTER SHOWS (§47.1) ═════════════════════════
    Islam: "add a columns filter to mark what to show of the columns and make
    the contact unchecked by default."
@@ -20563,14 +20689,11 @@ function renderPeople(){
      number the server is going to shrink (§35: the server picks the set). */
   var reach = live ? passwordReach() : [];
   var noCust = unitsWithoutCustodian();
-  /* A FAILED ASK IS NOT AN ANSWER (§93). PWSTATES holds {__error} when the
-     server refused or could not be reached, and counting over it would read
-     every key as absent and report nobody as missing a password — the same
-     shape of quiet-wrong-answer the dash itself was. */
-  var pwOk = !!PWSTATES && !PWSTATES.__error;
-  var noPw = live && pwOk
-    ? reach.filter(function(p){ return PWSTATES[p.key] === "none"; }).length
-    : 0;
+  /* A FAILED ASK IS NOT AN ANSWER (§93), and the test now lives in
+     noPasswordCount() so the Overview counts what this chip counts (§101.10).
+     `|| 0` is the coercion this page wants and the Overview does not: here a
+     null means "draw no chip", there it means "draw no row". */
+  var noPw = noPasswordCount() || 0;
 
   /* Lifted out of this function 2026-08-23: restoring a person names the
      places their roles were held, and a second copy of this in the shell is
@@ -23425,6 +23548,121 @@ function renderArchives(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div>');
 }
 
+/* ══ SETUP · OVERVIEW (§101.10, spec 016) ════════════════════════════════
+   Islam, on the makeover: Option A, and the gear lands here.
+
+   THE PAGE ANSWERS ONE QUESTION — *is anything waiting on me?* — and before it
+   existed the answer took a walk through five pages, because each outstanding
+   thing lived only on the page that fixes it. That is right for the thing and
+   wrong for the question: nobody opens Setup to read the People register, they
+   open it to find out whether the register needs them.
+
+   EVERY ROW NAMES THE FUNCTION IT COUNTS, and that is the whole design. A
+   summary page is the one place a disagreement with the page it summarises is
+   guaranteed to be seen and impossible to explain, so no row is allowed to
+   compute anything: each declares a `count` that calls the SAME function the
+   destination page calls, and `checks/setup-overview.py` asserts the two agree
+   rather than asserting the number (§53.5, §94.8). Add a row here with fresh
+   arithmetic in it and the check cannot help you.
+
+   NULL DRAWS NOTHING; ZERO IS AN ANSWER. Three of these depend on a server
+   fact fetched outside the state graph, so "we have not asked" is a real third
+   state and it is not "nothing is waiting" (§93, §101.10). A row whose count
+   is null is absent — never a 0, and never a spinner, because a page that
+   shows five zeroes while it is thinking has told somebody they are clear when
+   it does not know.
+
+   THE DESTINATION IS THE PAGE THAT FIXES IT, never a page that merely mentions
+   it — the row is a door, and §16.7's rule that a refusal must send somebody
+   somewhere applies just as much to a notice. */
+function attentionRows(){
+  var rows = [
+    { k:"chat",  dest:"chat",   glyph:"✉",
+      count: function(){ return OVQUEUE && !OVQUEUE.__error
+                                ? (OVQUEUE.waiting | 0) : null; },
+      text:  function(n){ return plural(n, "conversation") + " waiting for an answer"; } },
+    { k:"claims", dest:"cycle", glyph:"Σ",
+      count: function(){ return openClaimsList().length; },
+      text:  function(n){ return plural(n, "claim request") + " to answer"; } },
+    { k:"nocust", dest:"people", glyph:"☰",
+      count: function(){ return unitsWithoutCustodian().length; },
+      text:  function(n){ return plural(n, "unit") + " with no custodian"; } },
+    { k:"nopw",   dest:"people", glyph:"⚿",
+      count: noPasswordCount,
+      text:  function(n){ return n + (n === 1 ? " person has" : " people have") +
+                                 " never been issued a password"; } },
+    { k:"said",   dest:"people", glyph:"◎",
+      count: saidWhereCount,
+      text:  function(n){ return plural(n, "person", "people") +
+                                 " said where they work — accept or dismiss"; } }
+  ];
+  return rows.map(function(r){
+    var n = r.count();
+    return { k:r.k, n:n, dest:r.dest, glyph:r.glyph,
+             text: (n == null || n <= 0) ? null : r.text(n) };
+  }).filter(function(r){ return r.text !== null; });
+}
+
+/* The label a row's destination wears in the rail, asked of the rail's own
+   list rather than written out again — rename a page and this follows (§101.3
+   renamed three of them in one afternoon). */
+function attnDestLabel(k){
+  var d = (typeof setupDefs === "function" ? setupDefs() : []).filter(
+    function(x){ return x.k === k; })[0];
+  return d ? d.label : k;
+}
+
+var OVQUEUE = null;   /* {waiting,flagged} | {__error} | null — asked once per visit */
+
+function renderOverview(){
+  var open = REVIEW.state === "open";
+  var t = cycleTotals();
+  var att = attentionRows();
+
+  /* THE CYCLE STRIP IS THE SAME FOUR NUMBERS THE CYCLE PAGE OPENS WITH, from
+     cycleTotals() (§101.9) — read here and acted on there, which is why the
+     strip carries a way through rather than any control of its own. */
+  var strip =
+    '<div class="ovcycle">' +
+      '<div class="ovcyc-l">' +
+        '<div class="ovcyc-name">' + esc(REVIEW.name) +
+          ' <span class="badge b-' + (open ? "open" : "none") + '">' +
+          (open ? "Open" : "Closed") + '</span></div>' +
+        '<div class="ovcyc-meta">' + esc(REVIEW.from) + ' to ' + esc(REVIEW.to) +
+          ' &middot; due ' + esc(REVIEW.due) +
+          ' &middot; as of Q' + REVIEW.endsQuarter + '</div>' +
+      '</div>' +
+      '<div class="ovcyc-n"><b>' + t.done + '</b><span>of ' + t.total +
+        ' items reported</span></div>' +
+      '<div class="ovcyc-chips">' +
+        '<span class="badge b-done">' + t.sub + ' submitted</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
+        (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') +
+      '</div>' +
+      '<button type="button" class="editbtn ovcyc-go" data-setupgo="cycle">' +
+        'Open the cycle page</button>' +
+    '</div>';
+
+  var body = att.length
+    ? '<div class="ovlist">' + att.map(function(r){
+        return '<button type="button" class="ovrow" data-setupgo="' + esc(r.dest) + '">' +
+          '<span class="ovico" aria-hidden="true">' + r.glyph + '</span>' +
+          '<span class="ovtext">' + esc(r.text) + '</span>' +
+          '<span class="ovto">' + esc(attnDestLabel(r.dest)) + ' ›</span></button>';
+      }).join("") + '</div>'
+    /* NOT AN EMPTY BOX (§45.2 turned round). A page whose one job is to say
+       whether anything is waiting has to be able to say NO — an absent section
+       would read as a section that failed to load. */
+    : '<div class="ovquiet"><b>Nothing is waiting on the office.</b>' +
+      '<span>Everything the Overview watches is clear. The rest of Setup is in ' +
+      'the list on the left.</span></div>';
+
+  return cfgHead("Overview", [], null, false, null, null, "") +
+    strip +
+    '<div class="ovh">Waiting on the office</div>' +
+    body;
+}
+
 /* ── Setup · Reporting cycle ────────────────────────────────────────
    Opening turns a plan into a request. Closing snapshots it, which is the
    only way the product ever acquires a past to compare against.
@@ -23460,12 +23698,9 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  var t = { done:0, total:0, sub:0, none:0 };
-  activeKeys().forEach(function(k){
-    var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
-    var st = unitState(UNITS[k]);
-    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
-  });
+  /* ONE ANSWER, TWO PAGES (§101.9). Lifted into config-data.js so the Overview
+     summarises this page rather than recomputing it. */
+  var t = cycleTotals();
 
   var head =
     '<div class="fstrip" style="margin-bottom:20px"><div class="fstrip-head">' +
@@ -23518,7 +23753,7 @@ function renderCycle(){
     '<div class="fstrip-body">' +
       '<div class="kpi"><b>' + t.done + '</b><span>of ' + t.total + ' items reported</span></div>' +
       '<div class="fchips"><span class="badge b-done">' + t.sub + ' submitted</span>' +
-        '<span class="badge b-part">' + (activeKeys().length - t.sub - t.none) + ' in progress</span>' +
+        '<span class="badge b-part">' + t.progress + ' in progress</span>' +
         (t.none ? '<span class="badge b-late">' + t.none + ' not started</span>' : '') + '</div>' +
       '<div class="fmean">plan edits: ' + (open ? "SMO only while open" : "open to unit owners") + '</div>' +
     '</div></div>';
@@ -27776,7 +28011,28 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
-    unread: function(){ return state.unread; }
+    unread: function(){ return state.unread; },
+    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§101.10) ──────────────
+       The same `queue` action the inbox already calls, whose answer already
+       carries the two counts — so this is a second READER of one endpoint and
+       not a second endpoint, and the number the Overview prints is by
+       construction the number the Inbox's own tab prints.
+
+       IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
+       writing box.threads from here would leave a half-built queue behind for
+       whenever the inbox is next opened, and `drawQueue()` would be painting
+       into a document that does not have it. The Overview wants two integers.
+
+       `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
+       caller draws nothing for a null and "nothing is waiting" for a 0, and
+       those are different things to say (§101.10, §93). */
+    officeQueue: function(cb){
+      if (!servable()) return cb(null, null);
+      post({ action:"queue" }, function(err, j){
+        if (err || !j) return cb(err || new Error("no answer"), null);
+        cb(null, { waiting: j.waiting | 0, flagged: j.flagged | 0 });
+      });
+    }
   };
 })();
 
@@ -28616,9 +28872,22 @@ var SYNC = (function () {
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* FIRST, because it is the page you open before the others — and now
-         also because the gear lands on whichever def is `primary`. */
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
+      /* ── WHERE THE GEAR LANDS (§101.10, spec 016) ─────────────────────
+         FIRST AND `primary`, taking both from Reporting cycle: the office's
+         first question on opening Setup is not "how is the cycle going" but
+         "is anything waiting on me", and until this page existed the answer
+         took a walk through five pages.
+
+         THE OFFICE'S, BY THE SAME `when` AS Send a message AND Inbox — the
+         page says "waiting on the office", so for anybody else it would be a
+         page about somebody else's work. It is not a matrix cell for the same
+         reason those two are not (§37, §89): reading everything outstanding
+         across the whole tenant is not a tick somebody could set on a bad
+         afternoon. A non-office viewer's gear falls through to `st[0]`, which
+         is Reporting cycle — where it landed before this page existed. */
+      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", primary:true,
+        when: inOffice,                                                 render:renderOverview },
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -32343,9 +32612,17 @@ var SYNC = (function () {
        threw, nothing was logged, and the passwords themselves were never
        touched — `credentials` is its own table outside the state graph (§19).
 
-       KEYED ON THE TABLE NOW, which is the thing that is actually there when
-       this is worth asking. */
-    var onRegister = !!document.querySelector(".peoplecfg");
+       KEYED ON THE PAGE NOW, NOT ON ITS MARKUP (§101.11). §93.2 keyed it on
+       `.peoplecfg`, the register's table — better than the pen it replaced,
+       and still the same KIND of thing: a class name, which a restyle can
+       retire without anything failing. It asks the two pages that want the
+       answer by NAME, which is data rather than markup and cannot silently
+       stop matching. The Overview joins the list because it counts these two
+       facts (§101.10) — and gating it on the register's markup would have
+       given it a permanent, silent null, which draws no row: this exact fault
+       twice already, and in the safe-looking direction both times. */
+    var WANTS_PEOPLE_FACTS = { people:1, overview:1 };
+    var onRegister = !!WANTS_PEOPLE_FACTS[currentSub];
     if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
@@ -32366,8 +32643,28 @@ var SYNC = (function () {
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
-        if (err) return;
+        /* AND IT SAYS SO NOW TOO (§101.11). This was `if (err) return`, which
+           leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
+           the exact shape §93 removed from the passwords beside it and did not
+           come back for. It costs the register nothing (a note per row, absent
+           either way) and it costs the Overview a false all-clear, which is
+           the one thing that page must never give. */
+        if (err) { SAIDWHERE = { __error: String(err.message || err) }; return; }
         SAIDWHERE = said;
+        paint();
+      });
+    }
+    /* ── AND WHAT THE INBOX IS HOLDING (§101.10) ─────────────────────
+       Asked only on the Overview, because the Inbox counts its own queue when
+       it is open and the corner has its own cadence (§98.1) — a third asker
+       polling in the background is what §98 was about. Once per visit: this is
+       a summary somebody reads and then acts on, not a live board. */
+    if (OVQUEUE === null && currentSub === "overview" &&
+        typeof CHAT !== "undefined" && CHAT.servable && CHAT.servable() && inOffice()) {
+      OVQUEUE = {};
+      CHAT.officeQueue(function(err, q){
+        if (err || !q) { OVQUEUE = { __error: String((err && err.message) || err || "no answer") }; return; }
+        OVQUEUE = q;
         paint();
       });
     }

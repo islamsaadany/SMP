@@ -91,16 +91,17 @@
    number -- is chosen in the same breath as the fetch-and-look that precedes
    every merge, and never before. */
 
-/* v3.30 — reordering comes back as its own grant (§101): a unit's own people
-   get an arrange control in the pen's slot, and lib/authorize.js learned to
-   tell a reorder from a rewrite. THE TRIGGER IS THE BYTES, NOT THE VERSION
-   (§91) — the built file changed, so the name changes, whatever the platform's
-   filename says. Confirmed against origin/main, which is serving
-   "smp-shell-v3.29", at the moment of the merge and again immediately before
+/* v3.30b — focus measures get a switch (§102), on top of §101's arrange
+   control. THE TRIGGER IS THE BYTES, NOT THE VERSION (§91): the platform's
+   filename has not moved and the built file has, so the cache name moves with
+   the bytes. A LETTER RATHER THAN A NUMBER, because the version this ships
+   under is still v3.30 and a name that claimed v3.31 would say a version had
+   happened that had not. Confirmed against origin/main, which is serving
+   "smp-shell-v3.30", at the moment of the merge and again immediately before
    the push (§94.16): a worker caches by NAME, so the same string on both sides
-   of a merge conflicts on nothing while the bytes behind it differ, and a
-   browser holding the other copy would never fetch this one (§94.12). */
-const SHELL = "smp-shell-v3.30";
+   conflicts on nothing while the bytes behind it differ, and a browser holding
+   the other copy would never fetch this one (§94.12). */
+const SHELL = "smp-shell-v3.30b";
 const ASSETS = [
   "/",
   "/index.html",

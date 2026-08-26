@@ -107,7 +107,7 @@
    conflict only because a comment differed. Resolved to a name nobody has
    served, confirmed against origin/main at the merge and AGAIN immediately
    before the push (§94.16). */
-const SHELL = "smp-shell-v3.40";
+const SHELL = "smp-shell-v3.41";
 const ASSETS = [
   "/",
   "/index.html",

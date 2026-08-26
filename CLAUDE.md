@@ -1131,6 +1131,11 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   `test-authorize.js` had no `fn:` submission test at all, because there was no
   control, so no test had a reason to exist — it asks BOTH ends now, or the
   branch could accept anybody and the first assertion would still print ok.
+  **AND "1 NEED NOTES" HAD BEEN WRONG SINCE THE COLUMN EXISTED (§102.4)** —
+  unnoticed because it was rare, until the function rows put it on seven more.
+  `notesOwed()` is one function: two halves of one board saying it differently
+  is the fault §102.2 was built to avoid. *A defect can hide behind how seldom
+  it is reached, and adding rows is a way of finding one.*
   **ASKED FOR AND NOT BUILT — THE REFUSAL (§101.10):** *"refuse the
   submission"* has nothing to attach to: **a capability's Reporting page has no
   Submit button.** One `data-submit` exists in the whole platform and it is on

@@ -3908,6 +3908,12 @@ function renderArchives(){
    The SMO can close with gaps: waiting for the last number means never
    closing, and a cycle that never closes writes no history. Unreported items
    close as unreported and stay visibly so \u2014 a stronger prompt than an email. */
+/* "1 need notes" was on the unit half for as long as it has existed and went
+   unnoticed while it was rare; §102 put it on seven more rows and it stopped
+   being rare. ONE function, because the two halves saying it differently is
+   the fault this board was just built to avoid (§53.5). */
+function notesOwed(n){ return n === 1 ? "1 needs a note" : n + " need notes"; }
+
 function renderCycle(){
   var can = grant("c_cycle") === "edit";
   var open = REVIEW.state === "open";
@@ -3932,7 +3938,7 @@ function renderCycle(){
       '<td class="num">' + by.obj[0] + '/' + by.obj[1] + '</td>' +
       '<td class="num">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
       '<td class="num">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
@@ -3992,7 +3998,7 @@ function renderCycle(){
       '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
       '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
       '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + notesOwed(miss) + '</span>' : '') + '</td>' +
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
   if (fnRows) {

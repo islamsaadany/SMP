@@ -13310,7 +13310,17 @@ was no control, so no test had a reason to exist. It asks **both ends** now
 Without the second, the branch could accept anybody and the first would still
 print *ok*. Proved by flipping it and watching it fail.
 
-**Flagged, not changed:** the Notes column says *"1 need notes"*. That is the
-unit half's existing wording, now visible on seven more rows — a grammar slip,
-not a design one, and correcting a label is Islam's call (rule 1c). Both halves
-say it identically, which is at least the right kind of wrong.
+#### 102.4 "1 need notes"
+
+Flagged first rather than fixed, because correcting a label is Islam's call
+(rule 1c), and then corrected on his go-ahead. It is the unit half's wording
+and it has been wrong for as long as that column has existed — **unnoticed
+because it was rare**, and §102.1 put it on seven more rows where it stopped
+being rare. *A defect can hide behind how seldom it is reached, and adding rows
+is a way of finding one.*
+
+`notesOwed(n)` is one function, because two halves of one board saying it
+differently is the exact fault §102.2 was just built to avoid (§53.5). Measured
+at 1440 / 1280 / 1000: the longer string wraps nowhere and the table is no
+wider than it was (the 2px it overflows at 1000px is the pre-existing one, and
+was measured with the function half removed).

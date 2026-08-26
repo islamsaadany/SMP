@@ -207,64 +207,20 @@ the Knowledge base page for people to read whether or not this ships.
 
 ### 5.2 The recipes
 
-Roughly forty, grouped as the platform is. Each is one question, one short
-answer, and — where the answer is *"you can't, and here is who can"* — the
-person to ask. That last kind is not a gap in the product; it is §31 and §94
-being explained to the person who just hit them.
+**Written: `recipes.md`, 44 recipes, ~2,100 words.** Grouped as the platform is
+— reporting, my plan, understanding the numbers, capabilities and projects,
+getting in, the office's own work, the platform itself.
 
-**Reporting**
-1. How do I report a figure?
-2. Save draft and Submit — what is the difference?
-3. Can I still report once the cycle is locked?
-4. Why is a figure someone else's to enter? *(figure sets, §44)*
-5. Why does my score show a dash instead of 0?
-6. How do I add a note to a figure, and who reads it?
-7. I submitted by mistake — what now?
-8. What does the dot on Performance mean?
+The list is **not repeated here**. A spec that carries its own copy of the
+recipe titles is a second copy that goes stale the first time one is renamed —
+the fault `lib/rules.js` exists to prevent (§42), and the reason `db/kb.json` is
+generated rather than typed (§5.3).
 
-**My plan**
-9. There is a typo in my plan — how is it corrected? *(the office's, §94)*
-10. How do I add a pillar, a measure or a tactic?
-11. Why can't I reorder my pillars any more? *(§94.15)*
-12. Who may edit my unit's plan, and why not me?
-13. How does a plan arrive in the first place? *(import authors, §22)*
-14. What happens to the old plan when a new one is uploaded? *(archives)*
-15. What is a collaborator on a tactic, and what does it let them do?
-
-**Scores**
-16. How is my unit's headline number calculated?
-17. Why does a pillar disagree with my objectives?
-18. What is execution, and why is 100% not "finished"?
-19. What do the colours mean?
-20. What is a focus measure and the reward line?
-21. How does the group's number relate to mine? *(weighting)*
-
-**Capabilities and projects**
-22. How do I add a project to a capability?
-23. Deliverable or outcome — which is this?
-24. How is a project's performance worked out? *(§99)*
-25. Due date and measure date — what is the difference?
-
-**Getting in, and getting at things**
-26. How do I sign in — my email or my name?
-27. I have forgotten my password.
-28. Why can't I open another business unit?
-29. What does my role let me do?
-30. How do I get access to something I cannot open?
-
-**The office's own work**
-31. How do I add somebody to the register?
-32. How do I upload the people file, and what does it change?
-33. How do I open a new reporting cycle?
-34. How do I run a review, or present one?
-35. How do I put a picture into the review deck? *(§50)*
-36. How do I set the tenant's colours and mark?
-37. What does Demo data do, and why can't I save in it? *(§67)*
-
-**The platform itself**
-38. Does it work with no internet?
-39. Can I install it like an app?
-40. Where does my data actually live?
+**Thirteen of the forty-four refuse something**, and that is the finding worth
+keeping rather than a shortfall: *"you can't, and here is who can"* is §31 and
+§94 finally being explained to the person who just ran into them. Those thirteen
+keep one clause of *why* — the voice Islam settled on, concise everywhere and
+one sentence longer where the answer is no.
 
 ### 5.3 Generated, never a second copy
 

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.37 on `main` · **v3.38 in progress on the branch**
+**Latest version:** v3.38 on `main` · **v3.39 in progress on the branch**
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -63,6 +63,24 @@ Nothing proceeds past this line without an answer.
   is a true signal — do not silence it.
 
 ## Built and verified
+
+### v3.39 — the Strategy | Reporting split, and the plan as slides (§116, spec 019)
+
+- The Roles & access table's own columns are two halves each — **Strategy**
+  (Foundation · SWOT · Plan; a capability's definition and projects) and
+  **Reporting** (figures, drafts, submitting). Strategy edit ships with the
+  office alone; **the SMO can open it to a role deliberately** (Islam's
+  choice). A stored grant on the old key keeps meaning the Reporting half, so
+  nobody's rights move on upgrade and no migration runs.
+- §101's reorder arrows survive the split (they ride the Reporting grant), and
+  strategy-at-none hides the pane, the arrows and the download together.
+- **Download the plan as slides**: a button beside the pen on the Strategy
+  panel builds a real editable `.pptx` — plan content only, SWOT included, no
+  reported figures — for the office, the BU owner, the custodian, and a
+  function's head. Offline, no new dependency (the platform's own zip writer).
+- Proved by `checks/strategy-split.py` (both ends, both directions, the file
+  unzipped and read, proved able to fail three ways), `test-authorize.js` §15
+  (212 assertions), the full check suite and `qa.py`.
 
 ### v3.37 — the assistant (§111, §112), and a chat that vanished (§113)
 

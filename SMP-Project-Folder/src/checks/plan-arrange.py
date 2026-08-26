@@ -22,7 +22,8 @@ from playwright.sync_api import sync_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 FILE = "file://" + str(ROOT / "SMP-Project-Folder/src/strategy-management-platform.html")
-EXE = None
+import os
+EXE = os.environ.get("SMP_CHROME") or None
 bad = 0
 
 
@@ -53,7 +54,7 @@ def state(pg):
                const e=document.elementFromPoint(q.left+q.width/2, q.top+q.height/2);
                hit = e ? (e.closest('.arrpen') ? 'arrpen' : e.tagName) : 'nothing'; }
         return { arrange: !!a,
-                 pen: !!document.querySelector('.paneact .penbtn:not(.arrpen)'),
+                 pen: !!document.querySelector('.paneact .penbtn:not(.arrpen):not(.dlpen)'),
                  pressable: hit,
                  grips: document.querySelectorAll('.grip').length,
                  rule: SMPRules.mayArrange(world(), viewer(), TARGET) }; }""")

@@ -148,12 +148,10 @@ function renderAccess(){
     if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
       return "Every unit and function is theirs, so there is no “other”.";
     }
-    /* The split halves collapse exactly as their whole did (§116): no unit
-       means neither half of the unit pair can come up. */
-    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
+    if (roleKey === "fnhead" && areaKey === "a_unit_own") {
       return "A function head holds no business unit.";
     }
-    if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
+    if (roleKey === "cceo" && areaKey === "a_fn_own") {
       return "A company CEO holds no supporting function.";
     }
     return null;
@@ -166,32 +164,9 @@ function renderAccess(){
      stacked under seven labels made the HEAD of a 49-cell table taller than
      its body. The same answer the role column already reached in §37: the
      sentence is on hover, and the column keeps its name. */
-  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§116) ──────
-     The own pair split into Strategy | Reporting halves, and the pair's name
-     is written ONCE above them rather than twice into them. Built off the
-     `pair`/`col` fields the AREAS entries carry — the header is derived from
-     the same list the cells walk, so a column cannot appear in one and not
-     the other. Entries without a pair span both rows. Consecutive same-pair
-     entries group; the AREAS order is the column order, as it always was. */
-  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
-  var hi = 0;
-  while (hi < AREAS.length) {
-    var ha = AREAS[hi];
-    if (!ha.pair) {
-      headTop += '<th class="ac" rowspan="2" title="' + esc(ha.note) + '">' + esc(ha.label) + '</th>';
-      hi++;
-      continue;
-    }
-    var span = 0;
-    while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
-    headTop += '<th class="ac acpair" colspan="' + span + '">' + esc(ha.pair) + '</th>';
-    for (var hj = 0; hj < span; hj++) {
-      var hb = AREAS[hi + hj];
-      headSub += '<th class="ac achalf" title="' + esc(hb.note) + '">' + esc(hb.col) + '</th>';
-    }
-    hi += span;
-  }
-  var head = headTop + "</tr>" + headSub + "</tr>";
+  var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
+    return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
+  }).join("") + '</tr>';
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
      Employee stopped being one: nobody grants it, the × could never take it
@@ -229,8 +204,7 @@ function renderAccess(){
 
   return section("", "Who may see what",
       "Eight roles and the floor beneath them, against the kinds of page each may " +
-      "reach. Edit includes view. The own columns answer in two halves — " +
-      "Strategy is the words as agreed, Reporting is the figures entered against them. " +
+      "reach. Edit includes view. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -2888,17 +2862,12 @@ function renderKB(){
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
            'owner\u2019s answer for Mobile and the other-unit answer for Retail, from the ' +
            'same two roles, without either being asked about the wrong thing.' },
-      { h: "The own columns answer in two halves",
-        p: 'Strategy is the <b>words as agreed</b> — Foundation, the SWOT, the Plan, and on a ' +
-           'function a capability\u2019s definition and projects. Reporting is the <b>figures ' +
-           'entered against them</b>, drafts and submitting. Strategy edit ships with the ' +
-           'office alone, because a plan you are measured against is not yours to rewrite — ' +
-           'and opening it to a role is a deliberate act made on this table, not a side ' +
-           'effect of letting the same people report (§116).' },
-      { h: "Two things the table does not decide",
-        p: 'The <b>knowledge base</b> is readable by everyone, always. And <b>focus ' +
-           'measures</b>, what carries reward, are marked by the group CEO and the SMO. ' +
-           'These are rules; they do not change when the table does.' },
+      { h: "Three things the table does not decide",
+        p: 'The <b>knowledge base</b> is readable by everyone, always. A <b>plan</b> is ' +
+           'corrected by the SMO alone, however much access the unit\u2019s people hold — a ' +
+           'plan you are measured against is not yours to rewrite. And <b>focus measures</b>, ' +
+           'what carries reward, are marked by the group CEO and the SMO. These are rules; ' +
+           'they do not change when the table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +

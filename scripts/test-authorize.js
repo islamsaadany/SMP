@@ -1074,5 +1074,109 @@ check("and `false` reads as ON too, so a stale write cannot hide the feature",
 check("only `true` switches it off",
       R.focusOn(R.worldOf({ group: { focusOff: true } })) === false);
 
+console.log("\n15 · the strategy | reporting split (§116)");
+/* The own columns are two questions now. The old stored key kept meaning the
+   Reporting half — every §13 assertion above already proves a custodian's
+   stored `a_unit_own: edit` does NOT author — so this section proves the new
+   half both ways: opened it authors, closed it takes the arrows too.
+
+   PROVED ABLE TO FAIL (§94.5): the "opened" cases below refuse on the
+   pre-§116 build, where mayAuthorPage() was a hard office-only rule that no
+   grant could open. Run against the parent commit's lib/rules.js they go red. */
+(function () {
+  function withAccess(role, patch) {
+    const s = clone(SEED);
+    s.access = Object.assign({}, s.access,
+      { [role]: Object.assign({}, (s.access || {})[role], patch) });
+    return s;
+  }
+  function fromStored(stored, who, mutate) {
+    const inc = clone(stored); mutate(inc);
+    return A.authorize(stored, inc, personOf(stored, who));
+  }
+
+  /* The SMO opens strategy edit to the custodian role — a deliberate act on
+     the table (Islam, 2026-08-26), and from then on the words are theirs. */
+  const opened = withAccess("custodian", { a_unit_own_strat: "edit" });
+  let v = fromStored(opened, custKey, function (s) {
+    s.units[UNIT].items[0].name = "Renamed under an opened strategy grant";
+  });
+  check("strategy edit OPENED: the custodian may rename a pillar", v.ok, v.refusals.join(" / "));
+  v = fromStored(opened, custKey, function (s) {
+    s.units[UNIT].aspiration = "Rewritten under an opened strategy grant";
+  });
+  check("strategy edit OPENED: the custodian may rewrite the aspiration", v.ok, v.refusals.join(" / "));
+  v = fromStored(opened, custKey, function (s) {
+    s.units[UNIT].swot.s[0] = "Rewritten under an opened strategy grant";
+  });
+  check("strategy edit OPENED: the custodian may edit the SWOT", v.ok, v.refusals.join(" / "));
+  /* Opening OWN opens own and nothing else — another unit's plan stays the
+     office's however wide the stored map goes, because the other columns are
+     not split and mayAuthorPage() refuses a non-office author who does not
+     hold the target. */
+  const openedWide = withAccess("custodian",
+    { a_unit_own_strat: "edit", a_unit_other: "edit" });
+  v = fromStored(openedWide, custKey, function (s) {
+    s.units[OTHER].items[0].name = "Renamed in a unit this custodian does not hold";
+  });
+  check("strategy edit opened + other-units edit: ANOTHER unit's plan still refuses",
+        !v.ok, "was ALLOWED");
+
+  /* Closing the Strategy half takes the arrows with it (§101 rides the
+     Reporting half now, but a pane you cannot open is a pane you cannot
+     arrange) — while reporting itself is untouched. */
+  const closed = withAccess("custodian", { a_unit_own_strat: "none" });
+  const wClosed = R.worldOf(closed);
+  check("strategy NONE: the plan page's grant reads none",
+        R.grantAtPage(wClosed, personOf(closed, custKey), "u_plan", UNIT) === "none");
+  check("strategy NONE: mayArrange follows the pane out",
+        R.mayArrange(wClosed, personOf(closed, custKey), UNIT) === false);
+  check("strategy NONE: reporting is untouched",
+        R.grantAtPage(wClosed, personOf(closed, custKey), "u_report", UNIT) === "edit");
+  v = fromStored(closed, custKey, function (s) {
+    s.units[UNIT].items[0].measures[0].actual = "999";
+    s.units[UNIT].items[0].measures[0].progress = 12;
+  });
+  check("strategy NONE: the custodian still reports figures", v.ok, v.refusals.join(" / "));
+
+  /* The function side answers the same way through its own half. */
+  const FN = SEED.functionKeys.filter(function (k) {
+    return (SEED.functions[k] || {}).custodian && !(SEED.functions[k] || {}).format;
+  })[0];
+  const fnCust = (SEED.functions[FN] || {}).custodian;
+  check("the seed still has a capability-function custodian to test with", !!fnCust,
+        "no function with a custodian — these assertions measure nothing");
+  if (fnCust) {
+    v = fromStored(SEED, fnCust, function (s) {
+      s.group.capabilities.filter(function (c) { return c.fn === FN; })[0]
+        .def = "Rewritten by the function's custodian";
+    });
+    check("a function custodian may not rewrite a capability by default", !v.ok, "was ALLOWED");
+    const fnOpened = withAccess("custodian", { a_fn_own_strat: "edit" });
+    v = fromStored(fnOpened, fnCust, function (s) {
+      s.group.capabilities.filter(function (c) { return c.fn === FN; })[0]
+        .def = "Rewritten under an opened strategy grant";
+    });
+    check("strategy edit OPENED on the function half: now they may", v.ok, v.refusals.join(" / "));
+  }
+
+  /* The download is a pure rule with no server half — asserted here so the
+     one definition is proven where every other rule is (§116). */
+  const wSeed = R.worldOf(SEED);
+  check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
+  check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);
+  check("download: the office may", R.mayDownloadPlan(wSeed, personOf(SEED, "smo"), UNIT) === true);
+  if (fnCust) {
+    const fnHead = (SEED.functions[FN] || {}).head;
+    check("download: a function's head may, for their function",
+          R.mayDownloadPlan(wSeed, personOf(SEED, fnHead), "fn:" + FN) === true);
+  }
+  const nobody = { key: "smp_test_nobody", unit: UNIT };
+  check("download: somebody holding nothing may not",
+        R.mayDownloadPlan(wSeed, nobody, UNIT) === false);
+  check("download: strategy at none takes it away",
+        R.mayDownloadPlan(wClosed, personOf(closed, custKey), UNIT) === false);
+})();
+
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

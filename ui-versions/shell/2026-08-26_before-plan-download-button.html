@@ -192,7 +192,6 @@
 <script src="RECIPES"></script>
 <script src="TEMPLATES"></script>
 <script src="XLSX"></script>
-<script src="PPTX"></script>
 <script src="MAIL"></script>
 <script src="RENDER"></script>
 <script src="CONFIGRENDER"></script>
@@ -322,7 +321,7 @@
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
       { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", find:"departments official bu client names mapping",      render:renderMainbus },
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
 
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
@@ -2721,11 +2720,6 @@
         var k = b.dataset.page; EDIT_PAGE[k] = !EDIT_PAGE[k]; paint();
       });
     });
-    /* The plan as slides (§116): builds and saves, repaints nothing — a
-       download must not cost anybody a half-typed field elsewhere (§35). */
-    document.querySelectorAll("[data-dlpptx]").forEach(function(b){
-      b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
-    });
     document.querySelectorAll("[data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
     });
@@ -4841,11 +4835,13 @@
   }
 
   function sendXlsx(sheets, name){
-    /* The blob dance itself lives in pptx.js as sendFileBytes() since §116 —
-       this was about to be one of three copies, and three is where the rule
-       says extract. */
-    sendFileBytes(buildXlsx(sheets), name,
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    var bytes = buildXlsx(sheets);
+    var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }
 
   function wireImport(){
@@ -4928,7 +4924,11 @@
 
     var dl = document.querySelector("[data-dl]");
     if (dl) dl.addEventListener("click", function(){
-      sendFileBytes(csvFor(), fileName(), "text/csv;charset=utf-8");
+      var blob = new Blob([csvFor()], { type:"text/csv;charset=utf-8" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = fileName();
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
     });
 
     var show = document.querySelector("[data-showcsv]");

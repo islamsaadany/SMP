@@ -1318,11 +1318,23 @@
   .pband-code { font:600 13px/1 var(--mono); color:var(--stone); letter-spacing:.05em;
                 flex:none; }
   .pband-name { font:650 19px/1.3 var(--sans); color:var(--ink); letter-spacing:-.012em; }
-  /* The pen sits in the pane's corner and the band must not run under it. */
-  .pane .paneact ~ .pband, .pband { padding-right:38px; }
+  /* The pen sits in the pane's corner and the band must not run under it.
+     76px since §116: the corner can hold TWO controls now — the download
+     beside the pen (the office) or beside the arrows (a holder) — and a
+     reservation sized for one is a name running under the second. Reserved
+     always rather than counted, because padding a name never reaches costs
+     nothing and a hook that counts buttons is a second copy of the slot's
+     knowledge. */
+  .pane .paneact ~ .pband, .pband { padding-right:76px; }
   /* Above the band, or the pinned band covers the pen it left room for. */
   .pane .paneact { position:absolute; top:12px; right:12px; height:0; z-index:5; }
   .pane .paneact .penbtn { top:0; right:0; }
+  /* The second slot is a fixed offset, not a flexed row: these buttons are
+     absolute, so DOM order says nothing and the offset IS the layout (§116).
+     Alone — a holder whose reporting grant lost them the arrows — it takes
+     the corner itself. */
+  .pane .paneact .penbtn.dlpen { right:36px; }
+  .pane .paneact .penbtn.dlpen:only-child { right:0; }
   /* ── THE PEN ON A PLAN IS NOT HOVER-ONLY (§70) ────────────────────
      Islam: "in the project page I need to have the edit and add access, to
      edit current projects or add one. Same for the strategy plan page for the
@@ -1415,9 +1427,19 @@
      the header — so the widths have to be set on th, not only on td. `.cfg
      th:first-child` was still claiming 15% for the role column and
      `th:last-child` 15% for Setup, quietly overriding both numbers below. */
-  .acgrid th.ac, .acgrid td.ac { text-align:center; width:11.6%; padding-left:4px; padding-right:4px; }
-  .acgrid th.ac:last-child, .acgrid td.ac:last-child { width:11.6%; }
-  .acgrid th:first-child, .acgrid td.rolecell { width:19%; }
+  /* TEN COLUMNS SINCE THE SPLIT (§116): role + nine area columns, two of them
+     the halves under each own pair. Fixed layout still reads only the FIRST
+     header row, and a colspan cell there divides its width equally over the
+     columns it spans — so the pair header carries twice a half's share, and
+     the sub-row's widths are set nowhere because they would be ignored. */
+  .acgrid th.ac, .acgrid td.ac { text-align:center; width:9.4%; padding-left:4px; padding-right:4px; }
+  .acgrid th.acpair { width:18.8%; }
+  .acgrid th:first-child, .acgrid td.rolecell { width:15.4%; }
+  /* The halves read as sub-labels of the pair above them, not as two more
+     shouting columns: same band, one step quieter, no double border where the
+     pair meets its halves. */
+  .acgrid th.acpair { padding-bottom:2px; border-bottom:0; }
+  .acgrid th.achalf { padding-top:0; font-size:10.5px; letter-spacing:.05em; }
   /* _shared.css sets `thead th { white-space:nowrap }`, which is right for a
      one-word header and wrong for a column that explains what it covers: the
      note did not wrap, it ran straight across its neighbours. Seven headers
@@ -5857,18 +5879,48 @@ THEME.apply();
   ];
   var ROLE_KEYS = ROLES.map(function (r) { return r.key; });
 
-  /* ── 2 · Areas (§37) ──────────────────────────────────────────── */
+  /* ── 2 · Areas (§37; the own pair split in two, §116) ───────────
+     THE OWN COLUMNS ARE TWO QUESTIONS EACH (Islam, 2026-08-26): "the strategy
+     should be locked from the non SMO but the reporting should be editable by
+     who we grant the access so they can submit — we need this split in the
+     roles and access table." One grant had covered the strategy pages AND
+     reporting together, so §94's office-only lock was invisible on the table
+     and reporting could not be granted without the ambiguous whole.
+
+     THE NEW KEY IS THE STRATEGY HALF, AND THAT IS THE BACK-COMPAT ARGUMENT:
+     a tenant's stored grant on the old key governed what the person could
+     actually do — reporting, because §94 refused strategy authoring by rule —
+     so the old key KEEPS meaning the Reporting half and nobody's rights move
+     on upgrade. The Strategy half is a NEW key, absent from every stored map,
+     so it falls back to the shipped defaults below (§30.2: absent means "not
+     answered yet"). Renaming the stored key instead would have silently reset
+     every tenant that ever touched the matrix.
+
+     `pair` and `col` are the two-row header's vocabulary: the pair name spans
+     the two halves, the col name titles each. Entries without a pair span
+     both header rows. The OTHER columns are deliberately not split — they are
+     view/none for everyone but the office, and ten columns already cost the
+     table width; strategy authoring on somebody else's unit stays the
+     office's (mayAuthorPage below). */
   var AREAS = [
     { key:"a_group",      label:"Group",
       note:"Performance, Foundation, Temple, Weighting, Focus" },
-    { key:"a_unit_own",   label:"Own business unit",
-      note:"The units they hold a role in" },
+    { key:"a_unit_own_strat", label:"Own business unit — Strategy",
+      pair:"Own business unit", col:"Strategy",
+      note:"Authoring: Foundation · Analysis & SWOT · Plan" },
+    { key:"a_unit_own",   label:"Own business unit — Reporting",
+      pair:"Own business unit", col:"Reporting",
+      note:"Performance · entering figures · saving drafts · submitting" },
     { key:"a_unit_other", label:"Other business units",
-      note:"Every unit they do not" },
-    { key:"a_fn_own",     label:"Own supporting function",
-      note:"The functions they hold a role in" },
+      note:"Every unit they do not hold" },
+    { key:"a_fn_own_strat", label:"Own supporting function — Strategy",
+      pair:"Own supporting function", col:"Strategy",
+      note:"Authoring: a capability's definition and projects" },
+    { key:"a_fn_own",     label:"Own supporting function — Reporting",
+      pair:"Own supporting function", col:"Reporting",
+      note:"Performance · entering figures · saving drafts · submitting" },
     { key:"a_fn_other",   label:"Other supporting functions",
-      note:"Every function they do not" },
+      note:"Every function they do not hold" },
     { key:"a_cycle",      label:"Reporting cycle",
       note:"Open, chase and close · Import · Archived plans · Focus measures" },
     { key:"a_setup",      label:"Setup",
@@ -5879,10 +5931,15 @@ THEME.apply();
   /* The shipped answer for every role in every area. A tenant's stored map
      overrides it; an ABSENT key falls back here, because absent means "not
      answered yet", not "denied" (§30.2). */
+  /* THE STRATEGY DEFAULTS ARE §94 WRITTEN AS CELLS (§116). Edit starts with
+     the office alone and everyone else reads — the same behaviour the hard
+     rule enforced, now visible on the table. The SMO can OPEN strategy edit
+     to a role deliberately (Islam's choice, 2026-08-26), which makes §94 the
+     shipped default rather than a floor nobody can lower. */
   var ACCESS_DEFAULTS = {
     /* The SMO. Everything, everywhere. */
-    super:     { a_group:"edit", a_unit_own:"edit", a_unit_other:"edit",
-                 a_fn_own:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
+    super:     { a_group:"edit", a_unit_own:"edit", a_unit_own_strat:"edit", a_unit_other:"edit",
+                 a_fn_own:"edit", a_fn_own_strat:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
     /* ── THE SAME GRANTS AS THE SUPER USER, AND THAT IS DELIBERATE (§89) ──
        What separates the two is not a cell in this table. Every area a Super
        user edits, the SMO team edits — because the difference is three things
@@ -5894,13 +5951,13 @@ THEME.apply();
        IT IS STILL A ROW, so a tenant that wants a narrower SMO team can have
        one — the rules below are a floor nobody can raise, not a ceiling
        nobody can lower. */
-    smoteam:   { a_group:"edit", a_unit_own:"edit", a_unit_other:"edit",
-                 a_fn_own:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
+    smoteam:   { a_group:"edit", a_unit_own:"edit", a_unit_own_strat:"edit", a_unit_other:"edit",
+                 a_fn_own:"edit", a_fn_own_strat:"edit", a_fn_other:"edit", a_cycle:"edit", a_setup:"edit" },
     /* Sees the whole organisation and manages none of it. */
-    gceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
-                 a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
-    cceo:      { a_group:"view", a_unit_own:"view", a_unit_other:"view",
-                 a_fn_own:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+    gceo:      { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"view",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
+    cceo:      { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"view",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"view", a_cycle:"view", a_setup:"none" },
     /* ── SETUP IS THE SMO'S, AND SO IS THE CYCLE'S MACHINERY (§51.18) ──
        Islam: "no one should have access to the settings except for the SMO."
 
@@ -5920,19 +5977,19 @@ THEME.apply();
        gear is only what is theirs by rule: the knowledge base, the figures
        they report, and the set they fill. Those are `area:"always"` and were
        never a matrix question. */
-    owner:     { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-                 a_fn_own:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
-    custodian: { a_group:"view", a_unit_own:"edit", a_unit_other:"none",
-                 a_fn_own:"edit", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
-    fnhead:    { a_group:"view", a_unit_own:"none", a_unit_other:"none",
-                 a_fn_own:"edit", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    owner:     { a_group:"view", a_unit_own:"edit", a_unit_own_strat:"view", a_unit_other:"none",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    custodian: { a_group:"view", a_unit_own:"edit", a_unit_own_strat:"view", a_unit_other:"none",
+                 a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    fnhead:    { a_group:"view", a_unit_own:"none", a_unit_own_strat:"none", a_unit_other:"none",
+                 a_fn_own:"edit", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* VIEW, at Islam's direction (spec 006 §7.2): "contributors only view, and
        if we allow them they should be allowed to their lines only". The second
        half of that sentence is CONTRIB_OWN_LINES below — a rule with teeth,
        so a tenant that has edit stored here still cannot touch anybody
        else's rows. */
-    contrib:   { a_group:"view", a_unit_own:"view", a_unit_other:"none",
-                 a_fn_own:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
+    contrib:   { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" },
     /* THE SAME AS A CONTRIBUTOR'S, DELIBERATELY. A new role's defaults reach
        every existing tenant at once (§30.2: an absent key means "not answered
        yet", so `grant()` falls back to the shipped default) — so shipping a
@@ -5940,8 +5997,8 @@ THEME.apply();
        it today, on the day they upgraded and without anybody choosing it.
        It starts where they already are; the SMO tightens it on the matrix,
        which is the whole reason the role is a row of its own. */
-    employee:  { a_group:"view", a_unit_own:"view", a_unit_other:"none",
-                 a_fn_own:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" }
+    employee:  { a_group:"view", a_unit_own:"view", a_unit_own_strat:"view", a_unit_other:"none",
+                 a_fn_own:"view", a_fn_own_strat:"view", a_fn_other:"none", a_cycle:"none", a_setup:"none" }
   };
 
   var STATE_RANK = { none:0, view:1, edit:2 };
@@ -5953,9 +6010,9 @@ THEME.apply();
     { key:"g_temple", area:"a_group", scope:"group", label:"Temple",      note:"The strategy on one page. No performance figures" },
     { key:"g_weight", area:"a_group", scope:"group", label:"Weighting",   note:"How much each business unit counts" },
     { key:"u_perf",   area:"unit", scope:"unit",  label:"Performance", note:"The unit's headline and its pillars" },
-    { key:"u_found",  area:"unit", scope:"unit",  label:"Foundation",  note:"The unit's own words and Key Objectives" },
-    { key:"u_plan",   area:"unit", scope:"unit",  label:"Strategy",    note:"The plan as agreed, with no reported figure on it" },
-    { key:"u_anal",   area:"unit", scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
+    { key:"u_found",  area:"unit_strat", scope:"unit",  label:"Foundation",  note:"The unit's own words and Key Objectives" },
+    { key:"u_plan",   area:"unit_strat", scope:"unit",  label:"Strategy",    note:"The plan as agreed, with no reported figure on it" },
+    { key:"u_anal",   area:"unit_strat", scope:"unit",  label:"Analysis",    note:"The unit's SWOT" },
     { key:"c_labels", area:"a_setup", scope:"setup", label:"Labels",      note:"Internal names and tenant display labels" },
     { key:"c_access", area:"a_setup", scope:"setup", label:"Roles & access", note:"Which roles reach which kinds of page" },
     { key:"c_bands",  area:"a_setup", scope:"setup", label:"Scoring bands",   note:"The one scale every score reads on" },
@@ -5987,8 +6044,8 @@ THEME.apply();
     { key:"c_fns",    area:"a_setup", scope:"setup", label:"Supporting functions", note:"Who carries the capabilities" },
     { key:"c_caps",   area:"a_setup", scope:"setup", label:"Capabilities",    note:"What exists, and which function owns each" },
     { key:"k_perf",   area:"fn", scope:"fn",    label:"Performance",     note:"What this function's capabilities read" },
-    { key:"k_found",  area:"fn", scope:"fn",    label:"Function overview",     note:"What each capability is, and its key objectives" },
-    { key:"k_proj",   area:"fn", scope:"fn",    label:"Projects",        note:"The plan behind each project, with no reported figure on it" },
+    { key:"k_found",  area:"fn_strat", scope:"fn",    label:"Function overview",     note:"What each capability is, and its key objectives" },
+    { key:"k_proj",   area:"fn_strat", scope:"fn",    label:"Projects",        note:"The plan behind each project, with no reported figure on it" },
     { key:"k_report", area:"fn", scope:"fn",    label:"Reporting",       note:"Enter this cycle's figures" },
     { key:"g_focus",  area:"a_group", scope:"group", label:"Focus",           note:"Every unit's focus measures" },
     { key:"c_focus",  area:"a_cycle", scope:"manage", label:"Focus measures",  note:"Choose what carries reward this cycle" },
@@ -6141,6 +6198,16 @@ THEME.apply();
   }
 
   function areaFor(area, w, r, target) {
+    /* THE STRATEGY PAGES RESOLVE TO THEIR OWN HALF (§116). An OTHER unit or
+       function has no split column — reading somebody else's strategy rides
+       the same other-grant as reading their performance, and AUTHORING it is
+       refused for everyone but the office by mayAuthorPage() whatever that
+       grant says. */
+    if (area === "unit_strat" || area === "fn_strat") {
+      var owns = roleOwns(w, r, target);
+      return area === "unit_strat" ? (owns ? "a_unit_own_strat" : "a_unit_other")
+                                   : (owns ? "a_fn_own_strat"   : "a_fn_other");
+    }
     if (area !== "unit" && area !== "fn") return area;
     var own = roleOwns(w, r, target);
     return area === "unit" ? (own ? "a_unit_own" : "a_unit_other")
@@ -6298,9 +6365,25 @@ THEME.apply();
   /* May this person AUTHOR this page — write what was agreed, as opposed to
      reporting against it? The grant still has to say edit: this narrows, it
      never widens, so a tenant that has closed a page to the office keeps it
-     closed. */
+     closed.
+
+     §116 MOVES §94'S LOCK FROM A HARD RULE TO THE STRATEGY HALF'S GRANT.
+     The five strategy pages resolve to `a_unit_own_strat` / `a_fn_own_strat`
+     (areaFor), whose shipped default is edit for the office and view for
+     everyone else — so the behaviour §94 enforced is unchanged until the SMO
+     deliberately opens a role's Strategy cell, which was Islam's choice
+     (2026-08-26): the lock is now the default, not a floor nobody can lower.
+     ONE EXCEPTION SURVIVES AS A RULE: authoring somebody ELSE'S unit or
+     function stays the office's, because the other columns are not split and
+     an a_unit_other edit is the office's own wide grant, not a client role
+     handing itself a neighbour's plan. */
   function mayAuthorPage(w, person, pageKey, target) {
-    if (isStrategyPage(pageKey) && !isOffice(w, person)) return false;
+    if (isStrategyPage(pageKey) && !isOffice(w, person)) {
+      var ownsIt = rolesOrFloor(w, person).some(function (r) {
+        return roleOwns(w, r, target);
+      });
+      if (!ownsIt) return false;
+    }
     return grantAtPage(w, person, pageKey, target) === "edit";
   }
 
@@ -6360,13 +6443,50 @@ THEME.apply();
       return ARRANGE_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, target);
     });
     if (!holds) return false;
-    return grantAtPage(w, person, planPageOf(target), target) === "edit";
+    /* §116 MOVED THE PLAN PAGE'S GRANT TO THE STRATEGY HALF, WHICH A HOLDER
+       READS AT VIEW — so the edit §101 tested here has to stay the holder's
+       WORKING grant, the Reporting half, or the split would silently take the
+       arrows §101 gave back. Exactly the grant this rule asked before the
+       split, under its old name. The page itself must still be reachable:
+       strategy at none hides the pane the arrows live on. */
+    if (grantAtPage(w, person, planPageOf(target), target) === "none") return false;
+    return grantAtPage(w, person, reportPageOf(target), target) === "edit";
   }
 
   /* A unit arranges its Plan; a supporting function arranges its Projects.
      One place, so the two panes cannot be asked different questions (§53.5). */
   function planPageOf(target) {
     return String(target).indexOf("fn:") === 0 ? "k_proj" : "u_plan";
+  }
+  /* The same pairing for the Reporting half (§116). */
+  function reportPageOf(target) {
+    return String(target).indexOf("fn:") === 0 ? "k_report" : "u_report";
+  }
+
+  /* ── THE PLAN LEAVES AS SLIDES (§116) ────────────────────────────
+     Islam, 2026-08-26: "add the access of downloading a presentation for the
+     plan for the custodian and the business unit owner through a button in
+     the strategy panel — sometimes they need it in slides to update things
+     and view it outside to come back with the SMO for refinement."
+
+     WHO: the office, and the roles that HOLD the thing — §101's list, and for
+     the same reason: a function has no BU owner, so its holder is its head,
+     and a unit and a function are the same product (§53.5). A CEO reaches a
+     unit without holding it, so reaching is still not enough (§37).
+
+     A CLIENT-SIDE RULE ONLY, deliberately: the download re-arranges what the
+     page already shows this person — no write, no new data — so the server
+     has nothing to refuse that the state read has not already gated. The
+     strategy page must still be visible: a none grant hides the pane the
+     button sits on, and the rule says so too rather than trusting the layout
+     (§42, on the screen). */
+  function mayDownloadPlan(w, person, target) {
+    if (!person || !target || target === "group") return false;
+    if (grantAtPage(w, person, planPageOf(target), target) === "none") return false;
+    if (isOffice(w, person)) return true;
+    return rolesOrFloor(w, person).some(function (r) {
+      return ARRANGE_ROLES.indexOf(r.role) > -1 && roleOwns(w, r, target);
+    });
   }
 
   /* ── 5 · Figure sets (§16.7, spec 008) ───────────────────────────
@@ -6728,6 +6848,7 @@ THEME.apply();
     mayIssuePasswordTo: mayIssuePasswordTo,
     STRATEGY_PAGES: STRATEGY_PAGES, isStrategyPage: isStrategyPage,
     ARRANGE_ROLES: ARRANGE_ROLES, mayArrange: mayArrange, planPageOf: planPageOf,
+    reportPageOf: reportPageOf, mayDownloadPlan: mayDownloadPlan,
     focusOn: focusOn,
     mayAuthorPage: mayAuthorPage,
     namedOn: namedOn, namedInUnit: namedInUnit,
@@ -14066,12 +14187,18 @@ var PAGE_INFO = {
        "disagree. Two things a company decides for itself apply on top and can only ever narrow " +
        "it: whether its CEO sees <b>the group</b>, and whether they see <b>the other " +
        "companies</b>. Both are on the Companies page."],
-      ["Three things are rules, not settings, so they are not in the table",
+      ["The own columns answer in two halves",
+       "<b>Strategy</b> is the words as agreed &mdash; Foundation, the SWOT, the Plan, and on a " +
+       "function a capability&rsquo;s definition and projects. <b>Reporting</b> is the figures " +
+       "entered against them, drafts and submitting. Strategy edit ships with the office alone, " +
+       "because a plan you are measured against is not yours to rewrite &mdash; and opening it " +
+       "to a role is a deliberate act made on the table, not a side effect of letting the same " +
+       "people report."],
+      ["Two things are rules, not settings, so they are not in the table",
        "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody " +
-       "can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much " +
-       "access the unit&rsquo;s own people hold, because a plan you are measured against is not " +
-       "yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked " +
-       "by the group CEO and the SMO. Each of these used to be a cell in the matrix."],
+       "can open is not an explanation. And <b>focus measures</b> &mdash; what carries reward " +
+       "&mdash; are marked by the group CEO and the SMO. Each of these used to be a cell in the " +
+       "matrix."],
       ["Page level only",
        "If a role can open a page, it sees everything on it. Restriction happens by removing the " +
        "page, never by trimming its contents &mdash; per-element permissions make a system nobody " +
@@ -17133,6 +17260,446 @@ function peopleFromWorkbook(sheets){
 
 </script>
 <script>
+/* ── The plan leaves as slides (§116) ────────────────────────────────
+   Islam, 2026-08-26: "add the access of downloading a presentation for the
+   plan for the custodian and the business unit owner through a button in the
+   strategy panel — sometimes they need it in slides to update things and view
+   it outside to come back with the SMO for refinement."
+
+   A REAL .PPTX, NOT THE DECK PRINTED. The point of the ask is the file being
+   EDITABLE outside the platform — marked up, argued over, brought back — and
+   a picture of the deck cannot be edited. A .pptx is a zip of XML exactly as
+   a .xlsx is, so this reuses zipStore() from xlsx.js and adds no dependency:
+   the file builds offline, from file://, like everything else.
+
+   THE CONTENT IS THE PLAN, NEVER THE CYCLE. Foundation, the SWOT (asked for
+   by name), key objectives, and each pillar's measures and tactics — targets
+   and owners, no actual and no progress anywhere. This is u_plan's content
+   with u_found's and u_anal's around it, which is what "a presentation for
+   the plan" means; the review deck with its figures already exists and is a
+   different artefact for a different meeting.
+
+   A UNIT AND A FUNCTION ARE THE SAME PRODUCT (§53.5): a pillars-planning
+   function goes through fnAsUnit() and gets the unit's slides; a capability
+   function gets one overview slide per capability and its projects table —
+   plan-level facts only, same rule.
+
+   WHO GETS THE BUTTON IS `SMPRules.mayDownloadPlan()` — the office and the
+   roles that hold the thing. The rule is client-side only, deliberately: the
+   download re-arranges what the page already shows this person, so there is
+   no write for the server to refuse (§116).
+
+   COLOURS ARE THE TENANT'S where the tenant has set them (Setup › Branding),
+   and the house navy/gold where it has not — the same two answers the
+   platform itself gives, read from the same branding() the pages read. */
+
+/* 16:9 in EMUs. One inch is 914400; the margins and grid below are in whole
+   EMUs so nothing accumulates rounding. */
+var PPTX_W = 12192000, PPTX_H = 6858000;
+var PPTX_MX = 640080;                       /* 0.7in side margin */
+var PPTX_CW = PPTX_W - 2 * PPTX_MX;         /* content width */
+
+/* THE THIRD COPY OF THE BLOB DANCE GETS EXTRACTED (§54.3 said two copies is
+   when the second one gets the revoke wrong; this was about to be the third
+   after sendXlsx and the CSV button in shell.html — both call this now). */
+function sendFileBytes(bytes, name, mime){
+  var blob = new Blob([bytes], { type: mime });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+
+function pptxColors(){
+  var b = branding();
+  var strip = function(h, fb){ return String(h || fb).replace(/^#/, "").toUpperCase(); };
+  return {
+    bar:   strip(b.bar,    "#16325C"),      /* headers — the navigation's own */
+    accent:strip(b.accent, "#C9A24D"),      /* the mark, sparingly (§41) */
+    ink:   "1B2740", quiet:"5E6E88", ground:"FFFFFF", line:"DCE3ED",
+    zebra: "F2F5F9"
+  };
+}
+
+/* ── The DrawingML fragments ────────────────────────────────────────── */
+function pptxRun(text, o){
+  o = o || {};
+  return '<a:r><a:rPr lang="en" sz="' + (o.sz || 1400) + '"' +
+    (o.b ? ' b="1"' : '') + (o.i ? ' i="1"' : '') + '>' +
+    '<a:solidFill><a:srgbClr val="' + (o.color || pptxColors().ink) + '"/></a:solidFill>' +
+    '<a:latin typeface="Calibri"/></a:rPr><a:t>' + xesc(text) + '</a:t></a:r>';
+}
+function pptxPara(runs, o){
+  o = o || {};
+  return '<a:p><a:pPr' + (o.align ? ' algn="' + o.align + '"' : '') +
+    (o.before ? ' ><a:spcBef><a:spcPts val="' + o.before + '"/></a:spcBef></a:pPr>' : '/>') +
+    (Array.isArray(runs) ? runs.join("") : runs) + '</a:p>';
+}
+function pptxText(id, box, paras, o){
+  o = o || {};
+  return '<p:sp><p:nvSpPr><p:cNvPr id="' + id + '" name="text ' + id + '"/>' +
+    '<p:cNvSpPr txBox="1"/><p:nvPr/></p:nvSpPr>' +
+    '<p:spPr><a:xfrm><a:off x="' + box.x + '" y="' + box.y + '"/>' +
+    '<a:ext cx="' + box.cx + '" cy="' + box.cy + '"/></a:xfrm>' +
+    '<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>' +
+    (o.fill ? '<a:solidFill><a:srgbClr val="' + o.fill + '"/></a:solidFill>' : '') +
+    (o.line ? '<a:ln w="9525"><a:solidFill><a:srgbClr val="' + o.line + '"/></a:solidFill></a:ln>' : '') +
+    '</p:spPr>' +
+    '<p:txBody><a:bodyPr wrap="square" lIns="91440" rIns="91440" tIns="45720" bIns="45720">' +
+    '<a:normAutofit/></a:bodyPr><a:lstStyle/>' + paras.join("") + '</p:txBody></p:sp>';
+}
+/* A table. `widths` are EMU column widths; `head` is one array of strings;
+   `rows` an array of arrays. The header wears the tenant's bar with its own
+   ink — §38.5: a surface with its own ground needs its own ink. */
+function pptxTable(id, box, widths, head, rows){
+  var C = pptxColors();
+  function cell(text, hdr, ri){
+    return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
+      pptxPara(pptxRun(text, hdr ? { sz:1100, b:true, color:C.ground }
+                                 : { sz:1100, color:C.ink })) +
+      '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
+      '<a:lnB w="6350"><a:solidFill><a:srgbClr val="' + C.line + '"/></a:solidFill></a:lnB>' +
+      '<a:solidFill><a:srgbClr val="' +
+        (hdr ? C.bar : (ri % 2 ? C.zebra : C.ground)) + '"/></a:solidFill></a:tcPr></a:tc>';
+  }
+  var tr = function(cells, hdr, ri){
+    return '<a:tr h="335280">' + cells.map(function(t){ return cell(t, hdr, ri); }).join("") + '</a:tr>';
+  };
+  return '<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="' + id + '" name="table ' + id + '"/>' +
+    '<p:cNvGraphicFramePr/><p:nvPr/></p:nvGraphicFramePr>' +
+    '<p:xfrm><a:off x="' + box.x + '" y="' + box.y + '"/><a:ext cx="' + box.cx + '" cy="' + (box.cy || 335280) + '"/></p:xfrm>' +
+    '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table">' +
+    '<a:tbl><a:tblPr firstRow="1" bandRow="1"/><a:tblGrid>' +
+    widths.map(function(w){ return '<a:gridCol w="' + w + '"/>'; }).join("") +
+    '</a:tblGrid>' + tr(head, true, 0) +
+    rows.map(function(r, i){ return tr(r, false, i); }).join("") +
+    '</a:tbl></a:graphicData></a:graphic></p:graphicFrame>';
+}
+
+var PPTX_NS =
+  ' xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"' +
+  ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"' +
+  ' xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"';
+
+function pptxSlideXml(shapes){
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<p:sld' + PPTX_NS + '><p:cSld><p:spTree>' +
+    '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>' +
+    '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/>' +
+    '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>' +
+    shapes.join("") +
+    '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>';
+}
+
+/* Every content slide opens the same way: a kicker naming where we are, the
+   slide's own title, and a hairline of the tenant's accent under them. */
+function pptxHead(kicker, title){
+  var C = pptxColors();
+  return [
+    pptxText(2, { x:PPTX_MX, y:274320, cx:PPTX_CW, cy:320040 },
+      [pptxPara(pptxRun(kicker.toUpperCase(), { sz:1000, b:true, color:C.quiet }))]),
+    pptxText(3, { x:PPTX_MX, y:539496, cx:PPTX_CW, cy:594360 },
+      [pptxPara(pptxRun(title, { sz:2400, b:true, color:C.bar }))]),
+    pptxText(4, { x:PPTX_MX, y:1173480, cx:1828800, cy:45720 }, [pptxPara(pptxRun(" ", { sz:100 }))],
+      { fill:C.accent })
+  ];
+}
+
+/* ── The slides themselves ──────────────────────────────────────────── */
+var PPTX_TABLE_Y = 1381125;
+var PPTX_ROWS_PER_SLIDE = 11;
+
+/* A long table continues on its own next slide rather than shrinking to fit —
+   the deck's own fit-pass argument (§51.10), decided by counting rather than
+   measuring because a table row here has a fixed height by construction. */
+function pptxTableSlides(kicker, title, widths, head, rows){
+  var out = [];
+  for (var i = 0; i < rows.length || i === 0; i += PPTX_ROWS_PER_SLIDE) {
+    var part = rows.slice(i, i + PPTX_ROWS_PER_SLIDE);
+    var t = i ? title + " (continued)" : title;
+    out.push(pptxSlideXml(pptxHead(kicker, t).concat(part.length
+      ? [pptxTable(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW }, widths, head, part)]
+      : [pptxText(10, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:457200 },
+          [pptxPara(pptxRun("Nothing here yet.", { sz:1200, i:true, color:pptxColors().quiet }))])])));
+  }
+  return out;
+}
+
+function pptxQuarters(t){
+  var qs = ["q1","q2","q3","q4"].map(function(q, i){ return t[q] ? "Q" + (i + 1) : null; })
+    .filter(Boolean);
+  return qs.length ? qs.join(" · ") : "—";
+}
+
+function pptxCover(orgLine, name, subLine){
+  var C = pptxColors();
+  return pptxSlideXml([
+    /* The bar carries the tenant's colour across the whole cover. */
+    pptxText(2, { x:0, y:0, cx:PPTX_W, cy:PPTX_H }, [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.bar }),
+    pptxText(3, { x:PPTX_MX, y:2194560, cx:PPTX_CW, cy:365760 },
+      [pptxPara(pptxRun(orgLine.toUpperCase(), { sz:1200, b:true, color:C.accent }))]),
+    pptxText(4, { x:PPTX_MX, y:2651760, cx:PPTX_CW, cy:1005840 },
+      [pptxPara(pptxRun(name, { sz:4400, b:true, color:C.ground }))]),
+    pptxText(5, { x:PPTX_MX, y:3748333, cx:PPTX_CW, cy:365760 },
+      [pptxPara(pptxRun(subLine, { sz:1400, color:C.ground }))])
+  ]);
+}
+
+/* The plan of a unit — or of a pillars-planning function through fnAsUnit(),
+   which is the whole point of that reader existing (§61). */
+function pptxUnitSlides(u, kicker){
+  var C = pptxColors(), slides = [];
+  var today = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  slides.push(pptxCover(GROUP.org || "Strategy Management Platform", u.name,
+    "Strategy plan — as agreed, no reported figures · " + today));
+
+  /* Foundation: the clauses read as the sentences they are, the aspiration as
+     the one big statement the objectives hang off. */
+  var found = [];
+  (u.clauses || []).forEach(function(c){
+    found.push(pptxPara([pptxRun(c[0] + "  ", { sz:1200, b:true, color:C.quiet }),
+                         pptxRun(c[1], { sz:1200 })], { before:600 }));
+  });
+  var fShapes = pptxHead(kicker, "Foundation");
+  if (u.aspiration) fShapes.push(pptxText(6,
+    { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:1188720 },
+    [pptxPara(pptxRun("ASPIRATION", { sz:1000, b:true, color:C.quiet })),
+     pptxPara(pptxRun(u.aspiration, { sz:1500, i:true, color:C.bar }), { before:600 })],
+    { fill:C.zebra }));
+  if (found.length) fShapes.push(pptxText(7,
+    { x:PPTX_MX, y:2705100, cx:PPTX_CW, cy:2971800 }, found));
+  if (u.aspiration || found.length) slides.push(pptxSlideXml(fShapes));
+
+  var kos = u.keyObjectives || [];
+  if (kos.length) slides = slides.concat(pptxTableSlides(kicker, "Key objectives",
+    [4754880, 914400, 2621280, 2621280],
+    ["Objective", "Dir.", "This year's target", "3-year target"],
+    kos.map(function(k){ return [k.name, k.dir || "", k.target || "—", k.target3y || "—"]; })));
+
+  /* The SWOT, asked for by name (Islam, 2026-08-26). Four boxes, two rows —
+     the shape the Analysis page draws. */
+  var sw = u.swot || {};
+  if ((sw.s || []).length || (sw.w || []).length || (sw.o || []).length || (sw.t || []).length) {
+    var half = (PPTX_CW - 228600) / 2, boxH = 2103120, id = 6;
+    var quad = function(x, y, title, items){
+      return pptxText(id++, { x:x, y:y, cx:half, cy:boxH },
+        [pptxPara(pptxRun(title.toUpperCase(), { sz:1050, b:true, color:C.bar }))].concat(
+          (items || []).map(function(t){
+            return pptxPara(pptxRun("·  " + t, { sz:1000 }), { before:300 });
+          })), { fill:C.zebra });
+    };
+    slides.push(pptxSlideXml(pptxHead(kicker, "Analysis — SWOT").concat([
+      quad(PPTX_MX, PPTX_TABLE_Y, "Strengths", sw.s),
+      quad(PPTX_MX + half + 228600, PPTX_TABLE_Y, "Weaknesses", sw.w),
+      quad(PPTX_MX, PPTX_TABLE_Y + boxH + 182880, "Opportunities", sw.o),
+      quad(PPTX_MX + half + 228600, PPTX_TABLE_Y + boxH + 182880, "Threats", sw.t)
+    ])));
+  }
+
+  /* One pillar, two tables, two slides — measures then tactics, the order the
+     Plan pane reads them in. */
+  (u.items || []).forEach(function(p, pi){
+    var code = (u.codePrefix || "") + (p.code || (pi + 1));
+    var pk = kicker + " · " + code;
+    slides = slides.concat(pptxTableSlides(pk, p.name + " — Key measures",
+      [5303520, 914400, 2346960, 2346960],
+      ["Measure", "Dir.", "Target", "Compiles"],
+      (p.measures || []).map(function(m){
+        return [m.name, m.dir || "", m.target || "—", m.compile || "—"];
+      })));
+    slides = slides.concat(pptxTableSlides(pk, p.name + " — Tactics",
+      [5303520, 2103120, 2103120, 1402080],
+      ["Tactic", "Owner", "Collaborators", "Quarters"],
+      (p.tactics || []).map(function(t){
+        return [t.name, t.owner || "—",
+                (t.collaborators || []).join(", ") || "—", pptxQuarters(t)];
+      })));
+  });
+  return slides;
+}
+
+/* A capability function's plan: one overview slide per capability (what it
+   is, and its key objectives), then its projects — plan-level facts only.
+   The rows inside a project (deliverables, outcomes, milestones) are counted
+   rather than listed: the slide answers "what did we commit to", and the
+   product is where a project's inside lives. */
+function pptxFnSlides(fk){
+  var f = FUNCTIONS[fk], C = pptxColors(), slides = [];
+  var today = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  slides.push(pptxCover(GROUP.org || "Strategy Management Platform", f.name,
+    "Strategy plan — as agreed, no reported figures · " + today));
+  capsOfFunction(fk).forEach(function(c){
+    var shapes = pptxHead(f.name, c.name);
+    if (c.def) shapes.push(pptxText(6, { x:PPTX_MX, y:PPTX_TABLE_Y, cx:PPTX_CW, cy:960120 },
+      [pptxPara(pptxRun("WHAT IT IS", { sz:1000, b:true, color:C.quiet })),
+       pptxPara(pptxRun(c.def, { sz:1300, i:true, color:C.bar }), { before:600 })],
+      { fill:C.zebra }));
+    var kos = c.keyObjectives || [];
+    if (kos.length) shapes.push(pptxTable(7,
+      { x:PPTX_MX, y:c.def ? 2529840 : PPTX_TABLE_Y, cx:PPTX_CW },
+      [5760720, 914400, 2118360, 2118360],
+      ["Key objective", "Dir.", "Target", "Weight"],
+      kos.slice(0, 8).map(function(k){
+        return [k.name, k.dir || "", k.target || "—", k.weight != null ? k.weight + "%" : "—"];
+      })));
+    slides.push(pptxSlideXml(shapes));
+    slides = slides.concat(pptxTableSlides(f.name + " · " + c.name, "Projects",
+      [3931920, 1737360, 1188720, 1188720, 2865120],
+      ["Project", "Owner", "Start", "End", "Carries"],
+      (c.projects || []).map(function(p){
+        return [p.name, p.owner || "—", p.start || "—", p.end || "—",
+          plural((p.deliverables || []).length, "deliverable") + " · " +
+          plural((p.outcomes || []).length, "outcome") + " · " +
+          plural((p.milestones || []).length, "milestone")];
+      })));
+  });
+  return slides;
+}
+
+/* ── The package around the slides ──────────────────────────────────── */
+function pptxTheme(){
+  var C = pptxColors();
+  var scheme =
+    '<a:dk1><a:srgbClr val="' + C.ink + '"/></a:dk1><a:lt1><a:srgbClr val="FFFFFF"/></a:lt1>' +
+    '<a:dk2><a:srgbClr val="' + C.bar + '"/></a:dk2><a:lt2><a:srgbClr val="' + C.zebra + '"/></a:lt2>' +
+    '<a:accent1><a:srgbClr val="' + C.accent + '"/></a:accent1>' +
+    '<a:accent2><a:srgbClr val="' + C.bar + '"/></a:accent2>' +
+    '<a:accent3><a:srgbClr val="8FA3BE"/></a:accent3><a:accent4><a:srgbClr val="B0873A"/></a:accent4>' +
+    '<a:accent5><a:srgbClr val="5E6E88"/></a:accent5><a:accent6><a:srgbClr val="2F6B4F"/></a:accent6>' +
+    '<a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink>';
+  var fonts = '<a:majorFont><a:latin typeface="Calibri Light"/><a:ea typeface=""/><a:cs typeface=""/></a:majorFont>' +
+    '<a:minorFont><a:latin typeface="Calibri"/><a:ea typeface=""/><a:cs typeface=""/></a:minorFont>';
+  var fill = '<a:solidFill><a:schemeClr val="phClr"/></a:solidFill>';
+  var fmt =
+    '<a:fillStyleLst>' + fill + fill + fill + '</a:fillStyleLst>' +
+    '<a:lnStyleLst>' +
+      '<a:ln w="6350"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln>' +
+      '<a:ln w="12700"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln>' +
+      '<a:ln w="19050"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill></a:ln>' +
+    '</a:lnStyleLst>' +
+    '<a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle>' +
+    '<a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle></a:effectStyleLst>' +
+    '<a:bgFillStyleLst>' + fill + fill + fill + '</a:bgFillStyleLst>';
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n' +
+    '<a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="SMP">' +
+    '<a:themeElements><a:clrScheme name="SMP">' + scheme + '</a:clrScheme>' +
+    '<a:fontScheme name="SMP">' + fonts + '</a:fontScheme>' +
+    '<a:fmtScheme name="SMP">' + fmt + '</a:fmtScheme></a:themeElements></a:theme>';
+}
+
+function pptxPackage(slides, title){
+  var xmlh = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  var files = [];
+  files.push({ name:"[Content_Types].xml", data: xmlh +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/ppt/presentation.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml"/>' +
+    '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>' +
+    '<Override PartName="/ppt/slideLayouts/slideLayout1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>' +
+    '<Override PartName="/ppt/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>' +
+    slides.map(function(_, i){
+      return '<Override PartName="/ppt/slides/slide' + (i + 1) +
+        '.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>';
+    }).join("") +
+    '<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>' +
+    '<Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/>' +
+    '</Types>' });
+  files.push({ name:"_rels/.rels", data: xmlh +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="ppt/presentation.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>' +
+    '<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>' +
+    '</Relationships>' });
+  files.push({ name:"ppt/presentation.xml", data: xmlh +
+    '<p:presentation' + PPTX_NS + '>' +
+    '<p:sldMasterIdLst><p:sldMasterId id="2147483648" r:id="rId1"/></p:sldMasterIdLst>' +
+    '<p:sldIdLst>' + slides.map(function(_, i){
+      return '<p:sldId id="' + (256 + i) + '" r:id="rId' + (i + 2) + '"/>';
+    }).join("") + '</p:sldIdLst>' +
+    '<p:sldSz cx="' + PPTX_W + '" cy="' + PPTX_H + '"/>' +
+    '<p:notesSz cx="6858000" cy="9144000"/></p:presentation>' });
+  files.push({ name:"ppt/_rels/presentation.xml.rels", data: xmlh +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="slideMasters/slideMaster1.xml"/>' +
+    slides.map(function(_, i){
+      return '<Relationship Id="rId' + (i + 2) +
+        '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide" Target="slides/slide' + (i + 1) + '.xml"/>';
+    }).join("") + '</Relationships>' });
+  files.push({ name:"ppt/slideMasters/slideMaster1.xml", data: xmlh +
+    '<p:sldMaster' + PPTX_NS + '><p:cSld><p:spTree>' +
+    '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>' +
+    '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/>' +
+    '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>' +
+    '</p:spTree></p:cSld>' +
+    '<p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/>' +
+    '<p:sldLayoutIdLst><p:sldLayoutId id="2147483649" r:id="rId1"/></p:sldLayoutIdLst>' +
+    '</p:sldMaster>' });
+  files.push({ name:"ppt/slideMasters/_rels/slideMaster1.xml.rels", data: xmlh +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>' +
+    '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>' +
+    '</Relationships>' });
+  files.push({ name:"ppt/slideLayouts/slideLayout1.xml", data: xmlh +
+    '<p:sldLayout' + PPTX_NS + ' type="blank"><p:cSld><p:spTree>' +
+    '<p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>' +
+    '<p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/>' +
+    '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>' +
+    '</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>' });
+  files.push({ name:"ppt/slideLayouts/_rels/slideLayout1.xml.rels", data: xmlh +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideMaster" Target="../slideMasters/slideMaster1.xml"/>' +
+    '</Relationships>' });
+  files.push({ name:"ppt/theme/theme1.xml", data: pptxTheme() });
+  slides.forEach(function(xml, i){
+    files.push({ name:"ppt/slides/slide" + (i + 1) + ".xml", data: xml });
+    files.push({ name:"ppt/slides/_rels/slide" + (i + 1) + ".xml.rels", data: xmlh +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout" Target="../slideLayouts/slideLayout1.xml"/>' +
+      '</Relationships>' });
+  });
+  files.push({ name:"docProps/core.xml", data: xmlh +
+    '<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/">' +
+    '<dc:title>' + xesc(title) + '</dc:title>' +
+    '<dc:creator>Strategy Management Platform</dc:creator></cp:coreProperties>' });
+  files.push({ name:"docProps/app.xml", data: xmlh +
+    '<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties">' +
+    '<Application>Strategy Management Platform</Application></Properties>' });
+  return zipStore(files);
+}
+
+/* ── The one door the button calls ──────────────────────────────────── */
+function planPptxName(target){
+  var t = String(target || "");
+  var name = t.indexOf("fn:") === 0
+    ? (FUNCTIONS[t.slice(3)] || {}).name : (UNITS[t] || {}).name;
+  return (name || "Plan") + " — Strategy plan.pptx";
+}
+
+function buildPlanPptx(target){
+  var t = String(target || "");
+  var slides;
+  if (t.indexOf("fn:") === 0) {
+    var fk = t.slice(3), f = FUNCTIONS[fk];
+    slides = fnPlansInPillars(f) ? pptxUnitSlides(fnAsUnit(fk), f.name)
+                                 : pptxFnSlides(fk);
+  } else {
+    slides = pptxUnitSlides(UNITS[t], (UNITS[t] || {}).name || "");
+  }
+  return pptxPackage(slides, planPptxName(target).replace(/\.pptx$/, ""));
+}
+
+function sendPlanPptx(target){
+  /* Asked AGAIN at press time, not only at render time (§48.2): the viewer
+     switcher can change who this is between the paint and the click. */
+  if (!SMPRules.mayDownloadPlan(world(), viewer(), target)) return;
+  sendFileBytes(buildPlanPptx(target), planPptxName(target),
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation");
+}
+
+</script>
+<script>
 /* ══ THE EMAIL THE PLATFORM SENDS (§72) ═══════════════════════════════════
    Islam: "I need to have a test email send to see the design of the email and
    the sender of the email name etc."
@@ -19024,8 +19591,27 @@ function editBar(page, acKey){
    somebody added a pane, and §53.5's whole rule is that a unit and a function
    must not drift apart in silence. */
 function paneActs(page, acKey){
-  var inner = penBtn(page, acKey) + arrangePaneBtn();
+  var inner = penBtn(page, acKey) + arrangePaneBtn() + dlPlanBtn(page);
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
+}
+
+/* ── THE PLAN LEAVES AS SLIDES (§116) ─────────────────────────────
+   Islam: "add the access of downloading a presentation for the plan for the
+   custodian and the business unit owner through a button in the strategy
+   panel." Drawn ONLY on the plan pane — the page the ask names — and gated by
+   the shared rule, so the office, the unit's owner and custodian and a
+   function's head see it and a CEO passing through does not (§37: reaching is
+   not holding). The press asks the rule AGAIN (§48.2, in pptx.js), because
+   the viewer switcher can change who this is between paint and click. */
+function dlPlanBtn(page){
+  if (page !== "plan") return '';
+  if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
+  return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
+    ' title="Download the plan as slides (.pptx)"' +
+    ' aria-label="Download the plan as slides (.pptx)">' +
+    '<svg viewBox="0 0 20 20" aria-hidden="true" fill="none" stroke="currentColor"' +
+    ' stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M10 3.5v8M6.8 8.7L10 11.9l3.2-3.2M4.5 15h11"/></svg></button>';
 }
 
 function arrangePaneBtn(target){
@@ -21209,10 +21795,12 @@ function renderAccess(){
     if (ownsAll && (areaKey === "a_unit_other" || areaKey === "a_fn_other")) {
       return "Every unit and function is theirs, so there is no “other”.";
     }
-    if (roleKey === "fnhead" && areaKey === "a_unit_own") {
+    /* The split halves collapse exactly as their whole did (§116): no unit
+       means neither half of the unit pair can come up. */
+    if (roleKey === "fnhead" && (areaKey === "a_unit_own" || areaKey === "a_unit_own_strat")) {
       return "A function head holds no business unit.";
     }
-    if (roleKey === "cceo" && areaKey === "a_fn_own") {
+    if (roleKey === "cceo" && (areaKey === "a_fn_own" || areaKey === "a_fn_own_strat")) {
       return "A company CEO holds no supporting function.";
     }
     return null;
@@ -21225,9 +21813,32 @@ function renderAccess(){
      stacked under seven labels made the HEAD of a 49-cell table taller than
      its body. The same answer the role column already reached in §37: the
      sentence is on hover, and the column keeps its name. */
-  var head = '<tr><th style="width:19%">Role</th>' + AREAS.map(function(a){
-    return '<th class="ac" title="' + esc(a.note) + '">' + esc(a.label) + '</th>';
-  }).join("") + '</tr>';
+  /* ── TWO HEADER ROWS, BECAUSE TWO COLUMNS SHARE A NAME (§116) ──────
+     The own pair split into Strategy | Reporting halves, and the pair's name
+     is written ONCE above them rather than twice into them. Built off the
+     `pair`/`col` fields the AREAS entries carry — the header is derived from
+     the same list the cells walk, so a column cannot appear in one and not
+     the other. Entries without a pair span both rows. Consecutive same-pair
+     entries group; the AREAS order is the column order, as it always was. */
+  var headTop = '<tr><th style="width:17%" rowspan="2">Role</th>', headSub = "<tr>";
+  var hi = 0;
+  while (hi < AREAS.length) {
+    var ha = AREAS[hi];
+    if (!ha.pair) {
+      headTop += '<th class="ac" rowspan="2" title="' + esc(ha.note) + '">' + esc(ha.label) + '</th>';
+      hi++;
+      continue;
+    }
+    var span = 0;
+    while (hi + span < AREAS.length && AREAS[hi + span].pair === ha.pair) span++;
+    headTop += '<th class="ac acpair" colspan="' + span + '">' + esc(ha.pair) + '</th>';
+    for (var hj = 0; hj < span; hj++) {
+      var hb = AREAS[hi + hj];
+      headSub += '<th class="ac achalf" title="' + esc(hb.note) + '">' + esc(hb.col) + '</th>';
+    }
+    hi += span;
+  }
+  var head = headTop + "</tr>" + headSub + "</tr>";
 
   /* ── THE LAST ROW IS NOT A ROLE (§93) ─────────────────────────────
      Employee stopped being one: nobody grants it, the × could never take it
@@ -21265,7 +21876,8 @@ function renderAccess(){
 
   return section("", "Who may see what",
       "Eight roles and the floor beneath them, against the kinds of page each may " +
-      "reach. Edit includes view. " +
+      "reach. Edit includes view. The own columns answer in two halves — " +
+      "Strategy is the words as agreed, Reporting is the figures entered against them. " +
       "Change any cell and the navigation above re-renders immediately for whoever is being viewed as.",
       '<div class="cfg acgrid"><table><thead>' + head + '</thead><tbody>' + body + '</tbody></table></div>' +
       '<div class="chart-legend" style="margin-top:12px">' +
@@ -23923,12 +24535,17 @@ function renderKB(){
            'about what it is attached to. Owning Mobile and sitting on Finance gives the ' +
            'owner\u2019s answer for Mobile and the other-unit answer for Retail, from the ' +
            'same two roles, without either being asked about the wrong thing.' },
-      { h: "Three things the table does not decide",
-        p: 'The <b>knowledge base</b> is readable by everyone, always. A <b>plan</b> is ' +
-           'corrected by the SMO alone, however much access the unit\u2019s people hold — a ' +
-           'plan you are measured against is not yours to rewrite. And <b>focus measures</b>, ' +
-           'what carries reward, are marked by the group CEO and the SMO. These are rules; ' +
-           'they do not change when the table does.' },
+      { h: "The own columns answer in two halves",
+        p: 'Strategy is the <b>words as agreed</b> — Foundation, the SWOT, the Plan, and on a ' +
+           'function a capability\u2019s definition and projects. Reporting is the <b>figures ' +
+           'entered against them</b>, drafts and submitting. Strategy edit ships with the ' +
+           'office alone, because a plan you are measured against is not yours to rewrite — ' +
+           'and opening it to a role is a deliberate act made on this table, not a side ' +
+           'effect of letting the same people report (§116).' },
+      { h: "Two things the table does not decide",
+        p: 'The <b>knowledge base</b> is readable by everyone, always. And <b>focus ' +
+           'measures</b>, what carries reward, are marked by the group CEO and the SMO. ' +
+           'These are rules; they do not change when the table does.' },
       { h: "Companies decide reach",
         p: 'A company groups business units so a company CEO sees their own. It carries ' +
            '<b>no score and no page</b> — it decides who sees what, nothing more. Its two ' +
@@ -31452,7 +32069,7 @@ var SYNC = (function () {
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
       { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", find:"departments official bu client names mapping",      render:renderMainbus },
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant strategy reporting split lock submit", render:renderAccess },
 
       { k:"units",  ac:"c_units",  grp:"run", label:"Business units", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
@@ -33851,6 +34468,11 @@ var SYNC = (function () {
         var k = b.dataset.page; EDIT_PAGE[k] = !EDIT_PAGE[k]; paint();
       });
     });
+    /* The plan as slides (§116): builds and saves, repaints nothing — a
+       download must not cost anybody a half-typed field elsewhere (§35). */
+    document.querySelectorAll("[data-dlpptx]").forEach(function(b){
+      b.addEventListener("click", function(){ sendPlanPptx(b.dataset.dlpptx); });
+    });
     document.querySelectorAll("[data-sec]").forEach(function(b){
       b.addEventListener("click", function(){ GSEC = +b.dataset.sec; paint(); window.scrollTo(0,0); });
     });
@@ -35966,13 +36588,11 @@ var SYNC = (function () {
   }
 
   function sendXlsx(sheets, name){
-    var bytes = buildXlsx(sheets);
-    var blob = new Blob([bytes], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    /* The blob dance itself lives in pptx.js as sendFileBytes() since §116 —
+       this was about to be one of three copies, and three is where the rule
+       says extract. */
+    sendFileBytes(buildXlsx(sheets), name,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   }
 
   function wireImport(){
@@ -36055,11 +36675,7 @@ var SYNC = (function () {
 
     var dl = document.querySelector("[data-dl]");
     if (dl) dl.addEventListener("click", function(){
-      var blob = new Blob([csvFor()], { type:"text/csv;charset=utf-8" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = fileName();
-      document.body.appendChild(a); a.click();
-      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+      sendFileBytes(csvFor(), fileName(), "text/csv;charset=utf-8");
     });
 
     var show = document.querySelector("[data-showcsv]");

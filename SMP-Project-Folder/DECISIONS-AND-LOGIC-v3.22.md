@@ -15359,3 +15359,118 @@ ones proven untouched.
 **Deliberately not built:** auto-detecting repetition, a template column, and
 any per-run history UI beyond what Archived plans already shows — a handful of
 projects, and the pen is the door.
+
+## 116 · Strategy and Reporting split, and the plan leaves as slides (v3.39)
+
+Islam, 2026-08-26: *"the accessibility should have an option that
+differentiate the strategy from the reporting — the strategy should be locked
+from the non SMO but the reporting should be editable by who we grant the
+access so they can submit. so we need this split in the roles and access
+table."* And: *"we can as well add the access of downloading a presentation
+for the plan for the custodian and the business unit owner through a button in
+the strategy panel — sometimes they need it in slides to update things and
+view it outside to come back with the SMO for refinement."*
+
+Settled from a mockup made of the real platform
+(`design-mockups/access-strategy-reporting-split/2026-08-26_…html` — the
+proposal injected into the live table and pane, both sides the same build,
+§41.9), confirmed whole. Four choices were put as questions and three came
+back as recommended; the fourth did not, and it is the decision that shapes
+the section: **the SMO can OPEN strategy edit to a non-office role.**
+
+### 116.1 The own columns are two questions
+
+One grant had covered a unit's strategy pages AND its reporting, so §94's
+office-only lock was invisible on the table — a custodian's gold pen under
+"Own business unit" looked like it opened the plan when it only opened
+reporting — and reporting could not be granted without the ambiguous whole.
+Each own column is now two halves, **Strategy** (Foundation · Analysis & SWOT
+· Plan; a capability's definition and projects) and **Reporting** (Performance
+· figures · drafts · submitting), each its own eye-and-pen cell.
+
+**THE NEW KEY IS THE STRATEGY HALF** (`a_unit_own_strat`, `a_fn_own_strat`),
+and that is the whole back-compat argument: a stored grant on the old key
+governed what the person could actually DO — reporting, because §94 refused
+authoring by rule — so the old key keeps meaning the Reporting half and
+nobody's rights move on upgrade. The strategy half is absent from every stored
+map and falls back to the shipped defaults (§30.2). No migration; the matrix
+rides in the state graph as it always did.
+
+**§94'S LOCK BECOMES THE DEFAULT, NOT A FLOOR — A PARTIAL REVERSAL, RECORDED
+AS ONE.** The five strategy pages resolve to the strategy half (`areaFor`),
+whose default is edit for the office and view for everyone else — the exact
+behaviour the hard rule enforced. What changes is that the rule
+`mayAuthorPage()` now asks the GRANT, so opening a role's Strategy cell is a
+deliberate, visible, logged act that hands them the words. I recommended
+capping it at view; **Islam chose to be able to open it**, and the cost is
+stated rather than argued away: a tenant is one cell away from giving a
+custodian the pen §94 took from them — by choice, on the page whose whole job
+is such choices. **One piece of §94 survives as a rule**: authoring somebody
+ELSE'S unit or function stays the office's, because the other columns are not
+split, and `a_unit_other: edit` must not hand a client role a neighbour's
+plan.
+
+**§101 IS PRESERVED, AND IT NEEDED A DECISION TO BE.** The plan page's grant
+moved to a half a holder reads at *view*, so `mayArrange()`'s "the grant still
+has to say edit" would silently have taken the arrows back — the exact kind of
+regression the split was most likely to ship. It rides the holder's WORKING
+grant now (the Reporting half — the same stored value §101 tested before the
+split, under its old name), with strategy-at-none still taking the pane and
+the arrows with it. Proved by forcing the resolution back and watching five
+assertions go red.
+
+**THE HEADER IS DERIVED FROM THE SAME LIST THE CELLS WALK**: `pair`/`col` on
+the AREAS entries build the two-row header, so a column cannot appear in one
+and not the other. Fixed table layout reads widths from the FIRST header row,
+and a colspan cell there divides its width over the columns it spans — the
+pair header carries twice a half's share (config.css, §37's lesson extended).
+
+### 116.2 The plan leaves as slides
+
+A download button beside the pen on the Strategy panel — the office, the BU
+owner, the custodian, and a function's head for their function (§53.5: a unit
+and a function are the same product; a function has no BU owner, so its
+holder is its head — the same reading §101 made). `mayDownloadPlan()` in
+`lib/rules.js` is the one rule, client-side deliberately: the download
+re-arranges what the page already shows this person, so there is no write for
+the server to refuse.
+
+**A REAL .PPTX, NOT THE DECK PRINTED** — the ask is editing it outside and
+bringing it back, and a picture cannot be edited. A .pptx is a zip of XML
+exactly as a .xlsx is, so `src/pptx.js` reuses `zipStore()` and adds no
+dependency; it builds offline, from `file://`, like everything else. **The
+content is the plan, never the cycle**: Foundation, the SWOT (asked for by
+name), key objectives, each pillar's measures and tactics — or a capability
+function's overviews and projects — with no actual and no progress anywhere,
+asserted as ABSENCES. The colours are the tenant's where Branding set them
+and the house navy/gold where it did not, read from the same `branding()` the
+pages read. The blob dance became `sendFileBytes()` — this was its third copy,
+and three is where the rule says extract.
+
+**A FALSE ALARM WORTH THE INK**: the file "failed" LibreOffice — which turned
+out to have no Impress component in this image at all, refusing a vanilla
+python-pptx file identically (§68.10's class: a correct build reported broken
+by a broken measuring tool). With Impress installed it loads and renders
+cleanly; python-pptx opens it; twelve slides for Mobile.
+
+### 116.3 What proves it
+
+`checks/strategy-split.py`: the two-row header from the DOM; the strategy cell
+pressed OPEN and pressed CLOSED through the real matrix, the pen asked of the
+screen AND the rule at both states (§94.2, §94.5 — both directions, because a
+check that only watches a door open passes when it is stuck open); §101's
+arrows before, during and after; the download pressed as five viewers, the
+file unzipped, every part parsed as XML, the plan's words found inside and the
+demo's reported figures proved absent. **Proved able to fail three ways**
+before its green was believed: button removed (8 failures), an actual leaked
+into a table (1), the §116 resolution reverted (5). `test-authorize.js` gained
+section 15 — the opened grant authors, the wide grant still cannot touch a
+neighbour's plan, strategy-at-none keeps reporting — run against the pre-§116
+rules to watch exactly its six new assertions fail. 212 node assertions, the
+full check suite and `qa.py` green.
+
+**Known and left alone**: `checks/no-jump.py` reports "sorting a column"
+moving the page (220 → 93) — it fails identically on the pre-§116 build, so
+it is not this section's, and it is recorded here rather than quietly fixed.
+`checks/plan-arrange.py` learned `SMP_CHROME` and to stop counting the new
+download button as a pen (§51.11, on the day the control changed shape).

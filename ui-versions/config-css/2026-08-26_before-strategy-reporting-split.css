@@ -28,19 +28,9 @@
      the header — so the widths have to be set on th, not only on td. `.cfg
      th:first-child` was still claiming 15% for the role column and
      `th:last-child` 15% for Setup, quietly overriding both numbers below. */
-  /* TEN COLUMNS SINCE THE SPLIT (§116): role + nine area columns, two of them
-     the halves under each own pair. Fixed layout still reads only the FIRST
-     header row, and a colspan cell there divides its width equally over the
-     columns it spans — so the pair header carries twice a half's share, and
-     the sub-row's widths are set nowhere because they would be ignored. */
-  .acgrid th.ac, .acgrid td.ac { text-align:center; width:9.4%; padding-left:4px; padding-right:4px; }
-  .acgrid th.acpair { width:18.8%; }
-  .acgrid th:first-child, .acgrid td.rolecell { width:15.4%; }
-  /* The halves read as sub-labels of the pair above them, not as two more
-     shouting columns: same band, one step quieter, no double border where the
-     pair meets its halves. */
-  .acgrid th.acpair { padding-bottom:2px; border-bottom:0; }
-  .acgrid th.achalf { padding-top:0; font-size:10.5px; letter-spacing:.05em; }
+  .acgrid th.ac, .acgrid td.ac { text-align:center; width:11.6%; padding-left:4px; padding-right:4px; }
+  .acgrid th.ac:last-child, .acgrid td.ac:last-child { width:11.6%; }
+  .acgrid th:first-child, .acgrid td.rolecell { width:19%; }
   /* _shared.css sets `thead th { white-space:nowrap }`, which is right for a
      one-word header and wrong for a column that explains what it covers: the
      note did not wrap, it ran straight across its neighbours. Seven headers

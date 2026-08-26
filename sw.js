@@ -113,7 +113,7 @@
    the window between reading it and pushing — three collisions on one piece
    of work. Confirmed against origin/main serving "smp-shell-v3.41", and
    again immediately before the push (§94.16). */
-const SHELL = "smp-shell-v3.42";
+const SHELL = "smp-shell-v3.43-setup";
 const ASSETS = [
   "/",
   "/index.html",

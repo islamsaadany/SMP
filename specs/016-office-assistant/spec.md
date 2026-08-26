@@ -120,7 +120,48 @@ The button exists because **§4.1 covers the assistant KNOWING it cannot answer,
 and the harder case is the assistant being WRONG** — confident, plausible and
 incorrect. The original ask covers the first; nothing covered the second.
 
-### 4.4 An assistant answer must not look like the office's
+### 4.4 A handoff reaches a person, by email
+
+Islam: *"An email should be sent to the office representative, which needs to be
+set in the chat."*
+
+**This follows from answer 3 and could not have been left out once that was
+decided.** With the assistant marking threads answered, the office stops
+watching the Waiting queue — so a handoff is now the exception, and an exception
+nobody is told about is one nobody acts on. The very decision that makes the
+feature worth having is what makes this necessary.
+
+- **A named representative**, set in the chat's Settings dropdown, picked from
+  people who are in the office. Stored in `GROUP.chat.rep` beside the rest
+  (§98) — `org.extra`, **no migration**.
+- **Sent at the moment of the handoff**, not batched. There is no scheduler on
+  Vercel (§97.5 settled this once already), so the decision is made where the
+  event happens or it is not made at all.
+- **Reuses `lib/mailer.js`** — `api/chat.js` already calls it for the
+  away-email, so this is the same call site, and the key still lives in exactly
+  one place (§72, §97.5).
+
+**NOBODY SET IS SAID, NEVER SILENTLY NOTHING.** With no representative chosen,
+the settings row reads *"no one — handoffs wait in the queue"* rather than
+looking configured and doing nothing. §35's rule: absent is not "none".
+
+**AND THE SETTING IS NOT THE ASSISTANT'S — IT IS THE THREAD'S.** The event is
+*a conversation is waiting on a person*, which happens whether or not the
+assistant is on. Two readings, and the cost of each is stated rather than
+glossed:
+
+| The assistant is… | What the representative gets |
+|---|---|
+| **On** | Only the questions it could not answer — the exception, which is the point |
+| **Off** | Every new question, because every one waits on a person |
+
+Tying it to the assistant instead would mean **turning the assistant off
+silently turns the emails off**, which is the shape of fault this file keeps
+recording. So it is its own switch, and with the assistant off it is a mailing
+list for the whole chat — correct for a low-volume product, and worth Islam
+knowing before he turns it on.
+
+### 4.5 An assistant answer must not look like the office's
 
 This product spends a great deal of care on who is authorised to say what —
 §31 closed a plan to the person measured against it, §94 closed the whole
@@ -136,7 +177,7 @@ The office sees assistant answers in the thread like any other message, and
 gets a **queue filter for them** — which is the only way anybody finds out it
 is answering badly, given answer 3.
 
-### 4.5 The greeting
+### 4.6 The greeting
 
 The control already exists: §98's **promise** line on the panel. With the
 assistant on it reads as two facts rather than one —
@@ -252,6 +293,8 @@ Added to the existing **Settings dropdown on the Messages page** (§90's shape,
 | Control | Default |
 |---|---|
 | Assistant answers first | **Off** |
+| Tell someone when a question needs a person | **Off** |
+| — who | **nobody set** (the row says so, §4.4) |
 | *(shown, not settable)* What it can see: the knowledge base only | — |
 
 Stored in `GROUP.chat` beside the rest (§98) — `org.extra`, **no migration**,
@@ -301,6 +344,9 @@ problem, not the phrasing):
 5. A request for a person, in words, is handed over rather than answered.
 6. An answer containing `<script>` arrives escaped.
 7. A bot message carries the `bot` flag and never the office's name.
+8. A handoff emails the representative; an answered question does **not**.
+9. With no representative set, nothing is sent and nothing throws.
+10. A mail failure never costs the handoff — the thread is waiting either way.
 
 `src/checks/office-chat.py` gains: the panel's greeting says the assistant tries
 first; an assistant answer is drawn as its own kind; and its "send to the

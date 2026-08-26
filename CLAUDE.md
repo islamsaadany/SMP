@@ -159,6 +159,21 @@ A drift between specs and code is a documentation bug — report it before silen
   checks before pushing. Two branches each adding a `var pf` to `wire()` merged
   with no textual conflict at all and broke a page (§56.7) — a clean merge is
   not a working one.
+- **`main` MUST HOLD A SHA NO OTHER REF HOLDS, UNTIL PRODUCTION HAS SERVED IT
+  (§91, taught three times now — §91.4, §107.15, §108.17).** Vercel
+  deduplicates by SHA, so a SHA on two refs is ONE deployment and which ref
+  gets it is a race. **Order does not fix it** (§91.4), **delay does not fix
+  it** (§108.17 — 32 minutes of not-building is not proof the race is over, it
+  is proof the build has not started, which is the worst moment to offer a
+  second candidate), and **neither does the standard procedure**: "merge main
+  INTO the branch, resolve, fast-forward" creates the merge commit ON THE
+  BRANCH, so pushing that branch hands Vercel the SHA on a preview ref first
+  and `main` arriving later is a no-op (§107.15 — the same author's first
+  merge of the day deployed and the second did not, differing only in when the
+  branch was pushed). **Push the branch freely for every commit that is not
+  the merge commit; hold the merge commit's branch push until §91.5's live
+  check says production built.** The way back is a commit `main` holds and the
+  branch does not, and it must be one worth making.
 - **NEVER PUSH ONE COMMIT TO TWO REFS AT ONCE (§91, corrected).** Vercel
   deduplicates by commit SHA, so a SHA that reaches `main` and the branch within
   a second of each other produces exactly ONE deployment — and which ref it is

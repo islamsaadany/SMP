@@ -59,9 +59,27 @@
        padding:10px 13px 8px;cursor:pointer}
   .tab:hover{color:var(--ink)}
   .tab.on{color:var(--ink);border-bottom-color:var(--gold-deep);font-weight:600}
+  .secrow{display:flex;gap:2px;background:var(--surface-2);border-bottom:1px solid var(--line);padding:0 14px}
+  .sec{font:inherit;font-size:12px;color:var(--ink-3);background:none;border:0;border-bottom:2px solid transparent;
+       padding:7px 11px 5px;cursor:pointer}
+  .sec.on{color:var(--ink);border-bottom-color:var(--gold-deep);font-weight:600}
   .page{padding:18px;min-height:430px}
 
-  /* Plan view: rail + pane */
+  /* Strategy › Foundation */
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+  .fcard{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+  .fcard h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin:0 0 6px;font-weight:600}
+  .fcard p{margin:0;font-size:12.5px;color:var(--ink-2)}
+  .ftbl{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+
+  /* Strategy › SWOT */
+  .swot{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sq{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+  .sq h3{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px;font-weight:700;color:var(--gold-deep)}
+  .sq ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--ink-2)}
+  .sq li{margin-bottom:4px}
+
+  /* Strategy › Plan: rail + pane */
   .split{display:grid;grid-template-columns:250px 1fr;gap:14px}
   .rail{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden;align-self:start}
   .rhead{background:var(--panel);color:var(--panel-ink);font-size:10.5px;text-transform:uppercase;
@@ -74,19 +92,15 @@
   .pane{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .pband{background:var(--panel);color:var(--panel-ink);padding:9px 14px;font-size:12.5px;font-weight:600}
   .pband span{color:var(--gold);font-size:10.5px;letter-spacing:.06em;margin-right:8px}
-  .pane table{width:100%;border-collapse:collapse;font-size:12.5px}
-  .pane th{background:var(--panel);color:var(--panel-quiet);font-size:10.5px;text-transform:uppercase;
+  table.ptab{width:100%;border-collapse:collapse;font-size:12.5px}
+  .ptab th{background:var(--panel);color:var(--panel-quiet);font-size:10.5px;text-transform:uppercase;
            letter-spacing:.07em;text-align:left;padding:7px 12px;font-weight:600}
-  .pane td{padding:8px 12px;border-top:1px solid var(--line-soft);color:var(--ink-2)}
-  .pane td:first-child{color:var(--ink-3);width:34px}
+  .ptab td{padding:8px 12px;border-top:1px solid var(--line-soft);color:var(--ink-2)}
+  .ptab td:first-child{color:var(--ink-3);width:34px}
   .pill{display:inline-block;font-size:10.5px;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--ink-3)}
 
-  /* Performance view */
-  .hl{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
-  .hlc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
-  .hlc .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
-  .hlc .n{font-size:26px;font-weight:700;margin-top:2px}
-  .n.ok{color:var(--ok)} .n.warn{color:var(--warn)}
+  /* Performance — the action row is the FIRST row on the page, as built
+     (renderUnitPerformance returns bands(reportBtn + presentMenu) first). */
   .actrow{display:flex;align-items:center;gap:10px;margin-bottom:16px}
   .repbtn{font:inherit;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
           background:var(--cta);color:var(--cta-ink);border:0;border-radius:7px;padding:9px 18px;cursor:pointer}
@@ -95,6 +109,11 @@
            background:none;border:1px solid var(--line);border-radius:7px;padding:8px 14px;color:var(--ink-2);cursor:pointer}
   .legend{margin-left:auto;display:flex;gap:12px;font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:99px;margin-right:4px;vertical-align:-1px}
+  .hl{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+  .hlc{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+  .hlc .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+  .hlc .n{font-size:26px;font-weight:700;margin-top:2px}
+  .n.ok{color:var(--ok)} .n.warn{color:var(--warn)}
   .perfnote{background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:22px;
             text-align:center;color:var(--ink-3);font-size:12.5px}
 
@@ -103,23 +122,32 @@
   .frame.touring .tdim{display:block}
   .thole{position:absolute;z-index:41;border-radius:9px;pointer-events:none;display:none;
          box-shadow:0 0 0 9999px var(--dim), 0 0 0 2px var(--gold), 0 0 18px 2px rgba(201,162,77,.55)}
+  /* A step whose subject is the WHOLE view drops the dim — dimming means
+     nothing when everything is the subject — and keeps only the ring. */
+  .thole.open{box-shadow:0 0 0 2px var(--gold), 0 0 18px 2px rgba(201,162,77,.55)}
   .thole.doing{animation:tpulse 1.6s ease-in-out infinite}
   @keyframes tpulse{
     0%,100%{box-shadow:0 0 0 9999px var(--dim),0 0 0 2px var(--gold),0 0 10px 1px rgba(201,162,77,.4)}
     50%    {box-shadow:0 0 0 9999px var(--dim),0 0 0 4px var(--gold),0 0 24px 5px rgba(201,162,77,.75)}}
   @media (prefers-reduced-motion:reduce){.thole.doing{animation:none}}
   .frame.touring .lit{position:relative;z-index:42}
-  .tcard{position:absolute;z-index:43;width:330px;background:var(--surface);border:1px solid var(--line);
-         border-radius:10px;box-shadow:0 14px 40px rgba(9,14,24,.35);display:none}
-  .tcard.center{left:50%;top:50%;transform:translate(-50%,-50%);width:390px}
+  /* The card is a little transparent by design — where it must share space
+     with the page, what is under it stays readable through it. */
+  .tcard{position:absolute;z-index:43;width:310px;background:rgba(255,255,255,.92);
+         -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+         border:1px solid var(--line);border-radius:10px;
+         box-shadow:0 14px 40px rgba(9,14,24,.35);display:none}
+  .tcard.center{left:50%;top:50%;transform:translate(-50%,-50%);width:390px;background:var(--surface)}
   .tctop{display:flex;align-items:center;padding:11px 14px 0}
   .tstep{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-deep);font-weight:700}
   .tx{margin-left:auto;font:inherit;font-size:15px;line-height:1;background:none;border:0;color:var(--ink-3);
       cursor:pointer;padding:2px 4px;border-radius:4px}
   .tx:hover{color:var(--ink);background:var(--surface-2)}
-  .tcard h3{font-size:15px;margin:6px 14px 0;letter-spacing:.005em}
+  .tcard h3{font-size:14.5px;margin:6px 14px 0;letter-spacing:.005em}
   .tcard .tbody{font-size:12.5px;color:var(--ink-2);margin:6px 14px 12px}
-  .tfoot{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line-soft);padding:10px 14px}
+  .tfoot{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line-soft);padding:10px 14px}
+  .tback{font:inherit;font-size:12px;background:none;border:0;color:var(--ink-2);cursor:pointer;padding:0;font-weight:600}
+  .tback:hover{color:var(--ink);text-decoration:underline}
   .tskip{font:inherit;font-size:12px;background:none;border:0;color:var(--ink-3);cursor:pointer;padding:0}
   .tskip:hover{color:var(--ink);text-decoration:underline}
   .tnext{font:inherit;font-size:12.5px;font-weight:600;margin-left:auto;background:var(--panel);color:var(--panel-ink);
@@ -138,23 +166,24 @@
 
 <div class="mkwrap">
   <div class="mkhead">
-    <span class="mkt">Design mockup · for sign-off</span>
+    <span class="mkt">Design mockup · for sign-off · rev 2</span>
     <h1>Onboarding tour — dim, spotlight, story</h1>
     <span class="mkd">2026-08-26 · not the product</span>
   </div>
 
   <div class="mknote">
     <div class="mkcard">
-      <h2>What is proposed</h2>
+      <h2>What is proposed — revised after review</h2>
       <p>First sign-in opens a guided tour <b>on demo data</b>: the page dims, one control stays
-         lit, a short card says what it is. Two kinds of step — <b>look</b> steps advance with
-         Next; <b>do</b> steps have no Next: the person presses the lit control itself, and that
-         press is what advances the tour. Every card carries the step count, <b>Skip tour</b> and
-         <b>×</b>. The demo banner stays on screen the whole time, so nobody mistakes whose
-         figures they are looking at.</p>
-      <p>Below is a working sample of the <b>strategy custodian's</b> story, 7 steps, on a replica
-         of the platform. Steps 5 and 6 are do&#8209;steps. The BU/function owner's story shares
-         the engine with different steps.</p>
+         lit, a short card says what it is. <b>Look</b> steps advance with Next; <b>do</b> steps
+         have no Next — the person presses the lit control itself. Every card now carries
+         <b>&#8249; Back</b> beside the step count, Skip tour and &#215;.</p>
+      <p>Changed from rev 1: <b>Back on every step</b> · the strategy walk now opens the real
+         sections <b>one by one, in place</b> (Strategy is one tab holding Foundation &#183; SWOT
+         &#183; Plan) · the card is <b>slightly transparent</b> and placed <b>beside the
+         spotlight, never over it</b> · the Performance page now matches the built product — the
+         Report and Presentation buttons with the band legend are its <b>first row</b> · and
+         <b>Presentation gets its own step</b>. 9 steps.</p>
     </div>
     <div class="mkcard mkcost">
       <h2>Costs, stated</h2>
@@ -166,14 +195,14 @@
             as every role and asserts each target is present and hittable, or the build fails.</li>
         <li><b>"Seen it" is per browser</b> (localStorage) — a new device replays the tour once.
             Replay lives in the Knowledge base.</li>
-        <li>The overlay lives outside the repainted region and re-anchors after every repaint,
-            scroll and resize.</li>
+        <li>In this replica the controls sit where the built product puts them; in the real build
+            the tour anchors to the real controls, so their place is right by construction.</li>
       </ul>
     </div>
   </div>
 
-  <span class="replay">Check: press through all 7 steps · press the lit controls on steps 5–6 ·
-    try Skip and × · resize mid-step.
+  <span class="replay">Check: press through all 9 steps · use Back, including from a do-step ·
+    press the lit controls on steps 6&#8211;7 · try Skip and &#215; · resize mid-step.
     <button id="restart">Restart the tour</button></span>
 
   <!-- ════════ Platform replica ════════ -->
@@ -196,25 +225,58 @@
     </div>
     <div class="demoband"><b>Demo data · nothing here is saved.</b> The full worked example — you are looking at Raya Trade, not your own data.</div>
     <div class="tabs" id="tabrow">
-      <button class="tab on" id="tabPlan">Strategy &#8250; Plan</button>
-      <button class="tab">Foundation</button>
-      <button class="tab">Analysis</button>
+      <button class="tab on" id="tabStrat">Strategy</button>
       <button class="tab" id="tabPerf">Performance</button>
       <button class="tab">My reporting</button>
     </div>
+    <div class="secrow" id="secrow">
+      <button class="sec" id="secFound">Foundation</button>
+      <button class="sec" id="secSwot">SWOT</button>
+      <button class="sec on" id="secPlan">Plan</button>
+    </div>
+
+    <div class="page" id="viewFound" hidden>
+      <div id="foundBody">
+        <div class="fgrid">
+          <div class="fcard"><h3>Aspiration</h3>
+            <p>To be Egypt's most trusted mobile operator — first choice for the connected
+               household, growing value faster than the market.</p></div>
+          <div class="fcard"><h3>Who we are</h3>
+            <p>The group's consumer connectivity arm: 11m subscribers, a retail footprint in
+               every governorate, and the network the others are measured against.</p></div>
+        </div>
+        <div class="ftbl">
+          <table class="ptab">
+            <tr><th>#</th><th>Key objective</th><th>Dir.</th><th>Target</th></tr>
+            <tr><td>1</td><td>Grow service revenue</td><td>&#8593;</td><td>+12% YoY</td></tr>
+            <tr><td>2</td><td>Postpaid share of base</td><td>&#8593;</td><td>34%</td></tr>
+            <tr><td>3</td><td>Customer NPS</td><td>&#8593;</td><td>+41</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="viewSwot" hidden>
+      <div class="swot" id="swotBody">
+        <div class="sq"><h3>Strengths</h3><ul><li>Network quality leadership, 3 years running</li><li>Widest retail footprint in the group</li></ul></div>
+        <div class="sq"><h3>Weaknesses</h3><ul><li>ARPU below market on prepaid</li><li>Digital channel share of sales at 9%</li></ul></div>
+        <div class="sq"><h3>Opportunities</h3><ul><li>Household bundles with B2B Ecomm</li><li>FWA in underserved governorates</li></ul></div>
+        <div class="sq"><h3>Threats</h3><ul><li>Price-led competition in prepaid</li><li>Device cost inflation squeezing upgrades</li></ul></div>
+      </div>
+    </div>
 
     <div class="page" id="viewPlan">
-      <div class="split" id="planSplit">
-        <div class="rail">
+      <div class="split">
+        <div class="rail" id="planRail">
           <div class="rhead">Pillars</div>
           <div class="prow on"><div class="pc">MB01</div><div class="pn">Grow subscriber revenue</div><div class="pm">4 measures · 6 tactics</div></div>
           <div class="prow"><div class="pc">MB02</div><div class="pn">Digital-first distribution</div><div class="pm">3 measures · 5 tactics</div></div>
           <div class="prow"><div class="pc">MB03</div><div class="pn">Network quality leadership</div><div class="pm">4 measures · 4 tactics</div></div>
           <div class="prow"><div class="pc">MB04</div><div class="pn">Enterprise segment growth</div><div class="pm">2 measures · 3 tactics</div></div>
         </div>
-        <div class="pane">
+        <div class="pane" id="planPane">
           <div class="pband"><span>MB01</span>Grow subscriber revenue</div>
-          <table>
+          <table class="ptab">
             <tr><th>#</th><th>Measure</th><th>Target</th><th>Compile</th></tr>
             <tr><td>1</td><td>Postpaid net additions</td><td>420k</td><td><span class="pill">Sum of quarters</span></td></tr>
             <tr><td>2</td><td>Blended ARPU</td><td>EGP 96</td><td><span class="pill">Latest</span></td></tr>
@@ -226,19 +288,19 @@
     </div>
 
     <div class="page" id="viewPerf" hidden>
-      <div class="hl">
-        <div class="hlc"><div class="l">Key objectives</div><div class="n ok">78%</div></div>
-        <div class="hlc"><div class="l">Pillars</div><div class="n warn">64%</div></div>
-        <div class="hlc"><div class="l">Execution</div><div class="n ok">71%</div></div>
-      </div>
       <div class="actrow">
         <button class="repbtn" id="btnReport">Report</button>
-        <button class="presbtn">Presentation &#9662;</button>
+        <button class="presbtn" id="btnPresent">Presentation &#9662;</button>
         <span class="legend">
           <span><i style="background:var(--ok)"></i>On track</span>
           <span><i style="background:var(--warn)"></i>Watch</span>
           <span><i style="background:var(--bad)"></i>Off track</span>
         </span>
+      </div>
+      <div class="hl">
+        <div class="hlc"><div class="l">Key objectives</div><div class="n ok">78%</div></div>
+        <div class="hlc"><div class="l">Pillars</div><div class="n warn">64%</div></div>
+        <div class="hlc"><div class="l">Execution</div><div class="n ok">71%</div></div>
       </div>
       <div class="perfnote">Pillar and measure scores render here — the reporting cycle is open, and Mobile has not submitted yet.</div>
     </div>
@@ -263,38 +325,55 @@
   var frame=document.getElementById("frame"), dim=document.getElementById("tdim"),
       hole=document.getElementById("thole"), card=document.getElementById("tcard");
 
-  function showPlan(on){
-    document.getElementById("viewPlan").hidden=!on;
-    document.getElementById("viewPerf").hidden=on;
-    document.getElementById("tabPlan").classList.toggle("on",on);
-    document.getElementById("tabPerf").classList.toggle("on",!on);
+  /* One place decides what the replica shows: a view key, applied by every
+     step — which is what makes Back free (going back reapplies the view). */
+  function showView(v){
+    ["Found","Swot","Plan","Perf"].forEach(function(n){
+      document.getElementById("view"+n).hidden = (v!==n.toLowerCase()); });
+    var strat = v!=="perf";
+    document.getElementById("tabStrat").classList.toggle("on",strat);
+    document.getElementById("tabPerf").classList.toggle("on",!strat);
+    document.getElementById("secrow").style.display = strat?"":"none";
+    document.getElementById("secFound").classList.toggle("on",v==="found");
+    document.getElementById("secSwot").classList.toggle("on",v==="swot");
+    document.getElementById("secPlan").classList.toggle("on",v==="plan");
   }
 
-  /* The story: a step is {target, view, kind, title, body}. kind "do" waits
-     for a real click on the target; "look" advances with Next; no target =
-     a centred card. This is exactly the data shape the real tour would store. */
+  /* The story: {view, target, kind, title, body}. "do" waits for a real click
+     on the target; "look" advances with Next; no target = a centred card. */
   var STORY=[
-    {kind:"welcome", title:"Welcome to the Strategy Management Platform",
+    {kind:"welcome", view:"plan", title:"Welcome to the Strategy Management Platform",
      body:"This two-minute tour shows you around on <b>demo data</b> — a full worked example. "+
           "Nothing you press during the tour can change anything real, so press freely.",
      next:"Start the tour", skiplabel:"Not now"},
-    {kind:"look", target:"#navrow", title:"This row is the business",
+    {kind:"look", view:"plan", target:"#navrow", title:"This row is the business",
      body:"Each button is a business unit or a supporting function. You open the ones you are "+
           "responsible for — during the tour, that is Raya Trade's Mobile unit."},
-    {kind:"look", target:"#tabrow", title:"What was agreed, and how it is going",
-     body:"<b>Strategy</b> holds what was agreed — foundation, analysis and the plan. "+
+    {kind:"look", view:"plan", target:"#tabrow", title:"What was agreed, and how it is going",
+     body:"<b>Strategy</b> holds what was agreed, in three sections you will see one by one. "+
           "<b>Performance</b> shows what the reported figures make of it. As a custodian, "+
           "you will live mostly in these two."},
-    {kind:"look", target:"#planSplit", title:"The plan: pillars, measures, tactics",
-     body:"Pillars on the left; each holds the measures your unit is scored on and the tactics "+
-          "that deliver them. This is what reporting fills with figures each cycle."},
-    {kind:"do", target:"#tabPerf", title:"See how a plan becomes a score",
+    {kind:"look", view:"found", target:"#foundBody", title:"Strategy &#8250; Foundation",
+     body:"Who the unit is: the aspiration, and the key objectives the unit is judged on."},
+    {kind:"look", view:"swot", target:"#swotBody", title:"Strategy &#8250; SWOT",
+     body:"The reasoning the plan was built from — strengths, weaknesses, opportunities, "+
+          "threats. The pillars answer what this table says."},
+    {kind:"look", view:"plan", target:"#planRail", title:"Strategy &#8250; Plan — the pillars",
+     body:"The plan itself. Each pillar on this rail holds the measures your unit is scored "+
+          "on and the tactics that deliver them."},
+    {kind:"look", view:"plan", target:"#planPane", title:"A pillar's measures and tactics",
+     body:"Open a pillar and this pane shows its measures, targets and how each compiles. "+
+          "This is what reporting fills with figures each cycle."},
+    {kind:"do", view:"plan", target:"#tabPerf", title:"See how a plan becomes a score",
      body:"Performance reads the plan and the reported figures together and turns them into "+
           "the unit's score.", hint:"Press Performance to continue"},
-    {kind:"do", target:"#btnReport", title:"Where your figures go in",
+    {kind:"do", view:"perf", target:"#btnReport", title:"Where your figures go in",
      body:"While a reporting cycle is open, <b>Report</b> is where you enter this quarter's "+
-          "figures and submit them for the unit.", hint:"Press Report to finish"},
-    {kind:"finish", title:"That's the essentials",
+          "figures and submit them for the unit.", hint:"Press Report to continue"},
+    {kind:"look", view:"perf", target:"#btnPresent", title:"The unit's story, as slides",
+     body:"<b>Presentation</b> turns this page into the review deck — Present it live on a "+
+          "projector, or manage its slides first."},
+    {kind:"finish", view:"perf", title:"That's the essentials",
      body:"You can replay this tour any time from the <b>Knowledge base</b>. The moment this "+
           "closes you are back on your own data.", next:"Close"}
   ];
@@ -316,40 +395,54 @@
        too and a lit tab's text washes out (the §68.10 family). */
     dim.style.background="transparent";
     var el=frame.querySelector(s.target), r=el.getBoundingClientRect(), pad=6;
+    var h={l:r.left-fr.left-pad, t:r.top-fr.top-pad, w:r.width+2*pad, ht:r.height+2*pad};
     hole.style.display="block";
     hole.className="thole"+(s.kind==="do"?" doing":"");
-    hole.style.left=(r.left-fr.left-pad)+"px"; hole.style.top=(r.top-fr.top-pad)+"px";
-    hole.style.width=(r.width+2*pad)+"px";   hole.style.height=(r.height+2*pad)+"px";
+    hole.style.left=h.l+"px"; hole.style.top=h.t+"px";
+    hole.style.width=h.w+"px"; hole.style.height=h.ht+"px";
     card.style.display="block";
+    /* The card sits BESIDE the spotlight, never over it: try below, right,
+       left, above — first candidate fully inside the frame that does not
+       intersect the hole wins; the below-clamped position is the fallback. */
     var cw=card.offsetWidth, ch=card.offsetHeight,
-        below=r.bottom-fr.top+pad+12, above=r.top-fr.top-pad-12-ch,
-        top=(below+ch<frame.offsetHeight-10)?below:Math.max(10,above),
-        left=Math.min(Math.max(10, r.left-fr.left), frame.offsetWidth-cw-10);
-    card.style.top=top+"px"; card.style.left=left+"px";
+        W=frame.offsetWidth, H=frame.offsetHeight, g=14, m=8;
+    function fits(c){ return c.l>=m && c.t>=m && c.l+cw<=W-m && c.t+ch<=H-m; }
+    function clear(c){ return c.l>=h.l+h.w||c.l+cw<=h.l||c.t>=h.t+h.ht||c.t+ch<=h.t; }
+    /* …and when the spotlight is a whole content region with no room beside
+       it, the card docks in a corner of the frame instead of covering it. */
+    var cands=[{l:h.l,t:h.t+h.ht+g},{l:h.l+h.w+g,t:h.t},{l:h.l-cw-g,t:h.t},{l:h.l,t:h.t-ch-g},
+               {l:W-cw-m,t:H-ch-m},{l:m,t:H-ch-m}],
+        pick=null;
+    for(var i=0;i<cands.length;i++){
+      var c={l:Math.min(Math.max(m,cands[i].l),W-cw-m),t:cands[i].t};
+      if(fits(c)&&clear(c)){pick=c;break;} }
+    if(!pick){ hole.classList.add("open");
+               pick={l:W-cw-m, t:Math.min(Math.max(m,h.t+h.ht+g),H-ch-m)}; }
+    card.style.left=pick.l+"px"; card.style.top=pick.t+"px";
   }
 
   function go(n){
     clearLit();
     if(n>=STORY.length){ end(); return; }
-    at=n; var s=STORY[at];
-    if(s.target==="#btnReport") showPlan(false);
-    else if(s.kind!=="finish") showPlan(true);
+    at=Math.max(0,n); var s=STORY[at];
+    showView(s.view);
     document.getElementById("tstep").textContent=
-      s.kind==="welcome"?"The tour · strategy custodian":"Step "+at+" of "+(STORY.length-2);
-    if(s.kind==="finish") document.getElementById("tstep").textContent="The tour · done";
-    document.getElementById("ttitle").textContent=s.title;
+      s.kind==="welcome" ? "The tour · strategy custodian" :
+      s.kind==="finish"  ? "The tour · done" : "Step "+at+" of "+(STORY.length-2);
+    document.getElementById("ttitle").innerHTML=s.title;
     document.getElementById("tbody").innerHTML=s.body;
     var dots=document.getElementById("tdots"); dots.innerHTML="";
     for(var i=0;i<STORY.length;i++){var d=document.createElement("i");
       if(i===at)d.className="on"; dots.appendChild(d);}
-    var f=document.getElementById("tfoot");
+    var f=document.getElementById("tfoot"),
+        back=at>0 ? '<button class="tback" data-t="back">&#8249; Back</button>' : "";
     if(s.kind==="do"){
-      f.innerHTML='<button class="tskip" data-t="skipall">Skip tour</button>'+
+      f.innerHTML=back+'<button class="tskip" data-t="skipall">Skip tour</button>'+
         '<span class="tdo"><span class="dhint">'+s.hint+'</span>'+
         '<button class="dskip" data-t="skipstep">or skip this step</button></span>';
       var el=frame.querySelector(s.target); lit=el; el.classList.add("lit");
     } else {
-      f.innerHTML='<button class="tskip" data-t="skipall">'+(s.skiplabel||"Skip tour")+'</button>'+
+      f.innerHTML=back+'<button class="tskip" data-t="skipall">'+(s.skiplabel||"Skip tour")+'</button>'+
         '<button class="tnext" data-t="next">'+(s.next||"Next")+'</button>';
     }
     place();
@@ -358,15 +451,15 @@
   frame.addEventListener("click",function(e){
     var t=e.target.dataset&&e.target.dataset.t;
     if(t==="next"||t==="skipstep"){ go(at+1); return; }
+    if(t==="back"){ go(at-1); return; }
     if(t==="skipall"||e.target.id==="tclose"){ end(); return; }
     if(at>=0 && STORY[at].kind==="do" && lit && (e.target===lit||lit.contains(e.target))){
       go(at+1); return; }
-    if(at>=0 && (e.target===dim)) return;      /* the dim absorbs everything else */
   });
   document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&at>=0) end(); });
   window.addEventListener("resize",place);
   document.getElementById("restart").addEventListener("click",function(){
-    frame.classList.add("touring"); showPlan(true); go(0);
+    frame.classList.add("touring"); go(0);
     frame.scrollIntoView({behavior:"smooth",block:"start"});
   });
 

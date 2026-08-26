@@ -64,6 +64,34 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
+### v3.37 — the diagnostic contradicted itself (§117)
+
+The first thing §116's button reported was **"It is not working — the model"**
+with *The API key · **WORKING*** in the row directly above the provider's
+*400: API key not valid*. Two rows on one screen disagreeing, both written by
+the diagnostic.
+
+- **A status word is a claim.** `configured()` only checks that a variable is
+  non-empty; the word *working* claimed the provider accepts it. That row reads
+  **PRESENT** now, and a step may choose its own word wherever the state's
+  default would overclaim.
+- **The refusal is reported against the key, not the model.** Google answers a
+  bad key with **400**, so the generic branch had caught it —
+  `looksLikeBadKey()` reads 401, 403 and the provider's own words, and the row
+  is *The key itself*, naming the three causes that produce a correct-looking
+  key the provider refuses.
+- **Two of those can no longer happen**: `apiKey()` trims and strips
+  surrounding quotes, because a value that only works when it is clean should
+  be cleaned by whatever reads it.
+- **The headline spells its own field names** — `toLowerCase()` had turned
+  *The API key* into *the api key*; only the leading article moves now.
+
+**Verified:** office-chat.py ALL CLEAR with three new assertions, each watched
+to fail first (3 failures against the previous build) · all five real states
+driven end to end against a Google stub, each landing on the step it belongs
+to · qa.py ERRORS: none · test-chat 52/0 · test-assistant 25/0 ·
+test-authorize 193/0 · extract-kb --check in step.
+
 ### v3.37 — is the bot working? (§116)
 
 Islam turned the assistant on, asked it something, and nothing came back — but

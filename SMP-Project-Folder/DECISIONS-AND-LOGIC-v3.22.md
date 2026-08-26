@@ -15345,3 +15345,96 @@ And it presses the button, which is the only assertion that would have caught
 result was called `bad`, which is this file's module-level failure counter — so
 the summary crashed on a dict after every assertion had passed. Renamed to say
 what it holds.
+
+
+---
+
+## 117 · The diagnostic said the key was working while the provider refused it (v3.37)
+
+> Islam, having pressed §116's button: a screen reading **"It is not working —
+> the model (gemini-2.5-flash)"**, with *The API key · **WORKING** · Set on this
+> deployment* directly above *the assistant refused the request (400: API key
+> not valid. Please pass a valid API key.)*
+
+**Two rows on one screen contradicting each other, and the diagnostic wrote
+both.** §116 exists to send somebody to one page, and this sent them to the
+model page while the fault was the key.
+
+### 117.1 The row said "working" and had only checked presence
+
+`configured()` is `!!apiKey()` — a non-empty environment variable and nothing
+else. It cannot know whether Google accepts that value, and it never claimed
+to; **the word "working" claimed it on its behalf.**
+
+The state and the word had been the same fact: `TESTWORD` turned `ok` into
+*working*, `fail` into *stopped here*. That is right for every step whose check
+IS the thing — the switch is on, the corpus loaded, the model answered — and
+wrong for exactly one, because presence is all that step can see.
+
+So **a step chooses its own word** where the state's default would overclaim.
+The API key's is **PRESENT**, with the detail saying outright that whether the
+provider accepts it is the next step's answer.
+
+*A status word is a claim, and a claim wider than what was measured is a wrong
+answer wearing a green dot.* §35's rule with the sign reversed — that one is
+about absence being reported as "none"; this is presence being reported as
+proof.
+
+### 117.2 And the refusal belonged to the key, not to the model
+
+**Google answers a bad key with 400**, not 401 — so the generic branch caught
+it and reported it under *The model (…)*, which is the step that happened to be
+running rather than the thing that was wrong. `looksLikeBadKey(status, detail)`
+in `lib/assistant.js` reads 401 and 403 **and the provider's own words**,
+because the status alone cannot be trusted here; `ask()` returns
+`{ok:false, badKey:true}` and the diagnostic reports it as **The key itself**.
+
+**The three causes are named**, because all three produce a key that looks
+correct in the dashboard and is refused: a stray space or newline in the paste,
+a key restricted to a website or IP (a server key must not be), or a project
+where the Generative Language API was never switched on. None of them is
+visible from inside the deployment, so a diagnostic that stops at "rejected"
+leaves somebody staring at a value that looks right.
+
+### 117.3 Two of them are now impossible
+
+`apiKey()` **trims and strips surrounding quotes**. A key pasted into a
+dashboard field arrives with a trailing newline often enough to be the first
+thing to rule out, and some people paste it with its quotes. Both produce the
+provider's least helpful error against a character-for-character correct key,
+and neither is visible anywhere — the variable is set, it is non-empty, and it
+is wrong.
+
+Done in the reader rather than in an instruction to go and check: **a value
+that only works when it is clean should be cleaned by whatever reads it.**
+`model()` is trimmed with it, for the same reason and by the same road.
+
+### 117.4 The headline lowercased an acronym
+
+*"It is not working — the api key"*. The sentence lowercases the step's name so
+it reads as prose, and `toLowerCase()` reached the whole of it. `unCap()` moves
+**only the leading article**.
+
+Small, and worth the line: the headline is the one thing somebody reads before
+deciding whether to keep reading, and a product that cannot spell its own field
+names is read as a product that is guessing.
+
+### 117.5 What proves it
+
+Three assertions in `checks/office-chat.py` §10, and each was watched to fail
+before the green run was believed (§94.5 — 3 failures against the previous
+build):
+
+- a present key **never claims to be working**, and says only what it checked;
+- the refusal is reported **against the key, not the model**;
+- an acronym in a step's name **survives the headline**.
+
+The first is the one that matters, and it is a *these two must differ* check
+rather than a *these two must match* one — §113.8's blind spot does not apply,
+because the failure it guards against is precisely the two collapsing into one
+word.
+
+**Driven end to end against a stub standing in for Google**, in all five
+states — no key, a key it refuses, a retired model, exhausted quota, a real
+answer — because §116's own lesson is that the parts can each be right while
+the thing is not. Every one lands on the step it belongs to.

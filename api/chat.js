@@ -404,8 +404,13 @@ module.exports = async function handler(req, res) {
        tokens when somebody presses it. */
     if (action === "assistantTest") {
       const steps = [];
-      const step = function (name, state, detail) {
-        steps.push({ name: name, state: state, detail: detail || null });
+      /* THE WORD IS THE STEP'S TO CHOOSE (§117). "ok" is the state the row
+         is drawn in; what the row SAYS about itself is a different fact, and
+         the API key's is "present" rather than "working" — which is the whole
+         of what this page got wrong the first time. */
+      const step = function (name, state, detail, word) {
+        steps.push({ name: name, state: state, detail: detail || null,
+                     word: word || null });
       };
 
       step("The switch", cfg.assistant ? "ok" : "off",
@@ -419,12 +424,19 @@ module.exports = async function handler(req, res) {
                  (kb.pages || []).length + " page explainers")
               : "db/kb.json did not reach this deployment");
 
+      /* PRESENT, NOT VALID (§117). This row said "working" off a non-empty
+         variable, and Islam read that — reasonably — as the key being fine,
+         while the row beneath it carried the provider's "API key not valid".
+         Presence is all this step can see; whether the key is accepted is the
+         model step's answer, and it now says so there. */
       step("The API key", assistant.configured() ? "ok" : "fail",
            assistant.configured()
-             ? "Set on this deployment"
+             ? "Present on this deployment. Whether the provider accepts it is " +
+               "the next step."
              : "No " + assistant.KEY_NAME + " here. Note that Vercel only " +
                "gives a deployment the variables that existed when it was " +
-               "built — if it was added since, redeploy.");
+               "built — if it was added since, redeploy.",
+           assistant.configured() ? "present" : null);
 
       /* THE CALL ITSELF, only once there is something to call with. */
       if (kb && assistant.configured()) {
@@ -433,7 +445,17 @@ module.exports = async function handler(req, res) {
           kb: kb, question: q, history: [],
           who: "a member of the Strategy Office", labels: {}
         });
-        if (!out || !out.ok) {
+        if (out && out.badKey) {
+          /* REPORTED AGAINST THE KEY, because that is what is wrong and that
+             is the page somebody has to go to. The three causes worth naming
+             are the ones that produce a correct-looking key the provider
+             refuses, and none of them is visible from here. */
+          step("The key itself", "fail",
+               out.why + " — most often the key was pasted with a stray space " +
+               "or newline, is restricted to a website or IP (a server key must " +
+               "not be), or belongs to a project where the Generative Language " +
+               "API is not switched on.");
+        } else if (!out || !out.ok) {
           step("The model (" + assistant.model() + ")", "fail",
                (out && out.why) || "no answer");
         } else {

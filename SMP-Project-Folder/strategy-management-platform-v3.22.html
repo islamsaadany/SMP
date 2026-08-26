@@ -29195,12 +29195,18 @@ var CHAT = (function(){
   };
   var TESTWORD = { ok: "working", warn: "check this", fail: "stopped here", off: "off" };
 
+  /* ONLY THE FIRST LETTER (§117). This lowercased the whole name, so "The API
+     key" became "the api key" in the one sentence somebody reads first. */
+  function unCap(t){
+    return /^The /.test(t) ? "the " + t.slice(4) : t;
+  }
+
   function testHtml(steps){
     /* WHERE IT STOPS IS THE ANSWER, so the failing row is the loud one and
        everything above it is quiet confirmation that the chain got that far. */
     var bad = steps.filter(function(s){ return s.state === "fail"; })[0];
     var off = steps.filter(function(s){ return s.state === "off"; })[0];
-    var head = bad ? "It is not working \u2014 " + bad.name.toLowerCase()
+    var head = bad ? "It is not working \u2014 " + unCap(bad.name)
              : off ? "It is switched off"
              : "It is working";
     return '<div class="chtest' + (bad ? " bad" : off ? " off" : " good") + '">' +
@@ -29209,7 +29215,7 @@ var CHAT = (function(){
         return '<div class="chtest-r">' +
           (TESTMARK[st.state] || TESTMARK.fail) +
           '<span class="chtest-n">' + esc2(st.name) + "</span>" +
-          '<span class="chtest-s">' + esc2(TESTWORD[st.state] || st.state) + "</span>" +
+          '<span class="chtest-s">' + esc2(st.word || TESTWORD[st.state] || st.state) + "</span>" +
           (st.detail ? '<div class="chtest-d">' + esc2(st.detail) + "</div>" : "") +
         "</div>";
       }).join("") + "</div>";

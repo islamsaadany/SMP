@@ -549,6 +549,39 @@ with sync_playwright() as p:
         ck("a failure names the step that stopped it",
            "not working" in stopped["head"].lower() and "key" in stopped["head"].lower(), stopped)
         ck("and marks exactly one row as the stopping point", stopped["stopped"] == 1, stopped)
+        # AND THE NAME IS NOT SHOUTED DOWN (§117). The headline lowercases the
+        # step's name so it reads as a sentence, and lowercasing the WHOLE of
+        # it turned "The API key" into "the api key" in the one line somebody
+        # reads first. Only the leading article moves.
+        ck("an acronym in the step's name survives the headline",
+           "the API key" in stopped["head"], stopped)
+
+        # ── PRESENT IS NOT VALID (§117) ──────────────────────────────────
+        # The row that says a key is there had said WORKING, off nothing but a
+        # non-empty variable — while the row beneath it carried the provider
+        # refusing that same key. A state is how a row is DRAWN; what it SAYS
+        # about itself is a separate fact, and this is the one row where the
+        # two must differ.
+        CHAT["test"] = [
+            {"name": "The switch", "state": "ok", "detail": "on"},
+            {"name": "The knowledge base", "state": "ok", "detail": "43 how-tos"},
+            {"name": "The API key", "state": "ok", "word": "present",
+             "detail": "Present on this deployment."},
+            {"name": "The key itself", "state": "fail",
+             "detail": "the provider rejected the key: API key not valid."},
+        ]
+        pg.evaluate("()=>{ document.querySelector('[data-chtest]').click(); }")
+        pg.wait_for_timeout(1200)
+        pres = pg.evaluate("""()=>{ const rows=[...document.querySelectorAll('.chtest-r')];
+            const find=n=>rows.find(r=>(r.querySelector('.chtest-n')||{}).textContent===n);
+            const word=n=>{ const r=find(n); return r ? (r.querySelector('.chtest-s')||{}).textContent : null; };
+            return { key: word('The API key'), itself: word('The key itself'),
+                     head: (document.querySelector('.chtest-h')||{}).textContent || "" }; }""")
+        ck("a present key never claims to be working",
+           pres["key"] and "work" not in pres["key"].lower(), pres)
+        ck("it says only what it checked", (pres["key"] or "").lower() == "present", pres)
+        ck("and the refusal is reported against the key, not the model",
+           "key itself" in pres["head"].lower(), pres)
 
         CHAT["test"] = [
             {"name": "The switch", "state": "ok", "detail": "on"},

@@ -1346,6 +1346,29 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   instrumenting the click: no request, no console error, and the button's own
   label unchanged, which is what says *the handler never ran* rather than *the
   request failed*. §96's family, fifth time.
+- **A STATUS WORD IS A CLAIM, AND PRESENCE IS NOT PROOF (§117):** §116's own
+  screen said *The API key · **WORKING*** directly above the provider's *400:
+  API key not valid* — two rows contradicting each other, both written by the
+  diagnostic. `configured()` is `!!apiKey()` and never claimed more; **the word
+  claimed it on its behalf**, because the state and the word had been one fact
+  (`ok` → *working*). Right for every step whose check IS the thing, wrong for
+  the one step that can only see presence — so **a step now chooses its own
+  word** where the default would overclaim, and that row reads **PRESENT** with
+  the detail saying the next step is what answers it. §35 with the sign
+  reversed: that one is absence reported as *none*, this is presence reported
+  as proof. **AND THE REFUSAL BELONGED TO THE KEY, NOT THE MODEL** — Google
+  answers a bad key with **400**, not 401, so the generic branch reported it
+  under whichever step happened to be running; `looksLikeBadKey()` reads 401,
+  403 **and the provider's own words**, and the row is *The key itself*, naming
+  the three causes that produce a correct-looking key the provider refuses (a
+  pasted newline, a website/IP restriction on a server key, the Generative
+  Language API never switched on). **TWO OF THOSE ARE NOW IMPOSSIBLE**:
+  `apiKey()` trims and strips surrounding quotes, because *a value that only
+  works when it is clean should be cleaned by whatever reads it* — done in the
+  reader, never as an instruction to go and check. The check asserts *these two
+  must DIFFER* (§113.8 does not apply — the fault it guards is the two
+  collapsing into one word), and was watched to fail first: 3 failures against
+  the previous build.
 - **A CHECK THAT ASSERTS AGREEMENT PASSES WHEN BOTH SIDES VANISH (§113.8):**
   the knowledge base's contents are derived, and the check asserts one link per
   section — so when a fix pushed `undefined` into `secs` and the tour section

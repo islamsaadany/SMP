@@ -46,8 +46,10 @@
   /* settled decisions */
   .settled{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
   .settled div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--ink-2)}
+  .settled div.new{border-color:var(--gold)}
   .settled b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:2px}
   .settled .tick{color:var(--good);font-weight:800;margin-right:5px}
+  .settled .rev{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gold-deep);margin-left:6px}
 
   /* flow strip */
   .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:12px 0 4px}
@@ -80,21 +82,22 @@
   .m-tabs span{padding:6px 12px;font-size:12px;color:#414A58;border-radius:8px 8px 0 0}
   .m-tabs .on{background:#EFF2F6;color:#8A6B22;font-weight:700}
 
-  /* THE BUILDER BAND — the one new element */
+  /* THE BUILDER BAND — a map of the plan's sections, not a stepper */
   .bband{display:flex;align-items:center;gap:14px;background:#fff;border-bottom:1px solid #D6DCE5;
     border-left:3px solid #C9A24D;padding:8px 16px;flex-wrap:wrap}
   .bband .who{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8A6B22;flex:none}
-  .bsteps{display:flex;align-items:center;gap:2px;flex:none}
-  .bstep{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#636C79;padding:3px 9px;border-radius:99px}
-  .bstep .n{width:15px;height:15px;border-radius:50%;border:1px solid #D6DCE5;font-size:9.5px;font-weight:800;
-    display:inline-flex;align-items:center;justify-content:center;color:#636C79;background:#fff}
-  .bstep.done .n{background:#E4F0EA;border-color:#2E7D5B;color:#2E7D5B}
-  .bstep.done{color:#2E7D5B}
-  .bstep.cur{background:#16325C;color:#fff;font-weight:700}
-  .bstep.cur .n{background:#C9A24D;border-color:#C9A24D;color:#16325C}
+  .bsteps{display:flex;align-items:center;gap:4px;flex:none}
+  .bstep{display:flex;align-items:center;gap:5px;font-size:11.5px;color:#414A58;padding:3px 10px;
+    border-radius:99px;border:1px solid #D6DCE5;background:#fff;cursor:default}
+  .bstep .st{font-weight:800;font-size:10px}
+  .bstep .st.ok{color:#2E7D5B}
+  .bstep .st.n{color:#8A6B22}
+  .bstep .st.o{color:#9AA3B0}
+  .bstep.cur{background:#16325C;color:#fff;border-color:#16325C;font-weight:700}
+  .bstep.cur .st.ok,.bstep.cur .st.n,.bstep.cur .st.o{color:#C9A24D}
   .bhint{font-size:11.5px;color:#414A58;flex:1;min-width:180px}
   .bhint b{color:#171B22}
-  .bacts{display:flex;gap:6px;flex:none;margin-left:auto}
+  .bacts{display:flex;gap:6px;flex:none;margin-left:auto;align-items:center}
   .bacts .btn{border:1px solid #D6DCE5;background:#fff;border-radius:7px;padding:4px 12px;font-size:11.5px;color:#414A58}
   .bacts .btn.next{background:#16325C;color:#fff;border-color:#16325C;font-weight:700}
   .bacts .quiet{border:none;background:none;color:#636C79;font-size:11.5px;text-decoration:underline;padding:4px 4px}
@@ -108,7 +111,7 @@
   .m-add{display:inline-block;border:1px solid #D6DCE5;background:#F7F8FA;border-radius:7px;
     padding:4px 11px;font-size:11.5px;color:#414A58;margin-top:8px}
 
-  /* chooser modal mock */
+  /* chooser + row-form modal mocks */
   .m-dim{background:rgba(15,23,42,.45);padding:34px 0 40px}
   .m-modal{background:#fff;border-radius:12px;max-width:640px;margin:0 auto;padding:18px 22px 20px;
     box-shadow:0 18px 50px rgba(0,0,0,.35)}
@@ -129,6 +132,22 @@
   .m-newrow{display:flex;gap:8px;align-items:center;font-size:12px;color:#414A58;padding:2px 0 0}
   .m-newrow .m-add{margin-top:0}
 
+  /* the row form's ordered boxes */
+  .ff{margin:0 0 10px}
+  .ff .fl{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#636C79;margin-bottom:3px}
+  .ff .fi{border:1px solid #D6DCE5;border-radius:7px;padding:7px 10px;font-size:12.5px;background:#fff;color:#171B22}
+  .ff .fi.ph{color:#9AA3B0;font-style:italic}
+  .ffrow{display:flex;gap:10px}
+  .ffrow .ff{flex:1}
+  .fseg{display:inline-flex;border:1px solid #D6DCE5;border-radius:7px;overflow:hidden}
+  .fseg span{padding:6px 13px;font-size:12px;color:#414A58;border-right:1px solid #D6DCE5}
+  .fseg span:last-child{border-right:none}
+  .fseg .on{background:#16325C;color:#fff;font-weight:700}
+  .fmiss{font-size:11.5px;color:#B8860B;background:#F7EFD6;border-radius:7px;padding:6px 10px;margin:2px 0 10px}
+  .facts{display:flex;gap:8px;align-items:center}
+  .facts .btn{border:1px solid #D6DCE5;background:#fff;border-radius:7px;padding:5px 13px;font-size:12px;color:#414A58}
+  .facts .btn.pri{background:#16325C;color:#fff;border-color:#16325C;font-weight:700}
+
   /* review mock */
   .rvrow{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid #F1F3F6;font-size:12.5px}
   .rvrow:first-child{border-top:none}
@@ -146,36 +165,46 @@
 </style>
 
 <div class="wrap">
-  <div class="eyebrow">SMP &middot; design mockup &middot; 2026-08-26</div>
+  <div class="eyebrow">SMP &middot; design mockup &middot; 2026-08-26 &middot; revision 2</div>
   <h1>Building a plan on the platform</h1>
   <p class="lede">The SMO team picks a unit or a function — or creates one — chooses how it plans,
-  and is walked through authoring the whole plan on the platform's own pages. No file, no second editor:
-  a guided flow over the pens that already exist.</p>
+  and builds the whole plan on the platform's own pages. The builder is a <b>map</b> of the plan's
+  sections, open in any order, and every row is added through a form that protects its shape.</p>
 
   <section>
-    <h2><span class="snum">1</span>What is already settled</h2>
-    <p class="secnote">Agreed in the alignment before this mockup — the mockup draws these, it does not reopen them.</p>
+    <h2><span class="snum">1</span>What is settled</h2>
+    <p class="secnote">The first four from the opening alignment; the two marked <b>revised</b> are this round's
+    corrections and are what changed between revision 1 and this page.</p>
     <div class="settled">
       <div><b><span class="tick">&#10003;</span>Functions choose, units don't</b>
         A unit always plans in pillars. Only a function with nothing behind it is asked <i>pillars or projects</i> — the existing format switch, asked at a better moment.</div>
       <div><b><span class="tick">&#10003;</span>Guided mode, not a wizard</b>
-        The flow walks the platform's real pages with the pen open. Every field is the page's own; every server rule applies unchanged.</div>
+        The builder lives on the platform's real pages with the pen open. Reading, arranging and the score never move to a second surface.</div>
       <div><b><span class="tick">&#10003;</span>Live immediately</b>
         The plan appears as it is built, like pen edits today. No draft flag, no state to forget to clear; missing things read honestly as missing.</div>
       <div><b><span class="tick">&#10003;</span>New or existing subject</b>
         The first step offers the existing units and functions <i>and</i> creating a new one in place — which also gives Setup &rsaquo; Business units its missing "+ Add".</div>
+      <div class="new"><b><span class="tick">&#10003;</span>A map, not a march<span class="rev">revised</span></b>
+        No forced sequence. Every section of the plan is directly openable from the band, in any order;
+        the left-to-right order is a suggestion the band shows, never a gate. Nothing waits on a previous step.</div>
+      <div class="new"><b><span class="tick">&#10003;</span>A row is added whole<span class="rev">revised</span></b>
+        Adding an objective, measure, tactic, project, deliverable, outcome or milestone opens a form asking
+        that row kind's fields in the outcome's order — the template protects the structure, so a row cannot
+        arrive as a bare name with its shape missing.</div>
     </div>
   </section>
 
   <section>
-    <h2><span class="snum">2</span>The flow at a glance</h2>
-    <p class="secnote">Two routes after the first step, decided by what the subject is. Order matters and the flow says why at each step — but nothing is locked: Back always works, and every step may be left partly filled.</p>
+    <h2><span class="snum">2</span>The plan's sections</h2>
+    <p class="secnote">What the band offers, per route. The arrows are the <b>suggested</b> reading order —
+    the same order the plan's pages already present — but every box is a door, not a step: the SMO can start
+    at Pillars with the foundation still empty and come back to it whenever.</p>
 
     <div class="froute">Pillars route &mdash; a unit, or a function that plans in pillars</div>
     <div class="flow">
       <div class="fstep"><b>Choose the subject</b><span>existing or new</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>Foundation</b><span>who we are &middot; aspiration &middot; end in mind</span></div><div class="farrow">&rarr;</div>
-      <div class="fstep"><b>Key objectives</b><span>name, direction, targets</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Key objectives</b><span>objective &middot; direction &middot; targets &middot; compile</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>SWOT</b><span>the analysis the pillars come from</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>Pillars</b><span>each with measures &amp; tactics</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>Review</b><span>what is filled, what is not</span></div>
@@ -185,14 +214,14 @@
     <div class="flow">
       <div class="fstep"><b>Choose the subject</b><span>existing or new</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>Definition</b><span>what this capability is</span></div><div class="farrow">&rarr;</div>
-      <div class="fstep"><b>Key objectives</b><span>name, direction, targets</span></div><div class="farrow">&rarr;</div>
+      <div class="fstep"><b>Key objectives</b><span>objective &middot; direction &middot; targets &middot; compile</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>Projects</b><span>front matter &middot; deliverables &middot; outcomes &middot; milestones</span></div><div class="farrow">&rarr;</div>
       <div class="fstep"><b>Review</b><span>what is filled, what is not</span></div>
     </div>
 
-    <div class="note"><b>Progress is read off the data, never stored.</b> A step is "done" when it holds content.
-    Pausing costs nothing — reopening the builder for the same subject lands on the first step that is still empty.
-    Codes are minted the way the import mints them: automatically, by position.</div>
+    <div class="note"><b>Progress is read off the data, never stored.</b> A section's chip shows what it holds
+    — filled, a count so far, or empty. Pausing costs nothing; reopening the builder for the same subject
+    shows the same map with the same honest chips. Codes are minted the way the import mints them: automatically, by position.</div>
   </section>
 
   <section>
@@ -212,7 +241,7 @@
             </div>
             <div style="flex:1;border:1px solid #C9A24D;border-radius:9px;padding:12px;background:#FDFAF2">
               <b style="font-size:12.5px">Build it here</b>
-              <div style="font-size:11.5px;color:#636C79;margin:3px 0 8px">A guided flow through the plan's pages.</div>
+              <div style="font-size:11.5px;color:#636C79;margin:3px 0 8px">The plan's pages, with a form for every row.</div>
               <span class="m-add" style="background:#16325C;color:#fff;border-color:#16325C;font-weight:700">Build a plan</span>
             </div>
           </div>
@@ -250,9 +279,12 @@
 
   <section>
     <h2><span class="snum">5</span>The builder band</h2>
-    <p class="secnote">The one new piece of interface. A band under the tab row — visible on every step, never covering content.
-    It navigates the real pages with the pen already open, says what the current step wants, and counts what each step holds.
-    Below: step 2 on Line Electronics' Foundation, with step 1 already done.</p>
+    <p class="secnote">The band under the tab row is a <b>map</b>: one chip per section, each saying honestly
+    what it holds — <span style="color:var(--good);font-weight:700">&#10003; filled</span>,
+    <span style="color:var(--gold-deep);font-weight:700">a count so far</span>, or
+    <span style="color:var(--ink-3);font-weight:700">&#9675; empty</span> — and every chip opens its section
+    directly. Below: the SMO jumped straight to Pillars on Line Electronics with the foundation still empty,
+    and nothing stops them.</p>
     <div class="mockwrap"><div class="mock">
       <div class="m-top"><span class="t">Strategy Management</span><span class="org">Raya Trade</span><span class="right">signed in as the SMO</span></div>
       <div class="m-nav"><span class="grp">Raya Trade &#9662;</span><span class="u">Mobile</span><span class="u on">Line Electronics</span><span class="u">Nigeria</span><span class="u">&hellip;</span><span class="gear">&#9881;</span></div>
@@ -260,52 +292,14 @@
       <div class="bband">
         <span class="who">Building this plan</span>
         <div class="bsteps">
-          <span class="bstep done"><span class="n">&#10003;</span>Foundation</span>
-          <span class="bstep cur"><span class="n">2</span>Objectives</span>
-          <span class="bstep"><span class="n">3</span>SWOT</span>
-          <span class="bstep"><span class="n">4</span>Pillars</span>
-          <span class="bstep"><span class="n">5</span>Review</span>
+          <span class="bstep"><span class="st o">&#9675;</span>Foundation</span>
+          <span class="bstep"><span class="st n">2</span>Objectives</span>
+          <span class="bstep"><span class="st o">&#9675;</span>SWOT</span>
+          <span class="bstep cur"><span class="st n">2</span>Pillars</span>
+          <span class="bstep"><span class="st o">&#9675;</span>Review</span>
         </div>
-        <span class="bhint"><b>Key objectives</b> — what this unit is judged on. Name, direction and targets; 3&ndash;5 is typical. <b>2 added.</b></span>
-        <div class="bacts"><span class="quiet">Pause</span><span class="btn">Back</span><span class="btn next">Next</span></div>
-      </div>
-      <div class="m-body">
-        <div class="m-card"><h4>Who we are</h4>
-          <div class="m-lbl">We are</div><div class="m-fld">The consumer electronics arm of the group</div>
-          <div class="m-lbl">We serve</div><div class="m-fld">Retail chains and independent dealers</div>
-          <span class="m-add">+ Add a line</span>
-        </div>
-        <div class="m-card"><h4>Aspiration &amp; key objectives</h4>
-          <div class="m-fld">To lead the local market in every line we carry&hellip;</div>
-          <div class="m-lbl">Key objectives &middot; the step being built</div>
-          <div class="m-fld">Line revenue &middot; &ge; &middot; 1.2B EGP &middot; Sum</div>
-          <div class="m-fld">Dealer coverage &middot; &ge; &middot; 400 &middot; Latest</div>
-          <div class="m-fld empty">Name the next objective&hellip;</div>
-          <span class="m-add">+ Add objective</span>
-        </div>
-      </div>
-    </div></div>
-    <p class="cap">Everything inside the pane is the page's own edit mode — the dashed fields are the pens the office already has.
-    The band adds navigation and counts, never a second editor. <b>Pause</b> just leaves; the band comes back from the same door.</p>
-  </section>
-
-  <section>
-    <h2><span class="snum">6</span>The pillars step</h2>
-    <p class="secnote">The longest step, on the Plan page. The band's counts make the shape of the work visible —
-    pillars are added one by one, each with its measures and tactics, exactly as the pen does today.</p>
-    <div class="mockwrap"><div class="mock">
-      <div class="m-tabs"><span class="on">Strategy</span><span>Performance</span><span>My reporting</span></div>
-      <div class="bband">
-        <span class="who">Building this plan</span>
-        <div class="bsteps">
-          <span class="bstep done"><span class="n">&#10003;</span>Foundation</span>
-          <span class="bstep done"><span class="n">&#10003;</span>Objectives</span>
-          <span class="bstep done"><span class="n">&#10003;</span>SWOT</span>
-          <span class="bstep cur"><span class="n">4</span>Pillars</span>
-          <span class="bstep"><span class="n">5</span>Review</span>
-        </div>
-        <span class="bhint"><b>Pillars</b> — the work the strategy commits to. <b>2 pillars &middot; 5 measures &middot; 3 tactics.</b> LE02 has no tactics yet.</span>
-        <div class="bacts"><span class="quiet">Pause</span><span class="btn">Back</span><span class="btn next">Next</span></div>
+        <span class="bhint"><b>Pillars</b> — the work the strategy commits to. 2 pillars &middot; 5 measures &middot; 3 tactics so far.</span>
+        <div class="bacts"><span class="quiet">Pause</span><span class="btn next">Finish building</span></div>
       </div>
       <div class="m-body">
         <div class="m-card" style="max-width:250px"><h4>Plan</h4>
@@ -324,31 +318,67 @@
         </div>
       </div>
     </div></div>
+    <p class="cap">Everything inside the pane is the page's own edit mode — the dashed fields are the pens
+    the office already has, for correcting what a form added. <b>Pause</b> just leaves; the band comes back
+    from the same door, reading the same state off the data. <b>Finish building</b> is always visible and
+    opens the review, whatever order the sections were built in.</p>
   </section>
 
   <section>
-    <h2><span class="snum">7</span>The review step</h2>
-    <p class="secnote">Not a gate — an honest reading. Empty is allowed (a unit may genuinely have no SWOT yet);
-    the review names every gap so finishing with one is a decision, not an oversight. Each row jumps back to its step.</p>
+    <h2><span class="snum">6</span>Adding a row protects its shape</h2>
+    <p class="secnote">Every "+ Add" in build mode opens a form — the register's §116 shape — asking that row
+    kind's fields <b>in the order the outcome reads them</b>. An objective is not a name: it is a name, a
+    direction, a target, a horizon target and a compile rule, and the form asks for all of them together so
+    the row lands coherent with the table it joins. Below: adding a key objective.</p>
+    <div class="mockwrap"><div class="mock"><div class="m-dim">
+      <div class="m-modal" style="max-width:560px">
+        <h3>Add a key objective</h3>
+        <p class="sub">Line Electronics &middot; objective 3</p>
+        <div class="ff"><div class="fl">Objective</div><div class="fi">Accessories attach rate</div></div>
+        <div class="ffrow">
+          <div class="ff"><div class="fl">Direction</div><div class="fseg"><span class="on">&ge; at least</span><span>&le; at most</span></div></div>
+          <div class="ff"><div class="fl">Target this year</div><div class="fi">25%</div></div>
+          <div class="ff"><div class="fl">3-year target</div><div class="fi ph">e.g. 40%</div></div>
+        </div>
+        <div class="ff"><div class="fl">Compile rule &mdash; how the year's figure is read</div>
+          <div class="fseg"><span class="on">Latest</span><span>Sum</span><span>Average</span></div></div>
+        <div class="fmiss">No 3-year target yet — it can be added, and until then the row reads as missing it.</div>
+        <div class="facts"><span class="btn pri">Add &amp; add another</span><span class="btn">Add</span><span class="btn">Cancel</span></div>
+      </div>
+    </div></div></div>
+    <p class="cap">One form per row kind, each asking its own shape: <b>measure</b> — name, direction, target,
+    compile; <b>tactic</b> — name, owner, quarters, collaborators; <b>project</b> — name, owner, start, end,
+    brief; <b>deliverable</b> — name, measured as (done / % of progress), due date; <b>outcome</b> — name,
+    direction, target, measure date; <b>milestone</b> — name, date. The name is what makes Add live; anything
+    else left empty is named in the amber line before the row is added, and carries the page's own "missing"
+    mark after — asked for, never forced, so "we have not set the target yet" stays sayable.
+    <b>Add &amp; add another</b> keeps the form open for building a table in one sitting.</p>
+  </section>
+
+  <section>
+    <h2><span class="snum">7</span>The review</h2>
+    <p class="secnote">Not a gate — an honest reading, reachable at any moment from Finish building or its own
+    chip. Empty is allowed (a unit may genuinely have no SWOT yet); the review names every gap so finishing
+    with one is a decision, not an oversight. Each row jumps to its section.</p>
     <div class="mockwrap"><div class="mock">
       <div class="bband">
         <span class="who">Building this plan</span>
         <div class="bsteps">
-          <span class="bstep done"><span class="n">&#10003;</span>Foundation</span>
-          <span class="bstep done"><span class="n">&#10003;</span>Objectives</span>
-          <span class="bstep done"><span class="n">&#10003;</span>SWOT</span>
-          <span class="bstep done"><span class="n">&#10003;</span>Pillars</span>
-          <span class="bstep cur"><span class="n">5</span>Review</span>
+          <span class="bstep"><span class="st ok">&#10003;</span>Foundation</span>
+          <span class="bstep"><span class="st ok">&#10003;</span>Objectives</span>
+          <span class="bstep"><span class="st n">2</span>SWOT</span>
+          <span class="bstep"><span class="st ok">&#10003;</span>Pillars</span>
+          <span class="bstep cur"><span class="st o">&#9679;</span>Review</span>
         </div>
-        <span class="bhint"><b>Review</b> — the plan as it stands. Finish, or go back to any step.</span>
-        <div class="bacts"><span class="quiet">Pause</span><span class="btn">Back</span><span class="btn next">Finish building</span></div>
+        <span class="bhint"><b>Review</b> — the plan as it stands.</span>
+        <div class="bacts"><span class="quiet">Pause</span><span class="btn next">Finish building</span></div>
       </div>
       <div class="m-body"><div class="m-card" style="max-width:640px"><h4>Line Electronics &middot; the plan as it stands</h4>
         <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Foundation</b><span class="what">3 clauses &middot; aspiration &middot; end in mind</span></div>
-        <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Key objectives</b><span class="what">4 objectives, all with direction and target</span></div>
+        <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Key objectives</b><span class="what">4 objectives, all with direction, target and compile</span></div>
         <div class="rvrow"><span class="rv-gap">&#9679;</span><b>SWOT</b><span class="what">Strengths and weaknesses filled &middot; no opportunities or threats yet</span></div>
         <div class="rvrow"><span class="rv-ok">&#10003;</span><b>Pillars</b><span class="what">3 pillars &middot; 8 measures &middot; 9 tactics</span></div>
-        <div class="rvrow"><span class="rv-gap">&#9679;</span><b>Targets</b><span class="what">2 measures have no target — they will read as "missing" on Performance</span></div>
+        <div class="rvrow"><span class="rv-gap">&#9679;</span><b>Targets</b><span class="what">2 measures have no 3-year target — they will read as missing it</span></div>
         <div style="font-size:11.5px;color:#636C79;margin-top:10px">Finishing closes the band and nothing else — the plan has been live all along. Gaps stay findable here and on the pages.</div>
       </div></div>
     </div></div>
@@ -361,12 +391,17 @@
         <p>The editors were built for correcting an imported plan, so some first-rows cannot be written — an empty unit's
         "Who we are" has no way to add its first clause. Part one of the build is walking every authoring surface from a
         truly empty subject and fixing what cannot start from nothing. The builder is only as good as these.</p></div>
+      <div class="find"><b>The row forms are the register's dialog, generalised</b>
+        <p>§116 already moved the register's editing into a dialog because a form crammed into table cells collides with
+        everything around it. The builder's row forms are the same shape: one dialog component, one field list per row
+        kind, declared once — and the field lists are the same vocabulary the plan's tables and the import template
+        already use, never a second copy.</p></div>
       <div class="find"><b>Setup &rsaquo; Business units gains "+ Add a unit"</b>
         <p>Name, code prefix, company, weight — the same shape functions already have. The builder's "+ New business unit"
         and this button are one function, never two. A new unit starts unweighted and the weighting page says so.</p></div>
       <div class="find"><b>Almost nothing new on the server</b>
         <p>Every edit the builder makes is a plan edit the server already classifies (unitPlan / capPlan); creating a unit or
-        function is setup, which is already the SMO's. No new stored state — the band's progress is derived from the plan itself.</p></div>
+        function is setup, which is already the SMO's. No new stored state — the band's chips are derived from the plan itself.</p></div>
       <div class="find"><b>Deliberately not in this module</b>
         <p>Units planning in projects (settled: functions only). Draft visibility (settled: live immediately). Templates or
         pre-filled example plans. Changing anything about how the xlsx import works — the two doors stay siblings.</p></div>

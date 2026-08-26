@@ -14476,3 +14476,30 @@ identically on `origin/main`. Each needs a decision about the PRODUCT — whethe
 Arrange belongs there now, what a long function name should do in that cell —
 and guessing one inside a merge is how a reversal gets quietly re-reversed.
 Reported rather than patched.
+
+### 108.17 The branch caught up with main, and production stopped
+
+Islam, on the merge that had been reported as landed: *"it's only on the
+preview."* The work WAS on `main` — verified twice, and it is still there. What
+did not happen is a PRODUCTION deployment, and the cause is §91 exactly, walked
+into by the one route §91 does not spell out.
+
+**§91 SAYS THE BRANCH MUST NOT CARRY THE SAME SHA.** Vercel deduplicates by
+commit SHA, so one SHA on two refs is ONE deployment and which ref it is
+attributed to is a race. That rule was followed for the push itself: the merge
+went to `main` at 07:38 and the branch was left behind. Then production did not
+build for thirty-two minutes, and the branch was fast-forwarded onto the same
+SHA to tidy up — which handed the still-unbuilt deployment a second ref to be
+attributed to, and it went to the preview.
+
+**THE RULE IS NOT "DO NOT PUSH BOTH AT ONCE", IT IS "DO NOT LET THE BRANCH HOLD
+MAIN'S SHA UNTIL PRODUCTION HAS BUILT."** A thirty-two minute gap felt like
+proof the race was over; it was proof the deployment had not started yet, which
+is the *worst* moment to hand it another candidate. §91.4 already recorded that
+ORDER does not fix this. This adds that DELAY does not fix it either — only the
+branch not carrying the SHA does, and the wait ends when production says so
+(§91.5), not when a timer feels long enough.
+
+**AND A NO-OP COMMIT IS THE WRONG WAY OUT.** The way back is a commit `main`
+holds and the branch does not — and it has to be a commit worth making, or the
+next person reads an empty one as a ritual. This section is that commit.

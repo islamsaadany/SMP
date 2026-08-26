@@ -2494,21 +2494,6 @@ function splitOrPane(list, sel, rail, pane){
    greater than, and a blank cell would put back the one thing this merge
    removed. "= Y/N" is what the row actually says. */
 var DX_HEADING = "Deliverables and outcomes";
-/* ── WHAT THE SCORE COLUMN IS CALLED (§101.9) ─────────────────────────
-   The two tables read their last column from two different numbers, so they
-   say two different words. A deliverable or an outcome answers "how well" --
-   PERFORMANCE, the word this pane's own card and the group's projects table
-   already use for the same figure. A milestone answers "how far" -- PROGRESS,
-   which is what a unit's page has called that number since the scoring model
-   existed.
-
-   Both were "%" for one version, which is a unit and not a name: it says what
-   the cell is measured in and nothing about what it measures, on the one
-   column somebody runs their eye down. Named once, because the pane, the
-   reporting pane and the deck are three surfaces onto the same column and the
-   third is the one that gets left behind (§59). */
-var DX_PCT = "Performance";
-var MS_PCT = "Progress";
 function dxIsDeliv(row){ return row.kind === "d"; }
 function dxType(row){
   /* One box for both words: "Deliverable" and "Outcome" are seven characters
@@ -2705,9 +2690,9 @@ function projPerformanceBody(p, fk){
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + band(projPerf(p)) + '">' + pct(projPerf(p)) + '</span>') +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT], dxr) +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status","%"], dxr) +
     '<h4 class="mini">Milestones <em>' + mst.done + ' of ' + mst.total + ' completed</em></h4>' +
-    miniTable(["#","Milestone","Owner","Due date","Status",MS_PCT], mRows);
+    miniTable(["#","Milestone","Owner","Due date","Status","%"], mRows);
 }
 
 /* A FUNCTION WHOSE PLAN LIVES IN ITS CAPABILITIES AND WHICH CARRIES NONE
@@ -3046,9 +3031,9 @@ function projReportBody(p, may, fk){
   return pillarBand(projCode(fk, p), p.name,
       '<span class="pill ' + (r.done >= r.total ? "good" : "attn") + '">' + r.done + ' / ' + r.total + '</span>') +
     '<h4 class="mini">' + DX_HEADING + '</h4>' +
-    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status",DX_PCT,"Note"], dxr) +
+    miniTable(["#","Deliverables &amp; outcomes","Type","Target","Status","%","Note"], dxr) +
     '<h4 class="mini">Milestones</h4>' +
-    miniTable(["#","Milestone","Due date","Status",MS_PCT,"Note"], mRows);
+    miniTable(["#","Milestone","Due date","Status","%","Note"], mRows);
 }
 
 function capReportBody(c){

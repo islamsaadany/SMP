@@ -360,7 +360,7 @@ function deckSlidesFn(fk){
         '<h2>' + esc(p.name) + '<span class="dwhich">Deliverables and outcomes</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th>' +
         '<th>Deliverables &amp; outcomes</th><th>Type</th><th class="num">Due date</th>' +
-        '<th class="num">Target</th><th class="num">Status</th><th class="num">' + DX_PCT + '</th>' +
+        '<th class="num">Target</th><th class="num">Status</th><th class="num">%</th>' +
         '<th>Note</th></tr></thead><tbody>' + dxRowsHtml + '</tbody></table></section>');
 
       var over = projOverruns(p).map(function(m){ return m.id; });
@@ -379,7 +379,7 @@ function deckSlidesFn(fk){
       S.push('<section class="dslide" data-split="' + esc(p.id) + 'M">' +
         '<h2>' + esc(p.name) + '<span class="dwhich">Milestones &middot; ' + mst.done + ' of ' + mst.total + ' completed</span></h2>' +
         '<table class="zebra withnote"><thead><tr><th class="idx">#</th><th>Milestone</th>' +
-        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">' + MS_PCT + '</th>' +
+        '<th>Owner</th><th class="num">Due date</th><th class="num">Status</th><th class="num">%</th>' +
         '<th>Note</th></tr></thead><tbody>' + mRows + '</tbody></table></section>');
     });
   });

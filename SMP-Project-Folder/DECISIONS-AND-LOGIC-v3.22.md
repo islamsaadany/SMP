@@ -13097,3 +13097,51 @@ beside a figure is the same fault wearing the other cell.
 **Deliberately not widened**: the unit's tactic table has the identical lock and
 is untouched, because it was not what was asked about. It is named here so it is
 a decision rather than an oversight.
+
+### 101.9 The score column says what it holds, not what it is measured in
+
+Islam: *"for the deliverables and outcomes % column name it Performance and for
+the % column in the milestones name it Progress."*
+
+**`%` is a unit, not a name.** It says what the cell is measured in and nothing
+about what it measures — on the one column somebody runs their eye down. §101
+made both headings `%` in the same move that put the two kinds of row into one
+table; that was right for the row shape and wrong for the heading, and it is the
+third word this column has worn (`Reads` → `Performance` in §99.8, `%` in §101,
+and now back to two words, one per table).
+
+**Two tables, two numbers, two words.** They are not the same figure wearing one
+heading:
+
+* **Performance** — a deliverable or an outcome answers *how well*. The word is
+  already the product's for exactly this number: the card above the table says
+  *Project performance*, and the group's projects table has said *Performance*
+  since it existed. §99.8 settled it once, against my own recommendation of
+  *Score*, and §101 lost it by accident rather than by argument.
+* **Progress** — a milestone answers *how far*. §99.8 recorded *Progress was
+  never a candidate: the milestone table below uses it for a STATUS* — that was
+  true when a milestone's only column was `Status`, and it stopped being true
+  when the milestone table gained a per-cent of its own. **The twin (§87) is
+  gone, so the objection goes with it**: the two columns now read *Status* and
+  *Progress* and mean different things in plain English.
+
+`DX_PCT` and `MS_PCT` are declared once, beside `DX_HEADING`, because the
+Performance pane, the Reporting pane and the review deck are **three surfaces
+onto the same column** and the third is the one that gets left behind (§59).
+
+**The check asks for the two names, not for either.** Accepting *Performance or
+Progress* anywhere would go green on a build that had put the same word on both
+tables; it asserts each table's own, and that neither is left as the bare unit.
+
+**Measured, not assumed:** *Performance* is eight characters where `%` was one,
+on the widest table in the product. Swept at 1920 / 1500 / 1280 / 1000 (§27.1):
+no header wraps, no table scrolls sideways, no page does, and the deck's seven
+project tables measured in **present mode** — the only place a slide has a
+width at all (§69) — overflow neither across nor down.
+
+**Flagged, not changed:** the review deck still carries a **Due date** column on
+its deliverables-and-outcomes table, which the three panes lost in §101.8. The
+ask named the tables and the upload templates; the deck was not mentioned, and a
+column present on a projector and absent in the product is exactly the drift
+this file keeps recording. It is Islam's call, so it is written down rather than
+quietly aligned.

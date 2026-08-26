@@ -1030,6 +1030,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   label off the page and compares the two halves to each other (§53.5) —
   *a check written against the problem survives somebody changing their mind
   about the wording.*
+  **NOT DUE IS A LABEL, NOT A LOCK (§101.8):** the comment over the reporting
+  pane said exactly that from the day it was written and the code under it did
+  the opposite — `if (notDue)` **replaced** the picker with the words *Not
+  asked*, so reporting early (asked for outright: *"they can report on it
+  exceptional"*) was the one act the pane refused. **A comment can describe an
+  intention the code never carried out, and nothing in a build compares the
+  two.** The same gate on Performance printed a dash against a row that HAD
+  been delivered early while its 100% went on counting toward the score
+  (`projDeliverySide()` averages every deliverable, due or not) — *a figure
+  that counts and is not shown is a screen arguing with its own score.* The
+  gate moves from **"is this due"** to **"has this been answered"**;
+  `notDueCell()` and `reportedAny()` are the one pair the two panes and the
+  two tables ask, because four copies of a predicate drift. **THE FIRST CHECK
+  PASSED ON A REVERTED BUILD** — FIN01's five milestones are all due, so three
+  of the four paths went unmeasured, and §94.2 from the inverse side explains
+  why every OTHER assertion stayed green: they ask whether a cell is
+  *answered*, and a row replaced wholesale by a word answers every cell. It
+  MAKES the four cases now, and each of the three reversions was put back and
+  watched to fail before the green run was believed — the third needing its
+  own assertion, that **Status and % must agree about whether a row was
+  answered**. Deliberately not widened: the unit's tactic table has the
+  identical lock and is untouched.
+  **THE SCORE COLUMN SAYS WHAT IT HOLDS, NOT WHAT IT IS MEASURED IN (§101.9):**
+  `%` is a unit, not a name — it says what the cell is measured in and nothing
+  about what it measures, on the one column somebody runs their eye down. It is
+  **Performance** on the deliverables and outcomes (*how well*, the word the
+  card above the table and the group's projects table already use) and
+  **Progress** on the milestones (*how far*). **§99.8's objection to Progress
+  expired**: it read *the milestone table below uses it for a STATUS*, which
+  was true when that table's only column was `Status` and stopped being true
+  the moment the milestones gained a per-cent of their own — the §87 twin is
+  gone, so the reason goes with it. `DX_PCT` / `MS_PCT` are declared once
+  beside `DX_HEADING`, because the two panes and the deck are **three surfaces
+  onto one column** and the third is the one left behind (§59). **The check
+  asks for the two names and not for either**, or a build putting one word on
+  both tables would pass. Measured at 1920/1500/1280/1000 (§27.1) and in the
+  deck **in present mode**, the only place a slide has a width at all (§69): no
+  header wraps, nothing scrolls. **Flagged, not changed**: the deck still
+  carries a **Due date** column the three panes lost in §101.8 — the ask named
+  the tables and the templates, and a column on a projector that is absent in
+  the product is a decision, not a tidy-up.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

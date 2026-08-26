@@ -289,10 +289,17 @@ with sync_playwright() as p:
     }""")
     pg.wait_for_timeout(250)
 
+    # §101.9: the score column is called Performance on one table and Progress
+    # on the other, so it is found by EITHER name -- and both are asserted
+    # below, because a check that accepts either would not notice one of them
+    # reverting to the bare unit.
+    PCT = ("Performance", "Progress", "%")
+
     def cols(t):
         h = t["head"]
+        hit = [i for i, x in enumerate(h) if x in PCT]
         return (h.index("Status") if "Status" in h else -1,
-                h.index("%") if "%" in h else -1)
+                hit[-1] if hit else -1)
 
     for label, tab, sec, rep in (("Performance", "Performance", None, False),
                                  ("Reporting", "Performance", None, True)):
@@ -340,6 +347,19 @@ with sync_playwright() as p:
       const d = p.deliverables.find(x => x.status && !dueThisCycle(x.due));
       return { side: projDeliverySide(p), reads: statusReads(d) };
     }""")
+    # §101.9: the last column says WHAT it holds, not what it is measured in.
+    heads = pg.evaluate("""() => [...document.querySelectorAll(".pane table, .capbody table")]
+      .map(t => [...t.querySelectorAll("thead th")].map(e => e.textContent.trim()))
+      .filter(h => h.length)""")
+    dxh = [h for h in heads if "Deliverables & outcomes" in h]
+    msh = [h for h in heads if "Milestone" in h]
+    ck("the deliverables-and-outcomes score column is Performance",
+       dxh and all(h[-1] == "Performance" or h[-2] == "Performance" for h in dxh), dxh)
+    ck("the milestone score column is Progress",
+       msh and all(h[-1] == "Progress" or h[-2] == "Progress" for h in msh), msh)
+    ck("neither is left as the bare unit",
+       not [h for h in dxh + msh if "%" in h], dxh + msh)
+
     ck("a deliverable reported early still counts toward the score",
        early and early["reads"] is not None and early["side"] is not None, early)
 
@@ -352,12 +372,16 @@ with sync_playwright() as p:
       return { slides: box.querySelectorAll(".dslide").length,
                type: h.filter(x => x === "Type").length,
                due: h.filter(x => x === "Due date").length,
-               pct: h.filter(x => x === "%").length,
+               dxpct: h.filter(x => x === "Performance").length,
+               mspct: h.filter(x => x === "Progress").length,
+               bare: h.filter(x => x === "%").length,
                stale: h.filter(x => ["Reads","Finish","Measured as","Reported"].indexOf(x) > -1) };
     }""")
     ck("the deck still builds", deck["slides"] > 0, deck["slides"])
     ck("its project table carries the Type column", deck["type"] > 0, deck)
-    ck("...and Due date and %", deck["due"] > 0 and deck["pct"] > 0, deck)
+    ck("...and Due date", deck["due"] > 0, deck)
+    ck("...and the two score columns by name, neither left bare",
+       deck["dxpct"] > 0 and deck["mspct"] > 0 and deck["bare"] == 0, deck)
     ck("no slide carries a heading this version removed", not deck["stale"], deck["stale"])
 
     b.close()

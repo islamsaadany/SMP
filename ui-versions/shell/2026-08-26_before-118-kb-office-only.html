@@ -461,25 +461,8 @@
                                                                         render:renderImport },
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
-      /* Last in its group: it explains the rest, so it is not where you start.
-
-         ── AND IT IS THE OFFICE'S NOW (§118) ──────────────────────────
-         Islam: "remove knowledge base from the view of all except the smo team
-         and the super user." It REVERSES §30's "readable by everyone, always"
-         and §37's naming of that as one of the three things too fundamental to
-         be a matrix cell — recorded as a reversal rather than overwritten
-         (Principle II), because the argument that put it there was a good one
-         and the client's is better: this knowledge base explains how the
-         PLATFORM is run — cycles, access, imports, the reasoning behind every
-         decision — which is the office's job and nobody else's reading.
-
-         `when: inOffice()`, the shape `c_send` and `c_chat` already use (§97),
-         NOT a matrix cell: who may read the office's own working notes is not
-         a tick somebody could set on a bad afternoon. `c_kb` stays `area:
-         "always"` so the grant machinery is untouched; this gate sits in front
-         of it, and nothing else reads that key. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",
-        when: function(){ return inOffice(); },                          render:renderKB }
+      /* Last in its group: it explains the rest, so it is not where you start. */
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
     ]
   };
 

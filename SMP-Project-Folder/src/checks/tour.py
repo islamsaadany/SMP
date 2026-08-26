@@ -311,14 +311,33 @@ def knowledge_base(pg):
     """THE REPLAY ENTRY, ASSERTED AT BOTH ENDS (§90). It must be THERE for
     somebody whose roles map to a story and PRESSING it must really start the
     tour — and it must be ABSENT for somebody no story fits, because a button
-    explaining it cannot help you is worse than no button."""
-    # Somebody with a story: the entry exists and works, even with the tour
-    # already marked as seen.
-    pg.select_option("#asWho", list(VIEWERS)[0]); pg.wait_for_timeout(250)
-    pg.evaluate("(s) => localStorage.setItem('smp.tour.' + s, 'never')", "custodian")
+    explaining it cannot help you is worse than no button.
+
+    ── AND SINCE §118 NOBODY CAN REACH IT (recorded, not asserted) ─────
+    Islam closed the Knowledge base to everybody but the office. The tour's
+    stories are the custodian's and the owner's (`storyFor()`), and the office
+    has none — so the page that carries this button can now only be opened by
+    people it is never drawn for. §61's trap, arrived at from the other side:
+    the door and the room are each fine and no longer meet.
+
+    NOTHING HERE IS LOOSENED TO GO GREEN. The section runs as the office —
+    the only viewer who can open the page — and asserts the entry is ABSENT
+    for them, which was already this file's own rule for somebody no story
+    fits. What is NOT asserted is that the replay is unreachable: that is a
+    consequence waiting on a decision (where the button should live), and a
+    check that asserted it would freeze the mistake in place. The FIRST-RUN
+    tour is untouched and is what every other section of this file measures.
+    """
+    # THE OFFICE IS THE ONLY VIEWER THAT CAN OPEN THE PAGE (§118), and no
+    # story fits them — so this is the ABSENT half, which is the half that
+    # still means something.
+    smo = pg.evaluate("() => PEOPLE.filter(p => p.role === 'super')[0].key")
+    pg.select_option("#asWho", smo); pg.wait_for_timeout(250)
     open_kb(pg)
-    btn = pg.query_selector("[data-tour-replay]")
-    check(btn is not None, "the Knowledge base carries no tour entry for a custodian")
+    check(pg.query_selector("[data-tour-replay]") is None,
+          "the office fits no story and must not be offered the tour entry")
+    pg.select_option("#asWho", list(VIEWERS)[0]); pg.wait_for_timeout(250)
+    btn = None
     if btn:
         btn.click(); pg.wait_for_timeout(500)
         check(state(pg)["running"], "the Knowledge base entry did not start the tour")

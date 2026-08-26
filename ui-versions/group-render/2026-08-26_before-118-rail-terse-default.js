@@ -2475,20 +2475,8 @@ function railName(code, name){
    PREFERENCE, so it lives in localStorage beside the theme and the People
    page's columns (§25, §47.1) — putting it in the state graph would change
    the rail for everyone in the tenant. */
-/* ── COLLAPSED IS THE DEFAULT (§118) ──────────────────────────────
-   Islam: "make the default view for the pillar rail to be the collapsed one."
-   The rail's small line under each name carries counts and an owner — useful
-   once you are deep in a plan, noise when you are looking for which pillar to
-   open, and it is what makes a ten-pillar rail taller than the pane beside it.
-
-   READ THE OTHER WAY ROUND, LIKE §104'S TWO SETTINGS: absent now means TERSE,
-   so only an explicit "0" — somebody who pressed the control to bring the
-   detail back — turns it off. A stored "1" from before this change still
-   reads as terse, so nobody who had already collapsed it sees a change; and
-   the preference stays in localStorage, per screen, never the state graph
-   (§25, §47.1). */
 var RAIL_TERSE = (function(){
-  try { return localStorage.getItem("smp.rail.terse") !== "0"; } catch(e){ return true; }
+  try { return localStorage.getItem("smp.rail.terse") === "1"; } catch(e){ return false; }
 })();
 function railHead(label, n){
   return '<div class="rhead"><span class="rhl">' + label + ' <span>' + n + '</span></span>' +
@@ -2499,20 +2487,8 @@ function railHead(label, n){
     'stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>' +
     '</button></div>';
 }
-function railSub(html, alarm){
-  /* TERSE DROPS THE DETAIL, NEVER THE ALARM (§118). Collapsed is the default
-     now, and the routine half of this line — how many measures, how many
-     tactics, who owns it — is exactly what somebody scanning for a pillar does
-     not need. The other half is not detail: §106.2 put the count of rows
-     wanting attention HERE so the project holding them can be found without
-     opening each in turn (§93.4, the count belonging where the gap is closed),
-     and a default that hid it would have quietly undone that. So an `alarm`
-     survives terse and the rest does not; with both, terse shows the alarm
-     alone. Found by checks/project-tables.py going red on the day the default
-     flipped — the rail's line was carrying two different kinds of thing and
-     nothing had had to tell them apart before. */
-  var body = RAIL_TERSE ? (alarm || "") : [html, alarm].filter(Boolean).join(" &middot; ");
-  return body ? '<span class="rsub">' + body + '</span>' : "";
+function railSub(html){
+  return (RAIL_TERSE || !html) ? "" : '<span class="rsub">' + html + '</span>';
 }
 
 /* `opts` carries the two things the PLAN page's rail needs and the
@@ -2522,9 +2498,6 @@ function railSub(html, alarm){
    to author a plan from the page that reports against it. */
 function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
   opts = opts || {};
-  /* The half of the small line that survives a collapsed rail (§118). Optional
-     and last, so every existing caller is untouched. */
-  var alarmOf = opts.alarmOf;
   var lastGroup = null;
   var rows = list.map(function(it, i){
     var g = groupOf ? groupOf(it) : null, head = "";
@@ -2540,7 +2513,7 @@ function railFor(list, sel, numOf, subOf, groupOf, footNote, codeOf, opts){
          names out as though something were there — the unit's Plan rail, which
          has never had a number, does not render one at all. */
       (numOf ? '<span class="rnum">' + numOf(it) + '</span>' : '') +
-        railSub(subOf ? subOf(it) : "", alarmOf ? alarmOf(it) : "") +
+        railSub(subOf ? subOf(it) : "") +
       '</button>';
   }).join("");
   /* THE CONTAINER SAYS WHAT IT HOLDS (§63.5): `data-item=".ritem"`, because
@@ -3139,18 +3112,17 @@ function renderFnProjects(fnKey){
        date AND the end date AND which kind of timeline, over three. */
     var rail = railFor(c.projects, sel, null,
       function(p){
+        var n = planAttention(p);
         return plural(p.deliverables.length, "deliverable") + ' &middot; ' +
           plural(p.outcomes.length, "outcome") + ' &middot; ' +
-          plural(p.milestones.length, "milestone"); },
+          plural(p.milestones.length, "milestone") +
+          /* Appended to the SUB line, never passed as `numOf`: that argument
+             puts a `.rnum` on EVERY row and an empty one still takes its
+             column in the grid (the note on railFor says so). */
+          (n ? ' &middot; <span class="missing">' + plural(n, "row") + ' to check</span>' : ''); },
       null, null,
       function(p){ return projCode(fk, p); },
-      { arranging: on, add: ed, capId: c.id,
-        /* Appended to the SUB line, never passed as `numOf`: that argument
-           puts a `.rnum` on EVERY row and an empty one still takes its column
-           in the grid (the note on railFor says so). */
-        alarmOf: function(p){
-          var n = planAttention(p);
-          return n ? '<span class="missing">' + plural(n, "row") + ' to check</span>' : ''; } });
+      { arranging: on, add: ed, capId: c.id });
     /* splitOrPane() drops the rail below railWorthIt()'s threshold, which is
        right for reading and wrong while a plan is being authored: with one
        project there would be nowhere to press Add. */

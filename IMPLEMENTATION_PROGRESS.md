@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.40 on `main`
+**Latest version:** v3.41 on `main`
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -70,6 +70,23 @@ Nothing proceeds past this line without an answer.
   the attention chips become one queue, the quick filters go. See §116 in the
   decisions document; its checks (people-dialog and the reworked register
   checks) ride in this repo and are green on the merged build.
+
+### v3.41 — the deck names its gaps, and the base becomes the office's (§118)
+
+- **The plan download says `Missing` in bold red** wherever the plan owes
+  something, and draws the Foundation, SWOT and capability slides even when
+  they are empty — a skipped slide says "nothing is missing here".
+- **The tactics table becomes four quarter columns** (Q1–Q4) with a mark in
+  the ones in action, the shape the plan workbook already has.
+- **The pillar rail opens collapsed**; only an explicit press turns it off.
+  The rows-to-check alarm survives the collapse (§106.2 is preserved).
+- **The knowledge base is the office's** — Super user and SMO team — reversing
+  §30/§37. Cost recorded: the tour's replay button is no longer reachable by
+  the people it fits; the first-run tour is untouched, and where that button
+  should live is an open question.
+- **Not reproducible and asked instead**: "for the projects there is no arrange
+  or download" — measured on live production, the office gets pen + download
+  and a function head gets arrange + download.
 
 ### v3.40 — the Strategy | Reporting split, and the plan as slides (§117, spec 019)
 

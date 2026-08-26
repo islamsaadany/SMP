@@ -1833,7 +1833,45 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
+*Last Updated: 2026-08-26 &mdash; **v3.38: the pen's last read-only fields,
+a repeating project, and the remove button's seat** (&sect;114, &sect;115,
+&sect;114.4). **THE THREE FIELDS WERE READ-ONLY ON PURPOSE, AND THE PURPOSE
+EXPIRED**: &sect;31 closed a measure's direction and compile rule and a
+tactic's quarters because *"they change what a figure MEANS"* &mdash; the
+right worry while the pen could fall to the person being measured &mdash; and
+&sect;94 closed the pen to the office, so what was left was the office unable
+to correct exactly the fields that most need correcting after an upload.
+&sect;94.15's shape: a rule whose stated reason has expired does not get to
+stand on habit. The vocabulary is the Temple's own `selectOr` lists, a stored
+value outside the list is PREPENDED rather than displayed wrong (&sect;96.2
+from the display side), and the satisfying half is that **&sect;42 classified
+a quarter change as PLAN on the server four versions before the screen could
+make one**. **A PROJECT CAN REPEAT** (&sect;115): the CX mystery shopping runs
+H1 and again H2, and Islam refused the duplicate rows &mdash; one project,
+marked *Repeats: Each cycle* in its front matter, whose figures are re-asked
+and whose dates SHIFT by the new cycle's span when a cycle opens. **The
+machinery mostly existed and pointed the other way**: `clearAllNotes` was
+already wiping EVERY project's figures on each new cycle &mdash; a delivered
+project erased the day H2 opens, unseen because the live tenant is still in
+cycle 1 &mdash; so &sect;115 made the clear a decision per project: marked
+ones re-ask and shift, unmarked ones KEEP their figures. `shiftWhen()` is
+`monthsOf`'s mirror &mdash; one reader, one shifter, and an unreadable date is
+left exactly as it arrived &mdash; and `figuresSnapshot` was archiving a
+field deleted by migration 024 (`actual`) while missing the milestone `pct`
+that replaced it: **a snapshot of stale fields is an archive of nothing, and
+nothing complains**. The check turns the cycle through the REAL close and
+open controls, dialogs and all, and failed three ways on the pre-&sect;115
+build before its green was believed (&sect;94.5). **AND THE &times; STOPPED
+TAKING A FULL LINE** (&sect;114.4): `.fld` is `width:100%`, so the remove
+button wrapped and every editable row spent 20px on a 14px glyph. Two
+placements drawn in the real platform; Islam picked **beside the field**, and
+inside-the-field lost on SEMANTICS, not pixels &mdash; an &times; inside an
+input is the clear-the-text idiom, and this one removes the ROW. Keyed on the
+pair (`td:has(> .fld + .xbtn)`), so every table using the pattern is seated
+and nothing else is touched; the check presses the point
+(`elementFromPoint` at the button's centre, &sect;93.4).*
+
+*Earlier: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
 &sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me
 and I replied and the chat disappeared from all places."* **NOTHING WAS

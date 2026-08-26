@@ -6,7 +6,8 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.37 on `main` · **v3.38 in progress on the branch**
+**Latest version:** v3.38 on `main` (served, checked live) · **§114.4 — the
+remove button's seat — on the branch, awaiting Islam's word to merge**
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -109,7 +110,7 @@ knowledge-base.py ALL CLEAR · test-authorize 190/0 · qa.py clean.
 **Waiting on:** `GEMINI_API_KEY` in Vercel. Everything is built and tested
 against a stub; the live call is the only unexercised path.
 
-### v3.35 — the pen's last read-only fields, and a repeating project (§114–§115)
+### v3.38 — the pen's last read-only fields, and a repeating project (§114–§115)
 
 - **§114:** a measure's direction and compile, and a tactic's quarters, are
   editable behind the plan pen — §31's read-only reason expired with §94. The
@@ -123,9 +124,17 @@ against a stub; the live call is the only unexercised path.
   not yet stepped on. The archive also stops storing a deliverable's deleted
   `actual` and starts keeping the milestone's `pct` (stale since migration 024).
 
+- **§114.4: the remove button's seat.** The row-removing × wrapped under its
+  field (`.fld` is `width:100%`) and cost every editable row 20px. Islam picked
+  **beside the field** over inside it — inside an input, an × means clear the
+  text, not remove the row. Keyed on the pair (`td:has(> .fld + .xbtn)`), so
+  every table using the pattern is seated at once.
+
 **Verified:** `plan-fields.py` and `repeat-project.py` all passed, the second
 failing three ways on the pre-§115 build before its green was believed ·
-test-authorize **195** · full battery + qa.py clean.
+test-authorize **195** · full battery + qa.py clean · §114.4: pairs share one
+line and the × is hittable at its centre, proved able to fail (width rule
+removed → 1 FAILED).
 
 ### v3.34 — a project's front matter (§109)
 

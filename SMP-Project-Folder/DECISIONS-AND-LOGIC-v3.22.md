@@ -15295,6 +15295,42 @@ along finally exists.
 editor wired to nothing looks identical), and asserts the closed end too —
 pen off, none of the three is drawn (§94.2).
 
+### 114.4 The remove button's seat
+
+Islam, with a screenshot of an open plan row: *"for the x that delete
+something can you think of a better placement for it rather than taking a
+full line?"*
+
+The × that removes a row rides in the name cell — a column of its own would
+cost every row its width — but `.fld` is `width:100%`, so the button wrapped
+under the field and **every editable row spent 20px of height (56 → 76px) on
+a 14px glyph**. Two placements were drawn **in the real platform** (§41.9,
+§101's method — the built file driven to a unit's open plan pane with each
+candidate injected live, both themes) and published as a mockup:
+**A**, the field yields 30px and the × sits beside it on the same line; **B**,
+the × drawn inside the field's right edge, the way a search box carries its
+clear button. A was recommended and **Islam picked A**.
+
+**B loses on semantics, not on pixels**: an × inside an input is the
+clear-the-text idiom — press it and you expect an empty field, not a missing
+row. The one glyph would have carried two meanings depending on which box it
+sat in, which is §87's twins drawn in chrome. So the × sits **outside the
+border**, where what it acts on is the row it shares a line with.
+
+**Keyed on the PAIR, never on the table**: `td:has(> .fld + .xbtn)` reaches
+every cell where a field and a remove button actually sit together — the plan
+pen, the project panes, wherever the pattern lands next — and touches nothing
+else, so a field without an × keeps its full width and a table added later is
+seated the day it is added (§94's gate-on-the-control, in CSS).
+
+`checks/plan-fields.py` asserts the problem, not the layout (§94.8): every
+field-and-× pair shares one line (centre difference under 8px, 9 cells on the
+demo plan), and **every × is hittable at its centre** —
+`document.elementFromPoint` must return the button, §93.4's press-the-point,
+because a button on the right line but under a neighbour is the same fault
+with a nicer face. Proved able to fail before it was trusted (§94.5): with
+the width rule removed, 1 FAILED; restored, all passed.
+
 ## 115 · A repeating project (v3.38)
 
 Islam: *"the CX mystery shopping happens on H1 and is repeated for H2 — same

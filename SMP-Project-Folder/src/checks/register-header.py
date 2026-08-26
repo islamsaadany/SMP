@@ -1,4 +1,4 @@
-"""ONE LINE ABOVE THE TABLE, AND A DIALOG THAT FITS THE WINDOW (§117).
+"""ONE LINE ABOVE THE TABLE, AND A DIALOG THAT FITS THE WINDOW (§118).
 
 Islam: "the top part can include the password, the SMO badge remove it and
 remove the 77 people active text and the password can come to the same line and
@@ -163,7 +163,7 @@ with sync_playwright() as p:
 
     # ── 2. IT IS ONE ROW ─────────────────────────────────────────────
     print("\n2. one row, and the table under it")
-    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§117). `.phead2` wraps
+    # THE ASK WAS ABOUT THE HEADER, NOT ABOUT `.hright` (§118). `.phead2` wraps
     # too, so when the controls no longer fit beside the title the whole block
     # drops them to a line of their own — and `.hright` then reports ONE row
     # while the header is two. Measuring the inner box alone passed on the

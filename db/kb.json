@@ -52,8 +52,12 @@
      "p": "They get the <b>most generous</b> answer of them — but each role answers only about what it is attached to. Owning Mobile and sitting on Finance gives the owner’s answer for Mobile and the other-unit answer for Retail, from the same two roles, without either being asked about the wrong thing."
     },
     {
-     "h": "Three things the table does not decide",
-     "p": "The <b>knowledge base</b> is readable by everyone, always. A <b>plan</b> is corrected by the SMO alone, however much access the unit’s people hold — a plan you are measured against is not yours to rewrite. And <b>focus measures</b>, what carries reward, are marked by the group CEO and the SMO. These are rules; they do not change when the table does."
+     "h": "The own columns answer in two halves",
+     "p": "Strategy is the <b>words as agreed</b> — Foundation, the SWOT, the Plan, and on a function a capability’s definition and projects. Reporting is the <b>figures entered against them</b>, drafts and submitting. Strategy edit ships with the office alone, because a plan you are measured against is not yours to rewrite — and opening it to a role is a deliberate act made on this table, not a side effect of letting the same people report (§117)."
+    },
+    {
+     "h": "Two things the table does not decide",
+     "p": "The <b>knowledge base</b> is readable by everyone, always. And <b>focus measures</b>, what carries reward, are marked by the group CEO and the SMO. These are rules; they do not change when the table does."
     },
     {
      "h": "Companies decide reach",
@@ -440,8 +444,12 @@
      "p": "The head and the custodian of Mobile own Mobile. A company CEO owns every unit in their company. The SMO and the group CEO own all of it. <b>Nobody types that in anywhere</b> &mdash; it is read from who is attached to what on <b>Business units</b>, <b>Supporting functions</b> and <b>People</b>, which is why those pages and the access table cannot disagree. Two things a company decides for itself apply on top and can only ever narrow it: whether its CEO sees <b>the group</b>, and whether they see <b>the other companies</b>. Both are on the Companies page."
     },
     {
-     "h": "Three things are rules, not settings, so they are not in the table",
-     "p": "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody can open is not an explanation. A <b>plan</b> is corrected by the SMO alone, however much access the unit&rsquo;s own people hold, because a plan you are measured against is not yours to rewrite. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked by the group CEO and the SMO. Each of these used to be a cell in the matrix."
+     "h": "The own columns answer in two halves",
+     "p": "<b>Strategy</b> is the words as agreed &mdash; Foundation, the SWOT, the Plan, and on a function a capability&rsquo;s definition and projects. <b>Reporting</b> is the figures entered against them, drafts and submitting. Strategy edit ships with the office alone, because a plan you are measured against is not yours to rewrite &mdash; and opening it to a role is a deliberate act made on the table, not a side effect of letting the same people report."
+    },
+    {
+     "h": "Two things are rules, not settings, so they are not in the table",
+     "p": "The <b>knowledge base</b> is readable by everyone, always &mdash; an explanation nobody can open is not an explanation. And <b>focus measures</b> &mdash; what carries reward &mdash; are marked by the group CEO and the SMO. Each of these used to be a cell in the matrix."
     },
     {
      "h": "Page level only",

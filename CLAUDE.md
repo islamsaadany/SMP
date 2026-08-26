@@ -473,6 +473,20 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
+- **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
+  partially reversing §94 at Islam's direction):** each own column on Roles &
+  access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
+  `a_fn_own_strat`, NEW keys) and **Reporting** (the OLD keys, which is the
+  back-compat: a stored grant governed reporting, so it keeps meaning that and
+  nobody's rights move; the strategy half falls back to defaults, §30.2).
+  Strategy edit defaults to the office; **the SMO can open it to a role on the
+  table** — `mayAuthorPage()` asks the GRANT now, with one §94 remnant as a
+  rule: a non-office role never authors a unit or function it does not hold.
+  **`mayArrange()` rides the REPORTING half** or the split would have silently
+  taken §101's arrows back. **The plan downloads as slides** (`mayDownloadPlan`
+  — office + owner/custodian/fnhead): `src/pptx.js` builds a real editable
+  .pptx from `zipStore()`, plan content only, SWOT included, no reported
+  figure — asserted as absences in `checks/strategy-split.py`.
 - **THE STRATEGY TAB IS AUTHORED BY THE OFFICE, AND ONLY THE PLAN EVER WAS
   (§94):** Islam, asked whether he meant the plan or the tab — *"I tested and
   the custodian found the pens."* §31's argument (a plan correctable by the
@@ -1555,7 +1569,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   working through it. **Units with no custodian cannot join it** — not a person,
   so there would be nobody to open; it keeps its own line (§93.4).
 - **ONE LINE ABOVE THE TABLE, AND A DIALOG THAT WAS WASTEFUL RATHER THAN DENSE
-  (§117):** the badge said who you are (the chrome says it on every page) and
+  (§118):** the badge said who you are (the chrome says it on every page) and
   the count said how big the register is (**the table under it is that** — §116
   had already dropped the second copy of that count and kept this one, and
   *keeping one copy of something nobody asked for is still keeping it*). The
@@ -1578,7 +1592,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   shares, and comes off in `closeModal()` (§116.6's one door). Steps down are
   **3 → 2 → 1**, never 3 → 1, or the scroll comes back on a narrow laptop.
 - **THE CHECK MEASURED THE INNER BOX AND PASSED ON THE BUILD IT WAS WRITTEN TO
-  REJECT (§117.4):** it asked whether **`.hright`** was one row — green on the
+  REJECT (§118.4):** it asked whether **`.hright`** was one row — green on the
   previous build at every width, because **`.phead2` wraps too**, so when the
   controls stop fitting beside the title the whole block drops them onto a line
   of their own and the inner box honestly reports one row while the header is
@@ -1883,9 +1897,12 @@ python3 qa.py        # walks every page as every viewer, reports console errors 
 python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
                                 # Add, and neat with every column on (§116, over HTTP)
 python3 checks/register-header.py # one line above the table and a dialog that fits the
-                                # window — the HEADER's height, not .hright's (§117)
+                                # window — the HEADER's height, not .hright's (§118)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
+python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
+                                # open AND closed, both ends each time, and the .pptx
+                                # download unzipped and read — figures proved absent (§117)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
@@ -1934,8 +1951,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.40: one line above the table, and a
-dialog that fits the window** (&sect;117). Two asks minutes apart, both from
+*Last Updated: 2026-08-26 &mdash; **v3.41: one line above the table, and a
+dialog that fits the window** (&sect;118). Two asks minutes apart, both from
 using the register on his own laptop, and both turned out to be **waste rather
 than density**. The header: the badge said who you are, which the chrome says on
 every page, and the count said how big the register is, which the table under it
@@ -1959,6 +1976,34 @@ measured `.hright`, and `.phead2` wraps too &mdash; so when the controls stop
 fitting beside the title the whole block drops them to a line of their own, and
 the inner box honestly reports ONE row while the header is two. Assert the box
 somebody can SEE. With that corrected the previous build fails 12 times.*
+
+*Earlier: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
+the plan as slides (&sect;117, spec 019)**. Islam: *"the strategy should be
+locked from the non SMO but the reporting should be editable by who we grant
+the access so they can submit — we need this split in the roles and access
+table"*, and a plan download in slides for the custodian and the BU owner.
+Settled from a mockup of the REAL platform and confirmed whole. The decision
+that shapes it: I recommended capping the Strategy half at view for non-office
+roles and **Islam chose that the SMO can OPEN it** &mdash; so &sect;94's lock
+is the shipped default now, not a floor, and opening a cell is a deliberate,
+logged act. **THE NEW KEY IS THE STRATEGY HALF**, which is the whole
+back-compat argument: a stored grant on the old key governed what a person
+could actually DO (reporting, because &sect;94 refused authoring by rule), so
+the old key keeps meaning Reporting and nobody's rights move on upgrade; no
+migration. **&sect;101 NEEDED A DECISION TO SURVIVE**: the plan page's grant
+moved to a half a holder reads at view, so `mayArrange()` now rides the
+holder's WORKING grant &mdash; the same stored value it tested before the
+split &mdash; or the arrows would have gone back silently. **THE .PPTX IS THE
+XLSX'S SIBLING**: a zip of XML through the same `zipStore()`, offline, no
+dependency; plan content only with the SWOT, and the reported figures are
+asserted as ABSENCES, because a builder that quietly copied an actuals column
+would pass every presence assertion (&sect;94.2 from the negative side).
+**AND THE FALSE ALARM WAS THE MEASURING TOOL**: LibreOffice refused the file
+&mdash; and refused a vanilla python-pptx file identically, because this image
+ships no Impress component at all (&sect;68.10's class). With Impress
+installed it renders cleanly. `checks/strategy-split.py` was proved able to
+fail three ways before its green was believed; `test-authorize.js` &sect;15
+fails on the pre-&sect;117 rules by construction.*
 
 *Earlier: 2026-08-26 &mdash; **v3.39: the register stops being a form**
 (&sect;116). Six decisions from Islam after two rounds of mockups, and **one

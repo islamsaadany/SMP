@@ -222,6 +222,35 @@ keeping rather than a shortfall: *"you can't, and here is who can"* is §31 and
 keep one clause of *why* — the voice Islam settled on, concise everywhere and
 one sentence longer where the answer is no.
 
+### 5.2b A recipe has an audience, and some have two answers
+
+Islam, on *"how do I add a project to a capability?"*: *"That's an SMO ability
+only, right? We need to tag the questions — one question could have two tracks
+based on who is asking."*
+
+Right, and the tagging is the smaller half. **Some questions have two true
+answers**, and giving the wrong one is worse than declining:
+
+| Asked by | *"How do I add a project to a capability?"* |
+|---|---|
+| The office | Open the capability's Projects page and use the pen. |
+| A function head | The office adds them — say which capability and what it is called. |
+
+So a recipe is `{ id, question, audience, answer }`, and a question with two
+tracks is **two entries sharing a question**, tagged `office` and `everyone`.
+The assistant is told the asker's roles and picks; where only one track exists,
+it is the answer for everybody.
+
+**THIS DOES NOT WEAKEN §3, AND IT IS WORTH SAYING WHY.** Both tracks are things
+anybody may read — the office's track is not a secret, it is merely useless to
+somebody who cannot do it. Nothing here reads the state graph and nothing is
+withheld: the tag chooses between two public answers on **relevance**, never on
+permission. The moment a tag is used to hide something, it has become
+authorisation by prose and §3 applies.
+
+**Roles are read on the server**, from the session, never sent by the browser —
+the same rule the short sign-in list already follows (§93.13).
+
 ### 5.3 Generated, never a second copy
 
 `scripts/extract-kb.js` → `db/kb.json`, read by `api/chat.js` — the same shape

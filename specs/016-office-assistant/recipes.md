@@ -46,7 +46,8 @@ If a number is wrong, say so here. The office can still correct it.
 
 Some numbers belong to a team rather than to the unit that reports them —
 revenue exists in Finance before anyone asks you for it. Those are grouped into
-a named set with an owner, and the owner enters them.
+a named **figure set**, and the set's **figure owner** enters them wherever they
+appear.
 
 It still counts towards your unit's total, so you can chase it. The page names
 who owes it.
@@ -78,20 +79,13 @@ when you submit.
 If you cannot report, you never see it — the platform does not nag somebody who
 has no control that would clear it.
 
-### 9 · Who can submit for my unit?
+### 9 · Who reports my unit's figures?
 
-Whoever holds the unit — its head, its custodian, or the office. Submitting
-speaks for the whole unit, so a contributor who reports their own lines cannot
-do it.
+Your unit's **strategy custodian** or its **head**. Submitting speaks for the
+whole unit, so it stays with the people who hold it.
 
-### 10 · I can only see some of the lines on the reporting form. Why?
-
-You are named on those and not the others. A contributor reports what the plan
-names them on, and nothing else.
-
-If you should have more, ask here.
-
-## My plan
+Two exceptions: a figure that belongs to a **figure set** is entered by that
+set's owner wherever it appears, and the office can report on anyone's behalf.
 
 ### 11 · There is a mistake in my plan — how do I fix it?
 
@@ -106,13 +100,6 @@ only the measures.
 The office adds them, on your unit's **Plan** page. Ask here and say where it
 belongs and what it should be called.
 
-### 13 · Why can't I reorder my pillars any more?
-
-Because the order is part of what was agreed, so changing it is authoring the
-plan — and plans are the office's. It used to be open and it is not any more.
-
-Ask here and the office will move them.
-
 ### 14 · Who can edit my unit's plan, and why not me?
 
 The Strategy Office. A plan is the agreement you are measured against, so it
@@ -123,9 +110,10 @@ yours.
 
 ### 15 · How does a plan arrive in the first place?
 
-By upload. The office downloads the template, the unit fills it in, and
-uploading it **authors** the plan — the codes are minted on arrival, which is
-why the template carries none.
+It is authored once, by the office, and everything after that is reporting
+against it.
+
+If yours is missing or wrong, ask here.
 
 ### 16 · What happens to my old plan when a new one is uploaded?
 
@@ -134,10 +122,10 @@ deletion.
 
 ### 17 · What is a collaborator on a tactic?
 
-Somebody who supports the tactic alongside the person accountable for it. Being
-named as one is what lets a contributor report that line.
+Somebody who supports the tactic alongside the person accountable for it. It
+records who is involved — it does not by itself let them report the line.
 
-The office sets them, because being named there decides who may report.
+The office sets them.
 
 ### 18 · Can I change my targets during the year?
 
@@ -217,11 +205,6 @@ Both are evidence, and the score reads them as two halves.
 Half from its deliverables and half from its outcomes. Where a project has only
 one of the two, that side carries the whole score.
 
-### 29 · Due date or measure date — what is the difference?
-
-A **due date** is when a milestone or deliverable should be done. A **measure
-date** is when an outcome gets read.
-
 ### 30 · Why has my project no outcomes section?
 
 Because it has none yet. An empty half is not drawn — a project with no outcomes
@@ -231,17 +214,13 @@ Open the pen and both halves appear, so you can add the first one.
 
 ## Getting in, and getting at things
 
-### 31 · How do I sign in — my email or my name?
+### 32 · How do I change my password?
 
-Your email, as it appears on the people register. The short sign-in name still
-works if you know it.
+Ask the office here and they issue a temporary one; you choose your own the
+moment you use it.
 
-If your address is not on the register, ask here.
-
-### 32 · I have forgotten my password.
-
-Ask the office here, or by any other route you have. They issue a temporary one,
-and you choose your own the moment you use it.
+*(If you have FORGOTTEN it you cannot reach this chat at all — you are asking
+from inside the platform. Ask the office by any other route you have.)*
 
 ### 33 · Why can't I open another business unit?
 

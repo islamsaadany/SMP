@@ -1353,6 +1353,15 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Memory is `localStorage` (*never*) and `sessionStorage` (*skip for now*, so
   a new sign-in is a new session), and **a throwing store reads as
   already-marked** — a tour nobody can dismiss is worse than no tour.
+  **AND IT TAKES YOU TO THE MAIN PAGE FIRST (§107.14):** replaying from the
+  Knowledge base drew the welcome card OVER the Knowledge base, and worse,
+  `setMode("demo")` ran AFTER `own` was resolved — so a key from the CLIENT'S
+  tenant was looked up in the DEMO tenant's navigation, which matches only
+  because this deployment IS the worked example. **Switch the mode, THEN read
+  who and where, THEN check the place is reachable** (`if (!destBtn(own)) own
+  = firstDest()`), and the welcome step carries a destination. The check had
+  asked whether the tour was RUNNING and stopped there — **"it started" is not
+  "it went anywhere"** (§94.2).
   `src/checks/tour.py` walks **every story as every role** and was **proved
   able to fail first** (§94.5) — the first deliberate break set a value to
   what it already was and caught nothing, which is §94.5's own example.

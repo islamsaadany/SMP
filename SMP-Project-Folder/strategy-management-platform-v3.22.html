@@ -28728,7 +28728,11 @@ var TOUR = (function(){
     custodian: {
       role: "Strategy custodian",
       steps: [
-        { kind:"welcome",
+        /* THE WELCOME CARD CARRIES A DESTINATION, and that is the point:
+           replaying from the Knowledge base used to draw it over the
+           Knowledge base. The platform is moved to the person's own place
+           before the first word is read. */
+        { kind:"welcome", dest:"$own", tab:"strategy", sec:"plan",
           title:"Welcome to the Strategy Management Platform",
           body:"This two-minute tour shows you around on <b>demo data</b> — a full worked " +
                "example, labelled the whole time. Nothing in it is your own data, and nothing " +
@@ -28837,7 +28841,11 @@ var TOUR = (function(){
     owner: {
       role: "Business unit / function owner",
       steps: [
-        { kind:"welcome",
+        /* THE WELCOME CARD CARRIES A DESTINATION, and that is the point:
+           replaying from the Knowledge base used to draw it over the
+           Knowledge base. The platform is moved to the person's own place
+           before the first word is read. */
+        { kind:"welcome", dest:"$own", tab:"strategy", sec:"plan",
           title:"Welcome to the Strategy Management Platform",
           body:"This two-minute tour shows you around on <b>demo data</b> — a full worked " +
                "example, labelled the whole time. Nothing in it is your own data, and nothing " +
@@ -29193,25 +29201,48 @@ var TOUR = (function(){
     mount();
     if (!dock) return;
     story = key;
-    /* `viewer()` is the platform's own answer to "who is this", and it
-       RESOLVES rather than returning a maybe — including after a hydration or
-       a dataset swap moved the register under us, which this function is
-       about to do. */
-    own = ownPlace(viewer()) || firstDest();
-    steps = resolve(STORIES[key].steps, own);
-    /* Remembered BEFORE the switch, or the way back is lost. Read through
-       `demoMode()`, which the platform already exports — null means live, so
-       there is no new export to keep in step with `mode`.
 
-       FROM file:// THERE IS NOTHING TO SWITCH: `DEMO` is only captured when a
-       server answered, and the baked globals ARE the worked example, so the
-       platform is already showing exactly what the tour wants. setMode()
-       no-ops there by its own guard; prevMode stays null and end() puts
-       nothing back, which is correct rather than merely harmless. */
+    /* ── THE ORDER OF THESE FOUR LINES IS THE WHOLE FIX ───────────────
+       Islam, replaying from the Knowledge base: "make it take me by
+       default to the main page rather than in the knowledge base so the
+       tour can actually happen."
+
+       TWO FAULTS, ONE ROOT — the tour used to decide WHERE it was touring
+       before the world it would tour had arrived.
+
+       1. The mode was swapped AFTER `own` was resolved. `setMode("demo")`
+          replaces PEOPLE, UNITS and the whole register, so `own` was a key
+          from the CLIENT'S OWN tenant being looked up in the DEMO tenant's
+          navigation. On this deployment the two happen to match, because
+          the client IS the worked example — on any real client they share
+          no keys at all, `destBtn()` would find nothing, and the tour would
+          light nothing while cheerfully reporting nine steps. Invisible to
+          a file:// check, where there is no live dataset to swap away from
+          (§94.11's trap, exactly).
+
+       2. Nothing moved the platform off the page you replayed FROM. The
+          welcome card was drawn over Setup › Knowledge base, and only the
+          first Next left it — so the tour opened by explaining "this row is
+          the business" over a page that has no business row in view.
+
+       So: switch first, then read who and where from the world that is now
+       on screen, then CHECK that place is actually reachable, and only then
+       walk — the welcome step carries the same destination as step one, so
+       the platform is on the main page before the first card is read. */
     prevMode = (window.SYNC && SYNC.demoMode) ? (SYNC.demoMode() || "live") : null;
     if (prevMode && prevMode !== "demo" && SYNC.setMode) {
       try { SYNC.setMode("demo"); } catch(e){}
     }
+    /* `viewer()` is the platform's own answer to "who is this", and it
+       RESOLVES rather than returning a maybe — including after the swap
+       above has just moved the register under us. */
+    own = ownPlace(viewer()) || firstDest();
+    /* AND IT MUST BE SOMEWHERE THIS NAVIGATION CAN GO. A place that is not
+       on the row is a place nothing can press, and a tour pressing nothing
+       is the fault above wearing a different hat — so it falls back to the
+       first real destination rather than touring a key that is not there. */
+    if (!destBtn(own)) own = firstDest();
+    steps = resolve(STORIES[key].steps, own);
     dock.hidden = false;
     go(0);
   }

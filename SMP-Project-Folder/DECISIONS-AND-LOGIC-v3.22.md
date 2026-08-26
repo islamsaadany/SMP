@@ -14010,3 +14010,40 @@ fact that costs nothing to forget. One press of × answers it.
 **Still open:** the SMO, CEO and contributor stories (§16 backlog), and the
 owner story's copy, which is **mine until Islam has read it** — the custodian's
 is his, word for word off the signed-off mockup.
+
+### 107.14 It has to take you to the main page, and `own` was resolved too early
+
+> *"To start the tour from the knowledge base make it take me by default to
+> the main page rather than in the knowledge base so the tour can actually
+> happen."*
+
+Two faults with one root: **the tour decided WHERE it was touring before the
+world it would tour had arrived.**
+
+**The one that shows.** Nothing moved the platform off the page you replayed
+FROM, so the welcome card was drawn over Setup › Knowledge base and only the
+first Next left it — the tour opening by explaining *"this row is the
+business"* above a page with no business row on it. The welcome step carries
+a destination now, so the platform is on the person's own place before the
+first word is read.
+
+**The one that does not, and is worse.** `setMode("demo")` ran AFTER `own`
+was resolved. That swap replaces PEOPLE, UNITS and the whole register — so
+`own` was a key from the CLIENT'S OWN tenant being looked up in the DEMO
+tenant's navigation. On this deployment the two match, because the client IS
+the worked example; **on any real client they share no keys at all**,
+`destBtn()` would find nothing, and the tour would light nothing while
+cheerfully reporting nine steps. Switch first, then read who and where from
+the world now on screen, then check that place is actually reachable
+(`if (!destBtn(own)) own = firstDest()`).
+
+**INVISIBLE TO THE CHECK, TWICE OVER.** Over `file://` there is no live
+dataset to swap away from, so the second fault cannot occur there at all —
+§94.11's trap, which this feature's own check walked into by choosing
+`file://` deliberately. And the first fault was *measured and passed*: the
+Knowledge base assertion asked whether the tour was **running** and stopped
+there, which was true the whole time the welcome card sat over the wrong
+page. **"It started" is not "it went anywhere."** The check now asserts a
+destination is selected, the Knowledge base is gone from the screen, and
+there are tabs to tour — and each was watched failing on the reverted build
+before the green run was believed (§94.5).

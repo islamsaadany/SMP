@@ -86,6 +86,15 @@ once a function walked it (§107.7), a tenant's label inflected into *"the
 pillarss"* (§107.8), and a contrast measurement proved real by wrecking the
 card's text and watching it report 1.6:1.
 
+Corrected after Islam replayed it (§107.14): the tour now takes you to the
+main page before the welcome card, rather than drawing it over the Knowledge
+base — and the dataset swap moved ahead of resolving where to tour, because
+`own` was being read from the client's own tenant and looked up in the demo
+tenant's navigation. The check had asserted the tour was *running* and stopped
+there; **"it started" is not "it went anywhere"**, and it now asserts a
+destination is selected, the Knowledge base is off screen, and there are tabs
+to tour.
+
 **Waiting on Islam:** the owner story's copy. The custodian's is his, word
 for word off the signed-off mockup; the owner's is mine until he has read it.
 ### v3.30 — reordering comes back (§101), and focus gets a switch (§102)

@@ -1170,7 +1170,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   pane since §104.8 and naming a bad one would send somebody after a control
   that is not there (§61). **Resolved THERE, never here** — a plan is the
   client's. **Still not run: migration 024 against a real Postgres.**
-  **A PROJECT'S FRONT MATTER, AND IT IS NOT A `<TABLE>` (§107):** `start` and
+  **A PROJECT'S FRONT MATTER, AND IT IS NOT A `<TABLE>` (§109):** `start` and
   `end` were stored and shown in **exactly one place in the product — the
   review deck** — so the page that AUTHORS a project could not say when it
   runs. One box, divided: owner · start · end down the left, brief and
@@ -1353,6 +1353,46 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
+- **THE ONBOARDING TOUR IS TOLD WHERE THE PERSON WORKS (since v3.30, §107;
+  spec 017):** a first-sign-in guided tour on **demo data**, two stories
+  (strategy custodian; unit/function owner), told on a unit or a function —
+  whichever the person actually holds their role over. `src/tour.js` mounts to
+  `<body>` like the chat corner, **never calls `paint()`**, **holds selectors
+  and not nodes** (re-anchored by `TOUR.onPaint()` at the end of `paint()`),
+  and **navigates by pressing the platform's own `[data-u]` / `[data-s]` /
+  `[data-sub2]` controls** rather than keeping a second copy of the shell's
+  navigation. Roles come from the platform's own `personRoles()`, never from
+  `SMPRules` directly — `world()` is the ONE builder and its comment records
+  what happens twice in an afternoon otherwise. **A STEP NAMES A CONCEPT AND A
+  PLACE SPELLS IT**: `resolve()` turns `strategy`/`plan` into `fnstrat`/`proj`
+  for a function and DROPS the step a place cannot show (a function has no
+  SWOT), so the counter counts what is actually walked (§61). **AND THE
+  TARGETS SAY `$tab` / `$sec`** rather than repeating the key — the first
+  build resolved the fields and left the selectors spelling a unit's keys, so
+  a step disagreed with itself and lit nothing on four of eight steps.
+  **A TENANT'S LABEL IS NEVER INFLECTED** (§107.8): `L("pillar","bu")` is
+  *"Pillars"*, so `+ "s"` printed *the pillarss* — there is no singular to
+  reach for, and every sentence takes the label exactly as given. **COPY THAT
+  NAMES A PLACE IS A FUNCTION** (§64 again), or a constant evaluated before
+  hydration holds the baked example's vocabulary on a client's deployment.
+  Memory is `localStorage` (*never*) and `sessionStorage` (*skip for now*, so
+  a new sign-in is a new session), and **a throwing store reads as
+  already-marked** — a tour nobody can dismiss is worse than no tour.
+  **AND IT TAKES YOU TO THE MAIN PAGE FIRST (§107.14):** replaying from the
+  Knowledge base drew the welcome card OVER the Knowledge base, and worse,
+  `setMode("demo")` ran AFTER `own` was resolved — so a key from the CLIENT'S
+  tenant was looked up in the DEMO tenant's navigation, which matches only
+  because this deployment IS the worked example. **Switch the mode, THEN read
+  who and where, THEN check the place is reachable** (`if (!destBtn(own)) own
+  = firstDest()`), and the welcome step carries a destination. The check had
+  asked whether the tour was RUNNING and stopped there — **"it started" is not
+  "it went anywhere"** (§94.2).
+  `src/checks/tour.py` walks **every story as every role** and was **proved
+  able to fail first** (§94.5) — the first deliberate break set a value to
+  what it already was and caught nothing, which is §94.5's own example.
+  **`own_it` is not a function custodian for checking purposes**: they hold it
+  on the IT unit AND the IT function, so the walk measures the unit twice
+  while looking like it covers functions — `fn_mkt2` is the true case.
 - **THE CORNER MINIMISES, AND THE INBOX FOLLOWS THE WINDOW (since v3.29,
   §100.4, §100.5):** **the bubble is not drawn while the panel is open** —
   it sat underneath in the same dock column, pushing the panel a bubble's height
@@ -1535,6 +1575,16 @@ python3 build.py     # assembles strategy-management-platform.html (must be byte
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
                                 # because the whole feature is invisible over file:// (§97.9)
+python3 checks/setup-rail.py    # the Setup rail fits the window, every entry is reachable
+                                # by scrolling the LIST, and the cap does not move --chrome-h
+                                # (§101.5 — that last one is what licenses the cap at all)
+python3 checks/setup-overview.py      # the Overview agrees with the pages it summarises; it
+                                      # MAKES the state, because the demo tenant is all-clear
+python3 checks/setup-overview-live.py # ...and its three server-backed rows, over HTTP, where
+                                      # they exist at all (§101.12)
+python3 checks/setup-search.py  # the rail's search: typing NEVER repaints, a repaint keeps
+                                # the filter, and a match inside a FOLDED group is findable
+                                # (§101.13, §101.14 — all three fail silently)
 ```
 In this cloud image, run any sweep through the wrapper so Playwright finds the
 Chromium that is already here:
@@ -1569,7 +1619,153 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.30: reordering comes back
+*Last Updated: 2026-08-26 &mdash; **v3.33: the Setup makeover, complete &mdash;
+the words, the window, the Overview, the search and the pills** (&sect;108, spec 018). Islam asked for the whole settings page
+to be rethought &mdash; design, grouping, arrangement, a search bar, the namings
+&mdash; and for HR_ERP's admin page to be considered. Settled from a mockup
+carrying the audit, two drawn structures and a per-row naming table: he chose
+**Option A**, the rail keeping the door with an Overview page opening it.
+**THE AUDIT IS IN NUMBERS RATHER THAN ADJECTIVES**: the rail is **984px tall and
+pins 128px down**, so it hung **112px** below a 1000px window and **312px**
+below an 800px one, and what fell off the bottom was Branding and Communication
+&mdash; &sect;90's "a control below the fold is a control that does nothing", by
+a road &sect;90 did not walk. **THREE ROWS CAME OUT OF ONE WORD FAMILY** &mdash;
+Messages, Send a message, Communication, in three different groups &mdash; which
+is the collision HR_ERP hit with *Announcements* beside *Communications* and
+settled the same way: **Inbox** is what the office ANSWERS, **Email** is what
+the page actually sets (the display name, reply-to, kicker and footer of what
+LEAVES), and **Terminology** is the tenant's vocabulary rather than stickers.
+**Official BU list is deliberately NOT renamed**: it is the client's own word
+(&sect;58), and the confusion with Business units is answered by a description
+beside it, not by taking their word away. The group names **answer rather than
+ask** &mdash; &sect;46 was right about the grouping and wrong about the words,
+because a rail is scanned and a question reads a beat slower than its answer
+&mdash; while **the keys do not move**, or every folded group would silently
+unfold for everybody who ever touched one (&sect;30.2). **Import and Archived
+plans become one page with two sections**, inseparable by construction since
+&sect;22 made importing an archiving act, **with each section keeping its own
+gate** so &sect;48.2's edit-only Import survives the merge. **AND THE RAIL FITS
+THE WINDOW, WHICH &sect;28.3 SAYS IT MUST NOT** (&sect;108.5): that rule was
+written against v2.8's oscillation, whose loop ran through the header CONDENSE
+&mdash; deleted in v3.3 &mdash; so it is broken at a link rather than argued
+away, and `--chrome-h` is now a constant (73px at every height swept).
+**&sect;100.5 REFUSED THIS SAME CAP SIX DAYS AGO** and its reason was not the
+loop but the affordance: *a list that says "it ends here" when it does not is
+worse than a page that scrolls.* That objection is right, so the cap ships with
+the sign &mdash; a visible scrollbar track and a **sticky fade that gets out of
+its own way**, coming to rest after the last row where it has nothing left to
+cover. **AND TWO ATTEMPTS TO BE CLEVER BROKE THE THING IT PROTECTS**: a
+`margin-top:-22px` meant to give back the fade's height took it off the
+SCROLLABLE height and stranded the last five entries, and removing it did not
+fix them &mdash; the real cause was a speculative **`scroll-behavior:smooth`**
+in the same edit, which makes `scrollIntoView` asynchronous so the check
+measured before the scroll landed. *A nicety nobody asked for broke a real
+reachability assertion, and it was not the cause I suspected first.* The check
+**asserts the problem, not the numbers**, and was **proved able to fail before
+it was trusted** &mdash; 8 failures with the cap removed.
+**AND THE OVERVIEW IS BUILT** (&sect;108.10, spec 018): the gear lands on it, and
+it answers the one question the office opens Setup to ask &mdash; *is anything
+waiting on me?* &mdash; which before it existed took a walk through five pages,
+because each outstanding thing lives only on the page that fixes it. **NO ROW
+COMPUTES ANYTHING**: each declares a `count` calling the SAME function its
+destination page calls, and the check asserts the two AGREE rather than asserting
+the number (&sect;53.5, &sect;94.8) &mdash; a summary page is the one place a
+disagreement is guaranteed to be seen and impossible to explain. Two sources were
+already shared; the other three are **extracted rather than copied**, and
+`CHAT.officeQueue()` is a second READER of the `queue` action the inbox already
+calls rather than a second endpoint, so the Overview's number is by construction
+the Inbox tab's number. **A COUNT HAS THREE ANSWERS, NOT TWO** &mdash; a number,
+zero, and *we have not asked* &mdash; so a null draws no row, a zero says nothing
+is waiting, and the page never prints `0`: &sect;93's fault one surface out,
+because a summary showing five zeroes while it is still thinking has told
+somebody they are clear when it does not know. **AND SAYING NO IS THE PAGE'S JOB
+TOO** (&sect;45.2 turned round), or an absent list reads as a list that failed to
+load. Three old faults arrived in new places: the password and declaration
+fetches were **keyed on the register's MARKUP** and are keyed on the page NAME
+now (the third time that class of gate has silently stopped matching, in the
+safe-looking direction every time); the declarations fetch **never said it
+failed**, leaving `{}` &mdash; harmless on the register, a false all-clear on the
+Overview; and the demo tenant is entirely clear, so the check **MAKES the state
+it measures** or every attention row ships unexercised (&sect;45.2, &sect;94.2).
+**AND THE FIRST LIVE RUN'S ONE FAILURE WAS THE CHECK, NOT THE PRODUCT**: it
+asserted the password count equalled the stub's own number, and the page said 2
+where the stub marked 3 &mdash; because the first people on the seed are the SMO
+and a Super user, and &sect;89 excludes the office from issuing. It asserts the
+RELATIONSHIP now, **with the raw number asserted to differ**, or it would quietly
+pass again the day that exclusion broke. **AND THE SEARCH AND THE PILLS FINISH IT.**
+**THE KEYWORDS LIVE ON THE DEF** (&sect;108.13), beside the label, because some
+errands do not know their page at all &mdash; *"where do I change the logo"* is
+Branding &mdash; and a second table of them would have been the fourth place to
+edit the day a page is renamed (&sect;108.3 renamed three in an afternoon). Every
+typed word must match in any order, since *"reset password"* and *"password
+reset"* are one errand. **TYPING NEVER REPAINTS** (&sect;35), and the query is
+held in a variable rather than only in the box, because the Overview's own three
+fetches each end in `paint()` about a second after the page opens &mdash;
+exactly when somebody is typing; the filter is re-applied after every paint, or
+a repaint quietly shows the whole list to somebody who believes they are reading
+their results. **AND THE FOLD HAD TO STOP OMITTING ROWS** (&sect;108.14): a
+filter cannot reveal a row that was never drawn, and that failure would have
+looked exactly like *"there is no such setting"*. **THE PILLS ARE THE OVERVIEW'S
+OWN ROWS SUMMED BY DESTINATION** (&sect;108.15) &mdash; nothing new is counted,
+so a rail badge cannot disagree with the page it points at; never a zero, never
+for somebody who cannot clear it (&sect;69's dot), and on a group heading only
+while that group is FOLDED, because an open group's rows already speak. **AND
+&sect;51.11 BIT IN MY OWN CHECK**: the row gained a label span and a pill, so
+`.ritem`'s `textContent` became `"People register2"` and three assertions broke
+&mdash; grep every check when a control changes shape, not the one that failed
+first. **AND THE CONTRAST SCARE WAS THE MEASURING SCRIPT** (&sect;68.10): a
+throwaway sweep reported eight failures including the pill at 1.64:1, because
+its transparency test compared `'rgba(0,0,0,0)'` against `'rgba(0, 0, 0, 0)'`
+&mdash; a spelling, not a value &mdash; so everything was measured against
+BLACK. Testing the alpha instead: **0 failures**, the pill at 5.32:1 light and
+9.34:1 dark. *A correct build reported broken is the same class of fault as a
+broken build reported clean, and the first instinct &mdash; to go and change a
+colour &mdash; would have damaged a working palette.*
+
+*Earlier: 2026-08-26 &mdash; **v3.32: the onboarding tour** (&sect;107,
+spec 017). *"For first time users we need some orientation flow that takes them
+through the platform … highlighting some areas while dimming the rest of the
+page … in a user story mode."* Settled over **four reviewed revisions of a
+working mockup** before a line of `src/` was touched, and that is the part
+worth keeping: **three of the five decisions are reversals of something drawn
+first**, and not one of them could have been argued in the abstract.
+**THE INTERACTIVE TOUR WAS BUILT AND THEN REVERSED** &mdash; the first
+alignment said *"let them click, that would be more interactive"*, and demo
+mode made it safe to let a first-time user press real controls, because a
+dataset that refuses every write is the licence for that. Then: *"skip the
+buttons clicking overall."* **A tour that waits for a press is a tour that can
+be got wrong, by the one person in the tenant with no idea which button was
+meant** &mdash; narrating costs nothing the pressing bought. **SKIP TOUR WENT
+AND THE &times; STARTED ASKING** (*Don't show again* / *Skip for now*, with a
+way back for a stray press), because two controls for one act is one too many.
+**AND THE SPOTLIGHT HAD TO SAY WHERE YOU ARE**: lighting the whole navigation
+row names the SET and not the SELECTION, which is the one question a
+first-time viewer actually has &mdash; and lighting one button while ALSO
+lighting a section and its content is what forced the dim to become an **SVG
+mask**, since a box-shadow cutout can only ever have one hole. Built to hold
+**no copy of anything**: it never calls `paint()`, holds selectors rather than
+nodes, navigates by pressing the platform's own controls, and reads roles
+through the platform's own `personRoles()`. **A STEP NAMES A CONCEPT AND A
+PLACE SPELLS IT** &mdash; and the first build resolved the step's FIELDS while
+leaving its SELECTORS spelling a unit's keys, so a step disagreed with itself
+and the first function to walk the owner story lit nothing on four of eight
+steps; `checks/tour.py` caught it within a minute of that story existing,
+which is &sect;53.5's argument for walking both sides paid back immediately.
+**THE CHECK WAS PROVED ABLE TO FAIL BEFORE ITS GREEN RUN WAS BELIEVED**
+(&sect;94.5) **and the first attempt could not**: the deliberate break set a
+step's section to the value it already held, a no-op caught by nothing, which
+is exactly the fault &sect;94.5 records in `test-authorize.js`. Two more found
+only by measuring: `own_it` holds custodian on the IT unit AND the IT
+function, so adding them walked the unit twice while looking like it covered
+functions; and the contrast measurement was proved real by wrecking the card's
+text colour and watching it report 1.6:1, because a measurement that returns
+nothing looks identical whether it is clean or blind. **AND THE WORDS WERE
+WRONG WHILE EVERY ASSERTION WAS TRUE** (&sect;107.8): `L("pillar","bu")` is
+*"Pillars"*, so the card read *"Strategy &rsaquo; Plan &mdash; the pillarss"*
+&mdash; found by printing the nine titles and READING them, which no check
+would have done. A tenant's label is never inflected.*
+
+*Earlier: 2026-08-26 &mdash; **v3.30: reordering comes back
 (&sect;101), and focus measures get a switch (&sect;102)**. The second one
 carries the bug worth reading: the switch was wired, the rule was written, the
 writer worked &mdash; and flipping it changed nothing at all. **`worldOf()` does
@@ -2771,7 +2967,14 @@ bought 22px on a 47px header. Gone: the listener, the `scrolled` class, every
 `body.scrolled` rule. `--chrome-h` stays and now reports a constant. Also: the
 rail lost its `max-height` (a capped rail cut lists off mid-row — a navigation
 list must never say "it ends here"); **the sticky OFFSET may read `--chrome-h`,
-a max-height never may** (§28.3, the v2.8 loop); Manage is a gear with the word
+a max-height never may** (§28.3, the v2.8 loop — **AMENDED BY §101.5/§101.6**:
+the loop ran through the header CONDENSE, which this same version deleted, so
+`--chrome-h` is now a constant and a max-height fed by it closes nothing. The
+Setup rail is capped to the window since v3.30. Two conditions, both asserted by
+`checks/setup-rail.py`: **nothing above the box may move when the box resizes**,
+and the capped list must **say that it continues** — a visible scrollbar track
+and a sticky fade, because §100.5's objection is right even where its refusal is
+not); Manage is a gear with the word
 in its `title`; a unit opens on Strategy › Plan; and `section()` omits an empty
 header rather than rendering a blank `<h2>` that still spends its margin (§28).*
 

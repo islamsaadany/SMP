@@ -1119,7 +1119,7 @@
   .pctneed { display:block; margin-top:3px; font-size:11.5px; line-height:1.25;
              white-space:nowrap; }
 
-  /* ── A PROJECT'S FRONT MATTER (§107) ─────────────────────────────────
+  /* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────
      One box, one ground, one hairline down the middle: who and when on the
      left, what and with whom on the right. In arrange.css because that file is
      concatenated LAST of the four and config.css has now held the same rule

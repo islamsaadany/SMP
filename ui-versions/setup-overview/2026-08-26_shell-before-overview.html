@@ -198,7 +198,6 @@
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
 <script src="CHAT"></script>
-<script src="TOUR"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -313,22 +312,22 @@
          anybody opens Setup to answer. It used to be a section at the bottom
          of Roles & access, which is a matrix page — a staff list is not a
          matrix. */
-      { k:"people", ac:"c_people", grp:"who", label:"People register", find:"register staff employees person password reset retire add custodian owner emp id email", primary:true, render:renderPeople },
+      { k:"people", ac:"c_people", grp:"who", label:"People register", primary:true, render:renderPeople },
       /* The client's own names for parts of the business, and what each one
          opens here (§54.1). In *Who* rather than *What we run*, and sharing
          c_people rather than taking a key of its own: it is not another thing
          being planned, it is the vocabulary the register's own data arrives
          in, and Companies already shares c_units on exactly this argument. */
-      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list", find:"departments official bu client names mapping",      render:renderMainbus },
-      { k:"access", ac:"c_access", grp:"who", label:"Roles & access", find:"permissions matrix roles rights who can edit view grant",        render:renderAccess },
+      { k:"mainbu", ac:"c_people", grp:"who", label:"Official BU list",      render:renderMainbus },
+      { k:"access", ac:"c_access", grp:"who", label:"Roles & access",        render:renderAccess },
 
-      { k:"units",  ac:"c_units",  grp:"run", label:"Business units", find:"business units weight weighting logo mark rename retire",        render:renderUnits },
+      { k:"units",  ac:"c_units",  grp:"run", label:"Business units",        render:renderUnits },
       /* Its own tab since 3.5. It shares c_units - the same person manages
          both - but it answers a different question from "which units exist",
          and it was being pushed off the top of a ten-row table. */
-      { k:"companies", ac:"c_units", grp:"run", label:"Companies", find:"company companies grouping layer",           render:renderCompanies },
-      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions", find:"supporting functions plans in pillars capabilities",             render:renderFunctions },
-      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities", find:"capabilities projects enhancement deliverables",          render:renderCaps },
+      { k:"companies", ac:"c_units", grp:"run", label:"Companies",           render:renderCompanies },
+      { k:"fns",    ac:"c_fns",    grp:"run", label:"Functions",             render:renderFunctions },
+      { k:"caps",   ac:"c_caps",   grp:"run", label:"Capabilities",          render:renderCaps },
 
       /* Spec 008, restructured 2026-08-22 (§46.2). Configuring the sets and
          FILLING one were two Setup pages; they are one page with two sections
@@ -341,33 +340,33 @@
          who is not the SMO gets only Fill; anybody else gets no entry at all,
          because paint() drops a def whose every section is refused. Gate the
          parent on c_sets and the owner loses the page they exist for. */
-      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", find:"figure sets owner claim source of figures numbers finance", sections: function(){
+      { k:"sets",   ac:"c_source", grp:"meas", label:"Figure sets", sections: function(){
           return [{ k:"cfg",  ac:"c_sets",   label:"Sets configuration", render:renderSetsSetup },
                   { k:"fill", ac:"c_source", label:"Fill a figure set",
                     when: canPickSets,                                 render:renderSourceSetup }];
         } },
-      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands", find:"scoring bands green amber red threshold colours ranges",        render:function(){ return renderBands() + renderBandsExtra(); } },
-      /* TERMINOLOGY, NOT "LABELS" (§108.3). The page holds what THIS tenant
+      { k:"bands",  ac:"c_bands",  grp:"meas", label:"Scoring bands",        render:function(){ return renderBands() + renderBandsExtra(); } },
+      /* TERMINOLOGY, NOT "LABELS" (§101.3). The page holds what THIS tenant
          calls a pillar, a theme, an aspiration — its vocabulary, and the one
          contract every other screen reads its words from. "Labels" is what a
          developer calls that; to everybody else it sounds like stickers on a
          chart. The key `c_labels` and the stored map are untouched. */
-      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology", find:"terminology rename wording vocabulary words naming pillar theme aspiration labels",          render:renderLabels },
+      { k:"labels", ac:"c_labels", grp:"meas", label:"Terminology",          render:renderLabels },
 
       /* Last in Setup: it changes how everything else LOOKS, which is a thing
          you do once the things themselves exist (§39). */
-      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding", find:"branding logo colour color mark palette theme look accent",             render:renderBranding },
+      { k:"brand",  ac:"c_brand",  grp:"look", label:"Branding",             render:renderBranding },
       /* §72. In *How it looks* rather than a group of its own, and that is the
          argument rather than the leftover: an email leaves wearing the tenant's
          accent, the tenant's name and the tenant's footer, so what it looks
          like is the same subject Branding answers — one step further out, where
          the reader is not in the platform at all. */
-      /* EMAIL, NOT "COMMUNICATION" (§108.3). The third of the colliding three,
+      /* EMAIL, NOT "COMMUNICATION" (§101.3). The third of the colliding three,
          and the easiest to settle because the page is narrower than its name:
          it sets the display name, the reply-to, the kicker and the footer of
          what LEAVES the platform — an email, and nothing else. Naming it Email
          is what lets "Send a message" and "Inbox" each mean one thing too. */
-      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email", find:"email sender reply-to footer kicker display name outgoing from address",                 render:renderComms }
+      { k:"comms",  ac:"c_comms",  grp:"look", label:"Email",                 render:renderComms }
     ],
     /* ONE DESTINATION, NOT TWO (§47.7). Manage and Setup were split in §46.1
        because a flat menu of sixteen was doing two jobs — and that argument
@@ -379,22 +378,9 @@
        label and its own answer to "may this person reach anything here"; they
        are concatenated into the setup list by defsFor(). */
     manage: [
-      /* ── WHERE THE GEAR LANDS (§108.10, spec 018) ─────────────────────
-         FIRST AND `primary`, taking both from Reporting cycle: the office's
-         first question on opening Setup is not "how is the cycle going" but
-         "is anything waiting on me", and until this page existed the answer
-         took a walk through five pages.
-
-         THE OFFICE'S, BY THE SAME `when` AS Send a message AND Inbox — the
-         page says "waiting on the office", so for anybody else it would be a
-         page about somebody else's work. It is not a matrix cell for the same
-         reason those two are not (§37, §89): reading everything outstanding
-         across the whole tenant is not a tick somebody could set on a bad
-         afternoon. A non-office viewer's gear falls through to `st[0]`, which
-         is Reporting cycle — where it landed before this page existed. */
-      { k:"overview", ac:"c_cycle", grp:"cycle",  label:"Overview", find:"waiting attention outstanding needs me summary home todo", primary:true,
-        when: inOffice,                                                 render:renderOverview },
-      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", find:"open close due quarter period submit submissions progress reporting", render:renderCycle },
+      /* FIRST, because it is the page you open before the others — and now
+         also because the gear lands on whichever def is `primary`. */
+      { k:"cycle",    ac:"c_cycle", grp:"cycle",  label:"Reporting cycle", primary:true, render:renderCycle },
       /* ── WHERE THE OFFICE ANSWERS THE CORNER (§97.2) ──────────────────
          Second in the group, immediately under the cycle it is mostly about.
 
@@ -406,7 +392,7 @@
          done here). `inOffice()` is the SMO team as well as the Super user, or
          the office would be one person deep on the one page that has to be
          answered the day somebody is on leave. */
-      /* INBOX, NOT "MESSAGES" (§108.3). Three rows in this rail came out of one
+      /* INBOX, NOT "MESSAGES" (§101.3). Three rows in this rail came out of one
          word family — Messages (the office answering the corner), Send a message
          (the broadcast composer) and Communication (what an email wears) — and a
          name that could be any of the three is a name that identifies none of
@@ -416,24 +402,24 @@
          Communications — the same way, by renaming until each name meant one
          thing. The KEY stays `chat`, which is what the page def, the endpoint,
          `GROUP.chat` and checks/office-chat.py all name. */
-      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox", find:"messages chat conversations questions replies feedback answer",
+      { k:"chat",     ac:"c_chat",  grp:"cycle",  label:"Inbox",
         when: function(){ return inOffice() && CHAT.servable(); },
         render:function(){ return CHAT.renderInbox(); } },
       /* §74. A DOING page, so it sits with the cycle rather than beside the
          Email SETTINGS — and gated at edit for Import's reason (§48.2): there
          is nothing to read on a composer, so a view grant would open a page
          whose every control the server then refuses. */
-      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message", find:"broadcast announce notify everyone email the team",
+      { k:"send",     ac:"c_send", grp:"cycle",   label:"Send a message",
         when: function(){ return inOffice(); },                          render:renderSendMessage },
-      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures", find:"focus watch highlight measures",                render:renderFocusSetup },
+      { k:"focusset", ac:"c_focus", grp:"cycle",  label:"Focus measures",                render:renderFocusSetup },
       /* Only for somebody who has actually been named on a figure. Its reach
          is not a setting (§16.7), so `when` hides it outright rather than the
          matrix answering "none" — a menu entry that opens an empty page is
          worse than no entry. */
-      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report", find:"figures i report my numbers named",
+      { k:"myfig",    ac:"c_myfig", grp:"cycle",  label:"Figures I report",
         when: ownsAnySource,                                render:renderMySources },
 
-      /* ── ONE PAGE, TWO SECTIONS (§108.4) ──────────────────────────────
+      /* ── ONE PAGE, TWO SECTIONS (§101.4) ──────────────────────────────
          Import and Archived plans were two rails rows about ONE subject: a
          plan arriving, and the plan it displaced. They are inseparable by
          construction — §22 made importing an ARCHIVING act, so every visit to
@@ -452,7 +438,7 @@
          section is refused, so a view-only holder of c_import sees Archived
          plans alone and somebody with neither sees no entry — exactly what the
          two separate rows did, in one row. */
-      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives", find:"upload excel xlsx spreadsheet template plan archive archived restore replace",
+      { k:"import",   ac:"c_import", grp:"cycle", label:"Plan import & archives",
         sections: function(){
           return [{ k:"in",   ac:"c_import", label:"Import a plan",
                     when: function(){ return grant("c_import") === "edit"; },
@@ -460,7 +446,7 @@
                   { k:"arch", ac:"c_import", label:"Archived plans",    render:renderArchives }];
         } },
       /* Last in its group: it explains the rest, so it is not where you start. */
-      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base", find:"help explain how documentation guide reference reasoning",                render:renderKB }
+      { k:"kb",       ac:"c_kb", grp:"cycle",     label:"Knowledge base",                render:renderKB }
     ]
   };
 
@@ -768,7 +754,7 @@
      other. */
   function setupDefs(){ return SUBS.manage.concat(SUBS.setup); }
 
-  /* THE GROUP NAMES ANSWER RATHER THAN ASK (§108.2). §46 named these as the
+  /* THE GROUP NAMES ANSWER RATHER THAN ASK (§101.2). §46 named these as the
      QUESTION you came to answer — "Who", "What we run", "How it's measured" —
      and the argument was right about the grouping and wrong about the words:
      a rail is scanned, not read, and at 9.5px uppercase a question reads a beat
@@ -832,74 +818,6 @@
     try { localStorage.setItem("smp.setup.groups", JSON.stringify(RAILSHUT)); } catch (e) {}
   }
 
-  /* ── THE QUERY LIVES HERE, NOT IN THE BOX (§108.13) ────────────────
-     TYPING MUST NEVER REPAINT (§35, §45.5), so the filter hides rows in place
-     and the input is never rebuilt while somebody is in it. But an UNRELATED
-     repaint can still arrive mid-word — the Overview's three fetches each end
-     in paint(), and they answer a second or so after the page opens, which is
-     exactly when somebody is typing. So the query is held here and rendered
-     back into the box, or the first answer to arrive would wipe it (§30.1's
-     family, and §63's "the word has to survive the redraw that reports it").
-
-     NOT in localStorage: a search is what you are doing, not how you like your
-     screen (§25, §47.1). It is cleared on navigation, because arriving
-     somewhere is the end of the errand and a rail still filtered afterwards is
-     a rail lying about what Setup holds. */
-  var RAILQ = "";
-
-  /* Applied over the DOM after every paint and on every keystroke. It decides
-     visibility ALONE while a query is live — fold state included — so there is
-     never a fight between a CSS fold and a JS filter over the same row. */
-  function railFilter(){
-    var rail = document.querySelector(".setuprail");
-    if (!rail) return;
-    var q = String(RAILQ || "").trim().toLowerCase();
-    var shown = 0, total = 0;
-    /* EVERY WORD MUST MATCH, in any order and anywhere — "reset password" and
-       "password reset" are the same errand, and somebody who types both words
-       means both. A single blob per row, so this never needs to know which
-       field a word came from. */
-    var words = q ? q.split(/\s+/) : [];
-    rail.querySelectorAll("[data-railitems]").forEach(function(box){
-      var k = box.dataset.railitems;
-      var head = rail.querySelector('.rgroup[data-railgrp="' + k + '"]');
-      var any = 0;
-      box.querySelectorAll(".ritem").forEach(function(it){
-        total++;
-        var hay = it.dataset.find || "";
-        var ok = !words.length || words.every(function(w){ return hay.indexOf(w) > -1; });
-        it.hidden = !ok;
-        if (ok) { any++; shown++; }
-      });
-      if (!words.length) {
-        /* BACK TO THE FOLD, not to "everything open". Clearing a search must
-           put the rail back exactly as it was found. */
-        box.hidden = !!(head && head.classList.contains("shut"));
-        if (head) head.hidden = false;
-        var gw0 = head && head.querySelector(".rgwait");
-        if (gw0) gw0.hidden = false;
-      } else {
-        /* A MATCH INSIDE A SHUT GROUP IS STILL A MATCH, so a live query opens
-           whatever holds one — and closes the groups holding none, heading and
-           all, because a heading over nothing is noise in a list this long. */
-        box.hidden = !any;
-        if (head) head.hidden = !any;
-        /* A SHUT GROUP OPENED BY A SEARCH SHOWS ITS ROWS, so its heading's
-           pill would repeat what those rows now say (§108.15). Restored by
-           the branch above the moment the query is cleared. */
-        var gw = head && head.querySelector(".rgwait");
-        if (gw) gw.hidden = true;
-      }
-    });
-    var none = rail.querySelector("[data-railnone]");
-    if (none) {
-      none.hidden = !(words.length && !shown);
-      if (!none.hidden) none.textContent = "Nothing in Setup matches \u201c" + q + "\u201d";
-    }
-    var x = rail.querySelector("[data-railqx]");
-    if (x) x.hidden = !q;
-  }
-
   function setupRail(defs, activeKey){
     if (!RAIL_OPEN) {
       return '<div class="rail setuprail shut">' +
@@ -907,91 +825,30 @@
           'title="Show the Setup list" aria-label="Show the Setup list" ' +
           'aria-expanded="false">' + ICO_CHEV + '</button></div>';
     }
-    /* Asked ONCE for the whole rail rather than per row: every row would
-       otherwise re-run five counts, two of which walk the register (§108.15). */
-    var ATT = (typeof attentionByPage === "function") ? attentionByPage() : {};
     var rows = SETUP_GROUPS.map(function(g){
       var items = defs.filter(function(d){ return d.grp === g.k; });
       if (!items.length) return "";       /* a group with nothing in it is not a heading */
       var here = items.some(function(d){ return d.k === activeKey; });
       var shut = !!RAILSHUT[g.k] && !here;
-      var gwait = items.reduce(function(n, d){ return n + (ATT[d.k] || 0); }, 0);
-      /* THE FOLDED ITEMS STAY IN THE DOM (§108.14). They used to be omitted
-         entirely, which was fine while folding was the only thing that hid a
-         row — and impossible to search, because the filter runs over the DOM
-         and cannot reveal a row that was never rendered. Hiding is `hidden`
-         on the container now, so the fold is a STATE rather than an omission
-         and a match inside a shut group can be shown without a repaint (§35:
-         typing must never repaint).
-
-         `hidden` rather than a class, and set at RENDER time, or a shut group
-         would be visible for the frame between paint and wire. */
       return '<button type="button" class="rgroup' + (shut ? " shut" : "") +
           '" data-railgrp="' + g.k + '" title="' + esc(g.note) + '" ' +
           'aria-expanded="' + (!shut) + '">' +
           '<span class="rgtw" aria-hidden="true">' + (shut ? "\u25b8" : "\u25be") + '</span>' +
-          esc(g.label) +
-          /* ONLY WHILE FOLDED, and that is not a detail: an open group's rows
-             carry their own pills, so a heading repeating their sum would be
-             the same number twice. Folded, the rows cannot speak, and this is
-             the only thing that can say something behind here needs you. */
-          (shut && gwait
-            ? '<span class="rgwait" title="' + gwait +
-              ' waiting behind this group">' + gwait + '</span>'
-            : '') +
-          /* The entry count KEEPS its job and its quiet shape. The audit's
-             complaint was that it wore the shape of a number that changes
-             while never changing — answered by giving the changing number a
-             different shape, not by taking this one away: folded, it is the
-             only thing that says how much is behind the heading. */
-          '<span class="rgn">' + items.length + '</span></button>' +
-        '<div class="rgitems" data-railitems="' + g.k + '"' + (shut ? " hidden" : "") + '>' +
-          items.map(function(d){
-            var w = ATT[d.k] || 0;
-            return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
-              '" data-setupgo="' + d.k + '" data-find="' +
-              esc(((d.label || "") + " " + (d.find || "") + " " + g.label).toLowerCase()) +
-              '"><span class="rilab">' + esc(d.label) + '</span>' +
-              /* NEVER A ZERO (§108.10, and HR_ERP's own rule): a row with
-                 nothing waiting carries no pill at all, so the pill means one
-                 thing and reads at a glance. */
-              (w ? '<span class="riwait" title="' + w +
-                   ' waiting on this page">' + w + '</span>' : '') +
-              '</button>';
-          }).join("") + '</div>';
+          esc(g.label) + '<span class="rgn">' + items.length + '</span></button>' +
+        (shut ? '' : items.map(function(d){
+          return '<button type="button" class="ritem' + (d.k === activeKey ? " on" : "") +
+            '" data-setupgo="' + d.k + '">' + esc(d.label) + '</button>';
+        }).join(""));
     }).join("");
-    /* THE LIST SCROLLS, THE HEAD DOES NOT (§108.5). The rows go inside their
+    /* THE LIST SCROLLS, THE HEAD DOES NOT (§101.5). The rows go inside their
        own container so the rail can be capped to the window and still keep
        "Setup" and the collapse control on screen — see the note in config.css
        for why a max-height is safe here and was not in v2.8. */
-    /* ── FINDING A SETTING BY THE ERRAND (§108.13) ────────────────────
-       Eighteen entries is past the size where scanning beats typing, and some
-       errands do not know their page at all: "where do I change the logo" is
-       Branding, "where do I reset a password" is the People register. So each
-       row carries the words somebody would actually type, in `find` on the def
-       beside its label — one list, so a rename cannot orphan them (§108.3
-       renamed three pages in an afternoon).
-
-       IN THE HEAD, NOT IN THE LIST, so it cannot scroll away from the list it
-       filters — §108.5 capped that list to the window, and a search box that
-       leaves the screen when you scroll to read your own results is a control
-       below the fold by another road (§90). */
     return '<div class="rail setuprail"><div class="rhead">Setup' +
       '<button type="button" class="railtog" data-railtog="0" ' +
         'title="Hide the Setup list" aria-label="Hide the Setup list" ' +
         'aria-expanded="true">' + ICO_CHEV + '</button></div>' +
-      '<div class="railfind">' +
-        '<input type="search" class="railq" data-railq="1" autocomplete="off" ' +
-          'placeholder="Find a setting\u2026" aria-label="Find a setting" ' +
-          'value="' + esc(RAILQ) + '">' +
-        '<button type="button" class="railqx" data-railqx="1" title="Clear the search" ' +
-          'aria-label="Clear the search"' + (RAILQ ? "" : " hidden") + '>\u00d7</button>' +
-      '</div>' +
-      '<div class="raillist">' + rows +
-        /* SAYING NO IS THE LIST'S JOB TOO (§45.2, §108.10): a rail that empties
-           itself reads as a rail that broke, so it says what was searched for. */
-        '<div class="railnone" data-railnone="1" hidden></div>' +
-      '</div></div>';
+      '<div class="raillist">' + rows + '</div></div>';
   }
 
   function menuGroups(){
@@ -1620,11 +1477,6 @@
        ten seconds (§35, §71.2). Called here so it is also the place the clock
        is STOPPED when a paint navigates away from the page. */
     CHAT.wireInbox();
-    /* The tour, if one is running. It holds SELECTORS rather than nodes —
-       this paint has just replaced every element its spotlight was drawn
-       around — so it re-resolves them and puts the shade and the card back.
-       Like the inbox above, nothing in it ever calls paint(). */
-    TOUR.onPaint();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
@@ -1797,38 +1649,8 @@
     document.querySelectorAll("[data-railtog]").forEach(function(b){
       b.addEventListener("click", function(){ setRailOpen(b.dataset.railtog === "1"); paint(); });
     });
-    /* ── THE RAIL'S SEARCH (§108.13) ────────────────────────────────
-       `input` filters and NEVER paints, so the caret is never disturbed and a
-       half-typed word is never thrown away (§35). Re-applied at the end of
-       every paint below, so a repaint arriving mid-errand restores the filter
-       rather than silently showing everything again. */
-    document.querySelectorAll("[data-railq]").forEach(function(inp){
-      inp.addEventListener("input", function(){ RAILQ = inp.value; railFilter(); });
-      /* ESCAPE CLEARS, and only clears — it must not also close the rail or
-         leave the page, because the one thing somebody wants after a search
-         that found nothing is the list back. */
-      inp.addEventListener("keydown", function(e){
-        if (e.key !== "Escape") return;
-        e.stopPropagation();
-        if (!RAILQ) return;
-        RAILQ = ""; inp.value = ""; railFilter();
-      });
-    });
-    document.querySelectorAll("[data-railqx]").forEach(function(b){
-      b.addEventListener("click", function(){
-        RAILQ = "";
-        var inp = document.querySelector("[data-railq]");
-        if (inp) { inp.value = ""; inp.focus(); }
-        railFilter();
-      });
-    });
-
     document.querySelectorAll("[data-setupgo]").forEach(function(b){
       b.addEventListener("click", function(){
-        /* ARRIVING IS THE END OF THE ERRAND. A rail still filtered after you
-           have landed is a rail telling you Setup holds four things (§108.13).
-           Cleared before paint(), so the box below is rendered empty. */
-        RAILQ = "";
         /* CALLS leaveModes() RATHER THAN REPEATING THREE OF ITS LINES.
            This was a copy of part of it, and a partial copy is worse than none:
            every mode added since — the open row, the composed message, the
@@ -1980,12 +1802,6 @@
     wireImport();
     var lc = document.querySelector("[data-lockcycle]");
     if (lc) lc.addEventListener("click", function(){ CYCLE.locked = !CYCLE.locked; paint(); });
-    /* The focus feature's switch (§102). `this`, never a closure over the
-       element, for the reason stated three lines down. */
-    var fsw = document.querySelector("[data-focusswitch]");
-    if (fsw) fsw.addEventListener("click", function(){
-      setFocusOn(this.dataset.focusswitch === "1"); paint();
-    });
     /* `this`, NOT A CLOSURE OVER THE ELEMENT. Reading it back off the button
        that was clicked cannot go stale, and cannot be captured by whatever
        else happens to be in this scope — see the note on `pfile` below. */
@@ -2035,32 +1851,12 @@
         if (hit) { hit.obj.note = el.value.trim() || null; paint(); }
       });
     });
-    /* A DELIVERABLE AND A MILESTONE ARE PICKED THE SAME WAY NOW (§104): both
-       write `status`, and leaving In progress CLEARS the per-cent rather than
-       leaving it stranded under a word that no longer wants one. A stale 35%
-       sitting behind "Delivered" is a number nobody can see and the score
-       would not read -- but it would come back the moment somebody picked In
-       progress again, which is the kind of surprise a report cannot afford. */
     document.querySelectorAll("[data-cpick]").forEach(function(el){
       el.addEventListener("change", function(){
         var hit = capItemById(el.dataset.cpick);
         if (!hit) return;
-        hit.obj.status = el.value || null;
-        if (hit.obj.status !== "wip") hit.obj.pct = null;
-        paint();
-      });
-    });
-    /* The per-cent, which only an In progress row has. Out of range is
-       clamped rather than refused: somebody typing 120 means "done", and an
-       error message in a table of thirty rows is a worse answer than a
-       number. */
-    document.querySelectorAll("[data-cpct]").forEach(function(el){
-      el.addEventListener("change", function(){
-        var hit = capItemById(el.dataset.cpct);
-        if (!hit) return;
-        var v = el.value.trim();
-        if (v === "" || isNaN(Number(v))) hit.obj.pct = null;
-        else hit.obj.pct = Math.max(0, Math.min(100, Math.round(Number(v))));
+        if (hit.kind === "milestone") hit.obj.status = el.value || null;
+        else hit.obj.actual = el.value || null;
         paint();
       });
     });
@@ -2344,16 +2140,15 @@
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
-    /* ONE HANDLER FOR BOTH SUBMITS (§105). The attribute carries the TARGET --
-       a unit key, or `fn:<key>` for a supporting function -- which is the same
-       string `REVIEW.submitted` is keyed by and the same one the server
-       authorises. It read `UNITS[...]` before, so wiring a function's button to
-       it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var t = b.dataset.submit, why = submitRefusal(t);
-        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
-        REVIEW.submitted[t] = true; paint();
+        var u = UNITS[b.dataset.submit], miss = missingNotes(u);
+        if (miss.length) {
+          alert(miss.length + " figure" + (miss.length > 1 ? "s are" : " is") +
+            " at risk or off track with no note. Add a line to each before submitting.");
+          return;
+        }
+        REVIEW.submitted[b.dataset.submit] = true; paint();
       });
     });
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){
@@ -4310,23 +4105,9 @@
        threw, nothing was logged, and the passwords themselves were never
        touched — `credentials` is its own table outside the state graph (§19).
 
-       KEYED ON THE PAGE NOW, NOT ON ITS MARKUP (§108.11). §93.2 keyed it on
-       `.peoplecfg`, the register's table — better than the pen it replaced,
-       and still the same KIND of thing: a class name, which a restyle can
-       retire without anything failing. It asks the two pages that want the
-       answer by NAME, which is data rather than markup and cannot silently
-       stop matching. The Overview joins the list because it counts these two
-       facts (§108.10) — and gating it on the register's markup would have
-       given it a permanent, silent null, which draws no row: this exact fault
-       twice already, and in the safe-looking direction both times. */
-    /* THE FILTER IS RE-APPLIED AFTER EVERY PAINT, or a repaint that arrives
-       while somebody is reading their own results would quietly show them the
-       whole list again (§108.13). The box's value is rendered from RAILQ, so
-       the two can never disagree. */
-    railFilter();
-
-    var WANTS_PEOPLE_FACTS = { people:1, overview:1 };
-    var onRegister = !!WANTS_PEOPLE_FACTS[currentSub];
+       KEYED ON THE TABLE NOW, which is the thing that is actually there when
+       this is worth asking. */
+    var onRegister = !!document.querySelector(".peoplecfg");
     if (PWSTATES === null && onRegister &&
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       PWSTATES = {};
@@ -4347,28 +4128,8 @@
         typeof SYNC !== "undefined" && SYNC.isLive() && inOffice()) {
       SAIDWHERE = {};
       SYNC.declarations(function(err, said){
-        /* AND IT SAYS SO NOW TOO (§108.11). This was `if (err) return`, which
-           leaves SAIDWHERE as {} — "asked, and nobody declared anything" —
-           the exact shape §93 removed from the passwords beside it and did not
-           come back for. It costs the register nothing (a note per row, absent
-           either way) and it costs the Overview a false all-clear, which is
-           the one thing that page must never give. */
-        if (err) { SAIDWHERE = { __error: String(err.message || err) }; return; }
+        if (err) return;
         SAIDWHERE = said;
-        paint();
-      });
-    }
-    /* ── AND WHAT THE INBOX IS HOLDING (§108.10) ─────────────────────
-       Asked only on the Overview, because the Inbox counts its own queue when
-       it is open and the corner has its own cadence (§98.1) — a third asker
-       polling in the background is what §98 was about. Once per visit: this is
-       a summary somebody reads and then acts on, not a live board. */
-    if (OVQUEUE === null && currentSub === "overview" &&
-        typeof CHAT !== "undefined" && CHAT.servable && CHAT.servable() && inOffice()) {
-      OVQUEUE = {};
-      CHAT.officeQueue(function(err, q){
-        if (err || !q) { OVQUEUE = { __error: String((err && err.message) || err || "no answer") }; return; }
-        OVQUEUE = q;
         paint();
       });
     }
@@ -4539,16 +4300,6 @@
   function wireArrange(){
     document.querySelectorAll("[data-arrange]").forEach(function(b){
       b.addEventListener("click", function(){ ARRANGE = !ARRANGE; paint(); });
-    });
-
-    /* ── REPLAYING THE GUIDED TOUR (spec 017) ────────────────────────
-       The Knowledge base's one entry. It starts the story this viewer's
-       roles map to and IGNORES the stored "don't show again" — that mark
-       answers "should it open by itself", which is a different question
-       from "show me it now", and conflating the two would leave anybody who
-       once pressed it with no way back. */
-    document.querySelectorAll("[data-tour-replay]").forEach(function(b){
-      b.addEventListener("click", function(){ TOUR.start(this.dataset.tourReplay); });
     });
 
     /* ── Reporting is a MODE now (§63.1) ─────────────────────────────

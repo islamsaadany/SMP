@@ -2885,7 +2885,7 @@ function projEditing(){
 function projArranging(fk){
   return arranging("unit", "fn:" + fk) || projEditing();
 }
-/* ── A PROJECT'S FRONT MATTER (§107) ─────────────────────────────────────
+/* ── A PROJECT'S FRONT MATTER (§109) ─────────────────────────────────────
    Islam: "any project needs 3 things at its starting part which are the brief,
    stakeholders, start and end date."
 
@@ -3004,7 +3004,7 @@ function projPlanBody(p, fk){
      band carries the project's NAME, so in edit mode it has to become a field
      or the one thing a new project needs most cannot be typed — the same
      exception the pillar heading makes (see unitPlanBody). */
-  /* THE BAND IS IDENTITY, THE BLOCK IS THE FACTS (§107). The owner moved into
+  /* THE BAND IS IDENTITY, THE BLOCK IS THE FACTS (§109). The owner moved into
      the front matter below, and the Timeline pill is GONE -- not relocated.
      Islam asked what it was for and the honest answer was almost nothing: it
      once decided how every date on the project was read, §104 ended that

@@ -137,14 +137,17 @@ with sync_playwright() as p:
         v = pens(pg, key, who["unit"], "strategy", "plan")
         ck("%s %s a pen on the unit's Plan" % (label, "has" if want else "has NO"),
            (v["anyPen"] > 0) is want, v)
-        # THE ARRANGE BUTTON IS GONE FOR EVERYBODY NOW (§94.15), so asserting
-        # its absence here would be a check that cannot fail (§54). What is
-        # still a real rule is that somebody outside the office gets NO WAY IN
-        # AT ALL — no button and no handles — while the office's way in is the
-        # pen, which section 2c presses and counts.
+        # §101 REVERSED §94.3, and this assertion was written for the old world
+        # — it demanded "no way to reorder at all" for the owner and custodian,
+        # and went red the day reordering was deliberately given back to them.
+        # §51.11 exactly: when a control changes shape, grep the CHECKS. The
+        # rule that still has teeth is the SPLIT §101 drew: the words stay the
+        # office's (no pen), while the ORDER is the holder's — the arrange
+        # control is offered, and handles appear only once it is pressed
+        # (checks/plan-arrange.py presses it and asserts both ends).
         if not want:
-            ck("...and no way to reorder at all — no button, no handles",
-               v["arrange"] == 0 and v["grips"] == 0, v)
+            ck("...and the §101 split holds — arrange offered, no handles until pressed",
+               v["arrange"] == 1 and v["grips"] == 0, v)
         v = pens(pg, key, who["unit"], "strategy", "found")
         ck("...%s a pen on Foundation" % ("has" if want else "has NO"),
            (v["anyPen"] > 0) is want, v)

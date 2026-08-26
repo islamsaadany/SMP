@@ -407,7 +407,7 @@
                        border-bottom:1px solid var(--line-soft); }
   .setuprail .rgroup:first-of-type { border-top:0; }
 
-  /* ══ THE RAIL FITS THE WINDOW (§108.5) ════════════════════════════
+  /* ══ THE RAIL FITS THE WINDOW (§101.5) ════════════════════════════
      Islam, on the makeover: "would the rail stay fit to the window with an
      internal scroll down?" — and it did not. Measured before touching it, as
      the SMO with every group open: the rail is 984px tall and pins 128px from
@@ -452,35 +452,6 @@
                   somebody's split view rather than their screen. */
                min-height:260px; }
   .setuprail .rhead { flex:none; }
-
-  /* ══ FINDING A SETTING (§108.13) ═══════════════════════════════════
-     IN THE HEAD, ABOVE THE SCROLLING LIST, and `flex:none` for the same reason
-     `.rhead` is: §108.5 caps `.raillist` to the window, so anything that must
-     stay reachable while the list scrolls has to sit outside it. A search box
-     that scrolls away from its own results is §90's control-below-the-fold by
-     another road. */
-  .setuprail .railfind { flex:none; position:relative; padding:8px 10px 9px;
-                         border-bottom:1px solid var(--line); }
-  .setuprail .railq { width:100%; box-sizing:border-box; font:400 12.5px/1.3 var(--sans);
-                      color:var(--ink); background:var(--ground);
-                      border:1px solid var(--line); border-radius:var(--r-sm);
-                      padding:6px 26px 6px 9px; }
-  .setuprail .railq::placeholder { color:var(--ink-3); }
-  .setuprail .railq:focus { outline:none; border-color:var(--gold);
-                            box-shadow:0 0 0 2px var(--accent-glow); }
-  /* The browser's own clear affordance is inconsistent across engines and
-     invisible in dark mode on some, so the product draws its own and hides
-     theirs — one control, behaving the same everywhere. */
-  .setuprail .railq::-webkit-search-cancel-button { display:none; }
-  .setuprail .railqx { position:absolute; right:16px; top:50%; transform:translateY(-50%);
-                       background:none; border:0; cursor:pointer; line-height:1;
-                       font-size:15px; color:var(--ink-3); padding:2px 4px; }
-  .setuprail .railqx:hover { color:var(--ink); }
-  .setuprail .railqx:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
-  /* A rail that empties itself reads as a rail that broke (§45.2, §108.10). */
-  .setuprail .railnone { padding:14px 13px; color:var(--ink-3);
-                         font:400 12px/1.5 var(--sans); }
-
   .setuprail .raillist { overflow-y:auto; min-height:0;
                          /* A visible track rather than an overlay one: on macOS
                             a scrollbar that only appears once you are already
@@ -488,7 +459,7 @@
                          scrollbar-width:thin;
                          scrollbar-color:var(--line) transparent; }
 
-  /* ── AND IT NEVER SAYS "IT ENDS HERE" (§108.6, answering §100.5) ──────
+  /* ── AND IT NEVER SAYS "IT ENDS HERE" (§101.6, answering §100.5) ──────
      §100.5 refused to cap this rail six days ago, and its reason was not
      §28.3's loop — it was that "a list that says it ends here when it does not
      is worse than a page that scrolls." That objection is right, and it is
@@ -516,31 +487,10 @@
     content:""; display:block; position:sticky; bottom:0; z-index:1;
     height:22px; pointer-events:none;
     background:linear-gradient(to top, var(--surface), rgba(0,0,0,0)); }
-  /* FLEX SO A PILL CAN SIT AT THE END. The padding and the type are unchanged,
-     so a row without a pill is the row it always was (§108.15). */
-  .setuprail .ritem { display:flex; align-items:center; gap:8px;
-                      width:100%; text-align:left; background:none;
+  .setuprail .ritem { display:block; width:100%; text-align:left; background:none;
                       border:0; border-bottom:1px solid var(--line-soft);
                       padding:8px 13px; cursor:pointer;
                       font:500 13px/1.35 var(--sans); color:var(--ink-2); }
-  .setuprail .rilab { min-width:0; }
-  /* ── THE PILLS (§108.15) ──────────────────────────────────────────
-     THE ACCENT, AND ONE OF THE FEW SOLID FILLS IN THE PRODUCT (§41's budget).
-     It is spent here because the pill has exactly one meaning — something is
-     waiting — and it is never drawn for a zero, so a lit rail row is always
-     true. `--gold` on `--on-accent` is the pair declared for a filled accent,
-     so this cannot become white-on-gold (§38.4, six times). */
-  .setuprail .riwait, .setuprail .rgwait {
-      margin-left:auto; flex:none; background:var(--gold); color:var(--on-accent);
-      font:800 10px/1 var(--sans); letter-spacing:0; font-variant-numeric:tabular-nums;
-      min-width:17px; text-align:center; border-radius:99px; padding:3px 5px; }
-  /* SMALLER ON A HEADING, and that is not decoration: the heading is 9.5px
-     uppercase at .14em, so a row-sized pill beside it pushed "People & access"
-     onto a second line and made a folded group taller than an open row. The
-     heading also stops wrapping, or the pill can never be safe. */
-  .setuprail .rgroup { flex-wrap:nowrap; }
-  .setuprail .rgwait { margin-left:auto; margin-right:5px;
-                       font-size:9px; min-width:14px; padding:2px 4px; }
   .setuprail .ritem:hover { background:var(--surface-2); color:var(--ink); }
   .setuprail .ritem.on { background:var(--surface-2); color:var(--ink); font-weight:650;
                          box-shadow:inset 3px 0 0 var(--gold); }
@@ -563,7 +513,7 @@
   .setuppane .secrow button:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
   @media (max-width:900px){
     .setupsplit { grid-template-columns:1fr; }
-    /* THE CAP COMES OFF WHERE THE RAIL IS NOT A RAIL (§108.5). Below 900px the
+    /* THE CAP COMES OFF WHERE THE RAIL IS NOT A RAIL (§101.5). Below 900px the
        split stacks and this becomes a wrapping band ABOVE the page rather than
        a column beside it — so it is no longer competing with the window for
        height, and capping it would put a second scroll inside a page that is
@@ -577,7 +527,7 @@
     .setuprail .raillist { display:contents; }
   }
 
-  /* ══ SETUP · OVERVIEW (§108.10) ═══════════════════════════════════
+  /* ══ SETUP · OVERVIEW (§101.10) ═══════════════════════════════════
      The page the gear lands on: one strip saying how the cycle is going, and
      a list of what is waiting on the office.
 

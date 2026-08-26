@@ -22,6 +22,17 @@ glitch it replaces: slow, fast, unreachable, and refused.
 import json, pathlib, threading, http.server, socketserver, time, copy
 from playwright.sync_api import sync_playwright
 
+# ── THE TOUR IS NOT WHAT THIS FILE MEASURES (§107, §108.16) ──────────────
+# The onboarding tour auto-opens for a first-time viewer over HTTP, and its
+# dim layer covers the page — so every click here lands on `#tdim` and times
+# out. Suppressed as a RETURNING VIEWER would have it (the tour's own
+# "Skip for now" session flag), never by deleting or disabling the tour:
+# the tour has its own check, and a suppression that reached into its
+# internals would be this file quietly asserting the tour away.
+def _no_tour(pg):
+    pg.add_init_script("try{sessionStorage.setItem('smp.tour.later','1');}catch(e){}")
+
+
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 HTML = (ROOT / "SMP-Project-Folder/src/strategy-management-platform.html").read_bytes()
 SEED = json.loads((ROOT / "db/seed-state.json").read_text())
@@ -147,6 +158,7 @@ with sync_playwright() as p:
 
     def page():
         pg = b.new_page(viewport={"width": 1440, "height": 900})
+        _no_tour(pg)
         pg.on("pageerror", lambda e: errs.append(str(e)))
         return pg
 

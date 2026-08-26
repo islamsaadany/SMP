@@ -990,6 +990,27 @@ var CHAT = (function(){
     renderInbox: renderInbox,
     wireInbox: wireInbox,
     open: function(){ setOpen(true); },
-    unread: function(){ return state.unread; }
+    unread: function(){ return state.unread; },
+    /* ── HOW MANY ARE WAITING, FOR THE OVERVIEW (§108.10) ──────────────
+       The same `queue` action the inbox already calls, whose answer already
+       carries the two counts — so this is a second READER of one endpoint and
+       not a second endpoint, and the number the Overview prints is by
+       construction the number the Inbox's own tab prints.
+
+       IT DOES NOT TOUCH `box`. The office's page state belongs to the page:
+       writing box.threads from here would leave a half-built queue behind for
+       whenever the inbox is next opened, and `drawQueue()` would be painting
+       into a document that does not have it. The Overview wants two integers.
+
+       `null` RATHER THAN 0 ON EVERY FAILURE, including no server at all — the
+       caller draws nothing for a null and "nothing is waiting" for a 0, and
+       those are different things to say (§108.10, §93). */
+    officeQueue: function(cb){
+      if (!servable()) return cb(null, null);
+      post({ action:"queue" }, function(err, j){
+        if (err || !j) return cb(err || new Error("no answer"), null);
+        cb(null, { waiting: j.waiting | 0, flagged: j.flagged | 0 });
+      });
+    }
   };
 })();

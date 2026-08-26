@@ -198,6 +198,7 @@
 <script src="SLIDES"></script>
 <script src="SEARCHSEL"></script>
 <script src="CHAT"></script>
+<script src="TOUR"></script>
 <script src="SYNC"></script>
 <script>
 
@@ -1421,6 +1422,11 @@
        ten seconds (§35, §71.2). Called here so it is also the place the clock
        is STOPPED when a paint navigates away from the page. */
     CHAT.wireInbox();
+    /* The tour, if one is running. It holds SELECTORS rather than nodes —
+       this paint has just replaced every element its spotlight was drawn
+       around — so it re-resolves them and puts the shade and the card back.
+       Like the inbox above, nothing in it ever calls paint(). */
+    TOUR.onPaint();
     clipTitles();
     /* PUT THE SCREEN BACK BEFORE THE BROWSER SHOWS IT (§75). Synchronous, in
        the same frame as the rebuild, so nothing is ever drawn at the top and
@@ -4244,6 +4250,16 @@
   function wireArrange(){
     document.querySelectorAll("[data-arrange]").forEach(function(b){
       b.addEventListener("click", function(){ ARRANGE = !ARRANGE; paint(); });
+    });
+
+    /* ── REPLAYING THE GUIDED TOUR (spec 016) ────────────────────────
+       The Knowledge base's one entry. It starts the story this viewer's
+       roles map to and IGNORES the stored "don't show again" — that mark
+       answers "should it open by itself", which is a different question
+       from "show me it now", and conflating the two would leave anybody who
+       once pressed it with no way back. */
+    document.querySelectorAll("[data-tour-replay]").forEach(function(b){
+      b.addEventListener("click", function(){ TOUR.start(this.dataset.tourReplay); });
     });
 
     /* ── Reporting is a MODE now (§63.1) ─────────────────────────────

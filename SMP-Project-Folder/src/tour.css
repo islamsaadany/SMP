@@ -1,0 +1,96 @@
+/* ══ THE ONBOARDING TOUR (spec 016) ═════════════════════════════════════════
+   Ported from the signed-off mockup
+   (design-mockups/onboarding-tour/2026-08-26_spotlight-tour.html, rev 4).
+
+   EVERY COLOUR IS A TOKEN. The tour floats over whatever page it is
+   explaining, in whatever palette and theme the tenant and the viewer have
+   chosen, so a literal here is a light-mode assumption that survives into
+   dark — the fault §25 records against the zebra stripe.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.tourdock { position:fixed; inset:0; z-index:70; }
+.tourdock[hidden] { display:none; }
+
+/* NOT ON A PROJECTOR. Off the class present.js already sets, so there is no
+   second piece of state to keep in step — the chat corner is suppressed the
+   same way and for the same reason. */
+body.presenting .tourdock { display:none; }
+
+/* The click absorber is TRANSPARENT and does nothing but swallow presses.
+   All the dimming is painted by the masked rect below, because a dim laid
+   over a lit control washes out the very thing the step is about. */
+.tourdock .tdim { position:absolute; inset:0; background:transparent; }
+
+.tourdock .tsvg { position:absolute; inset:0; width:100%; height:100%;
+                  pointer-events:none; }
+.tourdock #tshade { fill:rgba(9,14,24,.62); }
+:root[data-theme="dark"] .tourdock #tshade,
+:root:not([data-theme="light"]) .tourdock #tshade { fill:rgba(0,0,0,.68); }
+
+.tourdock .tring { fill:none; stroke:var(--gold); stroke-width:2;
+                   filter:drop-shadow(0 0 6px rgba(201,162,77,.55)); }
+
+/* ── THE CARD ─────────────────────────────────────────────────────────────
+   Slightly transparent on purpose (Islam, rev 2: "make it a bit transparent
+   in general"): where the card has no clear space and must dock over the
+   page, what is under it stays readable through it. */
+.tourdock .tcard {
+  position:absolute; width:310px; max-width:calc(100vw - 24px);
+  background:color-mix(in srgb, var(--surface) 92%, transparent);
+  -webkit-backdrop-filter:blur(5px); backdrop-filter:blur(5px);
+  border:1px solid var(--line); border-radius:10px;
+  box-shadow:0 14px 40px rgba(9,14,24,.35);
+  color:var(--ink);
+}
+/* A browser without color-mix still gets a readable card rather than a
+   see-through one — the fallback is the opaque surface, never nothing. */
+@supports not (background: color-mix(in srgb, red 50%, transparent)) {
+  .tourdock .tcard { background:var(--surface); }
+}
+/* The welcome, the finish and the close prompt are about the TOUR rather than
+   about anything on the page, so they sit in the middle and are fully opaque:
+   there is nothing behind them worth reading through. */
+.tourdock .tcard.tcentre {
+  left:50%; top:50%; transform:translate(-50%,-50%);
+  width:390px; background:var(--surface);
+}
+
+.tourdock .tctop { display:flex; align-items:center; padding:11px 14px 0; }
+.tourdock .tstep { font-size:var(--fs-micro,10.5px); text-transform:uppercase;
+                   letter-spacing:.09em; color:var(--gold-deep); font-weight:600; }
+.tourdock .tx { margin-left:auto; font:inherit; font-size:15px; line-height:1;
+                background:none; border:0; color:var(--ink-3); cursor:pointer;
+                padding:2px 5px; border-radius:4px; }
+.tourdock .tx:hover { color:var(--ink); background:var(--surface-2); }
+
+.tourdock .tcard h3 { font-size:14.5px; margin:6px 14px 0; letter-spacing:.005em;
+                      text-wrap:balance; }
+.tourdock .tbody { font-size:12.5px; color:var(--ink-2); margin:6px 14px 12px; }
+
+.tourdock .tdots { display:flex; gap:5px; padding:0 14px 10px; }
+.tourdock .tdots i { width:6px; height:6px; border-radius:99px; background:var(--line); }
+.tourdock .tdots i.on { background:var(--gold-deep); }
+
+.tourdock .tfoot { display:flex; align-items:center; gap:12px;
+                   border-top:1px solid var(--line-soft); padding:10px 14px; }
+.tourdock .tback { font:inherit; font-size:12px; background:none; border:0;
+                   color:var(--ink-2); cursor:pointer; padding:0; font-weight:600; }
+.tourdock .tback:hover { color:var(--ink); text-decoration:underline; }
+.tourdock .tquiet { font:inherit; font-size:12px; background:none; border:0;
+                    color:var(--ink-3); cursor:pointer; padding:0; }
+.tourdock .tquiet:hover { color:var(--ink); text-decoration:underline; }
+.tourdock .tnext { font:inherit; font-size:12.5px; font-weight:600; margin-left:auto;
+                   background:var(--panel); color:var(--panel-ink); border:0;
+                   border-radius:7px; padding:8px 18px; cursor:pointer; }
+.tourdock .tnext:hover { background:var(--panel-hover); }
+.tourdock .tghost { font:inherit; font-size:12.5px; font-weight:600;
+                    background:var(--surface); color:var(--ink-2);
+                    border:1px solid var(--line); border-radius:7px;
+                    padding:7px 14px; cursor:pointer; }
+.tourdock .tghost:hover { border-color:var(--gold-deep); color:var(--ink); }
+/* The two answers to the × sit together at the end of the row; "Keep the
+   tour" stays at the other end, because it is not one of the two answers —
+   it is the way out of having been asked. */
+.tourdock .tchoice { margin-left:auto; display:flex; gap:8px; }
+
+.tourdock button:focus-visible { outline:2px solid var(--focus); outline-offset:2px; }

@@ -609,7 +609,17 @@ var SYNC = (function () {
           LIVE = clone(data.state);
           live = true;
           person = data.person || null;
-          land(function () { if (person) chromeFor(paint); else paint(); });
+          land(function () {
+            if (person) chromeFor(paint); else paint();
+            /* ── AND ONLY NOW IS THERE ANYTHING TO SHOW SOMEBODY ──────
+               The onboarding tour offers itself here and nowhere else: this
+               is after the one paint that puts a true page on screen, so a
+               first-time viewer is never handed a spotlight on the grey
+               skeleton (§94.10). It declines in silence — no session, no
+               story for their roles, already answered, a projector — which
+               is the common case and must stay cheap. */
+            TOUR.offer(person);
+          });
           lastSaved = serialize();
           setInterval(save, 5000);
 

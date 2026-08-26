@@ -2911,13 +2911,32 @@ function renderKB(){
       ["mail","Email"]
     ].map(function(x){ return '<a href="#kb-' + x[0] + '">' + x[1] + '</a>'; }).join("") + '</div>';
 
+  /* ── THE TOUR'S ONE WAY BACK IN (spec 016) ───────────────────────
+     Explanation lives here (v3.5), so the replay of the guided tour lives
+     here too rather than growing furniture of its own on a page somebody
+     visits for another reason (§90).
+
+     ABSENT, NEVER DISABLED, when this viewer's roles match no story: a
+     button that explains it cannot help you is worse than no button, and
+     there is nothing the person could do to earn it. */
+  var tourStory = (typeof TOUR !== "undefined") ? TOUR.storyFor(viewer()) : null;
+  var tourBlock = tourStory
+    ? '<div class="kb-sec" id="kb-tour"><h3>The guided tour</h3>' +
+      '<p class="kb-p">A short walk through the platform on the worked example — ' +
+      'the demo data, labelled the whole time, so nothing you see belongs to your ' +
+      'own tenant and nothing can be saved. It opens by itself the first time you ' +
+      'sign in; this is how you see it again.</p>' +
+      '<p><button type="button" class="editbtn" data-tour-replay="' + esc(tourStory) +
+      '">Start the tour</button></p></div>'
+    : '';
+
   return cfgHead("Knowledge base",
       ['<span class="pill kind">Everyone</span>', secs.length + ' sections'],
       null, false) +
     '<p class="kb-lede">How the platform works, in one place. This grows — anything we ' +
       'settle that a reader would need to know belongs here rather than in a note under ' +
       'the screen it happens to affect.</p>' +
-    toc + '<div class="kb">' + secs.join("") + '</div>';
+    toc + '<div class="kb">' + tourBlock + secs.join("") + '</div>';
 }
 
 

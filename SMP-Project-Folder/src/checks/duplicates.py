@@ -15,7 +15,10 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(70)
     pg.click('.setuprail [data-setupgo="people"]'); pg.wait_for_timeout(1100)
     ck("a clean register shows no duplicate marks", pg.eval_on_selector_all('.dupemark',"e=>e.length")==0)
-    ck("...and no Duplicates filter", pg.evaluate("!document.querySelector('[data-tkfilter=\"people|dupe\"]')"))
+    # THE QUICK FILTERS ARE GONE (§111, Islam: "remove the quick filters"), so a
+    # clean register is one with nobody in the attention queue for a duplicate.
+    ck("...and nobody is queued for one",
+       pg.evaluate("attentionQueue().filter(a=>a.why[0].kind==='dupe').length")==0)
 
     # make three kinds of duplicate, exactly as the real file could
     print("── with real duplicates injected")
@@ -29,11 +32,21 @@ with sync_playwright() as p:
       PEOPLE.push({key:'twin2', name:'Exactly The Same Person', empId:'B'});
       paint(); }""")
     pg.wait_for_timeout(900)
-    marks = pg.eval_on_selector_all('.dupemark',"e=>e.map(x=>x.textContent.trim())")
-    print("     marks:", marks)
-    ck("the employee-number pair is marked", marks.count("Emp ID twice")>=2, marks)
-    ck("the shared address pair is marked", marks.count("Email twice")>=2, marks)
-    ck("the identical full names are marked", marks.count("Name twice")>=2, marks)
+    # THE MARK IS A GLYPH AND THE WORDS ARE ON ITS HOVER (§111.4). It used to
+    # read "Emp ID twice" beside the name, in the frozen column — so any row
+    # carrying one wrapped and stood 13px taller than its neighbours. What is
+    # asserted is unchanged: that each kind of collision is marked and that the
+    # mark SAYS WHICH. It is read from the title now, which is where a check
+    # should have been reading it all along — the words are the contract, the
+    # glyph is a rendering of them.
+    marks = pg.eval_on_selector_all('.dupemark',"e=>e.map(x=>x.title)")
+    print("     marks:", [m[:44] for m in marks])
+    ck("the employee-number pair is marked",
+       len([m for m in marks if m.lower().startswith("emp id")])>=2, marks)
+    ck("the shared address pair is marked",
+       len([m for m in marks if m.lower().startswith("email")])>=2, marks)
+    ck("the identical full names are marked",
+       len([m for m in marks if m.lower().startswith("name")])>=2, marks)
     ck("the mark names the other rows",
        "is on 2 rows" in pg.eval_on_selector('.dupemark',"e=>e.title"),
        pg.eval_on_selector('.dupemark',"e=>e.title"))
@@ -62,19 +75,31 @@ with sync_playwright() as p:
        pg.evaluate("""() => [].slice.call(document.querySelectorAll('.peoplecfg tbody tr'))
           .filter(r=>/Ahmed Mostafa Mohamed/.test(r.innerText) && r.querySelector('.dupemark')).length""")==0)
 
-    print("── the filter")
-    ck("a Duplicates chip appears", pg.evaluate("!!document.querySelector('[data-tkfilter=\"people|dupe\"]')"))
-    pg.evaluate("document.querySelector('[data-tkfilter=\"people|dupe\"]').click()"); pg.wait_for_timeout(800)
-    vis = pg.evaluate("() => [].slice.call(document.querySelectorAll('.peoplecfg tbody tr')).filter(r=>!r.hidden && !r.classList.contains('newrow')).length")
-    ck("it narrows to exactly the six affected rows (%d)" % vis, vis==6, vis)
-    ck("every visible row carries a mark",
-       pg.evaluate("""() => [].slice.call(document.querySelectorAll('.peoplecfg tbody tr'))
-          .filter(r=>!r.hidden && !r.classList.contains('newrow'))
-          .every(r=>!!r.querySelector('.dupemark'))"""))
+    # ── THE QUEUE, NOT A FILTER (§111.2) ─────────────────────────────
+    # Islam: "I don't know which lines I should go and check", and then: "remove
+    # the quick filters". The Duplicates chip was how you found these rows; the
+    # attention queue is how you find them now, and it does the thing the chip
+    # could not — it opens them one after another with the reason stated.
+    print("── the queue")
+    q = pg.evaluate("attentionQueue().filter(a=>a.why.some(w=>w.kind==='dupe')).map(a=>a.key)")
+    ck("all six affected people are queued (%d)" % len(q), len(q)==6, q)
+    ck("and the reason names the collision",
+       pg.evaluate("""()=>{const a=attentionQueue().filter(x=>x.why[0].kind==='dupe')[0];
+          return !!a && /same (employee number|address|name)/i.test(a.why[0].say);}"""))
+    ck("the button carries the count",
+       pg.evaluate("""()=>{const b=document.querySelector('.attnn');
+          return !!b && parseInt(b.textContent,10) >= 6;}"""))
+    # ── AND THE HEADER SAYS IT ONCE, NOT SIX TIMES (§111) ────────────
+    # It carried a chip per KIND of collision — "1 employee number on more than
+    # one row", "1 address…", "1 name…" — beside three more counts and five
+    # filter chips, over two rows that ran off the right edge at 1280. They are
+    # one button, and it is the one that opens them.
     print("── header")
-    chips = pg.eval_on_selector_all('.phead2 .chip',"e=>e.map(x=>x.textContent.trim())")
-    print("     chips:", [c for c in chips if "row" in c])
-    ck("the header counts them too", any("more than one row" in c for c in chips), chips)
+    ck("no alarm chips are left in the header",
+       pg.eval_on_selector_all('.phead2 .chip', "e=>e.map(x=>x.textContent)")
+         .count("more than one row") == 0)
+    ck("the count is on the button that opens them",
+       pg.evaluate("!!document.querySelector('[data-attn] .attnn')"))
     print("\nerrors:", errs or "none")
     print("ALL GREEN" if bad==0 and not errs else str(bad)+" FAILED")
     b.close()

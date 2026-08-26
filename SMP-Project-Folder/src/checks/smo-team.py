@@ -129,7 +129,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(300)
     onClient = pg.eval_on_selector_all(".kmenu button", "e=>e.map(x=>x.textContent.trim())")
     ck("a client row still offers them the ordinary actions",
-       any("Retire" in t for t in onClient) and any("Edit this row" in t for t in onClient),
+       any("Retire" in t for t in onClient) and any("Edit details" in t for t in onClient),
        onClient)
     ck("...and never Delete permanently",
        not any("Delete" in t for t in onClient), onClient)
@@ -210,9 +210,12 @@ with sync_playwright() as p:
     # check was wrong, not the register.
     pg.evaluate("(k)=>{ revokePersonRole(k,'smoteam','group'); ADDROLE=null; ADDROLE_KIND=''; paint(); }", floor)
     pg.wait_for_timeout(500)
-    ck("the open row shows Save and Cancel rather than a menu",
-       pg.query_selector('.kebab[data-pmenu="%s"]' % floor) is None and
-       pg.query_selector("[data-rowsave]") is not None)
+    # THE DIALOG IS WHERE SAVE AND CANCEL ARE NOW (§111). The row keeps its ⋮
+    # whatever is open, because the register no longer edits — so the question
+    # is not "did the menu turn into two buttons" but "is the editor on screen".
+    ck("the dialog is open, with its own Save and Cancel",
+       pg.query_selector("#modal-b .pdlg") is not None and
+       pg.query_selector("[data-pdlg-close]") is not None)
     # WITH NO UNIT SET: refused, and it SAYS SO. Nothing granted on its own is
     # what the old pair did silently, so both ends are asked (§94.2).
     pg.evaluate("(k)=>{ attachPersonAt(personBy(k), null); paint(); }", floor)

@@ -17,13 +17,12 @@ with sync_playwright() as p:
         pg.click('.setuprail [data-railgrp="%s"]'%g); pg.wait_for_timeout(70)
     pg.click('.setuprail [data-setupgo="people"]'); pg.wait_for_timeout(1100)
     # §79.2: the whole-table pen is gone. A row is opened from its own menu.
-    OPEN_ROW = """() => { const rs=[].slice.call(document.querySelectorAll('[data-pmenu]'));
-      const k=rs[rs.length-3].dataset.pmenu;
-      document.querySelector('[data-pmenu="'+k+'"]').click();
-      document.querySelector('[data-pedit="'+k+'"]').click();
-      return k; }"""
-    ROWKEY = pg.evaluate(OPEN_ROW); pg.wait_for_timeout(900)
-
+    # ── THE REGISTER ONLY READS NOW (§111) ────────────────────────────
+    # Every trial that used to live here typed into a field on an open ROW and
+    # asked whether the box moved. There are no fields on a row: editing is a
+    # dialog, and while it is open the register is inert and covered. So what is
+    # asserted changes into what can still go wrong — the presses that DO
+    # repaint the register in place.
     def trial(label, prep, fire):
         """prep runs BEFORE the scroll is set, so the probe's own focus() cannot
            be mistaken for the product moving the box."""
@@ -38,44 +37,21 @@ with sync_playwright() as p:
         print(("  ok      " if ok else "  JUMPED  ") + label,
               "| box", before, "->", after, "| page", y0, "->", y1)
 
-    trial("editing a job title on the open row",
-      """() => { const el=document.querySelector('[data-ptitle]');
-                 el.focus(); el.setSelectionRange(3,3); window.__k=el.dataset.ptitle; }""",
-      """() => { const el=document.querySelector('[data-ptitle="'+window.__k+'"]');
-                 el.value='Zed'; el.dispatchEvent(new Event('change',{bubbles:true})); }""")
-    print("          focus kept on the same field:",
-          pg.evaluate("!!(document.activeElement.dataset && document.activeElement.dataset.ptitle===window.__k)"))
-
-    trial("opening the role picker", None,
-      """() => { const b=document.querySelector('[data-prole-open]'); if(b) b.click(); }""")
-
-    # THIS TRIAL HAD BEEN FIRING NOTHING (§51.11, in the file that exists to
-    # catch that class of thing). It asked for `[data-prole-kind]`, a selector
-    # the register has never carried — the picker's role select is
-    # `data-prole-pick` — and `if(!el) return` made the miss silent, so the
-    # trial reported "no jump" every run without touching a control. And
-    # 'contrib' is not grantable (§55: the floor is derived, never given), so
-    # even against the right selector it would have changed nothing.
-    trial("choosing a role in it", None,
-      """() => { const el=document.querySelector('[data-prole-pick]');
-                 if(!el) throw new Error('the role picker is not there');
-                 el.value='owner';
-                 el.dispatchEvent(new Event('change',{bubbles:true})); }""")
-
-    trial("changing where somebody sits", None,
-      """() => { const el=document.querySelector('[data-pat]'); if(!el) return;
-                 el.value='mobile'; el.dispatchEvent(new Event('change',{bubbles:true})); }""")
-
-    # THE VALUE HAS TO BE DISPATCHED, NOT ASSIGNED. Setting `.value` fires no
-    # event, and what the Add row reads is `input` — so this measured a paint
-    # that added nobody, and printed "33 -> 33" while reporting no jump. A
-    # print is not an assertion; the count is asserted now (§50.6).
+    trial("opening the row menu", None,
+      """() => { const rs=[].slice.call(document.querySelectorAll('[data-pmenu]'));
+                 rs[rs.length-3].click(); }""")
+    trial("closing it again", None,
+      """() => { const rs=[].slice.call(document.querySelectorAll('[data-pmenu]'));
+                 rs[rs.length-3].click(); }""")
+    # ADDING SOMEBODY IS THE DIALOG'S NOW, and the register repaints when it
+    # closes — which is the one moment the box could move under you.
     n0 = pg.evaluate("PEOPLE.length")
-    trial("adding a person", None,
-      """() => { const i=document.getElementById('newPersonName');
+    trial("adding a person, through the dialog", None,
+      """() => { document.querySelector('[data-padd-open]').click();
+                 const i=document.querySelector('#modal-b [data-pname]');
                  i.value='Test Person Added';
-                 i.dispatchEvent(new Event('input',{bubbles:true}));
-                 document.querySelector('[data-padd="1"]').click(); }""")
+                 i.dispatchEvent(new Event('change',{bubbles:true}));
+                 document.querySelector('[data-pdlg-add]').click(); }""")
     n1 = pg.evaluate("PEOPLE.length")
     if n1 != n0 + 1:
         bad += 1
@@ -88,6 +64,7 @@ with sync_playwright() as p:
                  i.value='a'; i.dispatchEvent(new Event('input',{bubbles:true})); }""")
     trial("sorting a column", None,
       """() => { document.querySelector('[data-tksort]').click(); }""")
+
 
     # ── AND THE ACT OF OPENING A ROW, ON THE OTHER SIX TABLES (§110) ──
     # Everything above opens a row FIRST and then measures repaints, so the

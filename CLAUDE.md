@@ -1368,6 +1368,47 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
+- **THE REGISTER STOPS BEING A FORM (since v3.35, §111):** Islam's six —
+  keep my column choice and make all-on neat; edit in a dialog; *"they said"*
+  becomes a button at the top that opens the pending people one after another;
+  Add opens it too; drop the row count and the quick filters; make the top panel
+  concise. **ONE THING FOLLOWS AND IS WHY THEY HANG TOGETHER: the table no
+  longer edits anything** — every collision this register has had (§110.1's
+  *+ role* under the frozen Cancel, §110.8's fields over their neighbours, the
+  Add row's boxes under the wrong headings) was a control clicked inside a 158px
+  cell, and none survives the move. **THE SAME `data-` ATTRIBUTES**, so moving
+  the form changed where it is drawn and nothing about how it saves — but
+  `fieldWire` and the control wiring now take a ROOT, or re-running `wire()`
+  binds a second handler to the page behind (§24, §47.2). **`paint()` REPAINTS
+  THE DIALOG TOO**, one line at its end rather than one per handler: the
+  dialog's controls are the register's and all end in `paint()`, so *+ role*
+  pressed inside it changed nothing at all. **`NEWDRAFT` IS A PERSON BEFORE IT
+  IS ON THE REGISTER** — not in PEOPLE, but `personBy()` answers for it, so Add
+  and Edit are one form. **AND THE FIELD BEING TYPED IS COMMITTED BEFORE THE
+  PRESS**: fields write on `change`, which for a text input means on blur, so
+  the last box typed into has not been written when somebody reaches for the
+  button — a mouse click blurs on the way past, which is the almost-always that
+  hid it.
+- **A MARK BELONGS INSIDE THE BLOCK IT MARKS (§111.4):** the declaration note,
+  the duplicate mark and the Official BU disagreement were each placed NEXT TO a
+  value, and `.val` and `<b>` are `display:block` under §88's clip rule — so each
+  put its row at 51px against its neighbours' 39px. Three times, in one section.
+  One glyph inside the value's own line, the sentence on the hover, the full
+  words in the queue: `◎` a declaration, `‖` a collision, `≈` a resemblance,
+  `≠` a disagreement.
+- **THE COUNT AND THE QUEUE ARE ONE LIST (§111.2):** `attentionQueue()` is what
+  the button counts AND what it opens — a count that cannot take you to what it
+  counts is a count that makes work (§16.7's rule applied to a notice). **One
+  entry per person, not per problem**; worst first then by name, so it is stable
+  between two people; **and it walks the list it started with**, because fixing
+  somebody removes them and a recomputed queue renumbers under whoever is
+  working through it. **Units with no custodian cannot join it** — not a person,
+  so there would be nobody to open; it keeps its own line (§93.4).
+- **EVERY WAY OUT OF A DIALOG IS THE SAME WAY OUT (§111.6):** the × and Escape
+  closed the overlay directly, which was fine when it held a wizard and not when
+  it holds a form with `PDLG`, a row snapshot and a draft behind it. **And the
+  body is emptied on close** — a form left in the hidden overlay collected a
+  second handler on every repaint, for ever (§3.2: hidden is not gone).
 - **THE UNIT CELL SAYS WHERE, THE ROLES CELL SAYS WHAT (since v3.34, §110):**
   Islam, of the picker's second half: *"choose where is very strange sentence.
   make it Unit and it's already in a cell what am I missing here?"* **Nothing,
@@ -1633,6 +1674,8 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
+                                # Add, and neat with every column on (§111, over HTTP)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
@@ -1683,7 +1726,34 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.34: giving somebody a role**
+*Last Updated: 2026-08-26 &mdash; **v3.35: the register stops being a form**
+(&sect;111). Six decisions from Islam after two rounds of mockups, and **one
+thing follows from them that nobody asked for, which is why they hang
+together: with editing, adding and the queue all in a dialog, the table no
+longer edits anything.** Every collision this register has had &mdash;
+&sect;110.1's *+ role* under the frozen Cancel, &sect;110.8's fields painting
+over their neighbours, the Add row's three boxes under the wrong headings
+&mdash; was a control being clicked inside a 158px cell, and not one of them
+survives the move. **THE COUNT AND THE QUEUE ARE THE SAME LIST**: six alarm
+chips used to sit across the header naming numbers and pointing at rows to find
+by eye, which is exactly *"I don't know which lines I should go and check"* &mdash;
+one button now, and pressing it opens the first of them, says why above the
+fields, and walks to the next in the same place. **THREE THINGS BESIDE A VALUE
+WERE ALL ON A SECOND LINE** &mdash; the declaration note, the duplicate mark and
+the Official BU disagreement &mdash; each putting its row at 51px against its
+neighbours' 39px: &sect;88's own wrapping fault three times over, because `.val`
+and `&lt;b&gt;` are `display:block` and a mark placed BESIDE one starts a new
+line. **AND THE EMAIL FINALLY HOLDS AN EMAIL** (133px shown of 235px needed, on
+33 of 33 rows): it could not be given the room while the table still edited,
+because widening it alone pushed the controls further under the frozen columns.
+Two faults were found by rewriting the checks rather than by reading: the
+identity ladder was being called with an object instead of two arguments, so
+&sect;87's stop never fired and a second row for somebody already here went
+straight in; and the dialog had no *Add anyway*, which &sect;87.3 requires. The
+new check was proved able to fail before its green run was believed &mdash;
+**17 failures** against the previous build.*
+
+*Earlier: 2026-08-26 &mdash; **v3.34: giving somebody a role**
 (&sect;110). Islam: *"in the people registry I'm trying to set business unit
 owners as roles and it keeps failing with no error message."* **THE CONTROL WAS
 PRESENT, ENABLED, CORRECTLY SIZED AND UNREACHABLE.** &sect;69.1 put the picker's

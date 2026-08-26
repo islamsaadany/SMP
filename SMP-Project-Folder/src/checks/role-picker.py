@@ -54,12 +54,22 @@ def people(pg):
 
 
 def open_row(pg, key):
-    """From script, never pg.click(): playwright scrolls a target into view
-    before pressing it, and whether the box moves is what section 8 measures."""
+    """Opens the person DIALOG (§111): the register stopped editing inline, so
+    every field this file presses now lives in the platform's own modal.
+
+    From script, never pg.click(): playwright scrolls a target into view before
+    pressing it, and section 7 measures whether anything moved."""
     pg.evaluate("(k)=>document.querySelector('[data-pmenu=\"'+k+'\"]').click()", key)
     pg.wait_for_timeout(200)
     pg.evaluate("(k)=>document.querySelector('[data-pedit=\"'+k+'\"]').click()", key)
-    pg.wait_for_timeout(400)
+    pg.wait_for_timeout(500)
+
+
+def close_row(pg):
+    """Save and let the register repaint — the row only shows what was typed
+    once the dialog is closed, which is the trade §111 took deliberately."""
+    pg.evaluate("()=>{const b=document.querySelector('[data-pdlg-close]'); if(b) b.click();}")
+    pg.wait_for_timeout(500)
 
 
 def set_unit(pg, key, at):
@@ -128,9 +138,9 @@ with sync_playwright() as p:
 
     # ── 2. THE ORDINARY CASE, BOTH ENDS ──────────────────────────────
     print("\n2. the role lands where the Unit says")
-    for at, role, want in (("mobile", "Business unit owner", {"role": "owner", "at": "mobile"}),
+    for at, role, want in (("mobile", "BU owner", {"role": "owner", "at": "mobile"}),
                            ("mobile", "Strategy custodian", {"role": "custodian", "at": "mobile"}),
-                           ("fn:finance", "Supporting function head", {"role": "fnhead", "at": "fn:finance"}),
+                           ("fn:finance", "Function head", {"role": "fnhead", "at": "fn:finance"}),
                            ("co:distribution", "Company CEO", {"role": "cceo", "at": "co:distribution"})):
         people(pg)
         open_row(pg, "cfo")
@@ -143,9 +153,14 @@ with sync_playwright() as p:
            any(r["role"] == want["role"] and r["at"] == want["at"] for r in held), held)
         # AND THE ROW SAYS SO. The retired case proves why: a grant can be
         # written and never drawn, which is the failure nobody can see.
+        ck(role + ": nothing is refused", stop_text(pg) is None, stop_text(pg))
+        # AND THE ROW SAYS SO, once the dialog is out of the way. The register
+        # repaints on close (§111.6), which is the one moment the two are
+        # compared — a grant written and never drawn is what a retired row used
+        # to do, and it is still the failure nobody can see.
+        close_row(pg)
         ck(role + " at " + at + " — the row", role.lower() in (chip_text(pg, "cfo") or "").lower(),
            chip_text(pg, "cfo"))
-        ck(role + ": nothing is refused", stop_text(pg) is None, stop_text(pg))
 
     # ── 3. A SEAT OVER THE GROUP IGNORES THE UNIT (§92) ──────────────
     # Somebody sitting in Mobile can be the Super user; the Unit cell has
@@ -173,7 +188,7 @@ with sync_playwright() as p:
     set_unit(pg, "cfo", "")
     pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
     pg.wait_for_timeout(300)
-    pick_role(pg, "cfo", "Business unit owner")
+    pick_role(pg, "cfo", "BU owner")
     said = stop_text(pg) or ""
     ck("no Unit: nothing granted", roles_of(pg, "cfo") == [], roles_of(pg, "cfo"))
     ck("no Unit: the row says to set it", "Unit" in said and said != "", said)
@@ -201,7 +216,7 @@ with sync_playwright() as p:
     set_unit(pg, "cfo", "")
     pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
     pg.wait_for_timeout(300)
-    pick_role(pg, "cfo", "Business unit owner")
+    pick_role(pg, "cfo", "BU owner")
     ck("refused first", roles_of(pg, "cfo") == [], roles_of(pg, "cfo"))
     set_unit(pg, "cfo", "nigeria")
     held = roles_of(pg, "cfo")
@@ -225,10 +240,12 @@ with sync_playwright() as p:
     set_unit(pg, "cfo", "")
     pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
     pg.wait_for_timeout(300)
-    pick_role(pg, "cfo", "Business unit owner")
+    pick_role(pg, "cfo", "BU owner")
     ck("refused", stop_text(pg) is not None)
-    pg.evaluate("()=>document.querySelector('[data-rowcancel]').click()")
-    pg.wait_for_timeout(400)
+    # Cancel is the dialog's now (§111): `data-rowcancel` was the open row's,
+    # and there is no open row.
+    pg.evaluate("()=>document.querySelector('[data-pdlg-cancel]').click()")
+    pg.wait_for_timeout(500)
     ck("Cancel takes the refusal away", stop_text(pg) is None, stop_text(pg))
     open_row(pg, "cfo")
     ck("and reopening the row starts clean — the picker is shut",
@@ -259,11 +276,11 @@ with sync_playwright() as p:
     set_unit(pg, "cfo", "nigeria")
     pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
     pg.wait_for_timeout(300)
-    pick_role(pg, "cfo", "Business unit owner")
+    pick_role(pg, "cfo", "BU owner")
     mid = pg.evaluate("[JSON.stringify(UNIT_ROLES.nigeria), personBy('cfo').unit||null]")
     ck("the grant landed first", mid != before, mid)
-    pg.evaluate("()=>document.querySelector('[data-rowcancel]').click()")
-    pg.wait_for_timeout(500)
+    pg.evaluate("()=>document.querySelector('[data-pdlg-cancel]').click()")
+    pg.wait_for_timeout(600)
     after = pg.evaluate("[JSON.stringify(UNIT_ROLES.nigeria), personBy('cfo').unit||null]")
     ck("Cancel restores the unit's head and the person's own place",
        after == before, str(before) + " -> " + str(after))
@@ -282,60 +299,58 @@ with sync_playwright() as p:
         " Math.round(document.querySelector('[data-pmenu=\"'+k+'\"]')"
         ".closest('tr').getBoundingClientRect().top)]", key)
     open_row(pg, key)
+    # THE ROW ITSELF, FOUND BY ITS KEY. There is no `tr.tk-open` any more — the
+    # register does not open rows — so the question becomes the one that always
+    # mattered: is the row where it was when you pressed it.
     af = pg.evaluate(
-        "()=>[document.querySelector('.cfg.peoplebox').scrollTop,"
-        " Math.round(document.querySelector('tr.tk-open').getBoundingClientRect().top)]")
+        "(k)=>[document.querySelector('.cfg.peoplebox').scrollTop,"
+        " Math.round(document.querySelector('[data-pmenu=\"'+k+'\"]')"
+        ".closest('tr').getBoundingClientRect().top)]", key)
     ck("the register does not scroll", b4 == af, str(b4) + " -> " + str(af))
-    # AND THE CURSOR STILL LANDS. Holding the row still by not focusing at all
-    # would pass the line above and lose the feature.
-    ck("the cursor is in the row's first field",
+    # AND THE CURSOR LANDS IN THE DIALOG. Opening it without focusing anything
+    # would pass the line above and lose the feature (§110.7's pair, one surface
+    # along).
+    ck("the cursor is in the dialog's first field",
        pg.evaluate("()=>{const a=document.activeElement;"
-                   "return !!(a && a.dataset && a.dataset.pname);}"))
+                   "return !!(a && a.closest && a.closest('#modal-b .pdf'));}"))
+    close_row(pg)
 
-    # ── 8. THE FIELDS SIT INSIDE THEIR CELLS ─────────────────────────
-    # Islam: "the boxes are overflowing on each other." The measure is that
-    # nothing moves, not merely that nothing overflows — a fix that shrank the
-    # columns would stop the overlap and move every cell in the row.
-    print("\n8. an open row's fields fit their cells, and move nothing")
+    # ── 8. THE TABLE HAS NOTHING TO OVERFLOW WITH (§111) ────────────
+    # Section 8 used to measure an open row's fields against their cells, and
+    # the answer now is that there are none: the register only reads. So the
+    # assertion changes into the one that made all of those impossible — no
+    # input, no select and no Save/Cancel column anywhere in the table, at any
+    # width — and the fields are measured where they actually live.
+    print("\n8. the table reads, the dialog writes")
     for w in (1600, 1440, 1280, 1100):
         pg.set_viewport_size({"width": w, "height": 900})
         people(pg)
-        closed = pg.evaluate(
-            "()=>[...document.querySelectorAll('.peoplecfg thead th')]"
-            ".map(t=>Math.round(t.getBoundingClientRect().width))")
+        ck("%d: no field in the table" % w,
+           pg.evaluate("document.querySelectorAll('.peoplecfg input, .peoplecfg select').length") == 0,
+           pg.evaluate("document.querySelectorAll('.peoplecfg input, .peoplecfg select').length"))
+        ck("%d: every row is one line" % w,
+           pg.evaluate("""()=>{const hs={};
+             document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
+               const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
+             return Object.keys(hs).length===1;}"""),
+           pg.evaluate("""()=>{const hs={};
+             document.querySelectorAll('.peoplecfg tbody tr').forEach(r=>{
+               const h=Math.round(r.getBoundingClientRect().height); hs[h]=(hs[h]||0)+1;});
+             return JSON.stringify(hs);}"""))
         open_row(pg, "cfo")
-        pg.evaluate("()=>document.querySelector('[data-prole-open]').click()")
-        pg.wait_for_timeout(300)
-        out = pg.evaluate("""()=>{
-          const tr=document.querySelector('tr.tk-open');
-          let worst=0, where='';
-          [...tr.cells].forEach((td,i)=>{
-            const r=td.getBoundingClientRect();
-            td.querySelectorAll('input.fld,.ssbtn,.rolestop').forEach(e=>{
-              const over=Math.round(e.getBoundingClientRect().right-r.right);
-              if(over>worst){worst=over; where='cell '+i;}});});
-          return {worst, where,
-            heads:[...document.querySelectorAll('.peoplecfg thead th')]
-                    .map(t=>Math.round(t.getBoundingClientRect().width))};}""")
-        ck("%d: no field paints outside its cell" % w, out["worst"] <= 0,
-           str(out["worst"]) + "px at " + out["where"])
-        # NO CONTENT COLUMN MAY GROW. That is §93.10's fault stated as an
-        # invariant: fields taking their intrinsic width blew the table from
-        # 1127px to 1516px the moment a pen was pressed, and every column to
-        # the right of the one that grew moved with it.
-        #
-        # NARROWING IS NOT THE SAME FAULT and is deliberately allowed. The
-        # frozen actions column has to widen for Save and Cancel (49 → 133px),
-        # and at a width where the table has slack to redistribute — 1600 here
-        # — that comes out of the two flexible select columns, which give up
-        # 53px and 23px. Nothing is clipped when they do, which is what the
-        # assertion above measures; pinning them would mean reserving 133px of
-        # empty column on all 33 read rows to spare the one being edited, and
-        # that is a worse trade. Recorded rather than hidden (§110).
-        grew = [(i, closed[i], out["heads"][i])
-                for i in range(min(len(closed), len(out["heads"])) - 1)
-                if out["heads"][i] - closed[i] > 2]
-        ck("%d: no content column grows" % w, not grew, grew)
+        # AND NOTHING IN THE DIALOG OVERFLOWS ITS FIELD.
+        ck("%d: nothing clipped in the dialog" % w,
+           pg.evaluate("""()=>{let bad=0;
+             document.querySelectorAll('#modal-b .pdf .fld').forEach(f=>{
+               if(f.scrollWidth>f.clientWidth+1) bad++;});
+             return bad;}""") == 0)
+        ck("%d: the role picker can be pressed" % w,
+           pg.evaluate("""()=>{const a=document.querySelector('#modal-b [data-prole-open]');
+             if(!a) return false; const q=a.getBoundingClientRect();
+             const h=document.elementFromPoint(Math.round(q.left+q.width/2),
+                                               Math.round(q.top+q.height/2));
+             return !!h && (h===a || a.contains(h));}"""))
+        close_row(pg)
 
     ck("no console errors", not errs, errs[:3])
     b.close()

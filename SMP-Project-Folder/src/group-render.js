@@ -1658,8 +1658,12 @@ function authoring(page, acKey){ return !!EDIT_PAGE[page] && mayAuthor(acKey); }
    pen that is open to somebody the rule closes it to — the gate is on the
    control, not on each of the eleven call sites that draw one. */
 function editBar(page, acKey){
-  if (!mayAuthor(acKey || "u_found")) return '';
-  return '<div class="pageact"><button class="editbtn" data-page="' + page + '">' +
+  /* THE DOWNLOAD IS NOT AN AUTHORING CONTROL (§119.9), so it is asked for
+     BEFORE the pen's gate and the bar is drawn when either is answered — a
+     custodian who may not author the overview may still take it away. */
+  var dl = dlPlanBtn(page);
+  if (!mayAuthor(acKey || "u_found")) return dl ? '<div class="pageact">' + dl + '</div>' : '';
+  return '<div class="pageact">' + dl + '<button class="editbtn" data-page="' + page + '">' +
     (EDIT_PAGE[page] ? "Done" : "Edit") + '</button></div>';
 }
 
@@ -1706,8 +1710,18 @@ function paneActs(page, acKey){
    function's head see it and a CEO passing through does not (§37: reaching is
    not holding). The press asks the rule AGAIN (§48.2, in pptx.js), because
    the viewer switcher can change who this is between paint and click. */
+/* THE WHOLE STRATEGY TAB CARRIES IT, NOT ONLY THE PLAN PANE (§119.9).
+   Islam: "the functional projects has no download button we need a download
+   button." A capability function's strategy tab is TWO sections — Function
+   overview (what each capability is) and Projects — and only the second had
+   a `.paneact` to hang the button on, so from the first half of the same tab
+   there was no way to take the plan away. One deck comes out either way, so
+   the button belongs on both: `"capfoundation"` is the overview's page key,
+   drawn in its Edit bar rather than a pane corner because that section is
+   cards and has no pane (§30's rule about which control suits which shape). */
+var DL_PAGES = { plan:1, capfoundation:1 };
 function dlPlanBtn(page){
-  if (page !== "plan") return '';
+  if (!DL_PAGES[page]) return '';
   if (!SMPRules.mayDownloadPlan(world(), viewer(), TARGET)) return '';
   return '<button class="penbtn dlpen" data-dlpptx="' + esc(TARGET) + '"' +
     ' title="Download the plan as slides (.pptx)"' +

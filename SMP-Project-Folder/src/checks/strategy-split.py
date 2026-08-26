@@ -55,6 +55,15 @@ def be(pg, key, dest=None, tab=None, sec=None):
     pg.wait_for_timeout(400)
 
 
+def slidenames(z):
+    """Slide parts IN DECK ORDER. `sorted()` is lexicographic, so slide10 comes
+    before slide2 — which silently measures a different slide than the one the
+    check went looking for. Numeric, once, for every reader here."""
+    return sorted((n for n in z.namelist()
+                   if n.startswith("ppt/slides/slide") and n.endswith(".xml")),
+                  key=lambda n: int(n.split("slide")[-1].split(".")[0]))
+
+
 def read_pptx(path):
     """Unzip, parse EVERY xml part (a file PowerPoint refuses is one that
     parses nowhere), and return the concatenated slide text."""
@@ -63,8 +72,8 @@ def read_pptx(path):
     for n in z.namelist():
         if n.endswith(".xml") or n.endswith(".rels"):
             ET.fromstring(z.read(n))  # raises on anything malformed
-    slides = [n for n in z.namelist() if n.startswith("ppt/slides/slide") and n.endswith(".xml")]
-    for n in sorted(slides):
+    slides = slidenames(z)
+    for n in slides:
         root = ET.fromstring(z.read(n))
         for t in root.iter("{http://schemas.openxmlformats.org/drawingml/2006/main}t"):
             text.append(t.text or "")
@@ -190,8 +199,8 @@ with sync_playwright() as p:
     import tempfile, os
     tmp = tempfile.mkdtemp(prefix="smp-pptx-")
 
-    def grab(pg, name):
-        btn = pg.query_selector(".pane .paneact [data-dlpptx]")
+    def grab(pg, name, sel=".pane .paneact [data-dlpptx]"):
+        btn = pg.query_selector(sel)
         if btn is None:
             return None
         with pg.expect_download() as dl:
@@ -279,8 +288,7 @@ with sync_playwright() as p:
         z = zipfile.ZipFile(gaps)
         A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
         marks, plain = [], 0
-        for n in sorted(x for x in z.namelist()
-                        if x.startswith("ppt/slides/slide") and x.endswith(".xml")):
+        for n in slidenames(z):
             root = ET.fromstring(z.read(n))
             for r in root.iter(A + "r"):
                 t = r.find(A + "t")
@@ -309,8 +317,7 @@ with sync_playwright() as p:
         # THE TACTICS TABLE IS FOUR QUARTER COLUMNS (§119, Islam: "a column for
         # each Q with a mark for the qs in action").
         heads, marked = None, 0
-        for n in sorted(x for x in z.namelist()
-                        if x.startswith("ppt/slides/slide") and x.endswith(".xml")):
+        for n in slidenames(z):
             root = ET.fromstring(z.read(n))
             body = "".join(t.text or "" for t in root.iter(A + "t"))
             if "Tactics" not in body:
@@ -371,6 +378,79 @@ with sync_playwright() as p:
             continue
         ck("%s does NOT" % lab, kb[k] is False, kb[k])
     fresh.close()
+
+    # ── 5 · §119'S THREE FOLLOW-UPS ──────────────────────────────────
+    print("\n5 · quarters that say nothing, a closing slide, and the overview's download")
+
+    # A TACTIC WITH NO QUARTER AT ALL IS A GAP; ONE WITH SOME IS NOT (§119.7).
+    # Both halves, because a build that marked every quarter cell would pass a
+    # check that only looked for the word.
+    be(pg, who["smo"], who["unit"], "strategy", "plan")
+    pg.evaluate("""(u) => {
+      const p = UNITS[u].items[0];
+      p.tactics.forEach(t => { t.q1 = 0; t.q2 = 0; t.q3 = 0; t.q4 = 0; });
+      p.tactics[0].q2 = 1;              /* one tactic still says WHEN */
+      paint();
+    }""", who["unit"])
+    pg.wait_for_timeout(300)
+    MUTATED = pg.evaluate("(u) => UNITS[u].items[0].name", who["unit"])
+    noq = grab(pg, "noq.pptx")
+    ck("a plan whose tactics have no quarters still downloads", noq is not None)
+    if noq:
+        z = zipfile.ZipFile(noq)
+        A = "{http://schemas.openxmlformats.org/drawingml/2006/main}"
+        rows = []
+        for n in slidenames(z):
+            root = ET.fromstring(z.read(n))
+            body = "".join(t.text or "" for t in root.iter(A + "t"))
+            if "Tactics" not in body or MUTATED not in body:
+                continue   # the pillar the mutation touched, not merely the first
+            for tbl in root.iter(A + "tbl"):
+                for tr in list(tbl.iter(A + "tr"))[1:]:
+                    tcs = list(tr.iter(A + "tc"))
+                    qs = tcs[-4:]
+                    rows.append({
+                        "text": "".join(t.text or "" for t in qs[0].iter(A + "t")),
+                        "span": qs[0].get("gridSpan"),
+                        "merged": [c.get("hMerge") for c in qs[1:]] })
+            break
+        ck("the tactics table was found", len(rows) > 0, len(rows))
+        gapped = [r for r in rows if r["text"] == "Missing"]
+        ck("every tactic with no quarter says Missing", len(gapped) == len(rows) - 1,
+           (len(gapped), len(rows)))
+        ck("...ONCE, merged across the four columns, not four times",
+           all(r["span"] == "4" and r["merged"] == ["1", "1", "1"] for r in gapped),
+           gapped[:2])
+        # THE OTHER HALF: a tactic that DOES name a quarter is left alone.
+        kept = [r for r in rows if r["text"] != "Missing"]
+        ck("a tactic that names a quarter is not flagged", len(kept) == 1, kept)
+
+        # THE DECK CLOSES ON THANK YOU (§119.8).
+        last = slidenames(z)[-1]
+        txt = "".join(t.text or "" for t in ET.fromstring(z.read(last)).iter(A + "t"))
+        ck("the last slide is the Thank you", "Thank you" in txt, txt[:60])
+
+    # THE FUNCTION OVERVIEW CARRIES THE DOWNLOAD TOO (§119.9), and it is
+    # PRESSED — §70: this button rendered, sat in the document and could not be
+    # seen or clicked, because `.penbtn` is built for a card corner and this
+    # bar is a row. A query would have called it present.
+    be(pg, who["smo"], "fn:" + who["fn"], "fnstrat", "found")
+    btn = pg.query_selector("[data-dlpptx]")
+    ck("the Function overview draws the download", btn is not None)
+    if btn:
+        hit = pg.evaluate("""() => {
+          const b = document.querySelector("[data-dlpptx]");
+          const r = b.getBoundingClientRect();
+          if (!r.width || !r.height) return "no box";
+          const el = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+          return (el === b || b.contains(el)) ? "the button" : "something else";
+        }""")
+        ck("...and the press lands on it, not on a neighbour", hit == "the button", hit)
+        f = grab(pg, "fn-overview.pptx", "[data-dlpptx]")
+        ck("...and it produces the function's deck", f is not None)
+        if f:
+            d = read_pptx(f)
+            ck("...which closes on Thank you too", "Thank you" in d["text"])
 
     print("")
     ck("no page errors anywhere in the run", not errs, "; ".join(errs[:3]))

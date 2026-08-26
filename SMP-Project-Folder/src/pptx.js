@@ -118,7 +118,14 @@ function pptxTable(id, box, widths, head, rows){
     var runOpts = hdr    ? { sz:1100, b:true, color:C.ground }
                 : o.miss ? { sz:1100, b:true, color:C.bad }
                 :          { sz:1100, color:C.ink };
-    return '<a:tc><a:txBody><a:bodyPr/><a:lstStyle/>' +
+    /* `span` opens a cell across the columns after it and `merged` is each of
+       those columns saying "I am the one before me" — the pair DrawingML needs
+       for a merged run, and what lets one Missing sit across Q1–Q4 rather than
+       being printed four times (§119.7). */
+    if (o.merged) return '<a:tc hMerge="1"><a:txBody><a:bodyPr/><a:lstStyle/>' +
+      pptxPara(pptxRun("", { sz:1100 })) + '</a:txBody><a:tcPr/></a:tc>';
+    return '<a:tc' + (o.span ? ' gridSpan="' + o.span + '"' : '') +
+      '><a:txBody><a:bodyPr/><a:lstStyle/>' +
       pptxPara(pptxRun(o.miss ? "Missing" : (o.t == null ? "" : o.t), runOpts),
                o.align ? { align: o.align } : undefined) +
       '</a:txBody><a:tcPr marL="72000" marR="72000" marT="36000" marB="36000">' +
@@ -193,9 +200,39 @@ function pptxTableSlides(kicker, title, widths, head, rows){
    the tactics columns a column for each Q with a mark for the qs in action",
    the shape the plan workbook's Q1–Q4 columns already have). */
 function pptxQCells(t){
+  /* AN UNTICKED QUARTER IS THE MARK; NO QUARTER AT ALL IS A GAP (§119.7).
+     Islam, seeing four empty columns beside a Missing owner: "in the tactics
+     slide, Qs are missing as well." §119.1 deliberately left a blank quarter
+     alone and that is still right — a tactic that runs in Q2 and Q3 is saying
+     something about Q1 and Q4 by leaving them empty. What it cannot mean is
+     ALL FOUR empty: nobody has said when this runs at all, which is exactly
+     what the plan owes. One Missing across the four, never four of them: the
+     gap is one fact, and printing it four times makes a row of alarm out of a
+     single unanswered question. */
+  var any = ["q1","q2","q3","q4"].some(function(q){ return t[q]; });
+  if (!any) return [{ miss:true, align:"ctr", span:4 },
+                    { merged:true }, { merged:true }, { merged:true }];
   return ["q1","q2","q3","q4"].map(function(q){
     return { t: t[q] ? "\u2713" : "", align: "ctr" };
   });
+}
+
+/* THE DECK CLOSES THE WAY THE REVIEW DECK CLOSES (§119.8). Islam: "add a
+   thank you page at the end of the ppt." `present.js` has ended on a
+   `d-thanks` cover slide since the deck existed — same words, same shape, the
+   subject's name under a rule — so this is the plan deck learning the manners
+   the projected one already has rather than a new idea (§53.5). */
+function pptxThanks(name, subLine){
+  var C = pptxColors();
+  return pptxSlideXml([
+    pptxText(2, { x:0, y:0, cx:PPTX_W, cy:PPTX_H }, [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.bar }),
+    pptxText(3, { x:PPTX_MX, y:2834640, cx:PPTX_CW, cy:1005840 },
+      [pptxPara(pptxRun("Thank you", { sz:4400, b:true, color:C.ground }))]),
+    pptxText(4, { x:PPTX_MX, y:3931920, cx:1828800, cy:45720 },
+      [pptxPara(pptxRun(" ", { sz:100 }))], { fill:C.accent }),
+    pptxText(5, { x:PPTX_MX, y:4114800, cx:PPTX_CW, cy:365760 },
+      [pptxPara(pptxRun(subLine, { sz:1400, color:C.ground }))])
+  ]);
 }
 
 function pptxCover(orgLine, name, subLine){
@@ -289,6 +326,7 @@ function pptxUnitSlides(u, kicker){
                 (t.collaborators || []).join(", ") || "—"].concat(pptxQCells(t));
       })));
   });
+  slides.push(pptxThanks(u.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
 }
 
@@ -330,6 +368,7 @@ function pptxFnSlides(fk){
           plural((p.milestones || []).length, "milestone")];
       })));
   });
+  slides.push(pptxThanks(f.name, (GROUP.org || "") + " \u00b7 Strategy plan"));
   return slides;
 }
 

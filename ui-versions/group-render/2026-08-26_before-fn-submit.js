@@ -3106,31 +3106,10 @@ function renderFnReport(fnKey){
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;
-  /* ── A FUNCTION SUBMITS, AND IT ALWAYS COULD (§102) ──────────────────
-     Every other half of this was already built: `canSpeakFor()` answers for an
-     `fn:` target, `CURRENT_REPORT_KEY` is already that string,
-     `reportSectionState()` already draws the Submitted badge from it, and
-     `lib/authorize.js` already classifies the change as `reportState` with an
-     explicit `fn:` branch. THE CONTROL WAS NEVER DRAWN -- §71's fault exactly,
-     which is why `reportPending()` has been putting a dot on this tab saying a
-     submission was owed with nothing on the page that would clear it (§69.9,
-     broken by the rule that wrote it).
-
-     The target is the `fn:<key>` string and not the bare key: it is what every
-     one of those five already expects, and a second key shape would mean a
-     second answer everywhere. */
-  var fnKeyTarget = "fn:" + fk;
-  var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   var bar = '<div class="rep-bar">' +
       '<div class="kpi"><b>' + done + '</b><span>of ' + total + ' reported</span></div>' +
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
-      (mayAll
-        ? (subd
-            ? '<span class="badge b-done">Submitted</span>' +
-              '<button class="linkbu" data-unsubmit="' + esc(fnKeyTarget) + '">Reopen my report</button>'
-            : '<button class="editbtn" data-submit="' + esc(fnKeyTarget) + '">Submit to the SMO</button>')
-        : '<span class="pill none">View only</span>') +
       draftBtns() +
     '</div>';
   return bar + caps.map(function(c){

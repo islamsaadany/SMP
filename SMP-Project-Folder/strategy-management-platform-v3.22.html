@@ -3599,9 +3599,14 @@
      IN arrange.css AND NOT config.css, deliberately: that file has now held
      the same rule block twice on four separate occasions (§29.2, §51.5,
      §53.6, §88), and this is concatenated last of the four stylesheets. */
+  /* §102.2: NOT nowrap. It spans the whole table, so it is the one row with
+     room for a sentence -- and at 1000px that sentence pushed the table 8px
+     wider than its box rather than taking a second line, which is the opposite
+     of what a full-width band is for. Line-height goes from 1 to 1.35 so two
+     lines do not touch. */
   tr.dxband th { background:var(--panel); color:var(--panel-ink); text-align:left;
-                 font:700 10.5px/1 var(--sans); letter-spacing:.11em; text-transform:uppercase;
-                 padding:10px 13px; white-space:nowrap; }
+                 font:700 10.5px/1.35 var(--sans); letter-spacing:.11em; text-transform:uppercase;
+                 padding:10px 13px; }
   /* --panel-quiet, never --ink-3: a surface with its own ground needs its own
      ink, and --ink-3 on the panel is 2.5:1 (§38.5). */
   tr.dxband th em { font-style:normal; text-transform:none; letter-spacing:0; font-weight:500;
@@ -3610,9 +3615,17 @@
      reads as a break rather than as a rule. Never on the first, which opens
      the table. */
   tr.dxband:not(:first-child) th { border-top:14px solid var(--surface); }
+  /* §102: the column strip WRAPS, and the nowrap it used to carry is why.
+     Its columns are sized by the table's own <thead> -- a unit's vocabulary --
+     and a function's words are longer, so "Deliverables & outcomes" ran
+     straight over "Milestones" with nothing to stop it. §88's one-line rule is
+     about DATA rows, whose height should not depend on how long somebody's
+     email is; a column label is a heading, and a heading on two lines is a
+     heading. */
   tr.dxhead th { background:var(--surface-2); color:var(--ink-2); font-weight:700;
                  font-size:10px; letter-spacing:.09em; text-transform:uppercase;
-                 padding:7px 13px; border-bottom:1px solid var(--line); white-space:nowrap; }
+                 padding:7px 13px; border-bottom:1px solid var(--line);
+                 line-height:1.3; vertical-align:bottom; }
   .endin { margin-top:14px; padding-top:12px; border-top:1px solid var(--line-soft); }
   .endin .boxlab { display:block; margin-bottom:6px; }
   .endin .statement { font-size:15px; }
@@ -11220,16 +11233,101 @@ function reportedCount(u){
 }
 /* A note is required where a figure lands in the bottom two bands. A red
    number with no explanation is the thing a review meeting stalls on. */
+/* WHAT A ROW READS, whatever kind of row it is. A tactic is a ratio, a
+   deliverable and a milestone are a status-and-per-cent (§101.10), and
+   everything else carries `progress`. One reader, because the note rule and
+   the board both ask and two copies would disagree about a deliverable. */
+function rowReads(x){
+  if (x.kind === "tactic") return tacticRatio(x.obj);
+  if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
+  return x.obj.progress;
+}
 function needsNote(x){
-  var p = x.kind === "tactic" ? tacticRatio(x.obj) : x.obj.progress;
+  var p = rowReads(x);
   if (p == null) return false;
   var k = bandOf(p).key;
   return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
-function unitState(u){
-  if (REVIEW.submitted[u.ukey]) return { key:"done", label:"Submitted" };
-  var c = reportedCount(u);
+
+/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§102) ────────────────────
+   The same three answers a unit has, over a function's own vocabulary: key
+   objectives, deliverables and outcomes, milestones. `reportItems()` could not
+   be reused -- a unit's rows hang off pillars and a function's off
+   capabilities -- but everything downstream is shared, which is why `kind` is
+   the only thing that differs and `rowReads()` above is one function.
+
+   ASKED is per row and per cycle, exactly as `tacticDue()` is for a unit: a
+   milestone due in December is not an empty box somebody forgot in June. */
+function fnReportItems(fk){
+  var out = [];
+  capsOfFunction(fk).forEach(function(c){
+    (c.keyObjectives || []).forEach(function(m){
+      out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
+    });
+    (c.projects || []).forEach(function(p){
+      var head = c.name + " \u00b7 " + (p.code || p.name);
+      (p.deliverables || []).forEach(function(d){
+        out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
+                   asked:dueThisCycle(d.due), owner:p.owner });
+      });
+      (p.outcomes || []).forEach(function(o){
+        out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
+                   asked:outcomeDue(o), owner:p.owner });
+      });
+      (p.milestones || []).forEach(function(m){
+        out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
+                   asked:dueThisCycle(m.finish), owner:m.owner || p.owner });
+      });
+    });
+  });
+  return out;
+}
+function fnAskedItems(fk){
+  return fnReportItems(fk).filter(function(x){ return x.asked; });
+}
+function fnReportedCount(fk){
+  var a = fnAskedItems(fk), n = 0;
+  a.forEach(function(x){
+    if (x.kind === "deliverable" || x.kind === "milestone") { if (statusGiven(x.obj)) n++; }
+    else if (x.obj.actual != null && x.obj.actual !== "") n++;
+  });
+  return { done:n, total:a.length };
+}
+function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
+
+/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§102) ───────────
+   A unit and a function are the same product (§53.5), so the refusal is one
+   function taking a TARGET rather than two that will drift. It returns the
+   rows, never a sentence, because the caller says it in its own words.
+
+   Two rules, and the second is new: a figure in the bottom two bands with no
+   note (a red number nobody explained is what a review meeting stalls on),
+   and a row that said In progress and never said how far (§101.10 -- the
+   score leaves it out, so submitting would file a report with a hole in it). */
+function submitBlockers(target){
+  var t = String(target || ""), fn = t.indexOf("fn:") === 0;
+  var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
+  return { notes: rows.filter(needsNote),
+           pending: rows.filter(function(x){ return statusPending(x.obj); }) };
+}
+/* The refusal in words, or "" when nothing is in the way. Said in ONE place so
+   the two Submits cannot explain themselves differently. */
+function submitRefusal(target){
+  var b = submitBlockers(target), say = [];
+  if (b.pending.length) say.push(plural(b.pending.length, "row") +
+    " said In progress and did not say how far. Enter a per-cent for each.");
+  if (b.notes.length) say.push(plural(b.notes.length, "figure") +
+    " " + (b.notes.length === 1 ? "is" : "are") +
+    " at risk or off track with no note. Add a line to each.");
+  return say.join("\n\n");
+}
+function unitState(u){ return reportState(reportedCount(u), u.ukey); }
+function fnState(fk){ return reportState(fnReportedCount(fk), "fn:" + fk); }
+/* One reading of "where has this subject got to", asked of a count and a key,
+   so the board cannot describe a function differently from a unit (§53.5). */
+function reportState(c, key){
+  if (REVIEW.submitted && REVIEW.submitted[key]) return { key:"done", label:"Submitted" };
   if (!c.done) return { key:"late", label:"Not started" };
   return { key:"part", label:"In progress" };
 }
@@ -19248,10 +19346,31 @@ function renderFnReport(fnKey){
   var done = 0, total = 0;
   caps.forEach(function(c){ var r = capReported(c); done += r.done; total += r.total; });
   var pctDone = total ? Math.round(done / total * 100) : 0;
+  /* ── A FUNCTION SUBMITS, AND IT ALWAYS COULD (§102) ──────────────────
+     Every other half of this was already built: `canSpeakFor()` answers for an
+     `fn:` target, `CURRENT_REPORT_KEY` is already that string,
+     `reportSectionState()` already draws the Submitted badge from it, and
+     `lib/authorize.js` already classifies the change as `reportState` with an
+     explicit `fn:` branch. THE CONTROL WAS NEVER DRAWN -- §71's fault exactly,
+     which is why `reportPending()` has been putting a dot on this tab saying a
+     submission was owed with nothing on the page that would clear it (§69.9,
+     broken by the rule that wrote it).
+
+     The target is the `fn:<key>` string and not the bare key: it is what every
+     one of those five already expects, and a second key shape would mean a
+     second answer everywhere. */
+  var fnKeyTarget = "fn:" + fk;
+  var mayAll = canSpeakFor(fnKeyTarget), subd = !!(REVIEW.submitted || {})[fnKeyTarget];
   var bar = '<div class="rep-bar">' +
       '<div class="kpi"><b>' + done + '</b><span>of ' + total + ' reported</span></div>' +
       '<div class="repbar' + (pctDone < 100 ? " part" : "") + '"><i style="width:' + pctDone + '%"></i></div>' +
       '<span class="why" style="margin:0">' + esc(REVIEW.name) + ' &middot; due ' + esc(REVIEW.due) + '</span>' +
+      (mayAll
+        ? (subd
+            ? '<span class="badge b-done">Submitted</span>' +
+              '<button class="linkbu" data-unsubmit="' + esc(fnKeyTarget) + '">Reopen my report</button>'
+            : '<button class="editbtn" data-submit="' + esc(fnKeyTarget) + '">Submit to the SMO</button>')
+        : '<span class="pill none">View only</span>') +
       draftBtns() +
     '</div>';
   return bar + caps.map(function(c){
@@ -23611,10 +23730,84 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
+  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§102) ────────────────────
+     A submission the SMO cannot see anywhere is half a feature. They go in the
+     SAME table rather than a second one, because "who has reported" is one
+     question -- but a function's three counts are its own vocabulary (key
+     objectives, deliverables and outcomes, milestones) and a unit's are not,
+     so the half opens with a band and a quiet column strip. §99's answer to
+     exactly this problem, and the reason nothing about the unit half changes:
+     the two vocabularies never share a heading. */
+  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
+    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
+  });
+  var fnRows = fnKeys.map(function(fk){
+    var c = fnReportedCount(fk), st = fnState(fk);
+    var f = FUNCTIONS[fk] || {};
+    /* Custodian first, head second -- the same order the unit row asks in, so
+       the board names the same kind of person on both halves (§53.5). */
+    var who = personName(f.custodian) || personName(f.head) || "\u2014";
+    var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
+    var miss = fnMissingNotes(fk).length;
+    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§102.2).
+       The first drawing gave the function half its own column strip and it
+       COLLIDED: the strip's widths come from the table's own <thead> -- a
+       unit's words -- and "DELIVERABLES" alone is wider than the Measures
+       column at every width from 1920 down, so it ran over Milestones with
+       nothing to stop it. Wrapping could not save it; a word that does not fit
+       does not fit.
+
+       The better answer was underneath the problem. A unit's three columns are
+       what we are judged on, what we measure, and the work: objectives,
+       measures, tactics. A function has the same three -- key objectives, its
+       OUTCOMES (a direction, a target and an actual: that is a measure), and
+       its deliverables and milestones (work that happened or did not). Mapped
+       onto the same headings the counts become COMPARABLE down the page, which
+       is more than the strip ever bought, and the vocabulary is named once in
+       the band above where nothing can collide. */
+    var by = { ko:[0,0], mea:[0,0], tac:[0,0] };
+    var deliv = 0, mile = 0;
+    fnAskedItems(fk).forEach(function(x){
+      var slot = x.kind === "objective" ? "ko" : x.kind === "outcome" ? "mea" : "tac";
+      if (x.kind === "deliverable") deliv++;
+      if (x.kind === "milestone") mile++;
+      by[slot][1]++;
+      var got = (x.kind === "deliverable" || x.kind === "milestone")
+        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
+      if (got) by[slot][0]++;
+    });
+    var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
+      ", asked this cycle";
+    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
+      '<td class="why" style="margin:0">' + esc(who) + '</td>' +
+      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
+        '<i style="width:' + pctD + '%"></i></span>' +
+        '<span class="mono why" style="margin:0">' + c.done + '/' + c.total + '</span></div></td>' +
+      '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
+      '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
+      '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
+      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
+      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
+  }).join("");
+  if (fnRows) {
+    /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
+       used it (§24 would have had it deleted). It is the right shape for
+       exactly this and it is used again. Its `em` slot carries the vocabulary,
+       which is the one place in this table wide enough to hold it. */
+    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
+        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
+        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
+  }
+
   var t = { done:0, total:0, sub:0, none:0 };
   activeKeys().forEach(function(k){
     var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
     var st = unitState(UNITS[k]);
+    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
+  });
+  fnKeys.forEach(function(fk){
+    var c = fnReportedCount(fk); t.done += c.done; t.total += c.total;
+    var st = fnState(fk);
     if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
   });
 
@@ -23714,7 +23907,7 @@ function renderCycle(){
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
         '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody></table></div>' +
+        '<tbody>' + rows + fnRows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
           'means never closing, and a cycle that never closes writes no history. Whatever is ' +
@@ -30426,15 +30619,16 @@ var BUILD_ID = "smp-shell-v3.27-tables";
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
+    /* ONE HANDLER FOR BOTH SUBMITS (§102). The attribute carries the TARGET --
+       a unit key, or `fn:<key>` for a supporting function -- which is the same
+       string `REVIEW.submitted` is keyed by and the same one the server
+       authorises. It read `UNITS[...]` before, so wiring a function's button to
+       it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var u = UNITS[b.dataset.submit], miss = missingNotes(u);
-        if (miss.length) {
-          alert(miss.length + " figure" + (miss.length > 1 ? "s are" : " is") +
-            " at risk or off track with no note. Add a line to each before submitting.");
-          return;
-        }
-        REVIEW.submitted[b.dataset.submit] = true; paint();
+        var t = b.dataset.submit, why = submitRefusal(t);
+        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        REVIEW.submitted[t] = true; paint();
       });
     });
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){

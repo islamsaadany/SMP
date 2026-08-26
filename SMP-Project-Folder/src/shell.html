@@ -2109,15 +2109,16 @@ var BUILD_ID = "BUILDID";
     document.querySelectorAll("[data-unote]").forEach(function(el){
       el.addEventListener("change", function(){ REVIEW.note[el.dataset.unote] = el.value; });
     });
+    /* ONE HANDLER FOR BOTH SUBMITS (§102). The attribute carries the TARGET --
+       a unit key, or `fn:<key>` for a supporting function -- which is the same
+       string `REVIEW.submitted` is keyed by and the same one the server
+       authorises. It read `UNITS[...]` before, so wiring a function's button to
+       it would have submitted `undefined` and said nothing was in the way. */
     document.querySelectorAll("[data-submit]").forEach(function(b){
       b.addEventListener("click", function(){
-        var u = UNITS[b.dataset.submit], miss = missingNotes(u);
-        if (miss.length) {
-          alert(miss.length + " figure" + (miss.length > 1 ? "s are" : " is") +
-            " at risk or off track with no note. Add a line to each before submitting.");
-          return;
-        }
-        REVIEW.submitted[b.dataset.submit] = true; paint();
+        var t = b.dataset.submit, why = submitRefusal(t);
+        if (why) { alert(why + "\n\nNothing has been submitted."); return; }
+        REVIEW.submitted[t] = true; paint();
       });
     });
     document.querySelectorAll("[data-unsubmit]").forEach(function(b){

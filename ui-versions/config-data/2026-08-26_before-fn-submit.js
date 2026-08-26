@@ -3747,101 +3747,16 @@ function reportedCount(u){
 }
 /* A note is required where a figure lands in the bottom two bands. A red
    number with no explanation is the thing a review meeting stalls on. */
-/* WHAT A ROW READS, whatever kind of row it is. A tactic is a ratio, a
-   deliverable and a milestone are a status-and-per-cent (§101.10), and
-   everything else carries `progress`. One reader, because the note rule and
-   the board both ask and two copies would disagree about a deliverable. */
-function rowReads(x){
-  if (x.kind === "tactic") return tacticRatio(x.obj);
-  if (x.kind === "deliverable" || x.kind === "milestone") return statusReads(x.obj);
-  return x.obj.progress;
-}
 function needsNote(x){
-  var p = rowReads(x);
+  var p = x.kind === "tactic" ? tacticRatio(x.obj) : x.obj.progress;
   if (p == null) return false;
   var k = bandOf(p).key;
   return (k === "bad" || k === "warn") && !(x.obj.note && x.obj.note.trim());
 }
 function missingNotes(u){ return askedItems(u).filter(needsNote); }
-
-/* ── A SUPPORTING FUNCTION REPORTS AND SUBMITS (§102) ────────────────────
-   The same three answers a unit has, over a function's own vocabulary: key
-   objectives, deliverables and outcomes, milestones. `reportItems()` could not
-   be reused -- a unit's rows hang off pillars and a function's off
-   capabilities -- but everything downstream is shared, which is why `kind` is
-   the only thing that differs and `rowReads()` above is one function.
-
-   ASKED is per row and per cycle, exactly as `tacticDue()` is for a unit: a
-   milestone due in December is not an empty box somebody forgot in June. */
-function fnReportItems(fk){
-  var out = [];
-  capsOfFunction(fk).forEach(function(c){
-    (c.keyObjectives || []).forEach(function(m){
-      out.push({ id:m.id, obj:m, kind:"objective", group:c.name, sub:"", asked:true });
-    });
-    (c.projects || []).forEach(function(p){
-      var head = c.name + " \u00b7 " + (p.code || p.name);
-      (p.deliverables || []).forEach(function(d){
-        out.push({ id:d.id, obj:d, kind:"deliverable", group:head, sub:"",
-                   asked:dueThisCycle(d.due), owner:p.owner });
-      });
-      (p.outcomes || []).forEach(function(o){
-        out.push({ id:o.id, obj:o, kind:"outcome", group:head, sub:"",
-                   asked:outcomeDue(o), owner:p.owner });
-      });
-      (p.milestones || []).forEach(function(m){
-        out.push({ id:m.id, obj:m, kind:"milestone", group:head, sub:"",
-                   asked:dueThisCycle(m.finish), owner:m.owner || p.owner });
-      });
-    });
-  });
-  return out;
-}
-function fnAskedItems(fk){
-  return fnReportItems(fk).filter(function(x){ return x.asked; });
-}
-function fnReportedCount(fk){
-  var a = fnAskedItems(fk), n = 0;
-  a.forEach(function(x){
-    if (x.kind === "deliverable" || x.kind === "milestone") { if (statusGiven(x.obj)) n++; }
-    else if (x.obj.actual != null && x.obj.actual !== "") n++;
-  });
-  return { done:n, total:a.length };
-}
-function fnMissingNotes(fk){ return fnAskedItems(fk).filter(needsNote); }
-
-/* ── WHAT STOPS A SUBMISSION, ASKED ONCE FOR BOTH SIDES (§102) ───────────
-   A unit and a function are the same product (§53.5), so the refusal is one
-   function taking a TARGET rather than two that will drift. It returns the
-   rows, never a sentence, because the caller says it in its own words.
-
-   Two rules, and the second is new: a figure in the bottom two bands with no
-   note (a red number nobody explained is what a review meeting stalls on),
-   and a row that said In progress and never said how far (§101.10 -- the
-   score leaves it out, so submitting would file a report with a hole in it). */
-function submitBlockers(target){
-  var t = String(target || ""), fn = t.indexOf("fn:") === 0;
-  var rows = fn ? fnAskedItems(t.slice(3)) : askedItems(UNITS[t] || { keyObjectives:[], items:[] });
-  return { notes: rows.filter(needsNote),
-           pending: rows.filter(function(x){ return statusPending(x.obj); }) };
-}
-/* The refusal in words, or "" when nothing is in the way. Said in ONE place so
-   the two Submits cannot explain themselves differently. */
-function submitRefusal(target){
-  var b = submitBlockers(target), say = [];
-  if (b.pending.length) say.push(plural(b.pending.length, "row") +
-    " said In progress and did not say how far. Enter a per-cent for each.");
-  if (b.notes.length) say.push(plural(b.notes.length, "figure") +
-    " " + (b.notes.length === 1 ? "is" : "are") +
-    " at risk or off track with no note. Add a line to each.");
-  return say.join("\n\n");
-}
-function unitState(u){ return reportState(reportedCount(u), u.ukey); }
-function fnState(fk){ return reportState(fnReportedCount(fk), "fn:" + fk); }
-/* One reading of "where has this subject got to", asked of a count and a key,
-   so the board cannot describe a function differently from a unit (§53.5). */
-function reportState(c, key){
-  if (REVIEW.submitted && REVIEW.submitted[key]) return { key:"done", label:"Submitted" };
+function unitState(u){
+  if (REVIEW.submitted[u.ukey]) return { key:"done", label:"Submitted" };
+  var c = reportedCount(u);
   if (!c.done) return { key:"late", label:"Not started" };
   return { key:"part", label:"In progress" };
 }

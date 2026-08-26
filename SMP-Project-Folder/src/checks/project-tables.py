@@ -462,6 +462,74 @@ with sync_playwright() as p:
         }""")
         pg.wait_for_timeout(200)
 
+    # ── A FUNCTION SUBMITS (§102) ────────────────────────────────────────
+    # §94.2 both ways: the control must BE there, and the refusals must stop it
+    # -- a Submit that always submits would pass every "is it present" check.
+    print("── a function submits its report")
+    goto(pg, DEST, "Performance", None, True)
+    btn = pg.eval_on_selector_all("[data-submit]",
+        "e=>e.map(x=>[x.dataset.submit, x.textContent.trim()])")
+    ck("the Reporting bar carries a Submit", len(btn) == 1, btn)
+    ck("...keyed by the fn: target the server authorises",
+       btn and btn[0][0] == DEST, btn)
+
+    def press():
+        """Press Submit and hand back whatever it said. A build with the control
+        REMOVED must fail readably rather than throw a stack trace 30 seconds
+        later -- a crash is a failure, but a failure nobody can read is one
+        somebody re-runs instead of fixing."""
+        if not pg.query_selector("[data-submit]"):
+            return "(there is no Submit to press)"
+        said = {}
+        pg.once("dialog", lambda d: (said.update(m=d.message), d.dismiss()))
+        pg.click("[data-submit]", timeout=3000); pg.wait_for_timeout(350)
+        return said.get("m", "")
+
+    # 1 · a row that owes a per-cent stops it (§101.10 with teeth)
+    pg.evaluate("""() => {
+      fnMissingNotes("finance").forEach(x => x.obj.note = "Explained.");
+      const p = capsOfFunction("finance")[0].projects[0];
+      p.milestones[0].status = "wip"; p.milestones[0].pct = null; paint();
+    }""")
+    pg.wait_for_timeout(250)
+    said = press()
+    ck("a row owing a per-cent refuses the submission",
+       "In progress" in said and not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
+
+    # 2 · a red figure with no note stops it, the same rule a unit has
+    pg.evaluate("""() => {
+      const p = capsOfFunction("finance")[0].projects[0];
+      p.milestones[0].status = "todo"; p.milestones[0].pct = null;
+      const o = p.outcomes[0]; o.progress = 20; o.actual = "1 h"; o.note = ""; paint();
+    }""")
+    pg.wait_for_timeout(250)
+    said = press()
+    ck("a figure at risk with no note refuses it too",
+       "no note" in said and not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
+
+    # 3 · nothing in the way -> it goes, and the dot the tab has been showing
+    #     since §69.9 finally has something that clears it
+    pg.evaluate("""() => {
+      fnMissingNotes("finance").forEach(x => x.obj.note = "Explained.");
+      fnAskedItems("finance").forEach(x => { if (statusPending(x.obj)) x.obj.pct = 50; });
+      paint();
+    }""")
+    pg.wait_for_timeout(250)
+    ck("nothing left in the way", pg.evaluate("() => submitRefusal('%s')" % DEST) == "",
+       pg.evaluate("() => submitRefusal('%s')" % DEST))
+    said = press()
+    ck("...and then it submits", pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST), said)
+    ck("...the dot on the Performance tab clears",
+       not pg.evaluate("() => reportPending('%s')" % DEST))
+    bar = pg.eval_on_selector(".rep-bar", "e=>e.textContent")
+    ck("...the bar says Submitted and offers Reopen",
+       "Submitted" in bar and "Reopen" in bar, bar)
+    if pg.query_selector("[data-unsubmit]"):
+        pg.click("[data-unsubmit]"); pg.wait_for_timeout(350)
+    ck("...and Reopen puts it back",
+       not pg.evaluate("() => !!REVIEW.submitted['%s']" % DEST)
+       and bool(pg.query_selector("[data-submit]")))
+
     # ── THE DECK ─────────────────────────────────────────────────────────
     print("── the review deck")
     deck = pg.evaluate("""() => {

@@ -13215,3 +13215,102 @@ control that would clear it. §69's own rule, broken by the thing that wrote it.
 Not built here, because a function's Submit is a feature and not a fix, and
 what it means for a function to submit — one function, or one per capability —
 is a decision.
+
+### 102 A supporting function submits its report
+
+Islam: *"We need have a submit to SMO in the capabilities projects as well is
+that set?"* It was not — §101.10 had just recorded that the refusal it needed
+had nothing to attach to. What that section missed, and what looking properly
+found, is that **everything except the button was already built**:
+
+* `canSpeakFor()` has an explicit `fn:` branch and answers correctly;
+* `CURRENT_REPORT_KEY` is already the `fn:<key>` string;
+* `reportSectionState()` already draws the *Submitted* badge from it;
+* `reportPending()` already lights the dot on the tab;
+* **`lib/authorize.js` already classifies the change as `reportState` with an
+  explicit `fn:` branch** and refuses anyone who may not report for it.
+
+**§71's fault exactly** — the back half built, the control never drawn — and it
+is why the dot on a function's Performance tab has been saying *this subject
+owes a submission* with nothing on the page that would clear it. §69.9's own
+rule, broken by the section that wrote it.
+
+**One submission per function, keyed `fn:<key>`.** Not one per capability: that
+key shape is what all five of the above already expect, and a second shape
+would mean a second answer in five places. It is also the honest unit of the
+act — a unit submits its whole plan rather than one pillar at a time.
+
+**THE REFUSAL IS ONE FUNCTION FOR BOTH SIDES.** `submitBlockers(target)` takes a
+unit key or an `fn:` key and `submitRefusal(target)` says it in words, because a
+unit and a function are the same product (§53.5) and two Submits explaining
+themselves differently is precisely the drift that rule exists to stop. The old
+handler read `UNITS[b.dataset.submit]`, so wiring a function's button to it
+would have submitted `undefined` and reported nothing in the way.
+
+Two rules stop it, and the second is new:
+
+1. **a figure at risk or off track with no note** — the unit's existing rule,
+   which needed `needsNote()` to learn how to read a deliverable and a
+   milestone. `rowReads()` is that one reader (a tactic is a ratio, a
+   deliverable and a milestone are a status-and-per-cent, everything else
+   carries `progress`);
+2. **a row that said In progress and never said how far** (§101.10) — the score
+   leaves it out, so submitting would file a report with a hole in it.
+
+Measured before it was built: **every function is blocked by rule 1 today, and
+so is every unit but Nigeria.** The demo behaves identically on both sides,
+which is the evidence that the generalisation is faithful rather than
+over-strict.
+
+#### 102.1 The board, because a submission nobody can see is half a feature
+
+Setup › Running the cycle listed units only. Functions are rows in the **same**
+table — "who has reported" is one question — with the totals at the top
+counting them.
+
+#### 102.2 Three columns are three layers, not two vocabularies
+
+The first drawing gave the function half its own column strip: *Key objectives ·
+Deliverables & outcomes · Milestones*. **It collided.** A strip's column widths
+come from the table's own `<thead>` — a unit's words — and `DELIVERABLES` alone
+is wider than the Measures column at **every width from 1920 down**, so it ran
+straight over *Milestones*. Wrapping could not save it: a word that does not fit
+does not fit.
+
+The better answer was underneath the problem. A unit's three columns are *what
+we are judged on · what we measure · the work*. **A function has the same
+three** — key objectives; its **outcomes** (a direction, a target and an actual:
+that is a measure); its **deliverables and milestones** (work that happened or
+did not). Mapped onto the same headings the counts become **comparable down the
+page**, which is more than the strip ever bought, and the vocabulary is named
+once in the band above, where nothing can collide. Each count cell carries the
+specific words in its hover.
+
+Two measuring lessons on the way, both §88's rule arriving somewhere new:
+
+* **A table cell returns ONE client rect however many lines it holds**, so
+  asking a cell how many lines it has always answers one. A `Range` over its
+  contents gives a rect per line, and the fault being hunted — one line running
+  over the cell beside it — is *one line, wider than the box*. The first
+  detector reported four false positives at 1000px because of this.
+* **`tr.dxband th` carried `white-space: nowrap`**, which is right for a short
+  band label and wrong for a band that spans the whole table: at 1000px the
+  sentence pushed the table 8px wider than its box rather than taking a second
+  line. The 2px the table still overflows at that width is **pre-existing and
+  measured as such** — identical with the function half removed.
+
+`dxband` was orphaned when §99.7 removed the split that used it (§24 would have
+had it deleted). It is the right shape for exactly this, and it is used again.
+
+#### 102.3 The server was never asked a question
+
+`scripts/test-authorize.js` had no test for an `fn:` submission at all — there
+was no control, so no test had a reason to exist. It asks **both ends** now
+(§94.2): the function's own head may submit, and the head of another may not.
+Without the second, the branch could accept anybody and the first would still
+print *ok*. Proved by flipping it and watching it fail.
+
+**Flagged, not changed:** the Notes column says *"1 need notes"*. That is the
+unit half's existing wording, now visible on seven more rows — a grammar slip,
+not a design one, and correcting a label is Islam's call (rule 1c). Both halves
+say it identically, which is at least the right kind of wrong.

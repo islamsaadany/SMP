@@ -3936,84 +3936,10 @@ function renderCycle(){
       '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
   }).join("");
 
-  /* ── THE FUNCTIONS ARE ON THE BOARD TOO (§102) ────────────────────
-     A submission the SMO cannot see anywhere is half a feature. They go in the
-     SAME table rather than a second one, because "who has reported" is one
-     question -- but a function's three counts are its own vocabulary (key
-     objectives, deliverables and outcomes, milestones) and a unit's are not,
-     so the half opens with a band and a quiet column strip. §99's answer to
-     exactly this problem, and the reason nothing about the unit half changes:
-     the two vocabularies never share a heading. */
-  var fnKeys = Object.keys(FUNCTIONS).filter(function(fk){
-    return fnShows(fk) && !fnPlansInPillars(FUNCTIONS[fk]) && capsOfFunction(fk).length;
-  });
-  var fnRows = fnKeys.map(function(fk){
-    var c = fnReportedCount(fk), st = fnState(fk);
-    var f = FUNCTIONS[fk] || {};
-    /* Custodian first, head second -- the same order the unit row asks in, so
-       the board names the same kind of person on both halves (§53.5). */
-    var who = personName(f.custodian) || personName(f.head) || "\u2014";
-    var pctD = c.total ? Math.round(c.done / c.total * 100) : 0;
-    var miss = fnMissingNotes(fk).length;
-    /* THE THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§102.2).
-       The first drawing gave the function half its own column strip and it
-       COLLIDED: the strip's widths come from the table's own <thead> -- a
-       unit's words -- and "DELIVERABLES" alone is wider than the Measures
-       column at every width from 1920 down, so it ran over Milestones with
-       nothing to stop it. Wrapping could not save it; a word that does not fit
-       does not fit.
-
-       The better answer was underneath the problem. A unit's three columns are
-       what we are judged on, what we measure, and the work: objectives,
-       measures, tactics. A function has the same three -- key objectives, its
-       OUTCOMES (a direction, a target and an actual: that is a measure), and
-       its deliverables and milestones (work that happened or did not). Mapped
-       onto the same headings the counts become COMPARABLE down the page, which
-       is more than the strip ever bought, and the vocabulary is named once in
-       the band above where nothing can collide. */
-    var by = { ko:[0,0], mea:[0,0], tac:[0,0] };
-    var deliv = 0, mile = 0;
-    fnAskedItems(fk).forEach(function(x){
-      var slot = x.kind === "objective" ? "ko" : x.kind === "outcome" ? "mea" : "tac";
-      if (x.kind === "deliverable") deliv++;
-      if (x.kind === "milestone") mile++;
-      by[slot][1]++;
-      var got = (x.kind === "deliverable" || x.kind === "milestone")
-        ? statusGiven(x.obj) : (x.obj.actual != null && x.obj.actual !== "");
-      if (got) by[slot][0]++;
-    });
-    var tacTitle = plural(deliv, "deliverable") + " \u00b7 " + plural(mile, "milestone") +
-      ", asked this cycle";
-    return '<tr><td><b>' + esc(f.name) + '</b></td>' +
-      '<td class="why" style="margin:0">' + esc(who) + '</td>' +
-      '<td><div class="repcell"><span class="repbar' + (pctD < 100 ? " part" : "") + '">' +
-        '<i style="width:' + pctD + '%"></i></span>' +
-        '<span class="mono why" style="margin:0">' + c.done + '/' + c.total + '</span></div></td>' +
-      '<td class="num" title="Key objectives">' + by.ko[0] + '/' + by.ko[1] + '</td>' +
-      '<td class="num" title="Outcomes asked this cycle">' + by.mea[0] + '/' + by.mea[1] + '</td>' +
-      '<td class="num" title="' + esc(tacTitle) + '">' + by.tac[0] + '/' + by.tac[1] + '</td>' +
-      '<td class="cc">' + (miss ? '<span class="badge b-late">' + miss + ' need notes</span>' : '') + '</td>' +
-      '<td class="cc"><span class="badge b-' + st.key + '">' + st.label + '</span></td></tr>';
-  }).join("");
-  if (fnRows) {
-    /* `dxband` is §99's own rule, orphaned when §99.7 removed the split that
-       used it (§24 would have had it deleted). It is the right shape for
-       exactly this and it is used again. Its `em` slot carries the vocabulary,
-       which is the one place in this table wide enough to hold it. */
-    fnRows = '<tr class="dxband"><th colspan="8">Supporting functions' +
-        '<em>' + plural(fnKeys.length, "function") + ' reporting in capabilities \u2014 ' +
-        'key objectives, outcomes, and deliverables and milestones</em></th></tr>' + fnRows;
-  }
-
   var t = { done:0, total:0, sub:0, none:0 };
   activeKeys().forEach(function(k){
     var c = reportedCount(UNITS[k]); t.done += c.done; t.total += c.total;
     var st = unitState(UNITS[k]);
-    if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
-  });
-  fnKeys.forEach(function(fk){
-    var c = fnReportedCount(fk); t.done += c.done; t.total += c.total;
-    var st = fnState(fk);
     if (st.key === "done") t.sub++; if (st.key === "late") t.none++;
   });
 
@@ -4113,7 +4039,7 @@ function renderCycle(){
       '<div class="cfg"><table><thead><tr><th style="width:17%">Business unit</th><th>Reporting</th>' +
         '<th style="width:20%">Progress</th><th class="cc">Objectives</th><th class="cc">Measures</th>' +
         '<th class="cc">Tactics</th><th class="cc">Notes</th><th class="cc">State</th></tr></thead>' +
-        '<tbody>' + rows + fnRows + '</tbody></table></div>' +
+        '<tbody>' + rows + '</tbody></table></div>' +
       (open
         ? '<div class="note"><b>A cycle can be closed with gaps.</b> Waiting for the last number ' +
           'means never closing, and a cycle that never closes writes no history. Whatever is ' +

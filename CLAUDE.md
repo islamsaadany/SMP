@@ -1095,6 +1095,42 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   regression for ever. It settles every In progress too, and **today's claim is
   asserted separately** (all 18 In progress milestones in the demo carry a
   number, so `pending` is 0 and no existing figure moved).
+  **A SUPPORTING FUNCTION SUBMITS, AND EVERYTHING BUT THE BUTTON WAS ALREADY
+  BUILT (§102):** `canSpeakFor()`, `CURRENT_REPORT_KEY`, `reportSectionState()`,
+  `reportPending()` and **`lib/authorize.js`'s `reportState` case** all carried
+  an explicit `fn:` branch — **§71's fault exactly**, the back half built and
+  the control never drawn, which is why the dot had been telling a function
+  head they owed a submission with nothing that would clear it (§69.9, broken
+  by the section that wrote it). **ONE PER FUNCTION, KEYED `fn:<key>`** — the
+  shape all five already expect; a second shape would mean a second answer in
+  five places. **THE REFUSAL IS ONE FUNCTION FOR BOTH SIDES**
+  (`submitBlockers` / `submitRefusal` take a TARGET), because two Submits
+  explaining themselves differently is §53.5's drift — and the old handler read
+  `UNITS[b.dataset.submit]`, so a function's button wired to it would have
+  submitted `undefined` and reported nothing in the way. Two rules stop it: a
+  figure at risk with no note (the unit's, with `rowReads()` teaching
+  `needsNote()` to read a deliverable and a milestone) and a row that said In
+  progress and never said how far (§101.10). **Measured before building: every
+  function is blocked by the note rule today, and so is every unit but
+  Nigeria** — the demo behaves identically on both sides, which is the evidence
+  the generalisation is faithful rather than over-strict.
+  **THREE COLUMNS ARE THREE LAYERS, NOT TWO VOCABULARIES (§102.2):** the board's
+  function half first got its own column strip and it **collided** — a strip's
+  widths come from the table's own `<thead>`, and `DELIVERABLES` alone is wider
+  than the Measures column at every width from 1920 down. Wrapping cannot save
+  a word that does not fit. A unit's three columns are *judged on · measured ·
+  the work*, and **a function has the same three** (key objectives; its
+  OUTCOMES, which have a direction, a target and an actual; its deliverables
+  and milestones) — so the counts become COMPARABLE down the page and the
+  vocabulary is named once in the band, where nothing can collide. **A TABLE
+  CELL RETURNS ONE CLIENT RECT HOWEVER MANY LINES IT HOLDS** (§88 somewhere
+  new): ask a `Range` over its contents instead, or a detector reports four
+  false positives. And `tr.dxband th`'s `nowrap` is right for a short label and
+  wrong for a band spanning the table — it pushed the table 8px past its box
+  rather than taking a second line. **AND THE SERVER HAD NEVER BEEN ASKED**:
+  `test-authorize.js` had no `fn:` submission test at all, because there was no
+  control, so no test had a reason to exist — it asks BOTH ends now, or the
+  branch could accept anybody and the first assertion would still print ok.
   **ASKED FOR AND NOT BUILT — THE REFUSAL (§101.10):** *"refuse the
   submission"* has nothing to attach to: **a capability's Reporting page has no
   Submit button.** One `data-submit` exists in the whole platform and it is on
@@ -1103,7 +1139,9 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   target**, so a function head sees the dot saying they owe a submission and
   there is no control that would clear it — §69's own rule broken by the thing
   that wrote it. A function's Submit is a feature, not a fix, and what it means
-  (one per function, or one per capability) is a decision.
+  (one per function, or one per capability) is a decision. **ANSWERED THE
+  SAME DAY, in §102 above:** one per function, and the server had been ready
+  for it all along.
   **STILL BROKEN AND DELIBERATELY NOT FIXED (§99.6):** `projPlanBody` defines
   `sortAttr()` and applies it to NEITHER table, so a project's drag grips are
   bound to nothing — §63's fault on the capability side. Flagged, not fixed:

@@ -6,7 +6,7 @@ version (rules A2 / A11, changed 2026-08-20) — those go only when asked for.
 
 **Where it runs:** Vercel, production tracks `main`. Static files plus two
 serverless functions (`/api/state`, `/api/auth`) against Neon Postgres.
-**Latest version:** v3.38 on `main` · **v3.39 in progress on the branch**
+**Latest version:** v3.40 on `main`
 **Last updated:** 2026-08-26
 
 **Sign in as:** `SMO` / `1234` — a password change is forced at once (§43.1,
@@ -64,7 +64,14 @@ Nothing proceeds past this line without an answer.
 
 ## Built and verified
 
-### v3.39 — the Strategy | Reporting split, and the plan as slides (§116, spec 019)
+### v3.39 — the register stops being a form (§116) — another session's
+
+- Merged from main during this release: the People register edits in a dialog,
+  the attention chips become one queue, the quick filters go. See §116 in the
+  decisions document; its checks (people-dialog and the reworked register
+  checks) ride in this repo and are green on the merged build.
+
+### v3.40 — the Strategy | Reporting split, and the plan as slides (§117, spec 019)
 
 - The Roles & access table's own columns are two halves each — **Strategy**
   (Foundation · SWOT · Plan; a capability's definition and projects) and

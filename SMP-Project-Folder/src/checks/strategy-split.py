@@ -1,4 +1,4 @@
-"""THE OWN COLUMNS ARE TWO QUESTIONS, AND THE PLAN LEAVES AS SLIDES (§116).
+"""THE OWN COLUMNS ARE TWO QUESTIONS, AND THE PLAN LEAVES AS SLIDES (§117).
 
 Islam, 2026-08-26: "the strategy should be locked from the non SMO but the
 reporting should be editable by who we grant the access so they can submit —

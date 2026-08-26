@@ -1,6 +1,6 @@
 # 019 · Strategy | Reporting split, and the plan as slides
 
-**Version:** v3.39 · **Decisions:** §116 · **Status:** answered; built
+**Version:** v3.40 · **Decisions:** §117 · **Status:** answered; built
 
 Islam: *"the accessibility should have an option that differentiate the
 strategy from the reporting — the strategy should be locked from the non SMO
@@ -47,5 +47,5 @@ Settled from a mockup made of the real platform
 
 `checks/strategy-split.py` (both ends, both directions, file torn open and
 read, negatives asserted; proved able to fail three ways),
-`scripts/test-authorize.js` §15 (six assertions that fail on the pre-§116
-rules), the full check suite and `qa.py` green. See §116.3.
+`scripts/test-authorize.js` §15 (six assertions that fail on the pre-§117
+rules), the full check suite and `qa.py` green. See §117.3.

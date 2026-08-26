@@ -1074,14 +1074,14 @@ check("and `false` reads as ON too, so a stale write cannot hide the feature",
 check("only `true` switches it off",
       R.focusOn(R.worldOf({ group: { focusOff: true } })) === false);
 
-console.log("\n15 · the strategy | reporting split (§116)");
+console.log("\n15 · the strategy | reporting split (§117)");
 /* The own columns are two questions now. The old stored key kept meaning the
    Reporting half — every §13 assertion above already proves a custodian's
    stored `a_unit_own: edit` does NOT author — so this section proves the new
    half both ways: opened it authors, closed it takes the arrows too.
 
    PROVED ABLE TO FAIL (§94.5): the "opened" cases below refuse on the
-   pre-§116 build, where mayAuthorPage() was a hard office-only rule that no
+   pre-§117 build, where mayAuthorPage() was a hard office-only rule that no
    grant could open. Run against the parent commit's lib/rules.js they go red. */
 (function () {
   function withAccess(role, patch) {
@@ -1161,7 +1161,7 @@ console.log("\n15 · the strategy | reporting split (§116)");
   }
 
   /* The download is a pure rule with no server half — asserted here so the
-     one definition is proven where every other rule is (§116). */
+     one definition is proven where every other rule is (§117). */
   const wSeed = R.worldOf(SEED);
   check("download: the unit's custodian may", R.mayDownloadPlan(wSeed, personOf(SEED, custKey), UNIT) === true);
   check("download: the unit's owner may", R.mayDownloadPlan(wSeed, personOf(SEED, headKey), UNIT) === true);

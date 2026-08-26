@@ -1698,7 +1698,7 @@ function paneActs(page, acKey){
   return inner ? '<div class="paneact">' + inner + '</div>' : '';
 }
 
-/* ── THE PLAN LEAVES AS SLIDES (§116) ─────────────────────────────
+/* ── THE PLAN LEAVES AS SLIDES (§117) ─────────────────────────────
    Islam: "add the access of downloading a presentation for the plan for the
    custodian and the business unit owner through a button in the strategy
    panel." Drawn ONLY on the plan pane — the page the ask names — and gated by

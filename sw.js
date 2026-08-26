@@ -100,11 +100,14 @@
    checks, and on this branch main moved 56 commits inside one such window.
    A worker caches by NAME, so the same string on both sides conflicts on
    nothing while the bytes behind it differ (§94.12). */
-/* v3.39 — the strategy | reporting split and the plan-as-slides download
-   (§116). Confirmed against origin/main, which is serving "smp-shell-v3.38",
-   at the moment of this bump — confirm AGAIN immediately before the merge
-   push (§94.16). */
-const SHELL = "smp-shell-v3.39";
+/* v3.40 — the strategy | reporting split and the plan-as-slides download
+   (§117). This branch FIRST took v3.39 for this work, checked against a main
+   serving v3.38 — and the register session took v3.39 in the same window,
+   §94.12's collision for the fifth time: git put the two identical strings in
+   conflict only because a comment differed. Resolved to a name nobody has
+   served, confirmed against origin/main at the merge and AGAIN immediately
+   before the push (§94.16). */
+const SHELL = "smp-shell-v3.40";
 const ASSETS = [
   "/",
   "/index.html",

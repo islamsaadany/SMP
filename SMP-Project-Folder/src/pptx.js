@@ -1,4 +1,4 @@
-/* ── The plan leaves as slides (§116) ────────────────────────────────
+/* ── The plan leaves as slides (§117) ────────────────────────────────
    Islam, 2026-08-26: "add the access of downloading a presentation for the
    plan for the custodian and the business unit owner through a button in the
    strategy panel — sometimes they need it in slides to update things and view
@@ -25,7 +25,7 @@
    WHO GETS THE BUTTON IS `SMPRules.mayDownloadPlan()` — the office and the
    roles that hold the thing. The rule is client-side only, deliberately: the
    download re-arranges what the page already shows this person, so there is
-   no write for the server to refuse (§116).
+   no write for the server to refuse (§117).
 
    COLOURS ARE THE TENANT'S where the tenant has set them (Setup › Branding),
    and the house navy/gold where it has not — the same two answers the

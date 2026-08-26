@@ -473,7 +473,7 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   door behind a door. A role with one place is granted on the role pick; a role
   with a real choice still asks. The × on the chip is what makes committing on
   one press safe.
-- **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§116,
+- **THE OWN COLUMNS ARE TWO QUESTIONS, AND §94'S LOCK IS A DEFAULT NOW (§117,
   partially reversing §94 at Islam's direction):** each own column on Roles &
   access splits into **Strategy** (the words as agreed — `a_unit_own_strat` /
   `a_fn_own_strat`, NEW keys) and **Reporting** (the OLD keys, which is the
@@ -1532,6 +1532,68 @@ console errors (in this cloud environment, run it via a wrapper that points Play
   Proved by asking the screen AND the shared rule for five viewers and
   asserting BOTH ENDS (§94.2), by PRESSING the button (§70, §93.4), and by
   forcing each half false to watch the checks fail (§94.5).
+- **THE REGISTER STOPS BEING A FORM (since v3.39, §116):** Islam's six —
+  keep my column choice and make all-on neat; edit in a dialog; *"they said"*
+  becomes a button at the top that opens the pending people one after another;
+  Add opens it too; drop the row count and the quick filters; make the top panel
+  concise. **ONE THING FOLLOWS AND IS WHY THEY HANG TOGETHER: the table no
+  longer edits anything** — every collision this register has had (§110.1's
+  *+ role* under the frozen Cancel, §110.8's fields over their neighbours, the
+  Add row's boxes under the wrong headings) was a control clicked inside a 158px
+  cell, and none survives the move. **THE SAME `data-` ATTRIBUTES**, so moving
+  the form changed where it is drawn and nothing about how it saves — but
+  `fieldWire` and the control wiring now take a ROOT, or re-running `wire()`
+  binds a second handler to the page behind (§24, §47.2). **`paint()` REPAINTS
+  THE DIALOG TOO**, one line at its end rather than one per handler: the
+  dialog's controls are the register's and all end in `paint()`, so *+ role*
+  pressed inside it changed nothing at all. **`NEWDRAFT` IS A PERSON BEFORE IT
+  IS ON THE REGISTER** — not in PEOPLE, but `personBy()` answers for it, so Add
+  and Edit are one form. **AND THE FIELD BEING TYPED IS COMMITTED BEFORE THE
+  PRESS**: fields write on `change`, which for a text input means on blur, so
+  the last box typed into has not been written when somebody reaches for the
+  button — a mouse click blurs on the way past, which is the almost-always that
+  hid it.
+- **A MARK BELONGS INSIDE THE BLOCK IT MARKS (§116.4):** the declaration note,
+  the duplicate mark and the Official BU disagreement were each placed NEXT TO a
+  value, and `.val` and `<b>` are `display:block` under §88's clip rule — so each
+  put its row at 51px against its neighbours' 39px. Three times, in one section.
+  One glyph inside the value's own line, the sentence on the hover, the full
+  words in the queue: `◎` a declaration, `‖` a collision, `≈` a resemblance,
+  `≠` a disagreement.
+- **THE COUNT AND THE QUEUE ARE ONE LIST (§116.2):** `attentionQueue()` is what
+  the button counts AND what it opens — a count that cannot take you to what it
+  counts is a count that makes work (§16.7's rule applied to a notice). **One
+  entry per person, not per problem**; worst first then by name, so it is stable
+  between two people; **and it walks the list it started with**, because fixing
+  somebody removes them and a recomputed queue renumbers under whoever is
+  working through it. **Units with no custodian cannot join it** — not a person,
+  so there would be nobody to open; it keeps its own line (§93.4).
+- **A LOCAL ALIAS IS INVISIBLE FROM ANOTHER FILE, AND ONLY OVER HTTP (§116.9):**
+  `attentionOf()` in `config-data.js` spelt half its declaration sentence with
+  `whereLabel`, which is a **`var` inside `renderPeople()`** in
+  `config-render.js` (§93.12's swap, made once rather than at five call sites).
+  Every check was green: the crash needs a declaration AND a register placement
+  that disagree, so it is invisible over `file://` (`SAIDWHERE` only ever comes
+  from a server, §94.11) **and the ternary short-circuits for anybody the
+  register has not placed** — which was every person the queue's own check had
+  made (§94.2 from the inside). It is `roleWhereLabel` on **both** halves now:
+  **a sentence that names two places and compares them must spell them the same
+  way**, or a match reads as a difference; `placeLabel` stays right for the Unit
+  CELL, where there is nothing to compare against. **AND THE COUNT AND THE QUEUE
+  HAD DRIFTED THE OTHER WAY**: the Overview's password row counts
+  `passwordReach()` (§89 excludes the office) and the queue's `nopw` counted
+  everybody, so a Super user with no password put a row in the queue that
+  whoever works through it has **no control to clear** — §16.7's fault inside
+  §116.2's own list, asked through `mayIssuePasswordTo()` now. The check asserts
+  the **relationship** (the button carries its own queue's length; every person
+  the Overview counts is findable in that queue) rather than the chip string
+  §116 removed — §51.11, loud this time only because the chip row is **gone**
+  rather than merely renamed.
+- **EVERY WAY OUT OF A DIALOG IS THE SAME WAY OUT (§116.6):** the × and Escape
+  closed the overlay directly, which was fine when it held a wizard and not when
+  it holds a form with `PDLG`, a row snapshot and a draft behind it. **And the
+  body is emptied on close** — a form left in the hidden overlay collected a
+  second handler on every repaint, for ever (§3.2: hidden is not gone).
 - **THE UNIT CELL SAYS WHERE, THE ROLES CELL SAYS WHAT (since v3.34, §110):**
   Islam, of the picker's second half: *"choose where is very strange sentence.
   make it Unit and it's already in a cell what am I missing here?"* **Nothing,
@@ -1797,11 +1859,13 @@ SMP/
 cd SMP-Project-Folder/src
 python3 build.py     # assembles strategy-management-platform.html (must be byte-identical to the shipped vX.Y file)
 python3 qa.py        # walks every page as every viewer, reports console errors (needs Playwright + Chromium)
+python3 checks/people-dialog.py # the register reads and the dialog writes: the queue,
+                                # Add, and neat with every column on (§116, over HTTP)
 python3 checks/role-picker.py   # giving somebody a role: every control PRESSED,
                                 # both ends asked, and the absences asserted (§110)
 python3 checks/strategy-split.py # the Strategy | Reporting halves: the cell pressed
                                 # open AND closed, both ends each time, and the .pptx
-                                # download unzipped and read — figures proved absent (§116)
+                                # download unzipped and read — figures proved absent (§117)
 python3 checks/no-jump.py       # nothing moves the register under you — the act of
                                 # OPENING a row included, since §110.7
 python3 checks/office-chat.py   # the chat's client half — serves the built file over HTTP,
@@ -1850,8 +1914,8 @@ prior sessions (on HR_ERP) accidentally reverted agreed-upon designs.
 
 ---
 
-*Last Updated: 2026-08-26 &mdash; **v3.39: the Strategy | Reporting split, and
-the plan as slides (&sect;116, spec 019)**. Islam: *"the strategy should be
+*Last Updated: 2026-08-26 &mdash; **v3.40: the Strategy | Reporting split, and
+the plan as slides (&sect;117, spec 019)**. Islam: *"the strategy should be
 locked from the non SMO but the reporting should be editable by who we grant
 the access so they can submit — we need this split in the roles and access
 table"*, and a plan download in slides for the custodian and the BU owner.
@@ -1876,8 +1940,45 @@ would pass every presence assertion (&sect;94.2 from the negative side).
 ships no Impress component at all (&sect;68.10's class). With Impress
 installed it renders cleanly. `checks/strategy-split.py` was proved able to
 fail three ways before its green was believed; `test-authorize.js` &sect;15
-fails on the pre-&sect;116 rules by construction.*
+fails on the pre-&sect;117 rules by construction.*
 
+*Earlier: 2026-08-26 &mdash; **v3.39: the register stops being a form**
+(&sect;116). Six decisions from Islam after two rounds of mockups, and **one
+thing follows from them that nobody asked for, which is why they hang
+together: with editing, adding and the queue all in a dialog, the table no
+longer edits anything.** Every collision this register has had &mdash;
+&sect;110.1's *+ role* under the frozen Cancel, &sect;110.8's fields painting
+over their neighbours, the Add row's three boxes under the wrong headings
+&mdash; was a control being clicked inside a 158px cell, and not one of them
+survives the move. **THE COUNT AND THE QUEUE ARE THE SAME LIST**: six alarm
+chips used to sit across the header naming numbers and pointing at rows to find
+by eye, which is exactly *"I don't know which lines I should go and check"* &mdash;
+one button now, and pressing it opens the first of them, says why above the
+fields, and walks to the next in the same place. **THREE THINGS BESIDE A VALUE
+WERE ALL ON A SECOND LINE** &mdash; the declaration note, the duplicate mark and
+the Official BU disagreement &mdash; each putting its row at 51px against its
+neighbours' 39px: &sect;88's own wrapping fault three times over, because `.val`
+and `&lt;b&gt;` are `display:block` and a mark placed BESIDE one starts a new
+line. **AND THE EMAIL FINALLY HOLDS AN EMAIL** (133px shown of 235px needed, on
+33 of 33 rows): it could not be given the room while the table still edited,
+because widening it alone pushed the controls further under the frozen columns.
+Two faults were found by rewriting the checks rather than by reading: the
+identity ladder was being called with an object instead of two arguments, so
+&sect;87's stop never fired and a second row for somebody already here went
+straight in; and the dialog had no *Add anyway*, which &sect;87.3 requires. The
+new check was proved able to fail before its green run was believed &mdash;
+**17 failures** against the previous build. **AND THE MERGE FOUND TWO MORE THAN
+THE BUILD COULD** (&sect;116.9): `attentionOf()` spelt half its declaration
+sentence with `whereLabel`, a **local `var` inside `renderPeople()` in another
+file** &mdash; green everywhere, because the crash needs a declaration AND a
+register placement that disagree, which is invisible over `file://` and
+short-circuits for anybody the register has not placed, and that was every
+person the queue's own check had made. Both halves say `roleWhereLabel` now: a
+sentence that compares two places must spell them the same way or a match reads
+as a difference. **And the count and the queue had drifted the other way** &mdash;
+the Overview counts people this viewer may issue a password TO (&sect;89) and
+the queue counted everybody, so a Super user with no password put a row in the
+list that whoever works through it has no control to clear.*
 *Earlier: 2026-08-26 &mdash; **v3.37: the assistant (&sect;111,
 &sect;112), and a chat that vanished (&sect;113)**. The last one came from
 production and is the one worth reading: *"the chat was a user, he sent to me

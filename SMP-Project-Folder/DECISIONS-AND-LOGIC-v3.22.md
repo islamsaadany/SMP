@@ -14087,6 +14087,42 @@ no other ref holds, from before the push until production has served it.** Not
 order (§91.4), not delay (§108.17), not tidiness — sole possession, until
 §91.5 says otherwise.
 
+### 107.16 Sole possession was necessary, and it was not the cause
+
+§107.15 and §108.17 both end by asserting that §91's race is why production
+stopped. **Measured afterwards, that is wrong, and it is corrected here rather
+than left standing** (Principle II).
+
+`main` was given a SHA no other ref held — `f885f94`, with the branch
+deliberately parked two commits behind — and production **still did not
+build**. Two hours and forty minutes after the last successful deployment, the
+live `sw.js` was byte-for-byte the 06:39:30 build, and it stayed there.
+
+So the race was **real hygiene and not the blocker**. What the evidence
+actually supports:
+
+  · the repository is not at fault — `vercel.json` parses with its rewrite
+    target present at the right size, `package.json` is still deliberately
+    scriptless, and every file in `api/` and `lib/` parses;
+  · it is not CDN caching — `must-revalidate` with a cache HIT means the
+    ORIGIN holds the old build, and a cache-buster returns the same file;
+  · the deployment is alive, just old — `/api/state` answers **401**, which
+    is the correct answer for a request with no session.
+
+That leaves the Vercel side: most plausibly the **Hobby plan's daily
+deployment cap** — two sessions merged heavily on the same day, and the plan
+is already recorded as Hobby (§98) — otherwise a paused git integration or
+builds that need promoting by hand. **None of those can be told apart from
+inside the repository**, and saying which it is would be a guess dressed as a
+finding.
+
+**WHAT THIS DOES NOT UNDO.** Sole possession stays the rule: it is cheap, it
+is correct, and §91.4, §107.15 and §108.17 each record a deployment that
+genuinely went to the wrong ref. What changes is the inference — **"production
+did not build" is not by itself evidence of the race**, and reaching for the
+most recently learned explanation is how a good rule acquires a bad reputation
+for not working.
+
 ## 108 · The Setup makeover (v3.30)
 
 > *"Rethink the whole settings page. The design, the grouping, the arrangement,

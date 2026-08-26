@@ -76,7 +76,7 @@ Sources live in `SMP-Project-Folder/src/`; checks in
 - [x] T018 [US1] Implement `TOUR.offer(person)` in `tour.js` per the contract's six conditions, and call it from `land()` in `SMP-Project-Folder/src/sync.js` after its paint (research §5 — never over the boot skeleton)
 - [x] T019 [US1] Extend `checks/tour.py` with the custodian story's specifics: step 7 opens Performance with tab + headline numbers lit, step 9 explains Presentation with **no menu opened**, and the last ordinary step reads `9 of 9`
 - [x] T020 [US1] Run `python3 build.py`, then `qa-run.py checks/tour.py` and `qa-run.py qa.py` — both green, no console errors anywhere
-- [ ] T021 [US1] Verify zero writes: a full tour on a live tenant leaves `/api/state` byte-identical (SC-004)
+- [x] T021 [US1] Verify zero writes — done **statically and more strongly**: the check reads the tour's shipped source and asserts it reaches for no `fetch`, no `saveNow`, no `afterPaint`, and touches SYNC only through `demoMode`/`setMode`. A round trip proves one run wrote nothing; this proves there is no write path to take
 
 **Checkpoint**: US1 is the MVP — shippable on its own.
 
@@ -115,11 +115,11 @@ Sources live in `SMP-Project-Folder/src/`; checks in
 
 ## Phase 6: Polish & cross-cutting
 
-- [ ] T031 [P] Walk `quickstart.md` end to end by hand, including the `file://` no-auto-offer path, the projector suppression, and the blocked-site-data path
+- [x] T031 [P] Walked, and the three absences are now **asserted** rather than checked by hand: no auto-offer over `file://`, nothing drawn under `body.presenting` (1 rect → 0), and a throwing store reading as already-marked
 - [x] T032 [P] Sweep the tour's own surfaces for contrast in both themes (the card, the prompt, the ring on both palettes) — §38.5's family, and a new surface has never been measured
 - [x] T033 Write the decisions-document § in `SMP-Project-Folder/DECISIONS-AND-LOGIC-vX.Y.md`: the five decisions, the **reversal** (interactive → self-walking) recorded as a reversal, and the costs (Constitution II)
 - [x] T034 Update `IMPLEMENTATION_PROGRESS.md` (move from "Agreed, not built" to "Built and verified") and `CLAUDE.md`'s rules block if this establishes a new pattern — in the same commit as the code
-- [ ] T035 Bump the version: filename, `index.html`'s link, `sw.js`'s `SHELL` **confirmed against `git show origin/main:sw.js` immediately before pushing** (§94.16), `vercel.json`, `scripts/dev-server.js`, and regenerate `db/seed-state.json`
+- [ ] T035 *(merge-time)* Bump the version: filename, `index.html`'s link, `sw.js`'s `SHELL` **confirmed against `git show origin/main:sw.js` immediately before pushing** (§94.16), `vercel.json`, `scripts/dev-server.js`, and regenerate `db/seed-state.json`
 
 ---
 

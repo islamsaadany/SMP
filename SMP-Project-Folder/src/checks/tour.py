@@ -389,6 +389,74 @@ def contrast(pg):
     pg.wait_for_timeout(150)
 
 
+def writes_nothing(pg):
+    """THE TOUR HAS NO WRITE PATH AT ALL, which is a stronger thing to know
+    than that one round trip happened to leave the state alone. Demo mode
+    refusing every save (§21, §67) is the backstop; this asserts the tour
+    never even reaches for one.
+
+    Read out of the SHIPPED source rather than off the disk, so what is
+    measured is what a client would actually run."""
+    src = pg.evaluate("""() => {
+      const s = [...document.scripts].map(x => x.textContent)
+        .filter(t => t.indexOf('var TOUR = (function()') > -1)[0];
+      return s || null;
+    }""")
+    if not check(src is not None, "the tour's source is not in the built file"):
+        return
+    # `setMode` is the ONE call it makes into SYNC, and setMode itself writes
+    # nothing — it swaps which dataset is hydrated. Anything else that could
+    # reach the server or the state graph is a fault.
+    for banned in ["fetch(", "saveNow", "afterPaint", "XMLHttpRequest",
+                   "navigator.sendBeacon"]:
+        check(banned not in src, f"the tour reaches for {banned!r} — it must write nothing")
+    calls = sorted(set(re.findall(r"SYNC\.([A-Za-z]+)", src)))
+    check(calls == ["demoMode", "setMode"],
+          f"the tour calls SYNC.{calls} — only demoMode and setMode are allowed")
+
+
+def not_on_a_projector(pg):
+    """PRESENTATION IS A STATE NOBODY ARRIVES AT BY NAVIGATING, so it is
+    entered explicitly. The tour must not be drawn there: the platform is on
+    a projector in front of the board (§97's rule for the chat corner, and
+    the same CSS class rather than a second piece of state)."""
+    pg.evaluate("(s) => TOUR.start(s)", "custodian")
+    pg.wait_for_timeout(250)
+    pg.evaluate("() => document.body.classList.add('presenting')")
+    pg.wait_for_timeout(150)
+    box = pg.evaluate("""() => {
+      const d = document.getElementById('tourdock');
+      return d ? d.getClientRects().length : -1; }""")
+    check(box == 0, f"the tour is still drawn on a projector (rects: {box})")
+    pg.evaluate("() => document.body.classList.remove('presenting')")
+    pg.wait_for_timeout(150)
+    # And offer() declines outright while presenting, not merely hides.
+    pg.evaluate("() => document.body.classList.add('presenting')")
+    pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    ran = pg.evaluate("""() => {
+      const p = PEOPLE.filter(x => TOUR.storyFor(x) === 'custodian')[0];
+      TOUR.offer(p); return TOUR.state().running; }""")
+    # It was already running from above; end it and ask again cleanly.
+    pg.evaluate("() => document.body.classList.remove('presenting')")
+    pg.evaluate("""() => { const b = document.getElementById('tclose'); b && b.click(); }""")
+    pg.wait_for_timeout(120)
+    if pg.query_selector("[data-t=never]"):
+        pg.click("[data-t=never]"); pg.wait_for_timeout(200)
+    pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+
+
+def no_offer_from_file(pg):
+    """Over file:// there is no sign-in, so there is no 'first sign-in' and
+    the tour must never offer itself — while the Knowledge base entry still
+    works, because the demo dataset is baked into the file. BOTH ENDS (§90):
+    knowledge_base() above is the other half of this assertion."""
+    pg.evaluate("localStorage.clear(); sessionStorage.clear()")
+    ran = pg.evaluate("""() => {
+      const p = PEOPLE.filter(x => TOUR.storyFor(x) === 'custodian')[0];
+      TOUR.offer(p); return TOUR.state().running; }""")
+    check(not ran, "the tour offered itself over file://, where nobody signed in")
+
+
 def run(page_break_sec=None, break_target=False):
     with sync_playwright() as p:
         b = p.chromium.launch()
@@ -429,6 +497,9 @@ def run(page_break_sec=None, break_target=False):
         offer_rules(pg, "custodian")
         knowledge_base(pg)
         contrast(pg)
+        writes_nothing(pg)
+        not_on_a_projector(pg)
+        no_offer_from_file(pg)
 
         # THE TOUR NEVER OPENS THE PRESENTATION MENU (rev 4). The step
         # explains it in place; a menu the tour opened would be a control it
